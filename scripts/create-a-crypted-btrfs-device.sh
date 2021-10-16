@@ -2,7 +2,7 @@
 
 : ${DEVICE:?not set}
 : ${LABEL:?not set}
-: ${MOUNT_OPTIONS:-compress-force=zstd}
+MOUNT_OPTIONS="${MOUNT_OPTIONS:-compress-force=zstd}"
 
 [[ ${EUID} -eq 0 ]]  || (echo "Please rerun this script with root privileges" && exit 1)
 [[ -f "${DEVICE}" ]] || echo "${DEVICE} not found"
