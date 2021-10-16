@@ -19,7 +19,7 @@ function dropbox-install {
 
 if [ ! -f start-multiple-instances.sh ]
 then
-    echo "[ERROR] Dropbox multi-instances start script not usable. Aborrting."
+    echo "[ERROR] Dropbox multi-instances start script not usable. Aborting."
     exit 1
 fi
 
@@ -36,5 +36,5 @@ killall -I dropbox
 
 dropbox-install
 
-echo "[NOTICE] Faccio ripartire il processo per ogni account"
+echo "[NOTICE] Restarting Dropbox daemons for all acounts."
 ./start-multiple-instances.sh
