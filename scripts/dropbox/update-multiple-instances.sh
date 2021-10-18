@@ -1,20 +1,31 @@
 #!/usr/bin/env sh
 
 function dropbox-install {
-	export DROPBOX_archive="dropbox_daemon.tar.gz"
-	export DROPBOX_retries="3"
-	export DROPBOX_url="http://www.getdropbox.com/download?plat=lnx.x86_64"
+	# https://www.dropbox.com/install-linux
+	[[ ${DEBUG} ]] && set -o xtrace
+
+	DROPBOX_archive="/tmp/dropbox_daemon.tar.gz"
+	DROPBOX_retries="3"
+	DROPBOX_url="http://www.getdropbox.com/download?plat=lnx.x86_64"
 
 	# download daemon
 	echo "  downloading archive…"
-	curl -C - -o $DROPBOX_archive --retry $DROPBOX_retries -S -L $DROPBOX_url
+	curl $DROPBOX_url \
+		--continue-at - \
+		--location \
+    	--output $DROPBOX_archive \
+		--retry $DROPBOX_retries \
+		--silent --show-error
 
 	# install daemon
+	[[ -d "${HOME}/.dropbox-dist" ]] && echo "  removing old executables…" && rm -r "${HOME}/.dropbox-dist"
 	echo "  unarchiving tarball…"
 	tar zxf $DROPBOX_archive -C $HOME
 
 	# cleaning
 	rm $DROPBOX_archive
+
+	[[ ${DEBUG} ]] && set +o xtrace
 }
 
 if [ ! -f start-multiple-instances.sh ]
