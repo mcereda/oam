@@ -13,7 +13,7 @@ function dropbox-install {
 	curl $DROPBOX_url \
 		--continue-at - \
 		--location \
-    	--output $DROPBOX_archive \
+		--output $DROPBOX_archive \
 		--retry $DROPBOX_retries \
 		--silent --show-error
 
