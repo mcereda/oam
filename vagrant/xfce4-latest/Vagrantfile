@@ -1,0 +1,28 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "archlinux/archlinux"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = "xfce4 latest"
+    vb.memory = "3072"
+    vb.gui = true
+    vb.customize ["modifyvm", :id, "--vram", "64"]
+    vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    pacman --noconfirm \
+      --remove --nosave --recursive --unneeded \
+      virtualbox-guest-utils-nox
+    pacman --noconfirm \
+      --sync --needed --noprogressbar --quiet --refresh \
+      virtualbox-guest-utils
+  SHELL
+  config.vm.provision "shell", path: "../../scripts/archlinux/xfce4.install.sh"
+  config.vm.provision "shell", inline: <<-SHELL
+    shutdown -r now
+  SHELL
+end
