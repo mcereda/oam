@@ -8,7 +8,7 @@ function dropbox-install {
 	DROPBOX_retries="3"
 	DROPBOX_url="http://www.getdropbox.com/download?plat=lnx.x86_64"
 
-	# download daemon
+	# download the daemon
 	echo "  downloading archive…"
 	curl $DROPBOX_url \
 		--continue-at - \
@@ -17,18 +17,18 @@ function dropbox-install {
 		--retry $DROPBOX_retries \
 		--silent --show-error
 
-	# install daemon
+	# install the daemon
 	[[ -d "${HOME}/.dropbox-dist" ]] && echo "  removing old executables…" && rm -r "${HOME}/.dropbox-dist"
 	echo "  unarchiving tarball…"
 	tar zxf $DROPBOX_archive -C $HOME
 
-	# cleaning
+	# clean up
 	rm $DROPBOX_archive
 
 	[[ ${DEBUG} ]] && set +o xtrace
 }
 
-if [ ! -f start-multiple-instances.sh ]
+if [ ! -r "$(dirname ${0})/start-multiple-instances.sh" ]
 then
 	echo "[ERROR] Dropbox multi-instances start script not usable. Aborting."
 	exit 1
@@ -48,4 +48,4 @@ killall -I dropbox
 dropbox-install
 
 echo "[NOTICE] Restarting Dropbox daemons for all acounts."
-./start-multiple-instances.sh
+$(dirname ${0})/start-multiple-instances.sh

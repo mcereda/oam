@@ -10,5 +10,5 @@ sudo zypper addrepo --check --refresh --priority 90 https://ftp.gwdg.de/pub/linu
 
 sudo zypper addrepo --check --refresh --priority 90 https://download.opensuse.org/repositories/mozilla/openSUSE_Tumbleweed/ mozilla
 
-./chromium.sh
-./keybase.sh
+./chromium.install.sh
+./keybase.install.sh
