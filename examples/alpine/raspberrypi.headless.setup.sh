@@ -24,9 +24,9 @@ rm /etc/local.d/headless.start
 
 passwd
 
-adduser mek
+adduser $USER
 apk add sudo
-echo "mek ALL=(ALL) NOPASSWD: ALL" | tee /etc/sudoers.d/mek
+echo "${USER} ALL=(ALL) NOPASSWD: ALL" | tee /etc/sudoers.d/${USER}
 
 lbu commit -d
 reboot
