@@ -1,0 +1,3 @@
+Package: firefox
+Pin: release a=unstable
+Pin-Priority: 990
