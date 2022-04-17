@@ -17,7 +17,7 @@ sudo cpupower frequency-set --governor powersave
 sudo cpupower frequency-set --governor schedutil
 ```
 
-## Sources
+## Further readings
 
 - [CPU frequency scaling]
 - [CPU governer settings ignore nice load]
