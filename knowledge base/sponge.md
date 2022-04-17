@@ -9,7 +9,7 @@ brew install sponge   # or moreutils
 # append file content to the source file
 cat path/to/file | sponge -a path/to/other/file
 
-# remove all lines starting with # in a file:
+# remove all lines starting with "#" in a file
 grep -v '^{{#}}' path/to/file | sponge path/to/other/file
 ```
 

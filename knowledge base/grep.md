@@ -8,7 +8,7 @@ grep 'pattern' path/to/search
 
 # recursive search
 grep -R 'pattern' path/to/search/recursively
-grep -R --exclude-dir excluded/dir 'pattern' path/to/search/recursively  # gnu grep >= 2.5.2
+grep -R --exclude-dir excluded/dir 'pattern' path/to/search/recursively   # gnu grep >= 2.5.2
 
 # show line numbers
 grep -n 'pattern' path/to/search
