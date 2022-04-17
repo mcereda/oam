@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-TOP_LEVEL="$(git rev-parse --show-toplevel)"
+: "${TOP_LEVEL:=$(git rev-parse --show-toplevel)}"
 
 echo "Decrypting files…"
 
