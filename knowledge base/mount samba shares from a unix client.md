@@ -6,7 +6,7 @@
 sudo mount -t cifs -o user=my-user //nas.local/shared_folder local_folder
 ```
 
-## Sources
+## Further readings
 
 - [Mounting samba shares from a unix client]
 

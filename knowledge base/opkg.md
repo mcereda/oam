@@ -38,7 +38,7 @@ opkg list-changed-conffiles
 opkg depends dropbear
 ```
 
-## Sources
+## Further readings
 
 - [Opkg package manager]
 

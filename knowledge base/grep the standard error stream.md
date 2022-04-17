@@ -26,13 +26,10 @@ command 1>/dev/null 2> >(grep -oP "(.*)(?=pattern)")
 > Do note that **the target command of process substitution runs asynchronously**.  
 > As a consequence, `stderr` lines that get through the grep filter may not appear at the place you would expect in the rest of the output, but even on your next command prompt.
 
-## See also
-
-- Knowledge base on [grep]
-
 ## Further readings
 
 - Answer on [StackExchange] about [how to grep the standard error stream]
+- Knowledge base on [grep]
 
 [grep]: grep.md
 

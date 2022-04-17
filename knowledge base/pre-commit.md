@@ -7,8 +7,8 @@
 pre-commit sample-config > .pre-commit-config.yaml
 
 # manually run checks
-pre-commit run --all-files   # all checks
-pre-commit run ansible-lint  # ansible-lint only
+pre-commit run --all-files    # all checks
+pre-commit run ansible-lint   # ansible-lint only
 
 # automatically run checks at every commit
 pre-commit install
@@ -22,12 +22,8 @@ SKIP=flake8 git commit -m "foo"
 
 ## Further readings
 
+- Pre-commit's [website]
 - List of [supported hooks]
 
 [supported hooks]: https://pre-commit.com/hooks.html
-
-## Sources
-
-- [Website]
-
 [website]: https://pre-commit.com
