@@ -1,4 +1,4 @@
-# fwupd
+# Fwupd
 
 ## TL;DR
 
