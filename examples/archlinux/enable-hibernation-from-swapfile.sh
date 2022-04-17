@@ -30,7 +30,7 @@ sudo findmnt -no UUID -T /swap/swapfile
 curl --location --output /tmp/btrfs_map_physical.c https://raw.githubusercontent.com/osandov/osandov-linux/master/scripts/btrfs_map_physical.c
 gcc -O2 -o /tmp/btrfs_map_physical /tmp/btrfs_map_physical.c
 chmod a+x /tmp/btrfs_map_physical
-physical_offset=$(sudo /tmp/btrfs_map_physical /swap/swapfile | awk '$1==0 {print $NF}')  # last column of the line starting with 0
+physical_offset=$(sudo /tmp/btrfs_map_physical /swap/swapfile | awk '$1==0 {print $NF}')   # last column of the line starting with 0
 resume_offset=$(( ${physical_offset} / $(getconf PAGESIZE) ))
 
 # configure the bootloader
