@@ -15,12 +15,12 @@ boinccmd --acct_mgr attach "${ACCT_MGR_URL}" "${ACCT_MGR_USERNAME}" "${ACCT_MGR_
 
 ## /var/lib/boinc/cc_config.xml
 # …
-#     <allow_remote_gui_rpc>1</allow_remote_gui_rpc>  # add this
+#     <allow_remote_gui_rpc>1</allow_remote_gui_rpc>   # <-- add this
 #   </log_flags>
 # </cc_config>
 ##
 
 ## /var/lib/boinc/remote_hosts.cfg
 ## network addresses do not work, only single hosts
-# 192.168.0.190   # mb-laptop
+# 192.168.0.190   # my-laptop
 ##
