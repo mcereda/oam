@@ -12,6 +12,11 @@ grep -R --exclude-dir excluded/dir 'pattern' path/to/search/recursively   # gnu 
 
 # show line numbers
 grep -n 'pattern' path/to/search
+
+# parallel execution
+# mind the files with spaces in their name
+find . -type f | parallel -j 100% grep 'pattern'
+find . -type f -print0 | xargs -0 -n 1 -P $(nproc) grep 'pattern'
 ```
 
 ## Grep variants
@@ -37,6 +42,18 @@ You can to this using [`pdftotext`](pdfgrep.md) as shown in this example ([sourc
 ```sh
 find /path -name '*.pdf' -exec sh -c 'pdftotext "{}" - | grep --with-filename --label="{}" --color "your pattern"' ';'
 ```
+
+## Gotchas
+
+- Standard editions of `grep` run in a single thread; use another executor like
+  `parallel` or `xargs` to parallelize grepping multiple files:
+
+  ```shell
+  find . -type f | parallel -j 100% grep 'pattern'
+  find . -type f -print0 | xargs -0 -n 1 -P $(nproc) grep 'pattern'
+  ```
+
+  > mind files with spaces in their name.
 
 ## Further readings
 
