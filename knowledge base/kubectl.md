@@ -24,6 +24,11 @@ kubectl get nodes \
 # remove a taint
 # notice the '-' sign at the end
 kubectl taint nodes node1 key1=value1:NoSchedule-
+
+# delete non-default service accounts
+kubectl delete serviceaccounts \
+  $(kubectl get serviceaccounts -o jsonpath="{.items[?(@.metadata.name!='default')].metadata.name}" \
+    | tr ' ' ',')
 ```
 
 ## Further readings
