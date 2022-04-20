@@ -1,4 +1,4 @@
-# fstab
+# Fstab
 
 ## TL;DR
 
