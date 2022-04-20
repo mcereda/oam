@@ -105,15 +105,12 @@ $
 {{- end }}
 ```
 
-## Sources
-
-- [cheat.sh]
-
 ## Further readings
 
 - Chezmoi [user guide]
 - [Go text/template]
 - [Sprig]
+- [cheat.sh]
 
 [user guide]: https://www.chezmoi.io/user-guide/setup/
 

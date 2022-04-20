@@ -63,7 +63,7 @@ Supported filters:
 - `newer:datetime`: only include files newer than the specified date; use the date/time format _YYYY-MM-DD HH:MM:SS_; time is optional
 - `older:datetime`: only include files older than the specified date; use the date/time format _YYYY-MM-DD HH:MM:SS_; time is optional
 
-## Sources
+## Further readings
 
 - Jdupes' [github] page
 

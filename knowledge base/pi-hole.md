@@ -7,7 +7,7 @@
 curl -sSL https://install.pi-hole.net | bash
 ```
 
-## Sources
+## Further readings
 
 - Pi-hole's [repository]
 
