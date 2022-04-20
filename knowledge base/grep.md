@@ -61,6 +61,7 @@ find /path -name '*.pdf' -exec sh -c 'pdftotext "{}" - | grep --with-filename --
 - [Regular expressions in grep with examples]
 - [Grep the standard error stream]
 - Knowledge base on [pdfgrep]
+- [Parallel grep]
 
 [grep the standard error stream]: grep\ the\ standard\ error\ stream.md
 [pdfgrep]: pdfgrep.md
@@ -68,4 +69,5 @@ find /path -name '*.pdf' -exec sh -c 'pdftotext "{}" - | grep --with-filename --
 [stackoverflow]: https://stackoverflow.com
 
 [how to search contents of multiple pdf files]: https://stackoverflow.com/a/4643518
+[parallel grep]: https://www.highonscience.com/blog/2021/03/21/parallel-grep/
 [regular expressions in grep with examples]: https://www.cyberciti.biz/faq/grep-regular-expressions/
