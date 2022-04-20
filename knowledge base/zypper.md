@@ -26,11 +26,8 @@ sudo rpm --query --list ${PACKAGE_NAME}
 ## Further readings
 
 - [rpm]
+- [How can I list all files which have been installed by an ZYpp/Zypper package?]
 
 [rpm]: rpm.md
-
-## Sources
-
-- [How can I list all files which have been installed by an ZYpp/Zypper package?]
 
 [how can i list all files which have been installed by an zypp/zypper package?]: https://unix.stackexchange.com/questions/162092/how-can-i-list-all-files-which-have-been-installed-by-an-zypp-zypper-package#239944

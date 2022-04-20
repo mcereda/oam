@@ -21,7 +21,7 @@ curl cht.sh/python/lambda
 curl cht.sh/go/:list
 ```
 
-## Sources
+## Further readings
 
 - [website]
 
