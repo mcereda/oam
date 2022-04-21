@@ -178,12 +178,18 @@ fi
 - [antibody]
 - [antigen]
 - [ohmyzsh]
+- [zcomet]
 - [zplug]
 
 ## Plugins
 
+[Awesome zsh plugins] is a comprehensive list of various plugins for ZSH.
+
+What follows are some I always add to my setup:
+
 - [fzf]
 - [zsh-autosuggestions]
+- [zsh-completions]
 - [zsh-history-substring-search]
 - [zsh-syntax-highlighting]
 
@@ -200,7 +206,7 @@ compaudit | xargs chmod g-w
 - [Substitutions]
 - [ZSH compinit: insecure directories and files, run compaudit for list]
 - [Pattern matching in a conditional expression]
-- [Eemove duplicates in ZSH path]
+- [Remove duplicates in ZSH path]
 - [Completion config example]
 - [What should/shouldn't go in .zshenv, .zshrc, .zlogin, .zprofile, .zlogout?]
 - [The Z Shell Manual]
@@ -208,21 +214,24 @@ compaudit | xargs chmod g-w
 - [How can I convert an array into a comma separated string?]
 - [How to list all variables names and their current values?]
 
+[antigen]: https://github.com/zsh-users/antigen
+[fzf]: https://github.com/junegunn/fzf
+[ohmyzsh]: https://github.com/ohmyzsh/ohmyzsh
+[zcomet]: https://github.com/agkozak/zcomet
+[zplug]: https://github.com/zplug/zplug
+[zsh-autosuggestions]: https://github.com/zsh-users/zsh-autosuggestions
+[zsh-completions]: https://github.com/zsh-users/zsh-completions
+[zsh-history-substring-search]: https://github.com/zsh-users/zsh-history-substring-search
+[zsh-syntax-highlighting]: https://github.com/zsh-users/zsh-syntax-highlighting
+
+[awesome zsh plugins]: https://github.com/unixorn/awesome-zsh-plugins
 [completion config example]: https://github.com/ThiefMaster/zsh-config/blob/master/zshrc.d/completion.zsh
 [gentoo wiki]: https://wiki.gentoo.org/wiki/Zsh
-[How can I convert an array into a comma separated string?]: https://stackoverflow.com/questions/53839253/how-can-i-convert-an-array-into-a-comma-separated-string
+[how can i convert an array into a comma separated string?]: https://stackoverflow.com/questions/53839253/how-can-i-convert-an-array-into-a-comma-separated-string
+[how to list all variables names and their current values?]: https://askubuntu.com/questions/275965/how-to-list-all-variables-names-and-their-current-values#275972
 [pattern matching in a conditional expression]: https://unix.stackexchange.com/questions/553607/pattern-matching-in-a-zsh-conditional-expression
 [remove duplicates in zsh path]: https://til.hashrocket.com/posts/7evpdebn7g-remove-duplicates-in-zsh-path
 [substitutions]: http://zsh.sourceforge.net/Guide/zshguide05.html
 [the z shell manual]: http://zsh.sourceforge.net/Doc/Release/
 [what should/shouldn't go in .zshenv, .zshrc, .zlogin, .zprofile, .zlogout?]: https://unix.stackexchange.com/questions/71253/what-should-shouldnt-go-in-zshenv-zshrc-zlogin-zprofile-zlogout#487889
 [zsh compinit: insecure directories and files, run compaudit for list]: https://github.com/zsh-users/zsh-completions/issues/433#issuecomment-619321054
-[how to list all variables names and their current values?]: https://askubuntu.com/questions/275965/how-to-list-all-variables-names-and-their-current-values#275972
-
-[antigen]: https://github.com/zsh-users/antigen
-[fzf]: https://github.com/junegunn/fzf
-[ohmyzsh]: https://github.com/ohmyzsh/ohmyzsh
-[zplug]: https://github.com/zplug/zplug
-[zsh-autosuggestions]: https://github.com/zsh-users/zsh-autosuggestions
-[zsh-history-substring-search]: https://github.com/zsh-users/zsh-history-substring-search
-[zsh-syntax-highlighting]: https://github.com/zsh-users/zsh-syntax-highlighting
