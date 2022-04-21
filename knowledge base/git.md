@@ -68,7 +68,7 @@ git config --list --show-origin
 # render the current configuration
 git config --list \
  | awk -F '=' '{print $1}' | uniq \
- | xargs -n 1 -I {} sh -c 'printf "{}=" && git config --get {}'
+ | xargs -I {} sh -c 'printf "{}=" && git config --get {}'
 
 # get the top-level directory of the current repository
 git rev-parse --show-toplevel
