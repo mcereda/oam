@@ -40,7 +40,8 @@ git remote add gitlab git@gitlab.com:user/my-awesome-repo.git
 git push gitlab
 
 # create a patch
-git add . && git commit -m 'commit message' && git format-patch HEAD~1 && git reset HEAD~1
+# FIXME: there has to be a better way to do this
+git add . && git commit -m 'message' && git format-patch HEAD~1 && git reset HEAD~1
 git diff > file.patch
 
 # apply a patch
@@ -59,9 +60,15 @@ git config --local commit.gpgsign true
 git config core.autocrlf "input"  # unix
 git config core.autocrlf "true"   # windows
 
-# show the current configuration
+# show git's configuration
 git config --list
+git config --list --show-scope
 git config --list --show-origin
+
+# render the current configuration
+git config --list \
+ | awk -F '=' '{print $1}' | uniq \
+ | xargs -n 1 -I {} sh -c 'printf "{}=" && git config --get {}'
 
 # get the top-level directory of the current repository
 git rev-parse --show-toplevel
@@ -97,7 +104,8 @@ git config --local alias.co checkout
 git config --global alias.unstage 'reset HEAD --'
 
 # remove merged branches
-git fetch -p && awk '/origin/&&/gone/{print $1}' <(git branch -vv) | xargs git branch -d
+git fetch -p && awk '/origin/&&/gone/{print $1}' <(git branch -vv) \
+ | xargs git branch -d
 
 # get a more specific diff
 git diff --word-diff
