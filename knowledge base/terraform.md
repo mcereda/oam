@@ -110,15 +110,27 @@ Terraform will perform the following actions:
     }
 ```
 
+### Useful internal variables
+
+Name                  | Description
+--------------------- | -----------
+`path.root`           | filesystem path of the root module of the configuration
+`path.module`         | filesystem path of the module where the expression is placed
+`path.cwd`            | filesystem path of the current working directory
+`terraform.workspace` | name of the currently selected workspace
+
 ## Further readings
 
 - [CLI Documentation]
 - [for_each vs count]
 - [Providers best practices]
 - [Version constraints]
+- [References to Named Values]
 
-[for_each vs count]: https://medium.com/@business_99069/terraform-count-vs-for-each-b7ada2c0b186
 
 [cli documentation]: https://www.terraform.io/docs/cli/
 [providers best practices]: https://www.terraform.io/language/providers/requirements#best-practices-for-provider-versions
+[references to named values]: https://www.terraform.io/language/expressions/references
 [version constraints]: https://www.terraform.io/language/expressions/version-constraints
+
+[for_each vs count]: https://medium.com/@business_99069/terraform-count-vs-for-each-b7ada2c0b186
