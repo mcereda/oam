@@ -78,8 +78,11 @@ ls **/*(-@)
 # show all set bindkeys
 bindkeys
 
-# make the delete key work as expected
-bindkey "\e[3~" delete-char
+# make the home, end and delete key work as expected
+# to know the code of a key: execute cat, press enter, press the key, Ctrl+C.
+bindkey  "^[[H"   beginning-of-line
+bindkey  "^[[F"   end-of-line
+bindkey  "^[[3~"  delete-char
 ```
 
 ## Configuration
@@ -206,13 +209,17 @@ What follows are some I always add to my setup:
 
 ## Troubleshooting
 
-### The delete key is not working as intended
+### The delete, end and/or home keys are not working as intended
 
-Some setting or plugin changed the key binding. Reassign the expected behaviour:
+Some setting or plugin changed the key binding. Reassign them to obtain the expected behaviour:
 
 ```shell
-bindkey "\e[3~" delete-char
+bindkey  "^[[H"   beginning-of-line
+bindkey  "^[[F"   end-of-line
+bindkey  "^[[3~"  delete-char
 ```
+
+> To know the code of a key, execute cat, press enter, press the key, then Ctrl+C.
 
 ### Compinit warnings of insecure directories and files
 
@@ -235,6 +242,7 @@ compaudit | xargs chmod g-w
 - [How can I convert an array into a comma separated string?]
 - [How to list all variables names and their current values?]
 - [Zsh delete keybinding]
+- [Fix key settings (Home/End/Insert/Delete) in .zshrc when running Zsh in Terminator Terminal Emulator]
 
 [antibody]: https://github.com/getantibody/antibody
 [antidote]: https://getantidote.github.io/
@@ -250,6 +258,7 @@ compaudit | xargs chmod g-w
 
 [awesome zsh plugins]: https://github.com/unixorn/awesome-zsh-plugins
 [completion config example]: https://github.com/ThiefMaster/zsh-config/blob/master/zshrc.d/completion.zsh
+[fix key settings (home/end/insert/delete) in .zshrc when running zsh in terminator terminal emulator]: https://stackoverflow.com/questions/8638012/fix-key-settings-home-end-insert-delete-in-zshrc-when-running-zsh-in-terminat#8645267
 [gentoo wiki]: https://wiki.gentoo.org/wiki/Zsh
 [how can i convert an array into a comma separated string?]: https://stackoverflow.com/questions/53839253/how-can-i-convert-an-array-into-a-comma-separated-string
 [how to list all variables names and their current values?]: https://askubuntu.com/questions/275965/how-to-list-all-variables-names-and-their-current-values#275972
