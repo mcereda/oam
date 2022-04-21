@@ -72,6 +72,16 @@ typeset -aU path
 ls **/*(-@)
 ```
 
+## Bindkeys
+
+```shell
+# show all set bindkeys
+bindkeys
+
+# make the delete key work as expected
+bindkey "\e[3~" delete-char
+```
+
 ## Configuration
 
 ### Config files read order
@@ -108,7 +118,7 @@ ls **/*(-@)
    1. `/etc/zlogout`
 
    This happens with either an explicit exit via the `exit` or `logout` commands, or an implicit exit by reading `end-of-file` from the terminal.  
-   However, if the shell terminates due to exec’ing another process, the files are not read. These are also affected by the `RCS` and `GLOBAL_RCS` options.  
+   However, if the shell terminates due to exec'ing another process, the files are not read. These are also affected by the `RCS` and `GLOBAL_RCS` options.  
    The `RCS` option affects the saving of history files, i.e. if `RCS` is unset when the shell exits, no history file will be saved.
 
 If `ZDOTDIR` is unset, `HOME` is used instead. Files listed above as being in `/etc` may be in another directory, depending on the installation.
@@ -196,7 +206,17 @@ What follows are some I always add to my setup:
 
 ## Troubleshooting
 
-> zsh compinit: insecure directories and files, run compaudit for list
+### The delete key is not working as intended
+
+Some setting or plugin changed the key binding. Reassign the expected behaviour:
+
+```shell
+bindkey "\e[3~" delete-char
+```
+
+### Compinit warnings of insecure directories and files
+
+Compinit is complaining of some critical files being group writable. Running `compaudit` will list those files. Just use it to remove the group's write permission:
 
 ```shell
 compaudit | xargs chmod g-w
@@ -214,6 +234,7 @@ compaudit | xargs chmod g-w
 - [Gentoo Wiki]
 - [How can I convert an array into a comma separated string?]
 - [How to list all variables names and their current values?]
+- [Zsh delete keybinding]
 
 [antibody]: https://github.com/getantibody/antibody
 [antidote]: https://getantidote.github.io/
@@ -238,3 +259,4 @@ compaudit | xargs chmod g-w
 [the z shell manual]: http://zsh.sourceforge.net/Doc/Release/
 [what should/shouldn't go in .zshenv, .zshrc, .zlogin, .zprofile, .zlogout?]: https://unix.stackexchange.com/questions/71253/what-should-shouldnt-go-in-zshenv-zshrc-zlogin-zprofile-zlogout#487889
 [zsh compinit: insecure directories and files, run compaudit for list]: https://github.com/zsh-users/zsh-completions/issues/433#issuecomment-619321054
+[zsh delete keybinding]: https://superuser.com/questions/983016/zsh-delete-keybinding#983018
