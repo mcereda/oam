@@ -176,6 +176,7 @@ fi
 ## Frameworks
 
 - [antibody]
+- [antidote]
 - [antigen]
 - [ohmyzsh]
 - [zcomet]
@@ -214,6 +215,8 @@ compaudit | xargs chmod g-w
 - [How can I convert an array into a comma separated string?]
 - [How to list all variables names and their current values?]
 
+[antibody]: https://github.com/getantibody/antibody
+[antidote]: https://getantidote.github.io/
 [antigen]: https://github.com/zsh-users/antigen
 [fzf]: https://github.com/junegunn/fzf
 [ohmyzsh]: https://github.com/ohmyzsh/ohmyzsh
