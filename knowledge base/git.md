@@ -25,6 +25,10 @@ git config --list \
   | awk -F '=' '{print $1}' | sort -u \
   | xargs -I {} sh -c 'printf "{}=" && git config --get {}'
 
+# Get a default value if the setting has none.
+# Does not work on sections alone.
+git config --get --default not-set filter.lfs.cleaned
+
 # Create or reinitialize a repository.
 git init
 git init --initial-branch main path/to/repo
