@@ -4,7 +4,7 @@
 
 ```shell
 # Set your identity.
-git config user.name "User Name"
+git config user.name 'User Name'
 git config --global user.email user@email.com
 
 # Avoid issues when collaborating from different platforms.
@@ -22,7 +22,7 @@ git config --list --show-origin
 
 # Render all current settings' values.
 git config --list \
-  | awk -F '=' '{print $1}' | uniq \
+  | awk -F '=' '{print $1}' | sort -u \
   | xargs -I {} sh -c 'printf "{}=" && git config --get {}'
 
 # Create or reinitialize a repository.
@@ -34,6 +34,7 @@ git init --bare path/to/repo.git
 git clone https://github.com:user/repo.git
 git clone git@github.com:user/repo.git path/to/clone
 git clone --recurse-submodules ssh@git.server:user/repo.git
+git clone --depth 1 ssh@git.server:user/repo.git
 
 # Show what files changed.
 git status
@@ -47,18 +48,22 @@ git add path/to/file
 # Interactively review chunks of changes.
 git add --patch path/to/file
 
-# Show changes.
+# Show changes in a repository.
 git diff
 git diff --staged commit
 git diff commit1..commit2
 git diff branch1 branch2
 git diff --word-diff=color
+git log -p feature --not master
+
+# Just show changes between two files.
+git diff --no-index path/to/file/a path/to/file/b
 
 # Stash changes locally.
 git stash
 
 # Stash changes with a message.
-git stash save "message"
+git stash save 'message'
 
 # List all the stashed changes.
 git stash list
@@ -80,6 +85,12 @@ git branch new-branch
 git switch -c new-branch
 git checkout -b new-local-branch remote/existing-branch
 
+# Create a bare branch without any commits.
+git checkout --orphan branch_name
+
+# List branches.
+git branch -a
+
 # Rename a branch.
 git branch --move old-name new-name
 
@@ -87,6 +98,9 @@ git branch --move old-name new-name
 git switch branch
 git checkout branch
 git checkout -
+
+# Set an existing branch to track a remote branch.
+git branch -u remote/upstream-branch
 
 # Get the current branch.
 git branch --show-current         # git > v2.22
@@ -106,6 +120,9 @@ git branch --delete --remotes branch
 # Sync the local branch list.
 git fetch --prune
 
+# Interactively rebase the last 7 commits.
+git rebase -i @~7
+
 # Rebase the 'main' branch on top of the current branch.
 git rebase main
 
@@ -116,19 +133,54 @@ git rebase remote/upstream-branch local-branch
 git pull --rebase=interactive origin master
 
 # Commit changes.
-git commit --message "message"
-git commit --message "whatever" --gpg-sign
+git commit --message 'message'
+git commit --message 'whatever' --gpg-sign
 git commit --allow-empty --allow-empty-message
-git commit --date="Jun 13 18:30:25 IST 2015"
-git commit --date="`date --date='2 days ago'`"
+git commit --date='Jun 13 18:30:25 IST 2015'
+git commit --date="$(date --date='2 days ago')"
 
 # Edit the last commit's message.
 git commit --amend
+git commit --amend --message 'message'
+
+# Change the date of an existing commit.
+git filter-branch --env-filter \
+  'if [ $GIT_COMMIT = 119f9ecf58069b265ab22f1f97d2b648faf932e0 ]
+   then
+     export GIT_AUTHOR_DATE="Fri Jan 2 21:38:53 2009 -0800"
+     export GIT_COMMITTER_DATE="Sat May 19 01:01:01 2007 -0700"
+   fi'
+
+# Revert a commit but keep the history of the event as a separate commit.
+git revert commit
 
 # Push committed changes.
 git push
-git push github gitlab
+git push remote branch1 branch2
+git push git@github.com:user/repo.git
 git push --all
+
+# Remove staged and working directory changes.
+git reset --hard
+git reset --hard origin/main
+
+# Go back 4 commits.
+git reset --hard HEAD~4
+
+# Apply only the changes made within a given commit.
+git cherry-pick commit
+
+# List changed files in a given commit.
+git diff-tree --no-commit-id --name-only -r commit
+
+# Remove untracked files.
+git clean -f -d
+
+# Remove ignored files.
+git clean -f -d -x
+
+# Show who committed which line.
+git blame path/to/file
 
 # Create patches.
 git diff > file.patch
@@ -161,7 +213,7 @@ git tag
 
 # Create annotated tags.
 git tag --annotate v0.1.0
-git tag -as v1.2.0-r0 -m "signed annotated tag for v1.2.0 release 0"
+git tag -as v1.2.0-r0 -m 'signed annotated tag for v1.2.0 release 0'
 git tag -a 1.1.9 9fceb02
 
 # Create lightweight tags.
@@ -171,14 +223,17 @@ git tag 1.12.1 HEAD
 # Push specific tags.
 git push origin v1.5
 
-# Push annotated tags only
+# Push annotated tags only.
 git push --follow-tags
 
-# Push all tags
+# Push all tags.
 git push --tags
 
 # Visualize the repository's history.
 git log --graph --full-history --all --color --decorate --oneline
+
+# Show commits which would be pushed.
+git log @{u}..
 
 # Delete local tags.
 git tag -d v1.4-lw
@@ -192,9 +247,26 @@ git fetch --prune-tags
 # Get the top-level directory of the current repository.
 git rev-parse --show-toplevel
 
-# Remove merged branches.
-git fetch -p && awk '/origin/&&/gone/{print $1}' <(git branch -vv) \
+# Remove all stale branches.
+git remote prune origin
+
+# Delete branches which have been merged or are otherwise absent from a remote.
+git fetch -p \
+  && awk '/origin/&&/gone/{print $1}' <(git branch -vv) | xargs git branch -d
+git branch --no-color --merged | grep -vE '^\*?\s+(master|main|dev.*)$' \
   | xargs git branch -d
+
+# Import commits from another repo.
+git --git-dir=../other-repo/.git format-patch -k -1 --stdout commit | git am -3 -k
+
+# Update all submodules.
+git submodule update --init --recursive
+
+# Unshallow a clone.
+git pull --unshallow
+
+# Show the first commit that has the string "cool" in its message body.
+git show :/cool
 ```
 
 ## Configuration
@@ -245,28 +317,33 @@ git config --list \
 # Show changes relative to the current index (not yet staged).
 git diff
 
-# Show changes in the staged files only
+# Show changes in the staged files only.
 git diff --staged
 
-# Show changes relative to 'commit' (defaults to HEAD if not given)
-# Alias of `--staged`
+# Show changes relative to 'commit' (defaults to HEAD if not given).
+# Alias of `--staged`.
 git diff --cached commit
 
-# Show changes relative to 'branch'
+# Show changes relative to 'branch'.
 git diff branch
 
-# Show changes between commits
-# Separating the commits with `..` is optional
+# Show changes between commits.
+# Separating the commits with `..` is optional.
 git diff commit1 commit2
 
-# Show changes between branches
-# Separating the branches with `..` is optional
+# Show changes between branches.
+# Separating the branches with `..` is optional.
 git diff branch1 branch2
 
-# Show a word diff using 'mode' to delimit changed words for emphasis
-# 'mode' defaults to 'plain'
-# 'mode' must be one of 'color', 'none', 'plain' or 'porcelain'
+# Show a word diff using 'mode' to delimit changed words for emphasis.
+# 'mode' defaults to 'plain'.
+# 'mode' must be one of 'color', 'none', 'plain' or 'porcelain'.
 git diff --word-diff=porcelain
+
+# Just show changes between two files.
+# DO NOT consider them part of of the repository.
+# This can be used to diff any two files.
+git diff --no-index path/to/file/A path/to/file/B
 ```
 
 ### Create a patch
@@ -327,7 +404,7 @@ The _stash_ is a changelist separated from the one in the current working direct
 git stash
 
 # Stash changes with a message.
-git stash save "message"
+git stash save 'message'
 
 # List all the stashed changes.
 git stash list
@@ -366,15 +443,19 @@ git push origin --delete feat-branch
 git branch --delete --remotes feat-branch
 ```
 
-## Delete all branches already merged on master
-
-Already present in `oh-my-zsh`'s **git** module as the `gbda` alias
+## Delete branches which have been merged or are otherwise absent from a remote.
 
 Command source [here][prune local branches that do not exist on remote anymore].
 
 ```shell
-git fetch -p && awk '/origin/&&/gone/{print $1}' <(git branch -vv) | xargs git branch -d
-git branch --no-color --merged | command grep -vE "^(\*|\s*(master|develop|dev)\s*$)" | command xargs -n 1 git branch -d
+# Branches not on the remote are tagged as 'gone' in `git branch -vv`'s output.
+git fetch -p \
+  && awk '/origin/&&/gone/{print $1}' <(git branch -vv) | xargs git branch -d
+
+# Retain the 'master', 'main' and 'dev*' branches in all cases.
+git branch --no-color --merged \
+  | grep -vE '^\*?\s+(master|main|dev.*)$' \
+  | xargs git branch -d
 ```
 
 ### Merge the master branch into a feature branch
@@ -561,16 +642,16 @@ See [remove files from git commit].
    git commit --amend
    ```
 
-## Remotes management
+## Remotes
 
 ```shell
-# add a remote
+# Add a remote.
 git remote add gitlab git@gitlab.com:user/my-awesome-repo.git
 
-# add other push urls to an existing remote
+# Add other push urls to an existing remote.
 git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo1
 
-# change a remote
+# Change a remote.
 git remote set-url origin git@github.com:user/new-repo-name.git
 ```
 
