@@ -36,17 +36,19 @@ git clone git@github.com:user/repo.git path/to/clone
 git clone --recurse-submodules ssh@git.server:user/repo.git
 git clone --depth 1 ssh@git.server:user/repo.git
 
+# Unshallow a clone.
+git pull --unshallow
+
+# Get objects and refs but do not incorporate them.
+git fetch
+
+# Get changes and merge them.
+git pull --all
+git pull remote branch
+
 # Show what files changed.
 git status
 git status --verbose
-
-# Stage changes for commit.
-git add .
-git add --all
-git add path/to/file
-
-# Interactively review chunks of changes.
-git add --patch path/to/file
 
 # Show changes in a repository.
 git diff
@@ -59,11 +61,97 @@ git log -p feature --not master
 # Just show changes between two files.
 git diff --no-index path/to/file/a path/to/file/b
 
+# Stage changes for commit.
+git add .
+git add --all
+git add path/to/file
+
+# Interactively review chunks of changes.
+git add --patch path/to/file
+
+# Commit changes.
+git commit --message 'message'
+git commit --message 'whatever' --gpg-sign
+git commit --allow-empty --allow-empty-message
+git commit --date='Jun 13 18:30:25 IST 2015'
+git commit --date="$(date --date='2 days ago')"
+
+# Edit the last commit's message.
+git commit --amend
+git commit --amend --message 'message'
+
+# Change the last commit's author.
+git config user.name "user name"
+git config user.email user.email@mail.com
+git commit --amend --reset-author
+
+# Show commits which would be pushed.
+git log @{u}..
+
+# Revert a commit but keep the history of the event as a separate commit.
+git revert commit
+
+# Interactively rebase the last 7 commits.
+git rebase -i @~7
+
+# List remotes.
+git remote --verbose
+
+# Add a new remote.
+git remote add gitlab git@gitlab.com:user/repo.git
+
+# Push committed changes.
+git push
+git push remote branch1 branch2
+git push git@github.com:user/repo.git
+git push --all --force
+
+# Show the repository's history.
+git reflog
+git log -p
+
+# Visualize the repository's history.
+git log --graph --full-history --all --color --decorate --oneline
+
+# Remove staged and working directory changes.
+git reset --hard
+git reset --hard origin/main
+
+# Go back 4 commits.
+git reset --hard HEAD~4
+
+# Remove untracked files.
+git clean -f -d
+
+# Remove ignored files.
+git clean -f -d -x
+
+# Show who committed which line.
+git blame path/to/file
+
+# List changed files in a given commit.
+git diff-tree --no-commit-id --name-only -r commit
+
+# Create patches.
+git diff > file.patch
+git diff --output file.patch --cached
+git format-patch -5 commit
+git format-patch HEAD~3 -o dir
+git format-patch HEAD~2 --stdout > single.patch
+
+# Create a full patch of the unstaged changes.
+git add . && git commit -m 'uncommitted' \
+  && git format-patch HEAD~1 && git reset HEAD~1
+
+# Apply a patch to the current index.
+git apply file.patch
+
+# Apply commits from a patch.
+git am file.patch
+
 # Stash changes locally.
 git stash
-
-# Stash changes with a message.
-git stash save 'message'
+git stash push 'message'
 
 # List all the stashed changes.
 git stash list
@@ -74,11 +162,17 @@ git stash pop
 # Apply a stash, but don't remove it from the stack.
 git stash apply stash@{6}
 
-# List remotes.
-git remote --verbose
+# Remove a single stash entry from the stash stack.
+# Defaults to the current one.
+git stash drop
+git stash drop stash@{2}
 
-# Add a new remote.
-git remote add gitlab git@gitlab.com:user/repo.git
+# Remove all the stash entries.
+# Those will then be pruned and may be impossible to recover.
+git stash clear
+
+# Apply only the changes made within a given commit.
+git cherry-pick commit
 
 # Create a branch.
 git branch new-branch
@@ -111,8 +205,8 @@ git branch --delete local-branch
 git branch -D local-branch
 
 # Delete remote branches.
-git push origin :remote-branch
-git push origin --delete remote-branch
+git push remote :remote-branch
+git push remote --delete remote-branch
 
 # Delete both local and remote branches.
 git branch --delete --remotes branch
@@ -120,93 +214,13 @@ git branch --delete --remotes branch
 # Sync the local branch list.
 git fetch --prune
 
-# Interactively rebase the last 7 commits.
-git rebase -i @~7
+# Remove all stale branches.
+git remote prune origin
 
-# Rebase the 'main' branch on top of the current branch.
-git rebase main
-
-# Rebase an upstream branch on top of a local branch.
-git rebase remote/upstream-branch local-branch
-
-# Rebase the current branch onto the *upstream* 'master' branch.
-git pull --rebase=interactive origin master
-
-# Commit changes.
-git commit --message 'message'
-git commit --message 'whatever' --gpg-sign
-git commit --allow-empty --allow-empty-message
-git commit --date='Jun 13 18:30:25 IST 2015'
-git commit --date="$(date --date='2 days ago')"
-
-# Edit the last commit's message.
-git commit --amend
-git commit --amend --message 'message'
-
-# Change the date of an existing commit.
-git filter-branch --env-filter \
-  'if [ $GIT_COMMIT = 119f9ecf58069b265ab22f1f97d2b648faf932e0 ]
-   then
-     export GIT_AUTHOR_DATE="Fri Jan 2 21:38:53 2009 -0800"
-     export GIT_COMMITTER_DATE="Sat May 19 01:01:01 2007 -0700"
-   fi'
-
-# Revert a commit but keep the history of the event as a separate commit.
-git revert commit
-
-# Push committed changes.
-git push
-git push remote branch1 branch2
-git push git@github.com:user/repo.git
-git push --all
-
-# Remove staged and working directory changes.
-git reset --hard
-git reset --hard origin/main
-
-# Go back 4 commits.
-git reset --hard HEAD~4
-
-# Apply only the changes made within a given commit.
-git cherry-pick commit
-
-# List changed files in a given commit.
-git diff-tree --no-commit-id --name-only -r commit
-
-# Remove untracked files.
-git clean -f -d
-
-# Remove ignored files.
-git clean -f -d -x
-
-# Show who committed which line.
-git blame path/to/file
-
-# Create patches.
-git diff > file.patch
-git diff --output file.patch --cached
-git format-patch -5 commit
-git format-patch HEAD~3 -o dir
-git format-patch HEAD~2 --stdout > single.patch
-
-# Create a full patch of the unstaged changes.
-git add . && git commit -m 'uncommitted' \
-  && git format-patch HEAD~1 && git reset HEAD~1
-
-# Apply a patch to the current index.
-git apply file.patch
-
-# Apply commits from a patch.
-git am file.patch
-
-# Change the last commit's author.
-git config user.name "user name"
-git config user.email user.email@mail.com
-git commit --amend --reset-author
-
-# Sign all commits from now on.
-git config --global user.signingkey 'KEY_ID_IN_SHORT_FORMAT'
-git config --local commit.gpgsign true
+# Delete branches which have been merged or are otherwise absent from a remote.
+git branch --merged | grep -vE '(^\*|master|main|dev)' | xargs git branch -d
+git fetch -p \
+  && awk '/origin/&&/gone/{print $1}' <(git branch -vv) | xargs git branch -d
 
 # List all tags.
 git tag
@@ -229,12 +243,6 @@ git push --follow-tags
 # Push all tags.
 git push --tags
 
-# Visualize the repository's history.
-git log --graph --full-history --all --color --decorate --oneline
-
-# Show commits which would be pushed.
-git log @{u}..
-
 # Delete local tags.
 git tag -d v1.4-lw
 
@@ -244,26 +252,31 @@ git push origin --delete v1.4-lw
 # Sync the local tags list.
 git fetch --prune-tags
 
-# Get the top-level directory of the current repository.
-git rev-parse --show-toplevel
+# Rebase a branch on top of another.
+git rebase main
+git rebase remote/upstream-branch local-branch
+git pull --rebase=interactive remote branch
 
-# Remove all stale branches.
-git remote prune origin
+# Change the date of an existing commit.
+git filter-branch --env-filter \
+  'if [ $GIT_COMMIT = 119f9ecf58069b265ab22f1f97d2b648faf932e0 ]
+   then
+     export GIT_AUTHOR_DATE="Fri Jan 2 21:38:53 2009 -0800"
+     export GIT_COMMITTER_DATE="Sat May 19 01:01:01 2007 -0700"
+   fi'
 
-# Delete branches which have been merged or are otherwise absent from a remote.
-git fetch -p \
-  && awk '/origin/&&/gone/{print $1}' <(git branch -vv) | xargs git branch -d
-git branch --no-color --merged | grep -vE '^\*?\s+(master|main|dev.*)$' \
-  | xargs git branch -d
+# Sign all commits from now on.
+git config --global user.signingkey 'KEY_ID_IN_SHORT_FORMAT'
+git config --local commit.gpgsign true
 
 # Import commits from another repo.
 git --git-dir=../other-repo/.git format-patch -k -1 --stdout commit | git am -3 -k
 
+# Get the top-level directory of the current repository.
+git rev-parse --show-toplevel
+
 # Update all submodules.
 git submodule update --init --recursive
-
-# Unshallow a clone.
-git pull --unshallow
 
 # Show the first commit that has the string "cool" in its message body.
 git show :/cool
@@ -448,14 +461,12 @@ git branch --delete --remotes feat-branch
 Command source [here][prune local branches that do not exist on remote anymore].
 
 ```shell
-# Branches not on the remote are tagged as 'gone' in `git branch -vv`'s output.
+# Branches merged on the remote are tagged as 'gone' in `git branch -vv`'s output.
 git fetch -p \
   && awk '/origin/&&/gone/{print $1}' <(git branch -vv) | xargs git branch -d
 
-# Retain the 'master', 'main' and 'dev*' branches in all cases.
-git branch --no-color --merged \
-  | grep -vE '^\*?\s+(master|main|dev.*)$' \
-  | xargs git branch -d
+# Retain the current, 'master', 'main' and 'dev*' branches in all cases.
+git branch --merged | grep -vE '(^\*|master|main|dev)' | xargs git branch -d
 ```
 
 ### Merge the master branch into a feature branch
@@ -533,82 +544,74 @@ git tag -d v1.4-lw
 git push origin --delete v1.4-lw
 ```
 
-## LFS
+## LFS extension
 
-1. install the LFS extension for git
+1. Install the extension:
 
    ```shell
-   # Ubuntu
    apt install git-lfs
+   brew install git-lfs
+   dnf install git-lfs
+   pacman -S git-lfs
    ```
 
-1. enable the extension in the repository
+1. If the package manager did not enable it system-wide, enable the extension for your user account:
 
    ```shell
-   $ cd "${REPOSITORY}"
-   [repository-root]$ git install lfs
+   git lfs install
    ```
 
-1. configure file tracking
+   Without any options, this will only setup the "lfs" smudge and clean filters if they are not already set.
+
+1. Configure file tracking from inside the repository:
 
    ```shell
-   [repository-root]$ git lfs track "*.exe"
-   [repository-root]$ git lfs track "enormous_file.*"
+   git lfs track "*.exe"
+   git lfs track "enormous_file.*"
    ```
 
-- add the `.gitattributes` file to the traced files
+1. Add the `.gitattributes` file to the traced files:
 
-  ```shell
-  [repository-root]$ git add .gitattributes
-  [repository-root]$ git commit -m "lfs configured"
-  ```
+   ```shell
+   git add .gitattributes
+   git commit -m "lfs configured"
+   ```
 
 ## Submodules
 
-See [Git Submodules: Adding, Using, Removing, Updating].
+See [Git Submodules: Adding, Using, Removing, Updating] for more information.
 
-- add a submodule to an existing repository:
+```shell
+# Add a submodule to an existing repository.
+git submodule add https://github.com/ohmyzsh/ohmyzsh lib/ohmyzsh
 
-  ```shell
-  git submodule add https://github.com/ohmyzsh/ohmyzsh lib/ohmyzsh
-  ```
+# Clone a repository which has submodules.
+git clone --recursive keybase://public/bananas/dotfiles
+git clone --recurse-submodules ohmyzsh keybase://public/bananas/dotfiles
 
-- clone a repository with submodules:
-
-  ```shell
-  git clone --recursive keybase://public/bananas/dotfiles
-  git clone --recurse-submodules ohmyzsh keybase://public/bananas/dotfiles
-  ```
-
-- update an existing repository with submodules:
-
-  ```shell
-  git pull --recurse-submodules
-  ```
+# Update an existing repository which has submodules.
+git pull --recurse-submodules
+```
 
 To delete a submodule the procedure is more complicated:
 
-1. de-init the submodule:
+1. De-init the submodule:
 
    ```shell
    git submodule deinit lib/ohmyzsh
    ```
 
-   this wil also remove the entry from `$REPO_ROOT/.git/config`
+   This wil also remove its entry from `$REPO_ROOT/.git/config`.
 
-1. remove the submodule from the index:
+1. Remove the submodule from the repository's index:
 
    ```shell
    git rm -rf lib/ohmyzsh
    ```
 
-   this wil also remove the entry from `$REPO_ROOT/.gitmodules`
+   This wil also remove its entry from `$REPO_ROOT/.gitmodules`.
 
-1. commit the changes
-
-## Crypt
-
-FIXME
+1. Commit the changes.
 
 ## Remove a file from a commit
 
@@ -616,27 +619,27 @@ See [remove files from git commit].
 
 ## Remove a file from the repository
 
-1. **unstage the file** using `git reset` specify the HEAD as source
+1. **Unstage** the file using `git reset`; specify HEAD as the source:
 
    ```shell
-   git reset HEAD superSecretFile
+   git reset HEAD secret-file
    ```
 
-1. **remove it from the index** using `git rm` with the `--cached` option
+1. **Remove** the file from the repository's index:
 
    ```shell
-   git rm --cached superSecretFile
+   git rm --cached secret-file
    ```
 
-1. check the file is no longer in the index
+1. Check the file is no longer in the index:
 
    ```shell
-   $ git ls-files | grep superSecretFile
+   $ git ls-files | grep secret-file
    $
    ```
 
-1. add it to `.gitignore` or remove it from the disk
-1. amend the most recent commit from your repository
+1. Add the file to `.gitignore` or remove it from the working directory.
+1. Amend the most recent commit from your repository:
 
    ```shell
    git commit --amend
