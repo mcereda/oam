@@ -1,0 +1,34 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Sources:
+# - https://book.keybase.io/guides/linux
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "fedora/35-cloud-base"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = "keybase"
+    vb.cpus = 1
+    vb.memory = "1024"
+    vb.customize ["modifyvm", :id, "--vram", "64"]
+    vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
+  end
+
+  config.vm.provision :shell do |shell|
+    shell.env = {
+      "KEYBASE_ALLOW_ROOT" => 1,
+      "KEYBASE_DEVICENAME" => ENV['KEYBASE_DEVICENAME'],
+      "KEYBASE_NO_KBFS"    => 0,
+      "KEYBASE_NO_GUI"     => 1,
+      "KEYBASE_PAPERKEY"   => ENV['KEYBASE_PAPERKEY'],
+      "KEYBASE_USERNAME"   => ENV['KEYBASE_USERNAME'],
+    }
+    shell.inline = <<-SHELL
+      dnf install --assumeyes https://prerelease.keybase.io/keybase_amd64.rpm
+
+      keybase oneshot
+      keybase git list
+    SHELL
+  end
+end

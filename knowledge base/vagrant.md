@@ -9,6 +9,7 @@ vagrant up
 
 # connect to the box
 vagrant ssh
+
 # print the ssh config snippet to connect to the box
 vagrant ssh-config
 
@@ -43,43 +44,38 @@ vagrant plugin install vagrant-disksize
 
 ## Usage
 
-1. install using your package manager
-1. create a box:
+> All commands need to be run from the box's folder.
+
+1. Install Vagrant.
+1. Optionally, create a folder to keep all files in order and move into it:
 
    ```shell
-   [home]$ mkdir -p "~/vagrant/archlinux"
-   [home]$ cd "${_}"
-   [archlinux]$ vagrant init archlinux/archlinux
+   mkdir test-box
+   cd $_
    ```
 
-1. start the box:
+1. Create a configuration:
 
    ```shell
-   [archlinux]$ vagrant up
-
-   # re-run provisioning
-   [archlinux]$ vagrant up --provision
+   vagrant init archlinux/archlinux
    ```
-  
-1. connect to the machine:
+
+1. Start the box:
 
    ```shell
-   [archlinux]$ vagrant ssh
+   vagrant up
+
+   # re-provision the box after startup
+   vagrant up --provision
    ```
 
-## Install autocomplete
+1. Connect to the machine:
 
-```shell
-$ vagrant autocomplete install --bash
-Autocomplete installed at paths:
-- /home/user/.bashrc
+   ```shell
+   vagrant ssh
+   ```
 
-$ vagrant autocomplete install --zsh
-Autocomplete installed at paths:
-- /home/user/.zshrc
-```
-
-## Boxes management
+### Boxes management
 
 ```shell
 vagrant box add archlinux/archlinux
@@ -91,16 +87,40 @@ vagrant box update
 vagrant box update --box generic/gentoo
 ```
 
-## Customize VM settings
+## Install shell's autocomplete
+
+```shell
+$ vagrant autocomplete install --bash
+Autocomplete installed at paths:
+- /home/user/.bashrc
+
+$ vagrant autocomplete install --zsh
+Autocomplete installed at paths:
+- /home/user/.zshrc
+```
+
+## Customize a box
 
 ```ruby
 Vagrant.configure("2") do |config|
   config.vm.box = "archlinux/archlinux"
 
   config.vm.provider "virtualbox" do |vb|
-    vb.memory = "3072"
+    # Vagrant can call any VBoxManage command prior to booting the machine.
+    # Multiple customize directives will be executed in order.
     vb.customize ["modifyvm", :id, "--vram", "64"]
     vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
+
+    # Some settings have convenience shortcuts.
+    vb.name = "xfce4 latest"
+    vb.cpus = 2
+    vb.memory = "2048"
+    vb.default_nic_type = "82543GC"
+    vb.gui = true
+
+    # Skip the guest additions check.
+    vb.check_guest_additions = false
   end
 ```
 
@@ -110,15 +130,16 @@ Add the variables as argument of the `config.vm.provision` key:
 
 ```ruby
 Vagrant.configure("2") do |config|
-  config.vm.provision "shell", env: { "KEYBASE_USERNAME" => ENV['KEYBASE_USERNAME'], "KEYBASE_PAPERKEY" => ENV['KEYBASE_PAPERKEY'] }, inline: <<-SHELL
-    pacman -Sy --noconfirm --noprogressbar \
-      fzf zsh-completions \
-      keybase
-    pacman -Scc --noconfirm
-    chsh --shell /bin/zsh vagrant
-    sudo --user vagrant --preserve-env=KEYBASE_USERNAME,KEYBASE_PAPERKEY keybase oneshot
-    sudo --user vagrant --preserve-env=KEYBASE_USERNAME,KEYBASE_PAPERKEY keybase git list
-  SHELL
+  config.vm.provision :shell do |shell|
+    shell.env = {
+      "STATIC" => "set-in-config",
+      "FORWARDED" => ENV['HOST_VAR'],
+      }
+    shell.inline = <<-SHELL
+      printenv STATIC FORWARDED
+      sudo -u vagrant --preserve-env=STATIC,FORWARDED printenv STATIC FORWARDED
+    SHELL
+  end
 end
 ```
 
@@ -138,12 +159,17 @@ vagrant.configure('2') do |config|
 end
 ```
 
-## Reboot after provision
+## Reboot after provisioning
 
-Add this to the Vagrantfile:
+Add one of the following to the box's Vagrantfile:
 
 ```ruby
 config.vm.provision "shell", reboot: true
+
+config.vm.provision :shell do |shell|
+  shell.privileged = true
+  shell.reboot = true
+end
 ```
 
 ## Further readings
