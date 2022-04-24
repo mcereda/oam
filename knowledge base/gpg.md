@@ -3,63 +3,62 @@
 ## TL;DR
 
 ```shell
-# generate a new key
+# List existing keys.
+gpg --list-keys
+gpg --list-keys --keyid-format short
+gpg --list-secret-keys --with-keygrip
+
+# Generate a new key.
 gpg --gen-key
 gpg --generate-key
 gpg --full-generate-key
 gpg --expert --full-generate-key
 
-# unattended key generation
-# the non-interactive (--batch) option requires a settings file
+# Generate a new key unattended.
+# The non-interactive (--batch) option requires a settings file.
 gpg --generate-key --batch setting.txt
 gpg --generate-key --batch <<-EOF
 	…
 EOF
 
-# list existing keys
-gpg --list-keys
-gpg --list-keys --keyid-format short
-gpg --list-secret-keys
-
-# delete a key from the keyring
-# the non-interactive (--batch) option requires the key fingerprint
+# Delete a key from the keyring.
+# The non-interactive (--batch) option requires the key fingerprint.
 gpg --delete-secret-key recipient
 gpg --delete-key recipient
 gpg --delete-keys --batch fingerprint
 
-# get the short id of the signing key only for a user
-# primarily used for git config
-gpg --list-keys --keyid-format short recipient \
- | grep --extended-regexp \
-     '^pub[[:blank:]]+[[:alnum:]]+/[[:alnum:]]+[[:blank:]].*\[[[:upper:]]*S[[:upper:]]*\]' \
- | awk '{print $2}' \
- | cut -d '/' -f 2
-
-# get a key fingerprint information
+# Get a key's fingerprint information.
 gpg --fingerprint
 gpg --fingerprint recipient
 
-# encrypt a file
+# Encrypt a file.
 gpg --output file.out.gpg --encrypt --recipient recipient file.in
 gpg -o file.out.gpg --encrypt --local-user sender --recipient recipient file.in
 
-# decrypt a file
+# Decrypt a file.
 gpg --output file.out --decrypt file.gpg
 
-# import keys from a file
+# Import keys from a file.
 gpg --import keys.asc
 
-# export keys to a file
+# Export keys to a file.
 gpg --armor --export > all.public-keys.asc
 gpg --armor --export recipient > recipient.public-keys.asc
 gpg --armor --export-secret-keys > all.private-keys.asc
 gpg --armor --export-secret-keys recipient > recipient.private-keys.asc
 
-# generate a revoke certificate
+# Generate a revoke certificate.
 gpg --gen-revoke
 
-# install on mac os x
-# choose one
+# Get the short ID of the signing key only for a user.
+# Primarily usable for git's signingKey configuration.
+gpg --list-keys --keyid-format short recipient \
+  | grep --extended-regexp '^pub[[:blank:]]+[[:alnum:]]+/[[:alnum:]]+[[:blank:]].*\[[[:upper:]]*S[[:upper:]]*\]' \
+  | awk '{print $2}' \
+  | cut -d '/' -f 2
+
+# Install on Mac OS X.
+# Choose one.
 brew install --cask gpg-suite-no-mail
 brew install gnupg
 ```
@@ -67,10 +66,10 @@ brew install gnupg
 ## Encryption
 
 ```shell
-# single file
+# Single file.
 gpg --output $DB.key.gpg --encrypt --recipient $RECIPIENT $DB.key
 
-# all found files
+# All files found.
 find . -type f -name secret.txt \
   -exec gpg --batch --yes --encrypt-files --recipient $RECIPIENT {} ';'
 ```
@@ -78,10 +77,10 @@ find . -type f -name secret.txt \
 ## Decryption
 
 ```shell
-# single file
+# Single file.
 gpg --output $DB.key --decrypt $DB.key.gpg
 
-# all found files
+# All files found.
 find . -type f -name "*.gpg" -exec gpg --decrypt-files {} +
 ```
 
@@ -132,12 +131,14 @@ gpg --import-ownertrust otrust.txt
 ## Key trust
 
 ```shell
-$ gpg --edit-key $FINGERPRINT
+$ gpg --edit-key fingerprint
 gpg> trust
 gpg> quit
 ```
 
 ## Unattended key generation
+
+> The non-interactive (--batch) option requires a settings file.
 
 ```shell
 # basic key with default values
@@ -159,7 +160,7 @@ EOF
 ## Change a key's password
 
 ```shell
-$ gpg --edit-key $FINGERPRINT
+$ gpg --edit-key fingerprint
 gpg> passwd
 gpg> quit
 ```
@@ -168,7 +169,7 @@ gpg> quit
 
 One can put comments in an armored ASCII message or key block using the `Comment` keyword for each line:
 
-```plaintext
+```text
 -----BEGIN PGP MESSAGE-----
 Comment: …
 Comment: …
@@ -179,6 +180,122 @@ hQIMAwbYc…
 
 OpenPGP defines all text to be in UTF-8, so a comment may be any UTF-8 string.  
 The whole point of armoring, however, is to provide seven-bit-clean data, so if a comment has characters that are outside the US-ASCII range of UTF they may very well not survive transport.
+
+## Use a GPG key for SSH authentication
+
+> Shamelessly copied over from [How to enable SSH access using a GPG key for authentication].
+
+This exercise will use a GPG subkey with only the authentication capability enabled to complete SSH connections.  
+You can create multiple subkeys as you would do for SSH keypairs.
+
+### Create an authentication subkey
+
+You should already have a GPG key. If you don't, read one of the many fine tutorials available on this topic.  
+You will create the subkey by editing your existing key **in expert mode** to get access to the appropriate options:
+
+```shell
+$ gpg2 --expert --edit-key fingerprint
+gpg> addkey
+Please select what kind of key you want:
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (5) Elgamal (encrypt only)
+   (6) RSA (encrypt only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+  (12) ECC (encrypt only)
+  (13) Existing key
+Your selection? 8
+
+Possible actions for a RSA key: Sign Encrypt Authenticate
+Current allowed actions: Sign Encrypt
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? s
+Your selection? e
+Your selection? a
+
+Possible actions for a RSA key: Sign Encrypt Authenticate
+Current allowed actions: Authenticate
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? q
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (4096)
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0)
+Key does not expire at all
+Is this correct? (y/N) y
+Really create? (y/N) y
+
+sec  rsa2048/8715AF32191DB135
+     created: 2019-03-21  expires: 2021-03-20  usage: SC  
+     trust: ultimate      validity: ultimate
+ssb  rsa2048/150F16909B9AA603
+     created: 2019-03-21  expires: 2021-03-20  usage: E  
+ssb  rsa2048/17E7403F18CB1123
+     created: 2019-03-21  expires: never       usage: A  
+[ultimate] (1). Brian Exelbierd
+
+gpg> quit
+Save changes? (y/N) y
+```
+
+### Enable SSH to use the GPG subkey
+
+When using SSH, `ssh-agent` is used to manage SSH keys. When using a GPG key, `gpg-agent` is used to manage GPG keys.  
+To get `gpg-agent` to handle requests from SSH, you need to enable its SSH support:
+
+```shell
+echo "enable-ssh-support" >> ~/.gnupg/gpg-agent.conf
+```
+
+You can avoid usinig `ssh-add` to load the keys pre-specifying which GPG keys to use in the `~/.gnupg/sshcontrol` file.  
+The entries in this file are keygrips—internal identifiers that `gpg-agent` uses to refer to the keys. A keygrip refers to both the public and private key.  
+To find the keygrip use `gpg -K --with-keygrip`, then add that line to the `~/.gnupg/sshcontrol` file:
+
+```shell
+$ gpg2 -K --with-keygrip
+/home/bexelbie/.gnupg/pubring.kbx
+------------------------------
+sec   rsa2048 2019-03-21 [SC] [expires: 2021-03-20]
+      96F33EA7F4E0F7051D75FC208715AF32191DB135
+      Keygrip = 90E08830BC1AAD225E657AD4FBE638B3D8E50C9E
+uid           [ultimate] Brian Exelbierd
+ssb   rsa2048 2019-03-21 [E] [expires: 2021-03-20]
+      Keygrip = 5FA04ABEBFBC5089E50EDEB43198B4895BCA2136
+ssb   rsa2048 2019-03-21 [A]
+      Keygrip = 7710BA0643CC022B92544181FF2EAC2A290CDC0E
+
+$ echo 7710BA0643CC022B92544181FF2EAC2A290CDC0E >> ~/.gnupg/sshcontrol
+```
+
+Now tell SSH how to access `gpg-agent` by setting the value of the `SSH_AUTH_SOCK` environment variable.
+
+```shell
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+gpgconf --launch gpg-agent
+```
+
+### Share the GPG-SSH key
+
+Run `ssh-add -L` to list your public keys and copy them over manually to the remote host, or use `ssh-copy-id` as you would normally do.
 
 ## Troubleshooting
 
