@@ -1,4 +1,4 @@
-# `jdupes`
+# Jdupes
 
 ## TL;DR
 

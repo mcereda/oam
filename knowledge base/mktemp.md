@@ -8,7 +8,7 @@ Creates a unique temporary file or directory and returns the absolute path to it
 # create an empty temporary file
 mktemp
 
-# create an empty temporary directory 
+# create an empty temporary directory
 mktemp -d
 
 # create an empty temporary file or directory with a random templated name

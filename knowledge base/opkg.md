@@ -31,7 +31,7 @@ opkg info python3-dns
 # list packages providing a file
 opkg search /usr/bin/vim
 
-# list user modified configuration files 
+# list user modified configuration files
 opkg list-changed-conffiles
 
 # list dependencies of a package

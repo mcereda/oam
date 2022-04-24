@@ -6,7 +6,7 @@
 # create main branch locally, taking the history from master
 git branch --move master main
 
-# push the new local main branch to the remote repo (GitHub) 
+# push the new local main branch to the remote repo (GitHub)
 git push --set-upstream origin main
 
 # switch the current HEAD to the main branch

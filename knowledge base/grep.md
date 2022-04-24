@@ -37,9 +37,9 @@ find . -type f -print0 | xargs -0 -n 1 -P $(nproc) grep 'pattern'
 For simple searches, you might want to use [pdfgrep].
 
 Should you need more advanced grep capabilities not incorporated by pdfgrep, you might want to convert the file to text and search there.  
-You can to this using [`pdftotext`](pdfgrep.md) as shown in this example ([source][stackoverflow answer about how to search contents of multiple pdf files]):
+You can to this using [pdftotext](pdfgrep.md) as shown in this example ([source][stackoverflow answer about how to search contents of multiple pdf files]):
 
-```sh
+```shell
 find /path -name '*.pdf' -exec sh -c 'pdftotext "{}" - | grep --with-filename --label="{}" --color "your pattern"' ';'
 ```
 

@@ -8,11 +8,11 @@ sudo gpasswd -a pi salt
 passwd
 sudo hostnamectl set-hostname pi4.lan
 sudo vim.tiny /etc/salt/minion.d/master.conf
-sudo rm /etc/salt/minion_id 
+sudo rm /etc/salt/minion_id
 sudo shutdown -r now
 sudo salt-key --list all
 sudo timedatectl set-timezone Europe/Dublin
-sudo timedatectl status 
+sudo timedatectl status
 sudo salt-key --list all
 sudo salt-key --accept pi4.lan
 sudo systemctl enable --now ssh.service
@@ -25,12 +25,12 @@ mkdir -p docker/boinc-client docker/pi-hole docker/nextcloud
 cd docker/boinc-client
 vim.tiny docker-compose.yml
 docker-compose up -d
-docker-compose logs --follow 
+docker-compose logs --follow
 cd ../pi-hole
-vim.tiny docker-compose.yml 
+vim.tiny docker-compose.yml
 docker-compose up -d
 docker-compose logs -f
 sudo vim.tiny /etc/locale.gen
-sudo locale-gen 
+sudo locale-gen
 sudo localectl set-locale LANG=en_IE.utf8 LANGUAGE=en_IE.utf8
 mkdir -p repositories/private
