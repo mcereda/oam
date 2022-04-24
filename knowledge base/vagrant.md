@@ -4,16 +4,17 @@
 ## TL;DR
 
 ```shell
-# start a box
+# start a vm from a box
 vagrant up
+vagrant up --provider libvirt
 
-# connect to the box
+# connect to a started vm
 vagrant ssh
 
-# print the ssh config snippet to connect to the box
+# print the ssh config snippet to connect to the vm
 vagrant ssh-config
 
-# (re)provision a box
+# (re)provision a vm
 vagrant provision
 vagrant up --provision
 
@@ -34,6 +35,10 @@ vagrant box update --box generic/gentoo
 # remove a box
 vagrant box remove archlinux/archlinux
 
+# destroy a machine
+vagrant destroy
+vagrant destroy --force
+
 # install autocomplete
 vagrant autocomplete install --bash
 vagrant autocomplete install --zsh
@@ -44,13 +49,13 @@ vagrant plugin install vagrant-disksize
 
 ## Usage
 
-> All commands need to be run from the box's folder.
+> All commands need to be run from the vm's folder.
 
 1. Install Vagrant.
 1. Optionally, create a folder to keep all files in order and move into it:
 
    ```shell
-   mkdir test-box
+   mkdir test-vm
    cd $_
    ```
 
@@ -60,16 +65,16 @@ vagrant plugin install vagrant-disksize
    vagrant init archlinux/archlinux
    ```
 
-1. Start the box:
+1. Start the vm:
 
    ```shell
    vagrant up
 
-   # re-provision the box after startup
+   # re-provision the vm after startup
    vagrant up --provision
    ```
 
-1. Connect to the machine:
+1. Connect to the vm:
 
    ```shell
    vagrant ssh
