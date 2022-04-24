@@ -163,7 +163,7 @@ ping -c 3 github.com
 lsblk
 
 # create 2 partitions:
-# partition 1: 
+# partition 1:
 #   - EFI
 #   - size 512 MiB
 #   - hex code ef00
@@ -400,7 +400,7 @@ sudo modprobe btusb
 sudo systemctl start bluetooth.service
 sudo systemctl enable bluetooth.service
 
-# auto enable Bluetooth 
+# auto enable Bluetooth
 # change AutoEnable to true in the [Policy] section:
 #
 #SET AutoEnable=True
@@ -424,7 +424,7 @@ cd yay
 makepkg -si
 
 # install fonts
-sudo pacman -S adobe-source-code-pro-fonts adobe-source-han-sans-cn-fonts adobe-source-han-sans-jp-fonts adobe-source-han-sans-kr-fonts adobe-source-han-sans-otc-fonts adobe-source-han-sans-tw-fonts adobe-source-sans-pro-fonts noto-fonts-emoji otf-ipafont ttf-dejavu ttf-hanazono ttf-inconsolata ttf-liberation ttf-roboto ttf-ubuntu-font-family 
+sudo pacman -S adobe-source-code-pro-fonts adobe-source-han-sans-cn-fonts adobe-source-han-sans-jp-fonts adobe-source-han-sans-kr-fonts adobe-source-han-sans-otc-fonts adobe-source-han-sans-tw-fonts adobe-source-sans-pro-fonts noto-fonts-emoji otf-ipafont ttf-dejavu ttf-hanazono ttf-inconsolata ttf-liberation ttf-roboto ttf-ubuntu-font-family
 yay -S ttf-google-fonts-git ttf-ms-fonts
 
 # install some more QOL utilities
@@ -435,10 +435,10 @@ yay -S etcher-bin brave-bin spotify skypeforlinux-stable-bin timeshift
 # create a script with the following content:
 #
 #   #!/bin/sh
-#   
+#
 #   APPLICATION_PATH="/usr/share/applications"
 #   USER_APPLICATION_PATH="${HOME}/.local/share/applications"
-#   
+#
 #   for FILE in cat $1; do
 #       if [ -e "${APPLICATION_PATH}/${FILE}" ]; then
 #           echo "Creating file ${USER_APPLICATION_PATH}/${FILE}"
@@ -447,7 +447,7 @@ yay -S etcher-bin brave-bin spotify skypeforlinux-stable-bin timeshift
 #           echo "Deleting unnecessary file ${USER_APPLICATION_PATH}/${FILE}"
 #           rm "${USER_APPLICATION_PATH}/${FILE}"
 #       fi
-#   done    
+#   done
 #
 vim ~/hide_desktop_icons.sh
 

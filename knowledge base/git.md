@@ -373,7 +373,7 @@ Just save the output from `git diff` to get a patch file:
 git diff > file.patch
 
 # Staged files only.
-git diff --output file.patch --cached 
+git diff --output file.patch --cached
 ```
 
 The output from `git diff` just shows changes to **text** files by default, no metadata or other information about commits or branches.  

@@ -1,4 +1,4 @@
-# Mac OS X <!-- omit in toc --> 
+# Mac OS X <!-- omit in toc -->
 
 - [TL;DR](#tldr)
 - [Xcode CLI tools](#xcode-cli-tools)
