@@ -1,11 +1,8 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
 # Sources:
 # - https://book.keybase.io/guides/linux
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "fedora/35-cloud-base"
+  config.vm.box = "fedora/35-cloud-base"   # just worked better than others
 
   config.vm.provider "virtualbox" do |vb|
     vb.name = "keybase"
