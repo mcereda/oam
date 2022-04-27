@@ -20,15 +20,15 @@ export AWS_PROFILE="work"
 # Initialize the default profile.
 # Not specifying a profile means to configure the default profile.
 $ aws configure
-AWS Access Key ID [None]: AKIAI44QH8DHBEXAMPLE
-AWS Secret Access Key [None]: je7MtGbClwBF/2Zp9Utk/h3yCo8nvbEXAMPLEKEY
+AWS Access Key ID [None]: AKIA…
+AWS Secret Access Key [None]: je7MtG…
 Default region name [None]: us-east-1
 Default output format [None]: text
 
 # Initialize a specific profile.
 $ aws configure --profile work
-AWS Access Key ID [None]: AKIAI44QH8DBEXAMPLE2
-AWS Secret Access Key [None]: je7MtGbClwBF/2Zp9Utk/h3yCo8nbEXAMPLEKEY2
+AWS Access Key ID [None]: AKIA…
+AWS Secret Access Key [None]: LB88Mt…
 Default region name [None]: us-west-1
 Default output format [None]: json
 
