@@ -13,9 +13,27 @@ KEYBASE_DEVICENAME=$(hostname) keybase login --paperkey "paper key" -s
 
 # Establish a temporary device.
 keybase oneshot
+KEYBASE_USERNAME="user" KEYBASE_PAPERKEY="paper key ..." keybase oneshot
 
 # List git repositories.
 keybase git list
+
+# Run garbage collection on git repository.
+keybase git gc awesomerepo
+
+# Enable LFS support for a repository.
+# Run it from the repository's root.
+keybase git lfs-config
+
+# Clone a repository with LFS-enabled files.
+git clone --no-checkout keybase://private/user/repo \
+  && cd repo && keybase git lfs-config && cd - \
+  && git -C repo checkout -f HEAD
+
+# Import an existing repository in Keybase
+keybase git create repo \
+  && git clone --mirror https://github.com/user/repo /tmp/repo.git \
+  && git -C /tmp/repo.git push --mirror keybase://private/user/repo
 
 # Run as root.
 KEYBASE_ALLOW_ROOT=1 keybase oneshot
@@ -35,6 +53,28 @@ Options can also be controlled by setting the related environment variable to 1:
 | `-g`   | do not start the gui                                | KEYBASE_NO_GUI=1     |
 | `-h`   | print this help text                                | -                    |
 | `-k`   | shut down all Keybase services                      | KEYBASE_KILL=1       |
+
+## Import an existing repository in Keybase
+
+Use the import form in [Keybase launches encrypted git], or:
+
+1. Create the remote repository:
+
+   ```shell
+   keybase git create dotfiles
+   ```
+
+1. Copy the existing repository to a temporary directory:
+
+   ```shell
+   git clone --mirror https://github.com/user/dotfiles _tmp.git
+   ```
+
+1. Push the contents of the old repository to the new one:
+
+   ```shell
+   git -C _tmp.git push --mirror keybase://private/user/dotfiles
+   ```
 
 ## Run as root
 
@@ -65,6 +105,13 @@ In addition, ephemeral keys are **purged entirely** when closing the oneshot ses
 
 - [Website]
 - [Linux guide]
+- [Keybase LFS support]
+- [Keybase launches encrypted git]
+- [How to use Keybase to encrypt files on Linux]
 
 [linux guide]: https://book.keybase.io/guides/linux
 [website]: https://keybase.io/
+
+[how to use keybase to encrypt files on linux]: https://www.addictivetips.com/ubuntu-linux-tips/keybase-encrypt-files-linux/
+[keybase launches encrypted git]: https://keybase.io/blog/encrypted-git-for-everyone
+[keybase lfs support]: https://github.com/keybase/client/issues/8936
