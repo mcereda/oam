@@ -84,7 +84,7 @@ Accepted time information:
 - `c` for the time of last change of file status information (creation)
 - `m` for the file's last modification time
 - `B` for the file's inode creation time
-  
+
 With the `-Xmin` form, times are rounded up to the next full **minute**. This is the same as using `-Xtime Nm`.
 
 With the `-Xtime` form, times depend on the given unit; if no unit is given, it defaults to full 24 hours periods (days).  
