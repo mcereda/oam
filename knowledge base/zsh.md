@@ -243,6 +243,7 @@ compaudit | xargs chmod g-w
 - [How to list all variables names and their current values?]
 - [Zsh delete keybinding]
 - [Fix key settings (Home/End/Insert/Delete) in .zshrc when running Zsh in Terminator Terminal Emulator]
+- [Handling Signals With Trap]
 
 [antibody]: https://github.com/getantibody/antibody
 [antidote]: https://getantidote.github.io/
@@ -260,6 +261,7 @@ compaudit | xargs chmod g-w
 [completion config example]: https://github.com/ThiefMaster/zsh-config/blob/master/zshrc.d/completion.zsh
 [fix key settings (home/end/insert/delete) in .zshrc when running zsh in terminator terminal emulator]: https://stackoverflow.com/questions/8638012/fix-key-settings-home-end-insert-delete-in-zshrc-when-running-zsh-in-terminat#8645267
 [gentoo wiki]: https://wiki.gentoo.org/wiki/Zsh
+[handling signals with trap]: https://stackoverflow.com/questions/59911669/proper-way-to-use-a-trap-to-exit-a-shell-script-in-zsh#59925138
 [how can i convert an array into a comma separated string?]: https://stackoverflow.com/questions/53839253/how-can-i-convert-an-array-into-a-comma-separated-string
 [how to list all variables names and their current values?]: https://askubuntu.com/questions/275965/how-to-list-all-variables-names-and-their-current-values#275972
 [pattern matching in a conditional expression]: https://unix.stackexchange.com/questions/553607/pattern-matching-in-a-zsh-conditional-expression
