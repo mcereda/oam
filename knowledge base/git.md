@@ -89,6 +89,9 @@ git config user.name "user name"
 git config user.email user.email@mail.com
 git commit --amend --reset-author
 
+# Sign the last commit.
+git commit --amend --no-edit --gpg-sign
+
 # Show commits which would be pushed.
 git log @{u}..
 
