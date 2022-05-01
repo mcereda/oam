@@ -48,7 +48,9 @@ youtube-dl -o '%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' playlist-url
 
 # Download an entire series season.
 # Keep each series and each season in separate directories.
-$ youtube-dl -o "C:/MyVideos/%(series)s/%(season_number)s - %(season)s/%(episode_number)s - %(episode)s.%(ext)s" https://videomore.ru/kino_v_detalayah/5_sezon/367617
+youtube-dl \
+  -o "%(series)s/%(season_number)s %(season)s/%(episode_number)s %(episode)s.%(ext)s" \
+  serie-url
 ```
 
 ## Installation
