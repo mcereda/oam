@@ -23,7 +23,7 @@ setfacl -x u:dummy:rw test
 setfacl -b test/declarations.h
 ```
 
-## Further readings
+## Sources
 
 - [Access Control Lists (ACL) in Linux]
 

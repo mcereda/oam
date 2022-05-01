@@ -2,6 +2,7 @@
 
 - [TL;DR](#tldr)
 - [Further readings](#further-readings)
+- [Sources](#sources)
 
 ## TL;DR
 
@@ -67,12 +68,16 @@ gcloud auth revoke account
 
 - [Gcloud cheat-sheet]
 - [Kubectl cluster access]
-- [How to run gcloud command line using a service account]
-- [How to change the active configuration profile in gcloud]
 - [Gcloud config configurations]
 
 [gcloud cheat-sheet]: https://cloud.google.com/sdk/gcloud/reference/cheat-sheet
 [gcloud config configurations]: https://cloud.google.com/sdk/gcloud/reference/config/configurations
+[kubectl cluster access]: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl
+
+## Sources
+
+- [How to run gcloud command line using a service account]
+- [How to change the active configuration profile in gcloud]
+
 [how to change the active configuration profile in gcloud]: https://stackoverflow.com/questions/35744901/how-to-change-the-active-configuration-profile-in-gcloud#35750001
 [how to run gcloud command line using a service account]: https://pnatraj.medium.com/how-to-run-gcloud-command-line-using-a-service-account-f39043d515b9
-[kubectl cluster access]: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl

@@ -14,7 +14,11 @@ pkexec COMMAND
 ## Further readings
 
 - [pkexec]
-- [How to get gui sudo password prompt without command line]
 
 [pkexec]: pkexec.md
+
+## Sources
+
+- [How to get gui sudo password prompt without command line]
+
 [how to get gui sudo password prompt without command line]: https://askubuntu.com/questions/515292/how-to-get-gui-sudo-password-prompt-without-command-line

@@ -110,13 +110,16 @@ $
 - Chezmoi [user guide]
 - [Go text/template]
 - [Sprig]
-- [cheat.sh]
 
 [user guide]: https://www.chezmoi.io/user-guide/setup/
 
 [go text/template]: https://pkg.go.dev/text/template
 [sprig]: https://masterminds.github.io/sprig/
 
-[custom data fields appear as all lowercase strings]: https://github.com/twpayne/chezmoi/issues/463
+## Sources
+
+- [cheat.sh]
+- [custom data fields appear as all lowercase strings]
 
 [cheat.sh]: https://cheat.sh/chezmoi
+[custom data fields appear as all lowercase strings]: https://github.com/twpayne/chezmoi/issues/463

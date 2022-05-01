@@ -36,7 +36,7 @@ az acr helm push -n acr-name chart.tgz --force
 export AZURE_CLI_DISABLE_CONNECTION_VERIFICATION=1
 ```
 
-## Further readings
+## Sources
 
 - [Install Azure CLI on macOS]
 - [Get started with Azure CLI]

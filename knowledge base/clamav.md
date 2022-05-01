@@ -46,8 +46,12 @@ nice -n 15 clamscan && clamscan --bell -i -r /home
 
 ## Further readings
 
-- [Install ClamAV on Fedora Linux 35]
 - [Gentoo Wiki]
 
 [gentoo wiki]: https://wiki.gentoo.org/wiki/ClamAV
+
+## Sources
+
+- [Install ClamAV on Fedora Linux 35]
+
 [install clamav on fedora linux 35]: https://www.linuxcapable.com/how-to-install-clamav-on-fedora-35/

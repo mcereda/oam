@@ -55,12 +55,14 @@ sudo snapper -c config diff 445..446
 
 - [Gentoo wiki]
 - [Snapper]
-- [does btrfs have an efficient way to compare snapshots?]
-- [determine if a btrfs subvolume is read-only]
-
-[snapper]: snapper.md
 
 [gentoo wiki]: https://wiki.gentoo.org/wiki/Btrfs
+[snapper]: snapper.md
+
+## Sources
+
+- [does btrfs have an efficient way to compare snapshots?]
+- [determine if a btrfs subvolume is read-only]
 
 [determine if a btrfs subvolume is read-only]: https://unix.stackexchange.com/questions/375645/determine-if-btrfs-subvolume-is-read-only#375646
 [does btrfs have an efficient way to compare snapshots?]: https://serverfault.com/questions/399894/does-btrfs-have-an-efficient-way-to-compare-snapshots#419444

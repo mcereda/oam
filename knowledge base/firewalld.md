@@ -76,11 +76,14 @@ sudo firewall-cmd --reload
 
 - [Website]
 - [Documentation]
-- [Open TCP Port on openSUSE Firewall]
-- [How To Set Up a Firewall Using firewalld on CentOS 8]
 
 [documentation]: https://firewalld.org/documentation/
 [website]: https://firewalld.org/
+
+## Sources
+
+- [Open TCP Port on openSUSE Firewall]
+- [How To Set Up a Firewall Using firewalld on CentOS 8]
 
 [how to set up a firewall using firewalld on centos 8]: https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-using-firewalld-on-centos-8
 [open tcp port on opensuse firewall]: https://vazhavandan.blogspot.com/2020/08/open-tcp-port-on-opensuse-firewall.html
