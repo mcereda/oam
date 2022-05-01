@@ -3,26 +3,40 @@
 ## TL;DR
 
 ```shell
-# limit the bandwidth
-youtube-dl --format 313 --limit-rate 2M $URL
+# Limit the bandwidth.
+youtube-dl --format 313 --limit-rate 2M video-url
 
-# list all available formats
-youtube-dl --list-formats ${URL}
+# List all available formats.
+youtube-dl --list-formats video-url
 
-# download bestvideo and bestaudio formats and merge them in a single file
-youtube-dl -f bestvideo+bestaudio $URL
+# Download the 'bestvideo' and 'bestaudio' formats and merge them in a single
+# file.
+youtube-dl -f bestvideo+bestaudio video-url
 
-# download formats separately and do not merge them
-youtube-dl -f bestvideo,bestaudio $URL
+# Download formats separately and do not merge them.
+youtube-dl -f bestvideo,bestaudio video-url
 
-# download the best all-around formats
-youtube-dl -f best $URL
+# Download the best all-around formats.
+youtube-dl -f best video-url
 
-# also download thumbnails and other info (in separate files)
-youtube-dl --write-description --write-info-json --write-annotations --write-sub --write-thumbnail $URL
+# Download the first format in a list.
+youtube-dl -f bestvideo+bestaudio/best video-url
 
-# sequentially download a list of videos
-parallel --jobs 1 --retries 10 'youtube-dl -f bestvideo+bestaudio "https://www.youtube.com/watch?v={}"' ::: ${CODES[@]}
+# Filter formats by conditions.
+youtube-dl -f bestvideo+bestaudio[height>=720]/best[filesize>100M] video-url
+
+# Also download thumbnails and other info (in separate files).
+youtube-dl --write-description --write-info-json --write-annotations \
+  --write-sub --write-thumbnail video-url
+
+# Sequentially download a list of videos.
+parallel --jobs 1 --retries 10 \
+  'youtube-dl -f bestvideo+bestaudio "https://www.youtube.com/watch?v={}"' \
+  ::: ${CODES[@]}
+
+# Download all videos in a YouTube channel.
+youtube-dl -f "bestvideo+bestaudio/best" -ciw \
+  -o "%(title)s.%(ext)s" -v channel-url
 ```
 
 ## Installation
@@ -37,13 +51,17 @@ python3 youtube-dl …
 
 Alternatively, most package managers will have the package available.
 
+> To be able to merge multiple formats into one, you will also need to install `ffmpeg` or `avconv`.
+
 ## Further readings
 
 - Github [project]'s page
 - [Website]
 - [Youtube-DL tutorial with examples for beginners]
+- [using youtube-dl to download entire youtube channel]
 
 [project]: https://github.com/ytdl-org/youtube-dl
 [website]: http://ytdl-org.gitlab.io/youtube-dl
 
 [youtube-dl tutorial with examples for beginners]: https://ostechnix.com/youtube-dl-tutorial-with-examples-for-beginners
+[using youtube-dl to download entire youtube channel]: https://askubuntu.com/questions/856911/using-youtube-dl-to-download-entire-youtube-channel#1245829
