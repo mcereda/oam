@@ -21,7 +21,7 @@ curl https://${COMPANY}.atlassian.net/rest/api/2/issue \
   }'
 ```
 
-## Further readings
+## Sources
 
 - [Creating JIRA issue using curl from command line]
 

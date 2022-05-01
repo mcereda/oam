@@ -24,8 +24,12 @@ magick *.png out.pdf
 
 - [Website]
 - [cheat.sh/convert]
-- [Converting Multiple Images into a PDF File]
 
 [cheat.sh/convert]: https://cheat.sh/convert
 [website]: https://imagemagick.org
+
+## Sources
+
+- [Converting Multiple Images into a PDF File]
+
 [converting multiple images into a pdf file]: https://legacy.imagemagick.org/discourse-server/viewtopic.php?p=144157&sid=e7706233f81874af86ffbbf3e57b1e76#p144157

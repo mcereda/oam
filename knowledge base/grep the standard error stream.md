@@ -28,10 +28,13 @@ command 1>/dev/null 2> >(grep -oP "(.*)(?=pattern)")
 
 ## Further readings
 
-- Answer on [StackExchange] about [how to grep the standard error stream]
 - Knowledge base on [grep]
 
 [grep]: grep.md
+
+## Sources
+
+- Answer on [StackExchange] about [how to grep the standard error stream]
 
 [stackexchange]: https://unix.stackexchange.com
 

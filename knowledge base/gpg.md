@@ -317,7 +317,7 @@ Run `ssh-add -L` to list your public keys and copy them over manually to the rem
 export GPG_TTY=$(tty)
 ```
 
-## Further readings
+## Sources
 
 - [Decrypt multiple openpgp files in a directory]
 - [ask redhat]

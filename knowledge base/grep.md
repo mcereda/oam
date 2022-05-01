@@ -57,14 +57,17 @@ find /path -name '*.pdf' -exec sh -c 'pdftotext "{}" - | grep --with-filename --
 
 ## Further readings
 
-- Answer on [StackOverflow] about [how to search contents of multiple pdf files]
-- [Regular expressions in grep with examples]
 - [Grep the standard error stream]
 - Knowledge base on [pdfgrep]
-- [Parallel grep]
 
 [grep the standard error stream]: grep\ the\ standard\ error\ stream.md
 [pdfgrep]: pdfgrep.md
+
+## Sources
+
+- Answer on [StackOverflow] about [how to search contents of multiple pdf files]
+- [Regular expressions in grep with examples]
+- [Parallel grep]
 
 [stackoverflow]: https://stackoverflow.com
 

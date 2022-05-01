@@ -105,12 +105,15 @@ In addition, ephemeral keys are **purged entirely** when closing the oneshot ses
 
 - [Website]
 - [Linux guide]
-- [Keybase LFS support]
-- [Keybase launches encrypted git]
-- [How to use Keybase to encrypt files on Linux]
 
 [linux guide]: https://book.keybase.io/guides/linux
 [website]: https://keybase.io/
+
+## Sources
+
+- [Keybase LFS support]
+- [Keybase launches encrypted git]
+- [How to use Keybase to encrypt files on Linux]
 
 [how to use keybase to encrypt files on linux]: https://www.addictivetips.com/ubuntu-linux-tips/keybase-encrypt-files-linux/
 [keybase launches encrypted git]: https://keybase.io/blog/encrypted-git-for-everyone

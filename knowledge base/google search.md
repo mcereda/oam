@@ -32,7 +32,7 @@
   site:heyitsa.me
   ```
 
-## Further readings
+## Sources
 
 - [20 Googling Tricks 99% of People Don't Know About]
 
