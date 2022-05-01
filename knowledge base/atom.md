@@ -7,7 +7,7 @@
 Change font to `NotoSansMono Nerd Font` in Platformio Ide Terminal's settings.  
 See [Why Zsh terminal icons are not getting displayed in Atom Platformio Ide Terminal?]
 
-## Further readings
+## Sources
 
 - [Why Zsh terminal icons are not getting displayed in Atom Platformio Ide Terminal?]
 

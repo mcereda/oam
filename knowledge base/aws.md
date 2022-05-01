@@ -36,7 +36,7 @@ Default output format [None]: json
 $ export AWS_PROFILE="work"
 ```
 
-## Further readings
+## Sources
 
 - CLI [quickstart]
 - [Configure profiles] in the CLI

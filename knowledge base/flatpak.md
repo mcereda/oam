@@ -20,9 +20,12 @@ flatpak uninstall --unused
 ## Further readings
 
 - [Using Flatpak] getting started guide on the official [documentation]
-- [How to clean up Flatpak apps to clear disk space]
 
 [documentation]: https://docs.flatpak.org/en/latest/
 [using flatpak]: https://docs.flatpak.org/en/latest/using-flatpak.html
+
+## Sources
+
+- [How to clean up Flatpak apps to clear disk space]
 
 [how to clean up flatpak apps to clear disk space]: https://www.debugpoint.com/2021/10/clean-up-flatpak/

@@ -32,7 +32,7 @@ In `/etc/bluetooth/main.conf`, under the `Policy` section, set `Autoenable` to `
 + AutoEnable = true
 ```
 
-## Further readings
+## Sources
 
 - [Failing to use bluetooth keyboard at login]
 

@@ -20,7 +20,7 @@ apt-get purge $(dpkg --get-selections | grep --color=never i386 | awk '{print $1
 dpkg --remove-architecture i386
 ```
 
-## Further readings
+## Sources
 
 - [How to check if dpkg-architecture --list has all the architectures?]
 

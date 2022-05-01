@@ -31,8 +31,12 @@ op list items
 
 ## Further readings
 
-- [CLI getting started] guide
 - [CLI guide]
 
-[cli getting started]: https://support.1password.com/command-line-getting-started/
 [cli guide]: https://support.1password.com/command-line/
+
+## Sources
+
+- [CLI getting started] guide
+
+[cli getting started]: https://support.1password.com/command-line-getting-started/

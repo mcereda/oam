@@ -16,7 +16,7 @@ compare -verbose -debug coder $PDF_1 $PDF_2 -compose src /tmp/$OUT_FILE.tmp
 pdftk /tmp/$OUT_FILE.tmp background $PDF_1 output $OUT_FILE
 ```
 
-## Further readings
+## Sources
 
 - [Compare PDF Files With DiffPDF]
 - [PDF compare on linux command line]

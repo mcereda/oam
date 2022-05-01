@@ -155,7 +155,7 @@ find / -newer file.txt -user wnj -print
   find -mtime 1.5h
   ```
 
-## Further readings
+## Sources
 
 - [How can I find broken symlinks?]
 - [find . -type f -exec chmod 644 {} ;]

@@ -24,4 +24,4 @@ boinccmd --get_project_status | grep "master URL" | awk -F ": " '{print $2}' | x
 
 ## Gotchas
 
-`boinccmd` looks for the `gui_rpc_auth.cfg` file in the same directory it is launched from.
+- `boinccmd` looks for the `gui_rpc_auth.cfg` file in the same directory it is launched from.

@@ -1,6 +1,6 @@
 # Dig
 
-## Further readings
+## Sources
 
 - [Using dig +trace to Understand DNS Resolution from Start to Finish]
 
