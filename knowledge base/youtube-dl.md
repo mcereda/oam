@@ -29,6 +29,10 @@ youtube-dl -f bestvideo+bestaudio[height>=720]/best[filesize>100M] video-url
 youtube-dl --write-description --write-info-json --write-annotations \
   --write-sub --write-thumbnail video-url
 
+# Show what name would the resulting file have
+youtube-dl --get-filename -o '%(title)s.%(ext)s' video-url
+youtube-dl --get-filename -o '%(title)s.%(ext)s' video-url --restrict-filenames
+
 # Sequentially download a list of videos.
 parallel --jobs 1 --retries 10 \
   'youtube-dl -f bestvideo+bestaudio "https://www.youtube.com/watch?v={}"' \
@@ -37,6 +41,14 @@ parallel --jobs 1 --retries 10 \
 # Download all videos in a YouTube channel.
 youtube-dl -f "bestvideo+bestaudio/best" -ciw \
   -o "%(title)s.%(ext)s" -v channel-url
+
+# Download YouTube playlist videos in a separate directory.
+# Index by video order in the playlist.
+youtube-dl -o '%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' playlist-url
+
+# Download an entire series season.
+# Keep each series and each season in separate directories.
+$ youtube-dl -o "C:/MyVideos/%(series)s/%(season_number)s - %(season)s/%(episode_number)s - %(episode)s.%(ext)s" https://videomore.ru/kino_v_detalayah/5_sezon/367617
 ```
 
 ## Installation
