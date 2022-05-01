@@ -25,11 +25,15 @@
 ## Further readings
 
 - [K8 keyboard user manual]
+
+[k8 keyboard user manual]: https://www.keychron.com/pages/k8-keyboard-user-manual
+
+## Sources
+
 - [Keychron fn keys in Linux]
 - [Apple Keyboard] on the [Archlinux wiki]
 
-[apple keyboard]: https://wiki.archlinux.org/index.php/Apple_Keyboard
-[k8 keyboard user manual]: https://www.keychron.com/pages/k8-keyboard-user-manual
-[keychron fn keys in linux]: https://mikeshade.com/posts/keychron-linux-function-keys
-
 [archlinux wiki]: https://wiki.archlinux.org
+
+[apple keyboard]: https://wiki.archlinux.org/index.php/Apple_Keyboard
+[keychron fn keys in linux]: https://mikeshade.com/posts/keychron-linux-function-keys

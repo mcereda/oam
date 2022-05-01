@@ -10,7 +10,7 @@ iperf3 -c iperf.server.ip
 iperf3 -c iperf.server.ip -p 7575
 ```
 
-## Further readings
+## Sources
 
 - [How to use iPerf3 to test network bandwidth]
 

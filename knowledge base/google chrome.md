@@ -1,6 +1,6 @@
 # Google Chrome
 
-## Gotchas
+## Troubleshooting
 
 ### No "Proceed Anyway" option on NET::ERR_CERT_INVALID in Chrome on MacOS
 
@@ -8,7 +8,7 @@ See [No "Proceed Anyway" option on NET::ERR_CERT_INVALID in Chrome on MacOS] for
 
 There's a secret passphrase built into the error page. Just make sure the page is selected (click anywhere on the screen), then just type `thisisunsafe` and wait for the page to reload.
 
-## Further readings
+## Sources
 
 - [No "Proceed Anyway" option on NET::ERR_CERT_INVALID in Chrome on MacOS]
 

@@ -87,12 +87,16 @@ git branch -d ${formula_name}-${formula_version}
 
 ## Further readings
 
-- [How to stop homebrew from upgrading itself on every run]
-- [macOS migrations with Brewfile]
 - [manpage]
 - Homebrew [bundle]
 
 [bundle]: https://github.com/Homebrew/homebrew-bundle
+[manpage]: https://docs.brew.sh/Manpage
+
+## Sources
+
+- [How to stop homebrew from upgrading itself on every run]
+- [macOS migrations with Brewfile]
+
 [how to stop homebrew from upgrading itself on every run]: https://superuser.com/questions/1209053/how-do-i-tell-homebrew-to-stop-running-brew-update-every-time-i-want-to-install/1209068#1209068
 [macos migrations with brewfile]: https://openfolder.sh/macos-migrations-with-brewfile
-[manpage]: https://docs.brew.sh/Manpage

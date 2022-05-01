@@ -38,13 +38,18 @@ jq '[.. | .errors?[0] | select(.) ]' /tmp/helm.template.out.json
 
 # find all images in a helm chart explicitly or implicitly using the tag 'latest'
 helm template ${CHART} | yq -r '.. | .image? | select(.) | select(.|test(".*:.*")|not), select(.|test(".*:$")), select(.|test(".*:latest"))' -
+```
 
 ## Further readings
 
-- [Filter objects list with regex]
-- [Select multiple conditions]
 - [JQ recipes]
 
-[filter objects list with regex]: https://til.hashrocket.com/posts/uv0bjiokwk-use-jq-to-filter-objects-list-with-regex
 [jq recipes]: https://remysharp.com/drafts/jq-recipes
+
+## Sources
+
+- [Filter objects list with regex]
+- [Select multiple conditions]
+
+[filter objects list with regex]: https://til.hashrocket.com/posts/uv0bjiokwk-use-jq-to-filter-objects-list-with-regex
 [select multiple conditions]: https://stackoverflow.com/questions/33057420/jq-select-multiple-conditions#33059058
