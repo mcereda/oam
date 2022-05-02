@@ -1,0 +1,67 @@
+---
+- hosts: all
+  tasks:
+
+    - name: >-
+        Remove empty or false values from a list piping it to 'select()'.
+        Returns ["string"] from ["", "string", 0, false].
+      vars:
+        list: ["", "string", 0, false]
+      debug:
+        var: list | select
+
+    - name: >-
+        Remove only empty strings from a list 'reject()'ing them.
+        Returns ["string", 0, false] from ["", "string", 0, false].
+      vars:
+        list: ["", "string", 0, false]
+      debug:
+        var: list | reject('match', '^$')
+
+    - name: >-
+        Merge two lists.
+        Returns ["a", "b", "c", "d"] from ["a", "b"] and ["c", "d"].
+      vars:
+        list1: ["a", "b"]
+        list2: ["c", "d"]
+      debug:
+        var: list1 + list2
+
+    - name: >-
+        Dedupe elements in a list.
+        Returns ["a", "b"] from ["a", "b", "b", "a"].
+      vars:
+        list: ["a", "b", "b", "a"]
+      debug:
+        var: list | unique
+
+    - name: >-
+        Sort list by version number (not lexicographically).
+        Returns ['2.7.0', '2.8.0', '2.9.0',, '2.10.0' '2.11.0'] from ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
+      vars:
+        list: ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
+      debug:
+        var: list | community.general.version_sort
+
+    - name: >-
+        Compare a semver version number.
+        Returns a boolean result.
+      debug:
+        var: "'2.0.0-rc.1+build.123' is version('2.1.0-rc.2+build.423', 'ge', version_type='semver')"
+
+    - name: >-
+        Generate a random password.
+        Returns a random string following the specifications.
+      vars:
+        password: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation') }}"
+      debug:
+        var: password
+
+    - name: >-
+        Hash a password.
+        Returns a hash of the requested type.
+      vars:
+        password: abcd
+        salt: "{{ lookup('community.general.random_string', special=false) }}"
+      debug:
+        var: password | password_hash('sha512', salt)
