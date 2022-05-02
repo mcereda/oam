@@ -9,11 +9,13 @@ run_keybase -fg
 
 # Authenticate your local service against the keybase server.
 keybase login
-KEYBASE_DEVICENAME=$(hostname) keybase login --paperkey "paper key" -s
+keybase login --devicename "$(hostname)" --paperkey 'paper key' -s
+KEYBASE_DEVICENAME=$(hostname) KEYBASE_PAPERKEY='paper key' keybase login
 
 # Establish a temporary device.
 keybase oneshot
-KEYBASE_USERNAME="user" KEYBASE_PAPERKEY="paper key ..." keybase oneshot
+keybase oneshot -u user --paperkey 'paper key'
+KEYBASE_USERNAME='user' KEYBASE_PAPERKEY='paper key' keybase oneshot
 
 # List git repositories.
 keybase git list
