@@ -50,38 +50,69 @@ ansible-galaxy remove namespace.role
 ## Templating
 
 ```yaml
-- name: Remove empty or false values from a list piping it to 'select()'
-  debug: msg="{{ [ '', 'string', 0, false ] | select }}"                  # ['string']
-
-- name: Remove only empty strings from a list 'reject()'ing them
-  debug: msg="{{ [ '', 'string', 0, false ] | reject('match', '^$') }}"   # ['string', 0, False]
-
-- name: Check if a list contains an item and fail otherwise
-  when: item not in list
-  fail: msg="item not in list"
-
-- name: Merge two lists
-  set_fact:
-    merged_lists: "{{ list_one + list_two }}"
-
-- name: Dedupe elements in a list
-  set_fact:
-    deduped_list: "{{ list | unique }}"
-
-- name: Sort list by version number (not lexicographically)
+- name: >-
+    Remove empty or false values from a list piping it to 'select()'.
+    Returns ["string"] from ["", "string", 0, false].
   vars:
-    ansible_versions: ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
+    list: ["", "string", 0, false]
   debug:
-    var: ansible_versions | community.general.version_sort
+    var: list | select
 
-- name: Compare a semver version number
-  when: semver_var is version('2.0.0-rc.1+build.123', 'ge', version_type='semver')
-  fail: msg="the given version is below the required one"
-
-- name: Generate a random password
+- name: >-
+    Remove only empty strings from a list 'reject()'ing them.
+    Returns ["string", 0, false] from ["", "string", 0, false].
   vars:
-    passwd: "{{lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation')}}"
-  debug: msg="password={{passwd}}, sha={{passwd | password_hash('sha512')}}"
+    list: ["", "string", 0, false]
+  debug:
+    var: list | reject('match', '^$')
+
+- name: >-
+    Merge two lists.
+    Returns ["a", "b", "c", "d"] from ["a", "b"] and ["c", "d"].
+  vars:
+    list1: ["a", "b"]
+    list2: ["c", "d"]
+  debug:
+    var: list1 + list2
+
+- name: >-
+    Dedupe elements in a list.
+    Returns ["a", "b"] from ["a", "b", "b", "a"].
+  vars:
+    list: ["a", "b", "b", "a"]
+  debug:
+    var: list | unique
+
+- name: >-
+    Sort list by version number (not lexicographically).
+    Returns ['2.7.0', '2.8.0', '2.9.0',, '2.10.0' '2.11.0'] from ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
+  vars:
+    list: ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
+  debug:
+    var: list | community.general.version_sort
+
+- name: >-
+    Compare a semver version number.
+    Returns a boolean result.
+  debug:
+    var: "'2.0.0-rc.1+build.123' is version('2.1.0-rc.2+build.423', 'ge', version_type='semver')"
+
+- name: >-
+    Generate a random password.
+    Returns a random string following the specifications.
+  vars:
+    password: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation') }}"
+  debug:
+    var: password
+
+- name: >-
+    Hash a password.
+    Returns a hash of the requested type.
+  vars:
+    password: abcd
+    salt: "{{ lookup('community.general.random_string', special=false) }}"
+  debug:
+    var: password | password_hash('sha512', salt)
 ```
 
 ## Roles
@@ -295,11 +326,19 @@ The `environment` keyword does not affect Ansible itself or its configuration se
 
 ### Set variables to the value of environment variables
 
-Use `lookup()` with the 'env' option:
+Use the `lookup()` plugin with the `env` option:
 
 ```yaml
 - name: Use a local environment variable
   debug: msg="HOME={{ lookup('env', 'HOME') }}"
+```
+
+### Check if a list contains an item and fail otherwise
+
+```yaml
+- name: Check if a list contains an item and fail otherwise
+  when: item not in list
+  fail: msg="item not in list"
 ```
 
 ## Further readings
