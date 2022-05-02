@@ -1,3 +1,5 @@
 # Hot to lint markdown files
 
-See [[mdl]].
+See [mdl].
+
+[mdl]: mdl.md
