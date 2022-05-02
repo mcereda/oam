@@ -17,4 +17,4 @@ mdl path/to/dir/
 
 - [GitHub]
 
-[github]:
+[github]: https://github.com/markdownlint/markdownlint
