@@ -1,0 +1,344 @@
+# Ansible
+
+```shell
+# Install.
+pip3 install --user ansible && port install sshpass   # darwin
+sudo pamac install ansible sshpass                    # manjaro linux
+
+# Show hosts' ansible facts.
+ansible -i hostfile -m setup all
+ansible -i host1,hostn, -m setup host1 -u remote-user
+ansible -i localhost, -c local -km setup localhost
+
+# Check the syntax of a playbook.
+# This will *not* execute the plays inside it.
+ansible-playbook path/to/playbook.yml --syntax-check
+
+# Execute a playbook.
+ansible-playbook path/to/playbook.yml -i hosts.list
+ansible-playbook path/to/playbook.yml -i host1,host2,hostn, -l hosts,list
+ansible-playbook path/to/playbook.yml -i host1,host2,other, -l hosts-pattern
+
+# Show what changes (with details) a play whould apply to the local machine.
+ansible-playbook path/to/playbook.yml -i localhost, -c local -vvC
+
+# Only execute tasks with specific tags.
+ansible-playbook path/to/playbook.yml --tags "configuration,packages"
+
+# Avoid executing tasks with specific tags.
+ansible-playbook path/to/playbook.yml --skip-tags "system,user"
+
+# Check what tasks will be executed.
+ansible-playbook example.yml --list-tasks
+ansible-playbook example.yml --list-tasks --tags "configuration,packages"
+ansible-playbook example.yml --list-tasks --skip-tags "system,user"
+
+# List roles installed from Galaxy.
+ansible-galaxy list
+
+# Install roles from Galaxy.
+ansible-galaxy install namespace.role
+ansible-galaxy install --roles-path ~/ansible-roles namespace.role
+ansible-galaxy install namespace.role,v1.0.0
+ansible-galaxy install git+https://github.com/namespace/role.git,commit-hash
+ansible-galaxy install -r requirements.yml
+
+# Remove roles installed from Galaxy.
+ansible-galaxy remove namespace.role
+```
+
+## Templating
+
+```yaml
+- name: Remove empty or false values from a list piping it to 'select()'
+  debug: msg="{{ [ '', 'string', 0, false ] | select }}"                  # ['string']
+
+- name: Remove only empty strings from a list 'reject()'ing them
+  debug: msg="{{ [ '', 'string', 0, false ] | reject('match', '^$') }}"   # ['string', 0, False]
+
+- name: Check if a list contains an item and fail otherwise
+  when: item not in list
+  fail: msg="item not in list"
+
+- name: Merge two lists
+  set_fact:
+    merged_lists: "{{ list_one + list_two }}"
+
+- name: Dedupe elements in a list
+  set_fact:
+    deduped_list: "{{ list | unique }}"
+
+- name: Sort list by version number (not lexicographically)
+  vars:
+    ansible_versions: ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
+  debug:
+    var: ansible_versions | community.general.version_sort
+
+- name: Compare a semver version number
+  when: semver_var is version('2.0.0-rc.1+build.123', 'ge', version_type='semver')
+  fail: msg="the given version is below the required one"
+
+- name: Generate a random password
+  vars:
+    passwd: "{{lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation')}}"
+  debug: msg="password={{passwd}}, sha={{passwd | password_hash('sha512')}}"
+```
+
+## Roles
+
+### Get roles
+
+Roles can be either **created**:
+
+```shell
+ansible-galaxy init role-name
+```
+
+or **installed** from [Ansible Galaxy]:
+
+```yaml
+---
+# requirements.yml
+collections:
+  - community.docker
+```
+
+```shell
+ansible-galaxy install mcereda.boinc_client
+ansible-galaxy install --roles-path ~/ansible-roles namespace.role
+ansible-galaxy install namespace.role,v1.0.0
+ansible-galaxy install git+https://github.com/namespace/role.git,0b7cd353c0250e87a26e0499e59e7fd265cc2f25
+ansible-galaxy install -r requirements.yml
+```
+
+### Role dependencies
+
+```yaml
+---
+# role/meta/main.yml
+dependencies:
+  - role: common
+    vars:
+      some_parameter: 3
+  - role: postgres
+    vars:
+      dbname: blarg
+      other_parameter: 12
+```
+
+## Output formatting
+
+> Introduced in Ansible 2.5
+
+Change Ansible's output setting the stdout callback to `json` or `yaml`:
+
+```shell
+ANSIBLE_STDOUT_CALLBACK=yaml
+```
+
+```ini
+# ansible.cfg
+[defaults]
+stdout_callback = json
+```
+
+`yaml` will set tasks output only to be in the defined format:
+
+```text
+$ ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook --inventory=localhost.localdomain, ansible/localhost.configure.yml -vv --check
+PLAY [Configure localhost] *******************************************************************
+
+TASK [Upgrade system packages] ***************************************************************
+task path: /home/user/localhost.configure.yml:7
+ok: [localhost.localdomain] => changed=false
+  cmd:
+  - /usr/bin/zypper
+  - --quiet
+  - --non-interactive
+  …
+  update_cache: false
+```
+
+The `json` output format will be a single, long JSON file:
+
+```text
+$ ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook --inventory=localhost.localdomain, ansible/localhost.configure.yml -vv --check
+{
+    "custom_stats": {},
+    "global_custom_stats": {},
+    "plays": [
+        {
+            "play": {
+                …
+                "name": "Configure localhost"
+            },
+            "tasks": [
+                {
+                    "hosts": {
+                        "localhost.localdomain": {
+                            …
+                            "action": "community.general.zypper",
+                            "changed": false,
+                            …
+                            "update_cache": false
+                        }
+                    }
+                    …
+…
+}
+```
+
+## Troubleshooting
+
+### Print all known variables
+
+Print the special variable `vars` as a task:
+
+```yaml
+- name: Debug all variables
+  debug: var=vars
+```
+
+### Force notified handlers to run at a specific point
+
+Use the `meta` plugin with the `flush_handlers` option:
+
+```yaml
+- name: Force all notified handlers to run at this point, not waiting for normal sync points
+  meta: flush_handlers
+```
+
+### Run specific tasks even in check mode
+
+Add the `check_mode: false` pair to the task:
+
+```yaml
+- name: this task will make changes to the system even in check mode
+  check_mode: false
+  command: /something/to/run --even-in-check-mode
+```
+
+### Dry-run only specific tasks
+
+Add the `check_mode: true` pair to the task:
+
+```yaml
+- name: This task will always run under checkmode and not change the system
+  check_mode: true
+  lineinfile:
+    line: "important file"
+    dest: /path/to/file.conf
+    state: present
+```
+
+### Set up recursive permissions on a directory so that directories are set to 755 and files to 644
+
+Use the special `X` mode setting in the `file` plugin:
+
+```yaml
+- name: Fix files and directories' permissions
+  file:
+    dest: /path/to/some/dir
+    mode: u=rwX,g=rX,o=rX
+    recurse: yes
+```
+
+### Only run a task when another changed or failed
+
+When a task executes, it also stores the two special values `changed` and `failed` in its results. You can use those as conditions to execute the next ones:
+
+```yaml
+- name: Trigger task
+  ansible.builtin.command: any
+  register: trigger_result
+  ignore_errors: true
+
+- name: Run if changed
+  when: trigger_result.changed
+  debug: msg="The trigger task changed"
+
+- name: Run if failed
+  when: trigger_result.failed
+  debug: msg="The trigger task failed"
+```
+
+### Define when a task changed or failed
+
+This lets you avoid using `ignore_errors`.
+
+Use the `changed_when` and `failed_when` attributes to define your own conditions:
+
+```yaml
+- name: Task with custom results
+  ansible.builtin.command: any
+  register: result
+  changed_when:
+    - result.rc == 2
+    - result.stderr | regex_search('things changed')
+  failed_when:
+    - result.rc != 0
+    - not (result.stderr | regex_search('all good'))
+```
+
+### Set environment variables for a play, role or task
+
+Environment variables can be set at a play, block, or task level using the `environment` keyword:
+
+```yaml
+- name: Use environment variables for a task
+  environment:
+    HTTP_PROXY: http://example.proxy
+  ansible.builtin.command: curl ifconfig.io
+```
+
+The `environment` keyword does not affect Ansible itself or its configuration settings, the environment for other users, or the execution of other plugins like lookups and filters; variables set with `environment` do not automatically become Ansible facts, even when set at the play level.
+
+### Set variables to the value of environment variables
+
+Use `lookup()` with the 'env' option:
+
+```yaml
+- name: Use a local environment variable
+  debug: msg="HOME={{ lookup('env', 'HOME') }}"
+```
+
+## Further readings
+
+- [Roles]
+- [Tests]
+- [Automating Helm using Ansible]
+- [Edit .ini file in other servers using Ansible PlayBook]
+- [Yes and No, True and False]
+
+[automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
+[roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
+[tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
+
+[edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
+[yes and no, true and false]: https://chronicler.tech/red-hat-ansible-yes-no-and/
+
+## Sources
+
+- [Removing empty values from a list and assigning it to a new list]
+- [Human-Readable Output Format]
+- [How to append to lists]
+- [Check if a list contains an item in ansible]
+- [Working with versions]
+- [How to install SSHpass on Mac]
+- [Include task only if file exists]
+- [Unique filter of list in jinja2]
+- [Only do something if another action changed]
+
+[check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
+[how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
+[how to install sshpass on mac]: https://stackoverflow.com/questions/32255660/how-to-install-sshpass-on-mac/62623099#62623099
+[human-readable output format]: https://www.shellhacks.com/ansible-human-readable-output-format/
+[include task only if file exists]: https://stackoverflow.com/questions/28119521/ansible-include-task-only-if-file-exists#comment118578470_62289639
+[only do something if another action changed]: https://raymii.org/s/tutorials/Ansible_-_Only-do-something-if-another-action-changed.html
+[removing empty values from a list and assigning it to a new list]: https://stackoverflow.com/questions/60525961/ansible-removing-empty-values-from-a-list-and-assigning-it-to-a-new-list#60526774
+[unique filter of list in jinja2]: https://stackoverflow.com/questions/44329598/unique-filter-of-list-in-jinja2
+[working with versions]: https://docs.ansible.com/ansible/latest/collections/community/general/docsite/filter_guide_working_with_versions.html
+
+<!-- Other references -->
+
+[Ansible Galaxy]: https://galaxy.ansible.com/
