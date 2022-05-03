@@ -3,39 +3,42 @@
 ## TL;DR
 
 ```shell
-# init
+# Initialization.
 terraform init
 terraform init -reconfigure
 
-# check what would be done
+# Validate files.
+terraform validate
+
+# Show what would be done.
 terraform plan
 terraform plan -out path/to/file.tfstate -parallelism 50
 
-# make the changes
+# Make the changes.
 terraform apply
 terraform apply -auto-approve -backup -parallelism 25 path/to/plan.tfstate
 
-# destroy everything
+# Destroy everything.
+# `destroy` is an alias of `apply -destroy` and is being deprecated.
 terraform destroy
+terraform apply -destroy
 
-# check files formatting
+# Format files.
 terraform fmt
 terraform fmt -check -diff -recursive
 
-# validate files
-terraform validate
-
-# create a graph
-# requires dot from graphviz for image generation
+# Create a dependency graph.
+# Requires `dot` from 'graphviz' for image generation.
 terraform graph
 terraform graph | dot -Tsvg > graph.svg
 
-# show a created resource
+# Show an existing resource.
 terraform state show 'packet_device.worker'
 terraform state show 'packet_device.worker["example"]'
 terraform state show 'module.foo.packet_device.worker'
 
-# recursively update all needed modules
+# Recursively update all modules.
+# `get` is being deprecated in favour of `init`
 terraform get -update -no-color
 ```
 
@@ -73,7 +76,20 @@ When terraform processes a module block, that block will inherit the provider fr
 
 A module's output can be accessed from the configuration that calls the module through the syntax `module.$moduleName.$outputName`. Module outputs are read-only attributes.
 
-## Gotchas
+### Useful internal variables
+
+Name                  | Description
+--------------------- | -----------
+`path.root`           | filesystem path of the root module of the configuration
+`path.module`         | filesystem path of the module where the expression is placed
+`path.cwd`            | filesystem path of the current working directory
+`terraform.workspace` | name of the currently selected workspace
+
+## Versioning
+
+
+
+## Troubleshooting
 
 ### `count` vs `for_each`
 
@@ -110,27 +126,20 @@ Terraform will perform the following actions:
     }
 ```
 
-### Useful internal variables
-
-Name                  | Description
---------------------- | -----------
-`path.root`           | filesystem path of the root module of the configuration
-`path.module`         | filesystem path of the module where the expression is placed
-`path.cwd`            | filesystem path of the current working directory
-`terraform.workspace` | name of the currently selected workspace
-
 ## Further readings
 
 - [CLI Documentation]
-- [for_each vs count]
 - [Providers best practices]
 - [Version constraints]
 - [References to Named Values]
-
 
 [cli documentation]: https://www.terraform.io/docs/cli/
 [providers best practices]: https://www.terraform.io/language/providers/requirements#best-practices-for-provider-versions
 [references to named values]: https://www.terraform.io/language/expressions/references
 [version constraints]: https://www.terraform.io/language/expressions/version-constraints
+
+## Sources
+
+- [for_each vs count]
 
 [for_each vs count]: https://medium.com/@business_99069/terraform-count-vs-for-each-b7ada2c0b186
