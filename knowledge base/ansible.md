@@ -51,6 +51,14 @@ ansible-galaxy remove namespace.role
 
 ```yaml
 - name: >-
+    Get the values of some special variables.
+    See https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
+    for the full list.
+  debug:
+    var: "{{ item }}"
+  with_items: ["ansible_local", "playbook_dir", "role_path"]
+
+- name: >-
     Remove empty or false values from a list piping it to 'select()'.
     Returns ["string"] from ["", "string", 0, false].
   vars:
@@ -345,12 +353,14 @@ Use the `lookup()` plugin with the `env` option:
 
 - [Roles]
 - [Tests]
+- [Special variables]
 - [Automating Helm using Ansible]
 - [Edit .ini file in other servers using Ansible PlayBook]
 - [Yes and No, True and False]
 
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
 [roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
+[special variables]: https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
 [tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
 
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
