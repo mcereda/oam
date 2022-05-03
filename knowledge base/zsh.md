@@ -13,57 +13,312 @@ Startup file sequence:
 Aliases are expanded when the function definition is parsed, not when the function is executed. Define aliases **before** functions to avoid problems.
 
 ```shell
-# create a function
+# Quoting.
+"$scalar"
+"${array[@]}"
+"${(@)array}"
+
+# Create a function.
 function_name () { … }
 function function_name { … }
 function function_name () { … }
 
-# regex match
-[[ $OSTYPE =~ "darwin" ]]
-[[ $OSTYPE -regex-match "darwin" ]]
+# Regex match.
+[[ "$OSTYPE" =~ "darwin" ]]
+[[ "$OSTYPE" -regex-match "darwin" ]]
 
-# find broken symlinks in the current directory
+# Find broken symlinks in the current directory.
 ls **/*(-@)
 
-# print all shell and environment variables
-( setopt posixbuiltin; set; )
+# Print all shell and environment variables.
+setopt posixbuiltins && set
+
+# Make entries unique in an array.
+typeset -aU path
+
+# Show all active key bindings.
+bindkeys
 ```
 
 ## Alias expansion
 
 When one writes an alias, one can also press `ctrl-x` followed by `a` to see the expansion of that alias.
 
+## Parameter expansion
+
+Parameter expansions can involve flags like `${(@kv)aliases}` and other operators such as `${PREFIX:-"/usr/local"}`. Parameter expansions can also be nested.
+
+If the parameter is a **scalar** then the value, if any, is substituted:
+
+```shell
+$ scalar='hello'
+$ echo "$scalar"
+hello
+```
+
+The braces are required if the expansion is to be followed by a letter, digit or underscore that is not to be interpreted as part of name:
+
+```shell
+$ echo "${scalar}_world"
+hello_world
+```
+
+If the parameter is an **array**, then the value of each element is substituted, one element per word:
+
+```shell
+$ typeset -a array=( 'hello' 'world' )
+$ echo "${array[@]}"
+hello world
+```
+
+The two forms are equivalent:
+
+```shell
+$ echo "${(@)array}"
+hello world
+```
+
+### Substitution
+
+#### Check if set
+
+If _name_ is set then its value is substituted by _1_, otherwise by _0_:
+
+```shell
+$ typeset name='tralala'
+$ echo "${+name}"
+1
+
+$ name=''
+$ echo "${+name}"
+1
+
+$ unset name
+$ echo "${+name}"
+0
+```
+
+#### Provide a default value
+
+If _name_ is set then substitute its value, otherwise substitute _word_:
+
+```shell
+$ name='tralala'
+$ echo "${name-word}"
+tralala
+
+$ name=''
+$ echo "${name-word}"
+(empty line)
+
+$ unset name
+$ echo "${name-word}"
+word
+```
+
+In the second form:
+
+- only substitute its value if _name_ is non-null, and
+- _name_ may be omitted, in which case _word_ is **always** substituted:
+
+```shell
+$ name='tralala'
+$ echo "${name:-word}"
+tralala
+
+$ name=''
+$ echo "${name:-word}"
+word
+
+$ unset name
+$ echo "${name:-word}"
+word
+```
+
+#### Just substitute
+
+If _name_ is set then substitute _word_, otherwise substitute nothing:
+
+```shell
+$ name='tralala'
+$ echo "${name+word}"
+word
+
+$ name=''
+$ echo "${name+word}"
+word
+
+$ unset name
+$ echo "${name+word}"
+(empty line)
+```
+
+In the second form, only substitute its value if _name_ is non-null:
+
+```shell
+$ name='tralala'
+$ echo "${name:+word}"
+word
+
+$ name=''
+$ echo "${name:+word}"
+(empty line)
+
+$ unset name
+$ echo "${name:+word}"
+(empty line)
+```
+
+#### Set a default value and substitute
+
+In the first form, if _name_ is unset then set it to _word_:
+
+```shell
+$ name='tralala'         # value: 'tralala'
+$ echo "${name=word}"
+tralala
+
+$ name=''                # value: ''
+$ echo "${name=word}"
+(empty line)
+
+$ unset name             # unset
+$ echo "${name=word}"    # value: 'word'
+word
+
+$ echo "$name"
+word
+```
+
+In the second form, if _name_ is unset or null then set it to _word_:
+
+```shell
+$ name='tralala'         # value: 'tralala'
+$ echo "${name:=word}"
+tralala
+
+$ name=''                # value: ''
+$ echo "${name:=word}"   # value: 'word'
+word
+
+$ echo "$name"
+word
+
+$ unset name             # unset
+$ echo "${name:=word}"   # value: 'word'
+word
+
+$ echo "$name"
+word
+```
+
+In the third form, unconditionally set _name_ to _word_:
+
+```shell
+$ name='tralala'         # value: 'tralala'
+$ echo "${name::=word}"
+word
+
+$ echo "$name"
+word
+
+$ name=''                # value: ''
+$ echo "${name::=word}"  # value: 'word'
+word
+
+$ echo "$name"
+word
+
+$ unset name             # unset
+$ echo "${name::=word}"  # value: 'word'
+word
+
+$ echo "$name"
+word
+```
+
+#### Fail on missing value
+
+In the first form, if _name_ is set then substitute its value, otherwise print _word_ and exit from the shell.
+
+```shell
+$ name='tralala'
+$ echo "${name?word}"
+tralala
+
+$ name=''
+$ echo "${name?word}"
+(empty line)
+
+$ unset name
+$ echo "${name?word}"
+zsh: name: word
+```
+
+In the second form, substitute its value only if _name_ is both set and non-null:
+
+```shell
+$ name='tralala'
+$ echo "${name:?word}"
+tralala
+
+$ name=''
+$ echo "${name:?word}"
+zsh: name: word
+
+$ unset name
+$ echo "${name:?word}"
+zsh: name: word
+```
+
+Interactive shells return to the prompt.
+
+If _word_ is omitted, a standard message is printed in its place:
+
+```shell
+$ name=''
+$ echo "${name:?}"
+zsh: name: parameter not set
+```
+
+### Matching and replacement
+
+In the following expressions, when _name_ is an array and the substitution is not quoted, or if the `(@)` flag or the `name[@]` syntax is used, matching and replacement is performed **on each array element** separately.
+
+FIXME
+
 ## Arrays
 
 ```shell
-# get a slice (negative are backwards)
-echo ${ARRAY[2,-1]}
+# Get a slice of an array.
+# Negative numbers count backwards.
+echo "${ARRAY[2,-1]}"
 
-# get all folders up to a non folder, backwards
+# Get all folders up to a non folder, backwards.
 local COMMAND
 local FOLDERS=()
-for (( I = $# ; I >= 0 ; I-- )); do
-  if [[ -d "${@[$I]}" ]]; then
-    FOLDERS+="${@[$I]}"
-  else
-    COMMAND="${@[1,-$((${#FOLDERS}+1))]}"
-    break
-  fi
+for (( I = $# ; I >= 0 ; I-- ))
+do
+	if [[ -d "${@[$I]}" ]]
+	then
+		FOLDERS+="${@[$I]}"
+	else
+		COMMAND="${@[1,-$((${#FOLDERS}+1))]}"
+		break
+	fi
 done
-```
 
-```shell
-# make entries in PATH unique
-# see https://til.hashrocket.com/posts/7evpdebn7g-remove-duplicates-in-zsh-path
+# Make entries unique in an array.
+# See https://til.hashrocket.com/posts/7evpdebn7g-remove-duplicates-in-zsh-path.
 typeset -aU path
 ```
 
 ## Tests
 
 ```shell
-# regex match
-[[ $OSTYPE =~ "darwin" ]]
-[[ $OSTYPE -regex-match "darwin" ]]
+# Regex match.
+[[ "$OSTYPE" =~ "darwin" ]]
+[[ "$OSTYPE" -regex-match "darwin" ]]
 ```
 
 ## Find broken symlinks in the current directory
@@ -72,14 +327,14 @@ typeset -aU path
 ls **/*(-@)
 ```
 
-## Bindkeys
+## Key bindings
 
 ```shell
-# show all set bindkeys
+# Show all active key bindings.
 bindkeys
 
-# make the home, end and delete key work as expected
-# to know the code of a key: execute cat, press enter, press the key, Ctrl+C.
+# Make the home, end and delete key work as expected.
+# To know the code of a key execute `cat`, press enter, the key, and Ctrl+C.
 bindkey  "^[[H"   beginning-of-line
 bindkey  "^[[F"   end-of-line
 bindkey  "^[[3~"  delete-char
@@ -152,20 +407,20 @@ SAVEHIST=1000
 ### Completion
 
 ```shell
-# Enable completion
+# Enable completion.
 autoload -U compinit
 compinit
 
-# Enable cache for the completions
+# Enable cache for the completions.
 zstyle ':completion::complete:*' use-cache true
 ```
 
 ### Prompt management
 
 ```shell
-# Enable prompt management
+# Enable prompt management.
 autoload -U promptinit
-promptinit; prompt gentoo
+promptinit; prompt theme-name
 ```
 
 ### Automatic source of files in a folder
@@ -175,12 +430,12 @@ promptinit; prompt gentoo
 # All files in the configuration folder will be automatically loaded in
 # numeric order. The last file setting a value overrides the previous ones.
 # Links are only sourced if their reference exists.
-ZSH_MODULES_DIR="${ZSH_MODULES_DIR:-$HOME/.zshrc.d}"
-if [[ -d "${ZSH_MODULES_DIR}" ]]
+: "${ZSH_MODULES_DIR:-$HOME/.zshrc.d}"
+if [[ -d "$ZSH_MODULES_DIR" ]]
 then
-	for ZSH_MODULE in ${ZSH_MODULES_DIR}/*
+	for ZSH_MODULE in "$ZSH_MODULES_DIR"/*
 	do
-		[[ -r ${ZSH_MODULE} ]] && source "${ZSH_MODULE}"
+		[[ -r "$ZSH_MODULE" ]] && source "$ZSH_MODULE"
 	done
 	unset ZSH_MODULE
 fi
