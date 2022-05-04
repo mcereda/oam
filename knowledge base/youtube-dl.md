@@ -40,7 +40,7 @@ parallel --jobs 1 --retries 10 \
 
 # Download all videos in a YouTube channel.
 youtube-dl -f "bestvideo+bestaudio/best" -ciw \
-  -o "%(title)s.%(ext)s" -v channel-url
+  -o "%(title)s.%(ext)s" -v https://www.youtube.com/c/pbsspacetime/videos
 
 # Download YouTube playlist videos in a separate directory.
 # Index by video order in the playlist.
