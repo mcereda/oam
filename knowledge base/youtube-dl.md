@@ -1,5 +1,7 @@
 # Youtube-DL
 
+> Not deprecated, but surpassed many times by its improved fork, [yt-dlp].
+
 ## TL;DR
 
 ```shell
@@ -71,11 +73,16 @@ Alternatively, most package managers will have the package available.
 
 - Github [project]'s page
 - [Website]
+- [yt-dlp]
+
+## Sources
+
 - [Youtube-DL tutorial with examples for beginners]
 - [using youtube-dl to download entire youtube channel]
 
 [project]: https://github.com/ytdl-org/youtube-dl
 [website]: http://ytdl-org.gitlab.io/youtube-dl
+[yt-dlp]: yt-dlp.md
 
 [youtube-dl tutorial with examples for beginners]: https://ostechnix.com/youtube-dl-tutorial-with-examples-for-beginners
 [using youtube-dl to download entire youtube channel]: https://askubuntu.com/questions/856911/using-youtube-dl-to-download-entire-youtube-channel#1245829
