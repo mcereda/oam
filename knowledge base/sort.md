@@ -3,10 +3,10 @@
 ## TL;DR
 
 ```shell
-# Sort all given lines.
+# Sort given lines.
 sort path/to/file
 
-# Sort all lines reverse.
+# Sort lines in reverse.
 sort -r path/to/file
 
 # Sort lines numerically.
