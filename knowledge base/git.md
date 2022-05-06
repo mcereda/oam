@@ -463,7 +463,7 @@ git push origin --delete feat-branch
 git branch --delete --remotes feat-branch
 ```
 
-## Delete branches which have been merged or are otherwise absent from a remote.
+### Delete branches which have been merged or are otherwise absent from a remote.
 
 Command source [here][prune local branches that do not exist on remote anymore].
 
@@ -549,6 +549,36 @@ git tag -d v1.4-lw
 
 # Delete specific remote tags only.
 git push origin --delete v1.4-lw
+```
+
+## Aliases
+
+Simple aliases to git commands can be added like aliases to a shell:
+
+```ini
+[alias]
+  caa = commit -a --amend -C HEAD
+  ls = log --oneline
+  statsu = status
+```
+
+But simple aliases have limitations:
+
+- they can't have parameters
+- you can't execute multiple git commands in a single alias
+- you can't use `|` (pipes) or `grep`
+
+`git` allows you to escape to a shell using `!` (bang); this opens a new world of possibilities for aliases:
+
+- use shell expansions and parameters
+- use multiple git commands
+- use pipes and all command line tools
+
+Those commands need to be wrapped into a one-line function definition:
+
+```ini
+[alias]
+  pull-from-all = "!f() { git remote show | xargs -I{} -P0 -n1 git pull {} ${1-$(git branch --show-current)}; } && f"
 ```
 
 ## LFS extension
@@ -731,6 +761,31 @@ export GPG_TTY=$(tty)
 
 ## Further readings
 
+- The official [LFS website]
+- Git [docs]
+- [Tagging]
+
+[docs]: https://git-scm.com/docs/git
+[gitignore]: https://git-scm.com/docs/gitignore
+[tagging]: https://git-scm.com/book/en/v2/Git-Basics-Tagging
+
+## Sources
+
+- [How to get the current branch name in Git?]
+- [Git Submodules: Adding, Using, Removing, Updating]
+- [How to add and update git submodules]
+- [Is there a way to make git pull automatically update submodules?]
+- [How to change a git remote]
+- [Why can't I delete a branch in a remote GitLab repository?]
+- [How to Delete a Git Branch Both Locally and Remotely]
+- [gpg failed to sign the data fatal: failed to write commit object]
+- [Able to push to all git remotes with the one command?]
+- [Create a git patch from the uncommitted changes in the current working directory]
+- [Is there a way to gpg sign all previous commits?]
+- [10 Git tips we can't live without]
+- [Coloring white space in git-diff's output]
+- [Multiple git configuration]
+- [How to improve git's diff highlighting?]
 - [Get the repository's root directory]
 - [How do I check out a remote Git branch] on [StackOverflow]
 - [How to manage your secrets with git-crypt]
@@ -740,28 +795,7 @@ export GPG_TTY=$(tty)
 - Question about how to [rebase remote branches]
 - Quick guide about [git rebase][rebase quick guide]
 - Quick guide about how to [remove files from git commit]
-- The official [LFS website]
-- [How to get the current branch name in Git?]
-- [Git Submodules: Adding, Using, Removing, Updating]
-- [How to add and update git submodules]
-- [Is there a way to make git pull automatically update submodules?]
-- [How to change a git remote]
-- Git [docs]
-- [Why can't I delete a branch in a remote GitLab repository?]
-- [How to Delete a Git Branch Both Locally and Remotely]
-- [gpg failed to sign the data fatal: failed to write commit object]
-- [Able to push to all git remotes with the one command?]
-- [Create a git patch from the uncommitted changes in the current working directory]
-- [Is there a way to gpg sign all previous commits?]
-- [Tagging]
-- [10 Git tips we can't live without]
-- [Coloring white space in git-diff's output]
-- [Multiple git configuration]
-- [How to improve git's diff highlighting?]
-
-[docs]: https://git-scm.com/docs/git
-[gitignore]: https://git-scm.com/docs/gitignore
-[tagging]: https://git-scm.com/book/en/v2/Git-Basics-Tagging
+- [One weird trick for powerful Git aliases]
 
 [cheat.sh]: https://cheat.sh/git
 
@@ -787,6 +821,7 @@ export GPG_TTY=$(tty)
 [lfs website]: https://git-lfs.github.com/
 [merge master into a feature branch]: https://stackoverflow.com/questions/16955980/git-merge-master-into-feature-branch
 [multiple git configuration]: https://riptutorial.com/git/example/1423/multiple-git-configurations
+[one weird trick for powerful git aliases]: https://www.atlassian.com/blog/git/advanced-git-aliases
 [prune local tracking branches that do not exist on remote anymore]: https://stackoverflow.com/questions/13064613/how-to-prune-local-tracking-branches-that-do-not-exist-on-remote-anymore#17029936
 [rebase quick guide]: https://medium.com/@gabriellamedas/git-rebase-and-git-rebase-onto-a6a3f83f9cce
 [rebase remote branches]: https://stackoverflow.com/questions/6199889/rebasing-remote-branches-in-git/#6204804
