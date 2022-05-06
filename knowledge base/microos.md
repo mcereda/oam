@@ -23,6 +23,14 @@ sudo tukit execute bash
 
 See [MicroOS Desktop] for more and updated information.
 
+## Further readings
+
+- [Flatpak]
+- [Toolbox]
+
+[flatpak]: flatpak.md
+[toolbox]: toolbox.md
+
 ## Sources
 
 - [MicroOS Desktop]
