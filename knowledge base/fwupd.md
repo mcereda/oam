@@ -3,22 +3,23 @@
 ## TL;DR
 
 ```shell
-# display all detected devices
+# Display all detected devices.
 fwupdmgr get-devices
 
-# download the latest metadata from lvfs
+# Download the latest metadata from LVFS.
 fwupdmgr refresh
+fwupdmgr refresh --force
 
-# display available updates, if present
+# Display available updates, if present.
 fwupdmgr get-updates
 
-# download and apply all available updates
+# Download and apply all available updates.
 fwupdmgr update
 
-# report the status of an update
+# Report the status of an update.
 fwupdmgr report-history
 
-# clear the local history of updates
+# Clear the local history of updates.
 fwupdmgr clear-history
 ```
 
