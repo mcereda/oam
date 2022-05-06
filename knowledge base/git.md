@@ -578,7 +578,13 @@ Those commands need to be wrapped into a one-line function definition:
 
 ```ini
 [alias]
-  pull-from-all = "!f() { git remote show | xargs -I{} -P0 -n1 git pull {} ${1-$(git branch --show-current)}; } && f"
+  new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
+  pull-from-all = "!f() { \
+      git remote show | xargs -I{} -P0 -n1 git pull {} ${1-$(git branch --show-current)}; \
+    } && f"
+  subtree-add = "!f() { \
+      git subtree add --prefix $2 $1 master --squash; \
+    }; f"
 ```
 
 ## LFS extension
