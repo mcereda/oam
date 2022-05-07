@@ -48,13 +48,13 @@ See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turr
    # Create the LXC container.
    lxc-create --name pi-hole --template debian
    lxc-create --name pi-hole --template download --dist Ubuntu --release Focal --arch armv7l --server repo.turris.cz/lxc
-   
+
    # Start it.
    lxc-start --name pi-hole
-   
+
    # Check it's running correctly.
    lxc-info --name pi-hole
-   
+
    # Get a shell to it.
    lxc-attach --name pi-hole
    ```
@@ -64,11 +64,11 @@ See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turr
    ```shell
    # Set the correct hostname.
    hostnamectl set-hostname pi-hole
-   
+
    # Install pi-hole.
    DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes ca-certificates curl
    curl -sSL https://install.pi-hole.net | bash
-   
+
    # Follow the guided procedure.
    ```
 
@@ -81,11 +81,11 @@ See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turr
    uci set dhcp.@host[-1].name=pi-hole
    uci set dhcp.@host[-1].mac=`grep hwaddr /srv/lxc/pi-hole/config | sed 's/.*= //'`
    uci set dhcp.@host[-1].ip=192.168.111.2
-   
+
    # Distribute pi-hole as primary DNS.
    uci set dhcp.lan.dhcp_option='6,192.168.111.2'
    uci add_list dhcp.lan.dns=`lxc-info --name pi-hole | grep "IP.* f[cd]" | sed "s/IP: *//"`
-   
+
    # Apply the new configuration.
    /etc/init.d/odhcpd restart
    /etc/init.d/dnsmasq restart
