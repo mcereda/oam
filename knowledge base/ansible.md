@@ -54,7 +54,7 @@ ansible-galaxy remove namespace.role
     Get the values of some special variables.
     See https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
     for the full list.
-  debug:
+  ansible.builtin.debug:
     var: "{{ item }}"
   with_items: ["ansible_local", "playbook_dir", "role_path"]
 
@@ -63,7 +63,7 @@ ansible-galaxy remove namespace.role
     Returns ["string"] from ["", "string", 0, false].
   vars:
     list: ["", "string", 0, false]
-  debug:
+  ansible.builtin.debug:
     var: list | select
 
 - name: >-
@@ -71,7 +71,7 @@ ansible-galaxy remove namespace.role
     Returns ["string", 0, false] from ["", "string", 0, false].
   vars:
     list: ["", "string", 0, false]
-  debug:
+  ansible.builtin.debug:
     var: list | reject('match', '^$')
 
 - name: >-
@@ -80,7 +80,7 @@ ansible-galaxy remove namespace.role
   vars:
     list1: ["a", "b"]
     list2: ["c", "d"]
-  debug:
+  ansible.builtin.debug:
     var: list1 + list2
 
 - name: >-
@@ -88,7 +88,7 @@ ansible-galaxy remove namespace.role
     Returns ["a", "b"] from ["a", "b", "b", "a"].
   vars:
     list: ["a", "b", "b", "a"]
-  debug:
+  ansible.builtin.debug:
     var: list | unique
 
 - name: >-
@@ -96,13 +96,13 @@ ansible-galaxy remove namespace.role
     Returns ['2.7.0', '2.8.0', '2.9.0',, '2.10.0' '2.11.0'] from ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
   vars:
     list: ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
-  debug:
+  ansible.builtin.debug:
     var: list | community.general.version_sort
 
 - name: >-
     Compare a semver version number.
     Returns a boolean result.
-  debug:
+  ansible.builtin.debug:
     var: "'2.0.0-rc.1+build.123' is version('2.1.0-rc.2+build.423', 'ge', version_type='semver')"
 
 - name: >-
@@ -110,7 +110,7 @@ ansible-galaxy remove namespace.role
     Returns a random string following the specifications.
   vars:
     password: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation') }}"
-  debug:
+  ansible.builtin.debug:
     var: password
 
 - name: >-
@@ -119,7 +119,7 @@ ansible-galaxy remove namespace.role
   vars:
     password: abcd
     salt: "{{ lookup('community.general.random_string', special=false) }}"
-  debug:
+  ansible.builtin.debug:
     var: password | password_hash('sha512', salt)
 ```
 
@@ -235,7 +235,7 @@ Print the special variable `vars` as a task:
 
 ```yaml
 - name: Debug all variables
-  debug: var=vars
+  ansible.builtin.debug: var=vars
 ```
 
 ### Force notified handlers to run at a specific point
@@ -244,7 +244,7 @@ Use the `meta` plugin with the `flush_handlers` option:
 
 ```yaml
 - name: Force all notified handlers to run at this point, not waiting for normal sync points
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 ```
 
 ### Run specific tasks even in check mode
@@ -254,7 +254,7 @@ Add the `check_mode: false` pair to the task:
 ```yaml
 - name: this task will make changes to the system even in check mode
   check_mode: false
-  command: /something/to/run --even-in-check-mode
+  ansible.builtin.command: /something/to/run --even-in-check-mode
 ```
 
 ### Dry-run only specific tasks
@@ -264,7 +264,7 @@ Add the `check_mode: true` pair to the task:
 ```yaml
 - name: This task will always run under checkmode and not change the system
   check_mode: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     line: "important file"
     dest: /path/to/file.conf
     state: present
@@ -276,7 +276,7 @@ Use the special `X` mode setting in the `file` plugin:
 
 ```yaml
 - name: Fix files and directories' permissions
-  file:
+  ansible.builtin.file:
     dest: /path/to/some/dir
     mode: u=rwX,g=rX,o=rX
     recurse: yes
@@ -294,11 +294,11 @@ When a task executes, it also stores the two special values `changed` and `faile
 
 - name: Run if changed
   when: trigger_result.changed
-  debug: msg="The trigger task changed"
+  ansible.builtin.debug: msg="The trigger task changed"
 
 - name: Run if failed
   when: trigger_result.failed
-  debug: msg="The trigger task failed"
+  ansible.builtin.debug: msg="The trigger task failed"
 ```
 
 ### Define when a task changed or failed
@@ -338,7 +338,7 @@ Use the `lookup()` plugin with the `env` option:
 
 ```yaml
 - name: Use a local environment variable
-  debug: msg="HOME={{ lookup('env', 'HOME') }}"
+  ansible.builtin.debug: msg="HOME={{ lookup('env', 'HOME') }}"
 ```
 
 ### Check if a list contains an item and fail otherwise
@@ -346,7 +346,7 @@ Use the `lookup()` plugin with the `env` option:
 ```yaml
 - name: Check if a list contains an item and fail otherwise
   when: item not in list
-  fail: msg="item not in list"
+  ansible.builtin.fail: msg="item not in list"
 ```
 
 ## Further readings

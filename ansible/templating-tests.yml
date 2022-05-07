@@ -7,7 +7,7 @@
         Get the values of some special variables.
         See https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
         for the full list.
-      debug:
+      ansible.builtin.debug:
         var: "{{ item }}"
       with_items: ["ansible_local", "playbook_dir", "role_path"]
 
@@ -16,7 +16,7 @@
         Returns ["string"] from ["", "string", 0, false].
       vars:
         list: ["", "string", 0, false]
-      debug:
+      ansible.builtin.debug:
         var: list | select
 
     - name: >-
@@ -24,7 +24,7 @@
         Returns ["string", 0, false] from ["", "string", 0, false].
       vars:
         list: ["", "string", 0, false]
-      debug:
+      ansible.builtin.debug:
         var: list | reject('match', '^$')
 
     - name: >-
@@ -33,7 +33,7 @@
       vars:
         list1: ["a", "b"]
         list2: ["c", "d"]
-      debug:
+      ansible.builtin.debug:
         var: list1 + list2
 
     - name: >-
@@ -41,7 +41,7 @@
         Returns ["a", "b"] from ["a", "b", "b", "a"].
       vars:
         list: ["a", "b", "b", "a"]
-      debug:
+      ansible.builtin.debug:
         var: list | unique
 
     - name: >-
@@ -49,13 +49,13 @@
         Returns ['2.7.0', '2.8.0', '2.9.0',, '2.10.0' '2.11.0'] from ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
       vars:
         list: ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
-      debug:
+      ansible.builtin.debug:
         var: list | community.general.version_sort
 
     - name: >-
         Compare a semver version number.
         Returns a boolean result.
-      debug:
+      ansible.builtin.debug:
         var: "'2.0.0-rc.1+build.123' is version('2.1.0-rc.2+build.423', 'ge', version_type='semver')"
 
     - name: >-
@@ -63,7 +63,7 @@
         Returns a random string following the specifications.
       vars:
         password: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation') }}"
-      debug:
+      ansible.builtin.debug:
         var: password
 
     - name: >-
@@ -72,5 +72,5 @@
       vars:
         password: abcd
         salt: "{{ lookup('community.general.random_string', special=false) }}"
-      debug:
+      ansible.builtin.debug:
         var: password | password_hash('sha512', salt)
