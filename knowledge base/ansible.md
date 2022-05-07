@@ -123,6 +123,18 @@ ansible-galaxy remove namespace.role
     var: password | password_hash('sha512', salt)
 ```
 
+## Loops
+
+```yaml
+- name: Fail when one of the given variables is an empty string.
+  when: lookup('vars', item) == ''
+  ansible.builtin.fail:
+    msg: "The {{ item }} variable is an empty string"
+  loop:
+    - variable1
+    - variableN
+```
+
 ## Roles
 
 ### Get roles
