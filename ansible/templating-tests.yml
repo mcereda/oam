@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- name: Test Ansible's templating
+  hosts: all
   tasks:
 
     - name: >-
