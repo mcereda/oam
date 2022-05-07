@@ -1,0 +1,27 @@
+---
+- name: Tune the Bluetooth daemon
+  tags:
+    - bluetooth
+    - configure
+  hosts: all
+  tasks:
+    - name: Enable faster connection to devices
+      become: true
+      ansible.builtin.lineinfile:
+        path: "/etc/bluetooth/main.conf"
+        line: "FastConnectable = true"
+        regexp: '^.*FastConnectable\s*=\s*.*$'
+        insertafter: '^[General]$'
+        mode: '0644'
+        create: true
+        backup: true
+    - name: Enable all controllers as soon as they are found
+      become: true
+      ansible.builtin.lineinfile:
+        path: "/etc/bluetooth/main.conf"
+        line: "AutoEnable = true"
+        regexp: '^.*AutoEnable\s*=\s*.*$'
+        insertafter: '^[Policy]$'
+        mode: '0644'
+        create: true
+        backup: true
