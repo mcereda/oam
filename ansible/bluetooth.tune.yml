@@ -6,6 +6,7 @@
   hosts: all
   tasks:
     - name: Enable faster connection to devices
+      when: ansible_system == 'Linux'
       become: true
       ansible.builtin.lineinfile:
         path: "/etc/bluetooth/main.conf"
@@ -16,6 +17,7 @@
         create: true
         backup: true
     - name: Enable all controllers as soon as they are found
+      when: ansible_system == 'Linux'
       become: true
       ansible.builtin.lineinfile:
         path: "/etc/bluetooth/main.conf"
