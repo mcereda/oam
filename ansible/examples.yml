@@ -78,3 +78,20 @@
     - name: Get a variable's type.
       ansible.builtin.debug:
         var: "'string' | type_debug"
+
+
+- name: Test Ansible's loops
+  hosts: all
+  tasks:
+
+    - name: Nested loop.
+      vars:
+        middles:
+          - 'middle1'
+          - 'middle2'
+      ansible.builtin.debug:
+        msg: "{{ item[0] }}, {{ item[1] }}, {{ item[2] }}"
+      with_nested:
+        - ['outer1', 'outer2']
+        - "{{ middles }}"
+        - ['inner1', 'inner2']
