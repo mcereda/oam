@@ -300,22 +300,42 @@ Use the special `X` mode setting in the `file` plugin:
     recurse: yes
 ```
 
-### Only run a task when another changed or failed
+### Only run a task when another has a specific result
 
 When a task executes, it also stores the two special values `changed` and `failed` in its results. You can use those as conditions to execute the next ones:
 
 ```yaml
 - name: Trigger task
   ansible.builtin.command: any
-  register: trigger_result
+  register: trigger_task
   ignore_errors: true
 
-- name: Run if changed
-  when: trigger_result.changed
+- name: Run only on change
+  when: trigger_task.changed
   ansible.builtin.debug: msg="The trigger task changed"
 
-- name: Run if failed
-  when: trigger_result.failed
+- name: Run only on failure
+  when: trigger_task.failed
+  ansible.builtin.debug: msg="The trigger task failed"
+```
+
+Alternatively, you can use special checks built for this:
+
+```yaml
+- name: Run only on success
+  when: trigger_task succeeded
+  ansible.builtin.debug: msg="The trigger task changed"
+
+- name: Run only on change
+  when: trigger_task changed
+  ansible.builtin.debug: msg="The trigger task changed"
+
+- name: Run only on failure
+  when: trigger_task failed
+  ansible.builtin.debug: msg="The trigger task failed"
+
+- name: Run only on skip
+  when: trigger_task skipped
   ansible.builtin.debug: msg="The trigger task failed"
 ```
 
