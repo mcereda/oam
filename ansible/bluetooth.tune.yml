@@ -5,7 +5,7 @@
     - configure
   hosts: all
   tasks:
-    - name: Enable faster connection to devices
+    - name: Enable faster Bluetooth connection to devices
       when: ansible_system == 'Linux'
       become: true
       ansible.builtin.lineinfile:
@@ -16,7 +16,7 @@
         mode: '0644'
         create: true
         backup: true
-    - name: Enable all controllers as soon as they are found
+    - name: Enable all Bluetooth devices as soon as they are found
       when: ansible_system == 'Linux'
       become: true
       ansible.builtin.lineinfile:
