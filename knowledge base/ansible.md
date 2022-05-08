@@ -121,12 +121,18 @@ ansible-galaxy remove namespace.role
     salt: "{{ lookup('community.general.random_string', special=false) }}"
   ansible.builtin.debug:
     var: password | password_hash('sha512', salt)
+
+- name: Get a variable's type.
+  ansible.builtin.debug:
+    var: "'string' | type_debug"
 ```
 
 ## Loops
 
 ```yaml
-- name: Fail when one of the given variables is an empty string.
+- name: >-
+    Fail when any of the given variables is an empty string.
+    Returns the ones which are.
   when: lookup('vars', item) == ''
   ansible.builtin.fail:
     msg: "The {{ item }} variable is an empty string"
