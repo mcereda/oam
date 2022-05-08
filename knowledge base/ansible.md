@@ -139,6 +139,18 @@ ansible-galaxy remove namespace.role
   loop:
     - variable1
     - variableN
+
+- name: Nested loop.
+  vars:
+    middles:
+      - 'middle1'
+      - 'middle2'
+  ansible.builtin.debug:
+    msg: "{{ item[0] }}, {{ item[1] }}, {{ item[2] }}"
+  with_nested:
+    - ['outer1', 'outer2']
+    - "{{ middles }}"
+    - ['inner1', 'inner2']
 ```
 
 ## Roles
