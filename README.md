@@ -24,7 +24,6 @@ This repository is not open for contributions, but I might accept suggestions. P
 
 - [myshittycode.com]
 
-
 [LICENSE]: LICENSE
 
 [myshittycode.com]: https://myshittycode.com/
