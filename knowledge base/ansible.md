@@ -387,6 +387,20 @@ Use the `lookup()` plugin with the `env` option:
   ansible.builtin.fail: msg="item not in list"
 ```
 
+### Define different values for `true`/`false`/`null`
+
+Create a test and define two values: the first will be returned when the test returns `true`, the second will be returned when the test returns `false` (Ansible 1.9+):
+
+```yaml
+{{ (ansible_pkg_mgr == 'zypper') | ternary('gnu_parallel', 'parallel')) }}
+```
+
+Since Ansible 2.8 you can define a third value to be returned when the test returns `null`:
+
+```yaml
+{{ autoscaling_enabled | ternary(true, false, omit) }}
+```
+
 ## Further readings
 
 - [Roles]
