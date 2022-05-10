@@ -20,6 +20,14 @@
         - keybase_devicename
         - keybase_paperkey
         - keybase_username
+  handlers:
+    - name: Login to Keybase
+      tags: login
+      environment:
+        KEYBASE_DEVICENAME: "{{ keybase_devicename }}"
+        KEYBASE_PAPERKEY: "{{ keybase_paperkey }}"
+        KEYBASE_USERNAME: "{{ keybase_username }}"
+      ansible.builtin.command: "keybase {{ oneshot | ternary('oneshot', 'login -s') }}"
   tasks:
     - name: Install Keybase
       tags:
@@ -72,11 +80,3 @@
         - keybase_user_logged_in.rc != 0
         - keybase_user_logged_in.stderr | regex_search('logged out') is false
         - "keybase_user_logged_in.stdout != '{{ keybase_username }}'"
-  handlers:
-    - name: Login to Keybase
-      tags: login
-      environment:
-        KEYBASE_DEVICENAME: "{{ keybase_devicename }}"
-        KEYBASE_PAPERKEY: "{{ keybase_paperkey }}"
-        KEYBASE_USERNAME: "{{ keybase_username }}"
-      ansible.builtin.command: "keybase {{ oneshot | ternary('oneshot', 'login') }}"
