@@ -25,7 +25,7 @@ PID  | PPID | UID  | User       | Command                           | Service
 731  | 1    | 488  | avahi      | avahi-daemon                      | avahi-daemon
 736  | 1    | 490  | messagebus | dbus-daemon                       | dbus
 …
-6260 | 1756 | 1000 | mek        | kdeinit5                          | 
+6260 | 1756 | 1000 | mek        | kdeinit5                          |
 
 You may wish to restart these processes.
 See 'man zypper' for information about the meaning of values in the above table.
