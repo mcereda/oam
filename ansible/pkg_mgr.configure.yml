@@ -1,0 +1,37 @@
+---
+
+- name: Configure the package manager
+  tags:
+    - config
+    - configuration
+    - configure
+    - dnf
+    - package_manager
+    - package_managers
+    - package-manager
+    - package-managers
+    - pkg_mgr
+  hosts: all
+  vars:
+    dnf_config: "{{ yum_config }}"
+    yum_config:
+      max_parallel_downloads: 10
+      deltarpm: true
+      fastestmirror: true
+      skip_if_unavailable: true
+      best: false
+      clean_requirements_on_remove: true
+      installonly_limit: 2
+      gpgcheck: 1
+  tasks:
+    - name: "Configure {{ ansible_pkg_mgr|upper }}"
+      when: ansible_pkg_mgr in ['dnf', 'yum']
+      become: true
+      ansible.builtin.lineinfile:
+        path: "/etc/{{ ansible_pkg_mgr }}/{{ ansible_pkg_mgr }}.conf"
+        line: "{{ item.key }}={{ item.value|string }}"
+        regexp: '^.*{{ item.key }}\s*=\s*.*$'
+        insertafter: '^[main]$'
+        mode: '0644'
+        backup: true
+      loop: "{{ lookup('vars', [ansible_pkg_mgr, 'config']|join('_') ) | dict2items }}"
