@@ -1,0 +1,24 @@
+---
+
+- name: Configure swappiness
+  tags:
+    - config
+    - configuration
+    - configure
+    - swappiness
+  hosts: all
+  vars:
+    swappiness_sysctl_file: "/etc/sysctl.d/{{ swappiness_sysctl_file_priority }}-{{ swappiness_sysctl_file_name }}.conf"
+    swappiness_sysctl_file_name: swappiness
+    swappiness_sysctl_file_priority: 99
+    swappiness_value: 10
+  tasks:
+    - when: ansible_system == 'Linux'
+      tags: linux
+      block:
+        - name: Configure swappiness
+          sysctl:
+            name: vm.swappiness
+            value: "{{ swappiness_value|string }}"
+            sysctl_file: "{{ swappiness_sysctl_file }}"
+            sysctl_set: true
