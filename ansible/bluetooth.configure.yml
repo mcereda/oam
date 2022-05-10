@@ -1,0 +1,49 @@
+---
+
+- name: Configure the Bluetooth service
+  tags:
+    - bluetooth
+    - config
+    - configuration
+    - configure
+    - daemon
+    - daemons
+    - service
+    - services
+    - tune
+    - tuning
+  hosts: all
+  vars:
+    auto_enable: true
+    fast_connectable: true
+  handlers:
+    - name: Restart Bluez
+      ansible.builtin.service:
+        name: bluetooth.service
+        state: restarted
+  tasks:
+    - when: ansible_system == 'Linux'
+      tags: linux
+      block:
+        - name: Configure faster Bluetooth connection to devices
+          become: true
+          notify: Restart Bluez
+          ansible.builtin.lineinfile:
+            path: "/etc/bluetooth/main.conf"
+            line: "FastConnectable = {{ fast_connectable|string|lower }}"
+            regexp: '^.*FastConnectable\s*=\s*.*$'
+            insertafter: '^[General]$'
+            mode: '0644'
+            create: true
+            backup: true
+        - name: Enable all Bluetooth devices as soon as they are found
+          become: true
+          notify: Restart Bluez
+          ansible.builtin.lineinfile:
+            path: "/etc/bluetooth/main.conf"
+            line: "AutoEnable = {{ auto_enable|string|lower }}"
+            regexp: '^.*AutoEnable\s*=\s*.*$'
+            insertafter: '^[Policy]$'
+            mode: '0644'
+            create: true
+            backup: true
