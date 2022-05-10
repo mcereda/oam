@@ -3,7 +3,6 @@
 - name: Install and configure Flatpak
   tags:
     - flatpak
-    - linux
     - package_manager
     - package_managers
     - package-manager
