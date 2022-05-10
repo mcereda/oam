@@ -1,0 +1,38 @@
+---
+
+- name: Install and configure Flatpak
+  tags:
+    - flatpak
+    - linux
+    - package_manager
+    - package_managers
+    - package-manager
+    - package-managers
+    - pkg_mgr
+  hosts: all
+  vars:
+    flathub_name: flathub
+    flathub_url: https://flathub.org/repo/flathub.flatpakrepo
+  tasks:
+    - when: ansible_system == 'Linux'
+      tags: linux
+      block:
+        - name: Install flatpak
+          tags:
+            - install
+            - installation
+          become: true
+          ansible.builtin.package:
+            name: flatpak
+            state: present
+        - name: Configure Flatpak
+          tags:
+            - configure
+            - configuration
+          block:
+            - name: Enable the Flathub remote for the system
+              tags: flathub
+              become: true
+              community.general.flatpak_remote:
+                name: "{{ flathub_name }}"
+                flatpakrepo_url: "{{ flathub_url }}"
