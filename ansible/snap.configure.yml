@@ -1,0 +1,25 @@
+---
+
+- name: Install and configure Snap
+  tags:
+    - package_manager
+    - package_managers
+    - package-manager
+    - package-managers
+    - pkg_mgr
+    - snap
+    - snapcraft
+    - snapd
+  hosts: all
+  tasks:
+    - when: ansible_system == 'Linux'
+      tags: linux
+      block:
+        - name: Install snapd
+          tags:
+            - install
+            - installation
+          become: true
+          ansible.builtin.package:
+            name: snapd
+            state: present
