@@ -1,0 +1,27 @@
+---
+
+- name: Upgrade the operating system
+  tags:
+    - os
+    - system
+    - upgrade
+  hosts: all
+  tasks:
+    - name: Upgrade GNU/Linux
+      tags: linux
+      when: ansible_system == 'Linux'
+      become: true
+      ansible.builtin.package:
+        name: '*'
+        state: "{{ (ansible_pkg_mgr in ['zypper']) | ternary('dist-upgrade', 'latest') }}"
+    - name: Upgrade Mac OS X
+      tags:
+        - darwin
+        - mac
+        - osx
+      when: ansible_system == 'Darwin'
+      ansible.builtin.command: softwareupdate --install --recommended
+      register: softwareupdate_result
+      changed_when:
+        - softwareupdate_result.rc != 0
+        - softwareupdate_result.stderr != 'No updates are available.'
