@@ -1,0 +1,82 @@
+---
+
+- name: Register the device on Keybase
+  hosts: all
+  tags: keybase
+  vars:
+    keybase_devicename: "{{ lookup('env', 'KEYBASE_DEVICENAME') }}"
+    keybase_paperkey: "{{ lookup('env', 'KEYBASE_PAPERKEY') }}"
+    keybase_username: "{{ lookup('env', 'KEYBASE_USERNAME') }}"
+    oneshot: false
+  pre_tasks:
+    - name: Pre-flight checks
+      tags:
+        - check
+        - pre-flight
+      when: lookup('vars', item) == ''
+      ansible.builtin.fail:
+        msg: "{{ item }} variable required but not set"
+      loop:
+        - keybase_devicename
+        - keybase_paperkey
+        - keybase_username
+  tasks:
+    - name: Install Keybase
+      tags:
+        - install
+        - package
+      block:
+        - name: "Install Keybase through {{ ansible_pkg_mgr }}"
+          when: ansible_pkg_mgr in ['dnf', 'yum']
+          become: true
+          ansible.builtin.dnf:
+            name: 'https://prerelease.keybase.io/keybase_amd64.rpm'
+            state: present
+          register: keybase_installed
+        - name: Install Keybase through Homebrew
+          when: ansible_pkg_mgr == 'homebrew'
+          community.general.homebrew_cask:
+            name: keybase
+            state: present
+            install_options: 'appdir=~/Applications'
+          register: keybase_installed
+        - name: Install Keybase through Zypper
+          when: ansible_pkg_mgr == 'zypper'
+          become: true
+          community.general.zypper:
+            name: 'https://prerelease.keybase.io/keybase_amd64.rpm'
+            state: present
+            disable_gpg_check: true
+            disable_recommends: false
+          register: keybase_installed
+    - name: Enable Keybase's service for the user
+      when: ansible_service_mgr == 'systemd'
+      tags:
+        - enable
+        - start
+        - service
+      ansible.builtin.systemd:
+        scope: user
+        name: keybase.service
+        state: started
+        enabled: true
+    - name: Check the user is already logged in to Keybase
+      check_mode: false
+      notify: Login to Keybase
+      ansible.builtin.command: keybase whoami
+      register: keybase_user_logged_in
+      changed_when:
+        - keybase_user_logged_in.rc == 2
+        - keybase_user_logged_in.stderr | regex_search('logged out')
+      failed_when:
+        - keybase_user_logged_in.rc != 0
+        - keybase_user_logged_in.stderr | regex_search('logged out') is false
+        - "keybase_user_logged_in.stdout != '{{ keybase_username }}'"
+  handlers:
+    - name: Login to Keybase
+      tags: login
+      environment:
+        KEYBASE_DEVICENAME: "{{ keybase_devicename }}"
+        KEYBASE_PAPERKEY: "{{ keybase_paperkey }}"
+        KEYBASE_USERNAME: "{{ keybase_username }}"
+      ansible.builtin.command: "keybase {{ oneshot | ternary('oneshot', 'login') }}"
