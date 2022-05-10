@@ -11,8 +11,11 @@
     - pkg_mgr
   hosts: all
   vars:
+    flathub_enabled: true
+    flathub_method: user
     flathub_name: flathub
     flathub_url: https://flathub.org/repo/flathub.flatpakrepo
+    remotes: []
   tasks:
     - when: ansible_system == 'Linux'
       tags: linux
@@ -30,9 +33,29 @@
             - configure
             - configuration
           block:
-            - name: Enable the Flathub remote for the system
-              tags: flathub
+            - name: Add flathub to the remotes
+              when: flathub_enabled
+              set_fact:
+                remotes: "{{ remotes + [ { 'name': flathub_name, 'method': flathub_method, 'url': flathub_url } ] }}"
+            - name: Enable system remotes
+              tags:
+                - remote
+                - remotes
+                - system
+              when: item.method == 'system'
               become: true
               community.general.flatpak_remote:
-                name: "{{ flathub_name }}"
-                flatpakrepo_url: "{{ flathub_url }}"
+                name: "{{ item.name }}"
+                flatpakrepo_url: "{{ item.url }}"
+              loop: "{{ remotes }}"
+            - name: Enable user remotes
+              tags:
+                - remote
+                - remotes
+                - user
+              when: item.method == 'user'
+              become: true
+              community.general.flatpak_remote:
+                name: "{{ item.name }}"
+                flatpakrepo_url: "{{ item.url }}"
+              loop: "{{ remotes }}"
