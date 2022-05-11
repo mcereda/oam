@@ -15,6 +15,7 @@ docker pull boinc/client:latest
 
 # Login to registries.
 docker login
+docker login -u username -p password
 
 # Create containers.
 docker create -h alpine-test --name alpine-test alpine
