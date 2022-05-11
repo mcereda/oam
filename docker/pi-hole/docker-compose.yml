@@ -14,8 +14,8 @@ services:
       TZ: Europe/Amsterdam
       WEBPASSWORD_FILE: /run/secrets/webpassword
     volumes:
-        - ./etc-pihole/:/etc/pihole/
-        - ./etc-dnsmasq.d/:/etc/dnsmasq.d/
+      - ./etc-pihole/:/etc/pihole/
+      - ./etc-dnsmasq.d/:/etc/dnsmasq.d/
     dns:
       - 127.0.0.1
       - 1.1.1.1
