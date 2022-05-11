@@ -3,17 +3,44 @@
 ## TL;DR
 
 ```shell
-# Run containers.
+# Create containers.
+docker create -h alpine-test --name alpine-test alpine
+
+# Start containers.
+docker start alpine-test
+
+# Create and start containers.
 docker run hello-world
 docker run -ti --rm alpine cat /etc/apk/repositories
 docker run -d --name boinc --network=host --pid=host -v "boinc:/var/lib/boinc" \
   -e BOINC_GUI_RPC_PASSWORD="123" -e BOINC_CMD_LINE_OPTIONS="--allow_remote_gui_rpc" \
   boinc/client
 
-# Show containers status.
+# Gracefully stop containers.
+docker stop alpine-test
+
+# Kill containers.
+docker kill alpine-test
+
+# Restart containers.
+docker restart alpine-test
+
+# Show containers' status.
+docker ps
 docker ps --all
 
+# Show containers' output.
+docker log alpine-test
+
+# List processes running inside containers.
+docker top alpine-test
+
+# Show information on containers.
+docker inspect alpine-test
+
 # Cleanup.
+docker rm -f alpine-test
+docker rmi alpine
 docker system prune -a
 ```
 
@@ -47,6 +74,8 @@ Those files come from the volume the docker container is using for its root, and
 
 - [Archlinux Wiki]
 - [Configuring DNS]
+- [Cheatsheet]
 
 [archlinux wiki]: https://wiki.archlinux.org/index.php/Docker
+[cheatsheet]: https://collabnix.com/docker-cheatsheet/
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html
