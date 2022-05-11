@@ -727,17 +727,17 @@ To only pull from `repo1` but push to `repo1` and `repo2` for a specific branch 
 [remote "origin"]
     url = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
     fetch = +refs/heads/*:refs/remotes/origin/*
-    ...
+    …
 [remote "specialRemote"]
     url = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
     pushurl = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
     pushurl = ssh://git@aaa.xxx.com:7999/yyy/repo2.git
     fetch = +refs/heads/*:refs/remotes/origin/*
-    ...
+    …
 [branch "specialBranch"]
     remote = origin
     pushRemote = specialRemote
-    ...
+    …
 ```
 
 See <https://git-scm.com/docs/git-config#git-config-branchltnamegtremote>.
@@ -763,6 +763,15 @@ If gnupg2 and gpg-agent 2.x are used, be sure to set the environment variable GP
 
 ```shell
 export GPG_TTY=$(tty)
+```
+
+### Git does not accept self-signed certificates
+
+Disable certificate verification:
+
+```shell
+export GIT_SSL_NO_VERIFY=true
+git -c http.sslVerify=false …
 ```
 
 ## Further readings
