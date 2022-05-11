@@ -1,3 +1,6 @@
+---
+# See https://hadolint.github.io/hadolint/ for more information
+
 override:
   style:
     - DL3006   # explicit image tag version
