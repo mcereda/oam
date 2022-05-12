@@ -3,6 +3,11 @@
 ## Tl;DR
 
 ```shell
+# Go to a particular line.
+42G
+42gg
+:42<CR>
+
 # Get help on something.
 :help modeline
 ```
@@ -34,8 +39,14 @@ Examples:
 /* ex: set ts=8 sw=4 tw=0 noet : */
 ```
 
-## Further readings
+## Sources
 
 - [Modeline magic]
+- [Embed vim settings in file]
+- [Basic vimrc]
+- [Set whitespace preferences by filetype]
 
+[basic vimrc]: https://github.com/amix/vimrc/blob/master/vimrcs/basic.vim
+[embed vim settings in file]: https://stackoverflow.com/questions/3958416/embed-vim-settings-in-file#3958516
 [modeline magic]: https://vim.fandom.com/wiki/Modeline_magic
+[set whitespace preferences by filetype]: https://stackoverflow.com/questions/1562633/setting-vim-whitespace-preferences-by-filetype#1563552
