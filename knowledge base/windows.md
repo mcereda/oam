@@ -9,6 +9,12 @@
 1. deselect _Turn on fast startup (recommended)_
 1. save the changes
 
+## Further readings
+
+- [WinGet]
+
+[winget]: winget.md
+
 ## Sources
 
 - [How to disable Windows 10 fast startup (and why you'd want to)]
