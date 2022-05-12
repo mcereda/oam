@@ -1,5 +1,7 @@
 # Ansible
 
+## TL;DR
+
 ```shell
 # Install.
 pip3 install --user ansible && port install sshpass   # darwin
@@ -421,13 +423,17 @@ Since Ansible 2.8 you can define a third value to be returned when the test retu
 - [Automating Helm using Ansible]
 - [Edit .ini file in other servers using Ansible PlayBook]
 - [Yes and No, True and False]
+- [Ansible Galaxy user guide]
+- [Windows playbook example]
 
+[ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
 [roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
 [special variables]: https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
 [tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
 
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
+[windows playbook example]: https://geekflare.com/ansible-playbook-windows-example/
 [yes and no, true and false]: https://chronicler.tech/red-hat-ansible-yes-no-and/
 
 ## Sources
@@ -441,10 +447,12 @@ Since Ansible 2.8 you can define a third value to be returned when the test retu
 - [Include task only if file exists]
 - [Unique filter of list in jinja2]
 - [Only do something if another action changed]
+- [How to recursively set directory and file permissions]
 
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
 [how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
 [how to install sshpass on mac]: https://stackoverflow.com/questions/32255660/how-to-install-sshpass-on-mac/62623099#62623099
+[how to recursively set directory and file permissions]: https://superuser.com/questions/1024677/ansible-how-to-recursively-set-directory-and-file-permissions#1317715
 [human-readable output format]: https://www.shellhacks.com/ansible-human-readable-output-format/
 [include task only if file exists]: https://stackoverflow.com/questions/28119521/ansible-include-task-only-if-file-exists#comment118578470_62289639
 [only do something if another action changed]: https://raymii.org/s/tutorials/Ansible_-_Only-do-something-if-another-action-changed.html
@@ -454,4 +462,4 @@ Since Ansible 2.8 you can define a third value to be returned when the test retu
 
 <!-- Other references -->
 
-[Ansible Galaxy]: https://galaxy.ansible.com/
+[ansible galaxy]: https://galaxy.ansible.com/
