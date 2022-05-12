@@ -1,16 +1,18 @@
 # Portage
 
-```shell
-# system update
-sudo emerge --sync
-sudo emerge --quiet --verbose --update --deep --newuse --with-bdeps=y --ask @world
-sudo emerge --depclean --ask
+## TL;DR
 
-# check active portage features
-portageq envvar FEATURES | xargs -n 1
+```shell
+# System update.
+sudo emerge --sync
+sudo emerge --depclean --ask
+sudo emerge -qv --update --deep --newuse --with-bdeps=y -a @world
+
+# Show what portage features are currently active.
+portageq envvar FEATURES | xargs -n1
 ```
 
-## Further readings
+## Sources
 
 - [/etc/portage]
 - [Portage]
