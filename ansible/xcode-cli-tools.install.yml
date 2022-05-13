@@ -8,6 +8,10 @@
     - xcode_tools
   hosts: all
   tasks:
+    - name: Pre-flight checks
+      when: ansible_system != 'Darwin'
+      fail:
+        msg: "Unsupported OS '{{ ansible_system }}'"
     - name: Check Command Line Tools are already installed
       check_mode: false
       register: cli_tools_check
@@ -47,5 +51,5 @@
           when: headless_cli_tools_installation is failed
           ansible.builtin.fail:
             msg: >-
-              Command Line Tools are not installed. Please execute
-              'xcode-select --install' in a terminal and accept the license.
+              Headless installation failed. Please execute
+              'xcode-select --install' in a terminal.
