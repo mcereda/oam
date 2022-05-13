@@ -3,13 +3,14 @@
 - [TL;DR](#tldr)
 - [Xcode CLI tools](#xcode-cli-tools)
   - [Headless installation](#headless-installation)
+  - [Removal](#removal)
   - [Upgrade](#upgrade)
 - [Hidden settings](#hidden-settings)
 - [Resize an image from CLI](#resize-an-image-from-cli)
 - [Boot keys cheatsheet](#boot-keys-cheatsheet)
-- [Update from CLI](#update-from-cli)
+- [Update the OS from CLI](#update-the-os-from-cli)
 - [Keychain access from CLI](#keychain-access-from-cli)
-- [Further readings](#further-readings)
+- [Sources](#sources)
 
 ## TL;DR
 
@@ -43,7 +44,8 @@ softwareupdate --download --recommended
 security add-generic-password -a johnny -s github -w 'b.good'
 
 # Add a password to the default keychain giving it some optional data.
-security add-generic-password -a johnny -s github -l work -j 'my key for work' -w 'b.good'
+security add-generic-password -a johnny -s github -l work \
+  -j 'my key for work' -w 'b.good'
 
 # Update a passwork value.
 security add-generic-password -a johnny -s github -l work -U -w 'new-pass'
@@ -58,15 +60,18 @@ security delete-generic-password -a johnny -s github
 
 # Get the host's bonjour name.
 scutil --get LocalHostName
-/usr/libexec/PlistBuddy -c "Print :System:Network:HostNames:LocalHostName" /Library/Preferences/SystemConfiguration/preferences.plist
+/usr/libexec/PlistBuddy -c "Print :System:Network:HostNames:LocalHostName" \
+  /Library/Preferences/SystemConfiguration/preferences.plist
 
 # Get the host's netbios name.
 defaults read /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName
-/usr/libexec/PlistBuddy -c "Print :NetBIOSName" /Library/Preferences/SystemConfiguration/com.apple.smb.server.plist
+/usr/libexec/PlistBuddy -c "Print :NetBIOSName" \
+  /Library/Preferences/SystemConfiguration/com.apple.smb.server.plist
 
 # Get the host's computer name.
 scutil --get ComputerName
-/usr/libexec/PlistBuddy -c "Print :System:System:ComputerName" /Library/Preferences/SystemConfiguration/preferences.plist
+/usr/libexec/PlistBuddy -c "Print :System:System:ComputerName" \
+  /Library/Preferences/SystemConfiguration/preferences.plist
 ```
 
 ## Xcode CLI tools
@@ -75,7 +80,7 @@ scutil --get ComputerName
 xcode-select --install
 ```
 
-The tools will be installed into `/Library/Developer/CommandLineTools`, with the binaries being available at /Library/Developer/CommandLineTools/usr/bin/`.
+The tools will be installed into `/Library/Developer/CommandLineTools` by default, with the binaries being available at `$(xcode-select -p)/usr/bin/`.
 
 ### Headless installation
 
@@ -92,7 +97,7 @@ CLI_TOOLS_LABEL="$(/usr/sbin/softwareupdate -l \
  | tail -n1)"
 
 # Install them.
-/usr/sbin/softwareupdate -i --agree-to-license $CLI_TOOLS_LABEL
+/usr/sbin/softwareupdate -i --agree-to-license "$CLI_TOOLS_LABEL"
 ```
 
 ### Removal
@@ -200,7 +205,8 @@ Save a password with the following settings:
 # Add the password to the default keychain.
 security add-generic-password -a johnny -s github -w 'b.good'
 # Also give it some optional data.
-security add-generic-password -a johnny -s github -l work -j 'my key for work' -w 'b.good'
+security add-generic-password -a johnny -s github -l work \
+  -j 'my key for work' -w 'b.good'
 # Update the passwork value.
 security add-generic-password -a johnny -s github -l work -U -w 'new-pass'
 
