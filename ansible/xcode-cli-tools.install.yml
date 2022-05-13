@@ -1,0 +1,32 @@
+---
+- name: Check Command Line Tools are already installed
+  command: xcode-select --print-path
+  ignore_errors: true
+  register: cli_tools_check
+
+- name: Try headless installing command line tools
+  when: cli_tools_check is failed
+  block:
+    - name: Force `softwareupdate` to list the Command Line Tools
+      file:
+        path: /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+        state: touch
+    - name: Get the tools' label
+      shell: >-
+        /usr/sbin/softwareupdate -l
+         | grep -B 1 -E 'Command Line Tools'
+         | awk -F'*' '/^ *\\*/ {print $2}'
+         | sed -e 's/^ *Label: //' -e 's/^ *//'
+         | sort -V
+         | tail -n1
+      register: cli_tools_label
+    - name: Install the tools
+      command: >-
+        /usr/sbin/softwareupdate -i --agree-to-license '{{cli_tools_label.stdout}}'
+      register: headless_cli_tools_installation
+    - name: Print message on failure
+      when: headless_cli_tools_installation is failed
+      fail:
+        msg: >-
+          Command Line Tools are not installed. Please execute
+          'xcode-select --install' in a terminal and accept the license.

@@ -14,50 +14,57 @@
 ## TL;DR
 
 ```shell
-# install a .pkg file from cli
-# target needs to be a device, not a path
+# Install a .pkg file from CLI.
+# 'target' needs to be a device, not a path.
 installer -pkg /path/to/non-root-package.pkg -target CurrentUserHomeDirectory
 sudo installer -pkg /path/to/root-needed-package.pkg -target /
 
-# install xcode cli tools
+# Install Xcode CLI tools.
 xcode-select --install
 
-# list all available updates
+# Show Xcode tools's path.
+xcode-select -p
+
+# Remove Xcode tools.
+sudo rm -rf $(xcode-select -p)
+
+# List all available updates.
 softwareupdate --list --all
 
-# install all recommended updates agreeing to software license agreement without interaction and automatically restart if required
+# Install all recommended updates, agreeing to software license agreement
+# without interaction, and automatically restart if required.
 softwareupdate --install --recommended --restart --agree-to-license
 
-# download (but not install) recommended updates
+# Download (but not install) recommended updates.
 softwareupdate --download --recommended
 
-# add a password to the default keychain
-# the password needs to be left last
+# Add a password to the default keychain.
+# The password needs to be left last.
 security add-generic-password -a johnny -s github -w 'b.good'
 
-# add a password to the default keychain giving it some optional data
+# Add a password to the default keychain giving it some optional data.
 security add-generic-password -a johnny -s github -l work -j 'my key for work' -w 'b.good'
 
-# update a passwork value
+# Update a passwork value.
 security add-generic-password -a johnny -s github -l work -U -w 'new-pass'
 
-# print a password to stdout
+# Print a password to stdout.
 security find-generic-password -w -a johnny -s github
 security find-generic-password -w -l work
 security find-generic-password -w -l work -s github
 
-# delete a password from the default keychain
+# Delete a password from the default keychain.
 security delete-generic-password -a johnny -s github
 
-# get the host's bonjour name
+# Get the host's bonjour name.
 scutil --get LocalHostName
 /usr/libexec/PlistBuddy -c "Print :System:Network:HostNames:LocalHostName" /Library/Preferences/SystemConfiguration/preferences.plist
 
-# get the host's netbios name
+# Get the host's netbios name.
 defaults read /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName
 /usr/libexec/PlistBuddy -c "Print :NetBIOSName" /Library/Preferences/SystemConfiguration/com.apple.smb.server.plist
 
-# get the host's computer name
+# Get the host's computer name.
 scutil --get ComputerName
 /usr/libexec/PlistBuddy -c "Print :System:System:ComputerName" /Library/Preferences/SystemConfiguration/preferences.plist
 ```
@@ -68,48 +75,43 @@ scutil --get ComputerName
 xcode-select --install
 ```
 
+The tools will be installed into `/Library/Developer/CommandLineTools`, with the binaries being available at /Library/Developer/CommandLineTools/usr/bin/`.
+
 ### Headless installation
 
 In CLI:
 
-1. prompt the `softwareupdate` utility to list the Command Line Tools
+```shell
+# Force the `softwareupdate` utility to list the Command Line Tools.
+touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
 
-   ```sh
-   touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-   ```
+# Get their label.
+CLI_TOOLS_LABEL="$(/usr/sbin/softwareupdate -l \
+ | grep -B 1 -E 'Command Line Tools' \
+ | awk -F'*' '/^ *\\*/ {print $2}' \
+ | sed -e 's/^ *Label: //' -e 's/^ *//' \
+ | sort -V \
+ | tail -n1)"
 
-1. get their label
-
-   ```sh
-   export cli_tools_label="$(/usr/sbin/softwareupdate -l \
-   | grep -B 1 -E 'Command Line Tools' \
-   | awk -F'*' '/^ *\\*/ {print $2}' \
-   | sed -e 's/^ *Label: //' -e 's/^ *//' \
-   | sort -V \
-   | tail -n1)"
-   ```
-
-1. install them
-
-   ```sh
-   /usr/sbin/softwareupdate -i ${cli_tools_label.stdout}
-   ```
+# Install them.
+/usr/sbin/softwareupdate -i --agree-to-license $CLI_TOOLS_LABEL
+```
 
 As Ansible task:
 
 ```yaml
-- name: Check Command Line Tools are avilable
+- name: Check Command Line Tools are already installed
   command: xcode-select --print-path
   ignore_errors: true
   register: cli_tools_check
-- name: Trying headless installing command line tools
+- name: Try headless installing command line tools
   when: cli_tools_check is failed
   block:
-  - name: Prompt the 'softwareupdate' utility to list the Command Line Tools
+  - name: Force `softwareupdate` to list the Command Line Tools
     file:
       path: /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
       state: touch
-  - name: Get CLI tools label
+  - name: Get the tools' label
     shell: >-
       /usr/sbin/softwareupdate -l
       | grep -B 1 -E 'Command Line Tools'
@@ -118,13 +120,23 @@ As Ansible task:
       | sort -V
       | tail -n1
     register: cli_tools_label
-  - name: Install CLI tools
-    command: /usr/sbin/softwareupdate -i '{{cli_tools_label.stdout}}'
+  - name: Install the tools
+    command: >-
+      /usr/sbin/softwareupdate -i --agree-to-license '{{cli_tools_label.stdout}}'
     register: headless_cli_tools_installation
-  - name: Fail with error
+  - name: Print message on failure
     when: headless_cli_tools_installation is failed
     fail:
-      msg: Command Line Tools are not installed. Please execute 'xcode-select --install' in a terminal and accept the license first
+      msg: >-
+        Command Line Tools are not installed. Please execute
+        'xcode-select --install' in a terminal and accept the license.
+```
+
+### Removal
+
+```shell
+sudo rm -rf $(xcode-select -p)
+sudo rm -rf /Library/Developer/CommandLineTools
 ```
 
 ### Upgrade
@@ -132,8 +144,8 @@ As Ansible task:
 See [How to update Xcode from command line] for details.
 
 ```shell
-# remove and reinstall
-sudo rm -rf /Library/Developer/CommandLineTools
+# Remove and reinstall.
+sudo rm -rf $(xcode-select -p)
 xcode-select --install
 ```
 
@@ -142,20 +154,23 @@ xcode-select --install
 > **Note:** once set something, you'll probably need to restart the dock with `killall Dock`
 
 ```shell
-# show hidden apps indicators in the dock
+# Show hidden apps indicators in the dock.
 defaults write com.apple.dock showhidden -bool TRUE
 
-# reset changes to the dock
+# Reset changes to the dock.
 defaults delete com.apple.dock
 
-# change the number of columns and rows in the springboard
+# Change the number of columns and rows in the springboard.
 defaults write com.apple.dock springboard-columns -int 9
 defaults write com.apple.dock springboard-rows -int 7
 
-# reset changes to the launchpad
+# Reset changes to the launchpad.
 defaults delete com.apple.dock springboard-rows
 defaults delete com.apple.dock springboard-columns
 defaults write com.apple.dock ResetLaunchPad -bool TRUE
+
+# Force Finder to always display hidden files.
+defaults write com.apple.finder AppleShowAllFiles TRUE
 ```
 
 ## Resize an image from CLI
@@ -171,7 +186,7 @@ sips -Z 1000 Downloads/IMG_20190527_013903.jpg
 
 ## Boot keys cheatsheet
 
-> only available for Intel based Macs
+> Only available on Intel based Macs.
 
 To use any of these key combinations, press and hold the keys immediately after pressing the power button to turn on your Mac, or after your Mac begins to restart. Keep holding until the described behavior occurs.
 
@@ -191,16 +206,18 @@ Combination | Behaviour
 `⌥ Option` + `N` | Start from a NetBoot server and use the default boot image on it. Disabled when using a firmware password
 `⌘ Command` + `S` | Start in _single-user_ mode. Disabled in macOS Mojave or later, or when using a firmware password
 
-## Update from CLI
+## Update the OS from CLI
 
 ```shell
-# list all available updates
+# List all available updates.
 softwareupdate --list --all
 
-# install all recommended updates agreeing to software license agreement without interaction and automatically restart if required
+# Install all recommended updates.
+# Agree to software license agreement without interaction.
+# Automatically restart if required.
 softwareupdate --install --recommended --restart --agree-to-license
 
-# download (but not install) recommended updates
+# Download (but not install) recommended updates.
 softwareupdate --download --recommended
 ```
 
@@ -214,34 +231,35 @@ Save a password with the following settings:
 - \[optional] entry name (a.k.a. _label_): `work`; if not given, the service name will be used
 - \[optional] comment: `my key for work`; if not given, it will be left blank
 
-> the password's value needs to be given **last**
+> The password's value needs to be given **last**.
 
 ```shell
-# add the password to the default keychain
+# Add the password to the default keychain.
 security add-generic-password -a johnny -s github -w 'b.good'
-# also give it some optional data
+# Also give it some optional data.
 security add-generic-password -a johnny -s github -l work -j 'my key for work' -w 'b.good'
-# update the passwork value
+# Update the passwork value.
 security add-generic-password -a johnny -s github -l work -U -w 'new-pass'
 
-# print the above password to stdout
+# Print the above password to stdout.
 security find-generic-password -w -a johnny -s github
 security find-generic-password -w -l work
 security find-generic-password -w -l work -s github
 
-# delete it
+# Delete it.
 security delete-generic-password -a johnny -s github
 ```
 
-## Further readings
+## Sources
 
-- [Boot a Mac from USB Drive] on [WikiHow]
-- [Mac startup key combinations] on [Apple's support site]
+- [Boot a Mac from USB Drive]
+- [Mac startup key combinations]
 - [Xcode Command Line Tools Installation FAQ]
 - [How to update Xcode from command line]
 - [Command line access to the Mac keychain]
 - [Installing .pkg with terminal?]
 - [Using Terminal to Find Your Mac's Network Name]
+- [List of Xcode Command Line Tools]
 
 [boot a mac from usb drive]: https://www.wikihow.com/Boot-a-Mac-from-USB-Drive
 [command line access to the mac keychain]: https://blog.koehntopp.info/2017/01/26/command-line-access-to-the-mac-keychain.html
@@ -250,6 +268,4 @@ security delete-generic-password -a johnny -s github
 [mac startup key combinations]: https://support.apple.com/en-us/HT201255
 [using terminal to find your mac's network name]: https://www.tech-otaku.com/networking/using-terminal-find-your-macs-network-name/
 [xcode command line tools installation faq]: https://www.godo.dev/tutorials/xcode-command-line-tools-installation-faq
-
-[apple's support site]: https://support.apple.com
-[wikihow]: https://www.wikihow.com
+[list of xcode command line tools]: https://mac.install.guide/commandlinetools/8.html
