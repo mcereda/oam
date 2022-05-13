@@ -1,32 +1,49 @@
 ---
-- name: Check Command Line Tools are already installed
-  command: xcode-select --print-path
-  ignore_errors: true
-  register: cli_tools_check
 
-- name: Try headless installing command line tools
-  when: cli_tools_check is failed
-  block:
-    - name: Force `softwareupdate` to list the Command Line Tools
-      file:
-        path: /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-        state: touch
-    - name: Get the tools' label
-      shell: >-
-        /usr/sbin/softwareupdate -l
-         | grep -B 1 -E 'Command Line Tools'
-         | awk -F'*' '/^ *\\*/ {print $2}'
-         | sed -e 's/^ *Label: //' -e 's/^ *//'
-         | sort -V
-         | tail -n1
-      register: cli_tools_label
-    - name: Install the tools
-      command: >-
-        /usr/sbin/softwareupdate -i --agree-to-license '{{cli_tools_label.stdout}}'
-      register: headless_cli_tools_installation
-    - name: Print message on failure
-      when: headless_cli_tools_installation is failed
-      fail:
-        msg: >-
-          Command Line Tools are not installed. Please execute
-          'xcode-select --install' in a terminal and accept the license.
+- name: Install Xcode CLI tools on Mac OS X
+  tags:
+    - macosx
+    - darwin
+    - xcode_cli_tools
+    - xcode_tools
+  hosts: all
+  tasks:
+    - name: Check Command Line Tools are already installed
+      ansible.builtin.command: xcode-select --print-path
+      register: cli_tools_check
+      ignore_errors: true
+      changed_when: false
+    - name: Try headless installing command line tools
+      when: cli_tools_check is failed
+      block:
+        - name: Force `softwareupdate` to list the Command Line Tools
+          ansible.builtin.file:
+            path: /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+            state: touch
+            mode: u=rw,g=rw,o=r
+        - name: Get the tools' label
+          register: cli_tools_label
+          ansible.builtin.shell: >-
+            /usr/sbin/softwareupdate -l
+            | grep -B 1 -E 'Command Line Tools'
+            | awk -F'*' '/^ *\\*/ {print $2}'
+            | sed -e 's/^ *Label: //' -e 's/^ *//'
+            | sort -V
+            | tail -n1
+          changed_when:
+            - cli_tools_label.rc == 0
+            - cli_tools_label.stdout | regex_match('No new software available.') is false
+        - name: Install the tools
+          register: headless_cli_tools_installation
+          ansible.builtin.command: >-
+            /usr/sbin/softwareupdate -i --agree-to-license
+            '{{ cli_tools_label.stdout }}'
+          changed_when:
+            - headless_cli_tools_installation.rc == 0
+            - headless_cli_tools_installation.stdout | regex_match('No new software available.') is false
+        - name: Print message on failure
+          when: headless_cli_tools_installation is failed
+          ansible.builtin.fail:
+            msg: >-
+              Command Line Tools are not installed. Please execute
+              'xcode-select --install' in a terminal and accept the license.
