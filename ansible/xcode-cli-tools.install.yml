@@ -9,8 +9,9 @@
   hosts: all
   tasks:
     - name: Check Command Line Tools are already installed
-      ansible.builtin.command: xcode-select --print-path
+      check_mode: false
       register: cli_tools_check
+      ansible.builtin.command: xcode-select --print-path
       ignore_errors: true
       changed_when: false
     - name: Try headless installing command line tools
@@ -24,7 +25,7 @@
         - name: Get the tools' label
           register: cli_tools_label
           ansible.builtin.shell: >-
-            /usr/sbin/softwareupdate -l
+            /usr/sbin/softwareupdate --list
             | grep -B 1 -E 'Command Line Tools'
             | awk -F'*' '/^ *\\*/ {print $2}'
             | sed -e 's/^ *Label: //' -e 's/^ *//'
@@ -32,15 +33,16 @@
             | tail -n1
           changed_when:
             - cli_tools_label.rc == 0
-            - cli_tools_label.stdout | regex_match('No new software available.') is false
+            - cli_tools_label.stdout is not match('Command Line Tools for Xcode')
+          failed_when: cli_tools_label.rc != 0
         - name: Install the tools
           register: headless_cli_tools_installation
           ansible.builtin.command: >-
-            /usr/sbin/softwareupdate -i --agree-to-license
-            '{{ cli_tools_label.stdout }}'
+            /usr/sbin/softwareupdate --install --agree-to-license
+            {{ cli_tools_label.stdout | quote }}
           changed_when:
             - headless_cli_tools_installation.rc == 0
-            - headless_cli_tools_installation.stdout | regex_match('No new software available.') is false
+            - headless_cli_tools_installation.stdout is not match('No new software available.')
         - name: Print message on failure
           when: headless_cli_tools_installation is failed
           ansible.builtin.fail:
