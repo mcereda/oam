@@ -7,7 +7,7 @@ Requires [polkit] to be:
 - installed
 - configured to authorize and authenticate the users
 
-```shell
+```sh
 pkexec COMMAND
 ```
 

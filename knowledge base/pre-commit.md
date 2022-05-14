@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # generate a very basic configuration
 pre-commit sample-config > .pre-commit-config.yaml
 

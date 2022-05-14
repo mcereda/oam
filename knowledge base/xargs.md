@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # print the command to be executed and immediately start it
 echo 1 2 3 4 | xargs -t mkdir
 

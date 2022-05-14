@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # update the list of available packages
 opkg update
 

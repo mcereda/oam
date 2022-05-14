@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # use a project manager
 boinccmd --acct_mgr attach http://bam.boincstats.com myAwesomeUsername myAwesomePassword
 boinccmd --acct_mgr info

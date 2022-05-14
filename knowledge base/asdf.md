@@ -4,7 +4,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # list installed plugins
 asdf plugin list
 
@@ -46,7 +46,7 @@ asdf current helm
 
 ## Installation
 
-```shell
+```sh
 # install the program
 brew install asdf
 
@@ -57,7 +57,7 @@ brew install asdf
 
 ## Plugins management
 
-```shell
+```sh
 # list installed plugins
 asdf plugin list
 asdf plugin list --urls
@@ -80,7 +80,7 @@ asdf plugin remove $PLUGIN_NAME
 
 ## Versions management
 
-```shell
+```sh
 # list installed versions for a plugin
 # asdf list $PLUGIN_NAME
 asdf list elixir

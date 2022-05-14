@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # show acls of file test/declarations.h
 getfacl test/declarations.h
 

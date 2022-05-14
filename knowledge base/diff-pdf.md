@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # just check
 diff-pdf --verbose file1.pdf file2.pdf
 

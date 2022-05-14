@@ -4,7 +4,7 @@
 
 Every set of changes to the underlying system is executed on a new inactive snapshot, which will be the one the system will boot into on the next reboot.
 
-```shell
+```sh
 # Upgrade the system.
 sudo transactional-update dup
 pkcon update

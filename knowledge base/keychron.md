@@ -6,7 +6,7 @@
 
 1. ensure the `hid_apple` module is loaded
 
-   ```shell
+   ```sh
    sudo modprobe hid_apple
 
    # load at boot
@@ -15,7 +15,7 @@
 
 1. configure the keyboard's _fn mode_:
 
-   ```shell
+   ```sh
    echo 0 | sudo tee /sys/module/hid_apple/parameters/fnmode
 
    # load at boot

@@ -4,7 +4,7 @@ SUSE and openSUSE GNU/Linux's package management utility.
 
 ## TL;DR
 
-```shell
+```sh
 # update the repositories
 zypper refresh
 
@@ -19,7 +19,7 @@ zypper install parallel
 
 Zypper does not have for now a way to list the content of an installed package. Use [rpm] for this:
 
-```shell
+```sh
 sudo rpm --query --list ${PACKAGE_NAME}
 ```
 

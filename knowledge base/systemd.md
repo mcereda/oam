@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # List all available units.
 systemctl list-unit-files
 
@@ -122,7 +122,7 @@ hostnamectl set-hostname prettiky --pretty
 
 User's service files should be placed into `~/.config/systemd/user`:
 
-```shell
+```sh
 cat > "${HOME}/.config/systemd/user/davmail.service" <<EOF
 [Unit]
 Description=Davmail
@@ -158,7 +158,7 @@ Storage=persistent
 
 1. disable and stop the systemd-resolved service:
 
-   ```shell
+   ```sh
    sudo systemctl disable --now systemd-resolved.service
    ```
 
@@ -172,13 +172,13 @@ Storage=persistent
 
 1. delete `/etc/resolv.conf`:
 
-   ```shell
+   ```sh
    sudo unlink /etc/resolv.conf
    ```
 
 1. restart NetworkManager
 
-   ```shell
+   ```sh
    sudo service network-manager restart
    ```
 

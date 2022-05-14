@@ -2,7 +2,7 @@
 
 ## Tl;DR
 
-```shell
+```sh
 # Go to a particular line.
 42G
 42gg

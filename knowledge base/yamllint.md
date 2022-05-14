@@ -4,7 +4,7 @@ A linter for YAML files written in Python and compatible with Python 3 only.
 
 ## TL;DR
 
-```shell
+```sh
 # Use a specific configuration file.
 yamllint -c /path/to/config file.yaml
 
@@ -18,7 +18,7 @@ yamllint -d "{extends: relaxed, rules: {line-length: {max: 120}}}" file.yaml
 
 To use a custom configuration file, use the `-c` option:
 
-```shell
+```sh
 yamllint -c /path/to/config file.yaml
 ```
 

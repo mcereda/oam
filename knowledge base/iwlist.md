@@ -4,7 +4,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Scan for networks.
 iwlist wlan0 scan
 ```

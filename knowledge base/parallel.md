@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # group output (--group)
 # fill up cpu threads (--jobs 100%)
 # use newline as delimiter for the arguments in input

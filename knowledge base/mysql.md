@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # connect with user "root" on the local default socket
 # don't ask password and do not select db
 mysql

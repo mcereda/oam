@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Run a command or function on exit, kill or error.
 trap "rm -f $tempfile" EXIT SIGTERM ERR
 trap function-name EXIT SIGTERM ERR

@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Install.
 pip3 install --user ansible && port install sshpass   # darwin
 sudo pamac install ansible sshpass                    # manjaro linux
@@ -161,7 +161,7 @@ ansible-galaxy remove namespace.role
 
 Roles can be either **created**:
 
-```shell
+```sh
 ansible-galaxy init role-name
 ```
 
@@ -174,7 +174,7 @@ collections:
   - community.docker
 ```
 
-```shell
+```sh
 ansible-galaxy install mcereda.boinc_client
 ansible-galaxy install --roles-path ~/ansible-roles namespace.role
 ansible-galaxy install namespace.role,v1.0.0
@@ -203,7 +203,7 @@ dependencies:
 
 Change Ansible's output setting the stdout callback to `json` or `yaml`:
 
-```shell
+```sh
 ANSIBLE_STDOUT_CALLBACK=yaml
 ```
 

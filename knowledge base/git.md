@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Set your identity.
 git config user.name 'User Name'
 git config --global user.email user@email.com
@@ -291,7 +291,7 @@ git show :/cool
 
 ## Configuration
 
-```shell
+```sh
 # Required to be able to commit changes.
 git config --local user.email 'me@me.info'
 git config --local user.name 'Me'
@@ -311,7 +311,7 @@ git config --global submodule.recurse true
 
 To show the current configuration use the `--list` option:
 
-```shell
+```sh
 git config --list
 git config --list --show-scope
 git config --list --global --show-origin
@@ -320,7 +320,7 @@ git config --list --global --show-origin
 The configuration is shown in full for the requested scope (or all if not specified), but it might include the same setting multiple times if it shows up in multiple scopes.  
 Render the current value of a setting using the `--get` option:
 
-```shell
+```sh
 # Get the current user.name value.
 git config --get user.name
 
@@ -333,7 +333,7 @@ git config --list \
 
 ## Manage changes
 
-```shell
+```sh
 # Show changes relative to the current index (not yet staged).
 git diff
 
@@ -370,7 +370,7 @@ git diff --no-index path/to/file/A path/to/file/B
 
 Just save the output from `git diff` to get a patch file:
 
-```shell
+```sh
 # Just the current changes.
 # No staged nor committed files.
 git diff > file.patch
@@ -382,7 +382,7 @@ git diff --output file.patch --cached
 The output from `git diff` just shows changes to **text** files by default, no metadata or other information about commits or branches.  
 To get a whole commit with all its metadata and binary changes, use `git format-patch`:
 
-```shell
+```sh
 # Include 5 commits starting with 'commit' and going backwards.
 git format-patch -5 commit
 
@@ -401,14 +401,14 @@ git add . && git commit -m 'uncommitted' \
 
 Use `git apply` to apply a patch file to the current index:
 
-```shell
+```sh
 git apply file.patch
 ```
 
 The changes from the patch are unstaged and no commits are created.  
 To apply all commits from a patch, use `git am` on a patch created with `git format-patch`:
 
-```shell
+```sh
 git am file.patch
 ```
 
@@ -419,7 +419,7 @@ The commits are applied one after the other and registered in the repository's l
 The _stash_ is a changelist separated from the one in the current working directory.  
 `git stash` will save the current changes there and cleans the working directory. You can (re-)apply changes from the stash at any time:
 
-```shell
+```sh
 # Stash changes locally.
 git stash
 
@@ -442,7 +442,7 @@ git stash apply stash@{6}
 
 This creates a local branch tracking an existing remote branch.
 
-```shell
+```sh
 $ git checkout -b local-branch remote/existing-branch
 Branch 'local-branch' set up to track remote branch 'existing-branch' from 'remote'.
 Switched to a new branch 'local-branch'
@@ -450,7 +450,7 @@ Switched to a new branch 'local-branch'
 
 ### Delete a branch
 
-```shell
+```sh
 # Delete local branches.
 git branch --delete local-branch
 git branch -D local-branch
@@ -467,7 +467,7 @@ git branch --delete --remotes feat-branch
 
 Command source [here][prune local branches that do not exist on remote anymore].
 
-```shell
+```sh
 # Branches merged on the remote are tagged as 'gone' in `git branch -vv`'s output.
 git fetch -p \
   && awk '/origin/&&/gone/{print $1}' <(git branch -vv) | xargs git branch -d
@@ -478,7 +478,7 @@ git branch --merged | grep -vE '(^\*|master|main|dev)' | xargs git branch -d
 
 ### Merge the master branch into a feature branch
 
-```shell
+```sh
 git stash pull
 git checkout master
 git pull
@@ -488,7 +488,7 @@ git merge --no-ff master
 git stash pop
 ```
 
-```shell
+```sh
 git checkout feature
 git pull origin master
 ```
@@ -498,7 +498,7 @@ git pull origin master
 `git rebase` takes the commits in a branch and appends them on top of the commits in a different branch.
 The commits to rebase are previously saved into a temporary area and then reapplied to the new branch, one by one, in order.
 
-```shell
+```sh
 # Rebase main on top of the current branch.
 git rebase main
 
@@ -513,7 +513,7 @@ git pull --rebase=interactive origin master
 
 _Annotated_ tags are stored as full objects in git's database:
 
-```shell
+```sh
 # Create annotated tags.
 git tag --annotate v0.1.0
 
@@ -529,7 +529,7 @@ git push --follow-tags
 
 while _lightweight_ tags are stored as a pointer to a specific commit:
 
-```shell
+```sh
 # Create lightweight tags.
 git tag v0.1.1-rc0
 git tag 1.12.1 HEAD
@@ -537,7 +537,7 @@ git tag 1.12.1 HEAD
 
 Type-generic tag operations:
 
-```shell
+```sh
 # Push specific tags.
 git push origin v1.5
 
@@ -591,7 +591,7 @@ Those commands need to be wrapped into a one-line function definition:
 
 1. Install the extension:
 
-   ```shell
+   ```sh
    apt install git-lfs
    brew install git-lfs
    dnf install git-lfs
@@ -600,7 +600,7 @@ Those commands need to be wrapped into a one-line function definition:
 
 1. If the package manager did not enable it system-wide, enable the extension for your user account:
 
-   ```shell
+   ```sh
    git lfs install
    ```
 
@@ -608,14 +608,14 @@ Those commands need to be wrapped into a one-line function definition:
 
 1. Configure file tracking from inside the repository:
 
-   ```shell
+   ```sh
    git lfs track "*.exe"
    git lfs track "enormous_file.*"
    ```
 
 1. Add the `.gitattributes` file to the traced files:
 
-   ```shell
+   ```sh
    git add .gitattributes
    git commit -m "lfs configured"
    ```
@@ -624,7 +624,7 @@ Those commands need to be wrapped into a one-line function definition:
 
 See [Git Submodules: Adding, Using, Removing, Updating] for more information.
 
-```shell
+```sh
 # Add a submodule to an existing repository.
 git submodule add https://github.com/ohmyzsh/ohmyzsh lib/ohmyzsh
 
@@ -640,7 +640,7 @@ To delete a submodule the procedure is more complicated:
 
 1. De-init the submodule:
 
-   ```shell
+   ```sh
    git submodule deinit lib/ohmyzsh
    ```
 
@@ -648,7 +648,7 @@ To delete a submodule the procedure is more complicated:
 
 1. Remove the submodule from the repository's index:
 
-   ```shell
+   ```sh
    git rm -rf lib/ohmyzsh
    ```
 
@@ -664,19 +664,19 @@ See [remove files from git commit].
 
 1. **Unstage** the file using `git reset`; specify HEAD as the source:
 
-   ```shell
+   ```sh
    git reset HEAD secret-file
    ```
 
 1. **Remove** the file from the repository's index:
 
-   ```shell
+   ```sh
    git rm --cached secret-file
    ```
 
 1. Check the file is no longer in the index:
 
-   ```shell
+   ```sh
    $ git ls-files | grep secret-file
    $
    ```
@@ -684,13 +684,13 @@ See [remove files from git commit].
 1. Add the file to `.gitignore` or remove it from the working directory.
 1. Amend the most recent commit from your repository:
 
-   ```shell
+   ```sh
    git commit --amend
    ```
 
 ## Remotes
 
-```shell
+```sh
 # Add a remote.
 git remote add gitlab git@gitlab.com:user/my-awesome-repo.git
 
@@ -705,7 +705,7 @@ git remote set-url origin git@github.com:user/new-repo-name.git
 
 To always push to `repo1`, `repo2`, and `repo3`, but always pull only from `repo1`, set up the remote 'origin' as follows:
 
-```shell
+```sh
 git remote add origin https://exampleuser@example.com/path/to/repo1
 git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo1
 git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo2
@@ -748,20 +748,20 @@ See <https://git-scm.com/docs/git-config#git-config-branchltnamegtremote>.
 
 When everything else fails, enable tracing:
 
-```shell
+```sh
 export GIT_TRACE=1
 ```
 
 ### GPG cannot sign a commit
 
-> ```shell
+> ```sh
 > error: gpg failed to sign the data
 > fatal: failed to write commit object
 > ```
 
 If gnupg2 and gpg-agent 2.x are used, be sure to set the environment variable GPG_TTY, specially zsh users with Powerlevel10k with Instant Prompt enabled.
 
-```shell
+```sh
 export GPG_TTY=$(tty)
 ```
 
@@ -769,7 +769,7 @@ export GPG_TTY=$(tty)
 
 Disable certificate verification:
 
-```shell
+```sh
 export GIT_SSL_NO_VERIFY=true
 git -c http.sslVerify=false …
 ```

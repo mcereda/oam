@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # add a field
 jq --arg REGION ${AWS_REGION} '.spec.template.spec.containers[]?.env? += [{name: "AWS_REGION", value: $REGION}]' /tmp/service.kube.json
 

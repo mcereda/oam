@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # scan all 65535 ports on a host
 nmap -p- 192.168.1.1
 

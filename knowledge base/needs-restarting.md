@@ -4,7 +4,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Install.
 sudo dnf install dnf-utils
 sudo yum install yum-utils

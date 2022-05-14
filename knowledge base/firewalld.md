@@ -9,7 +9,7 @@ It is the default firewall management tool for:
 
 ## TL;DR
 
-```shell
+```sh
 # Show which zone is currently selected as the default.
 firewall-cmd --get-default-zone
 

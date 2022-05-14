@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Configurations picked up from a directory
 $ kapp deploy -a my-app -f ./examples/simple-app-example/config-1.yml
 

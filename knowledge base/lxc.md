@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # install lxc
 apt-get install lxc
 snap install lxd
@@ -44,7 +44,7 @@ man lxc.container.conf(5)
 
 ## Create new containers as unprivileged user
 
-```shell
+```sh
 # allow user vagrant to create up to 10 veth devices connected to the lxcbr0 bridge
 echo "vagrant veth lxcbr0 10" | sudo tee -a /etc/lxc/lxc-usernet
 ```

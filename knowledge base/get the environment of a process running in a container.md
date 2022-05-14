@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 cat /proc/${PID}/environ
 
 # Container in kubernetes.

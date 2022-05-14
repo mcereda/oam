@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Install the CLI.
 brew install awscli
 
@@ -16,7 +16,7 @@ export AWS_PROFILE="work"
 
 ## Profiles
 
-```shell
+```sh
 # Initialize the default profile.
 # Not specifying a profile means to configure the default profile.
 $ aws configure

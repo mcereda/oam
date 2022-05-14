@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # follow logs
 log stream --style syslog --predicate 'senderImagePath contains[cd] "TimeMachine"' --info --debug
 

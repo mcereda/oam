@@ -1,6 +1,6 @@
 # Funtoo GNU/Linux
 
-```shell
+```sh
 # Portage update.
 sudo ego sync
 sudo emerge --sync

@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # installation
 brew install sponge   # or moreutils
 

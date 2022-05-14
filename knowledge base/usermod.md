@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Change a user's primary group.
 sudo usermod -g docker bob
 

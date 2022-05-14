@@ -4,7 +4,7 @@ Yet Another Dotfile Manager.
 
 ## TL;DR
 
-```shell
+```sh
 # Create a new repository.
 yadm init \
  && yadm add .gitconfig \
@@ -29,7 +29,7 @@ yadm config local.class 'Work'
 
 _Class_ is a special value stored **locally** on each host (inside the local repository). To use alternate symlinks using `##class.<CLASS>`, one must set the value of _Class_ in the `local.class` setting:
 
-```shell
+```sh
 yadm config local.class Work
 ```
 
@@ -75,7 +75,7 @@ Links are also created for directories named this way, as long as they have at l
 
 `yadm` will automatically create the links by default. This behaviour can be disabled using the `yadm.auto-alt` setting. Even if disabled, links can be manually created by running `yadm alt`:
 
-```shell
+```sh
 # force (re)creation of links based on alternate files
 yadm alt
 ```

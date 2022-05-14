@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # access a test container
 kubectl run --generator=run-pod/v1 --limits 'cpu=200m,memory=512Mi' --requests 'cpu=200m,memory=512Mi' --image alpine ${USER}-mysql-test -it -- sh
 

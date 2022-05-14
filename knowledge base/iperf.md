@@ -1,6 +1,6 @@
 # Iperf
 
-```shell
+```sh
 # on the server
 iperf3 -s
 iperf3 -s -p 7575

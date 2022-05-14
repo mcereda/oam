@@ -1,6 +1,6 @@
 # Jira
 
-```shell
+```sh
 # create a ticket
 curl https://${COMPANY}.atlassian.net/rest/api/2/issue \
   -D - \

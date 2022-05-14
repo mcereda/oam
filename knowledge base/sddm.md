@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # open a new window for every monitor you have connected and show a preview of the theme
 sddm-greeter --test-mode --theme /usr/share/sddm/themes/breeze
 ```

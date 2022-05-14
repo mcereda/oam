@@ -12,7 +12,7 @@ One can use the [branch comparison] tool to check in what branch a package is av
 
 ## Printing
 
-```shell
+```sh
 pamac install manjaro-printer
 sudo gpasswd -a ${USER} sys
 sudo systemctl enable --now cups.service

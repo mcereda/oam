@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Search words *forwards* in the current document.
 :/keyword <ENTER>
 

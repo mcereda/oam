@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Update the package lists.
 apk update
 

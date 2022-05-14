@@ -6,7 +6,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Login.
 gcloud auth login
 gcloud auth login account

@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # check if updates are available (in aur too)
 pamac checkupdates --aur
 

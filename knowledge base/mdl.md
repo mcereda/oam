@@ -4,7 +4,7 @@ Tool to check markdown files and flag style issues.
 
 ## TL;DR
 
-```shell
+```sh
 # Install.
 gem install mdl
 

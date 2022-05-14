@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # prompt to delete all duplicate files
 jdupes -Zdr directory
 

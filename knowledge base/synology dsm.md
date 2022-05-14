@@ -12,7 +12,7 @@ Requirements:
 
 Examples:
 
-```shell
+```sh
 # From a shared folder on a NAS to a local one.
 rsync \
   --archive --hard-links \
@@ -70,7 +70,7 @@ Gotchas:
 
 Examples:
 
-```shell
+```sh
 # small/medium dataset
 # 2 folders in a shared folder
 sudo docker run --privileged \

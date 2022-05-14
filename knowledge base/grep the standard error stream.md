@@ -2,13 +2,13 @@
 
 If you're using `bash` or `zsh` you can employ anonymous pipes:
 
-```shell
+```sh
 ffmpeg -i 01-Daemon.mp3 2> >(grep -i Duration)
 ```
 
 If you want the filtered redirected output on `stderr` again, add the `>&2` redirection to grep:
 
-```shell
+```sh
 command 2> >(grep something >&2)
 ```
 
@@ -19,7 +19,7 @@ Bash calls this _process substitution_:
 
 You can exclude `stdout` and grep `stderr` redirecting it to `null`:
 
-```shell
+```sh
 command 1>/dev/null 2> >(grep -oP "(.*)(?=pattern)")
 ```
 

@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 lshw -class disk
 smartctl -i /dev/sda
 hdparm -i /dev/sda

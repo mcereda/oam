@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Get LEDs intensity.
 rainbow get intensity
 
@@ -44,7 +44,7 @@ See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turr
 
 1. In Turris OS:
 
-   ```shell
+   ```sh
    # Create the LXC container.
    lxc-create --name pi-hole --template debian
    lxc-create --name pi-hole --template download --dist Ubuntu --release Focal --arch armv7l --server repo.turris.cz/lxc
@@ -61,7 +61,7 @@ See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turr
 
 1. In the container:
 
-   ```shell
+   ```sh
    # Set the correct hostname.
    hostnamectl set-hostname pi-hole
 
@@ -74,7 +74,7 @@ See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turr
 
 1. Again in Turris OS:
 
-   ```shell
+   ```sh
    # Configure pi-hole's static IP lease.
    uci add dhcp host
    uci set dhcp.@host[-1]=host

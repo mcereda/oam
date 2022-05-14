@@ -2,6 +2,6 @@
 
 ## TL;DR
 
-```shell
+```sh
 shred --force --remove --verbose --zero file other-file
 ```

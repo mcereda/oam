@@ -12,7 +12,7 @@ Startup file sequence:
 
 Aliases are expanded when the function definition is parsed, not when the function is executed. Define aliases **before** functions to avoid problems.
 
-```shell
+```sh
 # Quoting.
 "$scalar"
 "${array[@]}"
@@ -50,7 +50,7 @@ Parameter expansions can involve flags like `${(@kv)aliases}` and other operator
 
 If the parameter is a **scalar** then the value, if any, is substituted:
 
-```shell
+```sh
 $ scalar='hello'
 $ echo "$scalar"
 hello
@@ -58,14 +58,14 @@ hello
 
 The braces are required if the expansion is to be followed by a letter, digit or underscore that is not to be interpreted as part of name:
 
-```shell
+```sh
 $ echo "${scalar}_world"
 hello_world
 ```
 
 If the parameter is an **array**, then the value of each element is substituted, one element per word:
 
-```shell
+```sh
 $ typeset -a array=( 'hello' 'world' )
 $ echo "${array[@]}"
 hello world
@@ -73,7 +73,7 @@ hello world
 
 The two forms are equivalent:
 
-```shell
+```sh
 $ echo "${(@)array}"
 hello world
 ```
@@ -84,7 +84,7 @@ hello world
 
 If _name_ is set then its value is substituted by _1_, otherwise by _0_:
 
-```shell
+```sh
 $ typeset name='tralala'
 $ echo "${+name}"
 1
@@ -102,7 +102,7 @@ $ echo "${+name}"
 
 If _name_ is set then substitute its value, otherwise substitute _word_:
 
-```shell
+```sh
 $ name='tralala'
 $ echo "${name-word}"
 tralala
@@ -121,7 +121,7 @@ In the second form:
 - only substitute its value if _name_ is non-null, and
 - _name_ may be omitted, in which case _word_ is **always** substituted:
 
-```shell
+```sh
 $ name='tralala'
 $ echo "${name:-word}"
 tralala
@@ -139,7 +139,7 @@ word
 
 If _name_ is set then substitute _word_, otherwise substitute nothing:
 
-```shell
+```sh
 $ name='tralala'
 $ echo "${name+word}"
 word
@@ -155,7 +155,7 @@ $ echo "${name+word}"
 
 In the second form, only substitute its value if _name_ is non-null:
 
-```shell
+```sh
 $ name='tralala'
 $ echo "${name:+word}"
 word
@@ -173,7 +173,7 @@ $ echo "${name:+word}"
 
 In the first form, if _name_ is unset then set it to _word_:
 
-```shell
+```sh
 $ name='tralala'         # value: 'tralala'
 $ echo "${name=word}"
 tralala
@@ -192,7 +192,7 @@ word
 
 In the second form, if _name_ is unset or null then set it to _word_:
 
-```shell
+```sh
 $ name='tralala'         # value: 'tralala'
 $ echo "${name:=word}"
 tralala
@@ -214,7 +214,7 @@ word
 
 In the third form, unconditionally set _name_ to _word_:
 
-```shell
+```sh
 $ name='tralala'         # value: 'tralala'
 $ echo "${name::=word}"
 word
@@ -241,7 +241,7 @@ word
 
 In the first form, if _name_ is set then substitute its value, otherwise print _word_ and exit from the shell.
 
-```shell
+```sh
 $ name='tralala'
 $ echo "${name?word}"
 tralala
@@ -257,7 +257,7 @@ zsh: name: word
 
 In the second form, substitute its value only if _name_ is both set and non-null:
 
-```shell
+```sh
 $ name='tralala'
 $ echo "${name:?word}"
 tralala
@@ -275,7 +275,7 @@ Interactive shells return to the prompt.
 
 If _word_ is omitted, a standard message is printed in its place:
 
-```shell
+```sh
 $ name=''
 $ echo "${name:?}"
 zsh: name: parameter not set
@@ -289,7 +289,7 @@ FIXME
 
 ## Arrays
 
-```shell
+```sh
 # Get a slice of an array.
 # Negative numbers count backwards.
 echo "${ARRAY[2,-1]}"
@@ -315,7 +315,7 @@ typeset -aU path
 
 ## Tests
 
-```shell
+```sh
 # Regex match.
 [[ "$OSTYPE" =~ "darwin" ]]
 [[ "$OSTYPE" -regex-match "darwin" ]]
@@ -323,13 +323,13 @@ typeset -aU path
 
 ## Find broken symlinks in the current directory
 
-```shell
+```sh
 ls **/*(-@)
 ```
 
 ## Key bindings
 
-```shell
+```sh
 # Show all active key bindings.
 bindkeys
 
@@ -389,7 +389,7 @@ If `PATH` must be set in `~/.zshenv` to affect things like non-login ssh shells,
 
 ### History
 
-```shell
+```sh
 # The maximum number of events stored in the internal history list.
 # If you use the HIST_EXPIRE_DUPS_FIRST option, setting this value larger than
 # the SAVEHIST size will give you the difference as a cushion for saving
@@ -406,7 +406,7 @@ SAVEHIST=1000
 
 ### Completion
 
-```shell
+```sh
 # Enable completion.
 autoload -U compinit
 compinit
@@ -417,7 +417,7 @@ zstyle ':completion::complete:*' use-cache true
 
 ### Prompt management
 
-```shell
+```sh
 # Enable prompt management.
 autoload -U promptinit
 promptinit; prompt theme-name
@@ -425,7 +425,7 @@ promptinit; prompt theme-name
 
 ### Automatic source of files in a folder
 
-```shell
+```sh
 # Configuration modules.
 # All files in the configuration folder will be automatically loaded in
 # numeric order. The last file setting a value overrides the previous ones.
@@ -468,7 +468,7 @@ What follows are some I always add to my setup:
 
 Some setting or plugin changed the key binding. Reassign them to obtain the expected behaviour:
 
-```shell
+```sh
 bindkey  "^[[H"   beginning-of-line
 bindkey  "^[[F"   end-of-line
 bindkey  "^[[3~"  delete-char
@@ -480,7 +480,7 @@ bindkey  "^[[3~"  delete-char
 
 Compinit is complaining of some critical files being group writable. Running `compaudit` will list those files. Just use it to remove the group's write permission:
 
-```shell
+```sh
 compaudit | xargs chmod g-w
 ```
 

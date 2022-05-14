@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # create a volume with single metadata and double data blocks (useless but good example)
 sudo mkfs.btrfs --metadata single --data dup /dev/sdb
 
@@ -44,7 +44,7 @@ sudo compsize /mnt/btrfs-volume
 
 See also [snapper].
 
-```shell
+```sh
 sudo btrfs send --no-data -p /old/snapshot /new/snapshot | sudo btrfs receive --dump
 
 # requires you to be using snapper for your snapshots

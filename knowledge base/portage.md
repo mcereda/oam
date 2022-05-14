@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # System update.
 sudo emerge --sync
 sudo emerge --depclean --ask

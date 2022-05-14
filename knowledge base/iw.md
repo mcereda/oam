@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Scan for available wireless networks.
 iw dev wlp scan
 

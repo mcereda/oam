@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # recursively compress everything in the current directory to an archive named 'foo.zip'
 zip -r foo .
 

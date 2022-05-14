@@ -8,7 +8,7 @@ Enable containerization features in the kernel to be able to run containers as i
 
 Add the following properties at the end of the line in `/boot/cmdline.txt`:
 
-```shell
+```sh
 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory
 ```
 
@@ -16,7 +16,7 @@ cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory
 
 Switch Debian firewall to legacy config:
 
-```shell
+```sh
 update-alternatives --set iptables  /usr/sbin/iptables-legacy
 update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
 ```

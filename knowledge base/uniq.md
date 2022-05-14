@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Print all but duplicates lines.
 uniq path/to/file
 

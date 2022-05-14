@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Display all detected devices.
 fwupdmgr get-devices
 

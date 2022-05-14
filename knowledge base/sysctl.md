@@ -11,7 +11,7 @@ Default configuration files locations:
 
 ## TL;DR
 
-```shell
+```sh
 # see the value of a single setting
 sysctl kernel.ostype
 

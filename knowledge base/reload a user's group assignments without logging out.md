@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 exec su -l $USER
 ```
 

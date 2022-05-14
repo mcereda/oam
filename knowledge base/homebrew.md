@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # install/uninstall on os x
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall)"
@@ -21,7 +21,7 @@ brew bundle dump
 
 ## Configuration
 
-```shell
+```sh
 # require SHA check for casks
 # change cask installation dir to the Application folder in the user HOME
 export HOMEBREW_CASK_OPTS="--require-sha --appdir $HOME/Applications"

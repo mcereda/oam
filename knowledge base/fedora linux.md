@@ -6,7 +6,7 @@ RPM Fusion provides software that the Fedora Project or Red Hat doesn't want to 
 
 These repositories are not available by default and need to be installed using a remote package:
 
-```shell
+```sh
 # All flavours but Silverblue-based ones.
 sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
@@ -16,7 +16,7 @@ sudo rpm-ostree install https://download1.rpmfusion.org/free/fedora/rpmfusion-fr
 
 After enabling the repositories, you can add their _tainted_ versions for closed or restricted packages:
 
-```shell
+```sh
 sudo dnf install rpmfusion-{free,nonfree}-release-tainted
 sudo rpm-ostree install rpmfusion-{free,nonfree}-release-tainted
 ```

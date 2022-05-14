@@ -4,7 +4,7 @@
 
 > To be able to merge multiple formats into one, you will also need to install `ffmpeg`.
 
-```shell
+```sh
 # Install it.
 python3 -m pip install -U --user yt-dlp
 

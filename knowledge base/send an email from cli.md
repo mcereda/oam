@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 mail -s "Subject" recipient@mail.server
 echo "" | mail -a attachment.file -s "Subject" recipient@mail.server
 
