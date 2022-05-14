@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Show locally available images.
 docker images -a
 
@@ -101,7 +101,7 @@ The docker daemon is configured using the `/etc/docker/daemon.json` file:
 
 Docker mounts specific system files in all containers to forward its settings:
 
-```shell
+```sh
 6a95fabde222$ mount
 …
 /dev/disk/by-uuid/1bb…eb5 on /etc/resolv.conf type btrfs (rw,…)
@@ -116,7 +116,7 @@ Those files come from the volume the docker container is using for its root, and
 
 - Containers created with no specified name will be assigned one automatically:
 
-  ```shell
+  ```sh
   $ docker create hello-world
   8eaaae8c0c720ac220abac763ad4b477d807be4522d58e334337b1b74a14d0bd
 
@@ -131,7 +131,7 @@ Those files come from the volume the docker container is using for its root, and
 
 - When referring to a container or image using their ID, you just need to use as many characters you need to uniquely specify a single one of them:
 
-  ```shell
+  ```sh
   $ docker ps -a
   CONTAINER ID   IMAGE         COMMAND    CREATED          STATUS    PORTS   NAMES
   63b1a0a3e557   alpine        "/bin/sh"  34 seconds ago   Created           alpine

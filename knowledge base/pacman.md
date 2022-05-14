@@ -9,7 +9,7 @@ Useful options:
 
 ## TL;DR
 
-```shell
+```sh
 
 # search an installed package
 pacman --query --search ddc

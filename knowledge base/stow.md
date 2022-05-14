@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Stow files from packages in the current directory.
 stow --dotfiles package1 packageN
 

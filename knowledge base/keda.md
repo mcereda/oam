@@ -51,7 +51,7 @@ KEDA offers a wide range of triggers (A.K.A. _scalers_) that can both detect if 
 
 ### Helm chart
 
-```shell
+```sh
 # Installation.
 helm repo add kedacore https://kedacore.github.io/charts \
  && helm repo update kedacore \
@@ -67,7 +67,7 @@ helm uninstall keda --namespace keda \
 
 Use the YAML declaration (which includes the CRDs and all the other resources) available on the GitHub releases page:
 
-```shell
+```sh
 # Installation.
 kubectl apply -f https://github.com/kedacore/keda/releases/download/v2.0.0/keda-2.0.0.yaml
 
@@ -77,7 +77,7 @@ kubectl delete -f https://github.com/kedacore/keda/releases/download/v2.0.0/keda
 
 One can also use the tools in the repository:
 
-```shell
+```sh
 git clone https://github.com/kedacore/keda
 cd keda
 VERSION=2.0.0 make deploy    # installation
@@ -270,7 +270,7 @@ For details and updated information see KEDA's [External Scalers] page.
 
 Use the logs for the keda operator or apiserver:
 
-```shell
+```sh
 kubectl logs --namespace keda keda-operator-8488964969-sqbxq
 kubectl logs --namespace keda keda-operator-metrics-apiserver-5b488bc7f6-8vbpl
 ```
@@ -286,7 +286,7 @@ There is at the moment of writing no way to control which of the replicas get te
 
 Just run the following:
 
-```shell
+```sh
 kubectl delete -f https://raw.githubusercontent.com/kedacore/keda/main/config/crd/bases/keda.sh_scaledobjects.yaml
 kubectl delete -f https://raw.githubusercontent.com/kedacore/keda/main/config/crd/bases/keda.sh_scaledjobs.yaml
 kubectl delete -f https://raw.githubusercontent.com/kedacore/keda/main/config/crd/bases/keda.sh_triggerauthentications.yaml

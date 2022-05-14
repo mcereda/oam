@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Change the permissions of all files and directories in the current directory,
 # recursively.
 find . -type d -exec chmod 755 {} +
@@ -101,7 +101,7 @@ Any number of units may be combined in one `-Xtime` argument.
 with the `-newerXY file` form, `find` checks if `file` has a more recent last access time (X=a), inode creation time (X=B), change time (X=c), or modification time (X=m) than the last access time (Y=a), inode creation time (Y=B), change time (Y=c), or modification time (Y=m).  
 If Y=t, `file` is interpreted as a direct date specification of the form understood by `cvs`. Also, `-newermm` is the same as `-newer`.
 
-```shell
+```sh
 # Find files last accessed exactly 5 minutes ago.
 find /dir -amin 5
 find /dir -atime 300s
@@ -143,14 +143,14 @@ find / -newer file.txt -user wnj -print
 
 - in GNU's `find` the path parameter defaults to the current directory and can be avoided
 
-  ```shell
+  ```sh
   # Delete all empty folders in the current directory only.
   find -maxdepth 1 -empty -delete
   ```
 
 - GNU's `find` also understands fractional time specifications:
 
-  ```shell
+  ```sh
   # Find files modified in the last 1 hour and 30 minutes.
   find -mtime 1.5h
   ```

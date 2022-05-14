@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # manually update the virus definitions
 # do it once **before** starting a scan or the daemon
 # the definitions updater deamon must be stopped to avoid complaints from it
@@ -39,7 +39,7 @@ nice -n 15 clamscan && clamscan --bell -i -r /home
 - The `--fdpass` option of `clamdscan` (notice the _d_ in the command) sends a file descriptor to clamd rather than a path name, avoiding the need for the `clamav` user to be able to read everyone's files
 - `clamscan` is designed to be single-threaded, so when scanning a file or directory from the command line only a single CPU thread is used; use `xargs` or another executor to run a scan in parallel:
 
-  ```shell
+  ```sh
   find . -type f -printf "'%p' " | xargs -P $(nproc) -n 1 clamscan
   find . -type f | parallel --group --jobs 0 -d '\n' clamscan {}
   ```

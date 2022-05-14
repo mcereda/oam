@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # delete a bucket and all its contents
 gsutil rm -r gs://${BUCKET_NAME}
 

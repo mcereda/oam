@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 gopass init
 
 # multistore init
@@ -14,7 +14,7 @@ gopass init --store work    --path ~/.password-store.work
 
 ### Browserpass
 
-```shell
+```sh
 brew tap amar1729/formulae
 brew install browserpass
 for b in chromium chrome vivaldi brave firefox; do

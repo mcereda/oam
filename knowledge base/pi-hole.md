@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # one-step automated install
 curl -sSL https://install.pi-hole.net | bash
 ```

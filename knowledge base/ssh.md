@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # load ssh keys from ~/.ssh and add them to the agent
 eval `ssh-agent` && ssh-add
 
@@ -35,7 +35,7 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub user@nas.lan
 
 Create a new key:
 
-```shell
+```sh
 ssh-keygen -t rsa -b 4096
 ssh-keygen -t dsa
 ssh-keygen -t ecdsa -b 521
@@ -80,7 +80,7 @@ Original contents retained as /home/mek/.ssh/known_hosts.old
 
 Change password of a key file
 
-```shell
+```sh
 ssh-keygen -f ~/.ssh/id_rsa -p
 ```
 
@@ -96,13 +96,13 @@ Options:
 
 Usage:
 
-```shell
+```sh
 sshfs -o $OPTIONS_LIST $HOST:$REMOTE_PATH $LOCAL_PATH
 ```
 
 Example:
 
-```shell
+```sh
 sshfs user@nas.lan:/mnt/data Data -o auto_cache,reconnect,defer_permissions,noappledouble,volname=Data
 ```
 
@@ -110,7 +110,7 @@ sshfs user@nas.lan:/mnt/data Data -o auto_cache,reconnect,defer_permissions,noap
 
 OSX (requires macports since brew does not offer sshfs anymore):
 
-```shell
+```sh
 sudo port install sshfs
 ```
 

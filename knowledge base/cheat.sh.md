@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # using the exact name of the command
 curl cheat.sh/tar
 curl cht.sh/curl

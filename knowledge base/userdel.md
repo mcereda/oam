@@ -4,7 +4,7 @@ Delete a user account and its related files.
 
 ## TL;DR
 
-```shell
+```sh
 # Remove a user.
 sudo userdel username
 

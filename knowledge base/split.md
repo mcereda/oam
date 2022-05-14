@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Break the 'home.tar.bz2' archive file into small blocks.
 # Each block up to 10MB (10\*1000\*1000) in size.
 # Prefix each chunk with 'home.tar.bz2.part'.

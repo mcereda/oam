@@ -4,7 +4,7 @@ A multi-machine dotfile manager, written in Go.
 
 ## TL;DR
 
-```shell
+```sh
 # initialize chezmoi
 chezmoi init
 chezmoi init https://github.com/username/dotfiles.git
@@ -50,7 +50,7 @@ chezmoi update
 
 ## Save the current data to a remote repository
 
-```shell
+```sh
 $ chezmoi cd
 chezmoi $> git remote add origin https://github.com/username/dotfiles.git
 chezmoi $> git push -u origin main

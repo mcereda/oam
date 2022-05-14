@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 set -o allexport
 source envfile
 set +o allexport

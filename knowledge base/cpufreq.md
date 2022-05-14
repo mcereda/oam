@@ -4,7 +4,7 @@ Default governor is _ondemand_ for older CPUs and kernels and _schedutil_ for ne
 
 ## TL;DR
 
-```shell
+```sh
 # list the available governors
 cpupower frequency-info --governors
 

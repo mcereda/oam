@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # connect to a server
 psql --host "${HOSTNAME}" --port "${PORT:-5432}" "${DATABASENAME:-root}" "${USERNAME:-root}"
 ```

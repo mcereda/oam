@@ -4,7 +4,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Limit the bandwidth.
 youtube-dl --format 313 --limit-rate 2M video-url
 
@@ -59,7 +59,7 @@ youtube-dl \
 
 The preferred method is to just download it from the [project]:
 
-```shell
+```sh
 curl --location https://yt-dl.org/downloads/latest/youtube-dl --remote-name
 chown a+x youtube-dl
 python3 youtube-dl …

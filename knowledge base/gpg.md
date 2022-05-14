@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # List existing keys.
 gpg --list-keys
 gpg --list-keys --keyid-format short
@@ -65,7 +65,7 @@ brew install gnupg
 
 ## Encryption
 
-```shell
+```sh
 # Single file.
 gpg --output $DB.key.gpg --encrypt --recipient $RECIPIENT $DB.key
 
@@ -76,7 +76,7 @@ find . -type f -name secret.txt \
 
 ## Decryption
 
-```shell
+```sh
 # Single file.
 gpg --output $DB.key --decrypt $DB.key.gpg
 
@@ -90,7 +90,7 @@ The second command will create the decrypted version of all files in the same di
 
 As the original user, export all public keys to a base64-encoded text file and create an encrypted version of that file:
 
-```shell
+```sh
 gpg --armor --export > mypubkeys.asc
 gpg --armor --export email > mypubkeys-email.asc
 gpg --armor --symmetric --output mysecretatedpubkeys.sec.asc mypubkeys.asc
@@ -98,14 +98,14 @@ gpg --armor --symmetric --output mysecretatedpubkeys.sec.asc mypubkeys.asc
 
 Export all encrypted private keys (which will also include corresponding public keys) to a text file and create an encrypted version of that file:
 
-```shell
+```sh
 gpg --armor --export-secret-keys > myprivatekeys.asc
 gpg --armor --symmetric --output mysecretatedprivatekeys.sec.asc myprivatekeys.asc
 ```
 
 Optionally, export gpg's trustdb to a text file:
 
-```shell
+```sh
 gpg --export-ownertrust > otrust.txt
 ```
 
@@ -113,7 +113,7 @@ gpg --export-ownertrust > otrust.txt
 
 As the new user, execute `gpg --import` commands against the two `.asc` files, or the decrypted content of those files, and then check for the new keys with `gpg -k` and `gpg -K`, e.g.:
 
-```shell
+```sh
 gpg --output myprivatekeys.asc --decrypt mysecretatedprivatekeys.sec.asc
 gpg --import myprivatekeys.asc
 gpg --output mypubkeys.asc --decrypt mysecretatedpubkeys.sec.asc
@@ -124,13 +124,13 @@ gpg --list-keys
 
 Optionally import the trustdb file as well:
 
-```shell
+```sh
 gpg --import-ownertrust otrust.txt
 ```
 
 ## Key trust
 
-```shell
+```sh
 $ gpg --edit-key fingerprint
 gpg> trust
 gpg> quit
@@ -140,7 +140,7 @@ gpg> quit
 
 > The non-interactive (--batch) option requires a settings file.
 
-```shell
+```sh
 # basic key with default values
 gpg --batch --generate-key <<EOF
     %echo Generating a default key
@@ -159,7 +159,7 @@ EOF
 
 ## Change a key's password
 
-```shell
+```sh
 $ gpg --edit-key fingerprint
 gpg> passwd
 gpg> quit
@@ -193,7 +193,7 @@ You can create multiple subkeys as you would do for SSH keypairs.
 You should already have a GPG key. If you don't, read one of the many fine tutorials available on this topic.  
 You will create the subkey by editing your existing key **in expert mode** to get access to the appropriate options:
 
-```shell
+```sh
 $ gpg2 --expert --edit-key fingerprint
 gpg> addkey
 Please select what kind of key you want:
@@ -262,7 +262,7 @@ Save changes? (y/N) y
 When using SSH, `ssh-agent` is used to manage SSH keys. When using a GPG key, `gpg-agent` is used to manage GPG keys.  
 To get `gpg-agent` to handle requests from SSH, you need to enable its SSH support:
 
-```shell
+```sh
 echo "enable-ssh-support" >> ~/.gnupg/gpg-agent.conf
 ```
 
@@ -270,7 +270,7 @@ You can avoid usinig `ssh-add` to load the keys pre-specifying which GPG keys to
 The entries in this file are keygrips—internal identifiers that `gpg-agent` uses to refer to the keys. A keygrip refers to both the public and private key.  
 To find the keygrip use `gpg -K --with-keygrip`, then add that line to the `~/.gnupg/sshcontrol` file:
 
-```shell
+```sh
 $ gpg2 -K --with-keygrip
 /home/bexelbie/.gnupg/pubring.kbx
 ------------------------------
@@ -288,7 +288,7 @@ $ echo 7710BA0643CC022B92544181FF2EAC2A290CDC0E >> ~/.gnupg/sshcontrol
 
 Now tell SSH how to access `gpg-agent` by setting the value of the `SSH_AUTH_SOCK` environment variable.
 
-```shell
+```sh
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
 gpgconf --launch gpg-agent
 ```
@@ -313,7 +313,7 @@ Run `ssh-add -L` to list your public keys and copy them over manually to the rem
 
 **Solution:** if `gnupg2` and `gpg-agent` 2.x are used, be sure to set the environment variable `GPG_TTY`:
 
-```shell
+```sh
 export GPG_TTY=$(tty)
 ```
 

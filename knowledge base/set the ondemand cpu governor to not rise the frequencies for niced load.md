@@ -2,7 +2,7 @@
 
 ## TL:DR
 
-```shell
+```sh
 sudo cpupower frequency-set --governor ondemand
 echo 1 | sudo tee /sys/devices/system/cpu/cpufreq/ondemand/ignore_nice_load
 

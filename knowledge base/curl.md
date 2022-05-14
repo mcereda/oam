@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Send a single GET request and show its output on stdout.
 curl http://url.of/file
 

@@ -6,7 +6,7 @@ Default ports install location is `/opt/local`.
 
 ## TL;DR
 
-```shell
+```sh
 # get help on a command
 port help install
 port help select

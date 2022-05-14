@@ -4,7 +4,7 @@ Runs on top of [Podman].
 
 ## TL;DR
 
-```shell
+```sh
 # List locally available images and containers.
 toolbox list
 toolbox list -c

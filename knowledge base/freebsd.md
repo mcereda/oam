@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Initialize package managers.
 portsnap auto
 pkg bootstrap

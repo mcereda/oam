@@ -4,7 +4,7 @@ Allows an _authorized_ user to execute a command as another user. If a username 
 
 ## TL;DR
 
-```shell
+```sh
 pkexec systemctl hibernate
 ```
 

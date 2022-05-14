@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # list existing configurations
 snapper list-config
 

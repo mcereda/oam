@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Convert a webm file to GIF.
 ffmpeg -y -i rec.webm -vf palettegen palette.png \
   && ffmpeg -y -i rec.webm -i palette.png \
@@ -13,7 +13,7 @@ ffmpeg -y -i rec.webm -vf palettegen palette.png \
 
 ### Webm to GIF
 
-```shell
+```sh
 ffmpeg -y -i rec.webm -vf palettegen palette.png
 ffmpeg -y -i rec.webm -i palette.png -filter_complex paletteuse -r 10 out.gif
 ```

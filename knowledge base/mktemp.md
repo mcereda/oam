@@ -4,7 +4,7 @@ Creates a unique temporary file or directory and returns the absolute path to it
 
 ## TL;DR
 
-```shell
+```sh
 # create an empty temporary file
 mktemp
 

@@ -6,7 +6,7 @@ Components:
 
 ## TL;DR
 
-```shell
+```sh
 # scale an image to 50% its original size
 convert IMG_20200117_135049.jpg -adaptive-resize 50% IMG_20200117_135049_resized.jpg
 

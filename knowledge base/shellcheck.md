@@ -4,7 +4,7 @@ Gives warnings and suggestions about `bash`/`sh` shell scripts.
 
 ## TL;DR
 
-```shell
+```sh
 shellcheck /path/to/script.sh
 ```
 

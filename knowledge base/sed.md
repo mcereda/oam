@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Delete lines matching "OAM" from a file.
 sed -e '/OAM/d' -i .bash_history
 

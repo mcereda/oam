@@ -2,13 +2,13 @@
 
 Install and use `diffpdf` (preferred) or `diff-pdf`:
 
-```shell
+```sh
 sudo zypper install diff-pdf
 ```
 
 As an alternative:
 
-```shell
+```sh
 # create a pdf with the diff as red pixels
 compare -verbose -debug coder $PDF_1 $PDF_2 -compose src /tmp/$OUT_FILE.tmp
 

@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # List installed applications and runtimes.
 flatpak list
 flatpak list --app

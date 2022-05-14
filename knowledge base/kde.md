@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Get from '~/.config/kinfocenterrc' the current value for the 'MenuBar' key in
 # the 'MainWindow' group.
 kreadconfig5 --file kinfocenterrc --group MainWindow --key MenuBar

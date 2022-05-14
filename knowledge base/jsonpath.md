@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # filter elements
 # only works on arrays, not on maps
 kubectl get serviceaccounts \

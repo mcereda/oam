@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # debug the server
 redis-cli -h "${HOST}" -p "${PORT}" --user "${USERNAME}" --askpass MONITOR
 

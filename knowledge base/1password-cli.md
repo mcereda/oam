@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # installation
 brew cask install 1password-cli
 
@@ -23,7 +23,7 @@ op list items
 
 - After you have signed in the first time, you can sign in again using your account shorthand, which is your sign-in address subdomain (in this example, _company_); `op signin` will prompt you for your password and output a command that can save your session token to an environment variable:
 
-  ```shell
+  ```sh
   op signin company
   ```
 

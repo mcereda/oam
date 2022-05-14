@@ -4,7 +4,7 @@ Validates one or more Kubernetes configuration files.
 
 ## TL;DR
 
-```shell
+```sh
 $ kubeval my-invalid-rc.yaml || echo "Validation failed" >&2
 WARN - my-invalid-rc.yaml contains an invalid ReplicationController - spec.replicas: Invalid type. Expected: integer, given: string
 Validation failed

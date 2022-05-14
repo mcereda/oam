@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # by label
 mount -L seagate_2tb_usb /media/usb
 

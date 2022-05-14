@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # mark all packages as non-explicitly installed
 apt-mark auto $(sudo apt-mark showmanual)
 

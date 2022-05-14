@@ -20,7 +20,7 @@ Open port 22 on the firewall:
 
 - using [firewall-cmd][firewalld] on the command line:
 
-  ```shell
+  ```sh
   sudo firewall-cmd --add-port=22/tcp --permanent
   ```
 
@@ -29,7 +29,7 @@ Start the SSH daemon:
 - using Yast: open _Yast2_ > _System services_ and enable _SSHD_
 - using [systemctl][systemd] on the command line:
 
-  ```shell
+  ```sh
   sudo systemctl enable --now sshd.service
   ```
 
@@ -39,7 +39,7 @@ Install the OS from another computer capable of reading and writing SD cards.
 
 Given `/dev/sdb` being a SD card, use the following:
 
-```shell
+```sh
 curl -C - -L -o opensuse.raw.xz http://download.opensuse.org/ports/aarch64/tumbleweed/appliances/openSUSE-Tumbleweed-ARM-JeOS-raspberrypi.aarch64.raw.xz
 xzcat opensuse.raw.xz \
  | sudo dd bs=4M of=/dev/sdb iflag=fullblock oflag=direct status=progress \
@@ -52,7 +52,7 @@ Connect using SSH and login using `root:linux`.
 
 ### Firmware update from a running system
 
-```shell
+```sh
 # Check for an updated firmware.
 sudo rpi-eeprom-update
 

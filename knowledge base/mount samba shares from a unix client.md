@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 sudo mount -t cifs -o user=my-user //nas.local/shared_folder local_folder
 ```
 

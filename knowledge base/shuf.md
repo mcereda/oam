@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # randomize the order of lines in a file and output the result
 shuf filename
 

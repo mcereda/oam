@@ -4,7 +4,7 @@ Create a new user.
 
 ## TL;DR
 
-```shell
+```sh
 # Create a new user.
 sudo useradd username
 sudo useradd -p encryptedPassword username

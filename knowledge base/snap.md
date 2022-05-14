@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Find snaps.
 snap find chezmoi
 snap find --private boincstats-js
@@ -81,7 +81,7 @@ snap get foo bar
 
 ## Manage revisions
 
-```shell
+```sh
 # List installed snaps with all their revisions.
 snap list --all
 

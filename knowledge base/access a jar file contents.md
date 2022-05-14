@@ -3,7 +3,7 @@
 A `.jar` file is nothing more than an archive.  
 You can find all the files it contains just unzipping it:
 
-```shell
+```sh
 $ unzip file.jar
 Archive:  file.jar
    creating: META-INF/

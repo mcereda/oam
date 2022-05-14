@@ -14,7 +14,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Install a .pkg file from CLI.
 # 'target' needs to be a device, not a path.
 installer -pkg /path/to/non-root-package.pkg -target CurrentUserHomeDirectory
@@ -76,7 +76,7 @@ scutil --get ComputerName
 
 ## Xcode CLI tools
 
-```shell
+```sh
 xcode-select --install
 ```
 
@@ -84,7 +84,7 @@ The tools will be installed into `/Library/Developer/CommandLineTools` by defaul
 
 ### Headless installation
 
-```shell
+```sh
 # Force the `softwareupdate` utility to list the Command Line Tools.
 touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
 
@@ -102,7 +102,7 @@ CLI_TOOLS_LABEL="$(/usr/sbin/softwareupdate -l \
 
 ### Removal
 
-```shell
+```sh
 sudo rm -rf $(xcode-select -p)
 sudo rm -rf /Library/Developer/CommandLineTools
 ```
@@ -111,7 +111,7 @@ sudo rm -rf /Library/Developer/CommandLineTools
 
 See [How to update Xcode from command line] for details.
 
-```shell
+```sh
 # Remove and reinstall.
 sudo rm -rf $(xcode-select -p)
 xcode-select --install
@@ -121,7 +121,7 @@ xcode-select --install
 
 > **Note:** once set something, you'll probably need to restart the dock with `killall Dock`
 
-```shell
+```sh
 # Show hidden apps indicators in the dock.
 defaults write com.apple.dock showhidden -bool TRUE
 
@@ -148,7 +148,7 @@ Note:
 * edits the input image
 * `-Z` retains ratio
 
-```shell
+```sh
 sips -Z 1000 Downloads/IMG_20190527_013903.jpg
 ```
 
@@ -176,7 +176,7 @@ Combination | Behaviour
 
 ## Update the OS from CLI
 
-```shell
+```sh
 # List all available updates.
 softwareupdate --list --all
 
@@ -201,7 +201,7 @@ Save a password with the following settings:
 
 > The password's value needs to be given **last**.
 
-```shell
+```sh
 # Add the password to the default keychain.
 security add-generic-password -a johnny -s github -w 'b.good'
 # Also give it some optional data.

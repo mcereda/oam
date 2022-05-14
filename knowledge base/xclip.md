@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 xclip -selection clipboard < file
 ```
 

@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Start the services.
 run_keybase
 run_keybase -fg
@@ -62,19 +62,19 @@ Use the import form in [Keybase launches encrypted git], or:
 
 1. Create the remote repository:
 
-   ```shell
+   ```sh
    keybase git create dotfiles
    ```
 
 1. Copy the existing repository to a temporary directory:
 
-   ```shell
+   ```sh
    git clone --mirror https://github.com/user/dotfiles _tmp.git
    ```
 
 1. Push the contents of the old repository to the new one:
 
-   ```shell
+   ```sh
    git -C _tmp.git push --mirror keybase://private/user/dotfiles
    ```
 
@@ -89,7 +89,7 @@ Use `keybase oneshot` to establish a temporary device. The resulting process won
 
 `keybase oneshot` needs a username and a paperkey to work, either passed in via standard input, command-line flags, or environment variables:
 
-```shell
+```sh
 # Provide login information on the standard input.
 keybase oneshot
 

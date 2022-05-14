@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # add an extra architecture
 dpkg --add-architecture i386
 

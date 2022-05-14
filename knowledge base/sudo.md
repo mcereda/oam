@@ -4,7 +4,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Make changes to a sudoers file.
 visudo
 visudo -f path/to/file
@@ -15,7 +15,7 @@ visudo -c path/to/file
 
 ## Drop privileges
 
-```shell
+```sh
 # Invalidate the user's cached credentials.
 sudo -k
 
@@ -25,7 +25,7 @@ sudo -k ls
 
 ## Restrict permissions a little
 
-```shell
+```sh
 # file /etc/sudoers.d/user
 Cmnd_Alias UPGRADE_CMND  = /usr/bin/apt update, /usr/bin/apt list --upgradable, /usr/bin/apt upgrade
 Cmnd_Alias SHUTDOWN_CMND = /sbin/shutdown
@@ -34,7 +34,7 @@ user ALL=(ALL:ALL) NOPASSWD: SHUTDOWN_CMND, UPGRADE_CMND
 
 ## Avoid providing a password
 
-```shell
+```sh
 # file /etc/sudoers.d/user
 user ALL=(ALL:ALL) NOPASSWD: ALL
 ```
@@ -43,7 +43,7 @@ user ALL=(ALL:ALL) NOPASSWD: ALL
 
 Invoke a login shell using the `-i, --login` option. When one does not specify a command a login shell prompt is returned, otherwise the output of the command is returned:
 
-```shell
+```sh
 % whoami
 root
 % sudo -i -u user

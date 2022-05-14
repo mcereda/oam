@@ -8,7 +8,7 @@ Options are processed first, and affect the operation of all commands. Multiple 
 
 ## TL;DR
 
-```shell
+```sh
 # list the package id of all installed packages
 pkgutil --pkgs
 pkgutil --packages --volume /

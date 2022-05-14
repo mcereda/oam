@@ -12,7 +12,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Check port 22 on hosts.
 nc -Nnvz 192.168.0.81 22
 parallel -j 0 "nc -Nnvz -w 2 192.168.0.{} 22 2>&1" ::: {2..254} | grep -v "timed out"

@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Sort given lines.
 sort path/to/file
 
@@ -24,19 +24,19 @@ awk 'BEGIN {FS=","; OFS="|"} {print $NF,$0}' file.txt \
 
 1. copy the last field (column) of each line at the beginning of each of the lines with a different delimiter:
 
-   ```shell
+   ```sh
    awk 'BEGIN {FS=","; OFS="|"} {print $NF,$0}' file.txt
    ```
 
 1. sort on the 1st field specifing the delimiter to be the character above:
 
-   ```shell
+   ```sh
    awk 'BEGIN {FS=","; OFS="|"} {print $NF,$0}' file.txt | sort -n -t '|'
    ```
 
 1. discard the first field
 
-   ```shell
+   ```sh
    awk 'BEGIN {FS=","; OFS="|"} {print $NF,$0}' file.txt | sort -n -t '|' | awk -F '|' '{print $NF}'
    awk 'BEGIN {FS=","; OFS="|"} {print $NF,$0}' file.txt | sort -n -t '|' | awk -F '|' '{print $2}'
    awk 'BEGIN {FS=","; OFS="|"} {print $NF,$0}' file.txt | sort -n -t '|' | cut -d '|' -f 2

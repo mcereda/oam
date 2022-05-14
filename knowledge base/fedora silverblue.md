@@ -4,7 +4,7 @@
 
 Changes to the base layer are executed in a new bootable filesystem root. This means that the system must be rebooted after a package has been layered.
 
-```shell
+```sh
 # Check for available upgrades.
 rpm-ostree upgrade --check
 

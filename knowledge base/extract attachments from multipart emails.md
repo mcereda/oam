@@ -18,7 +18,7 @@ In such cases the text file itself contains the multipart message body of the em
 
 You can use `munpack` to easily extract attachments out of such text files and write them into a proper named files.
 
-```shell
+```sh
 $ munpack -f plaintext.eml
 myawesomefile.tar.gz (application/x-gzip)
 ```

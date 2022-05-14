@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # create an archive
 tar czvf directory.tar.gz directory
 tar capvf archive.tar.bz2 directory1 directory2 file

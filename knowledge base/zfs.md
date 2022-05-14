@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # create a single device pool
 zpool create pool_name device
 
@@ -113,7 +113,7 @@ man zfs
 
 Manjaro has prebuilt modules for ZFS, which package is the kernel's package postfixed by `-zfs` (e.g. for `linux-515` it is `linux515-zfs`)
 
-```shell
+```sh
 # install the modules' packages for all installed kernels
 sudo pamac install $(mhwd-kernel --listinstalled | grep '*' | awk -F '* ' '{print $2}' | xargs -I {} echo {}-zfs)
 ```
@@ -142,7 +142,7 @@ Filesystem options (`-O option`):
   * [reference](http://open-zfs.org/wiki/Performance_tuning#Deduplication)
 * `xattr=sa`
 
-```shell
+```sh
 sudo zpool \
   create \
     -f \

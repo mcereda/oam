@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # list all installed packages
 rpm --query --all
 

@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Initialization.
 terraform init
 terraform init -reconfigure

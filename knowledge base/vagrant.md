@@ -3,7 +3,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # start a vm from a box
 vagrant up
 vagrant up --provider libvirt
@@ -54,20 +54,20 @@ vagrant plugin install vagrant-disksize
 1. Install Vagrant.
 1. Optionally, create a folder to keep all files in order and move into it:
 
-   ```shell
+   ```sh
    mkdir test-vm
    cd $_
    ```
 
 1. Create a configuration:
 
-   ```shell
+   ```sh
    vagrant init archlinux/archlinux
    ```
 
 1. Start the vm:
 
-   ```shell
+   ```sh
    vagrant up
 
    # re-provision the vm after startup
@@ -76,13 +76,13 @@ vagrant plugin install vagrant-disksize
 
 1. Connect to the vm:
 
-   ```shell
+   ```sh
    vagrant ssh
    ```
 
 ### Boxes management
 
-```shell
+```sh
 vagrant box add archlinux/archlinux
 vagrant box add archlinux/archlinux --provider virtualbox
 
@@ -94,7 +94,7 @@ vagrant box update --box generic/gentoo
 
 ## Install shell's autocomplete
 
-```shell
+```sh
 $ vagrant autocomplete install --bash
 Autocomplete installed at paths:
 - /home/user/.bashrc
@@ -152,7 +152,7 @@ end
 
 Install the vagrant-disksize plugin:
 
-```shell
+```sh
 vagrant plugin install vagrant-disksize
 ```
 

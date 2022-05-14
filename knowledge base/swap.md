@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # show the swap usage
 swapon --show
 free -h
@@ -24,7 +24,7 @@ vmstat --wide 1
 
 ## Swappiness
 
-```shell
+```sh
 # change the current value
 sudo sysctl vm.swappiness=10
 sudo sysctl -w vm/swappiness=5
@@ -36,7 +36,7 @@ echo 'vm.swappiness = 5' | sudo tee -a /etc/sysctl.d/99-swappiness.conf
 
 ## Swapfile
 
-```shell
+```sh
 # add a swapfile
 sudo fallocate -l 1G /swapfile   # or sudo dd if=/dev/zero of=/swapfile bs=1024 count=1048576
 sudo chmod 600 /swapfile
