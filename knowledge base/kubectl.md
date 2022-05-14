@@ -1,27 +1,40 @@
-# Kubectl
+# Kubectl <!-- omit in toc -->
 
 Command line tool for communicating with a Kubernetes cluster's control plane using the Kubernetes API.
 
-Resource types are case **in**sensitive and can be specified in their singular, plural or abbreviated form for convenience; use `kubectl api-resources` to check them out:
+Resource types are case **in**sensitive and can be specified in their singular, plural or abbreviated form for convenience:
 
-```shell
+```sh
 # The two commands below are equivalent.
-kubectl get deployments,replicasets,pods -A
+kubectl get deployment,replicasets,pods -A
 kubectl get deploy,rs,po -A
 ```
+
+Use `kubectl api-resources` to check out the available resources and their abbreviations.
 
 Multiple resources types can be specified together, but only one resource name is accepted at a time.  
 Resource names are case sensitive and will filter the requested resources; use the `-l`, `--selector` option to get around filtering:
 
-```shell
+```sh
 kubectl get deployments,replicasets -A
 kubectl get pod etcd-minikube -n kube-system
 kubectl get pods -l app=nginx,tier=frontend
 ```
 
+### Table of contents
+
+- [TL;DR](#tldr)
+- [Configuration](#configuration)
+  - [Configure access to multiple clusters](#configure-access-to-multiple-clusters)
+- [Create resources](#create-resources)
+- [Output formatting](#output-formatting)
+- [Verbosity and debugging](#verbosity-and-debugging)
+- [Further readings](#further-readings)
+- [Sources](#sources)
+
 ## TL;DR
 
-```shell
+```sh
 # Enable shell completion.
 source <(kubectl completion bash)
 echo "[[ $commands[kubectl] ]] && source <(kubectl completion zsh)" >> ~/.zshrc
@@ -34,18 +47,18 @@ kubectl config view -o jsonpath='{.users[].name}'
 kubectl config view -o jsonpath='{.users[*].name}'
 kubectl config view -o jsonpath='{.users[?(@.name == "e2e")].user.password}'
 
-# Set config values.
+# Set configuration values.
 kubectl config set-context --current --namespace=keda
 kubectl config set-context gce --user=cluster-admin --namespace=foo
 kubectl config set-credentials \
   kubeuser/foo.kubernetes.com --username=kubeuser --password=kubepassword
 
-# Delete config values.
+# Delete configuration values.
 kubectl config unset users.foo
 
 # Use multiple config files at once.
-# This will merge them in one big temporary config file.
-KUBECONFIG="path/to/kube/config1:path/to/kube/configN"
+# This will temporarily merge them in one big configuration file.
+KUBECONFIG="path/to/config1:path/to/configN"
 
 # List contexts.
 kubectl config get-contexts
@@ -342,16 +355,27 @@ kubectl port-forward my-pod 5000:6000
 
 ## Configuration
 
-`kubectl` looks for a file named `config` in the `$HOME/.kube` directory by default. One can specify other kubeconfig files by setting the `KUBECONFIG` environment variable or using the `--kubeconfig` flag:
+The configuration files are loaded as follows:
 
-```shell
-KUBECONFIG="config.local:~/.kube/config" kubectl config view
-kubectl config --kubeconfig config.local view
-```
+1. If the `--kubeconfig` flag is set, then only that file is loaded; the flag may only be set **once**, and no merging takes place:
+
+   ```sh
+   kubectl config --kubeconfig config.local view
+   ```
+
+2. If the `$KUBECONFIG` environment variable is set, then it is used as a list of paths following the normal path delimiting rules for your system; the files are merged:
+
+   ```sh
+   export KUBECONFIG="/tmp/config.local:.kube/config.prod"
+   ```
+
+   When a value is modified, it is modified in the file that defines the stanza; when a value is created, it is created in the first existing file; if no file in the chain exist, then the last file in the list is created with the configuration.
+
+3. If none of the above happens, `~/.kube/config` is used, and no merging takes place.
 
 The configuration file can be edited, or acted upon from the command line:
 
-```shell
+```sh
 # Show the merged configuration.
 kubectl config view
 KUBECONFIG="~/.kube/config:config.local" kubectl config view
@@ -418,7 +442,7 @@ spec:
         - "1000"
 ```
 
-```shell
+```sh
 # Apply the manifest.
 kubectl apply -f manifest.yaml
 
@@ -446,13 +470,13 @@ EOF
 
 When subsequentially (re-)applying manifests, one can compare the current state of the cluster against the state it would be in if the manifest was applied:
 
-```shell
+```sh
 kubectl diff -f manifest.yaml
 ```
 
 Resources can also be created using default values or specifying them on the command line:
 
-```shell
+```sh
 # Start a Pod.
 kubectl run nginx --image nginx
 kubectl run busybox --rm -it --image=busybox -n keda -- sh
@@ -489,7 +513,7 @@ Examples using `-o=custom-columns`:
 # Print all the container images running in the cluster.
 kubectl get pods -A -o=custom-columns='DATA:spec.containers[*].image'
 
- # As above, but exclude "k8s.gcr.io/coredns:1.6.2" from the list.
+# As above, but exclude 'k8s.gcr.io/coredns:1.6.2' from the list.
 kubectl get pods -A \
   -o=custom-columns='DATA:spec.containers[?(@.image!="k8s.gcr.io/coredns:1.6.2")].image'
 
