@@ -3,18 +3,19 @@
 ## TL;DR
 
 ```sh
-# prompt to delete all duplicate files
+# Prompt to delete all duplicate files.
 jdupes -Zdr directory
 
-# automatically replace duplicate files with hard links to the first encountered
+# Automatically replace duplicate files with hardlinks to the first encountered.
 jdupes -ONLr directory1 directory2 directory3 file
 
-# quickly list all duplicate gz archives
+# Quickly list all duplicate GZ archives.
 jdupes -rQX onlyext:gz directory
 
-# delete all duplicates from a folder keeping all other folders intact
-# will need multiple runs
-find -mindepth 1 -maxdepth 1 -type d -not -name directoryWithDuplicates | xargs -I {} -n 1 -t jdupes -drINOZ {} directoryWithDuplicates
+# Delete all duplicates from a folder while keeping all other folders intact.
+# Usually needs multiple runs to delete all duplicates.
+find -mindepth 1 -maxdepth 1 -type d -not -name directoryWithDuplicates \
+| xargs -I {} -n 1 -t jdupes -drINOZ {} directoryWithDuplicates
 ```
 
 ## Options
