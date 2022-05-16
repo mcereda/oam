@@ -31,19 +31,16 @@ gpg --delete-keys --batch fingerprint
 gpg --fingerprint
 gpg --fingerprint recipient
 
-# Encrypt a file.
-gpg --output file.out.gpg --encrypt --recipient recipient file.in
-gpg -o file.out.gpg --encrypt --local-user sender --recipient recipient file.in
-
-# Encrypt multiple files.
-gpg --batch -r recipient --encrypt-files file.in.1 file.in.N
+# Encrypt files.
+gpg -e -o file.out.gpg -r recipient file.in
+gpg --encrypt -o file.out.gpg -u sender -r recipient file.in
+gpg --encrypt-files --batch -r recipient file.in.1 file.in.N
+gpg -e --multifile --batch -r recipient --yes file.in.1 file.in.N
 
 # Decrypt files.
-gpg --output file.out --decrypt file.in.gpg
-
-# Decrypt multiple files
-gpg --batch --decrypt-files file.in.gpg.1 file.in.gpg.N
-gpg --batch --decrypt-files --yes file.in.gpg.1 file.in.gpg.N
+gpg -d -o file.out file.in.gpg
+gpg --decrypt-files --batch file.in.gpg.1 file.in.gpg.N
+gpg -d --multifile --batch --yes file.in.gpg.1 file.in.gpg.N
 
 # Import keys from a file.
 gpg --import keys.asc
