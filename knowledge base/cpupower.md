@@ -5,14 +5,17 @@ Default governor is _ondemand_ for older CPUs and kernels and _schedutil_ for ne
 ## TL;DR
 
 ```sh
-# list the available governors
+# Install.
+sudo dnf install kernel-tools
+
+# List the available governors.
 cpupower frequency-info --governors
 
-# get the current active governor
+# Get the current active governor.
 cpupower frequency-info --policy
 
-# set a new governor
-sudo cpupower frequency-set --governor performance
+# Set a new governor until reboot.
+sudo cpupower frequency-set -g performance
 sudo cpupower frequency-set --governor powersave
 sudo cpupower frequency-set --governor schedutil
 ```
