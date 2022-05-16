@@ -27,10 +27,12 @@ duperemove -Adhr --hashfile=path/to/hashfile path/to/directory
 # List the files tracked by hashfiles.
 duperemove -L --hashfile=path/to/hashfile
 
-# Limit threads.
+# Limit threads; defaults are based on the host's cpus number.
 # I/O threads are used for hashing and in the deduplication stage.
 # CPU threads are used in the duplicate extent finding stage.
-duperemove -Adhr --hashfile=path/to/hashfile --io-threads=N --cpu-threads=N path/to/directory
+duperemove -Adhr --hashfile=path/to/hashfile \
+  --io-threads=N --cpu-threads=N \
+  path/to/directory
 ```
 
 ## Sources
