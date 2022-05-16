@@ -48,6 +48,7 @@ git fetch
 
 # Get changes and merge them.
 git pull --all
+git pull --verify-signatures
 git pull remote branch
 
 # Show what files changed.
@@ -119,6 +120,9 @@ git log -p
 
 # Visualize the repository's history.
 git log --graph --full-history --all --color --decorate --oneline
+
+# Show and verify signatures.
+git log --show-signature -1
 
 # Remove staged and working directory changes.
 git reset --hard
