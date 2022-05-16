@@ -143,13 +143,10 @@ defaults write com.apple.finder AppleShowAllFiles TRUE
 
 ## Resize an image from CLI
 
-Note:
-
-* edits the input image
-* `-Z` retains ratio
-
 ```sh
-sips -Z 1000 Downloads/IMG_20190527_013903.jpg
+# Retain ratio.
+# Save as different file.
+sips -Z 1000 -o resized.jpg IMG_20190527_013903.jpg
 ```
 
 ## Boot keys cheatsheet
