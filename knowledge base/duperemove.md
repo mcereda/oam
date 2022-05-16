@@ -12,7 +12,7 @@ When given the `-d` option, `duperemove` also submits duplicated extents for ded
 
 ## TL;DR
 
-```shell
+```sh
 # Recursively search for duplicated extents in a directory.
 duperemove -hr path/to/directory
 
