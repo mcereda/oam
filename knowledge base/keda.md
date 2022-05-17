@@ -7,7 +7,7 @@ Any Kubernetes cluster **>= 1.16.0** should work.
 **Table of contents:**
 
 - [How KEDA works](#how-keda-works)
-- [Deploment](#deploment)
+- [Deployment](#deployment)
   - [Helm chart](#helm-chart)
   - [Manual deployment](#manual-deployment)
 - [Usage](#usage)
@@ -47,7 +47,7 @@ The _metrics apiserver_ exposes rich event data, like queue length or stream lag
 
 KEDA offers a wide range of triggers (A.K.A. _scalers_) that can both detect if a resource should be activated or deactivated and feed custom metrics for a specific event source. The full list of scalers is available [here][scalers].
 
-## Deploment
+## Deployment
 
 ### Helm chart
 
