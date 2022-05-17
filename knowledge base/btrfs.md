@@ -16,7 +16,10 @@ mkfs.btrfs --label data /dev/sd{a,c,d,e,f,g} --force \
 btrfs filesystem show
 
 # Show detailed `df` analogue for a filesystem.
-btrfs filesystem df path/to/volume
+btrfs filesystem df path/to/filesystem
+
+# Give more details about usage.
+btrfs filesystem usage path/to/filesystem
 
 # Resize online volumes.
 # -2g decreases, +2g increases.
