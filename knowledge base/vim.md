@@ -8,6 +8,12 @@
 42gg
 :42<CR>
 
+# Substitute 4-spaces indentations with tabs.
+:%s/    /\t/g
+
+# Align the file to the current indentation settings.
+:retab
+
 # Get help on something.
 :help modeline
 ```
