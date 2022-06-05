@@ -1,6 +1,6 @@
 # Vim
 
-## Tl;DR
+## TL;DR
 
 ```sh
 # Go to a particular line.
