@@ -70,6 +70,14 @@ find . -perm -g+w,u+w
 find / \
   \( -perm -4000 -fprintf /root/suid.txt '%#m %u %p\n' \) , \
   \( -size +100M -fprintf big-files.txt '%-10s %p\n' \)
+
+# Show files with hard links.
+find . -type f -not -links 1
+find -type f -links +1
+
+# Show files hard linked to a given file.
+# GNU extension.
+find -samefile path/to/file
 ```
 
 ## Time specifications
@@ -160,8 +168,10 @@ find / -newer file.txt -user wnj -print
 
 - [How can I find broken symlinks?]
 - [find . -type f -exec chmod 644 {} ;]
-- [how to output file names surrounded with quotes in SINGLE line?]
+- [How to output file names surrounded with quotes in SINGLE line?]
+- [How to find all hardlinks in a folder?]
 
 [find . -type f -exec chmod 644 {} ;]: https://stackoverflow.com/questions/19737525/find-type-f-exec-chmod-644#22083532
 [how can i find broken symlinks?]: https://unix.stackexchange.com/questions/34248/how-can-i-find-broken-symlinks
+[how to find all hardlinks in a folder?]: https://askubuntu.com/questions/972121/how-to-find-all-hardlinks-in-a-folder#972244
 [how to output file names surrounded with quotes in single line?]: https://stackoverflow.com/questions/6041596/how-to-output-file-names-surrounded-with-quotes-in-single-line#15137696
