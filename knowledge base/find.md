@@ -46,7 +46,8 @@ find . -type f -o -type l \
 
 # Print quoted file paths.
 # %p is for path.
-find . -type f -printf '%p\n'
+find . -type f -printf '"%p"\n'
+find . -type f -printf "'%p'\n"
 
 # Sort files by size.
 # %s is for size, %p is for path.

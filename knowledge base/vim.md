@@ -8,6 +8,9 @@
 42gg
 :42<CR>
 
+# Delete all file's lines.
+:1,$d
+
 # Substitute 4-spaces indentations with tabs.
 :%s/    /\t/g
 
