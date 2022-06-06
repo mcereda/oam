@@ -3,10 +3,17 @@
 ## TL;DR
 
 ```sh
-# create a single device pool
+# Create a pool from a single device.
 zpool create pool_name device
 
-# list pools
+# Create an encrypted pool from multiple devices.
+sudo zpool create \
+  -o feature@encryption=enabled \
+  -O encryption=on -O keyformat=passphrase \
+  pool_name \
+  /dev/sdb /dev/sdc /dev/sdd
+
+# List available pools.
 zpool list
 
 # show pools configuration and status
@@ -51,6 +58,9 @@ zpool upgrade -a
 
 # get a pool's properties
 zpool get all pool_name
+
+# set a pool's properties
+zpool set compression=lz4 pool_name
 
 # add a vdev to a mirrored pool
 zpool attach pool_name first_drive_in_existing_mirror new_dev
@@ -208,12 +218,16 @@ sudo zpool \
 - [aaron toponce's article on zfs administration]
 - [archlinux wiki]
 - [article on zfs on linux]
+- [OpenZFS docs]
+- [Creating fully encrypted ZFS pool]
 
 [aaron toponce's article on zfs administration]: https://pthree.org/2012/12/04/zfs-administration-part-i-vdevs/
-[archlinux wiki]: https://wiki.archlinux.org/index.php/ZFS
+[archlinux wiki]: https://wiki.archlinux.org/title/ZFS
 [article on zfs on linux]: https://blog.heckel.io/2017/01/08/zfs-encryption-openzfs-zfs-on-linux
 [cheat.sh/zfs]: https://cheat.sh/zfs
+[creating fully encrypted zfs pool]: https://timor.site/2021/11/creating-fully-encrypted-zfs-pool/
 [gentoo wiki]: https://wiki.gentoo.org/wiki/ZFS
 [how to enable zfs deduplication]: https://linuxhint.com/zfs-deduplication/
+[openzfs docs]: https://openzfs.github.io/openzfs-docs/
 [oracle solaris zfs administration guide]: https://docs.oracle.com/cd/E19253-01/819-5461/index.html
 [zfs support + kernel, best approach]: https://forum.manjaro.org/t/zfs-support-kernel-best-approach/33329/2
