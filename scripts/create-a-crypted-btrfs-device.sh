@@ -5,9 +5,12 @@
 
 : "${MOUNT_OPTIONS:=compress-force=zstd}"
 : "${MOUNT_POINT:=/mnt/$LABEL}"
+: "${USERNAME:=root}"
+: "${GROUPNAME:=root}"
+: "${CLOSE_WHEN_DONE:=true}"
 
-[[ $EUID -eq 0 ]]  || (echo "Please rerun this script with root privileges" && exit 1)
-[[ -f "$DEVICE" ]] || echo "${DEVICE} not found"
+[[ $EUID -eq 0 ]]  || (echo "Re-run this script with root privileges" >&2 && exit 1)
+[[ -b "$DEVICE" ]] || (echo "${DEVICE} not found" >&2 && exit 1)
 
 cryptsetup luksFormat "$DEVICE"
 cryptsetup open "$DEVICE" "$LABEL"
@@ -21,5 +24,8 @@ btrfs subvolume create "$MOUNT_POINT/data"
 
 chown "$USER":"$USER" "$MOUNT_POINT/data"
 
-umount "/mnt/${LABEL}"
-cryptsetup close "$DEVICE"
+if [[ "$CLOSE_WHEN_DONE" ]]
+then
+	umount "/mnt/${LABEL}"
+	cryptsetup close "$DEVICE"
+fi
