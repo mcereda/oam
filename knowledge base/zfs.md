@@ -7,7 +7,7 @@
 zpool create pool_name device
 
 # Create an encrypted pool from multiple devices.
-sudo zpool create \
+zpool create \
   -o feature@encryption=enabled \
   -O encryption=on -O keyformat=passphrase \
   pool_name \
@@ -16,97 +16,114 @@ sudo zpool create \
 # List available pools.
 zpool list
 
-# show pools configuration and status
+# Show pools configuration and status.
 zpool status
 zpool status pool_name time_in_seconds
 
-# show pools i/o statistics
+# Show pools i/o statistics.
 zpool iostat
 zpool iostat pool_name -n 1
 
-# check a pool for errors
-# verifies the checksum of every block
-# very cpu and disk intensive
+# Check a pool for errors.
+# Verifies the checksum of every block.
+# Very cpu and disk intensive.
 zpool scrub pool_name
 
-# list all pools available for import
+# List all pools available for import.
 zpool import
 
-# import a pool
+# Import a pool.
 zpool import pool_name
 zpool import encrypted_pool_name -l
 
-# export a pool
-# unmounts all filesystems
+# Export a pool.
+# Unmounts all filesystems in the pool.
 zpool export pool_name
 
-# show the history of all pool operations
+# Show the history of all pool's operations.
 zpool history pool_name
 
-# create a mirrored pool
+# Create a mirrored pool.
 zpool create pool_name mirror device1 device2 mirror device3 device4
 
-# add a cache (L2ARC) device to a pool
+# Add a cache (L2ARC) device to a pool.
 zpool add pool_name cache cache_disk
 
-# show the current version of a pool
+# Show the current version of a pool.
 zpool upgrade -v
 
-# upgrade pools
+# Upgrade pools.
 zpool upgrade pool_name
 zpool upgrade -a
 
-# get a pool's properties
+# Get a pool's properties.
 zpool get all pool_name
 
-# set a pool's properties
+# Set a pool's properties.
 zpool set compression=lz4 pool_name
 
-# add a vdev to a mirrored pool
+# Add a vdev to a mirrored pool.
 zpool attach pool_name first_drive_in_existing_mirror new_dev
 
-# destroy a pool
+# Destroy a pool.
 zpool destroy pool_name
 
-# restore a destroyed pool
-# the pool needs to be reimported straight after the destroy command has been issued
+# Restore a destroyed pool.
+# The pool needs to be reimported straight after the destroy command has been
+# issued.
 zpool import -D
 
-# get info about zpools features
+# Get info about zpools features.
 man zpool-features
 
-# list all available filesystems
+# List all available datasets (filesystems).
 zfs list
 
-# mount or unmount filesystems
-# see 'zfs get mountpoint pool_name' for mountpoint's root path
+# Mount or unmount filesystems.
+# See 'zfs get mountpoint pool_name' for a dataset's mountpoint's root path.
 zfs mount -alv
 zfs unmount pool_name/filesystem_name
 
-# create a new filesystem
+# Create a new filesystem.
 zfs create pool_name/filesystem_name
 
-# delete a filesystem
+# Delete a filesystem.
 zfs destroy pool_name/filesystem_name
 
-# manage a snapshot
-zfs list -t snapshot                                                 # list all
-zfs list -r -t snapshot -o name,creation pool_name/filesystem_name   # list recursively for a given volume, output only name and creation date
-zfs snapshot pool_name/filesystem_name@snapshot_name                 # create
-zfs destroy  pool_name/filesystem_name@snapshot_name                 # destroy
+# List all snapshots.
+zfs list -t snapshot
 
-# query a file system or volume configuration (get properties)
+# Recursively list snapshots for a given dataset, outputting only name and
+# creation date
+zfs list -r -t snapshot -o name,creation pool_name/filesystem_name
+
+# Create a new snapshot.
+zfs snapshot pool_name/filesystem_name@snapshot_name
+
+# Destroy a snapshot.
+zfs destroy  pool_name/filesystem_name@snapshot_name
+
+# Query a file system or volume configuration (get properties).
 zfs get all pool_name
 zfs get all pool_name/filesystem_name
 
-# enable compression on a filesystem
+# Enable or change settings on a filesystem.
 zfs set compression=on pool_name/filesystem_name
-
-# change mountpoint for a filesystem
 zfs set mountpoint=/my/mount/path pool_name/filesystem_name
 
-# get info about zfs volumes properties
+# Get more information about zfs volumes properties.
 man zfs
+```
+
+```sh
+# Create a dataset in a new pool, adjust its permissions and unmount the pool.
+sudo zpool create \
+  -o feature@encryption=enabled \
+  -O encryption=on -O keyformat=passphrase \
+  vault /dev/sdb
+sudo zfs create vault/data
+sudo chown "$USER":users /vault/data
+sudo zpool export vault
 ```
 
 ## Gotchas
@@ -117,7 +134,7 @@ man zfs
 - one can **add** hot spares to a RAIDZ1 or RAIDZ2 pool
 - one can replace a drive with a bigger one (but **not a smaller one**) one at a time
 - one can mix MIRROR, RAIDZ1 and RAIDZ2 in a pool
-- volumes need an **empty** folder to be mounted
+- datasets need an **empty** folder to be mounted
 
 ## Manjaro
 
