@@ -34,6 +34,7 @@ zpool import
 
 # Import a pool.
 zpool import pool_name
+zpool import pool_name -N
 zpool import encrypted_pool_name -l
 
 # Export a pool.
@@ -79,7 +80,7 @@ man zpool-features
 # List all available datasets (filesystems).
 zfs list
 
-# Mount or unmount filesystems.
+# Automatically mount or unmount filesystems.
 # See 'zfs get mountpoint pool_name' for a dataset's mountpoint's root path.
 zfs mount -alv
 zfs unmount pool_name/filesystem_name
@@ -134,7 +135,7 @@ sudo zpool export vault
 - one can **add** hot spares to a RAIDZ1 or RAIDZ2 pool
 - one can replace a drive with a bigger one (but **not a smaller one**) one at a time
 - one can mix MIRROR, RAIDZ1 and RAIDZ2 in a pool
-- datasets need an **empty** folder to be mounted
+- datasets needs the mountpoint to be an **empty** folder to be mounted, unless explicitly mounted with the -O option of `zfs mount`
 
 ## Manjaro
 
@@ -146,6 +147,12 @@ sudo pamac install $(mhwd-kernel --listinstalled | grep '*' | awk -F '* ' '{prin
 ```
 
 ## Mac OS X
+
+```sh
+# On M1 devices, this requires system extensions to be enabled in the Startup
+# Security Utility.
+brew install --cask openzfs
+```
 
 Pool options (`-o option`):
 
