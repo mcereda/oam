@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+[[ -v DEBUG ]] && set -x
+
 : ${DEVICE:?not set}
 : ${POOL_NAME:?not set}
 
@@ -24,3 +26,5 @@ zfs create "${POOL_NAME}/${DATASET_NAME}"
 chown "$USERNAME":"$GROUPNAME" "${MOUNT_POINT}/${DATASET_NAME}"
 
 [[ "$UNMOUNT_WHEN_DONE" ]] && zfs unmount "${POOL_NAME}/${DATASET_NAME}"
+
+[[ -v DEBUG ]] && set +x
