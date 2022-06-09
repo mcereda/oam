@@ -1,0 +1,4 @@
+deb http://deb.debian.org/debian/ stable main non-free contrib
+
+# stable-updates, previously known as 'volatile'
+deb http://deb.debian.org/debian/ stable-updates main contrib non-free
