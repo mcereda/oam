@@ -1,0 +1,7 @@
+deb http://deb.debian.org/debian/ buster main non-free contrib
+
+# buster-updates, previously known as 'volatile'
+deb http://deb.debian.org/debian/ buster-updates main contrib non-free
+
+# buster-backports, previously on backports.debian.org
+deb http://deb.debian.org/debian/ buster-backports main contrib non-free
