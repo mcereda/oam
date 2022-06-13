@@ -3,49 +3,69 @@
 ## TL;DR
 
 ```sh
-# install/uninstall on os x
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall)"
+# Install/uninstall on OS X.
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
 
-# prevent a formula from upgrading
+# Search for formulae.
+brew search parallel
+brew search --cask gpg
+
+# Install something.
+brew install gettext
+brew install --cask spotify
+
+# Uninstall something
+brew uninstall --zap keybase
+
+# Get formulae's dependencies.
+brew deps
+brew deps --installed azure-cli
+brew deps --tree
+
+# Get information on formulae.
+brew info sponge
+
+# Prevent a formula from upgrading.
 brew pin gnupg2
 
-# bring an installation up to speed from a Brewfile
+# Bring an installation up to speed from a Brewfile.
 brew bundle
 brew bundle --global
 brew bundle --file $HOME/Brewfile --no-lock
 
-# dump all installed casks/formulae/images/taps into a Brewfile in the current directory
+# Dump all installed casks/formulae/images/taps into a Brewfile in the current
+# directory.
 brew bundle dump
 ```
 
 ## Configuration
 
 ```sh
-# require SHA check for casks
-# change cask installation dir to the Application folder in the user HOME
+# Require SHA check for casks.
+# Change cask installation dir to the Application folder in the user's HOME.
 export HOMEBREW_CASK_OPTS="--require-sha --appdir $HOME/Applications"
 
-# print install times for each formula at the end of the run
+# Print install times for each formula at the end of the run.
 export HOMEBREW_DISPLAY_INSTALL_TIMES=1
 
-# do not automatically update before running some commands
+# Do not automatically update before running some commands.
 export HOMEBREW_NO_AUTO_UPDATE=1
 
-# do not print HOMEBREW_INSTALL_BADGE on a successful build
+# Do not print HOMEBREW_INSTALL_BADGE on a successful build.
 export HOMEBREW_NO_EMOJI=1
 
-# do not use the GitHub API
-# avoid searches or fetching relevant issues after a failed install
+# Do not use the GitHub API.
+# Avoid searches or fetching relevant issues after a failed install.
 export HOMEBREW_NO_GITHUB_API=1
 
-# forbid redirects from secure HTTPS to insecure HTTP
+# Forbid redirects from secure HTTPS to insecure HTTP.
 export HOMEBREW_NO_INSECURE_REDIRECT=1
 
-# only list updates to installed software
+# Only list updates to installed software.
 export HOMEBREW_UPDATE_REPORT_ONLY_INSTALLED=1
 
-# pass the -A option when calling sudo
+# Pass the -A option when calling sudo.
 export SUDO_ASKPASS=1
 ```
 
@@ -55,7 +75,6 @@ export SUDO_ASKPASS=1
 
 ```sh
 brew unlink kubernetes-helm
-#install version 2.13.0
 brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/ed9dcb2cb455a816f744c3ad4ab5c18a0d335763/Formula/kubernetes-helm.rb
 brew switch kubernetes-helm 2.13.0
 ```
