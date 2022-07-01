@@ -48,6 +48,12 @@
             state: present
             install_options: 'appdir=~/Applications'
           register: keybase_installed
+        - name: Install Keybase through Pacman
+          when: ansible_pkg_mgr == 'pacman'
+          become: true
+          ansible.builtin.package:
+            name: 'keybase-gui'
+          register: keybase_installed
         - name: Install Keybase through Zypper
           when: ansible_pkg_mgr == 'zypper'
           become: true
