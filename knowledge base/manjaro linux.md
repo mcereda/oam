@@ -23,9 +23,12 @@ pamac install system-config-printer
 
 ## Further readings
 
+- The knowledge base about [Arch Linux]
 - [Branch comparison]
 - [Switching branches]
 - [Printing]
+
+[arch linux]: arch%20linux.md
 
 [branch comparison]: https://manjaro.org/branch-compare
 [printing]: https://wiki.manjaro.org/index.php/Printing
