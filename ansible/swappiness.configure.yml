@@ -17,6 +17,7 @@
       tags: linux
       block:
         - name: Configure swappiness
+          become: true
           sysctl:
             name: vm.swappiness
             value: "{{ swappiness_value|string }}"
