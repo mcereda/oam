@@ -13,6 +13,10 @@ kwriteconfig5 --file kdeglobals --group 'KFileDialog Settings' \
   --key 'Show hidden files' --type bool true
 ```
 
+## Prioritize a WiFi network connection
+
+Plasma-nm lets you change a network's priority specifying a number in the network's _General configuration_ tab. Higher numbers set a higher priority.
+
 ## Further readings
 
 - [KDE Configuration Files]
