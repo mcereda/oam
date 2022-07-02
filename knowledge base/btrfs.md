@@ -5,47 +5,49 @@
 ```sh
 # Create a volume with single metadata and double data blocks
 # Useless in practice but a good example.
-mkfs.btrfs --metadata single --data dup /dev/sdb
+sudo mkfs.btrfs --metadata single --data dup /dev/sdb
 
 # Sparse a volume on multiple devices.
-mkfs.btrfs --label data /dev/sd{a,c,d,e,f,g} --force \
+sudo mkfs.btrfs --label data /dev/sd{a,c,d,e,f,g} --force \
 && echo "LABEL=data  /mnt/data  btrfs  compress=zstd  0  0"
    | tee -a /etc/fstab
 
 # List all btrfs file systems.
-btrfs filesystem show
+sudo btrfs filesystem show
 
 # Show detailed `df` analogue for a filesystem.
-btrfs filesystem df path/to/filesystem
+sudo btrfs filesystem df path/to/filesystem
 
 # Give more details about usage.
-btrfs filesystem usage path/to/filesystem
+sudo btrfs filesystem usage path/to/filesystem
 
 # Resize online volumes.
 # -2g decreases, +2g increases.
-btrfs filesystem resize -2g path/to/volume
-btrfs filesystem resize max path/to/volume
+sudo btrfs filesystem resize -2g path/to/volume
+sudo btrfs filesystem resize max path/to/volume
 
 # Add new devices to a filesystem.
-btrfs device add /dev/sdf /mnt
+sudo btrfs device add /dev/sdf /mnt
 
 # Remove devices from a filesystem.
-btrfs device delete missing /mnt
+sudo btrfs device delete missing /mnt
 
 # List subvolumes.
-btrfs subvolume list /mnt
+sudo btrfs subvolume list /mnt
 
 # Create subvolumes.
-btrfs subvolume create /mnt/subvolume
+btrfs subvolume create ~/subvolume
+sudo btrfs subvolume create /mnt/subvolume
 
 # Create a readonly snapshot of a subvolume.
-sudo btrfs subvolume snapshot -r /mnt/volume/data /mnt/volume/snapshot
+btrfs subvolume snapshot ~/subvolume ~/snapshot
+sudo btrfs subvolume snapshot -r /mnt/volume/subvolume /mnt/volume/snapshot
 
 # Mount subvolumes without mounting their main filesystem.
-mount -o subvol=sv1 /dev/sdb /mnt
+sudo mount -o subvol=sv1 /dev/sdb /mnt
 
 # Delete a subvolume.
-sudo btrfs subvolume delete --commit-each /mnt/volume/data
+sudo btrfs subvolume delete --commit-each /mnt/volume/subvolume
 
 # Deduplicate a volume's blocks.
 sudo duperemove -Adrh --hashfile=/tmp/dr.hash /mnt/volume1 /media volume2
