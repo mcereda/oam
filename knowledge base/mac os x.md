@@ -10,6 +10,9 @@
 - [Boot keys cheatsheet](#boot-keys-cheatsheet)
 - [Update the OS from CLI](#update-the-os-from-cli)
 - [Keychain access from CLI](#keychain-access-from-cli)
+- [Use TouchID to authenticate in the terminal](#use-touchid-to-authenticate-in-the-terminal)
+  - [Fix iTerm2](#fix-iterm2)
+- [Further readings](#further-readings)
 - [Sources](#sources)
 
 ## TL;DR
@@ -216,6 +219,48 @@ security find-generic-password -w -l work -s github
 security delete-generic-password -a johnny -s github
 ```
 
+## Use TouchID to authenticate in the terminal
+
+Add the `pam_tid.so` module as _sufficient_ to `/etc/pam.d/sudo`:
+
+```diff
+# sudo: auth account password session
++auth       sufficient     pam_tid.so
+auth       sufficient     pam_smartcard.so
+auth       required       pam_opendirectory.so
+```
+
+> This file is normally read-only, so saving your changes may require you to force the save (e.g. vim will require the use of `wq!` when saving).
+
+### Fix iTerm2
+
+iTerm2 from version 3.2.8 comes with a _reattach_ advanced feature which is incompatible with the addition of the `pam_tid.so` module alone.
+
+You can either:
+
+- disable the feature: iTerm2 > Preferences > Advanced > (Goto the Session heading) > _Allow sessions to survive logging out and back in_
+- install and enable the `pam_reattach.so` module as _optional_ to `/etc/pam.d/sudo`:
+
+  ```sh
+  # pick one
+  brew install pam-reattach
+  sudo port install pam-reattach
+  ```
+
+  ```diff
+  # sudo: auth account password session
+  +auth       optional       /opt/local/lib/pam/pam_reattach.so ignore_ssh
+  +auth       sufficient     pam_tid.so
+  auth       sufficient     pam_smartcard.so
+  auth       required       pam_opendirectory.so
+  ```
+
+  > Note that when the module is not installed in `/usr/lib/pam` or `/usr/local/lib/pam` (e.g. on M1 Macs where Homebrew is installed in `/opt/homebrew`), you must specify the full path to the module in the PAM service file.
+
+## Further readings
+
+- [pam_reattach]
+
 ## Sources
 
 - [Boot a Mac from USB Drive]
@@ -226,12 +271,16 @@ security delete-generic-password -a johnny -s github
 - [Installing .pkg with terminal?]
 - [Using Terminal to Find Your Mac's Network Name]
 - [List of Xcode Command Line Tools]
+- [Can Touch ID for the Mac Touch Bar authenticate sudo users and admin privileges?]
+
+[pam_reattach]: https://github.com/fabianishere/pam_reattach
 
 [boot a mac from usb drive]: https://www.wikihow.com/Boot-a-Mac-from-USB-Drive
+[can touch id for the mac touch bar authenticate sudo users and admin privileges?]: https://apple.stackexchange.com/questions/259093/can-touch-id-for-the-mac-touch-bar-authenticate-sudo-users-and-admin-privileges#306324
 [command line access to the mac keychain]: https://blog.koehntopp.info/2017/01/26/command-line-access-to-the-mac-keychain.html
 [how to update xcode from command line]: https://stackoverflow.com/questions/34617452/how-to-update-xcode-from-command-line#34617930
 [installing .pkg with terminal?]: https://apple.stackexchange.com/questions/72226/installing-pkg-with-terminal#394976
+[list of xcode command line tools]: https://mac.install.guide/commandlinetools/8.html
 [mac startup key combinations]: https://support.apple.com/en-us/HT201255
 [using terminal to find your mac's network name]: https://www.tech-otaku.com/networking/using-terminal-find-your-macs-network-name/
 [xcode command line tools installation faq]: https://www.godo.dev/tutorials/xcode-command-line-tools-installation-faq
-[list of xcode command line tools]: https://mac.install.guide/commandlinetools/8.html
