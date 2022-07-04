@@ -1,0 +1,19 @@
+---
+
+- name: Enable Touch ID for sudo authentication in the terminal
+  tags:
+    - configuration
+    - enable
+    - sudo
+    - terminal
+    - touch-id
+  hosts: all
+  tasks:
+    - name: Enable Touch ID's PAM modules
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/pam.d/sudo
+        line: 'auth       sufficient     pam_tid.so'
+        insertafter: '^# sudo: auth account password session$'
+        mode: 'ugo=r'
+        backup: true
