@@ -1,4 +1,27 @@
-# Ansible
+# Ansible <!-- omit in toc -->
+
+- [TL;DR](#tldr)
+- [Templating](#templating)
+- [Loops](#loops)
+- [Roles](#roles)
+  - [Get roles](#get-roles)
+  - [Role dependencies](#role-dependencies)
+- [Output formatting](#output-formatting)
+- [Troubleshooting](#troubleshooting)
+  - [Print all known variables](#print-all-known-variables)
+  - [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
+  - [Run specific tasks even in check mode](#run-specific-tasks-even-in-check-mode)
+  - [Dry-run only specific tasks](#dry-run-only-specific-tasks)
+  - [Set up recursive permissions on a directory so that directories are set to 755 and files to 644](#set-up-recursive-permissions-on-a-directory-so-that-directories-are-set-to-755-and-files-to-644)
+  - [Only run a task when another has a specific result](#only-run-a-task-when-another-has-a-specific-result)
+  - [Define when a task changed or failed](#define-when-a-task-changed-or-failed)
+  - [Set environment variables for a play, role or task](#set-environment-variables-for-a-play-role-or-task)
+  - [Set variables to the value of environment variables](#set-variables-to-the-value-of-environment-variables)
+  - [Check if a list contains an item and fail otherwise](#check-if-a-list-contains-an-item-and-fail-otherwise)
+  - [Define different values for `true`/`false`/`null`](#define-different-values-for-truefalsenull)
+  - [Force a task or play to use a specific Python interpreter](#force-a-task-or-play-to-use-a-specific-python-interpreter)
+- [Further readings](#further-readings)
+- [Sources](#sources)
 
 ## TL;DR
 
@@ -337,20 +360,20 @@ Alternatively, you can use special checks built for this:
 
 ```yaml
 - name: Run only on success
-  when: trigger_task succeeded
-  ansible.builtin.debug: msg="The trigger task changed"
+  when: trigger_task is succeeded
+  ansible.builtin.debug: msg="The trigger task succeeded"
 
 - name: Run only on change
-  when: trigger_task changed
+  when: trigger_task is changed
   ansible.builtin.debug: msg="The trigger task changed"
 
 - name: Run only on failure
-  when: trigger_task failed
+  when: trigger_task is failed
   ansible.builtin.debug: msg="The trigger task failed"
 
 - name: Run only on skip
-  when: trigger_task skipped
-  ansible.builtin.debug: msg="The trigger task failed"
+  when: trigger_task is skipped
+  ansible.builtin.debug: msg="The trigger task skipped"
 ```
 
 ### Define when a task changed or failed
@@ -413,6 +436,15 @@ Since Ansible 2.8 you can define a third value to be returned when the test retu
 
 ```yaml
 {{ autoscaling_enabled | ternary(true, false, omit) }}
+```
+
+### Force a task or play to use a specific Python interpreter
+
+Just set it in the Play's or Task's variables:
+
+```yaml
+vars:
+  ansible_python_interpreter: /usr/local/bin/python3.9
 ```
 
 ## Further readings
