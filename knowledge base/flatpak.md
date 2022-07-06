@@ -31,6 +31,7 @@ flatpak update
 # Uninstall applications.
 flatpak uninstall org.stellarium.Stellarium
 flatpak uninstall --unused
+flatpak uninstall --delete-data edu.berkeley.BOINC
 
 # Remove remotes.
 flatpak remote-delete flathub
