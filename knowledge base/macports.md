@@ -54,8 +54,11 @@ port select --list python
 # show the current port selection
 port select --summary
 
-# set a default version
+# Set a default version.
+# Symlinks the "executable"'s version to 'opt/local/bin/executable'.
 sudo port select --set postgresql postgresql12
+sudo port select --set python3 python310
+sudo port select --set virtualenv virtualenv310
 
 # update macports itself to the latest version and sync the latest ports definitions
 sudo port selfupdate
