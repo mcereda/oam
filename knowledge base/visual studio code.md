@@ -8,6 +8,9 @@ Check the `extensionsGallery` key in your fork's `product.json` file is using th
 
 ```sh
 jq '.extensionsGallery' /usr/lib/code/product.json
+```
+
+```json
 {
   "serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
   "cacheUrl": "https://vscode.blob.core.windows.net/gallery/index",
