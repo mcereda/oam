@@ -1,5 +1,7 @@
 # Yt-dlp
 
+Improved fork of [youtube-dl].
+
 ## TL;DR
 
 > To be able to merge multiple formats into one, you will also need to install `ffmpeg`.
@@ -19,5 +21,8 @@ yt-dlp -f "bestvideo+bestaudio/best" -ciw \
 ## Further readings
 
 - [GitHub]
+- [youtube-dl]
+
+[youtube-dl]: youtube-dl.md
 
 [github]: https://github.com/yt-dlp/yt-dlp
