@@ -13,10 +13,14 @@ python3 -m pip install -U --user yt-dlp
 # List all available formats.
 yt-dlp -F AK44wAvv2E4
 
+# See all available information from a video.
+yt-dlp -j BaW_jenozKc
+
 # Check what name will be used for the destination.
-# Output templates at https://github.com/yt-dlp/yt-dlp#output-template
-yt-dlp --get-filename -o "test video.%(ext)s" BaW_jenozKc
-yt-dlp --get-filename -o "%(season)s.%(episode_number)02d.%(episode)s.%(ext)s" \
+# Output templates at https://github.com/yt-dlp/yt-dlp#output-template, or use
+# '-j' to see the json file with all of them.
+yt-dlp --get-filename \
+  -o "%(season_number)d.%(episode_number)02d %(episode)s.%(ext)s" \
   https://www.crunchyroll.com/some/good/serie
 
 # Download all videos in a YouTube channel.
