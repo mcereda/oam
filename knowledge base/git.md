@@ -67,6 +67,7 @@ git clone https://github.com:user/repo.git
 git clone git@github.com:user/repo.git path/to/clone
 git clone --recurse-submodules ssh@git.server:user/repo.git
 git clone --depth 1 ssh@git.server:user/repo.git
+git clone https://token@github.com/user/repo
 git \
   -c http.extraheader="Authorization: Basic $(echo -n "user:pat" | base64)" \
   clone https://dev.azure.com/org/project/_git/repo
@@ -329,6 +330,7 @@ git show :/cool
 ```sh
 # Use credentials in the URL.
 git clone https://username:password@host/path/to/repo
+git clone https://token@github.com/user/repo
 
 # Use headers.
 BASIC_AUTH='username:password'   # or 'username:token', or ':token'
