@@ -1,4 +1,32 @@
-# Git-related useful commands
+# Git-related useful commands <!-- omit in toc -->
+
+- [TL;DR](#tldr)
+- [Authentication](#authentication)
+- [Configuration](#configuration)
+  - [Remotes](#remotes)
+    - [Push to multiple git remotes with the one command](#push-to-multiple-git-remotes-with-the-one-command)
+  - [Aliases](#aliases)
+- [Manage changes](#manage-changes)
+  - [Create a patch](#create-a-patch)
+  - [Apply a patch](#apply-a-patch)
+- [The stash stack](#the-stash-stack)
+- [Branches](#branches)
+  - [Checkout an existing remote branch](#checkout-an-existing-remote-branch)
+  - [Delete a branch](#delete-a-branch)
+  - [Delete branches which have been merged or are otherwise absent from a remote.](#delete-branches-which-have-been-merged-or-are-otherwise-absent-from-a-remote)
+  - [Merge the master branch into a feature branch](#merge-the-master-branch-into-a-feature-branch)
+  - [Rebase a branch on top of another](#rebase-a-branch-on-top-of-another)
+- [Tags](#tags)
+- [LFS extension](#lfs-extension)
+- [Submodules](#submodules)
+- [Remove a file from a commit](#remove-a-file-from-a-commit)
+- [Remove a file from the repository](#remove-a-file-from-the-repository)
+- [Troubleshooting](#troubleshooting)
+  - [Debug](#debug)
+  - [GPG cannot sign a commit](#gpg-cannot-sign-a-commit)
+  - [Git does not accept self-signed certificates](#git-does-not-accept-self-signed-certificates)
+- [Further readings](#further-readings)
+- [Sources](#sources)
 
 ## TL;DR
 
@@ -39,6 +67,9 @@ git clone https://github.com:user/repo.git
 git clone git@github.com:user/repo.git path/to/clone
 git clone --recurse-submodules ssh@git.server:user/repo.git
 git clone --depth 1 ssh@git.server:user/repo.git
+git \
+  -c http.extraheader="Authorization: Basic $(echo -n "user:pat" | base64)" \
+  clone https://dev.azure.com/org/project/_git/repo
 
 # Unshallow a clone.
 git pull --unshallow
@@ -293,6 +324,20 @@ git submodule update --init --recursive
 git show :/cool
 ```
 
+## Authentication
+
+```sh
+# Use credentials in the URL.
+git clone https://username:password@host/path/to/repo
+
+# Use headers.
+BASIC_AUTH='username:password'   # or 'username:token', or ':token'
+BASIC_AUTH_B64="$(printf "$BASIC_AUTH" | base64)"
+git \
+  -c http.extraheader="Authorization: Basic ${BASIC_AUTH_B64}"
+  clone https://dev.azure.com/organizationName/projectName/_git/repoName
+```
+
 ## Configuration
 
 ```sh
@@ -311,6 +356,9 @@ git config --local commit.gpgsign true
 
 # Pull submodules by default.
 git config --global submodule.recurse true
+
+# Use a Personal Access Token to authenticate.
+git config http.extraheader="Authorization: Basic $(echo -n 'user:pat' | base64)"
 ```
 
 To show the current configuration use the `--list` option:
@@ -333,6 +381,96 @@ git config --get user.name
 git config --list \
   | awk -F '=' '{print $1}' | sort -u \
   | xargs -I {} sh -c 'printf "{}=" && git config --get {}'
+```
+
+### Remotes
+
+```sh
+# Add a remote.
+git remote add gitlab git@gitlab.com:user/my-awesome-repo.git
+
+# Add other push urls to an existing remote.
+git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo1
+
+# Change a remote.
+git remote set-url origin git@github.com:user/new-repo-name.git
+```
+
+#### Push to multiple git remotes with the one command
+
+To always push to `repo1`, `repo2`, and `repo3`, but always pull only from `repo1`, set up the remote 'origin' as follows:
+
+```sh
+git remote add origin https://exampleuser@example.com/path/to/repo1
+git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo1
+git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo2
+git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo3
+```
+
+```plaintext
+[remote "origin"]
+    url = https://exampleuser@example.com/path/to/repo1
+    pushurl = https://exampleuser@example.com/path/to/repo1
+    pushurl = https://exampleuser@example.com/path/to/repo2
+    pushurl = https://exampleuser@example.com/path/to/repo3
+    fetch = +refs/heads/*:refs/remotes/origin/*
+```
+
+To only pull from `repo1` but push to `repo1` and `repo2` for a specific branch `specialBranch`:
+
+```plaintext
+[remote "origin"]
+    url = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
+    fetch = +refs/heads/*:refs/remotes/origin/*
+    …
+[remote "specialRemote"]
+    url = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
+    pushurl = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
+    pushurl = ssh://git@aaa.xxx.com:7999/yyy/repo2.git
+    fetch = +refs/heads/*:refs/remotes/origin/*
+    …
+[branch "specialBranch"]
+    remote = origin
+    pushRemote = specialRemote
+    …
+```
+
+See <https://git-scm.com/docs/git-config#git-config-branchltnamegtremote>.
+
+### Aliases
+
+Simple aliases to git commands can be added like aliases to a shell:
+
+```ini
+[alias]
+  caa = commit -a --amend -C HEAD
+  ls = log --oneline
+  statsu = status
+```
+
+But simple aliases have limitations:
+
+- they can't have parameters
+- you can't execute multiple git commands in a single alias
+- you can't use `|` (pipes) or `grep`
+
+`git` allows you to escape to a shell using `!` (bang); this opens a new world of possibilities for aliases:
+
+- use shell expansions and parameters
+- use multiple git commands
+- use pipes and all command line tools
+
+Those commands need to be wrapped into a one-line function definition:
+
+```ini
+[alias]
+  new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
+  pull-from-all = "!f() { \
+      git remote show | xargs -I{} -P0 -n1 git pull {} ${1-$(git branch --show-current)}; \
+    } && f"
+  subtree-add = "!f() { \
+      git subtree add --prefix $2 $1 master --squash; \
+    }; f"
 ```
 
 ## Manage changes
@@ -555,42 +693,6 @@ git tag -d v1.4-lw
 git push origin --delete v1.4-lw
 ```
 
-## Aliases
-
-Simple aliases to git commands can be added like aliases to a shell:
-
-```ini
-[alias]
-  caa = commit -a --amend -C HEAD
-  ls = log --oneline
-  statsu = status
-```
-
-But simple aliases have limitations:
-
-- they can't have parameters
-- you can't execute multiple git commands in a single alias
-- you can't use `|` (pipes) or `grep`
-
-`git` allows you to escape to a shell using `!` (bang); this opens a new world of possibilities for aliases:
-
-- use shell expansions and parameters
-- use multiple git commands
-- use pipes and all command line tools
-
-Those commands need to be wrapped into a one-line function definition:
-
-```ini
-[alias]
-  new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
-  pull-from-all = "!f() { \
-      git remote show | xargs -I{} -P0 -n1 git pull {} ${1-$(git branch --show-current)}; \
-    } && f"
-  subtree-add = "!f() { \
-      git subtree add --prefix $2 $1 master --squash; \
-    }; f"
-```
-
 ## LFS extension
 
 1. Install the extension:
@@ -692,60 +794,6 @@ See [remove files from git commit].
    git commit --amend
    ```
 
-## Remotes
-
-```sh
-# Add a remote.
-git remote add gitlab git@gitlab.com:user/my-awesome-repo.git
-
-# Add other push urls to an existing remote.
-git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo1
-
-# Change a remote.
-git remote set-url origin git@github.com:user/new-repo-name.git
-```
-
-### Push to multiple git remotes with the one command
-
-To always push to `repo1`, `repo2`, and `repo3`, but always pull only from `repo1`, set up the remote 'origin' as follows:
-
-```sh
-git remote add origin https://exampleuser@example.com/path/to/repo1
-git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo1
-git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo2
-git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo3
-```
-
-```plaintext
-[remote "origin"]
-    url = https://exampleuser@example.com/path/to/repo1
-    pushurl = https://exampleuser@example.com/path/to/repo1
-    pushurl = https://exampleuser@example.com/path/to/repo2
-    pushurl = https://exampleuser@example.com/path/to/repo3
-    fetch = +refs/heads/*:refs/remotes/origin/*
-```
-
-To only pull from `repo1` but push to `repo1` and `repo2` for a specific branch `specialBranch`:
-
-```plaintext
-[remote "origin"]
-    url = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
-    fetch = +refs/heads/*:refs/remotes/origin/*
-    …
-[remote "specialRemote"]
-    url = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
-    pushurl = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
-    pushurl = ssh://git@aaa.xxx.com:7999/yyy/repo2.git
-    fetch = +refs/heads/*:refs/remotes/origin/*
-    …
-[branch "specialBranch"]
-    remote = origin
-    pushRemote = specialRemote
-    …
-```
-
-See <https://git-scm.com/docs/git-config#git-config-branchltnamegtremote>.
-
 ## Troubleshooting
 
 ### Debug
@@ -815,6 +863,7 @@ git -c http.sslVerify=false …
 - Quick guide about [git rebase][rebase quick guide]
 - Quick guide about how to [remove files from git commit]
 - [One weird trick for powerful Git aliases]
+- [Cannot clone git from Azure DevOps using PAT]
 
 [cheat.sh]: https://cheat.sh/git
 
@@ -822,6 +871,7 @@ git -c http.sslVerify=false …
 
 [10 git tips we can't live without]: https://opensource.com/article/22/4/git-tips
 [able to push to all git remotes with the one command?]: https://stackoverflow.com/questions/5785549/able-to-push-to-all-git-remotes-with-the-one-command
+[cannot clone git from azure devops using pat]: https://stackoverflow.com/questions/53106546/cannot-clone-git-from-azure-devops-using-pat#53182981
 [coloring white space in git-diff's output]: https://stackoverflow.com/questions/5257553/coloring-white-space-in-git-diffs-output#5259137
 [create a git patch from the uncommitted changes in the current working directory]: https://stackoverflow.com/questions/5159185/create-a-git-patch-from-the-uncommitted-changes-in-the-current-working-directory
 [get the repository's root directory]: https://stackoverflow.com/questions/957928/is-there-a-way-to-get-the-git-root-directory-in-one-command/#957978
