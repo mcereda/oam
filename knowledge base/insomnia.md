@@ -13,10 +13,21 @@
 ## Further readings
 
 - [Website]
+- [Documentation]
+- [Inso CLI], runner for Insomnia
 - [Postman], an alternative to Insomnia
+
+## Sources
+
+- [NPM install module in current directory]
 
 <!-- internal knowledge base -->
 [postman]: postman.md
 
 <!-- projects' references -->
+[documentation]: https://docs.insomnia.rest/
+[inso cli]: https://docs.insomnia.rest/inso-cli
 [website]: https://insomnia.rest/
+
+<!-- others -->
+[npm install module in current directory]: https://stackoverflow.com/questions/14032160/npm-install-module-in-current-directory#45660836
