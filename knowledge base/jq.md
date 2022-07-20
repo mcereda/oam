@@ -3,6 +3,12 @@
 ## TL;DR
 
 ```sh
+# Only list keys.
+jq 'keys' file.json
+
+# Sort all the keys.
+jq --sort-keys '.' input.json > output.json
+
 # Add a key.
 jq --arg REGION ${AWS_REGION} '.spec.template.spec.containers[]?.env? += [{name: "AWS_REGION", value: $REGION}]' /tmp/service.kube.json
 
@@ -26,9 +32,6 @@ jq '.extensionsGallery + {
        cacheUrl: "https://vscode.blob.core.windows.net/gallery/index",
        itemUrl: "https://marketplace.visualstudio.com/items"
     }' /usr/lib/code/product.json
-
-# Sort all the keys.
-jq --sort-keys '.' input.json > output.json
 
 # Put specific keys on top.
 jq '.objects = [(.objects[] as $in | {type,name,id} + $in)]' prod/dataPipeline_deviceLocationConversion_prod.json
