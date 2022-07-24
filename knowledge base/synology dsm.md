@@ -83,7 +83,7 @@ Examples:
 ```sh
 # `sudo` is only needed if the user has no privileges to run `docker` commands.
 sudo docker run \
-  -it --init \
+  -it --init --rm --name jdupes \
   -v "/volume/shared_folder1:/data1" \
   -v "/volume/shared_folder2:/data2" \
   ghcr.io/jbruchon/jdupes:latest \
