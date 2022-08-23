@@ -3,7 +3,12 @@
 Install and use `diffpdf` (preferred) or `diff-pdf`:
 
 ```sh
+sudo pacman -S diffpdf
 sudo zypper install diff-pdf
+```
+
+```sh
+diffpdf file1 file2
 ```
 
 As an alternative:
