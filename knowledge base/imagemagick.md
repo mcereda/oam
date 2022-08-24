@@ -31,5 +31,7 @@ magick *.png out.pdf
 ## Sources
 
 - [Converting Multiple Images into a PDF File]
+- [How to Quickly Resize, Convert & Modify Images from the Linux Terminal]
 
 [converting multiple images into a pdf file]: https://legacy.imagemagick.org/discourse-server/viewtopic.php?p=144157&sid=e7706233f81874af86ffbbf3e57b1e76#p144157
+[how to quickly resize, convert & modify images from the linux terminal]: https://www.howtogeek.com/109369/how-to-quickly-resize-convert-modify-images-from-the-linux-terminal/
