@@ -3,20 +3,20 @@
 ## TL;DR
 
 ```sh
-# generate a very basic configuration
+# Generate a very basic configuration.
 pre-commit sample-config > .pre-commit-config.yaml
 
-# manually run checks
+# Manually run checks.
 pre-commit run --all-files
 pre-commit run ansible-lint --files ansible/
 
-# automatically run checks at every commit
+# Automatically run checks at every commit.
 pre-commit install
 
-# update all hooks to the latest version
+# Update all hooks to the latest version.
 pre-commit autoupdate
 
-# skip check on commit
+# Skip check on commit.
 SKIP=flake8 git commit -m "foo"
 ```
 
@@ -25,6 +25,7 @@ SKIP=flake8 git commit -m "foo"
 # File .pre-commit-config.yaml
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+# See https://github.com/pre-commit/identify/blob/main/identify/extensions.py for the list of file types by extension
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -40,12 +41,14 @@ repos:
     rev: v0.11.0
     hooks:
       - id: markdownlint
+        types: [markdown]                 # limit target types
         args:
           - -r "~MD013"                   # ignore line-length rule
   - repo: https://github.com/ansible-community/ansible-lint
     rev: v6.0.2
     hooks:
       - id: ansible-lint
+        name: ansilint                    # use an alias
 ```
 
 ## Further readings
@@ -55,3 +58,5 @@ repos:
 
 [supported hooks]: https://pre-commit.com/hooks.html
 [website]: https://pre-commit.com
+
+[file types by extension]: https://github.com/pre-commit/identify/blob/main/identify/extensions.py
