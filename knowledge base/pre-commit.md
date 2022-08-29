@@ -51,6 +51,12 @@ repos:
         name: ansilint                    # use an alias
 ```
 
+## Troubleshooting
+
+### Some files are skipped during a run
+
+Check they are tracked (have been `add`ed to the repository).
+
 ## Further readings
 
 - Pre-commit's [website]
