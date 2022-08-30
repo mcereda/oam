@@ -87,7 +87,21 @@ Name                  | Description
 
 ## Versioning
 
+Use a _string_ literal containing one or more conditions separated by commas:
 
+```ini
+version = ">= 1.2.0, < 2.0.0"
+version = "~> 1.3, < 1.9.5"
+```
+
+Each condition must consist of an operator and a version number. The available operators are as follow:
+
+Operator             | Description
+-------------------- | -----------
+`=` or not present   | Specify the **exact** version number. It cannot be combined with other conditions.
+`!=`                 | Exclude the **exact** version number.
+`>`, `>=`, `<`, `<=` | Compare the available versions against the one specified and allow those for which the comparison is true.
+`~>`                 | Allow only the **rightmost** version component to be incremented.
 
 ## Troubleshooting
 
