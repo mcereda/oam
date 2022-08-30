@@ -165,5 +165,7 @@ provider "azurerm" {
 ## Sources
 
 - [for_each vs count]
+- [Azure Provider]
 
 [for_each vs count]: https://medium.com/@business_99069/terraform-count-vs-for-each-b7ada2c0b186
+[azure provider]: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs
