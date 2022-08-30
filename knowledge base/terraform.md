@@ -140,6 +140,16 @@ Terraform will perform the following actions:
     }
 ```
 
+### At least 1 "features" blocks are required
+
+The `azurerm` provider needs to be configured with at least the following lines:
+
+```hcl
+provider "azurerm" {
+  features {}
+}
+```
+
 ## Further readings
 
 - [CLI Documentation]
