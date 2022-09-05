@@ -167,10 +167,26 @@ export AZURE_CLI_DISABLE_CONNECTION_VERIFICATION=1
 One can directly call the APIs with the `rest` command:
 
 ```sh
-az rest -u https://graph.microsoft.com/v1.0/me/checkMemberObjects \
-  -m post -b "{\"ids\": [\"${GROUP_ID}\"]}"
-az rest -m delete \
-  -u "https://graph.microsoft.com/beta/groups/${GROUP_id}/members/${MEMBER_ID}/\$ref"
+az rest \
+  -u https://graph.microsoft.com/v1.0/me/checkMemberObjects \
+  --headers Authorization='Bearer ey…pw' \
+  -m post \
+  -b '{"ids": ["group_id"]}'
+
+az rest \
+  -u "https://graph.microsoft.com/beta/groups/group_id/members/member_id/\$ref" \
+  -m delete
+
+az rest \
+  -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?api-version=7.1-preview.1' \
+  -m put \
+  --headers \
+    Authorization='Bearer ey…pw' \
+    Content-Type='application/json' \
+  -b '{
+	  "authorizationId": "01234567-abcd-0987-fedc-0123456789ab",
+	  "validTo": "2021-12-31T23:46:23.319Z"
+    }'
 ```
 
 ## Further readings
