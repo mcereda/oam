@@ -12,11 +12,11 @@ terraform validate
 
 # Show what would be done.
 terraform plan
-terraform plan -out path/to/file.tfstate -parallelism 50
+terraform plan -out 'path/to/file.tfstate' -parallelism '50'
 
 # Make the changes.
 terraform apply
-terraform apply -auto-approve -backup -parallelism 25 path/to/plan.tfstate
+terraform apply -auto-approve -backup -parallelism 25 'path/to/plan.tfstate'
 
 # Destroy everything.
 # `destroy` is an alias of `apply -destroy` and is being deprecated.
@@ -30,7 +30,7 @@ terraform fmt -check -diff -recursive
 # Create a dependency graph.
 # Requires `dot` from 'graphviz' for image generation.
 terraform graph
-terraform graph | dot -Tsvg > graph.svg
+terraform graph | dot -Tsvg > 'graph.svg'
 
 # Show an existing resource.
 terraform state show 'packet_device.worker'
@@ -140,13 +140,27 @@ Terraform will perform the following actions:
     }
 ```
 
-### At least 1 "features" blocks are required
+### Error: at least 1 "features" blocks are required
 
 The `azurerm` provider needs to be configured with at least the following lines:
 
 ```hcl
 provider "azurerm" {
   features {}
+}
+```
+
+### Add/subtract time
+
+Instead of using the `timeadd()` function, it is advisable to use the `time_offset` resource:
+
+```hcl
+resource "time_offset" "one_year_from_now" {
+  offset_years = 1
+}
+resource "azurerm_key_vault_key" "key" {
+  expiration_date = time_offset.one_year_from_now.rfc3339
+  …
 }
 ```
 
