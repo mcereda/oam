@@ -164,14 +164,26 @@ resource "azurerm_key_vault_key" "key" {
 }
 ```
 
+### Export the contents of a tfvars file as shell variables
+
+```sh
+# As normal shell variables.
+eval "export $(sed -E 's/[[:blank:]]*//g' file.tfvars)"
+
+# As TF shell variables (TF_VAR_*).
+eval "export $(sed -E 's/([[:graph:]]+)[[:blank:]]*=[[:blank:]]*([[:graph:]]+)/TF_VAR_\1=\2/' file.tfvars)"
+```
+
 ## Further readings
 
 - [CLI Documentation]
 - [Providers best practices]
 - [Version constraints]
 - [References to Named Values]
+- [Environment Variables]
 
 [cli documentation]: https://www.terraform.io/docs/cli/
+[environment variables]: https://www.terraform.io/cli/config/environment-variables
 [providers best practices]: https://www.terraform.io/language/providers/requirements#best-practices-for-provider-versions
 [references to named values]: https://www.terraform.io/language/expressions/references
 [version constraints]: https://www.terraform.io/language/expressions/version-constraints
