@@ -4,117 +4,115 @@
 
 ```sh
 # Install the CLI.
-brew install azure-cli
-asdf plugin add azure-cli && asdf install azure-cli 2.37.0
+brew install 'azure-cli'
+asdf plugin add 'azure-cli' && asdf install 'azure-cli' '2.37.0'
 
 # Login to Azure.
 az login
-az login -u username -p password
-az login --service-principal -u app_id -p password_or_certificate --tenant tenant_id
-az login --identity --username client_id   # or object_id or resource_id
+az login -u 'username' -p 'password'
+az login --service-principal -u 'app_id' -p 'password_or_certificate' --tenant 'tenant_id'
+az login --identity --username 'client_id__or__object_id__or__resource_id'
 
 # Gather information on the current user.
 az ad signed-in-user show
 az ad signed-in-user list-owned-objects
 
 # Gather information on another user.
-az ad user show --id user@email.org
+az ad user show --id 'user@email.org'
 
 # Check a User's permissions.
-az ad user get-member-groups --id user@email.org
+az ad user get-member-groups --id 'user@email.org'
 
 # List Subscriptions available to the current User.
-az account list --refresh --output table
+az account list --refresh --output 'table'
 
 # Get the current User's default Subscription's ID.
-az account show --query id --output tsv
+az account show --query 'id' --output 'tsv'
 
 # Get the current User's default Subscription.
-az account set --subscription subscription_uuid
+az account set --subscription 'subscription_uuid_or_name'
 
 # Set the current User's default Resource Group.
-az configure --defaults group=resource_group_name
+az configure --defaults 'group=resource_group_name'
 
 # Get the ID of a Service Principal.
-az ad sp list --display-name service_principal_name --query '[0].id' -o tsv
+az ad sp list --display-name 'service_principal_name' --query '[0].id' -o 'tsv'
 
 # List available Locations.
-az account list-locations -o table
+az account list-locations -o 'table'
 
 # Get a Resource Group's ID.
-az group show resource_group_name
+az group show 'resource_group_name'
 
 # Create an Access Token for the current User.
 az account get-access-token
 
 # Get a password from a KeyVault.
-az keyvault secret show --query value \
-  --name secret_name --vault-name key_vault_name
+az keyvault secret show --query 'value' \
+  --name 'secret_name' --vault-name 'key_vault_name'
 
 # List LogAnalytics' Workspaces.
 az monitor log-analytics workspace list \
-  --resource-group resource_group_name \
+  --resource-group 'resource_group_name' \
 | jq -r '.[].name' -
 
 # Login to Azure DevOps with a PAT.
-az devops login --organization https://dev.azure.com/org_name
+az devops login --organization 'https://dev.azure.com/org_name'
 
 # Get the status of an Azure DevOps Pipeline.
 # Give the '--organization' parameter, or use '--detect true' if running the
 # command from a git repository to have it guessed automatically.
-az pipelines build show --detect true -o tsv \
-  --project project_name --id pipeline_id --query result
+az pipelines build show --detect true -o 'tsv' \
+  --project 'project_name' --id 'pipeline_id' --query 'result'
 
 # Validate a bicep template to create a Deployment Group.
 az deployment group validate \
-  -n deployment_group_name -g resource_group_name \
-  -f template.bicep -p parameter1="value" parameter2="value"
+  -n 'deployment_group_name' -g 'resource_group_name' \
+  -f 'template.bicep' -p 'parameter1=value' parameter2="value"
 
 # Check what a bicep template would do.
-az deployment group what-if \
-  -n deployment_group_name -g resource_group_name \
-  -f template.bicep -p parameter1="value" parameter2="value"
+az deployment group what-if …
 
 # Create a Deployment Group from a template.
-az deployment group create \
-  -n deployment_group_name -g resource_group_name \
-  -f template.bicep -p parameter1="value" parameter2="value"
+az deployment group create …
 
 # Cancel the current operation on a Deployment Group.
 az deployment group cancel \
-  -n deployment_group_name -g resource_group_name
+  -n 'deployment_group_name' -g 'resource_group_name'
 
 # Delete a Deployment Group.
 az deployment group delete \
-  -n deployment_group_name -g resource_group_name
+  -n 'deployment_group_name' -g 'resource_group_name'
 
 # Login to an ACR.
-az acr login --name acr_name
+az acr login --name 'acr_name'
 
 # Diagnose container registry connectivity issues.
 # Requires Docker being running.
 # Will run a hello-world image locally.
-az acr check-health -n acr_name -s subscription_uuid
+az acr check-health -n 'acr_name' -s 'subscription_uuid_or_name'
 
 # List helm charts in an ACR.
-az acr helm list -n acr_name -s subscription_uuid
+az acr helm list -n 'acr_name' -s 'subscription_uuid_or_name'
 
 # Get the 5 latest versions of a helm chart in an ACR.
-az acr helm list -n acr_name -s subscription_uuid --output json \
+az acr helm list -n 'acr_name' -s 'subscription_uuid_or_name' -o 'json' \
 | jq \
-    --arg CHART_REGEXP "kured" \
-    'to_entries | map(select(.key|test($CHART_REGEXP)))[].value[] | { version: .version, created: .created }' - \
+    --arg CHART_REGEXP 'chart_name_or_regex' \
+    'to_entries
+     | map(select(.key|test($CHART_REGEXP)))[].value[]
+     | { version: .version, created: .created }' - \
 | yq -sy 'sort_by(.created) | reverse | .[0:5]' -
 
 # Push a helm chart to an ACR.
-az acr helm push -n acr_name chart.tgz --force
+az acr helm push -n 'acr_name' 'chart.tgz' --force
 
 # Get credentials for an AKS cluster.
 az aks get-credentials --overwrite-existing \
-  --resource-group resource_group_name --name cluster_name
+  --resource-group 'resource_group_name' --name 'cluster_name'
 
 # Check if the current User is member of a given Group.
-az rest -u https://graph.microsoft.com/v1.0/me/checkMemberObjects \
+az rest -u 'https://graph.microsoft.com/v1.0/me/checkMemberObjects' \
   -m post -b '{"ids":["group_id"]}'
 
 # Check if a Service Principal is member of a given Group.
@@ -122,32 +120,32 @@ az rest -u 'https://graph.microsoft.com/v1.0/servicePrincipals/service_principal
   -m post -b '{"ids":["group_id"]}'
 
 # Query the Graph APIs for a specific Member in a Group.
-az rest -m get \
+az rest -m 'get' \
   -u 'https://graph.microsoft.com/beta/groups/group_id/members?$search="displayName:group_display_name"&$select=displayName' \
-  --headers consistencylevel=eventual
+  --headers 'consistencylevel=eventual'
 
 # Remove a Member from an AAD Group.
 # If '/$ref' is missing from the request, the user will be **deleted from AAD**
 # if the appropriate permissions are used, otherwise a '403 Forbidden' error is
 # returned.
-az rest -m delete \
+az rest -m 'delete' \
   -u 'https://graph.microsoft.com/beta/groups/group_id/members/member_id/$ref'
 
 # List the PATs of a User.
 # 'displayFilterOptions' are 'active' (default), 'all', 'expired' or 'revoked'.
 # If more then 20, results are paged and a 'continuationToken' will be returned.
-az rest -m get \
+az rest -m 'get' \
   --headers Authorization='Bearer ey…pw' \
   -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?api-version=7.1-preview.1'
 az rest … -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?api-version=7.1-preview.1&displayFilterOption=revoked&isSortAscending=false'
 az rest … -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats' \
-  --url-parameters api-version=7.1-preview.1 displayFilterOption=expired continuationToken='Hr…in='
+  --url-parameters 'api-version=7.1-preview.1' 'displayFilterOption=expired' continuationToken='Hr…in='
 
 # Extend a PAT.
 # Works with expired PATs too.
 az rest \
   -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?api-version=7.1-preview.1' \
-  -m put \
+  -m 'put' \
   --headers \
     Authorization='Bearer ey…pw' \
     Content-Type='application/json' \
@@ -155,7 +153,7 @@ az rest \
 	  "authorizationId": "01234567-abcd-0987-fedc-0123456789ab",
 	  "validTo": "2021-12-31T23:46:23.319Z"
     }'
-az rest … -b @file.json
+az rest … -b @'file.json'
 
 # Disable certificates check upon connection.
 # Use it for proxies with doubtful certificates.
@@ -168,25 +166,33 @@ One can directly call the APIs with the `rest` command:
 
 ```sh
 az rest \
-  -u https://graph.microsoft.com/v1.0/me/checkMemberObjects \
+  -u 'https://graph.microsoft.com/v1.0/me/checkMemberObjects' \
   --headers Authorization='Bearer ey…pw' \
-  -m post \
+  -m 'post' \
   -b '{"ids": ["group_id"]}'
 
 az rest \
-  -u "https://graph.microsoft.com/beta/groups/group_id/members/member_id/\$ref" \
-  -m delete
+  -u 'https://graph.microsoft.com/beta/groups/group_id/members/member_id/$ref' \
+  -m 'delete'
 
 az rest \
   -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?api-version=7.1-preview.1' \
-  -m put \
+  -m 'put' \
   --headers \
-    Authorization='Bearer ey…pw' \
-    Content-Type='application/json' \
+    'Authorization=Bearer ey…pw' \
+    'Content-Type=application/json' \
   -b '{
 	  "authorizationId": "01234567-abcd-0987-fedc-0123456789ab",
 	  "validTo": "2021-12-31T23:46:23.319Z"
     }'
+
+az rest \
+  -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats' \
+  -m 'get'
+  --url-parameters \
+    'api-version=7.1-preview.1' \
+    'displayFilterOption=expired' \
+    'continuationToken=Hr…in='
 ```
 
 ## Further readings
