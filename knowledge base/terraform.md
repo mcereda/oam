@@ -12,16 +12,20 @@ terraform validate
 
 # Show what would be done.
 terraform plan
+terraform plan -state 'path/to/file.tfstate' -var-file 'path/to/var.tfvars'
 terraform plan -out 'path/to/file.tfstate' -parallelism '50'
 
 # Make the changes.
 terraform apply
-terraform apply -auto-approve -backup -parallelism 25 'path/to/plan.tfstate'
+terraform apply -auto-approve -backup -parallelism '25' 'path/to/plan.tfstate'
 
 # Destroy everything.
 # `destroy` is an alias of `apply -destroy` and is being deprecated.
 terraform destroy
 terraform apply -destroy
+
+# Unlock a state file.
+terraform force-unlock 'lock_id'
 
 # Format files.
 terraform fmt
