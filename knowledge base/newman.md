@@ -2,6 +2,15 @@
 
 CLI Collection runner for Postman.
 
+1. [TL;DR](#tldr)
+2. [Further readings](#further-readings)
+
+## TL;DR
+
+```sh
+brew install newman
+```
+
 ## Further readings
 
 - [Postman]

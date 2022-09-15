@@ -2,6 +2,8 @@
 
 API platform for building and using APIs.
 
+1. [Further readings](#further-readings)
+
 ## Further readings
 
 - [Website]
