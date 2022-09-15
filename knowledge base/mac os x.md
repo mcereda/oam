@@ -1,19 +1,19 @@
 # Mac OS X <!-- omit in toc -->
 
-- [TL;DR](#tldr)
-- [Xcode CLI tools](#xcode-cli-tools)
-  - [Headless installation](#headless-installation)
-  - [Removal](#removal)
-  - [Upgrade](#upgrade)
-- [Hidden settings](#hidden-settings)
-- [Resize an image from CLI](#resize-an-image-from-cli)
-- [Boot keys cheatsheet](#boot-keys-cheatsheet)
-- [Update the OS from CLI](#update-the-os-from-cli)
-- [Keychain access from CLI](#keychain-access-from-cli)
-- [Use TouchID to authenticate in the terminal](#use-touchid-to-authenticate-in-the-terminal)
-  - [Fix iTerm2](#fix-iterm2)
-- [Further readings](#further-readings)
-- [Sources](#sources)
+1. [TL;DR](#tldr)
+2. [Xcode CLI tools](#xcode-cli-tools)
+   1. [Headless installation](#headless-installation)
+   2. [Removal](#removal)
+   3. [Upgrade](#upgrade)
+3. [Hidden settings](#hidden-settings)
+4. [Resize an image from CLI](#resize-an-image-from-cli)
+5. [Boot keys cheatsheet](#boot-keys-cheatsheet)
+6. [Update the OS from CLI](#update-the-os-from-cli)
+7. [Keychain access from CLI](#keychain-access-from-cli)
+8. [Use TouchID to authenticate in the terminal](#use-touchid-to-authenticate-in-the-terminal)
+   1. [Fix iTerm2](#fix-iterm2)
+9. [Further readings](#further-readings)
+10. [Sources](#sources)
 
 ## TL;DR
 
