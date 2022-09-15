@@ -1,4 +1,9 @@
-# Azure CLI
+# Azure CLI <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+2. [APIs](#apis)
+3. [Further readings](#further-readings)
+4. [Sources](#sources)
 
 ## TL;DR
 
@@ -23,6 +28,16 @@ az ad user show --id 'user@email.org'
 # Check a User's permissions.
 az ad user get-member-groups --id 'user@email.org'
 
+# Get the ID of a Service Principal from its Display Name.
+az ad sp list --display-name 'service_principal_name' --query 'id' -o 'tsv'
+
+# Get the Display Name of a Service Principal from its ID.
+az ad sp show -o 'tsv' \
+  --id '12345678-abcd-0987-fedc-567890abcdef' --query 'displayName'
+
+# Get a Resource Group's ID.
+az group show 'resource_group_name'
+
 # List Subscriptions available to the current User.
 az account list --refresh --output 'table'
 
@@ -35,14 +50,8 @@ az account set --subscription 'subscription_uuid_or_name'
 # Set the current User's default Resource Group.
 az configure --defaults 'group=resource_group_name'
 
-# Get the ID of a Service Principal.
-az ad sp list --display-name 'service_principal_name' --query '[0].id' -o 'tsv'
-
 # List available Locations.
 az account list-locations -o 'table'
-
-# Get a Resource Group's ID.
-az group show 'resource_group_name'
 
 # Create an Access Token for the current User.
 az account get-access-token
@@ -109,6 +118,8 @@ az acr helm push -n 'acr_name' 'chart.tgz' --force
 
 # Get credentials for an AKS cluster.
 az aks get-credentials --overwrite-existing \
+  --resource-group 'resource_group_name' --name 'cluster_name'
+az aks get-credentials --overwrite-existing --admin \
   --resource-group 'resource_group_name' --name 'cluster_name'
 
 # Check if the current User is member of a given Group.
@@ -208,6 +219,7 @@ az rest \
 - [Authenticate with an Azure container registry]
 - [Remove a member]
 
+<!-- external references -->
 [authenticate with an azure container registry]: https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication?tabs=azure-cli
 [get started with azure cli]: https://docs.microsoft.com/en-us/cli/azure/get-started-with-azure-cli
 [how to manage azure subscriptions with the azure cli]: https://docs.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli
