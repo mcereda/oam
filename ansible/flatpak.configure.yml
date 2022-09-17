@@ -32,7 +32,7 @@
             - configure
             - configuration
           block:
-            - name: Add flathub to the remotes
+            - name: Add flathub to the list of remotes of this run
               when: flathub_enabled
               set_fact:
                 remotes: "{{ remotes + [ { 'name': flathub_name, 'method': flathub_method, 'url': flathub_url } ] }}"
@@ -53,8 +53,8 @@
                 - remotes
                 - user
               when: item.method == 'user'
-              become: true
               community.general.flatpak_remote:
                 name: "{{ item.name }}"
                 flatpakrepo_url: "{{ item.url }}"
+                method: user
               loop: "{{ remotes }}"
