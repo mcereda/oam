@@ -1,4 +1,4 @@
-# Keybase client
+# Keybase git client
 
 The image gets `git` so I can use it to manage my repositories on keybase.io.
 
@@ -12,22 +12,22 @@ Can surely be vastly improved.
 
 ```sh
 # Build it.
-docker build -t 'michelecereda/keybaseio-client' .
+docker build -t 'michelecereda/keybaseio-git-client' .
 
 # Start the service.
 # Needs '--privileged' do be able to write to the disk.
 docker run \
-  -d --name 'keybaseio-client' \
+  -d --name 'keybaseio-git-client' \
   -e KEYBASE_SERVICE='1' \
   -e KEYBASE_USERNAME='user' \
   -e KEYBASE_PAPERKEY='paper key …' \
   --privileged \
   -v '/path/to/repos/root:/repos.ro' \
-  'michelecereda/keybaseio-client'
+  'michelecereda/keybaseio-git-client'
 
 # `bindfs` needs to be run as 'root' to use the '--create-for-user' flag.
 # Need to automate this when the container starts (entrypoint?).
-docker exec -u root 'keybaseio-client' \
+docker exec -u root 'keybaseio-git-client' \
   bindfs \
     --force-user='keybase' --force-group='keybase' \
     --create-for-user='keybase' --create-for-group='keybase' \
@@ -36,8 +36,8 @@ docker exec -u root 'keybaseio-client' \
     '/repos.rw'
 
 # Leverage the service to execute commands.
-docker exec -u 'keybase' 'keybaseio-client' keybase whoami
-docker exec -u 'keybase' 'keybaseio-client' \
+docker exec -u 'keybase' 'keybaseio-git-client' keybase whoami
+docker exec -u 'keybase' 'keybaseio-git-client' \
   git clone 'keybase://private/user/repo' '/repos.rw/repo'
 
 # Fix ownership of the new files in the directory (if needed).
@@ -58,17 +58,17 @@ drwxr-xr-x 1 myuser users   0 Sep 17 20:31 repos
 
 # Start the service.
 $ docker run \
->   -d --name 'keybaseio-client' \
+>   -d --name 'keybaseio-git-client' \
 >   --privileged \
 >   -v "${PWD}/repos:/repos.ro" \
 >   -e KEYBASE_SERVICE='1' \
 >   -e KEYBASE_USERNAME='user' \
 >   -e KEYBASE_PAPERKEY='paper key …' \
->   'michelecereda/keybaseio-client'
+>   'michelecereda/keybaseio-git-client'
 e6c550e02e1796cabfd752d8326e3c99d5f3646baa2e9befa34964b94ae67609
 
 # Mount the ro folder in the container to a rw folder I can use.
-$ docker exec -u root 'keybaseio-client' \
+$ docker exec -u root 'keybaseio-git-client' \
 >   bindfs --chown-ignore --chgrp-ignore \
 >     --force-user='keybase' --force-group='keybase' \
 >     --create-for-user='keybase' --create-for-group='keybase' \
@@ -80,12 +80,12 @@ total 0
 -rwx------ 1 myuser users   0 Sep 18 01:21 file.txt
 
 # Current permissions of the mounted folder in the container.
-$ docker exec -u keybase -ti 'keybaseio-client' ls -l '/repos.rw'
+$ docker exec -u keybase -ti 'keybaseio-git-client' ls -l '/repos.rw'
 total 0
 -rwx------ 1 keybase keybase   0 Sep 17 23:21 file.txt
 
 # Clone a repository from keybase.
-$ docker exec -u keybase -ti 'keybaseio-client' git clone keybase://private/mek/repo /repos.rw/repo
+$ docker exec -u keybase -ti 'keybaseio-git-client' git clone keybase://private/user/repo /repos.rw/repo
 Cloning into '/repos.rw/repo'...
 Initializing Keybase... done.
 Syncing with Keybase... done.
@@ -93,7 +93,7 @@ Counting: 10.46 KB... done.
 Cryptographic cloning: (100.00%) 10.46/10.46 KB... done.
 
 # Current permissions of the mounted folder in the container.
-$ sudo docker exec -u keybase -ti 'keybaseio-client' ls -l '/repos.rw'
+$ sudo docker exec -u keybase -ti 'keybaseio-git-client' ls -l '/repos.rw'
 total 0
 -rwx------ 1 keybase keybase   0 Sep 17 23:21 file.txt
 drwxr-xr-x 1 keybase keybase 304 Sep 18 08:04 repo
@@ -112,7 +112,7 @@ total 0
 drwxr-xr-x 1 myuser users 304 Sep 18 10:04 repo
 
 # Check the permissions of the mounted folder in the container.
-$ docker exec -u keybase -ti 'keybaseio-client' ls -l '/repos.rw'
+$ docker exec -u keybase -ti 'keybaseio-git-client' ls -l '/repos.rw'
 total 0
 -rwx------ 1 keybase keybase   0 Sep 17 23:21 file.txt
 drwxr-xr-x 1 keybase keybase 304 Sep 18 08:04 repo
