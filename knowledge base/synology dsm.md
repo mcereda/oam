@@ -125,8 +125,37 @@ sudo docker run --privileged \
     "/volume1/Data" "/volume1/@sharesnap/Data"
 ```
 
+## Use keybase
+
+Just use a containerized service and execute commands with it:
+
+```sh
+# Run the service.
+docker run -d --name 'keybase' \
+  -e KEYBASE_SERVICE='1' \
+  -e KEYBASE_USERNAME='user' \
+  -e KEYBASE_PAPERKEY='paper key' \
+  'keybaseio/client:stable'
+
+# Execute commands using the containerized service.
+docker exec \
+  --user keybase \
+  keybase \
+    keybase whoami
+```
+
+### Manage git repositories with a containerized keybase instance
+
+See the [readme for michelecereda/keybaseio-client][michelecereda/keybaseio-client].
+
+## Further readings
+
 ## Sources
 
 - [Configuring deduplication block on the Synology]
 
+<!-- internal references -->
+[michelecereda/keybaseio-client]: ../docker/keybaseio-client/README.md
+
+<!-- external references -->
 [configuring deduplication block on the synology]: https://onedrive.live.com/?authkey=%21ACYMJq62iJaU7HY&cid=1E8D74207941B8DD&id=1E8D74207941B8DD%21243&parId=1E8D74207941B8DD%21121&o=OneUp

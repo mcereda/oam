@@ -21,24 +21,37 @@ KEYBASE_USERNAME='user' KEYBASE_PAPERKEY='paper key' keybase oneshot
 keybase git list
 
 # Run garbage collection on git repository.
-keybase git gc awesomerepo
+keybase git gc 'awesomerepo'
 
 # Enable LFS support for a repository.
 # Run it from the repository's root.
 keybase git lfs-config
 
 # Clone a repository with LFS-enabled files.
-git clone --no-checkout keybase://private/user/repo \
-  && cd repo && keybase git lfs-config && cd - \
-  && git -C repo checkout -f HEAD
+git clone --no-checkout 'keybase://private/user/repo' \
+  && cd 'repo' && keybase git lfs-config && cd - \
+  && git -C 'repo' checkout -f HEAD
 
 # Import an existing repository in Keybase
-keybase git create repo \
-  && git clone --mirror https://github.com/user/repo /tmp/repo.git \
-  && git -C /tmp/repo.git push --mirror keybase://private/user/repo
+keybase git create 'repo' \
+  && git clone --mirror 'https://github.com/user/repo' '/tmp/repo.git' \
+  && git -C '/tmp/repo.git' push --mirror 'keybase://private/user/repo'
 
 # Run as root.
-KEYBASE_ALLOW_ROOT=1 keybase oneshot
+KEYBASE_ALLOW_ROOT='1' keybase oneshot
+
+# Run the service in a container.
+podman run -d --rm --name 'keybase' \
+  -e KEYBASE_SERVICE='1' \
+  -e KEYBASE_USERNAME='user' \
+  -e KEYBASE_PAPERKEY='paper key …' \
+  'keybaseio/client:stable'
+
+# Execute commands using the containerized service.
+podman exec \
+  --user keybase \
+  keybase \
+    keybase whoami
 ```
 
 ## Service execution
@@ -94,10 +107,10 @@ Use `keybase oneshot` to establish a temporary device. The resulting process won
 keybase oneshot
 
 # Use flags.
-keybase oneshot --username user --paperkey "paper key"
+keybase oneshot --username user --paperkey 'paper key'
 
 # Use environment variables
-KEYBASE_PAPERKEY="paper key" KEYBASE_USERNAME="user" keybase oneshot
+KEYBASE_PAPERKEY='paper key' KEYBASE_USERNAME='user' keybase oneshot
 ```
 
 Exploding messages work in oneshot mode with the caveat that you cannot run multiple instances of such with the same paperkey at the same time as each instance will try to create ephemeral keys, but require a distinct paperkey to uniquely identify itself as a separate device.  
