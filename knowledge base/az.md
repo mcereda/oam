@@ -15,8 +15,9 @@ asdf plugin add 'azure-cli' && asdf install 'azure-cli' '2.37.0'
 # Login to Azure.
 az login
 az login -u 'username' -p 'password'
-az login --service-principal -u 'app_id' -p 'password_or_certificate' --tenant 'tenant_id'
 az login --identity --username 'client_id__or__object_id__or__resource_id'
+az login --service-principal \
+  -u 'app_id' -p 'password_or_certificate' --tenant 'tenant_id'
 
 # Gather information on the current user.
 az ad signed-in-user show
@@ -55,6 +56,14 @@ az account list-locations -o 'table'
 
 # Create an Access Token for the current User.
 az account get-access-token
+
+# List role assignments.
+az role assignment list
+az role assignment list --all
+az role assignment list --scope 'scope_id' --role 'role_name__or__role_id'
+
+# List the names of all keys in a KeyVault.
+az keyvault key list --query '[].name' -o tsv --vault-name 'key_vault_name'
 
 # Get a password from a KeyVault.
 az keyvault secret show --query 'value' \
