@@ -1,4 +1,4 @@
-# Azure CLI <!-- omit in toc -->
+# Azure CLI
 
 1. [TL;DR](#tldr)
 2. [APIs](#apis)
@@ -116,11 +116,22 @@ az acr helm list -n 'acr_name' -s 'subscription_uuid_or_name' -o 'json' \
 # Push a helm chart to an ACR.
 az acr helm push -n 'acr_name' 'chart.tgz' --force
 
+# List the available AKS versions.
+az aks get-versions --location 'location' -o table
+
 # Get credentials for an AKS cluster.
-az aks get-credentials --overwrite-existing \
+az aks get-credentials \
   --resource-group 'resource_group_name' --name 'cluster_name'
-az aks get-credentials --overwrite-existing --admin \
+az aks get-credentials … --overwrite-existing --admin
+
+# Move the cluster to its goal state *without* changing its configuration.
+# Can be used to move out of a non succeeded state.
+az aks update --resource-group 'resource_group_name' --name 'cluster_name' --yes
+
+# Validate an ACR is accessible from an AKS cluster.
+az aks check-acr --acr 'acr_name' \
   --resource-group 'resource_group_name' --name 'cluster_name'
+az aks check-acr … --node-name 'node_name'
 
 # Check if the current User is member of a given Group.
 az rest -u 'https://graph.microsoft.com/v1.0/me/checkMemberObjects' \
@@ -157,9 +168,7 @@ az rest … -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats'
 az rest \
   -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?api-version=7.1-preview.1' \
   -m 'put' \
-  --headers \
-    Authorization='Bearer ey…pw' \
-    Content-Type='application/json' \
+  --headers Authorization='Bearer ey…pw' Content-Type='application/json' \
   -b '{
 	  "authorizationId": "01234567-abcd-0987-fedc-0123456789ab",
 	  "validTo": "2021-12-31T23:46:23.319Z"
@@ -218,9 +227,11 @@ az rest \
 - [How to manage Azure subscriptions with the Azure CLI]
 - [Authenticate with an Azure container registry]
 - [Remove a member]
+- [az aks reference]
 
 <!-- external references -->
 [authenticate with an azure container registry]: https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication?tabs=azure-cli
+[az aks reference]: https://learn.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest
 [get started with azure cli]: https://docs.microsoft.com/en-us/cli/azure/get-started-with-azure-cli
 [how to manage azure subscriptions with the azure cli]: https://docs.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli
 [install azure cli on macos]: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-macos
