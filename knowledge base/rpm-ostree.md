@@ -1,4 +1,9 @@
-# Fedora Silverblue
+# rpm-ostree
+
+| Name       | Base distribution  |
+| ---------- | ------------------ |
+| Kinoite    | Fedora KDE         |
+| Silverblue | Fedora Workstation |
 
 ## TL;DR
 
@@ -47,11 +52,13 @@ If you don't want to reboot your system to switch to the new deployment, you can
 
 ## Further readings
 
-- [User guide]
+- [rpm-ostree]
+- [Fedora Silverblue user guide]
 - [Flatpak]
 - [Toolbox]
 
 [flatpak]: flatpak.md
 [toolbox]: toolbox.md
 
-[user guide]: https://docs.fedoraproject.org/en-US/fedora-silverblue/
+[fedora silverblue user guide]: https://docs.fedoraproject.org/en-US/fedora-silverblue/
+[rpm-ostree]: https://coreos.github.io/rpm-ostree/
