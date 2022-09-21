@@ -15,9 +15,11 @@ systemctl --user start keybase.service
 
 # Restart services.
 sudo systemctl restart bluetooth.service
+systemctl --user restart davmail.service
 
 # Stop services.
 sudo systemctl stop cups.service
+systemctl --user stop davmail.service
 
 # Enable services on boot.
 sudo systemctl enable sshd.service
@@ -28,6 +30,24 @@ systemctl --user enable --now davmail.service
 sudo systemctl disable clamav-freshclam.service
 sudo systemctl disable --now gdm.service
 systemctl --user disable --now davmail.service
+
+# Suspend the system.
+# Saves the state to RAM only.
+systemctl suspend
+
+# Hibernate the system.
+# Saves the state to disk only.
+systemctl hibernate
+
+# Suspend the system in hybrid mode.
+# Saves the state to *both* RAM *and* disk.
+systemctl hybrid-sleep
+
+# Suspend the system, then hibernate after some time.
+# Saves the state to RAM initially, and if not interrupted within the specified
+# delay then wake up using an RTC alarm and hibernate.
+# Specify such delay in HibernateDelaySec in systemd-sleep.conf(5).
+systemctl suspend-then-hibernate
 
 # Show log entries.
 journalctl
@@ -189,9 +209,11 @@ Storage=persistent
 - [How To Use Journalctl to View and Manipulate Systemd Logs]
 - [How to Set Time, Timezone and Synchronize System Clock Using timedatectl Command]
 - [How to Set Hostname Using Hostnamectl Command?]
+- [Suspend and hibernate]
 
 [how to disable systemd-resolved in ubuntu]: https://askubuntu.com/questions/907246/how-to-disable-systemd-resolved-in-ubuntu
 [how to set hostname using hostnamectl command?]: https://linuxhint.com/set-hostname-using-hostnamectl-command/
 [how to set time, timezone and synchronize system clock using timedatectl command]: https://www.tecmint.com/set-time-timezone-and-synchronize-time-using-timedatectl-command/
 [how to use journalctl to view and manipulate systemd logs]: https://www.digitalocean.com/community/tutorials/how-to-use-journalctl-to-view-and-manipulate-systemd-logs
+[suspend and hibernate]: https://wiki.archlinux.org/title/Power_management#Suspend_and_hibernate
 [what are the systemctl options to list all failed units?]: https://unix.stackexchange.com/questions/341060/what-are-the-systemctl-options-to-list-all-failed-units/341061#341061
