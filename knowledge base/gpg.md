@@ -5,7 +5,7 @@
 ```sh
 # List existing keys.
 gpg --list-keys
-gpg --list-keys --keyid-format short
+gpg --list-keys --keyid-format 'short'
 gpg --list-secret-keys --with-keygrip
 
 # Generate a new key.
@@ -23,66 +23,67 @@ EOF
 
 # Delete a key from the keyring.
 # The non-interactive (--batch) option requires the key fingerprint.
-gpg --delete-secret-key recipient
-gpg --delete-key recipient
-gpg --delete-keys --batch fingerprint
+gpg --delete-secret-key 'recipient'
+gpg --delete-key 'recipient'
+gpg --delete-keys --batch 'key_fingerprint'
 
 # Get a key's fingerprint information.
 gpg --fingerprint
-gpg --fingerprint recipient
+gpg --fingerprint 'recipient'
 
 # Encrypt files.
-gpg -e -o file.out.gpg -r recipient file.in
-gpg --encrypt -o file.out.gpg -u sender -r recipient file.in
-gpg --encrypt-files --batch -r recipient file.in.1 file.in.N
-gpg -e --multifile --batch -r recipient --yes file.in.1 file.in.N
+gpg -e -o 'file.out.gpg' -r 'recipient' 'file.in'
+gpg --encrypt -o 'file.out.gpg' -u 'sender' -r 'recipient' 'file.in'
+gpg --encrypt-files --batch -r 'recipient' 'file.in.1' 'file.in.N'
+gpg -e --multifile --batch -r 'recipient' --yes 'file.in.1' 'file.in.N'
 
 # Decrypt files.
-gpg -d -o file.out file.in.gpg
-gpg --decrypt-files --batch file.in.gpg.1 file.in.gpg.N
-gpg -d --multifile --batch --yes file.in.gpg.1 file.in.gpg.N
+gpg -d -o 'file.out' 'file.in.gpg'
+gpg --decrypt-files --batch 'file.in.gpg.1' 'file.in.gpg.N'
+gpg -d --multifile --batch --yes 'file.in.gpg.1' 'file.in.gpg.N'
 
 # Import keys from a file.
-gpg --import keys.asc
+gpg --import 'keys.asc'
 
 # Export keys to a file.
-gpg --armor --export > all.public-keys.asc
-gpg --armor --export recipient > recipient.public-keys.asc
-gpg --armor --export-secret-keys > all.private-keys.asc
-gpg --armor --export-secret-keys recipient > recipient.private-keys.asc
+gpg --armor --export > 'all.public-keys.asc'
+gpg --armor --export recipient > 'recipient.public-keys.asc'
+gpg --armor --export-secret-keys > 'all.private-keys.asc'
+gpg --armor --export-secret-keys recipient > 'recipient.private-keys.asc'
 
 # Generate a revoke certificate.
 gpg --gen-revoke
 
 # Get the short ID of the signing key only for a user.
 # Primarily usable for git's signingKey configuration.
-gpg --list-keys --keyid-format short recipient \
+gpg --list-keys --keyid-format 'short' 'recipient' \
   | grep --extended-regexp '^pub[[:blank:]]+[[:alnum:]]+/[[:alnum:]]+[[:blank:]].*\[[[:upper:]]*S[[:upper:]]*\]' \
   | awk '{print $2}' \
   | cut -d '/' -f 2
 
 # Install on Mac OS X.
 # Choose one.
-brew install --cask gpg-suite-no-mail
-brew install gnupg
+brew install --cask 'gpg-suite-no-mail'
+brew install 'gnupg'
 ```
 
 ## Encryption
 
 ```sh
 # Single file.
-gpg --output $DB.key.gpg --encrypt --recipient $RECIPIENT $DB.key
+gpg --output 'file.out.gpg' --encrypt --recipient 'recipient' 'file.in'
+gpg --armor --symmetric --output 'file.out.gpg' 'file.in'
 
 # All files found.
-find . -type f -name secret.txt \
-  -exec gpg --batch --yes --encrypt-files --recipient $RECIPIENT {} ';'
+find . -type 'f' -name 'secret.txt' \
+  -exec gpg --batch --yes --encrypt-files --recipient 'recipient' {} ';'
 ```
 
 ## Decryption
 
 ```sh
 # Single file.
-gpg --output $DB.key --decrypt $DB.key.gpg
+gpg --output 'file.out' --decrypt 'file.in.gpg'
 
 # All files found.
 find . -type f -name "*.gpg" -exec gpg --decrypt-files {} +
@@ -95,33 +96,42 @@ The second command will create the decrypted version of all files in the same di
 As the original user, export all public keys to a base64-encoded text file and create an encrypted version of that file:
 
 ```sh
-gpg --armor --export > mypubkeys.asc
-gpg --armor --export email > mypubkeys-email.asc
-gpg --armor --symmetric --output mysecretatedpubkeys.sec.asc mypubkeys.asc
+# Export.
+gpg --armor --export > 'all.public-keys.asc'
+gpg --armor --export 'recipient' > 'recipient.public-keys.asc'
+
+# Encryption.
+gpg --output 'file.out.gpg' --encrypt --recipient 'recipient' 'file.in'
+gpg --armor --symmetric --output 'file.out.gpg' 'file.in'
 ```
 
 Export all encrypted private keys (which will also include corresponding public keys) to a text file and create an encrypted version of that file:
 
 ```sh
-gpg --armor --export-secret-keys > myprivatekeys.asc
-gpg --armor --symmetric --output mysecretatedprivatekeys.sec.asc myprivatekeys.asc
+# Export.
+gpg --armor --export-secret-keys > 'all.private-keys.asc'
+gpg --armor --export-secret-keys 'recipient' > 'recipient.private-keys.asc'
+
+# Encryption.
+gpg --output 'file.out.gpg' --encrypt --recipient 'recipient' 'file.in'
+gpg --armor --symmetric --output 'file.out.gpg' 'file.in'
 ```
 
-Optionally, export gpg's trustdb to a text file:
+Optionally, also export `gpg`'s trustdb to a text file:
 
 ```sh
-gpg --export-ownertrust > otrust.txt
+gpg --export-ownertrust > 'otrust.txt'
 ```
 
 ## Key import
 
-As the new user, execute `gpg --import` commands against the two `.asc` files, or the decrypted content of those files, and then check for the new keys with `gpg -k` and `gpg -K`, e.g.:
+As the new user execute `gpg --import` commands against the secured files, or the decrypted content of those files, and then check for the new keys with `gpg -k` and `gpg -K`, e.g.:
 
 ```sh
-gpg --output myprivatekeys.asc --decrypt mysecretatedprivatekeys.sec.asc
-gpg --import myprivatekeys.asc
-gpg --output mypubkeys.asc --decrypt mysecretatedpubkeys.sec.asc
-gpg --import mypubkeys.asc
+gpg --output 'myprivatekeys.asc' --decrypt 'mysecretatedprivatekeys.sec.asc' && \
+gpg --import 'myprivatekeys.asc'
+gpg --output 'mypubkeys.asc' --decrypt 'mysecretatedpubkeys.sec.asc'
+gpg --import 'mypubkeys.asc'
 gpg --list-secret-keys
 gpg --list-keys
 ```
@@ -129,13 +139,13 @@ gpg --list-keys
 Optionally import the trustdb file as well:
 
 ```sh
-gpg --import-ownertrust otrust.txt
+gpg --import-ownertrust 'otrust.txt'
 ```
 
 ## Key trust
 
 ```sh
-$ gpg --edit-key fingerprint
+$ gpg --edit-key 'key_fingerprint'
 gpg> trust
 gpg> quit
 ```
@@ -164,7 +174,7 @@ EOF
 ## Change a key's password
 
 ```sh
-$ gpg --edit-key fingerprint
+$ gpg --edit-key 'key_fingerprint'
 gpg> passwd
 gpg> quit
 ```
@@ -198,7 +208,7 @@ You should already have a GPG key. If you don't, read one of the many fine tutor
 You will create the subkey by editing your existing key **in expert mode** to get access to the appropriate options:
 
 ```sh
-$ gpg2 --expert --edit-key fingerprint
+$ gpg2 --expert --edit-key 'key_fingerprint'
 gpg> addkey
 Please select what kind of key you want:
    (3) DSA (sign only)
