@@ -1,9 +1,10 @@
 # Azure CLI
 
 1. [TL;DR](#tldr)
-2. [APIs](#apis)
-3. [Further readings](#further-readings)
-4. [Sources](#sources)
+2. [Pipelines](#pipelines)
+3. [APIs](#apis)
+4. [Further readings](#further-readings)
+5. [Sources](#sources)
 
 ## TL;DR
 
@@ -11,6 +12,10 @@
 # Install the CLI.
 brew install 'azure-cli'
 asdf plugin add 'azure-cli' && asdf install 'azure-cli' '2.37.0'
+
+# Disable certificates check upon connection.
+# Use it for proxies with doubtful certificates.
+export AZURE_CLI_DISABLE_CONNECTION_VERIFICATION=1
 
 # Login to Azure.
 az login
@@ -60,7 +65,7 @@ az account get-access-token
 # List role assignments.
 az role assignment list
 az role assignment list --all
-az role assignment list --scope 'scope_id' --role 'role_name__or__role_id'
+az role assignment list --scope 'scope_id' --role 'role_id_or_name'
 
 # List the names of all keys in a KeyVault.
 az keyvault key list --query '[].name' -o tsv --vault-name 'key_vault_name'
@@ -75,11 +80,22 @@ az monitor log-analytics workspace list \
 | jq -r '.[].name' -
 
 # Login to Azure DevOps with a PAT.
-az devops login --organization 'https://dev.azure.com/org_name'
+az devops login --organization 'https://dev.azure.com/organization_name'
 
-# Get the status of an Azure DevOps Pipeline.
-# Give the '--organization' parameter, or use '--detect true' if running the
-# command from a git repository to have it guessed automatically.
+# Get the names of all the Pipelines the current user has access to.
+az pipelines list --organization 'organization_id_or_name'
+az pipelines list --detect 'true' --query '[].name' -o 'tsv'
+
+# Show a specific Pipeline information.
+az pipelines show --id 'pipeline_id'
+az pipelines show --name 'pipeline_name'
+
+# Start a run.
+az pipelines run --name 'pipeline_name' \
+  --parameters 'system.debug=True' agent.diagnostic="True"
+
+# Get the status of a run of a Pipeline.
+az pipelines build show --id 'pipeline_id'
 az pipelines build show --detect true -o 'tsv' \
   --project 'project_name' --id 'pipeline_id' --query 'result'
 
@@ -183,11 +199,13 @@ az rest \
 	  "validTo": "2021-12-31T23:46:23.319Z"
     }'
 az rest … -b @'file.json'
-
-# Disable certificates check upon connection.
-# Use it for proxies with doubtful certificates.
-export AZURE_CLI_DISABLE_CONNECTION_VERIFICATION=1
 ```
+
+## Pipelines
+
+Give the `--organization` parameter, or use `--detect true` if running the command from a git repository to have it guessed automatically.
+
+`--detect` already defaults to `true`.
 
 ## APIs
 
@@ -237,10 +255,12 @@ az rest \
 - [Authenticate with an Azure container registry]
 - [Remove a member]
 - [az aks reference]
+- [Create and manage Azure Pipelines from the command line]
 
 <!-- external references -->
 [authenticate with an azure container registry]: https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication?tabs=azure-cli
 [az aks reference]: https://learn.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest
+[create and manage azure pipelines from the command line]: https://devblogs.microsoft.com/devops/create-and-manage-azure-pipelines-from-the-command-line/
 [get started with azure cli]: https://docs.microsoft.com/en-us/cli/azure/get-started-with-azure-cli
 [how to manage azure subscriptions with the azure cli]: https://docs.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli
 [install azure cli on macos]: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-macos
