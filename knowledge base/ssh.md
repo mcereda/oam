@@ -133,6 +133,7 @@ Host targaryen
 
 Host *ell
     user oberyn
+    sendenv BE_SASSY
 
 Host * !martell
     LogLevel INFO
@@ -140,6 +141,7 @@ Host * !martell
 Host *
     User root
     Compression yes
+    SendEnv -LC_* -LANG*
 ```
 
 ```ssh-config
