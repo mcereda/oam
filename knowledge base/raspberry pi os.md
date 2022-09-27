@@ -1,6 +1,25 @@
 # Raspberry Pi OS
 
-## Let it run containers
+1. [Store files on the SD even when the overlay file system is active](#store-files-on-the-sd-even-when-the-overlay-file-system-is-active)
+2. [Make it able to run containers](#make-it-able-to-run-containers)
+   1. [Kernel containerization features](#kernel-containerization-features)
+   2. [Firewall settings](#firewall-settings)
+3. [Sources](#sources)
+
+## Store files on the SD even when the overlay file system is active
+
+The files just need to be stored on a different file system from `/`. You can partition the SD and use that, or create a file and mount it as a virtual file system:
+
+```sh
+truncate -s '6G' 'file'
+mkfs.ext4 'file'
+mkdir 'mount/point'
+sudo mount -t 'ext4' -o 'loop' 'file' 'mount/point'
+sudo chown 'user':'group' 'mount/point'
+touch 'mount/point/new-file'
+```
+
+## Make it able to run containers
 
 ### Kernel containerization features
 
