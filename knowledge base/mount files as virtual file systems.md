@@ -14,7 +14,8 @@ mkfs.ext4 'path/to/file'
 mkdir 'mount/point'
 
 # Mount the file system.
-sudo mount -t 'ext4' 'path/to/file' 'mount/point'
+# The 'loop' option is optional.
+sudo mount -t 'ext4' -o 'loop' 'path/to/file' 'mount/point'
 ```
 
 Prefer `truncate` to `dd` to let the file expand dynamically and be resized (both larger or smaller) without damaging data with `losetup` and `resize2fs`.
