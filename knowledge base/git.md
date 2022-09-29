@@ -1,47 +1,49 @@
-# Git-related useful commands <!-- omit in toc -->
+# Git
 
-- [TL;DR](#tldr)
-- [Authentication](#authentication)
-- [Configuration](#configuration)
-  - [Remotes](#remotes)
-    - [Push to multiple git remotes with the one command](#push-to-multiple-git-remotes-with-the-one-command)
-  - [Aliases](#aliases)
-- [Manage changes](#manage-changes)
-  - [Create a patch](#create-a-patch)
-  - [Apply a patch](#apply-a-patch)
-- [The stash stack](#the-stash-stack)
-- [Branches](#branches)
-  - [Checkout an existing remote branch](#checkout-an-existing-remote-branch)
-  - [Delete a branch](#delete-a-branch)
-  - [Delete branches which have been merged or are otherwise absent from a remote.](#delete-branches-which-have-been-merged-or-are-otherwise-absent-from-a-remote)
-  - [Merge the master branch into a feature branch](#merge-the-master-branch-into-a-feature-branch)
-  - [Rebase a branch on top of another](#rebase-a-branch-on-top-of-another)
-- [Tags](#tags)
-- [LFS extension](#lfs-extension)
-- [Submodules](#submodules)
-- [Remove a file from a commit](#remove-a-file-from-a-commit)
-- [Remove a file from the repository](#remove-a-file-from-the-repository)
-- [Troubleshooting](#troubleshooting)
-  - [Debug](#debug)
-  - [GPG cannot sign a commit](#gpg-cannot-sign-a-commit)
-  - [Git does not accept self-signed certificates](#git-does-not-accept-self-signed-certificates)
-- [Further readings](#further-readings)
-- [Sources](#sources)
+1. [TL;DR](#tldr)
+2. [Authentication](#authentication)
+3. [Configuration](#configuration)
+   1. [Remotes](#remotes)
+      1. [Push to multiple git remotes with the one command](#push-to-multiple-git-remotes-with-the-one-command)
+   2. [Aliases](#aliases)
+4. [Manage changes](#manage-changes)
+   1. [Create a patch](#create-a-patch)
+   2. [Apply a patch](#apply-a-patch)
+5. [The stash stack](#the-stash-stack)
+6. [Branches](#branches)
+   1. [Checkout an existing remote branch](#checkout-an-existing-remote-branch)
+   2. [Delete a branch](#delete-a-branch)
+   3. [Delete branches which have been merged or are otherwise absent from a remote.](#delete-branches-which-have-been-merged-or-are-otherwise-absent-from-a-remote)
+   4. [Merge the master branch into a feature branch](#merge-the-master-branch-into-a-feature-branch)
+   5. [Rebase a branch on top of another](#rebase-a-branch-on-top-of-another)
+7. [Tags](#tags)
+8. [Convert a normal repository to a bare one](#convert-a-normal-repository-to-a-bare-one)
+9. [LFS extension](#lfs-extension)
+10. [Submodules](#submodules)
+11. [Remove a file from a commit](#remove-a-file-from-a-commit)
+12. [Remove a file from the repository](#remove-a-file-from-the-repository)
+13. [Troubleshooting](#troubleshooting)
+   1. [Debug](#debug)
+   2. [GPG cannot sign a commit](#gpg-cannot-sign-a-commit)
+   3. [Git does not accept self-signed certificates](#git-does-not-accept-self-signed-certificates)
+14. [Further readings](#further-readings)
+15. [Sources](#sources)
 
 ## TL;DR
 
 ```sh
 # Set your identity.
-git config user.name 'User Name'
-git config --global user.email user@email.com
+git config 'user.name' 'User Name'
+git config --global 'user.email' 'user@email.com'
 
 # Avoid issues when collaborating from different platforms.
-git config --local core.autocrlf 'input'
-git config --local core.autocrlf 'true'
+git config --local 'core.autocrlf' 'input'
+git config --local 'core.autocrlf' 'true'
 
 # Create aliases.
-git config --local alias.co checkout
-git config --global alias.unstage 'reset HEAD --'
+git config --local 'alias.co' 'checkout'
+git config --global 'alias.unstage' 'reset HEAD --'
+git config 'alias.funct' '!f() { sh_command ; sh_command | sh_command ; } && f'
 
 # Show git's configuration.
 git config --list
@@ -55,22 +57,25 @@ git config --list \
 
 # Get a default value if the setting has none.
 # Does not work on sections alone.
-git config --get --default not-set filter.lfs.cleaned
+git config --get --default not-set 'filter.lfs.cleaned'
 
 # Create or reinitialize a repository.
 git init
-git init --initial-branch main path/to/repo
-git init --bare path/to/repo.git
+git init --initial-branch 'main' 'path/to/repo'
+git init --bare 'path/to/repo.git'
 
 # Clone a repository.
-git clone https://github.com:user/repo.git
-git clone git@github.com:user/repo.git path/to/clone
-git clone --recurse-submodules ssh@git.server:user/repo.git
-git clone --depth 1 ssh@git.server:user/repo.git
-git clone https://token@github.com/user/repo
+git clone 'https://github.com:user/repo.git'
+git clone --bare 'git@github.com:user/repo.git' 'path/to/clone'
+git clone --recurse-submodules 'ssh@git.server:user/repo.git'
+git clone --depth 1 'ssh@git.server:user/repo.git'
+git clone 'https://token@github.com/user/repo'
 git \
   -c http.extraheader="Authorization: Basic $(echo -n "user:pat" | base64)" \
-  clone https://dev.azure.com/org/project/_git/repo
+  clone 'https://dev.azure.com/org/project/_git/repo'
+
+# Convert a normal repository to a bare one.
+git clone --bare 'repository' 'path/to/bare/clone.git'
 
 # Unshallow a clone.
 git pull --unshallow
@@ -81,7 +86,7 @@ git fetch
 # Get changes and merge them.
 git pull --all
 git pull --verify-signatures
-git pull remote branch
+git pull 'remote' 'branch'
 
 # Show what files changed.
 git status
@@ -89,22 +94,22 @@ git status --verbose
 
 # Show changes in a repository.
 git diff
-git diff --staged commit
-git diff commit1..commit2
-git diff branch1 branch2
-git diff --word-diff=color
-git log -p feature --not master
+git diff --staged 'commit_hash'
+git diff 'commit_hash_1..commit_hash_2'
+git diff 'branch_1' 'branch_2'
+git diff --word-diff='color'
+git log -p 'feature' --not 'master'
 
 # Just show changes between two files.
-git diff --no-index path/to/file/a path/to/file/b
+git diff --no-index 'path/to/file/a' 'path/to/file/b'
 
 # Stage changes for commit.
 git add .
 git add --all
-git add path/to/file
+git add 'path/to/file'
 
 # Interactively review chunks of changes.
-git add --patch path/to/file
+git add --patch 'path/to/file'
 
 # Commit changes.
 git commit --message 'message'
@@ -118,8 +123,8 @@ git commit --amend
 git commit --amend --message 'message'
 
 # Change the last commit's author.
-git config user.name "user name"
-git config user.email user.email@mail.com
+git config 'user.name' 'user name'
+git config 'user.email' 'user.email@mail.com'
 git commit --amend --reset-author
 
 # Sign the last commit.
@@ -129,21 +134,24 @@ git commit --amend --no-edit --gpg-sign
 git log @{u}..
 
 # Revert a commit but keep the history of the event as a separate commit.
-git revert commit
+git revert 'commit_hash'
 
 # Interactively rebase the last 7 commits.
-git rebase -i @~7
+git rebase -i '@~7'
 
 # List remotes.
 git remote --verbose
 
 # Add a new remote.
-git remote add gitlab git@gitlab.com:user/repo.git
+git remote add gitlab 'git@gitlab.com:user/repo.git'
+
+# Set a new URL for an existing remote.
+git remote set-url gitlab 'git@gitlab.com:user/repo.git'
 
 # Push committed changes.
 git push
-git push remote branch1 branch2
-git push git@github.com:user/repo.git
+git push 'remote' 'branch_1' 'branch_N'
+git push 'git@github.com:user/repo.git'
 git push --all --force
 
 # Show the repository's history.
@@ -158,10 +166,10 @@ git log --show-signature -1
 
 # Remove staged and working directory changes.
 git reset --hard
-git reset --hard origin/main
+git reset --hard 'origin/main'
 
 # Go back 4 commits.
-git reset --hard HEAD~4
+git reset --hard 'HEAD~4'
 
 # Remove untracked files.
 git clean -f -d
@@ -170,27 +178,27 @@ git clean -f -d
 git clean -f -d -x
 
 # Show who committed which line.
-git blame path/to/file
+git blame 'path/to/file'
 
 # List changed files in a given commit.
-git diff-tree --no-commit-id --name-only -r commit
+git diff-tree --no-commit-id --name-only -r 'commit_hash'
 
 # Create patches.
-git diff > file.patch
-git diff --output file.patch --cached
-git format-patch -5 commit
-git format-patch HEAD~3 -o dir
-git format-patch HEAD~2 --stdout > single.patch
+git diff > 'file.patch'
+git diff --output 'file.patch' --cached
+git format-patch -5 'commit_hash'
+git format-patch 'HEAD~3' -o 'dir'
+git format-patch 'HEAD~2' --stdout > 'single/file.patch'
 
 # Create a full patch of the unstaged changes.
 git add . && git commit -m 'uncommitted' \
-  && git format-patch HEAD~1 && git reset HEAD~1
+  && git format-patch 'HEAD~1' && git reset 'HEAD~1'
 
 # Apply a patch to the current index.
-git apply file.patch
+git apply 'file.patch'
 
 # Apply commits from a patch.
-git am file.patch
+git am 'file.patch'
 
 # Stash changes locally.
 git stash
@@ -215,50 +223,50 @@ git stash drop stash@{2}
 git stash clear
 
 # Apply only the changes made within a given commit.
-git cherry-pick commit
+git cherry-pick 'commit_hash'
 
 # Create a branch.
-git branch new-branch
-git switch -c new-branch
-git checkout -b new-local-branch remote/existing-branch
+git branch 'branch_name'
+git switch -c 'branch_name'
+git checkout -b 'local_branch_name' 'remote/branch_name'
 
 # Create a bare branch without any commits.
-git checkout --orphan branch_name
+git checkout --orphan 'branch_name'
 
 # List branches.
 git branch -a
 
 # Rename a branch.
-git branch --move old-name new-name
+git branch --move 'old_name' 'new_name'
 
 # Switch branches.
-git switch branch
-git checkout branch
+git switch 'branch_name'
+git checkout 'branch_name'
 git checkout -
 
 # Set an existing branch to track a remote branch.
-git branch -u remote/upstream-branch
+git branch -u 'remote_name/upstream-branch'
 
 # Get the current branch.
 git branch --show-current         # git > v2.22
-git rev-parse --abbrev-ref HEAD
+git rev-parse --abbrev-ref 'HEAD'
 
 # Delete local branches.
-git branch --delete local-branch
-git branch -D local-branch
+git branch --delete 'branch_name'
+git branch -D 'branch_name'
 
 # Delete remote branches.
-git push remote :remote-branch
-git push remote --delete remote-branch
+git push 'remote_name' ':branch_name'
+git push 'remote_name' --delete 'branch_name'
 
 # Delete both local and remote branches.
-git branch --delete --remotes branch
+git branch --delete --remotes 'branch_name'
 
 # Sync the local branch list.
 git fetch --prune
 
 # Remove all stale branches.
-git remote prune origin
+git remote prune 'branch_name'
 
 # Delete branches which have been merged or are otherwise absent from a remote.
 git branch --merged | grep -vE '(^\*|master|main|dev)' | xargs git branch -d
@@ -269,16 +277,16 @@ git fetch -p \
 git tag
 
 # Create annotated tags.
-git tag --annotate v0.1.0
-git tag -as v1.2.0-r0 -m 'signed annotated tag for v1.2.0 release 0'
-git tag -a 1.1.9 9fceb02
+git tag --annotate 'v0.1.0'
+git tag -as 'v1.2.0-r0' -m 'signed annotated tag for v1.2.0 release 0'
+git tag -a '1.1.9' '9fceb02'
 
 # Create lightweight tags.
-git tag v0.1.1-rc0
-git tag 1.12.1 HEAD
+git tag 'v0.1.1-rc0'
+git tag '1.12.1' 'HEAD'
 
 # Push specific tags.
-git push origin v1.5
+git push 'remote_name' 'v1.5'
 
 # Push annotated tags only.
 git push --follow-tags
@@ -287,18 +295,18 @@ git push --follow-tags
 git push --tags
 
 # Delete local tags.
-git tag -d v1.4-lw
+git tag -d 'v1.4-lw'
 
 # Delete remote tags.
-git push origin --delete v1.4-lw
+git push 'remote_name' --delete 'v1.4-lw'
 
 # Sync the local tags list.
 git fetch --prune-tags
 
 # Rebase a branch on top of another.
-git rebase main
-git rebase remote/upstream-branch local-branch
-git pull --rebase=interactive remote branch
+git rebase 'branch_name'
+git rebase 'remote_name/upstream_branch_name' 'local-branch_name'
+git pull --rebase='interactive' 'remote_name' 'branch_name'
 
 # Change the date of an existing commit.
 git filter-branch --env-filter \
@@ -309,11 +317,12 @@ git filter-branch --env-filter \
    fi'
 
 # Sign all commits from now on.
-git config --global user.signingkey 'KEY_ID_IN_SHORT_FORMAT'
-git config --local commit.gpgsign true
+git config --global 'user.signingkey' 'KEY_ID_IN_SHORT_FORMAT'
+git config --local 'commit.gpgsign' true
 
 # Import commits from another repo.
-git --git-dir=../other-repo/.git format-patch -k -1 --stdout commit | git am -3 -k
+git --git-dir='path/to/other-repo/.git' format-patch -k -1 --stdout 'commit_hash' \
+| git am -3 -k
 
 # Get the top-level directory of the current repository.
 git rev-parse --show-toplevel
@@ -329,35 +338,35 @@ git show :/cool
 
 ```sh
 # Use credentials in the URL.
-git clone https://username:password@host/path/to/repo
-git clone https://token@github.com/user/repo
+git clone 'https://username:password@host/path/to/repo'
+git clone 'https://token@github.com/user/repo'
 
 # Use headers.
 BASIC_AUTH='username:password'   # or 'username:token', or ':token'
 BASIC_AUTH_B64="$(printf "$BASIC_AUTH" | base64)"
 git \
   -c http.extraheader="Authorization: Basic ${BASIC_AUTH_B64}"
-  clone https://dev.azure.com/organizationName/projectName/_git/repoName
+  clone 'https://dev.azure.com/organizationName/projectName/_git/repoName'
 ```
 
 ## Configuration
 
 ```sh
 # Required to be able to commit changes.
-git config --local user.email 'me@me.info'
-git config --local user.name 'Me'
+git config --local 'user.email' 'me@me.info'
+git config --local 'user.name' 'Me'
 
 # Avoid issues when collaborating from different platforms.
 # 'input' on unix, 'true' on windows, 'false' only if you know what you are doing.
-git config --local core.autocrlf 'input'
+git config --local 'core.autocrlf' 'input'
 
 # Sign commits by default.
 # Get the GPG key short ID with `gpg --list-keys --keyid-format short`.
-git config --local user.signingkey 'KEY_ID_IN_SHORT_FORMAT'
-git config --local commit.gpgsign true
+git config --local 'user.signingkey' 'KEY_ID_IN_SHORT_FORMAT'
+git config --local 'commit.gpgsign' true
 
 # Pull submodules by default.
-git config --global submodule.recurse true
+git config --global 'submodule.recurse' true
 
 # Use a Personal Access Token to authenticate.
 git config http.extraheader="Authorization: Basic $(echo -n 'user:pat' | base64)"
@@ -376,7 +385,7 @@ Render the current value of a setting using the `--get` option:
 
 ```sh
 # Get the current user.name value.
-git config --get user.name
+git config --get 'user.name'
 
 # Render all current settings' values.
 # Gets the settings names, then requests the current value for each.
@@ -389,13 +398,13 @@ git config --list \
 
 ```sh
 # Add a remote.
-git remote add gitlab git@gitlab.com:user/my-awesome-repo.git
+git remote add 'gitlab' 'git@gitlab.com:user/my-awesome-repo.git'
 
-# Add other push urls to an existing remote.
-git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo1
+# Add other push URLs to an existing remote.
+git remote set-url --push --add 'origin' 'https://exampleuser@example.com/path/to/repo1'
 
-# Change a remote.
-git remote set-url origin git@github.com:user/new-repo-name.git
+# Change a remote's URL.
+git remote set-url 'origin' 'git@github.com:user/new-repo-name.git'
 ```
 
 #### Push to multiple git remotes with the one command
@@ -468,7 +477,8 @@ Those commands need to be wrapped into a one-line function definition:
 [alias]
   new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
   pull-from-all = "!f() { \
-      git remote show | xargs -I{} -P0 -n1 git pull {} ${1-$(git branch --show-current)}; \
+      git remote show \
+      | xargs -I{} -P0 -n1 git pull {} ${1-$(git branch --show-current)}; \
     } && f"
   subtree-add = "!f() { \
       git subtree add --prefix $2 $1 master --squash; \
@@ -486,28 +496,30 @@ git diff --staged
 
 # Show changes relative to 'commit' (defaults to HEAD if not given).
 # Alias of `--staged`.
-git diff --cached commit
+git diff --cached 'commit_hash'
 
-# Show changes relative to 'branch'.
-git diff branch
+# Show changes relative to a dirrenent branch.
+git diff 'branch_name'
 
 # Show changes between commits.
 # Separating the commits with `..` is optional.
-git diff commit1 commit2
+git diff 'commit_hash_1' 'commit_hash_2'
+git diff 'commit_hash_1..commit_hash_2'
 
 # Show changes between branches.
 # Separating the branches with `..` is optional.
-git diff branch1 branch2
+git diff 'branch_name_1' 'branch_name_2'
+git diff 'branch_name_1..branch_name_2'
 
 # Show a word diff using 'mode' to delimit changed words for emphasis.
 # 'mode' defaults to 'plain'.
 # 'mode' must be one of 'color', 'none', 'plain' or 'porcelain'.
-git diff --word-diff=porcelain
+git diff --word-diff='porcelain'
 
 # Just show changes between two files.
 # DO NOT consider them part of of the repository.
 # This can be used to diff any two files.
-git diff --no-index path/to/file/A path/to/file/B
+git diff --no-index 'path/to/file/A' 'path/to/file/B'
 ```
 
 ### Create a patch
@@ -517,10 +529,10 @@ Just save the output from `git diff` to get a patch file:
 ```sh
 # Just the current changes.
 # No staged nor committed files.
-git diff > file.patch
+git diff > 'file.patch'
 
 # Staged files only.
-git diff --output file.patch --cached
+git diff --output 'file.patch' --cached
 ```
 
 The output from `git diff` just shows changes to **text** files by default, no metadata or other information about commits or branches.  
@@ -528,17 +540,17 @@ To get a whole commit with all its metadata and binary changes, use `git format-
 
 ```sh
 # Include 5 commits starting with 'commit' and going backwards.
-git format-patch -5 commit
+git format-patch -5 'commit_hash'
 
 # Include 3 commits starting from HEAD and save the patches in 'dir'.
-git format-patch HEAD~3 -o dir
+git format-patch 'HEAD~3' -o 'dir'
 
 # Include 2 commits from HEAD and save them as a single file.
-git format-patch HEAD~2 --stdout > single.patch
+git format-patch 'HEAD~2' --stdout > 'single/file.patch'
 
 # Create a full patch of the unstaged changes.
 git add . && git commit -m 'uncommitted' \
-  && git format-patch HEAD~1 && git reset HEAD~1
+  && git format-patch 'HEAD~1' && git reset 'HEAD~1'
 ```
 
 ### Apply a patch
@@ -546,14 +558,14 @@ git add . && git commit -m 'uncommitted' \
 Use `git apply` to apply a patch file to the current index:
 
 ```sh
-git apply file.patch
+git apply 'file.patch'
 ```
 
 The changes from the patch are unstaged and no commits are created.  
 To apply all commits from a patch, use `git am` on a patch created with `git format-patch`:
 
 ```sh
-git am file.patch
+git am 'file.patch'
 ```
 
 The commits are applied one after the other and registered in the repository's logs.
@@ -587,7 +599,7 @@ git stash apply stash@{6}
 This creates a local branch tracking an existing remote branch.
 
 ```sh
-$ git checkout -b local-branch remote/existing-branch
+$ git checkout -b 'local-branch' 'remote/existing-branch'
 Branch 'local-branch' set up to track remote branch 'existing-branch' from 'remote'.
 Switched to a new branch 'local-branch'
 ```
@@ -596,15 +608,15 @@ Switched to a new branch 'local-branch'
 
 ```sh
 # Delete local branches.
-git branch --delete local-branch
-git branch -D local-branch
+git branch --delete 'local-branch'
+git branch -D 'local-branch'
 
 # Delete remote branches.
-git push origin :feat-branch
-git push origin --delete feat-branch
+git push 'remote' ':feat-branch'
+git push 'remote' --delete 'feat-branch'
 
 # Delete both local and remote branches.
-git branch --delete --remotes feat-branch
+git branch --delete --remotes 'feat-branch'
 ```
 
 ### Delete branches which have been merged or are otherwise absent from a remote.
@@ -624,17 +636,17 @@ git branch --merged | grep -vE '(^\*|master|main|dev)' | xargs git branch -d
 
 ```sh
 git stash pull
-git checkout master
+git checkout 'master'
 git pull
-git checkout feature
+git checkout 'feature'
 git pull
-git merge --no-ff master
+git merge --no-ff 'master'
 git stash pop
 ```
 
 ```sh
-git checkout feature
-git pull origin master
+git checkout 'feature'
+git pull 'origin' 'master'
 ```
 
 ### Rebase a branch on top of another
@@ -644,13 +656,13 @@ The commits to rebase are previously saved into a temporary area and then reappl
 
 ```sh
 # Rebase main on top of the current branch.
-git rebase main
+git rebase 'main'
 
 # Rebase an upstream branch on top of a local branch.
-git rebase remote/upstream-branch local-branch
+git rebase 'remote/upstream-branch' 'local-branch'
 
 # Rebase the current branch onto the *upstream* 'master' branch.
-git pull --rebase=interactive origin master
+git pull --rebase='interactive' 'origin' 'master'
 ```
 
 ## Tags
@@ -659,13 +671,13 @@ _Annotated_ tags are stored as full objects in git's database:
 
 ```sh
 # Create annotated tags.
-git tag --annotate v0.1.0
+git tag --annotate 'v0.1.0'
 
 # Create and sign annotated tags.
-git tag -as v1.2.0-r0 -m "signed annotated tag for v1.2.0 release 0"
+git tag -as 'v1.2.0-r0' -m "signed annotated tag for v1.2.0 release 0"
 
 # Tag specific commits.
-git tag -a 1.1.9 9fceb02
+git tag -a '1.1.9' '9fceb02'
 
 # Push all annotated tags only.
 git push --follow-tags
@@ -675,24 +687,32 @@ while _lightweight_ tags are stored as a pointer to a specific commit:
 
 ```sh
 # Create lightweight tags.
-git tag v0.1.1-rc0
-git tag 1.12.1 HEAD
+git tag 'v0.1.1-rc0'
+git tag '1.12.1' 'HEAD'
 ```
 
 Type-generic tag operations:
 
 ```sh
 # Push specific tags.
-git push origin v1.5
+git push 'origin' 'v1.5'
 
 # Push all tags
 git push --tags
 
 # Delete specific local tags only.
-git tag -d v1.4-lw
+git tag -d 'v1.4-lw'
 
 # Delete specific remote tags only.
-git push origin --delete v1.4-lw
+git push 'origin' --delete 'v1.4-lw'
+```
+
+## Convert a normal repository to a bare one
+
+The [preferred method][getting git on a server] is to create a bare clone of the normal repository:
+
+```sh
+git clone --bare 'repository' 'repository.git'
 ```
 
 ## LFS extension
@@ -700,10 +720,10 @@ git push origin --delete v1.4-lw
 1. Install the extension:
 
    ```sh
-   apt install git-lfs
-   brew install git-lfs
-   dnf install git-lfs
-   pacman -S git-lfs
+   apt install 'git-lfs'
+   brew install 'git-lfs'
+   dnf install 'git-lfs'
+   pacman -S 'git-lfs'
    ```
 
 1. If the package manager did not enable it system-wide, enable the extension for your user account:
@@ -724,7 +744,7 @@ git push origin --delete v1.4-lw
 1. Add the `.gitattributes` file to the traced files:
 
    ```sh
-   git add .gitattributes
+   git add '.gitattributes'
    git commit -m "lfs configured"
    ```
 
@@ -734,11 +754,11 @@ See [Git Submodules: Adding, Using, Removing, Updating] for more information.
 
 ```sh
 # Add a submodule to an existing repository.
-git submodule add https://github.com/ohmyzsh/ohmyzsh lib/ohmyzsh
+git submodule add 'https://github.com/ohmyzsh/ohmyzsh' 'lib/ohmyzsh'
 
 # Clone a repository which has submodules.
-git clone --recursive keybase://public/bananas/dotfiles
-git clone --recurse-submodules ohmyzsh keybase://public/bananas/dotfiles
+git clone --recursive 'keybase://public/bananas/dotfiles'
+git clone --recurse-submodules 'ohmyzsh' 'keybase://public/bananas/dotfiles'
 
 # Update an existing repository which has submodules.
 git pull --recurse-submodules
@@ -749,7 +769,7 @@ To delete a submodule the procedure is more complicated:
 1. De-init the submodule:
 
    ```sh
-   git submodule deinit lib/ohmyzsh
+   git submodule deinit 'lib/ohmyzsh'
    ```
 
    This wil also remove its entry from `$REPO_ROOT/.git/config`.
@@ -757,7 +777,7 @@ To delete a submodule the procedure is more complicated:
 1. Remove the submodule from the repository's index:
 
    ```sh
-   git rm -rf lib/ohmyzsh
+   git rm -rf 'lib/ohmyzsh'
    ```
 
    This wil also remove its entry from `$REPO_ROOT/.gitmodules`.
@@ -773,19 +793,19 @@ See [remove files from git commit].
 1. **Unstage** the file using `git reset`; specify HEAD as the source:
 
    ```sh
-   git reset HEAD secret-file
+   git reset HEAD 'secret-file'
    ```
 
 1. **Remove** the file from the repository's index:
 
    ```sh
-   git rm --cached secret-file
+   git rm --cached 'secret-file'
    ```
 
 1. Check the file is no longer in the index:
 
    ```sh
-   $ git ls-files | grep secret-file
+   $ git ls-files | grep 'secret-file'
    $
    ```
 
@@ -813,7 +833,7 @@ export GIT_TRACE=1
 > fatal: failed to write commit object
 > ```
 
-If gnupg2 and gpg-agent 2.x are used, be sure to set the environment variable GPG_TTY, specially zsh users with Powerlevel10k with Instant Prompt enabled.
+If `gnupg2` and `gpg-agent` 2.x are used, be sure to set the environment variable `GPG_TTY`, specially `zsh` users using `Powerlevel10k` with Instant Prompt enabled.
 
 ```sh
 export GPG_TTY=$(tty)
@@ -833,8 +853,12 @@ git -c http.sslVerify=false …
 - The official [LFS website]
 - Git [docs]
 - [Tagging]
+- [Getting Git on a Server]
+- [git-config reference]
 
 [docs]: https://git-scm.com/docs/git
+[getting git on a server]: https://git-scm.com/book/en/v2/Git-on-the-Server-Getting-Git-on-a-Server
+[git-config reference]: https://git-scm.com/docs/git-config
 [gitignore]: https://git-scm.com/docs/gitignore
 [tagging]: https://git-scm.com/book/en/v2/Git-Basics-Tagging
 
