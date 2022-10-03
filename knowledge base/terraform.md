@@ -1,5 +1,19 @@
 # Terraform
 
+1. [TL;DR](#tldr)
+2. [Modules](#modules)
+   1. [Useful internal variables](#useful-internal-variables)
+3. [Versioning](#versioning)
+4. [Troubleshooting](#troubleshooting)
+   1. [`count` vs `for_each`](#count-vs-for_each)
+   2. [Conditional creation of a resource](#conditional-creation-of-a-resource)
+   3. [Force the recreation of specific resources](#force-the-recreation-of-specific-resources)
+   4. [Error: at least 1 "features" blocks are required](#error-at-least-1-features-blocks-are-required)
+   5. [Add/subtract time](#addsubtract-time)
+   6. [Export the contents of a tfvars file as shell variables](#export-the-contents-of-a-tfvars-file-as-shell-variables)
+5. [Further readings](#further-readings)
+6. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -144,6 +158,46 @@ Terraform will perform the following actions:
     }
 ```
 
+### Conditional creation of a resource
+
+You can conditionally create one or more resources.  
+There are 2 ways to do this:
+
+- with `count`:
+
+  ```hcl
+  resource "cloudflare_record" "record" {
+    count = var.cloudflare_enabled ? 1 : 0
+    …
+  }
+  ```
+
+- with `for_each`:
+
+  ```hcl
+  resource "cloudflare_record" "record" {
+    for_each = length(var.cloudflare_records_map) > 0 ? var.cloudflare_records_map : {}
+    …
+  }
+  ```
+
+Mind the type of object in the line, and the gotchas for each method.
+
+### Force the recreation of specific resources
+
+Use the `-replace=resource_path` option during a `plan` or `apply`:
+
+```sh
+terraform apply -replace=aws_instance.example
+```
+
+```text
+# aws_instance.example will be replaced, as requested
+-/+ resource "aws_instance" "example" {
+      …
+    }
+```
+
 ### Error: at least 1 "features" blocks are required
 
 The `azurerm` provider needs to be configured with at least the following lines:
@@ -185,9 +239,11 @@ eval "export $(sed -E 's/([[:graph:]]+)[[:blank:]]*=[[:blank:]]*([[:graph:]]+)/T
 - [Version constraints]
 - [References to Named Values]
 - [Environment Variables]
+- [Forcing Re-creation of Resources]
 
 [cli documentation]: https://www.terraform.io/docs/cli/
 [environment variables]: https://www.terraform.io/cli/config/environment-variables
+[forcing re-creation of resources]: https://www.terraform.io/cli/state/taint
 [providers best practices]: https://www.terraform.io/language/providers/requirements#best-practices-for-provider-versions
 [references to named values]: https://www.terraform.io/language/expressions/references
 [version constraints]: https://www.terraform.io/language/expressions/version-constraints
@@ -196,6 +252,8 @@ eval "export $(sed -E 's/([[:graph:]]+)[[:blank:]]*=[[:blank:]]*([[:graph:]]+)/T
 
 - [for_each vs count]
 - [Azure Provider]
+- [Conditional creation of a resource based on a variable in .tfvars]
 
-[for_each vs count]: https://medium.com/@business_99069/terraform-count-vs-for-each-b7ada2c0b186
 [azure provider]: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs
+[conditional creation of a resource based on a variable in .tfvars]: https://stackoverflow.com/questions/60231309/terraform-conditional-creation-of-a-resource-based-on-a-variable-in-tfvars
+[for_each vs count]: https://medium.com/@business_99069/terraform-count-vs-for-each-b7ada2c0b186
