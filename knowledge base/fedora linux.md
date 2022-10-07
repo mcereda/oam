@@ -34,8 +34,16 @@ sudo systemctl start zfs-fuse.service
 sudo zpool import -a
 ```
 
+## Use DNF from behind a proxy
+
+Either:
+- add the line `sslverify=0` to `/etc/dnf/dnf.conf`; **not suggested**, but a quick fix
+- add the proxie's certificate, in PEM format, to the `/etc/pki/ca-trust/source/anchors/` folder and then run `sudo update-ca-trust`.
+
 ## Sources
 
 - [RPM fusion configuration]
+- [DNF update from behind SSL inspection proxy]
 
+[dnf update from behind ssl inspection proxy]: https://molo76.github.io/2017/07/04/dnf-update-behind-ssl-inspection-proxy.html
 [rpm fusion configuration]: https://rpmfusion.org/Configuration
