@@ -148,6 +148,10 @@ docker exec \
 
 See the [readme for michelecereda/keybaseio-client][michelecereda/keybaseio-client].
 
+## Ask for a feature to be implemented
+
+Use the [online feature request form]. Posting a request on the community site will not work.
+
 ## Further readings
 
 - [CLI Administrator Guide for Synology NAS]
@@ -162,3 +166,4 @@ See the [readme for michelecereda/keybaseio-client][michelecereda/keybaseio-clie
 <!-- external references -->
 [cli administrator guide for synology nas]: https://global.download.synology.com/download/Document/Software/DeveloperGuide/Firmware/DSM/All/enu/Synology_DiskStation_Administration_CLI_Guide.pdf
 [configuring deduplication block on the synology]: https://onedrive.live.com/?authkey=%21ACYMJq62iJaU7HY&cid=1E8D74207941B8DD&id=1E8D74207941B8DD%21243&parId=1E8D74207941B8DD%21121&o=OneUp
+[online feature request form]: https://www.synology.com/en-us/form/inquiry/feature
