@@ -1,0 +1,22 @@
+---
+
+- name:
+  tags:
+    - opensuse
+    - packman
+    - repository
+    - suse
+    - zypper
+  hosts: all
+  vars:
+    ansible_distribution_with_underscores: "{{ ansible_distribution | replace(' ', '_') }}"
+    repo_part_distribution: "{{ [ansible_distribution_with_underscores, ansible_distribution_version]|join('_') if ansible_distribution is search('leap', ignorecase=true) else ansible_distribution_with_underscores }}"
+  tasks:
+    - name: Add Packman to Zypper's repositories list
+      become: true
+      community.general.zypper_repository:
+        repo: "https://ftp.gwdg.de/pub/linux/misc/packman/suse/{{ repo_part_distribution }}/"
+        name: packman
+        priority: 90
+        overwrite_multiple: true
+        auto_import_keys: true
