@@ -1,75 +1,65 @@
 ---
 
-- name: Test Ansible's templating
+- name: Show off Ansible's templating
   hosts: all
   tasks:
 
-    - name: >-
-        Get the values of some special variables.
-        See https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
-        for the full list.
+    # A.K.A. ternary operator.
+    - name: Get back a conditional value.
       ansible.builtin.debug:
-        var: "{{ item }}"
-      with_items: ["ansible_local", "playbook_dir", "role_path"]
+        var: "{{ 'true' if 'test me a lot' is match('test') else 'false' }}"
 
-    - name: >-
-        Remove empty or false values from a list piping it to 'select()'.
-        Returns ["string"] from ["", "string", 0, false].
+    # Returns ["string"] from ["", "string", 0, false].
+    - name: Remove empty or false values from a list piping it to 'select()'.
       vars:
         list: ["", "string", 0, false]
       ansible.builtin.debug:
         var: list | select
 
-    - name: >-
-        Remove only empty strings from a list 'reject()'ing them.
-        Returns ["string", 0, false] from ["", "string", 0, false].
+    # Returns ["string", 0, false] from ["", "string", 0, false].
+    - name: Remove only empty strings from a list 'reject()'ing them.
       vars:
         list: ["", "string", 0, false]
       ansible.builtin.debug:
         var: list | reject('match', '^$')
 
-    - name: >-
-        Merge two lists.
-        Returns ["a", "b", "c", "d"] from ["a", "b"] and ["c", "d"].
+    # Returns ["a", "b", "c", "d"] from ["a", "b"] and ["c", "d"].
+    - name: Merge two lists.
       vars:
         list1: ["a", "b"]
         list2: ["c", "d"]
       ansible.builtin.debug:
         var: list1 + list2
 
-    - name: >-
-        Dedupe elements in a list.
-        Returns ["a", "b"] from ["a", "b", "b", "a"].
+    # Returns ["a", "b"] from ["a", "b", "b", "a"].
+    - name: Dedupe elements in a list.
       vars:
         list: ["a", "b", "b", "a"]
       ansible.builtin.debug:
         var: list | unique
 
-    - name: >-
-        Sort list by version number (not lexicographically).
-        Returns ['2.7.0', '2.8.0', '2.9.0',, '2.10.0' '2.11.0'] from ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
+    # Returns ['2.7.0', '2.8.0', '2.9.0',, '2.10.0' '2.11.0'] from
+    # ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
+    - name: Sort list by version number (not lexicographically).
       vars:
         list: ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
       ansible.builtin.debug:
         var: list | community.general.version_sort
 
-    - name: >-
-        Compare a semver version number.
-        Returns a boolean result.
+    - name: Replace spaces with underscores in a string.
       ansible.builtin.debug:
-        var: "'2.0.0-rc.1+build.123' is version('2.1.0-rc.2+build.423', 'ge', version_type='semver')"
+        var: "'string with spaces' | replace(' ', '_')"
 
-    - name: >-
-        Generate a random password.
-        Returns a random string following the specifications.
+    # Returns a random string following the specifications.
+    - name: Generate a random password.
       vars:
         password: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation') }}"
       ansible.builtin.debug:
         var: password
 
-    - name: >-
-        Hash a password.
-        Returns a hash of the requested type.
+    # Returns a hash of the requested type.
+    # Requires the 'passlib' Python module on Darwin.
+    - name: Hash a password.
       vars:
         password: abcd
         salt: "{{ lookup('community.general.random_string', special=false) }}"
@@ -80,12 +70,44 @@
       ansible.builtin.debug:
         var: "'string' | type_debug"
 
+- name: Show off Ansible's testing
+  hosts: all
+  vars:
+    url: "https://example.com/users/foo/resources/bar"
+  tasks:
 
-- name: Test Ansible's loops
+    - name: Compare a semver version number.
+      ansible.builtin.debug:
+        var: "'2.0.0-rc.1+build.123' is version('2.1.0-rc.2+build.423', 'ge', version_type='semver')"
+
+    # 'match' succeeds the pattern is **at the beginning** of the string.
+    # 'search' succeeds the pattern is **anywhere** within the string.
+    # 'regex' works like 'search', but can be configured to perform other
+    #   tests by passing the 'match_type' keyword argument.
+    # 'match_type' determines the 're' method used to perform the search.
+    # All of the string tests can also take the optional 'ignorecase' and
+    # 'multiline' arguments.
+    - name: Test a substring is present in a string.
+      debug:
+        msg: "{{ item }}"
+      with_items:
+        - "{{ url is match('https://example.com/users/.*/resources') }}"
+        - "{{ url is search('users/.*/resources/.*') }}"
+        - "{{ url is search('USERS', ignorecase=true) }}"
+        - "{{ url is regex('example\\.com/\\w+/foo') }}"
+
+- name: Show off Ansible's loops
   hosts: all
   tasks:
 
-    - name: Nested loop.
+    # See https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
+    # for the full list of special variables.
+    - name: Get the values of some special variables.
+      ansible.builtin.debug:
+        var: "{{ item }}"
+      with_items: ["ansible_local", "playbook_dir", "role_path"]
+
+    - name: Iterate through a nested loop.
       vars:
         middles:
           - 'middle1'

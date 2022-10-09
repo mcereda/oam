@@ -1,27 +1,28 @@
-# Ansible <!-- omit in toc -->
+# Ansible
 
-- [TL;DR](#tldr)
-- [Templating](#templating)
-- [Loops](#loops)
-- [Roles](#roles)
-  - [Get roles](#get-roles)
-  - [Role dependencies](#role-dependencies)
-- [Output formatting](#output-formatting)
-- [Troubleshooting](#troubleshooting)
-  - [Print all known variables](#print-all-known-variables)
-  - [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
-  - [Run specific tasks even in check mode](#run-specific-tasks-even-in-check-mode)
-  - [Dry-run only specific tasks](#dry-run-only-specific-tasks)
-  - [Set up recursive permissions on a directory so that directories are set to 755 and files to 644](#set-up-recursive-permissions-on-a-directory-so-that-directories-are-set-to-755-and-files-to-644)
-  - [Only run a task when another has a specific result](#only-run-a-task-when-another-has-a-specific-result)
-  - [Define when a task changed or failed](#define-when-a-task-changed-or-failed)
-  - [Set environment variables for a play, role or task](#set-environment-variables-for-a-play-role-or-task)
-  - [Set variables to the value of environment variables](#set-variables-to-the-value-of-environment-variables)
-  - [Check if a list contains an item and fail otherwise](#check-if-a-list-contains-an-item-and-fail-otherwise)
-  - [Define different values for `true`/`false`/`null`](#define-different-values-for-truefalsenull)
-  - [Force a task or play to use a specific Python interpreter](#force-a-task-or-play-to-use-a-specific-python-interpreter)
-- [Further readings](#further-readings)
-- [Sources](#sources)
+1. [TL;DR](#tldr)
+2. [Templating](#templating)
+   1. [Tests](#tests)
+   2. [Loops](#loops)
+3. [Roles](#roles)
+   1. [Get roles](#get-roles)
+   2. [Role dependencies](#role-dependencies)
+4. [Output formatting](#output-formatting)
+5. [Troubleshooting](#troubleshooting)
+   1. [Print all known variables](#print-all-known-variables)
+   2. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
+   3. [Run specific tasks even in check mode](#run-specific-tasks-even-in-check-mode)
+   4. [Dry-run only specific tasks](#dry-run-only-specific-tasks)
+   5. [Set up recursive permissions on a directory so that directories are set to 755 and files to 644](#set-up-recursive-permissions-on-a-directory-so-that-directories-are-set-to-755-and-files-to-644)
+   6. [Only run a task when another has a specific result](#only-run-a-task-when-another-has-a-specific-result)
+   7. [Define when a task changed or failed](#define-when-a-task-changed-or-failed)
+   8. [Set environment variables for a play, role or task](#set-environment-variables-for-a-play-role-or-task)
+   9. [Set variables to the value of environment variables](#set-variables-to-the-value-of-environment-variables)
+   10. [Check if a list contains an item and fail otherwise](#check-if-a-list-contains-an-item-and-fail-otherwise)
+   11. [Define different values for `true`/`false`/`null`](#define-different-values-for-truefalsenull)
+   12. [Force a task or play to use a specific Python interpreter](#force-a-task-or-play-to-use-a-specific-python-interpreter)
+6. [Further readings](#further-readings)
+7. [Sources](#sources)
 
 ## TL;DR
 
@@ -74,99 +75,106 @@ ansible-galaxy remove namespace.role
 
 ## Templating
 
-```yaml
-- name: >-
-    Get the values of some special variables.
-    See https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
-    for the full list.
-  ansible.builtin.debug:
-    var: "{{ item }}"
-  with_items: ["ansible_local", "playbook_dir", "role_path"]
+Ansible leverages [Jinja2 templating], which can be used directly in tasks or through the `template` module.
 
-- name: >-
-    Remove empty or false values from a list piping it to 'select()'.
-    Returns ["string"] from ["", "string", 0, false].
-  vars:
+All Jinja2's standard filters and tests can be used, with the addition of:
+
+- specialized filters for selecting and transforming data
+- tests for evaluating template expressions
+- lookup plugins for retrieving data from external sources for use in templating
+
+All templating happens **on the Ansible controller**, **before** the task is sent and executed on the target machine.
+
+Updated [examples] are available.
+
+```yaml
+# Remove empty or false values from a list piping it to 'select()'.
+# Returns ["string"].
+- vars:
     list: ["", "string", 0, false]
   ansible.builtin.debug:
     var: list | select
 
-- name: >-
-    Remove only empty strings from a list 'reject()'ing them.
-    Returns ["string", 0, false] from ["", "string", 0, false].
-  vars:
+# Remove only empty strings from a list 'reject()'ing them.
+# Returns ["string", 0, false].
+- vars:
     list: ["", "string", 0, false]
   ansible.builtin.debug:
     var: list | reject('match', '^$')
 
-- name: >-
-    Merge two lists.
-    Returns ["a", "b", "c", "d"] from ["a", "b"] and ["c", "d"].
-  vars:
+# Merge two lists.
+# Returns ["a", "b", "c", "d"].
+- vars:
     list1: ["a", "b"]
     list2: ["c", "d"]
   ansible.builtin.debug:
     var: list1 + list2
 
-- name: >-
-    Dedupe elements in a list.
-    Returns ["a", "b"] from ["a", "b", "b", "a"].
-  vars:
+# Dedupe elements in a list.
+# Returns ["a", "b"].
+- vars:
     list: ["a", "b", "b", "a"]
   ansible.builtin.debug:
     var: list | unique
 
-- name: >-
-    Sort list by version number (not lexicographically).
-    Returns ['2.7.0', '2.8.0', '2.9.0',, '2.10.0' '2.11.0'] from ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
-  vars:
+# Sort a list by version number (not lexicographically).
+# Returns ['2.7.0', '2.8.0', '2.9.0', '2.10.0' '2.11.0'].
+- vars:
     list: ['2.8.0', '2.11.0', '2.7.0', '2.10.0', '2.9.0']
   ansible.builtin.debug:
     var: list | community.general.version_sort
 
-- name: >-
-    Compare a semver version number.
-    Returns a boolean result.
-  ansible.builtin.debug:
-    var: "'2.0.0-rc.1+build.123' is version('2.1.0-rc.2+build.423', 'ge', version_type='semver')"
-
-- name: >-
-    Generate a random password.
-    Returns a random string following the specifications.
-  vars:
+# Generate a random password.
+# Returns a random string following the specifications.
+- vars:
     password: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation') }}"
   ansible.builtin.debug:
     var: password
 
-- name: >-
-    Hash a password.
-    Returns a hash of the requested type.
-  vars:
+# Hash a password.
+# Returns a hash of the requested type.
+- vars:
     password: abcd
     salt: "{{ lookup('community.general.random_string', special=false) }}"
   ansible.builtin.debug:
     var: password | password_hash('sha512', salt)
 
-- name: Get a variable's type.
-  ansible.builtin.debug:
+# Get a variable's type.
+- ansible.builtin.debug:
     var: "'string' | type_debug"
 ```
 
-## Loops
+### Tests
+
+Return a boolean result.
 
 ```yaml
-- name: >-
-    Fail when any of the given variables is an empty string.
-    Returns the ones which are.
-  when: lookup('vars', item) == ''
+# Compare semver version numbers.
+- ansible.builtin.debug:
+    var: "'2.0.0-rc.1+build.123' is version('2.1.0-rc.2+build.423', 'ge', version_type='semver')"
+```
+
+### Loops
+
+```yaml
+# Get the values of some special variables.
+# See the 'Further readings' section for the full list.
+- ansible.builtin.debug:
+    var: "{{ item }}"
+  with_items: ["ansible_local", "playbook_dir", "role_path"]
+
+
+# Fail when any of the given variables is an empty string.
+# Returns the ones which are empty.
+- when: lookup('vars', item) == ''
   ansible.builtin.fail:
     msg: "The {{ item }} variable is an empty string"
   loop:
     - variable1
     - variableN
 
-- name: Nested loop.
-  vars:
+# Iterate thrugh nested loops.
+- vars:
     middles:
       - 'middle1'
       - 'middle2'
@@ -449,6 +457,7 @@ vars:
 
 ## Further readings
 
+- [Templating]
 - [Roles]
 - [Tests]
 - [Special variables]
@@ -462,11 +471,13 @@ vars:
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
 [roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
 [special variables]: https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
+[templating]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html
 [tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
 
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
 [windows playbook example]: https://geekflare.com/ansible-playbook-windows-example/
 [yes and no, true and false]: https://chronicler.tech/red-hat-ansible-yes-no-and/
+
 
 ## Sources
 
@@ -492,6 +503,10 @@ vars:
 [unique filter of list in jinja2]: https://stackoverflow.com/questions/44329598/unique-filter-of-list-in-jinja2
 [working with versions]: https://docs.ansible.com/ansible/latest/collections/community/general/docsite/filter_guide_working_with_versions.html
 
-<!-- Other references -->
+<!-- internal references -->
+[examples]: ../ansible/examples.yml
+
+<!-- other references -->
 
 [ansible galaxy]: https://galaxy.ansible.com/
+[jinja2 templating]: https://jinja.palletsprojects.com/en/3.1.x/templates/
