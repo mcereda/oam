@@ -3,8 +3,8 @@
 ## TL;DR
 
 ```sh
-# use a project manager
-boinccmd --acct_mgr attach http://bam.boincstats.com myAwesomeUsername myAwesomePassword
+# Use a project manager.
+boinccmd --acct_mgr attach 'http://bam.boincstats.com' 'username' 'password'
 boinccmd --acct_mgr info
 boinccmd --acct_mgr sync
 boinccmd --acct_mgr detach
