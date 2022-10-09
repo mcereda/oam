@@ -60,11 +60,39 @@ sudo rpi-eeprom-update
 sudo rpi-eeprom-update -a && sync && reboot
 ```
 
+## Rollback from a bootable snapshot
+
+Do as follows:
+
+1. boot the system
+1. in GRUB's boot menu, choose _Bootable snapshots_
+1. select the snapshot you want to boot into; the list of snapshots is listed by date, the most recent snapshot being listed first
+1. log in to the system
+1. carefully check whether everything works as expected
+
+   > You cannot write to any directory that is part of the snapshot. Data you write to other directories will not get lost, regardless of what you do next.
+
+Depending on whether you want to perform the rollback or not, choose your next step:
+
+- if the system is in a state where you do **not** want to do a rollback, reboot and boot again into a different snapshot, or start the rescue system.
+- to perform the rollback, run
+
+  ```sh
+  sudo snapper rollback
+  ```
+
+  and reboot
+
+On the boot screen, choose the **default** boot entry to reboot into the reinstated system.
+
+A snapshot of the file system status before the rollback is created, and the default subvolume for root will be replaced with a fresh read-write snapshot.
+
 ## Further readings
 
 - [Bluetooth]
 - [Firewalld]
 - [Systemd]
+- [System Recovery and Snapshot Management with Snapper]
 
 ## Sources
 
@@ -81,3 +109,4 @@ sudo rpi-eeprom-update -a && sync && reboot
 [bluetooth on boot]: https://www.reddit.com/r/openSUSE/comments/eoozm2/comment/feetqpn/
 [openssh basics]: https://en.opensuse.org/SDB:OpenSSH_basics
 [raspberry pi4]: https://en.opensuse.org/openSUSE:Raspberry_Pi
+[system recovery and snapshot management with snapper]: https://documentation.suse.com/sles/12-SP4/html/SLES-all/cha-snapper.html
