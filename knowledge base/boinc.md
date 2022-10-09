@@ -1,11 +1,17 @@
 # BOINC
 
+1. [TL;DR](#tldr)
+2. [Client management](#client-management)
+3. [Use the GPU for computation](#use-the-gpu-for-computation)
+   1. [On OpenSUSE](#on-opensuse)
+4. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
 # Install.
 flatpak install 'edu.berkeley.BOINC'
-sudo zypper install 'boinc-manager'
+sudo zypper install 'boinc-client' 'boinc-manager'
 ```
 
 ## Client management
@@ -18,7 +24,9 @@ Name            | Type         | Description
 
 ## Use the GPU for computation
 
-[AMD Linux drivers] and [Radeon™ Software for Linux® Installation]
+Also see [AMD Linux drivers] and [Radeon™ Software for Linux® Installation].
+
+The BOINC client seems to need to be added to the `video` group to be able to use the drivers correctly - this is something I stiil need to check.
 
 ### On OpenSUSE
 
