@@ -38,6 +38,19 @@ typeset -aU path
 
 # Show all active key bindings.
 bindkeys
+
+# Make a variable value uppercase.
+echo ${name:u}
+echo ${(U)name}
+
+# Make a variable value lowercase.
+echo ${name:l}
+echo ${(L)name}
+
+# Declare a variable as inherently lower case or upper case.
+# The variable will automatically be lower- or uppercased on expansion.
+typeset -l name
+typeset -u name
 ```
 
 ## Alias expansion
@@ -499,6 +512,7 @@ compaudit | xargs chmod g-w
 - [Zsh delete keybinding]
 - [Fix key settings (Home/End/Insert/Delete) in .zshrc when running Zsh in Terminator Terminal Emulator]
 - [Handling Signals With Trap]
+- [Upper- or lower-casing strings]
 
 [antibody]: https://github.com/getantibody/antibody
 [antidote]: https://getantidote.github.io/
@@ -523,6 +537,7 @@ compaudit | xargs chmod g-w
 [remove duplicates in zsh path]: https://til.hashrocket.com/posts/7evpdebn7g-remove-duplicates-in-zsh-path
 [substitutions]: http://zsh.sourceforge.net/Guide/zshguide05.html
 [the z shell manual]: http://zsh.sourceforge.net/Doc/Release/
+[upper- or lower-casing strings]: https://scriptingosx.com/2019/12/upper-or-lower-casing-strings-in-bash-and-zsh/
 [what should/shouldn't go in .zshenv, .zshrc, .zlogin, .zprofile, .zlogout?]: https://unix.stackexchange.com/questions/71253/what-should-shouldnt-go-in-zshenv-zshrc-zlogin-zprofile-zlogout#487889
 [zsh compinit: insecure directories and files, run compaudit for list]: https://github.com/zsh-users/zsh-completions/issues/433#issuecomment-619321054
 [zsh delete keybinding]: https://superuser.com/questions/983016/zsh-delete-keybinding#983018
