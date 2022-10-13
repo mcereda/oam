@@ -10,7 +10,12 @@
   hosts: all
   vars:
     ansible_distribution_with_underscores: "{{ ansible_distribution | replace(' ', '_') }}"
-    repo_part_distribution: "{{ [ansible_distribution_with_underscores, ansible_distribution_version]|join('_') if ansible_distribution is search('leap', ignorecase=true) else ansible_distribution_with_underscores }}"
+    repo_part_distribution: >-
+      {{
+        [ansible_distribution_with_underscores, ansible_distribution_version]|join('_')
+        if ansible_distribution is search('leap', ignorecase=true)
+        else ansible_distribution_with_underscores
+      }}
   tasks:
     - name: Add Packman to Zypper's repositories list
       become: true
