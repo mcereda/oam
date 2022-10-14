@@ -23,6 +23,28 @@ echo ${name,,}
 echo ${name^^}
 ```
 
+## Files loading order
+
+On startup:
+
+1. (if login shell) `/etc/profile`
+1. (if interactive and non login shell) `/etc/bashrc`
+1. (if login shell) `~/.bash_profile`
+1. (if login shell and `~/.bash_profile` not found) `~/.bash_login`
+1. (if login shell and no `~/.bash_profile` nor `~/.bash_login` found) `~/.profile`
+1. (if interactive and non login shell) `~/.bashrc`
+
+Upon exit:
+
+1. (if login shell) `~/.bash_logout`
+1. (if login shell) `/etc/bash_logout`
+
+## Check if a script is sourced by another
+
+```sh
+(return 0 2>/dev/null) && echo "this script is not sourced" || echo "this script is sourced"
+```
+
 ## Further readings
 
 - [Trap]
@@ -31,10 +53,14 @@ echo ${name^^}
 ## Sources
 
 - [The Bash trap command]
+- [Bash startup files loading order]
+- [How to detect if a script is being sourced]
 
 <!-- internal references -->
 [trap]: trap.md
 
 <!-- external references -->
+[bash startup files loading order]: https://youngstone89.medium.com/unix-introduction-bash-startup-files-loading-order-562543ac12e9
+[how to detect if a script is being sourced]: https://stackoverflow.com/questions/2683279/how-to-detect-if-a-script-is-being-sourced#28776166
 [the bash trap command]: https://www.linuxjournal.com/content/bash-trap-command
 [upper- or lower-casing strings]: https://scriptingosx.com/2019/12/upper-or-lower-casing-strings-in-bash-and-zsh/
