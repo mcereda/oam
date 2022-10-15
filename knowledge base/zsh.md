@@ -1,14 +1,52 @@
 # ZSH
 
+1. [TL;DR](#tldr)
+2. [Alias expansion](#alias-expansion)
+3. [Parameter expansion](#parameter-expansion)
+   1. [Parameter substitution](#parameter-substitution)
+      1. [Check if a variable is set](#check-if-a-variable-is-set)
+      2. [Provide a default value](#provide-a-default-value)
+      3. [Just substitute with its value if set](#just-substitute-with-its-value-if-set)
+      4. [Set a default value and substitute](#set-a-default-value-and-substitute)
+      5. [Fail on missing value](#fail-on-missing-value)
+   2. [Matching and replacement](#matching-and-replacement)
+4. [Arrays](#arrays)
+5. [Tests](#tests)
+6. [Find broken symlinks in the current directory](#find-broken-symlinks-in-the-current-directory)
+7. [Key bindings](#key-bindings)
+8. [Configuration](#configuration)
+   1. [Config files read order](#config-files-read-order)
+   2. [History](#history)
+   3. [Completion](#completion)
+   4. [Prompt management](#prompt-management)
+   5. [Automatic source of files in a folder](#automatic-source-of-files-in-a-folder)
+9. [Frameworks](#frameworks)
+10. [Plugins](#plugins)
+11. [Troubleshooting](#troubleshooting)
+   1. [The delete, end and/or home keys are not working as intended](#the-delete-end-andor-home-keys-are-not-working-as-intended)
+   2. [Compinit warnings of insecure directories and files](#compinit-warnings-of-insecure-directories-and-files)
+12. [Further readings](#further-readings)
+
 ## TL;DR
 
-Startup file sequence:
+Startup files load sequence:
 
-1. `/etc/zshenv` and `${ZDOTDIR}/.zshenv`
-1. **login** shells only: `/etc/zprofile` and `${ZDOTDIR}/.zprofile`
-1. **interactive** shell only: `/etc/zshrc` and `${ZDOTDIR}/.zshrc`
-1. **login** shells only: `/etc/zlogin` and `${ZDOTDIR}/.zlogin`
-1. **upon exit**: `/etc/zlogout` and `${ZDOTDIR}/.zlogout`
+1. `/etc/zshenv`
+1. `${ZDOTDIR}/.zshenv`
+1. **login** shells only:
+   1. `/etc/zprofile`
+   1. `${ZDOTDIR}/.zprofile`
+1. **interactive** shells only:
+   1. `/etc/zshrc`
+   1. `${ZDOTDIR}/.zshrc`
+1. **login** shells only:
+   1. `/etc/zlogin`
+   1. `${ZDOTDIR}/.zlogin`
+
+Exit files load sequence:
+
+1. `/etc/zlogout`
+1. `${ZDOTDIR}/.zlogout`
 
 Aliases are expanded when the function definition is parsed, not when the function is executed. Define aliases **before** functions to avoid problems.
 
@@ -59,9 +97,10 @@ When one writes an alias, one can also press `ctrl-x` followed by `a` to see the
 
 ## Parameter expansion
 
-Parameter expansions can involve flags like `${(@kv)aliases}` and other operators such as `${PREFIX:-"/usr/local"}`. Parameter expansions can also be nested.
+Parameter expansions can involve flags like `${(@kv)aliases}` and other operators such as `${PREFIX:-"/usr/local"}`.  
+Nested parameters expand from the inside out.
 
-If the parameter is a **scalar** then the value, if any, is substituted:
+If the parameter is a **scalar** (a number or string) then the value, if any, is substituted:
 
 ```sh
 $ scalar='hello'
@@ -69,7 +108,7 @@ $ echo "$scalar"
 hello
 ```
 
-The braces are required if the expansion is to be followed by a letter, digit or underscore that is not to be interpreted as part of name:
+Curly braces are required if the expansion is followed by letters, digits or underscores that are not to be interpreted as part of name:
 
 ```sh
 $ echo "${scalar}_world"
@@ -84,18 +123,19 @@ $ echo "${array[@]}"
 hello world
 ```
 
-The two forms are equivalent:
+The two forms `array[@]` and `(@)array` are equivalent:
 
 ```sh
 $ echo "${(@)array}"
 hello world
 ```
 
-### Substitution
+### Parameter substitution
 
-#### Check if set
+#### Check if a variable is set
 
-If _name_ is set then its value is substituted by _1_, otherwise by _0_:
+Use the form `+parameterName`.  
+If _name_ is set, even to an empty string, then its value is substituted by _1_, otherwise by _0_:
 
 ```sh
 $ typeset name='tralala'
@@ -113,6 +153,7 @@ $ echo "${+name}"
 
 #### Provide a default value
 
+Use the forms `parameterName-defaultValue` or `parameterName:-defaultValue`.  
 If _name_ is set then substitute its value, otherwise substitute _word_:
 
 ```sh
@@ -122,7 +163,7 @@ tralala
 
 $ name=''
 $ echo "${name-word}"
-(empty line)
+(empty string)
 
 $ unset name
 $ echo "${name-word}"
@@ -146,11 +187,15 @@ word
 $ unset name
 $ echo "${name:-word}"
 word
+
+$ echo "${:-word}"
+word
 ```
 
-#### Just substitute
+#### Just substitute with its value if set
 
-If _name_ is set then substitute _word_, otherwise substitute nothing:
+Use the forms `parameterName+defaultValue` or `parameterName:+defaultValue`.  
+If _name_ is set, then substitute it with its value, otherwise substitute nothing:
 
 ```sh
 $ name='tralala'
@@ -166,7 +211,7 @@ $ echo "${name+word}"
 (empty line)
 ```
 
-In the second form, only substitute its value if _name_ is non-null:
+In the second form, only substitute its value if _name_ is set **and** non-null:
 
 ```sh
 $ name='tralala'
@@ -184,6 +229,7 @@ $ echo "${name:+word}"
 
 #### Set a default value and substitute
 
+Use the forms `parameterName=defaultValue`, `parameterName:=defaultValue` or `parameterName::=defaultValue`.  
 In the first form, if _name_ is unset then set it to _word_:
 
 ```sh
@@ -252,6 +298,7 @@ word
 
 #### Fail on missing value
 
+Use the forms `parameterName?defaultValue` or `parameterName:?defaultValue`.  
 In the first form, if _name_ is set then substitute its value, otherwise print _word_ and exit from the shell.
 
 ```sh

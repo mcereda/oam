@@ -3,14 +3,21 @@
 ## TL;DR
 
 ```sh
+# Declare functions.
+functionName () { … }
+function functionName { … }
+
+# Declare functions on a single line.
+functionName () { command1 ; … ; command N ; }
+
 # Run a command or function on exit, kill or error.
 trap "rm -f $tempfile" EXIT SIGTERM ERR
 trap function-name EXIT SIGTERM ERR
 
-# Disable CTRL-C
+# Disable CTRL-C.
 trap "" SIGINT
 
-# Re-enable CTRL-C
+# Re-enable CTRL-C.
 trap - SIGINT
 
 # Bash 3 and `sh` have no built-in means to convert case of a string, but the
@@ -23,7 +30,7 @@ echo ${name,,}
 echo ${name^^}
 ```
 
-## Files loading order
+## Startup files loading order
 
 On startup:
 
@@ -38,6 +45,10 @@ Upon exit:
 
 1. (if login shell) `~/.bash_logout`
 1. (if login shell) `/etc/bash_logout`
+
+## Functions
+
+A function automatically returns the exit code of the last command in it.
 
 ## Check if a script is sourced by another
 
