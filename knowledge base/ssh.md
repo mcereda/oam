@@ -1,33 +1,41 @@
 # SSH
 
+1. [TL;DR](#tldr)
+2. [Key Management](#key-management)
+3. [SSHFS](#sshfs)
+   1. [Installation](#installation)
+4. [Configuration](#configuration)
+5. [Further readings](#further-readings)
+6. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
-# load ssh keys from ~/.ssh and add them to the agent
+# Load keys from '~/.ssh' and add them to the agent.
 eval `ssh-agent` && ssh-add
 
-# create a new ssh key
+# Create new keys.
 ssh-keygen -t rsa -b 4096
 ssh-keygen -t dsa
 ssh-keygen -t ecdsa -b 521
 ssh-keygen -t ed25519 -f ~/.ssh/keys/id_ed25519 -C test@winzoz
 
-# remove an element from the list of known hosts
+# Remove elements from the known hosts list.
 ssh-keygen -R "pi4.lan"
 ssh-keygen -R 192.168.1.237 -f .ssh/known_hosts
 ssh-keygen -R "raspberrypi.lan" -f "${HOME}/.ssh/known_hosts"
 
-# change the password of a key file
+# Change the password of a key.
 ssh-keygen -f ~/.ssh/id_rsa -p
 
-# mount a remote folder
+# Mount a remote folder.
 sshfs nas.lan:/mnt/data Data -o auto_cache,reconnect,defer_permissions,noappledouble,volname=Data
 
-# list keys added to the agent by fingerprint
+# List keys added to the agent by fingerprint.
 ssh-add -l
 ssh-add -L   # full key in OpenSSH format
 
-# authorize a key for passwordless access
+# Authorize keys for passwordless access.
 ssh-copy-id -i ~/.ssh/id_rsa.pub user@nas.lan
 ```
 
@@ -88,11 +96,11 @@ ssh-keygen -f ~/.ssh/id_rsa -p
 
 Options:
 
-- `auto_cache` enables caching based on modification times
-- `reconnect` reconnects to server
-- `defer_permissions` certain shares may mount properly but cause permissions denied errors when accessed (an issue caused by the way permissions are translated and interpreted by the Mac OS X Finder). This option works around this problem
-- `noappledouble` prevents Mac OS X to write `.DS_Store` files on the remote file system
-- `volname` the volume name to be used
+- `auto_cache` enables caching based on modification times;
+- `reconnect` reconnects to the server;
+- `defer_permissions` works around the issue where certain shares may mount properly, but cause _permissions denied_ errors when accessed (caused by how Mac OS X's Finder translates and interprets permissions;
+- `noappledouble` prevents Mac OS X to write `.DS_Store` files on the remote file system;
+- `volname` defines the name to use for the volume.
 
 Usage:
 
@@ -100,17 +108,14 @@ Usage:
 sshfs -o $OPTIONS_LIST $HOST:$REMOTE_PATH $LOCAL_PATH
 ```
 
-Example:
-
 ```sh
 sshfs user@nas.lan:/mnt/data Data -o auto_cache,reconnect,defer_permissions,noappledouble,volname=Data
 ```
 
 ### Installation
 
-OSX (requires macports since brew does not offer sshfs anymore):
-
 ```sh
+# Mac OS X requires `macports`, since `brew` does not offer 'sshfs' anymore
 sudo port install sshfs
 ```
 
@@ -118,9 +123,11 @@ sudo port install sshfs
 
 When connecting to a host, the SSH client will use settings:
 
-1. from the command line
-1. from the user's `~/.ssh/config` file
+1. from the command line,
+1. from the user's `~/.ssh/config` file,
 1. from the `/etc/ssh/ssh_config` file
+
+In a first-come-first-served way. Settings should hence appear from the most specific to the most generic:
 
 ```ssh-config
 Host targaryen
@@ -134,9 +141,12 @@ Host targaryen
 Host *ell
     user oberyn
     sendenv BE_SASSY
+    StrictHostKeyChecking no
 
 Host * !martell
     LogLevel INFO
+    StrictHostKeyChecking accept-new
+    UserKnownHostsFile /dev/null
 
 Host *
     User root
@@ -145,20 +155,20 @@ Host *
 ```
 
 ```ssh-config
-# append domains to a hostname before attempting to check if they exist
+# Append domains to a hostname before attempting to check if they exist.
 CanonicalizeHostname yes
 CanonicalDomains xxx.auckland.ac.nz yyy.auckland.ac.nz
 
 Host  *.xxx.auckland.ac.nz
-    User myuser
+    User user_xxx
 Host *.yyy.auckland.ac.nz
-    User myotheruser
+    User user_yyy
 ```
 
 ```ssh-config
-# keep a connection open for 30s to be reused
-# save the pipe in a safe directory
-# use a hash of different data for pipe identification
+# Keep a connection open for 30s and reuse it when possible.
+# Save the above pipe in a safe directory, and use a hash of different data to
+# identify it.
 # source: https://www.cyberciti.biz/faq/linux-unix-reuse-openssh-connection/
 ControlMaster auto
 ControlPath ~/.ssh/control-%C
@@ -179,8 +189,10 @@ ControlPersist 30s
 - [How to perform hostname canonicalization]
 - [How to reuse SSH connection to speed up remote login process using multiplexing]
 
+<!-- -->
 [ssh-agent]: https://www.ssh.com/academy/ssh/agent
 
+<!-- -->
 [how to enable ssh access using a gpg key for authentication]: https://opensource.com/article/19/4/gpg-subkeys-ssh
 [how to list keys added to ssh-agent with ssh-add?]: https://unix.stackexchange.com/questions/58969/how-to-list-keys-added-to-ssh-agent-with-ssh-add
 [how to perform hostname canonicalization]: https://sleeplessbeastie.eu/2020/08/24/how-to-perform-hostname-canonicalization/
