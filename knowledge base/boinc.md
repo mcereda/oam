@@ -26,7 +26,7 @@ Name            | Type         | Description
 
 Also see [AMD Linux drivers] and [Radeon™ Software for Linux® Installation].
 
-The BOINC client seems to need to be added to the `video` group to be able to use the drivers correctly - this is something I stiil need to check.
+The BOINC client seems to need to be added to the `video` group to be able to use the drivers correctly - this is something I still need to check.
 
 ### On OpenSUSE
 

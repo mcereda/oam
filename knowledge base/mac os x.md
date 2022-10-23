@@ -50,10 +50,10 @@ security add-generic-password -a johnny -s github -w 'b.good'
 security add-generic-password -a johnny -s github -l work \
   -j 'my key for work' -w 'b.good'
 
-# Update a passwork value.
+# Update passwords' value.
 security add-generic-password -a johnny -s github -l work -U -w 'new-pass'
 
-# Print a password to stdout.
+# Print passwords to stdout.
 security find-generic-password -w -a johnny -s github
 security find-generic-password -w -l work
 security find-generic-password -w -l work -s github
@@ -207,7 +207,7 @@ security add-generic-password -a johnny -s github -w 'b.good'
 # Also give it some optional data.
 security add-generic-password -a johnny -s github -l work \
   -j 'my key for work' -w 'b.good'
-# Update the passwork value.
+# Update passwords' value.
 security add-generic-password -a johnny -s github -l work -U -w 'new-pass'
 
 # Print the above password to stdout.
