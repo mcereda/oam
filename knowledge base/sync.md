@@ -4,7 +4,7 @@
 # Flush all cached file data of the current user only.
 sync
 
-# Flush all pending write operations on all disks and mounted filesystems.
+# Flush all pending write operations on all disks and mounted file systems.
 sudo sync
 
 # Flush all pending write operations on given files only to disk.
@@ -23,7 +23,7 @@ sudo sync /dev/sdc1
 # Flush all pending write operations on all mounted filesystem from '/dev/sdb'.
 sudo sync /dev/sdb
 
-# Flush all pensing write operations on the entire file system which contains
+# Flush all pending write operations on the entire file system which contains
 # '/var/log/syslog'.
 sudo sync -f /var/log/syslog
 ```

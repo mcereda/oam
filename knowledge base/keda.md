@@ -6,21 +6,21 @@ Any Kubernetes cluster **>= 1.16.0** should work.
 
 **Table of contents:**
 
-- [How KEDA works](#how-keda-works)
-- [Deployment](#deployment)
-  - [Helm chart](#helm-chart)
-  - [Manual deployment](#manual-deployment)
-- [Usage](#usage)
-  - [ScaledObject](#scaledobject)
-  - [ScaledJobs](#scaledjobs)
-  - [Authentication](#authentication)
-- [External Scalers](#external-scalers)
-- [Troubleshooting](#troubleshooting)
-  - [Access logging and telemetry](#access-logging-and-telemetry)
-  - [Long running executions](#long-running-executions)
-  - [Manually uninstall everything](#manually-uninstall-everything)
-- [Further readings](#further-readings)
-- [Sources](#sources)
+1. [How KEDA works](#how-keda-works)
+2. [Deployment](#deployment)
+   1. [Helm chart](#helm-chart)
+   2. [Manual deployment](#manual-deployment)
+3. [Usage](#usage)
+   1. [ScaledObject](#scaledobject)
+   2. [ScaledJobs](#scaledjobs)
+   3. [Authentication](#authentication)
+4. [External Scalers](#external-scalers)
+5. [Troubleshooting](#troubleshooting)
+   1. [Access logging and telemetry](#access-logging-and-telemetry)
+   2. [Long running executions](#long-running-executions)
+   3. [Manually uninstall everything](#manually-uninstall-everything)
+6. [Further readings](#further-readings)
+7. [Sources](#sources)
 
 ## How KEDA works
 
@@ -86,7 +86,7 @@ VERSION=2.0.0 make undeploy  # uninstallation
 
 ## Usage
 
-One can just add a resouce to their deployment using the Custom Resource Definitions KEDA offers:
+One can just add a resource to their deployment using the Custom Resource Definitions KEDA offers:
 
 - **ScaledObject** for Deployments, StatefulSets and Custom Resources
 - **ScaledJob** for Jobs
@@ -174,7 +174,7 @@ For details and updated information see KEDA's [Scaling Jobs] page.
 
 The ScaledJob Custom Resource definition is what defines how KEDA should scale a Job and what the triggers (_scalers_) are. The full list of scalers is available [here][scalers].
 
-Instead of scaling up the number of replicas, KEDA will schedule a single Job for each detected event. For this, a ScaledJob is primarly used for long running executions or small tasks being able to run in parallel in massive spikes like processing queue messages:
+Instead of scaling up the number of replicas, KEDA will schedule a single Job for each detected event. For this, a ScaledJob is primarily used for long running executions or small tasks being able to run in parallel in massive spikes like processing queue messages:
 
 ```yaml
 apiVersion: keda.sh/v1alpha1

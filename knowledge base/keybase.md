@@ -98,7 +98,7 @@ Under some circumnstances (like Docker or other containers) `root` can be the be
 
 ## Temporary devices
 
-Use `keybase oneshot` to establish a temporary device. The resulting process won't write credential information on the local storage disk nor it will make any changes to the user's sigchain; rather, it will hold the given paperkey in memory for as long as the corrisponding `keybase service` process is running or until `keybase logout` is called; when this happens, it will disappear.
+Use `keybase oneshot` to establish a temporary device. The resulting process won't write credential information on the local storage disk nor it will make any changes to the user's sigchain; rather, it will hold the given paperkey in memory for as long as the corresponding `keybase service` process is running or until `keybase logout` is called; when this happens, it will disappear.
 
 `keybase oneshot` needs a username and a paperkey to work, either passed in via standard input, command-line flags, or environment variables:
 
