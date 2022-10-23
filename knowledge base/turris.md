@@ -113,7 +113,7 @@ Available reset modes are:
 
 After the selected mode indication is performed, all LEDs will turn blue for a moment and then a light wave indicates the start the first stage boot during which LEDs turn green.
 
-> **Warning:** when LEDs turn red, it means that some highly sensitive operation is in process and data may be corrupted if it is interupted. Try not to reset router during the proccess or you might end up with corrupted filesystem. That one can be fixed using mode 4 but with complete data loss.
+> **Warning:** when LEDs turn red, it means that some highly sensitive operation is in process and data may be corrupted if it is interrupted. Try not to reset router during the process or you might end up with corrupted filesystem. That one can be fixed using mode 4 but with complete data loss.
 
 ## Further readings
 

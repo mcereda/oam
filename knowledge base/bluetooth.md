@@ -21,7 +21,7 @@ In `/etc/bluetooth/main.conf`, under the `General` section, set `FastConnectable
 
 ### Bluetooth devices cannot be used at login
 
-In `/etc/bluetooth/main.conf`, under the `Policy` section, set `Autoenable` to `true`:
+In `/etc/bluetooth/main.conf`, under the `Policy` section, set `AutoEnable` to `true`:
 
 ```diff
 [Policy]
