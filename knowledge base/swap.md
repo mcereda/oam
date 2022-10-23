@@ -16,7 +16,7 @@ sudo swapoff /dev/sda2
 sudo swapon -a
 sudo swapoff --all
 
-# chech what processes are swapping
+# check what processes are swapping
 # see the "si" (swap in) and "so" (swap out) columns
 vmstat
 vmstat --wide 1
