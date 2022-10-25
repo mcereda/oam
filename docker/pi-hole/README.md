@@ -1,5 +1,13 @@
 # Pi-hole
 
+## TL;DR
+
+```sh
+# Run on Raspberry Pi.
+sudo apt update && sudo apt install -y docker-compose
+cd pi-hole && sudo docker-compose up -d
+```
+
 ## Further readings
 
 - [Github]
