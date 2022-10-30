@@ -7,6 +7,7 @@
 sudo zypper install hashcat
 
 # Add your user to the 'video' group to be able to use the GPU.
+# You'll still need the correct drivers to be installed.
 sudo usermod -a -G 'video' 'username'
 sudo gpasswd -a 'username' 'video'
 
