@@ -3,8 +3,11 @@
 ## TL;DR
 
 ```sh
-# one-step automated install
-curl -sSL https://install.pi-hole.net | bash
+# One-step automated install.
+curl -sSL 'https://install.pi-hole.net' | bash
+
+# Update Graviton's DB.
+pihole -g
 ```
 
 ## Further readings

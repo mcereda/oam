@@ -4,8 +4,11 @@
 
 ```sh
 # Run on Raspberry Pi.
-sudo apt update && sudo apt install -y docker-compose
-cd pi-hole && sudo docker-compose up -d
+apt update && apt install -y docker-compose
+cd pi-hole && docker-compose up -d
+
+# Upgrade Graviton's DB.
+docker exec -ti pihole pihole -g
 ```
 
 ## Further readings
