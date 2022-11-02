@@ -7,81 +7,84 @@
 docker images -a
 
 # Search for images.
-docker search boinc
+docker search 'boinc'
 
 # Pull images.
-docker pull alpine:3.14
-docker pull boinc/client:latest
+docker pull 'alpine:3.14'
+docker pull 'boinc/client:latest'
 
 # Login to registries.
 docker login
-docker login -u username -p password
+docker login -u 'username' -p 'password'
 
 # Create containers.
-docker create -h alpine-test --name alpine-test alpine
+docker create -h 'alpine-test' --name 'alpine-test' 'alpine'
 
 # Start containers.
-docker start alpine-test
-docker start bdbe3f45
+docker start 'alpine-test'
+docker start 'bdbe3f45'
 
 # Create and start containers.
-docker run hello-world
-docker run -ti --rm alpine cat /etc/apk/repositories
-docker run -d --name boinc --network=host --pid=host -v "boinc:/var/lib/boinc" \
-  -e BOINC_GUI_RPC_PASSWORD="123" -e BOINC_CMD_LINE_OPTIONS="--allow_remote_gui_rpc" \
-  boinc/client
+docker run 'hello-world'
+docker run -ti --rm 'alpine' cat '/etc/apk/repositories'
+docker run -d --name 'boinc' --network='host' --pid='host' -v 'boinc:/var/lib/boinc' \
+  -e BOINC_GUI_RPC_PASSWORD='123' -e BOINC_CMD_LINE_OPTIONS='--allow_remote_gui_rpc' \
+  'boinc/client'
 
 # Gracefully stop containers.
-docker stop alpine-test
-docker stop bdbe3f45
+docker stop 'alpine-test'
+docker stop 'bdbe3f45'
 
 # Kill containers.
-docker kill alpine-test
+docker kill 'alpine-test'
 
 # Restart containers.
-docker restart alpine-test
-docker restart bdbe3f45
+docker restart 'alpine-test'
+docker restart 'bdbe3f45'
 
 # Show containers' status.
 docker ps
 docker ps --all
 
+# List containers with specific metadata values.
+docker ps -f 'name=pihole' -f 'status=running' -f 'health=healthy' -q
+
 # Execute commands inside *running* containers.
-docker exec app_web_1 tail logs/development.log
-docker exec -ti alpine-test sh
+docker exec 'app_web_1' tail 'logs/development.log'
+docker exec -ti 'alpine-test' 'sh'
 
 # Show containers' output.
-docker log alpine-test
+docker log 'alpine-test'
 
 # List processes running inside containers.
-docker top alpine-test
+docker top 'alpine-test'
 
 # Show information on containers.
-docker inspect alpine-test
+docker inspect 'alpine-test'
 
 # Build a docker image.
-docker build -t private/alpine:3.14 .
+docker build -t 'private/alpine:3.14' .
 
 # Tag images.
-docker tag alpine:3.14 private/alpine:3.14
+docker tag 'alpine:3.14' 'private/alpine:3.14'
 
 # Push images.
-docker push private/alpine:3.14
+docker push 'private/alpine:3.14'
 
 # Export images to tarballs.
-docker save alpine:3.14 -o alpine.tar
-docker save hello-world > hw.tar
+docker save 'alpine:3.14' -o 'alpine.tar'
+docker save 'hello-world' > 'hw.tar'
 
 # Load images from tarballs.
-docker load -i hw.tar
+docker load -i 'hw.tar'
 
 # Delete containers.
-docker rm alpine-test
-docker rm -f 87b27
+docker rm 'alpine-test'
+docker rm -f '87b27'
 
 # Cleanup.
 docker logout
-docker rmi alpine
+docker rmi 'alpine'
 docker image prune -a
 docker system prune -a
 ```
@@ -93,7 +96,7 @@ The docker daemon is configured using the `/etc/docker/daemon.json` file:
 ```json
 {
     "default-runtime": "runc",
-    "dns": ['8.8.8.8', '1.1.1.1']
+    "dns": ["8.8.8.8", "1.1.1.1"]
 }
 ```
 
@@ -117,10 +120,10 @@ Those files come from the volume the docker container is using for its root, and
 - Containers created with no specified name will be assigned one automatically:
 
   ```sh
-  $ docker create hello-world
+  $ docker create 'hello-world'
   8eaaae8c0c720ac220abac763ad4b477d807be4522d58e334337b1b74a14d0bd
 
-  $ docker create --name alpine alpine
+  $ docker create --name 'alpine' 'alpine'
   63b1a0a3e557094eba7f18424fd50d49b36cacbc21f1df60b918b375b857f809
 
   $ docker ps -a
@@ -148,10 +151,10 @@ Those files come from the volume the docker container is using for its root, and
 
 ## Sources
 
-- [Archlinux Wiki]
+- [Arch Linux Wiki]
 - [Configuring DNS]
 - [Cheatsheet]
 
-[archlinux wiki]: https://wiki.archlinux.org/index.php/Docker
+[arch linux wiki]: https://wiki.archlinux.org/index.php/Docker
 [cheatsheet]: https://collabnix.com/docker-cheatsheet/
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html
