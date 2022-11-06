@@ -9,6 +9,9 @@ cd pi-hole && docker-compose up -d
 
 # Upgrade Graviton's DB.
 docker exec -ti pihole pihole -g
+
+# Check when Graviton's DB has been updated.
+docker exec pihole stat /etc/pihole/gravity.db
 ```
 
 ## Further readings

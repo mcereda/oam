@@ -8,6 +8,9 @@ curl -sSL 'https://install.pi-hole.net' | bash
 
 # Update Graviton's DB.
 pihole -g
+
+# Check when Graviton's DB has been updated.
+stat /etc/pihole/gravity.db
 ```
 
 ## Further readings
