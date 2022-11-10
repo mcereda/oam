@@ -57,7 +57,7 @@ git config --list \
 
 # Get a default value if the setting has none.
 # Does not work on sections alone.
-git config --get --default not-set 'filter.lfs.cleaned'
+git config --get --default 'not-set' 'filter.lfs.cleaned'
 
 # Create or reinitialize a repository.
 git init
@@ -71,7 +71,7 @@ git clone --recurse-submodules 'ssh@git.server:user/repo.git'
 git clone --depth 1 'ssh@git.server:user/repo.git'
 git clone 'https://token@github.com/user/repo'
 git \
-  -c http.extraheader="Authorization: Basic $(echo -n "user:pat" | base64)" \
+  -c http.extraHeader="Authorization: Basic $(echo -n "user:pat" | base64)" \
   clone 'https://dev.azure.com/org/project/_git/repo'
 
 # Convert a normal repository to a bare one.
@@ -143,10 +143,10 @@ git rebase -i '@~7'
 git remote --verbose
 
 # Add a new remote.
-git remote add gitlab 'git@gitlab.com:user/repo.git'
+git remote add 'gitlab' 'git@gitlab.com:user/repo.git'
 
 # Set a new URL for an existing remote.
-git remote set-url gitlab 'git@gitlab.com:user/repo.git'
+git remote set-url 'gitlab' 'git@gitlab.com:user/repo.git'
 
 # Push committed changes.
 git push
@@ -317,8 +317,8 @@ git filter-branch --env-filter \
    fi'
 
 # Sign all commits from now on.
-git config --global 'user.signingkey' 'KEY_ID_IN_SHORT_FORMAT'
-git config --local 'commit.gpgsign' true
+git config --global 'user.signingKey' 'KEY_ID_IN_SHORT_FORMAT'
+git config --local 'commit.gpgSign' true
 
 # Import commits from another repo.
 git --git-dir='path/to/other-repo/.git' format-patch -k -1 --stdout 'commit_hash' \
@@ -345,7 +345,7 @@ git clone 'https://token@github.com/user/repo'
 BASIC_AUTH='username:password'   # or 'username:token', or ':token'
 BASIC_AUTH_B64="$(printf "$BASIC_AUTH" | base64)"
 git \
-  -c http.extraheader="Authorization: Basic ${BASIC_AUTH_B64}"
+  -c http.extraHeader="Authorization: Basic ${BASIC_AUTH_B64}"
   clone 'https://dev.azure.com/organizationName/projectName/_git/repoName'
 ```
 
@@ -362,14 +362,14 @@ git config --local 'core.autocrlf' 'input'
 
 # Sign commits by default.
 # Get the GPG key short ID with `gpg --list-keys --keyid-format short`.
-git config --local 'user.signingkey' 'KEY_ID_IN_SHORT_FORMAT'
-git config --local 'commit.gpgsign' true
+git config --local 'user.signingKey' 'KEY_ID_IN_SHORT_FORMAT'
+git config --local 'commit.gpgSign' true
 
 # Pull submodules by default.
 git config --global 'submodule.recurse' true
 
 # Use a Personal Access Token to authenticate.
-git config http.extraheader="Authorization: Basic $(echo -n 'user:pat' | base64)"
+git config http.extraHeader="Authorization: Basic $(echo -n 'user:pat' | base64)"
 ```
 
 To show the current configuration use the `--list` option:
@@ -421,9 +421,9 @@ git remote set-url --push --add origin https://exampleuser@example.com/path/to/r
 ```plaintext
 [remote "origin"]
     url = https://exampleuser@example.com/path/to/repo1
-    pushurl = https://exampleuser@example.com/path/to/repo1
-    pushurl = https://exampleuser@example.com/path/to/repo2
-    pushurl = https://exampleuser@example.com/path/to/repo3
+    pushUrl = https://exampleuser@example.com/path/to/repo1
+    pushUrl = https://exampleuser@example.com/path/to/repo2
+    pushUrl = https://exampleuser@example.com/path/to/repo3
     fetch = +refs/heads/*:refs/remotes/origin/*
 ```
 
@@ -436,8 +436,8 @@ To only pull from `repo1` but push to `repo1` and `repo2` for a specific branch 
     …
 [remote "specialRemote"]
     url = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
-    pushurl = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
-    pushurl = ssh://git@aaa.xxx.com:7999/yyy/repo2.git
+    pushUrl = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
+    pushUrl = ssh://git@aaa.xxx.com:7999/yyy/repo2.git
     fetch = +refs/heads/*:refs/remotes/origin/*
     …
 [branch "specialBranch"]
@@ -478,11 +478,9 @@ Those commands need to be wrapped into a one-line function definition:
   new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
   pull-from-all = "!f() { \
       git remote show \
-      | xargs -I{} -P0 -n1 git pull {} ${1-$(git branch --show-current)}; \
-    } && f"
-  subtree-add = "!f() { \
-      git subtree add --prefix $2 $1 master --squash; \
-    }; f"
+      | xargs -I{} -P0 -n1 git pull {} ${1-$(git branch --show-current)} \
+      ; } && f"
+  subtree-add = "!f() { git subtree add --prefix $2 $1 master --squash ; } ; f"
 ```
 
 ## Manage changes
@@ -498,7 +496,7 @@ git diff --staged
 # Alias of `--staged`.
 git diff --cached 'commit_hash'
 
-# Show changes relative to a dirrenent branch.
+# Show changes relative to a different branch.
 git diff 'branch_name'
 
 # Show changes between commits.
@@ -856,12 +854,6 @@ git -c http.sslVerify=false …
 - [Getting Git on a Server]
 - [git-config reference]
 
-[docs]: https://git-scm.com/docs/git
-[getting git on a server]: https://git-scm.com/book/en/v2/Git-on-the-Server-Getting-Git-on-a-Server
-[git-config reference]: https://git-scm.com/docs/git-config
-[gitignore]: https://git-scm.com/docs/gitignore
-[tagging]: https://git-scm.com/book/en/v2/Git-Basics-Tagging
-
 ## Sources
 
 - [How to get the current branch name in Git?]
@@ -891,10 +883,16 @@ git -c http.sslVerify=false …
 - [One weird trick for powerful Git aliases]
 - [Cannot clone git from Azure DevOps using PAT]
 
+<!-- git documentation -->
+[docs]: https://git-scm.com/docs/git
+[getting git on a server]: https://git-scm.com/book/en/v2/Git-on-the-Server-Getting-Git-on-a-Server
+[git-config reference]: https://git-scm.com/docs/git-config
+[gitignore]: https://git-scm.com/docs/gitignore
+[tagging]: https://git-scm.com/book/en/v2/Git-Basics-Tagging
+
+<!-- external references -->
 [cheat.sh]: https://cheat.sh/git
-
 [stackoverflow]: https://stackoverflow.com
-
 [10 git tips we can't live without]: https://opensource.com/article/22/4/git-tips
 [able to push to all git remotes with the one command?]: https://stackoverflow.com/questions/5785549/able-to-push-to-all-git-remotes-with-the-one-command
 [cannot clone git from azure devops using pat]: https://stackoverflow.com/questions/53106546/cannot-clone-git-from-azure-devops-using-pat#53182981
