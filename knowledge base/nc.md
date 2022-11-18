@@ -13,10 +13,14 @@
 ## TL;DR
 
 ```sh
-# Check port 22 on hosts.
+# Check ports on hosts.
 nc -Nnvz 192.168.0.81 22
-parallel -j 0 "nc -Nnvz -w 2 192.168.0.{} 22 2>&1" ::: {2..254} | grep -v "timed out"
+nc -Nvz host.name 443
+
+# List hosts with a specific port open.
+parallel -j 0 "nc -Nnvz -w 2 192.168.0.{} 22 2>&1" ::: {2..254} \
+| grep -v "timed out"
 
 # Wait for a host to be up.
-until nc -Nvz -w 3 pi4.lan 22; do sleep 3; done
+until nc -Nvz -w 3 pi.lan 22; do sleep 3; done
 ```

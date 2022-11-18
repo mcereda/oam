@@ -4,63 +4,63 @@
 
 ```sh
 # Send a single GET request and show its output on stdout.
-curl http://url.of/file
+curl 'http://url.of/file'
 
 # Be quiet.
-curl --silent https://www.example.com
-curl -s --show-error https://www.example.com
+curl --silent 'https://www.example.com'
+curl -s --show-error 'https://www.example.com'
 
 # Download files.
-curl http://url.of/file -o path/to/file
-curl -O http://url.of/file1 -O http://url.of/file2
+curl 'http://url.of/file' -o 'path/to/file'
+curl -O 'http://url.of/file1' -O 'http://url.of/file2'
 curl http://url.of/file[1-24]
 
 # Resume downloads.
-curl -C - -o partial_file http://url.of/file
+curl -C - -o 'partial_file' 'http://url.of/file'
 
 # Limit downloads bandwidth.
-curl --limit-rate 1000B -O http://url.of/file
+curl --limit-rate '1000B' -O 'http://url.of/file'
 
 # Follow redirects.
-curl -L http://url.of/file
+curl -L 'http://url.of/file'
 
 # Only fetch HTTP headers from a response.
-curl -I http://example.com
+curl -I 'http://example.com'
 
 # Only return the HTTP status code.
-curl -o /dev/null -w '%{http_code}\n' -s -I http://example.com
+curl -o '/dev/null' -w '%{http_code}\n' -s -I 'http://example.com'
 
 # Send different request types.
-curl --request PUT http://example.com
+curl --request 'PUT' 'http://example.com'
 
 # Specify headers.
-curl http://example.com -H "Content-Type:application/json" http://example.com
+curl 'http://example.com' -H 'Content-Type:application/json' 'http://example.com'
 
 # Skip certificate validation.
-curl --insecure https://example.com
+curl --insecure 'https://example.com'
 
 # Pass certificates for a resource.
-curl --cert client.pem --key key.pem -k https://example.com
-curl --cacert ca.pem https://example.com
+curl --cert 'client.pem' --key 'key.pem' -k 'https://example.com'
+curl --cacert 'ca.pem' 'https://example.com'
 
 # Authenticate.
-curl -u username:password http://url.of/file
-curl -u username:password -O ftp://url.of/file
-curl ftp://username:password@example.com
+curl -u 'username':'password' 'http://url.of/file'
+curl -u 'username':'password' -O 'ftp://url.of/file'
+curl 'ftp://username:password@example.com'
 
 # POST to a form.
-curl -F "name=user" -F "password=test" http://example.com
-curl --data 'name=bob' http://example.com/form
+curl -F 'name=user' -F 'password=test' 'http://example.com'
+curl --data 'name=bob' 'http://example.com/form'
 
 # Send data.
-curl http://example.com -H "Content-Type:application/json" -d '{"name":"bob"}' -X POST
-curl http://example.com -H "Content-Type:application/json" -d @file.json -X POST
+curl 'http://example.com' -H "Content-Type:application/json" -d '{"name":"bob"}' -X 'POST'
+curl … -d @file.json
 
 # Use a proxy.
-curl http://example.com --proxy socks5://localhost:19999
+curl 'http://example.com' --proxy 'socks5://localhost:19999'
 
 # Forcefully resolve a host to a given address.
-curl https://example.com --resolve example.com:443:google.com
+curl 'https://example.com' --resolve 'example.com:443:google.com'
 ```
 
 ## Apply settings to all connections

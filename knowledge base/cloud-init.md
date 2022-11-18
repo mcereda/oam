@@ -23,17 +23,18 @@ cloud-init devel schema --config-file '/tmp/user-data'
 
 # Check the raw logs.
 cat '/var/log/cloud-init.log'
+cat '/var/log/cloud-init-output.log'
 
-# Parse and organize cloud-init.log events by stage.
+# Parse and organize the events in the log file by stage.
 cloud-init analyze show
 
-# Manually run a single cloud-config module onceafter the instance has booted.
+# Manually run a single cloud-config module once after the instance has booted.
 sudo cloud-init single --name 'cc_ssh' --frequency 'always'
 
-# Clean up everything so cloud-init can re-run.
+# Clean up everything so `cloud-init` can run again.
 sudo cloud-init clean
 
-# Re-run all.
+# Re-run everything.
 sudo cloud-init init
 ```
 
@@ -76,10 +77,14 @@ package_reboot_if_required: false
 #
 # docker-ce already depends on docker-ce-cli and containerd.io
 packages:
-packages:
   - docker-ce
   - jq
   - unzip
+
+# Enable and start the service after installation
+runcmd:
+  - systemctl daemon-reload
+  - systemctl enable --now docker.service
 ```
 
 ## Merge 2 or more files or parts
