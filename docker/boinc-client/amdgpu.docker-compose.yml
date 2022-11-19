@@ -1,19 +1,27 @@
 # gotchas:
 # - 'pid: host' allows boinc to determine nonboinc processes for cpu percentages
 #   and exclusive applications
+# - 'group_add' removed in 3.0
+# - 'cpus' available from 2.2 and removed in 3.0
 #
 # sources:
 # - https://hub.docker.com/r/boinc/client
 # - https://docs.docker.com/compose/compose-file/compose-file-v2/
 
-version: '2'
+version: '2.2'
 services:
   client:
-    image: boinc/client:arm32v7
+    image: boinc/client:amd
     container_name: boinc-client
     restart: always
     network_mode: host
     pid: host
+    mem_swappiness: 1
+    group_add:
+      - video
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/kfd:/dev/kfd
     volumes:
       - ./data:/var/lib/boinc
     environment:

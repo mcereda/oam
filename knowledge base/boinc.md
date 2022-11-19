@@ -12,6 +12,9 @@
 # Install.
 flatpak install 'edu.berkeley.BOINC'
 sudo zypper install 'boinc-client' 'boinc-manager'
+
+# Set the GUI RPC communications port.
+boinc --gui_rpc_port 30000
 ```
 
 ## Client management
@@ -50,6 +53,7 @@ Oct 09 23:09:40 hostnameHere boinc[1709]: 09-Oct-2022 23:09:40 [---] OpenCL: AMD
 - [BOINC Manager]
 - [boinccmd]
 - [boinctui]
+- [GUI RPC bind to port 31416 failed: 98]
 
 <!-- internal references -->
 [boinccmd]: boinccmd.md
@@ -60,3 +64,5 @@ Oct 09 23:09:40 hostnameHere boinc[1709]: 09-Oct-2022 23:09:40 [---] OpenCL: AMD
 
 [amd linux drivers]: https://www.amd.com/en/support/linux-drivers
 [radeon™ software for linux® installation]: https://amdgpu-install.readthedocs.io/en/latest/
+
+[gui rpc bind to port 31416 failed: 98]: https://boinc.mundayweb.com/wiki/index.php?title=GUI_RPC_bind_to_port_31416_failed:_98
