@@ -17,12 +17,13 @@ services:
     network_mode: host
     pid: host
     mem_swappiness: 1
-    group_add:
-      - video
     devices:
       - /dev/dri:/dev/dri
       - /dev/kfd:/dev/kfd
+    group_add:
+      - video
     volumes:
+      - /etc/resolv.conf:/etc/resolv.conf:ro
       - ./data:/var/lib/boinc
     environment:
       - BOINC_CMD_LINE_OPTIONS=--allow_remote_gui_rpc

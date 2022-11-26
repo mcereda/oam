@@ -1,2 +1,2 @@
-# Update Graviton's DB once a week.
+# Update Graviton's DB once a week (at midnight on Sundays).
 0 0 * * 0 docker ps -f 'name=pihole' -f 'status=running' -f 'health=healthy' -q | xargs -I{} docker exec {} pihole -g
