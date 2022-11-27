@@ -36,24 +36,15 @@ sudo cloud-init clean
 
 # Re-run everything.
 sudo cloud-init init
+
+# Check the user scripts.
+ls '/var/lib/cloud/instance/scripts'
 ```
 
 ```yaml
 #cloud-config
 
-# Sources:
-# - https://github.com/trajano/terraform-docker-swarm-aws/blob/master/common.cloud-config
-
 # Add the Docker repository
-# https://cloudinit.readthedocs.io/en/latest/topics/modules.html#yum-add-repo
-# https://cloudinit.readthedocs.io/en/latest/topics/examples.html#adding-a-yum-repository
-#
-# Got from the official installation guide at
-# https://docs.docker.com/engine/install/rhel/#install-using-the-repository :
-#   yum install -y yum-utils && \
-#   yum-config-manager --add-repo \
-#     https://download.docker.com/linux/rhel/docker-ce.repo && \
-#   cat /etc/yum.repos.d/docker-ce.repo
 yum_repos:
   docker-ce:
     name: Docker CE Stable - $basearch
@@ -64,17 +55,10 @@ yum_repos:
     gpgkey: https://download.docker.com/linux/rhel/gpg
 
 # Upgrade the instance
-# Deactivated as this could take a long time if the image is old
-# https://cloudinit.readthedocs.io/en/latest/topics/modules.html#package-update-upgrade-install
-# https://cloudinit.readthedocs.io/en/latest/topics/examples.html#run-apt-or-yum-upgrade
-package_upgrade: false
-package_reboot_if_required: false
+package_upgrade: true
+package_reboot_if_required: true
 
 # Install required packages
-# This will always update the list of packages, regardless of package_update's value.
-# https://cloudinit.readthedocs.io/en/latest/topics/modules.html#package-update-upgrade-install
-# https://cloudinit.readthedocs.io/en/latest/topics/examples.html#install-arbitrary-packages
-#
 # docker-ce already depends on docker-ce-cli and containerd.io
 packages:
   - docker-ce
@@ -162,22 +146,30 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
 - [Merging User-Data sections]
 - [cloud-init multipart encoding issues]
 - [Test cloud-init with a multipass container]
+- [Mime Multi Part Archive] format
+- [Docker cloud init example]
 
 ## Sources
 
 - [Debugging cloud-init]
 - [Tutorial]
 - [Cloud-Init configuration merging]
+- [Terraform's cloud-init provider]
 
 <!-- cloud-init documentation -->
 [debugging cloud-init]: https://cloudinit.readthedocs.io/en/latest/topics/debugging.html
 [examples]: https://cloudinit.readthedocs.io/en/latest/topics/examples.html
 [merging user-data sections]: https://cloudinit.readthedocs.io/en/latest/topics/merging.html
 [modules]: https://cloudinit.readthedocs.io/en/latest/topics/modules.html
+[mime multi part archive]: https://cloudinit.readthedocs.io/en/latest/topics/format.html#mime-multi-part-archive
 [tutorial]: https://cloudinit.readthedocs.io/en/latest/topics/tutorial.html
 [website]: https://cloud-init.io/
+
+<!-- internal references -->
+[docker cloud init example]: ../cloud-init/docker.yaml
 
 <!-- external references -->
 [cloud-init configuration merging]: https://jen20.dev/post/cloudinit-configuration-merging/
 [cloud-init multipart encoding issues]: https://github.com/hashicorp/terraform/issues/4794
 [test cloud-init with a multipass container]: https://medium.com/open-devops-academy/test-cloud-init-with-a-multipass-containers-e3e3bb740604
+[terraform's cloud-init provider]: https://registry.terraform.io/providers/hashicorp/cloudinit/latest/docs/data-sources/cloudinit_config
