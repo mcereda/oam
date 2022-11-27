@@ -1,19 +1,21 @@
 #cloud-config
 
+# Upgrade the instance.
+# Deactivated, as this could take a long time if the image is old.
+#
 # Sources:
-# - https://github.com/trajano/terraform-docker-swarm-aws/blob/master/common.cloud-config
-
-# Upgrade the instance
-# Deactivated as this could take a long time if the image is old
-# https://cloudinit.readthedocs.io/en/latest/topics/modules.html#package-update-upgrade-install
-# https://cloudinit.readthedocs.io/en/latest/topics/examples.html#run-apt-or-yum-upgrade
+# - https://cloudinit.readthedocs.io/en/latest/topics/modules.html#package-update-upgrade-install
+# - https://cloudinit.readthedocs.io/en/latest/topics/examples.html#run-apt-or-yum-upgrade
 package_upgrade: false
 package_reboot_if_required: false
 
-# Install required packages
-# This will always update the list of packages, regardless of package_update's value.
-# https://cloudinit.readthedocs.io/en/latest/topics/modules.html#package-update-upgrade-install
-# https://cloudinit.readthedocs.io/en/latest/topics/examples.html#install-arbitrary-packages
+# Install required packages.
+# This will *always* update the list of packages, regardless of the value of the
+# 'package_update' setting.
+#
+# Sources:
+# - https://cloudinit.readthedocs.io/en/latest/topics/modules.html#package-update-upgrade-install
+# - https://cloudinit.readthedocs.io/en/latest/topics/examples.html#install-arbitrary-packages
 packages:
   - jq
   - nc
