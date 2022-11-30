@@ -1,10 +1,11 @@
 # Raspberry Pi OS
 
 1. [Store files on the SD even when the overlay file system is active](#store-files-on-the-sd-even-when-the-overlay-file-system-is-active)
-2. [Make it able to run containers](#make-it-able-to-run-containers)
+2. [Swap](#swap)
+3. [Run containers](#run-containers)
    1. [Kernel containerization features](#kernel-containerization-features)
    2. [Firewall settings](#firewall-settings)
-3. [Sources](#sources)
+4. [Sources](#sources)
 
 ## Store files on the SD even when the overlay file system is active
 
@@ -19,7 +20,19 @@ sudo chown 'user':'group' 'mount/point'
 touch 'mount/point/new-file'
 ```
 
-## Make it able to run containers
+## Swap
+
+Disable the swap file.
+
+```sh
+sudo systemctl disable --now 'dphys-swapfile'
+```
+
+## Run containers
+
+1. enable the kernel's containerization feature
+1. disable swap
+1. if kubernetes is involved, set up the firewall to use the legacy configuration
 
 ### Kernel containerization features
 
@@ -28,12 +41,16 @@ Enable containerization features in the kernel to be able to run containers as i
 Add the following properties at the end of the line in `/boot/cmdline.txt`:
 
 ```sh
-cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory
+cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1
+```
+
+```sh
+sed -i '/cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1/!s/\s*$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1&/' /boot/cmdline.txt
 ```
 
 ### Firewall settings
 
-Switch Debian firewall to legacy config:
+Switch Debian firewall to use the legacy configuration:
 
 ```sh
 update-alternatives --set iptables  /usr/sbin/iptables-legacy
