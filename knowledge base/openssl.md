@@ -29,9 +29,11 @@ openssl req -noout -modulus -in 'request.csr' | openssl md5
 
 # Check an SSL connection.
 # All the certificates (including the intermediate ones) should be displayed.
-# CA certificates bundle on Linux: /etc/ssl/certs/ca-certificates.crt
-openssl s_client -connect 'host:port' -CAfile 'ca/certificates/bundle.crt'
-openssl s_client -connect 'dm1.experian.com:443' -CApath '/etc/ssl/certs'
+# CA certificates bundle on Linux: /etc/ssl/certs/ca-certificates.crt.
+# '-servername' used to specify a domain for multi-domain servers.
+openssl s_client -connect 'fqdn:port' -servername 'host-fqdn' -showcerts
+openssl … -CAfile 'ca/certificates/bundle.crt'
+openssl … -CApath '/etc/ssl/certs'
 
 # Generate a password-protected self-signed certificate.
 openssl req -x509 \
@@ -83,19 +85,38 @@ cat 'server.crt' 'intermediate1.crt' 'intermediateN.crt' 'rootca.crt'
 
 ### Code 20: unable to get local issuer certificate
 
-An `openssl s_client -connect 'host:port'` attempt fails with the error message of this section.
+An `openssl s_client -connect` attempt fails with this error message:
+
+```plaintext
+CONNECTED(00000003)
+depth=0 C = US, CN = server.fqdn
+verify error:num=20:unable to get local issuer certificate
+verify return:1
+depth=0 C = US, CN = server.fqdn
+verify error:num=21:unable to verify the first certificate
+verify return:1
+---
+…
+SSL-Session:
+    …
+    Verify return code: 21 (unable to verify the first certificate)
+---
+closed
+```
 
 See also [OpenSSL unable to verify the first certificate for Experian URL] and [Verify certificate chain with OpenSSL].
 
-One of the certificates in the chain is usually not valid, or simply not provided.<br />
+One or more certificates in the certificate chain is not valid, self-signed or simply was not provided by either the server or the client (if a client certificate is needed).<br />
+This could also mean that the root certificate is not in the local database of trusted root certificates, which could have been not given to, or queried by, OpenSSL.
+
 A well configured server sends the entire certificate chain during the handshake, therefore providing all the necessary intermediate certificates; servers for which the connection fails might be providing only the end entity certificate.
 
-OpenSSL is **not** capable of getting missing intermediate certificates on-the-fly, so a `s_client -connect` attempt could fail where a full-fledge browser able to discover certificates would succeed on the same URL.
+OpenSSL is **not** capable of getting missing intermediate certificates on-the-fly, so a `s_client -connect` attempt could fail where a full-fledge browser, able to discover certificates, would succeed on the same URL.
 
 You can:
 
 - either make the server send the entire certificate chain
-- or pass the missing intermediate certificates to OpenSSL as client-side parameters
+- or pass the missing certificates to OpenSSL as client-side parameters using the '-CApath' or '-CAfile' options.
 
 ### Code 21: unable to verify the first certificate
 
