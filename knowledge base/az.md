@@ -35,11 +35,11 @@ az ad user show --id 'user@email.org'
 az ad user get-member-groups --id 'user@email.org'
 
 # Get the ID of a Service Principal from its Display Name.
-az ad sp list --display-name 'service_principal_name' --query 'id' -o 'tsv'
+az ad sp list --query 'id' -o 'tsv' --display-name 'service_principal_name'
 
 # Get the Display Name of a Service Principal from its ID.
-az ad sp show -o 'tsv' \
-  --id '12345678-abcd-0987-fedc-567890abcdef' --query 'displayName'
+az ad sp show --query 'displayName' -o 'tsv' \
+  --id '12345678-abcd-0987-fedc-567890abcdef'
 
 # Get a Resource Group's ID.
 az group show 'resource_group_name'
@@ -65,7 +65,14 @@ az account get-access-token
 # List role assignments.
 az role assignment list
 az role assignment list --all
+az role assignment list --resource-group 'resource_group'
 az role assignment list --scope 'scope_id' --role 'role_id_or_name'
+
+# List role assignments with scope for a User or Managed Identity.
+# By default, it will only show role assignments for the current subscription.
+az role assignment list --subscription 'subscription_id' \
+  --all --include-inherited --assignee 'user_or_managed_identity_object_id' \
+  --query '[].{role: roleDefinitionName, scope: scope}' -o tsv
 
 # List the names of all keys in a KeyVault.
 az keyvault key list --query '[].name' -o tsv --vault-name 'key_vault_name'
@@ -132,10 +139,10 @@ az acr helm list -n 'acr_name' -s 'subscription_uuid_or_name'
 # Get the 5 latest versions of a helm chart in an ACR.
 az acr helm list -n 'acr_name' -s 'subscription_uuid_or_name' -o 'json' \
 | jq \
-    --arg CHART_REGEXP 'chart_name_or_regex' \
-    'to_entries
-     | map(select(.key|test($CHART_REGEXP)))[].value[]
-     | { version: .version, created: .created }' - \
+  --arg CHART_REGEXP 'chart_name_or_regex' \
+  'to_entries
+    | map(select(.key|test($CHART_REGEXP)))[].value[]
+    | { version: .version, created: .created }' - \
 | yq -sy 'sort_by(.created) | reverse | .[0:5]' -
 
 # Push a helm chart to an ACR.
@@ -197,7 +204,7 @@ az rest \
   -b '{
 	  "authorizationId": "01234567-abcd-0987-fedc-0123456789ab",
 	  "validTo": "2021-12-31T23:46:23.319Z"
-    }'
+  }'
 az rest … -b @'file.json'
 ```
 
@@ -231,7 +238,7 @@ az rest \
   -b '{
 	  "authorizationId": "01234567-abcd-0987-fedc-0123456789ab",
 	  "validTo": "2021-12-31T23:46:23.319Z"
-    }'
+  }'
 
 az rest \
   -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats' \
