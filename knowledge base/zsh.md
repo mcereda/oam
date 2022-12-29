@@ -23,8 +23,8 @@
 9. [Frameworks](#frameworks)
 10. [Plugins](#plugins)
 11. [Troubleshooting](#troubleshooting)
-   1. [The delete, end and/or home keys are not working as intended](#the-delete-end-andor-home-keys-are-not-working-as-intended)
-   2. [Compinit warnings of insecure directories and files](#compinit-warnings-of-insecure-directories-and-files)
+    1. [The delete, end and/or home keys are not working as intended](#the-delete-end-andor-home-keys-are-not-working-as-intended)
+    2. [Compinit warnings of insecure directories and files](#compinit-warnings-of-insecure-directories-and-files)
 12. [Further readings](#further-readings)
 
 ## TL;DR
@@ -70,6 +70,9 @@ ls **/*(-@)
 
 # Print all shell and environment variables.
 setopt posixbuiltins && set
+
+# Print exported variables only.
+export -p
 
 # Make entries unique in an array.
 typeset -aU path
