@@ -14,6 +14,18 @@
 # Substitute 4-spaces indentations with tabs.
 :%s/    /\t/g
 
+# Enable auto indentation per file type.
+:filetype plugin indent on
+
+# Render existing tab as 4 spaces in width.
+:set tabstop=4
+
+# Insert 4 spaces of width when indenting with '>'.
+:set shiftwidth=4
+
+# Insert 4 spaces when indenting with 'tab'.
+:set expandtab
+
 # Align the file to the current indentation settings.
 :retab
 
