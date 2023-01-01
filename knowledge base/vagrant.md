@@ -1,80 +1,83 @@
 # Vagrant
 
-
 ## TL;DR
 
 ```sh
-# start a vm from a box
-vagrant up
-vagrant up --provider libvirt
+# Initialize Vagrant.
+vagrant init 'archlinux/archlinux'
+vagrant init 'debian/testing64' --provider 'virtualbox'
 
-# connect to a started vm
+# Start a VM.
+vagrant up
+vagrant up --provider 'libvirt'
+
+# Connect to a started VM
 vagrant ssh
 
-# print the ssh config snippet to connect to the vm
+# Print the SSH config snippet to connect to the VM.
 vagrant ssh-config
 
-# (re)provision a vm
+# (re)Provision a VM.
 vagrant provision
 vagrant up --provision
 
-# add a box
-vagrant add archlinux/archlinux
-vagrant add debian/testing64 --provider virtualbox
+# Add a Box.
+vagrant add 'archlinux/archlinux'
+vagrant add 'debian/testing64' --provider 'virtualbox'
 
-# list downloaded boxes
+# List downloaded Boxes.
 vagrant box list
 
-# list outdated boxes
+# List outdated Boxes.
 vagrant box outdated
 
-# update a box
+# Update a Box.
 vagrant box update
-vagrant box update --box generic/gentoo
+vagrant box update --box 'generic/gentoo'
 
-# remove a box
-vagrant box remove archlinux/archlinux
+# Remove a Box from the local catalogue.
+vagrant box remove 'archlinux/archlinux'
 
-# destroy a machine
+# Destroy a VM.
 vagrant destroy
 vagrant destroy --force
 
-# install autocomplete
+# Install shells' autocompletion.
 vagrant autocomplete install --bash
 vagrant autocomplete install --zsh
 
-# install a plugin
-vagrant plugin install vagrant-disksize
+# Install a Plugin.
+vagrant plugin install 'vagrant-disksize'
 ```
 
 ## Usage
 
-> All commands need to be run from the vm's folder.
+> All commands need to be run from the VM's folder.
 
 1. Install Vagrant.
 1. Optionally, create a folder to keep all files in order and move into it:
 
    ```sh
-   mkdir test-vm
+   mkdir 'test-vm'
    cd $_
    ```
 
 1. Create a configuration:
 
    ```sh
-   vagrant init archlinux/archlinux
+   vagrant init 'archlinux/archlinux'
    ```
 
-1. Start the vm:
+1. Start the VM:
 
    ```sh
    vagrant up
 
-   # re-provision the vm after startup
+   # Re-provision the VM after startup.
    vagrant up --provision
    ```
 
-1. Connect to the vm:
+1. Connect to the VM:
 
    ```sh
    vagrant ssh
@@ -83,16 +86,16 @@ vagrant plugin install vagrant-disksize
 ### Boxes management
 
 ```sh
-vagrant box add archlinux/archlinux
-vagrant box add archlinux/archlinux --provider virtualbox
+vagrant box add 'archlinux/archlinux'
+vagrant box add 'archlinux/archlinux' --provider virtualbox
 
 vagrant box list
 
 vagrant box update
-vagrant box update --box generic/gentoo
+vagrant box update --box 'generic/gentoo'
 ```
 
-## Install shell's autocomplete
+## Install shells' autocompletion
 
 ```sh
 $ vagrant autocomplete install --bash
@@ -104,7 +107,7 @@ Autocomplete installed at paths:
 - /home/user/.zshrc
 ```
 
-## Customize a box
+## Customize a Box
 
 ```ruby
 Vagrant.configure("2") do |config|
@@ -150,10 +153,10 @@ end
 
 ## Specify the disk size
 
-Install the vagrant-disksize plugin:
+Install the 'vagrant-disksize' plugin:
 
 ```sh
-vagrant plugin install vagrant-disksize
+vagrant plugin install 'vagrant-disksize'
 ```
 
 then set it up:
@@ -166,7 +169,7 @@ end
 
 ## Reboot after provisioning
 
-Add one of the following to the box's Vagrantfile:
+Add one of the following to the box's `Vagrantfile`:
 
 ```ruby
 config.vm.provision "shell", reboot: true
@@ -179,14 +182,17 @@ end
 
 ## Further readings
 
-- [getting started]
-- [how to set vagrant virtualbox video memory]
+- [Getting started]
+- [How to set vagrant virtualbox video memory]
 - [Pass environment variables to vagrant shell provisioner]
-- [Tips & Tricks]
-- [Multi-Machine]
-- [how to specify the disk size]
+- [Tips & tricks]
+- [Multi-machine]
+- [How to specify the disk size]
 - [How do I reboot a Vagrant guest from a provisioner?]
+- [Configuring Vagrant virtual machines with .env]
 
+<!-- external references -->
+[configuring vagrant virtual machines with .env]: https://www.nickhammond.com/configuring-vagrant-virtual-machines-with-env/
 [getting started]: https://learn.hashicorp.com/tutorials/vagrant/getting-started-index
 [how do i reboot a vagrant guest from a provisioner?]: https://superuser.com/questions/1338429/how-do-i-reboot-a-vagrant-guest-from-a-provisioner#1579326
 [how to set vagrant virtualbox video memory]: https://stackoverflow.com/questions/24231620/how-to-set-vagrant-virtualbox-video-memory#24253435
