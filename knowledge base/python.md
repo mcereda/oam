@@ -1,11 +1,38 @@
 # Python
 
-## String formatting
+1. [TL,DR](#tldr)
+2. [Web servers](#web-servers)
+   1. [Flask](#flask)
+   2. [WSGI server](#wsgi-server)
+3. [Further readings](#further-readings)
 
-```python
-# f-strings
+## TL,DR
+
+```py
+# String formatting with f-strings.
 f"Hello, {name}. You are {age}."
 F"{name.lower()} is funny."
+
+# Make elements in a list unique.
+# Keep the resulting list mutable.
+unique_list = list(set(redundant_list))
+```
+
+Maintenance:
+
+```sh
+# Generate a list of the outdated packages.
+pip list --outdated
+
+# Upgrade all packages.
+pip install --requirement <(pip freeze | sed 's/==/>=/') --upgrade
+
+# Remove orphaned dependencies.
+# Requires `pip-autoremove`.
+pip-autoremove
+
+# Upgrade the included `pip` executable on Mac OS X.
+~/Library/Python/3.8/bin/pip3 install --user --upgrade pip
 ```
 
 ## Web servers
@@ -64,38 +91,31 @@ pip install flask waitress
 python hello.py
 ```
 
-## Maintenance
-
-```sh
-# generate a list of all outdated packages
-pip list --outdated
-
-# upgrade all packages (oneliner)
-pip install --requirement <(pip freeze | sed 's/==/>=/') --upgrade
-
-# remove orphaned dependencies
-# after installation of pip-autoremove
-pip-autoremove
-
-# upgrade onboard pip on mac os x
-pip3 install --user --upgrade pip
-echo 'export PATH="${HOME}/Library/Python/3.8/bin:${PATH}"' >> ${HOME}/.zprofile
-```
-
 ## Further readings
 
-- [flask at first run: do not use the development server in a production environment]
-- [f-strings]
-- [data types]
-- [flask example with POST]
-- [multi-value query parameters with flask]
 - [How To Update All Python Packages]
 - [invl/pip-autoremove]
+- [Data types]
+- [F-strings
+- [How to filter list elements in Python]
+- [Logging]
+- [Flask at first run: do not use the development server in a production environment]
+- [Flask example with POST]
+- [Multi-value query parameters with Flask]
+- [*args and **kwargs in Python]
+- [An intro to threading in Python]
+- [ThreadPoolExecutor in Python: the complete guide]
 
+<!-- external references -->
+[*args and **kwargs in python]: https://www.geeksforgeeks.org/args-kwargs-python/
+[an intro to threading in python]: https://realpython.com/intro-to-python-threading/
 [data types]: https://www.w3schools.com/python/python_datatypes.asp
 [f-strings]: https://realpython.com/python-f-strings/
 [flask at first run: do not use the development server in a production environment]: https://stackoverflow.com/questions/51025893/flask-at-first-run-do-not-use-the-development-server-in-a-production-environmen#54381386
 [flask example with POST]: https://stackoverflow.com/questions/22947905/flask-example-with-post#53725861
 [how to update all python packages]: https://www.activestate.com/resources/quick-reads/how-to-update-all-python-packages/
-[multi-value query parameters with flask]: https://dev.to/svencowart/multi-value-query-parameters-with-flask-3a92
 [invl/pip-autoremove]: https://github.com/invl/pip-autoremove
+[logging]: https://docs.python.org/3/howto/logging.html
+[multi-value query parameters with flask]: https://dev.to/svencowart/multi-value-query-parameters-with-flask-3a92
+[threadpoolexecutor in python: the complete guide]: https://superfastpython.com/threadpoolexecutor-in-python/
+[how to filter list elements in python]: https://www.pythontutorial.net/python-basics/python-filter-list/
