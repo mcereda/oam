@@ -23,9 +23,9 @@
 11. [Remove a file from a commit](#remove-a-file-from-a-commit)
 12. [Remove a file from the repository](#remove-a-file-from-the-repository)
 13. [Troubleshooting](#troubleshooting)
-   1. [Debug](#debug)
-   2. [GPG cannot sign a commit](#gpg-cannot-sign-a-commit)
-   3. [Git does not accept self-signed certificates](#git-does-not-accept-self-signed-certificates)
+    1. [Debug](#debug)
+    2. [GPG cannot sign a commit](#gpg-cannot-sign-a-commit)
+    3. [Git does not accept self-signed certificates](#git-does-not-accept-self-signed-certificates)
 14. [Further readings](#further-readings)
 15. [Sources](#sources)
 
@@ -244,7 +244,7 @@ git switch 'branch_name'
 git checkout 'branch_name'
 git checkout -
 
-# Set an existing branch to track a remote branch.
+# Set the current HEAD branch to track a remote branch.
 git branch -u 'remote_name/upstream-branch'
 
 # Get the current branch.
