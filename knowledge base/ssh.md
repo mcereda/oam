@@ -152,6 +152,7 @@ Host *
     User root
     Compression yes
     SendEnv -LC_* -LANG*
+    SetEnv MYENV=itsvalue
 ```
 
 ```ssh-config
