@@ -155,6 +155,7 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
 - [Tutorial]
 - [Cloud-Init configuration merging]
 - [Terraform's cloud-init provider]
+- [How to test cloud-init locally with Vagrant]
 
 <!-- cloud-init documentation -->
 [debugging cloud-init]: https://cloudinit.readthedocs.io/en/latest/topics/debugging.html
@@ -171,5 +172,6 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
 <!-- external references -->
 [cloud-init configuration merging]: https://jen20.dev/post/cloudinit-configuration-merging/
 [cloud-init multipart encoding issues]: https://github.com/hashicorp/terraform/issues/4794
-[test cloud-init with a multipass container]: https://medium.com/open-devops-academy/test-cloud-init-with-a-multipass-containers-e3e3bb740604
+[how to test cloud-init locally with vagrant]: https://www.grzegorowski.com/how-to-test-cloud-init-locally-with-vagrant
 [terraform's cloud-init provider]: https://registry.terraform.io/providers/hashicorp/cloudinit/latest/docs/data-sources/cloudinit_config
+[test cloud-init with a multipass container]: https://medium.com/open-devops-academy/test-cloud-init-with-a-multipass-containers-e3e3bb740604
