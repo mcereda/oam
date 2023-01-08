@@ -21,7 +21,7 @@ Stateless active/active.
 - Azure's [Terraform Enterprise Azure Instance Module][azure-terraform/terraform-azurerm-terraform-enterprise-instance] on GitHub
 
 <!-- knowledge base -->
-[requirements diagram]: requirements.png
+[requirements diagram]: design/requirements.png
 
 <!-- hashicorp documentation -->
 [terraform enterprise]: https://developer.hashicorp.com/terraform/enterprise
