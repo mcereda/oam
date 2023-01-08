@@ -8,7 +8,8 @@
 # Show what would change without changing anything (dry run).
 rename -vn foo bar *
 
-rename -nv 's/^(\d{4}-\d{2}-\d{2})  (.*)$/$1  addition  $2/' 'file'
+rename -n 's/^(\d{4}-\d{2}-\d{2})  (.*)$/$1  addition  $2/' 'file'
+rename -n 's/^What.*(\d{4}-\d{2}-\d{2}) at (\d{2}\.\d{2}.\d{2}\..*)/$1 $2/' *
 ```
 
 ## Sources
