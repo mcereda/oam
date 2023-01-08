@@ -66,7 +66,7 @@ az account get-access-token
 az role assignment list
 az role assignment list --all
 az role assignment list --resource-group 'resource_group'
-az role assignment list --scope 'scope_id' --role 'role_id_or_name'
+az role assignment list … --scope 'scope_id' --role 'role_id_or_name'
 
 # List role assignments with scope for a User or Managed Identity.
 # By default, it will only show role assignments for the current subscription.
@@ -105,6 +105,10 @@ az pipelines run --name 'pipeline_name' \
 az pipelines build show --id 'pipeline_id'
 az pipelines build show --detect true -o 'tsv' \
   --project 'project_name' --id 'pipeline_id' --query 'result'
+
+az pipelines runs artifact download --path 'local_path' \
+  --organization 'organization_id_or_name' --project 'project_name' \
+  --artifact-name 'artifact_name' --run-id 'run_id'
 
 # Validate a bicep template to create a Deployment Group.
 az deployment group validate \
@@ -151,6 +155,8 @@ az acr helm push -n 'acr_name' 'chart.tgz' --force
 # List the available AKS versions.
 az aks get-versions --location 'location' -o table
 
+az aks show -g 'resource_group_name' -n 'cluster_name'
+
 # Get credentials for an AKS cluster.
 az aks get-credentials \
   --resource-group 'resource_group_name' --name 'cluster_name'
@@ -164,6 +170,26 @@ az aks update --resource-group 'resource_group_name' --name 'cluster_name' --yes
 az aks check-acr --acr 'acr_name' \
   --resource-group 'resource_group_name' --name 'cluster_name'
 az aks check-acr … --node-name 'node_name'
+
+aks extension add --name k8s-extension
+aks extension show --name k8s-extension
+
+# List Kubernetes extensions in an AKS cluster.
+az k8s-extension list --cluster-type 'managedClusters' \
+  --resource-group 'resource_group_name' --name 'cluster_name'
+
+# List Flux configurations in an AKS cluster.
+az k8s-configuration flux list --cluster-type 'managedClusters' \
+  --resource-group 'resource_group_name' --name 'cluster_name'
+
+az feature list
+az feature show -n 'AKS-ExtensionManager' --namespace 'Microsoft.ContainerService'
+
+az policy definition list
+az policy definition list -o 'tsv' --query "[?(@.name=='policy_name')]"
+az policy definition list -o 'tsv' --query "[?(@.displayName=='policy_display_name')].name"
+
+az policy metadata list
 
 # Check if the current User is member of a given Group.
 az rest -u 'https://graph.microsoft.com/v1.0/me/checkMemberObjects' \
