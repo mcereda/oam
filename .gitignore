@@ -1,5 +1,12 @@
-__pycache__
 .DS_Store
-.obsidian
-.vagrant
-.vscode/
+
+.vscode/*
+!.vscode/settings.json
+
+.vagrant/
+
+.terraform/
+.terraform.lock.hcl
+*.auto.tfvars
+
+__pycache__/
