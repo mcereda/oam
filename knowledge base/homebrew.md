@@ -8,31 +8,39 @@
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
 
 # Search for formulae.
-brew search parallel
-brew search --cask gpg
+brew search 'parallel'
+brew search --cask 'gpg'
 
 # Install something.
-brew install gettext
-brew install --cask spotify
+brew install 'gettext'
+brew install --cask 'spotify'
 
-# Uninstall something
-brew uninstall --zap keybase
+# Uninstall something.
+brew uninstall --zap 'keybase'
 
 # Get formulae's dependencies.
 brew deps
-brew deps --installed azure-cli
+brew deps --installed 'azure-cli'
 brew deps --tree
 
 # Get information on formulae.
-brew info sponge
+brew info 'sponge'
 
-# Prevent a formula from upgrading.
-brew pin gnupg2
+# Prevent formulae from upgrading.
+brew pin 'gnupg2'
+
+# Add taps.
+# Only one at a time.
+brew tap 'homebrew/services'
+
+# Manage services.
+# Requires the 'homebrew/services' tap.
+brew services start 'openssl-osx-ca'
 
 # Bring an installation up to speed from a Brewfile.
 brew bundle
 brew bundle --global
-brew bundle --file $HOME/Brewfile --no-lock
+brew bundle --file "$HOME/Brewfile" --no-lock
 
 # Dump all installed casks/formulae/images/taps into a Brewfile in the current
 # directory.

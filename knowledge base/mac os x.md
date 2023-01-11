@@ -75,6 +75,27 @@ defaults read /Library/Preferences/SystemConfiguration/com.apple.smb.server NetB
 scutil --get ComputerName
 /usr/libexec/PlistBuddy -c "Print :System:System:ComputerName" \
   /Library/Preferences/SystemConfiguration/preferences.plist
+
+# Get environment variables from inside launchd.
+launchctl getenv 'key'
+launchctl export
+
+# Set environment variables inside of launchd.
+launchctl setenv 'key' 'value'
+launchctl unsetenv 'key' 'value'
+
+# List all loaded jobs.
+launchctl list
+
+# List Mach bootstrap services only.
+launchctl bslist
+launchctl bstree
+
+# Start jobs.
+launchctl start 'job_label'
+
+# Stop jobs.
+launchctl stop 'job_label'
 ```
 
 ## Xcode CLI tools
@@ -106,8 +127,8 @@ CLI_TOOLS_LABEL="$(/usr/sbin/softwareupdate -l \
 ### Removal
 
 ```sh
-sudo rm -rf $(xcode-select -p)
-sudo rm -rf /Library/Developer/CommandLineTools
+sudo rm -rf "$(xcode-select -p)"
+sudo rm -rf '/Library/Developer/CommandLineTools'
 ```
 
 ### Upgrade
@@ -116,7 +137,7 @@ See [How to update Xcode from command line] for details.
 
 ```sh
 # Remove and reinstall.
-sudo rm -rf $(xcode-select -p)
+sudo rm -rf "$(xcode-select -p)"
 xcode-select --install
 ```
 
@@ -149,7 +170,7 @@ defaults write com.apple.finder AppleShowAllFiles TRUE
 ```sh
 # Retain ratio.
 # Save as different file.
-sips -Z 1000 -o resized.jpg IMG_20190527_013903.jpg
+sips -Z '1000' -o 'resized.jpg' 'IMG_20190527_013903.jpg'
 ```
 
 ## Boot keys cheatsheet
@@ -260,6 +281,7 @@ You can either:
 ## Further readings
 
 - [pam_reattach]
+- [launchctl man page]
 
 ## Sources
 
@@ -284,3 +306,4 @@ You can either:
 [mac startup key combinations]: https://support.apple.com/en-us/HT201255
 [using terminal to find your mac's network name]: https://www.tech-otaku.com/networking/using-terminal-find-your-macs-network-name/
 [xcode command line tools installation faq]: https://www.godo.dev/tutorials/xcode-command-line-tools-installation-faq
+[launchctl man page]: https://www.unix.com/man-page/osx/1/launchctl
