@@ -11,7 +11,7 @@
 ```sh
 # Install the CLI.
 brew install 'azure-cli'
-asdf plugin add 'azure-cli' && asdf install 'azure-cli' '2.37.0'
+asdf plugin add 'azure-cli' && asdf install 'azure-cli' '2.43.0'
 
 # Disable certificates check upon connection.
 # Use it for proxies with doubtful certificates.
@@ -97,15 +97,16 @@ az pipelines list --detect 'true' --query '[].name' -o 'tsv'
 az pipelines show --id 'pipeline_id'
 az pipelines show --name 'pipeline_name'
 
-# Start a run.
+# Start a Pipeline run.
 az pipelines run --name 'pipeline_name' \
   --parameters 'system.debug=True' agent.diagnostic="True"
 
-# Get the status of a run of a Pipeline.
+# Get the status of a Pipeline's build run.
 az pipelines build show --id 'pipeline_id'
 az pipelines build show --detect true -o 'tsv' \
   --project 'project_name' --id 'pipeline_id' --query 'result'
 
+# Download an artifact uploaded during a Pipeline's run.
 az pipelines runs artifact download --path 'local_path' \
   --organization 'organization_id_or_name' --project 'project_name' \
   --artifact-name 'artifact_name' --run-id 'run_id'
@@ -155,6 +156,7 @@ az acr helm push -n 'acr_name' 'chart.tgz' --force
 # List the available AKS versions.
 az aks get-versions --location 'location' -o table
 
+# Show the details of an AKS cluster.
 az aks show -g 'resource_group_name' -n 'cluster_name'
 
 # Get credentials for an AKS cluster.
@@ -171,10 +173,13 @@ az aks check-acr --acr 'acr_name' \
   --resource-group 'resource_group_name' --name 'cluster_name'
 az aks check-acr … --node-name 'node_name'
 
-aks extension add --name k8s-extension
-aks extension show --name k8s-extension
+# Add a new AKS extensions.
+az aks extension add --name 'k8s-extension'
 
-# List Kubernetes extensions in an AKS cluster.
+# Show the details of an installed AKS extensions.
+az aks extension show --name 'k8s-extension'
+
+# List Kubernetes extensions of an AKS cluster.
 az k8s-extension list --cluster-type 'managedClusters' \
   --resource-group 'resource_group_name' --name 'cluster_name'
 
@@ -182,14 +187,31 @@ az k8s-extension list --cluster-type 'managedClusters' \
 az k8s-configuration flux list --cluster-type 'managedClusters' \
   --resource-group 'resource_group_name' --name 'cluster_name'
 
+# List the available Features in a Subscription.
 az feature list
+
+# Show the details of a Feature.
 az feature show -n 'AKS-ExtensionManager' --namespace 'Microsoft.ContainerService'
 
+# List Policies.
 az policy definition list
 az policy definition list -o 'tsv' --query "[?(@.name=='policy_name')]"
 az policy definition list -o 'tsv' --query "[?(@.displayName=='policy_display_name')].name"
 
+# Show a Policy's definition.
+az policy definition show -n 'policy_name'
+
+# List Policies metadata.
 az policy metadata list
+
+# List Policy Initiatives.
+az policy set-definition list
+az policy set-definition list -o 'tsv' --query "[?(@.name=='initiative_name')]"
+az policy set-definition list --management-group 'management_group_id' \
+  -o 'tsv' --query "[?(@.displayName=='initiative_display_name')].name"
+
+# Show an Initiative's definition.
+az policy set-definition show -n 'initiative_name'
 
 # Check if the current User is member of a given Group.
 az rest -u 'https://graph.microsoft.com/v1.0/me/checkMemberObjects' \
