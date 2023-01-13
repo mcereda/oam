@@ -1,0 +1,11 @@
+{
+    "DaemonAuthenticationType": "password",
+    "DaemonAuthenticationPassword": "your-password-here",
+    "TlsBootstrapType": "server-path",
+    "TlsBootstrapHostname": "server.company.com",
+    "TlsBootstrapCert": "/etc/server.crt",
+    "TlsBootstrapKey": "/etc/server.key",
+    "BypassPreflightChecks": true,
+    "ImportSettingsFrom": "/path/to/settings.json",
+    "LicenseFileLocation": "/path/to/license.rli"
+}
