@@ -167,7 +167,7 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
 [website]: https://cloud-init.io/
 
 <!-- internal references -->
-[docker cloud init example]: ../cloud-init/docker.yaml
+[docker cloud init example]: ../examples/cloud-init/docker.yum.yaml
 
 <!-- external references -->
 [cloud-init configuration merging]: https://jen20.dev/post/cloudinit-configuration-merging/

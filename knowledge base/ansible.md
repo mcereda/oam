@@ -504,7 +504,7 @@ vars:
 [working with versions]: https://docs.ansible.com/ansible/latest/collections/community/general/docsite/filter_guide_working_with_versions.html
 
 <!-- internal references -->
-[examples]: ../ansible/examples.yml
+[examples]: ../ansible/templating.cheatsheet.yml
 
 <!-- other references -->
 
