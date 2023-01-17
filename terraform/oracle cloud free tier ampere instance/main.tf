@@ -1,10 +1,10 @@
-# https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_vcn
+# See https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_vcn
 resource "oci_core_vcn" "this" {
   compartment_id = var.compartment_id
   cidr_blocks    = ["10.0.0.0/16"]
 }
 
-# https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_subnet
+# See https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_subnet
 resource "oci_core_subnet" "this" {
   compartment_id = var.compartment_id
   vcn_id         = oci_core_vcn.this.id
@@ -14,7 +14,7 @@ resource "oci_core_subnet" "this" {
 # Needed to be able to connect to the instance from the Internet.
 # Need to create a route table with the default route 0.0.0.0/0 pointing to the
 # internet gateway, and associate the subnet to it.
-# https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_internet_gateway
+# See https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_internet_gateway
 resource "oci_core_internet_gateway" "this" {
   compartment_id = var.compartment_id
   vcn_id         = oci_core_vcn.this.id
@@ -34,7 +34,7 @@ resource "oci_core_route_table_attachment" "this" {
   route_table_id = oci_core_route_table.this.id
 }
 
-# https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_instance
+# See https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_instance
 resource "oci_core_instance" "this" {
   compartment_id      = var.compartment_id
   availability_domain = var.availability_domain
