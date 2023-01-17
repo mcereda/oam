@@ -4,6 +4,9 @@
 
 Stateless active/active.
 
+1. [Requirements](#requirements)
+2. [Sources](#sources)
+
 ## Requirements
 
 | Requirement      | Description                                                                                                                                        |
@@ -17,14 +20,18 @@ Stateless active/active.
 ## Sources
 
 - [Terraform Enterprise]
+- [Automated installations] of Replicated
 - Hashicorp's [Terraform Enterprise Azure Module][hashicorp/terraform-azurerm-terraform-enterprise] on GitHub
 - Azure's [Terraform Enterprise Azure Instance Module][azure-terraform/terraform-azurerm-terraform-enterprise-instance] on GitHub
 
 <!-- knowledge base -->
 [requirements diagram]: design/requirements.png
 
-<!-- hashicorp documentation -->
+<!-- hashicorp references -->
 [terraform enterprise]: https://developer.hashicorp.com/terraform/enterprise
+
+<!-- replicated references -->
+[automated installations]: https://help.replicated.com/docs/native/customer-installations/automating/
 
 <!-- repositories -->
 [azure-terraform/terraform-azurerm-terraform-enterprise-instance]: https://github.com/Azure-Terraform/terraform-azurerm-terraform-enterprise-instance
