@@ -112,15 +112,21 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
      base64_encode = true
 
      part {
-       content      = file("files/first.yaml")
+       content      = file("${path.module}/files/cloud-init/first.yaml")
        content_type = "text/cloud-config"
+       filename     = "first.yaml"
      }
      …
      part {
-       content      = file("files/n-th.yaml")
+       content      = templatefile(
+         "${path.module}/templates/cloud-init/n-th.yaml.tftpl",
+         {
+           key = value
+         }
+       )
        content_type = "text/cloud-config"
-       filename     = "n-th.yaml"
        merge_type   = "dict(recurse_array,no_replace)+list(append)"
+       filename     = "n-th.yaml"
      }
    }
    ```
