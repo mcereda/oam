@@ -21,7 +21,7 @@ data "cloudinit_config" "azurerm_linux_virtual_machine" {
     )
     content_type = "text/cloud-config"
     merge_type   = "dict(recurse_array,no_replace)+list(append)"
-    filename     = "docker"
+    filename     = "docker-ce"
   }
 }
 
@@ -45,6 +45,6 @@ data "cloudinit_config" "oci_core_instance" {
     )
     content_type = "text/cloud-config"
     merge_type   = "dict(recurse_array,no_replace)+list(append)"
-    filename     = "docker"
+    filename     = "docker-ce"
   }
 }
