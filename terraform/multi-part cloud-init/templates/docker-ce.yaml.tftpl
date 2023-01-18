@@ -1,0 +1,20 @@
+#cloud-config
+
+packages:
+  - docker-ce
+
+runcmd:
+
+  # Give the user permissions to use Docker without `sudo`ing.
+  # The 'users' module overrode *both* the SSH keys *and* group assignments in
+  # previous tests. (┛◉Д◉)┛彡┻━┻
+  - grep -qE '^docker:' /etc/group && usermod -a -G docker ${user} || true
+
+yum_repos:
+  docker-ce:
+    name: Docker CE Stable - $basearch
+    enabled: true
+    baseurl: https://download.docker.com/linux/rhel/$releasever/$basearch/stable
+    priority: 1
+    gpgcheck: true
+    gpgkey: https://download.docker.com/linux/rhel/gpg

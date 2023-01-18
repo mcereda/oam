@@ -12,12 +12,17 @@ data "cloudinit_config" "azurerm_linux_virtual_machine" {
     filename     = "base"
   }
 
-  # part {
-  #   content      = file("${path.module}/templates/n-th.yaml")
-  #   content_type = "text/cloud-config"
-  #   merge_type   = "dict(recurse_array,no_replace)+list(append)"
-  #   filename     = "n-th.yaml"
-  # }
+  part {
+    content = templatefile(
+      "${path.module}/templates/docker-ce.yaml.tftpl",
+      {
+        user = "azureuser"
+      }
+    )
+    content_type = "text/cloud-config"
+    merge_type   = "dict(recurse_array,no_replace)+list(append)"
+    filename     = "docker"
+  }
 }
 
 data "cloudinit_config" "oci_core_instance" {
@@ -33,13 +38,13 @@ data "cloudinit_config" "oci_core_instance" {
 
   part {
     content = templatefile(
-      "${path.module}/templates/boinc-client.oci-core-instance.yaml.tftpl",
+      "${path.module}/templates/docker-ce.yaml.tftpl",
       {
         user = "opc"
       }
     )
     content_type = "text/cloud-config"
     merge_type   = "dict(recurse_array,no_replace)+list(append)"
-    filename     = "n-th.yaml"
+    filename     = "docker"
   }
 }
