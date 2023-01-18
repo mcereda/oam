@@ -1,0 +1,4 @@
+#cloud-config
+
+package_reboot_if_required: false
+package_upgrade: false
