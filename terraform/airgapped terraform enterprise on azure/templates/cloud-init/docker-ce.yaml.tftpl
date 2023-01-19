@@ -1,0 +1,23 @@
+#cloud-config
+
+# See https://cloudinit.readthedocs.io/en/latest/reference/modules.html#package-update-upgrade-install
+packages:
+  - docker-ce
+
+# See https://cloudinit.readthedocs.io/en/latest/reference/modules.html#runcmd
+runcmd:
+
+  # Give the user permissions to use Docker without `sudo`ing.
+  # The 'users' module overrode *both* the SSH keys *and* group assignments in
+  # previous tests. (┛◉Д◉)┛彡┻━┻
+  - grep -qE '^docker:' /etc/group && usermod -a -G docker ${docker_user} || true
+
+# See https://cloudinit.readthedocs.io/en/latest/reference/modules.html#yum-add-repo
+yum_repos:
+  docker-ce:
+    name: Docker CE Stable - $basearch
+    enabled: true
+    baseurl: https://download.docker.com/linux/rhel/$releasever/$basearch/stable
+    priority: 1
+    gpgcheck: true
+    gpgkey: https://download.docker.com/linux/rhel/gpg

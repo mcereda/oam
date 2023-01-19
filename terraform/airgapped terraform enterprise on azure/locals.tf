@@ -1,6 +1,9 @@
 locals {
   # See https://help.replicated.com/docs/native/customer-installations/automating/#configure-replicated-automatically
-  replicated_config = {}
+  replicated_config = {
+    LicenseFileLocation               = var.replicated_config_license_file_location
+    LicenseBootstrapAirgapPackagePath = var.replicated_config_license_bootstrap_airgap_package_path
+  }
 
   # Replicated's settings file is JSON formatted.
   # See https://help.replicated.com/docs/native/customer-installations/automating

@@ -1,0 +1,25 @@
+#cloud-config
+
+# Replicated requires Docker
+# TFE requires Replicated
+
+# See https://cloudinit.readthedocs.io/en/latest/reference/modules.html#write-files
+write_files:
+  - encoding: b64
+    path: ${replicated_config_file_location}
+    content: |
+      ${replicated_config_file_contents_b64encoded}
+    permissions: '0600'
+    defer: true
+  - encoding: b64
+    path: ${replicated_license_file_location}
+    content: |
+      ${replicated_license_file_contents_b64encoded}
+    permissions: '0600'
+    defer: true
+  - encoding: b64
+    path: ${tfe_config_file_location}
+    content: |
+      ${tfe_config_file_contents_b64encoded}
+    permissions: '0600'
+    defer: true
