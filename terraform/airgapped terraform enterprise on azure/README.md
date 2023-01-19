@@ -9,11 +9,14 @@ Stateless active/active.
 
 ## Requirements
 
-| Requirement      | Description                                                                                                                                        |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| TFE license file | A Terraform Enterprise license file must be provided as a Base64 encoded secret in Azure Key Vault.                                                |
-| TLS certificate  | The TLS certificate and private key files must be PEM-encoded. The TLS certificate file can contain a full chain of TLS certificates if necessary. |
-| Virtual machine  | Must be Linux.                                                                                                                                     |
+| Requirement             | Description                                                                                                                                        |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Passwords               | All passwords must be stored as a Base64 encoded secret in Azure Key Vault and retrieved during runtime.                                           |
+| Replicated license file | A valid Replicated license file (`.rli`) must be stored as a Base64 encoded secret in Azure Key Vault and retrieved during runtime.                |
+| TFE airgap bundle       | The TFE airgap bundle for Replicated must be stored as a Blob in a Storage Account and retrieved by the VM after first boot.                       |
+| TLS certificate         | The TLS certificate and private key files must be PEM-encoded. The TLS certificate file can contain a full chain of TLS certificates if necessary. |
+| Tokens                  | All tokens must be stored as a Base64 encoded secret in Azure Key Vault and retrieved during runtime.                                              |
+| Virtual machine         | Must be a Linux VM.                                                                                                                                |
 
 ![requirements diagram]
 
