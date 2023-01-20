@@ -81,6 +81,12 @@ az keyvault key list --query '[].name' -o tsv --vault-name 'key_vault_name'
 az keyvault secret show --query 'value' \
   --name 'secret_name' --vault-name 'key_vault_name'
 
+# Show a Virtual Machine's details.
+az vm show -g 'resource_group_name' -n 'vm_name'
+
+# Delete a Virtual Machine.
+az vm delete -g 'resource_group_name' -n 'vm_name'
+
 # List LogAnalytics' Workspaces.
 az monitor log-analytics workspace list \
   --resource-group 'resource_group_name' \
