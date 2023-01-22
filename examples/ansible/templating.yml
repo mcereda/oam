@@ -88,7 +88,7 @@
     # All of the string tests can also take the optional 'ignorecase' and
     # 'multiline' arguments.
     - name: Test a substring is present in a string.
-      debug:
+      ansible.builtin.debug:
         msg: "{{ item }}"
       with_items:
         - "{{ url is match('https://example.com/users/.*/resources') }}"
