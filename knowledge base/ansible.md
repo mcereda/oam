@@ -458,6 +458,7 @@ vars:
 ## Further readings
 
 - [Templating]
+- [Templating examples]
 - [Roles]
 - [Tests]
 - [Special variables]
@@ -504,7 +505,7 @@ vars:
 [working with versions]: https://docs.ansible.com/ansible/latest/collections/community/general/docsite/filter_guide_working_with_versions.html
 
 <!-- internal references -->
-[examples]: ../ansible/templating.cheatsheet.yml
+[templating examples]: ../examples/ansible/templating.yml
 
 <!-- other references -->
 
