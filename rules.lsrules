@@ -1,0 +1,112 @@
+{
+    "description": "Michele Cereda's Little Snitch rules list.\nRules are tentatively and progressively ordered by process, remote (from more to less specific, then alphabetically), protocol and, finally, port.",
+    "name": "Michele Cereda's Rules List",
+    "rules": [
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to check for captive portals.",
+            "ports": "80",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "tcp",
+            "remote-hosts": "detectportal.firefox.com"
+        },
+        {
+            "action": "deny",
+            "notes": "Stop Firefox from connecting to Google's Interactive Media Ads SDK, which allows developers and publishers to show interactive and video ads on their websites and mobile apps.",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "remote-domains": "imasdk.googleapis.com"
+        },
+        {
+            "action": "deny",
+            "notes": "Stop Firefox from connecting to google-analytics.com.",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "remote-domains": "google-analytics.com"
+        },
+        {
+            "action": "deny",
+            "notes": "Stop Firefox from tracking content from third-party sites.",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "remote-domains": "googletagservices.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to securely connect to websites.",
+            "ports": "443",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "tcp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow iTerm2 to securely connect to websites.",
+            "ports": "443",
+            "process": "/Applications/iTerm.app/Contents/MacOS/iTerm2",
+            "protocol": "tcp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow the KBFS functionality of Keybase.",
+            "ports": "443",
+            "process": "/Applications/Keybase.app/Contents/SharedSupport/bin/kbfs",
+            "protocol": "tcp",
+            "remote-domains": "kbfs.keybaseapi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Keybase to connect to its servers.",
+            "ports": "443",
+            "process": "/Applications/Keybase.app/Contents/SharedSupport/bin/keybase",
+            "protocol": "tcp",
+            "remote-domains": "core.keybaseapi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Keybase to get software updates.",
+            "ports": "443",
+            "process": "/Applications/Keybase.app/Contents/SharedSupport/bin/updater",
+            "protocol": "tcp",
+            "remote-domains": "core.keybaseapi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Little Snitch to get software updates.",
+            "ports": "443",
+            "process": "/Applications/Little Snitch.app/Contents/Components/Little Snitch Software Update.app/Contents/MacOS/Little Snitch Software Update",
+            "protocol": "tcp",
+            "remote-hosts": "sw-update.obdev.at"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Logi Options+ to connect to Logitech's account.",
+            "ports": "443",
+            "process": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/MacOS/logioptionsplus_agent",
+            "protocol": "tcp",
+            "remote-hosts": "accounts.logi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow the Flow functionality of Logi Options+.",
+            "ports": "443",
+            "process": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/MacOS/logioptionsplus_agent",
+            "protocol": "tcp",
+            "remote-hosts": "flow.logitech.io"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Little Snitch to download rules groups.",
+            "ports": "443",
+            "process": "/Library/Application Support/Objective Development/Little Snitch/Components/at.obdev.littlesnitch.daemon.bundle/Contents/XPCServices/at.obdev.littlesnitch.urldownloader.xpc/Contents/MacOS/at.obdev.littlesnitch.urldownloader",
+            "protocol": "tcp",
+            "remote-hosts": "mek.keybase.pub"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Little Snitch to download rules groups.",
+            "ports": "443",
+            "process": "/Library/Application Support/Objective Development/Little Snitch/Components/at.obdev.littlesnitch.daemon.bundle/Contents/XPCServices/at.obdev.littlesnitch.urldownloader.xpc/Contents/MacOS/at.obdev.littlesnitch.urldownloader",
+            "protocol": "tcp",
+            "remote-hosts": "pgl.yoyo.org"
+        }
+    ]
+}
