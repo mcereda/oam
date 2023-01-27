@@ -3,6 +3,8 @@
         "airgap",
         "airgapped",
         "bitwarden",
-        "keepass"
+        "kbfs",
+        "keepass",
+        "keybase"
     ]
 }
