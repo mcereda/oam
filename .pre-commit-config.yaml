@@ -19,10 +19,10 @@ repos:
         args:
           - -r "~MD013"   # ignore line-length rule
   - repo: https://github.com/ansible-community/ansible-lint
-    rev: v6.9.0
+    rev: v6.11.0
     hooks:
       - id: ansible-lint
-        exclude: ^cloud-init/
+        exclude: cloud-init/
   - repo: https://github.com/hadolint/hadolint
     rev: v2.12.1-beta
     hooks:
