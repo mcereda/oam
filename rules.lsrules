@@ -79,11 +79,19 @@
         },
         {
             "action": "allow",
-            "notes": "Allow Firefox to check certificates.",
+            "notes": "Allow Firefox to gather information about certificates.",
             "ports": "80",
             "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
             "protocol": "tcp",
             "remote-hosts": "ocsp.pki.goog"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to gather information about certificates.",
+            "ports": "80",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "tcp",
+            "remote-domains": "o.lencr.org"
         },
         {
             "action": "deny",
