@@ -80,6 +80,14 @@
         },
         {
             "action": "allow",
+            "notes": "Allow the GPG Suite updater to download updates.",
+            "ports": "443",
+            "process": "/Library/Application Support/GPGTools/GPGSuite_Updater.app/Contents/MacOS/GPGSuite_Updater",
+            "protocol": "tcp",
+            "remote-hosts": "gpgtools.com"
+        },
+        {
+            "action": "allow",
             "notes": "Allow iTerm2 to securely connect to websites.",
             "ports": "443",
             "process": "/Applications/iTerm.app/Contents/MacOS/iTerm2",
