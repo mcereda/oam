@@ -16,7 +16,8 @@
     flathub_url: https://flathub.org/repo/flathub.flatpakrepo
     remotes: []
   tasks:
-    - when: ansible_system == 'Linux'
+    - name: Install and configure Flatpak on Linux systems
+      when: ansible_system == 'Linux'
       tags: linux
       block:
         - name: Install flatpak
@@ -34,8 +35,8 @@
           block:
             - name: Add flathub to the list of remotes of this run
               when: flathub_enabled
-              set_fact:
-                remotes: "{{ remotes + [ { 'name': flathub_name, 'method': flathub_method, 'url': flathub_url } ] }}"
+              ansible.builtin.set_fact:
+                remotes: "{{ remotes + [{'name': flathub_name, 'method': flathub_method, 'url': flathub_url}] }}"
             - name: Enable system remotes
               tags:
                 - remote

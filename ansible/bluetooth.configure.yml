@@ -22,7 +22,8 @@
         name: bluetooth.service
         state: restarted
   tasks:
-    - when: ansible_system == 'Linux'
+    - name: Configure Bluetooth on Linux systems
+      when: ansible_system == 'Linux'
       tags: linux
       block:
         - name: Configure how long to stay in discoverable mode before going back to non-discoverable
@@ -32,7 +33,7 @@
           notify: Restart Bluez
           ansible.builtin.lineinfile:
             path: "/etc/bluetooth/main.conf"
-            line: "DiscoverableTimeout = {{ discoverable_timeout|string|lower }}"
+            line: "DiscoverableTimeout = {{ discoverable_timeout | string | lower }}"
             regexp: '^.*DiscoverableTimeout\s*=\s*.*$'
             insertafter: '^[General]$'
             mode: '0644'
@@ -45,7 +46,7 @@
           notify: Restart Bluez
           ansible.builtin.lineinfile:
             path: "/etc/bluetooth/main.conf"
-            line: "FastConnectable = {{ fast_connectable|string|lower }}"
+            line: "FastConnectable = {{ fast_connectable | string | lower }}"
             regexp: '^.*FastConnectable\s*=\s*.*$'
             insertafter: '^[General]$'
             mode: '0644'
@@ -58,7 +59,7 @@
           notify: Restart Bluez
           ansible.builtin.lineinfile:
             path: "/etc/bluetooth/main.conf"
-            line: "Name = {{ name|string|lower }}"
+            line: "Name = {{ name | string | lower }}"
             regexp: '^.*Name\s*=\s*.*$'
             insertafter: '^[General]$'
             mode: '0644'
@@ -71,7 +72,7 @@
           notify: Restart Bluez
           ansible.builtin.lineinfile:
             path: "/etc/bluetooth/main.conf"
-            line: "AutoEnable = {{ auto_enable|string|lower }}"
+            line: "AutoEnable = {{ auto_enable | string | lower }}"
             regexp: '^.*AutoEnable\s*=\s*.*$'
             insertafter: '^[Policy]$'
             mode: '0644'

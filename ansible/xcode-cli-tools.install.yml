@@ -10,7 +10,7 @@
   tasks:
     - name: Pre-flight checks
       when: ansible_system != 'Darwin'
-      fail:
+      ansible.builtin.fail:
         msg: "Unsupported OS '{{ ansible_system }}'"
     - name: Check Command Line Tools are already installed
       check_mode: false
