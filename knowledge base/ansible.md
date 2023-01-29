@@ -45,7 +45,7 @@ ansible-playbook path/to/playbook.yml -i hosts.list
 ansible-playbook path/to/playbook.yml -i host1,host2,hostn, -l hosts,list
 ansible-playbook path/to/playbook.yml -i host1,host2,other, -l hosts-pattern
 
-# Show what changes (with details) a play whould apply to the local machine.
+# Show what changes (with details) a play would apply to the local machine.
 ansible-playbook path/to/playbook.yml -i localhost, -c local -vvC
 
 # Only execute tasks with specific tags.
@@ -173,7 +173,7 @@ Return a boolean result.
     - variable1
     - variableN
 
-# Iterate thrugh nested loops.
+# Iterate through nested loops.
 - vars:
     middles:
       - 'middle1'
@@ -325,7 +325,7 @@ Add the `check_mode: false` pair to the task:
 Add the `check_mode: true` pair to the task:
 
 ```yaml
-- name: This task will always run under checkmode and not change the system
+- name: This task will always run under check mode and not change the system
   check_mode: true
   ansible.builtin.lineinfile:
     line: "important file"
