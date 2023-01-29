@@ -131,6 +131,24 @@
         },
         {
             "action": "allow",
+            "notes": "Allow VS Code's Helper to download schemas.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "json.schemastore.org",
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code's Helper to download schemas.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "www.schemastore.org",
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "allow",
             "notes": "Allow VS Code's Helper to gather extensions.",
             "ports": "443",
             "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
