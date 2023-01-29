@@ -32,5 +32,5 @@ dd if=path/to/file.img of=/dev/drive_device status=progress
 
 - [cheat.sh]
 
-<!-- -->
+<!-- external references -->
 [cheat.sh]: https://cheat.sh/dd

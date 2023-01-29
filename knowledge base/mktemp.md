@@ -13,7 +13,7 @@ mktemp -d
 
 # create an empty temporary file or directory with a random templated name
 # the Xs must be put at the end of the filename
-# the Xs specifies the templated parts and lenght in the file name
+# the Xs specifies the templated parts and length in the file name
 mktemp /tmp/filenameXXX
 mktemp -d /tmp/dirname.XXX
 
