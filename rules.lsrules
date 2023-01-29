@@ -1,5 +1,5 @@
 {
-    "description": "Michele Cereda's Little Snitch rules list.\nRules are tentatively and progressively ordered by process, remote (from more to less specific, then alphabetically), protocol and, finally, port.",
+    "description": "Michele Cereda's Little Snitch rules list.\nRules are ordered here as they appear in Little Snitch's console.",
     "name": "Michele Cereda's Rules List",
     "rules": [
         {
@@ -15,6 +15,14 @@
             "notes": "Stop Firefox from connecting to Google's Interactive Media Ads SDK, which allows developers and publishers to show interactive and video ads on their websites and mobile apps.",
             "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
             "remote-domains": "imasdk.googleapis.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to check certificates.",
+            "ports": "80",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "tcp",
+            "remote-hosts": "ocsp.pki.goog"
         },
         {
             "action": "deny",
