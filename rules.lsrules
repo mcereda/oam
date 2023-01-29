@@ -86,6 +86,76 @@
         },
         {
             "action": "allow",
+            "notes": "Allow VS Code's Helper to download repositories from Github.",
+            "ports": "22",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "github.com",
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code's Helper to download repositories from Github.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "github.com",
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code's Helper to download repositories from Gitlab.",
+            "ports": "22",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "gitlab.com",
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code's Helper to download repositories from Gitlab.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "gitlab.com",
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code's Helper to get the user's information from Gravatar.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "www.gravatar.com",
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code's Helper to gather extensions.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "marketplace.visualstudio.com",
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code's Helper to look for updates.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "update.code.visualstudio.com",
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "deny",
+            "notes": "Stop VS Code's Helper from connecting to dc.services.visualstudio.com.",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "remote-hosts": "dc.services.visualstudio.com",
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "allow",
             "notes": "Allow Logi Options+ to connect to Logitech's account.",
             "ports": "443",
             "process": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/MacOS/logioptionsplus_agent",
