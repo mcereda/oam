@@ -13,13 +13,14 @@
     swappiness_sysctl_file_priority: 99
     swappiness_value: 10
   tasks:
-    - when: ansible_system == 'Linux'
+    - name: Configure swappiness on Linux systems
+      when: ansible_system == 'Linux'
       tags: linux
       block:
         - name: Configure swappiness
           become: true
-          sysctl:
+          ansible.builtin.sysctl:
             name: vm.swappiness
-            value: "{{ swappiness_value|string }}"
+            value: "{{ swappiness_value | string }}"
             sysctl_file: "{{ swappiness_sysctl_file }}"
             sysctl_set: true

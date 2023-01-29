@@ -24,14 +24,14 @@
       installonly_limit: 2
       gpgcheck: true
   tasks:
-    - name: "Configure {{ ansible_pkg_mgr|upper }}"
+    - name: "Configure {{ ansible_pkg_mgr | upper }}"
       when: ansible_pkg_mgr in ['dnf', 'yum']
       become: true
       ansible.builtin.lineinfile:
         path: "/etc/{{ ansible_pkg_mgr }}/{{ ansible_pkg_mgr }}.conf"
-        line: "{{ item.key }}={{ item.value|string }}"
+        line: "{{ item.key }}={{ item.value | string }}"
         regexp: '^.*{{ item.key }}\s*=\s*.*$'
         insertafter: '^[main]$'
         mode: '0644'
         backup: true
-      loop: "{{ lookup('vars', [ansible_pkg_mgr, 'config']|join('_') ) | dict2items }}"
+      loop: "{{ lookup('vars', [ansible_pkg_mgr, 'config'] | join('_')) | dict2items }}"

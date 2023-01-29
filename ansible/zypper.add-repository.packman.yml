@@ -1,6 +1,6 @@
 ---
 
-- name:
+- name: Add Packman to Zypper's repositories list
   tags:
     - opensuse
     - packman
@@ -12,7 +12,7 @@
     ansible_distribution_with_underscores: "{{ ansible_distribution | replace(' ', '_') }}"
     repo_part_distribution: >-
       {{
-        [ansible_distribution_with_underscores, ansible_distribution_version]|join('_')
+        [ansible_distribution_with_underscores, ansible_distribution_version] | join('_')
         if ansible_distribution is search('leap', ignorecase=true)
         else ansible_distribution_with_underscores
       }}

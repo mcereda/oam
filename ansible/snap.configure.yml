@@ -12,7 +12,8 @@
     - snapd
   hosts: all
   tasks:
-    - when: ansible_system == 'Linux'
+    - name: Install and configure Snap on Linux systems
+      when: ansible_system == 'Linux'
       tags: linux
       block:
         - name: Install snapd
