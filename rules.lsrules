@@ -1,7 +1,23 @@
 {
-    "description": "Michele Cereda's Little Snitch rules list.\nRules are ordered here as they appear in Little Snitch's console.",
+    "description": "Michele Cereda's Little Snitch rules list.",
     "name": "Michele Cereda's Rules List",
     "rules": [
+        {
+            "action": "allow",
+            "notes": "Allow Little Snitch to download rules groups.",
+            "ports": "443",
+            "process": "/Library/Application Support/Objective Development/Little Snitch/Components/at.obdev.littlesnitch.daemon.bundle/Contents/XPCServices/at.obdev.littlesnitch.urldownloader.xpc/Contents/MacOS/at.obdev.littlesnitch.urldownloader",
+            "protocol": "tcp",
+            "remote-hosts": "github.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Little Snitch to download rules groups.",
+            "ports": "443",
+            "process": "/Library/Application Support/Objective Development/Little Snitch/Components/at.obdev.littlesnitch.daemon.bundle/Contents/XPCServices/at.obdev.littlesnitch.urldownloader.xpc/Contents/MacOS/at.obdev.littlesnitch.urldownloader",
+            "protocol": "tcp",
+            "remote-hosts": "gitlab.com"
+        },
         {
             "action": "allow",
             "notes": "Allow Little Snitch to download rules groups.",
