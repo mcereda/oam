@@ -4,17 +4,27 @@
     "rules": [
         {
             "action": "allow",
+            "notes": "Allow Little Snitch to download rules groups.",
+            "ports": "443",
+            "process": "/Library/Application Support/Objective Development/Little Snitch/Components/at.obdev.littlesnitch.daemon.bundle/Contents/XPCServices/at.obdev.littlesnitch.urldownloader.xpc/Contents/MacOS/at.obdev.littlesnitch.urldownloader",
+            "protocol": "tcp",
+            "remote-hosts": "mek.keybase.pub"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Little Snitch to download rules groups.",
+            "ports": "443",
+            "process": "/Library/Application Support/Objective Development/Little Snitch/Components/at.obdev.littlesnitch.daemon.bundle/Contents/XPCServices/at.obdev.littlesnitch.urldownloader.xpc/Contents/MacOS/at.obdev.littlesnitch.urldownloader",
+            "protocol": "tcp",
+            "remote-hosts": "pgl.yoyo.org"
+        },
+        {
+            "action": "allow",
             "notes": "Allow Firefox to check for captive portals.",
             "ports": "80",
             "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
             "protocol": "tcp",
             "remote-hosts": "detectportal.firefox.com"
-        },
-        {
-            "action": "deny",
-            "notes": "Stop Firefox from connecting to Google's Interactive Media Ads SDK, which allows developers and publishers to show interactive and video ads on their websites and mobile apps.",
-            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
-            "remote-domains": "imasdk.googleapis.com"
         },
         {
             "action": "allow",
@@ -23,6 +33,12 @@
             "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
             "protocol": "tcp",
             "remote-hosts": "ocsp.pki.goog"
+        },
+        {
+            "action": "deny",
+            "notes": "Stop Firefox from connecting to Google's Interactive Media Ads SDK, which allows developers and publishers to show interactive and video ads on their websites and mobile apps.",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "remote-domains": "imasdk.googleapis.com"
         },
         {
             "action": "deny",
@@ -70,14 +86,6 @@
         },
         {
             "action": "allow",
-            "notes": "Allow Keybase to get software updates.",
-            "ports": "443",
-            "process": "/Applications/Keybase.app/Contents/SharedSupport/bin/updater",
-            "protocol": "tcp",
-            "remote-domains": "core.keybaseapi.com"
-        },
-        {
-            "action": "allow",
             "notes": "Allow Little Snitch to get software updates.",
             "ports": "443",
             "process": "/Applications/Little Snitch.app/Contents/Components/Little Snitch Software Update.app/Contents/MacOS/Little Snitch Software Update",
@@ -86,12 +94,27 @@
         },
         {
             "action": "allow",
-            "notes": "Allow VS Code's Helper to download repositories from Github.",
-            "ports": "22",
-            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "notes": "Allow Logi Options+ to connect to Logitech's account.",
+            "ports": "443",
+            "process": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/MacOS/logioptionsplus_agent",
             "protocol": "tcp",
-            "remote-hosts": "github.com",
-            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+            "remote-hosts": "accounts.logi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow the Flow functionality of Logi Options+.",
+            "ports": "443",
+            "process": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/MacOS/logioptionsplus_agent",
+            "protocol": "tcp",
+            "remote-hosts": "flow.logitech.io"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Keybase to get software updates.",
+            "ports": "443",
+            "process": "/Applications/Keybase.app/Contents/SharedSupport/bin/updater",
+            "protocol": "tcp",
+            "remote-domains": "core.keybaseapi.com"
         },
         {
             "action": "allow",
@@ -100,15 +123,6 @@
             "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
             "protocol": "tcp",
             "remote-hosts": "github.com",
-            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
-        },
-        {
-            "action": "allow",
-            "notes": "Allow VS Code's Helper to download repositories from Gitlab.",
-            "ports": "22",
-            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
-            "protocol": "tcp",
-            "remote-hosts": "gitlab.com",
             "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
         },
         {
@@ -158,12 +172,27 @@
         },
         {
             "action": "allow",
-            "notes": "Allow VS Code's Helper to look for updates.",
+            "notes": "Allow VS Code to look for updates.",
             "ports": "443",
             "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
             "protocol": "tcp",
-            "remote-hosts": "update.code.visualstudio.com",
-            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+            "remote-hosts": "update.code.visualstudio.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code to download repositories from Github.",
+            "ports": "22",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "github.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code to download repositories from Gitlab.",
+            "ports": "22",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "gitlab.com"
         },
         {
             "action": "deny",
@@ -171,38 +200,6 @@
             "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
             "remote-hosts": "dc.services.visualstudio.com",
             "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
-        },
-        {
-            "action": "allow",
-            "notes": "Allow Logi Options+ to connect to Logitech's account.",
-            "ports": "443",
-            "process": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/MacOS/logioptionsplus_agent",
-            "protocol": "tcp",
-            "remote-hosts": "accounts.logi.com"
-        },
-        {
-            "action": "allow",
-            "notes": "Allow the Flow functionality of Logi Options+.",
-            "ports": "443",
-            "process": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/MacOS/logioptionsplus_agent",
-            "protocol": "tcp",
-            "remote-hosts": "flow.logitech.io"
-        },
-        {
-            "action": "allow",
-            "notes": "Allow Little Snitch to download rules groups.",
-            "ports": "443",
-            "process": "/Library/Application Support/Objective Development/Little Snitch/Components/at.obdev.littlesnitch.daemon.bundle/Contents/XPCServices/at.obdev.littlesnitch.urldownloader.xpc/Contents/MacOS/at.obdev.littlesnitch.urldownloader",
-            "protocol": "tcp",
-            "remote-hosts": "mek.keybase.pub"
-        },
-        {
-            "action": "allow",
-            "notes": "Allow Little Snitch to download rules groups.",
-            "ports": "443",
-            "process": "/Library/Application Support/Objective Development/Little Snitch/Components/at.obdev.littlesnitch.daemon.bundle/Contents/XPCServices/at.obdev.littlesnitch.urldownloader.xpc/Contents/MacOS/at.obdev.littlesnitch.urldownloader",
-            "protocol": "tcp",
-            "remote-hosts": "pgl.yoyo.org"
         }
     ]
 }
