@@ -121,6 +121,31 @@
         },
         {
             "action": "allow",
+            "notes": "Allow Homebrew to download updates.",
+            "ports": "443",
+            "process": "/Applications/iTerm.app/Contents/MacOS/iTerm2",
+            "protocol": "tcp",
+            "remote-hosts": "ghcr.io"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Macports to download updates.",
+            "ports": "873",
+            "process": "/Applications/iTerm.app/Contents/MacOS/iTerm2",
+            "protocol": "tcp",
+            "remote-hosts": "rsync.macports.org"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Macports to download updates.",
+            "ports": "80",
+            "process": "/Applications/iTerm.app/Contents/MacOS/iTerm2",
+            "protocol": "tcp",
+            "remote-domains": "packages.macports.org",
+            "via": "/opt/local/libexec/macports/bin/tclsh8.6"
+        },
+        {
+            "action": "allow",
             "notes": "Allow iTerm2 to securely connect to websites.",
             "ports": "443",
             "process": "/Applications/iTerm.app/Contents/MacOS/iTerm2",
