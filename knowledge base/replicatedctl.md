@@ -21,6 +21,7 @@ replicatedctl app inspect
 # Export the application's settings.
 replicatedctl app-config export
 replicatedctl app-config export > 'settings.json'
+replicatedctl app-config export --template '{{ .enc_password.Value }}'
 
 # Apply changes to the application's settings.
 replicatedctl app apply-config
