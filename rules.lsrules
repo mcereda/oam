@@ -80,6 +80,14 @@
         },
         {
             "action": "allow",
+            "notes": "Allow Firefox to securely connect to websites.",
+            "ports": "443",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "udp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
             "notes": "Allow the GPG Suite updater to download updates.",
             "ports": "443",
             "process": "/Library/Application Support/GPGTools/GPGSuite_Updater.app/Contents/MacOS/GPGSuite_Updater",
