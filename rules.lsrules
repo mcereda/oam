@@ -20,6 +20,24 @@
         },
         {
             "action": "allow",
+            "notes": "Allow Bitwarden's Helper to connect to its servers.",
+            "ports": "443",
+            "process": "/Applications/Bitwarden.app/Contents/MacOS/Bitwarden",
+            "protocol": "tcp",
+            "remote-hosts": "identity.bitwarden.com",
+            "via": "/Applications/Bitwarden.app/Contents/Frameworks/Bitwarden Helper.app/Contents/MacOS/Bitwarden Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Bitwarden's Helper to gather icons for its entries.",
+            "ports": "443",
+            "process": "/Applications/Bitwarden.app/Contents/MacOS/Bitwarden",
+            "protocol": "tcp",
+            "remote-hosts": "icons.bitwarden.net",
+            "via": "/Applications/Bitwarden.app/Contents/Frameworks/Bitwarden Helper.app/Contents/MacOS/Bitwarden Helper"
+        },
+        {
+            "action": "allow",
             "notes": "Allow Firefox to check for captive portals.",
             "ports": "80",
             "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
