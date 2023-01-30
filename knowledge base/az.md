@@ -81,11 +81,40 @@ az keyvault key list --query '[].name' -o tsv --vault-name 'key_vault_name'
 az keyvault secret show --query 'value' \
   --name 'secret_name' --vault-name 'key_vault_name'
 
+# List the Virtual Machine images available in Azure Marketplace.
+# Or check https://az-vm-image.info .
+# Suggested to use '--all' to avoid useless filtering at MSFT side.
+az vm image list --all
+az vm image list -l 'westeurope' --offer 'RHEL' -p 'RedHat' -s '8_5' --all
+
 # Show a Virtual Machine's details.
 az vm show -g 'resource_group_name' -n 'vm_name'
 
 # Delete a Virtual Machine.
 az vm delete -g 'resource_group_name' -n 'vm_name'
+
+# Assess updates in a Linux Virtual Machine.
+az vm assess-patches  -g 'resource_group_name'  -n 'vm_name'
+
+# Install security updates in a Linux Virtual Machine.
+# Do not reboot.
+# Max 4h of operation.
+az vm install-patches -g 'resource_group_name'  -n 'vm_name' \
+  --maximum-duration 'PT4H' --reboot-settings 'Never' \
+  --classifications-to-include-linux 'Security'
+
+# Get the status of the Agent in a Virtual Machine.
+az vm get-instance-view -g 'resource_group_name'  -n 'vm_name' \
+  --query 'instanceView.vmAgent.statuses[]' -o table
+
+# Wait until a Virtual Machine satisfies a condition.
+az vm wait -g 'resource_group_name'  -n 'vm_name' --created
+az vm wait … --updated --interval '5' --timeout '300'
+az vm wait … --custom "instanceView.statuses[?code=='PowerState/running']"
+
+# Wait for a Virtual Machine Agent to be Ready.
+az vm wait -g 'resource_group_name'  -n 'vm_name' \
+  --custom "instanceView.vmAgent.statuses[?code=='ProvisioningState/Ready']"
 
 # List LogAnalytics' Workspaces.
 az monitor log-analytics workspace list \
