@@ -3,6 +3,9 @@
 ## TL;DR
 
 ```sh
+# Reconfigure a package.
+dpkg-reconfigure --priority low unattended-upgrades
+
 # add an extra architecture
 dpkg --add-architecture i386
 
