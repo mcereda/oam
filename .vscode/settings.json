@@ -21,6 +21,7 @@
         "keepass",
         "keybase",
         "localdomain",
+        "macports",
         "makepkg",
         "markdownlint",
         "mktemp",
@@ -32,6 +33,7 @@
         "polkit",
         "radeon",
         "subvolume",
+        "tclsh",
         "templating",
         "zstd"
     ]
