@@ -71,6 +71,22 @@
         },
         {
             "action": "allow",
+            "notes": "Allow Firefox to gather information about certificates.",
+            "ports": "80",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "tcp",
+            "remote-hosts": "ocsp.sca1b.amazontrust.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to gather information about certificates.",
+            "ports": "80",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "tcp",
+            "remote-hosts": "ocsp.digicert.com"
+        },
+        {
+            "action": "allow",
             "notes": "Allow Firefox to check for captive portals.",
             "ports": "80",
             "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
@@ -280,6 +296,14 @@
         },
         {
             "action": "allow",
+            "notes": "Allow VS Code to sync the user's settings.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "vscode-sync.trafficmanager.net"
+        },
+        {
+            "action": "allow",
             "notes": "Allow VS Code to look for updates.",
             "ports": "443",
             "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
@@ -288,11 +312,27 @@
         },
         {
             "action": "allow",
+            "notes": "Allow VS Code to download Terraform's extension.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "checkpoint-api.hashicorp.com"
+        },
+        {
+            "action": "allow",
             "notes": "Allow VS Code to download repositories from Github.",
             "ports": "22",
             "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
             "protocol": "tcp",
             "remote-hosts": "github.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code to sync with its servers.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "api.github.com",
         },
         {
             "action": "allow",
@@ -308,6 +348,78 @@
             "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
             "remote-hosts": "dc.services.visualstudio.com",
             "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code to download extensions.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-domains": "gallery.vsassets.io"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code to download extensions.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-domains": "gallerycdn.vsassets.io"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to securely sync with its servers.",
+            "ports": "443",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote-hosts": "bifrost.vivaldi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to sync with its servers.",
+            "ports": "15674",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote-hosts": "bifrost.vivaldi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to securely login into the user's account.",
+            "ports": "443",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote-hosts": "login.vivaldi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to securely connect to websites.",
+            "ports": "443",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to securely connect to websites.",
+            "ports": "443",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "udp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow WhatsApp to authenticate.",
+            "ports": "443",
+            "process": "/Applications/WhatsApp.app/Contents/MacOS/WhatsApp",
+            "protocol": "tcp",
+            "remote-hosts": "web.whatsapp.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow WhatsApp to securely download media.",
+            "ports": "443",
+            "process": "/Applications/WhatsApp.app/Contents/MacOS/WhatsApp",
+            "protocol": "tcp",
+            "remote-domains": "cdn.whatsapp.net"
         }
     ]
 }
