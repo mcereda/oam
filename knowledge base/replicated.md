@@ -1,5 +1,12 @@
 # Replicated
 
+## TL;DR
+
+```sh
+# Get Replicated's logs.
+docker logs replicated
+```
+
 ## Further readings
 
 - [replicatedctl]

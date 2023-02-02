@@ -6,6 +6,13 @@
 # Get the status of the whole system.
 replicatedctl system status
 
+# Show information about the loaded license.
+replicatedctl license inspect
+
+# Load a new license.
+replicatedctl license-load < 'path/to/license.rli'
+replicatedctl license-load --airgap-package 'path/to/package' < 'path/to/license.rli'
+
 # Get the detailed status of the application.
 replicatedctl app status
 
