@@ -111,10 +111,11 @@ az vm get-instance-view -g 'resource_group_name'  -n 'vm_name' \
 az vm wait -g 'resource_group_name'  -n 'vm_name' --created
 az vm wait … --updated --interval '5' --timeout '300'
 az vm wait … --custom "instanceView.statuses[?code=='PowerState/running']"
+az vm wait … --custom "instanceView.vmAgent.statuses[?code!='ProvisioningState/Updating']"
 
 # Wait for a Virtual Machine Agent to be Ready.
 az vm wait -g 'resource_group_name'  -n 'vm_name' \
-  --custom "instanceView.vmAgent.statuses[?code=='ProvisioningState/Ready']"
+  --custom "instanceView.vmAgent.statuses[?code=='ProvisioningState/succeeded']"
 
 # List LogAnalytics' Workspaces.
 az monitor log-analytics workspace list \
