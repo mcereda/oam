@@ -37,6 +37,7 @@
         "polkit",
         "pvresize",
         "radeon",
+        "replicatedctl",
         "rootlv",
         "rootvg",
         "runcmd",
