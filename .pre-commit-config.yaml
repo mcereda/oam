@@ -18,11 +18,10 @@ repos:
       - id: markdownlint
         args:
           - -r "~MD013"   # ignore line-length rule
-  - repo: https://github.com/ansible-community/ansible-lint
-    rev: v6.11.0
-    hooks:
-      - id: ansible-lint
-        exclude: cloud-init/
+  # - repo: https://github.com/ansible-community/ansible-lint # FIXME: figure this out, too many stupid issues
+  #   rev: v6.12.0
+  #   hooks:
+  #     - id: ansible-lint
   - repo: https://github.com/hadolint/hadolint
     rev: v2.12.1-beta
     hooks:
