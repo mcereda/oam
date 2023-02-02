@@ -1,14 +1,15 @@
 # Ansible
 
 1. [TL;DR](#tldr)
-2. [Templating](#templating)
+2. [Configuration](#configuration)
+3. [Templating](#templating)
    1. [Tests](#tests)
    2. [Loops](#loops)
-3. [Roles](#roles)
+4. [Roles](#roles)
    1. [Get roles](#get-roles)
    2. [Role dependencies](#role-dependencies)
-4. [Output formatting](#output-formatting)
-5. [Troubleshooting](#troubleshooting)
+5. [Output formatting](#output-formatting)
+6. [Troubleshooting](#troubleshooting)
    1. [Print all known variables](#print-all-known-variables)
    2. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
    3. [Run specific tasks even in check mode](#run-specific-tasks-even-in-check-mode)
@@ -21,56 +22,78 @@
    10. [Check if a list contains an item and fail otherwise](#check-if-a-list-contains-an-item-and-fail-otherwise)
    11. [Define different values for `true`/`false`/`null`](#define-different-values-for-truefalsenull)
    12. [Force a task or play to use a specific Python interpreter](#force-a-task-or-play-to-use-a-specific-python-interpreter)
-6. [Further readings](#further-readings)
-7. [Sources](#sources)
+7. [Further readings](#further-readings)
+8. [Sources](#sources)
 
 ## TL;DR
 
 ```sh
 # Install.
-pip3 install --user ansible && port install sshpass   # darwin
-sudo pamac install ansible sshpass                    # manjaro linux
+pip3 install --user 'ansible' && port install 'sshpass'   # darwin
+sudo pamac install 'ansible' 'sshpass'                    # manjaro linux
 
 # Show hosts' ansible facts.
-ansible -i hostfile -m setup all
-ansible -i host1,hostn, -m setup host1 -u remote-user
-ansible -i localhost, -c local -km setup localhost
+ansible -i 'path/to/hosts/file' -m 'setup' all
+ansible -i 'host1,hostn,' -m 'setup' 'host1' -u 'remote-user'
+ansible -i 'localhost,' -c 'local' -km 'setup' 'localhost'
 
 # Check the syntax of a playbook.
 # This will *not* execute the plays inside it.
-ansible-playbook path/to/playbook.yml --syntax-check
+ansible-playbook 'path/to/playbook.yml' --syntax-check
 
 # Execute a playbook.
-ansible-playbook path/to/playbook.yml -i hosts.list
-ansible-playbook path/to/playbook.yml -i host1,host2,hostn, -l hosts,list
-ansible-playbook path/to/playbook.yml -i host1,host2,other, -l hosts-pattern
+ansible-playbook 'path/to/playbook.yml' -i 'hosts.list'
+ansible-playbook … -i 'host1,host2,hostn,' -l 'hosts,list'
+ansible-playbook … -i 'host1,host2,other,' -l 'hosts-pattern'
 
 # Show what changes (with details) a play would apply to the local machine.
-ansible-playbook path/to/playbook.yml -i localhost, -c local -vvC
+ansible-playbook 'path/to/playbook.yml' -i 'localhost,' -c 'local' -vvC
 
 # Only execute tasks with specific tags.
-ansible-playbook path/to/playbook.yml --tags "configuration,packages"
+ansible-playbook 'path/to/playbook.yml' --tags 'configuration,packages'
 
 # Avoid executing tasks with specific tags.
-ansible-playbook path/to/playbook.yml --skip-tags "system,user"
+ansible-playbook 'path/to/playbook.yml' --skip-tags 'system,user'
 
 # Check what tasks will be executed.
-ansible-playbook example.yml --list-tasks
-ansible-playbook example.yml --list-tasks --tags "configuration,packages"
-ansible-playbook example.yml --list-tasks --skip-tags "system,user"
+ansible-playbook 'path/to/playbook.yml' --list-tasks
+ansible-playbook … --list-tasks --tags 'configuration,packages'
+ansible-playbook … --list-tasks --skip-tags 'system,user'
 
 # List roles installed from Galaxy.
 ansible-galaxy list
 
 # Install roles from Galaxy.
-ansible-galaxy install namespace.role
-ansible-galaxy install --roles-path ~/ansible-roles namespace.role
-ansible-galaxy install namespace.role,v1.0.0
-ansible-galaxy install git+https://github.com/namespace/role.git,commit-hash
-ansible-galaxy install -r requirements.yml
+ansible-galaxy install 'namespace.role'
+ansible-galaxy install --roles-path 'path/to/ansible/roles' 'namespace.role'
+ansible-galaxy install 'namespace.role,v1.0.0'
+ansible-galaxy install 'git+https://github.com/namespace/role.git,commit-hash'
+ansible-galaxy install -r 'requirements.yml'
 
 # Remove roles installed from Galaxy.
-ansible-galaxy remove namespace.role
+ansible-galaxy remove 'namespace.role'
+```
+
+## Configuration
+
+Ansible can be configured using INI files named `ansible.cfg`, environment variables, command-line options, playbook keywords, and variables.
+
+The `ansible-config` utility allows to see all the configuration settings available, their defaults, how to set them and where their current value comes from.
+
+Ansible will process the following list and use the first file found; all the other files are ignored even if existing:
+
+1. the `ANSIBLE_CONFIG` environment variable;
+1. the `ansible.cfg` file in the current directory;
+1. the `~/.ansible.cfg` file in the home directory;
+1. the `/etc/ansible/ansible.cfg` file.
+
+One can generate a fully commented-out example of the `ansible.cfg` file:
+
+```sh
+ansible-config init --disabled > 'ansible.cfg'
+
+# Includes existing plugins.
+ansible-config init --disabled -t all > 'ansible.cfg'
 ```
 
 ## Templating
@@ -193,10 +216,10 @@ Return a boolean result.
 Roles can be either **created**:
 
 ```sh
-ansible-galaxy init role-name
+ansible-galaxy init 'role-name'
 ```
 
-or **installed** from [Ansible Galaxy]:
+or **installed** from [Galaxy]:
 
 ```yaml
 ---
@@ -206,11 +229,11 @@ collections:
 ```
 
 ```sh
-ansible-galaxy install mcereda.boinc_client
-ansible-galaxy install --roles-path ~/ansible-roles namespace.role
-ansible-galaxy install namespace.role,v1.0.0
-ansible-galaxy install git+https://github.com/namespace/role.git,0b7cd353c0250e87a26e0499e59e7fd265cc2f25
-ansible-galaxy install -r requirements.yml
+ansible-galaxy install 'mcereda.boinc_client'
+ansible-galaxy install --roles-path 'path/to/roles' 'namespace.role'
+ansible-galaxy install 'namespace.role,v1.0.0'
+ansible-galaxy install 'git+https://github.com/namespace/role.git,commit-hash'
+ansible-galaxy install -r 'requirements.yml'
 ```
 
 ### Role dependencies
@@ -235,7 +258,7 @@ dependencies:
 Change Ansible's output setting the stdout callback to `json` or `yaml`:
 
 ```sh
-ANSIBLE_STDOUT_CALLBACK=yaml
+ANSIBLE_STDOUT_CALLBACK='yaml'
 ```
 
 ```ini
@@ -246,8 +269,8 @@ stdout_callback = json
 
 `yaml` will set tasks output only to be in the defined format:
 
-```text
-$ ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook --inventory=localhost.localdomain, ansible/localhost.configure.yml -vv --check
+```sh
+$ ANSIBLE_STDOUT_CALLBACK='yaml' ansible-playbook --inventory='localhost.localdomain,' 'localhost.configure.yml' -vv --check
 PLAY [Configure localhost] *******************************************************************
 
 TASK [Upgrade system packages] ***************************************************************
@@ -263,8 +286,8 @@ ok: [localhost.localdomain] => changed=false
 
 The `json` output format will be a single, long JSON file:
 
-```text
-$ ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook --inventory=localhost.localdomain, ansible/localhost.configure.yml -vv --check
+```sh
+$ ANSIBLE_STDOUT_CALLBACK='json' ansible-playbook --inventory='localhost.localdomain,' 'localhost.configure.yml' -vv --check
 {
     "custom_stats": {},
     "global_custom_stats": {},
@@ -457,6 +480,7 @@ vars:
 
 ## Further readings
 
+- [Configuration]
 - [Templating]
 - [Templating examples]
 - [Roles]
@@ -465,20 +489,9 @@ vars:
 - [Automating Helm using Ansible]
 - [Edit .ini file in other servers using Ansible PlayBook]
 - [Yes and No, True and False]
+- [Galaxy]
 - [Ansible Galaxy user guide]
 - [Windows playbook example]
-
-[ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
-[automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
-[roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
-[special variables]: https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
-[templating]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html
-[tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
-
-[edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
-[windows playbook example]: https://geekflare.com/ansible-playbook-windows-example/
-[yes and no, true and false]: https://chronicler.tech/red-hat-ansible-yes-no-and/
-
 
 ## Sources
 
@@ -493,21 +506,31 @@ vars:
 - [Only do something if another action changed]
 - [How to recursively set directory and file permissions]
 
+<!-- project's references -->
+[ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
+[automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
+[configuration]: https://docs.ansible.com/ansible/latest/reference_appendices/config.html
+[galaxy]: https://galaxy.ansible.com/
+[roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
+[special variables]: https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
+[templating]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html
+[tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
+
+<!-- internal references -->
+[templating examples]: ../examples/ansible/templating.yml
+
+<!-- external references -->
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
+[edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
 [how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
 [how to install sshpass on mac]: https://stackoverflow.com/questions/32255660/how-to-install-sshpass-on-mac/62623099#62623099
 [how to recursively set directory and file permissions]: https://superuser.com/questions/1024677/ansible-how-to-recursively-set-directory-and-file-permissions#1317715
 [human-readable output format]: https://www.shellhacks.com/ansible-human-readable-output-format/
 [include task only if file exists]: https://stackoverflow.com/questions/28119521/ansible-include-task-only-if-file-exists#comment118578470_62289639
+[jinja2 templating]: https://jinja.palletsprojects.com/en/3.1.x/templates/
 [only do something if another action changed]: https://raymii.org/s/tutorials/Ansible_-_Only-do-something-if-another-action-changed.html
 [removing empty values from a list and assigning it to a new list]: https://stackoverflow.com/questions/60525961/ansible-removing-empty-values-from-a-list-and-assigning-it-to-a-new-list#60526774
 [unique filter of list in jinja2]: https://stackoverflow.com/questions/44329598/unique-filter-of-list-in-jinja2
+[windows playbook example]: https://geekflare.com/ansible-playbook-windows-example/
 [working with versions]: https://docs.ansible.com/ansible/latest/collections/community/general/docsite/filter_guide_working_with_versions.html
-
-<!-- internal references -->
-[templating examples]: ../examples/ansible/templating.yml
-
-<!-- other references -->
-
-[ansible galaxy]: https://galaxy.ansible.com/
-[jinja2 templating]: https://jinja.palletsprojects.com/en/3.1.x/templates/
+[yes and no, true and false]: https://chronicler.tech/red-hat-ansible-yes-no-and/
