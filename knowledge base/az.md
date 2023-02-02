@@ -249,6 +249,11 @@ az policy set-definition list --management-group 'management_group_id' \
 # Show an Initiative's definition.
 az policy set-definition show -n 'initiative_name'
 
+# Show the servers in the default HTTP backend of an Application Gateway.
+az network application-gateway show-backend-health -o table \
+  -g 'resource_group_name' -n 'agw_name' \
+  --query 'backendAddressPools[].backendHttpSettingsCollection[].servers[]'
+
 # Check if the current User is member of a given Group.
 az rest -u 'https://graph.microsoft.com/v1.0/me/checkMemberObjects' \
   -m post -b '{"ids":["group_id"]}'
