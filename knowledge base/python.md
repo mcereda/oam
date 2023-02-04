@@ -18,23 +18,6 @@ F"{name.lower()} is funny."
 unique_list = list(set(redundant_list))
 ```
 
-Maintenance:
-
-```sh
-# Generate a list of the outdated packages.
-pip list --outdated
-
-# Upgrade all packages.
-pip install --requirement <(pip freeze | sed 's/==/>=/') --upgrade
-
-# Remove orphaned dependencies.
-# Requires `pip-autoremove`.
-pip-autoremove
-
-# Upgrade the included `pip` executable on Mac OS X.
-~/Library/Python/3.8/bin/pip3 install --user --upgrade pip
-```
-
 ## Web servers
 
 ### Flask
@@ -93,10 +76,11 @@ python hello.py
 
 ## Further readings
 
+- [PIP]
 - [How To Update All Python Packages]
 - [invl/pip-autoremove]
 - [Data types]
-- [F-strings
+- [F-strings]
 - [How to filter list elements in Python]
 - [Logging]
 - [Flask at first run: do not use the development server in a production environment]
@@ -105,6 +89,9 @@ python hello.py
 - [*args and **kwargs in Python]
 - [An intro to threading in Python]
 - [ThreadPoolExecutor in Python: the complete guide]
+
+<!-- internal references -->
+[pip]: ./pip.md
 
 <!-- external references -->
 [*args and **kwargs in python]: https://www.geeksforgeeks.org/args-kwargs-python/
