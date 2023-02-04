@@ -32,9 +32,13 @@
 pip3 install --user 'ansible' && port install 'sshpass'   # darwin
 sudo pamac install 'ansible' 'sshpass'                    # manjaro linux
 
+# Generate an example configuration file with all entries disabled.
+ansible-config init --disabled > 'ansible.cfg'
+ansible-config init --disabled -t 'all' > 'ansible.cfg'
+
 # Show hosts' ansible facts.
 ansible -i 'path/to/hosts/file' -m 'setup' all
-ansible -i 'host1,hostn,' -m 'setup' 'host1' -u 'remote-user'
+ansible -i 'host1,hostN,' -m 'setup' 'host1' -u 'remote-user'
 ansible -i 'localhost,' -c 'local' -km 'setup' 'localhost'
 
 # Check the syntax of a playbook.
@@ -43,7 +47,7 @@ ansible-playbook 'path/to/playbook.yml' --syntax-check
 
 # Execute a playbook.
 ansible-playbook 'path/to/playbook.yml' -i 'hosts.list'
-ansible-playbook … -i 'host1,host2,hostn,' -l 'hosts,list'
+ansible-playbook … -i 'host1,host2,hostN,' -l 'hosts,list'
 ansible-playbook … -i 'host1,host2,other,' -l 'hosts-pattern'
 
 # Show what changes (with details) a play would apply to the local machine.
@@ -84,7 +88,7 @@ Ansible will process the following list and use the first file found; all the ot
 
 1. the `ANSIBLE_CONFIG` environment variable;
 1. the `ansible.cfg` file in the current directory;
-1. the `~/.ansible.cfg` file in the home directory;
+1. the `~/.ansible.cfg` file in the user's home directory;
 1. the `/etc/ansible/ansible.cfg` file.
 
 One can generate a fully commented-out example of the `ansible.cfg` file:
