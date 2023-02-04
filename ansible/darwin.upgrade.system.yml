@@ -1,0 +1,32 @@
+---
+
+- name: Upgrade a Darwin system
+  hosts: all
+  gather_facts: false
+  vars:
+    homebrew_installed: false
+    macports_installed: false
+    mas_installed: false
+  tasks:
+    - name: Install system ugrades
+      ansible.builtin.command: softwareupdate --install --recommended
+      register: softwareupdate_result
+      changed_when:
+        - softwareupdate_result.stderr != 'No updates are available.'
+    - name: Update homebrew and upgrade all packages
+      when: homebrew_installed
+      community.general.homebrew:
+        update_homebrew: true
+        upgrade_all: true
+    - name: Update Macports and the ports tree, then upgrade all outdated ports
+      when: macports_installed
+      become: true
+      community.general.macports:
+        selfupdate: true
+        upgrade: true
+      register: macports_result
+      changed_when: macports_result.stdout is not regex('Nothing to upgrade.')
+    - name: Upgrade all installed Mac App Store apps
+      when: mas_installed
+      community.general.mas:
+        upgrade_all: true
