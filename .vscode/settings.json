@@ -9,6 +9,7 @@
         "btrfs",
         "cereda",
         "chezmoi",
+        "cpulimit",
         "dhclient",
         "diffpdf",
         "dkms",
@@ -51,6 +52,8 @@
         "tclsh",
         "templating",
         "tfvars",
+        "tmpfs",
+        "tput",
         "zstd"
     ]
 }

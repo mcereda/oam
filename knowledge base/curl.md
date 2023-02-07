@@ -34,7 +34,11 @@ curl -o '/dev/null' -w '%{http_code}\n' -s -I 'http://example.com'
 curl --request 'PUT' 'http://example.com'
 
 # Specify headers.
-curl 'http://example.com' -H 'Content-Type:application/json' 'http://example.com'
+curl 'http://example.com' -H 'Content-Type:application/json'
+
+# Fail fast with no output.
+# Returns the HTTP error code.
+curl -f 'http://example.com'
 
 # Skip certificate validation.
 curl --insecure 'https://example.com'

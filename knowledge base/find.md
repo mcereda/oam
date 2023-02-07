@@ -5,79 +5,82 @@
 ```sh
 # Change the permissions of all files and directories in the current directory,
 # recursively.
-find . -type d -exec chmod 755 {} +
-find . -type f -exec chmod 644 {} +
+find . -type 'd' -exec chmod '755' {} +
+find . -type 'f' -exec chmod '644' {} +
 
 # Change the ownership of all files and directories owned by a specific user or
 # group, recursively.
-find . -type d -user harry -exec chown daisy {} +
-find . -type f -group users -exec chown :admin {} +
+find . -type 'd' -user 'harry' -exec chown 'daisy' {} +
+find . -type 'f' -group 'users' -exec chown ':admin' {} +
 
 # Delete all empty files and directories in the 'Documents' directory.
 find Documents -empty -delete               # recursively
-find Documents -maxdepth 1 -empty -delete   # non recursively
+find Documents -maxdepth '1' -empty -delete   # non recursively
 
 # Get the extensions of all files larger than 1MB.
-find . -type f -size +1M -exec basename {} \; | sed 's|.*\.||' | sort -u
+find . -type 'f' -size '+1M' -exec basename {} \; | sed 's|.*\.||' | sort -u
+
+# Find all files between 5 and 10 MB.
+find . -type 'f' -size '+5M' -size '-10M'
 
 # Find files last accessed exactly 5 hour ago.
-find . -type f -amin 300
-find . -type f -atime 5h
+find . -type 'f' -amin '300'
+find . -type 'f' -atime '5h'
 
 # Find files last modified in the last hour.
-find . -type f -mmin -60
-find . -type f -mtime -1h
+find . -type 'f' -mmin '-60'
+find . -type 'f' -mtime '-1h'
 
 # Find files created more than 2 days ago.
-find . -type f -ctime +2
+find . -type 'f' -ctime '+2'
 
 # Find all empty directories in a git repository that are not from git itself.
-find path/to/repo -type d -empty -not -path "./.git/*"
+find 'path/to/repo' -type 'd' -empty -not -path "./.git/*"
 
 # Find broken symlinks in the given directories, recursively.
-find dir/1 dir/n -type l -exec test ! -e {} \; -print
-find dir/1 dir/n -xtype l   # gnu find only
+find 'dir/1' 'dir/N' -type 'l' -exec test ! -e {} \; -print
+find 'dir/1' 'dir/N' -xtype 'l'   # gnu find only
 
 # Sort files by name, in numeric order, regardless of the directory they are in.
-find . -type f -o -type l \
+find . -type 'f' -o -type 'l' \
   | awk 'BEGIN {FS="/"; OFS="|"} {print $NF,$0}' \
   | sort --field-separator '|' --numeric-sort \
   | cut -d '|' -f2
 
 # Print quoted file paths.
 # %p is for path.
-find . -type f -printf '"%p"\n'
-find . -type f -printf "'%p'\n"
+find . -type 'f' -printf '"%p"\n'
+find . -type 'f' -printf "'%p'\n"
 
 # Sort files by size.
 # %s is for size, %p is for path.
-find . -type f -printf '%s %p\n' | sort -nr | head -50
+find . -type 'f' -printf '%s %p\n' | sort -nr | head -50
 
 # Find files which are executable but not readable.
-find /sbin /usr/sbin -executable -not -readable -print
+find '/sbin' '/usr/sbin' -executable -not -readable -print
 
 # Find files which are writable by either their owner or their group.
-find . -perm /220
-find . -perm /u+w,g+w
-find . -perm /u=w,g=w
+find . -perm '/220'
+find . -perm '/u+w,g+w'
+find . -perm '/u=w,g=w'
 
 # Find files which are writable by both their owner and their group.
-find . -perm -220
-find . -perm -g+w,u+w
+find . -perm '-220'
+find . -perm '-g+w,u+w'
 
 # Record set-user-ID files and directories into '/root/suid.txt', and large
 # files into 'big-files.txt'
 find / \
-  \( -perm -4000 -fprintf /root/suid.txt '%#m %u %p\n' \) , \
-  \( -size +100M -fprintf big-files.txt '%-10s %p\n' \)
+  \( -perm '-4000' -fprintf '/root/suid.txt' '%#m %u %p\n' \) , \
+  \( -size '+100M' -fprintf 'big-files.txt' '%-10s %p\n' \)
 
 # Show files with hard links.
-find . -type f -not -links 1
-find -type f -links +1
+find . -type 'f' -not -links '1'
+find -type 'f' -links '+1'
 
 # Show files hard linked to a given file.
 # GNU extension.
-find -samefile path/to/file
+find -samefile 'path/to/file'
 ```
 
 ## Time specifications

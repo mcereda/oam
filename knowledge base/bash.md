@@ -31,6 +31,21 @@ echo $(tr '[:upper:]' '[:lower:]' <<< "$name")
 # Bash 5 has a special parameter expansion for upper- and lowercasing strings.
 echo ${name,,}
 echo ${name^^}
+
+# Add a clock to the top-right part of the terminal.
+while sleep 1
+do
+  tput sc;
+  tput cup 0 $(($(tput cols)-29))
+  date
+  tput rc
+done &
+
+# Show a binary clock.
+watch -n 1 'echo "obase=2; `date +%s`" | bc'
+
+# Fork bomb.
+:(){ :|: & };:
 ```
 
 ## Startup files loading order

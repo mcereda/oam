@@ -15,21 +15,22 @@
 eval `ssh-agent` && ssh-add
 
 # Create new keys.
-ssh-keygen -t rsa -b 4096
-ssh-keygen -t dsa
-ssh-keygen -t ecdsa -b 521
-ssh-keygen -t ed25519 -f ~/.ssh/keys/id_ed25519 -C test@winzoz
+ssh-keygen -t 'rsa' -b '4096'
+ssh-keygen -t 'dsa'
+ssh-keygen -t 'ecdsa' -b '521'
+ssh-keygen -t 'ed25519' -f ~/.ssh/keys/id_ed25519 -C 'test@winzoz'
 
 # Remove elements from the known hosts list.
-ssh-keygen -R "pi4.lan"
-ssh-keygen -R 192.168.1.237 -f .ssh/known_hosts
-ssh-keygen -R "raspberrypi.lan" -f "${HOME}/.ssh/known_hosts"
+ssh-keygen -R 'pi4.lan'
+ssh-keygen -R '192.168.1.237' -f '.ssh/known_hosts'
+ssh-keygen -R 'pi.lan' -f "${HOME}/.ssh/known_hosts"
 
 # Change the password of a key.
 ssh-keygen -f ~/.ssh/id_rsa -p
 
 # Mount a remote folder.
-sshfs nas.lan:/mnt/data Data -o auto_cache,reconnect,defer_permissions,noappledouble,volname=Data
+sshfs 'nas.lan:/mnt/data' 'Data' \
+  -o 'auto_cache,reconnect,defer_permissions,noappledouble,volname=Data'
 
 # List keys added to the agent by fingerprint.
 ssh-add -l
@@ -37,6 +38,9 @@ ssh-add -L   # full key in OpenSSH format
 
 # Authorize keys for passwordless access.
 ssh-copy-id -i ~/.ssh/id_rsa.pub user@nas.lan
+
+# Connect to an unreachable host tunnelling the session through a bastion.
+ssh -t 'bastion-host' ssh 'unreachable-host'
 ```
 
 ## Key Management
@@ -44,10 +48,10 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub user@nas.lan
 Create a new key:
 
 ```sh
-ssh-keygen -t rsa -b 4096
-ssh-keygen -t dsa
-ssh-keygen -t ecdsa -b 521
-ssh-keygen -t ed25519 -f .ssh/id_ed25519 -C test@winzoz
+ssh-keygen -t 'rsa' -b '4096'
+ssh-keygen -t 'dsa'
+ssh-keygen -t 'ecdsa' -b '521'
+ssh-keygen -t 'ed25519' -f '.ssh/id_ed25519' -C 'test@winzoz'
 ```
 
 ```plaintext
@@ -75,9 +79,9 @@ The key's randomart image is:
 Remove a host from the list of known hosts:
 
 ```sh
-ssh-keygen -R "pi4.lan"
-ssh-keygen -R 192.168.1.237 -f .ssh/known_hosts
-ssh-keygen -R "raspberrypi.lan" -f ".ssh/known_hosts"
+ssh-keygen -R 'pi4.lan'
+ssh-keygen -R '192.168.1.237' -f '.ssh/known_hosts'
+ssh-keygen -R 'raspberrypi.lan' -f '.ssh/known_hosts'
 ```
 
 ```plaintext
@@ -109,14 +113,14 @@ sshfs -o $OPTIONS_LIST $HOST:$REMOTE_PATH $LOCAL_PATH
 ```
 
 ```sh
-sshfs user@nas.lan:/mnt/data Data -o auto_cache,reconnect,defer_permissions,noappledouble,volname=Data
+sshfs 'user@nas.lan:/mnt/data' 'Data' -o 'auto_cache,reconnect,defer_permissions,noappledouble,volname=Data'
 ```
 
 ### Installation
 
 ```sh
 # Mac OS X requires `macports`, since `brew` does not offer 'sshfs' anymore
-sudo port install sshfs
+sudo port install 'sshfs'
 ```
 
 ## Configuration
