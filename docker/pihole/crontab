@@ -1,2 +1,5 @@
-# Update Graviton's DB once a week (at midnight on Sundays).
-0 0 * * 0 docker ps -f 'name=pihole' -f 'status=running' -f 'health=healthy' -q | xargs -I{} docker exec {} pihole -g
+# Update Graviton's DB once a week (at 3:00 on Sundays).
+0 3 * * 0  docker ps -f 'name=pihole' -f 'status=running' -f 'health=healthy' -q | xargs -I{} docker exec {} pihole -g
+
+# Create a complete backup once a week (at 3:30 on Sundays).
+30 3 * * 0 docker ps -f 'name=pihole' -f 'status=running' -f 'health=healthy' -q | xargs -I{} docker exec {} pihole -a -t /etc/pihole/teleporter_backup.tar.gz
