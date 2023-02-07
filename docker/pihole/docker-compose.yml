@@ -1,36 +1,30 @@
 version: "3.2"
-
 secrets:
   webpassword:
     file: ./webpassword
-
 services:
   pihole:
     container_name: pihole
-    image: pihole/pihole:latest
+    image: pihole/pihole:2023.01.10
     environment:
+      FTLCONF_LOCAL_IPV4: 127.0.0.1
+      REV_SERVER_CIDR: 192.168.1.0/24
+      REV_SERVER_DOMAIN: localdomain
+      REV_SERVER_TARGET: 192.168.1.1
+      REV_SERVER: "true"
+      SKIPGRAVITYONBOOT: 1
       TZ: Europe/Amsterdam
       WEBPASSWORD_FILE: /run/secrets/webpassword
-      # DNSMASQ_LISTENING: all  # Only required if using Docker's default 'bridge' network setting
     volumes:
-      - ./etc-pihole:/etc/pihole
-      - ./etc-dnsmasq.d:/etc/dnsmasq.d
+      - ./etc/pihole:/etc/pihole
+      - ./etc/dnsmasq.d:/etc/dnsmasq.d
     dns:
       - 127.0.0.1
       - 1.1.1.1
     restart: unless-stopped
     secrets:
       - webpassword
-
-    # If using the container's DHCP server it is recommended to replace the
-    # 'ports' definition with the 'network_mode' definition instead.
-    network_mode: "host"
-    # ports:
-    #   - "53:53/tcp"
-    #   - "53:53/udp"
-    #   - "67:67/udp"  # Only required if using the DHCP server component.
-    #   - "80:80/tcp"
-
-    # Only required if using the DHCP server component.
-    # cap_add:
-    #   - NET_ADMIN
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "80:80/tcp"

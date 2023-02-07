@@ -35,6 +35,7 @@
         "ocsp",
         "pacman",
         "pamac",
+        "pihole",
         "pkexec",
         "polkit",
         "pvresize",
