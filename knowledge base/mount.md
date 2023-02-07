@@ -19,6 +19,9 @@ mount -t 'cifs' -o 'username=DOMAIN\Administrator,seal,vers=3.0' \
 # Mount a NFS share
 mount -t 'nfs' 'server:/share_name' '/mount/point'
 mount -t 'nfs' -o 'nfsvers=3,nolock' 'server:/share_name' '/mount/point'
+
+# Mount a temporary RAM disk.
+mount -t tmpfs tmpfs '/mount/point' -o 'size=2048m'
 ```
 
 ## Further readings
