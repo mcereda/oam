@@ -25,10 +25,10 @@ variable "subnet_cidr_block" {
 }
 
 ####################
-# Bastion
+# Common
 ####################
 
-variable "ssh_public_key" {
+variable "ssh_authorized_key" {
   type = string
 }
 
@@ -60,8 +60,4 @@ variable "source_id" {
 variable "source_type" {
   type    = string
   default = "image"
-}
-
-variable "ssh_authorized_keys" {
-  type = string
 }
