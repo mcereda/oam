@@ -10,5 +10,5 @@ source_id = "ocid1.image.oc1.eu-amsterdam-1.aaaaaaaavmra3s4va4fqd4vlcrqc5v5jyqov
 
 ssh_authorized_keys = <<-EOT
   ssh-ed25519 key-1 comment
-  ssh-ed25519 key-n comment
+  ssh-ed25519 key-N comment
 EOT
