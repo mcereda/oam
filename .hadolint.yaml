@@ -3,5 +3,7 @@
 
 override:
   style:
-    - DL3006   # explicit image tag version
-    - DL3018   # version pin in apk add
+    - DL3006   # always tag the version of an image explicitly
+    - DL3008   # pin versions in apt get install
+    - DL3015   # avoid additional packages by specifying `--no-install-recommends`
+    - DL3018   # pin versions in apk add
