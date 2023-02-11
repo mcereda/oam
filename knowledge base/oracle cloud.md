@@ -2,6 +2,8 @@
 
 1. [Concepts](#concepts)
    1. [Compartments](#compartments)
+   2. [Networking](#networking)
+      1. [Access to the Internet](#access-to-the-internet)
 2. [Further readings](#further-readings)
 3. [Sources](#sources)
 
@@ -15,10 +17,21 @@ After creating a compartment, you need to write at least one policy for it; unti
 
 Before deleting a compartment, all its resources must have been moved, deleted or terminated, including any policies attached to the compartment itself.
 
+### Networking
+
+#### Access to the Internet
+
+| Resource         | Used for                                                                                           | Free-tier limit   |
+| ---------------- | -------------------------------------------------------------------------------------------------- | ----------------- |
+| Internet Gateway | **public** resources that need to **be** reach**ed** from the internet                             | ?                 |
+| NAT Gateway      | resources that **need to reach** the internet but **are not reachable from** the internet          | 0 (not available) |
+| Bastion          | resources that require Secure Shell (SSH) access but otherwise are not reachable from the internet | 5                 |
+
 ## Further readings
 
 - [oci-cli]
-- [compute images]
+- [Compute images]
+- [Connect to private compute instances using OCI Bastion Service]
 
 ## Sources
 
@@ -32,3 +45,4 @@ Before deleting a compartment, all its resources must have been moved, deleted o
 [oci-cli]: ./oci-cli.md
 
 <!-- external references -->
+[connect to private compute instances using oci bastion service]: https://medium.com/@harjulthakkar/connect-to-private-compute-instance-using-oci-bastion-service-ca96a3ceea49

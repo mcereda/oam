@@ -39,6 +39,14 @@ oci compute image list -c 'tenancy_id' --all
 oci compute image list -c 'tenancy_id' \
   --operating-system 'Oracle Linux' --operating-system-version '8' \
   --lifecycle-state 'AVAILABLE'
+
+# List available compute instance plugins.
+# Requires to be given the OS and its version.
+oci instance-agent available-plugins get -c 'tenancy_id' \
+  --os-name 'Oracle Linux' --os-version '8'
+
+# List existing compute instances.
+oci compute instance list -c 'tenancy_id'
 ```
 
 ## Configuration
