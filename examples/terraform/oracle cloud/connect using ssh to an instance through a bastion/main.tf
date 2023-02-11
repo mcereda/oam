@@ -66,7 +66,7 @@ resource "oci_bastion_session" "ssh_port_forwarding" {
   bastion_id = oci_bastion_bastion.bastion.id
 
   key_details {
-    public_key_content = var.ssh_public_key
+    public_key_content = var.ssh_authorized_key
   }
 
   target_resource_details {
@@ -86,12 +86,19 @@ resource "oci_core_instance" "instance" {
   availability_domain = var.availability_domain
   shape               = var.shape
 
-  create_vnic_details {
-    subnet_id = oci_core_subnet.subnet.id
+  metadata = {
+    ssh_authorized_keys = var.ssh_authorized_key
   }
 
-  metadata = {
-    ssh_authorized_keys = var.ssh_authorized_keys
+  agent_config {
+    plugins_config {
+      name          = "Bastion"
+      desired_state = "ENABLED"
+    }
+  }
+
+  create_vnic_details {
+    subnet_id = oci_core_subnet.subnet.id
   }
 
   shape_config {
