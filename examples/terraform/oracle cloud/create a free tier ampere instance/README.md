@@ -9,7 +9,7 @@ Simple example to create an Ampere VM instance in Oracle Cloud's free tier.
 ## Requirements
 
 1. VCN
-1. Public Subnet
+1. **Public** Subnet
 
 For a Subnet to be considered Public, it needs to have associated a Route Table with a default route pointing to an Internet Gateway.
 
