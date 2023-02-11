@@ -93,7 +93,7 @@ bw import 'bitwardencsv' './from/source.csv'
 bw import 'keepass2xml' 'keepass_backup.xml'
 bw import --organizationid 'organization_id' 'keepass2xml' 'keepass_backup.xml'
 
-# List import files' formats. 
+# List import files' formats.
 bw import --formats
 
 # Export data to a CSV or JSON file.
