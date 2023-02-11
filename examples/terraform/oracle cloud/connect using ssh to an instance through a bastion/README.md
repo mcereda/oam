@@ -3,7 +3,7 @@
 Simple example to create a Bastion in Oracle Cloud.
 
 1. [Requirements](#requirements)
-2. [SSH configuration](#ssh-configuration)
+2. [Connect to the instance using SSH through the bastion](#connect-to-the-instance-using-ssh-through-the-bastion)
 3. [Further readings](#further-readings)
 4. [Sources](#sources)
 
@@ -22,7 +22,9 @@ A solution to this is to create a new Route Table **with** the default route abo
 
 ![requirements]
 
-## SSH configuration
+## Connect to the instance using SSH through the bastion
+
+Use this configuration as starting point and fix its values to simplify the command:
 
 ```ssh_config
 Host  bastion
@@ -42,6 +44,12 @@ Host  bastion instance
   IdentitiesOnly         yes
   StrictHostKeyChecking  no
   UserKnownHostsFile     /dev/null
+```
+
+and now use the following command:
+
+```sh
+ssh -fN bastion && ssh instance
 ```
 
 ## Further readings
