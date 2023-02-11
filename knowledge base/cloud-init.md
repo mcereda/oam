@@ -14,12 +14,13 @@ cloud-init status
 cloud-init status --wait
 
 # Verify that cloud-init received the expected user data.
-cloud-init query userdata
+sudo cloud-init query userdata
+sudo cat /var/lib/cloud/instance/user-data.txt | gunzip
 
 # Assert the user data we provided is a valid cloud-config.
 # From version 22.2, drops the 'devel' command.
-cloud-init devel schema --system --annotate
-cloud-init devel schema --config-file '/tmp/user-data'
+sudo cloud-init devel schema --system --annotate
+sudo cloud-init devel schema --config-file '/tmp/user-data'
 
 # Check the raw logs.
 cat '/var/log/cloud-init.log'
