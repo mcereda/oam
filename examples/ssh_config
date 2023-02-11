@@ -47,7 +47,7 @@ Host  omnia turris
 	AddressFamily   inet6
 	IdentitiesOnly  yes
 	User            root
-Host  pi* raspberrypi*
+Host  raspberrypi*
 	AddKeysToAgent  no
 	SendEnv         -LC_* PAGER
 	SetEnv          FOO=bar
@@ -60,7 +60,8 @@ Match  user  robots
 	ServerAliveInterval 300
 	ServerAliveCountMax 2
 
-# Default settings start here
+# Default settings
+# ------------------
 
 AddKeysToAgent       yes
 Compression          yes
