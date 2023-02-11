@@ -1,9 +1,18 @@
+####################
+# Oracle Cloud Account
+####################
+
 variable "availability_domain" {
   type = string
 }
 variable "compartment_id" {
   type = string
 }
+
+####################
+# Instance
+####################
+
 variable "shape" {
   type    = string
   default = "VM.Standard.A1.Flex"

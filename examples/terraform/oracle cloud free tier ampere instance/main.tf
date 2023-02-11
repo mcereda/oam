@@ -1,3 +1,14 @@
+terraform {
+  required_version = "1.2.9"
+
+  required_providers {
+    oci = {
+      source  = "oracle/oci"
+      version = "4.107.0"
+    }
+  }
+}
+
 # See https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_vcn
 resource "oci_core_vcn" "this" {
   compartment_id = var.compartment_id
