@@ -2,11 +2,15 @@
 
 1. [TL;DR](#tldr)
 2. [Key Management](#key-management)
-3. [SSHFS](#sshfs)
+3. [Configuration](#configuration)
+   1. [Append domains to a hostname before attempting to check if they exist](#append-domains-to-a-hostname-before-attempting-to-check-if-they-exist)
+   2. [Optimize connection handling](#optimize-connection-handling)
+4. [SSHFS](#sshfs)
    1. [Installation](#installation)
-4. [Configuration](#configuration)
-5. [Further readings](#further-readings)
-6. [Sources](#sources)
+5. [Troubleshooting](#troubleshooting)
+   1. [No matching host key type found](#no-matching-host-key-type-found)
+6. [Further readings](#further-readings)
+7. [Sources](#sources)
 
 ## TL;DR
 
@@ -96,33 +100,6 @@ Change password of a key file
 ssh-keygen -f ~/.ssh/id_rsa -p
 ```
 
-## SSHFS
-
-Options:
-
-- `auto_cache` enables caching based on modification times;
-- `reconnect` reconnects to the server;
-- `defer_permissions` works around the issue where certain shares may mount properly, but cause _permissions denied_ errors when accessed (caused by how Mac OS X's Finder translates and interprets permissions;
-- `noappledouble` prevents Mac OS X to write `.DS_Store` files on the remote file system;
-- `volname` defines the name to use for the volume.
-
-Usage:
-
-```sh
-sshfs -o $OPTIONS_LIST $HOST:$REMOTE_PATH $LOCAL_PATH
-```
-
-```sh
-sshfs 'user@nas.lan:/mnt/data' 'Data' -o 'auto_cache,reconnect,defer_permissions,noappledouble,volname=Data'
-```
-
-### Installation
-
-```sh
-# Mac OS X requires `macports`, since `brew` does not offer 'sshfs' anymore
-sudo port install 'sshfs'
-```
-
 ## Configuration
 
 When connecting to a host, the SSH client will use settings:
@@ -131,7 +108,7 @@ When connecting to a host, the SSH client will use settings:
 1. from the user's `~/.ssh/config` file,
 1. from the `/etc/ssh/ssh_config` file
 
-In a first-come-first-served way. Settings should hence appear from the most specific to the most generic:
+Settings are loaded in a first-come-first-served way. They should hence appear from the most specific to the most generic, both by file and by position in those files:
 
 ```ssh-config
 Host targaryen
@@ -159,8 +136,9 @@ Host *
     SetEnv MYENV=itsvalue
 ```
 
+### Append domains to a hostname before attempting to check if they exist
+
 ```ssh-config
-# Append domains to a hostname before attempting to check if they exist.
 CanonicalizeHostname yes
 CanonicalDomains xxx.auckland.ac.nz yyy.auckland.ac.nz
 
@@ -169,6 +147,8 @@ Host  *.xxx.auckland.ac.nz
 Host  *.yyy.auckland.ac.nz
     User user_yyy
 ```
+
+### Optimize connection handling
 
 ```ssh-config
 # Keep a connection open for 30s and reuse it when possible.
@@ -179,6 +159,62 @@ ControlMaster auto
 ControlPath ~/.ssh/control-%C
 ControlPersist 30s
 ```
+
+## SSHFS
+
+Options:
+
+- `auto_cache` enables caching based on modification times;
+- `reconnect` reconnects to the server;
+- `defer_permissions` works around the issue where certain shares may mount properly, but cause _permissions denied_ errors when accessed (caused by how Mac OS X's Finder translates and interprets permissions;
+- `noappledouble` prevents Mac OS X to write `.DS_Store` files on the remote file system;
+- `volname` defines the name to use for the volume.
+
+Usage:
+
+```sh
+sshfs -o $OPTIONS_LIST $HOST:$REMOTE_PATH $LOCAL_PATH
+```
+
+```sh
+sshfs 'user@nas.lan:/mnt/data' 'Data' -o 'auto_cache,reconnect,defer_permissions,noappledouble,volname=Data'
+```
+
+### Installation
+
+```sh
+# Mac OS X requires `macports`, since `brew` does not offer 'sshfs' anymore
+sudo port install 'sshfs'
+```
+
+## Troubleshooting
+
+### No matching host key type found
+
+Error message example:
+
+> Unable to negotiate with XXX port 22: no matching host key type found. Their offer: ssh-rsa.
+
+Cause: the server only supports the kind of RSA with SHA-1, which is considered weak and deprecated in newer SSH versions.
+
+Workaround: explicitly set your client to use the specified key type adding
+
+```ssh_config
+HostkeyAlgorithms        +ssh-rsa
+PubkeyAcceptedAlgorithms +ssh-rsa
+```
+
+to your `~/.ssh/config` like so:
+
+```diff
+Host  azure-devops
+  IdentityFile              ~/.ssh/id_rsa
+  IdentitiesOnly            yes
++ HostkeyAlgorithms         +ssh-rsa
++ PubkeyAcceptedAlgorithms  +ssh-rsa
+```
+
+Solution: update the SSH server.
 
 ## Further readings
 
