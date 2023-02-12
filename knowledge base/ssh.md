@@ -166,7 +166,7 @@ CanonicalDomains xxx.auckland.ac.nz yyy.auckland.ac.nz
 
 Host  *.xxx.auckland.ac.nz
     User user_xxx
-Host *.yyy.auckland.ac.nz
+Host  *.yyy.auckland.ac.nz
     User user_yyy
 ```
 
@@ -182,6 +182,8 @@ ControlPersist 30s
 
 ## Further readings
 
+- [`ssh_config`][ssh_config] file example
+- [`sshd_config`][sshd_config] file example
 - [ssh-agent]
 
 ## Sources
@@ -194,10 +196,14 @@ ControlPersist 30s
 - [How to perform hostname canonicalization]
 - [How to reuse SSH connection to speed up remote login process using multiplexing]
 
-<!-- -->
+<!-- project's references -->
 [ssh-agent]: https://www.ssh.com/academy/ssh/agent
 
-<!-- -->
+<!-- internal references -->
+[ssh_config]: ../examples/ssh/ssh_config
+[sshd_config]: ../examples/ssh/sshd_config
+
+<!-- external references -->
 [how to enable ssh access using a gpg key for authentication]: https://opensource.com/article/19/4/gpg-subkeys-ssh
 [how to list keys added to ssh-agent with ssh-add?]: https://unix.stackexchange.com/questions/58969/how-to-list-keys-added-to-ssh-agent-with-ssh-add
 [how to perform hostname canonicalization]: https://sleeplessbeastie.eu/2020/08/24/how-to-perform-hostname-canonicalization/

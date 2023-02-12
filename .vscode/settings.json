@@ -5,7 +5,9 @@
         "awscli",
         "bitwarden",
         "boinc",
+        "boinccmd",
         "bootable",
+        "bootcmd",
         "btrfs",
         "cereda",
         "chezmoi",
@@ -15,7 +17,9 @@
         "dkms",
         "dpkg",
         "duperemove",
+        "epel",
         "fdupes",
+        "firewalld",
         "flatpak",
         "getfacl",
         "gpgtools",
@@ -54,6 +58,7 @@
         "tfvars",
         "tmpfs",
         "tput",
+        "usermod",
         "zstd"
     ]
 }
