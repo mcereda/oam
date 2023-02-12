@@ -6,23 +6,19 @@
 # Add the official Docker repository.
 #
 # Got from the official installation guide at
-# https://docs.docker.com/engine/install/rhel/#install-using-the-repository :
-#   yum install -y yum-utils && \
-#   yum-config-manager --add-repo \
-#     https://download.docker.com/linux/rhel/docker-ce.repo && \
-#   cat /etc/yum.repos.d/docker-ce.repo
+# https://docs.docker.com/engine/install/
 #
 # Sources:
 # - https://cloudinit.readthedocs.io/en/latest/topics/modules.html#yum-add-repo
 # - https://cloudinit.readthedocs.io/en/latest/topics/examples.html#adding-a-yum-repository
 yum_repos:
-  docker-ce:
+  docker-ce-stable:
     name: Docker CE Stable - $basearch
     enabled: true
-    baseurl: https://download.docker.com/linux/rhel/$releasever/$basearch/stable
+    baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
     priority: 1
     gpgcheck: true
-    gpgkey: https://download.docker.com/linux/rhel/gpg
+    gpgkey: https://download.docker.com/linux/centos/gpg
 
 # Install required packages.
 # This will *always* update the list of packages, regardless of the value of the
@@ -35,8 +31,12 @@ yum_repos:
 # - https://cloudinit.readthedocs.io/en/latest/topics/examples.html#install-arbitrary-packages
 packages:
   - docker-ce
+  - docker-compose-plugin
 
-# Enable and start the service after installation
 runcmd:
+  # Enable and start the service after installation.
   - systemctl daemon-reload
   - systemctl enable --now docker.service
+
+  # Give the default user permission to use docker without privilege escalation.
+  - grep docker /etc/group -q && sudo usermod -a -G docker user
