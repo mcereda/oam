@@ -1,0 +1,15 @@
+################################################################################
+## ~/.azure/config
+##
+## Sources:
+## - https://learn.microsoft.com/en-us/cli/azure/azure-cli-configuration
+################################################################################
+
+[cloud]
+name = AzureCloud
+
+[core]
+collect_telemetry = false
+
+[defaults]
+location = eastus

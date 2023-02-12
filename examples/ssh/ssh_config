@@ -1,0 +1,88 @@
+################################################################################
+## ~/.ssh/config
+##
+## Gotchas:
+## - options are applied first-come-first-served, so:
+##   - specific and higher priority settings go on top, generic and lower ones
+##     go on the bottom
+##   - user defaults MUST come last to be treated as such
+## - host specificity is NOT a factor of priority
+## - multiple host names (and aliases) may be specified per section
+## - targets may match multiple host sections and have settings applied in order
+## - host sections only apply to the matched names
+## - canonicalization forces a configuration reload to check the now canonical
+##   host name against the configuration
+################################################################################
+
+# Canonicalize host names as first thing
+# Forces a configuration reload so that only the canonical host name is matched
+# against the rest of the configuration
+CanonicalizeHostname  yes
+CanonicalDomains      lan localdomain my.org
+
+# 'special' devices
+# E.g. work ones
+Host  net?a?-fw? org?-h?-sw?
+	CanonicalDomains     that.org
+	CanonicalizeMaxDots  0
+Host  !bastion* *.brt*.my.org *.brs? *.brs??
+	AddressFamily  inet6
+	ProxyCommand   ssh -W %h:%p `host bastion.my.org | awk '/address/ {print $4; exit}' | xargs host | cut -d\  -f5`
+
+# Connect to secured hosts
+# E.g. targets using non-default configuration
+Host  *-bastion-* *-fw
+	IdentitiesOnly  yes
+	IdentityFile    ~/.ssh/id_rsa
+	Port            2222
+
+# Avoid OS incompatibility nuisances
+# E.g. LANG not set when connecting to Linux from Darwin
+Host  linux-* raspberrypi?
+	SendEnv  -LC_* PAGER
+	SetEnv   LANG=C LANGUAGE=en LC_ALL=C
+
+# Connect to unresolvable host names
+# E.g. home routers
+Host  router fixed-ip
+	HostName  192.168.50.1
+	User      root
+
+# Enable connections to old SSH server versions
+# E.g. legacy targets using old key algorithms
+Host  legacy-hosts azure-vm-* oci-bastion-*
+	HostKeyAlgorithms         +ssh-dss +ssh-rsa
+	PubkeyAcceptedAlgorithms  +ssh-rsa
+
+# Avoid nuisances with ephemeral hosts and localhost
+# E.g. preemptible or testing virtual machines which are often recreated
+Host  localhost *-vm-*
+	StrictHostKeyChecking  no
+	UserKnownHostsFile     /dev/null
+
+# User-specific settings
+# E.g. programmatic accesses
+Match  user  robots
+	AddKeysToAgent       no
+	BatchMode            yes
+	ForwardAgent         no
+	IdentitiesOnly       yes
+	IdentityFile         ~/.ssh/robots.id_ed25519
+	ServerAliveCountMax  1
+	ServerAliveInterval  30
+	UseKeyChain          no
+
+# Keep connections open for some time to reuse them
+# %C returns a hash of different information and is useful as socket identifier
+ControlMaster   auto
+ControlPersist  30s
+ControlPath     ~/.ssh/control-%C
+
+# User defaults
+AddKeysToAgent       yes
+Compression          yes
+ForwardAgent         yes
+HashKnownHosts       no
+ServerAliveCountMax  2
+ServerAliveInterval  300
+UseKeyChain          yes
