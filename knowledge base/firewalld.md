@@ -59,17 +59,21 @@ sudo firewall-cmd --add-port=22/tcp --permanent
 sudo firewall-cmd --add-port=4990-4999/udp --zone=public --permanent
 
 # Close an open port.
-sudo firewall-cmd --add-port=1978/tcp
-sudo firewall-cmd --add-port=1978/tcp --zone=public
+sudo firewall-cmd --remove-port=1978/tcp
+sudo firewall-cmd --remove-port=1978/tcp --zone=public
 
 # Create a new zone.
 sudo firewall-cmd --new-zone=publicweb --permanent
 
-# Make changes permament.
+# Make changes permanent.
 sudo firewall-cmd --runtime-to-permanent
 
 # Reload the firewall.
 sudo firewall-cmd --reload
+
+# Use the offline version.
+# '--permanent' does not work here.
+sudo firewall-offline-cmd --add-port=22/tcp && sudo firewall-cmd --reload
 ```
 
 ## Further readings
