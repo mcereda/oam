@@ -1,0 +1,10 @@
+################################################################################
+## ~/.oci/config
+################################################################################
+
+[DEFAULT]
+user=ocid1.user.oc1..aaaaaaaayap6nsl77k2u34v2k7t47uidv27qfhv43av7ryn2xp37tezezlha
+fingerprint=aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99
+key_file=/home/user/.oci/oci_api_key.pem
+tenancy=ocid1.tenancy.oc1..aaaaaaaawtuhnzgr175bto5wmddky4nqorr9txnjxugmtrcsoatsbv4nn6qt4
+region=eu-amsterdam-1
