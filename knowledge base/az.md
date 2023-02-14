@@ -24,6 +24,9 @@ az login --identity --username 'client_id__or__object_id__or__resource_id'
 az login --service-principal \
   -u 'app_id' -p 'password_or_certificate' --tenant 'tenant_id'
 
+# Check the CLI status.
+az self-test
+
 # Gather information on the current user.
 az ad signed-in-user show
 az ad signed-in-user list-owned-objects
@@ -61,6 +64,7 @@ az account list-locations -o 'table'
 
 # Create an Access Token for the current User.
 az account get-access-token
+az account get-access-token --query 'accessToken' -o 'tsv'
 
 # List role assignments.
 az role assignment list
@@ -295,6 +299,30 @@ az rest \
 	  "validTo": "2021-12-31T23:46:23.319Z"
   }'
 az rest … -b @'file.json'
+
+# Automatically renew the first 100 expired Devops PATs.
+# The others are in the next pages and pagination just su*ks bad.
+# Assumes the command uses the GNU version of each tool (see `date`).
+ORGANIZATION_NAME='organization_name' \
+TOKEN="$(az account get-access-token --query 'accessToken' -o 'tsv')" \
+VALID_TO="$(date -d '+13 days' '+%FT%T.00Z')" \
+&& az rest -m 'get' \
+     -u "https://vssps.dev.azure.com/${ORGANIZATION_NAME}/_apis/tokens/pats" \
+     --headers "Authorization=Bearer ${TOKEN}" \
+     --url-parameters \
+       'api-version=7.1-preview.1' \
+       'displayFilterOption=expired' \
+       '$top=100' \
+| jq -r '.patTokens[].authorizationId' - \
+| parallel -qr -j '100%' \
+    az rest -m 'put' \
+      -u "https://vssps.dev.azure.com/${ORGANIZATION_NAME}/_apis/tokens/pats" \
+      --headers \
+        "Authorization=Bearer ${TOKEN}" \
+        'Content-Type=application/json' \
+      --url-parameters \
+        'api-version=7.1-preview.1' \
+      -b "{ \"authorizationId\": \"{}\", \"validTo\": \"${VALID_TO}\" }"
 ```
 
 ## Pipelines
@@ -340,7 +368,8 @@ az rest \
 
 ## Further readings
 
-- [Pat token APIs]
+- [PAT APIs]
+- [az command reference][az reference]
 
 ## Sources
 
@@ -353,13 +382,17 @@ az rest \
 - [az aks reference]
 - [Create and manage Azure Pipelines from the command line]
 
+<!-- project's references -->
+[authenticate with an azure container registry]: https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication?tabs=azure-cli
+[az aks reference]: https://learn.microsoft.com/en-us/cli/azure/aks
+[az reference]: https://learn.microsoft.com/en-us/cli/azure/reference-index
+[get started with azure cli]: https://learn.microsoft.com/en-us/cli/azure/get-started-with-azure-cli
+[how to manage azure subscriptions with the azure cli]: https://learn.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli
+[install azure cli on macos]: https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-macos
+[pat apis]: https://learn.microsoft.com/en-us/rest/api/azure/devops/tokens/pats
+[remove a member]: https://learn.microsoft.com/en-us/graph/api/group-delete-members?view=graph-rest-1.0&tabs=http
+[sign in with azure cli]: https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli
+
+<!-- internal references -->
 <!-- external references -->
-[authenticate with an azure container registry]: https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication?tabs=azure-cli
-[az aks reference]: https://learn.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest
 [create and manage azure pipelines from the command line]: https://devblogs.microsoft.com/devops/create-and-manage-azure-pipelines-from-the-command-line/
-[get started with azure cli]: https://docs.microsoft.com/en-us/cli/azure/get-started-with-azure-cli
-[how to manage azure subscriptions with the azure cli]: https://docs.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli
-[install azure cli on macos]: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-macos
-[pat token apis]: https://docs.microsoft.com/en-us/rest/api/azure/devops/tokens/pats/list?view=azure-devops-rest-7.1
-[remove a member]: https://docs.microsoft.com/en-us/graph/api/group-delete-members?view=graph-rest-1.0&tabs=http
-[sign in with azure cli]: https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli
