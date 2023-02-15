@@ -1,0 +1,14 @@
+{
+    "description": "",
+    "name": "GPG Suite",
+    "rules": [
+        {
+            "action": "allow",
+            "notes": "Allow the GPG Suite's updater to download updates.",
+            "ports": "443",
+            "process": "/Library/Application Support/GPGTools/GPGSuite_Updater.app/Contents/MacOS/GPGSuite_Updater",
+            "protocol": "tcp",
+            "remote-hosts": "gpgtools.com"
+        }
+    ]
+}

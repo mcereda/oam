@@ -10,6 +10,7 @@ repos:
         args:
           - --markdown-linebreak-ext=md   # ignore markdown's line break
       - id: end-of-file-fixer
+      - id: check-json
       - id: check-yaml
       - id: check-added-large-files
   - repo: https://github.com/markdownlint/markdownlint

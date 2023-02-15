@@ -1,0 +1,23 @@
+{
+    "description": "",
+    "name": "Little Snitch",
+    "rules": [
+        {
+            "action": "allow",
+            "notes": "Allow Little Snitch to download software updates.",
+            "ports": "443",
+            "process": "/Applications/Little Snitch.app/Contents/Components/Little Snitch Software Update.app/Contents/MacOS/Little Snitch Software Update",
+            "protocol": "tcp",
+            "remote-hosts": "sw-update.obdev.at"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow Little Snitch to subscribe to rules groups.",
+            "ports": "443",
+            "process": "/Library/Application Support/Objective Development/Little Snitch/Components/at.obdev.littlesnitch.daemon.bundle/Contents/XPCServices/at.obdev.littlesnitch.urldownloader.xpc/Contents/MacOS/at.obdev.littlesnitch.urldownloader",
+            "protocol": "tcp",
+            "remote-hosts": "pgl.yoyo.org"
+        }
+    ]
+}

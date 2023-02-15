@@ -1,0 +1,83 @@
+{
+    "description": "See https://code.visualstudio.com/docs/setup/network for details.",
+    "name": "Visual Studio Code",
+    "rules": [
+        {
+            "action": "allow",
+            "notes": "Allow VS Code to access its documentation.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "code.visualstudio.com"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow VS Code to update itself.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "update.code.visualstudio.com"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow VS Code's Helper to access the marketplace and download extensions.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": [
+                "az764295.vo.msecnd.net",
+                "download.visualstudio.microsoft.com",
+                "marketplace.visualstudio.com",
+                "vsmarketplacebadges.dev"
+            ],
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code to download extensions from the marketplace.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-domains": [
+                "gallery.vsassets.io",
+                "gallerycdn.vsassets.io"
+            ]
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow VS Code to sync the user's settings.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": [
+                "vscode-sync-insiders.trafficmanager.net",
+                "vscode-sync.trafficmanager.net",
+                "vscode.dev"
+            ]
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow VS Code's Helper to download schemas.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": [
+                "json.schemastore.org",
+                "www.schemastore.org"
+            ],
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+
+        {
+            "action": "deny",
+            "notes": "Stop VS Code's Helper from connecting to dc.services.visualstudio.com.\nUsed by the Application Insights SDK or Application Insights Agent to send data to the vendor's services in Azure.\nSee https://learn.microsoft.com/en-us/azure/azure-monitor/app/ip-addresses for details.",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "remote-hosts": "dc.services.visualstudio.com",
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        }
+    ]
+}

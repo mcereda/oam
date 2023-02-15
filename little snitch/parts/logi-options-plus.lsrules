@@ -1,0 +1,32 @@
+{
+    "description": "",
+    "name": "Logi Options Plus",
+    "rules": [
+        {
+            "action": "allow",
+            "notes": "Allow the Logi Options+'s updater to download the application's updates.",
+            "ports": "443",
+            "process": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/Frameworks/logioptionsplus_updater.app/Contents/MacOS/logioptionsplus_updater",
+            "protocol": "tcp",
+            "remote-hosts": "updates.optionsplus.logitechg.com"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow Logi Options+ to connect to Logitech's account.",
+            "ports": "443",
+            "process": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/MacOS/logioptionsplus_agent",
+            "protocol": "tcp",
+            "remote-hosts": "accounts.logi.com"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow the Flow functionality of Logi Options+.",
+            "ports": "443",
+            "process": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/MacOS/logioptionsplus_agent",
+            "protocol": "tcp",
+            "remote-hosts": "flow.logitech.io"
+        }
+    ]
+}

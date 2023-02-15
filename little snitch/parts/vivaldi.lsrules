@@ -1,0 +1,48 @@
+{
+    "description": "See https://vivaldi.com/blog/decoding-network-activity-in-vivaldi/ for details.",
+    "name": "Vivaldi",
+    "rules": [
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to securely sync with its servers.",
+            "ports": "443",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote-hosts": "bifrost.vivaldi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to sync with its servers.",
+            "ports": "15674",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote-hosts": "bifrost.vivaldi.com"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to securely login into the user's account.",
+            "ports": "443",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote-hosts": "login.vivaldi.com"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to securely connect to websites.",
+            "ports": "443",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to securely connect to websites.",
+            "ports": "443",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "udp",
+            "remote": "any"
+        }
+    ]
+}
