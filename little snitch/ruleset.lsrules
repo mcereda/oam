@@ -1,0 +1,318 @@
+{
+    "description": "Michele Cereda's collection of common Little Snitch rules.\nAssumes a deny-all default policy.",
+    "name": "Michele Cereda's Rules List",
+    "rules": [
+        {
+            "action": "allow",
+            "notes": "Allow Bitwarden to connect to its servers.",
+            "ports": "443",
+            "process": "/Applications/Bitwarden.app/Contents/MacOS/Bitwarden",
+            "protocol": "tcp",
+            "remote-hosts": "api.bitwarden.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Bitwarden's Helper to connect to its servers.",
+            "ports": "443",
+            "process": "/Applications/Bitwarden.app/Contents/MacOS/Bitwarden",
+            "protocol": "tcp",
+            "remote-hosts": [
+                "identity.bitwarden.com",
+                "notifications.bitwarden.com"
+            ],
+            "via": "/Applications/Bitwarden.app/Contents/Frameworks/Bitwarden Helper.app/Contents/MacOS/Bitwarden Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Bitwarden's Helper to gather icons for its entries.",
+            "ports": "443",
+            "process": "/Applications/Bitwarden.app/Contents/MacOS/Bitwarden",
+            "protocol": "tcp",
+            "remote-hosts": "icons.bitwarden.net",
+            "via": "/Applications/Bitwarden.app/Contents/Frameworks/Bitwarden Helper.app/Contents/MacOS/Bitwarden Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to check for captive portals.",
+            "ports": "80",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "tcp",
+            "remote-hosts": "detectportal.firefox.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to gather information about certificates.",
+            "ports": "80",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "tcp",
+            "remote-hosts": [
+                "o.lencr.org",
+                "ocsp.digicert.com",
+                "ocsp.entrust.net",
+                "ocsp.globalsign.com",
+                "ocsp.pki.goog",
+                "ocsp.r2m01.amazontrust.com",
+                "ocsp.sca1b.amazontrust.com",
+                "ocsp.sectigo.com"
+            ]
+        },
+        {
+            "action": "deny",
+            "notes": "Stop Firefox from connecting to Google's Interactive Media Ads SDK, which allows developers and publishers to show interactive and video ads on their websites and mobile apps.",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "remote-domains": "imasdk.googleapis.com"
+        },
+        {
+            "action": "deny",
+            "notes": "Stop Firefox from connecting to google-analytics.com.",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "remote-domains": "google-analytics.com"
+        },
+        {
+            "action": "deny",
+            "notes": "Stop Firefox from tracking content from third-party sites.",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "remote-domains": "googletagservices.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to securely connect to websites.",
+            "ports": "443",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "tcp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to securely connect to websites.",
+            "ports": "443",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "udp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow the GPG Suite's updater to download updates.",
+            "ports": "443",
+            "process": "/Library/Application Support/GPGTools/GPGSuite_Updater.app/Contents/MacOS/GPGSuite_Updater",
+            "protocol": "tcp",
+            "remote-hosts": "gpgtools.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Keybase to connect to its servers.",
+            "ports": "443",
+            "process": "/Applications/Keybase.app/Contents/SharedSupport/bin/keybase",
+            "protocol": "tcp",
+            "remote-domains": "core.keybaseapi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Keybase's updater to download software updates.",
+            "ports": "443",
+            "process": "/Applications/Keybase.app/Contents/SharedSupport/bin/updater",
+            "protocol": "tcp",
+            "remote-domains": "core.keybaseapi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow the KBFS functionality of Keybase.",
+            "ports": "443",
+            "process": "/Applications/Keybase.app/Contents/SharedSupport/bin/kbfs",
+            "protocol": "tcp",
+            "remote-domains": "kbfs.keybaseapi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Little Snitch to download software updates.",
+            "ports": "443",
+            "process": "/Applications/Little Snitch.app/Contents/Components/Little Snitch Software Update.app/Contents/MacOS/Little Snitch Software Update",
+            "protocol": "tcp",
+            "remote-hosts": "sw-update.obdev.at"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Little Snitch to subscribe to rules groups.",
+            "ports": "443",
+            "process": "/Library/Application Support/Objective Development/Little Snitch/Components/at.obdev.littlesnitch.daemon.bundle/Contents/XPCServices/at.obdev.littlesnitch.urldownloader.xpc/Contents/MacOS/at.obdev.littlesnitch.urldownloader",
+            "protocol": "tcp",
+            "remote-hosts": "pgl.yoyo.org"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow the Logi Options+'s updater to download the application's updates.",
+            "ports": "443",
+            "process": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/Frameworks/logioptionsplus_updater.app/Contents/MacOS/logioptionsplus_updater",
+            "protocol": "tcp",
+            "remote-hosts": "updates.optionsplus.logitechg.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Logi Options+ to connect to Logitech's account.",
+            "ports": "443",
+            "process": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/MacOS/logioptionsplus_agent",
+            "protocol": "tcp",
+            "remote-hosts": "accounts.logi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow the Flow functionality of Logi Options+.",
+            "ports": "443",
+            "process": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/MacOS/logioptionsplus_agent",
+            "protocol": "tcp",
+            "remote-hosts": "flow.logitech.io"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow RaspberryPi Imager to securely connect to websites to download images and their metadata.",
+            "ports": "443",
+            "process": "/Applications/Raspberry Pi Imager.app/Contents/MacOS/rpi-imager",
+            "protocol": "tcp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to securely sync with its servers.",
+            "ports": "443",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote-hosts": "bifrost.vivaldi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to sync with its servers.",
+            "ports": "15674",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote-hosts": "bifrost.vivaldi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to securely login into the user's account.",
+            "ports": "443",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote-hosts": "login.vivaldi.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to securely connect to websites.",
+            "ports": "443",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to securely connect to websites.",
+            "ports": "443",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "udp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code to access its documentation.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "code.visualstudio.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code to update itself.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": "update.code.visualstudio.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code's Helper to access the marketplace and download extensions.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": [
+                "az764295.vo.msecnd.net",
+                "download.visualstudio.microsoft.com",
+                "marketplace.visualstudio.com",
+                "vsmarketplacebadges.dev"
+            ],
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code to download extensions from the marketplace.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-domains": [
+                "gallery.vsassets.io",
+                "gallerycdn.vsassets.io"
+            ]
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code to sync the user's settings.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": [
+                "vscode-sync-insiders.trafficmanager.net",
+                "vscode-sync.trafficmanager.net",
+                "vscode.dev"
+            ]
+        },
+        {
+            "action": "allow",
+            "notes": "Allow VS Code's Helper to download schemas.",
+            "ports": "443",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "protocol": "tcp",
+            "remote-hosts": [
+                "json.schemastore.org",
+                "www.schemastore.org"
+            ],
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "deny",
+            "notes": "Stop VS Code's Helper from connecting to dc.services.visualstudio.com.\nUsed by the Application Insights SDK or Application Insights Agent to send data to the vendor's services in Azure.\nSee https://learn.microsoft.com/en-us/azure/azure-monitor/app/ip-addresses for details.",
+            "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+            "remote-hosts": "dc.services.visualstudio.com",
+            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow WhatsApp to authenticate to its servers.",
+            "ports": "443",
+            "process": "/Applications/WhatsApp.app/Contents/MacOS/WhatsApp",
+            "protocol": "tcp",
+            "remote-hosts": "web.whatsapp.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow WhatsApp to securely download media.",
+            "ports": "443",
+            "process": "/Applications/WhatsApp.app/Contents/MacOS/WhatsApp",
+            "protocol": "tcp",
+            "remote-hosts": "cdn.whatsapp.net"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow WhatsApp to securely connect to websites to get links' previews.",
+            "ports": "443",
+            "process": "/Applications/WhatsApp.app/Contents/MacOS/WhatsApp",
+            "protocol": "tcp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow WhatsApp to securely connect to websites to get links' previews.",
+            "ports": "443",
+            "process": "/Applications/WhatsApp.app/Contents/MacOS/WhatsApp",
+            "protocol": "udp",
+            "remote": "any"
+        }
+    ]
+}

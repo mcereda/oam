@@ -1,0 +1,32 @@
+{
+    "description": "",
+    "name": "Keybase",
+    "rules": [
+        {
+            "action": "allow",
+            "notes": "Allow Keybase to connect to its servers.",
+            "ports": "443",
+            "process": "/Applications/Keybase.app/Contents/SharedSupport/bin/keybase",
+            "protocol": "tcp",
+            "remote-domains": "core.keybaseapi.com"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow Keybase's updater to download software updates.",
+            "ports": "443",
+            "process": "/Applications/Keybase.app/Contents/SharedSupport/bin/updater",
+            "protocol": "tcp",
+            "remote-domains": "core.keybaseapi.com"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow the KBFS functionality of Keybase.",
+            "ports": "443",
+            "process": "/Applications/Keybase.app/Contents/SharedSupport/bin/kbfs",
+            "protocol": "tcp",
+            "remote-domains": "kbfs.keybaseapi.com"
+        }
+    ]
+}

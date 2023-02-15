@@ -1,0 +1,40 @@
+{
+    "description": "",
+    "name": "WhatsApp",
+    "rules": [
+        {
+            "action": "allow",
+            "notes": "Allow WhatsApp to authenticate to its servers.",
+            "ports": "443",
+            "process": "/Applications/WhatsApp.app/Contents/MacOS/WhatsApp",
+            "protocol": "tcp",
+            "remote-hosts": "web.whatsapp.com"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow WhatsApp to securely download media.",
+            "ports": "443",
+            "process": "/Applications/WhatsApp.app/Contents/MacOS/WhatsApp",
+            "protocol": "tcp",
+            "remote-hosts": "cdn.whatsapp.net"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow WhatsApp to securely connect to websites to get links' previews.",
+            "ports": "443",
+            "process": "/Applications/WhatsApp.app/Contents/MacOS/WhatsApp",
+            "protocol": "tcp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow WhatsApp to securely connect to websites to get links' previews.",
+            "ports": "443",
+            "process": "/Applications/WhatsApp.app/Contents/MacOS/WhatsApp",
+            "protocol": "udp",
+            "remote": "any"
+        }
+    ]
+}

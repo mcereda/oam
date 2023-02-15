@@ -33,13 +33,19 @@ jq '.extensionsGallery + {
        itemUrl: "https://marketplace.visualstudio.com/items"
     }' /usr/lib/code/product.json
 
+# Add elements from an array from another file.
+jq '.rules=([input.rules]|flatten)' starting-rule-set.json ending-rule-set.json
+
+# Add elements from an array from multiple files.
+jq '.rules=([inputs.rules]|flatten)' starting-rule-set.json parts/*.json
+
 # Put specific keys on top.
 jq '.objects = [(.objects[] as $in | {type,name,id} + $in)]' prod/dataPipeline_deviceLocationConversion_prod.json
 
 # Convert Enpass' JSON export to a YAML file
 jq '.items[] | {title, fields} | .title + ":", (.fields[] | select(.value != "") | "  " + .label + ": " + .value)' test.json -cr
 
-# Refactor a datapipeline definition.
+# Refactor an AWS DataPipeline definition.
 jq --sort-keys '.' datapipeline.json > /tmp/sorted.json \
 && jq '.objects = [(.objects[] as $in | {type,name,id} + $in | with_entries(select(.value != null)))]' \
      /tmp/sorted.json > /tmp/reordered.json \

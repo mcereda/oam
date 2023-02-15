@@ -1,0 +1,68 @@
+{
+    "description": "",
+    "name": "Firefox",
+    "rules": [
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to check for captive portals.",
+            "ports": "80",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "tcp",
+            "remote-hosts": "detectportal.firefox.com"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to gather information about certificates.",
+            "ports": "80",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "tcp",
+            "remote-hosts": [
+                "o.lencr.org",
+                "ocsp.digicert.com",
+                "ocsp.entrust.net",
+                "ocsp.globalsign.com",
+                "ocsp.pki.goog",
+                "ocsp.r2m01.amazontrust.com",
+                "ocsp.sca1b.amazontrust.com",
+                "ocsp.sectigo.com"
+            ]
+        },
+
+        {
+            "action": "deny",
+            "notes": "Stop Firefox from connecting to Google's Interactive Media Ads SDK, which allows developers and publishers to show interactive and video ads on their websites and mobile apps.",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "remote-domains": "imasdk.googleapis.com"
+        },
+        {
+            "action": "deny",
+            "notes": "Stop Firefox from connecting to google-analytics.com.",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "remote-domains": "google-analytics.com"
+        },
+        {
+            "action": "deny",
+            "notes": "Stop Firefox from tracking content from third-party sites.",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "remote-domains": "googletagservices.com"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to securely connect to websites.",
+            "ports": "443",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "tcp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to securely connect to websites.",
+            "ports": "443",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "udp",
+            "remote": "any"
+        }
+    ]
+}
