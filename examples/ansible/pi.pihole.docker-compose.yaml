@@ -1,0 +1,135 @@
+---
+
+# Assumes pihole is to be run on a Raspberry Pi.
+
+- name: Start Pihole using Docker-compose
+  gather_facts: false
+  hosts: all
+  vars:
+    pihole_root_dir: "{{ ansible_user_dir }}/containers/pihole"
+  pre_tasks:
+    - name: Enable containerization features in the kernel
+      tags:
+        - kernel
+      become: true
+      ansible.builtin.replace:
+        path: /boot/cmdline.txt
+        regexp: '^(?!.*(cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1))(.+)$'
+        replace: '\2 cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1'
+    - name: Install and configure Docker
+      tags:
+        - docker
+      block:
+        - name: Install docker-compose
+          become: true
+          ansible.builtin.package:
+            name: docker-compose
+        - name: Add user to the 'docker' group
+          become: true
+          ansible.builtin.user:
+            name: "{{ ansible_user_id }}"
+            groups: docker
+            append: true
+  tasks:
+    - name: Set up Pihole's files
+      tags:
+        - pihole
+      block:
+        - name: Create the directory tree
+          ansible.builtin.file:
+            path: "{{ pihole_root_dir }}"
+            state: directory
+            mode: '0755'
+        - name: Create the compose file
+          tags:
+            - docker-compose
+          ansible.builtin.copy:
+            dest: "{{ pihole_root_dir }}/docker-compose.yaml"
+            content: |
+              version: "3.2"
+              secrets:
+                webpassword:
+                  file: ./webpassword
+              services:
+                pihole:
+                  container_name: pihole
+                  image: pihole/pihole:2023.01.10
+                  environment:
+                    FTLCONF_LOCAL_IPV4: 127.0.0.1
+                    REV_SERVER_CIDR: 192.168.0.0/24
+                    REV_SERVER_DOMAIN: lan
+                    REV_SERVER_TARGET: 192.168.0.1
+                    REV_SERVER: "true"
+                    SKIPGRAVITYONBOOT: 1
+                    TZ: Europe/Amsterdam
+                    WEBPASSWORD_FILE: /run/secrets/webpassword
+                  volumes:
+                    - ./etc/pihole:/etc/pihole
+                    - ./etc/dnsmasq.d:/etc/dnsmasq.d
+                  dns:
+                    - 127.0.0.1
+                    - 1.1.1.1
+                  restart: unless-stopped
+                  secrets:
+                    - webpassword
+                  ports:
+                    - "53:53/tcp"
+                    - "53:53/udp"
+                    - "80:80/tcp"
+            mode: '0644'
+        - name: Create the password file
+          tags:
+            - password
+          ansible.builtin.copy:
+            dest: "{{ pihole_root_dir }}/webpassword"
+            content: |
+              CHANGE ME
+            mode: '0600'
+        - name: Start the composition
+          tags:
+            - docker-compose
+          community.docker.docker_compose:
+            project_src: "{{ pihole_root_dir }}"
+        - name: Create the cron job to update Graviton's DB
+          tags:
+            - crontab
+            - graviton
+          ansible.builtin.cron:
+            name: Update Graviton's DB once a week (at 3:00 on Sundays).
+            minute: 0
+            hour: 3     # 3 AM
+            weekday: 0  # Sunday
+            job: docker ps -f 'name=pihole' -f 'status=running' -f 'health=healthy' -q | xargs -I{} docker exec {} pihole -g
+        - name: Create the cron job for automatic backups
+          tags:
+            - backup
+            - crontab
+            - settings
+          ansible.builtin.cron:
+            name: Create a complete backup once a week (at 3:30 on Sundays).
+            minute: 30
+            hour: 3     # 3 AM
+            weekday: 0  # Sunday
+            job: >-
+              docker ps -f 'name=pihole' -f 'status=running' -f 'health=healthy' -q
+              | xargs -I{} docker exec {} pihole -a -t /etc/pihole/teleporter_backup.tar.gz
+        - name: Add adlists from v.firebog.net
+          tags:
+            - adlists
+            - graviton
+          community.docker.docker_container_exec:
+            container: pihole
+            command: >
+              sqlite3 '/etc/pihole/gravity.db'
+              "INSERT OR IGNORE INTO adlist (address, enabled, comment) VALUES ('{{ item }}', 1, 'Listed on v.firebog.net');"
+          # on M1 macs execute `export NO_PROXY=*` first
+          loop: "{{ lookup('ansible.builtin.url', 'https://v.firebog.net/hosts/lists.php?type=tick', wantlist=True) }}"
+          async: 600
+          poll: 5
+        - name: Upgrade Graviton with the new adlists.
+          tags:
+            - graviton
+            - update
+          community.docker.docker_container_exec:
+            container: pihole
+            command: pihole -g
