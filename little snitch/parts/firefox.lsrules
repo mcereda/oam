@@ -18,15 +18,24 @@
             "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
             "protocol": "tcp",
             "remote-hosts": [
-                "o.lencr.org",
                 "ocsp.digicert.com",
                 "ocsp.entrust.net",
                 "ocsp.globalsign.com",
                 "ocsp.pki.goog",
                 "ocsp.r2m01.amazontrust.com",
                 "ocsp.sca1b.amazontrust.com",
-                "ocsp.sectigo.com"
+                "ocsp.sectigo.com",
+                "ocsp.usertrust.com",
+                "status.geotrust.com"
             ]
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Firefox to gather information about certificates.",
+            "ports": "80",
+            "process": "/Applications/Firefox.app/Contents/MacOS/firefox",
+            "protocol": "tcp",
+            "remote-domains": "o.lencr.org"
         },
 
         {
