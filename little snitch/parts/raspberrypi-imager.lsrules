@@ -4,6 +4,14 @@
     "rules": [
         {
             "action": "allow",
+            "notes": "Allow RaspberryPi Imager to securely download updates.",
+            "ports": "443",
+            "process": "/Applications/Raspberry Pi Imager.app/Contents/MacOS/rpi-imager",
+            "protocol": "tcp",
+            "remote-hosts": "downloads.raspberrypi.org"
+        },
+        {
+            "action": "allow",
             "notes": "Allow RaspberryPi Imager to securely connect to websites to download images and their metadata.",
             "ports": "443",
             "process": "/Applications/Raspberry Pi Imager.app/Contents/MacOS/rpi-imager",

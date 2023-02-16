@@ -53,6 +53,7 @@
             "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
             "protocol": "tcp",
             "remote-hosts": [
+                "login.microsoftonline.com",
                 "vscode-sync-insiders.trafficmanager.net",
                 "vscode-sync.trafficmanager.net",
                 "vscode.dev"
@@ -76,8 +77,7 @@
             "action": "deny",
             "notes": "Stop VS Code's Helper from connecting to dc.services.visualstudio.com.\nUsed by the Application Insights SDK or Application Insights Agent to send data to the vendor's services in Azure.\nSee https://learn.microsoft.com/en-us/azure/azure-monitor/app/ip-addresses for details.",
             "process": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
-            "remote-hosts": "dc.services.visualstudio.com",
-            "via": "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper"
+            "remote-hosts": "dc.services.visualstudio.com"
         }
     ]
 }
