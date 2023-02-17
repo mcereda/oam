@@ -1,5 +1,17 @@
 # Microsoft windows
 
+## TL;DR
+
+```bat
+Rem Check ports in listening state.
+netstat -an
+```
+
+```ps1
+# Test a network connection.
+Test-NetConnection -Port 443 -ComputerName 192.168.0.1 -InformationLevel Detailed
+```
+
 ## Disable fast startup on Windows 10
 
 1. open the Control Panel

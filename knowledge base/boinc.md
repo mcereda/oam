@@ -2,6 +2,7 @@
 
 1. [TL;DR](#tldr)
 2. [Client management](#client-management)
+   1. [Remote management](#remote-management)
 3. [Use the GPU for computation](#use-the-gpu-for-computation)
    1. [On OpenSUSE](#on-opensuse)
 4. [Further readings](#further-readings)
@@ -24,6 +25,22 @@ Name            | Type         | Description
 [BOINC Manager] | Graphical    |
 [boinccmd]      | Command line |
 [boinctui]      | Text         |
+
+### Remote management
+
+Quick, dirty solution: use the `--allow_remote_gui_rpc` option when starting the client.<br/>
+This will make the BOINC client accept connections from **any** host (subject to password authentication) even if the client's configuration files are set otherwise.
+
+Better solution:
+
+1. add the `<allow_remote_gui_rpc>1</allow_remote_gui_rpc>` **option** to the `cc_config.xml` file in the BOINC data directory
+1. restart the service to make the above change effective
+1. check port 31416 (or the one configured for use) is reachable from other hosts
+1. specify a set of allowed hosts creating the `remote_hosts.cfg` file in the BOINC data directory; its entries must be DNS host names or IP addresses, and must be one per line
+
+   > the _Read config file_ action in BOINC Manager's _Advanced_ menu will also read the `remote_hosts.cfg` file, so a restart of the client is not required to enable changes to the remote host list.
+
+1. check the `gui_rpc_auth.cfg` file in the BOINC data directory to get the password for authentication
 
 ## Use the GPU for computation
 

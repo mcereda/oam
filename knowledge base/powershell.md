@@ -13,6 +13,9 @@ CertUtil -hashfile path/to/file sha256
 # Get super user privileges.
 powershell Start-Process powershell -Verb runAs
 
+# Test a network connection.
+Test-NetConnection -Port 443 -ComputerName 192.168.0.1 -InformationLevel Detailed
+
 # Assign values to variables.
 $variableName = 'value'
 $response = Invoke-WebRequest -Uri 'https://jsonplaceholder.typicode.com/users'
