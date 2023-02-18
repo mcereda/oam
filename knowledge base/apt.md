@@ -3,6 +3,9 @@
 ## TL;DR
 
 ```sh
+# Check for broken dependencies.
+sudo apt-get check
+
 # Update the packages lists.
 sudo apt update
 
