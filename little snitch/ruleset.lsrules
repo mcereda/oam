@@ -54,6 +54,7 @@
                 "ocsp.sca1b.amazontrust.com",
                 "ocsp.sectigo.com",
                 "ocsp.usertrust.com",
+                "ocsp2.globalsign.com",
                 "status.geotrust.com"
             ]
         },
@@ -186,6 +187,33 @@
             "process": "/Applications/Raspberry Pi Imager.app/Contents/MacOS/rpi-imager",
             "protocol": "tcp",
             "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to gather information about certificates.",
+            "ports": "80",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote-hosts": [
+                "ocsp.digicert.com",
+                "ocsp.entrust.net",
+                "ocsp.globalsign.com",
+                "ocsp.pki.goog",
+                "ocsp.r2m01.amazontrust.com",
+                "ocsp.sca1b.amazontrust.com",
+                "ocsp.sectigo.com",
+                "ocsp.usertrust.com",
+                "ocsp2.globalsign.com",
+                "status.geotrust.com"
+            ]
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to gather information about certificates.",
+            "ports": "80",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "tcp",
+            "remote-domains": "o.lencr.org"
         },
         {
             "action": "allow",
