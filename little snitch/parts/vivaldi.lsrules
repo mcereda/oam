@@ -72,6 +72,15 @@
             "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
             "protocol": "udp",
             "remote": "any"
+        },
+
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to advertise its capabilities on the local network.",
+            "ports": "1900",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "udp",
+            "remote-addresses": "239.255.255.250"
         }
     ]
 }
