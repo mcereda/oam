@@ -191,6 +191,14 @@
         },
         {
             "action": "allow",
+            "notes": "Allow Spotify to advertise its capabilities on the local network.",
+            "ports": "1900",
+            "process": "/Users/mek/Applications/Spotify.app/Contents/MacOS/Spotify",
+            "protocol": "udp",
+            "remote-addresses": "239.255.255.250"
+        },
+        {
+            "action": "allow",
             "notes": "Allow Vivaldi to gather information about certificates.",
             "ports": "80",
             "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
@@ -256,6 +264,14 @@
             "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
             "protocol": "udp",
             "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Vivaldi to advertise its capabilities on the local network.",
+            "ports": "1900",
+            "process": "/Applications/Vivaldi.app/Contents/MacOS/Vivaldi",
+            "protocol": "udp",
+            "remote-addresses": "239.255.255.250"
         },
         {
             "action": "allow",

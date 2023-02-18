@@ -1,0 +1,14 @@
+{
+    "description": "",
+    "name": "Spotify",
+    "rules": [
+        {
+            "action": "allow",
+            "notes": "Allow Spotify to advertise its capabilities on the local network.",
+            "ports": "1900",
+            "process": "/Users/mek/Applications/Spotify.app/Contents/MacOS/Spotify",
+            "protocol": "udp",
+            "remote-addresses": "239.255.255.250"
+        }
+    ]
+}
