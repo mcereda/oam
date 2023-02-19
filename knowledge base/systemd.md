@@ -86,6 +86,9 @@ journalctl -F '_GID'
 # Filter logs by path.
 journalctl '/usr/bin/bash'
 
+# Filter logs by identifier (like a tag).
+journalctl -t 'CROND'
+
 # Display kernel logs only.
 # Works like `dmesg`.
 journalctl -k

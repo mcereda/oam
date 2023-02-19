@@ -1,0 +1,9 @@
+#cloud-config
+
+write_files:
+  - path: /etc/cron.daily/security-updates
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      dnf -y upgrade --security --nobest
+    defer: true
