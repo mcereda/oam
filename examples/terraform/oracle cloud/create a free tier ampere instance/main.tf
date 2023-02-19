@@ -55,6 +55,7 @@ resource "oci_core_instance" "this" {
     subnet_id = oci_core_subnet.this.id
   }
 
+  extended_metadata = {}
   metadata = {
     ssh_authorized_keys = var.ssh_authorized_keys
   }
