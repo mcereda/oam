@@ -1,8 +1,8 @@
 # Google cloud platform CLI <!-- omit in toc -->
 
-- [TL;DR](#tldr)
-- [Further readings](#further-readings)
-- [Sources](#sources)
+1. [TL;DR](#tldr)
+2. [Further readings](#further-readings)
+3. [Sources](#sources)
 
 ## TL;DR
 

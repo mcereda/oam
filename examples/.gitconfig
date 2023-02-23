@@ -1,0 +1,126 @@
+################################################################################
+## ~/.gitconfig
+##
+## Global git configuration file. Settings in here override the system's ones,
+## and are in turn overridden by the repositories' local ones.
+## Check the resolved configuration in full and its origins with the following:
+## `git config --list --show-origin`.
+##
+## Sources:
+## - https://git-scm.com/docs/git-config
+## - https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration
+################################################################################
+
+[alias]
+	branch-get-default = "!f() { \
+		git remote show origin \
+		| awk '/HEAD branch/ {print $NF}' \
+	;} && f"
+	branch-get-gone = "!f() { \
+		git fetch -p && \
+		git branch -vv \
+		| awk '/origin/&&/gone/{print $1}' \
+	;} && f"
+	branch-prune-gone = "!f() { \
+		git branch-get-gone \
+		| xargs \
+			git branch -D \
+	;} && f"
+	checkout-default-branch = "!f() { \
+		git checkout $(git branch-get-default) \
+	;} && f"
+	config-show-final = "!f() { \
+		git config --list \
+		| awk -F '=' '{print $1}' \
+		| sort -u \
+		| xargs -I {} \
+			sh -c 'printf \"{}=\" && git config --get {}' \
+	;} && f"
+	pull-from-all-remotes = "!f() { \
+		git remote show \
+		| xargs -I{} \
+			git pull {} ${1-$(git branch --show-current)} \
+	;} && f"
+	pull-from-all-remotes-once = "!f() { \
+		git remote-show-unique \
+		| xargs -I{} \
+			git pull {} ${1-$(git branch --show-current)} \
+	;} && f"
+	pull-from-reachable-remotes = "!f() { \
+		git remote show \
+		| xargs -I{} \
+			sh -c \"timeout 1 git ls-remote -hq {} HEAD >/dev/null 2>&1 && echo {}\" \
+		| xargs -I{} \
+			git pull {} ${1-$(git branch --show-current)} \
+	;} && f"
+	pull-from-reachable-remotes-once = "!f() { \
+		git remote-show-unique \
+		| xargs -I{} \
+			sh -c \"timeout 1 git ls-remote -hq {} HEAD >/dev/null 2>&1 && echo {}\" \
+		| xargs -I{} \
+			git pull {} ${1-$(git branch --show-current)} \
+	;} && f"
+	push-to-all-remotes = "!f() { \
+		git remote show \
+		| xargs -I{} \
+			git push {} ${1-$(git branch --show-current)} \
+	;} && f"
+	push-to-all-remotes-once = "!f() { \
+		git remote-show-unique \
+		| xargs -I{} \
+			git push {} ${1-$(git branch --show-current)} \
+	;} && f"
+	push-to-reachable-remotes = "!f() { \
+		git remote show \
+		| xargs -I{} \
+			sh -c \"timeout 1 git ls-remote -hq {} HEAD >/dev/null 2>&1 && echo {}\" \
+		| xargs -I{} \
+			git push {} ${1-$(git branch --show-current)} \
+	;} && f"
+	push-to-reachable-remotes-once = "!f() { \
+		git remote-show-unique \
+		| xargs -I{} \
+			sh -c \"timeout 1 git ls-remote -hq {} HEAD >/dev/null 2>&1 && echo {}\" \
+		| xargs -I{} \
+			git push {} ${1-$(git branch --show-current)} \
+	;} && f"
+	remote-show-unique = "!f() { \
+		git remote -v \
+		| sort -k2 -u \
+		| awk '{print $1}' \
+		| sort -u \
+	;} && f"
+	statis = status
+	statsu = status
+	switch-default-branch = "!f() { \
+		git switch $(git branch-get-default) \
+	;} && f"
+	top-level = "rev-parse --show-toplevel"
+[core]
+	# 'input' on unix, 'true' on windows
+	# 'false' only if you know what you are doing
+	autocrlf = input
+[diff]
+	wsErrorHighlight = all
+[init]
+	defaultBranch = main
+[pull]
+	rebase = false
+[submodule]
+	recurse = true
+[user]
+	email = name.surname@company.com
+	name = Name Surname
+
+# Enable LFS.
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+
+# Always sign commits.
+[commit]
+	gpgSign = true
+[user]
+	signingKey = 99C324BA

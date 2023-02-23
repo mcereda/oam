@@ -1,14 +1,68 @@
 # Bourne Again SHell
 
+1. [TL;DR](#tldr)
+2. [Startup files loading order](#startup-files-loading-order)
+3. [Functions](#functions)
+4. [Substitutions](#substitutions)
+   1. [!! (command substitution)](#-command-substitution)
+   2. [^^ (caret substitution)](#-caret-substitution)
+5. [Here documents](#here-documents)
+6. [Keys combinations](#keys-combinations)
+7. [Check if a script is sourced by another](#check-if-a-script-is-sourced-by-another)
+8. [Gotchas](#gotchas)
+   1. [Exist statuses of killed commands](#exist-statuses-of-killed-commands)
+   2. [Go incognito](#go-incognito)
+9. [Further readings](#further-readings)
+10. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
+# Declare arrays. 
+ARRAY=(
+  "first_element"
+  "second_element" "nth_element"
+)
+
+# Get the length of arrays.
+# A.K.A. number of elements.
+ARRAY_LEN=${#ARRAY[@]}
+
+# Access all elements in arrays with referencing.
+echo ${ARRAY[@]}
+echo ${ARRAY[*]}
+
+# Access the last value of arrays.
+echo ${ARRAY[-1]}
+echo ${ARRAY: -1}
+
+# Get a slice of 4 elements from an array.
+# Start from the element with index number 2.
+echo ${ARRAY:2:4}
+
 # Declare functions.
 functionName () { … }
 function functionName { … }
 
 # Declare functions on a single line.
 functionName () { command1 ; … ; command N ; }
+
+# Get all the arguments in input.
+echo $@
+
+# Of all the arguments in input, return only those which are existing directories.
+DIRECTORIES=()
+for (( I = $# ; I >= 0 ; I-- )); do
+  if [[ -d ${@[$I]} ]]; then
+    DIRECTORIES+=${@[$I]}
+  else
+    local COMMAND="${@:1: 1-$I}"
+    break
+  fi
+done
+
+# Print all shell and environment variables.
+( set -o posix ; set )
 
 # Print exported variables only.
 export -p
@@ -68,10 +122,118 @@ Upon exit:
 
 A function automatically returns the exit code of the last command in it.
 
+## Substitutions
+
+### !! (command substitution)
+
+Substitutes `!!` with the last command in your history
+
+```sh
+$ echo 'hallo!'
+hallo!
+
+$ !!
+echo 'hallo!'
+hallo!
+
+$ sudo !!
+sudo echo 'hallo!'
+[sudo] password for user:
+hallo!
+```
+
+### ^^ (caret substitution)
+
+Re-runs a command replacing a string.
+
+```sh
+$ sudo apt search tmux
+…
+
+$ ^search^show
+sudo apt show tmux
+…
+```
+
+## Here documents
+
+A _Here document_ (_heredoc_) is a type of redirection that allows you to pass multiple lines of input to a command.
+
+```sh
+[COMMAND] <<[-] 'DELIMITER'
+  HERE-DOCUMENT
+DELIMITER
+```
+
+- the first line must start with an **optional command** followed by the special redirection operator `<<` and the **delimiting identifier**
+- one can use **any string** as a delimiting identifier, the most commonly used being `EOF` or `END`
+- if the delimiting identifier is **unquoted**, the shell will substitute all variables, commands and special characters before passing the here-document lines to the command
+- appending a **minus sign** to the redirection operator (`<<-`), will cause all leading tab characters to be **ignored**  
+  this allows one to use indentation when writing here-documents in shell scripts  
+  leading whitespace characters are not allowed, only tabs are
+- the here-document block can contain strings, variables, commands and any other type of input
+- the last line must end with the delimiting identifier  
+  white space in front of the delimiter is not allowed
+
+```sh
+$ cat << EOF
+The current working directory is: $PWD
+You are logged in as: $(whoami)
+EOF
+The current working directory is: /home/user
+You are logged in as: user
+```
+
+```sh
+$ cat <<-'EOF' | sed 's/l/e/g' > file.txt
+  Hello
+  World
+EOF
+$ cat file.txt
+Heeeo
+Wored
+```
+
+## Keys combinations
+
+- `Ctrl+L`: clear the screen (instead of typing `clear`)
+- `Ctrl+R`: reverse search your Bash history for a command that you have already run and wish to run again
+
 ## Check if a script is sourced by another
 
 ```sh
-(return 0 2>/dev/null) && echo "this script is not sourced" || echo "this script is sourced"
+(return 0 2>/dev/null) \
+&& echo "this script is not sourced" \
+|| echo "this script is sourced"
+```
+
+## Gotchas
+
+### Exist statuses of killed commands
+
+The exit status of a killed command is **128 + _n_** if the command was killed by signal _n_:
+
+```sh
+$ pgrep tryme.sh
+880
+$ kill -9 880
+$ echo $?
+137
+```
+
+### Go incognito
+
+See [How do I open an incognito bash session] on [unix.stackexchange.com]
+
+```sh
+HISTFILE=
+```
+
+You can also avoid recording a single command simply preceding it with space
+
+```shell
+echo $RECORDED
+ echo $NOT_RECORDED
 ```
 
 ## Further readings
@@ -93,3 +255,29 @@ A function automatically returns the exit code of the last command in it.
 [how to detect if a script is being sourced]: https://stackoverflow.com/questions/2683279/how-to-detect-if-a-script-is-being-sourced#28776166
 [the bash trap command]: https://www.linuxjournal.com/content/bash-trap-command
 [upper- or lower-casing strings]: https://scriptingosx.com/2019/12/upper-or-lower-casing-strings-in-bash-and-zsh/
+
+<!-- FIXME -->
+
+[add directory to $path if it's not already there]: https://superuser.com/questions/39751/add-directory-to-path-if-its-not-already-there
+[append elements to an array]: https://linuxhint.com/bash_append_array/
+[bash-heredoc]: https://linuxize.com/post/bash-heredoc
+[bashrc ps1 generator]: http://bashrcgenerator.com/
+[check if a string represents a valid path]: https://unix.stackexchange.com/questions/214886/check-if-string-represents-valid-path-in-bash
+[command line arguments in a shell script]: https://tecadmin.net/tutorial/bash-scripting/bash-command-arguments/
+[find out the exit codes of all piped commands]: https://www.cyberciti.biz/faq/unix-linux-bash-find-out-the-exit-codes-of-all-piped-commands
+[histsize vs histfilesize]: https://stackoverflow.com/questions/19454837/bash-histsize-vs-histfilesize#19454838
+[how do i open an incognito bash session]: https://unix.stackexchange.com/questions/158933/how-do-i-open-an-incognito-bash-session/158937#158937
+[how to find a bash shell array length]: https://www.cyberciti.biz/faq/finding-bash-shell-array-length-elements/
+[how to slice an array]: https://stackoverflow.com/questions/1335815/how-to-slice-an-array-in-bash#1336245
+[is there a way of reading the last element of an array?]: https://unix.stackexchange.com/questions/198787/is-there-a-way-of-reading-the-last-element-of-an-array-with-bash#198789
+[linux-terminal-trick]: https://opensource.com/article/20/1/linux-terminal-trick
+[printing array elements in reverse]: https://www.unix.com/shell-programming-and-scripting/267967-printing-array-elements-reverse.html
+[regular expressions in a case statement]: https://stackoverflow.com/questions/9631335/regular-expressions-in-a-bash-case-statement#9631449
+[reverse an array]: https://unix.stackexchange.com/questions/412868/bash-reverse-an-array
+[set]: https://ss64.com/bash/set.html
+[slice of positional parameters]: https://unix.stackexchange.com/questions/82060/bash-slice-of-positional-parameters#82061
+[how to list all variables names and their current values?]: https://askubuntu.com/questions/275965/how-to-list-all-variables-names-and-their-current-values#275972
+
+[linuxize.com]: https://linuxize.com
+[opensource.com]: https://opensource.com
+[unix.stackexchange.com]: https://unix.stackexchange.com
