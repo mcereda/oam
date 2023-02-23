@@ -21,6 +21,7 @@
         "fdupes",
         "firewalld",
         "flatpak",
+        "gcloud",
         "getfacl",
         "gpgtools",
         "growpart",
@@ -60,6 +61,7 @@
         "tmpfs",
         "tput",
         "usermod",
+        "userspace",
         "zstd"
     ]
 }
