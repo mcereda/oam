@@ -52,6 +52,7 @@
         "rootlv",
         "rootvg",
         "runcmd",
+        "scrollback",
         "setfacl",
         "sshpass",
         "subvolume",
