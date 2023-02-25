@@ -1,4 +1,4 @@
-# ubports
+# UBports
 
 1. [TL;DR](#tldr)
 1. [Connect using SSH](#connect-using-ssh)
@@ -14,6 +14,26 @@ libertine-container-manager list
 # Default type: 'chroot'.
 libertine-container-manager create -i 'identifier'
 libertine-container-manager create -i 'identifier' -n 'name' -t 'lxc'
+
+# Search for packages.
+libertine-container-manager search-cache -s 'pattern'
+
+# Install packages.
+libertine-container-manager install-package -p 'package'
+
+# Execute commands.
+libertine-container-manager exec -c 'command'
+libertine-launch -i 'identifier' ls -a
+DISPLAY= libertine-launch ls -a
+
+# Get a shell inside the container.
+DISPLAY= libertine-launch '/bin/bash'
+
+# Launch graphical applications from the terminal.
+ubuntu-app-launch 'containerId_app_0.0'
+
+# Remove packages.
+libertine-container-manager remove-package -p 'package'
 
 # Destroy containers.
 libertine-container-manager destroy -i 'identifier'
