@@ -3,20 +3,23 @@
 ## TL;DR
 
 ```sh
-# base search
-grep 'pattern' path/to/search
+# Basic search.
+grep 'pattern' 'path/to/search'
 
-# recursive search
-grep -R 'pattern' path/to/search/recursively
-grep -R --exclude-dir excluded/dir 'pattern' path/to/search/recursively   # gnu grep >= 2.5.2
+# Search recursively.
+grep -R 'pattern' 'path/to/search/recursively'
+grep -R --exclude-dir 'excluded/dir' 'pattern' 'path/to/search/recursively'   # gnu grep >= 2.5.2
 
-# show line numbers
-grep -n 'pattern' path/to/search
+# Show line numbers.
+grep -n 'pattern' 'path/to/search'
 
-# parallel execution
-# mind the files with spaces in their name
-find . -type f | parallel -j 100% grep 'pattern'
-find . -type f -print0 | xargs -0 -n 1 -P $(nproc) grep 'pattern'
+# Multiple parallel searches.
+# Mind files with spaces in their name.
+find . -type f | parallel -j +100% grep 'pattern'
+find . -type f -print0 | xargs -0 -n 1 -P "$(nproc)" grep 'pattern'
+
+# Highlight numbers in strings.
+grep --color '[[:digit:]]' 'file.txt'
 ```
 
 ## Grep variants
