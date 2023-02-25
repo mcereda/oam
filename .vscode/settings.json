@@ -8,6 +8,7 @@
         "boinccmd",
         "bootable",
         "bootcmd",
+        "bootloader",
         "btrfs",
         "cereda",
         "chezmoi",
@@ -18,6 +19,7 @@
         "dpkg",
         "duperemove",
         "epel",
+        "fastboot",
         "fdupes",
         "firewalld",
         "flatpak",
@@ -61,6 +63,7 @@
         "tfvars",
         "tmpfs",
         "tput",
+        "twrp",
         "usermod",
         "userspace",
         "zstd"
