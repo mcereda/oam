@@ -10,14 +10,18 @@
         "bootcmd",
         "bootloader",
         "btrfs",
+        "byod",
         "cereda",
         "chezmoi",
         "cpulimit",
+        "csma",
+        "datagram",
         "dhclient",
         "diffpdf",
         "dkms",
         "dpkg",
         "duperemove",
+        "eeprom",
         "epel",
         "fastboot",
         "fdupes",
@@ -66,6 +70,7 @@
         "twrp",
         "usermod",
         "userspace",
+        "wlan",
         "zstd"
     ]
 }
