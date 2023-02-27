@@ -1,14 +1,14 @@
 # BOINC
 
 1. [TL;DR](#tldr)
-2. [Client management](#client-management)
+1. [Client management](#client-management)
    1. [Remote management](#remote-management)
-3. [Use the GPU for computations](#use-the-gpu-for-computations)
+1. [Use the GPU for computations](#use-the-gpu-for-computations)
    1. [On OpenSUSE](#on-opensuse)
-   2. [Check the GPU is OpenCL-enabled](#check-the-gpu-is-opencl-enabled)
-4. [Use VirtualBox for computations](#use-virtualbox-for-computations)
-5. [Gotchas](#gotchas)
-6. [Further readings](#further-readings)
+   1. [Check the GPU is OpenCL-enabled](#check-the-gpu-is-opencl-enabled)
+1. [Use VirtualBox for computations](#use-virtualbox-for-computations)
+1. [Gotchas](#gotchas)
+1. [Further readings](#further-readings)
 
 Files are located in `/var/lib/boinc` by default.  
 Some distribution (debian and derivate) use `/etc/boinc-client` for configuration files instead, and create links to the ones in the default location.
@@ -122,6 +122,9 @@ usermod --append --groups 'vboxusers' 'boinc'
 - [boinccmd] for the bare CLI utility
 - [boinctui] for a TUI manager
 - [GUI RPC bind to port 31416 failed: 98]
+
+<!-- project's references -->
+[website]: https://boinc.berkeley.edu/
 
 <!-- internal references -->
 [boinccmd]: boinccmd.md
