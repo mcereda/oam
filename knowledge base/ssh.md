@@ -1,16 +1,16 @@
 # SSH
 
 1. [TL;DR](#tldr)
-2. [Key Management](#key-management)
-3. [Configuration](#configuration)
+1. [Key Management](#key-management)
+1. [Configuration](#configuration)
    1. [Append domains to a hostname before attempting to check if they exist](#append-domains-to-a-hostname-before-attempting-to-check-if-they-exist)
-   2. [Optimize connection handling](#optimize-connection-handling)
-4. [SSHFS](#sshfs)
+   1. [Optimize connection handling](#optimize-connection-handling)
+1. [SSHFS](#sshfs)
    1. [Installation](#installation)
-5. [Troubleshooting](#troubleshooting)
+1. [Troubleshooting](#troubleshooting)
    1. [No matching host key type found](#no-matching-host-key-type-found)
-6. [Further readings](#further-readings)
-7. [Sources](#sources)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -90,8 +90,8 @@ ssh-keygen -R 'raspberrypi.lan' -f '.ssh/known_hosts'
 
 ```plaintext
 Host pi4.lan found: line 5
-/home/mek/.ssh/known_hosts updated.
-Original contents retained as /home/mek/.ssh/known_hosts.old
+/home/user/.ssh/known_hosts updated.
+Original contents retained as /home/user/.ssh/known_hosts.old
 ```
 
 Change password of a key file
