@@ -23,6 +23,6 @@ done
 
 jq --indent 4 -M \
 	'.rules=([inputs.rules]|flatten)' \
-	"${WORKDIR}/ruleset.lsrules" \
+	"${WORKDIR}/all.lsrules" \
 	"${WORKDIR}/parts/"*.lsrules \
-| sponge "${WORKDIR}/ruleset.lsrules"
+| sponge "${WORKDIR}/all.lsrules"
