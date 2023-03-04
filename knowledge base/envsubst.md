@@ -13,6 +13,6 @@ envsubst < input.file > output.file
 $ cat hello.file
 hello $NAME
 
-$ NAME='mek' envsubst < hello.file
-hello mek
+$ NAME='Johnny' envsubst < hello.file
+hello Johnny
 ```

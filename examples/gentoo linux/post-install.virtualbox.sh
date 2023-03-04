@@ -27,7 +27,7 @@ emerge \
   kde-plasma/plasma-meta
 rc-update add dbus default
 rc-update add elogind default
-cat > /home/mek/.xinitrc <<EOF
+cat > /home/user/.xinitrc <<EOF
 #!/bin/sh
 exec dbus-launch --exit-with-session startplasma-wayland
 EOF

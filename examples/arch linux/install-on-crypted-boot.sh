@@ -87,8 +87,8 @@ $ locale-gen
 $ mkinitcpio -p linux
 
 # utenza personale
-$ useradd --create-home --groups wheel --user-group mek
-$ passwd mek
+$ useradd --create-home --groups wheel --user-group user
+$ passwd user
 $ visudo
 
 # grub

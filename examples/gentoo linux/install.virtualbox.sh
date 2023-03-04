@@ -131,8 +131,8 @@ emerge \
   --quiet --verbose \
   app-admin/sudo
 echo '%wheel ALL=(ALL) ALL' | tee /etc/sudoers.d/wheel
-useradd -m -G users,wheel,audio -s /bin/bash mek
-passwd mek
+useradd -m -G users,wheel,audio -s /bin/bash user
+passwd user
 passwd -l root
 
 emerge \
