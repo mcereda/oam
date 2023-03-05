@@ -1,5 +1,16 @@
 # Vagrant
 
+1. [TL;DR](#tldr)
+1. [Usage](#usage)
+   1. [Boxes management](#boxes-management)
+1. [Install shells' autocompletion](#install-shells-autocompletion)
+1. [Customize a Box](#customize-a-box)
+1. [Use environment variables in the provisioning script](#use-environment-variables-in-the-provisioning-script)
+1. [Specify the disk size](#specify-the-disk-size)
+1. [Reboot after provisioning](#reboot-after-provisioning)
+1. [Loop over VMs' definitions](#loop-over-vms-definitions)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -142,7 +153,7 @@ Vagrant.configure("2") do |config|
     shell.env = {
       "STATIC" => "set-in-config",
       "FORWARDED" => ENV['HOST_VAR'],
-      }
+    }
     shell.inline = <<-SHELL
       printenv STATIC FORWARDED
       sudo -u vagrant --preserve-env=STATIC,FORWARDED printenv STATIC FORWARDED
@@ -180,6 +191,31 @@ config.vm.provision :shell do |shell|
 end
 ```
 
+## Loop over VMs' definitions
+
+The inner portion of multi-machine definitions and provider overrides are lazy-loaded.<br/>
+This means the value of variables used in it cannot change (like in a `for` cycle).
+
+This works:
+
+```ruby
+(1..3).each do |i|
+  config.vm.define "node-#{i}" do |node|
+    node.vm.provision "shell", inline: "hostname"
+  end
+end
+```
+
+This does **not** work:
+
+```ruby
+for i in 1..3 do
+  config.vm.define "node-#{i}" do |node|
+    node.vm.provision "shell", inline: "hostname"
+  end
+end
+```
+
 ## Further readings
 
 - [Getting started]
@@ -191,12 +227,14 @@ end
 - [How do I reboot a Vagrant guest from a provisioner?]
 - [Configuring Vagrant virtual machines with .env]
 
+<!-- project's references -->
+[getting started]: https://learn.hashicorp.com/tutorials/vagrant/getting-started-index
+[multi-machine]: https://www.vagrantup.com/docs/multi-machine
+[tips & tricks]: https://www.vagrantup.com/docs/vagrantfile/tips
+
 <!-- external references -->
 [configuring vagrant virtual machines with .env]: https://www.nickhammond.com/configuring-vagrant-virtual-machines-with-env/
-[getting started]: https://learn.hashicorp.com/tutorials/vagrant/getting-started-index
 [how do i reboot a vagrant guest from a provisioner?]: https://superuser.com/questions/1338429/how-do-i-reboot-a-vagrant-guest-from-a-provisioner#1579326
 [how to set vagrant virtualbox video memory]: https://stackoverflow.com/questions/24231620/how-to-set-vagrant-virtualbox-video-memory#24253435
 [how to specify the disk size]: https://stackoverflow.com/questions/49822594/vagrant-how-to-specify-the-disk-size#60185312
-[multi-machine]: https://www.vagrantup.com/docs/multi-machine
 [pass environment variables to vagrant shell provisioner]: https://stackoverflow.com/questions/19648088/pass-environment-variables-to-vagrant-shell-provisioner#37563822
-[tips & tricks]: https://www.vagrantup.com/docs/vagrantfile/tips

@@ -1,0 +1,60 @@
+Vagrant.configure("2") do |config|
+
+    # Requirements:
+    #
+    # - VirtualBox
+    # - A host-only virtual network ('VirtualBox Host-Only Ethernet Adapter',
+    #   address space '192.168.56.0/24')
+    # - An SSH key pair (files 'id_ed25519' and 'id_ed25519.pub')
+    # - An SSH config file ('ssh_config.txt') configured like so:
+    #
+    #     Host  192.168.56.*
+    #       IdentityFile           ~/.ssh/id_ed25519
+    #       StrictHostKeyChecking  no
+    #
+    # - A list of hosts for MPICH ('mpi_hosts.txt') containing the IP addresses
+    #   of the workers
+
+    # When up, execute the command below and enjoy:
+    # vagrant ssh -c 'mpiexec -f mpi_hosts -n 3 hostname'
+
+    controller_hostname = "controller"
+    controller_ip = "192.168.56.101"
+
+    config.vm.provider "virtualbox" do |virtualbox|
+        virtualbox.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
+        virtualbox.memory = 1024
+        virtualbox.cpus = 1
+    end
+
+    config.vm.box = "ubuntu/focal64"
+
+    config.vm.provision "shell", inline: <<-SHELL
+        apt update
+        apt -y install mpich
+    SHELL
+
+    config.vm.define "controller", primary: true do |controller|
+        controller.vm.hostname = "#{controller_hostname}"
+
+        controller.vm.provision "file", source: "id_ed25519", destination: "~/.ssh/id_ed25519"
+        controller.vm.provision "file", source: "ssh_config.txt", destination: "~/.ssh/config"
+        controller.vm.provision "file", source: "mpi_hosts.txt", destination: "~/mpi_hosts"
+        controller.vm.provision "shell", inline: "chmod go-rwx /home/vagrant/.ssh/id*"
+
+        controller.vm.network "private_network", ip: "#{controller_ip}", name: "VirtualBox Host-Only Ethernet Adapter"
+    end
+
+    (1..3).each do |i|
+        config.vm.define "worker-#{i}" do |worker|
+            worker.vm.network "private_network", ip: "192.168.56.#{200+i}", name: "VirtualBox Host-Only Ethernet Adapter"
+            worker.vm.hostname = "worker-#{i}"
+            worker.vm.provision "file", source: "id_ed25519.pub", destination: "~/.ssh/id_ed25519.pub"
+            worker.vm.provision "shell", inline: <<-SHELL
+                echo #{controller_ip} #{controller_hostname} >> /etc/hosts
+                cat /home/vagrant/.ssh/id_ed25519.pub >> /home/vagrant/.ssh/authorized_keys
+            SHELL
+        end
+    end
+
+end
