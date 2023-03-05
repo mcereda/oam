@@ -1,23 +1,5 @@
 Vagrant.configure("2") do |config|
 
-    # Requirements:
-    #
-    # - VirtualBox
-    # - A host-only virtual network ('VirtualBox Host-Only Ethernet Adapter',
-    #   address space '192.168.56.0/24')
-    # - An SSH key pair (files 'id_ed25519' and 'id_ed25519.pub')
-    # - An SSH config file ('ssh_config.txt') configured like so:
-    #
-    #     Host  192.168.56.*
-    #       IdentityFile           ~/.ssh/id_ed25519
-    #       StrictHostKeyChecking  no
-    #
-    # - A list of hosts for MPICH ('mpi_hosts.txt') containing the IP addresses
-    #   of the workers
-
-    # When up, execute the command below and enjoy:
-    # vagrant ssh -c 'mpiexec -f mpi_hosts -n 3 hostname'
-
     controller_hostname = "controller"
     controller_ip = "192.168.56.101"
 
