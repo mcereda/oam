@@ -1,17 +1,25 @@
 # Windows PowerShell <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
-2. [Further readings](#further-readings)
-3. [Sources](#sources)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
-```powershell
+```ps1
 # Calculate the hash of a file.
 CertUtil -hashfile path/to/file sha256
 
 # Get super user privileges.
-powershell Start-Process powershell -Verb runAs
+Start-Process powershell -Verb runAs
+
+# List available features.
+Get-WindowsCapability -Online
+Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
+
+# Install a feature.
+Add-WindowsCapability -Online -Name OpenSSH.Server
+Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
 
 # Test a network connection.
 Test-NetConnection -Port 443 -ComputerName 192.168.0.1 -InformationLevel Detailed
@@ -19,6 +27,7 @@ Test-NetConnection -Port 443 -ComputerName 192.168.0.1 -InformationLevel Detaile
 # Assign values to variables.
 $variableName = 'value'
 $response = Invoke-WebRequest -Uri 'https://jsonplaceholder.typicode.com/users'
+$env:PATH += ';C:\foo'
 
 # Print the value of the PATH environment variable.
 $env:PATH
@@ -84,7 +93,12 @@ kubectl get nodes -o json `
 - [Retrieve JSON object by field value]
 - [Select-Object of multiple properties]
 - [Multiple -and -or in PowerShell Where-Object statement]
+- [Get started with OpenSSH for Windows]
 
+<!-- microsoft's references -->
+[get started with openssh for windows]: https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=powershell
+
+<!-- external references -->
 [how to print environment variables to the console in powershell?]: https://stackoverflow.com/questions/50861082/how-to-print-environment-variables-to-the-console-in-powershell#50861113
 [json file to table]: https://stackoverflow.com/questions/31415158/powershell-json-file-to-table#31415897
 [multiline commands]: https://shellgeek.com/powershell-multiline-command/

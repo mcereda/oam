@@ -1,6 +1,7 @@
 # SSH
 
 1. [TL;DR](#tldr)
+1. [Server installation on Windows](#server-installation-on-windows)
 1. [Key Management](#key-management)
 1. [Configuration](#configuration)
    1. [Append domains to a hostname before attempting to check if they exist](#append-domains-to-a-hostname-before-attempting-to-check-if-they-exist)
@@ -23,6 +24,7 @@ ssh-keygen -t 'rsa' -b '4096'
 ssh-keygen -t 'dsa'
 ssh-keygen -t 'ecdsa' -b '521'
 ssh-keygen -t 'ed25519' -f ~/.ssh/keys/id_ed25519 -C 'test@winzoz'
+ssh-keygen -f ~/.ssh/id_rsa -N '' -C 'batch-generated key with no password'
 
 # Remove elements from the known hosts list.
 ssh-keygen -R 'pi4.lan'
@@ -46,6 +48,54 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub user@nas.lan
 # Connect to an unreachable host tunnelling the session through a bastion.
 ssh -t 'bastion-host' ssh 'unreachable-host'
 ```
+
+## Server installation on Windows
+
+Needs Administrator privileges.<br/>
+Tested on Window 11 22H2.
+
+Via PowerShell:
+
+1. Install the server component:
+
+   ```ps1
+   Add-WindowsCapability -Online -Name OpenSSH.Server
+   ```
+
+1. Start and enable the service:
+
+   ```ps1
+   Start-Service sshd
+   Set-Service -Name sshd -StartupType 'Automatic'
+   ```
+
+1. Verify the firewall rule has been created automatically during the installation:
+
+   ```ps1
+   if (!(Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyContinue | Select-Object Name, Enabled)) {
+     Write-Output "Firewall Rule 'OpenSSH-Server-In-TCP' does not exist, creating it..."
+     New-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
+   } else {
+     Write-Output "Firewall rule 'OpenSSH-Server-In-TCP' has been created and exists."
+   }
+   ```
+
+Via GUI:
+
+1. Open _Settings_ > _Apps_, then select _Optional features_
+1. Scan the list to see if the OpenSSH server is not already installed
+1. At the top of the page, select _View features_ in the _Add an optional feature_ field
+1. Find _OpenSSH Server_ and select _Install_
+1. Once the setup completes, return to _Apps_ > _Optional features_ and confirm OpenSSH is now listed
+1. Open the _Services_ desktop app:
+
+   1. Select Start
+   1. Type `services.msc` in the search box
+   1. Select the _Services_ app or just press ENTER
+
+1. In the details panel, double-click _OpenSSH SSH Server_ to enter its properties
+1. On the _General_ tab, from the _Startup type_ drop-down menu, select _Automatic_ to enable the service
+1. In the same tab, select _Start_ to start the service
 
 ## Key Management
 
@@ -231,6 +281,7 @@ Solution: update the SSH server.
 - [How to enable SSH access using a GPG key for authentication]
 - [How to perform hostname canonicalization]
 - [How to reuse SSH connection to speed up remote login process using multiplexing]
+- [Get started with OpenSSH for Windows]
 
 <!-- project's references -->
 [ssh-agent]: https://www.ssh.com/academy/ssh/agent
@@ -240,6 +291,7 @@ Solution: update the SSH server.
 [sshd_config]: ../examples/ssh/sshd_config
 
 <!-- external references -->
+[get started with openssh for windows]: https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=gui
 [how to enable ssh access using a gpg key for authentication]: https://opensource.com/article/19/4/gpg-subkeys-ssh
 [how to list keys added to ssh-agent with ssh-add?]: https://unix.stackexchange.com/questions/58969/how-to-list-keys-added-to-ssh-agent-with-ssh-add
 [how to perform hostname canonicalization]: https://sleeplessbeastie.eu/2020/08/24/how-to-perform-hostname-canonicalization/
