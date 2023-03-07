@@ -16,7 +16,7 @@ gpg --expert --full-generate-key
 
 # Generate a new key unattended.
 # The non-interactive (--batch) option requires a settings file.
-gpg --generate-key --batch setting.txt
+gpg --generate-key --batch 'setting.txt'
 gpg --generate-key --batch <<-EOF
 	…
 EOF
@@ -57,14 +57,21 @@ gpg --gen-revoke
 # Get the short ID of the signing key only for a user.
 # Primarily usable for git's signingKey configuration.
 gpg --list-keys --keyid-format 'short' 'recipient' \
-  | grep --extended-regexp '^pub[[:blank:]]+[[:alnum:]]+/[[:alnum:]]+[[:blank:]].*\[[[:upper:]]*S[[:upper:]]*\]' \
-  | awk '{print $2}' \
-  | cut -d '/' -f 2
+| grep --extended-regexp '^pub[[:blank:]]+[[:alnum:]]+/[[:alnum:]]+[[:blank:]].*\[[[:upper:]]*S[[:upper:]]*\]' \
+| awk '{print $2}' \
+| cut -d '/' -f 2
 
 # Install on Mac OS X.
 # Choose one.
 brew install --cask 'gpg-suite-no-mail'
 brew install 'gnupg'
+
+# Integrate with the SSH agent.
+export SSH_AUTH_SOCK="$(gpgconf --list-dirs 'agent-ssh-socket')" && \
+gpgconf --launch 'gpg-agent'
+
+# Integrate with Pinentry.
+export GPG_TTY="$(tty)"
 ```
 
 ## Encryption
@@ -200,7 +207,7 @@ The whole point of armoring, however, is to provide seven-bit-clean data, so if 
 > Shamelessly copied over from [How to enable SSH access using a GPG key for authentication].
 
 This exercise will use a GPG subkey with only the authentication capability enabled to complete SSH connections.  
-You can create multiple subkeys as you would do for SSH keypairs.
+You can create multiple subkeys as you would do for SSH key pairs.
 
 ### Create an authentication subkey
 
@@ -280,7 +287,7 @@ To get `gpg-agent` to handle requests from SSH, you need to enable its SSH suppo
 echo "enable-ssh-support" >> ~/.gnupg/gpg-agent.conf
 ```
 
-You can avoid usinig `ssh-add` to load the keys pre-specifying which GPG keys to use in the `~/.gnupg/sshcontrol` file.  
+You can avoid using `ssh-add` to load the keys pre-specifying which GPG keys to use in the `~/.gnupg/sshcontrol` file.  
 The entries in this file are keygrips—internal identifiers that `gpg-agent` uses to refer to the keys. A keygrip refers to both the public and private key.  
 To find the keygrip use `gpg -K --with-keygrip`, then add that line to the `~/.gnupg/sshcontrol` file:
 
@@ -331,20 +338,28 @@ Run `ssh-add -L` to list your public keys and copy them over manually to the rem
 export GPG_TTY=$(tty)
 ```
 
+## Further readings
+
+- [Commonly seen problems]
+- [Unattended key generation]
+
 ## Sources
 
 - [Decrypt multiple openpgp files in a directory]
 - [ask redhat]
 - [how can i remove the passphrase from a gpg2 private key?]
-- [Unattended key generation]
 - [How to enable SSH access using a GPG key for authentication]
 - [gpg failed to sign the data fatal: failed to write commit object]
 - [Can you manually add a comment to a PGP public key block and not break it?]
 
+<!-- project's references -->
+[commonly seen problems]: https://www.gnupg.org/documentation/manuals/gnupg/Common-Problems.html
+[unattended key generation]: https://www.gnupg.org/documentation/manuals/gnupg/Unattended-GPG-key-generation.html
+
+<!-- external references -->
 [ask redhat]: https://access.redhat.com/solutions/2115511
 [can you manually add a comment to a pgp public key block and not break it?]: https://stackoverflow.com/questions/58696139/can-you-manually-add-a-comment-to-a-pgp-public-key-block-and-not-break-it#58696634
 [decrypt multiple openpgp files in a directory]: https://stackoverflow.com/questions/18769290/decrypt-multiple-openpgp-files-in-a-directory/42431810#42431810
 [gpg failed to sign the data fatal: failed to write commit object]: https://stackoverflow.com/questions/39494631/gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object-git-2-10-0#42265848
 [how can i remove the passphrase from a gpg2 private key?]: https://unix.stackexchange.com/a/550538
 [how to enable ssh access using a gpg key for authentication]: https://opensource.com/article/19/4/gpg-subkeys-ssh
-[unattended key generation]: https://www.gnupg.org/documentation/manuals/gnupg/Unattended-GPG-key-generation.html
