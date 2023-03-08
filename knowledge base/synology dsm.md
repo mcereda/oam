@@ -155,15 +155,19 @@ Use the [online feature request form]. Posting a request on the community site w
 ## Further readings
 
 - [CLI Administrator Guide for Synology NAS]
+- [Making disk hibernation work on Synology DSM 7]
 
 ## Sources
 
 - [Configuring deduplication block on the Synology]
 
+<!-- project's references -->
+[cli administrator guide for synology nas]: https://global.download.synology.com/download/Document/Software/DeveloperGuide/Firmware/DSM/All/enu/Synology_DiskStation_Administration_CLI_Guide.pdf
+[online feature request form]: https://www.synology.com/en-us/form/inquiry/feature
+
 <!-- internal references -->
 [michelecereda/keybaseio-client]: ../docker/keybaseio-client/README.md
 
 <!-- external references -->
-[cli administrator guide for synology nas]: https://global.download.synology.com/download/Document/Software/DeveloperGuide/Firmware/DSM/All/enu/Synology_DiskStation_Administration_CLI_Guide.pdf
 [configuring deduplication block on the synology]: https://onedrive.live.com/?authkey=%21ACYMJq62iJaU7HY&cid=1E8D74207941B8DD&id=1E8D74207941B8DD%21243&parId=1E8D74207941B8DD%21121&o=OneUp
-[online feature request form]: https://www.synology.com/en-us/form/inquiry/feature
+[making disk hibernation work on synology dsm 7]: https://www.reddit.com/r/synology/comments/10cpbqd/making_disk_hibernation_work_on_synology_dsm_7/
