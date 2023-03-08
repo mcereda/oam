@@ -1,17 +1,19 @@
 # Azure CLI
 
 1. [TL;DR](#tldr)
-2. [Pipelines](#pipelines)
-3. [APIs](#apis)
-4. [Further readings](#further-readings)
-5. [Sources](#sources)
+1. [Pipelines](#pipelines)
+1. [APIs](#apis)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
 ```sh
 # Install the CLI.
+pip install 'azure-cli'
 brew install 'azure-cli'
 asdf plugin add 'azure-cli' && asdf install 'azure-cli' '2.43.0'
+docker run -it -v "${HOME}/.ssh:/root/.ssh" 'mcr.microsoft.com/azure-cli'
 
 # Disable certificates check upon connection.
 # Use it for proxies with doubtful certificates.
@@ -36,6 +38,12 @@ az ad user show --id 'user@email.org'
 
 # Check a User's permissions.
 az ad user get-member-groups --id 'user@email.org'
+
+# Get the ID of a Subscription from its Name.
+az account show --query 'name' -o 'tsv' -s 'subscription_id'
+
+# Get the Name of a Subscription from its ID.
+az account show --query 'id' -o 'tsv' -n 'subscription_name'
 
 # Get the ID of a Service Principal from its Display Name.
 az ad sp list --query 'id' -o 'tsv' --display-name 'service_principal_name'
@@ -76,10 +84,10 @@ az role assignment list … --scope 'scope_id' --role 'role_id_or_name'
 # By default, it will only show role assignments for the current subscription.
 az role assignment list --subscription 'subscription_id' \
   --all --include-inherited --assignee 'user_or_managed_identity_object_id' \
-  --query '[].{role: roleDefinitionName, scope: scope}' -o tsv
+  --query '[].{role: roleDefinitionName, scope: scope}' -o 'tsv'
 
 # List the names of all keys in a KeyVault.
-az keyvault key list --query '[].name' -o tsv --vault-name 'key_vault_name'
+az keyvault key list --query '[].name' -o 'tsv' --vault-name 'key_vault_name'
 
 # Get a password from a KeyVault.
 az keyvault secret show --query 'value' \
@@ -109,7 +117,7 @@ az vm install-patches -g 'resource_group_name'  -n 'vm_name' \
 
 # Get the status of the Agent in a Virtual Machine.
 az vm get-instance-view -g 'resource_group_name'  -n 'vm_name' \
-  --query 'instanceView.vmAgent.statuses[]' -o table
+  --query 'instanceView.vmAgent.statuses[]' -o 'table'
 
 # Wait until a Virtual Machine satisfies a condition.
 az vm wait -g 'resource_group_name'  -n 'vm_name' --created
@@ -123,8 +131,8 @@ az vm wait -g 'resource_group_name'  -n 'vm_name' \
 
 # List LogAnalytics' Workspaces.
 az monitor log-analytics workspace list \
-  --resource-group 'resource_group_name' \
-| jq -r '.[].name' -
+  --query '[].name' \
+  --resource-group 'resource_group_name'
 
 # Login to Azure DevOps with a PAT.
 az devops login --organization 'https://dev.azure.com/organization_name'
@@ -143,7 +151,7 @@ az pipelines run --name 'pipeline_name' \
 
 # Get the status of a Pipeline's build run.
 az pipelines build show --id 'pipeline_id'
-az pipelines build show --detect true -o 'tsv' \
+az pipelines build show --detect 'true' -o 'tsv' \
   --project 'project_name' --id 'pipeline_id' --query 'result'
 
 # Download an artifact uploaded during a Pipeline's run.
@@ -194,7 +202,7 @@ az acr helm list -n 'acr_name' -s 'subscription_uuid_or_name' -o 'json' \
 az acr helm push -n 'acr_name' 'chart.tgz' --force
 
 # List the available AKS versions.
-az aks get-versions --location 'location' -o table
+az aks get-versions --location 'location' -o 'table'
 
 # Show the details of an AKS cluster.
 az aks show -g 'resource_group_name' -n 'cluster_name'
@@ -254,7 +262,7 @@ az policy set-definition list --management-group 'management_group_id' \
 az policy set-definition show -n 'initiative_name'
 
 # Show the servers in the default HTTP backend of an Application Gateway.
-az network application-gateway show-backend-health -o table \
+az network application-gateway show-backend-health -o 'table' \
   -g 'resource_group_name' -n 'agw_name' \
   --query 'backendAddressPools[].backendHttpSettingsCollection[].servers[]'
 
