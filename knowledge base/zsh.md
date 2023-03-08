@@ -1,31 +1,31 @@
 # ZSH
 
 1. [TL;DR](#tldr)
-2. [Alias expansion](#alias-expansion)
-3. [Parameter expansion](#parameter-expansion)
+1. [Alias expansion](#alias-expansion)
+1. [Parameter expansion](#parameter-expansion)
    1. [Parameter substitution](#parameter-substitution)
       1. [Check if a variable is set](#check-if-a-variable-is-set)
-      2. [Provide a default value](#provide-a-default-value)
-      3. [Just substitute with its value if set](#just-substitute-with-its-value-if-set)
-      4. [Set a default value and substitute](#set-a-default-value-and-substitute)
-      5. [Fail on missing value](#fail-on-missing-value)
-   2. [Matching and replacement](#matching-and-replacement)
-4. [Arrays](#arrays)
-5. [Tests](#tests)
-6. [Find broken symlinks in the current directory](#find-broken-symlinks-in-the-current-directory)
-7. [Key bindings](#key-bindings)
-8. [Configuration](#configuration)
+      1. [Provide a default value](#provide-a-default-value)
+      1. [Just substitute with its value if set](#just-substitute-with-its-value-if-set)
+      1. [Set a default value and substitute](#set-a-default-value-and-substitute)
+      1. [Fail on missing value](#fail-on-missing-value)
+   1. [Matching and replacement](#matching-and-replacement)
+1. [Arrays](#arrays)
+1. [Tests](#tests)
+1. [Find broken symlinks in the current directory](#find-broken-symlinks-in-the-current-directory)
+1. [Key bindings](#key-bindings)
+1. [Configuration](#configuration)
    1. [Config files read order](#config-files-read-order)
-   2. [History](#history)
-   3. [Completion](#completion)
-   4. [Prompt management](#prompt-management)
-   5. [Automatic source of files in a folder](#automatic-source-of-files-in-a-folder)
-9. [Frameworks](#frameworks)
-10. [Plugins](#plugins)
-11. [Troubleshooting](#troubleshooting)
+   1. [History](#history)
+   1. [Completion](#completion)
+   1. [Prompt management](#prompt-management)
+   1. [Automatic source of files in a folder](#automatic-source-of-files-in-a-folder)
+1. [Frameworks](#frameworks)
+1. [Plugins](#plugins)
+1. [Troubleshooting](#troubleshooting)
     1. [The delete, end and/or home keys are not working as intended](#the-delete-end-andor-home-keys-are-not-working-as-intended)
-    2. [Compinit warnings of insecure directories and files](#compinit-warnings-of-insecure-directories-and-files)
-12. [Further readings](#further-readings)
+    1. [Compinit warnings of insecure directories and files](#compinit-warnings-of-insecure-directories-and-files)
+1. [Further readings](#further-readings)
 
 ## TL;DR
 
@@ -71,6 +71,12 @@ ls **/*(-@)
 # Print all shell and environment variables.
 setopt posixbuiltins && set
 
+# Treat '#' as a comment starter instead of matching patterns.
+# Disabled by default in interactive sessions, enabled by default in
+# non-interactive ones.
+setopt interactive_comments
+shopt -u interactive_comments
+
 # Print exported variables only.
 export -p
 
@@ -78,7 +84,12 @@ export -p
 typeset -aU path
 
 # Show all active key bindings.
-bindkeys
+bindkey
+
+# Reassign keys.
+bindkey "^[[3~" delete-char
+bindkey "^[[F"  end-of-line
+bindkey "^[[H"  beginning-of-line
 
 # Make a variable value uppercase.
 echo ${name:u}
