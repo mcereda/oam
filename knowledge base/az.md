@@ -93,11 +93,19 @@ az keyvault key list --query '[].name' -o 'tsv' --vault-name 'key_vault_name'
 az keyvault secret show --query 'value' \
   --name 'secret_name' --vault-name 'key_vault_name'
 
+# List all the available SKUs.
+az vm list-skus
+az vm list-skus -l 'location'
+
+# List all the SKUs supporting an ephemeral OS disk.
+az vm list-skus -l 'location' -o tsv \
+  --query "[?capabilities[?name=='EphemeralOSDiskSupported' && value=='True']]"
+
 # List the Virtual Machine images available in Azure Marketplace.
 # Or check https://az-vm-image.info .
 # Suggested to use '--all' to avoid useless filtering at MSFT side.
 az vm image list --all
-az vm image list -l 'westeurope' --offer 'RHEL' -p 'RedHat' -s '8_5' --all
+az vm image list -l 'westus' --offer 'RHEL' -p 'RedHat' -s '8_5' --all
 
 # Show a Virtual Machine's details.
 az vm show -g 'resource_group_name' -n 'vm_name'
