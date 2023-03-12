@@ -11,8 +11,15 @@ rainbow intensity 50
 rainbow intensity 100
 rainbow intensity 0
 
+# Gracefully reboot the device.
+reboot
+
 # Gracefully shutdown the device.
 poweroff
+
+# Create LXC containers.
+lxc-create --name 'ubuntu-focal' --template 'download' -- --dist 'Ubuntu' --release 'Focal' --arch 'armv7l' --server 'repo.turris.cz/lxc'
+lxc-create … -t 'download' -- --dist 'debian' --release 'bullseye' --arch 'armhf' --server 'images.linuxcontainers.org'
 ```
 
 ## LED diodes settings
@@ -42,51 +49,73 @@ MAILTO=""   # avoid automatic logging of the output
 
 See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turris Omnia] for details.
 
+Choose one of Pi-hole's [supported operating systems][pi-hole supported operating systems], then follow this procedure:
+
 1. In Turris OS:
 
    ```sh
-   # Create the LXC container.
-   lxc-create --name pi-hole --template debian
-   lxc-create --name pi-hole --template download --dist Ubuntu --release Focal --arch armv7l --server repo.turris.cz/lxc
+   # Create the LXC container (pick one).
+   lxc-create --name 'pi-hole' --template 'download' -- --dist 'debian' --release 'bullseye' --arch 'armhf' --server 'images.linuxcontainers.org'
+
+   # Configure pi-hole's static IP lease.
+   uci add dhcp host
+   uci set dhcp.@host[-1].name='pi-hole'
+   uci set dhcp.@host[-1].mac="$(grep hwaddr /srv/lxc/pi-hole/config | sed 's/.*= //')"
+   uci set dhcp.@host[-1].ip='192.168.111.2'
+   uci commit 'dhcp'
+   luci-reload
 
    # Start it.
-   lxc-start --name pi-hole
+   lxc-start --name 'pi-hole'
 
    # Check it's running correctly.
-   lxc-info --name pi-hole
+   lxc-info --name 'pi-hole'
 
    # Get a shell to it.
-   lxc-attach --name pi-hole
+   lxc-attach --name 'pi-hole'
    ```
 
 1. In the container:
 
    ```sh
-   # Set the correct hostname.
-   hostnamectl set-hostname pi-hole
+   # Set the correct hostname, if different from what is expected.
+   hostnamectl set-hostname 'pi-hole'
 
    # Install pi-hole.
-   DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes ca-certificates curl
-   curl -sSL https://install.pi-hole.net | bash
+   DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'ca-certificates' 'curl'
+   curl -sSL 'https://install.pi-hole.net' | bash
 
    # Follow the guided procedure.
+
+   # Change the Web interface password, if needed.
+   /etc/.pihole/pihole -a -p
    ```
 
+1. Check all is working as expected.
 1. Again in Turris OS:
 
    ```sh
-   # Configure pi-hole's static IP lease.
-   uci add dhcp host
-   uci set dhcp.@host[-1]=host
-   uci set dhcp.@host[-1].name=pi-hole
-   uci set dhcp.@host[-1].mac=`grep hwaddr /srv/lxc/pi-hole/config | sed 's/.*= //'`
-   uci set dhcp.@host[-1].ip=192.168.111.2
+   # Start pi-hole at boot
+   vim '/etc/config/lxc-auto'
+   ```
 
-   # Distribute pi-hole as primary DNS.
-   uci set dhcp.lan.dhcp_option='6,192.168.111.2'
-   uci add_list dhcp.lan.dns=`lxc-info --name pi-hole | grep "IP.* f[cd]" | sed "s/IP: *//"`
+   ```text
+   config container
+       option name pi-hole
+       option timeout 60
+   ```
+
+   ```sh
+   # Distribute pi-hole as the primary DNS.
+   # Keep the router as secondary.
+   uci set dhcp.lan.dhcp_option='6,192.168.111.2,192.168.111.1'
+
+   # The dns server address in the IPv6 RA should be the container's ULA address
+   # since the global routable IPv6 address tend to change daily.
+   uci add_list dhcp.lan.dns="$(lxc-info --name pi-hole | grep -E 'IP.* f[cd]' | sed 's/IP: *//')"
 
    # Apply the new configuration.
+   uci commit 'dhcp' && luci-reload
    /etc/init.d/odhcpd restart
    /etc/init.d/dnsmasq restart
    ```
@@ -120,9 +149,6 @@ After the selected mode indication is performed, all LEDs will turn blue for a m
 - [Led settings][wiki led settings] on the [wiki][turris wiki]
 - [opkg]
 
-[opkg]: opkg.md
-[wiki led settings]: https://wiki.turris.cz/doc/en/howto/led_settings
-
 ## Sources
 
 - Turris [official documentation][docs]
@@ -132,10 +158,18 @@ After the selected mode indication is performed, all LEDs will turn blue for a m
 - [Installing pi-hole on Turris Omnia]
 - [Factory reset on Turris Omnia]
 
+<!-- project's references-->
 [docs]: https://docs.turris.cz
 [factory reset on turris omnia]: https://docs.turris.cz/hw/omnia/rescue-modes/
+[turris wiki]: https://wiki.turris.cz/doc/en/start
+[wiki led settings]: https://wiki.turris.cz/doc/en/howto/led_settings
+
+<!-- internal references -->
+[opkg]: opkg.md
+
+<!-- external references -->
 [install pi-hole]: https://github.com/nminten/turris-omnia_documentation/blob/master/howtos/pihole.md
 [installing pi-hole on turris omnia]: https://blog.weinreich.org/posts/2020/2020-05-02-turris-omnia-pihole/
 [openwrt uci]: https://openwrt.org/docs/guide-user/base-system/uci
 [pi-hole on turris omnia]: http://polster.github.io/2017/08/04/Pi-Hole-on-Turris.html
-[turris wiki]: https://wiki.turris.cz/doc/en/start
+[pi-hole supported operating systems]: https://docs.pi-hole.net/main/prerequisites/#supported-operating-systems
