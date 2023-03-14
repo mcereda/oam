@@ -1,5 +1,16 @@
 # Turris OS
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [LED diodes settings](#led-diodes-settings)
+   1. [Automatic overnight dimming](#automatic-overnight-dimming)
+1. [Containerized pi-hole](#containerized-pi-hole)
+1. [Factory reset](#factory-reset)
+1. [Hardware upgrades](#hardware-upgrades)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -70,6 +81,8 @@ MAILTO=""   # avoid automatic logging of the output
 ## Containerized pi-hole
 
 > Requires the `lxc` package to be installed.
+
+> Suggested the use of an [expansion disk](#hardware-upgrades).
 
 See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turris Omnia] for details.
 
@@ -168,6 +181,18 @@ After the selected mode indication is performed, all LEDs will turn blue for a m
 
 > **Warning:** when LEDs turn red, it means that some highly sensitive operation is in process and data may be corrupted if it is interrupted. Try not to reset router during the process or you might end up with corrupted filesystem. That one can be fixed using mode 4 but with complete data loss.
 
+## Hardware upgrades
+
+Most compatible upgrades are available on [Discomp].
+
+[Supported SFP modules].
+
+| Type                 | Product                                      |
+| -------------------- | -------------------------------------------- |
+| mSATA expansion disk | [Kingston 1024G SSD KC600 SATA3 mSATA]       |
+| SFP module           | [Turris RTROM01-RTSF-10G SFP+ copper module] |
+| WiFi                 | [Turris Omnia WiFi 6 upgrade kit]            |
+
 ## Further readings
 
 - [Led settings][wiki led settings] on the [wiki][turris wiki]
@@ -194,8 +219,12 @@ After the selected mode indication is performed, all LEDs will turn blue for a m
 [opkg]: opkg.md
 
 <!-- external references -->
+[discomp]: https://www.discomp.cz/
 [install pi-hole]: https://github.com/nminten/turris-omnia_documentation/blob/master/howtos/pihole.md
 [installing pi-hole on turris omnia]: https://blog.weinreich.org/posts/2020/2020-05-02-turris-omnia-pihole/
+[kingston 1024g ssd kc600 sata3 msata]: https://www.amazon.com/gp/product/B08ZNRTDD8/
 [openwrt uci]: https://openwrt.org/docs/guide-user/base-system/uci
 [pi-hole on turris omnia]: http://polster.github.io/2017/08/04/Pi-Hole-on-Turris.html
 [pi-hole supported operating systems]: https://docs.pi-hole.net/main/prerequisites/#supported-operating-systems
+[turris omnia wifi 6 upgrade kit]: https://www.discomp.cz/turris-omnia-wi-fi-6-upgrade-kit_d120048.html
+[turris rtrom01-rtsf-10g sfp+ copper module]: https://www.discomp.cz/turris-rtrom01-rtsf-10g-sfp-metalicky-modul-10-gbps-rj45_d113354.html
