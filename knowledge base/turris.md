@@ -3,13 +3,35 @@
 ## TL;DR
 
 ```sh
+# Show settings.
+uci show
+uci show 'dhcp'
+
+# Configure a static IP address lease.
+uci add dhcp host
+uci set dhcp.@host[-1].name='hostname'
+uci set dhcp.@host[-1].mac='11:22:33:44:55:66'
+uci set dhcp.@host[-1].ip='192.168.1.2'
+
+# Show changes to the settings.
+uci changes
+uci changes 'dhcp'
+
+# Commit changes.
+uci commit
+uci commit 'dhcp'
+
+# Reload the configuration.
+# Necessary to reflect changes to the settings.
+luci-reload
+
 # Get LEDs intensity.
-rainbow get intensity
+rainbow brightness -q
 
 # Set LEDs intensity.
-rainbow intensity 50
-rainbow intensity 100
-rainbow intensity 0
+# 0 to 8 normally, 0 to 255 using '-p'.
+rainbow brightness '5'
+rainbow brightness -p '100'
 
 # Gracefully reboot the device.
 reboot
@@ -28,6 +50,8 @@ A permanent change of color can be set in the UCI configuration file `/etc/confi
 
 The `rainbow` utility allows one to change the color and set the status of each diode individually. The setting are `disable` (off), `enable` (on) or `auto`; `auto` leaves the control of the diodes to the hardware, like blinking during data transfer and so on.
 
+`rainbow`'s `brightness` subcommand uses numbers from 0 to 8, or from 0 to 255 if using the `-p` switch for higher precision.
+
 ### Automatic overnight dimming
 
 Should you want to see the state of individual devices during day but not to be dazzled by the diodes in the night, you can automatically adjust the intensity of LEDs using a cronjob.
@@ -39,8 +63,8 @@ Create a text file in the `/etc/cron.d` directory:
 # Set the light intensity to the second lowest degree every day at 11 PM and set
 # it back to maximum every day at 7 AM.
 MAILTO=""   # avoid automatic logging of the output
-0  23  *  *  *  root   rainbow intensity 5
-0   7  *  *  *  root   rainbow intensity 100
+0  23  *  *  *  root   rainbow brightness 1
+0   7  *  *  *  root   rainbow brightness 5
 ```
 
 ## Containerized pi-hole
@@ -148,6 +172,7 @@ After the selected mode indication is performed, all LEDs will turn blue for a m
 
 - [Led settings][wiki led settings] on the [wiki][turris wiki]
 - [opkg]
+- [Supported SFP modules]
 
 ## Sources
 
@@ -161,6 +186,7 @@ After the selected mode indication is performed, all LEDs will turn blue for a m
 <!-- project's references-->
 [docs]: https://docs.turris.cz
 [factory reset on turris omnia]: https://docs.turris.cz/hw/omnia/rescue-modes/
+[supported sfp modules]: https://wiki.turris.cz/doc/en/public/sfp
 [turris wiki]: https://wiki.turris.cz/doc/en/start
 [wiki led settings]: https://wiki.turris.cz/doc/en/howto/led_settings
 
