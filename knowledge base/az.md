@@ -148,8 +148,7 @@ az vm wait -g 'resource_group_name'  -n 'vm_name' \
   --custom "instanceView.vmAgent.statuses[?code=='ProvisioningState/succeeded']"
 
 # List LogAnalytics' Workspaces.
-az monitor log-analytics workspace list \
-  --query '[].name' \
+az monitor log-analytics workspace list --query '[].name' \
   --resource-group 'resource_group_name'
 
 # Login to Azure DevOps with a PAT.
@@ -317,9 +316,9 @@ az rest … -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats'
   --url-parameters 'api-version=7.1-preview.1' 'displayFilterOption=expired' continuationToken='Hr…in='
 
 # Create a PAT.
-az rest \
-  -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?api-version=7.1-preview.1' \
-  -m 'post' \
+az rest -m 'post' \
+  -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats' \
+  --url-parameters 'api-version=7.1-preview.1' \
   --headers Authorization='Bearer ey…pw' Content-Type='application/json' \
   -b '{
     "displayName": "new-pat",
@@ -330,9 +329,9 @@ az rest \
 
 # Extend a PAT.
 # Works with expired PATs too, but not revoked ones.
-az rest \
-  -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?api-version=7.1-preview.1' \
-  -m 'put' \
+az rest -m 'put' \
+  -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats' \
+  --url-parameters 'api-version=7.1-preview.1' \
   --headers Authorization='Bearer ey…pw' Content-Type='application/json' \
   -b '{
 	  "authorizationId": "01234567-abcd-0987-fedc-0123456789ab",
@@ -348,21 +347,21 @@ TOKEN="$(az account get-access-token --query 'accessToken' -o 'tsv')" \
 VALID_TO="$(date -d '+13 days' '+%FT%T.00Z')" \
 && az rest -m 'get' \
      -u "https://vssps.dev.azure.com/${ORGANIZATION_NAME}/_apis/tokens/pats" \
-     --headers "Authorization=Bearer ${TOKEN}" \
      --url-parameters \
        'api-version=7.1-preview.1' \
        'displayFilterOption=!revoked' \
        '$top=100' \
+     --headers "Authorization=Bearer ${TOKEN}" \
      --query 'patTokens[].authorizationId' \
      -o 'tsv' \
 | parallel -qr -j '100%' \
     az rest -m 'put' \
       -u "https://vssps.dev.azure.com/${ORGANIZATION_NAME}/_apis/tokens/pats" \
+      --url-parameters \
+        'api-version=7.1-preview.1' \
       --headers \
         "Authorization=Bearer ${TOKEN}" \
         'Content-Type=application/json' \
-      --url-parameters \
-        'api-version=7.1-preview.1' \
       -b "{ \"authorizationId\": \"{}\", \"validTo\": \"${VALID_TO}\" }"
 ```
 
@@ -378,18 +377,18 @@ One can directly call the APIs with the `rest` command:
 
 ```sh
 az rest \
+  -m 'post' \
   -u 'https://graph.microsoft.com/v1.0/me/checkMemberObjects' \
   --headers Authorization='Bearer ey…pw' \
-  -m 'post' \
   -b '{"ids": ["group_id"]}'
 
 az rest \
-  -u 'https://graph.microsoft.com/beta/groups/group_id/members/member_id/$ref' \
-  -m 'delete'
+  -m 'delete' \
+  -u 'https://graph.microsoft.com/beta/groups/group_id/members/member_id/$ref'
 
 az rest \
-  -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?api-version=7.1-preview.1' \
   -m 'put' \
+  -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?api-version=7.1-preview.1' \
   --headers \
     'Authorization=Bearer ey…pw' \
     'Content-Type=application/json' \
@@ -399,8 +398,8 @@ az rest \
   }'
 
 az rest \
+  -m 'get' \
   -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats' \
-  -m 'get'
   --url-parameters \
     'api-version=7.1-preview.1' \
     'displayFilterOption=expired' \
