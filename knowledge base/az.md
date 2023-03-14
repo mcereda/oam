@@ -1,5 +1,9 @@
 # Azure CLI
 
+Queries (`az … --query …`) use the [JMESPath] query language for JSON.
+
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Pipelines](#pipelines)
 1. [APIs](#apis)
@@ -410,5 +414,7 @@ az rest \
 [sign in with azure cli]: https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli
 
 <!-- internal references -->
+[jmespath]: jmespath.md
+
 <!-- external references -->
 [create and manage azure pipelines from the command line]: https://devblogs.microsoft.com/devops/create-and-manage-azure-pipelines-from-the-command-line/
