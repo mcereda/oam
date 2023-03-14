@@ -4,8 +4,14 @@
 1. [Server installation on Windows](#server-installation-on-windows)
 1. [Key Management](#key-management)
 1. [Configuration](#configuration)
-   1. [Append domains to a hostname before attempting to check if they exist](#append-domains-to-a-hostname-before-attempting-to-check-if-they-exist)
-   1. [Optimize connection handling](#optimize-connection-handling)
+   1. [Client](#client)
+      1. [Append domains to a hostname before attempting to check if they exist](#append-domains-to-a-hostname-before-attempting-to-check-if-they-exist)
+      1. [Optimize connection handling](#optimize-connection-handling)
+   1. [Server](#server)
+      1. [Change port](#change-port)
+      1. [Disable password authentication](#disable-password-authentication)
+      1. [Permit root login](#permit-root-login)
+      1. [Conditional blocks](#conditional-blocks)
 1. [SSHFS](#sshfs)
    1. [Installation](#installation)
 1. [Troubleshooting](#troubleshooting)
@@ -152,6 +158,8 @@ ssh-keygen -f ~/.ssh/id_rsa -p
 
 ## Configuration
 
+### Client
+
 When connecting to a host, the SSH client will use settings:
 
 1. from the command line,
@@ -186,7 +194,7 @@ Host *
     SetEnv MYENV=itsvalue
 ```
 
-### Append domains to a hostname before attempting to check if they exist
+#### Append domains to a hostname before attempting to check if they exist
 
 ```ssh-config
 CanonicalizeHostname yes
@@ -198,7 +206,7 @@ Host  *.yyy.auckland.ac.nz
     User user_yyy
 ```
 
-### Optimize connection handling
+#### Optimize connection handling
 
 ```ssh-config
 # Keep a connection open for 30s and reuse it when possible.
@@ -208,6 +216,40 @@ Host  *.yyy.auckland.ac.nz
 ControlMaster auto
 ControlPath ~/.ssh/control-%C
 ControlPersist 30s
+```
+
+### Server
+
+Config file defaults to `/etc/ssh/sshd_config`.<br/>
+Restart the server upon config file change.
+
+#### Change port
+
+```sshd-config
+Port 2222
+```
+
+#### Disable password authentication
+
+```sshd-config
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+```
+
+#### Permit root login
+
+```sshd-config
+PermitRootLogin yes
+```
+
+#### Conditional blocks
+
+> Only a subset of keywords may be used in a _Match_ block. Check the `SSHD_CONFIG(5)` man page.
+
+```sshd-config
+Match Address 192.168.111.0/24
+    PasswordAuthentication no
+    PermitRootLogin no
 ```
 
 ## SSHFS
