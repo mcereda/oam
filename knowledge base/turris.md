@@ -18,6 +18,9 @@
 uci show
 uci show 'dhcp'
 
+# Show what interface is the WAN.
+uci show network.wan.device | cut -d "'" -f 2
+
 # Configure a static IP address lease.
 uci add dhcp host
 uci set dhcp.@host[-1].name='hostname'
@@ -197,6 +200,7 @@ Most compatible upgrades are available on [Discomp].
 
 - [Led settings][wiki led settings] on the [wiki][turris wiki]
 - [opkg]
+- [uci]
 - [Supported SFP modules]
 
 ## Sources
@@ -217,6 +221,7 @@ Most compatible upgrades are available on [Discomp].
 
 <!-- internal references -->
 [opkg]: opkg.md
+[uci]: uci.md
 
 <!-- external references -->
 [discomp]: https://www.discomp.cz/
