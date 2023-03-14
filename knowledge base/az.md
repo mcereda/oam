@@ -306,7 +306,9 @@ az rest -m 'delete' \
 
 # List the PATs of a User.
 # 'displayFilterOptions' are 'active' (default), 'all', 'expired' or 'revoked'.
-# If more then 20, results are paged and a 'continuationToken' will be returned.
+# 'displayFilterOptions' can be negated ('!revoked').
+# If more then 20, or up to 100 using the '$top' url parameter, results are
+# paged and a 'continuationToken' will be returned.
 az rest -m 'get' \
   --headers Authorization='Bearer ey…pw' \
   -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?api-version=7.1-preview.1'
@@ -314,8 +316,20 @@ az rest … -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?
 az rest … -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats' \
   --url-parameters 'api-version=7.1-preview.1' 'displayFilterOption=expired' continuationToken='Hr…in='
 
+# Create a PAT.
+az rest \
+  -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?api-version=7.1-preview.1' \
+  -m 'post' \
+  --headers Authorization='Bearer ey…pw' Content-Type='application/json' \
+  -b '{
+    "displayName": "new-pat",
+    "scope": "pat-scope",
+    "validTo": "2021-12-31T23:46:23.319Z",
+    "allOrgs": false
+  }'
+
 # Extend a PAT.
-# Works with expired PATs too.
+# Works with expired PATs too, but not revoked ones.
 az rest \
   -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?api-version=7.1-preview.1' \
   -m 'put' \
@@ -326,7 +340,7 @@ az rest \
   }'
 az rest … -b @'file.json'
 
-# Automatically renew the first 100 expired Devops PATs.
+# Automatically renew the first 100 non revoked Devops PATs.
 # The others are in the next pages and pagination just su*ks bad.
 # Assumes the command uses the GNU version of each tool (see `date`).
 ORGANIZATION_NAME='organization_name' \
@@ -337,9 +351,10 @@ VALID_TO="$(date -d '+13 days' '+%FT%T.00Z')" \
      --headers "Authorization=Bearer ${TOKEN}" \
      --url-parameters \
        'api-version=7.1-preview.1' \
-       'displayFilterOption=expired' \
+       'displayFilterOption=!revoked' \
        '$top=100' \
-| jq -r '.patTokens[].authorizationId' - \
+     --query 'patTokens[].authorizationId' \
+     -o 'tsv' \
 | parallel -qr -j '100%' \
     az rest -m 'put' \
       -u "https://vssps.dev.azure.com/${ORGANIZATION_NAME}/_apis/tokens/pats" \
