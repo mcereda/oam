@@ -1,13 +1,13 @@
 # Iperf
 
 ```sh
-# on the server
+# Server side.
 iperf3 -s
-iperf3 -s -p 7575
+iperf3 -f M -s -p '7575'
 
-# on the client
-iperf3 -c iperf.server.ip
-iperf3 -c iperf.server.ip -p 7575
+# Client side.
+iperf3 -f K -c 'iperf.server.ip'
+iperf3 -c 'iperf.server.ip' -p '7575'
 ```
 
 ## Sources
