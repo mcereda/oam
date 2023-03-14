@@ -90,10 +90,16 @@ az role assignment list --subscription 'subscription_id' \
   --all --include-inherited --assignee 'user_or_managed_identity_object_id' \
   --query '[].{role: roleDefinitionName, scope: scope}' -o 'tsv'
 
-# List the names of all keys in a KeyVault.
+# Give Principals permissions on Key Vaults.
+az keyvault set-policy -n 'key_vault_name' --object-id 'principal_object_id' \
+  --secret-permissions 'get' 'list' 'set' --certificate-permissions 'all'
+az keyvault set-policy -n 'key_vault_name' --spn 'service_principal_name' …
+az keyvault set-policy -n 'key_vault_name' --upn 'user_principal_name' …
+
+# List the names of all keys in Key Vaults.
 az keyvault key list --query '[].name' -o 'tsv' --vault-name 'key_vault_name'
 
-# Get a password from a KeyVault.
+# Get passwords from Key Vaults.
 az keyvault secret show --query 'value' \
   --name 'secret_name' --vault-name 'key_vault_name'
 
