@@ -131,7 +131,7 @@ Stores the global (`~/.tool-versions`) or local (`./.tool-versions`) settings fo
 ```txt
 # Multiple versions can be set by separating them with a space.
 # plugin_name  default_version  first_fallback_version ... nth_fallback_version
-python system 3.11.0 3.10.9 3.9.7 
+python system 3.11.0 3.10.9 3.9.7
 ```
 
 The versions listed in such file can be:
