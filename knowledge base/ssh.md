@@ -3,15 +3,14 @@
 1. [TL;DR](#tldr)
 1. [Server installation on Windows](#server-installation-on-windows)
 1. [Key Management](#key-management)
-1. [Configuration](#configuration)
-   1. [Client](#client)
-      1. [Append domains to a hostname before attempting to check if they exist](#append-domains-to-a-hostname-before-attempting-to-check-if-they-exist)
-      1. [Optimize connection handling](#optimize-connection-handling)
-   1. [Server](#server)
-      1. [Change port](#change-port)
-      1. [Disable password authentication](#disable-password-authentication)
-      1. [Permit root login](#permit-root-login)
-      1. [Conditional blocks](#conditional-blocks)
+1. [Client configuration](#client-configuration)
+   1. [Append domains to a hostname before attempting to check if they exist](#append-domains-to-a-hostname-before-attempting-to-check-if-they-exist)
+   1. [Optimize connection handling](#optimize-connection-handling)
+1. [Server configuration](#server-configuration)
+   1. [Change port](#change-port)
+   1. [Disable password authentication](#disable-password-authentication)
+   1. [Permit root login](#permit-root-login)
+   1. [Conditional blocks](#conditional-blocks)
 1. [SSHFS](#sshfs)
    1. [Installation](#installation)
 1. [Troubleshooting](#troubleshooting)
@@ -22,15 +21,15 @@
 ## TL;DR
 
 ```sh
-# Load keys from '~/.ssh' and add them to the agent.
-eval `ssh-agent` && ssh-add
+# Load keys from '${HOME}/.ssh' and add them to the agent.
+eval $(ssh-agent) && ssh-add
 
 # Create new keys.
 ssh-keygen -t 'rsa' -b '4096'
 ssh-keygen -t 'dsa'
 ssh-keygen -t 'ecdsa' -b '521'
-ssh-keygen -t 'ed25519' -f ~/.ssh/keys/id_ed25519 -C 'test@winzoz'
-ssh-keygen -f ~/.ssh/id_rsa -N '' -C 'batch-generated key with no password'
+ssh-keygen -t 'ed25519' -f "${HOME}/.ssh/keys/id_ed25519" -C 'test@winzoz'
+ssh-keygen -f "${HOME}/.ssh/id_rsa" -N '' -C 'batch-generated key with no password'
 
 # Remove elements from the known hosts list.
 ssh-keygen -R 'pi4.lan'
@@ -38,7 +37,7 @@ ssh-keygen -R '192.168.1.237' -f '.ssh/known_hosts'
 ssh-keygen -R 'pi.lan' -f "${HOME}/.ssh/known_hosts"
 
 # Change the password of a key.
-ssh-keygen -f ~/.ssh/id_rsa -p
+ssh-keygen -f "${HOME}/.ssh/id_rsa" -p
 
 # Mount a remote folder.
 sshfs 'nas.lan:/mnt/data' 'Data' \
@@ -49,7 +48,7 @@ ssh-add -l
 ssh-add -L   # full key in OpenSSH format
 
 # Authorize keys for passwordless access.
-ssh-copy-id -i ~/.ssh/id_rsa.pub user@nas.lan
+ssh-copy-id -i "${HOME}/.ssh/id_rsa.pub" user@nas.lan
 
 # Connect to an unreachable host tunnelling the session through a bastion.
 ssh -t 'bastion-host' ssh 'unreachable-host'
@@ -153,12 +152,10 @@ Original contents retained as /home/user/.ssh/known_hosts.old
 Change password of a key file
 
 ```sh
-ssh-keygen -f ~/.ssh/id_rsa -p
+ssh-keygen -f "${HOME}/.ssh/id_rsa" -p
 ```
 
-## Configuration
-
-### Client
+## Client configuration
 
 When connecting to a host, the SSH client will use settings:
 
@@ -194,7 +191,7 @@ Host *
     SetEnv MYENV=itsvalue
 ```
 
-#### Append domains to a hostname before attempting to check if they exist
+### Append domains to a hostname before attempting to check if they exist
 
 ```ssh-config
 CanonicalizeHostname yes
@@ -206,7 +203,7 @@ Host  *.yyy.auckland.ac.nz
     User user_yyy
 ```
 
-#### Optimize connection handling
+### Optimize connection handling
 
 ```ssh-config
 # Keep a connection open for 30s and reuse it when possible.
@@ -218,35 +215,35 @@ ControlPath ~/.ssh/control-%C
 ControlPersist 30s
 ```
 
-### Server
+## Server configuration
 
 Config file defaults to `/etc/ssh/sshd_config`.<br/>
 Restart the server upon config file change.
 
-#### Change port
+### Change port
 
-```sshd-config
+```ssh-config
 Port 2222
 ```
 
-#### Disable password authentication
+### Disable password authentication
 
-```sshd-config
+```ssh-config
 PasswordAuthentication no
 ChallengeResponseAuthentication no
 ```
 
-#### Permit root login
+### Permit root login
 
-```sshd-config
+```ssh-config
 PermitRootLogin yes
 ```
 
-#### Conditional blocks
+### Conditional blocks
 
-> Only a subset of keywords may be used in a _Match_ block. Check the `SSHD_CONFIG(5)` man page.
+> Only a subset of keywords may be used in a _Match_ block. Check the [`SSHD_CONFIG(5)`][sshd_config man page] man page.
 
-```sshd-config
+```ssh-config
 Match Address 192.168.111.0/24
     PasswordAuthentication no
     PermitRootLogin no
@@ -254,7 +251,7 @@ Match Address 192.168.111.0/24
 
 ## SSHFS
 
-Options:
+Notable options:
 
 - `auto_cache` enables caching based on modification times;
 - `reconnect` reconnects to the server;
@@ -265,11 +262,10 @@ Options:
 Usage:
 
 ```sh
-sshfs -o $OPTIONS_LIST $HOST:$REMOTE_PATH $LOCAL_PATH
-```
-
-```sh
-sshfs 'user@nas.lan:/mnt/data' 'Data' -o 'auto_cache,reconnect,defer_permissions,noappledouble,volname=Data'
+sshfs \
+  -o 'auto_cache,reconnect,defer_permissions,noappledouble,volname=Data'
+  'user@nas.lan:/path/to/remote/dir' \
+  '/path/to/local/dir' 
 ```
 
 ### Installation
@@ -285,13 +281,13 @@ sudo port install 'sshfs'
 
 Error message example:
 
-> Unable to negotiate with XXX port 22: no matching host key type found. Their offer: ssh-rsa.
+> `Unable to negotiate with XXX port 22: no matching host key type found. Their offer: ssh-rsa.`
 
 Cause: the server only supports the kind of RSA with SHA-1, which is considered weak and deprecated in newer SSH versions.
 
 Workaround: explicitly set your client to use the specified key type adding
 
-```ssh_config
+```ssh-config
 HostkeyAlgorithms        +ssh-rsa
 PubkeyAcceptedAlgorithms +ssh-rsa
 ```
@@ -300,18 +296,20 @@ to your `~/.ssh/config` like so:
 
 ```diff
 Host  azure-devops
-  IdentityFile              ~/.ssh/id_rsa
-  IdentitiesOnly            yes
-+ HostkeyAlgorithms         +ssh-rsa
-+ PubkeyAcceptedAlgorithms  +ssh-rsa
+    IdentityFile              ~/.ssh/id_rsa
+    IdentitiesOnly            yes
++   HostkeyAlgorithms         +ssh-rsa
++   PubkeyAcceptedAlgorithms  +ssh-rsa
 ```
 
 Solution: update the SSH server.
 
 ## Further readings
 
-- [`ssh_config`][ssh_config] file example
-- [`sshd_config`][sshd_config] file example
+- [`SSH_CONFIG(5)`][ssh_config man page] man page
+- [`ssh_config`][ssh_config example] example
+- [`SSHD_CONFIG(5)`][sshd_config man page] man page
+- [`sshd_config`][sshd_config example] example
 - [ssh-agent]
 
 ## Sources
@@ -326,11 +324,13 @@ Solution: update the SSH server.
 - [Get started with OpenSSH for Windows]
 
 <!-- project's references -->
+[ssh_config man page]: https://man.openbsd.org/ssh_config
 [ssh-agent]: https://www.ssh.com/academy/ssh/agent
+[sshd_config man page]: https://man.openbsd.org/sshd_config
 
 <!-- internal references -->
-[ssh_config]: ../examples/ssh/ssh_config
-[sshd_config]: ../examples/ssh/sshd_config
+[ssh_config example]: ../examples/ssh/ssh_config
+[sshd_config example]: ../examples/ssh/sshd_config
 
 <!-- external references -->
 [get started with openssh for windows]: https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=gui
