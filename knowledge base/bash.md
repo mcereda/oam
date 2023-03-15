@@ -18,7 +18,7 @@
 ## TL;DR
 
 ```sh
-# Declare arrays. 
+# Declare arrays.
 ARRAY=(
   "first_element"
   "second_element" "nth_element"

@@ -265,7 +265,7 @@ Usage:
 sshfs \
   -o 'auto_cache,reconnect,defer_permissions,noappledouble,volname=Data'
   'user@nas.lan:/path/to/remote/dir' \
-  '/path/to/local/dir' 
+  '/path/to/local/dir'
 ```
 
 ### Installation

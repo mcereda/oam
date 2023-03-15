@@ -23,7 +23,7 @@ sudo 'powertop'
 
 ```sh
 $ sudo systemd-analyze
-Startup finished in 13.129s (firmware) + 5.413s (loader) + 1.746s (kernel) + 7.903s (userspace) = 28.192s 
+Startup finished in 13.129s (firmware) + 5.413s (loader) + 1.746s (kernel) + 7.903s (userspace) = 28.192s
 graphical.target reached after 1.239s in userspace
 
 $ sudo systemd-analyze critical-chain
