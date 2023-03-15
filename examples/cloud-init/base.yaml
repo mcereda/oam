@@ -1,5 +1,9 @@
 #cloud-config
 
+# Tested on:
+# - RHEL 8.6
+# - Oracle Linux 8.6
+
 # Upgrade the instance.
 # Deactivated, as this could take a long time if the image is old.
 #
