@@ -1,5 +1,8 @@
 #cloud-config
 
+# Tested on:
+# - Oracle Linux 8.6
+
 yum_repos:
   epel:
     name: Extra Packages for Enterprise Linux 8 - $basearch
@@ -12,8 +15,7 @@ packages:
   - boinc-tui
 
 bootcmd:
-  # `cloud-init` has issues with `firewall-cmd`.
-  # Using the offline version.
+  # `cloud-init` has issues with `firewall-cmd`, using the offline version.
   - firewall-offline-cmd --add-port='31416/tcp' --zone='public'
 
 runcmd:

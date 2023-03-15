@@ -1,0 +1,28 @@
+#cloud-config
+
+# Use port 2222 instead of the default 22. Also, close port 22 behind.
+# Do not allow the 'root' user to login from SSH.
+#
+# Tested on:
+# - Oracle Linux 8.6
+
+# On cloud instances, remember to open the port in the NSG.
+
+bootcmd:
+  # `cloud-init` has issues with `firewall-cmd`, using the offline version.
+  - firewall-offline-cmd --add-port='2222/tcp' --zone='public'
+  - firewall-offline-cmd --remove-service='ssh'  --zone='public'
+
+runcmd:
+  # Allow the new port in SELinux.
+  - semanage port -a -t ssh_port_t -p tcp '2222'
+
+  # Change the port from the default to 2222.
+  - sed -Ei 's|^\#*\s*(Port)\s+[0-9]+\s*$|\1 2222|' '/etc/ssh/sshd_config'
+
+  # Do not permit 'root' login
+  - sed -Ei 's|^\#*\s*(PermitRootLogin)\s+[Yy][Ee][Ss]\s*$|\1 no|' '/etc/ssh/sshd_config'
+
+  # Apply the changes.
+  - systemctl reload 'firewalld.service'
+  - systemctl restart 'sshd.service'

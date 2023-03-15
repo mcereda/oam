@@ -1,5 +1,8 @@
 #cloud-config
 
+# Tested on:
+# - RHEL 8.6
+#
 # Sources:
 # - https://github.com/trajano/terraform-docker-swarm-aws/blob/master/common.cloud-config
 
