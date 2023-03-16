@@ -1,8 +1,8 @@
 # openssl-osx-ca
 
 1. [TL;DR](#tldr)
-2. [Further readings](#further-readings)
-3. [Sources](#sources)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -15,6 +15,10 @@ brew services start openssl-osx-ca
 
 # Run manually.
 openssl-osx-ca
+
+# Check the last time the certificates file changed.
+stat "$(brew --prefix)/etc/openssl@"*"/cert.pem"
+find "$(brew --prefix)/etc" -type 'f' -name 'cert.pem' -path '*/openssl*' -exec stat {} +
 ```
 
 ## Further readings

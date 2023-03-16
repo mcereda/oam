@@ -1,10 +1,10 @@
 # OpenSSL
 
 1. [TL;DR](#tldr)
-2. [Troubleshooting](#troubleshooting)
+1. [Troubleshooting](#troubleshooting)
    1. [Code 20: unable to get local issuer certificate](#code-20-unable-to-get-local-issuer-certificate)
-   2. [Code 21: unable to verify the first certificate](#code-21-unable-to-verify-the-first-certificate)
-3. [Sources](#sources)
+   1. [Code 21: unable to verify the first certificate](#code-21-unable-to-verify-the-first-certificate)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -59,6 +59,7 @@ openssl rsa -in 'protected.key' -out 'unprotected.key'
 
 # Convert a DER-formatted file (.crt .cer .der) to the PEM format.
 openssl x509 -inform 'der' -in 'certificate.cer' -out 'certificate.pem'
+openssl x509 -in 'certificate.cer' -out 'certificate.pem' -outform 'PEM'
 
 # Convert a PEM file to the DER format.
 openssl x509 -outform 'der' -in 'certificate.pem' -out 'certificate.der'
@@ -78,6 +79,7 @@ openssl pkcs12 -export -out 'certificate.pfx' \
 openssl verify -CAfile 'RootCert.pem' -untrusted 'Intermediate.pem' 'UserCert.pem'
 
 # Create bundles.
+# Mind the file order.
 cat 'server.crt' 'intermediate1.crt' 'intermediateN.crt' 'rootca.crt'
 ```
 
