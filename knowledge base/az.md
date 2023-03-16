@@ -56,6 +56,14 @@ az ad sp list --query 'id' -o 'tsv' --display-name 'service_principal_name'
 az ad sp show --query 'displayName' -o 'tsv' \
   --id '12345678-abcd-0987-fedc-567890abcdef'
 
+# Get the Principal (Object) ID of a Managed Identity from its Name.
+az identity show --query 'principalId' -o 'tsv' \
+  --resource-group 'resource_group_name' --name 'managed_identity_name'
+
+# Get the name of a Managed Identity from its Principal (Object) ID.
+az identity list -o 'tsv' \
+  --query "[?(@.principalId=='managed_identity_principal_id')].name"
+
 # Get a Resource Group's ID.
 az group show 'resource_group_name'
 
