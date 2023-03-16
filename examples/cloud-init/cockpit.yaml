@@ -1,0 +1,31 @@
+#cloud-config
+
+# Use another port instead of the default 9090. Also, close port 9090 behind.
+#
+# Tested on:
+# - Oracle Linux 8.6
+
+# On cloud instances, remember to open the port in the NSG.
+
+bootcmd:
+  # `cloud-init` has issues with `firewall-cmd`, using the offline version.
+  - firewall-offline-cmd --add-port='48763/tcp' --zone='public'
+
+packages:
+  - cockpit
+
+write_files:
+  - path: /etc/systemd/system/cockpit.socket.d/listen.conf
+    content: |
+      [Socket]
+      ListenStream=
+      ListenStream=48763
+
+runcmd:
+  # Allow the new port in SELinux.
+  - semanage port -a -t 'websm_port_t' -p 'tcp' '48763'
+
+  # Apply the changes.
+  - systemctl reload 'firewalld.service'
+  - systemctl daemon-reload
+  - systemctl restart 'cockpit.socket'
