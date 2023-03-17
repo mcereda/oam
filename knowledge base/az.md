@@ -5,7 +5,11 @@ Queries (`az … --query …`) use the [JMESPath] query language for JSON.
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
+1. [Installation](#installation)
 1. [Pipelines](#pipelines)
+1. [Bicep](#bicep)
+   1. [Bicep installation](#bicep-installation)
+   1. [Bicep upgrade](#bicep-upgrade)
 1. [APIs](#apis)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
@@ -183,6 +187,21 @@ az pipelines build show --detect 'true' -o 'tsv' \
 az pipelines runs artifact download --path 'local_path' \
   --organization 'organization_id_or_name' --project 'project_name' \
   --artifact-name 'artifact_name' --run-id 'run_id'
+
+# Install the `bicep` utility.
+# Includes the utility inside the local Azure CLI installation's path.
+az bicep install
+az bicep install -v 'v0.2.212' -t 'linux-arm64'
+
+# The CLI defaults to the included installation.
+# External instances of the `bicep` utility *can* be used *if* the CLI is
+# configured to do so.
+brew install azure/bicep/bicep && \
+az config set bicep.use_binary_from_path=True
+
+# Upgrade `bicep` from the CLI.
+az bicep upgrade
+az bicep upgrade -t 'linux-x64'
 
 # Validate a bicep template to create a Deployment Group.
 az deployment group validate \
@@ -373,11 +392,62 @@ VALID_TO="$(date -d '+13 days' '+%FT%T.00Z')" \
       -b "{ \"authorizationId\": \"{}\", \"validTo\": \"${VALID_TO}\" }"
 ```
 
+## Installation
+
+```sh
+pip install 'azure-cli'
+brew install 'azure-cli'
+asdf plugin add 'azure-cli' && asdf install 'azure-cli' '2.43.0'
+docker run -it -v "${HOME}/.ssh:/root/.ssh" 'mcr.microsoft.com/azure-cli'
+```
+
 ## Pipelines
 
 Give the `--organization` parameter, or use `--detect true` if running the command from a git repository to have it guessed automatically.
 
 `--detect` already defaults to `true`.
+
+## Bicep
+
+Domain-specific language (DSL) for Infrastructure as Code, using declarative syntax to deploy Azure resources in a consistent manner.
+
+See [bicep]'s page for more information.
+
+The Azure CLI can use a command group (`az bicep …`) to integrate with the `bicep` utility.
+
+### Bicep installation
+
+The simplest way to install the `bicep` utility is to use the CLI:
+
+```sh
+az bicep install
+az bicep install -v 'v0.2.212' -t 'linux-arm64'
+```
+
+When doing so, the CLI downloads the utility inside its path.
+
+When using a proxy (like in companies forcing connections through it), the certificate check might fail.<br/>
+If this is the case, or when needed, `bicep` **can** be installed externally and used by the CLI, **if** the CLI is configured to use it with the following setting:
+
+```sh
+az config set bicep.use_binary_from_path=True
+```
+
+### Bicep upgrade
+
+Bicep will by default check for upgrades when run.<br/>
+To avoid this, the CLI needs to be configured to as follows:
+
+```sh
+az config set bicep.version_check=False
+```
+
+When `bicep` is installed through the CLI, it can be updated from it too:
+
+```sh
+az bicep upgrade
+az bicep upgrade -t 'linux-x64'
+```
 
 ## APIs
 
@@ -433,7 +503,9 @@ az rest \
 <!-- project's references -->
 [authenticate with an azure container registry]: https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication?tabs=azure-cli
 [az aks reference]: https://learn.microsoft.com/en-us/cli/azure/aks
+[az bicep]: https://learn.microsoft.com/en-us/cli/azure/bicep
 [az reference]: https://learn.microsoft.com/en-us/cli/azure/reference-index
+[bicep]: https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview
 [get started with azure cli]: https://learn.microsoft.com/en-us/cli/azure/get-started-with-azure-cli
 [how to manage azure subscriptions with the azure cli]: https://learn.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli
 [install azure cli on macos]: https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-macos
