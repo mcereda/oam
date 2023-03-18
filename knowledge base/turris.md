@@ -8,6 +8,8 @@
 1. [Containerized pi-hole](#containerized-pi-hole)
 1. [Factory reset](#factory-reset)
 1. [Hardware upgrades](#hardware-upgrades)
+1. [The SFP+ caged module](#the-sfp-caged-module)
+   1. [Use the SFP module as a LAN port](#use-the-sfp-module-as-a-lan-port)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -37,6 +39,7 @@ uci commit 'dhcp'
 
 # Reload the configuration.
 # Necessary to reflect changes to the settings.
+reload_config
 luci-reload
 
 # Get LEDs intensity.
@@ -195,6 +198,70 @@ Most compatible upgrades are available on [Discomp].
 | mSATA expansion disk | [Kingston 1024G SSD KC600 SATA3 mSATA]       |
 | SFP module           | [Turris RTROM01-RTSF-10G SFP+ copper module] |
 | WiFi                 | [Turris Omnia WiFi 6 upgrade kit]            |
+
+## The SFP+ caged module
+
+> The physical WAN port and the SFP module cage are wired to a single controller; when a SFP module is inserted, the physical WAN **port** **will be disabled**, and the virtual WAN interface will automatically be switched to the SFP module.
+
+When the OS is installed, it will probably miss the SFP kernel modules.<br/>
+Check the module is recognized by the system like so:
+
+1. Insert the module in the cage.
+1. Check the module has been recognized automatically:
+
+   ```sh
+   dmesg | grep 'sfp'
+   ```
+
+1. If the `grep` returned results:
+
+   ```text
+   [   7.823007] sfp sfp: Host maximum power 3.0W
+   [   8.167128] sfp sfp: Turris  RTSFP-10G  rev A  sn 1234567890  dc 123456
+   ```
+
+   the SFP module is recognized and probably started working already right away.<br/>
+   If, instead, no result has been returned:
+
+   1. Make sure the SFP kernel modules are installed:
+
+      ```sh
+      opkg install 'kmod-spf'
+      ```
+
+   1. Reboot (for safety).
+   1. Check the module has been recognized (see point 2 in this list).
+
+### Use the SFP module as a LAN port
+
+To use the SFP module as a LAN port, assign any other physical switch port to the virtual WAN interface to use that as the WAN connection and the SFP module in the LAN.
+
+In the Foris web interface:
+
+1. Go to _Network Settings_ > _Interfaces_.
+1. Select the WAN interface.
+1. In the dropdown _Network_ menu, change _WAN_ to _LAN_.
+1. Select the LAN4 interface.
+1. In the dropdown _Network_ menu, change _LAN_ to _WAN_.
+1. Hit _Save_.
+
+In the LuCI web interface:
+
+1. Go to _Network_ > _Interfaces_.
+1. In the _Interfaces_ tab, edit the WAN interface and assign the _lan4_ port to it.
+1. In the _Devices_ tab, edit the _br-lan_ bridge device to include the port used by the SFP module (on mine, it was `eth2`).
+1. Hit _Save & Apply_.
+
+Using the CLI (yet to be tested):
+
+```sh
+uci set network.wan.device='lan4'
+uci del_list network.br_lan.ports='lan4'
+uci add_list network.br_lan.ports='eth2'
+uci commit 'network'
+reload_config
+luci-reload
+```
 
 ## Further readings
 
