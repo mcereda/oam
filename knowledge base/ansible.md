@@ -1,29 +1,32 @@
 # Ansible
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
-2. [Configuration](#configuration)
-3. [Templating](#templating)
+1. [Configuration](#configuration)
+1. [Templating](#templating)
    1. [Tests](#tests)
-   2. [Loops](#loops)
-4. [Roles](#roles)
+   1. [Loops](#loops)
+1. [Roles](#roles)
    1. [Get roles](#get-roles)
-   2. [Role dependencies](#role-dependencies)
-5. [Output formatting](#output-formatting)
-6. [Troubleshooting](#troubleshooting)
+   1. [Role dependencies](#role-dependencies)
+1. [Output formatting](#output-formatting)
+1. [Troubleshooting](#troubleshooting)
    1. [Print all known variables](#print-all-known-variables)
-   2. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
-   3. [Run specific tasks even in check mode](#run-specific-tasks-even-in-check-mode)
-   4. [Dry-run only specific tasks](#dry-run-only-specific-tasks)
-   5. [Set up recursive permissions on a directory so that directories are set to 755 and files to 644](#set-up-recursive-permissions-on-a-directory-so-that-directories-are-set-to-755-and-files-to-644)
-   6. [Only run a task when another has a specific result](#only-run-a-task-when-another-has-a-specific-result)
-   7. [Define when a task changed or failed](#define-when-a-task-changed-or-failed)
-   8. [Set environment variables for a play, role or task](#set-environment-variables-for-a-play-role-or-task)
-   9. [Set variables to the value of environment variables](#set-variables-to-the-value-of-environment-variables)
-   10. [Check if a list contains an item and fail otherwise](#check-if-a-list-contains-an-item-and-fail-otherwise)
-   11. [Define different values for `true`/`false`/`null`](#define-different-values-for-truefalsenull)
-   12. [Force a task or play to use a specific Python interpreter](#force-a-task-or-play-to-use-a-specific-python-interpreter)
-7. [Further readings](#further-readings)
-8. [Sources](#sources)
+   1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
+   1. [Run specific tasks even in check mode](#run-specific-tasks-even-in-check-mode)
+   1. [Dry-run only specific tasks](#dry-run-only-specific-tasks)
+   1. [Set up recursive permissions on a directory so that directories are set to 755 and files to 644](#set-up-recursive-permissions-on-a-directory-so-that-directories-are-set-to-755-and-files-to-644)
+   1. [Only run a task when another has a specific result](#only-run-a-task-when-another-has-a-specific-result)
+   1. [Define when a task changed or failed](#define-when-a-task-changed-or-failed)
+   1. [Set environment variables for a play, role or task](#set-environment-variables-for-a-play-role-or-task)
+   1. [Set variables to the value of environment variables](#set-variables-to-the-value-of-environment-variables)
+   1. [Check if a list contains an item and fail otherwise](#check-if-a-list-contains-an-item-and-fail-otherwise)
+   1. [Define different values for `true`/`false`/`null`](#define-different-values-for-truefalsenull)
+   1. [Force a task or play to use a specific Python interpreter](#force-a-task-or-play-to-use-a-specific-python-interpreter)
+   1. [Provide a template file content inline](#provide-a-template-file-content-inline)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -482,6 +485,19 @@ vars:
   ansible_python_interpreter: /usr/local/bin/python3.9
 ```
 
+### Provide a template file content inline
+
+Use the `ansible.builtin.copy` instead of `ansible.builtin.template`:
+
+```yaml
+- name: Configure knockd
+  ansible.builtin.copy:
+    dest: /etc/knockd.conf
+    content: |
+      [options]
+        UseSyslog
+```
+
 ## Further readings
 
 - [Configuration]
@@ -499,6 +515,8 @@ vars:
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [Removing empty values from a list and assigning it to a new list]
 - [Human-Readable Output Format]
 - [How to append to lists]
@@ -509,6 +527,7 @@ vars:
 - [Unique filter of list in jinja2]
 - [Only do something if another action changed]
 - [How to recursively set directory and file permissions]
+- [Is it possible to use inline templates?]
 
 <!-- project's references -->
 [ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
@@ -521,6 +540,7 @@ vars:
 [tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
 
 <!-- internal references -->
+[further readings]: #further-readings
 [templating examples]: ../examples/ansible/templating.yml
 
 <!-- external references -->
@@ -531,6 +551,7 @@ vars:
 [how to recursively set directory and file permissions]: https://superuser.com/questions/1024677/ansible-how-to-recursively-set-directory-and-file-permissions#1317715
 [human-readable output format]: https://www.shellhacks.com/ansible-human-readable-output-format/
 [include task only if file exists]: https://stackoverflow.com/questions/28119521/ansible-include-task-only-if-file-exists#comment118578470_62289639
+[is it possible to use inline templates?]: https://stackoverflow.com/questions/33768690/is-it-possible-to-use-inline-templates#33783423
 [jinja2 templating]: https://jinja.palletsprojects.com/en/3.1.x/templates/
 [only do something if another action changed]: https://raymii.org/s/tutorials/Ansible_-_Only-do-something-if-another-action-changed.html
 [removing empty values from a list and assigning it to a new list]: https://stackoverflow.com/questions/60525961/ansible-removing-empty-values-from-a-list-and-assigning-it-to-a-new-list#60526774

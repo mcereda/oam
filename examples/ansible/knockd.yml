@@ -1,0 +1,50 @@
+---
+
+- name: Setup port knocking
+  tags:
+    - knock
+    - knockd
+    - port-knocking
+  hosts: all
+  vars:
+    packages:
+      - "{{ (ansible_pkg_mgr in ['dnf', 'yum']) | ternary('knock-server', 'knockd') }}"
+
+  handlers:
+    - name: Restart knockd
+      tags:
+        - restart
+        - service
+      ansible.builtin.service:
+        name: knockd.service
+        state: restarted
+        enabled: true
+
+  tasks:
+    - name: Install knockd
+      tags:
+        - installation
+        - package
+      become: true
+      ansible.builtin.package:
+        name: "{{ packages }}"
+    - name: Configure knockd
+      tags:
+        - configuration
+      become: true
+      notify: Restart knockd
+      ansible.builtin.copy:
+        dest: /etc/knockd.conf
+        content: |
+          [options]
+          	UseSyslog
+          	Interface = {{ ansible_default_ipv4.alias }}
+
+          [openClose7777]
+          	sequence      = 2222:udp,3333:tcp,4444:udp
+          	seq_timeout   = 15
+          	tcpflags      = syn
+          	cmd_timeout   = 10
+          	start_command = /usr/bin/firewall-cmd --add-port=7777/tcp --zone=public
+          	stop_command  = /usr/bin/firewall-cmd --remove-port=7777/tcp --zone=public
+          
