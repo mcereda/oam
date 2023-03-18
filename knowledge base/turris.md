@@ -1,5 +1,7 @@
 # Turris OS
 
+Linux distribution based on top of OpenWrt. Check the [website] for more information.
+
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
@@ -265,28 +267,33 @@ luci-reload
 
 ## Further readings
 
-- [Led settings][wiki led settings] on the [wiki][turris wiki]
+- [Website]
+- Turris' [official documentation][docs]
+- Turris' [wiki][turris wiki]
+- [How to control LED diodes]
+- [Factory reset on Turris Omnia]
+- [Supported SFP modules]
 - [opkg]
 - [uci]
-- [Supported SFP modules]
 
 ## Sources
 
-- Turris [official documentation][docs]
-- Turris [wiki][turris wiki]
+All the references in the [further readings] section, plus the following:
+
 - [Install Pi-hole]
 - [Pi-Hole on Turris Omnia]
 - [Installing pi-hole on Turris Omnia]
-- [Factory reset on Turris Omnia]
 
 <!-- project's references-->
 [docs]: https://docs.turris.cz
 [factory reset on turris omnia]: https://docs.turris.cz/hw/omnia/rescue-modes/
+[how to control led diodes]: https://wiki.turris.cz/doc/en/howto/led_settings
 [supported sfp modules]: https://wiki.turris.cz/doc/en/public/sfp
 [turris wiki]: https://wiki.turris.cz/doc/en/start
-[wiki led settings]: https://wiki.turris.cz/doc/en/howto/led_settings
+[website]: https://www.turris.com/turris-os/
 
 <!-- internal references -->
+[further readings]: #further-readings
 [opkg]: opkg.md
 [uci]: uci.md
 
