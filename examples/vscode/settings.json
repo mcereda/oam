@@ -20,5 +20,5 @@
     "extensions.autoUpdate": false,
     "files.insertFinalNewline": true,
     "markdown.extension.orderedList.marker": "one",
-    "markdown.extension.toc.orderedList": true,
+    "markdown.extension.toc.orderedList": true
 }
