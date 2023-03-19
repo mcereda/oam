@@ -19,7 +19,7 @@
       block:
         - name: Configure swappiness
           become: true
-          ansible.builtin.sysctl:
+          ansible.posix.sysctl:
             name: vm.swappiness
             value: "{{ swappiness_value | string }}"
             sysctl_file: "{{ swappiness_sysctl_file }}"

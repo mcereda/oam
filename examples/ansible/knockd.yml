@@ -47,3 +47,5 @@
           	cmd_timeout   = 10
           	start_command = /usr/bin/firewall-cmd --add-port=7777/tcp --zone=public
           	stop_command  = /usr/bin/firewall-cmd --remove-port=7777/tcp --zone=public
+        backup: true
+        mode: '0600'
