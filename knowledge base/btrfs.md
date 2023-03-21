@@ -4,11 +4,11 @@
 
 ```sh
 # Create a volume with single metadata and double data blocks
-# Useless in practice but a good example.
-sudo mkfs.btrfs --metadata single --data dup /dev/sdb
+# Useless in practice, but a good example nonetheless.
+sudo mkfs.btrfs --metadata 'single' --data 'dup' '/dev/sdb'
 
 # Sparse a volume on multiple devices.
-sudo mkfs.btrfs --label data /dev/sd{a,c,d,e,f,g} --force \
+sudo mkfs.btrfs --label 'data' /dev/sd{a,c,d,f,g} --force \
 && echo "LABEL=data  /mnt/data  btrfs  compress=zstd  0  0"
    | tee -a /etc/fstab
 
@@ -16,103 +16,108 @@ sudo mkfs.btrfs --label data /dev/sd{a,c,d,e,f,g} --force \
 sudo btrfs filesystem show
 
 # Show detailed `df` analogue for a filesystem.
-sudo btrfs filesystem df path/to/filesystem
+sudo btrfs filesystem df 'path/to/filesystem'
+sudo btrfs filesystem df -h 'path/to/filesystem'
+
+# Show detailed `du` analogue for a filesystem.
+sudo btrfs filesystem du 'path/to/filesystem'
+sudo btrfs filesystem du --human-readable -s 'path/to/filesystem'
 
 # Give more details about usage.
-sudo btrfs filesystem usage path/to/filesystem
+sudo btrfs filesystem usage 'path/to/filesystem'
 
 # Resize online volumes.
 # -2g decreases, +2g increases.
-sudo btrfs filesystem resize -2g path/to/volume
-sudo btrfs filesystem resize max path/to/volume
+sudo btrfs filesystem resize '-2g' 'path/to/volume'
+sudo btrfs filesystem resize 'max' 'path/to/volume'
 
 # Add new devices to a filesystem.
-sudo btrfs device add /dev/sdf /mnt
+sudo btrfs device add '/dev/sdb' '/mnt'
 
 # Remove devices from a filesystem.
-sudo btrfs device delete missing /mnt
+sudo btrfs device delete missing '/mnt'
 
 # List subvolumes.
-sudo btrfs subvolume list /mnt
+sudo btrfs subvolume list '/mnt'
 
 # Create subvolumes.
 btrfs subvolume create ~/subvolume
-sudo btrfs subvolume create /mnt/subvolume
+sudo btrfs subvolume create '/mnt/subvolume'
 
 # Create a readonly snapshot of a subvolume.
 btrfs subvolume snapshot ~/subvolume ~/snapshot
-sudo btrfs subvolume snapshot -r /mnt/volume/subvolume /mnt/volume/snapshot
+sudo btrfs subvolume snapshot -r '/mnt/volume/subvolume' '/mnt/volume/snapshot'
 
 # Mount subvolumes without mounting their main filesystem.
-sudo mount -o subvol=sv1 /dev/sdb /mnt
+sudo mount -o 'subvol=sv1' '/dev/sdb' '/mnt'
 
 # Delete a subvolume.
-sudo btrfs subvolume delete --commit-each /mnt/volume/subvolume
+sudo btrfs subvolume delete --commit-each '/mnt/volume/subvolume'
 
 # Deduplicate a volume's blocks.
-sudo duperemove -Adrh --hashfile=/tmp/dr.hash /mnt/volume1 /media volume2
-sudo jdupes --dedupe -rZ /mnt/volume1 /media volume2
+sudo duperemove -Adrh --hashfile='/tmp/dr.hash' '/mnt/volume1' '/media' 'volume2'
+sudo jdupes --dedupe -rZ '/mnt/volume1' '/media' 'volume2'
 
 # Send and receive snapshots.
-sudo btrfs send /source/.snapshots/snap \
-| sudo btrfs receive /destination/.snapshots/
+sudo btrfs send '/source/.snapshots/snap' \
+| sudo btrfs receive '/destination/.snapshots/'
 
 # Show the properties of a subvolume/filesystem/inode/device.
-btrfs property get -ts /path/to/subvolume
-btrfs property get -tf /path/to/filesystem
-btrfs property get -ti /path/to/inode
-btrfs property get -td /path/to/device
-btrfs property get /path/to/autoselected/type/of/resource
+btrfs property get -ts 'path/to/subvolume'
+btrfs property get -tf 'path/to/filesystem'
+btrfs property get -ti 'path/to/inode'
+btrfs property get -td 'path/to/device'
+btrfs property get 'path/to/autoselected/type/of/resource'
 
 # Change a subvolume to RO on the fly.
-btrfs property set -ts /path/to/subvolume ro true
+btrfs property set -ts 'path/to/subvolume' 'ro' 'true'
 
 # Show a volume's information.
-sudo btrfs subvolume show /path/to/subvolume
+sudo btrfs subvolume show 'path/to/subvolume'
 
 # Check the compress ratio of a compressed volume.
-sudo compsize /mnt/volume
+sudo compsize '/mnt/volume'
 
 # Show the status of a running or paused balance operation.
-sudo btrfs balance status path/to/filesystem
+sudo btrfs balance status 'path/to/filesystem'
 
 # Balance all block groups.
 # Slow: rewrites all blocks in filesystem.
-sudo btrfs balance start path/to/filesystem
-sudo btrfs balance start path/to/filesystem --bg --enqueue
+sudo btrfs balance start 'path/to/filesystem'
+sudo btrfs balance start 'path/to/filesystem' --bg --enqueue
 
 # Balance data block groups which are less than 15% utilized.
 # Run the operation in the background
-sudo btrfs balance start --bg -dusage=15 path/to/filesystem
+sudo btrfs balance start --bg -dusage='15' 'path/to/filesystem'
 
 # Balance a max of 10 metadata chunks with less than 20% utilization and at
 # least 1 chunk on a given device 'devid'.
 # Get the device's devid with `btrfs filesystem show`.
-sudo btrfs balance start -musage=20,limit=10,devid=devid path/to/filesystem
+sudo btrfs balance start -musage='20,limit=10,devid=devid' 'path/to/filesystem'
 
-# Convert data blocks to the raid6 profile, and metadata to raid1c3.
-sudo btrfs balance start -dconvert=raid6 -mconvert=raid1c3 path/to/filesystem
+# Convert data blocks to the 'raid6' profile, and metadata to 'raid1c3'.
+sudo btrfs balance start -dconvert='raid6' -mconvert='raid1c3' 'path/to/filesystem'
 
 # Convert data blocks to raid1 skipping already converted chunks.
 # Useful after a previous cancelled conversion operation.
-sudo btrfs balance start -dconvert=raid1,soft path/to/filesystem
+sudo btrfs balance start -dconvert='raid1,soft' 'path/to/filesystem'
 
 # Cancel, pause or resume a running or paused balance operation.
-sudo btrfs balance cancel path/to/filesystem
-sudo btrfs balance pause path/to/filesystem
-sudo btrfs balance resume path/to/filesystem
+sudo btrfs balance cancel 'path/to/filesystem'
+sudo btrfs balance pause 'path/to/filesystem'
+sudo btrfs balance resume 'path/to/filesystem'
 
 # Enable quota.
-sudo btrfs quota enable path/to/subvolume
+sudo btrfs quota enable 'path/to/subvolume'
 
 # Show quota.
-sudo btrfs qgroup show path/to/subvolume
+sudo btrfs qgroup show 'path/to/subvolume'
 
 # Convert ext3/ext4 to btrfs.
-btrfs-convert /dev/sdb1
+btrfs-convert '/dev/sdb1'
 
 # Convert btrfs to ext3/ext4.
-btrfs-convert -r /dev/sdb1
+btrfs-convert -r '/dev/sdb1'
 ```
 
 ## Check differences between 2 snapshots
@@ -120,7 +125,8 @@ btrfs-convert -r /dev/sdb1
 See also [snapper].
 
 ```sh
-sudo btrfs send --no-data -p /old/snapshot /new/snapshot | sudo btrfs receive --dump
+sudo btrfs send --no-data -p '/old/snapshot' '/new/snapshot' \
+| sudo btrfs receive --dump
 
 # requires you to be using snapper for your snapshots
 sudo snapper -c config diff 445..446
