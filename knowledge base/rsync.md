@@ -1,8 +1,8 @@
 # rsync
 
 1. [TL;DR](#tldr)
-2. [Explored options](#explored-options)
-3. [Sources](#sources)
+1. [Explored options](#explored-options)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -30,7 +30,11 @@ rsync -av --ignore-existing 'source/dir/1' 'source/dir/n/' 'destination/dir/'
 
 # Exclude files from the sync.
 rsync … --exclude "*.DS_Store" --exclude "._*"
+rsync … --exclude={"*.DS_Store","._*"}
 rsync … --filter "merge filter.txt"
+
+# Delete files from the source after they have been transferred.
+rsync … --remove-source-files 
 
 # Copy local files to a folder in the user's remote home over SSH on port 1234.
 # Compress the data during transfer.
@@ -49,8 +53,8 @@ rsync … --partial --append
 rsync … -P --append-verify
 
 # Limit the transfer's bandwidth.
-rsync … --bwlimit=1200
-rsync … --bwlimit=5m
+rsync … --bwlimit='1200'
+rsync … --bwlimit='5m'
 
 # Execute multiple syncs to a single destination.
 ls -1 'source/dir' \
@@ -69,6 +73,12 @@ rsync -AHPXazv --append-verify --no-motd 'source/dir/' 'synology.lan:/shared/fol
 rsync -AHPXazv --append-verify --no-motd --rsh ssh --exclude "#*" --exclude "@*" 'user@synology.lan:/shared/folder/' 'destination/dir/' --delete --dry-run
 rsync -AHPazv --append-verify --no-motd --exclude "#*" --exclude "@*" 'source/dir/' 'user@synology.lan:/shared/folder/' --delete --dry-run
 rsync -AXaz --append-verify --chown='user' --fake-super --info='progress2' --no-i-r --no-motd --partial -e "ssh -i /home/user/.ssh/id_ed25519 -o UserKnownHostsFile=/home/user/.ssh/known_hosts" 'source/dir/' 'user@synology.lan:/shared/folder/' -n
+
+# Parallel sync.
+# Each thread must use a different directory.
+parallel -q \
+  rsync "path/to/source/dir/{}" "nas.lan:/path/to/destination/dir/" … \
+  ::: $( ls -1 path/to/source/dir )
 ```
 
 ## Explored options
