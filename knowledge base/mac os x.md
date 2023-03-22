@@ -1,17 +1,18 @@
 # Mac OS X <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
+1. [Hidden settings](#hidden-settings)
+1. [Resize an image from CLI](#resize-an-image-from-cli)
+1. [Update the OS from CLI](#update-the-os-from-cli)
+1. [Keychain access from CLI](#keychain-access-from-cli)
+1. [Mount an NFS share](#mount-an-nfs-share)
+1. [Use TouchID to authenticate in the terminal](#use-touchid-to-authenticate-in-the-terminal)
+   1. [Fix iTerm2](#fix-iterm2)
 1. [Xcode CLI tools](#xcode-cli-tools)
    1. [Headless installation](#headless-installation)
    1. [Removal](#removal)
    1. [Upgrade](#upgrade)
-1. [Hidden settings](#hidden-settings)
-1. [Resize an image from CLI](#resize-an-image-from-cli)
 1. [Boot keys cheatsheet](#boot-keys-cheatsheet)
-1. [Update the OS from CLI](#update-the-os-from-cli)
-1. [Keychain access from CLI](#keychain-access-from-cli)
-1. [Use TouchID to authenticate in the terminal](#use-touchid-to-authenticate-in-the-terminal)
-   1. [Fix iTerm2](#fix-iterm2)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -43,6 +44,13 @@ softwareupdate --install --recommended --restart --agree-to-license
 
 # Download (but not install) recommended updates.
 softwareupdate --download --recommended
+
+# Check an NFS share is available on the network.
+showmount -e 'host'
+
+# Mount an NFS share.
+sudo mount -t 'nfs' 'host:/path/to/share' 'path/to/mount/point'
+sudo mount -t 'nfs' -o 'rw,resvport' 'host:/path/to/share' 'path/to/mount/point'
 
 # Install a .pkg file from CLI.
 # 'target' needs to be a device, not a path.
@@ -105,49 +113,6 @@ launchctl start 'job_label'
 launchctl stop 'job_label'
 ```
 
-## Xcode CLI tools
-
-```sh
-xcode-select --install
-```
-
-The tools will be installed into `/Library/Developer/CommandLineTools` by default, with the binaries being available at `$(xcode-select -p)/usr/bin/`.
-
-### Headless installation
-
-```sh
-# Force the `softwareupdate` utility to list the Command Line Tools.
-touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-
-# Get their label.
-CLI_TOOLS_LABEL="$(/usr/sbin/softwareupdate -l \
- | grep -B 1 -E 'Command Line Tools' \
- | awk -F'*' '/^ *\\*/ {print $2}' \
- | sed -e 's/^ *Label: //' -e 's/^ *//' \
- | sort -V \
- | tail -n1)"
-
-# Install them.
-/usr/sbin/softwareupdate -i --agree-to-license "$CLI_TOOLS_LABEL"
-```
-
-### Removal
-
-```sh
-sudo rm -rf "$(xcode-select -p)"
-sudo rm -rf '/Library/Developer/CommandLineTools'
-```
-
-### Upgrade
-
-See [How to update Xcode from command line] for details.
-
-```sh
-# Remove and reinstall.
-sudo rm -rf "$(xcode-select -p)"
-xcode-select --install
-```
-
 ## Hidden settings
 
 > **Note:** once set something, you'll probably need to restart the dock with `killall Dock`
@@ -179,28 +144,6 @@ defaults write com.apple.finder AppleShowAllFiles TRUE
 # Save as different file.
 sips -Z '1000' -o 'resized.jpg' 'IMG_20190527_013903.jpg'
 ```
-
-## Boot keys cheatsheet
-
-> Only available on Intel based Macs.
-
-To use any of these key combinations, press and hold the keys immediately after pressing the power button to turn on your Mac, or after your Mac begins to restart. Keep holding until the described behavior occurs.
-
-| Combination                                                                  | Behaviour                                                                                                                                                                                                                     |
-| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `⌥ Option` or `Alt`                                                          | Start to _Startup Manager_, which allows you to choose other available startup disks or volumes. If your Mac is using a firmware password, you're prompted to enter the password                                              |
-| `⌥ Option` + `⌘ Command` + `P` + `R`                                         | Reset the NVRAM or PRAM. If your Mac is using a firmware password, it ignores this key combination or starts up from _Recovery_                                                                                               |
-| `⇧ Shift`                                                                    | Start in _safe_ mode. Disabled when using a firmware password                                                                                                                                                                 |
-| `⌘ Command` + `R`                                                            | Start from the built-in _Recovery_ system                                                                                                                                                                                     |
-| `⌥ Option` + `⌘ Command` + `R` or `⇧ Shift` + `⌥ Option` + `⌘ Command` + `R` | Start from _Recovery_ over the Internet. It installs different versions of macOS, depending on the key combination you use while starting up. If your Mac is using a firmware password, you're prompted to enter the password |
-| `⏏ Eject` or `F12` or `mouse button` or `trackpad button`                    | Eject a removable media, such as an optical disc. Disabled when using a firmware password                                                                                                                                     |
-| `T`                                                                          | Start in _target disk_ mode. Disabled when using a firmware password                                                                                                                                                          |
-| `⌘ Command` + `V`                                                            | Start in verbose mode. Disabled when using a firmware password                                                                                                                                                                |
-| `D`                                                                          | Start to _Apple Diagnostics_                                                                                                                                                                                                  |
-| `⌥ Option` + `D`                                                             | Start to _Apple Diagnostics_ over the Internet. Disabled when using a firmware password                                                                                                                                       |
-| `N`                                                                          | Start from a NetBoot server, if your Mac supports network startup volumes. Disabled when using a firmware password                                                                                                            |
-| `⌥ Option` + `N`                                                             | Start from a NetBoot server and use the default boot image on it. Disabled when using a firmware password                                                                                                                     |
-| `⌘ Command` + `S`                                                            | Start in _single-user_ mode. Disabled in macOS Mojave or later, or when using a firmware password                                                                                                                             |
 
 ## Update the OS from CLI
 
@@ -247,6 +190,24 @@ security find-generic-password -w -l work -s github
 security delete-generic-password -a johnny -s github
 ```
 
+## Mount an NFS share
+
+1. Check the share is available on the network:
+
+   ```sh
+   showmount -e 'host'
+   ```
+
+1. Mount the share:
+
+   - Using the CLI:
+
+     ```sh
+     mkdir -p 'path/to/mount/point'
+     sudo mount -t 'nfs' 'host:/path/to/share' 'path/to/mount/point'
+     sudo mount -t 'nfs' -o 'rw,resvport' 'host:/path/to/share' 'path/to/mount/point'
+     ```
+
 ## Use TouchID to authenticate in the terminal
 
 Add the `pam_tid.so` module as _sufficient_ to `/etc/pam.d/sudo`:
@@ -284,6 +245,71 @@ You can either:
   ```
 
   > Note that when the module is not installed in `/usr/lib/pam` or `/usr/local/lib/pam` (e.g. on M1 Macs where Homebrew is installed in `/opt/homebrew`), you must specify the full path to the module in the PAM service file.
+
+## Xcode CLI tools
+
+```sh
+xcode-select --install
+```
+
+The tools will be installed into `/Library/Developer/CommandLineTools` by default, with the binaries being available at `$(xcode-select -p)/usr/bin/`.
+
+### Headless installation
+
+```sh
+# Force the `softwareupdate` utility to list the Command Line Tools.
+touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+
+# Get their label.
+CLI_TOOLS_LABEL="$(/usr/sbin/softwareupdate -l \
+ | grep -B 1 -E 'Command Line Tools' \
+ | awk -F'*' '/^ *\\*/ {print $2}' \
+ | sed -e 's/^ *Label: //' -e 's/^ *//' \
+ | sort -V \
+ | tail -n1)"
+
+# Install them.
+/usr/sbin/softwareupdate -i --agree-to-license "$CLI_TOOLS_LABEL"
+```
+
+### Removal
+
+```sh
+sudo rm -rf "$(xcode-select -p)"
+sudo rm -rf '/Library/Developer/CommandLineTools'
+```
+
+### Upgrade
+
+See [How to update Xcode from command line] for details.
+
+```sh
+# Remove and reinstall.
+sudo rm -rf "$(xcode-select -p)"
+xcode-select --install
+```
+
+## Boot keys cheatsheet
+
+> Only available on Intel based Macs.
+
+To use any of these key combinations, press and hold the keys immediately after pressing the power button to turn on your Mac, or after your Mac begins to restart. Keep holding until the described behavior occurs.
+
+| Combination                                                                  | Behaviour                                                                                                                                                                                                                     |
+| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `⌥ Option` or `Alt`                                                          | Start to _Startup Manager_, which allows you to choose other available startup disks or volumes. If your Mac is using a firmware password, you're prompted to enter the password                                              |
+| `⌥ Option` + `⌘ Command` + `P` + `R`                                         | Reset the NVRAM or PRAM. If your Mac is using a firmware password, it ignores this key combination or starts up from _Recovery_                                                                                               |
+| `⇧ Shift`                                                                    | Start in _safe_ mode. Disabled when using a firmware password                                                                                                                                                                 |
+| `⌘ Command` + `R`                                                            | Start from the built-in _Recovery_ system                                                                                                                                                                                     |
+| `⌥ Option` + `⌘ Command` + `R` or `⇧ Shift` + `⌥ Option` + `⌘ Command` + `R` | Start from _Recovery_ over the Internet. It installs different versions of macOS, depending on the key combination you use while starting up. If your Mac is using a firmware password, you're prompted to enter the password |
+| `⏏ Eject` or `F12` or `mouse button` or `trackpad button`                    | Eject a removable media, such as an optical disc. Disabled when using a firmware password                                                                                                                                     |
+| `T`                                                                          | Start in _target disk_ mode. Disabled when using a firmware password                                                                                                                                                          |
+| `⌘ Command` + `V`                                                            | Start in verbose mode. Disabled when using a firmware password                                                                                                                                                                |
+| `D`                                                                          | Start to _Apple Diagnostics_                                                                                                                                                                                                  |
+| `⌥ Option` + `D`                                                             | Start to _Apple Diagnostics_ over the Internet. Disabled when using a firmware password                                                                                                                                       |
+| `N`                                                                          | Start from a NetBoot server, if your Mac supports network startup volumes. Disabled when using a firmware password                                                                                                            |
+| `⌥ Option` + `N`                                                             | Start from a NetBoot server and use the default boot image on it. Disabled when using a firmware password                                                                                                                     |
+| `⌘ Command` + `S`                                                            | Start in _single-user_ mode. Disabled in macOS Mojave or later, or when using a firmware password                                                                                                                             |
 
 ## Further readings
 
