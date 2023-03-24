@@ -7,6 +7,8 @@ Linux distribution based on top of OpenWrt. Check the [website] for more informa
 1. [TL;DR](#tldr)
 1. [LED diodes settings](#led-diodes-settings)
    1. [Automatic overnight dimming](#automatic-overnight-dimming)
+1. [Local DNS resolution](#local-dns-resolution)
+1. [Static DHCP leases and hostnames](#static-dhcp-leases-and-hostnames)
 1. [Containerized pi-hole](#containerized-pi-hole)
 1. [Factory reset](#factory-reset)
 1. [Hardware upgrades](#hardware-upgrades)
@@ -104,6 +106,22 @@ MAILTO=""   # avoid automatic logging of the output
 0  23  *  *  *  root   rainbow brightness 1
 0   7  *  *  *  root   rainbow brightness 5
 ```
+
+## Local DNS resolution
+
+Turris OS can answer DNS queries for local devices.
+
+> Requires the _Network Settings_ > _DNS_ > _Enable DHCP clients in DNS_ option to be enabled.
+
+## Static DHCP leases and hostnames
+
+When assigning static DHCP leases LuCI **only requires** the IP and MAC addresses, while reForis will **also**:
+
+- **require** a unique hostname for each entry
+- set the lease time to _infinite_
+
+Setting a hostname in an entry will make Turris OS resolve the IP address **only** with that given hostname (and **not** the name the host presents itself with).<br/>
+Not setting a hostname in an entry will make Turris OS resolve the IP address with the name the host presents itself with.
 
 ## Containerized pi-hole
 
