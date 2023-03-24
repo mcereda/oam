@@ -166,6 +166,20 @@ az monitor log-analytics workspace list --query '[].name' \
 # Login to Azure DevOps with a PAT.
 az devops login --organization 'https://dev.azure.com/organization_name'
 
+# List DevOps' Service Endpoints.
+az devops service-endpoint list \
+  --organization 'https://dev.azure.com/organization_name' --project 'project'
+
+# Get the ID of a Service Endpoint from its name.
+az devops service-endpoint list -o 'tsv' \
+  --organization 'https://dev.azure.com/organization_name' --project 'project' \
+  --query "[?name=='service_endpoint_name'].id"
+
+# Get the name of a Service Endpoint from its id.
+az devops service-endpoint list -o 'tsv' \
+  --organization 'https://dev.azure.com/organization_name' --project 'project' \
+  --query "[?id=='service_endpoint_id'].name"
+
 # Get the names of all the Pipelines the current user has access to.
 az pipelines list --organization 'organization_id_or_name'
 az pipelines list --detect 'true' --query '[].name' -o 'tsv'
@@ -187,6 +201,21 @@ az pipelines build show --detect 'true' -o 'tsv' \
 az pipelines runs artifact download --path 'local_path' \
   --organization 'organization_id_or_name' --project 'project_name' \
   --artifact-name 'artifact_name' --run-id 'run_id'
+
+# List available Resource Providers.
+az provider list
+az provider list --expand
+
+# Enable a Resource Provider.
+az provider register -n 'Microsoft.Confluent' --accept-terms
+az provider register -n 'Microsoft.Automation' -m 'management_group_id'
+
+# List the available properties of the 'ContainerService' Resource Provider.
+az provider show -o 'tsv' --namespace 'Microsoft.ContainerService' \
+  --expand 'resourceTypes/aliases' --query 'resourceTypes[].aliases[].name'
+
+# Disable a Resource Provider.
+az provider unregister -n 'Microsoft.Confluent'
 
 # Install the `bicep` utility.
 # Includes the utility inside the local Azure CLI installation's path.
