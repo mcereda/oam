@@ -61,6 +61,25 @@ poweroff
 # Create LXC containers.
 lxc-create --name 'ubuntu-focal' --template 'download' -- --dist 'Ubuntu' --release 'Focal' --arch 'armv7l' --server 'repo.turris.cz/lxc'
 lxc-create … -t 'download' -- --dist 'debian' --release 'bullseye' --arch 'armhf' --server 'images.linuxcontainers.org'
+
+# List snapshots.
+schnapps list
+
+# Create snapshots.
+schnapps create 'description'
+schnapps create -t 'pre' 'description'
+
+# Change snapshots' information.
+schnapps modify '4' -t 'time' -d 'new description'
+
+# Rollback to a snapshot.
+schnapps rollback '2'
+
+# Delete snapshots by number.
+schnapps delete '3'
+
+# Delete snapshots by type.
+schnapps delete -t 'post'
 ```
 
 ## LED diodes settings
@@ -108,6 +127,7 @@ Choose one of Pi-hole's [supported operating systems][pi-hole supported operatin
    uci set dhcp.@host[-1].mac="$(grep hwaddr /srv/lxc/pi-hole/config | sed 's/.*= //')"
    uci set dhcp.@host[-1].ip='192.168.111.2'
    uci commit 'dhcp'
+   reload_config
    luci-reload
 
    # Start it.
@@ -160,7 +180,7 @@ Choose one of Pi-hole's [supported operating systems][pi-hole supported operatin
    uci add_list dhcp.lan.dns="$(lxc-info --name pi-hole | grep -E 'IP.* f[cd]' | sed 's/IP: *//')"
 
    # Apply the new configuration.
-   uci commit 'dhcp' && luci-reload
+   uci commit 'dhcp' && reload_config && luci-reload
    /etc/init.d/odhcpd restart
    /etc/init.d/dnsmasq restart
    ```
