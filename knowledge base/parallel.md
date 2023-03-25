@@ -22,13 +22,13 @@ find . -type d -name .git -exec dirname "{}" + \
 | parallel --jobs 0 --tagstring {/} --joblog - \
     'git -C {} pull --recurse-submodules'
 
-# Inject Istio's sidecar to all deployments in a namespace.
+# Inject Istio's sidecar to all Deployments in a Namespace.
 kubectl get deployments -o jsonpath='{.items[*].metadata.name}' \
 | parallel --jobs 0 'kubectl -n ${NAMESPACE:-default} apply -f \
     <(istioctl kube-inject -f \
         <(kubectl get deployments,services {} -o json))'
 
-# Given a list of namespaces, get all Pods in them and the nodes they are
+# Given a list of Namespaces, get all Pods in them and the Nodes they are
 # running on.
 parallel --group --jobs 100% --tag \
   "kubectl --context $KUBE_CONTEXT --namespace {} get pods --output json \
