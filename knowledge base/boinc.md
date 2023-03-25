@@ -82,7 +82,7 @@ sudo amdgpu-install
 
 At the next restart of the boinc-client, something similar to this line should appear in the client's logs:
 
-```text
+```txt
 Oct 09 23:09:40 hostnameHere boinc[1709]: 09-Oct-2022 23:09:40 [---] OpenCL: AMD/ATI GPU 0: gfx90c:xnack- (driver version 3452.0 (HSA1.1,LC), device ve>
 ```
 

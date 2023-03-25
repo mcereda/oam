@@ -16,7 +16,7 @@ sudo needs-restarting -r
 sudo needs-restarting -s
 ```
 
-```text
+```txt
 $ sudo needs-restarting
 The following running processes use deleted files:
 

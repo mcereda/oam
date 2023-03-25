@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```text
+```txt
 # by label
 # e2label /dev/sdc1
 # mount -L seagate_2tb_usb /media/usb

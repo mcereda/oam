@@ -20,7 +20,7 @@ crontab -r
 sudo crontab -r -u other_user
 ```
 
-```text
+```txt
 # Run 'pwd' every day at 10PM.
 0 22 * * * pwd
 

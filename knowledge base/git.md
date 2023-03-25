@@ -1,33 +1,33 @@
 # Git
 
 1. [TL;DR](#tldr)
-2. [Authentication](#authentication)
-3. [Configuration](#configuration)
+1. [Authentication](#authentication)
+1. [Configuration](#configuration)
    1. [Remotes](#remotes)
       1. [Push to multiple git remotes with the one command](#push-to-multiple-git-remotes-with-the-one-command)
-   2. [Aliases](#aliases)
-4. [Manage changes](#manage-changes)
+   1. [Aliases](#aliases)
+1. [Manage changes](#manage-changes)
    1. [Create a patch](#create-a-patch)
-   2. [Apply a patch](#apply-a-patch)
-5. [The stash stack](#the-stash-stack)
-6. [Branches](#branches)
+   1. [Apply a patch](#apply-a-patch)
+1. [The stash stack](#the-stash-stack)
+1. [Branches](#branches)
    1. [Checkout an existing remote branch](#checkout-an-existing-remote-branch)
-   2. [Delete a branch](#delete-a-branch)
-   3. [Delete branches which have been merged or are otherwise absent from a remote.](#delete-branches-which-have-been-merged-or-are-otherwise-absent-from-a-remote)
-   4. [Merge the master branch into a feature branch](#merge-the-master-branch-into-a-feature-branch)
-   5. [Rebase a branch on top of another](#rebase-a-branch-on-top-of-another)
-7. [Tags](#tags)
-8. [Convert a normal repository to a bare one](#convert-a-normal-repository-to-a-bare-one)
-9. [LFS extension](#lfs-extension)
-10. [Submodules](#submodules)
-11. [Remove a file from a commit](#remove-a-file-from-a-commit)
-12. [Remove a file from the repository](#remove-a-file-from-the-repository)
-13. [Troubleshooting](#troubleshooting)
+   1. [Delete a branch](#delete-a-branch)
+   1. [Delete branches which have been merged or are otherwise absent from a remote.](#delete-branches-which-have-been-merged-or-are-otherwise-absent-from-a-remote)
+   1. [Merge the master branch into a feature branch](#merge-the-master-branch-into-a-feature-branch)
+   1. [Rebase a branch on top of another](#rebase-a-branch-on-top-of-another)
+1. [Tags](#tags)
+1. [Convert a normal repository to a bare one](#convert-a-normal-repository-to-a-bare-one)
+1. [LFS extension](#lfs-extension)
+1. [Submodules](#submodules)
+1. [Remove a file from a commit](#remove-a-file-from-a-commit)
+1. [Remove a file from the repository](#remove-a-file-from-the-repository)
+1. [Troubleshooting](#troubleshooting)
     1. [Debug](#debug)
-    2. [GPG cannot sign a commit](#gpg-cannot-sign-a-commit)
-    3. [Git does not accept self-signed certificates](#git-does-not-accept-self-signed-certificates)
-14. [Further readings](#further-readings)
-15. [Sources](#sources)
+    1. [GPG cannot sign a commit](#gpg-cannot-sign-a-commit)
+    1. [Git does not accept self-signed certificates](#git-does-not-accept-self-signed-certificates)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -418,7 +418,7 @@ git remote set-url --push --add origin https://exampleuser@example.com/path/to/r
 git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo3
 ```
 
-```plaintext
+```txt
 [remote "origin"]
     url = https://exampleuser@example.com/path/to/repo1
     pushUrl = https://exampleuser@example.com/path/to/repo1
@@ -429,7 +429,7 @@ git remote set-url --push --add origin https://exampleuser@example.com/path/to/r
 
 To only pull from `repo1` but push to `repo1` and `repo2` for a specific branch `specialBranch`:
 
-```plaintext
+```txt
 [remote "origin"]
     url = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
     fetch = +refs/heads/*:refs/remotes/origin/*

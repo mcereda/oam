@@ -51,7 +51,7 @@ The modeline line needs to:
 
 Examples:
 
-```text
+```txt
 # vim: set expandtab:
 
 # -*- mode: ruby -*-

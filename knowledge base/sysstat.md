@@ -30,7 +30,7 @@ sudo sar -P ALL
 
 Example output:
 
-```text
+```txt
 Linux 5.10.17-v8+ (raspberrypi)   07/08/21   _aarch64_   (4 CPU)
 
 10:24:12     LINUX RESTART   (4 CPU)

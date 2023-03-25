@@ -136,7 +136,7 @@ variable "my_list" {
 }
 ```
 
-```text
+```txt
 Terraform will perform the following actions:
 
 # null_resource.default[0] must be replaced
@@ -191,7 +191,7 @@ Use the `-replace=resource_path` option during a `plan` or `apply`:
 terraform apply -replace=aws_instance.example
 ```
 
-```text
+```txt
 # aws_instance.example will be replaced, as requested
 -/+ resource "aws_instance" "example" {
       …

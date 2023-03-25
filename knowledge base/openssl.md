@@ -89,7 +89,7 @@ cat 'server.crt' 'intermediate1.crt' 'intermediateN.crt' 'rootca.crt'
 
 An `openssl s_client -connect` attempt fails with this error message:
 
-```plaintext
+```txt
 CONNECTED(00000003)
 depth=0 C = US, CN = server.fqdn
 verify error:num=20:unable to get local issuer certificate

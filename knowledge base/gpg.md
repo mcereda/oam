@@ -190,7 +190,7 @@ gpg> quit
 
 One can put comments in an armored ASCII message or key block using the `Comment` keyword for each line:
 
-```text
+```txt
 -----BEGIN PGP MESSAGE-----
 Comment: …
 Comment: …
@@ -327,7 +327,7 @@ Run `ssh-add -L` to list your public keys and copy them over manually to the rem
 - `git` is instructed to sign a commit with `gpg`
 - `git commit` fails with the following error:
 
-  > ```plaintext
+  > ```txt
   > gpg failed to sign the data
   > fatal: failed to write commit object
   > ```

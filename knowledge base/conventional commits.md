@@ -12,7 +12,7 @@ It provides an easy set of rules for creating an explicit commit history.
 
 A commit message should be structured as follows:
 
-```text
+```txt
 <type>[optional scope]: <description>
 
 [optional body]

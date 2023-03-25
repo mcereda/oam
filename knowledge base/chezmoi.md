@@ -70,7 +70,7 @@ $
     normallookingcustomfield = "normalLookingValue"
   ```
 
-  ```plaintext
+  ```txt
   map[awesomecustomfield:my Awesome custom Value chezmoi:… normallookingcustomfield:normalLookingValue]
   ```
 
