@@ -3,26 +3,33 @@
 ## TL;DR
 
 ```sh
-# group output (--group)
-# fill up cpu threads (--jobs 100%)
-# use newline as delimiter for the arguments in input
-# simulate and print to output the command that would have been executed
+# Group output ('--group', defaults to on).
+# Fill up CPU threads ('--jobs 0' or '--jobs 100%').
+# Use newline as delimiter for the arguments in input.
+# Simulate and print to output the command that would have been executed.
 find . -type f \
 | parallel --group --jobs 0 --delimiter '\n' --dry-run clamscan {}
 
-# get the exit status of all subjobs (--joblog $outfile)
-# use all the threads you can (--jobs 0), hammering the cpu
+# Rsync all folders in a directory to a NAS.
+# So it one by one, and print and properly quote the command before execution.
+parallel -qt -j 1 \
+  rsync -a --info=stats2 {} nas.lan:/shares/backup/ \
+  ::: backup/.snapshots/*
+
+# Get the exit status of all subjobs ('--joblog $outfile').
+# Use all the threads you can (--jobs 0), hammering the CPU.
 find . -type d -name .git -exec dirname "{}" + \
-| parallel --group --jobs 0 --tagstring {/} --joblog - \
+| parallel --jobs 0 --tagstring {/} --joblog - \
     'git -C {} pull --recurse-submodules'
 
-# inject istio to all deployments in a namespace in (GNU) parallel
+# Inject Istio's sidecar to all deployments in a namespace.
 kubectl get deployments -o jsonpath='{.items[*].metadata.name}' \
-| parallel --group --jobs 0 'kubectl -n ${NAMESPACE:-default} apply -f \
+| parallel --jobs 0 'kubectl -n ${NAMESPACE:-default} apply -f \
     <(istioctl kube-inject -f \
         <(kubectl get deployments,services {} -o json))'
 
-# given a list of namespaces get pods and their nodes
+# Given a list of namespaces, get all Pods in them and the nodes they are
+# running on.
 parallel --group --jobs 100% --tag \
   "kubectl --context $KUBE_CONTEXT --namespace {} get pods --output json \
    | jq -r '.items[] | .metadata.name + \"\t\" + .spec.nodeName' -" \
