@@ -84,7 +84,7 @@ On Non-Windows hosts, `curl` uses `getpwuid` to find the user's home directory.
 
 On Windows, if curl finds no `.curlrc` file in the sequence described above, it will check for one in the same dir the curl executable is placed.
 
-```text
+```txt
 # ~/.curlrc
 # Accepts both short and long options.
 # Options in long format are accepted without the leading two dashes to make it

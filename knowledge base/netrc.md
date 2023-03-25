@@ -28,12 +28,12 @@ lines:
 
 The two formats below are equivalent:
 
-```text
+```txt
 machine example.com login daniel password qwerty
 machine host1.austin.century.com login fred password bluebonnet
 ```
 
-```text
+```txt
 machine example.com
 login daniel
 password qwerty

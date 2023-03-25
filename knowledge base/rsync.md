@@ -34,7 +34,7 @@ rsync … --exclude={"*.DS_Store","._*"}
 rsync … --filter "merge filter.txt"
 
 # Delete files from the source after they have been transferred.
-rsync … --remove-source-files 
+rsync … --remove-source-files
 
 # Copy local files to a folder in the user's remote home over SSH on port 1234.
 # Compress the data during transfer.

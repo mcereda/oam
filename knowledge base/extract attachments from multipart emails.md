@@ -3,7 +3,7 @@
 When saved as plain text, emails may be saved as S/MIME files with attachments.  
 In such cases the text file itself contains the multipart message body of the email, so the attachments are provided as base64 streams:
 
-```text
+```txt
  1 --------------060903090608060502040600
  2 Content-Type: application/x-gzip;
  3  name="myawesomefile.tar.gz"

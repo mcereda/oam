@@ -98,7 +98,7 @@ Should you want to see the state of individual devices during day but not to be 
 
 Create a text file in the `/etc/cron.d` directory:
 
-```text
+```txt
 # File /etc/cron.d/rainbow_night.
 # Set the light intensity to the second lowest degree every day at 11 PM and set
 # it back to maximum every day at 7 AM.
@@ -182,7 +182,7 @@ Choose one of Pi-hole's [supported operating systems][pi-hole supported operatin
    vim '/etc/config/lxc-auto'
    ```
 
-   ```text
+   ```txt
    config container
        option name pi-hole
        option timeout 60
@@ -255,7 +255,7 @@ Check the module is recognized by the system like so:
 
 1. If the `grep` returned results:
 
-   ```text
+   ```txt
    [   7.823007] sfp sfp: Host maximum power 3.0W
    [   8.167128] sfp sfp: Turris  RTSFP-10G  rev A  sn 1234567890  dc 123456
    ```

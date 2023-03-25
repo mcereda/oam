@@ -113,7 +113,7 @@ ssh-keygen -t 'ecdsa' -b '521'
 ssh-keygen -t 'ed25519' -f '.ssh/id_ed25519' -C 'test@winzoz'
 ```
 
-```plaintext
+```txt
 Generating public/private ed25519 key pair.
 Enter passphrase (empty for no passphrase):
 Enter same passphrase again:
@@ -143,7 +143,7 @@ ssh-keygen -R '192.168.1.237' -f '.ssh/known_hosts'
 ssh-keygen -R 'raspberrypi.lan' -f '.ssh/known_hosts'
 ```
 
-```plaintext
+```txt
 Host pi4.lan found: line 5
 /home/user/.ssh/known_hosts updated.
 Original contents retained as /home/user/.ssh/known_hosts.old
