@@ -229,7 +229,7 @@ sudo zpool import -a
 sudo zpool \
   create \
     -f \
-    -o ashift=12 \
+    -o 'ashift=12' \
     -o 'feature@allocation_classes=disabled' \
     -o 'feature@async_destroy=enabled' \
     -o 'feature@bookmarks=enabled' \
