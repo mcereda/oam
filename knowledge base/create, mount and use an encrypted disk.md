@@ -30,7 +30,8 @@ parallel -j1 \
   'sudo btrfs send source/volume/.snapshots/{} | sudo btrfs receive destination/volume' \
   ::: $(ls source/volume/.snapshots)
 parallel -q \
-  btrfs subvolume snapshot volume/{} volume/.snapshots/$(date +%FT%T)/{} ::: $(ls source/volume)
+  btrfs subvolume snapshot -r volume/{} volume/.snapshots/$(date +%FT%T)/{} \
+  ::: $(ls source/volume)
 
 # Umount the volume.
 sudo umount 'path/to/mount/point'
@@ -49,6 +50,7 @@ All the references in the [further readings] section, plus the following:
 - script: [Create an encrypted ZFS device]
 
 <!-- project's references -->
+
 <!-- internal references -->
 
 [further readings]: #further-readings

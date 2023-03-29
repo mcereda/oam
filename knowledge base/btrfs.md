@@ -1,5 +1,8 @@
 # BTRFS
 
+Copy on write (COW) filesystem for Linux.<br/>
+Features and benefits [here][introduction]. (Meta)Data profiles [here][mkfs.btrfs].
+
 ## TL;DR
 
 ```sh
@@ -76,6 +79,7 @@ btrfs property set -ts 'path/to/subvolume' 'ro' 'true'
 sudo btrfs subvolume show 'path/to/subvolume'
 
 # Check the compress ratio of a compressed volume.
+# Requires `compsize`.
 sudo compsize '/mnt/volume'
 
 # Show the status of a running or paused balance operation.
@@ -118,6 +122,20 @@ btrfs-convert '/dev/sdb1'
 
 # Convert btrfs to ext3/ext4.
 btrfs-convert -r '/dev/sdb1'
+
+# Create and activate a 2GB swapfile.
+# Generic procedure. Valid for all `btrfs`' versions.
+truncate -s '0' 'path/to/swapfile'
+chattr +C 'path/to/swapfile'
+fallocate -l '2G' 'path/to/swapfile'
+chmod '0600' 'path/to/swapfile'
+mkswap 'path/to/swapfile'
+swapon 'path/to/swapfile'
+
+# Create and activate a 2GB swapfile.
+# `btrfs` >= 6.1 only.
+btrfs filesystem mkswapfile --size '2G' 'path/to/swapfile'
+swapon 'path/to/swapfile'
 ```
 
 ## Check differences between 2 snapshots
@@ -128,22 +146,35 @@ See also [snapper].
 sudo btrfs send --no-data -p '/old/snapshot' '/new/snapshot' \
 | sudo btrfs receive --dump
 
-# requires you to be using snapper for your snapshots
-sudo snapper -c config diff 445..446
+# Requires one to be using `snapper` to manage the snapshots.
+sudo snapper -c 'config' diff '445..446'
 ```
 
 ## Further readings
 
+- Official [documentation]
+- [Swapfile]
 - [Gentoo wiki]
 - [Snapper]
 
 ## Sources
 
 - [cheat.sh]
-- [does btrfs have an efficient way to compare snapshots?]
-- [determine if a btrfs subvolume is read-only]
+- [Does BTRFS have an efficient way to compare snapshots?]
+- [Determine if a BTRFS subvolume is read-only]
+
+<!-- project's references -->
+
+[documentation]: https://btrfs.readthedocs.io/en/latest/
+[introduction]: https://btrfs.readthedocs.io/en/latest/Introduction.html
+[mkfs.btrfs]: https://btrfs.readthedocs.io/en/latest/mkfs.btrfs.html
+[swapfile]: https://btrfs.readthedocs.io/en/latest/Swapfile.html
+
+<!-- internal references -->
 
 [snapper]: snapper.md
+
+<!-- external references -->
 
 [cheat.sh]: https://cheat.sh/btrfs
 [gentoo wiki]: https://wiki.gentoo.org/wiki/Btrfs
