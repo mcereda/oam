@@ -1,4 +1,4 @@
-# Mount and use an encrypted device
+# Create, mount and use an encrypted disk
 
 ## Table of contents <!-- omit in toc -->
 
@@ -10,28 +10,33 @@
 
 ```sh
 # Encrypt the device.
-cryptsetup luksFormat '/dev/sda'
+sudo cryptsetup luksFormat '/dev/sda'
 
 # Open the encrypted device.
 # 'mapper_name' is any name you want. It will be used by the device mapper.
-cryptsetup open '/dev/sda' 'mapper_name'
+sudo cryptsetup open '/dev/sda' 'mapper_name'
 
 # Format the volume.
-mkfs.btrfs -f --label 'label' '/dev/mapper/mapper_name'
+sudo mkfs.btrfs -f --label 'label' -m 'dup' '/dev/mapper/mapper_name'
 
 # Mount the volume.
 mkdir -p 'path/to/mount/point'
-mount -t 'filesystem' -o 'mount,options' '/dev/mapper/mapper_name' 'path/to/mount/point'
+sudo mount -t 'filesystem' -o 'mount,options' '/dev/mapper/mapper_name' 'path/to/mount/point'
 
 # Do something.
+sudo chown 'user':'group' 'path/to/subvolume/in/mount/point'
 btrfs subvolume create 'path/to/subvolume/in/mount/point'
-chown 'user':'group' 'path/to/subvolume/in/mount/point'
+parallel -j1 \
+  'sudo btrfs send source/volume/.snapshots/{} | sudo btrfs receive destination/volume' \
+  ::: $(ls source/volume/.snapshots)
+parallel -q \
+  btrfs subvolume snapshot volume/{} volume/.snapshots/$(date +%FT%T)/{} ::: $(ls source/volume)
 
 # Umount the volume.
-umount 'path/to/mount/point'
+sudo umount 'path/to/mount/point'
 
 # Close the device.
-cryptsetup close '/dev/mapper/mapper_name'
+sudo cryptsetup close '/dev/mapper/mapper_name'
 ```
 
 ## Further readings
