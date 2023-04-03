@@ -1,5 +1,12 @@
 # DNF
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Lock packages versions](#lock-packages-versions)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -39,6 +46,9 @@ dnf list --autoremove
 
 # Show packages' description and summary information
 dnf info 'tar'
+
+# Show packages' dependencies.
+dnf deplist 'docker-ce'
 
 # Finds the packages providing a given specification.
 dnf provides 'gzip'
@@ -83,17 +93,78 @@ dnf history redo '5'
 # Undo all transactions performed after the given one.
 # RPMDB's current state must allow it.
 dnf history rollback '7'
+
+# List configured repositories.
+dnf repolist
+
+# List packages in specific repositories.
+dnf repo-pkgs 'oracle' list
+dnf repository-packages 'mariadb' list 'mariadb-server'
+
+# Downgrade packages.
+dnf downgrade 'docker-ce-20.10.23-3.el8'
+
+# Lock packages versions.
+# Requires the 'versionlock' plugin.
+dnf versionlock 'kernel-5.2.17-200.fc30'
+dnf versionlock add 'docker-ce' 'docker-ce-cli' 'docker-ce-rootless-extras'
+
+# List locked versions.
+# Requires the 'versionlock' plugin.
+dnf versionlock list
+
+# Unlock packages versions.
+# Requires the 'versionlock' plugin.
+dnf versionlock delete 'kernel' 'docker-ce-20.10.23-3.el8'
 ```
+
+## Lock packages versions
+
+Use DNF's _versionlock_ plugin:
+
+```sh
+# Installation.
+dnf install 'python3-dnf-plugin-versionlock'
+
+# Lock versions.
+dnf versionlock 'kernel-5.2.17-200.fc30'
+dnf versionlock add 'docker-ce' 'docker-ce-cli' 'docker-ce-rootless-extras'
+
+# List locked versions.
+
+# Unlock versions.
+dnf versionlock delete 'kernel' 'docker-ce-20.10.23-3.el8'
+```
+
+The _versionlock_ plugin maintains the constraints in its configuration file and automatically checks the constraints on every run.
+
+Alternative could be to exclude the packages from one or more repositories or during the action, but the exclusion will not allow their installation in the first place.<br/>
+Not to mention,
+
+- acting on the repository files requires the `exclude` configuration key to be set for every repository the package could be found in;
+- using the `--exclude` CLI option requires the option to be given at every run. 
+
+## Further readings
+
+- [Man page]
 
 ## Sources
 
-- [Man page]
+All the references in the [further readings] section, plus the following:
+
 - [cheat.sh]
 - [How to install only security and bugfixes updates with DNF]
+- [How to use YUM/DNF to downgrade or rollback some package updates?]
+- [How to lock kernel (or another package) on Fedora]
 
 <!-- project's references -->
 
+<!-- internal references -->
+
 <!-- external references -->
+
 [cheat.sh]: https://cheat.sh/dnf
 [how to install only security and bugfixes updates with dnf]: https://fedoramagazine.org/how-to-install-only-security-and-bugfixes-updates-with-dnf/
+[how to lock kernel (or another package) on fedora]: https://robbinespu.gitlab.io/posts/locking-package-fedora/
+[how to use yum/dnf to downgrade or rollback some package updates?]: https://access.redhat.com/solutions/29617
 [man page]: https://man7.org/linux/man-pages/man8/dnf.8.html
