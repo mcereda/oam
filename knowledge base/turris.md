@@ -10,10 +10,12 @@ Linux distribution based on top of OpenWrt. Check the [website] for more informa
 1. [Local DNS resolution](#local-dns-resolution)
 1. [Static DHCP leases and hostnames](#static-dhcp-leases-and-hostnames)
 1. [Containerized pi-hole](#containerized-pi-hole)
+1. [Git server](#git-server)
+1. [Hardening ideas](#hardening-ideas)
 1. [Factory reset](#factory-reset)
 1. [Hardware upgrades](#hardware-upgrades)
 1. [The SFP+ caged module](#the-sfp-caged-module)
-   1. [Use the SFP module as a LAN port](#use-the-sfp-module-as-a-lan-port)
+    1. [Use the SFP module as a LAN port](#use-the-sfp-module-as-a-lan-port)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -203,6 +205,16 @@ Choose one of Pi-hole's [supported operating systems][pi-hole supported operatin
    /etc/init.d/dnsmasq restart
    ```
 
+## Git server
+
+The `git` package is not available in `opkg`'s configured repositories by default.
+
+## Hardening ideas
+
+- [SSH]:
+  - Change the SSH port from the default `22` value.
+  - Restrict login to specific IP addresses.
+
 ## Factory reset
 
 Keep pressed the reset button on the back panel and wait for LEDs to indicate the number of the desired mode, then release the reset button.
@@ -313,6 +325,7 @@ luci-reload
 - [Supported SFP modules]
 - [opkg]
 - [uci]
+- [Home NAS]
 
 ## Sources
 
@@ -325,6 +338,7 @@ All the references in the [further readings] section, plus the following:
 <!-- project's references-->
 [docs]: https://docs.turris.cz
 [factory reset on turris omnia]: https://docs.turris.cz/hw/omnia/rescue-modes/
+[home nas]: https://wiki.turris.cz/doc/en/howto/nas
 [how to control led diodes]: https://wiki.turris.cz/doc/en/howto/led_settings
 [supported sfp modules]: https://wiki.turris.cz/doc/en/public/sfp
 [turris wiki]: https://wiki.turris.cz/doc/en/start
@@ -333,6 +347,7 @@ All the references in the [further readings] section, plus the following:
 <!-- internal references -->
 [further readings]: #further-readings
 [opkg]: opkg.md
+[ssh]: ssh.md
 [uci]: uci.md
 
 <!-- external references -->
