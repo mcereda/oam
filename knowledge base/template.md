@@ -19,7 +19,6 @@ All the references in the [further readings] section, plus the following:
 <!-- project's references -->
 
 <!-- internal references -->
-
 [further readings]: #further-readings
 
 <!-- external references -->
