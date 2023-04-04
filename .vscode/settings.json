@@ -57,6 +57,7 @@
         "nvme",
         "ocsp",
         "openpgp",
+        "opkg",
         "pacman",
         "pamac",
         "pihole",
