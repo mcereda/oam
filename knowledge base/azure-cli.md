@@ -115,7 +115,7 @@ az keyvault key list --query '[].name' -o 'tsv' --vault-name 'key_vault_name'
 az keyvault secret show --query 'value' \
   --name 'secret_name' --vault-name 'key_vault_name'
 
-# List all the available SKUs.
+# List all the available SKUs for VMs.
 az vm list-skus
 az vm list-skus -l 'location'
 
@@ -158,6 +158,9 @@ az vm wait … --custom "instanceView.vmAgent.statuses[?code!='ProvisioningState
 # Wait for a Virtual Machine Agent to be Ready.
 az vm wait -g 'resource_group_name'  -n 'vm_name' \
   --custom "instanceView.vmAgent.statuses[?code=='ProvisioningState/succeeded']"
+
+# List all the available SKUs for PostgreSQL flexible DB servers.
+az postgres flexible-server list-skus --location 'westeurope' -o 'table'
 
 # List LogAnalytics' Workspaces.
 az monitor log-analytics workspace list --query '[].name' \
