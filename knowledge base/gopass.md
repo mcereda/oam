@@ -124,6 +124,10 @@ gopass fsck
 gopass sync
 gopass sync -s 'store-1' … 'store-N'
 
+# Manage git operations manually.
+gopass git pull
+gopass git push --store='foo' 'origin' 'main'
+
 # Reset gopass' configuration.
 rm "${HOME}/.config/gopass/config"
 
@@ -149,12 +153,12 @@ done
 
 ## Troubleshooting
 
-See [faq].
+See the [FAQ] page.
 
 ## Further readings
 
-- [website]
-- GoPass [documentation]
+- GoPass' [website]
+- GoPass' [documentation]
 - [woile's cheatsheet]
 
 ## Sources
