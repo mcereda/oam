@@ -22,9 +22,11 @@ gopass config
 
 # Show specific configuration values only.
 gopass config 'core.autoclip'
+gopass config 'core.autopush'
 
 # Update specific configuration values.
 gopass config 'core.autoclip' false
+gopass config 'core.autopush' false
 
 # Initiate the *root* store.
 gopass init
@@ -104,6 +106,26 @@ gopass mounts remove 'store-1' … 'store-N'
 gopass mounts rm …
 gopass mounts unmount …
 gopass mounts umount …
+
+# List templates.
+gopass templates
+gopass templates 'path/to/folder'
+
+# Show templates.
+gopass templates show 'path/to/folder'
+gopass templates cat …
+
+# Create templates.
+gopass templates edit 'path/to/folder'
+gopass templates create …
+gopass templates new …
+
+# Use templates to create new secrets.
+gopass edit -c 'path/to/folder/with/template'/'secret'
+
+# Remove templates.
+gopass templates remove 'path/to/folder'
+gopass templates rm …
 
 # List all recipients.
 gopass recipients
