@@ -142,7 +142,7 @@ Alternative could be to exclude the packages from one or more repositories or du
 Not to mention,
 
 - acting on the repository files requires the `exclude` configuration key to be set for every repository the package could be found in;
-- using the `--exclude` CLI option requires the option to be given at every run. 
+- using the `--exclude` CLI option requires the option to be given at every run.
 
 ## Further readings
 
