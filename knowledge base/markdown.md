@@ -4,7 +4,9 @@ ReadMe's Markdown engine.
 
 ## Table of contents <!-- omit in toc -->
 
+1. [TODO list](#todo-list)
 1. [Folded content](#folded-content)
+1. [Images](#images)
 1. [Diagrams](#diagrams)
    1. [Flow chart A.K.A. graph](#flow-chart-aka-graph)
    1. [Sequence diagram](#sequence-diagram)
@@ -12,11 +14,22 @@ ReadMe's Markdown engine.
    1. [State diagram](#state-diagram)
    1. [Gantt diagram](#gantt-diagram)
    1. [Pie chart](#pie-chart)
+1. [Math](#math)
 1. [Troubleshooting](#troubleshooting)
    1. [Escape the backtick character](#escape-the-backtick-character)
    1. [VS Code and mermaid graph in Markdown preview](#vs-code-and-mermaid-graph-in-markdown-preview)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
+
+## TODO list
+
+Use `[ ]` after the bullet point or numbered list character to switch them for an empty ballot box, and `[x]` for a checked one.
+
+1. [ ] 1
+1. [ ] 2
+   - [x] a
+
+- [x] Point 3
 
 ## Folded content
 
@@ -27,6 +40,27 @@ Use a `<details>` HTML tag:
   <summary>Fold/Open</summary>
   Folded content
 </details>
+```
+
+## Images
+
+Add an image:
+
+```md
+![description](path/to.image)
+![description][reference name]
+```
+
+Control width and height:
+
+```md
+<img src="./cat.png" width=300px height=200px />
+```
+
+Align in the center:
+
+```md
+<div align="center">![sleep-cat](./cat.png)</div>
 ```
 
 ## Diagrams
@@ -41,7 +75,7 @@ Code blocks for diagrams can either:
 ### Flow chart A.K.A. graph
 
 ```md
-:::mermaid 
+:::mermaid
 graph LR
     A[Christmas] -->|Get money| B(Go shopping)
     B --> C{Let me think}
@@ -55,7 +89,7 @@ graph LR
 :::
 ```
 
-```mermaid 
+```mermaid
 graph LR
     A[Christmas] -->|Get money| B(Go shopping)
     B --> C{Let me think}
@@ -210,6 +244,16 @@ pie title Pets adopted by volunteers
     "Rats" : 15
 ```
 
+## Math
+
+```md
+$\sum_{n=1}^{10} n^2$
+$$\sum_{n=1}^{10} n^2$$
+```
+
+$\sum_{n=1}^{10} n^2$
+$$\sum_{n=1}^{10} n^2$$
+
 ## Troubleshooting
 
 ### Escape the backtick character
@@ -228,19 +272,21 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 ## Further readings
 
 - Official [documentation]
+- [Extended syntax]
 - [Linguist supported language syntax list]
 
 ## Sources
 
 All the references in the [further readings] section, plus the following:
 
-- [Escaping Backticks]
+- [Escaping backticks]
 - [Escaping backtick in Markdown]
 - [The magical Markdown I bet you don't know]
 - [slaise/High-level-Markdown]
 
 <!-- project's references -->
 [documentation]: https://docs.readme.com/rdmd/docs
+[extended syntax]: https://www.markdownguide.org/extended-syntax/
 
 <!-- internal references -->
 [mermaid.js]: mermaid.js.md
