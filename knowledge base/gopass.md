@@ -93,16 +93,16 @@ gopass mounts
 
 # Add (a.k.a mount) existing stores in multi store mode.
 # Default command for 'mounts' if missing.
-gopass mounts 'store' 'path/to/store'
+gopass mounts 'internal/path/to/store' 'external/path/to/store'
 gopass mounts add …
 gopass mounts mount …
 
 # Create and mount stores.
-gopass mounts add -c 'store' 'path/to/store'
+gopass mounts add -c 'internal/path/to/store' 'external/path/to/store'
 gopass init -s 'store' -p 'path/to/store'
 
 # Remove (a.k.a unmount) stores.
-gopass mounts remove 'store-1' … 'store-N'
+gopass mounts remove 'internal/path/to/store-1' … 'store-N'
 gopass mounts rm …
 gopass mounts unmount …
 gopass mounts umount …
