@@ -9,8 +9,9 @@ Linux distribution based on top of OpenWrt. Check the [website] for more informa
    1. [Automatic overnight dimming](#automatic-overnight-dimming)
 1. [Local DNS resolution](#local-dns-resolution)
 1. [Static DHCP leases and hostnames](#static-dhcp-leases-and-hostnames)
-1. [Containerized pi-hole](#containerized-pi-hole)
-1. [Git server](#git-server)
+1. [Containers](#containers)
+   1. [Git server](#git-server)
+   1. [Pi-hole](#pi-hole)
 1. [Hardening ideas](#hardening-ideas)
 1. [The SFP+ caged module](#the-sfp-caged-module)
    1. [Use the SFP module as a LAN port](#use-the-sfp-module-as-a-lan-port)
@@ -126,62 +127,72 @@ When assigning static DHCP leases LuCI **only requires** the IP and MAC addresse
 Setting a hostname in an entry will make Turris OS resolve the IP address **only** with that given hostname (and **not** the name the host presents itself with).<br/>
 Not setting a hostname in an entry will make Turris OS resolve the IP address with the name the host presents itself with.
 
-## Containerized pi-hole
+CLI procedure:
 
-> Requires the `lxc` package to be installed.
+```sh
+uci add dhcp host
+uci set dhcp.@host[-1].name='paracelsus'
+uci set dhcp.@host[-1].mac='11:22:33:44:55:66'
+uci set dhcp.@host[-1].ip='192.168.1.200'
+uci commit 'dhcp'
+reload_config
+luci-reload
+```
+
+## Containers
+
+Some packages are not available in `opkg`'s repository, but containers can be used to provide them.
+
+This requires the `lxc` package to be installed.
 
 > Suggested the use of an [expansion disk](#hardware-upgrades).
 
-See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turris Omnia] for details.
+The usual steps are the following, and should be executed in Turris OS:
 
-Choose one of Pi-hole's [supported operating systems][pi-hole supported operating systems], then follow this procedure:
-
-1. In Turris OS:
+1. Create a container for the service:
 
    ```sh
-   # Create the LXC container (pick one).
-   lxc-create --name 'pi-hole' --template 'download' -- --dist 'debian' --release 'bullseye' --arch 'armhf' --server 'images.linuxcontainers.org'
+   # Default source is 'repo.turris.cz/lxc'.
+   lxc-create --name 'test' --template 'download'
+   lxc-create -n 'pi-hole' -t 'download' -- --dist 'debian' --release 'bullseye' --arch 'armhf' --server 'images.linuxcontainers.org'
+   ```
 
-   # Configure pi-hole's static IP lease.
+1. Assign it a static IP address:
+
+   ```sh
    uci add dhcp host
    uci set dhcp.@host[-1].name='pi-hole'
-   uci set dhcp.@host[-1].mac="$(grep hwaddr /srv/lxc/pi-hole/config | sed 's/.*= //')"
+   uci set dhcp.@host[-1].mac="$(grep 'hwaddr' '/srv/lxc/pi-hole/config' | sed 's/.*= //')"
    uci set dhcp.@host[-1].ip='192.168.111.2'
    uci commit 'dhcp'
    reload_config
    luci-reload
+   ```
 
-   # Start it.
+1. Start the container:
+
+   ```sh
    lxc-start --name 'pi-hole'
 
    # Check it's running correctly.
    lxc-info --name 'pi-hole'
+   ```
 
-   # Get a shell to it.
+1. Execute a shell into it:
+
+   ```sh
    lxc-attach --name 'pi-hole'
    ```
 
-1. In the container:
+1. Set up the container.
 
-   ```sh
-   # Set the correct hostname, if different from what is expected.
-   hostnamectl set-hostname 'pi-hole'
-
-   # Install pi-hole.
-   DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'ca-certificates' 'curl'
-   curl -sSL 'https://install.pi-hole.net' | bash
-
-   # Follow the guided procedure.
-
-   # Change the Web interface password, if needed.
-   /etc/.pihole/pihole -a -p
-   ```
+   > See examples of specific instructions in the subsections below.
 
 1. Check all is working as expected.
-1. Again in Turris OS:
+1. If you changed the hostname inside the container, restart it for good measure.
+1. Start the container at boot if required:
 
    ```sh
-   # Start pi-hole at boot
    vim '/etc/config/lxc-auto'
    ```
 
@@ -191,24 +202,79 @@ Choose one of Pi-hole's [supported operating systems][pi-hole supported operatin
        option timeout 60
    ```
 
-   ```sh
-   # Distribute pi-hole as the primary DNS.
-   # Keep the router as secondary.
-   uci set dhcp.lan.dhcp_option='6,192.168.111.2,192.168.111.1'
+### Git server
 
-   # The dns server address in the IPv6 RA should be the container's ULA address
-   # since the global routable IPv6 address tend to change daily.
-   uci add_list dhcp.lan.dns="$(lxc-info --name pi-hole | grep -E 'IP.* f[cd]' | sed 's/IP: *//')"
+Follow the usual procedure above and, as the _set up the container_ step, install and configure git from *+inside** the container:
 
-   # Apply the new configuration.
-   uci commit 'dhcp' && reload_config && luci-reload
-   /etc/init.d/odhcpd restart
-   /etc/init.d/dnsmasq restart
-   ```
+```sh
+# Set the correct hostname, if different from what is expected.
+hostnamectl set-hostname 'git'
 
-## Git server
+# Install `git` and the SSH server.
+DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'git' 'openssh-server'
 
-The `git` package is not available in `opkg`'s configured repositories by default.
+# (Optionally) configure the SSH server.
+vim '/etc/ssh/sshd_config'
+systemctl restart 'ssh.service'
+
+# Create the git user.
+adduser 'git'
+
+# Set up passwordless authentication.
+mkdir '/home/git/.ssh' && sudo chmod '700' '/home/git/.ssh'
+touch '/home/git/.ssh/authorized_keys' && sudo chmod '600' '/home/git/.ssh/authorized_keys'
+echo 'ssh-…' >> '/home/git/.ssh/authorized_keys'
+
+# (Optionally) create the repositories' root directory.
+mkdir '/home/git/repositories'
+
+# Make sure the 'git' user has the correct permissions on the folders.
+chown -R 'git' '/home/git'
+
+# (Optionally) lock down the git user.
+# This will *prevent* clients to set their SSH key using `ssh-copy-id`.
+chsh 'git' -s "$(which 'git-shell')"
+
+# All done!
+exit
+```
+
+### Pi-hole
+
+See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turris Omnia] for details.
+
+Choose one of Pi-hole's [supported operating systems][pi-hole supported operating systems], then follow the usual procedure above and, as the _set up the container_ step, install and configure pi-hole from *+inside** the container:
+
+```sh
+# Set the correct hostname, if different from what is expected.
+hostnamectl set-hostname 'pi-hole'
+
+# Install pi-hole.
+DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'ca-certificates' 'curl'
+curl -sSL 'https://install.pi-hole.net' | bash
+
+# Follow the guided procedure.
+
+# Change the Web interface password, if needed.
+/etc/.pihole/pihole -a -p
+```
+
+After this, finish the procedure above. Then, in Turris OS:
+
+```sh
+# Distribute pi-hole as the primary DNS.
+# Keep the router as secondary.
+uci set dhcp.lan.dhcp_option='6,192.168.111.2,192.168.111.1'
+
+# The dns server address in the IPv6 RA should be the container's ULA address
+# since the global routable IPv6 address tend to change daily.
+uci add_list dhcp.lan.dns="$(lxc-info --name pi-hole | grep -E 'IP.* f[cd]' | sed 's/IP: *//')"
+
+# Apply the new configuration.
+uci commit 'dhcp' && reload_config && luci-reload
+/etc/init.d/odhcpd restart
+/etc/init.d/dnsmasq restart
+```
 
 ## Hardening ideas
 
