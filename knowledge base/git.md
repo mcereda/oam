@@ -18,6 +18,7 @@
    1. [Rebase a branch on top of another](#rebase-a-branch-on-top-of-another)
 1. [Tags](#tags)
 1. [Convert a normal repository to a bare one](#convert-a-normal-repository-to-a-bare-one)
+1. [Prepare the git server](#prepare-the-git-server)
 1. [LFS extension](#lfs-extension)
 1. [Submodules](#submodules)
 1. [Remove a file from a commit](#remove-a-file-from-a-commit)
@@ -713,6 +714,50 @@ The [preferred method][getting git on a server] is to create a bare clone of the
 git clone --bare 'repository' 'repository.git'
 ```
 
+## Prepare the git server
+
+1. Create the git user:
+
+   ```sh
+   sudo adduser 'git'
+   sudo chsh 'git' -s "$(which 'git-shell')"
+   ```
+
+1. (Optionally) create the service's directory:
+
+   ```sh
+   sudo mkdir '/srv/git'
+   sudo chown 'git' '/srv/git'
+   ```
+
+1. Set up passwordless authentication:
+
+   ```sh
+   sudo mkdir '/home/git/.ssh' && sudo chmod '700' '/home/git/.ssh'
+   sudo touch '/home/git/.ssh/authorized_keys' && sudo chmod '600' '/home/git/.ssh/authorized_keys'
+   sudo chown -R 'git' '/home/git'
+   ```
+
+1. (Optionally) create the bare _project_ repository:
+
+   > Do this as the `git` user, or assign it permissions on the folders.
+
+   ```sh
+   git init --bare 'project.git'
+
+   # Or, if one wants the repository to reside in the service's directory:
+   git init --bare '/srv/git/project.git'
+   ```
+
+The _project_ repository will be available for clients using the following:
+
+```sh
+git clone 'git@fqdn:project.git'
+
+# Or, if the repository resides in the service's directory:
+git clone 'git@fqdn:/srv/git/project.git'
+```
+
 ## LFS extension
 
 1. Install the extension:
@@ -848,10 +893,11 @@ git -c http.sslVerify=false …
 
 ## Further readings
 
-- The official [LFS website]
 - Git [docs]
 - [Tagging]
-- [Getting Git on a Server]
+- The official [LFS website]
+- [Getting git on a server]
+- [Setting up the server]
 - [git-config reference]
 
 ## Sources
@@ -883,11 +929,12 @@ git -c http.sslVerify=false …
 - [One weird trick for powerful Git aliases]
 - [Cannot clone git from Azure DevOps using PAT]
 
-<!-- git documentation -->
+<!-- project's references -->
 [docs]: https://git-scm.com/docs/git
 [getting git on a server]: https://git-scm.com/book/en/v2/Git-on-the-Server-Getting-Git-on-a-Server
 [git-config reference]: https://git-scm.com/docs/git-config
 [gitignore]: https://git-scm.com/docs/gitignore
+[setting up the server]: https://git-scm.com/book/en/v2/Git-on-the-Server-Setting-Up-the-Server
 [tagging]: https://git-scm.com/book/en/v2/Git-Basics-Tagging
 
 <!-- external references -->
