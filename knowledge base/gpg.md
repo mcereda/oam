@@ -351,6 +351,8 @@ export GPG_TTY=$(tty)
 - [How to enable SSH access using a GPG key for authentication]
 - [gpg failed to sign the data fatal: failed to write commit object]
 - [Can you manually add a comment to a PGP public key block and not break it?]
+- [How to renew a (soon to be) expired GPG key]
+- [Renew GPG key]
 
 <!-- project's references -->
 [commonly seen problems]: https://www.gnupg.org/documentation/manuals/gnupg/Common-Problems.html
@@ -363,3 +365,5 @@ export GPG_TTY=$(tty)
 [gpg failed to sign the data fatal: failed to write commit object]: https://stackoverflow.com/questions/39494631/gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object-git-2-10-0#42265848
 [how can i remove the passphrase from a gpg2 private key?]: https://unix.stackexchange.com/a/550538
 [how to enable ssh access using a gpg key for authentication]: https://opensource.com/article/19/4/gpg-subkeys-ssh
+[how to renew a (soon to be) expired gpg key]: https://filipe.kiss.ink/renew-expired-gpg-key/
+[renew gpg key]: https://gist.github.com/krisleech/760213ed287ea9da85521c7c9aac1df0
