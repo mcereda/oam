@@ -204,14 +204,16 @@ The usual steps are the following, and should be executed in Turris OS:
 
 ### Git server
 
+> This procedure assumes you are using a LXC container based upon Debian Bullseye.
+
 Follow the usual procedure above and, as the _set up the container_ step, install and configure git from *+inside** the container:
 
 ```sh
 # Set the correct hostname, if different from what is expected.
 hostnamectl set-hostname 'git'
 
-# Install `git` and the SSH server.
-DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'git' 'openssh-server'
+# Install `git`, the SSH server and `unattended-upgrades`.
+DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'git' 'openssh-server' 'unattended-upgrades'
 
 # (Optionally) configure the SSH server.
 vim '/etc/ssh/sshd_config'
@@ -241,6 +243,8 @@ exit
 
 ### Pi-hole
 
+> This procedure assumes you are using a LXC container based upon Debian Bullseye.
+
 See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turris Omnia] for details.
 
 Choose one of Pi-hole's [supported operating systems][pi-hole supported operating systems], then follow the usual procedure above and, as the _set up the container_ step, install and configure pi-hole from *+inside** the container:
@@ -257,6 +261,9 @@ curl -sSL 'https://install.pi-hole.net' | bash
 
 # Change the Web interface password, if needed.
 /etc/.pihole/pihole -a -p
+
+# Update pi-hole as a whole, if needed.
+/etc/.pihole/pihole -up
 ```
 
 After this, finish the procedure above. Then, in Turris OS:
