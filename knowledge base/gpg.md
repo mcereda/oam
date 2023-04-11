@@ -6,7 +6,7 @@
 # List existing keys.
 gpg --list-keys
 gpg --list-keys --keyid-format 'short'
-gpg --list-secret-keys --with-keygrip
+gpg --list-secret-keys --with-keygrip --keyid-format '0xlong'
 
 # Generate a new key.
 gpg --gen-key
