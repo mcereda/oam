@@ -130,8 +130,11 @@ gopass templates rm …
 # List all recipients.
 gopass recipients
 
+# Get the key ID in the format used by gopass.
+gpg --list-keys --keyid-format '0xlong'
+
 # Add recipients.
-gopass recipients add 'key-id'
+gopass recipients add 'key-id-in-0xlong-format'
 gopass recipients add -s 'store' …
 
 # Remove recipients
