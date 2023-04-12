@@ -362,7 +362,7 @@ az rest -m 'get' \
 az rest -m 'delete' \
   -u 'https://graph.microsoft.com/beta/groups/group_id/members/member_id/$ref'
 
-# List the PATs of a User.
+# List a User's PATs.
 # 'displayFilterOptions' are 'active' (default), 'all', 'expired' or 'revoked'.
 # 'displayFilterOptions' can be negated ('!revoked').
 # If more then 20, or up to 100 using the '$top' url parameter, results are
@@ -374,7 +374,7 @@ az rest … -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats?
 az rest … -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats' \
   --url-parameters 'api-version=7.1-preview.1' 'displayFilterOption=expired' continuationToken='Hr…in='
 
-# Create a PAT.
+# Create PATs.
 az rest -m 'post' \
   -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats' \
   --url-parameters 'api-version=7.1-preview.1' \
@@ -386,7 +386,7 @@ az rest -m 'post' \
     "allOrgs": false
   }'
 
-# Extend a PAT.
+# Extend PATs.
 # Works with expired PATs too, but not revoked ones.
 az rest -m 'put' \
   -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats' \
@@ -398,8 +398,17 @@ az rest -m 'put' \
   }'
 az rest … -b @'file.json'
 
+# Revoke PATs.
+az rest -m 'delete' \
+  -u 'https://vssps.dev.azure.com/organization_name/_apis/tokens/pats' \
+  --url-parameters \
+    'api-version=7.1-preview.1' \
+    'authorizationId=01234567-abcd-0987-fedc-0123456789ab' \
+  --headers Authorization='Bearer ey…pw'
+
 # Automatically renew the first 100 non revoked Devops PATs.
-# The others are in the next pages and pagination just su*ks bad.
+# The others are in the next pages and not being able to deactivate pagination
+# just su*ks bad.
 # Assumes the command uses the GNU version of each tool (see `date`).
 ORGANIZATION_NAME='organization_name' \
 TOKEN="$(az account get-access-token --query 'accessToken' -o 'tsv')" \
