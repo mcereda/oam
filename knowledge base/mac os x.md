@@ -57,6 +57,9 @@ sudo mount -t 'nfs' -o 'rw,resvport' 'host:/path/to/share' 'path/to/mount/point'
 installer -pkg /path/to/non-root-package.pkg -target CurrentUserHomeDirectory
 sudo installer -pkg /path/to/root-needed-package.pkg -target /
 
+# Clear the DNS cache.
+sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
+
 # Add a password to the default keychain.
 # The password needs to be left last.
 security add-generic-password -a johnny -s github -w 'b.good'
@@ -329,6 +332,7 @@ To use any of these key combinations, press and hold the keys immediately after 
 - [Can Touch ID for the Mac Touch Bar authenticate sudo users and admin privileges?]
 - [Caffeinate your Mac]
 - [MacOS network quality tool]
+- [How to Clear DNS Cache in MacOS Ventura & MacOS Monterey]
 
 <!-- project's references -->
 [mac startup key combinations]: https://support.apple.com/en-us/HT201255
@@ -338,6 +342,7 @@ To use any of these key combinations, press and hold the keys immediately after 
 [caffeinate your mac]: https://www.theapplegeek.co.uk/blog/caffeinate
 [can touch id for the mac touch bar authenticate sudo users and admin privileges?]: https://apple.stackexchange.com/questions/259093/can-touch-id-for-the-mac-touch-bar-authenticate-sudo-users-and-admin-privileges#306324
 [command line access to the mac keychain]: https://blog.koehntopp.info/2017/01/26/command-line-access-to-the-mac-keychain.html
+[how to clear dns cache in macos ventura & macos monterey]: https://osxdaily.com/2022/11/21/how-clear-dns-cache-macos-ventura-monterey/
 [how to update xcode from command line]: https://stackoverflow.com/questions/34617452/how-to-update-xcode-from-command-line#34617930
 [installing .pkg with terminal?]: https://apple.stackexchange.com/questions/72226/installing-pkg-with-terminal#394976
 [launchctl man page]: https://www.unix.com/man-page/osx/1/launchctl
