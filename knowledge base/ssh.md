@@ -21,9 +21,6 @@
 ## TL;DR
 
 ```sh
-# Load keys from '${HOME}/.ssh' and add them to the agent.
-eval $(ssh-agent) && ssh-add
-
 # Create new keys.
 ssh-keygen -t 'rsa' -b '4096'
 ssh-keygen -t 'dsa'
@@ -39,19 +36,31 @@ ssh-keygen -R 'pi.lan' -f "${HOME}/.ssh/known_hosts"
 # Change the password of a key.
 ssh-keygen -f "${HOME}/.ssh/id_rsa" -p
 
-# Mount a remote folder.
-sshfs 'nas.lan:/mnt/data' 'Data' \
-  -o 'auto_cache,reconnect,defer_permissions,noappledouble,volname=Data'
+# Show keys' fingerprint.
+ssh-keygen -l -f "${HOME}/.ssh/id_ed25519"
 
-# List keys added to the agent by fingerprint.
+# Show certificates' content.
+ssh-keygen -L -f 'path/to/ssh.cert'
+
+# Load keys from '${HOME}/.ssh' and add them to the agent.
+eval $(ssh-agent) && ssh-add
+
+# List keys added to the agent, by fingerprint.
 ssh-add -l
-ssh-add -L   # full key in OpenSSH format
+
+# List keys added to the agent, by public key.
+ssh-add -L
 
 # Authorize keys for passwordless access.
-ssh-copy-id -i "${HOME}/.ssh/id_rsa.pub" user@nas.lan
+ssh-copy-id 'host.fqdn'
+ssh-copy-id -i "${HOME}/.ssh/id_rsa.pub" 'user@host.fqdn'
 
 # Connect to an unreachable host tunnelling the session through a bastion.
 ssh -t 'bastion-host' ssh 'unreachable-host'
+
+# Mount a remote folder.
+sshfs 'nas.lan:/mnt/data' 'Data' \
+  -o 'auto_cache,reconnect,defer_permissions,noappledouble,volname=Data'
 ```
 
 ## Server installation on Windows

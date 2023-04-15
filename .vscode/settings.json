@@ -76,6 +76,7 @@
         "scrollback",
         "setfacl",
         "slurm",
+        "sshfs",
         "sshpass",
         "subvolume",
         "swapfile",
