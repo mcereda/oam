@@ -4,22 +4,33 @@
 
 ```sh
 # Only list keys.
-jq 'keys' file.json
+jq 'keys' 'file.json'
 
 # Sort all the keys.
-jq --sort-keys '.' input.json > output.json
+jq --sort-keys '.' 'input.json' > 'output.json'
+jq --sort-keys '.' 'file.json' | sponge 'file.json'
 
-# Add a key.
+# Do not fail due to possibly missing keys.
+# Postfix operator '?'.
+jq '.spec.template.spec.containers[]?.env?' 'manifest.kube.json'
+
+# Add keys.
 jq --arg REGION ${AWS_REGION} '.spec.template.spec.containers[]?.env? += [{name: "AWS_REGION", value: $REGION}]' /tmp/service.kube.json
 
-# Delete a key.
+# Delete keys.
 jq 'del(.items[].spec.clusterIP)' /tmp/service.kube.json
 
-# Change a value.
+# Print objects as 'key [space] "value"' pairs.
+jq -r 'to_entries[] | "\(.key) \"\(.value)\""' 'file.json'
+
+# Change single values.
+# A.K.A. update values.
 jq '.extensionsGallery
     | .serviceUrl |= "https://marketplace.visualstudio.com/_apis/public/gallery"' \
   /usr/lib/code/product.json
-jq --arg NAMESPACE ${NAMESPACE} '.spec.template.spec.containers[]?.env[]? |= {name: .name, value: (if .name == "KUBERNETES_NAMESPACE" then $NAMESPACE else .value end)}' /tmp/service.kube.json
+jq --arg NAMESPACE ${NAMESPACE} \
+  '.spec.template.spec.containers[]?.env[]? |= {name: .name, value: (if .name == "KUBERNETES_NAMESPACE" then $NAMESPACE else .value end)}' \
+  /tmp/service.kube.json
 
 # Change multiple values at once.
 jq '.extensionsGallery
@@ -33,10 +44,8 @@ jq '.extensionsGallery + {
        itemUrl: "https://marketplace.visualstudio.com/items"
     }' /usr/lib/code/product.json
 
-# Add elements from an array from another file.
+# Add elements from arrays from other files.
 jq '.rules=([input.rules]|flatten)' starting-rule-set.json ending-rule-set.json
-
-# Add elements from an array from multiple files.
 jq '.rules=([inputs.rules]|flatten)' starting-rule-set.json parts/*.json
 
 # Put specific keys on top.
