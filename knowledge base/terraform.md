@@ -1,18 +1,19 @@
 # Terraform
 
 1. [TL;DR](#tldr)
-2. [Modules](#modules)
+1. [Modules](#modules)
    1. [Useful internal variables](#useful-internal-variables)
-3. [Versioning](#versioning)
-4. [Troubleshooting](#troubleshooting)
+1. [Versioning](#versioning)
+1. [Troubleshooting](#troubleshooting)
    1. [`count` vs `for_each`](#count-vs-for_each)
-   2. [Conditional creation of a resource](#conditional-creation-of-a-resource)
-   3. [Force the recreation of specific resources](#force-the-recreation-of-specific-resources)
-   4. [Error: at least 1 "features" blocks are required](#error-at-least-1-features-blocks-are-required)
-   5. [Add/subtract time](#addsubtract-time)
-   6. [Export the contents of a tfvars file as shell variables](#export-the-contents-of-a-tfvars-file-as-shell-variables)
-5. [Further readings](#further-readings)
-6. [Sources](#sources)
+   1. [Conditional creation of a resource](#conditional-creation-of-a-resource)
+   1. [Force the recreation of specific resources](#force-the-recreation-of-specific-resources)
+   1. [Error: at least 1 "features" blocks are required](#error-at-least-1-features-blocks-are-required)
+   1. [Add/subtract time](#addsubtract-time)
+   1. [Export the contents of a tfvars file as shell variables](#export-the-contents-of-a-tfvars-file-as-shell-variables)
+   1. [Print sensitive values in output](#print-sensitive-values-in-output)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -45,15 +46,38 @@ terraform force-unlock 'lock_id'
 terraform fmt
 terraform fmt -check -diff -recursive
 
+# Show outputs.
+terraform output 'team_tokens'
+
+# List registered resource.
+terraform state list
+
+# Show registered resources' details.
+terraform state show 'packet_device.worker'
+terraform state show 'packet_device.worker["example"]'
+terraform state show 'module.foo.packet_device.worker'
+
+# Remove registered resources from states.
+terraform state rm 'oci_core_instance.ampere'
+terraform state -state 'path/to/file.tfstate' \
+  'module.foo.packet_device.worker' 'tfe_team.robots[1]'
+
+# Remove all resources from the current state.
+terraform state list | xargs terraform state rm
+
+# Import existing resources into the state.
+terraform import 'oci_core_instance.this' 'ocid1.instance.oc1…'
+terraform import 'tfe_team.robots[4]' 'team-KV54…'
+terraform import 'module.app42.google_sql_user.teams["secops"]' 'fizzybull/…'
+
+# Show all the existing resources.
+terraform show
+terraform show -json
+
 # Create a dependency graph.
 # Requires `dot` from 'graphviz' for image generation.
 terraform graph
 terraform graph | dot -Tsvg > 'graph.svg'
-
-# Show an existing resource.
-terraform state show 'packet_device.worker'
-terraform state show 'packet_device.worker["example"]'
-terraform state show 'module.foo.packet_device.worker'
 
 # Recursively update all modules.
 # `get` is being deprecated in favour of `init`
@@ -231,6 +255,27 @@ eval "export $(sed -E 's/[[:blank:]]*//g' file.tfvars)"
 # As TF shell variables (TF_VAR_*).
 eval "export $(sed -E 's/([[:graph:]]+)[[:blank:]]*=[[:blank:]]*([[:graph:]]+)/TF_VAR_\1=\2/' file.tfvars)"
 ```
+
+### Print sensitive values in output
+
+1. Set the `sensitive` flag in the output definition, since it is required anyways:
+
+   ```hcl
+   output "team_tokens" {
+     value     = { for key, team in … : key => team.token }
+     sensitive = true
+   }
+   ```
+
+1. Call `terraform output` specifying that output's identifier:
+
+   ```sh
+   $ terraform output 'team_tokens'
+   {
+     "team1" = "5aaH5674…"
+     "test_team" = "543aH56f…"
+   }
+   ```
 
 ## Further readings
 
