@@ -115,6 +115,13 @@ az keyvault key list --query '[].name' -o 'tsv' --vault-name 'key_vault_name'
 az keyvault secret show --query 'value' \
   --name 'secret_name' --vault-name 'key_vault_name'
 
+# Get Key ID and Access Policy of Disk Encryption Sets.
+az disk-encryption-set show --ids 'id' \
+  --query "{
+    \"keyId\": activeKey.keyUrl,
+    \"accessPolicyId\": join('/', [activeKey.sourceVault.id, 'objectId', identity.principalId])
+  }"
+
 # List all the available SKUs for VMs.
 az vm list-skus
 az vm list-skus -l 'location'
@@ -182,6 +189,19 @@ az devops service-endpoint list -o 'tsv' \
 az devops service-endpoint list -o 'tsv' \
   --organization 'https://dev.azure.com/organization_name' --project 'project' \
   --query "[?id=='service_endpoint_id'].name"
+
+# Filter out users whose Principal Name starts for X and access Y.
+az devops user list --org 'https://dev.azure.com/organizationName' \
+  --query "
+    items[?
+      startsWith(user.principalName, 'yourNameHere') &&
+      \! contains(accessLevel.licenseDisplayName, 'Test plans')
+    ].user.displayName"
+
+# Get Teams' information.
+az devops team show \
+  --org 'https://dev.azure.com/organizationName' --project 'project' \
+  --team 'display_name'
 
 # Get the names of all the Pipelines the current user has access to.
 az pipelines list --organization 'organization_id_or_name'
