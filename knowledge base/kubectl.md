@@ -23,21 +23,21 @@ kubectl get pods -l app=nginx,tier=frontend
 
 ### Table of contents
 
-- [TL;DR](#tldr)
-- [Configuration](#configuration)
-  - [Configure access to multiple clusters](#configure-access-to-multiple-clusters)
-- [Create resources](#create-resources)
-- [Output formatting](#output-formatting)
-- [Verbosity and debugging](#verbosity-and-debugging)
-- [Further readings](#further-readings)
-- [Sources](#sources)
+1. [TL;DR](#tldr)
+1. [Configuration](#configuration)
+   1. [Configure access to multiple clusters](#configure-access-to-multiple-clusters)
+1. [Create resources](#create-resources)
+1. [Output formatting](#output-formatting)
+1. [Verbosity and debugging](#verbosity-and-debugging)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
 ```sh
 # Enable shell completion.
-source <(kubectl completion bash)
-echo "[[ $commands[kubectl] ]] && source <(kubectl completion zsh)" >> ~/.zshrc
+source <(kubectl completion 'bash')
+echo "[[ $commands[kubectl] ]] && source <(kubectl completion 'zsh')" >> ~/.zshrc
 
 # Shot the merged configuration.
 kubectl config view
@@ -48,13 +48,13 @@ kubectl config view -o jsonpath='{.users[*].name}'
 kubectl config view -o jsonpath='{.users[?(@.name == "e2e")].user.password}'
 
 # Set configuration values.
-kubectl config set-context --current --namespace=keda
-kubectl config set-context gce --user=cluster-admin --namespace=foo
+kubectl config set-context --current --namespace='keda'
+kubectl config set-context 'gce' --user='cluster-admin' --namespace='foo'
 kubectl config set-credentials \
-  kubeuser/foo.kubernetes.com --username=kubeuser --password=kubepassword
+  'kubeuser/foo.kubernetes.com' --username='kubeuser' --password='kubepassword'
 
 # Delete configuration values.
-kubectl config unset users.foo
+kubectl config unset 'users.foo'
 
 # Use multiple config files at once.
 # This will temporarily merge them in one big configuration file.
@@ -65,47 +65,47 @@ kubectl config get-contexts
 kubectl config current-context
 
 # Set context as the default one.
-kubectl config use-context docker-desktop
-kubectl config use-context gce
+kubectl config use-context 'docker-desktop'
+kubectl config use-context 'gce'
 
 # Display addresses of the master and services.
 kubectl cluster-info
 
 # Dump the complete current cluster state.
 kubectl cluster-info dump
-kubectl cluster-info dump --output-directory=/path/to/cluster-state
+kubectl cluster-info dump --output-directory='/path/to/cluster-state'
 
 # List supported resources types along with their short name, API group, Kind,
 # and whether they are namespaced.
 kubectl api-resources
-kubectl api-resources --namespaced=true
-kubectl api-resources -o name
-kubectl api-resources -o wide
-kubectl api-resources --verbs=list,get
+kubectl api-resources --namespaced='true'
+kubectl api-resources -o 'name'
+kubectl api-resources -o 'wide'
+kubectl api-resources --verbs='list,get'
 
 # Show the documentation about resources or their fields.
-kubectl explain pods
-kubectl explain pods.spec.containers
+kubectl explain 'pods'
+kubectl explain 'pods.spec.containers'
 
 # List and filter resources.
 kubectl get pods
-kubectl get pod/coredns-845757d86-47np2 -n kube-system
+kubectl get 'pod/coredns-845757d86-47np2' -n 'kube-system'
 kubectl get namespaces,pods --show-labels
-kubectl get services -A -o wide
-kubectl get rs --sort-by=.metadata.name
-kubectl get pv --sort-by=.spec.capacity.storage --no-headers
+kubectl get services -A -o 'wide'
+kubectl get rs --sort-by='.metadata.name'
+kubectl get pv --sort-by='.spec.capacity.storage' --no-headers
 kubectl get po --sort-by='.status.containerStatuses[0].restartCount'
-kubectl get events --sort-by .metadata.creationTimestamp
-kubectl get pods --field-selector=status.phase=Running
+kubectl get events --sort-by '.metadata.creationTimestamp'
+kubectl get pods --field-selector='status.phase=Running'
 kubectl get node -l='!node-role.kubernetes.io/master'
 kubectl get replicasets -l 'environment in (prod, qa)'
 kubectl get deploy --selector 'tier,tier notin (frontend)'
 
 # Extract information from resources' definition.
-kubectl get deployment nginx -o yaml
-kubectl get cm kube-root-ca.crt -o jsonpath='{.data.ca\.crt}'
+kubectl get deployment 'nginx' -o 'yaml'
+kubectl get cm 'kube-root-ca.crt' -o jsonpath='{.data.ca\.crt}'
 kubectl get po -o=jsonpath='{.items..metadata.name}'
-kubectl get po -l app=redis -o jsonpath='{.items[*].metadata.labels.version}'
+kubectl get po -l 'app=redis' -o jsonpath='{.items[*].metadata.labels.version}'
 kubectl get nodes \
   -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}'
 
@@ -126,9 +126,9 @@ kubectl get nodes \
 | grep "Ready=True"
 
 # List all secrets currently in use by a Pod.
-kubectl get pods -o json \
+kubectl get pods -o 'json' \
 | jq '.items[].spec.containers[].env[]?.valueFrom.secretKeyRef.name' \
-| grep -v null | sort | uniq
+| grep -v 'null' | sort | uniq
 
 # List the name of Pods belonging to a particular RC.
 SELECTOR=${$(kubectl get rc my-rc --output=json | jq -j '.spec.selector | to_entries | .[] | "\(.key)=\(.value),"')%?} kubectl get pods -l=$SELECTOR \
@@ -144,17 +144,17 @@ kubectl get pods --all-namespaces \
 # Produce a period-delimited tree of all keys returned for nodes.
 # Helpful when trying to locate a specific key within a complex nested JSON
 # structure.
-kubectl get nodes -o json | jq -c 'path(..)|[.[]|tostring]|join(".")'
+kubectl get nodes -o 'json' | jq -c 'path(..)|[.[]|tostring]|join(".")'
 
 # Show detailed information about resources.
 kubectl describe node pi
-kubectl describe deploy,rs,po -l app=redis
+kubectl describe deploy,rs,po -l 'app=redis'
 
 # Create resources from manifests.
-kubectl apply -f manifest.yaml
-kubectl apply -f path/to/m1.yaml -f ./m2.yaml
-kubectl apply -f dir/
-kubectl apply -f https://git.io/vPieo
+kubectl apply -f 'manifest.yaml'
+kubectl apply -f 'path/to/m1.yaml' -f './m2.yaml'
+kubectl apply -f 'dir/'
+kubectl apply -f 'https://git.io/vPieo'
 cat <<-EOF | kubectl apply -f -
   apiVersion: v1
   kind: Secret
@@ -171,18 +171,27 @@ EOF
 kubectl diff -f ./manifest.yaml
 
 # Start a Pod.
-kubectl run nginx --image nginx
-kubectl run busybox --rm -it --image=busybox -n keda -- sh
+kubectl run 'nginx' --image 'nginx'
+kubectl run 'busybox' --rm -it --image='busybox' -n 'keda' -- sh
+kubectl run 'alpine' --restart=Never -it --image 'alpine' -- sh
+kubectl run 'ephemeral' --image=registry.k8s.io/pause:3.1 --restart=Never
 
 # Start a Pod and write its specs into a file.
-kubectl run nginx --image=nginx --dry-run=client -o yaml > pod.yaml
+kubectl run 'nginx' --image='nginx' --dry-run='client' -o 'yaml' > 'pod.yaml'
 
 # Create a single instance deployment of 'nginx'.
-kubectl create deployment nginx --image=nginx
+kubectl create deployment 'nginx' --image 'nginx'
 
-# Start a Job using an existing Job as template
-kubectl create job backup-before-upgrade-13.6.2-to-13.9.2 \
-  --from=cronjob.batch/backup -n gitlab
+# Start a Job printing "Hello World".
+kubectl create job 'hello' --image 'busybox:1.28' -- echo "Hello World"
+
+# Start a Job using an existing Job as template.
+kubectl create job 'backup-before-upgrade-13.6.2-to-13.9.2' \
+  --from=cronjob.batch/backup -n 'gitlab'
+
+# Start a CronJob printing "Hello World" every minute.
+kubectl create cronjob 'hello' --image=busybox:1.28 --schedule="*/1 * * * *" \
+  -- echo "Hello World"
 
 # Wait for a pod to be 'ready'.
 kubectl wait --for 'condition=ready' --timeout 120s \
@@ -210,7 +219,7 @@ kubectl rollout status -w deployment/frontend
 kubectl rollout restart deployment/frontend
 
 # Replace a Pod based on the JSON passed into stdin.
-cat pod.json | kubectl replace -f -
+cat 'pod.json' | kubectl replace -f -
 
 # Force replacement, deletion and recreation (in this order) of resources.
 # This Will cause a service outage.
@@ -225,8 +234,9 @@ kubectl get pod mypod -o yaml \
 | sed 's/\(image: myimage\):.*$/\1:v4/' \
 | kubectl replace -f -
 
-# Add Labels to resources.
-kubectl label pods nginx custom-name=awesome
+# Add Labels.
+kubectl label pods 'nginx' 'custom-name=awesome'
+kubectl label ns 'default' 'pod-security.kubernetes.io/enforce=privileged'
 
 # Add Annotations.
 kubectl annotate pods alpine icon-url=http://goo.gl/XXBTWq
@@ -336,6 +346,9 @@ kubectl taint nodes node1 key1=value1:NoSchedule-
 # If a taint with that key and effect already exists, replace its value.
 kubectl taint nodes foo dedicated=special-user:NoSchedule
 
+# Execute a privileged, debug container.
+kubectl debug -it 'node/docker-desktop' --image 'busybox:1.28'
+
 # Mark Nodes as unschedulable.
 kubectl cordon my-node
 
@@ -351,6 +364,14 @@ kubectl top node my-node
 # Listen on port 5000 on the local machine and forward connections to port 6000
 # of my-pod
 kubectl port-forward my-pod 5000:6000
+
+# Show Containers' status, properties and capabilities from the inside.
+# Run the command from *inside* the container.
+cat /proc/1/status
+
+# Check a container's capabilities.
+# Run the command from *inside* the container.
+grep 'Cap' /proc/1/status
 ```
 
 ## Configuration
@@ -546,6 +567,8 @@ Verbosity | Description
 - [Taints and Tolerations]
 - [Commands reference]
 - [Configure access to multiple clusters]
+- [Configure a Security Context for a Pod or Container]
+- [Enforce Pod Security Standards with Namespace Labels]
 
 ## Sources
 
@@ -554,14 +577,16 @@ Verbosity | Description
 - [Run a replicated stateful application]
 - [Accessing an application on Kubernetes in Docker]
 
-<!-- docs -->
+<!-- project's references -->
 [assigning pods to nodes]: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
 [cheatsheet]: https://kubernetes.io/docs/reference/kubectl/cheatsheet
 [commands reference]: https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands
+[configure a security context for a pod or container]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 [configure access to multiple clusters]: https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
+[enforce pod security standards with namespace labels]: https://kubernetes.io/docs/tasks/configure-pod-container/enforce-standards-namespace-labels/
 [taints and tolerations]: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
 
-<!-- other articles -->
+<!-- external references articles -->
 [accessing an application on kubernetes in docker]: https://medium.com/@lizrice/accessing-an-application-on-kubernetes-in-docker-1054d46b64b1
 [run a replicated stateful application]: https://kubernetes.io/docs/tasks/run-application/run-replicated-stateful-application/
 [run a single-instance stateful application]: https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/

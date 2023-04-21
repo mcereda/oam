@@ -6,18 +6,23 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 1. [Composition](#composition)
    1. [The control plane](#the-control-plane)
       1. [kube-apiserver](#kube-apiserver)
-      2. [etcd](#etcd)
-      3. [kube-scheduler](#kube-scheduler)
-      4. [kube-controller-manager](#kube-controller-manager)
-      5. [cloud-controller-manager](#cloud-controller-manager)
-   2. [The worker Nodes](#the-worker-nodes)
+      1. [etcd](#etcd)
+      1. [kube-scheduler](#kube-scheduler)
+      1. [kube-controller-manager](#kube-controller-manager)
+      1. [cloud-controller-manager](#cloud-controller-manager)
+   1. [The worker Nodes](#the-worker-nodes)
       1. [kubelet](#kubelet)
-      2. [kube-proxy](#kube-proxy)
-      3. [Container runtime](#container-runtime)
-   3. [Addons](#addons)
-2. [The API](#the-api)
-3. [Managed Kubernetes Services](#managed-kubernetes-services)
-4. [Sources](#sources)
+      1. [kube-proxy](#kube-proxy)
+      1. [Container runtime](#container-runtime)
+      1. [Addons](#addons)
+1. [The API](#the-api)
+1. [Managed Kubernetes Services](#managed-kubernetes-services)
+1. [Security](#security)
+   1. [Highly privileged containers](#highly-privileged-containers)
+      1. [Capabilities](#capabilities)
+      1. [Privileged container vs privilege escalation](#privileged-container-vs-privilege-escalation)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## Composition
 
@@ -107,7 +112,7 @@ The software that is responsible for running containers.
 
 Kubernetes supports container runtimes like `containerd`, `CRI-O`, and any other implementation of the Kubernetes CRI (Container Runtime Interface).
 
-### Addons
+#### Addons
 
 Addons use Kubernetes resources (_DaemonSet_, _Deployment_, etc) to implement cluster features, and as such namespaced resources for addons belong within the `kube-system` namespace.
 
@@ -131,15 +136,119 @@ The Kubernetes API can be extended:
 
 Cloud providers offer managed versions.
 
+## Security
+
+### Highly privileged containers
+
+Some workloads (e.g. [ElasticSearch]) might require to change one or more system settings for performance, stability, or other issues.<br/>
+This is usually achieved executing the change from a Container with high privileges, which has access to the Node's resources and breaks the isolation Containers are usually famous for. If compromised, an attacker can use this highly privileged container to gain access to the underlying Node.
+
+To mitigate this, [Kubernetes introduced the design of a Security Context][security context design proposal].<br/>
+From this document:
+
+> A security context is a set of constraints that are applied to a Container in order to achieve the following goals (from the [Security design][Security Design Proposal]):
+>
+> - ensure a **clear isolation** between the Container and the underlying host it runs on;
+> - **limit** the ability of the Container to negatively impact the infrastructure or other Containers.
+>
+> [The main idea is that] **Containers should only be granted the access they need to perform their work**. The Security Context takes advantage of containerization features such as the ability to [add or remove capabilities][Runtime privilege and Linux capabilities in Docker containers] to give a process some privileges, but not all the privileges of the `root` user.
+
+#### Capabilities
+
+Adding capabilities to a Container is **not** making it _privileged_, **nor** allowing _privilege escalation_. It is just giving the Container the ability to write to specific files or devices depending on the given capability.
+
+This means having a capability assigned does **not** automatically make the Container able to wreak havoc on a Node, and this practice **can be a legitimate use** of this feature instead.
+
+From the feature's `man` page:
+
+> Linux divides the privileges traditionally associated with superuser into distinct units, known as _capabilities_, which can be independently enabled and disabled. Capabilities are a per-thread attribute.
+
+This also means a Container will be **limited** to its contents, plus the capabilities it has been assigned.
+
+Some capabilities are assigned to all Containers by default, while others (the ones which could cause more issues) require to be **explicitly** set using the Containers' `securityContext.capabilities.add` property.<br/>
+If a Container is _privileged_ (see [Privileged container vs privilege escalation](#privileged-container-vs-privilege-escalation)), it will have access to **all** the capabilities, with no regards of what are explicitly assigned to it.
+
+Check:
+- [Linux capabilities], to see what capabilities can be assigned to a process **in a Linux system**;
+- [Runtime privilege and Linux capabilities in Docker containers] for the capabilities available **inside Kubernetes**, and
+- [Container capabilities in Kubernetes] for a handy table associating capabilities in Kubernetes to their Linux variant.
+
+#### Privileged container vs privilege escalation
+
+A _privileged container_ is very different from a _container leveraging privilege escalation_.
+
+A **privileged container** does whatever a processes running directly on the Node can.<br/>
+It will have automatically assigned **all** [capabilities](#capabilities), and being `root` in this container is effectively being `root` on the Node it is running on.
+
+> For a Container to be _privileged_, its definition **requires the `securityContext.privileged` property set to `true`**.
+
+**Privilege escalation** allows **a process inside the Container** to gain more privileges than its parent process.<br/>
+The process will be able to assume `root`-like powers, but will have access only to the **assigned** [capabilities](#capabilities) and generally have limited to no access to the Node like any other Container.
+
+> For a Container to _leverage privilege escalation_, its definition **requires the `securityContext.allowPrivilegeEscalation` property**:
+>
+> - to **either** be set to `true`, or
+> - to **not be set** at all **if**:
+>   - the Container is already privileged, or
+>   - the Container has `SYS_ADMIN` capabilities.
+>
+> This property directly controls whether the [`no_new_privs`][No New Privileges Design Proposal] flag gets set on the Container's process.
+
+From the [design document for `no_new_privs`][No New Privileges Design Proposal]:
+
+> In Linux, the `execve` system call can grant more privileges to a newly-created process than its parent process. Considering security issues, since Linux kernel v3.5, there is a new flag named `no_new_privs` added to prevent those new privileges from being granted to the processes.
+>
+> `no_new_privs` is inherited across `fork`, `clone` and `execve` and **can not be unset**. With `no_new_privs` set, `execve` promises not to grant the privilege to do anything that could not have been done without the `execve` call.
+>
+> For more details about `no_new_privs`, please check the [Linux kernel documentation][no_new_privs linux kernel documentation].
+>
+> […]
+>
+> To recap, below is a table defining the default behavior at the pod security policy level and what can be set as a default with a pod security policy:
+>
+> | allowPrivilegeEscalation setting | uid = 0 or unset   | uid != 0           | privileged/CAP_SYS_ADMIN |
+> | -------------------------------- | ------------------ | ------------------ | ------------------------ |
+> | nil                              | no_new_privs=true  | no_new_privs=false | no_new_privs=false       |
+> | false                            | no_new_privs=true  | no_new_privs=true  | no_new_privs=false       |
+> | true                             | no_new_privs=false | no_new_privs=false | no_new_privs=false       |
+
+## Further readings
+
+- Kubernetes' [security context design proposal]
+- Kubernetes' [No New Privileges Design Proposal]
+- [Linux kernel documentation about `no_new_privs`][no_new_privs linux kernel documentation]
+- [Linux capabilities]
+- [Runtime privilege and Linux capabilities in Docker containers]
+- [Container capabilities in Kubernetes]
+- [Configure a Security Context for a Pod or a Container], specifically the [Set capabilities for a Container] section
+- [Kubernetes SecurityContext Capabilities Explained]
+- [Best practices for pod security in Azure Kubernetes Service (AKS)]
+- [`kubectl`][kubectl]
+
 ## Sources
 
-- [Concepts]
+All the references in the [further readings] section, plus the following:
+
+- Kubernetes' [concepts]
 
 <!-- project's documentation -->
 [api deprecation policy]: https://kubernetes.io/docs/reference/using-api/deprecation-policy/
 [concepts]: https://kubernetes.io/docs/concepts/
+[configure a security context for a pod or a container]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+[no new privileges design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/no-new-privs.md
+[security context design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security_context.md
+[security design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security.md
+[set capabilities for a container]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container
 
 <!-- internal references -->
+[kubectl]: kubectl.md
 
 <!-- external references -->
+[best practices for pod security in azure kubernetes service (aks)]: https://learn.microsoft.com/en-us/azure/aks/developer-best-practices-pod-security
 [cncf]: https://www.cncf.io/
+[container capabilities in kubernetes]: https://unofficial-kubernetes.readthedocs.io/en/latest/concepts/policy/container-capabilities/
+[elasticsearch]: https://github.com/elastic/helm-charts/issues/689
+[kubernetes securitycontext capabilities explained]: https://www.golinuxcloud.com/kubernetes-securitycontext-capabilities/
+[linux capabilities]: https://man7.org/linux/man-pages/man7/capabilities.7.html
+[no_new_privs linux kernel documentation]: https://www.kernel.org/doc/Documentation/prctl/no_new_privs.txt
+[runtime privilege and linux capabilities in docker containers]: https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities
