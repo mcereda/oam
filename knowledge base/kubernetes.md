@@ -16,11 +16,12 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
       1. [Container runtime](#container-runtime)
       1. [Addons](#addons)
 1. [The API](#the-api)
-1. [Managed Kubernetes Services](#managed-kubernetes-services)
 1. [Security](#security)
-   1. [Highly privileged containers](#highly-privileged-containers)
+   1. [Containers with high privileges](#containers-with-high-privileges)
       1. [Capabilities](#capabilities)
-      1. [Privileged container vs privilege escalation](#privileged-container-vs-privilege-escalation)
+      1. [Privileged containers vs privilege escalation](#privileged-containers-vs-privilege-escalation)
+   1. [Sysctl settings](#sysctl-settings)
+1. [Managed Kubernetes Services](#managed-kubernetes-services)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -132,19 +133,14 @@ The Kubernetes API can be extended:
 - using _Custom resources_ to declaratively define how the API server should provide your chosen resource API, or
 - extending the Kubernetes API by implementing an aggregation layer.
 
-## Managed Kubernetes Services
-
-Cloud providers offer managed versions.
-
 ## Security
 
-### Highly privileged containers
+### Containers with high privileges
 
-Some workloads (e.g. [ElasticSearch]) might require to change one or more system settings for performance, stability, or other issues.<br/>
-This is usually achieved executing the change from a Container with high privileges, which has access to the Node's resources and breaks the isolation Containers are usually famous for. If compromised, an attacker can use this highly privileged container to gain access to the underlying Node.
+Kubernetes [introduced a Security Context][security context design proposal] as a mitigation solution to some workloads requiring to change one or more Node settings for performance, stability, or other issues (e.g. [ElasticSearch]).<br/>
+This is usually achieved executing the needed command from an InitContainer with higher privileges than normal, which will have access to the Node's resources and breaks the isolation Containers are usually famous for. If compromised, an attacker can use this highly privileged container to gain access to the underlying Node.
 
-To mitigate this, [Kubernetes introduced the design of a Security Context][security context design proposal].<br/>
-From this document:
+From the design proposal:
 
 > A security context is a set of constraints that are applied to a Container in order to achieve the following goals (from the [Security design][Security Design Proposal]):
 >
@@ -173,7 +169,7 @@ Check:
 - [Runtime privilege and Linux capabilities in Docker containers] for the capabilities available **inside Kubernetes**, and
 - [Container capabilities in Kubernetes] for a handy table associating capabilities in Kubernetes to their Linux variant.
 
-#### Privileged container vs privilege escalation
+#### Privileged containers vs privilege escalation
 
 A _privileged container_ is very different from a _container leveraging privilege escalation_.
 
@@ -212,8 +208,17 @@ From the [design document for `no_new_privs`][No New Privileges Design Proposal]
 > | false                            | no_new_privs=true  | no_new_privs=true  | no_new_privs=false       |
 > | true                             | no_new_privs=false | no_new_privs=false | no_new_privs=false       |
 
+### Sysctl settings
+
+See [Using `sysctls` in a Kubernetes Cluster].
+
+## Managed Kubernetes Services
+
+Most cloud providers offer their managed versions of Kubernetes. Check their websites.
+
 ## Further readings
 
+- [`kubectl`][kubectl]
 - Kubernetes' [security context design proposal]
 - Kubernetes' [No New Privileges Design Proposal]
 - [Linux kernel documentation about `no_new_privs`][no_new_privs linux kernel documentation]
@@ -223,7 +228,7 @@ From the [design document for `no_new_privs`][No New Privileges Design Proposal]
 - [Configure a Security Context for a Pod or a Container], specifically the [Set capabilities for a Container] section
 - [Kubernetes SecurityContext Capabilities Explained]
 - [Best practices for pod security in Azure Kubernetes Service (AKS)]
-- [`kubectl`][kubectl]
+- [Using `sysctls` in a Kubernetes Cluster][Using sysctls in a Kubernetes Cluster]
 
 ## Sources
 
@@ -239,6 +244,7 @@ All the references in the [further readings] section, plus the following:
 [security context design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security_context.md
 [security design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security.md
 [set capabilities for a container]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container
+[using sysctls in a kubernetes cluster]: https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/
 
 <!-- internal references -->
 [kubectl]: kubectl.md
