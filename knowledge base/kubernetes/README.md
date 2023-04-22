@@ -346,7 +346,7 @@ Leverage the `preStop` hook instead of `postStart`.
 Since kubernetes version 1.9 and forth, volumeMounts behavior on secret, configMap, downwardAPI and projected have changed to Read-Only by default.
 A workaround to the problem is to create an `emtpyDir` Volume and copy the contents into it and execute/write whatever you need:
 
-```shell
+```sh
   initContainers:
     - name: copy-ro-scripts
       image: busybox
