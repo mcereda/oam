@@ -27,6 +27,7 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
    1. [Sysctl settings](#sysctl-settings)
 1. [Managed Kubernetes Services](#managed-kubernetes-services)
    1. [Best practices](#best-practices)
+1. [Edge computing](#edge-computing)
 1. [Troubleshooting](#troubleshooting)
    1. [Run a command in a Pod right **after** its initialization](#run-a-command-in-a-pod-right-after-its-initialization)
    1. [Run a command **just before a Pod stops**](#run-a-command-just-before-a-pod-stops)
@@ -44,7 +45,7 @@ When you deploy Kubernetes, you get a _cluster_.
 
 A K8S cluster consists of:
 
-- one or more sets of worker machines (_Nodes_), which execute containers; every cluster must have at least one worker node;
+- one or more sets of worker machines (_Nodes_), which execute containerized applications; every cluster must have at least one worker node;
 - a _control plane_, which manages the worker Nodes and the workloads in the cluster.
 
 ![Cluster components](components.png)
@@ -58,7 +59,7 @@ In production environments:
 
 ### The control plane
 
-The control plane's components make global decisions about the cluster (like scheduling) and detect and respond to cluster events (like starting up a new Pod when a deployment has less replicas then it requests).
+The control plane's components make global decisions about the cluster (like scheduling) and detect and respond to cluster events (like starting up a new Pod when a Deployment has less Replicas then it requests).
 
 Control plane components can be run on any machine in the cluster. For simplicity, set up scripts typically start all control plane components on the same machine, and avoid running user containers on it.
 
@@ -66,7 +67,7 @@ Control plane components can be run on any machine in the cluster. For simplicit
 
 The API server exposes the Kubernetes API, and is the front end for, and the core of, the Kubernetes control plane.
 
-The main implementation of a Kubernetes API server is _kube-apiserver_, which is designed to scale horizontally (scales by deploying more instances) and balance traffic between its instances.
+The main implementation of a Kubernetes API server is _kube-apiserver_, which is designed to scale horizontally (by deploying more instances) and balance traffic between its instances.
 
 #### etcd
 
@@ -86,6 +87,7 @@ Each controller is a separate process logically speaking, but to reduce complexi
 Examples of these controllers are the following:
 
 - Node controller: notices and responds when Nodes go down;
+- Replication controller: maintains the correct number of Pods for every replication controller object in the system;
 - Job controller: checks _Job_ objects (one-off tasks) and creates Pods to run them to completion;
 - EndpointSlice controller: populates _EndpointSlice_ objects, which provide a link between Services and Pods;
 - ServiceAccount controller: create default ServiceAccounts for new namespaces.
@@ -96,7 +98,7 @@ Embeds cloud-specific control logic, linking your cluster into your cloud provid
 
 They only run controllers that are specific to your cloud provider. If you are running Kubernetes on your own premises, or in a learning environment inside your own PC, the cluster will have no cloud controller managers.
 
-As with the kube-controller-manager, it combines several logically independent control loops into a single binary that you run as a single process. It can scale horizontally (run more than one copy) to improve performance or to help tolerate failures.
+As with the kube-controller-manager, it combines several logically independent control loops into a single binary that you run as a single process. It can scale horizontally to improve performance or to help tolerate failures.
 
 The following controllers can have cloud provider dependencies:
 
@@ -150,9 +152,14 @@ The Kubernetes API can be extended:
 
 ## Pods
 
+The smallest deployable unit of computing that one can create and manage in Kubernetes.<br/>
+Pods contain one or more relatively tightly coupled application Containers; they are always co-located and co-scheduled, and share context, storage/network resources, and a specification for how to run them.
+
+Pods are usually created trough workload resources (Deployments, StatefulSets or Jobs) and **not** directly.
+
 Gotchas:
 
-- If a Container specifies a memory or CPU `limit` but does **not** specify a memory or CPU `request`, Kubernetes automatically assigns it a resource `request` spec that matches the given `limit`
+- If a Container specifies a memory or CPU `limit` but does **not** specify a memory or CPU `request`, Kubernetes automatically assigns it a resource `request` spec equal to the given `limit`.
 
 ### Quality of service
 
@@ -314,6 +321,10 @@ Each node pool should:
 - sparse nodes on availability zones
 - be labelled with information about the nodes' features
 
+## Edge computing
+
+If planning to run Kubernetes on a Raspberry Pi, see [k3s] and the [Build your very own self-hosting platform with Raspberry Pi and Kubernetes] series of articles.
+
 ## Troubleshooting
 
 ### Run a command in a Pod right **after** its initialization
@@ -432,20 +443,27 @@ See the example's [README][create an admission webhook].
 
 ## Further readings
 
+Usage:
+
+- [Official documentation][documentation]
+- [Configure a Pod to use a ConfigMap]
+- [Distribute credentials securely using Secrets]
+- [Configure a Security Context for a Pod or a Container]
+  - [Set capabilities for a Container]
+- [Using `sysctls` in a Kubernetes Cluster][Using sysctls in a Kubernetes Cluster]
+
 Concepts:
 
+- [Namespaces]
+- [Container hooks]
 - Kubernetes' [security context design proposal]
 - Kubernetes' [No New Privileges Design Proposal]
 - [Linux kernel documentation about `no_new_privs`][no_new_privs linux kernel documentation]
 - [Linux capabilities]
 - [Runtime privilege and Linux capabilities in Docker containers]
 - [Container capabilities in Kubernetes]
-- [Configure a Security Context for a Pod or a Container], specifically the [Set capabilities for a Container] section
 - [Kubernetes SecurityContext Capabilities Explained]
 - [Best practices for pod security in Azure Kubernetes Service (AKS)]
-- [Using `sysctls` in a Kubernetes Cluster][Using sysctls in a Kubernetes Cluster]
-- [Namespaces]
-- [Container hooks]
 
 Tools:
 
@@ -456,6 +474,11 @@ Tools:
 - [`kubectx`+`kubens`][kubectx+kubens] (alternative to [`kubie`][kubie])
 - [`kube-ps1`][kube-ps1]
 - [`kubie`][kubie] (alternative to [`kubectx`+`kubens`][kubectx+kubens] and [`kube-ps1`][kube-ps1])
+- [k3s]
+
+Others:
+
+- The [Build your very own self-hosting platform with Raspberry Pi and Kubernetes] series of articles
 
 ## Sources
 
@@ -470,10 +493,14 @@ All the references in the [further readings] section, plus the following:
 
 <!-- project's documentation -->
 [api deprecation policy]: https://kubernetes.io/docs/reference/using-api/deprecation-policy/
+[common labels]: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
 [concepts]: https://kubernetes.io/docs/concepts/
+[configure a pod to use a configmap]: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
 [configure a security context for a pod or a container]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 [configure quality of service for pods]: https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/
 [container hooks]: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
+[distribute credentials securely using secrets]: https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/
+[documentation]: https://kubernetes.io/docs/home/
 [namespaces]: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 [no new privileges design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/no-new-privs.md
 [security context design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security_context.md
@@ -485,6 +512,7 @@ All the references in the [further readings] section, plus the following:
 [create an admission webhook]: ../../examples/kubernetes/create%20an%20admission%20webhook/README.md
 [helm]: helm.md
 [helmfile]: helmfile.md
+[k3s]: k3s.md
 [kubectl]: kubectl.md
 [kubeval]: kubeval.md
 [prometheus on kubernetes using helm]: ../../examples/kubernetes/prometheus%20on%20k8s%20using%20helm.md
@@ -493,6 +521,7 @@ All the references in the [further readings] section, plus the following:
 <!-- external references -->
 
 [best practices for pod security in azure kubernetes service (aks)]: https://learn.microsoft.com/en-us/azure/aks/developer-best-practices-pod-security
+[build your very own self-hosting platform with raspberry pi and kubernetes]: https://kauri.io/build-your-very-own-self-hosting-platform-with-raspberry-pi-and-kubernetes/5e1c3fdc1add0d0001dff534/c
 [cncf]: https://www.cncf.io/
 [container capabilities in kubernetes]: https://unofficial-kubernetes.readthedocs.io/en/latest/concepts/policy/container-capabilities/
 [elasticsearch]: https://github.com/elastic/helm-charts/issues/689
