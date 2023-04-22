@@ -7,20 +7,20 @@ Any Kubernetes cluster **>= 1.16.0** should work.
 **Table of contents:**
 
 1. [How KEDA works](#how-keda-works)
-2. [Deployment](#deployment)
+1. [Deployment](#deployment)
    1. [Helm chart](#helm-chart)
-   2. [Manual deployment](#manual-deployment)
-3. [Usage](#usage)
+   1. [Manual deployment](#manual-deployment)
+1. [Usage](#usage)
    1. [ScaledObject](#scaledobject)
-   2. [ScaledJobs](#scaledjobs)
-   3. [Authentication](#authentication)
-4. [External Scalers](#external-scalers)
-5. [Troubleshooting](#troubleshooting)
+   1. [ScaledJobs](#scaledjobs)
+   1. [Authentication](#authentication)
+1. [External Scalers](#external-scalers)
+1. [Troubleshooting](#troubleshooting)
    1. [Access logging and telemetry](#access-logging-and-telemetry)
-   2. [Long running executions](#long-running-executions)
-   3. [Manually uninstall everything](#manually-uninstall-everything)
-6. [Further readings](#further-readings)
-7. [Sources](#sources)
+   1. [Long running executions](#long-running-executions)
+   1. [Manually uninstall everything](#manually-uninstall-everything)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## How KEDA works
 
@@ -239,7 +239,7 @@ spec:
             - secretRef:
                 name: rabbitmq-consumer
         restartPolicy: Never
-    backoffLimit: 4  
+    backoffLimit: 4
   pollingInterval: 10
   maxReplicaCount: 30
   successfulJobsHistoryLimit: 3

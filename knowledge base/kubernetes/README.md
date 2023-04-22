@@ -1,9 +1,11 @@
-# Kubernetes primer
+# Kubernetes
 
 Open source container orchestration engine for containerized applications.<br />
 Hosted by the [Cloud Native Computing Foundation][cncf].
 
-1. [Composition](#composition)
+## Table of content <!-- omit in toc -->
+
+1. [Components](#components)
    1. [The control plane](#the-control-plane)
       1. [kube-apiserver](#kube-apiserver)
       1. [etcd](#etcd)
@@ -16,16 +18,27 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
       1. [Container runtime](#container-runtime)
       1. [Addons](#addons)
 1. [The API](#the-api)
+1. [Pods](#pods)
+   1. [Quality of service](#quality-of-service)
 1. [Security](#security)
    1. [Containers with high privileges](#containers-with-high-privileges)
       1. [Capabilities](#capabilities)
       1. [Privileged containers vs privilege escalation](#privileged-containers-vs-privilege-escalation)
    1. [Sysctl settings](#sysctl-settings)
 1. [Managed Kubernetes Services](#managed-kubernetes-services)
+   1. [Best practices](#best-practices)
+1. [Troubleshooting](#troubleshooting)
+   1. [Run a command in a Pod right **after** its initialization](#run-a-command-in-a-pod-right-after-its-initialization)
+   1. [Run a command **just before a Pod stops**](#run-a-command-just-before-a-pod-stops)
+   1. [Dedicate Nodes to specific workloads](#dedicate-nodes-to-specific-workloads)
+   1. [Recreate Pods upon ConfigMap's or Secret's content change](#recreate-pods-upon-configmaps-or-secrets-content-change)
+1. [Examples](#examples)
+   1. [Prometheus on Kubernetes using Helm](#prometheus-on-kubernetes-using-helm)
+   1. [Create an admission webhook](#create-an-admission-webhook)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
-## Composition
+## Components
 
 When you deploy Kubernetes, you get a _cluster_.
 
@@ -33,6 +46,8 @@ A K8S cluster consists of:
 
 - one or more sets of worker machines (_Nodes_), which execute containers; every cluster must have at least one worker node;
 - a _control plane_, which manages the worker Nodes and the workloads in the cluster.
+
+![Cluster components](components.png)
 
 The components of an application workload are called _Pods_. Pods are hosted by Nodes, are composed of containers, and are also the smallest execution unit in the cluster.
 
@@ -133,6 +148,72 @@ The Kubernetes API can be extended:
 - using _Custom resources_ to declaratively define how the API server should provide your chosen resource API, or
 - extending the Kubernetes API by implementing an aggregation layer.
 
+## Pods
+
+Gotchas:
+
+- If a Container specifies a memory or CPU `limit` but does **not** specify a memory or CPU `request`, Kubernetes automatically assigns it a resource `request` spec that matches the given `limit`
+
+### Quality of service
+
+See [Configure Quality of Service for Pods] for more information.
+
+QoS classes are used to make decisions about scheduling and evicting Pods.  
+When a Pod is created, it is also assigned one of the following QoS classes:
+
+- _Guaranteed_, when **every** Container in the Pod, including init containers, has:
+
+  - a memory limit **and** a memory request, **and** they are the same
+  - a CPU limit **and** a CPU request, **and** they are the same
+
+  ```yaml
+  spec:
+    containers:
+      …
+      resources:
+        limits:
+          cpu: 700m
+          memory: 200Mi
+        requests:
+          cpu: 700m
+          memory: 200Mi
+      …
+  status:
+    qosClass: Guaranteed
+  ```
+
+- _Burstable_, when
+
+  - the Pod does not meet the criteria for the _Guaranteed_ QoS class
+  - **at least one** Container in the Pod has a memory **or** CPU request spec
+
+  ```yaml
+  spec:
+    containers:
+    - name: qos-demo
+      …
+      resources:
+        limits:
+          memory: 200Mi
+        requests:
+          memory: 100Mi
+    …
+  status:
+    qosClass: Burstable
+  ```
+
+- _BestEffort_, when the Pod does not meet the criteria for the other QoS classes (its Containers have **no** memory or CPU limits **nor** requests)
+
+  ```yaml
+  spec:
+    containers:
+      …
+      resources: {}
+    …
+  status:
+    qosClass: BestEffort
+  ```
+
 ## Security
 
 ### Containers with high privileges
@@ -216,9 +297,143 @@ See [Using `sysctls` in a Kubernetes Cluster].
 
 Most cloud providers offer their managed versions of Kubernetes. Check their websites.
 
+### Best practices
+
+All kubernetes clusters should:
+
+- be created using IaC ([terraform], [pulumi])
+- have different node pools, to be able to manage different workloads
+- have a **non pre-emptible** node pool to host critical services like Admission Controller Webhooks
+
+Each node pool should:
+
+- have a meaningful name (\<prefix..>-\<randomid>)
+- have a _minimum_ set of _meaningful_ labels:
+  - cloud provider information
+  - node information and capabilities
+- sparse nodes on availability zones
+- be labelled with information about the nodes' features
+
+## Troubleshooting
+
+### Run a command in a Pod right **after** its initialization
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  template:
+    …
+    spec:
+      containers:
+        - name: my-container
+          …
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "echo 'heeeeeeey yaaaaaa!'"]
+```
+
+### Run a command **just before a Pod stops**
+
+Leverage the `preStop` hook instead of `postStart`.
+
+> Hooks **are not passed parameters**, and this includes environment variables
+> Use a script if you need them. See [container hooks] and [preStop hook doesn't work with env variables]
+
+Since kubernetes version 1.9 and forth, volumeMounts behavior on secret, configMap, downwardAPI and projected have changed to Read-Only by default.
+A workaround to the problem is to create an `emtpyDir` Volume and copy the contents into it and execute/write whatever you need:
+
+```shell
+  initContainers:
+    - name: copy-ro-scripts
+      image: busybox
+      command: ['sh', '-c', 'cp /scripts/* /etc/pre-install/']
+      volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+        - name: pre-install
+          mountPath: /etc/pre-install
+  volumes:
+    - name: pre-install
+      emptyDir: {}
+    - name: scripts
+      configMap:
+        name: bla
+```
+
+### Dedicate Nodes to specific workloads
+
+Leverage taints and node affinity:
+
+1. Taint the Nodes:
+
+   ```sh
+   $ kubectl taint nodes 'host1' 'dedicated=devs:NoSchedule'
+   node "host1" tainted
+   ```
+
+1. Add Labels to the nodes:
+
+   ```sh
+   $ kubectl label nodes 'host1' 'dedicated=devs'
+   node "host1" labeled
+   ```
+
+1. add tolerations and node affinity to any Pod's `spec`:
+
+   ```yaml
+   spec:
+     affinity:
+       nodeAffinity:
+         requiredDuringSchedulingIgnoredDuringExecution:
+           nodeSelectorTerms:
+           - matchExpressions:
+             - key: dedicated
+               operator: In
+               values:
+               - devs
+     tolerations:
+     - key: "dedicated"
+       operator: "Equal"
+       value: "devs"
+       effect: "NoSchedule"
+   ```
+
+### Recreate Pods upon ConfigMap's or Secret's content change
+
+Use a checksum annotation to do the trick:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    metadata:
+      annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") $ | sha256sum }}
+        {{- if .podAnnotations }}
+          {{- toYaml .podAnnotations | trim | nindent 8 }}
+        {{- end }}
+```
+
+## Examples
+
+### Prometheus on Kubernetes using Helm
+
+See the example's [README][prometheus on kubernetes using helm].
+
+### Create an admission webhook
+
+See the example's [README][create an admission webhook].
+
 ## Further readings
 
-- [`kubectl`][kubectl]
+Concepts:
+
 - Kubernetes' [security context design proposal]
 - Kubernetes' [No New Privileges Design Proposal]
 - [Linux kernel documentation about `no_new_privs`][no_new_privs linux kernel documentation]
@@ -229,17 +444,37 @@ Most cloud providers offer their managed versions of Kubernetes. Check their web
 - [Kubernetes SecurityContext Capabilities Explained]
 - [Best practices for pod security in Azure Kubernetes Service (AKS)]
 - [Using `sysctls` in a Kubernetes Cluster][Using sysctls in a Kubernetes Cluster]
+- [Namespaces]
+- [Container hooks]
+
+Tools:
+
+- [`kubectl`][kubectl]
+- [`helm`][helm]
+- [`helmfile`][helmfile]
+- [`kubeval`][kubeval]
+- [`kubectx`+`kubens`][kubectx+kubens] (alternative to [`kubie`][kubie])
+- [`kube-ps1`][kube-ps1]
+- [`kubie`][kubie] (alternative to [`kubectx`+`kubens`][kubectx+kubens] and [`kube-ps1`][kube-ps1])
 
 ## Sources
 
 All the references in the [further readings] section, plus the following:
 
 - Kubernetes' [concepts]
+- [How to run a command in a Pod after initialization]
+- [Making sense of Taints and Tolerations]
+- [Read-only filesystem error]
+- [preStop hook doesn't work with env variables]
+- [Configure Quality of Service for Pods]
 
 <!-- project's documentation -->
 [api deprecation policy]: https://kubernetes.io/docs/reference/using-api/deprecation-policy/
 [concepts]: https://kubernetes.io/docs/concepts/
 [configure a security context for a pod or a container]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+[configure quality of service for pods]: https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/
+[container hooks]: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
+[namespaces]: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 [no new privileges design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/no-new-privs.md
 [security context design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security_context.md
 [security design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security.md
@@ -247,14 +482,30 @@ All the references in the [further readings] section, plus the following:
 [using sysctls in a kubernetes cluster]: https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/
 
 <!-- internal references -->
+[create an admission webhook]: ../../examples/kubernetes/create%20an%20admission%20webhook/README.md
+[helm]: helm.md
+[helmfile]: helmfile.md
 [kubectl]: kubectl.md
+[kubeval]: kubeval.md
+[prometheus on kubernetes using helm]: ../../examples/kubernetes/prometheus%20on%20k8s%20using%20helm.md
+[terraform]: ../terraform.md
 
 <!-- external references -->
+
 [best practices for pod security in azure kubernetes service (aks)]: https://learn.microsoft.com/en-us/azure/aks/developer-best-practices-pod-security
 [cncf]: https://www.cncf.io/
 [container capabilities in kubernetes]: https://unofficial-kubernetes.readthedocs.io/en/latest/concepts/policy/container-capabilities/
 [elasticsearch]: https://github.com/elastic/helm-charts/issues/689
+[how to run a command in a pod after initialization]: https://stackoverflow.com/questions/44140593/how-to-run-command-after-initialization/44146351#44146351
 [kubernetes securitycontext capabilities explained]: https://www.golinuxcloud.com/kubernetes-securitycontext-capabilities/
 [linux capabilities]: https://man7.org/linux/man-pages/man7/capabilities.7.html
+[making sense of taints and tolerations]: https://medium.com/kubernetes-tutorials/making-sense-of-taints-and-tolerations-in-kubernetes-446e75010f4e
 [no_new_privs linux kernel documentation]: https://www.kernel.org/doc/Documentation/prctl/no_new_privs.txt
+[prestop hook doesn't work with env variables]: https://stackoverflow.com/questions/61929055/kubernetes-prestop-hook-doesnt-work-with-env-variables#62135231
+[read-only filesystem error]: https://stackoverflow.com/questions/49614034/kubernetes-deployment-read-only-filesystem-error/51478536#51478536
 [runtime privilege and linux capabilities in docker containers]: https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities
+
+[kubectx+kubens]: https://github.com/ahmetb/kubectx
+[kube-ps1]: https://github.com/jonmosco/kube-ps1
+[kubie]: https://github.com/sbstp/kubie
+[pulumi]: https://www.pulumi.com

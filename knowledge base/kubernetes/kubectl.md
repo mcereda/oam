@@ -12,7 +12,7 @@ kubectl get deploy,rs,po -A
 
 Use `kubectl api-resources` to check out the available resources and their abbreviations.
 
-Multiple resources types can be specified together, but only one resource name is accepted at a time.  
+Multiple resources types can be specified together, but only one resource name is accepted at a time.<br/>
 Resource names are case sensitive and will filter the requested resources; use the `-l`, `--selector` option to get around filtering:
 
 ```sh
