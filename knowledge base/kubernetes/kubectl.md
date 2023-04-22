@@ -21,7 +21,9 @@ kubectl get pod etcd-minikube -n kube-system
 kubectl get pods -l app=nginx,tier=frontend
 ```
 
-### Table of contents
+One possible output format is [JSONpath].
+
+## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
@@ -563,6 +565,7 @@ Verbosity | Description
 
 ## Further readings
 
+- [Kubernetes]
 - [Assigning Pods to Nodes]
 - [Taints and Tolerations]
 - [Commands reference]
@@ -571,6 +574,8 @@ Verbosity | Description
 - [Enforce Pod Security Standards with Namespace Labels]
 
 ## Sources
+
+All the references in the [further readings] section, plus the following:
 
 - [Cheatsheet]
 - [Run a single-instance stateful application]
@@ -586,7 +591,11 @@ Verbosity | Description
 [enforce pod security standards with namespace labels]: https://kubernetes.io/docs/tasks/configure-pod-container/enforce-standards-namespace-labels/
 [taints and tolerations]: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
 
-<!-- external references articles -->
+<!-- internal references -->
+[jsonpath]: ../jsonpath.md
+[kubernetes]: README.md
+
+<!-- external references -->
 [accessing an application on kubernetes in docker]: https://medium.com/@lizrice/accessing-an-application-on-kubernetes-in-docker-1054d46b64b1
 [run a replicated stateful application]: https://kubernetes.io/docs/tasks/run-application/run-replicated-stateful-application/
 [run a single-instance stateful application]: https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/

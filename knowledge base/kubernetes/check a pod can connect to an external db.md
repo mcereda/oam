@@ -1,5 +1,11 @@
 # Check a Pod can connect to an external DB
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -15,3 +21,19 @@ nc -vz -w3 10.0.2.15 3306
 # test the client can connect
 mysql --host 10.0.2.15 --port 3306 --user root
 ```
+
+## Further readings
+
+- [Kubernetes]
+- [`kubectl`][kubectl]
+
+## Sources
+
+All the references in the [further readings] section, plus the following:
+
+<!-- internal references -->
+[further readings]: #further-readings
+[kubectl]: kubectl.md
+[kubernetes]: README.md
+
+<!-- external references -->
