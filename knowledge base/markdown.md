@@ -4,7 +4,8 @@ ReadMe's Markdown engine.
 
 ## Table of contents <!-- omit in toc -->
 
-1. [TODO list](#todo-list)
+1. [Syntax highlighting](#syntax-highlighting)
+1. [TODO lists](#todo-lists)
 1. [Folded content](#folded-content)
 1. [Images](#images)
 1. [Diagrams](#diagrams)
@@ -21,7 +22,23 @@ ReadMe's Markdown engine.
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
-## TODO list
+## Syntax highlighting
+
+Specify the language right after the code block's opening:
+
+```ruby
+def index
+  puts "hello world"
+end
+```
+
+```csharp
+private void index(){
+  MessageBox.Show("hello world");
+}
+```
+
+## TODO lists
 
 Use `[ ]` after the bullet point or numbered list character to switch them for an empty ballot box, and `[x]` for a checked one.
 
@@ -283,8 +300,11 @@ All the references in the [further readings] section, plus the following:
 - [Escaping backtick in Markdown]
 - [The magical Markdown I bet you don't know]
 - [slaise/High-level-Markdown]
+- [Syntax highlighting in Markdown]
 
 <!-- project's references -->
+[basic syntax]: https://www.markdownguide.org/basic-syntax
+[code blocks]: https://docs.readme.com/rdmd/docs/code-blocks
 [documentation]: https://docs.readme.com/rdmd/docs
 [extended syntax]: https://www.markdownguide.org/extended-syntax/
 
@@ -297,4 +317,5 @@ All the references in the [further readings] section, plus the following:
 [escaping backticks]: https://www.markdownguide.org/basic-syntax/#escaping-backticks
 [linguist supported language syntax list]: https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
 [slaise/high-level-markdown]: https://github.com/slaise/High-level-Markdown
+[syntax highlighting in markdown]: https://support.codebasehq.com/articles/tips-tricks/syntax-highlighting-in-markdown
 [the magical markdown i bet you don't know]: https://medium.com/codex/the-magical-markdown-i-bet-you-dont-know-b51f8c049773
