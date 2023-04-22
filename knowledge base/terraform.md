@@ -279,6 +279,7 @@ eval "export $(sed -E 's/([[:graph:]]+)[[:blank:]]*=[[:blank:]]*([[:graph:]]+)/T
 
 ## Further readings
 
+- [Website]
 - [CLI Documentation]
 - [Providers best practices]
 - [Version constraints]
@@ -286,18 +287,27 @@ eval "export $(sed -E 's/([[:graph:]]+)[[:blank:]]*=[[:blank:]]*([[:graph:]]+)/T
 - [Environment Variables]
 - [Forcing Re-creation of Resources]
 
+## Sources
+
+All the references in the [further readings] section, plus the following:
+
+- [for_each vs count]
+- [Azure Provider]
+- [Conditional creation of a resource based on a variable in .tfvars]
+
+<!-- project's references -->
 [cli documentation]: https://www.terraform.io/docs/cli/
 [environment variables]: https://www.terraform.io/cli/config/environment-variables
 [forcing re-creation of resources]: https://www.terraform.io/cli/state/taint
 [providers best practices]: https://www.terraform.io/language/providers/requirements#best-practices-for-provider-versions
 [references to named values]: https://www.terraform.io/language/expressions/references
 [version constraints]: https://www.terraform.io/language/expressions/version-constraints
+[website]: https://www.terraform.io
 
-## Sources
+<!-- internal references -->
+[further readings]: #further-readings
 
-- [for_each vs count]
-- [Azure Provider]
-- [Conditional creation of a resource based on a variable in .tfvars]
+<!-- external references -->
 
 [azure provider]: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs
 [conditional creation of a resource based on a variable in .tfvars]: https://stackoverflow.com/questions/60231309/terraform-conditional-creation-of-a-resource-based-on-a-variable-in-tfvars
