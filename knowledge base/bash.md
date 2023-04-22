@@ -1,19 +1,19 @@
 # Bourne Again SHell
 
 1. [TL;DR](#tldr)
-2. [Startup files loading order](#startup-files-loading-order)
-3. [Functions](#functions)
-4. [Substitutions](#substitutions)
+1. [Startup files loading order](#startup-files-loading-order)
+1. [Functions](#functions)
+1. [Substitutions](#substitutions)
    1. [!! (command substitution)](#-command-substitution)
-   2. [^^ (caret substitution)](#-caret-substitution)
-5. [Here documents](#here-documents)
-6. [Keys combinations](#keys-combinations)
-7. [Check if a script is sourced by another](#check-if-a-script-is-sourced-by-another)
-8. [Gotchas](#gotchas)
+   1. [^^ (caret substitution)](#-caret-substitution)
+1. [Here documents](#here-documents)
+1. [Keys combinations](#keys-combinations)
+1. [Check if a script is sourced by another](#check-if-a-script-is-sourced-by-another)
+1. [Gotchas](#gotchas)
    1. [Exist statuses of killed commands](#exist-statuses-of-killed-commands)
-   2. [Go incognito](#go-incognito)
-9. [Further readings](#further-readings)
-10. [Sources](#sources)
+   1. [Go incognito](#go-incognito)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -231,7 +231,7 @@ HISTFILE=
 
 You can also avoid recording a single command simply preceding it with space
 
-```shell
+```sh
 echo $RECORDED
  echo $NOT_RECORDED
 ```

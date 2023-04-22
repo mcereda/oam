@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-```shell
+```sh
 # Install the CLI.
 brew tap hashicorp/tap && brew install hashicorp/tap/vault
 
