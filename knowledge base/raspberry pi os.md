@@ -2,14 +2,14 @@
 
 1. [Disable WiFi and Bluetooth](#disable-wifi-and-bluetooth)
    1. [Through boot configuration](#through-boot-configuration)
-   2. [Through rfkill](#through-rfkill)
-2. [Swap](#swap)
-3. [Run containers](#run-containers)
+   1. [Through rfkill](#through-rfkill)
+1. [Swap](#swap)
+1. [Run containers](#run-containers)
    1. [Kernel containerization features](#kernel-containerization-features)
-   2. [Firewall settings](#firewall-settings)
-4. [Store files on the SD even when the overlay file system is active](#store-files-on-the-sd-even-when-the-overlay-file-system-is-active)
-5. [Further readings](#further-readings)
-6. [Sources](#sources)
+   1. [Firewall settings](#firewall-settings)
+1. [Store files on the SD even when the overlay file system is active](#store-files-on-the-sd-even-when-the-overlay-file-system-is-active)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## Disable WiFi and Bluetooth
 
@@ -95,18 +95,16 @@ touch 'mount/point/new-file'
 ## Sources
 
 - The [k3s] project page
-- The [Build your very own self-hosting platform with Raspberry Pi and Kubernetes] series of articles
 - [Run Kubernetes on a Raspberry Pi with k3s]
 - Project's [issue 2067]
 
 <!-- project's references -->
 
 <!-- internal references -->
+[k3s]: kubernetes/k3s.md
 [rfkill]: rfkill.md
 
 <!-- external references -->
-[build your very own self-hosting platform with raspberry pi and kubernetes]: https://kauri.io/build-your-very-own-self-hosting-platform-with-raspberry-pi-and-kubernetes/5e1c3fdc1add0d0001dff534/c
 [how to disable your raspberry pi's wi-fi]: https://pimylifeup.com/raspberry-pi-disable-wifi/
 [issue 2067]: https://github.com/k3s-io/k3s/issues/2067#issuecomment-664052806
-[k3s]: https://k3s.io/
 [run kubernetes on a raspberry pi with k3s]: https://opensource.com/article/20/3/kubernetes-raspberry-pi-k3s
