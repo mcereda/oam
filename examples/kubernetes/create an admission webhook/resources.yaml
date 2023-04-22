@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook
+  namespace: test
+  labels:
+    app: webhook
+spec:
+  selector:
+    matchLabels:
+      app: webhook
+  template:
+    metadata:
+      namespace: test
+      labels:
+        app: webhook
+    spec:
+      containers:
+      - name: webhook
+        image: webhook
+        imagePullPolicy: Never  # only needed locally
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - mountPath: /cert
+          name: cert
+      volumes:
+      - name: cert
+        secret:
+          secretName: webhook
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webhook
+  namespace: test
+spec:
+  selector:
+    app: webhook
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 8443
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: webhook-validate
+  namespace: test
+webhooks:
+  - name: test.example.com
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        name: webhook
+        namespace: test
+        path: /validate
+    rules:
+      - apiGroups: [""]
+        resources:
+          - "pods"
+        apiVersions:
+          - "*"
+        operations:
+          - CREATE
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: webhook-mutate
+  namespace: test
+  labels:
+    component: mutating-controller
+webhooks:
+  - name: test.example.com
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        name: webhook
+        namespace: test
+        path: /mutate
+    rules:
+      - apiGroups: [""]
+        resources:
+          - "pods"
+        apiVersions:
+          - "*"
+        operations:
+          - CREATE
