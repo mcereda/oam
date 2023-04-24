@@ -44,7 +44,10 @@ jq '.extensionsGallery + {
        itemUrl: "https://marketplace.visualstudio.com/items"
     }' /usr/lib/code/product.json
 
-# Add elements from arrays from other files.
+# Merge objects from 2 files
+jq '.[0] * .[1]' '1.json' '2.json'
+
+# Add elements from arrays with the same name from other files.
 jq '.rules=([input.rules]|flatten)' starting-rule-set.json ending-rule-set.json
 jq '.rules=([inputs.rules]|flatten)' starting-rule-set.json parts/*.json
 

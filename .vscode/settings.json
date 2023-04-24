@@ -70,6 +70,7 @@
         "pvresize",
         "radeon",
         "replicatedctl",
+        "rfkill",
         "rootlv",
         "rootvg",
         "runcmd",
