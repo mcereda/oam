@@ -4,7 +4,8 @@
 
 1. [TL;DR](#tldr)
 1. [Hidden settings](#hidden-settings)
-1. [Resize an image from CLI](#resize-an-image-from-cli)
+1. [Resize an image](#resize-an-image)
+1. [Resize a PDF file from Preview](#resize-a-pdf-file-from-preview)
 1. [Update the OS from CLI](#update-the-os-from-cli)
 1. [Keychain access from CLI](#keychain-access-from-cli)
 1. [Mount an NFS share](#mount-an-nfs-share)
@@ -142,13 +143,27 @@ defaults write com.apple.dock ResetLaunchPad -bool TRUE
 defaults write com.apple.finder AppleShowAllFiles TRUE
 ```
 
-## Resize an image from CLI
+## Resize an image
+
+See also [Resize, rotate, or flip an image in Preview on Mac].
+
+From CLI:
 
 ```sh
 # Retain ratio.
 # Save as different file.
 sips -Z '1000' -o 'resized.jpg' 'IMG_20190527_013903.jpg'
 ```
+
+## Resize a PDF file from Preview
+
+In the Preview app:
+
+1. Open the PDF file you want to compress.
+1. Choose _File_ > _Export_.<br/>
+   **Do not** choose _Export as PDF_.
+1. Click the _Quartz Filter_ pop-up menu, then choose _Reduce File Size_.
+1. Click the _Export_ button.
 
 ## Update the OS from CLI
 
@@ -341,9 +356,13 @@ All the references in the [further readings] section, plus the following:
 - [Caffeinate your Mac]
 - [MacOS network quality tool]
 - [How to Clear DNS Cache in MacOS Ventura & MacOS Monterey]
+- [Compress a PDF in Preview on Mac]
+- [Resize, rotate, or flip an image in Preview on Mac]
 
 <!-- project's references -->
+[compress a pdf in preview on mac]: https://support.apple.com/guide/preview/compress-a-pdf-prvw1509/mac
 [mac startup key combinations]: https://support.apple.com/en-us/HT201255
+[resize, rotate, or flip an image in preview on mac]: https://support.apple.com/guide/preview/resize-rotate-or-flip-an-image-prvw2015/11.0/mac/13.0
 
 <!-- internal references -->
 [time machine]: time%20machine.md
