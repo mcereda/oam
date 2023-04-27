@@ -42,6 +42,9 @@ sudo cryptsetup close '/dev/mapper/mapper_name'
 
 ## Further readings
 
+- [`cryptsetup`][cryptsetup]
+- [Encrypted root filesystem]
+
 ## Sources
 
 All the references in the [further readings] section, plus the following:
@@ -54,6 +57,9 @@ All the references in the [further readings] section, plus the following:
 <!-- internal references -->
 
 [further readings]: #further-readings
+
+[cryptsetup]: cryptsetup.md
+[encrypted root filesystem]: encrypted%20root%20filesystem.md
 
 [create an encrypted btrfs device]: scripts/create-an-encrypted-btrfs-device.sh
 [create an encrypted zfs device]: scripts/create-an-encrypted-btrfs-device.sh

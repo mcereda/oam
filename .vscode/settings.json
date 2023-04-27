@@ -18,6 +18,7 @@
         "chezmoi",
         "chsh",
         "compsize",
+        "cowsay",
         "cpulimit",
         "cryptsetup",
         "csma",
@@ -94,6 +95,7 @@
         "twrp",
         "usermod",
         "userspace",
+        "winget",
         "wlan",
         "zstd"
     ],
