@@ -51,8 +51,18 @@ echo "vagrant veth lxcbr0 10" | sudo tee -a /etc/lxc/lxc-usernet
 
 ## Further readings
 
-- LXC's [website]
-- LXC's [getting started] guide
+- [Website]
+- [Getting started guide][getting started]
 
-[website]: https://linuxcontainers.org/
+## Sources
+
+All the references in the [further readings] section, plus the following:
+
+<!-- project's references -->
 [getting started]: https://linuxcontainers.org/lxc/getting-started/
+[website]: https://linuxcontainers.org/
+
+<!-- internal references -->
+[further readings]: #further-readings
+
+<!-- external references -->

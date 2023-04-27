@@ -90,15 +90,23 @@ sudo apt update
 - [Apt configuration]
 - [Configuring Apt sources]
 - [Unattended Upgrades]
-- [cheat.sh]
+- [`dpkg`][dpkg]
+- [`apt-file`][apt-file]
 
 ## Sources
 
+- [cheat.sh]
 - [Fix a "Problem with MergeList" or "status file could not be parsed" error]
 
-<!-- external references -->
+<!-- project's references -->
 [apt configuration]: https://wiki.debian.org/AptConfiguration
 [configuring apt sources]: https://wiki.debian.org/SourcesList
 [unattended upgrades]: https://wiki.debian.org/UnattendedUpgrades
+
+<!-- internal references -->
+[apt-file]: apt-file.md
+[dpkg]: dpkg.md
+
+<!-- external references -->
 [cheat.sh]: https://cheat.sh/apt
 [fix a "problem with mergelist" or "status file could not be parsed" error]: https://askubuntu.com/questions/30072/how-do-i-fix-a-problem-with-mergelist-or-status-file-could-not-be-parsed-err#30199

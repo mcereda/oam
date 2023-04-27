@@ -3,28 +3,52 @@
 ## TL;DR
 
 ```sh
-# Reconfigure a package.
-dpkg-reconfigure --priority low unattended-upgrades
+# Reconfigure packages.
+dpkg-reconfigure --priority 'low' 'unattended-upgrades'
 
-# add an extra architecture
-dpkg --add-architecture i386
+# Find which package provides a file already present on a system.
+dpkg -S '/path/to/file'
 
-# list extra architectures
-dpkg --print-foreign-architectures
+# Find which files were installed by a package.
+dpkg -L 'cfengine3'
 
-# list available extra architectures
+# Find which files would be installed by a local package.
+dpkg --contents 'cfengine3.deb'
+
+# List available extra architectures.
 dpkg-architecture --list-known
 
-#list all installed packages of the i386 architecture
-dpkg --get-selections | grep i386 | awk '{print $1}'
+# Add extra architectures.
+dpkg --add-architecture 'i386'
 
-# remove the i386 architecture
-apt-get purge $(dpkg --get-selections | grep --color=never i386 | awk '{print $1}')
-dpkg --remove-architecture i386
+# List added extra architectures.
+dpkg --print-foreign-architectures
+
+# List all installed packages of the i386 architecture.
+dpkg --get-selections | grep 'i386' | awk '{print $1}'
+
+# Remove all traces of the i386 architecture.
+apt-get purge \
+  "$(dpkg --get-selections | grep --color=never 'i386' | awk '{print $1}')" \
+&& dpkg --remove-architecture 'i386'
 ```
+
+## Further readings
+
+- [`apt`][apt]
 
 ## Sources
 
-- [How to check if dpkg-architecture --list has all the architectures?]
+All the references in the [further readings] section, plus the following:
 
+- [How to check if dpkg-architecture --list has all the architectures?]
+- [List of files installed from apt package]
+
+<!-- project's references-->
+
+<!-- internal references-->
+[apt]: apt.md
+
+<!-- external references-->
 [how to check if dpkg-architecture --list has all the architectures?]: https://askubuntu.com/questions/852115/how-to-check-if-dpkg-architecture-list-has-all-the-architectures#852120
+[list of files installed from apt package]: https://serverfault.com/questions/96964/list-of-files-installed-from-apt-package#96965
