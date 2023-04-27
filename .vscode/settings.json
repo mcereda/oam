@@ -36,6 +36,7 @@
         "flatpak",
         "gcloud",
         "getfacl",
+        "gettext",
         "gopass",
         "gpgconf",
         "gpgtools",

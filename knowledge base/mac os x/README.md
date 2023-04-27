@@ -1,4 +1,6 @@
-# Mac OS X <!-- omit in toc -->
+# Mac OS X
+
+## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
 1. [Hidden settings](#hidden-settings)
@@ -316,10 +318,16 @@ To use any of these key combinations, press and hold the keys immediately after 
 
 ## Further readings
 
-- [pam_reattach]
-- [launchctl man page]
+- [Time Machine]
+- [`pam_reattach`][pam_reattach]
+- [`launchctl`'s man page][launchctl man page]
+- [`macports`][macports]
+- [`openssl-osx-ca`][openssl-osx-ca]
+- [Little Snitch]
 
 ## Sources
+
+All the references in the [further readings] section, plus the following:
 
 - [Boot a Mac from USB Drive]
 - [Mac startup key combinations]
@@ -336,6 +344,12 @@ To use any of these key combinations, press and hold the keys immediately after 
 
 <!-- project's references -->
 [mac startup key combinations]: https://support.apple.com/en-us/HT201255
+
+<!-- internal references -->
+[time machine]: time%20machine.md
+[macports]: macports.md
+[openssl-osx-ca]: openssl-osx-ca.md
+[little snitch]: little%20snitch.md
 
 <!-- external references -->
 [boot a mac from usb drive]: https://www.wikihow.com/Boot-a-Mac-from-USB-Drive
