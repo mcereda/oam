@@ -10,9 +10,16 @@ Linux distribution based on top of OpenWrt. Check the [website] for more informa
 1. [Local DNS resolution](#local-dns-resolution)
 1. [Static DHCP leases and hostnames](#static-dhcp-leases-and-hostnames)
 1. [Containers](#containers)
-   1. [Git server](#git-server)
-   1. [Pi-hole](#pi-hole)
-1. [Hardening ideas](#hardening-ideas)
+   1. [Create new containers](#create-new-containers)
+   1. [Assign containers a static IP address](#assign-containers-a-static-ip-address)
+   1. [Start containers](#start-containers)
+   1. [Execute a shell into containers](#execute-a-shell-into-containers)
+   1. [Start containers at boot](#start-containers-at-boot)
+   1. [Examples](#examples)
+      1. [CFEngine hub](#cfengine-hub)
+      1. [Git server](#git-server)
+      1. [Pi-hole](#pi-hole)
+1. [Hardening](#hardening)
 1. [The SFP+ caged module](#the-sfp-caged-module)
    1. [Use the SFP module as a LAN port](#use-the-sfp-module-as-a-lan-port)
 1. [Further readings](#further-readings)
@@ -141,78 +148,146 @@ luci-reload
 
 ## Containers
 
-Some packages are not available in `opkg`'s repository, but containers can be used to provide them.
+Some packages are not available in `opkg`'s repository, but containers can replace them.<br/>
+This is particularly useful to run services off the system which are not officially supported (like [Pi-hole]).
 
+At the time of writing [LXC] is the only container runtime supported in Turris OS, and this guide will assume one is using it.<br/>
 This requires the `lxc` package to be installed.
 
-> Suggested the use of an [expansion disk](#hardware-upgrades).
+> It is highly suggested to use an [expansion disk](#hardware-upgrades) to store any container, but specially any one I/O heavy.
 
-The usual steps are the following, and should be executed in Turris OS:
+The procedure to have a working container is as follows:
 
-1. Create a container for the service:
-
-   ```sh
-   # Default source is 'repo.turris.cz/lxc'.
-   lxc-create --name 'test' --template 'download'
-   lxc-create -n 'pi-hole' -t 'download' -- --dist 'debian' --release 'bullseye' --arch 'armhf' --server 'images.linuxcontainers.org'
-   ```
-
-1. Assign it a static IP address:
-
-   ```sh
-   uci add dhcp host
-   uci set dhcp.@host[-1].name='pi-hole'
-   uci set dhcp.@host[-1].mac="$(grep 'hwaddr' '/srv/lxc/pi-hole/config' | sed 's/.*= //')"
-   uci set dhcp.@host[-1].ip='192.168.111.2'
-   uci commit 'dhcp'
-   reload_config
-   luci-reload
-   ```
-
-1. Start the container:
-
-   ```sh
-   lxc-start --name 'pi-hole'
-
-   # Check it's running correctly.
-   lxc-info --name 'pi-hole'
-   ```
-
-1. Execute a shell into it:
-
-   ```sh
-   lxc-attach --name 'pi-hole'
-   ```
-
-1. Set up the container.
-
-   > See examples of specific instructions in the subsections below.
-
+1. [Create a new container](#create-new-containers).
+1. Optionally, [assign it a static IP address](#assign-containers-a-static-ip-address).<br/>
+   This is particularly suggested in case of services.
+1. [Start the container](#start-containers).
+1. [Execute a shell](#execute-a-shell-into-containers) to enter it and set it all up.<br/>
+   See the configuration [examples](#examples) below.
 1. Check all is working as expected.
-1. If you changed the hostname inside the container, restart it for good measure.
-1. Start the container at boot if required:
+1. If you changed the container's hostname from inside if, restart it for good measure.
+1. Set the container to [start at boot](#start-containers-at-boot) if required.
 
-   ```sh
-   vim '/etc/config/lxc-auto'
-   ```
+Details for all actions are explained in the next sections.<br/>
+Unless otherwise specified:
 
-   ```txt
-   config container
-       option name pi-hole
-       option timeout 60
-   ```
+- All shell commands need to be executed from Turris OS.
+- All WebUI actions need to be taken from LuCI.<br/>
+  At the time of writing reForis does not have a way to manage containers.
 
-### Git server
+### Create new containers
 
-> This procedure assumes you are using a LXC container based upon Debian Bullseye.
-
-Follow the usual procedure above and, as the _set up the container_ step, install and configure git from *+inside** the container:
+In shell:
 
 ```sh
-# Set the correct hostname, if different from what is expected.
+# Default source is 'repo.turris.cz/lxc'.
+lxc-create --name 'test' --template 'download'
+lxc-create -n 'pi-hole' -t 'download' -- --dist 'debian' --release 'bullseye' --arch 'armhf' --server 'images.linuxcontainers.org'
+```
+
+Using the WebUI:
+
+1. Navigate to the _Services_ > _LXC Containers_ page.
+1. In the _Create New Container_ section, give it a name and choose its template.
+1. Click the _Create_ button under _Actions_.
+
+### Assign containers a static IP address
+
+In shell:
+
+```sh
+uci add dhcp host
+uci set dhcp.@host[-1].name='pi-hole'
+uci set dhcp.@host[-1].mac="$(grep 'hwaddr' '/srv/lxc/pi-hole/config' | sed 's/.*= //')"
+uci set dhcp.@host[-1].ip='192.168.111.2'
+uci commit 'dhcp'
+reload_config
+luci-reload
+```
+
+Using the WebUI:
+
+1. Get the container's MAC address:
+
+   1. Navigate to the _Services_ > _LXC Containers_ page.
+   1. In the dropdown menu for the container, choose _configure_.
+   1. Grab the MAC address from the textbox.
+
+1. Navigate to the _Network_ > _DHCP and DNS_ page.
+1. In the _Static Leases_ tab, assign a new lease to the container's MAC address.
+
+### Start containers
+
+In shell:
+
+```sh
+lxc-start --name 'pi-hole'
+
+# Check it's running correctly.
+lxc-info --name 'pi-hole'
+```
+
+Using the WebUI:
+
+1. Navigate to the _Services_ > _LXC Containers_ page.
+1. In the _Available Containers_ section, click the _Start_ button under _Actions_.
+
+### Execute a shell into containers
+
+In shell:
+
+```sh
+lxc-attach --name 'pi-hole'
+```
+
+### Start containers at boot
+
+```sh
+vim '/etc/config/lxc-auto'
+```
+
+```txt
+config container
+      option name pi-hole
+      option timeout 60
+```
+
+### Examples
+
+#### CFEngine hub
+
+> CFEngine does not seem to support 32bits ARM processors (but it does support arm64) anymore.
+
+<details>
+  <summary>Old installation test</summary>
+
+  > This procedure assumes an LXC container based upon Debian Bullseye.
+
+  ```sh
+  # Set the correct hostname.
+  hostnamectl set-hostname 'cfengine'
+
+  # Install CFEngine and the SSH server.
+  # Also install `unattended-upgrades` to ease updates management.
+  DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'cfengine3' 'openssh-server' 'unattended-upgrades'
+
+  # Set up passwordless authentication.
+  mkdir "${HOME}/.ssh" && chmod '700' "${HOME}/.ssh"
+  echo 'ssh-…' >> "${HOME}/.ssh/authorized_keys" && chmod '600' "${HOME}/.ssh/authorized_keys"
+  ```
+
+</details>
+
+#### Git server
+
+> This procedure assumes an LXC container based upon Debian Bullseye.
+
+```sh
+# Set the correct hostname.
 hostnamectl set-hostname 'git'
 
-# Install `git`, the SSH server and `unattended-upgrades`.
+# Install Git and the SSH server.
+# Also install `unattended-upgrades` to ease updates management.
 DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'git' 'openssh-server' 'unattended-upgrades'
 
 # (Optionally) configure the SSH server.
@@ -241,16 +316,16 @@ chsh 'git' -s "$(which 'git-shell')"
 exit
 ```
 
-### Pi-hole
+#### Pi-hole
 
-> This procedure assumes you are using a LXC container based upon Debian Bullseye.
+> This procedure assumes an LXC container based upon Debian Bullseye.
 
 See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turris Omnia] for details.
 
-Choose one of Pi-hole's [supported operating systems][pi-hole supported operating systems], then follow the usual procedure above and, as the _set up the container_ step, install and configure pi-hole from *+inside** the container:
+Install and configure Pi-hole in the container:
 
 ```sh
-# Set the correct hostname, if different from what is expected.
+# Set the correct hostname.
 hostnamectl set-hostname 'pi-hole'
 
 # Install pi-hole.
@@ -266,7 +341,8 @@ curl -sSL 'https://install.pi-hole.net' | bash
 /etc/.pihole/pihole -up
 ```
 
-After this, finish the procedure above. Then, in Turris OS:
+Finish setting up the container as explained above.<br/>
+Then, in Turris OS:
 
 ```sh
 # Distribute pi-hole as the primary DNS.
@@ -283,7 +359,9 @@ uci commit 'dhcp' && reload_config && luci-reload
 /etc/init.d/dnsmasq restart
 ```
 
-## Hardening ideas
+## Hardening
+
+Suggestions:
 
 - [SSH]:
   - Change the SSH port from the default `22` value.
@@ -363,9 +441,10 @@ luci-reload
 - [How to control LED diodes]
 - [Factory reset on Turris Omnia]
 - [Supported SFP modules]
-- [opkg]
-- [uci]
+- [`opkg`][opkg]
+- [UCI]
 - [Home NAS]
+- [LXC]
 
 ## Sources
 
@@ -386,7 +465,9 @@ All the references in the [further readings] section, plus the following:
 
 <!-- internal references -->
 [further readings]: #further-readings
+[lxc]: lxc.md
 [opkg]: opkg.md
+[pi-hole]: pi-hole.md
 [ssh]: ssh.md
 [uci]: uci.md
 

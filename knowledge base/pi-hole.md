@@ -15,12 +15,14 @@ stat /etc/pihole/gravity.db
 
 ## Further readings
 
-- Pi-hole's [repository]
+- [Website]
+- [Github]
 - The [pihole] command
 - [Run Pi-hole as a container with Podman on openSUSE]
 
 <!-- project's references -->
-[repository]: https://github.com/pi-hole/pi-hole
+[github]: https://github.com/pi-hole/pi-hole
+[website]: https://pi-hole.net/
 
 <!-- internal references -->
 [pihole]: pihole.md
