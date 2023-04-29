@@ -108,7 +108,7 @@ Follow the [deployment] guide for details.
   ```
 
   ```sh
-  export VALUES_DIR="$(git rev-parse --show-toplevel)/kubernetes/helm/gitlab" 
+  export VALUES_DIR="$(git rev-parse --show-toplevel)/kubernetes/helm/gitlab"
   helm inspect values 'gitlab/gitlab' > "${VALUES_DIR}/values.yaml"
   ```
 
