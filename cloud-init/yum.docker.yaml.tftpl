@@ -16,4 +16,4 @@ packages:
 runcmd:
   - systemctl daemon-reload
   - systemctl enable --now docker.service
-  - grep docker /etc/group -q && sudo usermod -a -G docker ${docker_user}
+  - grep docker /etc/group -q && usermod -a -G docker ${docker_user}
