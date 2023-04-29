@@ -193,7 +193,7 @@ git format-patch 'HEAD~2' --stdout > 'single/file.patch'
 
 # Create a full patch of the unstaged changes.
 git add . && git commit -m 'uncommitted' \
-  && git format-patch 'HEAD~1' && git reset 'HEAD~1'
+&& git format-patch 'HEAD~1' && git reset 'HEAD~1'
 
 # Apply a patch to the current index.
 git apply 'file.patch'
@@ -272,7 +272,8 @@ git remote prune 'branch_name'
 # Delete branches which have been merged or are otherwise absent from a remote.
 git branch --merged | grep -vE '(^\*|master|main|dev)' | xargs git branch -d
 git fetch -p \
-  && awk '/origin/&&/gone/{print $1}' <(git branch -vv) | xargs git branch -d
+&& awk '/origin/&&/gone/{print $1}' <(git branch -vv) \
+   | xargs git branch -d
 
 # List all tags.
 git tag
@@ -625,7 +626,8 @@ Command source [here][prune local branches that do not exist on remote anymore].
 ```sh
 # Branches merged on the remote are tagged as 'gone' in `git branch -vv`'s output.
 git fetch -p \
-  && awk '/origin/&&/gone/{print $1}' <(git branch -vv) | xargs git branch -d
+&& awk '/origin/&&/gone/{print $1}' <(git branch -vv) \
+   | xargs git branch -d
 
 # Retain the current, 'master', 'main' and 'dev*' branches in all cases.
 git branch --merged | grep -vE '(^\*|master|main|dev)' | xargs git branch -d

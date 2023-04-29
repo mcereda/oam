@@ -1,8 +1,8 @@
 # Google cloud platform CLI <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
-2. [Further readings](#further-readings)
-3. [Sources](#sources)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -56,8 +56,8 @@ gcloud compute operations list \
 # Use a specific service account for an operation.
 # The service account must have been activated.
 gcloud config set account serviceaccount@gcpproject.iam.gserviceaccount.com \
-  && gcloud auth application-default login --no-launch-browser \
-  && gcloud compute instances list
+&& gcloud auth application-default login --no-launch-browser \
+&& gcloud compute instances list
 
 # Logout.
 gcloud auth revoke --all
