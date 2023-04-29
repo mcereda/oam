@@ -21,7 +21,7 @@ Requirements:
 
 1. MicroSD card, possibly UHS-I or greater with 8GB free.<br/>
    Suggested models:
-   
+
    - SanDisk Extreme microSDHC UHS-I (32GB)
    - SanDisk Extreme PRO microSDHC UHS-I (32GB)
    - Strontium Nitro MicroSD (16GB)
@@ -36,7 +36,7 @@ Procedure:
 
 1. Download the ISO from the [download page].
 1. Copy the ISO to the SD card and make it bootable:
-   
+
    - using [balenaetcher];
    - using the CLI:
 

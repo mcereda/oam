@@ -39,19 +39,19 @@ This should only be done in an encrypted root partition that includes `/boot`, s
    ```
 
 1. make `/boot` accessible to `root` only to prevent non-`root` users to read the initrd and extract the key file:
-   
+
    ```sh
    sudo chmod 700 /boot
    ```
-   
+
    to ensure that new permissions are not overwritten at a later timepoint, add the following line to `/etc/permissions.local`:
-   
+
    ```text
    /boot/ root:root 700
    ```
 
-If you have other encrypted partitions (e.g. `/home`, `swap`, etc), you can create additional keys to mount them without entering a passphrase.   
-This works exactly as described above in steps 1-4, except that you don't need to add the key for those partitions to the initrd. 
+If you have other encrypted partitions (e.g. `/home`, `swap`, etc), you can create additional keys to mount them without entering a passphrase.  
+This works exactly as described above in steps 1-4, except that you don't need to add the key for those partitions to the initrd.
 
 ## Further readings
 

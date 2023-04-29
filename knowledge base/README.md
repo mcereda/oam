@@ -58,7 +58,7 @@ This is the collection of all notes, reminders and whatnot I gathered during the
   -     && mv /tmp/reordered.json datapipeline.json
   + && jq '.objects = [(
   +   .objects[] as $in
-  +   | {type,name,id} + $in 
+  +   | {type,name,id} + $in
   +   | with_entries(select(.value != null))
   + )]' /tmp/sorted.json > /tmp/reordered.json \
   + && mv /tmp/reordered.json datapipeline.json
