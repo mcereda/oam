@@ -3,35 +3,38 @@
 ## TL;DR
 
 ```sh
-# manually update the virus definitions
-# do it once **before** starting a scan or the daemon
-# the definitions updater deamon must be stopped to avoid complaints from it
-sudo systemctl stop clamav-freshclam \
-  && sudo freshclam \
-  && sudo systemctl enable --now clamav-freshclam
+# Manually update the virus definitions.
+# Do this once **before** starting a scan or the daemon.
+# The definitions updater daemon **must be stopped** to avoid its complaints.
+sudo systemctl stop 'clamav-freshclam' \
+&& sudo 'freshclam' \
+&& sudo systemctl enable --now 'clamav-freshclam'
 
-# scan a file or directory
-clamscan path/to/file
-clamscan --recursive path/to/dir
+# scan a file or directory.
+clamscan 'path/to/file'
+clamscan --recursive 'path/to/dir'
 
-# only return specific files
-clamscan --infected /home/
-clamscan --suppress-ok-results Downloads/
+# only return specific files.
+clamscan --infected '/home/'
+clamscan --suppress-ok-results 'Downloads/'
 
-# save results to file
-clamscan --bell -i -r /home -l output.txt
+# save results to file.
+clamscan --bell -i -r '/home' -l 'output.txt'
 
-# scan files in a list
-clamscan -i -f /tmp/scan.list
+# scan files in a list.
+clamscan -i -f '/tmp/scan.list'
 
-# remove infected files
-clamscan -r --remove /home/user
-clamscan -r -i --move=/home/user/infected /home/
+# remove infected files.
+clamscan -r --remove '/home/user'
+clamscan -r -i --move='/home/user/infected' '/home/'
 
-# limit cpu usage
-nice -n 15 clamscan && clamscan --bell -i -r /home
+# limit cpu usage.
+nice -n 15 clamscan \
+&& clamscan --bell -i -r '/home'
 
-# use multiple threads
+# use multiple threads.
+find . -type f -printf "'%p' " | xargs -P "$(nproc)" -n 1 clamscan
+find . -type f | parallel --group --jobs 0 -d '\n' clamscan {}
 ```
 
 ## Gotchas

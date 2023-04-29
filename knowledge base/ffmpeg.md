@@ -4,9 +4,8 @@
 
 ```sh
 # Convert a webm file to GIF.
-ffmpeg -y -i rec.webm -vf palettegen palette.png \
-  && ffmpeg -y -i rec.webm -i palette.png \
-       -filter_complex paletteuse -r 10 out.gif
+ffmpeg -y -i 'rec.webm' -vf 'palettegen' 'palette.png'
+ffmpeg -y -i 'rec.webm' -i 'palette.png' -filter_complex 'paletteuse' -r 10 'out.gif'
 ```
 
 ## Format conversion
@@ -14,8 +13,8 @@ ffmpeg -y -i rec.webm -vf palettegen palette.png \
 ### Webm to GIF
 
 ```sh
-ffmpeg -y -i rec.webm -vf palettegen palette.png
-ffmpeg -y -i rec.webm -i palette.png -filter_complex paletteuse -r 10 out.gif
+ffmpeg -y -i 'rec.webm' -vf 'palettegen' 'palette.png'
+ffmpeg -y -i 'rec.webm' -i 'palette.png' -filter_complex 'paletteuse' -r 10 'out.gif'
 ```
 
 Here `rec.webm` is the recorded video.  

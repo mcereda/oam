@@ -29,13 +29,13 @@ keybase git lfs-config
 
 # Clone a repository with LFS-enabled files.
 git clone --no-checkout 'keybase://private/user/repo' \
-  && cd 'repo' && keybase git lfs-config && cd - \
-  && git -C 'repo' checkout -f HEAD
+&& cd 'repo' && keybase git lfs-config && cd - \
+&& git -C 'repo' checkout -f HEAD
 
 # Import an existing repository in Keybase
 keybase git create 'repo' \
-  && git clone --mirror 'https://github.com/user/repo' '/tmp/repo.git' \
-  && git -C '/tmp/repo.git' push --mirror 'keybase://private/user/repo'
+&& git clone --mirror 'https://github.com/user/repo' '/tmp/repo.git' \
+&& git -C '/tmp/repo.git' push --mirror 'keybase://private/user/repo'
 
 # Run as root.
 KEYBASE_ALLOW_ROOT='1' keybase oneshot
