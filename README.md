@@ -2,7 +2,7 @@
 
 A.K.A. _Operations, administration and management_ or _operations, administration and maintenance_, the processes, activities, tools, and standards involved with operating, administering, managing and maintaining any system. This commonly applies to telecommunication, computer networks, and computer hardware.
 
-In short, this is my personal collection of notes and scripts I use to ease my tech life.
+In short, my private collection of notes and scripts. I use them to ease my tech life.
 
 ## License
 
@@ -14,16 +14,21 @@ Development is always ongoing. Changes will be made when I need them.
 
 ## Support
 
-Aaahm… Well… Nope, but suggestions are appreciated.
+Aaahm… Well… Nope. Just storing knowledge for myself here.<br/>
+Feel free to suggest something, though. See [Contributing] for this.
 
 ## Contributing
 
-This repository is not open for contributions, but I might accept suggestions. Please use the repository's hosting platform's tools for this.
+This repository is not open for contributions.<br/>
+I might accept suggestions, though. Use the repository's hosting platform's tools for this.
 
-## Further readings
+## Sources
 
 - [myshittycode.com]
 
-[LICENSE]: LICENSE
+<!-- internal references -->
+[contributing]: #contributing
+[license]: LICENSE
 
+<!-- external references -->
 [myshittycode.com]: https://myshittycode.com/
