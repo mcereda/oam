@@ -6,6 +6,13 @@
 
 All working modules I created are either private, or made public through repositories on [GitHub] or [GitLab]. Please have a look there.
 
+## Examples
+
+Check them [here][examples].
+
+<!-- internal references -->
+[examples]: ../examples/terraform
+
 <!-- external references -->
 [github]: https://github.com/mcereda
 [gitlab]: https://gitlab.com/mckie
