@@ -20,10 +20,14 @@ repos:
       - id: markdownlint
         args:
           - -r "~MD013"   # ignore line-length rule
-  # - repo: https://github.com/ansible-community/ansible-lint # FIXME: figure this out, too many stupid issues
-  #   rev: v6.12.0
+  # - repo: https://github.com/ansible-community/ansible-lint
+  #   # FIXME: need to figure this out, too many stupid issues.
+  #   # Using `ansible-lint -v ansible` for the time being.
+  #   rev: v6.15.0
   #   hooks:
   #     - id: ansible-lint
+  #       exclude: .*
+  #       files: ansible/
   - repo: https://github.com/hadolint/hadolint
     rev: v2.12.1-beta
     hooks:
