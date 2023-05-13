@@ -78,6 +78,7 @@
         "pkexec",
         "polkit",
         "portsnap",
+        "poweroff",
         "pvresize",
         "radeon",
         "replicatedctl",

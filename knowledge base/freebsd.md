@@ -80,6 +80,15 @@ pkg install -y 'zsh' 'zsh-autosuggestions'
 # Check for known vulnerabilities in *installed* applications.
 pkg audit -F
 pkg audit -Fr 'sqlite'
+
+# *Gently* reboot the system.
+shutdown -r now
+shutdown -r +30 "System will reboot"
+
+# *Gently* shutdown the system.
+# `poweroff` is equivalent to `shutdown -p now`.
+shutdown -p +5
+poweroff
 ```
 
 ## Utilities worth noting
