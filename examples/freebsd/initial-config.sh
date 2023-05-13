@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+set -e
+
 if [ "$(id -ru)" -eq 0 ]
 then
 	echo "Run this again as 'root'"
@@ -19,6 +21,7 @@ pkg install -y \
 
 pw groupmod 'wheel' -m 'username'
 sed -i '.bak' -E 's|# (%wheel ALL=\(ALL:ALL\) ALL)|\1|' '/usr/local/etc/sudoers'
+visudo -cf '/usr/local/etc/sudoers'
 cat > '/home/username/.zshrc' <<-EOF
 	source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 	source /usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh
