@@ -1,4 +1,4 @@
-# Kubectl <!-- omit in toc -->
+# Kubectl
 
 Command line tool for communicating with a Kubernetes cluster's control plane using the Kubernetes API.
 
@@ -58,19 +58,19 @@ kubectl config set-credentials \
 # Delete configuration values.
 kubectl config unset 'users.foo'
 
-# Use multiple config files at once.
-# This will temporarily merge them in one big configuration file.
+# Use multiple configuration files at once.
+# This will *merge* all files in one big temporary configuration file.
 KUBECONFIG="path/to/config1:path/to/configN"
 
-# List contexts.
+# List Contexts.
 kubectl config get-contexts
 kubectl config current-context
 
-# Set context as the default one.
+# Set given Contexts as the default one.
 kubectl config use-context 'docker-desktop'
 kubectl config use-context 'gce'
 
-# Display addresses of the master and services.
+# Display the cluster's state with FQDNs.
 kubectl cluster-info
 
 # Dump the complete current cluster state.
@@ -85,11 +85,11 @@ kubectl api-resources -o 'name'
 kubectl api-resources -o 'wide'
 kubectl api-resources --verbs='list,get'
 
-# Show the documentation about resources or their fields.
+# Show the documentation about Resources or their fields.
 kubectl explain 'pods'
 kubectl explain 'pods.spec.containers'
 
-# List and filter resources.
+# List and filter Resources.
 kubectl get pods
 kubectl get 'pod/coredns-845757d86-47np2' -n 'kube-system'
 kubectl get namespaces,pods --show-labels
@@ -103,7 +103,7 @@ kubectl get node -l='!node-role.kubernetes.io/master'
 kubectl get replicasets -l 'environment in (prod, qa)'
 kubectl get deploy --selector 'tier,tier notin (frontend)'
 
-# Extract information from resources' definition.
+# Extract information from Resources' definition.
 kubectl get deployment 'nginx' -o 'yaml'
 kubectl get cm 'kube-root-ca.crt' -o jsonpath='{.data.ca\.crt}'
 kubectl get po -o=jsonpath='{.items..metadata.name}'
@@ -116,18 +116,19 @@ kubectl get pods -A -o=custom-columns='DATA:metadata.*'
 
 # List images being run in a cluster.
 kubectl get po -A -o=custom-columns='DATA:spec.containers[*].image'
-kubectl get po -A -o=custom-columns='DATA:spec.containers[?(@.image!="k8s.gcr.io/coredns:1.6.2")].image'
+kubectl get po -A \
+  -o=custom-columns='DATA:spec.containers[?(@.image!="k8s.gcr.io/coredns:1.6.2")].image'
 
-# List all pods in status 'Shutdown'.
+# List all Pods in status 'Shutdown'.
 kubectl get po -A \
   -o jsonpath='{.items[?(@.status.reason=="Shutdown")].metadata.name}'
 
-# List ready nodes.
+# List ready Nodes.
 kubectl get nodes \
   -o jsonpath='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}' \
 | grep "Ready=True"
 
-# List all secrets currently in use by a Pod.
+# List all the Secrets currently in use by a Pod.
 kubectl get pods -o 'json' \
 | jq '.items[].spec.containers[].env[]?.valueFrom.secretKeyRef.name' \
 | grep -v 'null' | sort | uniq
@@ -288,23 +289,26 @@ kubectl delete -f ./pod.json
 # Delete Pods and Services named 'baz' and 'foo'.
 kubectl delete pod,service baz foo
 
-# Delete pods and services with Label name=myLabel.
+# Delete all Completed Jobs and all Pods in a failed state.
+kubectl delete pods --field-selector 'status.phase=Failed'
+
+# Delete all Pods and Services with Label 'name=myLabel'.
 kubectl delete pods,services -l name=myLabel
 
-# Delete all pods and services in namespace my-ns.
+# Delete all Pods and Services in the 'my-ns' Namespace.
 kubectl -n my-ns delete pod,svc --all
 
-# Delete all pods matching awk's pattern1 or pattern2.
+# Delete all Pods matching 'pattern1' or 'pattern2'.
 kubectl get pods --no-headers \
 | awk '/pattern1|pattern2/{print $1}' \
 | xargs -n1 kubectl delete pods
 
-# Delete non-default service accounts.
+# Delete non-default Service Accounts.
 kubectl get serviceaccounts \
   -o jsonpath="{.items[?(@.metadata.name!='default')].metadata.name}" \
 | xargs -n1 kubectl delete serviceaccounts
 
-# Attach to a running container.
+# Attach to a running Container.
 kubectl attach my-pod -i
 
 # Run command in existing Pods.
@@ -314,53 +318,54 @@ kubectl exec my-pod -c my-container -- ls /
 # Show metrics for a given Pod and its containers.
 kubectl top pod busybox --containers
 
-# Get logs from resources.
+# Get Logs from Resources.
 kubectl logs redis-0
 kubectl logs -l name=myLabel
 kubectl logs my-pod -c my-container
 
-# Follow logs.
+# Follow Logs.
 kubectl logs -f my-pod
 kubectl logs -f my-pod -c my-container
 kubectl logs -f -l name=myLabel --all-containers
 
-# Get logs for a previous instantiation of a container.
+# Get Logs for a previous instantiation of a Container.
 kubectl logs nginx --previous
 
-# Get the logs of the first Pod matching ID.
+# Get the Logs of the first Pod matching 'ID'.
 kubectl logs $(kubectl get pods --no-headers | grep $ID | awk '{print $2}')
 
-# Verify user's permissions on the cluster.
+# Verify the current user's permissions on the cluster.
 kubectl auth can-i create roles
 kubectl auth can-i list pods
 
 # Taint a Node.
 kubectl taint nodes node1 key1=value1:NoSchedule
 
-# Taint all nodes in a certain nodepool (Azure AKS).
+# Taint all Nodes in a given node pool (Azure AKS).
 kubectl get no -l "agentpool=nodepool1" -o jsonpath='{.items[*].metadata.name}'
 | xargs -n1 -I{} -p kubectl taint nodes {} key1=value1:NoSchedule
 
-# Remove a taint.
+# Remove Taints.
 # Notice the '-' sign at the end.
 kubectl taint nodes node1 key1=value1:NoSchedule-
 
-# If a taint with that key and effect already exists, replace its value.
+# If a Taint with that key and effect already exists, replace its value.
 kubectl taint nodes foo dedicated=special-user:NoSchedule
 
-# Execute a privileged, debug container.
+# Execute debug Containers.
+# Debug Containers are privileged.
 kubectl debug -it 'node/docker-desktop' --image 'busybox:1.28'
 
 # Mark Nodes as unschedulable.
 kubectl cordon my-node
 
-# Mark my-node as schedulable.
+# Mark Nodes as schedulable.
 kubectl uncordon my-node
 
-# Drain my-node in preparation for maintenance.
+# Drain Nodes in preparation for maintenance.
 kubectl drain my-node
 
-# Show metrics for a given node.
+# Show metrics for given Nodes.
 kubectl top node my-node
 
 # Listen on port 5000 on the local machine and forward connections to port 6000
