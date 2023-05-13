@@ -11,12 +11,14 @@ fi
 pkg bootstrap
 pkg update
 pkg install -y \
+	'sudo' \
 	'vim' \
 	'zsh' 'zsh-autosuggestions' 'zsh-completions' 'zsh-navigation-tools' 'zsh-syntax-highlighting'
 
 # Non-'root' user management
 
 pw groupmod 'wheel' -m 'username'
+sed -i '.bak' -E 's|# (%wheel ALL=\(ALL:ALL\) ALL)|\1|' '/usr/local/etc/sudoers'
 cat > '/home/username/.zshrc' <<-EOF
 	source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 	source /usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh
