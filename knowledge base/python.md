@@ -1,13 +1,16 @@
 # Python
 
 1. [TL,DR](#tldr)
-2. [Dictionaries](#dictionaries)
-3. [F-strings](#f-strings)
-4. [Web servers](#web-servers)
+1. [Dictionaries](#dictionaries)
+1. [F-strings](#f-strings)
+1. [Logging](#logging)
+1. [Web servers](#web-servers)
    1. [Flask](#flask)
-   2. [WSGI server](#wsgi-server)
-5. [Further readings](#further-readings)
-6. [Sources](#sources)
+   1. [WSGI server](#wsgi-server)
+1. [Execute commands on the host](#execute-commands-on-the-host)
+1. [Concurrent execution](#concurrent-execution)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL,DR
 
@@ -72,6 +75,25 @@ f"Hello, {name}. You are {age}."
 F"{name.lower()} is funny."
 ```
 
+## Logging
+
+Very basic logger:
+
+```py
+import logging
+logging.basicConfig(level=logging.WARNING)
+
+logging.critical("CRITICAL level message")
+logging.exception("ERROR level message")
+logging.error("ERROR level message")
+logging.warning("WARNING level message")
+logging.info("INFO level message")
+logging.debug("DEBUG level message")
+logging.log(level, "{level} level message")
+```
+
+See [logging howto] and [logging library] for more information.
+
 ## Web servers
 
 ### Flask
@@ -128,6 +150,33 @@ pip install flask waitress
 python hello.py
 ```
 
+## Execute commands on the host
+
+Very basic execution:
+
+```py
+import subprocess
+subprocess.call(command)
+```
+
+See [subprocess library] for more information.
+
+## Concurrent execution
+
+Very basic multi-threaded operations:
+
+```py
+from concurrent.futures import ThreadPoolExecutor
+from os import cpu_count
+
+with ThreadPoolExecutor(max_workers=cpu_count()) as executor:
+    for element in elements:
+        logging.debug(f"submitting thread for {element}")
+        executor.submit(function_name, function_arg_1, function_arg_n)
+```
+
+See [concurrent execution] for more information.
+
 ## Further readings
 
 - [Dictionaries]
@@ -137,21 +186,27 @@ python hello.py
 - [Data types]
 - [F-strings]
 - [How to filter list elements in Python]
-- [Logging]
+- [Logging howto]
 - [Flask at first run: do not use the development server in a production environment]
 - [Flask example with POST]
 - [Multi-value query parameters with Flask]
 - [*args and **kwargs in Python]
 - [An intro to threading in Python]
 - [ThreadPoolExecutor in Python: the complete guide]
+- [Concurrent execution]
 
 ## Sources
 
 - [10 python one-liners for dictionaries]
+- [Logging library]
+- [Subprocess library]
 
 <!-- project's references -->
+[concurrent execution]: https://docs.python.org/3/library/concurrency.html
 [dictionaries]: https://docs.python.org/3/tutorial/datastructures.html#dictionaries
-[logging]: https://docs.python.org/3/howto/logging.html
+[logging howto]: https://docs.python.org/3/howto/logging.html
+[logging library]: https://docs.python.org/3/library/logging.html
+[subprocess library]: https://docs.python.org/3/library/subprocess.html
 
 <!-- internal references -->
 [pip]: ./pip.md
