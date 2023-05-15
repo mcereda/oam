@@ -40,6 +40,7 @@ steps:
 
 - [Expressions]
 - [Use predefined variables]
+- [Azure CLI]
 
 ## Sources
 
@@ -51,8 +52,11 @@ All the references in the [further readings] section, plus the following:
 [expressions]: https://learn.microsoft.com/en-us/azure/devops/pipelines/process/expressions
 [use predefined variables]: https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
 
-<!-- internal references -->
+<!-- in-article references -->
 [further readings]: #further-readings
+
+<!-- internal references -->
+[azure cli]: azure%20cli.md
 
 <!-- external references -->
 [loops in azure devops pipelines]: https://pakstech.com/blog/azure-devops-loops/
