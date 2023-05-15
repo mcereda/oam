@@ -47,17 +47,19 @@ az ad user show --id 'user@email.org'
 # Check a User's permissions.
 az ad user get-member-groups --id 'user@email.org'
 
-# Get the ID of a Subscription from its Name.
-az account show --query 'name' -o 'tsv' -s 'subscription_id'
-
-# Get the Name of a Subscription from its ID.
-az account show --query 'id' -o 'tsv' -n 'subscription_name'
-
 # Get the ID of a Service Principal from its Display Name.
 az ad sp list --query 'id' -o 'tsv' --display-name 'service_principal_name'
 
 # Get the Display Name of a Service Principal from its ID.
 az ad sp show --query 'displayName' -o 'tsv' \
+  --id '12345678-abcd-0987-fedc-567890abcdef'
+
+# Show information about an Application.
+# The ID must be an application id, object id or identifier uri.
+az ad app show --id '12345678-abcd-0987-fedc-567890abcdef'
+
+# Get the Display Name of an Application from its ID.
+az ad app show --query 'displayName' -o 'tsv' \
   --id '12345678-abcd-0987-fedc-567890abcdef'
 
 # Get the Principal (Object) ID of a Managed Identity from its Name.
@@ -77,8 +79,14 @@ az account list --refresh --output 'table'
 # Get the current User's default Subscription's ID.
 az account show --query 'id' --output 'tsv'
 
+# Get the ID of a Subscription from its Name.
+az account show --query 'name' -o 'tsv' -s 'subscription_id'
+
+# Get the Name of a Subscription from its ID.
+az account show --query 'id' -o 'tsv' -n 'subscription_name'
+
 # Get the current User's default Subscription.
-az account set --subscription 'subscription_uuid_or_name'
+az account set --subscription 'subscription_uuid__or__name'
 
 # Set the current User's default Resource Group.
 az configure --defaults 'group=resource_group_name'
@@ -179,6 +187,10 @@ az devops login --organization 'https://dev.azure.com/organization_name'
 # List DevOps' Service Endpoints.
 az devops service-endpoint list \
   --organization 'https://dev.azure.com/organization_name' --project 'project'
+az rest -m 'get' \
+  -u 'https://dev.azure.com/organization_name/project_name/_apis/serviceendpoint/endpoints' \
+  --url-parameters 'api-version=7.1-preview.4' \
+  --headers Authorization='Bearer ey…pw'
 
 # Get the ID of a Service Endpoint from its name.
 az devops service-endpoint list -o 'tsv' \
