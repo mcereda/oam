@@ -302,7 +302,9 @@ See [Using `sysctls` in a Kubernetes Cluster].
 
 ## Managed Kubernetes Services
 
-Most cloud providers offer their managed versions of Kubernetes. Check their websites.
+Most cloud providers offer their managed versions of Kubernetes. Check their websites:
+
+- [Azure Kubernetes Service]
 
 ### Best practices
 
@@ -509,6 +511,7 @@ All the references in the [further readings] section, plus the following:
 [using sysctls in a kubernetes cluster]: https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/
 
 <!-- internal references -->
+[azure kubernetes service]: ../azure/aks.md
 [create an admission webhook]: ../../examples/kubernetes/create%20an%20admission%20webhook/README.md
 [helm]: helm.md
 [helmfile]: helmfile.md
