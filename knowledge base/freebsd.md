@@ -164,18 +164,12 @@ sysrc ntpd_sync_on_start="YES"
 
 ## Graphical UI
 
-> This section will use Wayland. See [Wayland] for more information.
+### KDE
+
+> Not working (= need to study how to make it work) with Wayland at the time of writing.
 
 ```sh
 pw groupmod 'video' -m 'user'
-pkg install 'wayland' 'seatd'
-sysrc seatd_enable="YES"
-service 'seatd' start
-```
-
-### KDE
-
-```sh
 pkg install 'xorg' 'sddm' 'plasma5-plasma' 'plasma5-sddm-kcm' 'konsole' 'dolphin-plugins'
 sysctl net.local.stream.recvspace=65536 net.local.stream.sendspace=65536
 sysrc dbus_enable="YES" sddm_enable="YES"
