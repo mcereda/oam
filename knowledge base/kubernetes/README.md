@@ -19,6 +19,7 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
    1. [Addons](#addons)
 1. [The API](#the-api)
 1. [Pods](#pods)
+   1. [Gotchas](#gotchas)
    1. [Quality of service](#quality-of-service)
 1. [Containers with high privileges](#containers-with-high-privileges)
    1. [Capabilities](#capabilities)
@@ -161,7 +162,7 @@ Pods contain one or more relatively tightly coupled application Containers; they
 
 Pods are usually created trough workload resources (Deployments, StatefulSets or Jobs) and **not** directly.
 
-Gotchas:
+### Gotchas
 
 - If a Container specifies a memory or CPU `limit` but does **not** specify a memory or CPU `request`, Kubernetes automatically assigns it a resource `request` spec equal to the given `limit`.
 
