@@ -9,7 +9,10 @@
    1. [Manage binary packages with `pkg`](#manage-binary-packages-with-pkg)
    1. [Manage ports from the Ports collection](#manage-ports-from-the-ports-collection)
 1. [Enable time sync for the NTP server](#enable-time-sync-for-the-ntp-server)
+1. [Graphical UI](#graphical-ui)
+   1. [KDE](#kde)
 1. [VirtualBox Guest Additions](#virtualbox-guest-additions)
+1. [Linux binary compatibility](#linux-binary-compatibility)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -159,6 +162,27 @@ sysrc ntpd_enable="YES"
 sysrc ntpd_sync_on_start="YES"
 ```
 
+## Graphical UI
+
+> This section will use Wayland. See [Wayland] for more information.
+
+```sh
+pw groupmod 'video' -m 'user'
+pkg install 'wayland' 'seatd'
+sysrc seatd_enable="YES"
+service 'seatd' start
+```
+
+### KDE
+
+```sh
+pkg install 'xorg' 'sddm' 'plasma5-plasma' 'plasma5-sddm-kcm' 'konsole' 'dolphin-plugins'
+sysctl net.local.stream.recvspace=65536 net.local.stream.sendspace=65536
+sysrc dbus_enable="YES" sddm_enable="YES"
+service 'dbus' start
+service 'sddm' start
+```
+
 ## VirtualBox Guest Additions
 
 1. Install the additions.<br/>
@@ -172,8 +196,7 @@ sysrc ntpd_sync_on_start="YES"
 1. Enable the services at boot:
 
    ```sh
-   sysrc vboxguest_enable="YES"
-   sysrc vboxservice_enable="YES"
+   sysrc vboxguest_enable="YES" vboxservice_enable="YES"
    ```
 
 1. If `ntp` or `ntpdate` are used, disable the additions' time sync:
@@ -182,12 +205,43 @@ sysrc ntpd_sync_on_start="YES"
    sysrc vboxservice_flags="--disable-timesync"
    ```
 
+1. If you plan to use Xorg, also install `xf86-video-vmware`:
+
+   ```sh
+   pkg install -y 'xf86-video-vmware'
+   ```
+
+## Linux binary compatibility
+
+Already present on the host but disabled by default.
+
+```sh
+sysrc linux_enable="YES"
+service linux start
+```
+
+The Linux service loads kernel modules and mounts the file systems Linux applications expect under `/compat/linux`.<br/>
+Linux binaries start in the same way native FreeBSD binaries do; they behave almost exactly like native processes and can be traced and debugged as usual.
+
+A Linux userland must be installed to run Linux software that requires more than just an ABI to work (like depending on common libraries).
+Some Linux software is already included in the Ports tree, and installing it will automatically setup the required Linux userland.
+
+```sh
+# CentOS userland.
+# Will place the base system derived from CentOS 7 into '/compat/linux'.
+pkg install 'linux_base-c7'
+
+# Use `debootstrap` for Debian or Ubuntu userland.
+# See https://docs.freebsd.org/en/books/handbook/linuxemu/#linuxemu-debootstrap.
+```
+
 ## Further readings
 
 - The [FreeBSD Handbook]
 - [`rc.conf`'s man page][rc.conf man page]
 - [Installing applications]
 - [Using the Ports collection]
+- [Linux binary compatibility]
 
 ## Sources
 
@@ -199,9 +253,11 @@ All the references in the [further readings] section, plus the following:
 
 <!-- project's references -->
 [freebsd handbook]: https://docs.freebsd.org/en/books/handbook/
-[Installing applications]: https://docs.freebsd.org/en/books/handbook/ports/
+[installing applications]: https://docs.freebsd.org/en/books/handbook/ports/
+[linux binary compatibility]: https://docs.freebsd.org/en/books/handbook/linuxemu/
 [rc.conf man page]: https://man.freebsd.org/cgi/man.cgi?rc.conf(5)
 [using the ports collection]: https://docs.freebsd.org/en/books/handbook/ports/#ports-using
+[wayland]: https://docs.freebsd.org/en/books/handbook/wayland/
 
 <!-- internal references -->
 [manage binary packages with pkg]: #manage-binary-packages-with-pkg
