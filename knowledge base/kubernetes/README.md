@@ -5,134 +5,138 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 
 ## Table of content <!-- omit in toc -->
 
-1. [Components](#components)
-   1. [The control plane](#the-control-plane)
-      1. [kube-apiserver](#kube-apiserver)
-      1. [etcd](#etcd)
-      1. [kube-scheduler](#kube-scheduler)
-      1. [kube-controller-manager](#kube-controller-manager)
-      1. [cloud-controller-manager](#cloud-controller-manager)
-   1. [The worker Nodes](#the-worker-nodes)
-      1. [kubelet](#kubelet)
-      1. [kube-proxy](#kube-proxy)
-      1. [Container runtime](#container-runtime)
-      1. [Addons](#addons)
+1. [Components overview](#components-overview)
+1. [The control plane](#the-control-plane)
+   1. [`kube-apiserver`](#kube-apiserver)
+   1. [`etcd`](#etcd)
+   1. [`kube-scheduler`](#kube-scheduler)
+   1. [`kube-controller-manager`](#kube-controller-manager)
+   1. [`cloud-controller-manager`](#cloud-controller-manager)
+1. [The worker nodes](#the-worker-nodes)
+   1. [`kubelet`](#kubelet)
+   1. [`kube-proxy`](#kube-proxy)
+   1. [Container runtime](#container-runtime)
+   1. [Addons](#addons)
 1. [The API](#the-api)
 1. [Pods](#pods)
    1. [Quality of service](#quality-of-service)
-1. [Security](#security)
-   1. [Containers with high privileges](#containers-with-high-privileges)
-      1. [Capabilities](#capabilities)
-      1. [Privileged containers vs privilege escalation](#privileged-containers-vs-privilege-escalation)
-   1. [Sysctl settings](#sysctl-settings)
+1. [Containers with high privileges](#containers-with-high-privileges)
+   1. [Capabilities](#capabilities)
+   1. [Privileged containers vs privilege escalation](#privileged-containers-vs-privilege-escalation)
+1. [Sysctl settings](#sysctl-settings)
 1. [Managed Kubernetes Services](#managed-kubernetes-services)
-   1. [Best practices](#best-practices)
+   1. [Best practices in cloud environments](#best-practices-in-cloud-environments)
 1. [Edge computing](#edge-computing)
 1. [Troubleshooting](#troubleshooting)
-   1. [Run a command in a Pod right **after** its initialization](#run-a-command-in-a-pod-right-after-its-initialization)
-   1. [Run a command **just before a Pod stops**](#run-a-command-just-before-a-pod-stops)
-   1. [Dedicate Nodes to specific workloads](#dedicate-nodes-to-specific-workloads)
-   1. [Recreate Pods upon ConfigMap's or Secret's content change](#recreate-pods-upon-configmaps-or-secrets-content-change)
+    1. [Dedicate Nodes to specific workloads](#dedicate-nodes-to-specific-workloads)
+    1. [Recreate Pods upon ConfigMap's or Secret's content change](#recreate-pods-upon-configmaps-or-secrets-content-change)
+    1. [Run a command in a Pod right after its initialization](#run-a-command-in-a-pod-right-after-its-initialization)
+    1. [Run a command just before a Pod stops](#run-a-command-just-before-a-pod-stops)
 1. [Examples](#examples)
-   1. [Prometheus on Kubernetes using Helm](#prometheus-on-kubernetes-using-helm)
-   1. [Create an admission webhook](#create-an-admission-webhook)
+    1. [Prometheus on Kubernetes using Helm](#prometheus-on-kubernetes-using-helm)
+    1. [Create an admission webhook](#create-an-admission-webhook)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
-## Components
+## Components overview
 
-When you deploy Kubernetes, you get a _cluster_.
+Kubernetes clusters consist of:
 
-A K8S cluster consists of:
+- one or more worker hosts (_nodes_), executing containerized applications (_workloads_);<br/>
+  in cloud environments, nodes are also available in grouped sets (_node pools_) capable of automatic scaling;
+- the _control plane_, an orchestration layer spanning one or more nodes and exposing the API and interfaces to define, deploy, and manage the lifecycle of nodes and workloads in the cluster.
 
-- one or more sets of worker machines (_Nodes_), which execute containerized applications; every cluster must have at least one worker node;
-- a _control plane_, which manages the worker Nodes and the workloads in the cluster.
+![Cluster components](components.svg)
 
-![Cluster components](components.png)
+Workloads consist of groups of containers (_pods_) and a specification for how to run them.<br/>
+Pods execute one or more co-located and co-scheduled containers in an encapsulating environment with shared storage and network resources, and are the smallest deployable units of computing that one can create and manage in Kubernetes.
 
-The components of an application workload are called _Pods_. Pods are hosted by Nodes, are composed of containers, and are also the smallest execution unit in the cluster.
+## The control plane
 
-In production environments:
+The control plane's components make global decisions about the cluster (like scheduling), and detect and respond to cluster events (like starting up a new pod when a deployment has less replicas then it requests).
 
-- the control plane usually runs across multiple Nodes;
-- a cluster usually runs multiple Nodes, to provide fault-tolerance and high availability.
+Control plane components run on one or more cluster nodes. For simplicity, set up scripts typically start all control plane components on the same host, and avoid running users' workloads on it.
 
-### The control plane
+### `kube-apiserver`
 
-The control plane's components make global decisions about the cluster (like scheduling) and detect and respond to cluster events (like starting up a new Pod when a Deployment has less Replicas then it requests).
+The API server exposes the Kubernetes API. It is the front end for, and the core of, the Kubernetes control plane.<br/>
+`kube-apiserver` is the main implementation of the Kubernetes API server, and is designed to scale horizontally (by deploying more instances) and balance traffic between its instances.
 
-Control plane components can be run on any machine in the cluster. For simplicity, set up scripts typically start all control plane components on the same machine, and avoid running user containers on it.
+### `etcd`
 
-#### kube-apiserver
+`etcd` is a consistent and highly-available key-value store used as Kubernetes' backing store for all cluster data.<br/>
+See its [website][etcd] for more information.
 
-The API server exposes the Kubernetes API, and is the front end for, and the core of, the Kubernetes control plane.
+### `kube-scheduler`
 
-The main implementation of a Kubernetes API server is _kube-apiserver_, which is designed to scale horizontally (by deploying more instances) and balance traffic between its instances.
+Detects newly created pods with no assigned node, and selects one for them to run on.
 
-#### etcd
+Scheduling decisions take into account:
 
-Consistent and highly-available key value store used as Kubernetes' backing store for all cluster data.
+- individual and collective resource requirements;
+- hardware/software/policy constraints;
+- affinity and anti-affinity specifications;
+- data locality;
+- inter-workload interference;
+- deadlines.
 
-#### kube-scheduler
+### `kube-controller-manager`
 
-Detects newly created Pods with no assigned Node and selects one for them to run on.
+Runs _controller_ processes.<br />
+Each controller is a separate process logically speaking; they are all compiled into a single binary and run in a single process to reduce complexity.
 
-Scheduling decisions take into account individual and collective resource requirements, hardware/software/policy constraints, affinity and anti-affinity specifications, data locality, inter-workload interference, and deadlines.
+Examples of these controllers are:
 
-#### kube-controller-manager
+- the node controller, which notices and responds when nodes go down;
+- the replication controller, which maintains the correct number of pods for every replication controller object in the system;
+- the job controller, which checks one-off tasks (_job_) objects and creates pods to run them to completion;
+- the EndpointSlice controller, which populates _EndpointSlice_ objects providing a link between services and pods;
+- the ServiceAccount controller, which creates default ServiceAccounts for new namespaces.
 
-Runs controller processes.<br />
-Each controller is a separate process logically speaking, but to reduce complexity they are all compiled into a single binary and run in a single process.
+### `cloud-controller-manager`
 
-Examples of these controllers are the following:
+Embeds cloud-specific control logic, linking clusters to one's cloud provider's API and separating the components that interact with that cloud platform from the components that only interact with clusters.
 
-- Node controller: notices and responds when Nodes go down;
-- Replication controller: maintains the correct number of Pods for every replication controller object in the system;
-- Job controller: checks _Job_ objects (one-off tasks) and creates Pods to run them to completion;
-- EndpointSlice controller: populates _EndpointSlice_ objects, which provide a link between Services and Pods;
-- ServiceAccount controller: create default ServiceAccounts for new namespaces.
+They only run controllers that are specific to one's cloud provider. If you are running Kubernetes on your own premises, or in a learning environment inside your own PC, your cluster will have no cloud controller managers.
 
-#### cloud-controller-manager
-
-Embeds cloud-specific control logic, linking your cluster into your cloud provider's API and separating the components that interact with that cloud platform from the components that only interact with your cluster.
-
-They only run controllers that are specific to your cloud provider. If you are running Kubernetes on your own premises, or in a learning environment inside your own PC, the cluster will have no cloud controller managers.
-
-As with the kube-controller-manager, it combines several logically independent control loops into a single binary that you run as a single process. It can scale horizontally to improve performance or to help tolerate failures.
+As with the `kube-controller-manager`, it combines several logically independent control loops into a single binary that you run as a single process. It can scale horizontally to improve performance or to help tolerate failures.
 
 The following controllers can have cloud provider dependencies:
 
-- Node controller: checks the cloud provider to determine if a node has been deleted in the cloud after it stops responding;
-- Route controller: sets up routes in the underlying cloud infrastructure;
-- Service controller: creates, updates and deletes cloud provider load balancers.
+- the node controller, which checks the cloud provider to determine if a node has been deleted in the cloud after it stops responding;
+- the route controller, which sets up routes in the underlying cloud infrastructure;
+- the service controller, which creates, updates and deletes cloud provider load balancers.
 
-### The worker Nodes
+## The worker nodes
 
-Each Node runs components which provide a runtime environment for the cluster, and sync with the control plane to maintain workloads running as requested.
+Each and every node runs components providing a runtime environment for the cluster, and syncing with the control plane to maintain workloads running as requested.
 
-#### kubelet
+### `kubelet`
 
-Runs as an agent on each node in the cluster, making sure that containers are run in a Pod.
+A `kubelet` runs as an agent on each and every node in the cluster, making sure that containers are run in a pod.
 
-It takes a set of _PodSpecs_ and ensures that the containers described in them are running and healthy. It only manages containers created by Kubernetes.
+It takes a set of _PodSpecs_ and ensures that the containers described in them are running and healthy.<br/>
+It only manages containers created by Kubernetes.
 
-#### kube-proxy
+### `kube-proxy`
 
-Network proxy that runs on each node and implements part of the Kubernetes Service concept.
+Network proxy running on each node and implementing part of the Kubernetes Service concept.
 
 It maintains all the network rules on nodes which allow network communication to the Pods from network sessions inside or outside of your cluster.
 
 It uses the operating system's packet filtering layer, if there is one and it's available; if not, it forwards the traffic itself.
 
-#### Container runtime
+### Container runtime
 
 The software that is responsible for running containers.
 
 Kubernetes supports container runtimes like `containerd`, `CRI-O`, and any other implementation of the Kubernetes CRI (Container Runtime Interface).
 
-#### Addons
+### Addons
 
 Addons use Kubernetes resources (_DaemonSet_, _Deployment_, etc) to implement cluster features, and as such namespaced resources for addons belong within the `kube-system` namespace.
+
+See [addons] for an extended list of the available addons.
 
 ## The API
 
@@ -221,9 +225,7 @@ When a Pod is created, it is also assigned one of the following QoS classes:
     qosClass: BestEffort
   ```
 
-## Security
-
-### Containers with high privileges
+## Containers with high privileges
 
 Kubernetes [introduced a Security Context][security context design proposal] as a mitigation solution to some workloads requiring to change one or more Node settings for performance, stability, or other issues (e.g. [ElasticSearch]).<br/>
 This is usually achieved executing the needed command from an InitContainer with higher privileges than normal, which will have access to the Node's resources and breaks the isolation Containers are usually famous for. If compromised, an attacker can use this highly privileged container to gain access to the underlying Node.
@@ -237,7 +239,7 @@ From the design proposal:
 >
 > [The main idea is that] **Containers should only be granted the access they need to perform their work**. The Security Context takes advantage of containerization features such as the ability to [add or remove capabilities][Runtime privilege and Linux capabilities in Docker containers] to give a process some privileges, but not all the privileges of the `root` user.
 
-#### Capabilities
+### Capabilities
 
 Adding capabilities to a Container is **not** making it _privileged_, **nor** allowing _privilege escalation_. It is just giving the Container the ability to write to specific files or devices depending on the given capability.
 
@@ -257,7 +259,7 @@ Check:
 - [Runtime privilege and Linux capabilities in Docker containers] for the capabilities available **inside Kubernetes**, and
 - [Container capabilities in Kubernetes] for a handy table associating capabilities in Kubernetes to their Linux variant.
 
-#### Privileged containers vs privilege escalation
+### Privileged containers vs privilege escalation
 
 A _privileged container_ is very different from a _container leveraging privilege escalation_.
 
@@ -296,7 +298,7 @@ From the [design document for `no_new_privs`][No New Privileges Design Proposal]
 > | false                            | no_new_privs=true  | no_new_privs=true  | no_new_privs=false       |
 > | true                             | no_new_privs=false | no_new_privs=false | no_new_privs=false       |
 
-### Sysctl settings
+## Sysctl settings
 
 See [Using `sysctls` in a Kubernetes Cluster].
 
@@ -306,76 +308,27 @@ Most cloud providers offer their managed versions of Kubernetes. Check their web
 
 - [Azure Kubernetes Service]
 
-### Best practices
+### Best practices in cloud environments
 
 All kubernetes clusters should:
 
-- be created using IaC ([terraform], [pulumi])
-- have different node pools, to be able to manage different workloads
-- have a **non pre-emptible** node pool to host critical services like Admission Controller Webhooks
+- be created using **IaC** ([terraform], [pulumi]);
+- have different node pools dedicated to different workloads;
+- have at least one node pool composed by **non-preemptible** dedicated to critical services like Admission Controller Webhooks.
 
 Each node pool should:
 
-- have a meaningful name (\<prefix..>-\<randomid>)
-- have a _minimum_ set of _meaningful_ labels:
-  - cloud provider information
-  - node information and capabilities
-- sparse nodes on availability zones
-- be labelled with information about the nodes' features
+- have a _meaningful_ **name** (like \<prefix..>-\<randomid>) to make it easy to recognize the workloads running on it or the features of the nodes in it;
+- have a _minimum_ set of _meaningful_ **labels**, like:
+  - cloud provider information;
+  - node information and capabilities;
+- sparse nodes on multiple **availability zones**.
 
 ## Edge computing
 
 If planning to run Kubernetes on a Raspberry Pi, see [k3s] and the [Build your very own self-hosting platform with Raspberry Pi and Kubernetes] series of articles.
 
 ## Troubleshooting
-
-### Run a command in a Pod right **after** its initialization
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-deployment
-spec:
-  template:
-    …
-    spec:
-      containers:
-        - name: my-container
-          …
-          lifecycle:
-            postStart:
-              exec:
-                command: ["/bin/sh", "-c", "echo 'heeeeeeey yaaaaaa!'"]
-```
-
-### Run a command **just before a Pod stops**
-
-Leverage the `preStop` hook instead of `postStart`.
-
-> Hooks **are not passed parameters**, and this includes environment variables
-> Use a script if you need them. See [container hooks] and [preStop hook doesn't work with env variables]
-
-Since kubernetes version 1.9 and forth, volumeMounts behavior on secret, configMap, downwardAPI and projected have changed to Read-Only by default.
-A workaround to the problem is to create an `emtpyDir` Volume and copy the contents into it and execute/write whatever you need:
-
-```sh
-  initContainers:
-    - name: copy-ro-scripts
-      image: busybox
-      command: ['sh', '-c', 'cp /scripts/* /etc/pre-install/']
-      volumeMounts:
-        - name: scripts
-          mountPath: /scripts
-        - name: pre-install
-          mountPath: /etc/pre-install
-  volumes:
-    - name: pre-install
-      emptyDir: {}
-    - name: scripts
-      configMap:
-        name: bla
-```
 
 ### Dedicate Nodes to specific workloads
 
@@ -433,6 +386,56 @@ spec:
         {{- end }}
 ```
 
+### Run a command in a Pod right after its initialization
+
+Use a container's `lifecycle.postStart.exec.command` spec:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  template:
+    …
+    spec:
+      containers:
+        - name: my-container
+          …
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "echo 'heeeeeeey yaaaaaa!'"]
+```
+
+### Run a command just before a Pod stops
+
+Leverage the `preStop` hook instead of `postStart`.
+
+> Hooks **are not passed parameters**, and this includes environment variables
+> Use a script if you need them. See [container hooks] and [preStop hook doesn't work with env variables]
+
+Since kubernetes version 1.9 and forth, volumeMounts behavior on secret, configMap, downwardAPI and projected have changed to Read-Only by default.
+A workaround to the problem is to create an `emtpyDir` Volume and copy the contents into it and execute/write whatever you need:
+
+```sh
+  initContainers:
+    - name: copy-ro-scripts
+      image: busybox
+      command: ['sh', '-c', 'cp /scripts/* /etc/pre-install/']
+      volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+        - name: pre-install
+          mountPath: /etc/pre-install
+  volumes:
+    - name: pre-install
+      emptyDir: {}
+    - name: scripts
+      configMap:
+        name: bla
+```
+
 ## Examples
 
 ### Prometheus on Kubernetes using Helm
@@ -481,6 +484,7 @@ Tools:
 Others:
 
 - The [Build your very own self-hosting platform with Raspberry Pi and Kubernetes] series of articles
+- [Why separate your Kubernetes workload with nodepool segregation and affinity options]
 
 ## Sources
 
@@ -494,6 +498,7 @@ All the references in the [further readings] section, plus the following:
 - [Configure Quality of Service for Pods]
 
 <!-- project's documentation -->
+[addons]: https://kubernetes.io/docs/concepts/cluster-administration/addons/
 [api deprecation policy]: https://kubernetes.io/docs/reference/using-api/deprecation-policy/
 [common labels]: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
 [concepts]: https://kubernetes.io/docs/concepts/
@@ -528,6 +533,7 @@ All the references in the [further readings] section, plus the following:
 [cncf]: https://www.cncf.io/
 [container capabilities in kubernetes]: https://unofficial-kubernetes.readthedocs.io/en/latest/concepts/policy/container-capabilities/
 [elasticsearch]: https://github.com/elastic/helm-charts/issues/689
+[etcd]: https://etcd.io/docs/
 [how to run a command in a pod after initialization]: https://stackoverflow.com/questions/44140593/how-to-run-command-after-initialization/44146351#44146351
 [kubernetes securitycontext capabilities explained]: https://www.golinuxcloud.com/kubernetes-securitycontext-capabilities/
 [linux capabilities]: https://man7.org/linux/man-pages/man7/capabilities.7.html
@@ -536,6 +542,7 @@ All the references in the [further readings] section, plus the following:
 [prestop hook doesn't work with env variables]: https://stackoverflow.com/questions/61929055/kubernetes-prestop-hook-doesnt-work-with-env-variables#62135231
 [read-only filesystem error]: https://stackoverflow.com/questions/49614034/kubernetes-deployment-read-only-filesystem-error/51478536#51478536
 [runtime privilege and linux capabilities in docker containers]: https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities
+[why separate your kubernetes workload with nodepool segregation and affinity options]: https://medium.com/contino-engineering/why-separate-your-kubernetes-workload-with-nodepool-segregation-and-affinity-rules-cb5225953788
 
 [kubectx+kubens]: https://github.com/ahmetb/kubectx
 [kube-ps1]: https://github.com/jonmosco/kube-ps1
