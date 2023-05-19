@@ -5,7 +5,7 @@
 1. [TL;DR](#tldr)
 1. [Connect to a cloud SQL instance](#connect-to-a-cloud-sql-instance)
 1. [Create users in a SQL instance from the MySQL shell](#create-users-in-a-sql-instance-from-the-mysql-shell)
-1. [Manually execute a `terraform plan` or `apply` on a project defining Cloud SQL instances and users](#manually-execute-a-terraform-plan-or-apply-on-a-project-defining-cloud-sql-instances-and-users)
+1. [Use Terraform to manage users in a cloud SQL instance](#use-terraform-to-manage-users-in-a-cloud-sql-instance)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
@@ -26,7 +26,7 @@ cloud_sql_proxy -instances=project-name:region:instance-name -dir=/tmp \
 ## Connect to a cloud SQL instance
 
 ```sh
-$ gcloud sql connect $INSTANCE_NAME --user=root --quiet
+$ gcloud sql connect 'instance-name' --user=root --quiet
 Allowlisting your IP for incoming connection for 5 minutes...done.
 Connecting to database with SQL user [root].Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
@@ -46,40 +46,40 @@ mysql>
 
 ## Create users in a SQL instance from the MySQL shell
 
-1. create an administrative user for the instance using `gcloud`, the APIs or the console
-1. use this administrative user to connect to the MySQL console:
+1. Create an administrative user for the instance using `gcloud`, the APIs or the console;
+1. Use this administrative user to connect to the MySQL console:
 
-   ```shell
-   mysql -h $HOST -u admin -p
+   ```sh
+   mysql -h 'host' -u 'admin' -p
    ```
 
-1. create the new users from there
+1. Create the new users from there.
 
-## Manually execute a `terraform plan` or `apply` on a project defining Cloud SQL instances and users
+## Use Terraform to manage users in a cloud SQL instance
 
-- make sure the SQL instance has been created (using a IaC tool or not, it doesn't matter)
-- install `cloud_sql_proxy` on your machine:
+- Make sure the SQL instance has been created (using a IaC tool or not, it doesn't matter);
+- Install `cloud_sql_proxy` on your machine:
 
   ```sh
   brew install 'cloud_sql_proxy'
   ```
 
-- start the proxy and point it to the SQL instance the code needs to connect to
+- Start the proxy and point it to the SQL instance the code needs to connect to:
 
   ```sh
-  $ cloud_sql_proxy -instances=${PROJECT}:${REGION}:${INSTANCE}=tcp:3306 -verbose -log_debug_stdout
+  $ cloud_sql_proxy -instances=myAwesomeProject:europe-west4:sqlInstance=tcp:3306 -verbose -log_debug_stdout
   2021/04/20 10:49:03 Rlimits for file descriptors set to {Current = 8500, Max = 9223372036854775807}
   2021/04/20 10:49:05 Listening on 127.0.0.1:3306 for myAwesomeProject:europe-west4:sqlInstance
   2021/04/20 10:49:05 Ready for new connections
 
   # or, using sockets
-  $ cloud_sql_proxy -instances=${PROJECT}:${REGION}:${INSTANCE} -dir=/tmp -verbose -log_debug_stdout
+  $ cloud_sql_proxy -instances=myAwesomeProject:europe-west4:sqlInstance -dir=/tmp -verbose -log_debug_stdout
   2021/05/19 23:13:40 Rlimits for file descriptors set to {Current = 8500, Max = 9223372036854775807}
   2021/05/19 23:13:41 Listening on /tmp/myAwesomeProject:europe-west4:sqlInstance for myAwesomeProject:europe-west4:sqlInstance
   2021/05/19 23:13:41 Ready for new connections
   ```
 
-- make the Terraform SQL provider point to localhost
+- Point the Terraform SQL provider to localhost:
 
   ```hcl
   provider "mysql" {
@@ -92,7 +92,7 @@ mysql>
   }
   ```
 
-- execute `terraform plan` from your machine
+- Execute `terraform plan` or whatever other action from your machine.
 
 Terraform will use the provider to connect to the proxy and operate on the SQL instance.
 
