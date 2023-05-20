@@ -329,7 +329,7 @@ Install and configure Pi-hole in the container:
 hostnamectl set-hostname 'pi-hole'
 
 # Install pi-hole.
-DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'ca-certificates' 'curl'
+DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'ca-certificates' 'curl' 'unattended-upgrades'
 curl -sSL 'https://install.pi-hole.net' | bash
 
 # Follow the guided procedure.
@@ -339,6 +339,20 @@ curl -sSL 'https://install.pi-hole.net' | bash
 
 # Update pi-hole as a whole, if needed.
 /etc/.pihole/pihole -up
+
+# Set the router as the primary DNS server.
+sed -E -i.bak 's|^#?\s*DNS\s*=\s*.*$|DNS=192.168.1.1|' '/etc/systemd/resolved.conf'
+
+# Set Cloudflare as the fallback DNS server.
+# Optional.
+sed -E -i.bak 's|^#?\s*FallbackDNS\s*=\s*.*$|FallbackDNS=1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001 # Cloudflare|' '/etc/systemd/resolved.conf'
+
+# Set the interface to ignore DNS lists given by the DHCP server.
+cp '/etc/systemd/network/eth0.network' '/etc/systemd/network/eth0.network.bak'
+cat >> '/etc/systemd/network/eth0.network' <<EOF
+[DHCP]
+UseDNS=false
+EOF
 ```
 
 Finish setting up the container as explained above.<br/>
@@ -349,7 +363,7 @@ Then, in Turris OS:
 # Keep the router as secondary.
 uci set dhcp.lan.dhcp_option='6,192.168.111.2,192.168.111.1'
 
-# The dns server address in the IPv6 RA should be the container's ULA address
+# The DNS server address in the IPv6 RA should be the container's ULA address
 # since the global routable IPv6 address tend to change daily.
 uci add_list dhcp.lan.dns="$(lxc-info --name pi-hole | grep -E 'IP.* f[cd]' | sed 's/IP: *//')"
 
@@ -366,6 +380,7 @@ Suggestions:
 - [SSH]:
   - Change the SSH port from the default `22` value.
   - Restrict login to specific IP addresses.
+  - Restrict authentication options to keys.
 
 ## The SFP+ caged module
 
