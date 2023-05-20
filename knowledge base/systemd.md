@@ -110,6 +110,9 @@ journalctl --disk-usage
 sudo journalctl --vacuum-size='1G'
 sudo journalctl --vacuum-time='1years'
 
+# Show the current time settings.
+timedatectl
+
 # List available timezones.
 timedatectl list-timezones
 
@@ -134,7 +137,7 @@ sudo timedatectl set-ntp false
 # Check the time and timezones state.
 timedatectl status
 
-# Show the current hostname state.
+# Show the current hostname settings.
 hostnamectl
 hostnamectl --pretty status
 hostnamectl --static status
@@ -142,6 +145,20 @@ hostnamectl --static status
 # Set hostnames.
 hostnamectl set-hostname 'static_hostname' --static
 hostnamectl set-hostname 'pretty_hostname' --pretty
+
+# Show the current DNS resolution settings.
+resolvectl status
+resolvectl status 'eth0'
+
+# Get an address-ip resolution and viceversa.
+resolvectl query 'www.0pointer.net'
+resolvectl query '85.214.157.71'
+
+# Retrieve PGP keys.
+resolvectl openpgp 'zbyszek@fedoraproject.org'
+
+# Restart the DNS resolver.
+sudo systemctl restart 'systemd-resolved.service'
 ```
 
 ## User services
@@ -207,6 +224,29 @@ Storage=persistent
    ```sh
    sudo service 'network-manager' restart
    ```
+
+### Ignore the DNS servers list given by the DHCP server
+
+Set the following lines in any network-specific file for which you want to ignore DNS servers from DHCP (like `/etc/systemd/network/eth0.network`), or in the global settings (`/etc/systemd/resolved.conf` or any file in `/etc/systemd/resolved.conf.d/`):
+
+```ini
+[DHCP]
+UseDNS=false
+```
+
+Restarting the `systemd-resolved` service seems to not be enough. Restarting the host changed the settings.
+
+### Manually set DNS servers
+
+Set the following lines in the global settings (`/etc/systemd/resolved.conf` or any file in `/etc/systemd/resolved.conf.d/`), or in any network-specific file you want to set DNS servers for (like `/etc/systemd/network/eth0.network`):
+
+```ini
+[Resolve]
+DNS=192.168.1.1 # Local router
+FallbackDNS=1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001 # Cloudflare
+```
+
+Restart the `systemd-resolved` service to apply the new settings.
 
 ## Sources
 
