@@ -32,6 +32,7 @@
 
 ```sh
 # Install.
+pip3 install 'ansible'
 pip3 install --user 'ansible' && port install 'sshpass'   # darwin
 sudo pamac install 'ansible' 'sshpass'                    # manjaro linux
 
@@ -192,7 +193,6 @@ Return a boolean result.
 - ansible.builtin.debug:
     var: "{{ item }}"
   with_items: ["ansible_local", "playbook_dir", "role_path"]
-
 
 # Fail when any of the given variables is an empty string.
 # Returns the ones which are empty.

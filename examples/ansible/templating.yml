@@ -2,6 +2,9 @@
 
 - name: Show off Ansible's templating
   hosts: all
+  vars:
+    random_string: ""
+    random_integer: random(-34485, 45666)
   tasks:
 
     # A.K.A. ternary operator.
@@ -70,11 +73,30 @@
       ansible.builtin.debug:
         var: "'string' | type_debug"
 
+    - name: Make assertions.
+      ansible.builtin.assert:
+        that:
+          - 12 | type_debug == "int"
+          - 12 < 24
+
 - name: Show off Ansible's testing
   hosts: all
   vars:
-    url: "https://example.com/users/foo/resources/bar"
+    resource_url: "https://example.com/users/foo/resources/bar"
+    random_string: "{{ lookup('password', '/dev/null length=8 chars=ascii_letters') }}"
   tasks:
+
+    - name: Check a variable is a string.
+      ansible.builtin.debug:
+        var: "'{{ random_string }}' is string"
+
+    - name: Check a value is an integer.
+      ansible.builtin.debug:
+        var: 34 is integer
+
+    - name: Check a given URL is in fact an URL.
+      ansible.builtin.debug:
+        var: "'{{ resource_url }}' is url"
 
     - name: Compare a semver version number.
       ansible.builtin.debug:
@@ -91,10 +113,10 @@
       ansible.builtin.debug:
         msg: "{{ item }}"
       with_items:
-        - "{{ url is match('https://example.com/users/.*/resources') }}"
-        - "{{ url is search('users/.*/resources/.*') }}"
-        - "{{ url is search('USERS', ignorecase=true) }}"
-        - "{{ url is regex('example\\.com/\\w+/foo') }}"
+        - "{{ resource_url is match('https://example.com/users/.*/resources') }}"
+        - "{{ resource_url is search('users/.*/resources/.*') }}"
+        - "{{ resource_url is search('USERS', ignorecase=true) }}"
+        - "{{ resource_url is regex('example\\.com/\\w+/foo') }}"
 
 - name: Show off Ansible's loops
   hosts: all
