@@ -21,7 +21,8 @@
     1. [Firewall settings](#firewall-settings)
 1. [Store files on the SD even when the overlay file system is active](#store-files-on-the-sd-even-when-the-overlay-file-system-is-active)
 1. [Disable automatic upgrades](#disable-automatic-upgrades)
-    1. [Troubleshooting](#troubleshooting)
+1. [Troubleshooting](#troubleshooting)
+    1. [LED warning flash codes](#led-warning-flash-codes)
     1. [Issues connecting to WiFi network using roaming features or WPA3](#issues-connecting-to-wifi-network-using-roaming-features-or-wpa3)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
@@ -297,7 +298,35 @@ Using **_mask_** to prevent the above services from being re-enabled by some dep
 
 Notice those are two separate services; they both run `/usr/lib/apt/apt.systemd.daily`, a shell script, with parameters install and update.
 
-### Troubleshooting
+## Troubleshooting
+
+### LED warning flash codes
+
+If a Raspberry Pi fails to boot or has to shut down for some reason, in most cases it will flash a LED a specific number of times to indicate what happened.<br/>
+The LED will blink for a number of long flashes (0 or more), then short flashes, to indicate the exact status. In most cases, the pattern will repeat after a 2 second gap.
+
+See the [configuration] page for updated information.
+
+| Long flashes | Short flashes | Status                                 | Notes     |
+| ------------ | ------------- | -------------------------------------- | --------- |
+| 0            | 3             | Generic failure on boot                |           |
+| 0            | 4             | `start*.elf` not found                 |           |
+| 0            | 7             | Kernel image not found                 |           |
+| 0            | 8             | SDRAM failure                          |           |
+| 0            | 9             | Insufficient SDRAM                     |           |
+| 0            | 10            | In HALT state                          |           |
+| 2            | 1             | Partition not FAT                      |           |
+| 2            | 2             | Failed to read from partition          |           |
+| 2            | 3             | Extended partition not FAT             |           |
+| 2            | 4             | File signature/hash mismatch           | Pi 4 only |
+| 3            | 1             | SPI EEPROM error                       | Pi 4 only |
+| 3            | 2             | SPI EEPROM is write protected          | Pi 4 only |
+| 3            | 3             | I2C error                              | Pi 4 only |
+| 3            | 4             | Secure-boot configuration is not valid |           |
+| 4            | 4             | Unsupported board type                 |           |
+| 4            | 5             | Fatal firmware error                   |           |
+| 4            | 6             | Power failure type A                   |           |
+| 4            | 7             | Power failure type B                   |           |
 
 ### Issues connecting to WiFi network using roaming features or WPA3
 
@@ -329,6 +358,7 @@ Long term solution: none currently known.
 - [`rfkill`][rfkill]
 - [Country code search]
 - [`k3s`][k3s]
+- [Configuration]
 
 ## Sources
 
@@ -340,6 +370,7 @@ Long term solution: none currently known.
 
 <!-- project's references -->
 [/boot/config.txt]: https://www.raspberrypi.org/documentation/configuration/config-txt/README.md
+[configuration]: https://www.raspberrypi.com/documentation/computers/configuration.html
 [overclocking]: https://www.raspberrypi.org/documentation/configuration/config-txt/overclocking.md
 
 <!-- internal references -->
