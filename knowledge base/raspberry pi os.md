@@ -21,6 +21,8 @@
     1. [Firewall settings](#firewall-settings)
 1. [Store files on the SD even when the overlay file system is active](#store-files-on-the-sd-even-when-the-overlay-file-system-is-active)
 1. [Disable automatic upgrades](#disable-automatic-upgrades)
+    1. [Troubleshooting](#troubleshooting)
+    1. [Issues connecting to WiFi network using roaming features or WPA3](#issues-connecting-to-wifi-network-using-roaming-features-or-wpa3)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -295,6 +297,31 @@ Using **_mask_** to prevent the above services from being re-enabled by some dep
 
 Notice those are two separate services; they both run `/usr/lib/apt/apt.systemd.daily`, a shell script, with parameters install and update.
 
+### Troubleshooting
+
+### Issues connecting to WiFi network using roaming features or WPA3
+
+Check [raspbian's bug 1929746][raspbian bug 1929746] for more information.
+
+Quick solutions:
+
+- (quick 'n' dirty) disable roaming options and WPA3 in your router;
+- (preferable) disable SAE (WPA3) and SWSUP (offload authentication to the firmware), and fast roaming:
+
+  ```sh
+  rmmod 'brcmfmac'
+  modprobe 'brcmfmac' roamoff=1 feature_disable=0x82000
+  ```
+
+  Make it permanent in a `.conf` file in `/etc/modprobe.d/`:
+
+  ```sh
+  # /etc/modprobe.d/wifi_workaround.conf
+  options brcmfmac roamoff=1 feature_disable=0x82000
+  ```
+
+Long term solution: none currently known.
+
 ## Further readings
 
 - [`/boot/config.txt`][/boot/config.txt]
@@ -324,6 +351,7 @@ Notice those are two separate services; they both run `/usr/lib/apt/apt.systemd.
 [how to disable your raspberry pi's wi-fi]: https://pimylifeup.com/raspberry-pi-disable-wifi/
 [issue 2067]: https://github.com/k3s-io/k3s/issues/2067#issuecomment-664052806
 [prepare sd card for wifi on headless pi]: https://raspberrypi.stackexchange.com/questions/10251/prepare-sd-card-for-wifi-on-headless-pi
+[raspbian bug 1929746]: https://bugs.launchpad.net/raspbian/+bug/1929746
 [re: how to make sure the rpi cpu is not throttled down?]: https://www.raspberrypi.org/forums/viewtopic.php?t=152549#p999931
 [run kubernetes on a raspberry pi with k3s]: https://opensource.com/article/20/3/kubernetes-raspberry-pi-k3s
 [timely tips for speeding up your raspberry pi]: https://www.raspberry-pi-geek.com/Archive/2013/01/Timely-tips-for-speeding-up-your-Raspberry-Pi
