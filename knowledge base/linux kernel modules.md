@@ -13,6 +13,12 @@
 # Show what kernel modules are currently loaded.
 lsmod
 
+# List all modules built into the currently running kernel.
+cat "/lib/modules/$(uname -r)/modules.builtin"
+
+# List all available modules.
+find "/lib/modules/$(uname -r)" -type f -name '*.ko*'
+
 # Show information about a module.
 modinfo 'module_name'
 
@@ -55,7 +61,8 @@ options brcmfmac roamoff=1 feature_disable=0x82000
 
 All the references in the [further readings] section, plus the following:
 
-- The [Kernel module] page in the [Arch wiki]
+- The [Kernel module][arch wiki kernel module] page in the [Arch wiki]
+- The [Kernel modules][gentoo wiki kernel modules]
 
 <!-- project's references -->
 
@@ -64,4 +71,6 @@ All the references in the [further readings] section, plus the following:
 
 <!-- external references -->
 [arch wiki]: https://wiki.archlinux.org
-[kernel module]: https://wiki.archlinux.org/title/Kernel_module
+[arch wiki kernel module]: https://wiki.archlinux.org/title/Kernel_module
+[gentoo wiki]: https://wiki.gentoo.org/wiki/Main_Page
+[gentoo wiki kernel modules]: https://wiki.gentoo.org/wiki/Kernel_Modules
