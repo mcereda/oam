@@ -91,7 +91,8 @@ sudo apt update
 - [Configuring Apt sources]
 - [Unattended Upgrades]
 - [`dpkg`][dpkg]
-- [`apt-file`][apt-file]
+- [`apt-file`][apt-file] to look for files in packages
+- [`netselect-apt`][netselect-apt] to select the fastest APT mirror
 
 ## Sources
 
@@ -106,6 +107,7 @@ sudo apt update
 <!-- internal references -->
 [apt-file]: apt-file.md
 [dpkg]: dpkg.md
+[netselect-apt]: netselect-apt.md
 
 <!-- external references -->
 [cheat.sh]: https://cheat.sh/apt
