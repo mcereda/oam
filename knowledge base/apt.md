@@ -1,5 +1,16 @@
 # The APT package manager
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Automate security upgrades](#automate-security-upgrades)
+1. [Configuration](#configuration)
+1. [Version pinning](#version-pinning)
+1. [Troubleshooting](#troubleshooting)
+   1. [Fix a "Problem with MergeList" or "status file could not be parsed" error](#fix-a-problem-with-mergelist-or-status-file-could-not-be-parsed-error)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -72,6 +83,52 @@ sudo unattended-upgrade -d --dry-run
 sudo unattended-upgrade
 ```
 
+## Configuration
+
+See [Apt configuration] for more information.
+
+```txt
+# /etc/apt/apt.conf.d/90default-release
+APT::Default-Release "stable";
+```
+
+```txt
+# /etc/apt/apt.conf.d/99parallel-fetch
+APT::Acquire::Queue-Mode "access";
+APT::Acquire::Retries 3;
+```
+
+## Version pinning
+
+See [`apt_preferences`'s man page][apt_preferences man page] for more information.
+
+```txt
+# /etc/apt/preferences.d/99perl
+Package: perl
+Pin: version 5.20*
+Pin-Priority: 1001
+```
+
+```txt
+# /etc/apt/preferences.d/90debian-release
+Package: *
+Pin: release a=testing
+Pin-Priority: 990
+Package: *
+Pin: release a=stable
+Pin-Priority: 500
+Package: *
+Pin: release a=unstable
+Pin-Priority: -1
+```
+
+```txt
+# /etc/apt/preferences.d/boinc
+Package: boinc boinc-client boinc-manager libboinc7
+Pin: release a=unstable
+Pin-Priority: 995
+```
+
 ## Troubleshooting
 
 ### Fix a "Problem with MergeList" or "status file could not be parsed" error
@@ -90,17 +147,21 @@ sudo apt update
 - [Apt configuration]
 - [Configuring Apt sources]
 - [Unattended Upgrades]
+- [`apt_preferences`'s man page][apt_preferences man page]
 - [`dpkg`][dpkg]
 - [`apt-file`][apt-file] to look for files in packages
 - [`netselect-apt`][netselect-apt] to select the fastest APT mirror
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [cheat.sh]
 - [Fix a "Problem with MergeList" or "status file could not be parsed" error]
 
 <!-- project's references -->
 [apt configuration]: https://wiki.debian.org/AptConfiguration
+[apt_preferences man page]: https://manpages.debian.org/testing/apt/apt_preferences.5.en.html
 [configuring apt sources]: https://wiki.debian.org/SourcesList
 [unattended upgrades]: https://wiki.debian.org/UnattendedUpgrades
 
