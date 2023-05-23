@@ -1,4 +1,5 @@
-deb http://deb.debian.org/debian/ buster main non-free contrib
+deb http://deb.debian.org/debian/ buster main contrib non-free
+deb http://security.debian.org/ buster/updates main contrib non-free
 
 # buster-updates, previously known as 'volatile'
 deb http://deb.debian.org/debian/ buster-updates main contrib non-free
