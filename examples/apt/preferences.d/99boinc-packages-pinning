@@ -1,3 +1,3 @@
 Package: boinc boinc-app-eah-brp boinc-client boinc-client-nvidia-cuda boinc-client-opencl boinc-dev boinc-manager boinc-screensaver boinctui libboinc-app-dev libboinc-app7 libboinc7
 Pin: release a=testing
-Pin-Priority: 991
+Pin-Priority: 995
