@@ -1,5 +1,5 @@
 Package: *
-Pin: release a=testing
+Pin: release a=testing*
 Pin-Priority: 990
 
 Package: *
