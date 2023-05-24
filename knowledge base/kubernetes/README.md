@@ -34,8 +34,8 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
     1. [Run a command in a Pod right after its initialization](#run-a-command-in-a-pod-right-after-its-initialization)
     1. [Run a command just before a Pod stops](#run-a-command-just-before-a-pod-stops)
 1. [Examples](#examples)
-    1. [Prometheus on Kubernetes using Helm](#prometheus-on-kubernetes-using-helm)
     1. [Create an admission webhook](#create-an-admission-webhook)
+    1. [Prometheus on Kubernetes using Helm](#prometheus-on-kubernetes-using-helm)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -301,7 +301,7 @@ From the [design document for `no_new_privs`][No New Privileges Design Proposal]
 
 ## Sysctl settings
 
-See [Using `sysctls` in a Kubernetes Cluster].
+See [Using `sysctls` in a Kubernetes Cluster][using sysctls in a kubernetes cluster].
 
 ## Managed Kubernetes Services
 
@@ -439,13 +439,13 @@ A workaround to the problem is to create an `emtpyDir` Volume and copy the conte
 
 ## Examples
 
-### Prometheus on Kubernetes using Helm
-
-See the example's [README][prometheus on kubernetes using helm].
-
 ### Create an admission webhook
 
 See the example's [README][create an admission webhook].
+
+### Prometheus on Kubernetes using Helm
+
+See the example's [README][prometheus on kubernetes using helm].
 
 ## Further readings
 
@@ -515,6 +515,9 @@ All the references in the [further readings] section, plus the following:
 [security design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security.md
 [set capabilities for a container]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container
 [using sysctls in a kubernetes cluster]: https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/
+
+<!-- in-article references -->
+[further readings]: #further-readings
 
 <!-- internal references -->
 [azure kubernetes service]: ../azure/aks.md
