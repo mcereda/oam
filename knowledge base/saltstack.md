@@ -2,7 +2,7 @@
 
 ## Table of contents <!-- omit in toc -->
 
-1. [TL:DR](#tldr)
+1. [TL;DR](#tldr)
 1. [Key management](#key-management)
 1. [Execute commands on minions](#execute-commands-on-minions)
 1. [Targeting](#targeting)
@@ -17,7 +17,7 @@
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
-## TL:DR
+## TL;DR
 
 ```sh
 # View all minion connections with their status.

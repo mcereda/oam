@@ -5,11 +5,11 @@ None of the files in input can be encrypted.
 
 ## Table of contents <!-- omit in toc -->
 
-1. [TL:DR](#tldr)
+1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
-## TL:DR
+## TL;DR
 
 ```sh
 sudo apt install 'poppler-utils'

@@ -1,6 +1,6 @@
 # Set the _ondemand_ CPU governor to not rise the frequencies for niced loads
 
-## TL:DR
+## TL;DR
 
 ```sh
 sudo cpupower frequency-set --governor ondemand

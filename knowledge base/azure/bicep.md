@@ -8,14 +8,14 @@ The Azure CLI can use a command group (`az bicep …`) to integrate with the `bi
 
 ## Table of contents <!-- omit in toc -->
 
-1. [TL:DR](#tldr)
+1. [TL;DR](#tldr)
 1. [Utility management](#utility-management)
    1. [Installation](#installation)
    1. [Upgrade](#upgrade)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
-## TL:DR
+## TL;DR
 
 ```sh
 # Install the `bicep` utility.
