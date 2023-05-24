@@ -596,6 +596,9 @@ All the references in the [further readings] section, plus the following:
 [enforce pod security standards with namespace labels]: https://kubernetes.io/docs/tasks/configure-pod-container/enforce-standards-namespace-labels/
 [taints and tolerations]: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
 
+<!-- in-article references -->
+[further readings]: #further-readings
+
 <!-- internal references -->
 [jsonpath]: ../jsonpath.md
 [kubernetes]: README.md

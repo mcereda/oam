@@ -1,6 +1,6 @@
-# Title
+# The `gcloud` utility
 
-Intro
+CLI for the Google Cloud Platform.
 
 ## Table of contents <!-- omit in toc -->
 
@@ -63,7 +63,8 @@ All the references in the [further readings] section, plus the following:
 [creating and managing projects]: https://cloud.google.com/resource-manager/docs/creating-managing-projects
 [gcloud projects]: https://cloud.google.com/sdk/gcloud/reference/projects
 
-<!-- internal references -->
+<!-- in-article references -->
 [further readings]: #further-readings
 
+<!-- internal references -->
 <!-- external references -->

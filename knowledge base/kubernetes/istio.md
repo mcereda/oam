@@ -39,20 +39,20 @@ See the [getting started guide] for more information.
 1. download and extract the **latest** release for x86_64
 
    ```sh
-   curl -L https://istio.io/downloadIstio | sh -
+   curl -L 'https://istio.io/downloadIstio' | sh -
    ```
 
    or specify the version and/or architecture if you need
 
    ```sh
-   curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.6.8 TARGET_ARCH=x86_64 sh -
+   curl -L 'https://istio.io/downloadIstio' | ISTIO_VERSION='1.6.8' TARGET_ARCH='x86_64' sh -
    ```
 
 1. add `istioctl` to your _PATH_ if you need it
 
    ```sh
-   cd istio-${ISTIO_VERSION}
-   export PATH=$PWD/bin:$PATH
+   cd "istio-${ISTIO_VERSION}"
+   export PATH="${PWD}/bin:${PATH}"
    ```
 
 1. install istio using a profile to set it up (_demo_ is for testing, but others are available)
@@ -64,7 +64,7 @@ See the [getting started guide] for more information.
 1. add the label to instruct Istio to automatically inject Envoy sidecar proxies when you deploy your application later
 
    ```sh
-   kubectl label namespace default istio-injection=enable
+   kubectl label namespace 'default' 'istio-injection=enable'
    ```
 
 ## Further readings
@@ -80,8 +80,9 @@ All the references in the [further readings] section, plus the following:
 <!-- project's references -->
 [getting started guide]: https://istio.io/latest/docs/setup/getting-started/
 
-<!-- internal references -->
+<!-- in-article references -->
 [further readings]: #further-readings
 
+<!-- internal references -->
 <!-- external references -->
 [service mesh]: https://www.redhat.com/en/topics/microservices/what-is-a-service-mesh

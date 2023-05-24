@@ -105,8 +105,9 @@ All the references in the [further readings] section, plus the following:
 [kubectl cluster access]: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl
 [preparing a google kubernetes engine environment for production]: https://cloud.google.com/solutions/prep-kubernetes-engine-for-prod
 
-<!-- internal references -->
+<!-- in-article references -->
 [further readings]: #further-readings
 
+<!-- internal references -->
 <!-- external references -->
 [how to master admission webhooks in kubernetes]: https://digizoo.com.au/1376/mastering-admission-webhooks-in-kubernetes-gke-part-1/

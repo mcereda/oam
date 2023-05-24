@@ -1,10 +1,10 @@
-# KEDA <!-- omit in toc -->
+# KEDA
 
 The _Kubernetes-based Event Driven Auto-Scaler_ will automatically scale a resource in a Kubernetes cluster based on a scale trigger: KEDA will monitor the event source, and feed that data to Kubernetes to scale the resource out/in accordingly, leveraging standard Kubernetes components (e.g. HPA) and extending the existing functionality without overwriting or duplicating components.
 
 Any Kubernetes cluster **>= 1.16.0** should work.
 
-**Table of contents:**
+## Table of contents <!-- omit in toc -->
 
 1. [How KEDA works](#how-keda-works)
 1. [Deployment](#deployment)
@@ -304,14 +304,17 @@ and then delete the namespace.
 - The complete [scalers] list
 - The project's [website]
 - The project's [FAQ]s
+- [Kubernetes]
 
 ## Sources
+
+All the references in the [further readings] section, plus the following:
 
 - [KEDA: Event Driven and Serverless Containers in Kubernetes] by Jeff Hollan, Microsoft
 - The `/scale` [subresource][/scale subresource]
 - The [ScaledObject specification]
 
-<!-- further readings -->
+<!-- project's references -->
 [authentication]: https://keda.sh/docs/2.0/concepts/authentication/
 [concepts]: https://keda.sh/docs/2.0/concepts/
 [external scalers]: https://keda.sh/docs/2.0/concepts/external-scalers/
@@ -321,7 +324,13 @@ and then delete the namespace.
 [scaling jobs]: https://keda.sh/docs/2.0/concepts/scaling-jobs/
 [website]: https://keda.sh/
 
-<!-- sources -->
+<!-- in-article references -->
+[further readings]: #further-readings
+
+<!-- internal references -->
+[kubernetes]: README.md
+
+<!-- external references -->
 [keda: event driven and serverless containers in kubernetes]: https://www.youtube.com/watch?v=ZK2SS_GXF-g
 [scaledobject specification]: https://github.com/kedacore/keda/blob/v2.0.0/api/v1alpha1/scaledobject_types.go
 [/scale subresource]: https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#scale-subresource

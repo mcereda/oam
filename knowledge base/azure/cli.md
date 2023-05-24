@@ -519,6 +519,8 @@ az rest \
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [Install Azure CLI on macOS]
 - [Get started with Azure CLI]
 - [Sign in with Azure CLI]
@@ -538,6 +540,9 @@ az rest \
 [pat apis]: https://learn.microsoft.com/en-us/rest/api/azure/devops/tokens/pats
 [remove a member]: https://learn.microsoft.com/en-us/graph/api/group-delete-members?view=graph-rest-1.0&tabs=http
 [sign in with azure cli]: https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli
+
+<!-- in-article references -->
+[further readings]: #further-readings
 
 <!-- internal references -->
 [az bicep]: bicep.md#tldr

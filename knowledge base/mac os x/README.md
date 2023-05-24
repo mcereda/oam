@@ -364,6 +364,9 @@ All the references in the [further readings] section, plus the following:
 [mac startup key combinations]: https://support.apple.com/en-us/HT201255
 [resize, rotate, or flip an image in preview on mac]: https://support.apple.com/guide/preview/resize-rotate-or-flip-an-image-prvw2015/11.0/mac/13.0
 
+<!-- in-article references -->
+[further readings]: #further-readings
+
 <!-- internal references -->
 [time machine]: time%20machine.md
 [macports]: macports.md
