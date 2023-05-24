@@ -6,10 +6,8 @@ Queries (`az … --query …`) use the [JMESPath] query language for JSON.
 
 1. [TL;DR](#tldr)
 1. [Installation](#installation)
+1. [Extensions](#extensions)
 1. [Pipelines](#pipelines)
-1. [Bicep](#bicep)
-   1. [Bicep installation](#bicep-installation)
-   1. [Bicep upgrade](#bicep-upgrade)
 1. [APIs](#apis)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
@@ -181,40 +179,6 @@ az postgres flexible-server list-skus --location 'westeurope' -o 'table'
 az monitor log-analytics workspace list --query '[].name' \
   --resource-group 'resource_group_name'
 
-# Login to Azure DevOps with a PAT.
-az devops login --organization 'https://dev.azure.com/organization_name'
-
-# List DevOps' Service Endpoints.
-az devops service-endpoint list \
-  --organization 'https://dev.azure.com/organization_name' --project 'project'
-az rest -m 'get' \
-  -u 'https://dev.azure.com/organization_name/project_name/_apis/serviceendpoint/endpoints' \
-  --url-parameters 'api-version=7.1-preview.4' \
-  --headers Authorization='Bearer ey…pw'
-
-# Get the ID of a Service Endpoint from its name.
-az devops service-endpoint list -o 'tsv' \
-  --organization 'https://dev.azure.com/organization_name' --project 'project' \
-  --query "[?name=='service_endpoint_name'].id"
-
-# Get the name of a Service Endpoint from its id.
-az devops service-endpoint list -o 'tsv' \
-  --organization 'https://dev.azure.com/organization_name' --project 'project' \
-  --query "[?id=='service_endpoint_id'].name"
-
-# Filter out users whose Principal Name starts for X and access Y.
-az devops user list --org 'https://dev.azure.com/organizationName' \
-  --query "
-    items[?
-      startsWith(user.principalName, 'yourNameHere') &&
-      \! contains(accessLevel.licenseDisplayName, 'Test plans')
-    ].user.displayName"
-
-# Get Teams' information.
-az devops team show \
-  --org 'https://dev.azure.com/organizationName' --project 'project' \
-  --team 'display_name'
-
 # Get the names of all the Pipelines the current user has access to.
 az pipelines list --organization 'organization_id_or_name'
 az pipelines list --detect 'true' --query '[].name' -o 'tsv'
@@ -252,22 +216,22 @@ az provider show -o 'tsv' --namespace 'Microsoft.ContainerService' \
 # Disable a Resource Provider.
 az provider unregister -n 'Microsoft.Confluent'
 
-# Install the `bicep` utility.
-# Includes the utility inside the local Azure CLI installation's path.
-az bicep install
-az bicep install -v 'v0.2.212' -t 'linux-arm64'
+# List available CLI extensions.
+az extension list-available --output 'table'
 
-# The CLI defaults to the included installation.
-# External instances of the `bicep` utility *can* be used *if* the CLI is
-# configured to do so.
-brew install azure/bicep/bicep && \
-az config set bicep.use_binary_from_path=True
+# Add extensions to the CLI.
+az extension add --name 'extension_name'
+az extension add --source 'url__or__local_path'
 
-# Upgrade `bicep` from the CLI.
-az bicep upgrade
-az bicep upgrade -t 'linux-x64'
+# Update extensions.
+az extension update --name 'extension_name'
+az extension add --source 'updated__url__or__local_path'
+
+# Remove installed extensions.
+az extension remove --name 'extension_name'
 
 # Validate a bicep template to create a Deployment Group.
+# Leverages the `bicep` utility.
 az deployment group validate \
   -n 'deployment_group_name' -g 'resource_group_name' \
   -f 'template.bicep' -p 'parameter1=value' parameter2="value"
@@ -474,53 +438,42 @@ asdf plugin add 'azure-cli' && asdf install 'azure-cli' '2.43.0'
 docker run -it -v "${HOME}/.ssh:/root/.ssh" 'mcr.microsoft.com/azure-cli'
 ```
 
+## Extensions
+
+The Azure CLI can load _extensions_, practically Python wheels that aren't shipped as part of the CLI itself but run as CLI commands.<br/>
+You could create your own CLI interface.
+
+```sh
+# List available CLI extensions.
+az extension list-available --output 'table'
+
+# Add extensions to the CLI.
+az extension add --name 'extension_name'
+az extension add --source 'url__or__local_path'
+
+# Update extensions.
+az extension update --name 'extension_name'
+az extension add --source 'updated__url__or__local_path'
+
+# Remove installed extensions.
+az extension remove --name 'extension_name'
+```
+
+When you run a command for an extension which is not currently installed, CLI recognizes it and tries to automatically install the extension. This feature is called _dynamic install_, and is enabled by default since version 2.12.0.
+
+```sh
+# Configure if and how to use the 'dynamic install' feature.
+az config set 'extension.use_dynamic_install=yes_prompt'
+az config set 'extension.use_dynamic_install=yes_without_prompt'
+az config set 'extension.use_dynamic_install=no'
+az config set 'extension.run_after_dynamic_install=no'
+```
+
 ## Pipelines
 
 Give the `--organization` parameter, or use `--detect true` if running the command from a git repository to have it guessed automatically.
 
 `--detect` already defaults to `true`.
-
-## Bicep
-
-Domain-specific language (DSL) for Infrastructure as Code, using declarative syntax to deploy Azure resources in a consistent manner.
-
-See [bicep]'s page for more information.
-
-The Azure CLI can use a command group (`az bicep …`) to integrate with the `bicep` utility.
-
-### Bicep installation
-
-The simplest way to install the `bicep` utility is to use the CLI:
-
-```sh
-az bicep install
-az bicep install -v 'v0.2.212' -t 'linux-arm64'
-```
-
-When doing so, the CLI downloads the utility inside its path.
-
-When using a proxy (like in companies forcing connections through it), the certificate check might fail.<br/>
-If this is the case, or when needed, `bicep` **can** be installed externally and used by the CLI, **if** the CLI is configured to use it with the following setting:
-
-```sh
-az config set bicep.use_binary_from_path=True
-```
-
-### Bicep upgrade
-
-Bicep will by default check for upgrades when run.<br/>
-To avoid this, the CLI needs to be configured to as follows:
-
-```sh
-az config set bicep.version_check=False
-```
-
-When `bicep` is installed through the CLI, it can be updated from it too:
-
-```sh
-az bicep upgrade
-az bicep upgrade -t 'linux-x64'
-```
 
 ## APIs
 
@@ -560,7 +513,9 @@ az rest \
 ## Further readings
 
 - [PAT APIs]
-- [az command reference][az reference]
+- The [`az` command reference][az reference]
+- The [`az bicep` command group][az bicep]
+- [Devops CLI extension]
 
 ## Sources
 
@@ -570,15 +525,13 @@ az rest \
 - [How to manage Azure subscriptions with the Azure CLI]
 - [Authenticate with an Azure container registry]
 - [Remove a member]
-- [az aks reference]
+- [`az aks` command reference][az aks reference]
 - [Create and manage Azure Pipelines from the command line]
 
 <!-- project's references -->
 [authenticate with an azure container registry]: https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication?tabs=azure-cli
 [az aks reference]: https://learn.microsoft.com/en-us/cli/azure/aks
-[az bicep]: https://learn.microsoft.com/en-us/cli/azure/bicep
 [az reference]: https://learn.microsoft.com/en-us/cli/azure/reference-index
-[bicep]: https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview
 [get started with azure cli]: https://learn.microsoft.com/en-us/cli/azure/get-started-with-azure-cli
 [how to manage azure subscriptions with the azure cli]: https://learn.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli
 [install azure cli on macos]: https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-macos
@@ -587,7 +540,9 @@ az rest \
 [sign in with azure cli]: https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli
 
 <!-- internal references -->
-[jmespath]: jmespath.md
+[az bicep]: bicep.md#tldr
+[devops cli extension]: devops.md#tldr
+[jmespath]: ../jmespath.md
 
 <!-- external references -->
 [create and manage azure pipelines from the command line]: https://devblogs.microsoft.com/devops/create-and-manage-azure-pipelines-from-the-command-line/
