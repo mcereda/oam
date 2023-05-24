@@ -2,12 +2,12 @@
 
 ## Table of contents <!-- omit in toc -->
 
-1. [TL:DR](#tldr)
+1. [TL;DR](#tldr)
 1. [Permanent modules configuration](#permanent-modules-configuration)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
-## TL:DR
+## TL;DR
 
 ```sh
 # Show what kernel modules are currently loaded.

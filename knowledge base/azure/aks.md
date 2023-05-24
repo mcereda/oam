@@ -4,13 +4,13 @@ Managed Kubernetes solution offered by Azure.
 
 ## Table of contents <!-- omit in toc -->
 
-1. [TL:DR](#tldr)
+1. [TL;DR](#tldr)
 1. [Troubleshooting](#troubleshooting)
    1. [_Subnet XXX does not have enough capacity for YY IP addresses_ while updating the credentials for an existing Service Principal](#subnet-xxx-does-not-have-enough-capacity-for-yy-ip-addresses-while-updating-the-credentials-for-an-existing-service-principal)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
-## TL:DR
+## TL;DR
 
 ## Troubleshooting
 

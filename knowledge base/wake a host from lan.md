@@ -4,11 +4,11 @@ The host needs to support wake-on-LAN and have it enabled.
 
 ## Table of contents <!-- omit in toc -->
 
-1. [TL:DR](#tldr)
+1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
-## TL:DR
+## TL;DR
 
 Use [`wakeonlan`][wakeonlan].
 

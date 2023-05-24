@@ -2,7 +2,7 @@
 
 ## Table of contents <!-- omit in toc -->
 
-1. [TL:DR](#tldr)
+1. [TL;DR](#tldr)
 1. [OS installation](#os-installation)
 1. [First boot](#first-boot)
 1. [Connect to the Helios4 using a serial console](#connect-to-the-helios4-using-a-serial-console)
@@ -11,7 +11,7 @@
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
-## TL:DR
+## TL;DR
 
 ## OS installation
 
