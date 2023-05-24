@@ -2,11 +2,51 @@
 
 ## Table of contents <!-- omit in toc -->
 
+1. [TL;DR](#tldr)
 1. [Pipelines](#pipelines)
    1. [Predefined variables](#predefined-variables)
    1. [Loops](#loops)
+1. [Azure CLI extension](#azure-cli-extension)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
+
+## TL;DR
+
+```sh
+# Login to Azure DevOps with a PAT.
+az devops login --organization 'https://dev.azure.com/organization_name'
+
+# List DevOps' Service Endpoints.
+az devops service-endpoint list \
+  --organization 'https://dev.azure.com/organization_name' --project 'project'
+az rest -m 'get' \
+  -u 'https://dev.azure.com/organization_name/project_name/_apis/serviceendpoint/endpoints' \
+  --url-parameters 'api-version=7.1-preview.4' \
+  --headers Authorization='Bearer ey…pw'
+
+# Get the ID of a Service Endpoint from its name.
+az devops service-endpoint list -o 'tsv' \
+  --organization 'https://dev.azure.com/organization_name' --project 'project' \
+  --query "[?name=='service_endpoint_name'].id"
+
+# Get the name of a Service Endpoint from its id.
+az devops service-endpoint list -o 'tsv' \
+  --organization 'https://dev.azure.com/organization_name' --project 'project' \
+  --query "[?id=='service_endpoint_id'].name"
+
+# Filter out users whose Principal Name starts for X and access Y.
+az devops user list --org 'https://dev.azure.com/organizationName' \
+  --query "
+    items[?
+      startsWith(user.principalName, 'yourNameHere') &&
+      \! contains(accessLevel.licenseDisplayName, 'Test plans')
+    ].user.displayName"
+
+# Get Teams' information.
+az devops team show \
+  --org 'https://dev.azure.com/organizationName' --project 'project' \
+  --team 'display_name'
+```
 
 ## Pipelines
 
@@ -36,11 +76,17 @@ steps:
       - script: echo ${{ fruit.fruitName}} ${{ fruitColor }}
 ```
 
+## Azure CLI extension
+
+Devops offers the [`az devops`][az devops] extension to the Azure CLI.<br/>
+The extension will automatically install itself the first time you run an `az devops` command.
+
 ## Further readings
 
 - [Expressions]
 - [Use predefined variables]
 - [Azure CLI]
+- [`az devops`][az devops]
 
 ## Sources
 
@@ -51,6 +97,7 @@ All the references in the [further readings] section, plus the following:
 <!-- project's references -->
 [expressions]: https://learn.microsoft.com/en-us/azure/devops/pipelines/process/expressions
 [use predefined variables]: https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
+[az devops]: https://learn.microsoft.com/en-us/cli/azure/devops?view=azure-cli-latest
 
 <!-- in-article references -->
 [further readings]: #further-readings
