@@ -45,8 +45,13 @@ All the references in the [further readings] section, plus the following:
 
 - [How to drain a node in Kubernetes]
 
-<!-- internal references -->
+<!-- project's references -->
+<!-- in-article references -->
 [further readings]: #further-readings
+
+<!-- internal references -->
+[kubectl]: kubectl.md
+[kubernetes]: README.md
 
 <!-- external references -->
 [how to drain a node in kubernetes]: https://linuxhandbook.com/kubectl-drain-node/

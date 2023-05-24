@@ -2,7 +2,7 @@
 
 Domain-specific language (DSL) for Infrastructure as Code, using declarative syntax to deploy Azure resources in a consistent manner.
 
-See [bicep]'s page for more information.
+See the [What is Bicep?] page for more information.
 
 The Azure CLI can use a command group (`az bicep …`) to integrate with the `bicep` utility.
 

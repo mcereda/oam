@@ -32,7 +32,8 @@ All the references in the [further readings] section, plus the following:
 <!-- project's references -->
 [Update or rotate the credentials for an AKS cluster]: https://learn.microsoft.com/en-us/azure/aks/update-credentials
 
-<!-- internal references -->
+<!-- in-article references -->
 [further readings]: #further-readings
 
+<!-- internal references -->
 <!-- external references -->

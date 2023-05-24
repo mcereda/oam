@@ -116,8 +116,10 @@ All the references in the [further readings] section, plus the following:
 <!-- project's references -->
 [website]: https://helm.sh/
 
-<!-- internal references -->
+<!-- in-article references -->
 [further readings]: #further-readings
+
+<!-- internal references -->
 [helmfile]: helmfile.md
 [kubernetes]: README.md
 

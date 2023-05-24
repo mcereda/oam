@@ -1,4 +1,6 @@
-# openssl-osx-ca
+# `openssl-osx-ca`
+
+## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -8,10 +10,10 @@
 
 ```sh
 # Install and configure.
-brew tap homebrew/services
-brew tap raggi/ale
-brew install openssl-osx-ca
-brew services start openssl-osx-ca
+brew tap 'homebrew/services'
+brew tap 'raggi/ale'
+brew install 'openssl-osx-ca'
+brew services start 'openssl-osx-ca'
 
 # Run manually.
 openssl-osx-ca
@@ -23,14 +25,22 @@ find "$(brew --prefix)/etc" -type 'f' -name 'cert.pem' -path '*/openssl*' -exec 
 
 ## Further readings
 
+- [Github]
 - [Homebrew]
+- [Mac OS X]
 
 ## Sources
 
-- [openssl-osx-ca]
+All the references in the [further readings] section, plus the following:
 
 <!-- project's references -->
-[openssl-osx-ca]: https://github.com/raggi/openssl-osx-ca
+[github]: https://github.com/raggi/openssl-osx-ca
+
+<!-- in-article references -->
+[further readings]: #further-readings
 
 <!-- internal references -->
 [homebrew]: homebrew.md
+[mac os x]: README.md
+
+<!-- external references -->

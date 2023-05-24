@@ -13,18 +13,18 @@
 
 ```sh
 # Install minikube.
-sudo pacman -S minikube
-brew install docker minikube
+sudo pacman -S 'minikube'
+brew install 'docker' 'minikube'
 
 # Shell completion.
-source <(minikube completion $(basename $SHELL))
+source <(minikube completion "$(basename $SHELL)")
 
 # Disable emojis in the commands.
 export MINIKUBE_IN_STYLE=false
 
 # Start the cluster.
 minikube start
-minikube start --cpus 4 --memory 8192
+minikube start --cpus '4' --memory '8192'
 
 # Pause the cluster without impacting deployed applications
 minikube pause
@@ -34,25 +34,25 @@ minikube stop
 
 # Permanently increase the default memory limit.
 # Requires the cluster to restart.
-minikube config set memory 16384
+minikube config set 'memory' '16384'
 
 # Browse the catalog of easily installable Kubernetes services.
 minikube addons list
 
 # Create a(nother) cluster running a specific Kubernetes version.
-minikube start -p old-k8s --kubernetes-version=v1.16.1
-minikube config set kubernetes-version v1.16.15 && minikube start
+minikube start -p 'old-k8s' --kubernetes-version='v1.16.1'
+minikube config set 'kubernetes-version' 'v1.16.15' && minikube start
 
 # Use a specific docker driver.
-minikube start --driver=docker
-minikube config set driver docker && minikube start
+minikube start --driver='docker'
+minikube config set 'driver' 'docker' && minikube start
 
 # Disable new update notifications.
-minikube config set WantUpdateNotification false
+minikube config set 'WantUpdateNotification' false
 
 # Get IP and port of a service of type NodePort.
-minikube service --url nextcloud
-minikube service --url nextcloud --namespace nextcloud
+minikube service --url 'nextcloud'
+minikube service --url 'nextcloud' --namespace 'nextcloud'
 
 # Use the integrated kubectl command.
 minikube kubectl -- get pods
@@ -106,8 +106,10 @@ All the references in the [further readings] section, plus the following:
 [use untrusted certs]: https://minikube.sigs.k8s.io/docs/handbook/untrusted_certs
 [website]: https://minikube.sigs.k8s.io
 
-<!-- internal references -->
+<!-- in-article references -->
 [further readings]: #further-readings
+
+<!-- internal references -->
 [kubectl]: kubectl.md
 [kubernetes]: README.md
 

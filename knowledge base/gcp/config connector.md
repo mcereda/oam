@@ -66,7 +66,8 @@ All the references in the [further readings] section, plus the following:
 [website]: https://cloud.google.com/config-connector
 [workload identity]: https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
 
-<!-- internal references -->
+<!-- in-article references -->
 [further readings]: #further-readings
 
+<!-- internal references -->
 <!-- external references -->

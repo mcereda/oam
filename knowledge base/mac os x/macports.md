@@ -153,6 +153,9 @@ All the references in the [further readings] section, plus the following:
 [ports]: https://ports.macports.org/
 [website]: https://www.macports.org/
 
+<!-- in-article references -->
+[further readings]: #further-readings
+
 <!-- internal references -->
 [mac os x]: README.md
 
