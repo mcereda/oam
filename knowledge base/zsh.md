@@ -51,6 +51,9 @@ Exit files load sequence:
 Aliases are expanded when the function definition is parsed, not when the function is executed. Define aliases **before** functions to avoid problems.
 
 ```sh
+# Logout after 3 minutes of inactivity.
+TMOUT=180
+
 # Quoting.
 "$scalar"
 "${array[@]}"
