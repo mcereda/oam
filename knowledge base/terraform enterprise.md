@@ -2,6 +2,12 @@
 
 Self-hosted distribution of Terraform Cloud.
 
+## Table of contents <!-- omit in toc -->
+
+1. [Basic requirements](#basic-requirements)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## Basic requirements
 
 - a license file from HashiCorp
@@ -14,15 +20,22 @@ Self-hosted distribution of Terraform Cloud.
 ## Further readings
 
 - [Replicated]
+- [`tfe-admin`][tfe-admin]
 
 ## Sources
+
+All the references in the [further readings] section, plus the following:
 
 - [Terraform Enterprise documentation]
 
 <!-- project's references -->
 [terraform enterprise documentation]: https://developer.hashicorp.com/terraform/enterprise
 
+<!-- in-article references -->
+[further readings]: #further-readings
+
 <!-- internal references -->
 [replicated]: replicated.md
+[tfe-admin]: tfe-admin.md
 
 <!-- external references -->
