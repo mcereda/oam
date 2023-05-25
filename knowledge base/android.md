@@ -1,7 +1,10 @@
 # Android
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -58,11 +61,19 @@ fastboot reboot
 ## Further readings
 
 - [ADB]
-- [How to Use ADB and Fastboot on Android]
 - [Using ADB and fastboot]
+
+## Sources
+
+All the references in the [further readings] section, plus the following:
+
+- [How to Use ADB and Fastboot on Android]
 
 <!-- project's references -->
 [adb]: https://developer.android.com/studio/command-line/adb
+
+<!-- in-article references -->
+[further readings]: #further-readings
 
 <!-- internal references -->
 <!-- external references -->

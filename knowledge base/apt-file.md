@@ -1,4 +1,4 @@
-# apt-file
+# `apt-file`
 
 ## Table of contents <!-- omit in toc -->
 
@@ -25,10 +25,11 @@ All the references in the [further readings] section, plus the following:
 - [List of files installed from apt package]
 
 <!-- project's references -->
+<!-- in-article references -->
+[further readings]: #further-readings
 
 <!-- internal references -->
 [apt]: apt.md
-[further readings]: #further-readings
 
 <!-- external references -->
 [list of files installed from apt package]: https://serverfault.com/questions/96964/list-of-files-installed-from-apt-package#96965

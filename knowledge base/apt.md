@@ -217,6 +217,9 @@ All the references in the [further readings] section, plus the following:
 [configuring apt sources]: https://wiki.debian.org/SourcesList
 [unattended upgrades]: https://wiki.debian.org/UnattendedUpgrades
 
+<!-- in-article references -->
+[further readings]: #further-readings
+
 <!-- internal references -->
 [apt-file]: apt-file.md
 [dpkg]: dpkg.md

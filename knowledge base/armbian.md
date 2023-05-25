@@ -23,8 +23,10 @@ All the references in the [further readings] section, plus the following:
 <!-- project's references -->
 [website]: https://www.armbian.com/
 
+<!-- in-article references -->
+[further readings]: #further-readings
+
 <!-- internal references -->
 [debian]: debian.md
-[further readings]: #further-readings
 
 <!-- external references -->
