@@ -5,6 +5,9 @@
 ```sh
 # Get Replicated's logs.
 docker logs replicated
+
+# Reveal Terraform Enterprise instances' Initial Admin Creation Token.
+replicated admin --tty=0 retrieve-iact
 ```
 
 ## Further readings
