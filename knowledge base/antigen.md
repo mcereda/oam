@@ -1,5 +1,12 @@
 # Antigen
 
+## Table of contents <!-- omit in toc -->
+
+1. [Troubleshooting](#troubleshooting)
+   1. [While loading, a completion fails with error `No such file or directory`.](#while-loading-a-completion-fails-with-error-no-such-file-or-directory)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## Troubleshooting
 
 ### While loading, a completion fails with error `No such file or directory`.
@@ -23,5 +30,16 @@ antigen apply
 - [Github]'s repository
 - Antigen's [Wiki]
 
+## Sources
+
+All the references in the [further readings] section, plus the following:
+
+<!-- project's references -->
 [github]: https://github.com/zsh-users/antigen
 [wiki]: https://github.com/zsh-users/antigen/wiki
+
+<!-- in-article references -->
+[further readings]: #further-readings
+
+<!-- internal references -->
+<!-- external references -->

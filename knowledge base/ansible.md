@@ -116,7 +116,7 @@ All Jinja2's standard filters and tests can be used, with the addition of:
 
 All templating happens **on the Ansible controller**, **before** the task is sent and executed on the target machine.
 
-Updated [examples] are available.
+Updated [examples][templating examples] are available.
 
 ```yaml
 # Remove empty or false values from a list piping it to 'select()'.
@@ -539,8 +539,10 @@ All the references in the [further readings] section, plus the following:
 [templating]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html
 [tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
 
-<!-- internal references -->
+<!-- in-article references -->
 [further readings]: #further-readings
+
+<!-- internal references -->
 [templating examples]: ../examples/ansible/templating.yml
 
 <!-- external references -->

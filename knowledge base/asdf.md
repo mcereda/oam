@@ -1,14 +1,16 @@
 # ASDF
 
-`asdf` is a CLI tool to manage multiple language runtime versions on a per-project basis. It works like `gvm`, `nvm`, `rbenv` and `pyenv` (and more) all in one.
+CLI tool to manage multiple language runtime versions on a per-project basis. It works like `gvm`, `nvm`, `rbenv` and `pyenv` (and more) all in one.
+
+## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
-2. [Installation](#installation)
-3. [Plugins management](#plugins-management)
+1. [Installation](#installation)
+1. [Plugins management](#plugins-management)
    1. [Plugins gotchas](#plugins-gotchas)
-4. [Versions management](#versions-management)
+1. [Versions management](#versions-management)
    1. [The `.tool-versions` file](#the-tool-versions-file)
-5. [Further readings](#further-readings)
+1. [Further readings](#further-readings)
 
 ## TL;DR
 
@@ -153,5 +155,8 @@ The versions listed in such file can be:
 [homepage]: https://asdf-vm.com/
 [plugins list]: https://github.com/asdf-vm/asdf-plugins
 
+<!-- in-article references -->
 <!-- internal references -->
 [.tool-versions example]: ../examples/.tool-versions
+
+<!-- external references -->

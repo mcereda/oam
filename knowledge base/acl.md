@@ -1,30 +1,46 @@
 # Access Control Lists assignment
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
-# show acls of file test/declarations.h
-getfacl test/declarations.h
+# Show acls of files.
+getfacl 'test/declarations.h'
 
-# set permissions for user awe-user
-setfacl -m u:awe-user:rwx test/declarations.h
+# Set permissions for users.
+setfacl -m 'u:username:rwx' 'test/declarations.h'
 
-# set permissions for group awe-group
-setfacl -m "g:awe-group:r-x" test/declarations.h
+# Set permissions for groups.
+setfacl -m "g:groupname:r-x" 'test/declarations.h'
 
-# make children files and directories inherit acls
-# sets default acls
-setfacl -d -m u:dummy:rw test
+# Make children files and directories inherit acls.
+# A.K.A. sets default acls.
+setfacl -d -m 'u:dummy:rw' 'test'
 
-# remove a specific acl
-setfacl -x u:dummy:rw test
+# Remove specific acls.
+setfacl -x 'u:dummy:rw' 'test'
 
-# remove all acls
-setfacl -b test/declarations.h
+# Remove all acls.
+setfacl -b 'test/declarations.h'
 ```
+
+## Further readings
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [Access Control Lists (ACL) in Linux]
 
+<!-- project's references -->
+<!-- in-article references -->
+[further readings]: #further-readings
+
+<!-- internal references -->
+<!-- external references -->
 [access control lists (acl) in linux]: https://www.geeksforgeeks.org/access-control-listsacl-linux/
