@@ -18,6 +18,9 @@
 ## TL;DR
 
 ```sh
+# Logout after 3 minutes of inactivity.
+TMOUT=180
+
 # Declare arrays.
 ARRAY=(
   "first_element"
