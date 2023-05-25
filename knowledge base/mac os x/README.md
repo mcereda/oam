@@ -29,6 +29,15 @@ caffeinate -t 600
 # Do a network speed test.
 networkquality -sv
 
+# List open ports.
+netstat
+netstat -n -p 'tcp'
+lsof -n -i ':443'
+sudo lsof -n -i 'TCP' -s 'TCP:LISTEN'
+
+# Get the PID of processes using specific ports.
+lsof -nt -i ':443'
+
 # Install Xcode CLI tools.
 xcode-select --install
 
@@ -358,6 +367,7 @@ All the references in the [further readings] section, plus the following:
 - [How to Clear DNS Cache in MacOS Ventura & MacOS Monterey]
 - [Compress a PDF in Preview on Mac]
 - [Resize, rotate, or flip an image in Preview on Mac]
+- [Who is listening on a given TCP port on Mac OS X?]
 
 <!-- project's references -->
 [compress a pdf in preview on mac]: https://support.apple.com/guide/preview/compress-a-pdf-prvw1509/mac
@@ -386,4 +396,5 @@ All the references in the [further readings] section, plus the following:
 [macos network quality tool]: https://www.theapplegeek.co.uk/blog/networkquality
 [pam_reattach]: https://github.com/fabianishere/pam_reattach
 [using terminal to find your mac's network name]: https://www.tech-otaku.com/networking/using-terminal-find-your-macs-network-name/
+[who is listening on a given tcp port on mac os x?]: https://stackoverflow.com/questions/4421633/who-is-listening-on-a-given-tcp-port-on-mac-os-x
 [xcode command line tools installation faq]: https://www.godo.dev/tutorials/xcode-command-line-tools-installation-faq
