@@ -150,10 +150,12 @@ kubectl get pods --all-namespaces \
 kubectl get nodes -o 'json' | jq -c 'path(..)|[.[]|tostring]|join(".")'
 
 # Show detailed information about resources.
+# Also includes the latest events involving them.
 kubectl describe node pi
 kubectl describe deploy,rs,po -l 'app=redis'
 
-# Create resources from manifests.
+# Create or update resources from manifests.
+# Missing resources will be created. Existing resources will be updated.
 kubectl apply -f 'manifest.yaml'
 kubectl apply -f 'path/to/m1.yaml' -f './m2.yaml'
 kubectl apply -f 'dir/'
@@ -282,6 +284,10 @@ kubectl scale --current-replicas=2 --replicas=3 deployment/mysql
 
 # Scale multiple ReplicationControllers at once.
 kubectl scale --replicas=5 rc/foo rc/bar rc/baz
+
+# Delete resources of a single type.
+# Also deletes the resources managed by the specified ones.
+kubectl delete deployment 'bar'
 
 # Delete a Pod using the type and name specified in pod.json.
 kubectl delete -f ./pod.json
