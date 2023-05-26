@@ -28,6 +28,7 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 1. [Managed Kubernetes Services](#managed-kubernetes-services)
    1. [Best practices in cloud environments](#best-practices-in-cloud-environments)
 1. [Edge computing](#edge-computing)
+1. [Best practices](#best-practices)
 1. [Troubleshooting](#troubleshooting)
     1. [Dedicate Nodes to specific workloads](#dedicate-nodes-to-specific-workloads)
     1. [Recreate Pods upon ConfigMap's or Secret's content change](#recreate-pods-upon-configmaps-or-secrets-content-change)
@@ -329,6 +330,45 @@ Each node pool should:
 
 If planning to run Kubernetes on a Raspberry Pi, see [k3s] and the [Build your very own self-hosting platform with Raspberry Pi and Kubernetes] series of articles.
 
+## Best practices
+
+Also see [configuration best practices] and the [production best practices checklist].
+
+- Prefer an **updated** version of Kubernetes.<br/>
+  The upstream project maintains release branches for the most recent three minor releases.<br/>
+  Kubernetes 1.19 and newer receive approximately 1 year of patch support. Kubernetes 1.18 and older received approximately 9 months of patch support.
+- Prefer **stable** versions of Kubernetes and **multiple nodes** for production clusters.
+- Prefer **consistent** versions of Kubernetes components throughout **all** nodes.<br/>
+  Components support [version skew][version skew policy] up to a point, with specific tools placing additional restrictions.
+- Consider keeping **separation of ownership and control** and/or group related resources.<br/>
+  [Namespaces].
+- Consider **organizing** cluster and workload resources.<br/>
+  [Labels][labels and selectors]; [recommended Labels].
+- Avoid sending traffic to pods which are not ready to manage it.<br/>
+  [Readiness probes][Configure Liveness, Readiness and Startup Probes] signal services to not forward requests until the probe verifies its own pod is up. [Liveness probes][configure liveness, readiness and startup probes] ping the pod for a response and check its health; if the check fails, they kill the current pod and launch a new one.
+- Avoid workloads and nodes fail due limited resources being available.<br/>
+  Set [resource requests and limits][resource management for pods and containers] to reserve a minimum amount of resources for pods and limit their hogging abilities.
+- Prefer smaller container images.
+- Prioritize critical workloads.
+  Quality of service.
+- Instrument applications to detect and respond to the SIGTERM signal.
+- Avoid using bare pods.<br/>
+  Prefer defining them as part of a replica-based resource, like Deployments, StatefulSets, ReplicaSets or DaemonSets.
+- Restrict traffic between objects in the cluster.
+  Network policies.
+- Reduce container privileges.
+- Leverage autoscalers.
+- Pod disruption budgets.
+- Try to use all nodes possible.
+  Affinities, taint and tolerations.
+- Push for automation.
+  GitOps.
+- Apply the principle of least privilege.<br/>
+  Role-based access control (RBAC).
+- Continuously audit events and logs regularly, also for control plane components.
+- Protect the cluster's ingress points.
+  Firewalls, web application firewalls, application gateways.
+
 ## Troubleshooting
 
 ### Dedicate Nodes to specific workloads
@@ -477,6 +517,7 @@ Tools:
 - [`helm`][helm]
 - [`helmfile`][helmfile]
 - [`kubeval`][kubeval]
+- `kube-score`
 - [`kubectx`+`kubens`][kubectx+kubens] (alternative to [`kubie`][kubie])
 - [`kube-ps1`][kube-ps1]
 - [`kubie`][kubie] (alternative to [`kubectx`+`kubens`][kubectx+kubens] and [`kube-ps1`][kube-ps1])
@@ -497,24 +538,37 @@ All the references in the [further readings] section, plus the following:
 - [Read-only filesystem error]
 - [preStop hook doesn't work with env variables]
 - [Configure Quality of Service for Pods]
+- [Version skew policy]
+- [Labels and Selectors]
+- [Recommended Labels]
+- [Configure Liveness, Readiness and Startup Probes]
+- [Configuration best practices]
+- [Cloudzero Kubernetes best practices]
 
 <!-- project's documentation -->
 [addons]: https://kubernetes.io/docs/concepts/cluster-administration/addons/
 [api deprecation policy]: https://kubernetes.io/docs/reference/using-api/deprecation-policy/
 [common labels]: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
 [concepts]: https://kubernetes.io/docs/concepts/
+[configuration best practices]: https://kubernetes.io/docs/concepts/configuration/overview/
 [configure a pod to use a configmap]: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
 [configure a security context for a pod or a container]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+[configure liveness, readiness and startup probes]: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 [configure quality of service for pods]: https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/
 [container hooks]: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
 [distribute credentials securely using secrets]: https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/
 [documentation]: https://kubernetes.io/docs/home/
+[labels and selectors]: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 [namespaces]: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 [no new privileges design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/no-new-privs.md
+[production best practices checklist]: https://learnk8s.io/production-best-practices
+[recommended labels]: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
+[resource management for pods and containers]: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 [security context design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security_context.md
 [security design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security.md
 [set capabilities for a container]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container
 [using sysctls in a kubernetes cluster]: https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/
+[version skew policy]: https://kubernetes.io/releases/version-skew-policy/
 
 <!-- in-article references -->
 [further readings]: #further-readings
@@ -534,6 +588,7 @@ All the references in the [further readings] section, plus the following:
 
 [best practices for pod security in azure kubernetes service (aks)]: https://learn.microsoft.com/en-us/azure/aks/developer-best-practices-pod-security
 [build your very own self-hosting platform with raspberry pi and kubernetes]: https://kauri.io/build-your-very-own-self-hosting-platform-with-raspberry-pi-and-kubernetes/5e1c3fdc1add0d0001dff534/c
+[cloudzero kubernetes best practices]: https://www.cloudzero.com/blog/kubernetes-best-practices
 [cncf]: https://www.cncf.io/
 [container capabilities in kubernetes]: https://unofficial-kubernetes.readthedocs.io/en/latest/concepts/policy/container-capabilities/
 [elasticsearch]: https://github.com/elastic/helm-charts/issues/689
