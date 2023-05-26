@@ -17,10 +17,10 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
    1. [`kube-proxy`](#kube-proxy)
    1. [Container runtime](#container-runtime)
    1. [Addons](#addons)
-1. [The API](#the-api)
-1. [Pods](#pods)
-   1. [Gotchas](#gotchas)
-   1. [Quality of service](#quality-of-service)
+1. [Workloads](#workloads)
+   1. [Pods](#pods)
+1. [Best practices](#best-practices)
+1. [Quality of service](#quality-of-service)
 1. [Containers with high privileges](#containers-with-high-privileges)
    1. [Capabilities](#capabilities)
    1. [Privileged containers vs privilege escalation](#privileged-containers-vs-privilege-escalation)
@@ -28,7 +28,6 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 1. [Managed Kubernetes Services](#managed-kubernetes-services)
    1. [Best practices in cloud environments](#best-practices-in-cloud-environments)
 1. [Edge computing](#edge-computing)
-1. [Best practices](#best-practices)
 1. [Troubleshooting](#troubleshooting)
     1. [Dedicate Nodes to specific workloads](#dedicate-nodes-to-specific-workloads)
     1. [Recreate Pods upon ConfigMap's or Secret's content change](#recreate-pods-upon-configmaps-or-secrets-content-change)
@@ -50,9 +49,6 @@ Kubernetes clusters consist of:
 
 ![Cluster components](components.svg)
 
-Workloads consist of groups of containers (_pods_) and a specification for how to run them.<br/>
-Pods execute one or more co-located and co-scheduled containers in an encapsulating environment with shared storage and network resources, and are the smallest deployable units of computing that one can create and manage in Kubernetes.
-
 ## The control plane
 
 The control plane's components make global decisions about the cluster (like scheduling), and detect and respond to cluster events (like starting up a new pod when a deployment has less replicas then it requests).
@@ -63,6 +59,20 @@ Control plane components run on one or more cluster nodes. For simplicity, set u
 
 The API server exposes the Kubernetes API. It is the front end for, and the core of, the Kubernetes control plane.<br/>
 `kube-apiserver` is the main implementation of the Kubernetes API server, and is designed to scale horizontally (by deploying more instances) and balance traffic between its instances.
+
+The API server exposes the HTTP API that lets end users, different parts of a cluster, and external components communicate with one another. This lets you query and manipulate the state of API objects in Kubernetes and can be accessed through command-line tools or directly using REST calls. The serialized state of the objects is stored by writing them into `etcd`'s store.
+
+Consider using one of the client libraries if you are writing an application using the Kubernetes API. The complete API details are documented using OpenAPI.
+
+Kubernetes supports multiple API versions, each at a different API path (like `/api/v1` or `/apis/rbac.authorization.k8s.io/v1alpha1`); the server handles the conversion between API versions transparently. Versioning is done at the API level rather than at the resource or field level, ensuring that the API presents a clear and consistent view of system resources and behavior, and enabling controlling access to end-of-life and/or experimental APIs. All the different versions are representations of the same persisted data.
+
+To make it easier to evolve and to extend them, Kubernetes implements API groups that can be enabled or disabled. API resources are distinguished by their **API group**, **resource type**, **namespace** (for namespaced resources), and **name**.<br />
+New API resources and new resource fields can be added often and frequently. Elimination of resources or fields requires following the [API deprecation policy].
+
+The Kubernetes API can be extended:
+
+- using _custom resources_ to declaratively define how the API server should provide your chosen resource API, or
+- extending the Kubernetes API by implementing an aggregation layer.
 
 ### `etcd`
 
@@ -140,34 +150,67 @@ Addons use Kubernetes resources (_DaemonSet_, _Deployment_, etc) to implement cl
 
 See [addons] for an extended list of the available addons.
 
-## The API
+## Workloads
 
-The API server exposes an HTTP API that lets end users, different parts of your cluster, and external components communicate with one another. This lets you query and manipulate the state of API objects in Kubernetes and can be accessed through command-line tools or directly using REST calls. The serialized state of the objects is stored by writing them into `etcd`.
+Workloads consist of groups of containers (_pods_) and a specification for how to run them (_manifest_).<br/>
+Configuration files are written in YAML (preferred) or JSON format and are composed of:
 
-Consider using one of the client libraries if you are writing an application using the Kubernetes API. The complete API details are documented using OpenAPI.
+- metadata,
+- resource specifications, with attributes specific to the kind of resource they are describing, and
+- status, automatically generated and edited by the control plane.
 
-Kubernetes supports multiple API versions, each at a different API path (like `/api/v1` or `/apis/rbac.authorization.k8s.io/v1alpha1`); the server handles the conversion between API versions transparently. Versioning is done at the API level rather than at the resource or field level; this ensures that the API presents a clear and consistent view of system resources and behavior, and enables controlling access to end-of-life and/or experimental APIs. All the different versions are representations of the same persisted data.
-
-To make it easier to evolve and to extend them, Kubernetes implements API groups that can be enabled or disabled. API resources are distinguished by their **API group**, **resource type**, **namespace** (for namespaced resources), and **name**.<br />
-New API resources and new resource fields can be added often and frequently. Elimination of resources or fields requires following the [API deprecation policy].
-
-The Kubernetes API can be extended:
-
-- using _Custom resources_ to declaratively define how the API server should provide your chosen resource API, or
-- extending the Kubernetes API by implementing an aggregation layer.
-
-## Pods
+### Pods
 
 The smallest deployable unit of computing that one can create and manage in Kubernetes.<br/>
-Pods contain one or more relatively tightly coupled application Containers; they are always co-located and co-scheduled, and share context, storage/network resources, and a specification for how to run them.
+Pods contain one or more relatively tightly coupled application containers; they are always co-located (executed on the same host) and co-scheduled (executed together), and share context, storage/network resources, and a specification for how to run them.
 
-Pods are usually created trough workload resources (Deployments, StatefulSets or Jobs) and **not** directly.
+Pods are usually created trough workload resources (like _Deployments_, _StatefulSets_, or _Jobs_) and **not** directly.<br/>
+Those leverage and manage _ReplicaSets_, which in turn manage copies of the same pod. When deleted, all the resources they manage are deleted with them.
 
-### Gotchas
+Gotchas:
 
 - If a Container specifies a memory or CPU `limit` but does **not** specify a memory or CPU `request`, Kubernetes automatically assigns it a resource `request` spec equal to the given `limit`.
 
-### Quality of service
+## Best practices
+
+Also see [configuration best practices] and the [production best practices checklist].
+
+- Prefer an **updated** version of Kubernetes.<br/>
+  The upstream project maintains release branches for the most recent three minor releases.<br/>
+  Kubernetes 1.19 and newer receive approximately 1 year of patch support. Kubernetes 1.18 and older received approximately 9 months of patch support.
+- Prefer **stable** versions of Kubernetes and **multiple nodes** for production clusters.
+- Prefer **consistent** versions of Kubernetes components throughout **all** nodes.<br/>
+  Components support [version skew][version skew policy] up to a point, with specific tools placing additional restrictions.
+- Consider keeping **separation of ownership and control** and/or group related resources.<br/>
+  [Namespaces].
+- Consider **organizing** cluster and workload resources.<br/>
+  [Labels][labels and selectors]; [recommended Labels].
+- Avoid sending traffic to pods which are not ready to manage it.<br/>
+  [Readiness probes][Configure Liveness, Readiness and Startup Probes] signal services to not forward requests until the probe verifies its own pod is up. [Liveness probes][configure liveness, readiness and startup probes] ping the pod for a response and check its health; if the check fails, they kill the current pod and launch a new one.
+- Avoid workloads and nodes fail due limited resources being available.<br/>
+  Set [resource requests and limits][resource management for pods and containers] to reserve a minimum amount of resources for pods and limit their hogging abilities.
+- Prefer smaller container images.
+- Prioritize critical workloads.
+  Quality of service.
+- Instrument applications to detect and respond to the SIGTERM signal.
+- Avoid using bare pods.<br/>
+  Prefer defining them as part of a replica-based resource, like Deployments, StatefulSets, ReplicaSets or DaemonSets.
+- Restrict traffic between objects in the cluster.
+  Network policies.
+- Reduce container privileges.
+- Leverage autoscalers.
+- Pod disruption budgets.
+- Try to use all nodes possible.
+  Affinities, taint and tolerations.
+- Push for automation.
+  GitOps.
+- Apply the principle of least privilege.<br/>
+  Role-based access control (RBAC).
+- Continuously audit events and logs regularly, also for control plane components.
+- Protect the cluster's ingress points.
+  Firewalls, web application firewalls, application gateways.
+
+## Quality of service
 
 See [Configure Quality of Service for Pods] for more information.
 
@@ -329,45 +372,6 @@ Each node pool should:
 ## Edge computing
 
 If planning to run Kubernetes on a Raspberry Pi, see [k3s] and the [Build your very own self-hosting platform with Raspberry Pi and Kubernetes] series of articles.
-
-## Best practices
-
-Also see [configuration best practices] and the [production best practices checklist].
-
-- Prefer an **updated** version of Kubernetes.<br/>
-  The upstream project maintains release branches for the most recent three minor releases.<br/>
-  Kubernetes 1.19 and newer receive approximately 1 year of patch support. Kubernetes 1.18 and older received approximately 9 months of patch support.
-- Prefer **stable** versions of Kubernetes and **multiple nodes** for production clusters.
-- Prefer **consistent** versions of Kubernetes components throughout **all** nodes.<br/>
-  Components support [version skew][version skew policy] up to a point, with specific tools placing additional restrictions.
-- Consider keeping **separation of ownership and control** and/or group related resources.<br/>
-  [Namespaces].
-- Consider **organizing** cluster and workload resources.<br/>
-  [Labels][labels and selectors]; [recommended Labels].
-- Avoid sending traffic to pods which are not ready to manage it.<br/>
-  [Readiness probes][Configure Liveness, Readiness and Startup Probes] signal services to not forward requests until the probe verifies its own pod is up. [Liveness probes][configure liveness, readiness and startup probes] ping the pod for a response and check its health; if the check fails, they kill the current pod and launch a new one.
-- Avoid workloads and nodes fail due limited resources being available.<br/>
-  Set [resource requests and limits][resource management for pods and containers] to reserve a minimum amount of resources for pods and limit their hogging abilities.
-- Prefer smaller container images.
-- Prioritize critical workloads.
-  Quality of service.
-- Instrument applications to detect and respond to the SIGTERM signal.
-- Avoid using bare pods.<br/>
-  Prefer defining them as part of a replica-based resource, like Deployments, StatefulSets, ReplicaSets or DaemonSets.
-- Restrict traffic between objects in the cluster.
-  Network policies.
-- Reduce container privileges.
-- Leverage autoscalers.
-- Pod disruption budgets.
-- Try to use all nodes possible.
-  Affinities, taint and tolerations.
-- Push for automation.
-  GitOps.
-- Apply the principle of least privilege.<br/>
-  Role-based access control (RBAC).
-- Continuously audit events and logs regularly, also for control plane components.
-- Protect the cluster's ingress points.
-  Firewalls, web application firewalls, application gateways.
 
 ## Troubleshooting
 
@@ -572,6 +576,7 @@ All the references in the [further readings] section, plus the following:
 
 <!-- in-article references -->
 [further readings]: #further-readings
+[pods]: #pods
 
 <!-- internal references -->
 [azure kubernetes service]: ../azure/aks.md
