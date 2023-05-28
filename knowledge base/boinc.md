@@ -10,10 +10,12 @@
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
 
-Files are located in `/var/lib/boinc` by default.  
-Some distribution (debian and derivate) use `/etc/boinc-client` for configuration files instead, and create links to the ones in the default location.
-
 ## TL;DR
+
+Files are located in `/var/lib/boinc` by default.<br/>
+Some distribution (debian and derivate) use `/etc/boinc-client` for configuration files instead, and create links to them in the default location.
+
+The resource share property can be set anywhere from 0 to 1000 for each project, with 0 meaning it will not get any work from that project unless every other project you run is out of work.
 
 ```sh
 # Install.
@@ -35,6 +37,9 @@ Name            | Type         | Description
 Local control RPCs are authenticated using the GUI RPC password. This password is located in the `gui_rpc_auth.cfg` configuration file, as the single first line, with a max length of 255 characters.
 
 A password is **required** from version FIXME, and is automatically generated if the file is not found or it is empty.
+
+Resource share is used to help BOINC determine which projects to prioritize. The larger the number, the more it will prioritize work from that project over the other projects. It does not determine anything about how much of your CPU, GPU, etc. are used. If you want to do that, change the relative settings.<br/>
+The number for resource share can be set anywhere from 0 to 1000 for each project. Setting a project's resource share to zero means it will not get any work from that project unless every other project you run is out of work.
 
 ### Remote management
 
@@ -109,7 +114,7 @@ usermod --append --groups 'vboxusers' 'boinc'
 
 ## Gotchas
 
-- it seems to work much better on debian-based distribution
+- It seems to work much better on debian-based distribution than on others.
 - In order to suspend computing when the computer is in use, the `boinc` user should have access to your X session so that mouse and keyboard input can be communicated to the client:
 
   ```sh
