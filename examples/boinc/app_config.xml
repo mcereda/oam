@@ -1,0 +1,21 @@
+<!--
+  ${BOINC_DATA_DIR}/projects/${PROJECT}/app_config.xml
+  Configurtion file for specific applications or app versions.
+  See https://boinc.berkeley.edu/wiki/Client_configuration#Project-level_configuration
+  for a complete list of all the available options.
+-->
+
+<app_config>
+  <project_max_concurrent>
+    <!-- Limit the number of running jobs for this project. -->
+    3
+  </project_max_concurrent>
+  <report_results_immediately>
+    <!--
+      Report jobs to the project server as soon as they are finished.
+      Satisfies the inbuilt 60 second delay from the completion of the
+      result's upload.
+    -->
+    1
+  </report_results_immediately>
+</app_config>
