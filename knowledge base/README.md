@@ -7,7 +7,8 @@ This is the collection of all notes, reminders and whatnot I gathered during the
 - Prefer keeping an 80 characters width limit in code blocks.<br/>
   This improves readability on most locations.
 
-- Always use an highlighting annotation when writing code blocks (default to `txt`).
+- Always use an highlighting annotation when writing code blocks<br/>
+  Default to `txt` if none is available.
 
 - Use `sh` as highlighting annotation instead of `shell` when writing shell snippets in code blocks.<br/>
   The local renderer just displays them better like this.
