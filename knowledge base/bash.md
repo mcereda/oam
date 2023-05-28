@@ -17,10 +17,100 @@
 
 ## TL;DR
 
+Shortcuts:
+
+| Shortcut     | Action                                                  |
+| ------------ | ------------------------------------------------------- |
+| `!!`         | Insert the previous command in the current prompt.      |
+| `Alt` + `.`  | Insert the last argument in the current prompt.         |
+| `Ctrl` + `L` | Clear the terminal.                                     |
+| `Ctrl` + `R` | Search **backwards** in the history one step at a time. |
+| `Ctrl` + `Z` | Send the current foreground task to background.         |
+
+Get help:
+
 ```sh
+# Get a brief summary about commands.
+help 'nano'
+
+# Get detailed information about commands.
+man 'parallel'
+```
+
+Session management:
+
+```sh
+# Clean the console.
+clear
+
+# Print the current directory.
+pwd
+
+# Change the current directory.
+cd
+cd /bin
+cd ..
+
+# Create local variables.
+VAR_NAME="value"
+
+# Convert local variables in environment ones.
+export VAR_NAME
+export VAR_NAME="value"
+
+# Deletes variables.
+unset MY_FRIENDS
+
+# Add directories to the current executables locations.
+export PATH="${PATH}:/home/user/bin"
+export PATH="/home/user/bin:${PATH}"
+
+# Show the path of executables in $PATH.
+which 'redis-cli'
+
+# Show the path, man pages, source code, etc of executables in $PATH.
+whereis nano
+
+# List existing aliases.
+alias
+
+# Create aliases.
+alias redo='$(history -p !!)'
+
+# Remove aliases.
+unalias redo
+
+# Print all environment variables.
+env
+
+# Print all local *and* environment variables.
+set
+( set -o posix ; set )
+
+# Print exported variables only.
+export -p
+
 # Logout after 3 minutes of inactivity.
 TMOUT=180
+```
 
+Piping:
+
+```sh
+# Use the output of a command as the input of another.
+tail 'file.txt' | grep 'search'
+
+# Save the output of command 'a' as 'file.txt'.
+# This *overwrites* already existing files with that name.
+a > 'file.txt'
+
+# Append the output of command 'a' to 'file.txt'.
+a >> 'file.txt'
+```
+
+Arrays:
+
+```sh
 # Declare arrays.
 ARRAY=(
   "first_element"
@@ -42,7 +132,11 @@ echo ${ARRAY: -1}
 # Get a slice of 4 elements from an array.
 # Start from the element with index number 2.
 echo ${ARRAY:2:4}
+```
 
+Functions:
+
+```sh
 # Declare functions.
 functionName () { … }
 function functionName { … }
@@ -52,6 +146,43 @@ functionName () { command1 ; … ; command N ; }
 
 # Get all the arguments in input.
 echo $@
+```
+
+Error management:
+
+```sh
+# Run a command or function on exit, kill or error.
+trap "rm -f $tempfile" EXIT SIGTERM ERR
+trap function-name EXIT SIGTERM ERR
+
+# Disable CTRL-C.
+trap "" SIGINT
+
+# Re-enable CTRL-C.
+trap - SIGINT
+```
+
+Job control:
+
+```sh
+# Print a list of background tasks.
+jobs
+
+# Bring a background task in the foreground.
+fg
+fg 'task_number'
+```
+
+Other snippets:
+
+```sh
+# Copy and paste *on Linux*.
+echo "Hello my friend!" | xclip \
+&& xclip -o >> pasted_text.txt
+
+# Copy and paste *on Darwin*.
+echo "Hello my friend!" | pbcopy \
+&& pbpaste >> pasted_text.txt
 
 # Of all the arguments in input, return only those which are existing directories.
 DIRECTORIES=()
@@ -64,22 +195,6 @@ for (( I = $# ; I >= 0 ; I-- )); do
   fi
 done
 
-# Print all shell and environment variables.
-( set -o posix ; set )
-
-# Print exported variables only.
-export -p
-
-# Run a command or function on exit, kill or error.
-trap "rm -f $tempfile" EXIT SIGTERM ERR
-trap function-name EXIT SIGTERM ERR
-
-# Disable CTRL-C.
-trap "" SIGINT
-
-# Re-enable CTRL-C.
-trap - SIGINT
-
 # Bash 3 and `sh` have no built-in means to convert case of a string, but the
 # `awk`, `sed` or `tr` tools can be used instead.
 echo $(echo "$name" |  tr '[:upper:]' '[:lower:]' )
@@ -88,6 +203,11 @@ echo $(tr '[:upper:]' '[:lower:]' <<< "$name")
 # Bash 5 has a special parameter expansion for upper- and lowercasing strings.
 echo ${name,,}
 echo ${name^^}
+
+# Leverage brace expansion to write less duplicated stuff.
+mv /tmp/readme.md{,.backup}  # = mv /tmp/readme.md /tmp/readme.md.backup
+cp a{1,2,3}.txt backup-dir   # = cp a1.txt a2.txt a3.txt backup-dir
+cp a{1..3}.txt backup-dir    # = cp a1.txt a2.txt a3.txt backup-dir
 
 # Add a clock to the top-right part of the terminal.
 while sleep 1
@@ -99,7 +219,7 @@ do
 done &
 
 # Show a binary clock.
-watch -n 1 'echo "obase=2; `date +%s`" | bc'
+watch -n 1 'echo "obase=2; $(date +%s)" | bc'
 
 # Fork bomb.
 :(){ :|: & };:
@@ -249,14 +369,20 @@ echo $RECORDED
 - [The Bash trap command]
 - [Bash startup files loading order]
 - [How to detect if a script is being sourced]
+- [The essential Bash cheat sheet]
+- [Speed up your command line navigation]
+- [6 Bash tricks you can use daily]
 
 <!-- internal references -->
 [trap]: trap.md
 
 <!-- external references -->
+[6 bash tricks you can use daily]: https://medium.com/for-linux-users/6-bash-tricks-you-can-use-daily-a32abdd8b13
 [bash startup files loading order]: https://youngstone89.medium.com/unix-introduction-bash-startup-files-loading-order-562543ac12e9
 [how to detect if a script is being sourced]: https://stackoverflow.com/questions/2683279/how-to-detect-if-a-script-is-being-sourced#28776166
+[speed up your command line navigation]: https://blog.jread.com/speed-up-your-command-line-navigation-d4050207f02c
 [the bash trap command]: https://www.linuxjournal.com/content/bash-trap-command
+[the essential bash cheat sheet]: https://betterprogramming.pub/the-essential-bash-cheat-sheet-e1c3df06560
 [upper- or lower-casing strings]: https://scriptingosx.com/2019/12/upper-or-lower-casing-strings-in-bash-and-zsh/
 
 <!-- FIXME -->
