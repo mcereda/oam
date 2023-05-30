@@ -10,23 +10,28 @@
     
     <!-- Avoid storing more than the minimum required data on disk. -->
 
-    <abort_jobs_on_exit>
-      <!-- Abort jobs and update projects when the client exits. -->
-      1
-    </abort_jobs_on_exit>
-    <fetch_minimal_work>
-      <!-- Fetch only one job per device. -->
-      1
-    </fetch_minimal_work>
-    <report_results_immediately>
-      <!--
-        Report jobs to the project server as soon as they are finished.
-        Satisfies the inbuilt 60 second delay from the completion of the
-        result's upload.
-      -->
-      1
-    </report_results_immediately>
+    <!-- Abort jobs and update projects when the client exits. -->
+    <abort_jobs_on_exit>1</abort_jobs_on_exit>
 
+    <!-- Exit cleanly when all tasks have finished. -->
+    <exit_when_idle>0|1</exit_when_idle>
+    
+    <!--
+      Fetch only the minimum amount of jobs this host can process, then do
+      not fetch any more job even if manually asked to update the projects.
+      Usually used with 'exit_when_idle'.
+    -->
+    <fetch_minimal_work>1</fetch_minimal_work>
+
+    <!--
+      Report jobs to the project server as soon as they are finished.
+      Satisfies the inbuilt 60 second delay from the completion of the
+      result's upload.
+    -->
+    <report_results_immediately>1</report_results_immediately>
+
+
+    <!-- Optimize usage. -->
 
     <!--
       Act as if the host had N CPUs.
@@ -36,17 +41,25 @@
     -->
     <ncpus>4</ncpus>
 
-
-    <!-- Don't accept jobs for specific devices. -->
-
+    <!-- Don't accept jobs for VirtualBox. -->
     <dont_use_vbox>1</dont_use_vbox>
 
     <!--
+      Ignore specific GPUs.
       0 is the first GPU for the vendor.
       1 is the second, and so on.
     -->
     <ignore_intel_dev>0</ignore_intel_dev>
     <ignore_nvidia_dev>0</ignore_nvidia_dev>
+
+    <!--
+      Run the client in a mode where its CPU, disk, and memory usage has lower
+      priority than other processes.
+    -->
+    <lower_client_priority>1</lower_client_priority>
+
+    <!-- Exempt non-CPU-intensive tasks from most cases of suspension. -->
+    <dont_suspend_nci>1</dont_suspend_nci>
 
 
     <!--
@@ -57,9 +70,11 @@
 
   </options>
   <log_flags>
-    <!-- Already on by default. -->
+
+    <!-- On by default. -->
     <task>1</task>
     <file_xfer>1</file_xfer>
     <sched_ops>1</sched_ops>
+
   </log_flags>
 </cc_config>
