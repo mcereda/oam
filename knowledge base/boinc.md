@@ -1,5 +1,7 @@
 # BOINC
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Client management](#client-management)
    1. [Remote management](#remote-management)
@@ -7,8 +9,10 @@
    1. [On OpenSUSE](#on-opensuse)
    1. [Check the GPU is OpenCL-enabled](#check-the-gpu-is-opencl-enabled)
 1. [Use VirtualBox for computations](#use-virtualbox-for-computations)
+1. [Ask for tasks for alternative platforms](#ask-for-tasks-for-alternative-platforms)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -112,6 +116,24 @@ Install VirtualBox, then add the `boinc` user to the `vboxusers` group:
 usermod --append --groups 'vboxusers' 'boinc'
 ```
 
+## Ask for tasks for alternative platforms
+
+Required, for instance, to compute 32 bit tasks for World Community Grid's tasks on arm64 on Pi 4.<br/>
+One line per platform.
+
+See <https://boinc.berkeley.edu/trac/wiki/BoincPlatforms> for the available platforms.
+
+In `cc_config.xml`:
+
+```xml
+<cc_config>
+  <options>
+    <alt_platform>arm-unknown-linux-gnueabihf</alt_platform>
+    <alt_platform>arm-unknown-linux-gnueabisf</alt_platform>
+  </options>
+</cc_config>
+```
+
 ## Gotchas
 
 - It seems to work much better on debian-based distribution than on others.
@@ -129,25 +151,30 @@ usermod --append --groups 'vboxusers' 'boinc'
 - [boinctui] for a TUI manager
 - [GUI RPC bind to port 31416 failed: 98]
 
+## Sources
+
+All the references in the [further readings] section, plus the following:
+
 <!-- project's references -->
+[boinc manager]: https://boinc.berkeley.edu/wiki/BOINC_Manager
+[client configuration]: https://boinc.berkeley.edu/wiki/Client_configuration
+[controlling boinc remotely]: https://boinc.berkeley.edu/wiki/Controlling_BOINC_remotely
+[platforms]: https://boinc.berkeley.edu/trac/wiki/BoincPlatforms
 [website]: https://boinc.berkeley.edu/
+
+<!-- in-article references -->
+[further readings]: #further-readings
 
 <!-- internal references -->
 [boinccmd]: boinccmd.md
 
 <!-- external references -->
-[boinc manager]: https://boinc.berkeley.edu/wiki/BOINC_Manager
 [boinctui]: https://www.mankier.com/package/boinc-tui
+[boinc on arch wiki]: https://wiki.archlinux.org/title/BOINC
+[linux suspend when computer is in use bug]: https://boinc.berkeley.edu/dev/forum_thread.php?id=14019&postid=101146#101146
 
 [amd linux drivers]: https://www.amd.com/en/support/linux-drivers
+[installing or uninstalling the amdgpu stack]: https://amdgpu-install.readthedocs.io/en/latest/install-installing.html
 [radeon™ software for linux® installation]: https://amdgpu-install.readthedocs.io/en/latest/
 
 [gui rpc bind to port 31416 failed: 98]: https://boinc.mundayweb.com/wiki/index.php?title=GUI_RPC_bind_to_port_31416_failed:_98
-
-<!-- FIXME -->
-
-[boinc on arch wiki]: https://wiki.archlinux.org/title/BOINC
-[client configuration]: https://boinc.berkeley.edu/wiki/Client_configuration
-[controlling boinc remotely]: https://boinc.berkeley.edu/wiki/Controlling_BOINC_remotely
-[installing or uninstalling the amdgpu stack]: https://amdgpu-install.readthedocs.io/en/latest/install-installing.html
-[linux suspend when computer is in use bug]: https://boinc.berkeley.edu/dev/forum_thread.php?id=14019&postid=101146#101146
