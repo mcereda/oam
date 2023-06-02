@@ -14,7 +14,7 @@
     <abort_jobs_on_exit>1</abort_jobs_on_exit>
 
     <!-- Exit cleanly when all tasks have finished. -->
-    <exit_when_idle>0|1</exit_when_idle>
+    <exit_when_idle>1</exit_when_idle>
     
     <!--
       Fetch only the minimum amount of jobs this host can process, then do
