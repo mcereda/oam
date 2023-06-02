@@ -68,6 +68,15 @@
     -->
     <allow_remote_gui_rpc>1</allow_remote_gui_rpc>
 
+
+    <!--
+      Give alternative platform names in scheduler requests.
+      Can be specified more than once.
+      See https://boinc.berkeley.edu/trac/wiki/BoincPlatforms.
+    -->
+    <alt_platform>arm-unknown-linux-gnueabihf</alt_platform>
+    <alt_platform>arm-unknown-linux-gnueabisf</alt_platform>
+
   </options>
   <log_flags>
 
