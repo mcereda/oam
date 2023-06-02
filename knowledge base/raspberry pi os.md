@@ -1,6 +1,7 @@
 # Raspberry Pi OS
 
 1. [First boot](#first-boot)
+1. [Repositories](#repositories)
 1. [Privilege escalation](#privilege-escalation)
 1. [Disable WiFi and Bluetooth](#disable-wifi-and-bluetooth)
    1. [Through boot configuration](#through-boot-configuration)
@@ -30,6 +31,10 @@
 ## First boot
 
 Unless manually set from the Imager, on first boot the system will ask to create a new initial user.
+
+## Repositories
+
+[Repositories], [Mirrors].
 
 ## Privilege escalation
 
@@ -367,11 +372,15 @@ Long term solution: none currently known.
 - Project's [issue 2067]
 - [Re: How to make sure the rpi CPU is not throttled down?]
 - [Timely tips for speeding up your Raspberry Pi]
+- [Repositories]
+- [Mirrors]
 
 <!-- project's references -->
 [/boot/config.txt]: https://www.raspberrypi.org/documentation/configuration/config-txt/README.md
 [configuration]: https://www.raspberrypi.com/documentation/computers/configuration.html
+[mirrors]: https://www.raspbian.org/RaspbianMirrors
 [overclocking]: https://www.raspberrypi.org/documentation/configuration/config-txt/overclocking.md
+[repositories]: https://www.raspbian.org/RaspbianRepository
 
 <!-- internal references -->
 [k3s]: kubernetes/k3s.md
