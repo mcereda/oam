@@ -522,6 +522,26 @@ git diff --word-diff='porcelain'
 git diff --no-index 'path/to/file/A' 'path/to/file/B'
 ```
 
+Better word-aware diff:
+
+- use this alias:
+
+  ```ini
+  [alias]
+    diff-words = diff --color-words='[^[:space:]]|([[:alnum:]]|UTF_8_GUARD)+'
+  ```
+
+- use `diff-highlight` as pager; it should come with the `git` installation:
+
+  ```sh
+  pip install -U --user diff-highlight
+  ```
+
+  ```ini
+  [core]
+    pager = diff-highlight | less
+  ```
+
 ### Create a patch
 
 Just save the output from `git diff` to get a patch file:
@@ -930,6 +950,9 @@ git -c http.sslVerify=false …
 - Quick guide about how to [remove files from git commit]
 - [One weird trick for powerful Git aliases]
 - [Cannot clone git from Azure DevOps using PAT]
+- [Git Config | Setup Git Environment]
+- [1 minute coding tip: git diff-words to see diffs on a per-word basis instead of per line]
+- [Dress up your git diffs with word-level highlights]
 
 <!-- project's references -->
 [docs]: https://git-scm.com/docs/git
@@ -940,14 +963,16 @@ git -c http.sslVerify=false …
 [tagging]: https://git-scm.com/book/en/v2/Git-Basics-Tagging
 
 <!-- external references -->
-[cheat.sh]: https://cheat.sh/git
-[stackoverflow]: https://stackoverflow.com
+[1 minute coding tip: git diff-words to see diffs on a per-word basis instead of per line]: https://www.youtube.com/watch?v=gDkvLxbA5ZE
 [10 git tips we can't live without]: https://opensource.com/article/22/4/git-tips
 [able to push to all git remotes with the one command?]: https://stackoverflow.com/questions/5785549/able-to-push-to-all-git-remotes-with-the-one-command
 [cannot clone git from azure devops using pat]: https://stackoverflow.com/questions/53106546/cannot-clone-git-from-azure-devops-using-pat#53182981
+[cheat.sh]: https://cheat.sh/git
 [coloring white space in git-diff's output]: https://stackoverflow.com/questions/5257553/coloring-white-space-in-git-diffs-output#5259137
 [create a git patch from the uncommitted changes in the current working directory]: https://stackoverflow.com/questions/5159185/create-a-git-patch-from-the-uncommitted-changes-in-the-current-working-directory
+[dress up your git diffs with word-level highlights]: https://www.viget.com/articles/dress-up-your-git-diffs-with-word-level-highlights/
 [get the repository's root directory]: https://stackoverflow.com/questions/957928/is-there-a-way-to-get-the-git-root-directory-in-one-command/#957978
+[git config | setup git environment]: https://initialcommit.com/blog/git-config
 [git submodules: adding, using, removing, updating]: https://chrisjean.com/git-submodules-adding-using-removing-and-updating/
 [gpg failed to sign the data fatal: failed to write commit object]: https://stackoverflow.com/questions/39494631/gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object-git-2-10-0
 [how do i check out a remote git branch]: https://stackoverflow.com/questions/1783405/how-do-i-check-out-a-remote-git-branch/#1787014
@@ -968,4 +993,5 @@ git -c http.sslVerify=false …
 [rebase quick guide]: https://medium.com/@gabriellamedas/git-rebase-and-git-rebase-onto-a6a3f83f9cce
 [rebase remote branches]: https://stackoverflow.com/questions/6199889/rebasing-remote-branches-in-git/#6204804
 [remove files from git commit]: https://devconnected.com/how-to-remove-files-from-git-commit/
+[stackoverflow]: https://stackoverflow.com
 [why can't i delete a branch in a remote gitlab repository?]: https://stackoverflow.com/questions/44657989/why-cant-i-delete-a-branch-in-a-remote-gitlab-repository#44658277
