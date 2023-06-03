@@ -1,5 +1,12 @@
 # Boinccmd
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Gotchas](#gotchas)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -9,19 +16,55 @@ boinccmd --acct_mgr info
 boinccmd --acct_mgr sync
 boinccmd --acct_mgr detach
 
-# get the host status
+# Reread the configuration files.
+# Includes any 'app_config.xml' file existing in the projects' folders.
+boinccmd --read_cc_config
+
+# Get the host's status.
 boinccmd --get_simple_gui_info
 boinccmd --get_state
 
-# list the current tasks
+# List the current tasks.
 boinccmd --get_tasks
-boinccmd --get_tasks | grep -i -C 8 executing
+boinccmd --get_tasks | grep -i -C 8 'executing'
 
-# toggle getting work units from a project
+# Request projects' update.
+boinccmd --project http://www.worldcommunitygrid.org/ update
+
+# Get file transfers.
+boinccmd --get_file_transfers
+
+# Retry file transfers.
+boinccmd --file_transfer \
+  'https://www.sidock.si/sidock/' \
+  'corona_RdRp_v2_sidock_00475839_r2_s-20_0_r356677380_0' \
+  retry
+
+# Toggle getting work units from a project.
 boinccmd --project http://www.worldcommunitygrid.org/ allowmorework
-boinccmd --get_project_status | grep "master URL" | awk -F ": " '{print $2}' | xargs -n 1 -t -I {} boinccmd --project {} nomorework
+boinccmd --get_project_status \
+| grep "master URL" \
+| awk -F ": " '{print $2}' \
+| xargs -n 1 -t -I {} boinccmd --project {} nomorework
 ```
 
 ## Gotchas
 
 - `boinccmd` looks for the `gui_rpc_auth.cfg` file in the same directory it is launched from.
+
+## Further readings
+
+- [Boinccmd tool]
+
+## Sources
+
+All the references in the [further readings] section, plus the following:
+
+<!-- project's references -->
+[boinccmd tool]: https://boinc.berkeley.edu/wiki/Boinccmd_tool
+
+<!-- in-article references -->
+[further readings]: #further-readings
+
+<!-- internal references -->
+<!-- external references -->
