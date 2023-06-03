@@ -1,0 +1,22 @@
+<cc_config>
+  <options>
+    
+    <!-- Set as one-shot run. -->
+    <abort_jobs_on_exit>1</abort_jobs_on_exit>
+    <exit_when_idle>1</exit_when_idle>
+    <fetch_minimal_work>1</fetch_minimal_work>
+    <report_results_immediately>1</report_results_immediately>
+
+    <!-- Allow remote control. -->
+    <allow_remote_gui_rpc>1</allow_remote_gui_rpc>
+
+  </options>
+  <log_flags>
+
+    <!-- Minimal logs, just the ones on by defaults. -->
+    <task>1</task>
+    <file_xfer>1</file_xfer>
+    <sched_ops>1</sched_ops>
+
+  </log_flags>
+</cc_config>

@@ -1,0 +1,921 @@
+<!--
+  ${BOINC_DATA_DIR}/cc_config.xml
+  Configuration file for the BOINC core client.
+  See https://boinc.berkeley.edu/wiki/Client_configuration#Client_configuration
+  for a complete list of all the available options.
+-->
+
+<cc_config>
+  <options>
+
+    <abort_jobs_on_exit>
+      <!--
+        Abort all jobs and update all projects when the client exits.
+        Useful on grids where disk gets wiped after each run.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </abort_jobs_on_exit>
+
+    <allow_multiple_clients>
+      <!--
+        Allow multiple BOINC clients to run on a single host.
+        Each one of them must use a different data directory.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </allow_multiple_clients>
+
+    <allow_remote_gui_rpc>
+      <!--
+        Allow GUI RPCs from *any* remote host.
+        If this is set, the 'remote_hosts.cfg' file is ignored.
+        See https://boinc.berkeley.edu/wiki/Controlling_BOINC_remotely.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </allow_remote_gui_rpc>
+
+    <alt_platform>
+      <!--
+        Give alternative platform names in scheduler requests.
+        Can be specified more than once.
+        See https://boinc.berkeley.edu/trac/wiki/BoincPlatforms for the list.
+        String value. No default.
+      -->
+    </alt_platform>
+
+    <coproc>
+      <!--
+        Specify a coprocessor, such as a FPGA or a GPU not known to BOINC (i.e.
+        not NVIDIA, AMD, or Intel).
+        This element must be specified in the form
+          <coproc>
+            <type>some_name</type>
+            <count>1</count>
+            [ <device_nums>0 2</device_nums> ]
+            [ <peak_flops>1e10</peak_flops> ]
+            [ <non_gpu/> ]
+          </coproc>
+        where:
+          - <count> is the number of coprocessor instances;
+          - <device_nums> is the device numbers (0, 1, ...), and defaults to 0;
+          - <peak_flops> is the number of peak FLOPS (or IOPS, for integer
+            processors) per instance;
+          - <non_gpu/>, if specified, makes the coprocessor not being treated as
+            a GPU (e.g. "Suspend GPU" will not affect it).
+        You can use this in combination with the Anonymous platform mechanism,
+        in which case the name given in <type> must match that in the <coproc>
+        element in the projects' 'app_info.xml'.
+        In the same way, projects can offer app versions that use that
+        coprocessor, with an appropriate plan class specification.
+        The coprocessor description is passed in scheduler RPC requests.
+        Requires a client restart.
+        Object value. No default.
+      -->
+    </coproc>
+
+    <device_name>
+      <!--
+        Use this name to identify this computer on the projects' web sites.
+        String value. Defaults to the host's network domain name.
+      -->
+    </device_name>
+
+    <disallow_attach>
+      <!--
+        Do not attach to any new projects.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </disallow_attach>
+
+    <dont_check_file_sizes>
+      <!--
+        Do not compare the size of application and input files with the
+        project-supplied values after the files are downloaded and just before
+        starting an application.
+        Useful if you need to modify files locally for some reason.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </dont_check_file_sizes>
+
+    <dont_contact_ref_site>
+      <!--
+        Do not determine if a physical network connection exists.
+        This is normally done occasionally contacting a highly-available web
+        site like google.com.
+        Also suppress the periodic fetch of a project list from
+        boinc.berkeley.edu.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </dont_contact_ref_site>
+
+    <dont_suspend_nci>
+      <!--
+        Exempt non-CPU-intensive tasks from most cases of suspension.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </dont_suspend_nci>
+
+    <dont_use_vbox>
+      <!--
+        Don't accept new jobs for VirtualBox.
+        Does not cancel already downloaded jobs.
+        Requires a client restart.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </dont_use_vbox>
+
+    <exclude_gpu>
+      <!--
+        Don't use this GPU for a specific project.
+        This element must be specified in the form
+          <exclude_gpu>
+            <url>project_URL</url>
+            [<device_num>N</device_num>]
+            [<type>NVIDIA|ATI|intel_gpu</type>]
+            [<app>appname</app>]
+          </exclude_gpu>
+        where:
+          - <device_num> specifies the number of the GPU to exclude (0..63);
+            if not given, excludes all GPUs of the given type;
+          - <type> is required if the host has more than one type of GPU,
+            otherwise it can be omitted;
+          - <app> specifies the short name of an application (i.e. the <name>
+            element within the <app> element in 'client_state.xml'); if
+            specified, only tasks for that app are excluded.
+        You may include multiple <exclude_gpu> elements.
+        If you want to exclude the GPU use for all projects, look at the
+        <ignore_ati_dev>, <ignore_nvidia_dev> and <ignore_intel_dev> options.
+        Requires a client restart.
+        Object value. No default.
+      -->
+    </exclude_gpu>
+
+    <exclusive_app>
+      <!--
+        Suspend computing whenever the specified executable is running (e.g.,
+        a game).
+        Case is ignored in filenames.
+        Multiple applications can be specified, one per <exclusive_app> element.
+        String value. No default.
+      -->
+    </exclusive_app>
+
+    <exclusive_gpu_app>
+      <!--
+        Suspend GPU computing whenever the specified executable is running
+        (e.g., a game).
+        Case is ignored in filenames.
+        Multiple applications can be specified, one per <exclusive_gpu_app>
+        element.
+        String value. No default.
+      -->
+    </exclusive_gpu_app>
+
+    <exit_before_start>
+      <!--
+        Exit just before starting any job.
+        Useful to check the contents of slot directories.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </exit_before_start>
+
+    <exit_when_idle>
+      <!--
+        Exit when there are no more tasks, and report completed tasks
+        immediately.
+        Typically used in combination with <fetch_minimal_work>.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </exit_when_idle>
+
+    <fetch_minimal_work>
+      <!--
+        Fetch only enough jobs to use all the device instances (CPU, GPU), then
+        stop fetching any other job.
+        Used with <exit_when_idle>, the client will use all devices (possibly
+        with a single multicore job), and then exit upon jobs completion.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </fetch_minimal_work>
+
+    <fetch_on_update>
+      <!--
+        Request work when updating a project, even if this is not the highest
+        priority project.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </fetch_on_update>
+
+    <force_auth>
+      <!--
+        Use this specific authentication method when authenticating against a
+        proxy server.
+        Valid parameters are 'basic', 'digest', 'gss-negotiate', 'ntlm'.
+        'ntlm' is of particular importance for World Community Grid to
+        facilitate SSL/HTTPS communications.
+        String value. No default.
+      -->
+    </force_auth>
+
+    <http_transfer_timeout>
+      <!--
+        Abort HTTP transfers if idle for this many seconds.
+        Integer value. Defaults to 300.
+      -->
+      300
+    </http_transfer_timeout>
+
+    <http_transfer_timeout_bps>
+      <!--
+        Consider idle an HTTP transfer if its transfer rate is below N bps.
+        Integer value. No default.
+      -->
+    </http_transfer_timeout_bps>
+
+    <http_1_0>
+      <!--
+        Force the use of HTTP 1.0.
+        This may be needed with some proxies.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </http_1_0>
+
+    <ignore_ati_dev>
+      <!--
+        Ignore (don't use) a specific ATI GPU.
+        Can be specified multiple times. Use 0 for the first GPU of this vendor
+        in the system, 1 for the second, and so on.
+        Requires a client restart.
+        Integer value. No default.
+      -->
+    </ignore_ati_dev>
+
+    <ignore_cuda_dev>
+      <!--
+        Ignore (don't use) a specific NVIDIA GPU.
+        Can be specified multiple times. Use 0 for the first GPU of this vendor
+        in the system, 1 for the second, and so on.
+        Requires a client restart.
+        Only used in 6.10.19 till 6.12.41.
+        Integer value. No default.
+      -->
+    </ignore_cuda_dev>
+
+    <ignore_intel_dev>
+      <!--
+        Ignore (don't use) a specific Intel GPU.
+        Can be specified multiple times. Use 0 for the first GPU of this vendor
+        in the system, 1 for the second, and so on.
+        Requires a client restart.
+        Integer value. No default.
+      -->
+    </ignore_intel_dev>
+
+    <ignore_nvidia_dev>
+      <!--
+        Ignore (don't use) a specific NVIDIA GPU.
+        Can be specified multiple times. Use 0 for the first GPU of this vendor
+        in the system, 1 for the second, and so on.
+        Replaces <ignore_cuda_dev>
+        Requires a client restart.
+        Integer value. No default.
+      -->
+    </ignore_nvidia_dev>
+
+    <ignore_tty>
+      <!--
+        In Unix, ignore TTY devices starting with the given path for checking if
+        the system is idle.
+        String value. By default, '/dev/tty*', '/dev*', and '/dev/pts/*' devices
+        are the ones checked for activity.
+      -->
+    </ignore_tty>
+
+    <lower_client_priority>
+      <!--
+        Run the client in a mode where its CPU, disk, and memory usage has lower
+        priority than other processes.
+        Requires a client restart.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </lower_client_priority>
+
+    <max_event_log_lines>
+      <!--
+        The maximum number of lines to display in BOINC Manager's Event Log
+        window.
+        Integer value. Defaults to 2000, with 0 meaning 'no limit'.
+      -->
+      2000
+    </max_event_log_lines>
+
+    <max_file_xfers>
+      <!--
+        The maximum number of simultaneous file transfers.
+        Integer value. Defaults to 8.
+      -->
+      8
+    </max_file_xfers>
+
+    <max_file_xfers_per_project>
+      <!--
+        The maximum number of simultaneous file transfers per project.
+        Integer value. Defaults to 2.
+      -->
+      2
+    </max_file_xfers_per_project>
+
+    <max_stderr_file_size>
+      <!--
+        The maximum size in bytes of the standard error log file 'stderrdae.txt'.
+        String value. Defaults to 2097152 (2 MB).
+        Requires a client restart.
+      -->
+      2097152
+    </max_stderr_file_size>
+
+    <max_stdout_file_size>
+      <!--
+        The maximum size in bytes of the standard output log file 'stdoutdae.txt'.
+        String value. Defaults to 2097152 (2 MB).
+        Requires a client restart.
+      -->
+      2097152
+    </max_stdout_file_size>
+
+    <max_tasks_reported>
+      <!--
+        Report at most N tasks per scheduler RPC.
+        Try N=1000 if your computer has lots of tasks to report and is having
+        trouble completing a scheduler RPC.
+        Integer value. No default.
+      -->
+    </max_tasks_reported>
+
+    <ncpus>
+      <!--
+        Act as if the host had N CPUs.
+        Zero means to use the actual number of CPUs.
+        Intented to simulate more CPUs than effectively available. Use the
+        computing preferences to limit CPU usage instead.
+        Integer value. No default.
+      -->
+    </ncpus>
+
+    <no_alt_platform>
+      <!--
+        Run applications only for the host's primary platform.
+        I.E., a Win64 machine will run only Win64 apps, and not Win32.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </no_alt_platform>
+
+    <no_gpus>
+      <!--
+        Don't use GPUs even if they're present.
+        Requires a client restart.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </no_gpus>
+
+    <no_info_fetch>
+      <!--
+        Prevent downloading version info, updating project list and notices from
+        BOINC servers.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </no_info_fetch>
+
+    <no_opencl>
+      <!--
+        Do not use OpenCL.
+        Requires a client restart.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </no_opencl>
+
+    <no_priority_change>
+      <!--
+        Do not change the priority of applications, running them at same
+        priority as the client.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </no_priority_change>
+
+    <no_rdp_check>
+      <!--
+        In Windows only, allow GPU apps to run while using Remote Desktop
+        Protocol (RDP).
+        This requires that you configure RDP as described in
+        https://knowledge.civilgeo.com/knowledge-base/enabling-gpu-rendering-for-microsoft-remote-desktop/.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </no_rdp_check>
+
+    <os_random_only>
+      <!--
+        Use only OS-level functions to generate a random GUI RPC password, and
+        exit if these functions fail.
+        Without this flag, if OS secure random functions aren't available, the
+        client will fall back to a random-string generator based on time of day,
+        free disk space, and other host-specific information.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </os_random_only>
+
+    <process_priority>
+      <!--
+        The OS process priority at which tasks are run.
+        Acceptable values are:
+          - 0 for lowest priority;
+          - 1 for below normal;
+          - 2 for normal;
+          - 3 for high;
+          - 4 for highest.
+        Used for *all but* coprocessor (GPU) applications, wrapper applications,
+        and non-compute-intensive applications.
+        Can be used independently from <process_priority_special>.
+        Integer value. Defaults to 0.
+      -->
+    </process_priority>
+
+    <process_priority_special>
+      <!--
+        The OS process priority at which tasks are run.
+        Acceptable values are:
+          - 0 for lowest priority;
+          - 1 for below normal;
+          - 2 for normal;
+          - 3 for high;
+          - 4 for highest.
+        Integer value. Defaults to 0.
+        Used for coprocessor (GPU) applications, wrapper applications, and
+        non-compute-intensive applications.
+        Can be used independently from <process_priority>.
+        Integer value. Defaults to 0.
+      -->
+    </process_priority_special>
+
+    <proxy_info>
+      <!--
+        Specify proxy settings.
+        This element must be specified in the form
+          <proxy_info>
+            [ <http_server_name></http_server_name> ]
+            [ <http_server_port>80</http_server_port> ]
+            [ <http_user_name></http_user_name> ]
+            [ <http_user_passwd></http_user_passwd> ]
+            [ <socks_version>5</socks_version> ]
+            [ <socks_server_name></socks_server_name> ]
+            [ <socks_server_port>80</socks_server_port> ]
+            [ <socks5_user_name></socks5_user_name> ]
+            [ <socks5_user_passwd></socks5_user_passwd> ]
+            [ <socks5_remote_dns>0|1</socks5_remote_dns> ]
+            [ <no_proxy>list of hostnames for which proxy not used</no_proxy> ]
+            [ <no_autodetect>0|1</no_autodetect> ]
+          </proxy_info>
+        Object value. No default.
+      -->
+    </proxy_info>
+
+    <rec_half_life_days>
+      <!--
+        A project's scheduling priority is determined by its estimated credit in the last X days.
+        Set it larger if you run long high-priority jobs.
+        Integer value. Defaults to 10.
+      -->
+      10
+    </rec_half_life_days>
+
+    <report_results_immediately>
+      <!--
+        Report jobs to the project server as soon as they are finished.
+        Satisfies the inbuilt 60 second delay from the completion of the
+        result's upload.
+        Normally the report is deferred for up to one hour, so that several jobs
+        can be reported in one request.
+        This option increases the load on project servers, and should generally
+        be avoided. It is intended to be used only on computers whose disks are
+        reformatted daily.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </report_results_immediately>
+
+    <run_apps_manually>
+      <!--
+        Used to debug applications.
+        When running an application, the client will do everything except
+        actually run the application (i.e. it will set up the slot dir,
+        create the shared mem segment, etc). It will then continue as if the
+        application was actually running, and you can then manually run your app
+        under a debugger in the slot directory.
+        Note: the client will not notice the termination of your application.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </run_apps_manually>
+
+    <save_stats_days>
+      <!--
+        The number of days to save the per-project credit totals that are
+        displayed in the Statistics tab of the BOINC Manager.
+        Integer value. Defaults to 30.
+      -->
+      30
+    </save_stats_days>
+
+    <simple_gui_only>
+      <!--
+        Display only the simple GUI in the BOINC Manager.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </simple_gui_only>
+
+    <skip_cpu_benchmarks>
+      <!--
+        Disable the periodic benchmark testing and block the 'run CPU
+        benchmarks' command from the manager menu.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </skip_cpu_benchmarks>
+
+    <start_delay>
+      <!--
+        Number of seconds to delay running applications after client startup.
+        Integer value. No default.
+      -->
+    </start_delay>
+
+    <suppress_net_info>
+      <!--
+        Prevent sending this host's IP address and domain name to the servers.
+        Normally this information is sent to, and stored on, servers. It is
+        visible to you (but not other users) via the web.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </suppress_net_info>
+
+    <use_all_gpus>
+      <!--
+        Use all GPUs in the system.
+        Normally only the most capable ones are used.
+        Requires a client restart.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </use_all_gpus>
+
+    <use_certs>
+      <!--
+        Accept applications signed using X509 certificates, as well as those
+        that have BOINC signatures.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </use_certs>
+
+    <use_certs_only>
+      <!--
+        Accept only applications signed with X509 certificates.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </use_certs_only>
+
+    <vbox_window>
+      <!--
+        Launch VirtualBox applications with an interactive console window.
+        Normally, they are run silently with VBoxHeadless.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </vbox_window>
+
+    <zero_debt>
+      <!--
+        Resets inter-project debts.
+        Intended to be applied one time, then to be set back to 0 before the
+        next client restart or reread of the config file.
+        No longer used in BOINC 7.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </zero_debt>
+
+  </options>
+  <log_flags>
+
+    <task>
+      <!--
+        Log the start and completion of compute jobs.
+        Should write two messages per job.
+        Boolean integer value (0 or 1). Defaults to 1.
+      -->
+      1
+    </task>
+
+    <file_xfer>
+      <!--
+        Log the start and completion of file transfers.
+        Should write two messages per file transfer.
+        Boolean integer value (0 or 1). Defaults to 1.
+      -->
+      1
+    </file_xfer>
+
+    <sched_ops>
+      <!--
+        Log connections to scheduling servers.
+        Boolean integer value (0 or 1). Defaults to 1.
+      -->
+      1
+    </sched_ops>
+
+    <app_msg_receive>
+      <!--
+        Log shared-memory messages received from applications.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </app_msg_receive>
+
+    <app_msg_send>
+      <!--
+        Log shared-memory messages sent to applications.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </app_msg_send>
+
+    <async_file_debug>
+      <!--
+        Log asynchronous copy and checksum of large files (> 10 MB).
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </async_file_debug>
+
+    <benchmark_debug>
+      <!--
+        Log debugging information about CPU benchmarks.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </benchmark_debug>
+
+    <checkpoint_debug>
+      <!--
+        Log applications' checkpoints.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </checkpoint_debug>
+
+    <coproc_debug>
+      <!--
+        Log details of coprocessor (GPU) scheduling.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </coproc_debug>
+
+    <cpu_sched>
+      <!--
+        Log CPU scheduler actions (preemption and resumption).
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </cpu_sched>
+
+    <cpu_sched_debug>
+      <!--
+        Explain CPU scheduler's decisions.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </cpu_sched_debug>
+
+    <cpu_sched_status>
+      <!--
+        Show what tasks are running.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </cpu_sched_status>
+
+    <dcf_debug>
+      <!--
+        Log changes in DCF.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </dcf_debug>
+
+    <disk_usage_debug>
+      <!--
+        Log disk usage information.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </disk_usage_debug>
+
+    <file_xfer_debug>
+      <!--
+        Log the completion status of file transfers.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </file_xfer_debug>
+
+    <gui_rpc_debug>
+      <!--
+        Log debugging information about GUI RPC operations.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </gui_rpc_debug>
+
+    <http_debug>
+      <!--
+        Log debugging information about HTTP operations.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </http_debug>
+
+    <http_xfer_debug>
+      <!--
+        Log debugging information about network communication.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </http_xfer_debug>
+
+    <mem_usage_debug>
+      <!--
+        Log application memory usage.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </mem_usage_debug>
+
+    <network_status_debug>
+      <!--
+        Log the network status.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </network_status_debug>
+
+    <priority_debug>
+      <!--
+        Log changes to project scheduling priority.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </priority_debug>
+
+    <poll_debug>
+      <!--
+        Show what poll functions do.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </poll_debug>
+
+    <proxy_debug>
+      <!--
+        Log debugging information about HTTP proxy operations.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </proxy_debug>
+
+    <rr_simulation>
+      <!--
+        Log results of the round-robin simulation used by CPU scheduler and
+        work-fetch.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </rr_simulation>
+
+    <sched_op_debug>
+      <!--
+        Log details of scheduler RPCs.
+        Also shows deferral intervals and other low info.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </sched_op_debug>
+
+    <scrsave_debug>
+      <!--
+        Log debugging information about the screen saver.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </scrsave_debug>
+
+    <slot_debug>
+      <!--
+        Log messages about allocation of slots, creating/removing files in slot
+        dirs.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </slot_debug>
+
+    <state_debug>
+      <!--
+        Log summaries of the client state after connecting to the scheduler RPC
+        and doing garbage collection.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </state_debug>
+
+    <statefile_debug>
+      <!--
+        Show when and why state file is written.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </statefile_debug>
+
+    <suspend_debug>
+      <!--
+        Log details of processing and network suspend/resume.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </suspend_debug>
+
+    <task_debug>
+      <!--
+        Log low-level details of process start/end (status codes, PIDs etc.),
+        and when applications checkpoint.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </task_debug>
+
+    <time_debug>
+      <!--
+        Log updates to on_frac, active_frac and connected_frac.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </time_debug>
+
+    <trickle_debug>
+      <!--
+        Log details of trickles.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </trickle_debug>
+
+    <unparsed_xml>
+      <!--
+        Log any unparsed XML.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </unparsed_xml>
+
+    <work_fetch_debug>
+      <!--
+        Log work fetch policy decisions.
+        Boolean integer value (0 or 1). Defaults to 0.
+      -->
+      0
+    </work_fetch_debug>
+
+  </log_flags>
+
+</cc_config>

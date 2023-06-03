@@ -1,0 +1,28 @@
+<cc_config>
+  <options>
+
+    <!-- Allow remote control. -->
+    <allow_remote_gui_rpc>1</allow_remote_gui_rpc>
+
+    <!-- Also execute 32bit tasks. -->
+    <alt_platform>arm-unknown-linux-gnueabihf</alt_platform>
+    <alt_platform>arm-unknown-linux-gnueabisf</alt_platform>
+
+    <!-- Avoid tasks for non-existing devices. -->
+    <dont_use_vbox>1</dont_use_vbox>
+    <no_gpus>1</no_gpus>
+
+    <!-- Avoid interrumptions. -->
+    <dont_suspend_nci>1</dont_suspend_nci>
+    <no_info_fetch>1</no_info_fetch>
+
+  </options>
+  <log_flags>
+
+    <!-- On by default. -->
+    <task>1</task>
+    <file_xfer>1</file_xfer>
+    <sched_ops>1</sched_ops>
+
+  </log_flags>
+</cc_config>
