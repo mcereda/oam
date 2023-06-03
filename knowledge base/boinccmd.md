@@ -42,6 +42,9 @@ boinccmd --file_transfer \
   'corona_RdRp_v2_sidock_00475839_r2_s-20_0_r356677380_0' \
   retry
 
+# Retry deferred network communication.
+boinccmd --network_available
+
 # Toggle getting work units from a project.
 boinccmd --project http://www.worldcommunitygrid.org/ allowmorework
 boinccmd --get_project_status \
