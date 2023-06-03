@@ -17,8 +17,10 @@ boinccmd --acct_mgr sync
 boinccmd --acct_mgr detach
 
 # Reread the configuration files.
-# Includes any 'app_config.xml' file existing in the projects' folders.
+# '--read_cc_config' also includes any 'app_config.xml' file existing in the
+# projects' folders.
 boinccmd --read_cc_config
+boinccmd --read_global_prefs_override
 
 # Get the host's status.
 boinccmd --get_simple_gui_info
@@ -46,6 +48,15 @@ boinccmd --get_project_status \
 | grep "master URL" \
 | awk -F ": " '{print $2}' \
 | xargs -n 1 -t -I {} boinccmd --project {} nomorework
+
+# Set run modes.
+# 'always' = do work or transfer files always.
+# 'auto' = do work or transfer files when allowed by the preferences.
+# 'never' = do not work nor transfer files.
+# Unless a duration in seconds is given after the mode, the change is permanent.
+boinccmd --set_run_mode 'always'
+boinccmd --set_gpu_mode 'auto' '10'
+boinccmd --set_network_mode 'never' '600'
 ```
 
 ## Gotchas
