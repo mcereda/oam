@@ -1,6 +1,6 @@
 <!--
   ${BOINC_DATA_DIR}/projects/${PROJECT}/app_config.xml
-  Configurtion file for specific applications or app versions.
+  Configuration file for specific applications or app versions.
   See https://boinc.berkeley.edu/wiki/Client_configuration#Project-level_configuration
   for a complete list of all the available options.
 -->

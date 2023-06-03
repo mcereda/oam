@@ -1,16 +1,317 @@
 <!--
   ${BOINC_DATA_DIR}/global_prefs_override.xml
-  Configurtion file for the BOINC core client that can be used to override global
+  Configuration file for the BOINC core client that can be used to override global
   preferences locally.
-  See http://boinc.berkeley.edu/trac/wiki/PrefsOverride and
+  See http://boinc.berkeley.edu/trac/wiki/PrefsOverride,
+  https://boinc.berkeley.edu/trac/wiki/PrefsImpl and
   https://boinc.berkeley.edu/wiki/Global_prefs_override.xml for a complete list
   of all preferences which can be overridden.
 -->
 
 <global_preferences>
-  <cpu_usage_limit>100</cpu_usage_limit>
-  <max_cpus>1024</max_cpus>
-  <max_ncpus_pct>90</max_ncpus_pct>
-  <run_if_user_active>0</run_if_user_active>
-  <suspend_cpu_usage>40</suspend_cpu_usage>
+
+  <!--
+    Account managers.
+  -->
+
+  <source_project>
+    <!-- Account manager's URL. -->
+    http://bam.boincstats.com/
+  </source_project>
+
+  <!-- End -->
+
+
+  <!--
+    Time limits.
+  -->
+
+  <!--
+    Generic time range for computation.
+    Should be superseded by day-specific time ranges.
+    Use the default value to run always.
+    Floating point values. Defaults to 0.000000.
+  -->
+  <start_hour>0.000000</start_hour>
+  <end_hour>0.000000</end_hour>
+
+  <!--
+    Generic time range for network transfers.
+    Should be superseded by day-specific time ranges.
+    Use the default value to always have network connectivity.
+    Floating point values. Defaults to 0.000000.
+  -->
+  <net_start_hour>0.000000</net_start_hour>
+  <net_end_hour>0.000000</net_end_hour>
+
+
+  <!--
+    Day-specific time ranges.
+    Should supersede the generic time ranges for the specified day.
+    To be specified once per day of the week (0 = Sunday to 6 = Saturday).
+  -->
+  <day_prefs>
+    <day_of_week>0</day_of_week>
+    <start_hour>0.00</start_hour>
+    <end_hour>24.00</end_hour>
+    <net_start_hour>0.00</net_start_hour>
+    <net_end_hour>6.00</net_end_hour>
+  </day_prefs>
+
+  <!-- End -->
+
+
+  <!--
+    Computation during user activity.
+  -->
+
+  <run_if_user_active>
+    <!--
+      Suspend all computation and network transfers when the user is active.
+      Boolean integer value (0 or 1). Defaults to 1.
+    -->
+    1
+  </run_if_user_active>
+
+  <run_gpu_if_user_active>
+    <!--
+      Suspend GPU computation when the user is active.
+      Boolean integer value (0 or 1). Defaults to 0.
+    -->
+    0
+  </run_gpu_if_user_active>
+
+  <run_on_batteries>
+    <!--
+      Suspend all computation and network transfers when running on battery.
+      Boolean integer value (0 or 1). Defaults to 0.
+    -->
+    0
+  </run_on_batteries>
+
+  <idle_time_to_run>
+    <!--
+      Consider the user as active if mouse/keyboard input is registered in the
+      last N minutes.
+      Integer value. Defaults to 3.
+    -->
+    3
+  </idle_time_to_run>
+
+  <suspend_if_no_recent_input>
+    <!--
+      Suspend if no mouse or keyboard input is registered after X minutes.
+      Useful to compute for some time when the computer is idle, then stop to
+      let the system enter a low-power state or sleep.
+      Boolean integer value (0 or 1). Defaults to 1.
+    -->
+    1
+  </suspend_if_no_recent_input>
+
+  <!-- End -->
+
+
+  <!--
+    Usage limits.
+  -->
+
+  <max_cpus>
+    <!--
+      Use at most N CPUs on multi-CPU systems, and keep the rest free for other
+      applications.
+      Integer value. Maxes out at 1024. No default.
+    -->
+    1024
+  </max_cpus>
+
+  <max_ncpus_pct>
+    <!--
+      Use at most N% of the CPUs, and keep the rest free for other applications.
+      Example: 75% means to use 6 cores on an 8-core CPU.
+      Floating point percentage value. Defaults to 100.000000.
+    -->
+    100.000000
+  </max_ncpus_pct>
+
+  <cpu_usage_limit>
+    <!--
+      Use at most N% of the CPU time.
+      Suspend/resume computing every few seconds to reduce CPU temperature
+      and energy usage.
+      Example: 75% means compute for 3 seconds, wait for 1 second, and repeat.
+      Floating point percentage value. Defaults to 100.000000.
+    -->
+    100.000000
+  </cpu_usage_limit>
+
+  <suspend_cpu_usage>
+    <!--
+      Suspend all computation when the system is busy running other programs
+      and the CPU usage for non-BOINC programs is above N%.
+      Floating point percentage value. Defaults to 25.000000.
+    -->
+    25.000000
+  </suspend_cpu_usage>
+
+  <cpu_scheduling_period_minutes>
+    <!--
+      Switch between tasks every N minutes.
+      If you run several projects, BOINC may switch between them.
+      Floating point value. Defaults to 60.000000.
+    -->
+    60.000000
+  </cpu_scheduling_period_minutes>
+
+  <ram_max_used_busy_pct>
+    <!--
+      When the computer is in use, use at most N% of the RAM.
+      Floating point percentage value. Defaults to 90.000000.
+    -->
+    90.000000
+  </ram_max_used_busy_pct>
+
+  <ram_max_used_idle_pct>
+    <!--
+      When the computer is idle, use at most N% of the RAM.
+      Floating point percentage value. Defaults to 90.000000.
+    -->
+    90.000000
+  </ram_max_used_idle_pct>
+
+  <vm_max_used_pct>
+    <!--
+      Use at most N% of the swap space (page file).
+      Floating point percentage value. Defaults to 75.000000.
+    -->
+    75.000000
+  </vm_max_used_pct>
+
+  <disk_max_used_gb>
+    <!--
+      Use no more than N GB of disk space.
+      Floating point value. Defaults to 100.000000.
+    -->
+    100.000000
+  </disk_max_used_gb>
+
+  <disk_max_used_pct>
+    <!--
+      Use no more than N% of the total disk space of the volume where BOINC stores data.
+      Floating point percentage value. Defaults to 100.000000.
+    -->
+    100.000000
+  </disk_max_used_pct>
+
+  <disk_min_free_gb>
+    <!--
+      Leave at least N GB free of disk space on the volume where BOINC stores data.
+      Floating point value. Defaults to 0.100000.
+    -->
+    0.100000
+  </disk_min_free_gb>
+
+  <max_bytes_sec_up>
+    <!--
+      Limit file transfers to an upload rate of N KB/second.
+      Floating point value. Defaults to 0.000000.
+    -->
+    0.000000
+  </max_bytes_sec_up>
+
+  <max_bytes_sec_down>
+    <!--
+      Limit file transfers to a download rate of N KB/second.
+      Floating point value. Defaults to 0.000000.
+    -->
+    0.000000
+  </max_bytes_sec_down>
+
+  <daily_xfer_period_days>
+    <!--
+      Set the time period in days of the limit for file transfers.
+      Floating point value. Defaults to 0.000000.
+    -->
+    0
+  </daily_xfer_period_days>
+
+  <daily_xfer_limit_mb>
+    <!--
+      Limit file transfers to a total of N MB in the defined time period.
+      Floating point value. Defaults to 0.000000.
+    -->
+    0.000000
+  </daily_xfer_limit_mb>
+
+  <confirm_before_connecting>
+    <!--
+      Ask for confirmation before connecting to Internet.
+      Useful only with a modem, ISDN or VPN connection.
+      Boolean integer value (0 or 1). Defaults to 0.
+    -->
+    0
+  </confirm_before_connecting>
+
+  <hangup_if_dialed>
+    <!--
+      Disconnect after network transfers are done, if connected before.
+      Useful only with a modem, ISDN or VPN connection.
+      Boolean integer value (0 or 1). Defaults to 0.
+    -->
+    0
+  </hangup_if_dialed>
+
+  <!-- End -->
+
+
+  <!--
+    Task management.
+  -->
+
+  <disk_interval>
+    <!--
+      Request tasks to save their state to disk at most every N seconds.
+      This checkpoint will be the task's starting point when it is restarted.
+      Floating point value. Defaults to 60.000000.
+    -->
+    60.000000
+  </disk_interval>
+
+  <leave_apps_in_memory>
+    <!--
+      Leave non-GPU tasks in memory while suspended.
+      If 1, suspended tasks stay in memory and resume with no work lost.
+      If 0 or unset, suspended tasks are removed from memory and resume from
+      their last checkpoint on disk.
+      Boolean integer value (0 or 1). Defaults to 0.
+    -->
+    0
+  </leave_apps_in_memory>
+
+  <work_buf_min_days>
+    <!--
+      Store a buffer of tasks, enough for at least N days of work.
+      Determines how much work is requested when contacting a project.
+      Floating point value. Defaults to 0.000000.
+    -->
+    0.100000
+  </work_buf_min_days>
+
+  <work_buf_additional_days>
+    <!--
+      Store tasks above the minimum buffer and up to an additional N days of
+      estimated work.
+      Determines how much work is requested when contacting a project.
+      Floating point value. Defaults to 0.000000.
+    -->
+    0.000000
+  </work_buf_additional_days>
+
+  <dont_verify_images>
+    <!--
+      Whether to avoid verification of the downloaded tasks.
+      Boolean integer value (0 or 1). Defaults to 0.
+    -->
+    0
+  </dont_verify_images>
+
 </global_preferences>
