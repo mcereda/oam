@@ -1,6 +1,6 @@
 <!--
   ${BOINC_DATA_DIR}/cc_config.xml
-  Configurtion file for the BOINC core client.
+  Configuration file for the BOINC core client.
   See https://boinc.berkeley.edu/wiki/Client_configuration#Client_configuration
   for a complete list of all the available options.
 -->
