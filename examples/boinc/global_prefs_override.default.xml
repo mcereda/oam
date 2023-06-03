@@ -128,9 +128,9 @@
     <!--
       Use at most N% of the CPUs, and keep the rest free for other applications.
       Example: 75% means to use 6 cores on an 8-core CPU.
-      Floating point percentage value. Defaults to 100.000000.
+      Floating point percentage value. Defaults to 90.000000.
     -->
-    100.000000
+    90.000000
   </max_ncpus_pct>
 
   <cpu_usage_limit>
@@ -165,9 +165,9 @@
   <ram_max_used_busy_pct>
     <!--
       When the computer is in use, use at most N% of the RAM.
-      Floating point percentage value. Defaults to 90.000000.
+      Floating point percentage value. Defaults to 60.000000.
     -->
-    90.000000
+    60.000000
   </ram_max_used_busy_pct>
 
   <ram_max_used_idle_pct>
@@ -189,17 +189,17 @@
   <disk_max_used_gb>
     <!--
       Use no more than N GB of disk space.
-      Floating point value. Defaults to 100.000000.
+      Floating point value. Defaults to 1024.000000.
     -->
-    100.000000
+    1024.000000
   </disk_max_used_gb>
 
   <disk_max_used_pct>
     <!--
       Use no more than N% of the total disk space of the volume where BOINC stores data.
-      Floating point percentage value. Defaults to 100.000000.
+      Floating point percentage value. Defaults to 90.000000.
     -->
-    100.000000
+    90.000000
   </disk_max_used_pct>
 
   <disk_min_free_gb>
@@ -313,5 +313,7 @@
     -->
     0
   </dont_verify_images>
+
+  <!-- End -->
 
 </global_preferences>
