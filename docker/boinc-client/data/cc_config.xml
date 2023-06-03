@@ -1,0 +1,42 @@
+<!--
+  ${BOINC_DATA_DIR}/cc_config.xml
+  Configuration file for the BOINC core client.
+  See https://boinc.berkeley.edu/wiki/Client_configuration#Client_configuration
+  for a complete list of all the available options.
+-->
+
+<cc_config>
+  <options>
+
+    <!-- Abort jobs and update projects when the client exits. -->
+    <abort_jobs_on_exit>1</abort_jobs_on_exit>
+
+    <!--
+      Report jobs to the project server as soon as they are finished.
+      Satisfies the inbuilt 60 second delay from the completion of the
+      result's upload.
+    -->
+    <report_results_immediately>1</report_results_immediately>
+
+    <!-- Don't accept jobs for VirtualBox. -->
+    <dont_use_vbox>1</dont_use_vbox>
+
+    <!-- Exempt non-CPU-intensive tasks from most cases of suspension. -->
+    <dont_suspend_nci>1</dont_suspend_nci>
+
+    <!--
+      Allow GUI RPCs from *any* remote host.
+      See https://boinc.berkeley.edu/wiki/Controlling_BOINC_remotely.
+    -->
+    <allow_remote_gui_rpc>1</allow_remote_gui_rpc>
+
+  </options>
+  <log_flags>
+
+    <!-- On by default. -->
+    <task>1</task>
+    <file_xfer>1</file_xfer>
+    <sched_ops>1</sched_ops>
+
+  </log_flags>
+</cc_config>
