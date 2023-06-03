@@ -1,0 +1,23 @@
+<global_preferences>
+
+  <!-- Use the BoincStats account manager. -->
+  <source_project>http://bam.boincstats.com/</source_project>
+
+  <!-- Run always. -->
+  <run_if_user_active>1</run_if_user_active>
+  <run_gpu_if_user_active>1</run_gpu_if_user_active>
+  
+  <!-- Keep 1 CPU free and some wiggle room for system use and management. -->
+  <max_cpus>3</max_cpus>
+  <suspend_cpu_usage>66.000000</suspend_cpu_usage>
+  <disk_min_free_gb>2.000000</disk_min_free_gb>
+
+  <!-- Do not use swap. -->
+  <vm_max_used_pct>0.000000</vm_max_used_pct>
+
+  <!-- Be easy on the SD card. -->
+  <disk_interval>600.000000</disk_interval>
+  <leave_apps_in_memory>1</leave_apps_in_memory>
+  <work_buf_min_days>0.000000</work_buf_min_days>
+
+</global_preferences>

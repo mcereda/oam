@@ -1,0 +1,30 @@
+<global_preferences>
+
+  <!-- Use the BoincStats account manager. -->
+  <source_project>http://bam.boincstats.com/</source_project>
+
+  <!-- Run always. -->
+  <run_if_user_active>1</run_if_user_active>
+  <run_gpu_if_user_active>1</run_gpu_if_user_active>
+
+  <!-- Always be active on the network. -->
+  <net_start_hour>0</net_start_hour>
+  <net_end_hour>0</net_end_hour>
+
+  <!-- Do not use swap. -->
+  <vm_max_used_pct>0.000000</vm_max_used_pct>
+
+  <!--
+    Avoid buffering tasks.
+    Containers are ephemeral, after all.
+  -->
+  <work_buf_min_days>0.000000</work_buf_min_days>
+
+  <!--
+    Save data and reschedule every often.
+    I do not expect a container to run too long.
+  -->
+  <cpu_scheduling_period_minutes>10</cpu_scheduling_period_minutes>
+  <disk_interval>60</disk_interval>
+
+</global_preferences>
