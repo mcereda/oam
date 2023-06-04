@@ -6,7 +6,7 @@
   <!-- Run always. -->
   <run_if_user_active>1</run_if_user_active>
   <run_gpu_if_user_active>1</run_gpu_if_user_active>
-  
+
   <!-- Keep 1 CPU free and some wiggle room for system use and management. -->
   <max_cpus>3</max_cpus>
   <suspend_cpu_usage>66.000000</suspend_cpu_usage>
