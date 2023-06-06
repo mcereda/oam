@@ -1,10 +1,10 @@
 # PoCL
 
-PoCL is a portable open source implementation of the 1.2 OpenCL standard.
+Portable open source implementation of the 1.2 OpenCL standard.
 
 Upstream PoCL currently supports various CPUs, NVIDIA GPUs via libcuda, HSA-supported GPUs and TCE ASIPs (experimental, see: OpenASIP).
 
-PoCL uses Clang as an OpenCL C frontend and LLVM for kernel compiler implementation, and as a portability layer.
+PoCL uses Clang as an OpenCL C frontend, and LLVM for kernel compiler implementation and as a portability layer.
 
 ## Table of contents <!-- omit in toc -->
 
@@ -18,8 +18,10 @@ PoCL uses Clang as an OpenCL C frontend and LLVM for kernel compiler implementat
 <!-- project's references -->
 [website]: http://portablecl.org/
 
-<!-- internal references -->
+<!-- in-article references -->
 [further readings]: #further-readings
+
+<!-- internal references -->
 [opencl]: opencl.md
 
 <!-- external references -->
