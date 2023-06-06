@@ -1,6 +1,6 @@
 # Python
 
-1. [TL,DR](#tldr)
+1. [TL;DR](#tldr)
 1. [Dictionaries](#dictionaries)
 1. [F-strings](#f-strings)
 1. [Logging](#logging)
@@ -12,7 +12,7 @@
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
-## TL,DR
+## TL;DR
 
 ```py
 # Declare a dictionary.
@@ -26,7 +26,7 @@ F"{name.lower()} is funny."
 
 # Make elements in a list unique.
 # Keep the resulting list mutable.
-unique_list = list(set(redundant_list))
+unique_elements = list(set(redundant_elements))
 ```
 
 ## Dictionaries
