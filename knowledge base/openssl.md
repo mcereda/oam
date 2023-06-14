@@ -1,5 +1,7 @@
 # OpenSSL
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Create a self signed certificate](#create-a-self-signed-certificate)
 1. [Display the contents of a SSL certificate](#display-the-contents-of-a-ssl-certificate)
@@ -12,77 +14,87 @@
 ## TL;DR
 
 ```sh
-# Generate a pseudo-random password, encode it in base64 and print it out.
+# Generate pseudo-random passwords.
+openssl rand 32
 openssl rand -base64 18
 
-# Check a certificate and return information about it.
-openssl x509 -in 'certificate.crt' -text -noout
+# Generate certificate signing requests.
+# '-nodes' leaves the output files unencrypted.
+openssl req -new -out 'request.csr' \
+  -newkey 'rsa:2048' -keyout 'private.key'
+openssl req -new -out 'request.csr' -key 'private.key'
+openssl req -new -out 'domain.req.pem' … \
+  -config 'domain.conf' -days '365' -sha256
 
-# Check a key and verify its consistency.
-openssl rsa -in 'file.key' -check
+# Generate certificate signing requests from existing certificates and keys.
+openssl x509 -x509toreq -out 'request.csr' \
+  -in 'certificate.crt' -signkey 'private.key'
 
-# Verify a CSR and print the data given in input during creation.
-openssl req -in 'request.csr' -text -noout -verify
+# Generate self-signed certificates.
+openssl req -x509 -out 'certificate.pem' \
+  -newkey 'rsa:4096' -keyout 'private.key' \
+  -subj '/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=www.company.com' \
+  -days '365' -sha256
+openssl req -x509 -out 'certificate.pem' … -key 'private.key'
 
-# Check a PKCS#12 file (.p12 or .pfx).
+
+# Check PKCS#12 file (.p12 or .pfx).
 openssl pkcs12 -info -in 'keyStore.p12'
 
-# Check a MD5 hash of the public key to ensure it matches with the one in a CSR
-# or private key.
-openssl x509 -noout -modulus -in 'certificate.crt' | openssl md5
-openssl rsa -noout -modulus -in 'private.key' | openssl md5
-openssl req -noout -modulus -in 'request.csr' | openssl md5
+# Verify certificate signing requests and print the data given in input
+# during their creation.
+openssl req -text -noout -verify -in 'request.csr'
 
-# Check an SSL connection.
-# All the certificates (including the intermediate ones) should be displayed.
-# CA certificates bundle on Linux: /etc/ssl/certs/ca-certificates.crt.
-# '-servername' used to specify a domain for multi-domain servers.
-openssl s_client -connect 'fqdn:port' -servername 'host-fqdn' -showcerts
-openssl … -CAfile 'ca/certificates/bundle.crt'
-openssl … -CApath '/etc/ssl/certs'
+# Check existing keys and verify their consistency.
+openssl rsa -check -in 'file.key'
 
-# Generate a password-protected self-signed certificate.
-openssl req -x509 \
-  -sha256 -newkey 'rsa:4096' -keyout 'private.key' \
-  -subj '/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=www.example.com' \
-  -out 'certificate.pem' -days '365'
+# Check certificates and return information about them.
+openssl x509 -text -noout -in 'certificate.crt'
 
-# Generate a new non-protected signing request.
-openssl req -new \
-  -config 'domain.conf' \
-  -sha256 -newkey 'rsa:2048' -nodes -keyout 'domain.key' \
-  -days '365' -out 'domain.req.pem'
-
-# Generate a Certificate Signing Request for an existing private key.
-openssl req -new -key 'private.key' -out 'request.csr'
-
-# Generate a Certificate Signing Request from an existing certificate and key.
-openssl x509 -x509toreq \
-  -in 'certificate.crt' -out 'request.csr' -signkey 'private.key'
-
-# Remove password protection from a key.
-openssl rsa -in 'protected.key' -out 'unprotected.key'
-
-# Convert a DER-formatted file (.crt .cer .der) to the PEM format.
-openssl x509 -inform 'der' -in 'certificate.cer' -out 'certificate.pem'
-openssl x509 -in 'certificate.cer' -out 'certificate.pem' -outform 'PEM'
-
-# Convert a PEM file to the DER format.
-openssl x509 -outform 'der' -in 'certificate.pem' -out 'certificate.der'
-
-# Convert a PKCS#12 file (.pfx .p12) with private key and certificates to PEM.
-# Add -nocerts to output only the private key.
-# Add -nokeys to output only the certificates.
-openssl pkcs12 -in 'keyStore.pfx' -out 'keyStore.pem' -nodes
-
-# Convert a PEM certificate file and a private key to PKCS#12 (.pfx .p12).
-openssl pkcs12 -export -out 'certificate.pfx' \
-  -inkey 'privateKey.key' -in 'certificate.crt' -certfile
-
-# Verify a certificate chain.
+# Verify certificate chains.
 # If a certificate is its own issuer, it is assumed to be the root CA.
 # This means the root CA needs to be self signed for 'verify' to work.
 openssl verify -CAfile 'RootCert.pem' -untrusted 'Intermediate.pem' 'UserCert.pem'
+
+
+# Check SSL connections.
+# All the certificates (including the intermediate ones) should be displayed.
+# CA certificates bundle on Linux: '/etc/ssl/certs/ca-certificates.crt'.
+# '-servername' is used to specify a domain for multi-domain servers.
+openssl s_client -connect 'www.google.com:443' -showcerts
+openssl s_client … -servername 'host.fqdn'
+openssl s_client … -CAfile 'ca/certificates/bundle.crt'
+openssl s_client … -CApath '/etc/ssl/certs'
+
+
+# Print out the MD5 hash of public keys.
+openssl req -noout -modulus -in 'request.csr' | openssl md5
+openssl rsa -noout -modulus -in 'private.key' | openssl md5
+openssl x509 -noout -modulus -in 'certificate.crt' | openssl md5
+
+
+# Remove password protection from keys.
+openssl rsa -in 'protected.key' -out 'unprotected.key'
+
+
+# Convert DER-formatted files (.crt .cer .der) to the PEM format.
+openssl x509 -inform 'der' -in 'certificate.cer' -out 'certificate.pem'
+openssl x509 -in 'certificate.cer' -out 'certificate.pem' -outform 'pem'
+
+# Convert PEM files to the DER format.
+openssl x509 -outform 'der' -in 'certificate.pem' -out 'certificate.der'
+
+# Convert PKCS#12 files (.pfx .p12) with private key and certificates to PEM.
+# '-nocerts' outputs only the private key.
+# '-nokeys' outputs only the certificates.
+# '-nodes' leaves the output files unencrypted.
+openssl pkcs12 -in 'keyStore.pfx' -out 'keyStore.pem' -nodes
+
+# Convert PEM certificates and private keys to PKCS#12 (.pfx .p12).
+openssl pkcs12 -export -out 'certificate.pfx' \
+  -inkey 'privateKey.key' -in 'certificate.crt' \
+  -certfile 'cacert.crt'
+
 
 # Create bundles.
 # Mind the file order.
@@ -185,6 +197,7 @@ See [code 20](#code-20-unable-to-get-local-issuer-certificate).
 - [The most common OpenSSL commands]
 - [Create a self signed certificate]
 - [Display the contents of a SSL certificate]
+- [Check SSL certificate chain with OpenSSL examples]
 
 ## Sources
 
@@ -195,11 +208,12 @@ All the references in the [further readings] section, plus the following:
 - [Verify certificate chain with OpenSSL]
 
 <!-- project's references -->
-
-<!-- internal references -->
+<!-- in-article references -->
 [further readings]: #further-readings
 
+<!-- internal references -->
 <!-- external references -->
+[check ssl certificate chain with openssl examples]: https://www.howtouselinux.com/post/certificate-chain
 [create a self signed certificate]: https://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl#10176685
 [display the contents of a ssl certificate]: https://support.qacafe.com/knowledge-base/how-do-i-display-the-contents-of-a-ssl-certificate/
 [how to generate a self-signed ssl certificate using openssl]: https://stackoverflow.com/questions/10175812/how-to-generate-a-self-signed-ssl-certificate-using-openssl#10176685
