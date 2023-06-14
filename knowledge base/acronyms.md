@@ -23,8 +23,8 @@
 | CSMA    | Carrier-Sense Multiple Access                          |                                                                                                     |
 | CSMA/CD | Carrier-Sense Multiple Access with Collision Detection |                                                                                                     |
 | CSP     | Cloud Service Provider                                 |                                                                                                     |
+| CSR     | Certificate Signing Request                            |                                                                                                     |
 | CSS     | Cascading Style Sheets                                 |                                                                                                     |
-| CSS     | Cross-Site Scripting                                   |                                                                                                     |
 | CVE     | Common Vulnerabilities and Exposures                   |                                                                                                     |
 | CVS     | Concurrent Versioning System                           |                                                                                                     |
 | DBMS    | Data Base Management System                            |                                                                                                     |
@@ -63,3 +63,4 @@
 | WiMAX   | Worldwide interoperability for Microwave Access        |                                                                                                     |
 | WLAN    | Wireless Local Area Network                            |                                                                                                     |
 | XML     | eXtensible Markup Language                             |                                                                                                     |
+| XSS     | Cross-Site Scripting                                   |                                                                                                     |
