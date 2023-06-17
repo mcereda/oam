@@ -55,6 +55,9 @@ ssh-add -L
 ssh-copy-id 'host.fqdn'
 ssh-copy-id -i "${HOME}/.ssh/id_rsa.pub" 'user@host.fqdn'
 
+# Preload trusted keys.
+ssh-keyscan 'host.fqdn' >> "${HOME}/.ssh/known_hosts"
+
 # Connect to an unreachable host tunnelling the session through a bastion.
 ssh -t 'bastion-host' ssh 'unreachable-host'
 
