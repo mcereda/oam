@@ -16,6 +16,46 @@
 # Login to Azure DevOps with a PAT.
 az devops login --organization 'https://dev.azure.com/organization_name'
 
+# Create new repositories.
+az repos create --name 'repo_name' \
+  --org 'https://dev.azure.com/organization_name' --project 'project_name'
+
+# Delete repositories.
+az repos delete --yes --id 'repo_id' \
+  --org 'https://dev.azure.com/organization_name' --project 'project_name'
+
+# Create pipelines from YAML definition files.
+az pipelines create --name 'pipeline_name' \
+  --org 'https://dev.azure.com/organization_name' --project 'project_name' \
+  --repository 'repo_name' --repository-type 'tfsgit' \
+  --folder-path '\\path\\to\\folder' --yaml-path '/path/in/repo.yaml' \
+  --skip-first-run 'true'
+
+# Get the names of all the Pipelines the current user has access to.
+az pipelines list --organization 'organization_id_or_name'
+az pipelines list --detect 'true' --query '[].name' -o 'tsv'
+
+# Show a specific Pipeline information.
+az pipelines show --id 'pipeline_id'
+az pipelines show --name 'pipeline_name'
+
+# Start a Pipeline run.
+az pipelines run --name 'pipeline_name' \
+  --parameters 'system.debug=True' agent.diagnostic="True"
+
+# Get the status of a Pipeline's build run.
+az pipelines build show --id 'pipeline_id'
+az pipelines build show --detect 'true' -o 'tsv' \
+  --project 'project_name' --id 'pipeline_id' --query 'result'
+
+# Download an artifact uploaded during a Pipeline's run.
+az pipelines runs artifact download --path 'local_path' \
+  --organization 'organization_id_or_name' --project 'project_name' \
+  --artifact-name 'artifact_name' --run-id 'run_id'
+
+# Delete pipelines.
+az pipelines delete --yes --id 'pipeline_id'
+
 # List DevOps' Service Endpoints.
 az devops service-endpoint list \
   --organization 'https://dev.azure.com/organization_name' --project 'project'
@@ -49,6 +89,10 @@ az devops team show \
 ```
 
 ## Pipelines
+
+Give the `--organization` parameter, or use `--detect true` if running the command from a git repository to have it guessed automatically.
+
+`--detect` already defaults to `true`.
 
 ### Predefined variables
 
