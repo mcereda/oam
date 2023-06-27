@@ -179,28 +179,6 @@ az postgres flexible-server list-skus --location 'westeurope' -o 'table'
 az monitor log-analytics workspace list --query '[].name' \
   --resource-group 'resource_group_name'
 
-# Get the names of all the Pipelines the current user has access to.
-az pipelines list --organization 'organization_id_or_name'
-az pipelines list --detect 'true' --query '[].name' -o 'tsv'
-
-# Show a specific Pipeline information.
-az pipelines show --id 'pipeline_id'
-az pipelines show --name 'pipeline_name'
-
-# Start a Pipeline run.
-az pipelines run --name 'pipeline_name' \
-  --parameters 'system.debug=True' agent.diagnostic="True"
-
-# Get the status of a Pipeline's build run.
-az pipelines build show --id 'pipeline_id'
-az pipelines build show --detect 'true' -o 'tsv' \
-  --project 'project_name' --id 'pipeline_id' --query 'result'
-
-# Download an artifact uploaded during a Pipeline's run.
-az pipelines runs artifact download --path 'local_path' \
-  --organization 'organization_id_or_name' --project 'project_name' \
-  --artifact-name 'artifact_name' --run-id 'run_id'
-
 # List available Resource Providers.
 az provider list
 az provider list --expand
@@ -471,9 +449,7 @@ az config set 'extension.run_after_dynamic_install=no'
 
 ## Pipelines
 
-Give the `--organization` parameter, or use `--detect true` if running the command from a git repository to have it guessed automatically.
-
-`--detect` already defaults to `true`.
+See [devops].
 
 ## APIs
 
@@ -546,6 +522,7 @@ All the references in the [further readings] section, plus the following:
 
 <!-- internal references -->
 [az bicep]: bicep.md#tldr
+[devops]: devops.md
 [devops cli extension]: devops.md#tldr
 [jmespath]: ../jmespath.md
 
