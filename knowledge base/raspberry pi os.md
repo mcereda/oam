@@ -1,5 +1,7 @@
 # Raspberry Pi OS
 
+## Table of contents <!-- omit in toc -->
+
 1. [First boot](#first-boot)
 1. [Repositories](#repositories)
 1. [Privilege escalation](#privilege-escalation)
@@ -8,20 +10,22 @@
    1. [Through rfkill](#through-rfkill)
    1. [Disable the related services](#disable-the-related-services)
    1. [Disable the stacks completely uninstalling the packages](#disable-the-stacks-completely-uninstalling-the-packages)
-1. [Swap](#swap)
+1. [Disable swap](#disable-swap)
+1. [Disable automatic upgrades](#disable-automatic-upgrades)
 1. [Overlay filesystem mode](#overlay-filesystem-mode)
-1. [Check for CPU throttling](#check-for-cpu-throttling)
-1. [Check the board temperature](#check-the-board-temperature)
+   1. [Store files on the SD when the overlay file system is active](#store-files-on-the-sd-when-the-overlay-file-system-is-active)
+1. [Checks](#checks)
+   1. [Frequencies](#frequencies)
+   1. [CPU throttling](#cpu-throttling)
+   1. [Board temperature](#board-temperature)
 1. [Apply CPU governors](#apply-cpu-governors)
 1. [Tuning](#tuning)
 1. [Headless boot](#headless-boot)
     1. [The `wpa_supplicant` file](#the-wpa_supplicant-file)
-    1. [Compute the password's hash](#compute-the-passwords-hash)
+       1. [Compute the password's hash](#compute-the-passwords-hash)
 1. [Run containers](#run-containers)
     1. [Kernel containerization features](#kernel-containerization-features)
     1. [Firewall settings](#firewall-settings)
-1. [Store files on the SD even when the overlay file system is active](#store-files-on-the-sd-even-when-the-overlay-file-system-is-active)
-1. [Disable automatic upgrades](#disable-automatic-upgrades)
 1. [Troubleshooting](#troubleshooting)
     1. [LED warning flash codes](#led-warning-flash-codes)
     1. [Issues connecting to WiFi network using roaming features or WPA3](#issues-connecting-to-wifi-network-using-roaming-features-or-wpa3)
@@ -80,7 +84,7 @@ sudo apt --assume-yes purge 'bluez'
 sudo apt --assume-yes autoremove --purge
 ```
 
-## Swap
+## Disable swap
 
 Disable the swap file:
 
@@ -88,15 +92,83 @@ Disable the swap file:
 sudo systemctl disable --now 'dphys-swapfile'
 ```
 
+## Disable automatic upgrades
+
+Raspberry Pi OS has daily upgrades enabled by default. Check the second line of this command's output:
+
+```sh
+systemctl status 'apt-daily-upgrade.timer'
+```
+
+Check the time it was last run with the following:
+
+```sh
+stat -c '%z' '/var/lib/apt/daily-lock'
+```
+
+If the service is enabled, there should be a record of that in `/var/log/dpkg.log`.
+
+To disable this, execute the following:
+
+```sh
+sudo systemctl mask 'apt-daily-upgrade'
+sudo systemctl mask 'apt-daily'
+sudo systemctl disable 'apt-daily-upgrade.timer'
+sudo systemctl disable 'apt-daily.timer'
+```
+
+Using **_mask_** to prevent the above services from being re-enabled by some dependency.
+
+Notice those are two separate services; they both run `/usr/lib/apt/apt.systemd.daily`, a shell script, with parameters install and update.
+
 ## Overlay filesystem mode
 
 This enhances the performances, but all changes will be kept in RAM and lost after a reboot unless it is saved elsewhere.
 
 Enable it using `raspi-config`. While enabled, `/root` is in RO and no data will be written to the card.
 
-## Check for CPU throttling
+### Store files on the SD when the overlay file system is active
 
-See [Re: How to make sure the rpi cpu is not throttled down?].
+The files just need to be stored on a different file system from `/`. You can partition the SD and use that, or create a file and mount it as a virtual file system:
+
+```sh
+truncate -s '6G' 'file'
+mkfs.ext4 'file'
+mkdir 'mount/point'
+sudo mount -t 'ext4' -o 'loop' 'file' 'mount/point'
+sudo chown 'user':'group' 'mount/point'
+touch 'mount/point/new-file'
+```
+
+## Checks
+
+See [vcgenmod] for more information.
+
+### Frequencies
+
+```sh
+# Current CPU frequency.
+vcgencmd measure_clock arm
+
+# Current GPU frequency.
+vcgencmd measure_clock core
+
+# Min set frequency per CPU core.
+cat '/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq'
+cat /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_min_freq
+
+# Max set frequency per CPU core.
+cat '/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq'
+cat /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_max_freq
+
+# Current set frequency per CPU core.
+cat '/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq'
+cat /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_cur_freq
+```
+
+### CPU throttling
+
+See also [Re: How to make sure the rpi cpu is not throttled down?].
 
 ```sh
 $ vcgencmd get_throttled
@@ -124,13 +196,12 @@ Capping just limits the CPU frequency (somewhere between 600MHz and 1200MHz) to 
 
 If the board throttled but is not under-voltage, you can assume over-temperature; confirm this with `vcgencmd measure_temp`.
 
+Sums of error codes mean multiple events occurred.<br/>
 E.g., `0x50005` means you are currently under-voltage and throttled. If you want to be able to support this use case without throttling you will need a better power supply.
 
 If you never see a non-zero `get_throttled` value in normal usage, then you may not need to do anything.
 
-## Check the board temperature
-
-Use the `vcgencmd` utility with the `measure_temp` command:
+### Board temperature
 
 ```sh
 $ vcgencmd measure_temp
@@ -210,7 +281,7 @@ network={
 }
 ```
 
-### Compute the password's hash
+#### Compute the password's hash
 
 Use `wpa_passphrase`:
 
@@ -260,48 +331,6 @@ Switch Debian firewall to use the legacy configuration:
 update-alternatives --set 'iptables'  '/usr/sbin/iptables-legacy'
 update-alternatives --set 'ip6tables' '/usr/sbin/ip6tables-legacy'
 ```
-
-## Store files on the SD even when the overlay file system is active
-
-The files just need to be stored on a different file system from `/`. You can partition the SD and use that, or create a file and mount it as a virtual file system:
-
-```sh
-truncate -s '6G' 'file'
-mkfs.ext4 'file'
-mkdir 'mount/point'
-sudo mount -t 'ext4' -o 'loop' 'file' 'mount/point'
-sudo chown 'user':'group' 'mount/point'
-touch 'mount/point/new-file'
-```
-
-## Disable automatic upgrades
-
-Raspberry Pi OS has daily upgrades enabled by default. Check the second line of this command's output:
-
-```sh
-systemctl status 'apt-daily-upgrade.timer'
-```
-
-Check the time it was last run with the following:
-
-```sh
-stat -c '%z' '/var/lib/apt/daily-lock'
-```
-
-If the service is enabled, there should be a record of that in `/var/log/dpkg.log`.
-
-To disable this, execute the following:
-
-```sh
-sudo systemctl mask 'apt-daily-upgrade'
-sudo systemctl mask 'apt-daily'
-sudo systemctl disable 'apt-daily-upgrade.timer'
-sudo systemctl disable 'apt-daily.timer'
-```
-
-Using **_mask_** to prevent the above services from being re-enabled by some dependency.
-
-Notice those are two separate services; they both run `/usr/lib/apt/apt.systemd.daily`, a shell script, with parameters install and update.
 
 ## Troubleshooting
 
@@ -367,6 +396,8 @@ Long term solution: none currently known.
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [Prepare SD card for WiFi on headless Pi]
 - [Run Kubernetes on a Raspberry Pi with k3s]
 - Project's [issue 2067]
@@ -375,34 +406,40 @@ Long term solution: none currently known.
 - [Repositories]
 - [Mirrors]
 
-<!-- project's references -->
+<!--
+  references
+  -->
+
+<!-- project -->
 [/boot/config.txt]: https://www.raspberrypi.org/documentation/configuration/config-txt/README.md
 [configuration]: https://www.raspberrypi.com/documentation/computers/configuration.html
 [mirrors]: https://www.raspbian.org/RaspbianMirrors
 [overclocking]: https://www.raspberrypi.org/documentation/configuration/config-txt/overclocking.md
 [repositories]: https://www.raspbian.org/RaspbianRepository
+[vcgencmd]: https://www.raspberrypi.com/documentation/computers/os.html#vcgencmd
 
-<!-- internal references -->
+<!-- article sections -->
+[further readings]: #further-readings
+
+<!-- knowledge base -->
 [k3s]: kubernetes/k3s.md
 [rfkill]: rfkill.md
 
-<!-- external references -->
+<!-- others -->
 [country code search]: https://www.iso.org/obp/ui/#search/code/
-[how to disable your raspberry pi's wi-fi]: https://pimylifeup.com/raspberry-pi-disable-wifi/
-[issue 2067]: https://github.com/k3s-io/k3s/issues/2067#issuecomment-664052806
-[prepare sd card for wifi on headless pi]: https://raspberrypi.stackexchange.com/questions/10251/prepare-sd-card-for-wifi-on-headless-pi
-[raspbian bug 1929746]: https://bugs.launchpad.net/raspbian/+bug/1929746
-[re: how to make sure the rpi cpu is not throttled down?]: https://www.raspberrypi.org/forums/viewtopic.php?t=152549#p999931
-[run kubernetes on a raspberry pi with k3s]: https://opensource.com/article/20/3/kubernetes-raspberry-pi-k3s
-[timely tips for speeding up your raspberry pi]: https://www.raspberry-pi-geek.com/Archive/2013/01/Timely-tips-for-speeding-up-your-Raspberry-Pi
-
-<!-- imported, FIXME -->
 [disabling bluetooth on raspberry pi]: https://di-marco.net/blog/it/2020-04-18-tips-disabling_bluetooth_on_raspberry_pi/
 [ghollingworth/overlayfs]: https://github.com/ghollingworth/overlayfs
 [how to disable onboard wifi and bluetooth on raspberry pi 3]: https://sleeplessbeastie.eu/2018/12/31/how-to-disable-onboard-wifi-and-bluetooth-on-raspberry-pi-3/
 [how to disable wi-fi on raspberry pi]: https://raspberrytips.com/disable-wifi-raspberry-pi/
+[how to disable your raspberry pi's wi-fi]: https://pimylifeup.com/raspberry-pi-disable-wifi/
 [how to make your raspberry pi 4 faster with a 64 bit kernel]: https://medium.com/for-linux-users/how-to-make-your-raspberry-pi-4-faster-with-a-64-bit-kernel-77028c47d653
+[issue 2067]: https://github.com/k3s-io/k3s/issues/2067#issuecomment-664052806
 [os documentation]: https://www.raspberrypi.org/documentation/computers/os.html
+[prepare sd card for wifi on headless pi]: https://raspberrypi.stackexchange.com/questions/10251/prepare-sd-card-for-wifi-on-headless-pi
+[raspbian bug 1929746]: https://bugs.launchpad.net/raspbian/+bug/1929746
+[re: how to make sure the rpi cpu is not throttled down?]: https://www.raspberrypi.org/forums/viewtopic.php?t=152549#p999931
 [re: raspbian jessie linux 4.4.9 severe performance degradati]: https://www.raspberrypi.org/forums/viewtopic.php?f=63&t=147781&start=50#p972790
 [rp automatic updates]: https://raspberrypi.stackexchange.com/questions/102377/rp-automatic-updates#102379
+[run kubernetes on a raspberry pi with k3s]: https://opensource.com/article/20/3/kubernetes-raspberry-pi-k3s
 [sd card power failure resilience ideas]: https://www.raspberrypi.org/forums/viewtopic.php?f=63&t=253104&p=1549229#p1549117
+[timely tips for speeding up your raspberry pi]: https://www.raspberry-pi-geek.com/Archive/2013/01/Timely-tips-for-speeding-up-your-Raspberry-Pi
