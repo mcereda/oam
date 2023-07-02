@@ -3,8 +3,8 @@
 Oracle Cloud Infrastructure CLI.
 
 1. [TL;DR](#tldr)
-2. [Configuration](#configuration)
-3. [Further readings](#further-readings)
+1. [Configuration](#configuration)
+1. [Further readings](#further-readings)
 
 ## TL;DR
 
@@ -37,8 +37,9 @@ oci iam availability-domain list -c 'tenancy_id'
 # Output is paginated.
 oci compute image list -c 'tenancy_id' --all
 oci compute image list -c 'tenancy_id' \
+  --lifecycle-state 'AVAILABLE' --shape 'VM.Standard.A1.Flex' \
   --operating-system 'Oracle Linux' --operating-system-version '8' \
-  --lifecycle-state 'AVAILABLE'
+  --sort-by 'DISPLAYNAME' --sort-order 'DESC'
 
 # List available compute instance plugins.
 # Requires to be given the OS and its version.

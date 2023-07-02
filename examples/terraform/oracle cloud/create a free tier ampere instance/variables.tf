@@ -13,11 +13,6 @@ variable "compartment_id" {
 # Instance
 ####################
 
-variable "shape" {
-  type    = string
-  default = "VM.Standard.A1.Flex"
-}
-
 variable "memory_in_gbs" {
   type    = number
   default = 24
@@ -31,8 +26,21 @@ variable "boot_volume_size_in_gbs" {
   type    = number
   default = 50
 }
+variable "operating_system" {
+  type = string
+  default = "Oracle Linux"
+}
+variable "operating_system_version" {
+  type = number
+  default = 9
+}
+variable "shape" {
+  type = string
+  default = "VM.Standard.A1.Flex"
+}
 variable "source_id" {
   type = string
+  default = null
 }
 variable "source_type" {
   type    = string
