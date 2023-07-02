@@ -1,0 +1,24 @@
+################################################################################
+## ~/.inputrc
+##
+## Control the behavior of the readline library, used e.g. by Bash in its
+## interactive mode for line editing.
+##
+## This file is NOT used by ZSH.
+################################################################################
+
+# The bell style used e.g. on error or tab completion, possible values
+# are `none', `visible', and `audible' the ringing the bell.
+# set bell-style none
+
+# If set to on, words which have more than one possible completion without
+# any possible partial completion cause the matches to be listed immediately
+# instead of ringing the bell.
+# set show-all-if-unmodified on
+
+# If set to on, words which have more than one possible completion cause the
+# matches to be listed immediately instead of ringing the bell.
+# set show-all-if-ambiguous on
+
+# If set to on, disable case sensitivity for completion purposes.
+set completion-ignore-case on

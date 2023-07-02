@@ -1,6 +1,7 @@
 ################################################################################
-## ~/.Brewfile
+## ./Brewfile or ~/.Brewfile
 ##
+## If ~/.Brewfile, used as global file for homebrew.
 ## Gotchas:
 ## - `moreutils` installs its own old version of parallel, which conflicts with
 ##   the `parallel` formula; install `gettext`, `parallel` and `sponge` instead
