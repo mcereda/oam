@@ -87,6 +87,7 @@ resource "oci_core_instance" "this" {
 
   lifecycle {
     ignore_changes = [
+      # avoid recreating the instance when an updated source image is found.
       source_details["source_id"]
     ]
   }
