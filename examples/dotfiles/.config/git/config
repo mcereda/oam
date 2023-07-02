@@ -1,5 +1,5 @@
 ################################################################################
-## ~/.gitconfig
+## ~/.config/git/config or ~/.gitconfig
 ##
 ## Global git configuration file. Settings in here override the system's ones,
 ## and are in turn overridden by the repositories' local ones.
@@ -123,4 +123,4 @@
 [commit]
 	gpgSign = true
 [user]
-	signingKey = 99C324BA
+	signingKey = 89C324BA
