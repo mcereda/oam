@@ -142,7 +142,7 @@ touch 'mount/point/new-file'
 
 ## Checks
 
-See [vcgenmod] for more information.
+See [vcgencmd] for more information.
 
 ### Frequencies
 
