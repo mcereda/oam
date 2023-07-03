@@ -228,6 +228,13 @@ az deployment group cancel \
 az deployment group delete \
   -n 'deployment_group_name' -g 'resource_group_name'
 
+# Delete Log Analytics Workspaces.
+az monitor log-analytics workspace delete -y -f 'y' \
+  -g 'resource_group_name' -n 'law_name'
+
+# Delete Disk Encryption Sets.
+az disk-encryption-set delete -g 'resource_group_name' -n 'des_name'
+
 # Login to an ACR.
 az acr login --name 'acr_name'
 
@@ -262,9 +269,16 @@ az aks get-credentials \
   --resource-group 'resource_group_name' --name 'cluster_name'
 az aks get-credentials … --overwrite-existing --admin
 
+# Wait for the cluster to be ready.
+az aks wait --created --interval 10 --timeout 1800 \
+  -g 'resource_group_name' -n 'cluster_name'
+
 # Move the cluster to its goal state *without* changing its configuration.
 # Can be used to move out of a non succeeded state.
 az aks update --resource-group 'resource_group_name' --name 'cluster_name' --yes
+
+# Delete AKS clusters.
+az aks delete -y -g 'resource_group_name' -n 'cluster_name'
 
 # Validate an ACR is accessible from an AKS cluster.
 az aks check-acr --acr 'acr_name' \
