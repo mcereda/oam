@@ -25,8 +25,9 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
    1. [Capabilities](#capabilities)
    1. [Privileged containers vs privilege escalation](#privileged-containers-vs-privilege-escalation)
 1. [Sysctl settings](#sysctl-settings)
+1. [Backup and restore](#backup-and-restore)
 1. [Managed Kubernetes Services](#managed-kubernetes-services)
-   1. [Best practices in cloud environments](#best-practices-in-cloud-environments)
+    1. [Best practices in cloud environments](#best-practices-in-cloud-environments)
 1. [Edge computing](#edge-computing)
 1. [Troubleshooting](#troubleshooting)
     1. [Dedicate Nodes to specific workloads](#dedicate-nodes-to-specific-workloads)
@@ -347,6 +348,10 @@ From the [design document for `no_new_privs`][No New Privileges Design Proposal]
 
 See [Using `sysctls` in a Kubernetes Cluster][using sysctls in a kubernetes cluster].
 
+## Backup and restore
+
+See [velero].
+
 ## Managed Kubernetes Services
 
 Most cloud providers offer their managed versions of Kubernetes. Check their websites:
@@ -588,6 +593,7 @@ All the references in the [further readings] section, plus the following:
 [kubeval]: kubeval.md
 [prometheus on kubernetes using helm]: ../../examples/kubernetes/prometheus%20on%20k8s%20using%20helm.md
 [terraform]: ../terraform.md
+[velero]: velero.md
 
 <!-- external references -->
 
