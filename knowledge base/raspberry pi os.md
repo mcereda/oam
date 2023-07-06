@@ -40,6 +40,17 @@ Unless manually set from the Imager, on first boot the system will ask to create
 
 [Repositories], [Mirrors].
 
+```sh
+curl -fsSL https://raspbian.mirror.garr.it/mirrors/raspbian/raspbian.public.key | sudo gpg --dearmor -o /etc/apt/keyrings/raspbian.mirror.garr.it
+curl -fsSL https://mirror.nl.leaseweb.net/raspbian/raspbian.public.key | sudo gpg --dearmor -o /etc/apt/keyrings/mirror.nl.leaseweb.net.gpg
+cat <<EOF | sudo tee /etc/apt/sources.list.d/mirrors.list > /dev/null
+deb [arch=armhf signed-by=/etc/apt/keyrings/raspbian.mirror.garr.it] https://raspbian.mirror.garr.it/mirrors/raspbian/raspbian/ bullseye main contrib non-free rpi firmware
+deb [arch=armhf signed-by=/etc/apt/keyrings/mirror.nl.leaseweb.net.gpg] http://mirror.nl.leaseweb.net/raspbian/raspbian bullseye main contrib non-free rpi firmware
+deb [arch=armhf signed-by=/etc/apt/keyrings/mirror.nl.leaseweb.net.gpg] https://raspbian.mirror.liteserver.nl/ bullseye main contrib non-free rpi firmware
+EOF
+sudo apt update
+```
+
 ## Privilege escalation
 
 - Users in the `sudo` group can `sudo`.
