@@ -15,4 +15,11 @@
 
 ## Sources
 
-[case insensitive search]: https://unix.stackexchange.com/questions/116395/less-searches-are-always-case-insensitive#577376
+- [Less searches are always case-insensitive]
+
+<!--
+  References
+  -->
+
+<!-- Others -->
+[less searches are always case-insensitive]: https://unix.stackexchange.com/questions/116395/less-searches-are-always-case-insensitive#577376

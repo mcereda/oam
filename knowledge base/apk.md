@@ -64,10 +64,11 @@ apk info -d 'parallel'
 
 ## Sources
 
-- [10 Alpine Linux apk Command Examples]
+- [10 alpine linux apk command examples]
 
-<!-- upstream -->
-<!-- in-article references -->
-<!-- internal references -->
-<!-- external references -->
+<!--
+  References
+  -->
+
+<!-- Others -->
 [10 alpine linux apk command examples]: https://www.cyberciti.biz/faq/10-alpine-linux-apk-command-examples/

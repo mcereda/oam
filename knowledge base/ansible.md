@@ -529,7 +529,11 @@ All the references in the [further readings] section, plus the following:
 - [How to recursively set directory and file permissions]
 - [Is it possible to use inline templates?]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
 [configuration]: https://docs.ansible.com/ansible/latest/reference_appendices/config.html
@@ -539,13 +543,13 @@ All the references in the [further readings] section, plus the following:
 [templating]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html
 [tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Files -->
 [templating examples]: ../examples/ansible/templating.yml
 
-<!-- external references -->
+<!-- Others -->
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
 [how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible

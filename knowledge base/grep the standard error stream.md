@@ -38,4 +38,9 @@ command 1>/dev/null 2> >(grep -oP "(.*)(?=pattern)")
 
 [stackexchange]: https://unix.stackexchange.com
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [how to grep the standard error stream]: https://unix.stackexchange.com/questions/3514/how-to-grep-standard-error-stream-stderr/#3657

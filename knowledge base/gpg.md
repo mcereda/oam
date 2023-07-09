@@ -1,5 +1,25 @@
 # GnuPG
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Encryption](#encryption)
+1. [Decryption](#decryption)
+1. [Key export](#key-export)
+1. [Key import](#key-import)
+1. [Key trust](#key-trust)
+1. [Unattended key generation](#unattended-key-generation)
+1. [Change a key's password](#change-a-keys-password)
+1. [Put comments in a message or file](#put-comments-in-a-message-or-file)
+1. [Use a GPG key for SSH authentication](#use-a-gpg-key-for-ssh-authentication)
+    1. [Create an authentication subkey](#create-an-authentication-subkey)
+    1. [Enable SSH to use the GPG subkey](#enable-ssh-to-use-the-gpg-subkey)
+    1. [Share the GPG-SSH key](#share-the-gpg-ssh-key)
+1. [Troubleshooting](#troubleshooting)
+    1. [`gpg failed to sign the data; fatal: failed to write commit object`](#gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -345,6 +365,8 @@ export GPG_TTY=$(tty)
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [Decrypt multiple openpgp files in a directory]
 - [ask redhat]
 - [how can i remove the passphrase from a gpg2 private key?]
@@ -354,11 +376,18 @@ export GPG_TTY=$(tty)
 - [How to renew a (soon to be) expired GPG key]
 - [Renew GPG key]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [commonly seen problems]: https://www.gnupg.org/documentation/manuals/gnupg/Common-Problems.html
 [unattended key generation]: https://www.gnupg.org/documentation/manuals/gnupg/Unattended-GPG-key-generation.html
 
-<!-- external references -->
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Others -->
 [ask redhat]: https://access.redhat.com/solutions/2115511
 [can you manually add a comment to a pgp public key block and not break it?]: https://stackoverflow.com/questions/58696139/can-you-manually-add-a-comment-to-a-pgp-public-key-block-and-not-break-it#58696634
 [decrypt multiple openpgp files in a directory]: https://stackoverflow.com/questions/18769290/decrypt-multiple-openpgp-files-in-a-directory/42431810#42431810

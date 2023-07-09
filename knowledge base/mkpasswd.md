@@ -1,6 +1,6 @@
 # Debian's mkpasswd
 
-Crypts a given password using crypt(3).
+Crypts a given password using `crypt(3)`.
 
 ```sh
 mkpasswd [OPTIONS]... [PASSWORD [SALT]]

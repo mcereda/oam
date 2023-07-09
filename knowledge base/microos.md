@@ -1,5 +1,12 @@
 # OpenSUSE MicroOS
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Setting up MicroOS as a desktop OS](#setting-up-microos-as-a-desktop-os)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 Every set of changes to the underlying system is executed on a new inactive snapshot, which will be the one the system will boot into on the next reboot.
@@ -28,13 +35,19 @@ See [MicroOS Desktop] for more and updated information.
 - [Flatpak]
 - [Toolbox]
 
-[flatpak]: flatpak.md
-[toolbox]: toolbox.md
-
 ## Sources
 
 - [MicroOS Desktop]
 - [MicroOS Portal]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [microos desktop]: https://opensuse.github.io/openSUSE-docs-revamped-temp/microos_getting_started/
 [microos portal]: https://en.opensuse.org/Portal:MicroOS
+
+<!-- Knowledge base -->
+[flatpak]: flatpak.md
+[toolbox]: toolbox.md

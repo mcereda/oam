@@ -69,13 +69,16 @@ All the references in the [further readings] section, plus the following:
 
 - [How to Use ADB and Fastboot on Android]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [adb]: https://developer.android.com/studio/command-line/adb
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
-<!-- external references -->
+<!-- Others -->
 [how to use adb and fastboot on android]: https://www.makeuseof.com/tag/use-adb-fastboot-android/
 [using adb and fastboot]: https://wiki.lineageos.org/adb_fastboot_guide

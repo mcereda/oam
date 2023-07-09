@@ -4,7 +4,6 @@
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -31,16 +30,11 @@ setfacl -b 'test/declarations.h'
 
 ## Further readings
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
-
 - [Access Control Lists (ACL) in Linux]
 
-<!-- upstream -->
-<!-- in-article references -->
-[further readings]: #further-readings
+<!--
+  References
+  -->
 
-<!-- internal references -->
-<!-- external references -->
+<!-- Others -->
 [access control lists (acl) in linux]: https://www.geeksforgeeks.org/access-control-listsacl-linux/

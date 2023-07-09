@@ -6,7 +6,6 @@ Command-line tool for generating animated GIF files from asciicast files produce
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -22,19 +21,9 @@ agg 'path/to/file.cast' 'path/to/file.gif'
 
 - [Asciinema] to record terminal sessions
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
-
 <!--
-  references
+  References
   -->
 
-<!-- upstream -->
-<!-- article sections -->
-[further readings]: #further-readings
-
-<!-- knowledge base -->
+<!-- Knowledge base -->
 [asciinema]: asciinema.md
-
-<!-- others -->

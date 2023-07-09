@@ -47,12 +47,13 @@ All the references in the [further readings] section, plus the following:
 
 - [CLI getting started] guide
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [cli getting started]: https://support.1password.com/command-line-getting-started/
 [cli guide]: https://support.1password.com/command-line/
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
-
-<!-- internal references -->
-<!-- external references -->

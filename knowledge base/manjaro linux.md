@@ -1,5 +1,12 @@
 # Manjaro GNU/Linux
 
+## Table of contents <!-- omit in toc -->
+
+1. [Repositories](#repositories)
+1. [Printing](#printing)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## Repositories
 
 To ensure continued stability and reliability, Manjaro uses its own dedicated software branches rather than relying on those provided by Arch:
@@ -28,14 +35,26 @@ pamac install system-config-printer
 - [Switching branches]
 - [Printing]
 
-[arch linux]: arch%20linux.md
+## Sources
 
+All the references in the [further readings] section, plus the following:
+
+- [Kde Plasma 5.23 not updating]
+
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [branch comparison]: https://manjaro.org/branch-compare
 [printing]: https://wiki.manjaro.org/index.php/Printing
 [switching branches]: https://wiki.manjaro.org/index.php/Switching_Branches
 
-## Sources
+<!-- In-article sections -->
+[further readings]: #further-readings
 
-- [Kde Plasma 5.23 not updating]
+<!-- Knowledge base -->
+[arch linux]: arch%20linux.md
 
+<!-- Others -->
 [kde plasma 5.23 not updating]: https://forum.manjaro.org/t/kde-plasma-5-23-not-updating/88297/4

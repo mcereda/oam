@@ -1,4 +1,6 @@
-# Google cloud platform CLI <!-- omit in toc -->
+# Google cloud platform CLI
+
+## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -70,14 +72,25 @@ gcloud auth revoke account
 - [Kubectl cluster access]
 - [Gcloud config configurations]
 
-[gcloud cheat-sheet]: https://cloud.google.com/sdk/gcloud/reference/cheat-sheet
-[gcloud config configurations]: https://cloud.google.com/sdk/gcloud/reference/config/configurations
-[kubectl cluster access]: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl
-
 ## Sources
+
+All the references in the [further readings] section, plus the following:
 
 - [How to run gcloud command line using a service account]
 - [How to change the active configuration profile in gcloud]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
+[gcloud cheat-sheet]: https://cloud.google.com/sdk/gcloud/reference/cheat-sheet
+[gcloud config configurations]: https://cloud.google.com/sdk/gcloud/reference/config/configurations
+[kubectl cluster access]: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Others -->
 [how to change the active configuration profile in gcloud]: https://stackoverflow.com/questions/35744901/how-to-change-the-active-configuration-profile-in-gcloud#35750001
 [how to run gcloud command line using a service account]: https://pnatraj.medium.com/how-to-run-gcloud-command-line-using-a-service-account-f39043d515b9

@@ -2,6 +2,11 @@
 
 Tool to check markdown files and flag style issues.
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -20,4 +25,9 @@ mdl -r "~MD013" README.md
 
 - [GitHub]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [github]: https://github.com/markdownlint/markdownlint

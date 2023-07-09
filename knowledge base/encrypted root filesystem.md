@@ -1,5 +1,10 @@
 # Encrypted root filesystem
 
+## Table of contents <!-- omit in toc -->
+
+1. [Avoiding to type the passphrase twice](#avoiding-to-type-the-passphrase-twice)
+1. [Further readings](#further-readings)
+
 ## Avoiding to type the passphrase twice
 
 Add a key file to your initrd so that you only type the decryption passphrase in the bootloader.
@@ -58,8 +63,12 @@ This works exactly as described above in steps 1-4, except that you don't need t
 - [Avoiding to type the passphrase twice] on the [openSUSE wiki]
 - [Encrypting an entire system] on the [Archlinux wiki]
 
-[Avoiding to type the passphrase twice]: https://en.opensuse.org/SDB:Encrypted_root_file_system#Avoiding_to_type_the_passphrase_twice
-[Encrypting an entire system]: https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_an_entire_system
+<!--
+  References
+  -->
 
+<!-- Others -->
 [archlinux wiki]: https://wiki.archlinux.org
-[openSUSE wiki]: https://en.opensuse.org/
+[avoiding to type the passphrase twice]: https://en.opensuse.org/SDB:Encrypted_root_file_system#Avoiding_to_type_the_passphrase_twice
+[encrypting an entire system]: https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_an_entire_system
+[opensuse wiki]: https://en.opensuse.org/

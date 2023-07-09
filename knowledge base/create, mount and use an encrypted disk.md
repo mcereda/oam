@@ -52,16 +52,17 @@ All the references in the [further readings] section, plus the following:
 - script: [Create an encrypted BTRFS device]
 - script: [Create an encrypted ZFS device]
 
-<!-- upstream -->
+<!--
+  References
+  -->
 
-<!-- internal references -->
-
+<!-- In-article sections -->
 [further readings]: #further-readings
 
+<!-- Knowledge base -->
 [cryptsetup]: cryptsetup.md
 [encrypted root filesystem]: encrypted%20root%20filesystem.md
 
+<!-- Files -->
 [create an encrypted btrfs device]: scripts/create-an-encrypted-btrfs-device.sh
 [create an encrypted zfs device]: scripts/create-an-encrypted-btrfs-device.sh
-
-<!-- external references -->

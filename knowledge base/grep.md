@@ -1,5 +1,15 @@
 # Grep
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Variants](#variants)
+   1. [Archive-related variants](#archive-related-variants)
+   1. [PDFgrep](#pdfgrep)
+1. [Gotchas](#gotchas)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -22,7 +32,7 @@ find . -type f -print0 | xargs -0 -n 1 -P "$(nproc)" grep 'pattern'
 grep --color '[[:digit:]]' 'file.txt'
 ```
 
-## Grep variants
+## Variants
 
 - [`egrep`](#egrep) to use regular expressions in search patterns, same as `grep -E`
 - [`fgrep`](#fgrep) to use patterns as fixed strings, same as `grep -F`
@@ -61,19 +71,29 @@ find /path -name '*.pdf' -exec sh -c 'pdftotext "{}" - | grep --with-filename --
 ## Further readings
 
 - [Grep the standard error stream]
-- Knowledge base on [pdfgrep]
-
-[grep the standard error stream]: grep\ the\ standard\ error\ stream.md
-[pdfgrep]: pdfgrep.md
+- [`pdfgrep`][pdfgrep]
 
 ## Sources
+
+All the references in the [further readings] section, plus the following:
 
 - Answer on [StackOverflow] about [how to search contents of multiple pdf files]
 - [Regular expressions in grep with examples]
 - [Parallel grep]
 
-[stackoverflow]: https://stackoverflow.com
+<!--
+  References
+  -->
 
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Knowledge base -->
+[grep the standard error stream]: grep%20the%20standard%20error%20stream.md
+[pdfgrep]: pdfgrep.md
+
+<!-- Others -->
 [how to search contents of multiple pdf files]: https://stackoverflow.com/a/4643518
 [parallel grep]: https://www.highonscience.com/blog/2021/03/21/parallel-grep/
 [regular expressions in grep with examples]: https://www.cyberciti.biz/faq/grep-regular-expressions/
+[stackoverflow]: https://stackoverflow.com

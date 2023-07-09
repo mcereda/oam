@@ -20,10 +20,10 @@ git clone https://aur.archlinux.org/jdupes.git \
 - [Suspend and hibernate]
 - [Arch User Repository]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [arch user repository]: https://wiki.archlinux.org/title/Arch_User_Repository
 [suspend and hibernate]: https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate
-
-<!-- in-article references -->
-<!-- internal references -->
-<!-- external references -->

@@ -1,6 +1,6 @@
 # Limit the CPU usage of a process
 
-## TL;DR
+See [`cpulimit`][cpulimit]:
 
 ```sh
 sudo cpulimit -p 'process-id' -l 'cpu-percentage'
@@ -10,4 +10,12 @@ sudo cpulimit -p 'process-id' -l 'cpu-percentage'
 
 - [25 awesome linux command one-Liners]
 
+<!--
+  References
+  -->
+
+<!-- Knowledge base -->
+[cpulimit]: cpulimit.md
+
+<!-- Others -->
 [25 awesome linux command one-liners]: https://betterprogramming.pub/25-awesome-linux-command-one-liners-9495f26f07fb
