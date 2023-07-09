@@ -1,12 +1,12 @@
 # Resize images using the CLI
 
-Leverages `convert` from `imagemagick`.
+Leverage `convert` from `imagemagick`:
 
 ```sh
-convert input.jpg -adaptive-resize 50% output.jpg
+magick convert -adaptive-resize '50%' 'in.jpg' 'out.jpg'
 
 # Scale down all images in a folder.
-ls -1 | xargs -I{} convert {} -adaptive-resize 50% {}_scaled.jpg
+ls -1 | xargs -I{} magick convert -adaptive-resize '50%' {} {}_scaled.jpg
 ```
 
 Further readings
