@@ -22,18 +22,22 @@ Validation failed
 
 ## Sources
 
-- [Validating kubernetes YAML files with kubeval]
-
 All the references in the [further readings] section, plus the following:
 
-<!-- upstream -->
+- [Validating kubernetes YAML files with kubeval]
+
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [kubeval]: https://www.kubeval.com
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [kubernetes]: README.md
 
-<!-- external references -->
+<!-- Others -->
 [validating kubernetes yaml files with kubeval]: https://learnk8s.io/validating-kubernetes-yaml#kubeval

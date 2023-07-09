@@ -1,4 +1,6 @@
-# Touch
+# The `touch` command
+
+## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
 

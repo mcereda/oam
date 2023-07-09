@@ -2,6 +2,11 @@
 
 Improved fork of [youtube-dl].
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 > To be able to merge multiple formats into one, you will also need to install `ffmpeg`.
@@ -49,6 +54,12 @@ yt-dlp -ciw \
 - [GitHub]
 - [youtube-dl]
 
-[youtube-dl]: youtube-dl.md
+<!--
+  References
+  -->
 
+<!-- Upstream -->
 [github]: https://github.com/yt-dlp/yt-dlp
+
+<!-- Knowledge base -->
+[youtube-dl]: youtube-dl.md

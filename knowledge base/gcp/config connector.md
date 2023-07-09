@@ -11,7 +11,6 @@ Provides a collection of Custom Resource Definitions and controllers.
 1. [Resources management](#resources-management)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -52,11 +51,11 @@ kubectl get crds --selector cnrm.cloud.google.com/managed-by-kcc=true
 - [Website]
 - [Getting started]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [getting started]: https://cloud.google.com/config-connector/docs/how-to/getting-started
 [installation howto]: https://cloud.google.com/config-connector/docs/how-to/install-upgrade-uninstall
 [installation types]: https://cloud.google.com/config-connector/docs/concepts/installation-types
@@ -65,9 +64,3 @@ All the references in the [further readings] section, plus the following:
 [stackdriver]: https://cloud.google.com/stackdriver/docs/solutions/gke
 [website]: https://cloud.google.com/config-connector
 [workload identity]: https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
-
-<!-- in-article references -->
-[further readings]: #further-readings
-
-<!-- internal references -->
-<!-- external references -->

@@ -73,12 +73,13 @@ kubelogin remove-tokens
 - [Azure CLI]
 - [`kubectl`][kubectl]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [website]: https://azure.github.io/kubelogin/
 
-<!-- in-article references -->
-<!-- internal references -->
+<!-- Knowledge base -->
 [azure cli]: cli.md
 [kubectl]: ../kubernetes/kubectl.md
-
-<!-- external references -->

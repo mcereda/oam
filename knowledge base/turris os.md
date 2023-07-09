@@ -469,7 +469,11 @@ All the references in the [further readings] section, plus the following:
 - [Pi-Hole on Turris Omnia]
 - [Installing pi-hole on Turris Omnia]
 
-<!-- project's references-->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [docs]: https://docs.turris.cz
 [factory reset on turris omnia]: https://docs.turris.cz/hw/omnia/rescue-modes/
 [home nas]: https://wiki.turris.cz/doc/en/howto/nas
@@ -478,15 +482,17 @@ All the references in the [further readings] section, plus the following:
 [turris wiki]: https://wiki.turris.cz/doc/en/start
 [website]: https://www.turris.com/turris-os/
 
-<!-- internal references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
+
+<!-- Knowledge base -->
 [lxc]: lxc.md
 [opkg]: opkg.md
 [pi-hole]: pi-hole.md
 [ssh]: ssh.md
 [uci]: uci.md
 
-<!-- external references -->
+<!-- Others -->
 [install pi-hole]: https://github.com/nminten/turris-omnia_documentation/blob/master/howtos/pihole.md
 [installing pi-hole on turris omnia]: https://blog.weinreich.org/posts/2020/2020-05-02-turris-omnia-pihole/
 [openwrt uci]: https://openwrt.org/docs/guide-user/base-system/uci

@@ -2,7 +2,6 @@
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -18,15 +17,9 @@ FIXME
 
 - [The .lsrules file format]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [the .lsrules file format]: https://help.obdev.at/littlesnitch5/ref-lsrules-file-format
-
-<!-- in-article references -->
-[further readings]: #further-readings
-
-<!-- internal references -->
-<!-- external references -->

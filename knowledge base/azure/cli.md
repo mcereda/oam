@@ -520,7 +520,11 @@ All the references in the [further readings] section, plus the following:
 - [`az aks` command reference][az aks reference]
 - [Create and manage Azure Pipelines from the command line]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [authenticate with an azure container registry]: https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication?tabs=azure-cli
 [az aks reference]: https://learn.microsoft.com/en-us/cli/azure/aks
 [az reference]: https://learn.microsoft.com/en-us/cli/azure/reference-index
@@ -531,14 +535,14 @@ All the references in the [further readings] section, plus the following:
 [remove a member]: https://learn.microsoft.com/en-us/graph/api/group-delete-members?view=graph-rest-1.0&tabs=http
 [sign in with azure cli]: https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [az bicep]: bicep.md#tldr
 [devops]: devops.md
 [devops cli extension]: devops.md#tldr
 [jmespath]: ../jmespath.md
 
-<!-- external references -->
+<!-- Others -->
 [create and manage azure pipelines from the command line]: https://devblogs.microsoft.com/devops/create-and-manage-azure-pipelines-from-the-command-line/

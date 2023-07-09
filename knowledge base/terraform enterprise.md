@@ -28,14 +28,16 @@ All the references in the [further readings] section, plus the following:
 
 - [Terraform Enterprise documentation]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [terraform enterprise documentation]: https://developer.hashicorp.com/terraform/enterprise
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [replicated]: replicated.md
 [tfe-admin]: tfe-admin.md
-
-<!-- external references -->

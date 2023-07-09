@@ -1,4 +1,9 @@
-# Usermod
+# The `usermod` command
+
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -35,4 +40,9 @@ sudo usermod --move-home --home path/to/new_home lonny
 
 - [cheat.sh]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [cheat.sh]: cheat.sh/usermod

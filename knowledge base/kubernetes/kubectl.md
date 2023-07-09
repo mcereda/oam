@@ -593,7 +593,11 @@ All the references in the [further readings] section, plus the following:
 - [Run a replicated stateful application]
 - [Accessing an application on Kubernetes in Docker]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [assigning pods to nodes]: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
 [cheatsheet]: https://kubernetes.io/docs/reference/kubectl/cheatsheet
 [commands reference]: https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands
@@ -602,14 +606,14 @@ All the references in the [further readings] section, plus the following:
 [enforce pod security standards with namespace labels]: https://kubernetes.io/docs/tasks/configure-pod-container/enforce-standards-namespace-labels/
 [taints and tolerations]: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [jsonpath]: ../jsonpath.md
 [kubernetes]: README.md
 
-<!-- external references -->
+<!-- Others -->
 [accessing an application on kubernetes in docker]: https://medium.com/@lizrice/accessing-an-application-on-kubernetes-in-docker-1054d46b64b1
 [run a replicated stateful application]: https://kubernetes.io/docs/tasks/run-application/run-replicated-stateful-application/
 [run a single-instance stateful application]: https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/

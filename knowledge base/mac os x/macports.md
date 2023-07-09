@@ -148,16 +148,20 @@ All the references in the [further readings] section, plus the following:
 
 - [cheat.sh]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [guide]: https://guide.macports.org/
 [ports]: https://ports.macports.org/
 [website]: https://www.macports.org/
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [mac os x]: README.md
 
-<!-- external references -->
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/port

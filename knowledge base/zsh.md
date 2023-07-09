@@ -1,5 +1,7 @@
 # ZSH
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Alias expansion](#alias-expansion)
 1. [Parameter expansion](#parameter-expansion)
@@ -578,6 +580,11 @@ compaudit | xargs chmod g-w
 - [Handling Signals With Trap]
 - [Upper- or lower-casing strings]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [antibody]: https://github.com/getantibody/antibody
 [antidote]: https://getantidote.github.io/
 [antigen]: https://github.com/zsh-users/antigen
@@ -589,7 +596,6 @@ compaudit | xargs chmod g-w
 [zsh-completions]: https://github.com/zsh-users/zsh-completions
 [zsh-history-substring-search]: https://github.com/zsh-users/zsh-history-substring-search
 [zsh-syntax-highlighting]: https://github.com/zsh-users/zsh-syntax-highlighting
-
 [awesome zsh plugins]: https://github.com/unixorn/awesome-zsh-plugins
 [completion config example]: https://github.com/ThiefMaster/zsh-config/blob/master/zshrc.d/completion.zsh
 [fix key settings (home/end/insert/delete) in .zshrc when running zsh in terminator terminal emulator]: https://stackoverflow.com/questions/8638012/fix-key-settings-home-end-insert-delete-in-zshrc-when-running-zsh-in-terminat#8645267

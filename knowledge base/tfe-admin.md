@@ -4,7 +4,6 @@
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -20,15 +19,9 @@ tfe-admin health-check
 
 - [Terraform Enterprise]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
-<!-- in-article references -->
-[further readings]: #further-readings
-
-<!-- internal references -->
+<!-- Knowledge base -->
 [terraform enterprise]: terraform%20enterprise.md
-
-<!-- external references -->

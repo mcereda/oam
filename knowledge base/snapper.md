@@ -1,5 +1,10 @@
 # Snapper
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -44,6 +49,10 @@ snapper modify \
 - [System recovery and snapshot management with Snapper]
 - [Arch Wiki]
 
-<!-- external references -->
+<!--
+  References
+  -->
+
+<!-- Others -->
 [arch wiki]: https://wiki.archlinux.org/title/snapper
 [system recovery and snapshot management with snapper]: https://doc.opensuse.org/documentation/leap/archive/15.0/reference/html/book.opensuse.reference/cha.snapper.html

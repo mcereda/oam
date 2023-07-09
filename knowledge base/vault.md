@@ -1,5 +1,10 @@
 # Hashicorp Vault
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -35,5 +40,9 @@ vault read -format 'json' 'secret/data/demo-app/config'
 
 - [HashiCorp Vault]
 
-<!-- -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [hashicorp vault]: https://www.vaultproject.io/

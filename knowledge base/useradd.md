@@ -1,6 +1,11 @@
-# Useradd
+# The `useradd` command
 
-Create a new user.
+Creates new users.
+
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -36,4 +41,9 @@ sudo useradd --system username
 
 - [cheat.sh]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [cheat.sh]: cheat.sh/useradd

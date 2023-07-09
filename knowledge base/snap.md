@@ -1,5 +1,11 @@
 # Snap
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Manage revisions](#manage-revisions)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -96,5 +102,10 @@ snap list --all \
 - [cheat.sh]
 - [Managing Ubuntu snaps]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/snap
 [managing ubuntu snaps]: https://www.freecodecamp.org/news/managing-ubuntu-snaps/

@@ -1,6 +1,12 @@
-# uci
+# The `uci` command
 
 Command line utility for OpenWrt's UCI system.
+
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -48,10 +54,12 @@ reload_config
 - [The UCI system]
 - [Turris Omnia]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [the uci system]: https://openwrt.org/docs/guide-user/base-system/uci
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [Turris Omnia]: turris.md
-
-<!-- external references -->

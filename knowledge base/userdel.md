@@ -1,6 +1,11 @@
-# Useradd
+# The `useradd` command
 
-Delete a user account and its related files.
+Delete users accounts and their related files.
+
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -19,4 +24,9 @@ sudo userdel --remove username
 
 - [cheat.sh]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [cheat.sh]: cheat.sh/userdel

@@ -1,9 +1,11 @@
 # sysstat
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
-2. [Installation example](#installation-example)
-3. [Further readings](#further-readings)
-4. [Sources](#sources)
+1. [Installation example](#installation-example)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -68,5 +70,12 @@ Average:          3      0.19     19.11      0.74      0.00      0.00     79.96
 - [webpage]
 - [github page]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [github page]: https://github.com/sysstat/sysstat
+
+<!-- Others -->
 [webpage]: http://sebastien.godard.pagesperso-orange.fr/

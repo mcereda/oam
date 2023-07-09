@@ -2,6 +2,12 @@
 
 A linter for YAML files written in Python and compatible with Python 3 only.
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Configuration](#configuration)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -54,6 +60,11 @@ extends: relaxed
 - Yamllint's [documentation]
 - [Rules]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [documentation]: https://yamllint.readthedocs.io/en/stable
 [github]: https://github.com/adrienverge/yamllint
 [rules]: https://yamllint.readthedocs.io/en/stable/rules.html

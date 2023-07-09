@@ -1,5 +1,16 @@
 # Systemd
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [User services](#user-services)
+1. [Keep past boots record (persistent logging)](#keep-past-boots-record-persistent-logging)
+1. [Resolved](#resolved)
+   1. [Disable systemd-resolved](#disable-systemd-resolved)
+   1. [Ignore the DNS servers list given by the DHCP server](#ignore-the-dns-servers-list-given-by-the-dhcp-server)
+   1. [Manually set DNS servers](#manually-set-dns-servers)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -257,6 +268,11 @@ Restart the `systemd-resolved` service to apply the new settings.
 - [How to Set Hostname Using Hostnamectl Command?]
 - [Suspend and hibernate]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [how to disable systemd-resolved in ubuntu]: https://askubuntu.com/questions/907246/how-to-disable-systemd-resolved-in-ubuntu
 [how to set hostname using hostnamectl command?]: https://linuxhint.com/set-hostname-using-hostnamectl-command/
 [how to set time, timezone and synchronize system clock using timedatectl command]: https://www.tecmint.com/set-time-timezone-and-synchronize-time-using-timedatectl-command/

@@ -50,15 +50,14 @@ All the references in the [further readings] section, plus the following:
 - [cheat.sh]
 
 <!--
-  references
+  References
   -->
 
-<!-- upstream -->
+<!-- Upstream -->
 [website]: https://www.gnu.org/software/coreutils/timeout
 
-<!-- article sections -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- knowledge base -->
-<!-- others -->
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/timeout

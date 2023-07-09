@@ -1,6 +1,12 @@
-# truncate
+# The `truncate` command
 
 Shrink or extend the size of a file to the specified size.
+
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -34,6 +40,12 @@ truncate --no-create --size 0 'file'
 
 - [cheat.sh]
 
-<!-- -->
-[cheat.sh]: https://cheat.sh/truncate
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [gnu's documentation]: https://www.gnu.org/software/coreutils/truncate
+
+<!-- Others -->
+[cheat.sh]: https://cheat.sh/truncate

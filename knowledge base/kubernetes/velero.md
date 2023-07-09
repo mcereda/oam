@@ -20,16 +20,15 @@ All the references in the [further readings] section, plus the following:
 - [Backup and Restore AKS clusters using Velero]
 
 <!--
-  references
+  References
   -->
 
-<!-- upstream -->
+<!-- Upstream -->
 [documentation]: https://velero.io/docs/main/
 [website]: https://velero.io/
 
-<!-- article sections -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- knowledge base -->
-<!-- others -->
+<!-- Others -->
 [backup and restore aks clusters using velero]: https://github.com/mutazn/Backup-and-Restore-AKS-cluster-using-Velero

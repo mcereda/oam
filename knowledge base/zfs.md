@@ -281,17 +281,18 @@ All the references in the [further readings] section, plus the following:
 - [How to Enable ZFS Deduplication]
 - [ZFS support + kernel, best approach]
 
-<!-- upstream -->
+<!--
+  References
+  -->
 
+<!-- Upstream -->
 [openzfs docs]: https://openzfs.github.io/openzfs-docs/
 [oracle solaris zfs administration guide]: https://docs.oracle.com/cd/E19253-01/819-5461/index.html
 
-<!-- internal references -->
-
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- external references -->
-
+<!-- Others -->
 [aaron toponce's article on zfs administration]: https://pthree.org/2012/12/04/zfs-administration-part-i-vdevs/
 [archlinux wiki]: https://wiki.archlinux.org/title/ZFS
 [article on zfs on linux]: https://blog.heckel.io/2017/01/08/zfs-encryption-openzfs-zfs-on-linux

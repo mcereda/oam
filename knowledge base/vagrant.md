@@ -1,5 +1,7 @@
 # Vagrant
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Usage](#usage)
    1. [Boxes management](#boxes-management)
@@ -227,12 +229,16 @@ end
 - [How do I reboot a Vagrant guest from a provisioner?]
 - [Configuring Vagrant virtual machines with .env]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [getting started]: https://learn.hashicorp.com/tutorials/vagrant/getting-started-index
 [multi-machine]: https://www.vagrantup.com/docs/multi-machine
 [tips & tricks]: https://www.vagrantup.com/docs/vagrantfile/tips
 
-<!-- external references -->
+<!-- Others -->
 [configuring vagrant virtual machines with .env]: https://www.nickhammond.com/configuring-vagrant-virtual-machines-with-env/
 [how do i reboot a vagrant guest from a provisioner?]: https://superuser.com/questions/1338429/how-do-i-reboot-a-vagrant-guest-from-a-provisioner#1579326
 [how to set vagrant virtualbox video memory]: https://stackoverflow.com/questions/24231620/how-to-set-vagrant-virtualbox-video-memory#24253435

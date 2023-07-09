@@ -95,7 +95,11 @@ All the references in the [further readings] section, plus the following:
 - How to [use local docker images] in Minikube
 - How to [use untrusted certs]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [accessing]: https://minikube.sigs.k8s.io/docs/handbook/accessing
 [completion]: https://minikube.sigs.k8s.io/docs/commands/completion
 [configuration]: https://minikube.sigs.k8s.io/docs/handbook/config
@@ -106,13 +110,13 @@ All the references in the [further readings] section, plus the following:
 [use untrusted certs]: https://minikube.sigs.k8s.io/docs/handbook/untrusted_certs
 [website]: https://minikube.sigs.k8s.io
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [kubectl]: kubectl.md
 [kubernetes]: README.md
 
-<!-- external references -->
+<!-- Others -->
 [hello world]: https://kubernetes.io/docs/tutorials/hello-minikube
 [use local docker images]: https://stackoverflow.com/questions/42564058/how-to-use-local-docker-images-with-minikube#62303945

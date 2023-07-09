@@ -2,6 +2,10 @@
 
 The `zstd`, `zstdmt`, `unzstd`, `zstdcat` utilities compress or decompress `.zst` files.
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+
 ## TL;DR
 
 ```sh

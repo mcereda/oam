@@ -1,5 +1,10 @@
 # YAML
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```yaml
@@ -22,7 +27,14 @@ object:
 ## Further readings
 
 - [yaml-multiline.info]
-- [yamllint]
+- [`yamllint`][yamllint]
 
-[yaml-multiline.info]: https://yaml-multiline.info
+<!--
+  References
+  -->
+
+<!-- Knowledge base -->
 [yamllint]: yamllint.md
+
+<!-- Others -->
+[yaml-multiline.info]: https://yaml-multiline.info

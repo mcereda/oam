@@ -138,16 +138,20 @@ All the references in the [further readings] section, plus the following:
 
 - [Loops in Azure DevOps Pipelines]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [expressions]: https://learn.microsoft.com/en-us/azure/devops/pipelines/process/expressions
 [use predefined variables]: https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
 [az devops]: https://learn.microsoft.com/en-us/cli/azure/devops?view=azure-cli-latest
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [azure cli]: azure%20cli.md
 
-<!-- external references -->
+<!-- Others -->
 [loops in azure devops pipelines]: https://pakstech.com/blog/azure-devops-loops/

@@ -4,7 +4,6 @@
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -29,18 +28,13 @@ find "$(brew --prefix)/etc" -type 'f' -name 'cert.pem' -path '*/openssl*' -exec 
 - [Homebrew]
 - [Mac OS X]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [github]: https://github.com/raggi/openssl-osx-ca
 
-<!-- in-article references -->
-[further readings]: #further-readings
-
-<!-- internal references -->
+<!-- Knowledge base -->
 [homebrew]: homebrew.md
 [mac os x]: README.md
-
-<!-- external references -->
