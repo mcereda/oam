@@ -1,5 +1,10 @@
 # JMESPath
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -23,5 +28,10 @@ az disk-encryption-set show --ids 'id' \
 
 - [Website]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [specifications]: https://jmespath.org/specification.html
 [website]: https://jmespath.org/

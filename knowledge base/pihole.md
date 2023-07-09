@@ -1,5 +1,10 @@
 # Pihole
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -40,10 +45,12 @@ pihole -a -t 'path/to/backup/file.tar.gz'
 - [Pi-hole]
 - [The pihole command]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [the pihole command]: https://docs.pi-hole.net/core/pihole-command/
 
-<!-- internal references -->
+<!-- In-article sections -->
 [pi-hole]: pi-hole.md
-
-<!-- external references -->

@@ -1,5 +1,10 @@
 # Network Manager
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -16,6 +21,15 @@ nmtui
 
 ## Sources
 
-- [nm-settings]
+- [Website]
+- [NM-settings]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
+[website]: https://networkmanager.dev/
+
+<!-- Others -->
 [nm-settings]: https://people.freedesktop.org/~lkundrak/nm-docs/nm-settings.html

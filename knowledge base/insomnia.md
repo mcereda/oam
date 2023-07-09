@@ -1,4 +1,11 @@
-# Insomnia <!-- omit in toc -->
+# Insomnia
+
+## Table of contents <!-- omit in toc -->
+
+1. [Troubleshooting](#troubleshooting)
+   1. [Manually install plugins](#manually-install-plugins)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## Troubleshooting
 
@@ -19,15 +26,24 @@
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [NPM install module in current directory]
 
-<!-- internal knowledge base -->
-[postman]: postman.md
+<!--
+  References
+  -->
 
-<!-- projects' references -->
+<!-- Upstream -->
 [documentation]: https://docs.insomnia.rest/
 [inso cli]: https://docs.insomnia.rest/inso-cli
 [website]: https://insomnia.rest/
 
-<!-- others -->
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Knowledge base -->
+[postman]: postman.md
+
+<!-- Others -->
 [npm install module in current directory]: https://stackoverflow.com/questions/14032160/npm-install-module-in-current-directory#45660836

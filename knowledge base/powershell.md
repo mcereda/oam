@@ -4,6 +4,12 @@
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```ps1
@@ -95,10 +101,14 @@ kubectl get nodes -o json `
 - [Multiple -and -or in PowerShell Where-Object statement]
 - [Get started with OpenSSH for Windows]
 
-<!-- microsoft's references -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [get started with openssh for windows]: https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=powershell
 
-<!-- external references -->
+<!-- Others -->
 [how to print environment variables to the console in powershell?]: https://stackoverflow.com/questions/50861082/how-to-print-environment-variables-to-the-console-in-powershell#50861113
 [json file to table]: https://stackoverflow.com/questions/31415158/powershell-json-file-to-table#31415897
 [multiline commands]: https://shellgeek.com/powershell-multiline-command/

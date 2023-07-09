@@ -1,5 +1,11 @@
 # SED
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Character classes and bracket expressions](#character-classes-and-bracket-expressions)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -37,5 +43,12 @@ sed /etc/fstab \
 - [GNU SED Online Tester]
 - [Character Classes and Bracket Expressions]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [character classes and bracket expressions]: https://www.gnu.org/software/sed/manual/html_node/Character-Classes-and-Bracket-Expressions.html
+
+<!-- Others -->
 [gnu sed online tester]: https://sed.js.org/

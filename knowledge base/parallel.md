@@ -1,5 +1,10 @@
 # GNU Parallel
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -49,7 +54,13 @@ parallel --tag "magick compare -metric NCC -quiet {} NULL: 2>&1; echo" \
 - GNU Parallel's [tutorial]
 - [Obtaining exit status values from GNU parallel]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [man page]: https://www.gnu.org/software/parallel/man.html
 [tutorial]: https://www.gnu.org/software/parallel/parallel_tutorial.html
 
+<!-- Others -->
 [obtaining exit status values from gnu parallel]: https://stackoverflow.com/questions/6310181/obtaining-exit-status-values-from-gnu-parallel#6789085

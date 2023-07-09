@@ -1,5 +1,10 @@
 # Fstab
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```txt
@@ -19,5 +24,10 @@ UUID=41c22818-fbad-4da6-8196-c816df0b7aa8  /disk2p2  ext3  defaults,errors=remou
 - [Mount a disk partition using LABEL]
 - [Mount a disk partition using UUID]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [mount a disk partition using label]: https://www.cyberciti.biz/faq/rhel-centos-debian-fedora-mount-partition-label/
 [mount a disk partition using uuid]: https://www.cyberciti.biz/faq/linux-finding-using-uuids-to-update-fstab/

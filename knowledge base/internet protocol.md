@@ -6,7 +6,6 @@
    1. [IPv4 ranges](#ipv4-ranges)
    1. [IPv6 ranges](#ipv6-ranges)
       1. [IPv6 additional ranges](#ipv6-additional-ranges)
-1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
 ## Bogon addresses
@@ -83,18 +82,13 @@ These ranges aren't officially IPv6 bogon ranges - they're IPv6 representations 
 | 2001:0:f000::/36      | Teredo bogon (240.0.0.0/4)        |
 | 2001:0:ffff:ffff::/64 | Teredo bogon (255.255.255.255/32) |
 
-## Further readings
-
 ## Sources
 
 - [Bogon IP addresses]
 
-All the references in the [further readings] section, plus the following:
+<!--
+  References
+  -->
 
-<!-- upstream -->
-
-<!-- internal references -->
-[further readings]: #further-readings
-
-<!-- external references -->
+<!-- Others -->
 [bogon ip addresses]: https://ipinfo.io/bogon

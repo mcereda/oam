@@ -1,5 +1,15 @@
 # Keybase
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Service execution](#service-execution)
+1. [Import an existing repository in Keybase](#import-an-existing-repository-in-keybase)
+1. [Run as root](#run-as-root)
+1. [Temporary devices](#temporary-devices)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -126,10 +136,22 @@ In addition, ephemeral keys are **purged entirely** when closing the oneshot ses
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [Keybase LFS support]
 - [Keybase launches encrypted git]
 - [How to use Keybase to encrypt files on Linux]
 
-[how to use keybase to encrypt files on linux]: https://www.addictivetips.com/ubuntu-linux-tips/keybase-encrypt-files-linux/
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [keybase launches encrypted git]: https://keybase.io/blog/encrypted-git-for-everyone
 [keybase lfs support]: https://github.com/keybase/client/issues/8936
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Others -->
+[how to use keybase to encrypt files on linux]: https://www.addictivetips.com/ubuntu-linux-tips/keybase-encrypt-files-linux/

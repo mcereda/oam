@@ -1,7 +1,9 @@
 # rfkill
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
-2. [Sources](#sources)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -22,7 +24,9 @@ rfkill unblock 'id'
 
 - [How to disable your Raspberry Pi's Wi-Fi]
 
-<!-- upstream -->
-<!-- internal references -->
-<!-- external references -->
+<!--
+  References
+  -->
+
+<!-- Others -->
 [how to disable your raspberry pi's wi-fi]: https://pimylifeup.com/raspberry-pi-disable-wifi/

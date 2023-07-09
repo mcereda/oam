@@ -22,8 +22,9 @@ $ curl https://ghcr.io/v2/jbruchon/jdupes/tags/list \
 
 - [How to check if a container image exists on GHCR?]
 
-<!-- upstream -->
-<!-- internal references -->
+<!--
+  References
+  -->
 
-<!-- external references -->
+<!-- Others -->
 [how to check if a container image exists on ghcr?]: https://github.com/orgs/community/discussions/26279#discussioncomment-3251171

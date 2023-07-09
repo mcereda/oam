@@ -1,5 +1,12 @@
 # PDFtk
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Combine multiple files](#combine-multiple-files)
+1. [Rotate a file](#rotate-a-file)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -43,5 +50,10 @@ where:
 - [Combine multiple PDF files with PDFTK]
 - [Lossless rotation of PDF files with ImageMagick]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [combine multiple pdf files with pdftk]: https://www.maketecheasier.com/combine-multiple-pdf-files-with-pdftk/
 [lossless rotation of pdf files with imagemagick]: https://stackoverflow.com/questions/38281526/lossless-rotation-of-pdf-files-with-imagemagick/51859078#51859078

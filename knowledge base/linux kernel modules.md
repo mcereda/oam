@@ -4,7 +4,6 @@
 
 1. [TL;DR](#tldr)
 1. [Permanent modules configuration](#permanent-modules-configuration)
-1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
 ## TL;DR
@@ -55,8 +54,6 @@ Write the options in a `.conf` file in `/etc/modprobe.d/`:
 options brcmfmac roamoff=1 feature_disable=0x82000
 ```
 
-## Further readings
-
 ## Sources
 
 All the references in the [further readings] section, plus the following:
@@ -64,12 +61,14 @@ All the references in the [further readings] section, plus the following:
 - The [Kernel module][arch wiki kernel module] page in the [Arch wiki]
 - The [Kernel modules][gentoo wiki kernel modules]
 
-<!-- upstream -->
+<!--
+  References
+  -->
 
-<!-- internal references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- external references -->
+<!-- Others -->
 [arch wiki]: https://wiki.archlinux.org
 [arch wiki kernel module]: https://wiki.archlinux.org/title/Kernel_module
 [gentoo wiki]: https://wiki.gentoo.org/wiki/Main_Page

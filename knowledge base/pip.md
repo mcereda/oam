@@ -3,8 +3,14 @@
 Package installer for Python.
 
 1. [TL;DR](#tldr)
-2. [Configuration](#configuration)
-3. [Further readings](#further-readings)
+1. [Configuration](#configuration)
+1. [Further readings](#further-readings)
+
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Configuration](#configuration)
+1. [Further readings](#further-readings)
 
 ## TL;DR
 
@@ -54,4 +60,9 @@ Latter files override values from previous files, i.e. the global timeout specif
 
 - [Configuration]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [configuration]: https://pip.pypa.io/en/stable/topics/configuration/

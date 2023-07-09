@@ -1,5 +1,11 @@
 # Linux Container Runtime
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Create new containers as an unprivileged user](#create-new-containers-as-an-unprivileged-user)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -55,15 +61,10 @@ echo "vagrant veth lxcbr0 10" | sudo tee -a '/etc/lxc/lxc-usernet'
 - [Website]
 - [Getting started guide][getting started]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [getting started]: https://linuxcontainers.org/lxc/getting-started/
 [website]: https://linuxcontainers.org/
-
-<!-- internal references -->
-[further readings]: #further-readings
-
-<!-- external references -->

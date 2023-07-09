@@ -5,6 +5,10 @@
 - [Fedora Silverblue]
 - OpenSUSE [MicroOS]
 
-<!-- internal references -->
+<!--
+  References
+  -->
+
+<!-- Knowledge base -->
 [fedora silverblue]: fedora%20silverblue.md
 [microos]: microos.md

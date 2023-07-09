@@ -1,5 +1,12 @@
 # KDE
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Prioritize a WiFi network connection](#prioritize-a-wifi-network-connection)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -25,6 +32,16 @@ Plasma-nm lets you change a network's priority specifying a number in the networ
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [Gsettings-like tools for KDE]
 
+<!--
+  References
+  -->
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Others -->
 [gsettings-like tools for kde]: https://askubuntu.com/questions/839647/gsettings-like-tools-for-kde

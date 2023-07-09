@@ -1,5 +1,12 @@
 # Pre-commit
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Troubleshooting](#troubleshooting)
+   1. [Some files are skipped during a run](#some-files-are-skipped-during-a-run)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -62,7 +69,11 @@ Check they are tracked (have been `add`ed to the repository).
 - Pre-commit's [website]
 - List of [supported hooks]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
+[file types by extension]: https://github.com/pre-commit/identify/blob/main/identify/extensions.py
 [supported hooks]: https://pre-commit.com/hooks.html
 [website]: https://pre-commit.com
-
-[file types by extension]: https://github.com/pre-commit/identify/blob/main/identify/extensions.py

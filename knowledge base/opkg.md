@@ -1,5 +1,10 @@
 # Opkg
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -42,4 +47,9 @@ opkg depends dropbear
 
 - [Opkg package manager]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [opkg package manager]: https://openwrt.org/docs/guide-user/additional-software/opkg

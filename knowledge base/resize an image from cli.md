@@ -9,8 +9,13 @@ magick convert -adaptive-resize '50%' 'in.jpg' 'out.jpg'
 ls -1 | xargs -I{} magick convert -adaptive-resize '50%' {} {}_scaled.jpg
 ```
 
-Further readings
+## Further readings
 
 - [imagemagick]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [imagemagick]: imagemagick.md

@@ -1,5 +1,12 @@
 # Jdupes
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Options](#options)
+1. [Filter format](#filter-format)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -40,7 +47,6 @@ Short | Long                     | Description
 `-X`  | `--ext-filter=spec:info` | exclude/filter files based on specified criteria; see the [filter format](#filter-format) section
 `-Z`  | `--soft-abort`           | if the user aborts the program (as with CTRL-C), act on the matches that were found before the abort was received; the default behavior without `-Z` is to abort without taking any actions
 
-
 ## Filter format
 
 `jdupes -X filter[:value][size_suffix]`
@@ -68,4 +74,9 @@ Supported filters:
 
 - Jdupes' [github] page
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [github]: https://github.com/jbruchon/jdupes

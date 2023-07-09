@@ -1,9 +1,11 @@
 # Optimize battery on a linux system
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
-2. [Disable unused services](#disable-unused-services)
-3. [Improve battery performance](#improve-battery-performance)
-4. [Further readings](#further-readings)
+1. [Disable unused services](#disable-unused-services)
+1. [Improve battery performance](#improve-battery-performance)
+1. [Further readings](#further-readings)
 
 ## TL;DR
 
@@ -61,5 +63,10 @@ sudo 'powertop'
 - [laptop-mode-tools]
 - [laptop-mode-tools in the Arch Wiki]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [laptop-mode-tools]: https://www.unixmen.com/laptop-mode-tools-extend-laptop-battery-life/
 [laptop-mode-tools in the arch wiki]: https://wiki.archlinux.org/title/Laptop_Mode_Tools

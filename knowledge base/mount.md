@@ -1,5 +1,10 @@
 # Mount
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -32,6 +37,11 @@ mount -t tmpfs tmpfs '/mount/point' -o 'size=2048m'
 - [Manually Mounting an SMB Share]
 - [Access denied by server while mounting NFS share]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [access denied by server while mounting nfs share]: https://www.thegeekdiary.com/mount-nfs-access-denied-by-server-while-mounting-how-to-resolve/
 [how to mount a .img file]: https://www.linuxquestions.org/questions/linux-general-1/how-to-mount-img-file-882386/#post4366162
 [manually mounting an smb share]: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/storage_administration_guide/mounting_an_smb_share

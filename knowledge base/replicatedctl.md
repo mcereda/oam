@@ -1,5 +1,10 @@
 # replicatedctl
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -38,5 +43,9 @@ replicatedctl app apply-config
 
 - [Command reference]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [command reference]: https://help.replicated.com/api/replicatedctl/

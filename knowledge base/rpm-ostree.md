@@ -5,6 +5,12 @@
 | Kinoite    | Fedora KDE         |
 | Silverblue | Fedora Workstation |
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Package layering](#package-layering)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 Changes to the base layer are executed in a new bootable filesystem root. This means that the system must be rebooted after a package has been layered.
@@ -60,5 +66,10 @@ If you don't want to reboot your system to switch to the new deployment, you can
 [flatpak]: flatpak.md
 [toolbox]: toolbox.md
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [fedora silverblue user guide]: https://docs.fedoraproject.org/en-US/fedora-silverblue/
 [rpm-ostree]: https://coreos.github.io/rpm-ostree/

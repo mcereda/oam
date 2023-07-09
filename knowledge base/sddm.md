@@ -1,5 +1,10 @@
 # SDDM
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -11,6 +16,10 @@ sddm-greeter --test-mode --theme /usr/share/sddm/themes/breeze
 
 - The [SDDM article] on the [Archlinux wiki]
 
-[archlinux wiki]: https://wiki.archlinux.org
+<!--
+  References
+  -->
 
+<!-- Others -->
+[archlinux wiki]: https://wiki.archlinux.org
 [sddm article]: https://wiki.archlinux.org/index.php/SDDM

@@ -2,6 +2,8 @@
 
 Oracle Cloud Infrastructure CLI.
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
 1. [Further readings](#further-readings)
@@ -63,7 +65,11 @@ oci compute instance list -c 'tenancy_id'
 - [SDK and CLI Configuration File]
 - [Required keys and OCIDs]
 
-<!-- oracle cloud's documentation -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [command line interface]: https://docs.oracle.com/en-us/iaas/Content/API/Concepts/cliconcepts.htm
 [required keys and ocids]: https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm
 [sdk and cli configuration file]: https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm

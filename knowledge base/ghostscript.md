@@ -1,5 +1,11 @@
 # Ghostscript
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Reduce the size of PDF files](#reduce-the-size-of-pdf-files)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -39,4 +45,9 @@ Use one of the following options for the value of `-dPDFSETTINGS`:
 
 - [Reducing PDF File size]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [reducing pdf file size]: https://superuser.com/questions/293856/reducing-pdf-file-size#1217306

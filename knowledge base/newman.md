@@ -1,9 +1,11 @@
-# Newman <!-- omit in toc -->
+# Newman
 
 CLI Collection runner for Postman.
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
-2. [Further readings](#further-readings)
+1. [Further readings](#further-readings)
 
 ## TL;DR
 
@@ -16,8 +18,12 @@ brew install newman
 - [Postman]
 - [Running Collections on the command line with Newman]
 
-<!-- internal knowledge base -->
+<!--
+  References
+  -->
+
+<!-- Knowledge base -->
 [postman]: postman.md
 
-<!-- projects' references -->
+<!-- Upstream -->
 [running collections on the command line with newman]: https://learning.postman.com/docs/running-collections/using-newman-cli/command-line-integration-with-newman/

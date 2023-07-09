@@ -418,10 +418,10 @@ All the references in the [further readings] section, plus the following:
 - [Mirrors]
 
 <!--
-  references
+  References
   -->
 
-<!-- upstream -->
+<!-- Upstream -->
 [/boot/config.txt]: https://www.raspberrypi.org/documentation/configuration/config-txt/README.md
 [configuration]: https://www.raspberrypi.com/documentation/computers/configuration.html
 [mirrors]: https://www.raspbian.org/RaspbianMirrors
@@ -429,14 +429,14 @@ All the references in the [further readings] section, plus the following:
 [repositories]: https://www.raspbian.org/RaspbianRepository
 [vcgencmd]: https://www.raspberrypi.com/documentation/computers/os.html#vcgencmd
 
-<!-- article sections -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- knowledge base -->
+<!-- Knowledge base -->
 [k3s]: kubernetes/k3s.md
 [rfkill]: rfkill.md
 
-<!-- others -->
+<!-- Others -->
 [country code search]: https://www.iso.org/obp/ui/#search/code/
 [disabling bluetooth on raspberry pi]: https://di-marco.net/blog/it/2020-04-18-tips-disabling_bluetooth_on_raspberry_pi/
 [ghollingworth/overlayfs]: https://github.com/ghollingworth/overlayfs

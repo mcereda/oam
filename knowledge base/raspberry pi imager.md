@@ -29,11 +29,13 @@ All the references in the [further readings] section, plus the following:
 
 - [Raspberry Pi Imager Now Comes With Advanced Options]
 
-<!-- upstream -->
+<!--
+  References
+  -->
 
-<!-- internal references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 [raspberry pi os]: raspberry%20pi%20os.md
 
-<!-- external references -->
+<!-- Others -->
 [raspberry pi imager now comes with advanced options]: https://www.tomshardware.com/news/raspberry-pi-imager-now-comes-with-advanced-options

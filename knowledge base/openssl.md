@@ -207,12 +207,14 @@ All the references in the [further readings] section, plus the following:
 - [OpenSSL unable to verify the first certificate for Experian URL]
 - [Verify certificate chain with OpenSSL]
 
-<!-- upstream -->
-<!-- in-article references -->
+<!--
+  References
+  -->
+
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
-<!-- external references -->
+<!-- Others -->
 [check ssl certificate chain with openssl examples]: https://www.howtouselinux.com/post/certificate-chain
 [create a self signed certificate]: https://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl#10176685
 [display the contents of a ssl certificate]: https://support.qacafe.com/knowledge-base/how-do-i-display-the-contents-of-a-ssl-certificate/

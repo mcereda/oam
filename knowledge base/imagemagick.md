@@ -51,18 +51,17 @@ All the references in the [further readings] section, plus the following:
 - [ImageMagick compare without generating diff image]
 
 <!--
-  references
+  References
   -->
 
-<!-- upstream -->
+<!-- Upstream -->
 [image similarity comparison]: https://imagemagick.org/script/compare.php
 [website]: https://imagemagick.org
 
-<!-- article sections -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- knowledge base -->
-<!-- others -->
+<!-- Others -->
 [cheat.sh/compare]: https://cheat.sh/compare
 [cheat.sh/convert]: https://cheat.sh/convert
 [converting multiple images into a pdf file]: https://legacy.imagemagick.org/discourse-server/viewtopic.php?p=144157&sid=e7706233f81874af86ffbbf3e57b1e76#p144157

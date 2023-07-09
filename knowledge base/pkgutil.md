@@ -6,6 +6,11 @@ Query and manipulate Mac OS X Installer packages and receipts.
 
 Options are processed first, and affect the operation of all commands. Multiple commands are performed sequentially in the given order.
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -30,4 +35,9 @@ pkgutil --file-info Bitwarden.app/Contents/MacOS/Bitwarden
 
 - [cheat.sh]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/pkgutil

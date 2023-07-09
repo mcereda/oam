@@ -6,7 +6,6 @@ Open Computing Language is an open, royalty-free standard for cross-platform, pa
 
 1. [Implementations](#implementations)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## Implementations
 
@@ -16,15 +15,12 @@ Open Computing Language is an open, royalty-free standard for cross-platform, pa
 
 - [Website]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [website]: https://www.khronos.org/opencl/
 
-<!-- internal references -->
-[further readings]: #further-readings
+<!-- In-article sections -->
 [pocl]: pocl.md
-
-<!-- external references -->

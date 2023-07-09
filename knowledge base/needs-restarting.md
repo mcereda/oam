@@ -2,6 +2,11 @@
 
 `needs-restarting -r` returns 1 if a reboot is needed, and 0 if it is not.
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -38,4 +43,9 @@ Reboot is required to ensure that your system benefits from these updates.
 
 - [Automatic Reboot on Kernel Update]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [automatic reboot on kernel update]: https://access.redhat.com/discussions/3106621#comment-1196821
