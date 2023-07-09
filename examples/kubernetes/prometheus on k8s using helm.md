@@ -1,5 +1,13 @@
 # Prometheus on Kubernetes using Helm
 
+## Table of contents <!-- omit in toc -->
+
+1. [Usage](#usage)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
+## Usage
+
 Installation:
 
 ```sh
@@ -43,12 +51,16 @@ All the references in the [further readings] section, plus the following:
 
 - [Helm chart]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [helm chart]: https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus
 
-<!-- internal references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- external references -->
+<!-- Others -->
 [install prometheus and grafana with helm 3 on a local machine vm]: https://dev.to/ko_kamlesh/install-prometheus-grafana-with-helm-3-on-local-machine-vm-1kgj
 [set up prometheus and ingress on kubernetes]: https://blog.gojekengineering.com/diy-how-to-set-up-prometheus-and-ingress-on-kubernetes-d395248e2ba

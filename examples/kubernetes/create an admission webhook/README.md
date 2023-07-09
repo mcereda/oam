@@ -237,7 +237,11 @@ All the references in the [further readings] section, plus the following:
 - [writing a very basic kubernetes mutating admission webhook]
 - Istio's [script][certificate script] to generate a certificate signing request
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [admission request]: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#request
 [admission response]: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#response
 [cert script]: create-signed-cert.sh
@@ -247,10 +251,10 @@ All the references in the [further readings] section, plus the following:
 [resources]: resources.yaml
 [webhook.py]: webhook.py
 
-<!-- internal references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- external references -->
+<!-- Others -->
 [building a kubernetes mutating admission webhook]: https://didil.medium.com/building-a-kubernetes-mutating-admission-webhook-7e48729523ed
 [creating your own admission controller]: https://docs.giantswarm.io/guides/creating-your-own-admission-controller/
 [diving into kubernetes mutatingadmissionwebhook]: https://medium.com/ibm-cloud/diving-into-kubernetes-mutatingadmissionwebhook-6ef3c5695f74

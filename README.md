@@ -4,6 +4,14 @@ A.K.A. _Operations, administration and management_ or _operations, administratio
 
 In short, my private collection of notes and scripts. I use them to ease my tech life.
 
+## Table of contents <!-- omit in toc -->
+
+1. [License](#license)
+1. [Status](#status)
+1. [Support](#support)
+1. [Contributing](#contributing)
+1. [Sources](#sources)
+
 ## License
 
 The MIT license is used here, see [LICENSE].
@@ -26,9 +34,15 @@ I might accept suggestions, though. Use the repository's hosting platform's tool
 
 - [myshittycode.com]
 
-<!-- internal references -->
+<!--
+  References
+  -->
+
+<!-- In-article sections -->
 [contributing]: #contributing
+
+<!-- Files -->
 [license]: LICENSE
 
-<!-- external references -->
+<!-- Others -->
 [myshittycode.com]: https://myshittycode.com/

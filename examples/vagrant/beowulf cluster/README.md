@@ -1,6 +1,10 @@
 # Beowulf cluster example
 
-## Requirements:
+## Table of contents <!-- omit in toc -->
+
+1. [Requirements](#requirements)
+
+## Requirements
 
 - VirtualBox
 - A host-only virtual network (`VirtualBox Host-Only Ethernet Adapter`, address space `192.168.56.0/24`)
@@ -19,6 +23,10 @@ When up, execute the command below and enjoy:
 vagrant ssh -c 'mpiexec -f mpi_hosts -n 3 hostname'
 ```
 
-<!-- internal references -->
+<!--
+  References
+  -->
+
+<!-- Files -->
 [mpi_hosts.txt]: mpi_hosts.txt
 [ssh_config.txt]: ssh_config.txt
