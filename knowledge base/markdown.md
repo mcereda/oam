@@ -302,7 +302,7 @@ All the references in the [further readings] section, plus the following:
 - [slaise/High-level-Markdown]
 - [Syntax highlighting in Markdown]
 
-<!-- project's references -->
+<!-- upstream -->
 [basic syntax]: https://www.markdownguide.org/basic-syntax
 [code blocks]: https://docs.readme.com/rdmd/docs/code-blocks
 [documentation]: https://docs.readme.com/rdmd/docs

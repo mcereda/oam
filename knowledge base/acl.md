@@ -37,7 +37,7 @@ All the references in the [further readings] section, plus the following:
 
 - [Access Control Lists (ACL) in Linux]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- in-article references -->
 [further readings]: #further-readings
 

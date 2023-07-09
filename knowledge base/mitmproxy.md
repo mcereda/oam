@@ -24,7 +24,7 @@ brew install 'mitmproxy'
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [documentation]: https://docs.mitmproxy.org/stable/
 [website]: https://mitmproxy.org/
 

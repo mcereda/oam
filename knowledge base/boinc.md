@@ -155,7 +155,7 @@ In `cc_config.xml`:
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [boinc manager]: https://boinc.berkeley.edu/wiki/BOINC_Manager
 [client configuration]: https://boinc.berkeley.edu/wiki/Client_configuration
 [controlling boinc remotely]: https://boinc.berkeley.edu/wiki/Controlling_BOINC_remotely

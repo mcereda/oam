@@ -369,7 +369,7 @@ All the references in the [further readings] section, plus the following:
 - [Resize, rotate, or flip an image in Preview on Mac]
 - [Who is listening on a given TCP port on Mac OS X?]
 
-<!-- project's references -->
+<!-- upstream -->
 [compress a pdf in preview on mac]: https://support.apple.com/guide/preview/compress-a-pdf-prvw1509/mac
 [mac startup key combinations]: https://support.apple.com/en-us/HT201255
 [resize, rotate, or flip an image in preview on mac]: https://support.apple.com/guide/preview/resize-rotate-or-flip-an-image-prvw2015/11.0/mac/13.0

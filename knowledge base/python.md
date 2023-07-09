@@ -201,7 +201,7 @@ See [concurrent execution] for more information.
 - [Logging library]
 - [Subprocess library]
 
-<!-- project's references -->
+<!-- upstream -->
 [concurrent execution]: https://docs.python.org/3/library/concurrency.html
 [dictionaries]: https://docs.python.org/3/tutorial/datastructures.html#dictionaries
 [logging howto]: https://docs.python.org/3/howto/logging.html

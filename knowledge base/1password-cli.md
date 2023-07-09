@@ -47,7 +47,7 @@ All the references in the [further readings] section, plus the following:
 
 - [CLI getting started] guide
 
-<!-- project's references -->
+<!-- upstream -->
 [cli getting started]: https://support.1password.com/command-line-getting-started/
 [cli guide]: https://support.1password.com/command-line/
 

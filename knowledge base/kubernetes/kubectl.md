@@ -593,7 +593,7 @@ All the references in the [further readings] section, plus the following:
 - [Run a replicated stateful application]
 - [Accessing an application on Kubernetes in Docker]
 
-<!-- project's references -->
+<!-- upstream -->
 [assigning pods to nodes]: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
 [cheatsheet]: https://kubernetes.io/docs/reference/kubectl/cheatsheet
 [commands reference]: https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands

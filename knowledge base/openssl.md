@@ -207,7 +207,7 @@ All the references in the [further readings] section, plus the following:
 - [OpenSSL unable to verify the first certificate for Experian URL]
 - [Verify certificate chain with OpenSSL]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- in-article references -->
 [further readings]: #further-readings
 

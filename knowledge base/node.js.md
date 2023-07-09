@@ -24,7 +24,7 @@ export NODE_EXTRA_CA_CERTS='path/to/trusted/ca/cert.pem'
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [website]: https://nodejs.org/en
 
 <!-- internal references -->

@@ -148,7 +148,7 @@ All the references in the [further readings] section, plus the following:
 
 - [cheat.sh]
 
-<!-- project's references -->
+<!-- upstream -->
 [guide]: https://guide.macports.org/
 [ports]: https://ports.macports.org/
 [website]: https://www.macports.org/

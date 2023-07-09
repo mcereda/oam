@@ -163,7 +163,7 @@ sudo snapper -c 'config' diff '445..446'
 - [Does BTRFS have an efficient way to compare snapshots?]
 - [Determine if a BTRFS subvolume is read-only]
 
-<!-- project's references -->
+<!-- upstream -->
 
 [documentation]: https://btrfs.readthedocs.io/en/latest/
 [introduction]: https://btrfs.readthedocs.io/en/latest/Introduction.html

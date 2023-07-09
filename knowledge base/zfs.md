@@ -281,7 +281,7 @@ All the references in the [further readings] section, plus the following:
 - [How to Enable ZFS Deduplication]
 - [ZFS support + kernel, best approach]
 
-<!-- project's references -->
+<!-- upstream -->
 
 [openzfs docs]: https://openzfs.github.io/openzfs-docs/
 [oracle solaris zfs administration guide]: https://docs.oracle.com/cd/E19253-01/819-5461/index.html

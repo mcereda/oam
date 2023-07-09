@@ -86,7 +86,7 @@ az bicep upgrade -t 'linux-x64'
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [az bicep]: https://learn.microsoft.com/en-us/cli/azure/bicep
 [what is bicep?]: https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview
 

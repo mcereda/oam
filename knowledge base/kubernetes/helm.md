@@ -113,7 +113,7 @@ To achieve this:
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [website]: https://helm.sh/
 
 <!-- in-article references -->

@@ -24,7 +24,7 @@ pdfunite 'page-1.pdf' … 'page-N.pdf' 'output.pdf'
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [website]: https://poppler.freedesktop.org/
 
 <!-- internal references -->

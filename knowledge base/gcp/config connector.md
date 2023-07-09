@@ -56,7 +56,7 @@ kubectl get crds --selector cnrm.cloud.google.com/managed-by-kcc=true
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [getting started]: https://cloud.google.com/config-connector/docs/how-to/getting-started
 [installation howto]: https://cloud.google.com/config-connector/docs/how-to/install-upgrade-uninstall
 [installation types]: https://cloud.google.com/config-connector/docs/concepts/installation-types

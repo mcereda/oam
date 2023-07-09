@@ -227,7 +227,7 @@ end
 - [How do I reboot a Vagrant guest from a provisioner?]
 - [Configuring Vagrant virtual machines with .env]
 
-<!-- project's references -->
+<!-- upstream -->
 [getting started]: https://learn.hashicorp.com/tutorials/vagrant/getting-started-index
 [multi-machine]: https://www.vagrantup.com/docs/multi-machine
 [tips & tricks]: https://www.vagrantup.com/docs/vagrantfile/tips

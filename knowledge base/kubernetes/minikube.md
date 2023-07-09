@@ -95,7 +95,7 @@ All the references in the [further readings] section, plus the following:
 - How to [use local docker images] in Minikube
 - How to [use untrusted certs]
 
-<!-- project's references -->
+<!-- upstream -->
 [accessing]: https://minikube.sigs.k8s.io/docs/handbook/accessing
 [completion]: https://minikube.sigs.k8s.io/docs/commands/completion
 [configuration]: https://minikube.sigs.k8s.io/docs/handbook/config

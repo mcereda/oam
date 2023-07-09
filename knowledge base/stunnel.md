@@ -35,7 +35,7 @@ stunnel 'path/to/config/file'
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [sample configuration for unix systems]: https://www.stunnel.org/config_unix.html
 [website]: https://www.stunnel.org/
 

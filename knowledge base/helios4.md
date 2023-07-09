@@ -89,7 +89,7 @@ sudo armbian-config
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [download page]: https://wiki.kobol.io/download/#helios4
 [installation guide]: https://wiki.kobol.io/helios4/install/
 [tested microsd cards]: https://wiki.kobol.io/helios4/sdcard/#tested-microsd-card

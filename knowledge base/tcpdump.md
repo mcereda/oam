@@ -50,7 +50,7 @@ tcpdump 'tcp[tcpflags] == tcp-fin'
 
 - [A tcpdump tutorial with examples — 50 ways to isolate traffic]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- internal references -->
 <!-- external references -->
 [a tcpdump tutorial with examples — 50 ways to isolate traffic]: https://danielmiessler.com/study/tcpdump/

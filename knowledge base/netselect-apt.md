@@ -34,7 +34,7 @@ All the references in the [further readings] section, plus the following:
 
 - [How to find the fastest mirror in Debian and derivatives]
 
-<!-- project's references -->
+<!-- upstream -->
 [man page]: https://manpages.debian.org/testing/netselect-apt/netselect-apt.1.en.html
 
 <!-- internal references -->

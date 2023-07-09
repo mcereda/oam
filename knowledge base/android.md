@@ -69,7 +69,7 @@ All the references in the [further readings] section, plus the following:
 
 - [How to Use ADB and Fastboot on Android]
 
-<!-- project's references -->
+<!-- upstream -->
 [adb]: https://developer.android.com/studio/command-line/adb
 
 <!-- in-article references -->

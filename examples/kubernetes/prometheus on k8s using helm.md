@@ -43,7 +43,7 @@ All the references in the [further readings] section, plus the following:
 
 - [Helm chart]
 
-<!-- project's references -->
+<!-- upstream -->
 [helm chart]: https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus
 
 <!-- internal references -->

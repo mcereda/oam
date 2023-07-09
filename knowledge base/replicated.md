@@ -17,7 +17,7 @@ replicated admin --tty=0 retrieve-iact
 
 ## Sources
 
-<!-- project's references -->
+<!-- upstream -->
 
 <!-- internal references -->
 [replicatedctl]: replicatedctl.md

@@ -32,7 +32,7 @@ awk '$2 > 100' sales.txt
 - [Printing the last column of a line in a file]
 - [The essential Bash cheat sheet]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- in-article references -->
 <!-- internal references -->
 <!-- external references -->

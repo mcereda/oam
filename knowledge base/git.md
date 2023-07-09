@@ -954,7 +954,7 @@ git -c http.sslVerify=false …
 - [1 minute coding tip: git diff-words to see diffs on a per-word basis instead of per line]
 - [Dress up your git diffs with word-level highlights]
 
-<!-- project's references -->
+<!-- upstream -->
 [docs]: https://git-scm.com/docs/git
 [getting git on a server]: https://git-scm.com/book/en/v2/Git-on-the-Server-Getting-Git-on-a-Server
 [git-config reference]: https://git-scm.com/docs/git-config

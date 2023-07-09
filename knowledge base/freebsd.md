@@ -245,7 +245,7 @@ All the references in the [further readings] section, plus the following:
 - [Boinc]
 - [sbz's FreeBSD commands cheat-sheet]
 
-<!-- project's references -->
+<!-- upstream -->
 [freebsd handbook]: https://docs.freebsd.org/en/books/handbook/
 [installing applications]: https://docs.freebsd.org/en/books/handbook/ports/
 [linux binary compatibility]: https://docs.freebsd.org/en/books/handbook/linuxemu/

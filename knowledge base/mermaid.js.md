@@ -18,7 +18,7 @@ Mermaid.js offers a [live editor] to check the graph code.
 - [Markdown]
 - [mermaid-cli]
 
-<!-- project's references -->
+<!-- upstream -->
 [documentation]: https://mermaid.js.org/intro/
 [live editor]: https://mermaid.live
 

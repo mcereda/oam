@@ -51,7 +51,7 @@ Most compatible upgrades are available on [Discomp].
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [supported sfp modules]: https://wiki.turris.cz/doc/en/public/sfp
 
 <!-- internal references -->

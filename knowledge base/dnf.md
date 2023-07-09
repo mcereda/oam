@@ -157,7 +157,7 @@ All the references in the [further readings] section, plus the following:
 - [How to use YUM/DNF to downgrade or rollback some package updates?]
 - [How to lock kernel (or another package) on Fedora]
 
-<!-- project's references -->
+<!-- upstream -->
 
 <!-- internal references -->
 

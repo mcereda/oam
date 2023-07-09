@@ -421,7 +421,7 @@ All the references in the [further readings] section, plus the following:
   references
   -->
 
-<!-- project -->
+<!-- upstream -->
 [/boot/config.txt]: https://www.raspberrypi.org/documentation/configuration/config-txt/README.md
 [configuration]: https://www.raspberrypi.com/documentation/computers/configuration.html
 [mirrors]: https://www.raspbian.org/RaspbianMirrors

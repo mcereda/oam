@@ -52,7 +52,7 @@ All the references in the [further readings] section, plus the following:
 - script: [Create an encrypted BTRFS device]
 - script: [Create an encrypted ZFS device]
 
-<!-- project's references -->
+<!-- upstream -->
 
 <!-- internal references -->
 

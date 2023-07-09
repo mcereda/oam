@@ -45,7 +45,7 @@ All the references in the [further readings] section, plus the following:
 
 - [How to drain a node in Kubernetes]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- in-article references -->
 [further readings]: #further-readings
 

@@ -237,7 +237,7 @@ All the references in the [further readings] section, plus the following:
 - [writing a very basic kubernetes mutating admission webhook]
 - Istio's [script][certificate script] to generate a certificate signing request
 
-<!-- project's references -->
+<!-- upstream -->
 [admission request]: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#request
 [admission response]: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#response
 [cert script]: create-signed-cert.sh

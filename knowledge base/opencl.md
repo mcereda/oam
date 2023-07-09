@@ -20,7 +20,7 @@ Open Computing Language is an open, royalty-free standard for cross-platform, pa
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [website]: https://www.khronos.org/opencl/
 
 <!-- internal references -->

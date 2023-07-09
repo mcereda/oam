@@ -40,7 +40,7 @@ pihole -a -t 'path/to/backup/file.tar.gz'
 - [Pi-hole]
 - [The pihole command]
 
-<!-- project's references -->
+<!-- upstream -->
 [the pihole command]: https://docs.pi-hole.net/core/pihole-command/
 
 <!-- internal references -->

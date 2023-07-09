@@ -34,7 +34,7 @@ antigen apply
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [github]: https://github.com/zsh-users/antigen
 [wiki]: https://github.com/zsh-users/antigen/wiki
 

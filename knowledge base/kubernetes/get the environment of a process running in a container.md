@@ -28,7 +28,7 @@ All the references in the [further readings] section, plus the following:
 
 - [Get the environment variables of running process in container]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- in-article references -->
 [further readings]: #further-readings
 

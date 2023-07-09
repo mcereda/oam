@@ -38,5 +38,5 @@ replicatedctl app apply-config
 
 - [Command reference]
 
-<!-- project's references -->
+<!-- upstream -->
 [command reference]: https://help.replicated.com/api/replicatedctl/

@@ -100,7 +100,7 @@ All the references in the [further readings] section, plus the following:
 - [Connect to a compute instance]
 - [Preparing a Google Kubernetes Engine environment for production]
 
-<!-- project's references -->
+<!-- upstream -->
 [connect to a compute instance]: https://cloud.google.com/compute/docs/instances/connecting-to-instance
 [kubectl cluster access]: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl
 [preparing a google kubernetes engine environment for production]: https://cloud.google.com/solutions/prep-kubernetes-engine-for-prod
