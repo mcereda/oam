@@ -1,5 +1,10 @@
 # tcpdump
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -50,7 +55,9 @@ tcpdump 'tcp[tcpflags] == tcp-fin'
 
 - [A tcpdump tutorial with examples — 50 ways to isolate traffic]
 
-<!-- upstream -->
-<!-- internal references -->
-<!-- external references -->
+<!--
+  References
+  -->
+
+<!-- Others -->
 [a tcpdump tutorial with examples — 50 ways to isolate traffic]: https://danielmiessler.com/study/tcpdump/

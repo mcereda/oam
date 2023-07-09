@@ -6,7 +6,6 @@ Proxy designed to add TLS encryption functionality to existing clients and serve
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -31,16 +30,10 @@ stunnel 'path/to/config/file'
 - [Website]
 - [Sample configuration for Unix systems]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [sample configuration for unix systems]: https://www.stunnel.org/config_unix.html
 [website]: https://www.stunnel.org/
-
-<!-- in-article references -->
-[further readings]: #further-readings
-
-<!-- internal references -->
-<!-- external references -->

@@ -369,21 +369,25 @@ All the references in the [further readings] section, plus the following:
 - [Resize, rotate, or flip an image in Preview on Mac]
 - [Who is listening on a given TCP port on Mac OS X?]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [compress a pdf in preview on mac]: https://support.apple.com/guide/preview/compress-a-pdf-prvw1509/mac
 [mac startup key combinations]: https://support.apple.com/en-us/HT201255
 [resize, rotate, or flip an image in preview on mac]: https://support.apple.com/guide/preview/resize-rotate-or-flip-an-image-prvw2015/11.0/mac/13.0
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [time machine]: time%20machine.md
 [macports]: macports.md
 [openssl-osx-ca]: openssl-osx-ca.md
 [little snitch]: little%20snitch.md
 
-<!-- external references -->
+<!-- Others -->
 [boot a mac from usb drive]: https://www.wikihow.com/Boot-a-Mac-from-USB-Drive
 [caffeinate your mac]: https://www.theapplegeek.co.uk/blog/caffeinate
 [can touch id for the mac touch bar authenticate sudo users and admin privileges?]: https://apple.stackexchange.com/questions/259093/can-touch-id-for-the-mac-touch-bar-authenticate-sudo-users-and-admin-privileges#306324

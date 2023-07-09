@@ -7,8 +7,6 @@
 1. [Create users in a SQL instance from the MySQL shell](#create-users-in-a-sql-instance-from-the-mysql-shell)
 1. [Use Terraform to manage users in a cloud SQL instance](#use-terraform-to-manage-users-in-a-cloud-sql-instance)
 1. [Gotchas](#gotchas)
-1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -100,17 +98,3 @@ Terraform will use the provider to connect to the proxy and operate on the SQL i
 
 - As of 2021-05-18 the `root` user will **not be able** to create other users from the MySQL shell because it will lack `CREATE USER` permissions.  
 - The documentation says that SQL users created using `gcloud`, the APIs or the cloud console will have the same permissions of the `root` user; in reality, those administrative entities will be able to create users only from the MySQL shell.
-
-## Further readings
-
-## Sources
-
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
-
-<!-- in-article references -->
-[further readings]: #further-readings
-
-<!-- internal references -->
-<!-- external references -->

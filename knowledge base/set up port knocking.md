@@ -5,9 +5,11 @@ When the correct sequence is used, the daemon issues a configured command, usual
 
 This is frequently used to open the SSH port in a server for a specific client.
 
-## Further readings
+See [Knockd].
 
-- [Knockd]
+<!--
+  References
+  -->
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [knockd]: knockd.md

@@ -1,5 +1,11 @@
 # Vim
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Modelines](#modelines)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -67,6 +73,11 @@ Examples:
 - [Basic vimrc]
 - [Set whitespace preferences by filetype]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [basic vimrc]: https://github.com/amix/vimrc/blob/master/vimrcs/basic.vim
 [embed vim settings in file]: https://stackoverflow.com/questions/3958416/embed-vim-settings-in-file#3958516
 [modeline magic]: https://vim.fandom.com/wiki/Modeline_magic

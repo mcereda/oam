@@ -1,5 +1,12 @@
 # Swap
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Swappiness](#swappiness)
+1. [Swapfile](#swapfile)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -56,6 +63,11 @@ sudo rm /swapfile
 - [How to reload sysctl.conf variables on Linux]
 - [How to empty swap if there is free RAM]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [create a linux swap file]: https://linuxize.com/post/create-a-linux-swap-file/
 [how to reload sysctl.conf variables on linux]: https://www.cyberciti.biz/faq/reload-sysctl-conf-on-linux-using-sysctl/
 [how to empty swap if there is free ram]: https://askubuntu.com/questions/1357/how-to-empty-swap-if-there-is-free-ram#1379

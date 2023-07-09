@@ -2,6 +2,17 @@
 
 > Avoid modifying the `sudoers` files manually and execute `visudo` instead; it will check the syntax on save, preventing you from screwing up the file.
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Drop privileges](#drop-privileges)
+1. [Restrict permissions a little](#restrict-permissions-a-little)
+1. [Avoid providing a password](#avoid-providing-a-password)
+1. [Execute commands as a specific user](#execute-commands-as-a-specific-user)
+1. [Troubleshooting](#troubleshooting)
+   1. [I modified a sudoers file manually, messed it up, and now I cannot use sudo anymore](#i-modified-a-sudoers-file-manually-messed-it-up-and-now-i-cannot-use-sudo-anymore)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -79,6 +90,11 @@ pkexec visudo -f /etc/sudoers.d/user
 - [sudo as another user with their environment]
 - [sudo: Drop root privileges]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [how to modify an invalid sudoers file]: https://askubuntu.com/questions/73864/how-to-modify-an-invalid-etc-sudoers-file
 [sudo as another user with their environment]: https://unix.stackexchange.com/questions/176997/sudo-as-another-user-with-their-environment
 [sudo: drop root privileges]: https://coderwall.com/p/x2oica/sudo-drop-root-privileges

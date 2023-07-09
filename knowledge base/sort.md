@@ -59,9 +59,10 @@ awk 'BEGIN {FS=","; OFS="|"} {print $NF,$0}' file.txt \
 - [Sort a file in Unix based on the last field]
 - [The essential Bash cheat sheet]
 
-<!-- upstream -->
-<!-- in-article references -->
-<!-- internal references -->
-<!-- external references -->
+<!--
+  References
+  -->
+
+<!-- Others -->
 [sort a file in unix based on the last field]: http://www.unixcl.com/2010/11/sort-file-based-on-last-field-unix.html
 [the essential bash cheat sheet]: https://betterprogramming.pub/the-essential-bash-cheat-sheet-e1c3df06560

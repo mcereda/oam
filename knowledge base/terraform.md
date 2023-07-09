@@ -1,5 +1,7 @@
 # Terraform
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Modules](#modules)
    1. [Useful internal variables](#useful-internal-variables)
@@ -291,11 +293,15 @@ eval "export $(sed -E 's/([[:graph:]]+)[[:blank:]]*=[[:blank:]]*([[:graph:]]+)/T
 
 All the references in the [further readings] section, plus the following:
 
-- [for_each vs count]
+- [`for_each` vs `count`][for_each vs count]
 - [Azure Provider]
 - [Conditional creation of a resource based on a variable in .tfvars]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [cli documentation]: https://www.terraform.io/docs/cli/
 [environment variables]: https://www.terraform.io/cli/config/environment-variables
 [forcing re-creation of resources]: https://www.terraform.io/cli/state/taint
@@ -304,11 +310,10 @@ All the references in the [further readings] section, plus the following:
 [version constraints]: https://www.terraform.io/language/expressions/version-constraints
 [website]: https://www.terraform.io
 
-<!-- internal references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- external references -->
-
+<!-- Others -->
 [azure provider]: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs
 [conditional creation of a resource based on a variable in .tfvars]: https://stackoverflow.com/questions/60231309/terraform-conditional-creation-of-a-resource-based-on-a-variable-in-tfvars
 [for_each vs count]: https://medium.com/@business_99069/terraform-count-vs-for-each-b7ada2c0b186

@@ -554,6 +554,10 @@ All the references in the [further readings] section, plus the following:
 - [Configuration best practices]
 - [Cloudzero Kubernetes best practices]
 
+<!--
+  References
+  -->
+
 <!-- project's documentation -->
 [addons]: https://kubernetes.io/docs/concepts/cluster-administration/addons/
 [api deprecation policy]: https://kubernetes.io/docs/reference/using-api/deprecation-policy/
@@ -579,11 +583,11 @@ All the references in the [further readings] section, plus the following:
 [using sysctls in a kubernetes cluster]: https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/
 [version skew policy]: https://kubernetes.io/releases/version-skew-policy/
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 [pods]: #pods
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [azure kubernetes service]: ../azure/aks.md
 [create an admission webhook]: ../../examples/kubernetes/create%20an%20admission%20webhook/README.md
 [helm]: helm.md
@@ -595,8 +599,7 @@ All the references in the [further readings] section, plus the following:
 [terraform]: ../terraform.md
 [velero]: velero.md
 
-<!-- external references -->
-
+<!-- Others -->
 [best practices for pod security in azure kubernetes service (aks)]: https://learn.microsoft.com/en-us/azure/aks/developer-best-practices-pod-security
 [build your very own self-hosting platform with raspberry pi and kubernetes]: https://kauri.io/build-your-very-own-self-hosting-platform-with-raspberry-pi-and-kubernetes/5e1c3fdc1add0d0001dff534/c
 [cloudzero kubernetes best practices]: https://www.cloudzero.com/blog/kubernetes-best-practices

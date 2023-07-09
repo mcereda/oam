@@ -1,4 +1,9 @@
-# Trap
+# The Bash `trap` command
+
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -19,5 +24,10 @@ trap - SIGINT
 - [Using Bash traps in your scripts]
 - [The Bash trap command]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [the bash trap command]: https://www.linuxjournal.com/content/bash-trap-command
 [using bash traps in your scripts]: https://opensource.com/article/20/6/bash-trap

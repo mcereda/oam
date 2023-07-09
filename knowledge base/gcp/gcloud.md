@@ -59,12 +59,13 @@ All the references in the [further readings] section, plus the following:
 
 - [`gcloud projects`][gcloud projects]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [creating and managing projects]: https://cloud.google.com/resource-manager/docs/creating-managing-projects
 [gcloud projects]: https://cloud.google.com/sdk/gcloud/reference/projects
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
-
-<!-- internal references -->
-<!-- external references -->

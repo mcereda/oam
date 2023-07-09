@@ -1,5 +1,7 @@
 # SSH
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Server installation on Windows](#server-installation-on-windows)
 1. [Key Management](#key-management)
@@ -326,6 +328,8 @@ Solution: update the SSH server.
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [Use SSHFS to mount a remote directory as a volume on OSX]
 - [Using the SSH config file]
 - [How to list keys added to ssh-agent with ssh-add?]
@@ -336,16 +340,23 @@ Solution: update the SSH server.
 - [Get started with OpenSSH for Windows]
 - [Restrict SSH login to a specific IP or host]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [ssh_config man page]: https://man.openbsd.org/ssh_config
 [ssh-agent]: https://www.ssh.com/academy/ssh/agent
 [sshd_config man page]: https://man.openbsd.org/sshd_config
 
-<!-- internal references -->
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Files -->
 [ssh_config example]: ../examples/ssh/ssh_config
 [sshd_config example]: ../examples/ssh/sshd_config
 
-<!-- external references -->
+<!-- Others -->
 [get started with openssh for windows]: https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=gui
 [how to enable ssh access using a gpg key for authentication]: https://opensource.com/article/19/4/gpg-subkeys-ssh
 [how to list keys added to ssh-agent with ssh-add?]: https://unix.stackexchange.com/questions/58969/how-to-list-keys-added-to-ssh-agent-with-ssh-add

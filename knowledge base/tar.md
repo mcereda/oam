@@ -1,5 +1,7 @@
 # Tar
 
+## Table of contents <!-- omit in toc -->
+
 ## TL;DR
 
 ```sh
@@ -33,5 +35,10 @@ short | long              | description
 - [how to compress and extract files using the tar command on linux]
 - [how to create tar gz file in linux using command line]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [how to create tar gz file in linux using command line]: https://www.cyberciti.biz/faq/how-to-create-tar-gz-file-in-linux-using-command-line/
 [how to compress and extract files using the tar command on linux]: https://www.howtogeek.com/248780/how-to-compress-and-extract-files-using-the-tar-command-on-linux/

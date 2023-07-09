@@ -87,23 +87,18 @@ Please note, users who have never signed in to PlayStation™Network (PSN) can r
 - [PS4: External hard drive support]
 - [How to back up and restore PS4 console data]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [how to back up and restore ps4 console data]: https://www.playstation.com/en-us/support/hardware/ps4-back-up-and-restore-with-external-storage/
 [ps4: external hard drive support]: https://www.playstation.com/en-us/support/hardware/ps4-external-hdd-support/
 [ps4: upgrade hdd]: https://www.playstation.com/en-us/support/hardware/ps4-upgrade-hdd/#7000
 [system software download page]: https://www.playstation.com/en-us/support/hardware/ps4/system-software/
 
-<!-- in-article references -->
-[further readings]: #further-readings
-
-<!-- internal references -->
+<!-- In-article sections -->
 [back up the existing data on an external usb storage device]: #back-up-the-existing-data-on-an-external-usb-storage-device
 [reinstall the system software]: #reinstall-the-system-software
 [restore backed up data from an external usb storage device to the playstation 4]: #restore-backed-up-data-from-an-external-usb-storage-device-to-the-playstation-4
 [upgrade the hdd]: #upgrade-the-hdd
-
-<!-- external references -->

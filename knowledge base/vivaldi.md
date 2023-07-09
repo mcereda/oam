@@ -1,5 +1,10 @@
 # Vivaldi browser
 
+## Table of contents <!-- omit in toc -->
+
+1. [Network activity](#network-activity)
+1. [Further readings](#further-readings)
+
 ## Network activity
 
 | URL                 | Ports      | Description                 |

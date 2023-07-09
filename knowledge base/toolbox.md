@@ -2,6 +2,12 @@
 
 Runs on top of [Podman].
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -37,12 +43,17 @@ toolbox rmi -af
 - [GitHub] page
 - [Podman]
 
-[podman]: podman.md
-
-[github]: https://github.com/containers/toolbox
-
 ## Sources
 
 - [Fedora Silverblue]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [fedora silverblue]: https://docs.fedoraproject.org/en-US/fedora-silverblue/toolbox/
+[github]: https://github.com/containers/toolbox
+
+<!-- Knowledge base -->
+[podman]: podman.md

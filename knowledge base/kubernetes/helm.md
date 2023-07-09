@@ -7,7 +7,6 @@ Package manager for Kubernetes.
 1. [TL;DR](#tldr)
 1. [Start managing existing resources with a specific helm chart](#start-managing-existing-resources-with-a-specific-helm-chart)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -109,18 +108,13 @@ To achieve this:
 - [Kubernetes]
 - [Helmfile]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [website]: https://helm.sh/
 
-<!-- in-article references -->
-[further readings]: #further-readings
-
-<!-- internal references -->
+<!-- Knowledge base -->
 [helmfile]: helmfile.md
 [kubernetes]: README.md
-
-<!-- external references -->

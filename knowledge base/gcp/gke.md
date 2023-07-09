@@ -100,14 +100,17 @@ All the references in the [further readings] section, plus the following:
 - [Connect to a compute instance]
 - [Preparing a Google Kubernetes Engine environment for production]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [connect to a compute instance]: https://cloud.google.com/compute/docs/instances/connecting-to-instance
 [kubectl cluster access]: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl
 [preparing a google kubernetes engine environment for production]: https://cloud.google.com/solutions/prep-kubernetes-engine-for-prod
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
-<!-- external references -->
+<!-- Others -->
 [how to master admission webhooks in kubernetes]: https://digizoo.com.au/1376/mastering-admission-webhooks-in-kubernetes-gke-part-1/

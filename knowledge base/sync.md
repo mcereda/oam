@@ -1,5 +1,12 @@
 # Sync
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
+
+## TL;DR
+
 ```sh
 # Flush all cached file data of the current user only.
 sync
@@ -33,5 +40,10 @@ sudo sync -f /var/log/syslog
 - [cheat.sh]
 - [Linux sync command]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/sync
 [linux sync command]: https://www.computerhope.com/unix/sync.htm

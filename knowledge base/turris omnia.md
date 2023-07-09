@@ -5,7 +5,6 @@
 1. [Factory reset](#factory-reset)
 1. [Hardware upgrades](#hardware-upgrades)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## Factory reset
 
@@ -47,18 +46,17 @@ Most compatible upgrades are available on [Discomp].
 
 - [Turris OS]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [supported sfp modules]: https://wiki.turris.cz/doc/en/public/sfp
 
-<!-- internal references -->
-[further readings]: #further-readings
+<!-- Knowledge base -->
 [turris os]: turris%20os.md
 
-<!-- external references -->
+<!-- Others -->
 [discomp]: https://www.discomp.cz/
 [kingston 1024g ssd kc600 sata3 msata]: https://www.amazon.com/gp/product/B08ZNRTDD8/
 [turris omnia wifi 6 upgrade kit]: https://www.discomp.cz/turris-omnia-wi-fi-6-upgrade-kit_d120048.html

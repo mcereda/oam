@@ -314,7 +314,11 @@ All the references in the [further readings] section, plus the following:
 - The `/scale` [subresource][/scale subresource]
 - The [ScaledObject specification]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [authentication]: https://keda.sh/docs/2.0/concepts/authentication/
 [concepts]: https://keda.sh/docs/2.0/concepts/
 [external scalers]: https://keda.sh/docs/2.0/concepts/external-scalers/
@@ -324,13 +328,13 @@ All the references in the [further readings] section, plus the following:
 [scaling jobs]: https://keda.sh/docs/2.0/concepts/scaling-jobs/
 [website]: https://keda.sh/
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [kubernetes]: README.md
 
-<!-- external references -->
+<!-- Others -->
 [keda: event driven and serverless containers in kubernetes]: https://www.youtube.com/watch?v=ZK2SS_GXF-g
 [scaledobject specification]: https://github.com/kedacore/keda/blob/v2.0.0/api/v1alpha1/scaledobject_types.go
 [/scale subresource]: https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#scale-subresource

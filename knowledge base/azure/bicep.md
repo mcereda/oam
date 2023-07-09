@@ -13,7 +13,6 @@ The Azure CLI can use a command group (`az bicep …`) to integrate with the `bi
    1. [Installation](#installation)
    1. [Upgrade](#upgrade)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -82,18 +81,13 @@ az bicep upgrade -t 'linux-x64'
 - The [`az bicep` command reference][az bicep]
 - The [Azure CLI]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [az bicep]: https://learn.microsoft.com/en-us/cli/azure/bicep
 [what is bicep?]: https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview
 
-<!-- in-article references -->
-[further readings]: #further-readings
-
-<!-- internal references -->
+<!-- Knowledge base -->
 [azure cli]: cli.md
-
-<!-- external references -->

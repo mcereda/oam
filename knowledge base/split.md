@@ -1,5 +1,10 @@
 # Split
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -18,5 +23,10 @@ split -b 2M -d logs.tgz "logs.tgz."
 - [split large tar into multiple files of certain size]
 - [create a tar archive split into blocks of a maximum size]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [create a tar archive split into blocks of a maximum size]: https://unix.stackexchange.com/questions/61774/create-a-tar-archive-split-into-blocks-of-a-maximum-size
 [split large tar into multiple files of certain size]: https://www.tecmint.com/split-large-tar-into-multiple-files-of-certain-size/

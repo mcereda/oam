@@ -1,5 +1,10 @@
 # Sponge
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -18,5 +23,10 @@ grep -v '^{{#}}' path/to/file | sponge path/to/other/file
 - [mankier man page]
 - [tldr live demo page]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [mankier man page]: https://www.mankier.com/1/sponge
 [tldr live demo page]: https://tldr.ostera.io/sponge

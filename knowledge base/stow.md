@@ -1,5 +1,10 @@
 # GNU Stow
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -14,4 +19,9 @@ $ stow --dotfiles --dir $HOME/.dotfiles --target $HOME vim screen --simulate --v
 
 - [Website]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [website]: https://www.gnu.org/software/stow

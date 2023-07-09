@@ -77,12 +77,15 @@ All the references in the [further readings] section, plus the following:
 
 - Red Hat's article on [service meshes][service mesh]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [getting started guide]: https://istio.io/latest/docs/setup/getting-started/
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
-<!-- external references -->
+<!-- Others -->
 [service mesh]: https://www.redhat.com/en/topics/microservices/what-is-a-service-mesh

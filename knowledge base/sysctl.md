@@ -1,5 +1,12 @@
 # Sysctl
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
+## TL;DR
+
 Default configuration files locations:
 
 1. `/run/sysctl.d/*.conf`
@@ -8,8 +15,6 @@ Default configuration files locations:
 1. `/usr/lib/sysctl.d/*.conf`
 1. `/lib/sysctl.d/*.conf`
 1. `/etc/sysctl.conf`
-
-## TL;DR
 
 ```sh
 # Show the value of a single setting.
@@ -40,8 +45,12 @@ echo 'vm.swappiness = 5' | sudo tee -a /etc/sysctl.d/99-swappiness.conf
 - [How to reload sysctl.conf variables on Linux]
 - [Documentation for /proc/sys]
 
-<!-- official documentation -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [documentation for /proc/sys]: https://docs.kernel.org/admin-guide/sysctl/
 
-<!-- forums -->
+<!-- Others -->
 [how to reload sysctl.conf variables on linux]: https://www.cyberciti.biz/faq/reload-sysctl-conf-on-linux-using-sysctl/

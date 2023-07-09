@@ -1,5 +1,10 @@
 # Zip
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -17,4 +22,9 @@ unzip -Zl foo.zip
 
 - [cheat.sh]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/zip

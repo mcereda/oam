@@ -1,5 +1,7 @@
 # UBports
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Connect using SSH](#connect-using-ssh)
 1. [Sources](#sources)
@@ -85,5 +87,9 @@ libertine-container-manager destroy -i 'identifier'
 
 - [Documentation]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [documentation]: https://docs.ubports.com/en/latest/index.html

@@ -8,7 +8,6 @@ Managed Kubernetes solution offered by Azure.
 1. [Troubleshooting](#troubleshooting)
    1. [_Subnet XXX does not have enough capacity for YY IP addresses_ while updating the credentials for an existing Service Principal](#subnet-xxx-does-not-have-enough-capacity-for-yy-ip-addresses-while-updating-the-credentials-for-an-existing-service-principal)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -25,15 +24,9 @@ Make sure you have enough space in your cluster's Subnet for at least one new No
 
 - [Update or rotate the credentials for an AKS cluster]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [Update or rotate the credentials for an AKS cluster]: https://learn.microsoft.com/en-us/azure/aks/update-credentials
-
-<!-- in-article references -->
-[further readings]: #further-readings
-
-<!-- internal references -->
-<!-- external references -->

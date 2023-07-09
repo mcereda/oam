@@ -1,4 +1,9 @@
-# Uniq
+# The `uniq` command
+
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -23,8 +28,9 @@ uniq -cd path/to/file
 
 - [The essential Bash cheat sheet]
 
-<!-- upstream -->
-<!-- in-article references -->
-<!-- internal references -->
-<!-- external references -->
+<!--
+  References
+  -->
+
+<!-- Others -->
 [the essential bash cheat sheet]: https://betterprogramming.pub/the-essential-bash-cheat-sheet-e1c3df06560
