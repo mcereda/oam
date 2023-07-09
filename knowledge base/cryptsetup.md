@@ -1,5 +1,13 @@
 # Cryptsetup
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Crypt a device](#crypt-a-device)
+1. [Troubleshooting](#troubleshooting)
+   1. [The process is killed due to too much memory used](#the-process-is-killed-due-to-too-much-memory-used)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -89,6 +97,11 @@ The solution is simple; either:
 - [btrfs man page]
 - [High memory usage when opening a LUKS2 partition]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [arch linux wiki]: https://wiki.archlinux.org/index.php/dm-crypt/Device_encryption
 [btrfs man page]: https://btrfs.wiki.kernel.org/index.php/Manpage/btrfs(5)
 [high memory usage when opening a luks2 partition]: https://gitlab.com/cryptsetup/cryptsetup/issues/372

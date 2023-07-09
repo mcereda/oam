@@ -1,10 +1,12 @@
 # Cloud init
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
-2. [Merge 2 or more files or parts](#merge-2-or-more-files-or-parts)
+1. [Merge 2 or more files or parts](#merge-2-or-more-files-or-parts)
    1. [In Terraform](#in-terraform)
-3. [Further readings](#further-readings)
-4. [Sources](#sources)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -158,13 +160,19 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [Debugging cloud-init]
 - [Tutorial]
 - [Cloud-Init configuration merging]
 - [Terraform's cloud-init provider]
 - [How to test cloud-init locally with Vagrant]
 
-<!-- cloud-init documentation -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [debugging cloud-init]: https://cloudinit.readthedocs.io/en/latest/topics/debugging.html
 [examples]: https://cloudinit.readthedocs.io/en/latest/topics/examples.html
 [merging user-data sections]: https://cloudinit.readthedocs.io/en/latest/topics/merging.html
@@ -173,10 +181,13 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
 [tutorial]: https://cloudinit.readthedocs.io/en/latest/topics/tutorial.html
 [website]: https://cloud-init.io/
 
-<!-- internal references -->
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Files -->
 [docker cloud init example]: ../examples/cloud-init/docker.yum.yaml
 
-<!-- external references -->
+<!-- Others -->
 [cloud-init configuration merging]: https://jen20.dev/post/cloudinit-configuration-merging/
 [cloud-init multipart encoding issues]: https://github.com/hashicorp/terraform/issues/4794
 [how to test cloud-init locally with vagrant]: https://www.grzegorowski.com/how-to-test-cloud-init-locally-with-vagrant

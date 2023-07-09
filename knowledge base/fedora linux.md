@@ -1,5 +1,13 @@
 # Fedora GNU/Linux
 
+## Table of contents <!-- omit in toc -->
+
+1. [Enable the RPM Fusion repositories](#enable-the-rpm-fusion-repositories)
+1. [Broadcom Wi-Fi drivers](#broadcom-wi-fi-drivers)
+1. [Enable ZFS management](#enable-zfs-management)
+1. [Use DNF from behind a proxy](#use-dnf-from-behind-a-proxy)
+1. [Sources](#sources)
+
 ## Enable the RPM Fusion repositories
 
 RPM Fusion provides software that the Fedora Project or Red Hat doesn't want to ship. That software is provided as precompiled RPMs for all current Fedora versions and current Red Hat Enterprise Linux or clones versions; you can use the RPM Fusion repositories with tools like yum and PackageKit.
@@ -45,5 +53,10 @@ Either:
 - [RPM fusion configuration]
 - [DNF update from behind SSL inspection proxy]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [dnf update from behind ssl inspection proxy]: https://molo76.github.io/2017/07/04/dnf-update-behind-ssl-inspection-proxy.html
 [rpm fusion configuration]: https://rpmfusion.org/Configuration

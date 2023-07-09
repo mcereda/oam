@@ -1,5 +1,12 @@
 # ClamAV
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Gotchas](#gotchas)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -51,10 +58,19 @@ find . -type f | parallel --group --jobs 0 -d '\n' clamscan {}
 
 - [Gentoo Wiki]
 
-[gentoo wiki]: https://wiki.gentoo.org/wiki/ClamAV
-
 ## Sources
+
+All the references in the [further readings] section, plus the following:
 
 - [Install ClamAV on Fedora Linux 35]
 
+<!--
+  References
+  -->
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Others -->
+[gentoo wiki]: https://wiki.gentoo.org/wiki/ClamAV
 [install clamav on fedora linux 35]: https://www.linuxcapable.com/how-to-install-clamav-on-fedora-35/

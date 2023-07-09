@@ -44,17 +44,16 @@ All the references in the [further readings] section, plus the following:
 - [6 more terminal commands you should know]
 
 <!--
-  references
+  References
   -->
 
-<!-- upstream -->
-<!-- article sections -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- knowledge base -->
+<!-- Knowledge base -->
 [cmp]: cmp.md
 
-<!-- others -->
+<!-- Others -->
 [6 more terminal commands you should know]: https://betterprogramming.pub/6-more-terminal-commands-you-should-know-3606cecdf8b6
 [check whether all lines of file occur in different file]: https://unix.stackexchange.com/questions/397747/check-whether-all-lines-of-file-occur-in-different-file#397749
 [man page]: https://linux.die.net/man/1/comm

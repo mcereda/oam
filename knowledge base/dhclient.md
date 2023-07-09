@@ -1,5 +1,10 @@
 # Dhclient
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -15,6 +20,9 @@ sudo dhclient -r eth0
 
 - [Force the DHCP client to renew the IP address in Linux]
 
-<!-- internal references -->
-<!-- external references -->
+<!--
+  References
+  -->
+
+<!-- Others -->
 [force the dhcp client to renew the ip address in linux]: https://www.cyberciti.biz/faq/howto-linux-renew-dhcp-client-ip-address/

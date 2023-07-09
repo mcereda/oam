@@ -2,6 +2,15 @@
 
 A multi-machine dotfile manager, written in Go.
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Save the current data to a remote repository](#save-the-current-data-to-a-remote-repository)
+1. [Gotchas](#gotchas)
+1. [Snippets](#snippets)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -111,15 +120,25 @@ $
 - [Go text/template]
 - [Sprig]
 
-[user guide]: https://www.chezmoi.io/user-guide/setup/
-
-[go text/template]: https://pkg.go.dev/text/template
-[sprig]: https://masterminds.github.io/sprig/
-
 ## Sources
+
+All the references in the [further readings] section, plus the following:
 
 - [cheat.sh]
 - [custom data fields appear as all lowercase strings]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
+[user guide]: https://www.chezmoi.io/user-guide/setup/
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/chezmoi
 [custom data fields appear as all lowercase strings]: https://github.com/twpayne/chezmoi/issues/463
+[go text/template]: https://pkg.go.dev/text/template
+[sprig]: https://masterminds.github.io/sprig/

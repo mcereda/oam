@@ -157,12 +157,14 @@ All the references in the [further readings] section, plus the following:
 - [How to use YUM/DNF to downgrade or rollback some package updates?]
 - [How to lock kernel (or another package) on Fedora]
 
-<!-- upstream -->
+<!--
+  References
+  -->
 
-<!-- internal references -->
+<!-- In-article sections -->
+[further readings]: #further-readings
 
-<!-- external references -->
-
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/dnf
 [how to install only security and bugfixes updates with dnf]: https://fedoramagazine.org/how-to-install-only-security-and-bugfixes-updates-with-dnf/
 [how to lock kernel (or another package) on fedora]: https://robbinespu.gitlab.io/posts/locking-package-fedora/

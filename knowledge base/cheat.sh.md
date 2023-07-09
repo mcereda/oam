@@ -1,5 +1,10 @@
 # cheat.sh
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -25,4 +30,9 @@ curl cht.sh/go/:list
 
 - [website]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [website]: https://cheat.sh/

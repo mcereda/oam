@@ -2,6 +2,12 @@
 
 Convert and copy a file.
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Benchmark disks](#benchmark-disks)
+1. [Sources](#sources)
+
 ## TL;DR
 
 N and BYTES values may be followed by the following multiplicative suffixes:
@@ -78,18 +84,16 @@ dd if=/dev/zero of=/tmp/test4.img bs=8k count=10k
 dd if=/dev/zero of=/tmp/test4.img bs=512 count=1000 oflag=dsync
 ```
 
-## Further readings
-
 ## Sources
-
-All the references in the [further readings] section, plus the following:
 
 - [cheat.sh]
 - [Linux and Unix Test Disk I/O Performance With dd Command]
 
-<!-- upstream -->
-<!-- internal references -->
-<!-- external references -->
+<!--
+  References
+  -->
+
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/dd
 [how to create a disk image in linux]: https://itstillworks.com/clone-hard-drive-ubuntu-6884403.html
 [linux and unix test disk i/o performance with dd command]: https://www.cyberciti.biz/faq/howto-linux-unix-test-disk-performance-with-dd-command/

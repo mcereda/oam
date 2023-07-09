@@ -1,9 +1,11 @@
 # Diagrams as code
 
+## Table of contents <!-- omit in toc -->
+
 1. [JavaScript](#javascript)
    1. [Mermaid](#mermaid)
-2. [Python](#python)
-3. [Further readings](#further-readings)
+1. [Python](#python)
+1. [Further readings](#further-readings)
 
 ## JavaScript
 
@@ -20,7 +22,11 @@ Use the `diagrams` library.
 - [Mermaid]
 - [Python's diagrams library]
 
-<!-- external references -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [mermaid]: https://mermaid.js.org
 [mermaid live editor]: https://mermaid.live/edit
 [python's diagrams library]: https://diagrams.mingrammer.com/

@@ -1,4 +1,4 @@
-# Cpufreq
+# Cpupower
 
 Default governor is _ondemand_ for older CPUs and kernels and _schedutil_ for new CPUs and kernels.
 
@@ -24,10 +24,19 @@ sudo cpupower frequency-set --governor schedutil
 
 - [CPU frequency scaling]
 
-[cpu frequency scaling]: https://wiki.archlinux.org/title/CPU_frequency_scaling
-
 ## Sources
+
+All the references in the [further readings] section, plus the following:
 
 - [CPU governer settings ignore nice load]
 
+<!--
+  References
+  -->
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Others -->
+[cpu frequency scaling]: https://wiki.archlinux.org/title/CPU_frequency_scaling
 [cpu governer settings ignore nice load]: https://forum.manjaro.org/t/cpu-governer-settings-ignore-nice-load/71476/3

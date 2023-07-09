@@ -3,6 +3,13 @@
 Copy on write (COW) filesystem for Linux.<br/>
 Features and benefits [here][introduction]. (Meta)Data profiles [here][mkfs.btrfs].
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Check differences between 2 snapshots](#check-differences-between-2-snapshots)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -159,25 +166,30 @@ sudo snapper -c 'config' diff '445..446'
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [cheat.sh]
 - [Does BTRFS have an efficient way to compare snapshots?]
 - [Determine if a BTRFS subvolume is read-only]
 
-<!-- upstream -->
+<!--
+  References
+  -->
 
+<!-- Upstream -->
 [documentation]: https://btrfs.readthedocs.io/en/latest/
 [introduction]: https://btrfs.readthedocs.io/en/latest/Introduction.html
 [mkfs.btrfs]: https://btrfs.readthedocs.io/en/latest/mkfs.btrfs.html
 [swapfile]: https://btrfs.readthedocs.io/en/latest/Swapfile.html
 
-<!-- internal references -->
+<!-- In-article sections -->
+[further readings]: #further-readings
 
+<!-- Knowledge base -->
 [snapper]: snapper.md
 
-<!-- external references -->
-
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/btrfs
-[gentoo wiki]: https://wiki.gentoo.org/wiki/Btrfs
-
 [determine if a btrfs subvolume is read-only]: https://unix.stackexchange.com/questions/375645/determine-if-btrfs-subvolume-is-read-only#375646
 [does btrfs have an efficient way to compare snapshots?]: https://serverfault.com/questions/399894/does-btrfs-have-an-efficient-way-to-compare-snapshots#419444
+[gentoo wiki]: https://wiki.gentoo.org/wiki/Btrfs
