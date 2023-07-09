@@ -14,11 +14,14 @@
 1. under the USB drive, select the USB flash drive that you would like to use to create the USB recovery media and check the button _I understand that the selected drive will be reformatted and existing data will be deleted._
 1. click _Download_ to begin downloading the operating system recovery image; once the process is complete, a summary screen is shown
 
-
 ## Sources
 
 - [How to download and use the Dell operating system recovery image in Microsoft Windows]
 
-[os recovery tool]: https://www.dell.com/support/home/en-us/drivers/osiso/
+<!--
+  References
+  -->
 
+<!-- Upstream -->
 [how to download and use the dell operating system recovery image in microsoft windows]: https://www.dell.com/support/kbdoc/en-us/000123667/how-to-download-and-use-the-dell-os-recovery-image-in-microsoft-windows
+[os recovery tool]: https://www.dell.com/support/home/en-us/drivers/osiso/

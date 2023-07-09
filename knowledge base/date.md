@@ -1,5 +1,7 @@
 # Date
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 
 ## TL;DR

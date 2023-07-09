@@ -245,7 +245,11 @@ All the references in the [further readings] section, plus the following:
 - [Boinc]
 - [sbz's FreeBSD commands cheat-sheet]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [freebsd handbook]: https://docs.freebsd.org/en/books/handbook/
 [installing applications]: https://docs.freebsd.org/en/books/handbook/ports/
 [linux binary compatibility]: https://docs.freebsd.org/en/books/handbook/linuxemu/
@@ -253,11 +257,12 @@ All the references in the [further readings] section, plus the following:
 [using the ports collection]: https://docs.freebsd.org/en/books/handbook/ports/#ports-using
 [wayland]: https://docs.freebsd.org/en/books/handbook/wayland/
 
-<!-- internal references -->
+<!-- In-article sections -->
+[further readings]: #further-readings
 [manage binary packages with pkg]: #manage-binary-packages-with-pkg
 [manage ports from the ports collection]: #manage-ports-from-the-ports-collection
 
-<!-- external references -->
+<!-- Others -->
 [boinc]: https://people.freebsd.org/~pav/boinc.html
 [ntpdate - not updating to current time]: https://forums.freebsd.org/threads/ntpdate-not-updating-to-current-time.72847/
 [sbz's freebsd commands cheat-sheet]: https://github.com/sbz/freebsd-commands

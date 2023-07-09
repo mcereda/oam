@@ -20,13 +20,17 @@ All the references in the [further readings] section, plus the following:
 
 - [Advice for new users on not breaking their Debian system]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [advice for new users on not breaking their debian system]: https://wiki.debian.org/DontBreakDebian
 
-<!-- internal references -->
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Knowledge base -->
 [armbian]: armbian.md
 [apt]: apt.md
 [dpkg]: dpkg.md
-[further readings]: #further-readings
-
-<!-- external references -->

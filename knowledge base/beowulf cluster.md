@@ -60,10 +60,16 @@ See the [Vagrant example].
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [beowulf.org][beowulf]
 - [Wikipedia]
 
-<!-- projects' references -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [apptainer]: https://github.com/apptainer/apptainer
 [beowulf]: https://beowulf.org/overview/
 [hkube]: https://hkube.io/
@@ -74,11 +80,16 @@ See the [Vagrant example].
 [singularity]: https://github.com/gmkurtzer/singularity
 [slurm]: https://slurm.schedmd.com/
 
-<!-- internal references -->
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Knowledge base -->
 [boinc]: boinc.md
+
+<!-- Files -->
 [vagrant example]: ../examples/vagrant/beowulf%20cluster/Vagrantfile
 
-<!-- external references -->
+<!-- Others -->
 [a container for hpc]: https://www.admin-magazine.com/HPC/Articles/Singularity-A-Container-for-HPC
 [a simple beowulf cluster]: http://www.kerrywong.com/2008/11/04/a-simple-beowulf-cluster/
 [building a beowulf cluster from old macbooks - part 1]: https://jondeaton.wordpress.com/2017/10/01/building-a-beowulf-cluster-from-old-macbooks-part-1/

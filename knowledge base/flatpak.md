@@ -55,6 +55,16 @@ flatpak history
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [How to clean up Flatpak apps to clear disk space]
 
+<!--
+  References
+  -->
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Others -->
 [how to clean up flatpak apps to clear disk space]: https://www.debugpoint.com/2021/10/clean-up-flatpak/

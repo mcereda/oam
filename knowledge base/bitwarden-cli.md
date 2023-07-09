@@ -137,5 +137,9 @@ bw logout
 
 - [cheat.sh]
 
-<!-- external references -->
+<!--
+  References
+  -->
+
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/bw

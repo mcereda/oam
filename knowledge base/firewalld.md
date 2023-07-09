@@ -82,13 +82,24 @@ sudo firewall-offline-cmd --add-port='22/tcp' && sudo firewall-cmd --reload
 - [Website]
 - [Documentation]
 
-[documentation]: https://firewalld.org/documentation/
-[website]: https://firewalld.org/
-
 ## Sources
+
+All the references in the [further readings] section, plus the following:
 
 - [Open TCP Port on openSUSE Firewall]
 - [How To Set Up a Firewall Using firewalld on CentOS 8]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
+[documentation]: https://firewalld.org/documentation/
+[website]: https://firewalld.org/
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Others -->
 [how to set up a firewall using firewalld on centos 8]: https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-using-firewalld-on-centos-8
 [open tcp port on opensuse firewall]: https://vazhavandan.blogspot.com/2020/08/open-tcp-port-on-opensuse-firewall.html

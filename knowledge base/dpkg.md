@@ -1,5 +1,11 @@
 # Dpkg
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -44,11 +50,16 @@ All the references in the [further readings] section, plus the following:
 - [How to check if dpkg-architecture --list has all the architectures?]
 - [List of files installed from apt package]
 
-<!-- project's references-->
+<!--
+  References
+  -->
 
-<!-- internal references-->
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Knowledge base -->
 [apt]: apt.md
 
-<!-- external references-->
+<!-- Others -->
 [how to check if dpkg-architecture --list has all the architectures?]: https://askubuntu.com/questions/852115/how-to-check-if-dpkg-architecture-list-has-all-the-architectures#852120
 [list of files installed from apt package]: https://serverfault.com/questions/96964/list-of-files-installed-from-apt-package#96965

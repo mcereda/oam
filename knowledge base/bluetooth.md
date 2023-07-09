@@ -1,5 +1,12 @@
 # Bluetooth
 
+## Table of contents <!-- omit in toc -->
+
+1. [Troubleshooting](#troubleshooting)
+   1. [Bluetooth devices take a long time to connect](#bluetooth-devices-take-a-long-time-to-connect)
+   1. [Bluetooth devices cannot be used at login](#bluetooth-devices-cannot-be-used-at-login)
+1. [Sources](#sources)
+
 ## Troubleshooting
 
 ### Bluetooth devices take a long time to connect
@@ -36,4 +43,9 @@ In `/etc/bluetooth/main.conf`, under the `Policy` section, set `AutoEnable` to `
 
 - [Failing to use bluetooth keyboard at login]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [failing to use bluetooth keyboard at login]: https://archived.forum.manjaro.org/t/failing-to-use-bluetooth-keyboard-at-login/145056/12

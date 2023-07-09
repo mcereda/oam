@@ -1,5 +1,13 @@
 # Docker
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Daemon configuration](#daemon-configuration)
+1. [Containers configuration](#containers-configuration)
+1. [Gotchas](#gotchas)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -155,6 +163,11 @@ Those files come from the volume the docker container is using for its root, and
 - [Configuring DNS]
 - [Cheatsheet]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [arch linux wiki]: https://wiki.archlinux.org/index.php/Docker
 [cheatsheet]: https://collabnix.com/docker-cheatsheet/
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html

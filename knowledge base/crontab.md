@@ -1,5 +1,10 @@
 # Crontab
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -35,4 +40,9 @@ sudo crontab -r -u other_user
 
 - [cheat.sh]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/crontab

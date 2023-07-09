@@ -1,5 +1,7 @@
 # Bourne Again SHell
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Startup files loading order](#startup-files-loading-order)
 1. [Functions](#functions)
@@ -366,6 +368,8 @@ echo $RECORDED
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [The Bash trap command]
 - [Bash startup files loading order]
 - [How to detect if a script is being sourced]
@@ -373,10 +377,17 @@ echo $RECORDED
 - [Speed up your command line navigation]
 - [6 Bash tricks you can use daily]
 
-<!-- internal references -->
+<!--
+  References
+  -->
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Knowledge base -->
 [trap]: trap.md
 
-<!-- external references -->
+<!-- Others -->
 [6 bash tricks you can use daily]: https://medium.com/for-linux-users/6-bash-tricks-you-can-use-daily-a32abdd8b13
 [bash startup files loading order]: https://youngstone89.medium.com/unix-introduction-bash-startup-files-loading-order-562543ac12e9
 [how to detect if a script is being sourced]: https://stackoverflow.com/questions/2683279/how-to-detect-if-a-script-is-being-sourced#28776166

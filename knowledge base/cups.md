@@ -1,5 +1,10 @@
 # CUPS
 
+## Table of contents <!-- omit in toc -->
+
+1. [Administration](#administration)
+1. [Let users print](#let-users-print)
+
 ## Administration
 
 1. Add this line to `/etc/cups/cupsd.conf`

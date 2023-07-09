@@ -22,6 +22,18 @@ Steps for all procedures:
    - disable fast boot
 1. in the bios, change disk mode from Intel's _RAID_ (Rapid .. .. Disk) to **AHCI** (.. .. .. ..)
 
+## Table of contents <!-- omit in toc -->
+
+1. [Create the installation media](#create-the-installation-media)
+1. [Fedora](#fedora)
+1. [Ubuntu](#ubuntu)
+   1. [Partitioning](#partitioning)
+   1. [Install Windows](#install-windows)
+   1. [Install Ubuntu](#install-ubuntu)
+   1. [Ubuntu Tweaks for XPS 9560](#ubuntu-tweaks-for-xps-9560)
+   1. [Reinstall Ubuntu](#reinstall-ubuntu)
+   1. [Additional notes](#additional-notes)
+
 ## Create the installation media
 
 1. Create Windows installation USB stick
@@ -152,8 +164,11 @@ If you need to reinstall ubuntu, you should be able to jump to #4 directly. If y
 - Ubuntu (GRUB) is the default boot option, both Ubuntu and Windows should be there
 - Additionally, you can bring up the UEFI boot screen pressing F12 as soon as you turn on the laptop
 
-## Further readings
+<!--
+  References
+  -->
 
+<!-- Others -->
 [luispabon's gist]: https://gist.github.com/luispabon/db2c9e5f6cc73bb37812a19a40e137bc
 [mdziekon's gist]: https://gist.github.com/mdziekon/221bdb597cf32b46c50ffab96dbec08a
 [ubuntu wiki community]: https://help.ubuntu.com/community/Full_Disk_Encryption_Howto_2019

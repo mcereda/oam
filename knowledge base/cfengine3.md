@@ -5,7 +5,6 @@
 1. [TL;DR](#tldr)
 1. [Installation](#installation)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -65,15 +64,10 @@ cf-remote install --hub 'hub' --bootstrap 'hub'
 - [Website]
 - [Documentation]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [documentation]: https://docs.cfengine.com/docs/master/
 [website]: https://cfengine.com/
-
-<!-- internal references -->
-[further readings]: #further-readings
-
-<!-- external references -->

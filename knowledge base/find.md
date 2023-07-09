@@ -1,5 +1,12 @@
 # Find
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Time specifications](#time-specifications)
+1. [Gotchas](#gotchas)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -174,6 +181,11 @@ find / -newer file.txt -user wnj -print
 - [How to output file names surrounded with quotes in SINGLE line?]
 - [How to find all hardlinks in a folder?]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [find . -type f -exec chmod 644 {} ;]: https://stackoverflow.com/questions/19737525/find-type-f-exec-chmod-644#22083532
 [how can i find broken symlinks?]: https://unix.stackexchange.com/questions/34248/how-can-i-find-broken-symlinks
 [how to find all hardlinks in a folder?]: https://askubuntu.com/questions/972121/how-to-find-all-hardlinks-in-a-folder#972244

@@ -6,7 +6,6 @@ Pretty diff highlighter with emphasis on changed words.
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -35,18 +34,13 @@ In `${HOME}/.gitconfig`:
 - [PyPi] page
 - [Git]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [github]: https://github.com/tk0miya/diff-highlight
 [pypi]: https://pypi.org/project/diff-highlight/
 
-<!-- in-article references -->
-[further readings]: #further-readings
-
-<!-- internal references -->
+<!-- Knowledge base -->
 [git]: git.md
-
-<!-- external references -->

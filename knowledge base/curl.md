@@ -1,5 +1,11 @@
 # cURL
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Apply settings to all connections](#apply-settings-to-all-connections)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -101,10 +107,20 @@ config: "~/.config/curl"
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [cheat.sh]
 - [How to ignore invalid and self signed ssl connection errors with curl]
 - [Config file]
 
+<!--
+  References
+  -->
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/curl
 [config file]: https://everything.curl.dev/cmdline/configfile
 [how to ignore invalid and self signed ssl connection errors with curl]: https://www.cyberciti.biz/faq/how-to-curl-ignore-ssl-certificate-warnings-command-option/
