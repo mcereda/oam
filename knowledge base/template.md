@@ -17,12 +17,13 @@ Intro
 All the references in the [further readings] section, plus the following:
 
 <!--
-  references
+  References
   -->
 
-<!-- upstream -->
-<!-- article sections -->
+<!-- Upstream -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- knowledge base -->
-<!-- others -->
+<!-- Knowledge base -->
+<!-- Files -->
+<!-- Others -->
