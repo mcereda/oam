@@ -35,6 +35,12 @@ parallel --group --jobs 100% --tag \
    | jq -r '.items[] | .metadata.name + \"\t\" + .spec.nodeName' -" \
   ::: "${NAMESPACES}" \
 | column -t
+
+# Given  a collection of images in the same working directory, find all those
+# that are at least 90% similar, but not equal, to another.
+parallel --tag "magick compare -metric NCC -quiet {} NULL: 2>&1; echo" \
+  ::: *.jpg *.jpeg *.png *.webp ::: *.jpg *.jpeg *.png *.webp \
+| grep '0\.9'
 ```
 
 ## Further readings
