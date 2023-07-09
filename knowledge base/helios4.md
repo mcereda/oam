@@ -2,16 +2,12 @@
 
 ## Table of contents <!-- omit in toc -->
 
-1. [TL;DR](#tldr)
 1. [OS installation](#os-installation)
 1. [First boot](#first-boot)
 1. [Connect to the Helios4 using a serial console](#connect-to-the-helios4-using-a-serial-console)
    1. [First login](#first-login)
 1. [Configuration](#configuration)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
-
-## TL;DR
 
 ## OS installation
 
@@ -85,18 +81,17 @@ sudo armbian-config
 
 - [Armbian]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [download page]: https://wiki.kobol.io/download/#helios4
 [installation guide]: https://wiki.kobol.io/helios4/install/
 [tested microsd cards]: https://wiki.kobol.io/helios4/sdcard/#tested-microsd-card
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [armbian]: armbian.md
-[further readings]: #further-readings
 
-<!-- external references -->
+<!-- Others -->
 [balenaetcher]: http://etcher.io/

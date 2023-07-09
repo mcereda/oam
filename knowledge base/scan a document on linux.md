@@ -48,14 +48,18 @@ All the references in the [further readings] section, plus the following:
 
 - [SANE frontends]
 
-<!-- sane references -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [sane frontends]: http://www.sane-project.org/sane-frontends.html
 [sane]: https://wiki.archlinux.org/title/SANE
 
-<!-- internal references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- external references -->
+<!-- Others -->
 [gscan2pdf]: https://en.wikipedia.org/wiki/Scanner_Access_Now_Easy#gscan2pdf
 [ocrfeeder]: https://en.wikipedia.org/wiki/OCRFeeder
 [paperwork]: https://openpaper.work/

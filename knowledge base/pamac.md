@@ -1,5 +1,10 @@
 # Pamac
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -14,4 +19,9 @@ pamac remove --no-save --orphans --unneeded
 
 - Manjaro's [Wiki]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [wiki]: https://wiki.manjaro.org/index.php/Pamac

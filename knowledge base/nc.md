@@ -10,6 +10,11 @@
 - `-w=SECS`: timeout for connects and final net reads, in seconds
 - `-z`: zero-I/O mode, exit once connected
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -34,6 +39,9 @@ nc -l 5666
 
 - [How To use Netcat to establish and test TCP and UDP connections]
 
-<!-- upstream -->
+<!--
+  References
+  -->
 
+<!-- Others -->
 [how to use netcat to establish and test tcp and udp connections]: https://www.digitalocean.com/community/tutorials/how-to-use-netcat-to-establish-and-test-tcp-and-udp-connections

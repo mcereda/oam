@@ -42,15 +42,13 @@ All the references in the [further readings] section, plus the following:
 - [cheat.sh]
 
 <!--
-  references
+  References
   -->
 
-<!-- upstream -->
-<!-- article sections -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- knowledge base -->
-<!-- others -->
+<!-- Others -->
 [6 more terminal commands you should know]: https://betterprogramming.pub/6-more-terminal-commands-you-should-know-3606cecdf8b6
 [cheat.sh]: https://cheat.sh/script
 [man]: https://manned.org/script

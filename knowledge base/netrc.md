@@ -7,6 +7,11 @@ either by the user executing the command or by the root user.
 If the .netrc file contains a login password, the file's permissions must be set
 to `600` (read and write by its owner only).
 
+## Table of contents <!-- omit in toc -->
+
+1. [Format](#format)
+1. [Further readings](#further-readings)
+
 ## Format
 
 The file can contain the following entries separated by spaces, tabs, or new
@@ -46,4 +51,9 @@ password bluebonnet
 
 - [netrc]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [netrc]: https://everything.curl.dev/usingcurl/netrc

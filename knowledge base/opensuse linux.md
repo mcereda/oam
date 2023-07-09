@@ -1,5 +1,15 @@
 # OpenSUSE
 
+## Table of contents <!-- omit in toc -->
+
+1. [Enable Bluetooth pairing on boot](#enable-bluetooth-pairing-on-boot)
+1. [Enable SSH access from outside after installation](#enable-ssh-access-from-outside-after-installation)
+1. [Raspberry Pi](#raspberry-pi)
+   1. [Firmware update from a running system](#firmware-update-from-a-running-system)
+1. [Rollback from a bootable snapshot](#rollback-from-a-bootable-snapshot)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## Enable Bluetooth pairing on boot
 
 1. enable the `bluetooth` service on boot
@@ -96,17 +106,25 @@ A snapshot of the file system status before the rollback is created, and the def
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [OpenSSH basics]
 - [Bluetooth on boot]
 - [Raspberry Pi4]
 
-<!-- further readings -->
+<!--
+  References
+  -->
 
+<!-- Upstream -->
+[openssh basics]: https://en.opensuse.org/SDB:OpenSSH_basics
+[raspberry pi4]: https://en.opensuse.org/openSUSE:Raspberry_Pi
+[system recovery and snapshot management with snapper]: https://documentation.suse.com/sles/12-SP4/html/SLES-all/cha-snapper.html
+
+<!-- Knowledge base -->
 [bluetooth]: bluetooth.md#bluetooth-devices-cannot-be-used-at-login
 [firewalld]: firewalld.md
 [systemd]: systemd.md
 
+<!-- Others -->
 [bluetooth on boot]: https://www.reddit.com/r/openSUSE/comments/eoozm2/comment/feetqpn/
-[openssh basics]: https://en.opensuse.org/SDB:OpenSSH_basics
-[raspberry pi4]: https://en.opensuse.org/openSUSE:Raspberry_Pi
-[system recovery and snapshot management with snapper]: https://documentation.suse.com/sles/12-SP4/html/SLES-all/cha-snapper.html

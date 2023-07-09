@@ -8,7 +8,6 @@ When the server detects a specific sequence of port-hits, it runs a command defi
 
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
-1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
 ## TL;DR
@@ -88,17 +87,17 @@ Sequences can also be defined in files.
 
 Check the [`knockd(1)`][knockd man page] man page for all the information.
 
-## Further readings
-
 ## Sources
 
 - [How to use port knocking to secure SSH service in Linux]
 - [Server][knockd man page]'s man page
 - [Client][knock man page]'s man page
 
-<!-- upstream -->
-<!-- internal references -->
-<!-- external references -->
+<!--
+  References
+  -->
+
+<!-- Others -->
 [how to use port knocking to secure ssh service in linux]: https://www.tecmint.com/port-knocking-to-secure-ssh/
 [knockd man page]: https://linux.die.net/man/1/knockd
 [knock man page]: https://linux.die.net/man/1/knock

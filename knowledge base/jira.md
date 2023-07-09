@@ -1,7 +1,14 @@
 # Jira
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
+
+## TL;DR
+
 ```sh
-# create a ticket
+# Create a ticket from the CLI.
 curl https://${COMPANY}.atlassian.net/rest/api/2/issue \
   -D - \
   -u ${USER_EMAIL}:${API_TOKEN} \
@@ -25,4 +32,9 @@ curl https://${COMPANY}.atlassian.net/rest/api/2/issue \
 
 - [Creating JIRA issue using curl from command line]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [creating jira issue using curl from command line]: https://stackoverflow.com/questions/31052721/creating-jira-issue-using-curl-from-command-line#31052990

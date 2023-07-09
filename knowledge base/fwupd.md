@@ -1,5 +1,10 @@
 # Fwupd
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -28,5 +33,10 @@ fwupdmgr clear-history
 - [Website]
 - [GitHub] page
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [github]: https://github.com/fwupd/fwupd
 [website]: https://fwupd.org/

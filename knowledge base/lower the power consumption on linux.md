@@ -1,5 +1,12 @@
 # Lower the power consumption on Linux
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
+
+## TL;DR
+
 ```sh
 echo '0' > '/proc/sys/kernel/nmi_watchdog'
 echo 'med_power_with_dipm' > '/sys/class/scsi_host/host0/link_power_management_policy'
@@ -15,5 +22,9 @@ sudo sysctl vm.dirty_writeback_centisecs=6000
 
 - Arch Wiki's [power management][arch wiki power management] page
 
-<!-- -->
+<!--
+  References
+  -->
+
+<!-- Others -->
 [arch wiki power management]: https://wiki.archlinux.org/title/Power_management

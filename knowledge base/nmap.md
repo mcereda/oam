@@ -1,5 +1,10 @@
 # Nmap
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -18,5 +23,13 @@ nmap -O 192.168.0.1
 - [Cheatsheet]
 - [OS detection]
 
-[cheatsheet]: https://hackertarget.com/nmap-cheatsheet-a-quick-reference-guide/
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [os detection]: https://nmap.org/book/man-os-detection.html
+
+
+<!-- Others -->
+[cheatsheet]: https://hackertarget.com/nmap-cheatsheet-a-quick-reference-guide/

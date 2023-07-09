@@ -4,7 +4,6 @@
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -28,15 +27,12 @@ npm uninstall '@pnp/cli-microsoft365'
 - Official [documentation]
 - [node.js]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [documentation]: https://docs.npmjs.com/cli/
 
-<!-- internal references -->
-[further readings]: #further-readings
+<!-- Knowledge base -->
 [node.js]: node.js.md
-
-<!-- external references -->

@@ -40,17 +40,21 @@ redis-cli … 'MONITOR'
 
 ## Sources
 
-- [cheat.sh]
-
 All the references in the [further readings] section, plus the following:
 
-<!-- upstream -->
+- [cheat.sh]
+
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [documentation]: https://redis.io/docs/
 [website]: https://redis.io/
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
-<!-- external references -->
+<!-- In-article sections -->
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/redis-cli

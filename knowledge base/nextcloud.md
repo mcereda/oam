@@ -2,6 +2,13 @@
 
 Redis is recommended to prevent file locking problems.
 
+## Table of contents <!-- omit in toc -->
+
+1. [Containerized](#containerized)
+   1. [Official helm chart](#official-helm-chart)
+1. [Snappy](#snappy)
+1. [Further readings](#further-readings)
+
 ## Containerized
 
 Use environment variables to inform Nextcloud about internal configuration:
@@ -85,10 +92,17 @@ To configure Nextcloud from `snap`:
 - The snap version's [README][snap readme]
 - [How to install and configure Nextcloud on Ubuntu 18.04]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [check if redis is used by nextcloud]: https://help.nextcloud.com/t/how-to-check-if-redis-is-used-in-nc/22268/2
 [docker image]: https://hub.docker.com/_/nextcloud/
 [docker readme]: https://github.com/docker-library/docs/blob/master/nextcloud/README.md
 [helm chart]: https://github.com/nextcloud/helm/tree/master/charts/nextcloud
-[how to install and configure nextcloud on ubuntu 18.04]: https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-nextcloud-on-ubuntu-18-04
 [snap readme]: https://github.com/nextcloud/nextcloud-snap
 [website]: https://nextcloud.com/
+
+<!-- Others -->
+[how to install and configure nextcloud on ubuntu 18.04]: https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-nextcloud-on-ubuntu-18-04

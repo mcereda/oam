@@ -1,5 +1,7 @@
 # Git
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Authentication](#authentication)
 1. [Configuration](#configuration)
@@ -924,6 +926,8 @@ git -c http.sslVerify=false …
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [How to get the current branch name in Git?]
 - [Git Submodules: Adding, Using, Removing, Updating]
 - [How to add and update git submodules]
@@ -954,7 +958,11 @@ git -c http.sslVerify=false …
 - [1 minute coding tip: git diff-words to see diffs on a per-word basis instead of per line]
 - [Dress up your git diffs with word-level highlights]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [docs]: https://git-scm.com/docs/git
 [getting git on a server]: https://git-scm.com/book/en/v2/Git-on-the-Server-Getting-Git-on-a-Server
 [git-config reference]: https://git-scm.com/docs/git-config
@@ -962,7 +970,10 @@ git -c http.sslVerify=false …
 [setting up the server]: https://git-scm.com/book/en/v2/Git-on-the-Server-Setting-Up-the-Server
 [tagging]: https://git-scm.com/book/en/v2/Git-Basics-Tagging
 
-<!-- external references -->
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Others -->
 [1 minute coding tip: git diff-words to see diffs on a per-word basis instead of per line]: https://www.youtube.com/watch?v=gDkvLxbA5ZE
 [10 git tips we can't live without]: https://opensource.com/article/22/4/git-tips
 [able to push to all git remotes with the one command?]: https://stackoverflow.com/questions/5785549/able-to-push-to-all-git-remotes-with-the-one-command

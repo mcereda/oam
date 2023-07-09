@@ -1,5 +1,11 @@
 # Multipass
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -41,10 +47,19 @@ multipass purge
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [Use Linux Virtual Machines with Multipass]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [website]: https://multipass.run/
 
-<!-- external references -->
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Others -->
 [use linux virtual machines with multipass]: https://medium.com/codex/use-linux-virtual-machines-with-multipass-4e2b620cc6

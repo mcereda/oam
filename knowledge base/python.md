@@ -1,5 +1,7 @@
 # Python
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Dictionaries](#dictionaries)
 1. [F-strings](#f-strings)
@@ -201,17 +203,21 @@ See [concurrent execution] for more information.
 - [Logging library]
 - [Subprocess library]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [concurrent execution]: https://docs.python.org/3/library/concurrency.html
 [dictionaries]: https://docs.python.org/3/tutorial/datastructures.html#dictionaries
 [logging howto]: https://docs.python.org/3/howto/logging.html
 [logging library]: https://docs.python.org/3/library/logging.html
 [subprocess library]: https://docs.python.org/3/library/subprocess.html
 
-<!-- internal references -->
-[pip]: ./pip.md
+<!-- In-article sections -->
+[pip]: pip.md
 
-<!-- external references -->
+<!-- Others -->
 [*args and **kwargs in python]: https://www.geeksforgeeks.org/args-kwargs-python/
 [10 Python One-Liners for Dictionaries]: https://medium.com/codex/10-python-one-liners-for-dictionaries-d58754386a1d
 [an intro to threading in python]: https://realpython.com/intro-to-python-threading/

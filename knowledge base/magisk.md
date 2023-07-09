@@ -1,12 +1,14 @@
 # Magisk
 
-1. [TL;DR](#tldr)
-1. [Further readings](#further-readings)
-
-> This procedure worked for the following devices:
+> Worked on:
 >
 > - OnePlus One
 > - OnePlus 5
+
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
 
 ## TL;DR
 
@@ -65,11 +67,13 @@ To flash the patched boot image from your computer with `adb` and `fastboot`:
 - [How to Install Magisk on your Android Phone]
 - [Magisk install]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
+[magisk install]: https://topjohnwu.github.io/Magisk/install.html
 [releases]: https://github.com/topjohnwu/Magisk/releases
 
-<!-- internal references -->
-
-<!-- external references -->
+<!-- Others -->
 [how to install magisk on your android phone]: https://www.xda-developers.com/how-to-install-magisk/
-[magisk install]: https://topjohnwu.github.io/Magisk/install.html

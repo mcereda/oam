@@ -1,11 +1,13 @@
 # Oracle Cloud
 
+## Table of contents <!-- omit in toc -->
+
 1. [Concepts](#concepts)
    1. [Compartments](#compartments)
-   2. [Networking](#networking)
+   1. [Networking](#networking)
       1. [Access to the Internet](#access-to-the-internet)
-2. [Further readings](#further-readings)
-3. [Sources](#sources)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## Concepts
 
@@ -29,20 +31,26 @@ Before deleting a compartment, all its resources must have been moved, deleted o
 
 ## Further readings
 
-- [oci-cli]
+- [`oci-cli`][oci-cli]
 - [Compute images]
 - [Connect to private compute instances using OCI Bastion Service]
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [Required keys and OCIDs]
 
-<!-- oracle cloud's documentation -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [compute images]: https://docs.oracle.com/en-us/iaas/images/
 [required keys and ocids]: https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm
 
-<!-- internal references -->
-[oci-cli]: ./oci-cli.md
+<!-- In-article sections -->
+[oci-cli]: oci-cli.md
 
-<!-- external references -->
+<!-- Others -->
 [connect to private compute instances using oci bastion service]: https://medium.com/@harjulthakkar/connect-to-private-compute-instance-using-oci-bastion-service-ca96a3ceea49

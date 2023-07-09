@@ -1,5 +1,10 @@
 # MySQL
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -36,6 +41,11 @@ grant ALL on db.* to 'username'@'127.0.0.1';
 - How to [show databases] in MySQL
 - [phpimap issue 1549]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [list tables]: https://alvinalexander.com/blog/post/mysql/list-tables-in-mysql-database/
 [show databases]: https://linuxize.com/post/how-to-show-databases-in-mysql/
 [phpimap issue 1549]: https://github.com/phpipam/phpipam/issues/1549

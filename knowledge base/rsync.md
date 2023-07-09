@@ -1,5 +1,7 @@
 # rsync
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
 1. [Explored options](#explored-options)
 1. [Sources](#sources)
@@ -130,8 +132,10 @@ parallel -q \
 - [cheat.sh]
 - [Showing total progress in rsync: is it possible?]
 
-<!-- -->
-[cheat.sh]: https://cheat.sh/rsync
+<!--
+  References
+  -->
 
-<!-- -->
+<!-- Others -->
+[cheat.sh]: https://cheat.sh/rsync
 [showing total progress in rsync: is it possible?]: https://serverfault.com/questions/219013/showing-total-progress-in-rsync-is-it-possible#441724

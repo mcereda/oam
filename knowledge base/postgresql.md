@@ -29,12 +29,15 @@ All the references in the [further readings] section, plus the following:
 
 - [Connect to a PostgreSQL database]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [docker image]: https://github.com/docker-library/docs/blob/master/postgres/README.md
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
-<!-- external references -->
+<!-- Others -->
 [connect to a postgresql database]: https://www.postgresqltutorial.com/connect-to-postgresql-database/

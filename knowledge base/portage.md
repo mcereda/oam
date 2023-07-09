@@ -4,7 +4,6 @@
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -21,18 +20,18 @@ portageq envvar 'FEATURES' | xargs -n1
 ## Further readings
 
 - [Portage]
-- [/etc/portage]
+- [`/etc/portage`][/etc/portage]
+- [Gentoo Linux]
+- [Funtoo Linux]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [/etc/portage]: https://wiki.gentoo.org/wiki//etc/portage
 [portage]: https://wiki.gentoo.org/wiki/Portage
 
-<!-- in-article references -->
-[further readings]: #further-readings
-
-<!-- internal references -->
-<!-- external references -->
+<!-- Knowledge base -->
+[gentoo linux]: gentoo%20linux.md
+[funtoo linux]: funtoo%20linux.md

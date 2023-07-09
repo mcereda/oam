@@ -6,7 +6,6 @@ Open-source, cross-platform JavaScript runtime environment.
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -20,15 +19,12 @@ export NODE_EXTRA_CA_CERTS='path/to/trusted/ca/cert.pem'
 - [Website]
 - [`npm`][npm]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [website]: https://nodejs.org/en
 
-<!-- internal references -->
-[further readings]: #further-readings
+<!-- Knowledge base -->
 [npm]: npm.md
-
-<!-- external references -->

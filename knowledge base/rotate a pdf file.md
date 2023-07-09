@@ -1,7 +1,10 @@
 # Rotate a PDF file
 
-## Further readings
+See [`pdftk`][pdftk].
 
-- [pdftk]
+<!--
+  References
+  -->
 
+<!-- Knowledge base -->
 [pdftk]: pdftk.md#rotate-a-file

@@ -1,5 +1,10 @@
 # Replicated
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -15,12 +20,12 @@ replicated admin --tty=0 retrieve-iact
 - [replicatedctl]
 - [Configuration file example]
 
-## Sources
+<!--
+  References
+  -->
 
-<!-- upstream -->
-
-<!-- internal references -->
+<!-- Knowledge base -->
 [replicatedctl]: replicatedctl.md
-[configuration file example]: ../examples/terraform%20enterprise/replicated.settings.json
 
-<!-- external references -->
+<!-- Files -->
+[configuration file example]: ../examples/terraform%20enterprise/replicated.settings.json

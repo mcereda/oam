@@ -1,5 +1,11 @@
 # JQ
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -94,10 +100,20 @@ helm template chartName \
 
 ## Sources
 
+All the references in the [further readings] section, plus the following:
+
 - [Filter objects list with regex]
 - [Select multiple conditions]
 - [Change multiple values at once]
 
+<!--
+  References
+  -->
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Others -->
 [change multiple values at once]: https://stackoverflow.com/questions/47355901/jq-change-multiple-values#47357956
 [filter objects list with regex]: https://til.hashrocket.com/posts/uv0bjiokwk-use-jq-to-filter-objects-list-with-regex
 [select multiple conditions]: https://stackoverflow.com/questions/33057420/jq-select-multiple-conditions#33059058

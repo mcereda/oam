@@ -1,5 +1,10 @@
 # JSONPath
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -14,5 +19,10 @@ kubectl get serviceaccounts \
 - [JSONPath Syntax]
 - [Live editor]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [jsonpath syntax]: https://support.smartbear.com/alertsite/docs/monitors/api/endpoint/jsonpath.html
 [live editor]: https://json8.github.io/patch/demos/apply/

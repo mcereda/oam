@@ -1,5 +1,10 @@
 # Pi-hole
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -17,15 +22,19 @@ stat /etc/pihole/gravity.db
 
 - [Website]
 - [Github]
-- The [pihole] command
+- [`pihole`][pihole] the command
 - [Run Pi-hole as a container with Podman on openSUSE]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [github]: https://github.com/pi-hole/pi-hole
 [website]: https://pi-hole.net/
 
-<!-- internal references -->
+<!-- In-article sections -->
 [pihole]: pihole.md
 
-<!-- external references -->
+<!-- Others -->
 [run pi-hole as a container with podman on opensuse]: https://www.suse.com/c/pihole-podman-opensuse/

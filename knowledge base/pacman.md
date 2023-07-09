@@ -7,6 +7,11 @@ Useful options:
 - `--needed`
 - `--unneeded`
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -36,4 +41,9 @@ pacman --noconfirm \
 
 - [Prevent pacman from reinstalling packages that were already installed]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [Prevent pacman from reinstalling packages that were already installed]: https://superuser.com/questions/568967/prevent-pacman-from-reinstalling-packages-that-were-already-installed#568983
