@@ -1,5 +1,7 @@
 # Little Snitch
 
+## Table of contents <!-- omit in toc -->
+
 1. [Rules](#rules)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
@@ -18,11 +20,19 @@ All the references in the [further readings] section, plus the following:
 
 - [Commonly whitelisted domains]
 
-<!-- internal references-->
-[full ruleset]: rules/all.lsrules
+<!--
+  References
+  -->
+
+<!-- In-article sections -->
 [further readings]: #further-readings
+
+<!-- Knowledge base -->
 [little snitch]: ../knowledge%20base/mac%20os%20x/little%20snitch.md
+
+<!-- Files -->
+[full ruleset]: rules/all.lsrules
 [parts]: rules/parts/
 
-<!-- external references -->
+<!-- Others -->
 [commonly whitelisted domains]: https://discourse.pi-hole.net/t/commonly-whitelisted-domains/212

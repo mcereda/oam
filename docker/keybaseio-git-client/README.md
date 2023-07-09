@@ -4,9 +4,11 @@ The image gets `git` so I can use it to manage my repositories on keybase.io.
 
 Can surely be vastly improved.
 
+## Table of contents <!-- omit in toc -->
+
 1. [TL;DR](#tldr)
-2. [Permissions mismatch in the binded directory](#permissions-mismatch-in-the-binded-directory)
-3. [Further readings](#further-readings)
+1. [Permissions mismatch in the binded directory](#permissions-mismatch-in-the-binded-directory)
+1. [Further readings](#further-readings)
 
 ## TL;DR
 
@@ -122,11 +124,17 @@ drwxr-xr-x 1 keybase keybase 304 Sep 18 08:04 repo
 
 - [keybaseio/client] on DockerHub
 - [Configure the selinux label]
-- [How to create docker volume device/host path] (not used but interesting)
+- [How to create docker volume device/host path] (not used, but interesting)
 - [Docker and the Host Filesystem Owner Matching Problem]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [keybaseio/client]: https://hub.docker.com/r/keybaseio/client
 
+<!-- Others -->
 [configure the selinux label]: https://docs.docker.com/storage/bind-mounts/#configure-the-selinux-label
 [how to create docker volume device/host path]: https://stackoverflow.com/questions/49950326/how-to-create-docker-volume-device-host-path#49952217
 [docker and the host filesystem owner matching problem]: https://www.fullstaq.com/knowledge-hub/blogs/docker-and-the-host-filesystem-owner-matching-problem

@@ -1,5 +1,13 @@
 # Grafana on Kubernetes using Helm
 
+## Table of contents <!-- omit in toc -->
+
+1. [Usage](#usage)
+1. [Gotchas](#gotchas)
+1. [Further readings](#further-readings)
+
+## Usage
+
 Installation:
 
 1. add the repository:
@@ -57,5 +65,12 @@ Useful dashboards:
 - Official [helm chart]
 - [Set up prometheus and ingress on kubernetes]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [helm chart]: https://github.com/grafana/helm-charts/tree/main/charts/grafana
+
+<!-- Others -->
 [set up prometheus and ingress on kubernetes]: https://blog.gojekengineering.com/diy-how-to-set-up-prometheus-and-ingress-on-kubernetes-d395248e2ba

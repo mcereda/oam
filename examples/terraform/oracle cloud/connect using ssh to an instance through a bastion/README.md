@@ -2,10 +2,12 @@
 
 Simple example to create a Bastion in Oracle Cloud.
 
+## Table of contents <!-- omit in toc -->
+
 1. [Requirements](#requirements)
-2. [Connect to the instance using SSH through the bastion](#connect-to-the-instance-using-ssh-through-the-bastion)
-3. [Further readings](#further-readings)
-4. [Sources](#sources)
+1. [Connect to the instance using SSH through the bastion](#connect-to-the-instance-using-ssh-through-the-bastion)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## Requirements
 
@@ -54,18 +56,30 @@ ssh -fN bastion && ssh instance
 
 ## Further readings
 
+- [Ridiculously powerful free server in the cloud]
+
 ## Sources
 
-- [Ridiculously powerful free server in the cloud]
+All the references in the [further readings] section, plus the following:
+
 - [Always free resources] in Oracle Cloud
 - [Oracle Cloud Infrastructure Provider documentation]
 - [oracle-terraform-modules/terraform-oci-compute-instance]
 
-<!-- internal references -->
-[requirements]: design/requirements.png
+<!--
+  References
+  -->
 
-<!-- external references -->
+<!-- Upstream -->
 [always free resources]: https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm
 [oracle cloud infrastructure provider documentation]: https://registry.terraform.io/providers/oracle/oci/latest/docs
-[ridiculously powerful free server in the cloud]: https://medium.com/codex/ridiculously-powerful-free-server-in-the-cloud-dd4da8524a9c
 [oracle-terraform-modules/terraform-oci-compute-instance]: https://github.com/oracle-terraform-modules/terraform-oci-compute-instance
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Files -->
+[requirements]: design/requirements.png
+
+<!-- Others -->
+[ridiculously powerful free server in the cloud]: https://medium.com/codex/ridiculously-powerful-free-server-in-the-cloud-dd4da8524a9c

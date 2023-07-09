@@ -1,5 +1,13 @@
 # Boinc client on Docker
 
+## Table of contents <!-- omit in toc -->
+
+1. [Parameters](#parameters)
+1. [Docker Compose](#docker-compose)
+1. [Attach to an account manager](#attach-to-an-account-manager)
+1. [TODO](#todo)
+1. [Sources](#sources)
+
 ## Parameters
 
 Parameter | Type | Default | Function
@@ -47,5 +55,10 @@ boinccmd --acct_mgr attach https://bam.boincstats.com $USER $PASSWORD
 - [Github]
 - [Docker Hub]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [docker hub]: https://hub.docker.com/r/boinc/client
 [github]: https://github.com/BOINC/boinc-client-docker
