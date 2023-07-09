@@ -1,5 +1,7 @@
 # Vivaldi browser
 
+## Network activity
+
 | URL                 | Ports      | Description                 |
 | ------------------- | ---------- | --------------------------- |
 | bifrost.vivaldi.com | 443, 15674 | Sync settings               |
@@ -9,4 +11,9 @@
 
 - [Decoding network activity in Vivaldi]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [decoding network activity in vivaldi]: https://vivaldi.com/blog/decoding-network-activity-in-vivaldi/

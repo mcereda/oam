@@ -16,15 +16,27 @@ In such cases the text file itself contains the multipart message body of the em
 10 j5Dv4g9+fPnTRcX006T++LdYYw7w+i...
 ```
 
-You can use `munpack` to easily extract attachments out of such text files and write them into a proper named files.
+You can use `munpack` to easily extract attachments out of such text files, and save them as properly named files.
 
 ```sh
 $ munpack -f plaintext.eml
 myawesomefile.tar.gz (application/x-gzip)
 ```
 
+## Further readings
+
+- [`munpack`][munpack]
+
 ## Sources
 
 - [Extract attachments from multipart messages]
 
+<!--
+  References
+  -->
+
+<!-- Knowledge base -->
+[munpack]: munpack.md
+
+<!-- Others -->
 [extract attachments from multipart messages]: https://liquidat.wordpress.com/2013/08/07/short-tip-extract-attachments-from-multipart-messages/

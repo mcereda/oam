@@ -192,7 +192,11 @@ All the references in the [further readings] section, plus the following:
 
 - [BrowserPass extension installation guide]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [config]: https://github.com/gopasspw/gopass/blob/master/docs/config.md
 [documentation]: https://github.com/gopasspw/gopass/tree/master/docs
 [faq]: https://github.com/gopasspw/gopass/blob/master/docs/faq.md
@@ -200,9 +204,9 @@ All the references in the [further readings] section, plus the following:
 [secrets]: https://github.com/gopasspw/gopass/blob/master/docs/secrets.md
 [website]: https://www.gopass.pw/
 
-<!-- internal references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- external references -->
+<!-- Others -->
 [browserpass extension installation guide]: https://github.com/browserpass/browserpass-extension#
 [woile's cheatsheet]: https://woile.github.io/gopass-cheat-sheet/

@@ -32,10 +32,11 @@ awk '$2 > 100' sales.txt
 - [Printing the last column of a line in a file]
 - [The essential Bash cheat sheet]
 
-<!-- upstream -->
-<!-- in-article references -->
-<!-- internal references -->
-<!-- external references -->
+<!--
+  References
+  -->
+
+<!-- Others -->
 [print line only if number in third field is greater than x]: https://unix.stackexchange.com/questions/395588/print-line-only-if-number-in-third-field-is-greater-than-x#395593
 [printing the last column of a line in a file]: https://stackoverflow.com/questions/13046167/printing-the-last-column-of-a-line-in-a-file#13046224
 [the essential bash cheat sheet]: https://betterprogramming.pub/the-essential-bash-cheat-sheet-e1c3df06560

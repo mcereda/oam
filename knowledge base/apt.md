@@ -211,20 +211,24 @@ All the references in the [further readings] section, plus the following:
 - [cheat.sh]
 - [Fix a "Problem with MergeList" or "status file could not be parsed" error]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [apt configuration]: https://wiki.debian.org/AptConfiguration
 [apt_preferences man page]: https://manpages.debian.org/testing/apt/apt_preferences.5.en.html
 [configuring apt sources]: https://wiki.debian.org/SourcesList
 [unattended upgrades]: https://wiki.debian.org/UnattendedUpgrades
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [apt-file]: apt-file.md
 [dpkg]: dpkg.md
 [netselect-apt]: netselect-apt.md
 
-<!-- external references -->
+<!-- Others -->
 [cheat.sh]: https://cheat.sh/apt
 [fix a "problem with mergelist" or "status file could not be parsed" error]: https://askubuntu.com/questions/30072/how-do-i-fix-a-problem-with-mergelist-or-status-file-could-not-be-parsed-err#30199

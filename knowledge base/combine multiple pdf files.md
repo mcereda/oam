@@ -1,7 +1,10 @@
 # Combine multiple PDF files
 
-## Further readings
+See [`pdftk`][pdftk].
 
-- [pdftk]
+<!--
+  References
+  -->
 
+<!-- Others -->
 [pdftk]: pdftk.md#combine-multiple-files

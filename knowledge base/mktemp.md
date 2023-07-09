@@ -2,6 +2,11 @@
 
 Creates a unique temporary file or directory and returns the absolute path to it.
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -28,4 +33,9 @@ mktemp -t "txt"
 
 - [Man page]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [man page]: https://www.gnu.org/software/autogen/mktemp.html

@@ -150,13 +150,14 @@ The versions listed in such file can be:
 - [plugins list]
 - [`.tool-versions` example][.tool-versions example]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [github]: https://github.com/asdf-vm/asdf
 [homepage]: https://asdf-vm.com/
 [plugins list]: https://github.com/asdf-vm/asdf-plugins
 
-<!-- in-article references -->
-<!-- internal references -->
+<!-- Files -->
 [.tool-versions example]: ../examples/.tool-versions
-
-<!-- external references -->

@@ -28,13 +28,16 @@ All the references in the [further readings] section, plus the following:
 
 - [Get the environment variables of running process in container]
 
-<!-- upstream -->
-<!-- in-article references -->
+<!--
+  References
+  -->
+
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [kubectl]: kubectl.md
 [kubernetes]: README.md
 
-<!-- external references -->
+<!-- Others -->
 [get the environment variables of running process in container]: https://unix.stackexchange.com/a/412730

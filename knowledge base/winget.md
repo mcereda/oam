@@ -1,5 +1,13 @@
 # WinGet
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Installation](#installation)
+   1. [Through the Microsoft Store (recommended)](#through-the-microsoft-store-recommended)
+   1. [Manual installation](#manual-installation)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```powershell
@@ -39,10 +47,16 @@ Once you have received the updated App Installer you should be able to execute `
 
 - Tool [overview]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [overview]: https://docs.microsoft.com/en-us/windows/package-manager/winget/
 [releases page]: https://github.com/microsoft/winget-cli/releases
 [repository]: https://github.com/microsoft/winget-cli
 
+<!-- Others -->
 [app installer package]: https://www.microsoft.com/p/app-installer/9nblggh4nns1
 [join the preview flight ring]: http://aka.ms/winget-InsiderProgram
 [windows insider]: https://insider.windows.com/

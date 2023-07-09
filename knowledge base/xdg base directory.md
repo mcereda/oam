@@ -27,16 +27,19 @@ All paths set in these environment variables must be absolute. By specification,
 
 ## Sources
 
-- [Arch Linux Wiki page]
-
 All the references in the [further readings] section, plus the following:
 
-<!-- upstream -->
+- [Arch Linux Wiki page]
+
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [specifications]: https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
-<!-- external references -->
+<!-- Others -->
 [arch linux wiki page]: https://wiki.archlinux.org/title/XDG_Base_Directory

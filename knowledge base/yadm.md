@@ -2,6 +2,14 @@
 
 Yet Another Dotfile Manager.
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Class and overrides](#class-and-overrides)
+1. [Alternate files](#alternate-files)
+1. [Templates](#templates)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -86,11 +94,15 @@ Check the official docs on [templates] for the updated information.
 
 ## Further readings
 
-- the project's [homepage]
+- [Website]
 - [Alternate files]
 - [Templates]
 
-[homepage]: https://yadm.io/
+<!--
+  References
+  -->
 
+<!-- Upstream -->
 [alternate files]: https://yadm.io/docs/alternates
 [templates]: https://yadm.io/docs/templates
+[website]: https://yadm.io/

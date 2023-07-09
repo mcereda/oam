@@ -302,16 +302,23 @@ All the references in the [further readings] section, plus the following:
 - [slaise/High-level-Markdown]
 - [Syntax highlighting in Markdown]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [basic syntax]: https://www.markdownguide.org/basic-syntax
 [code blocks]: https://docs.readme.com/rdmd/docs/code-blocks
 [documentation]: https://docs.readme.com/rdmd/docs
 [extended syntax]: https://www.markdownguide.org/extended-syntax/
 
-<!-- internal references -->
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Knowledge base -->
 [mermaid.js]: mermaid.js.md
 
-<!-- external references -->
+<!-- Others -->
 [bierner.markdown-mermaid]: https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid
 [escaping backtick in markdown]: https://www.growingwiththeweb.com/2015/06/escaping-backtick-in-markdown.html
 [escaping backticks]: https://www.markdownguide.org/basic-syntax/#escaping-backticks

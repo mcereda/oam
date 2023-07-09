@@ -6,7 +6,6 @@ Terminal session recorder.
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -38,22 +37,13 @@ asciinema upload 'path/to/file.cast'
 - [Github]
 - [`agg`][agg] to convert cast files into GIFs
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
-
 <!--
-  references
+  References
   -->
 
-<!-- upstream -->
+<!-- Upstream -->
 [github]: https://github.com/asciinema/asciinema
 [website]: https://asciinema.org/
 
-<!-- article sections -->
-[further readings]: #further-readings
-
-<!-- knowledge base -->
+<!-- Knowledge base -->
 [agg]: agg.md
-
-<!-- others -->

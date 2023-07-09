@@ -1,4 +1,4 @@
-# Gsutils
+# Gsutil
 
 ## TL;DR
 
@@ -14,4 +14,9 @@ gsutil rb gs://${BUCKET_NAME}
 
 - [Deleting buckets]
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [deleting buckets]: https://cloud.google.com/storage/docs/deleting-buckets

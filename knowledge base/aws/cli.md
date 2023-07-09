@@ -1,5 +1,11 @@
 # AWS CLI
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Profiles](#profiles)
+1. [Further readings](#further-readings)
+
 ## TL;DR
 
 ```sh
@@ -36,10 +42,15 @@ Default output format [None]: json
 $ export AWS_PROFILE="work"
 ```
 
-## Sources
+## Further readings
 
 - CLI [quickstart]
 - [Configure profiles] in the CLI
 
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [quickstart]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html
 [configure profiles]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html

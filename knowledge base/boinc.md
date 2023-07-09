@@ -12,7 +12,6 @@
 1. [Ask for tasks for alternative platforms](#ask-for-tasks-for-alternative-platforms)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -151,30 +150,26 @@ In `cc_config.xml`:
 - [boinctui] for a TUI manager
 - [GUI RPC bind to port 31416 failed: 98]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
+[amd linux drivers]: https://www.amd.com/en/support/linux-drivers
 [boinc manager]: https://boinc.berkeley.edu/wiki/BOINC_Manager
 [client configuration]: https://boinc.berkeley.edu/wiki/Client_configuration
 [controlling boinc remotely]: https://boinc.berkeley.edu/wiki/Controlling_BOINC_remotely
+[installing or uninstalling the amdgpu stack]: https://amdgpu-install.readthedocs.io/en/latest/install-installing.html
 [platforms]: https://boinc.berkeley.edu/trac/wiki/BoincPlatforms
+[radeon™ software for linux® installation]: https://amdgpu-install.readthedocs.io/en/latest/
 [website]: https://boinc.berkeley.edu/
 
-<!-- in-article references -->
-[further readings]: #further-readings
 
-<!-- internal references -->
+<!-- In-article sections -->
 [boinccmd]: boinccmd.md
 
-<!-- external references -->
-[boinctui]: https://www.mankier.com/package/boinc-tui
+<!-- Others -->
 [boinc on arch wiki]: https://wiki.archlinux.org/title/BOINC
-[linux suspend when computer is in use bug]: https://boinc.berkeley.edu/dev/forum_thread.php?id=14019&postid=101146#101146
-
-[amd linux drivers]: https://www.amd.com/en/support/linux-drivers
-[installing or uninstalling the amdgpu stack]: https://amdgpu-install.readthedocs.io/en/latest/install-installing.html
-[radeon™ software for linux® installation]: https://amdgpu-install.readthedocs.io/en/latest/
-
+[boinctui]: https://www.mankier.com/package/boinc-tui
 [gui rpc bind to port 31416 failed: 98]: https://boinc.mundayweb.com/wiki/index.php?title=GUI_RPC_bind_to_port_31416_failed:_98
+[linux suspend when computer is in use bug]: https://boinc.berkeley.edu/dev/forum_thread.php?id=14019&postid=101146#101146

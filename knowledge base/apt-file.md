@@ -24,12 +24,15 @@ All the references in the [further readings] section, plus the following:
 
 - [List of files installed from apt package]
 
-<!-- upstream -->
-<!-- in-article references -->
+<!--
+  References
+  -->
+
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [apt]: apt.md
 
-<!-- external references -->
+<!-- Others -->
 [list of files installed from apt package]: https://serverfault.com/questions/96964/list-of-files-installed-from-apt-package#96965

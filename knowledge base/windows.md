@@ -1,4 +1,11 @@
-# Microsoft windows
+# Microsoft Windows
+
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Disable fast startup on Windows 10](#disable-fast-startup-on-windows-10)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -31,4 +38,9 @@ Test-NetConnection -Port 443 -ComputerName 192.168.0.1 -InformationLevel Detaile
 
 - [How to disable Windows 10 fast startup (and why you'd want to)]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [how to disable windows 10 fast startup (and why you'd want to)]: https://www.windowscentral.com/how-disable-windows-10-fast-startup

@@ -6,7 +6,6 @@ CLI for mermaid. Takes a mermaid definition file as input and generates an `svg`
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -22,15 +21,12 @@ mmdc -i 'input.mmd' -o 'output.svg'
 
 - [mermaid.js]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [github]: https://github.com/mermaid-js/mermaid-cli
 
-<!-- internal references -->
-[further readings]: #further-readings
+<!-- Knowledge base -->
 [mermaid.js]: mermaid.js.md
-
-<!-- external references -->

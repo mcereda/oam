@@ -1,5 +1,13 @@
 # Keychron
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
+## TL;DR
+
 1. set the keyboard to _Windows mode_ using the side switch
 
 1. hold `Fn + X + L` for 4 seconds to set the function key row to _fn mode_
@@ -33,7 +41,11 @@
 - [Keychron fn keys in Linux]
 - [Apple Keyboard] on the [Archlinux wiki]
 
-[archlinux wiki]: https://wiki.archlinux.org
+<!--
+  References
+  -->
 
+<!-- Others -->
 [apple keyboard]: https://wiki.archlinux.org/index.php/Apple_Keyboard
+[archlinux wiki]: https://wiki.archlinux.org
 [keychron fn keys in linux]: https://mikeshade.com/posts/keychron-linux-function-keys

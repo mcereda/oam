@@ -7,7 +7,6 @@ Based on Debian.
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -16,17 +15,15 @@ Based on Debian.
 - [Website]
 - [Debian] GNU/Linux
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [website]: https://www.armbian.com/
 
-<!-- in-article references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [debian]: debian.md
-
-<!-- external references -->

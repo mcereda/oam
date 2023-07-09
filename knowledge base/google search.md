@@ -1,5 +1,10 @@
 # Google Search
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Sources](#sources)
+
 ## TL;DR
 
 - find an **exact phrase** enclosing it in _quotation marks_ (`""`); it will give back only results that include those same words in that same order:
@@ -36,4 +41,9 @@
 
 - [20 Googling Tricks 99% of People Don't Know About]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [20 googling tricks 99% of people don't know about]: https://betterhumans.pub/20-googling-tricks-99-of-people-dont-know-about-465ba0477bec

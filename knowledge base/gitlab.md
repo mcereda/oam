@@ -369,7 +369,11 @@ All the references in the [further readings] section, plus the following:
 - [Configuring private dns zones and upstream nameservers in kubernetes]
 - [Using GitLab token to clone without authentication]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [adding and removing kubernetes clusters]: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
 [chart]: https://docs.gitlab.com/charts/
 [command-line options]: https://docs.gitlab.com/charts/installation/command-line-options.html
@@ -381,9 +385,9 @@ All the references in the [further readings] section, plus the following:
 [runners on kubernetes]: https://docs.gitlab.com/runner/install/kubernetes.html
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
 
-<!-- internal references -->
+<!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- external references -->
+<!-- Others -->
 [configuring private dns zones and upstream nameservers in kubernetes]: https://kubernetes.io/blog/2017/04/configuring-private-dns-zones-upstream-nameservers-kubernetes/
 [using gitlab token to clone without authentication]: https://stackoverflow.com/questions/25409700/using-gitlab-token-to-clone-without-authentication#29570677

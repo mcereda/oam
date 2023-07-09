@@ -5,7 +5,6 @@
 1. [TL;DR](#tldr)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
@@ -69,16 +68,14 @@ boinccmd --set_network_mode 'never' '600'
 ## Further readings
 
 - [Boinccmd tool]
+- [Boinc]
 
-## Sources
+<!--
+  References
+  -->
 
-All the references in the [further readings] section, plus the following:
-
-<!-- upstream -->
+<!-- Upstream -->
 [boinccmd tool]: https://boinc.berkeley.edu/wiki/Boinccmd_tool
 
-<!-- in-article references -->
-[further readings]: #further-readings
-
-<!-- internal references -->
-<!-- external references -->
+<!-- Knowledge base -->
+[boinc]: boinc.md

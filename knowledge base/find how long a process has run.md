@@ -2,6 +2,12 @@
 
 UNIX and Linux have commands for almost everything; if there is no command, you can check some important files in the `/etc` directory or in the `/proc` virtual filesystem to find out some useful information.
 
+## Table of contents <!-- omit in toc -->
+
+1. [The easy way](#the-easy-way)
+1. [The hackish way](#the-hackish-way)
+1. [Sources](#sources)
+
 ## The easy way
 
 If the program started today, `ps` also shows when:
@@ -36,6 +42,11 @@ Useful if the process started before today:
 
 ## Sources
 
-- [how to find how long a process has run in unix]
+- [How to find how long a process has run in Unix]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [how to find how long a process has run in unix]: https://dzone.com/articles/how-to-find-how-long-a-process-has-run-in-unix

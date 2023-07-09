@@ -33,15 +33,17 @@ wakeonlan -n '11:22:33:44:55:66' -i '192.168.100.3'
 
 All the references in the [further readings] section, plus the following:
 
-- [wake a host from lan]
+- [Wake a host from LAN]
 
-<!-- upstream -->
-<!-- internal references -->
+<!--
+  References
+  -->
 
+<!-- In-article sections -->
 [further readings]: #further-readings
 
+<!-- Knowledge base -->
 [wake a host from lan]: wake%20a%20host%20from%20lan.md
 
-<!-- external references -->
-
+<!-- Others -->
 [man page]: https://www.unix.com/man-page/debian/1/WAKEONLAN/

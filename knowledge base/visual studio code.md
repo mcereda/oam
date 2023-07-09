@@ -1,5 +1,7 @@
 # Visual Studio Code
 
+## Table of contents <!-- omit in toc -->
+
 1. [Handy keyboard shortcuts](#handy-keyboard-shortcuts)
 1. [Handy settings](#handy-settings)
    1. [Built-in](#built-in)
@@ -107,12 +109,15 @@ and if not, change them.
 
 ## Sources
 
-- [using extensions in compiled vscode]
+- [Using extensions in compiled VSCode]
 
-<!-- product's references -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [network connections in visual studio code]: https://code.visualstudio.com/docs/setup/network
 [official product.json]: https://github.com/Microsoft/vscode/blob/master/product.json
 
-<!-- internal references -->
-<!-- external references -->
+<!-- Others -->
 [using extensions in compiled vscode]: https://stackoverflow.com/questions/44057402/using-extensions-in-compiled-vscode#45291490

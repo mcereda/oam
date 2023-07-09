@@ -1,5 +1,12 @@
 # ffmpeg
 
+## Table of contents <!-- omit in toc -->
+
+1. [TL;DR](#tldr)
+1. [Format conversion](#format-conversion)
+   1. [Webm to GIF](#webm-to-gif)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
@@ -25,5 +32,10 @@ The first command creates a palette out of the webm file. The second command con
 - [Convert a webm file to gif]
 - [How to convert a webm video to a gif on the command line]
 
+<!--
+  References
+  -->
+
+<!-- Others -->
 [convert a webm file to gif]: https://mundanecode.com/posts/convert-webm-to-gif
 [how to convert a webm video to a gif on the command line]: https://askubuntu.com/questions/506670/how-to-do-i-convert-an-webm-video-to-a-animated-gif-on-the-command-line

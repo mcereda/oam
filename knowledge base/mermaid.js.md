@@ -18,12 +18,14 @@ Mermaid.js offers a [live editor] to check the graph code.
 - [Markdown]
 - [mermaid-cli]
 
-<!-- upstream -->
+<!--
+  References
+  -->
+
+<!-- Upstream -->
 [documentation]: https://mermaid.js.org/intro/
 [live editor]: https://mermaid.live
 
-<!-- internal references -->
+<!-- Knowledge base -->
 [markdown]: markdown.md
 [mermaid-cli]: mermaid-cli.md
-
-<!-- external references -->
