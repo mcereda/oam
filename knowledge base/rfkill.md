@@ -22,7 +22,7 @@ rfkill unblock 'id'
 
 - [How to disable your Raspberry Pi's Wi-Fi]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- internal references -->
 <!-- external references -->
 [how to disable your raspberry pi's wi-fi]: https://pimylifeup.com/raspberry-pi-disable-wifi/

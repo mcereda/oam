@@ -20,7 +20,7 @@ All the references in the [further readings] section, plus the following:
 
 - [Advice for new users on not breaking their Debian system]
 
-<!-- project's references -->
+<!-- upstream -->
 [advice for new users on not breaking their debian system]: https://wiki.debian.org/DontBreakDebian
 
 <!-- internal references -->

@@ -24,5 +24,5 @@ A commit message should be structured as follows:
 
 - [Website]
 
-<!-- project's references -->
+<!-- upstream -->
 [website]: https://www.conventionalcommits.org

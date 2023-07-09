@@ -520,7 +520,7 @@ All the references in the [further readings] section, plus the following:
 - [`az aks` command reference][az aks reference]
 - [Create and manage Azure Pipelines from the command line]
 
-<!-- project's references -->
+<!-- upstream -->
 [authenticate with an azure container registry]: https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication?tabs=azure-cli
 [az aks reference]: https://learn.microsoft.com/en-us/cli/azure/aks
 [az reference]: https://learn.microsoft.com/en-us/cli/azure/reference-index

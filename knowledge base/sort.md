@@ -59,7 +59,7 @@ awk 'BEGIN {FS=","; OFS="|"} {print $NF,$0}' file.txt \
 - [Sort a file in Unix based on the last field]
 - [The essential Bash cheat sheet]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- in-article references -->
 <!-- internal references -->
 <!-- external references -->

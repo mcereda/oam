@@ -529,7 +529,7 @@ All the references in the [further readings] section, plus the following:
 - [How to recursively set directory and file permissions]
 - [Is it possible to use inline templates?]
 
-<!-- project's references -->
+<!-- upstream -->
 [ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
 [configuration]: https://docs.ansible.com/ansible/latest/reference_appendices/config.html

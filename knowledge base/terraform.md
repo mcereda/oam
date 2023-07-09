@@ -295,7 +295,7 @@ All the references in the [further readings] section, plus the following:
 - [Azure Provider]
 - [Conditional creation of a resource based on a variable in .tfvars]
 
-<!-- project's references -->
+<!-- upstream -->
 [cli documentation]: https://www.terraform.io/docs/cli/
 [environment variables]: https://www.terraform.io/cli/config/environment-variables
 [forcing re-creation of resources]: https://www.terraform.io/cli/state/taint

@@ -207,7 +207,7 @@ All the references in the [further readings] section, plus the following:
 - [Configuring deduplication block on the Synology]
 - [Encrypting an attached external USB drive?]
 
-<!-- project's references -->
+<!-- upstream -->
 
 [cli administrator guide for synology nas]: https://global.download.synology.com/download/Document/Software/DeveloperGuide/Firmware/DSM/All/enu/Synology_DiskStation_Administration_CLI_Guide.pdf
 [online feature request form]: https://www.synology.com/en-us/form/inquiry/feature

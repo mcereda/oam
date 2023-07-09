@@ -26,7 +26,7 @@ mmdc -i 'input.mmd' -o 'output.svg'
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [github]: https://github.com/mermaid-js/mermaid-cli
 
 <!-- internal references -->

@@ -211,7 +211,7 @@ All the references in the [further readings] section, plus the following:
 - [cheat.sh]
 - [Fix a "Problem with MergeList" or "status file could not be parsed" error]
 
-<!-- project's references -->
+<!-- upstream -->
 [apt configuration]: https://wiki.debian.org/AptConfiguration
 [apt_preferences man page]: https://manpages.debian.org/testing/apt/apt_preferences.5.en.html
 [configuring apt sources]: https://wiki.debian.org/SourcesList

@@ -23,7 +23,7 @@ uniq -cd path/to/file
 
 - [The essential Bash cheat sheet]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- in-article references -->
 <!-- internal references -->
 <!-- external references -->

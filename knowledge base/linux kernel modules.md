@@ -64,7 +64,7 @@ All the references in the [further readings] section, plus the following:
 - The [Kernel module][arch wiki kernel module] page in the [Arch wiki]
 - The [Kernel modules][gentoo wiki kernel modules]
 
-<!-- project's references -->
+<!-- upstream -->
 
 <!-- internal references -->
 [further readings]: #further-readings

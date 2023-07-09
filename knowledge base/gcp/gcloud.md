@@ -59,7 +59,7 @@ All the references in the [further readings] section, plus the following:
 
 - [`gcloud projects`][gcloud projects]
 
-<!-- project's references -->
+<!-- upstream -->
 [creating and managing projects]: https://cloud.google.com/resource-manager/docs/creating-managing-projects
 [gcloud projects]: https://cloud.google.com/sdk/gcloud/reference/projects
 

@@ -22,7 +22,7 @@ FIXME
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [the .lsrules file format]: https://help.obdev.at/littlesnitch5/ref-lsrules-file-format
 
 <!-- in-article references -->

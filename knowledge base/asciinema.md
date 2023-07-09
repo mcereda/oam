@@ -46,7 +46,7 @@ All the references in the [further readings] section, plus the following:
   references
   -->
 
-<!-- project -->
+<!-- upstream -->
 [github]: https://github.com/asciinema/asciinema
 [website]: https://asciinema.org/
 

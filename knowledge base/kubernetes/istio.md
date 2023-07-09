@@ -77,7 +77,7 @@ All the references in the [further readings] section, plus the following:
 
 - Red Hat's article on [service meshes][service mesh]
 
-<!-- project's references -->
+<!-- upstream -->
 [getting started guide]: https://istio.io/latest/docs/setup/getting-started/
 
 <!-- in-article references -->

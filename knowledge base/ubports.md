@@ -85,5 +85,5 @@ libertine-container-manager destroy -i 'identifier'
 
 - [Documentation]
 
-<!-- project's references -->
+<!-- upstream -->
 [documentation]: https://docs.ubports.com/en/latest/index.html

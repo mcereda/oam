@@ -48,7 +48,7 @@ reload_config
 - [The UCI system]
 - [Turris Omnia]
 
-<!-- project's references -->
+<!-- upstream -->
 [the uci system]: https://openwrt.org/docs/guide-user/base-system/uci
 
 <!-- internal references -->

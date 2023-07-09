@@ -369,7 +369,7 @@ All the references in the [further readings] section, plus the following:
 - [Configuring private dns zones and upstream nameservers in kubernetes]
 - [Using GitLab token to clone without authentication]
 
-<!-- project's references -->
+<!-- upstream -->
 [adding and removing kubernetes clusters]: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
 [chart]: https://docs.gitlab.com/charts/
 [command-line options]: https://docs.gitlab.com/charts/installation/command-line-options.html

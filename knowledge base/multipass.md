@@ -43,7 +43,7 @@ multipass purge
 
 - [Use Linux Virtual Machines with Multipass]
 
-<!-- project's references -->
+<!-- upstream -->
 [website]: https://multipass.run/
 
 <!-- external references -->

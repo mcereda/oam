@@ -30,7 +30,7 @@ $ kapp -y deploy -a 'my-app' -f <(ytt -f './examples/simple-app-example/config-1
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [website]: https://get-kapp.io
 
 <!-- in-article references -->

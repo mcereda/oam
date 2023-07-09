@@ -34,6 +34,6 @@ nc -l 5666
 
 - [How To use Netcat to establish and test TCP and UDP connections]
 
-<!-- project's references -->
+<!-- upstream -->
 
 [how to use netcat to establish and test tcp and udp connections]: https://www.digitalocean.com/community/tutorials/how-to-use-netcat-to-establish-and-test-tcp-and-udp-connections

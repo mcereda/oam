@@ -31,7 +31,7 @@ All paths set in these environment variables must be absolute. By specification,
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [specifications]: https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 
 <!-- in-article references -->

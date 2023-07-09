@@ -354,7 +354,7 @@ export GPG_TTY=$(tty)
 - [How to renew a (soon to be) expired GPG key]
 - [Renew GPG key]
 
-<!-- project's references -->
+<!-- upstream -->
 [commonly seen problems]: https://www.gnupg.org/documentation/manuals/gnupg/Common-Problems.html
 [unattended key generation]: https://www.gnupg.org/documentation/manuals/gnupg/Unattended-GPG-key-generation.html
 

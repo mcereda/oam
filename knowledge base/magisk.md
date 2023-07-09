@@ -65,7 +65,7 @@ To flash the patched boot image from your computer with `adb` and `fastboot`:
 - [How to Install Magisk on your Android Phone]
 - [Magisk install]
 
-<!-- project's references -->
+<!-- upstream -->
 [releases]: https://github.com/topjohnwu/Magisk/releases
 
 <!-- internal references -->

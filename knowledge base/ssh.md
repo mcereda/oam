@@ -336,7 +336,7 @@ Solution: update the SSH server.
 - [Get started with OpenSSH for Windows]
 - [Restrict SSH login to a specific IP or host]
 
-<!-- project's references -->
+<!-- upstream -->
 [ssh_config man page]: https://man.openbsd.org/ssh_config
 [ssh-agent]: https://www.ssh.com/academy/ssh/agent
 [sshd_config man page]: https://man.openbsd.org/sshd_config

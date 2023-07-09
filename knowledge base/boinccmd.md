@@ -74,7 +74,7 @@ boinccmd --set_network_mode 'never' '600'
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [boinccmd tool]: https://boinc.berkeley.edu/wiki/Boinccmd_tool
 
 <!-- in-article references -->

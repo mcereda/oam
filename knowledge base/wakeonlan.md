@@ -35,7 +35,7 @@ All the references in the [further readings] section, plus the following:
 
 - [wake a host from lan]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- internal references -->
 
 [further readings]: #further-readings

@@ -228,7 +228,7 @@ salt --batch-size 10 '*' state.apply
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [installation]: https://docs.saltstack.com/en/getstarted/fundamentals/install.html
 [states]: https://docs.saltstack.com/en/getstarted/fundamentals/states.html
 [targeting]: https://docs.saltstack.com/en/getstarted/fundamentals/targeting.html

@@ -27,7 +27,7 @@ portageq envvar 'FEATURES' | xargs -n1
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [/etc/portage]: https://wiki.gentoo.org/wiki//etc/portage
 [portage]: https://wiki.gentoo.org/wiki/Portage
 

@@ -314,7 +314,7 @@ All the references in the [further readings] section, plus the following:
 - The `/scale` [subresource][/scale subresource]
 - The [ScaledObject specification]
 
-<!-- project's references -->
+<!-- upstream -->
 [authentication]: https://keda.sh/docs/2.0/concepts/authentication/
 [concepts]: https://keda.sh/docs/2.0/concepts/
 [external scalers]: https://keda.sh/docs/2.0/concepts/external-scalers/

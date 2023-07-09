@@ -24,7 +24,7 @@ All the references in the [further readings] section, plus the following:
 
 - [List of files installed from apt package]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- in-article references -->
 [further readings]: #further-readings
 

@@ -87,7 +87,7 @@ All the references in the [further readings] section, plus the following:
 - [cheat.sh]
 - [Linux and Unix Test Disk I/O Performance With dd Command]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- internal references -->
 <!-- external references -->
 [cheat.sh]: https://cheat.sh/dd

@@ -28,7 +28,7 @@ All the references in the [further readings] section, plus the following:
 
 - [Terraform Enterprise documentation]
 
-<!-- project's references -->
+<!-- upstream -->
 [terraform enterprise documentation]: https://developer.hashicorp.com/terraform/enterprise
 
 <!-- in-article references -->

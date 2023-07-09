@@ -20,7 +20,7 @@ Based on Debian.
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [website]: https://www.armbian.com/
 
 <!-- in-article references -->

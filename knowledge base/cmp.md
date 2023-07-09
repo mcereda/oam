@@ -32,7 +32,7 @@ All the references in the [further readings] section, plus the following:
   references
   -->
 
-<!-- project -->
+<!-- upstream -->
 <!-- article sections -->
 [further readings]: #further-readings
 

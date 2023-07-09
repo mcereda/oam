@@ -138,7 +138,7 @@ All the references in the [further readings] section, plus the following:
 
 - [Loops in Azure DevOps Pipelines]
 
-<!-- project's references -->
+<!-- upstream -->
 [expressions]: https://learn.microsoft.com/en-us/azure/devops/pipelines/process/expressions
 [use predefined variables]: https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
 [az devops]: https://learn.microsoft.com/en-us/cli/azure/devops?view=azure-cli-latest

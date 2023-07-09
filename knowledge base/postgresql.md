@@ -29,7 +29,7 @@ All the references in the [further readings] section, plus the following:
 
 - [Connect to a PostgreSQL database]
 
-<!-- project's references -->
+<!-- upstream -->
 [docker image]: https://github.com/docker-library/docs/blob/master/postgres/README.md
 
 <!-- in-article references -->

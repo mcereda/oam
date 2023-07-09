@@ -20,7 +20,7 @@ stat /etc/pihole/gravity.db
 - The [pihole] command
 - [Run Pi-hole as a container with Podman on openSUSE]
 
-<!-- project's references -->
+<!-- upstream -->
 [github]: https://github.com/pi-hole/pi-hole
 [website]: https://pi-hole.net/
 

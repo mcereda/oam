@@ -22,7 +22,7 @@ All the references in the [further readings] section, plus the following:
 
 - [How to wake up computers using Linux by sending magic packets]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- internal references -->
 
 [further readings]: #further-readings

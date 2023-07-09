@@ -32,7 +32,7 @@ npm uninstall '@pnp/cli-microsoft365'
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [documentation]: https://docs.npmjs.com/cli/
 
 <!-- internal references -->

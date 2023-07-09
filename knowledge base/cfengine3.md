@@ -69,7 +69,7 @@ cf-remote install --hub 'hub' --bootstrap 'hub'
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [documentation]: https://docs.cfengine.com/docs/master/
 [website]: https://cfengine.com/
 

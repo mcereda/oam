@@ -11,7 +11,7 @@ ping -i 120 -a 'ip-address'
 
 - [18 selected super-useful Linux one-liners]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- internal references -->
 <!-- external references -->
 [18 selected super-useful linux one-liners]: https://medium.com/codex/18-selected-super-useful-linux-one-liners-398ba6d20f8c

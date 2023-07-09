@@ -20,7 +20,7 @@ All the references in the [further readings] section, plus the following:
 - The [Build your very own self-hosting platform with Raspberry Pi and Kubernetes] series of articles
 - [Run Kubernetes on a Raspberry Pi with k3s]
 
-<!-- project's references -->
+<!-- upstream -->
 [documentation]: https://docs.k3s.io/
 [website]: https://k3s.io/
 

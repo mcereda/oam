@@ -150,7 +150,7 @@ The versions listed in such file can be:
 - [plugins list]
 - [`.tool-versions` example][.tool-versions example]
 
-<!-- project's references -->
+<!-- upstream -->
 [github]: https://github.com/asdf-vm/asdf
 [homepage]: https://asdf-vm.com/
 [plugins list]: https://github.com/asdf-vm/asdf-plugins

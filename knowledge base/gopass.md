@@ -192,7 +192,7 @@ All the references in the [further readings] section, plus the following:
 
 - [BrowserPass extension installation guide]
 
-<!-- project's references -->
+<!-- upstream -->
 [config]: https://github.com/gopasspw/gopass/blob/master/docs/config.md
 [documentation]: https://github.com/gopasspw/gopass/tree/master/docs
 [faq]: https://github.com/gopasspw/gopass/blob/master/docs/faq.md

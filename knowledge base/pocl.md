@@ -15,7 +15,7 @@ PoCL uses Clang as an OpenCL C frontend, and LLVM for kernel compiler implementa
 - [Website]
 - [OpenCL]
 
-<!-- project's references -->
+<!-- upstream -->
 [website]: http://portablecl.org/
 
 <!-- in-article references -->

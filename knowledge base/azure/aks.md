@@ -29,7 +29,7 @@ Make sure you have enough space in your cluster's Subnet for at least one new No
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [Update or rotate the credentials for an AKS cluster]: https://learn.microsoft.com/en-us/azure/aks/update-credentials
 
 <!-- in-article references -->

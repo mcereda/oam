@@ -66,7 +66,7 @@ apk info -d 'parallel'
 
 - [10 Alpine Linux apk Command Examples]
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- in-article references -->
 <!-- internal references -->
 <!-- external references -->

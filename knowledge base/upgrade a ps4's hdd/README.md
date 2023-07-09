@@ -91,7 +91,7 @@ Please note, users who have never signed in to PlayStation™Network (PSN) can r
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [how to back up and restore ps4 console data]: https://www.playstation.com/en-us/support/hardware/ps4-back-up-and-restore-with-external-storage/
 [ps4: external hard drive support]: https://www.playstation.com/en-us/support/hardware/ps4-external-hdd-support/
 [ps4: upgrade hdd]: https://www.playstation.com/en-us/support/hardware/ps4-upgrade-hdd/#7000

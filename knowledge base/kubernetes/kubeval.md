@@ -26,7 +26,7 @@ Validation failed
 
 All the references in the [further readings] section, plus the following:
 
-<!-- project's references -->
+<!-- upstream -->
 [kubeval]: https://www.kubeval.com
 
 <!-- in-article references -->

@@ -53,7 +53,7 @@ All the references in the [further readings] section, plus the following:
   references
   -->
 
-<!-- project -->
+<!-- upstream -->
 [website]: https://www.gnu.org/software/coreutils/timeout
 
 <!-- article sections -->

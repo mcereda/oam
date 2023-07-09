@@ -96,7 +96,7 @@ Check the [`knockd(1)`][knockd man page] man page for all the information.
 - [Server][knockd man page]'s man page
 - [Client][knock man page]'s man page
 
-<!-- project's references -->
+<!-- upstream -->
 <!-- internal references -->
 <!-- external references -->
 [how to use port knocking to secure ssh service in linux]: https://www.tecmint.com/port-knocking-to-secure-ssh/
