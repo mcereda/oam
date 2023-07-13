@@ -1,0 +1,8 @@
+scrape_configs:
+  - job_name: node_exporter
+    static_configs:
+      - targets:
+          # FIXME: since node exporter is executed in host mode, this needs to
+          # be the FQDN or IP address of the host running the 'node_exporter'
+          # container.
+          - node_exporter:9100
