@@ -14,6 +14,7 @@ Monitoring system that collects metrics from configured targets at given interva
 - [`docker/monitoring`][docker/monitoring]
 - [Node exporter]
 - [SMNP exporter]
+- [`ordaa/boinc_exporter`][ordaa/boinc_exporter]
 
 ## Sources
 
@@ -47,4 +48,5 @@ All the references in the [further readings] section, plus the following:
 [docker/monitoring]: ../docker/monitoring/README.md
 
 <!-- Others -->
+[ordaa/boinc_exporter]: https://gitlab.com/ordaa/boinc_exporter
 [snmp monitoring and easing it with prometheus]: https://medium.com/@openmohan/snmp-monitoring-and-easing-it-with-prometheus-b157c0a42c0c
