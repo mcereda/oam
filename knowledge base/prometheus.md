@@ -42,6 +42,9 @@ scrape_configs:
       - targets:
           - fqdn:9100
           - host.local:9100
+  - job_name: router
+    static_configs:
+      - targets: [ 'openwrt.local:9100' ]
 ```
 
 ## Queries
@@ -96,6 +99,7 @@ All the references in the [further readings] section, plus the following:
 - [SNMP monitoring and easing it with Prometheus]
 - [`prometheus/node_exporter`][prometheus/node_exporter]
 - [`prometheus/snmp_exporter`][prometheus/snmp_exporter]
+- [How I monitor my OpenWrt router with Grafana Cloud and Prometheus]
 
 <!--
   References
@@ -123,5 +127,6 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Others -->
 [getting started with prometheus]: https://opensource.com/article/18/12/introduction-prometheus
+[how i monitor my openwrt router with grafana cloud and prometheus]: https://grafana.com/blog/2021/02/09/how-i-monitor-my-openwrt-router-with-grafana-cloud-and-prometheus/
 [ordaa/boinc_exporter]: https://gitlab.com/ordaa/boinc_exporter
 [snmp monitoring and easing it with prometheus]: https://medium.com/@openmohan/snmp-monitoring-and-easing-it-with-prometheus-b157c0a42c0c
