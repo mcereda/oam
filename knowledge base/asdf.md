@@ -15,115 +15,110 @@ CLI tool to manage multiple language runtime versions on a per-project basis. It
 ## TL;DR
 
 ```sh
-# list installed plugins
+# List installed plugins.
 asdf plugin list
 
-# list available plugins
+# List available plugins.
 asdf plugin list all
 
-# install plugins
-asdf plugin add helm
+# Add plugins.
+asdf plugin add 'helm'
 
-# update plugins
-asdf plugin update kubectl
+# Update plugins.
+asdf plugin update 'kubectl'
 asdf plugin update --all
 
-# remove plugins
-asdf plugin remove terraform
+# Remove plugins.
+asdf plugin remove 'terraform'
 
-# list installed versions
-asdf list elixir
+# List installed versions.
+asdf list 'elixir'
 
-# list available versions
-asdf list all elixir
+# List available versions.
+asdf list all 'elixir'
 
-# install a specific version
-asdf install erlang latest
-asdf install terraform 1.1.1
+# Install versions.
+asdf install 'erlang' 'latest'
+asdf install 'terraform' '1.1.1'
 
-# install all versions specified in the '.tool-versions' file
+# Install all versions specified in '.tool-versions'.
 asdf install
 
-# set a specific installed version to use
-asdf global helm 3.3 3.2
-asdf shell erlang latest
-asdf local elixir system
+# Set specific installed versions for use.
+asdf global 'helm' '3.3' '3.2'
+asdf shell 'erlang' 'latest'
+asdf local 'elixir' 'system'
 
-# uninstall a version
-asdf uninstall helm 3.3
+# Uninstall versions.
+asdf uninstall 'helm' '3.3'
 
-# show the current status
+# Show the current status.
 asdf current
-asdf current helm
+asdf current 'helm'
 ```
 
 ## Installation
 
 ```sh
-# install the program
-brew install asdf
+# Install the application.
+brew install 'asdf'
 
-# load its shell file and completion
-# or just load oh-my-zsh's plugin
-. $(brew --prefix asdf)/asdf.sh
+# Load ASDF's environment and completion.
+# Alternatively, just load oh-my-zsh's plugin for it.
+. "$(brew --prefix 'asdf')/asdf.sh"
 ```
 
 ## Plugins management
 
 ```sh
-# list installed plugins
+# List installed plugins.
 asdf plugin list
 asdf plugin list --urls
 
-# list all plugins (available too)
+# List all available and plugins.
 asdf plugin list all
 
-# asdf plugin add $PLUGIN_NAME [$PLUGIN_URL]
-asdf plugin add helm
+# Add plugins.
+asdf plugin add 'helm'
 
+# Update plugins.
 asdf plugin update --all
-asdf plugin update $PLUGIN_NAME
+asdf plugin update 'erlang'
 
-asdf plugin remove $PLUGIN_NAME
+# Remove plugins.
+asdf plugin remove 'terraform'
 ```
 
 ### Plugins gotchas
 
-`asdf plugin list all` or `asdf plugin add $PLUGIN_NAME` also trigger a sync to the plugins repository.
+`asdf plugin list all` or `asdf plugin add $PLUGIN_NAME` also trigger a sync with the plugins repository.
 
 ## Versions management
 
 ```sh
-# list installed versions for a plugin
-# asdf list $PLUGIN_NAME
-asdf list elixir
+# List installed versions.
+asdf list 'elixir'
 
-# list all available versions for a plugin
-# asdf list all $PLUGIN_NAME
-asdf list all elixir
+# List all available versions of a plugin.
+asdf list all 'elixir'
 
-# install a plugin version
-# asdf install $PLUGIN_NAME $PLUGIN_VERSION
-asdf install erlang latest
+# Install a version.
+asdf install 'erlang' 'latest'
 
-# check current plugin version
-# asdf current [$PLUGIN_NAME]
+# Check currently installed and configured versions.
 asdf current
-asdf current helm
+asdf current 'helm'
 
-# set plugin version
-# asdf global|shell|local $PLUGIN_NAME $PLUGIN_VERSION [$PLUGIN_VERSION,...]
-asdf global helm 3.3 3.2
-asdf shell erlang latest
-asdf local elixir latest
+# Configure versions for use.
+asdf global 'helm' '3.3' '3.2'
+asdf shell erlang 'latest'
+asdf local elixir 'latest'
 
-# fallback to system version
-# asdf local $PLUGIN_NAME system
-asdf local python system
+# Fallback to the system-installed version.
+asdf local python 'system'
 
-# uninstall a version
-# asdf uninstall $PLUGIN_NAME $PLUGIN_VERSION
-asdf uninstall helm 3.3
+# Uninstall versions.
+asdf uninstall 'helm' '3.3'
 ```
 
 ### The `.tool-versions` file
