@@ -456,9 +456,10 @@ luci-reload
 - [How to control LED diodes]
 - [Factory reset on Turris Omnia]
 - [Supported SFP modules]
+- [Home NAS]
+- [OpenWrt]
 - [`opkg`][opkg]
 - [UCI]
-- [Home NAS]
 - [LXC]
 
 ## Sources
@@ -487,6 +488,7 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Knowledge base -->
 [lxc]: lxc.md
+[openwrt]: openwrt.md
 [opkg]: opkg.md
 [pi-hole]: pi-hole.md
 [ssh]: ssh.md
