@@ -117,6 +117,11 @@ az keyvault set-policy -n 'key_vault_name' --upn 'user_principal_name' …
 # List the names of all keys in Key Vaults.
 az keyvault key list --query '[].name' -o 'tsv' --vault-name 'key_vault_name'
 
+# Create or update passwords in Key Vaults.
+az keyvault secret set \
+  --vault-name 'key_vault_name' --name 'secret_name' --value 'plain_text'
+az keyvault secret set … --expires '2024-04-10T12:19:54Z'
+
 # Get passwords from Key Vaults.
 az keyvault secret show --query 'value' \
   --name 'secret_name' --vault-name 'key_vault_name'
