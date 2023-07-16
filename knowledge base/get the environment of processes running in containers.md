@@ -1,4 +1,4 @@
-# Get the environment of a process running in a container
+# Get the environment of processes running in containers
 
 ## Table of contents <!-- omit in toc -->
 
@@ -9,13 +9,14 @@
 ## TL;DR
 
 ```sh
-cat /proc/${PID}/environ
+# From a shell inside the container.
+cat "/proc/${PID}/environ"
 
-# Container in kubernetes.
-kubectl exec pod-name -- cat /proc/1/environ
+# In Kubernetes.
+kubectl exec 'pod-name' -- cat '/proc/1/environ'
 
-# Only works if the onboard `ps` is not from busybox.
-ps e -p $PID
+# This only works if the onboard `ps` is **not** the one from Busybox.
+ps e -p "$PID"
 ```
 ## Further readings
 
