@@ -1,4 +1,4 @@
-# Drain a K8S cluster node
+# Drain nodes in K8S clusters
 
 ## Table of contents <!-- omit in toc -->
 
@@ -8,14 +8,16 @@
 
 ## TL;DR
 
-1. mark the node as unschedulable (_cordon_):
+1. **Cordon** the Nodes.<br/>
+   This marks each Node as _unschedulable_ and prevents new Pods to start on them.
 
    ```sh
    $ kubectl cordon 'kworker-rj2'
    node/kworker-rj2 cordoned
    ```
 
-1. remove pods running on the node:
+1. **Drain** the nodes.<br/>
+   This _evicts_ Pods already running on the Nodes.
 
    ```sh
    $ kubectl drain 'kworker-rj2' --grace-period=300 --ignore-daemonsets=true
@@ -26,8 +28,9 @@
    node/kworker-rj2 evicted
    ```
 
-1. do to the node what you need to do
-1. make the node available again:
+1. Do to the Nodes what you need to do.
+1. **Uncordon** the Nodes.
+   This makes them available for scheduling again.
 
    ```sh
    $ kubectl uncordon 'kworker-rj2'

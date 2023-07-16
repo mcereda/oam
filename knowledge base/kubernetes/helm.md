@@ -16,25 +16,33 @@ helm plugin list
 helm plugin ls
 
 # Install new plugins.
-helm plugin add https://github.com/author/plugin
-helm plugin install path/to/plugin
+helm plugin add 'https://github.com/author/plugin'
+helm plugin install 'path/to/plugin'
 
 # Update installed plugins.
-helm plugin update plugin-name
-helm plugin up plugin-name
+helm plugin update 'plugin_name'
+helm plugin up 'plugin_name'
 
 # Uninstall plugins.
-helm plugin rm plugin-name
-helm plugin remove plugin-name
-helm plugin uninstall plugin-name
+helm plugin rm 'plugin_name'
+helm plugin remove 'plugin_name'
+helm plugin uninstall 'plugin_name'
 
-# Manage repositories.
+
+# List added repositories.
 helm repo list
+
+# Add repositories.
 helm repo add 'grafana' 'https://grafana.github.io/helm-charts'
 helm repo add 'ingress-nginx' 'https://kubernetes.github.io/ingress-nginx'
+
+# Update repositories.
 helm repo update
 helm repo update 'keda'
+
+# Remove repositories.
 helm repo remove 'prometheus'
+
 
 # Search for specific charts
 helm search hub --max-col-width '100' 'ingress-nginx'
@@ -50,6 +58,7 @@ helm pull 'ingress-nginx/ingress-nginx' --version '4.0.6' \
 # Get the default values of specific charts.
 helm inspect values 'gitlab/gitlab'
 
+
 # Install releases
 helm install 'my-gitlab' 'gitlab/gitlab'
 helm upgrade --install 'my-gitlab' 'gitlab/gitlab'
@@ -61,13 +70,13 @@ helm upgrade --install 'keda' 'keda' \
   --repo 'https://kedacore.github.io/charts' \
   --namespace 'keda' --create-namespace
 
-# Upgrade deployed releases
+# Upgrade deployed releases.
 helm upgrade --install 'my-wordpress' 'wordpress'
-helm upgrade --values values.yaml 'my-wordpress' 'wordpress'
+helm upgrade --values 'values.yaml' 'my-wordpress' 'wordpress'
 helm upgrade --namespace 'gitlab' --values 'values.yaml' 'gitlab gitlab/gitlab' --dry-run
 helm upgrade --atomic --create-namespace --namespace 'gitlab' --timeout 0 --values 'values.yaml' 'gitlab' 'gitlab/gitlab' --debug
 
-# Inspect deployed releases' manifest
+# Inspect deployed releases' manifests.
 helm get manifest 'wordpress'
 ```
 
@@ -82,12 +91,12 @@ To achieve this:
    ```yaml
    annotations:
      meta.helm.sh/release-name: app-release-name
-     meta.helm.sh/release-namespace: app-deploy-namespace-name
+     meta.helm.sh/release-namespace: app-deployment-namespace-name
    labels:
      app.kubernetes.io/managed-by: Helm
    ```
 
-   with `app-release-name` being the release name used to deploy the helm chart and `app-deploy-namespace-name` being the deployment namespace
+   with `app-release-name` being the release name used to deploy the helm chart and `app-deployment-namespace-name` being the deployment namespace.
 
    ```sh
    kubectl annotate "$KIND" "$NAME" "meta.helm.sh/release-name=${RELEASE_NAME}"
@@ -95,11 +104,11 @@ To achieve this:
    kubectl label "$KIND" "$NAME" "app.kubernetes.io/managed-by=Helm"
    ```
 
-1. add now the existing resources' manifests to the chart
+1. now, add the existing resources' manifests to the chart
 1. execute a chart upgrade:
 
    ```sh
-   helm upgrade <app-release-name>
+   helm upgrade 'app-release-name'
    ```
 
 ## Further readings
