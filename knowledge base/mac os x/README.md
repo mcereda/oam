@@ -4,17 +4,18 @@
 
 1. [TL;DR](#tldr)
 1. [Hidden settings](#hidden-settings)
-1. [Resize an image](#resize-an-image)
-1. [Resize a PDF file from Preview](#resize-a-pdf-file-from-preview)
+1. [Image manipulation](#image-manipulation)
+1. [Resize PDF files](#resize-pdf-files)
+1. [Manage tags](#manage-tags)
 1. [Update the OS from CLI](#update-the-os-from-cli)
 1. [Keychain access from CLI](#keychain-access-from-cli)
 1. [Mount an NFS share](#mount-an-nfs-share)
 1. [Use TouchID to authenticate in the terminal](#use-touchid-to-authenticate-in-the-terminal)
    1. [Fix iTerm2](#fix-iterm2)
 1. [Xcode CLI tools](#xcode-cli-tools)
-   1. [Headless installation](#headless-installation)
-   1. [Removal](#removal)
-   1. [Upgrade](#upgrade)
+    1. [Headless installation](#headless-installation)
+    1. [Removal](#removal)
+    1. [Upgrade](#upgrade)
 1. [Boot keys cheatsheet](#boot-keys-cheatsheet)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
@@ -150,21 +151,20 @@ defaults write com.apple.dock ResetLaunchPad -bool TRUE
 
 # Force Finder to always display hidden files.
 defaults write com.apple.finder AppleShowAllFiles TRUE
+
+# Prevent Finder to create .DS_Store files on network shares.
+defaults write com.apple.desktopservices DSDontWriteNetworkStores true
 ```
 
-## Resize an image
+## Image manipulation
 
-See also [Resize, rotate, or flip an image in Preview on Mac].
+Use Preview to perform basic image manipulation through the GUI.<br/>
+See [Resize, rotate, or flip an image in Preview on Mac].
 
-From CLI:
+See [`sips`][sips] for the command line utility shipping with OS X by default.<br/>
+Install [ImageMagick] if you need something more powerful.
 
-```sh
-# Retain ratio.
-# Save as different file.
-sips -Z '1000' -o 'resized.jpg' 'IMG_20190527_013903.jpg'
-```
-
-## Resize a PDF file from Preview
+## Resize PDF files
 
 In the Preview app:
 
@@ -173,6 +173,32 @@ In the Preview app:
    **Do not** choose _Export as PDF_.
 1. Click the _Quartz Filter_ pop-up menu, then choose _Reduce File Size_.
 1. Click the _Export_ button.
+
+## Manage tags
+
+Tags are stored both in a file's or folder's `com.apple.metadata:_kMDItemUserTags` extended attribute.
+
+Avoid using the `xattr` tool, as it almost always returns the hex dump of a `plist` file, which needs to be converted:
+
+```sh
+$ xattr -px com.apple.metadata:_kMDItemUserTags 'path/to/file' \
+| perl -wane 'print chr hex for @F' | plutil -p -
+[
+  0 => "test"
+]
+```
+
+[`mdls`][mdls] returns a more readable output, but still is not really useful for other actions than read:
+
+```sh
+$ mdls -raw -name kMDItemUserTags 'path/to/file'
+(
+    test
+)
+```
+
+See [jdberry/tag] for a more versatile command line utility.<br/>
+See [Tagging files from the macOS command line] for more information.
 
 ## Update the OS from CLI
 
@@ -368,6 +394,7 @@ All the references in the [further readings] section, plus the following:
 - [Compress a PDF in Preview on Mac]
 - [Resize, rotate, or flip an image in Preview on Mac]
 - [Who is listening on a given TCP port on Mac OS X?]
+- [Tagging files from the macOS command line]
 
 <!--
   References
@@ -382,10 +409,13 @@ All the references in the [further readings] section, plus the following:
 [further readings]: #further-readings
 
 <!-- Knowledge base -->
-[time machine]: time%20machine.md
+[imagemagick]: ../imagemagick.md
+[jdberry/tag]: tag.md
+[little snitch]: little%20snitch.md
 [macports]: macports.md
 [openssl-osx-ca]: openssl-osx-ca.md
-[little snitch]: little%20snitch.md
+[sips]: sips.md
+[time machine]: time%20machine.md
 
 <!-- Others -->
 [boot a mac from usb drive]: https://www.wikihow.com/Boot-a-Mac-from-USB-Drive
@@ -398,7 +428,9 @@ All the references in the [further readings] section, plus the following:
 [launchctl man page]: https://www.unix.com/man-page/osx/1/launchctl
 [list of xcode command line tools]: https://mac.install.guide/commandlinetools/8.html
 [macos network quality tool]: https://www.theapplegeek.co.uk/blog/networkquality
+[mdls]: https://ss64.com/osx/mdls.html
 [pam_reattach]: https://github.com/fabianishere/pam_reattach
+[tagging files from the macos command line]: https://brettterpstra.com/2017/08/22/tagging-files-from-the-command-line/
 [using terminal to find your mac's network name]: https://www.tech-otaku.com/networking/using-terminal-find-your-macs-network-name/
 [who is listening on a given tcp port on mac os x?]: https://stackoverflow.com/questions/4421633/who-is-listening-on-a-given-tcp-port-on-mac-os-x
 [xcode command line tools installation faq]: https://www.godo.dev/tutorials/xcode-command-line-tools-installation-faq

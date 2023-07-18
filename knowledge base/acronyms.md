@@ -29,6 +29,7 @@
 | CVS     | Concurrent Versioning System                           |                                                                                                     |
 | DBMS    | Data Base Management System                            |                                                                                                     |
 | DKIM    | DomainKeys Identified Mail                             |                                                                                                     |
+| EA      | Extended Attributes                                    |                                                                                                     |
 | EEPROM  | Electronically Erasable Programmable Read-Only Memory  |                                                                                                     |
 | FIFO    | First In First Out                                     |                                                                                                     |
 | FILO    | First In Last Out                                      |                                                                                                     |
