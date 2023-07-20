@@ -369,8 +369,13 @@ To use any of these key combinations, press and hold the keys immediately after 
 ## Further readings
 
 - [Time Machine]
+- [`tag`][tag]
+- [`sips`][sips]
+- [`defaults`][defaults]
 - [`pam_reattach`][pam_reattach]
 - [`launchctl`'s man page][launchctl man page]
+- [`mdls`][mdls]
+- [`xattr`][xattr]
 - [`macports`][macports]
 - [`openssl-osx-ca`][openssl-osx-ca]
 - [Little Snitch]
@@ -409,13 +414,16 @@ All the references in the [further readings] section, plus the following:
 [further readings]: #further-readings
 
 <!-- Knowledge base -->
+[defaults]: defaults.md
 [imagemagick]: ../imagemagick.md
 [jdberry/tag]: tag.md
 [little snitch]: little%20snitch.md
 [macports]: macports.md
 [openssl-osx-ca]: openssl-osx-ca.md
 [sips]: sips.md
+[tag]: tag.md
 [time machine]: time%20machine.md
+[xattr]: xattr.md
 
 <!-- Others -->
 [boot a mac from usb drive]: https://www.wikihow.com/Boot-a-Mac-from-USB-Drive
