@@ -13,58 +13,71 @@
 curl 'http://url.of/file'
 
 # Be quiet.
-curl --silent 'https://www.example.com'
-curl -s --show-error 'https://www.example.com'
+curl 'https://www.example.com' … --silent
+curl … -s --show-error
 
-# Download files.
-curl 'http://url.of/file' -o 'path/to/file'
-curl -O 'http://url.of/file1' -O 'http://url.of/file2'
-curl http://url.of/file[1-24]
+# Download files to specific paths.
+curl 'http://url.of/file' --output 'path/to/file'
+curl … -o 'path/to/file'
+
+# Download files reusing their name for output.
+curl … --remote-name 'http://url.of/file1' -O 'http://url.of/file2'
+curl … -O http://url.of/file[1-24]
 
 # Resume downloads.
-curl -C - -o 'partial_file' 'http://url.of/file'
+curl 'http://url.of/file' --continue-at -
+curl … -o 'partial_file' -C -
 
 # Limit downloads bandwidth.
-curl --limit-rate '1000B' -O 'http://url.of/file'
+curl 'http://url.of/file' --limit-rate '1000B'
 
 # Follow redirects.
-curl -L 'http://url.of/file'
+curl 'http://url.of/file' --location
+curl … -L
 
-# Only fetch HTTP headers from a response.
-curl -I 'http://example.com'
+# Only fetch the response's HTTP headers.
+# Prevents downloading the response's body.
+curl 'http://example.com' --head
+curl … -I
 
-# Only return the HTTP status code.
-curl -o '/dev/null' -w '%{http_code}\n' -s -I 'http://example.com'
+# Write specific information in output.
+curl 'http://example.com' … --write-out '@template.file'
+curl … -w 'request returned %{http_code}\nDownloaded %{size_download} bytes\n'
 
 # Send different request types.
-curl --request 'PUT' 'http://example.com'
+curl 'http://example.com' --request 'PUT'
+curl … -X 'GET'
 
 # Specify headers.
 curl 'http://example.com' -H 'Content-Type:application/json'
+curl … --header 'Content-Type:application/json'
 
 # Fail fast with no output.
 # Returns the HTTP error code.
-curl -f 'http://example.com'
+curl 'http://example.com' --fail
+curl … -f
 
 # Skip certificate validation.
-curl --insecure 'https://example.com'
+curl 'https://example.com' --insecure
+curl … -k
 
 # Pass certificates for a resource.
-curl --cert 'client.pem' --key 'key.pem' -k 'https://example.com'
-curl --cacert 'ca.pem' 'https://example.com'
+curl 'https://example.com' --cert 'client.pem' --key 'key.pem'
+curl … --cacert 'ca.pem'
 
 # Authenticate.
-curl -u 'username':'password' 'http://url.of/file'
-curl -u 'username':'password' -O 'ftp://url.of/file'
+curl 'http://url.of/file' --user 'username':'password'
+curl 'ftp://url.of/file' -u 'username':'password' -O
 curl 'ftp://username:password@example.com'
 
-# POST to a form.
-curl -F 'name=user' -F 'password=test' 'http://example.com'
-curl --data 'name=bob' 'http://example.com/form'
-
 # Send data.
-curl 'http://example.com' -H "Content-Type:application/json" -d '{"name":"bob"}' -X 'POST'
-curl … -d @file.json
+curl 'http://example.com' -X 'POST' -H "Content-Type:application/json" --data '@file.json'
+curl … -d '{"name": "bob"}'
+curl … -d 'name=bob'
+
+# POST to a form.
+curl 'http://example.com' --form 'name=user' -F 'password=test'
+curl … -d 'name=bob' -F 'password=@password.file'
 
 # Use a proxy.
 curl 'http://example.com' --proxy 'socks5://localhost:19999'
