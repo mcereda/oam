@@ -181,8 +181,12 @@ In shell:
 
 ```sh
 # Default source is 'repo.turris.cz/lxc'.
+# Values for the template options are case sensitive.
 lxc-create --name 'test' --template 'download'
-lxc-create -n 'pi-hole' -t 'download' -- --dist 'debian' --release 'bullseye' --arch 'armhf' --server 'images.linuxcontainers.org'
+lxc-create -n 'git' -t 'download' -- -d 'Debian' -r 'Bullseye' -a 'armv7l'
+lxc-create -n 'pi-hole' -t 'download' --
+  --server 'images.linuxcontainers.org' \
+  --dist 'debian' --release 'bullseye' --arch 'armhf'
 ```
 
 Using the WebUI:
