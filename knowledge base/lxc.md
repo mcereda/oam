@@ -16,9 +16,20 @@ snap install 'lxd'
 # List available templates.
 ls '/usr/share/lxc/templates'
 
+# List the options supported by templates.
+lxc-create -t 'download' -h
+
 # Create new containers.
-# Use the 'download' template to choose from a list of distribution
-lxc-create -n 'pi-hole' --template 'download'
+# Use the 'download' template to choose from a list of distribution.
+lxc-create -n 'nas' --template 'download'
+
+# Values are case sensitive and depend from what is on the server.
+lxc-create -n 'pi-hole' -t 'download' -- \
+  --server 'images.linuxcontainers.org' \
+  --dist 'debian' --release 'bullseye' --arch 'armhf' --variant 'cloud'
+lxc-create -n 'git' -t 'download' -- \
+  --server 'repo.turris.cz/lxc' \
+  -d 'Debian' -r 'Bullseye' -a 'armv7l'
 
 # Start containers.
 lxc-start -n 'pi-hole'
