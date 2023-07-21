@@ -77,7 +77,7 @@ Enter passphrase for /dev/sdb1: ***
 killed
 ```
 
-it could be the process is using too much memory.  
+it could be the process is using too much memory.<br/>
 This is due to the LUKS2 format using by default the Argon2i key derivation function, that is so called _memory-hard function_ - it requires certain amount of physical memory (to make dictionary attacks more costly).
 
 The solution is simple; either:

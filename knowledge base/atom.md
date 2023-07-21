@@ -12,7 +12,7 @@
 
 ### Zsh terminal icons are not getting displayed in Atom PlatformIO Ide Terminal
 
-Change font to `NotoSansMono Nerd Font` in PlatformIO Ide Terminal's settings.  
+Change font to `NotoSansMono Nerd Font` in PlatformIO Ide Terminal's settings.<br/>
 See [Why Zsh terminal icons are not getting displayed in Atom PlatformIO Ide Terminal?]
 
 ## Further readings

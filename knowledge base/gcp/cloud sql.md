@@ -96,5 +96,5 @@ Terraform will use the provider to connect to the proxy and operate on the SQL i
 
 ## Gotchas
 
-- As of 2021-05-18 the `root` user will **not be able** to create other users from the MySQL shell because it will lack `CREATE USER` permissions.  
+- As of 2021-05-18 the `root` user will **not be able** to create other users from the MySQL shell because it will lack `CREATE USER` permissions.<br/>
 - The documentation says that SQL users created using `gcloud`, the APIs or the cloud console will have the same permissions of the `root` user; in reality, those administrative entities will be able to create users only from the MySQL shell.

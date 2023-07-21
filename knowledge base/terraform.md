@@ -113,7 +113,7 @@ module "local_vpc_module" {
 }
 ```
 
-Run `terraform init` or `terraform get` to install the modules.  
+Run `terraform init` or `terraform get` to install the modules.<br/>
 Modules are installed in the `.terraform/modules` directory inside the configuration's working directory; local modules are symlinked from there.
 
 When terraform processes a module block, that block will inherit the provider from the enclosing configuration.
@@ -186,7 +186,7 @@ Terraform will perform the following actions:
 
 ### Conditional creation of a resource
 
-You can conditionally create one or more resources.  
+You can conditionally create one or more resources.<br/>
 There are 2 ways to do this:
 
 - with `count`:

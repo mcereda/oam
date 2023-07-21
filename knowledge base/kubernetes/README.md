@@ -215,7 +215,7 @@ Also see [configuration best practices] and the [production best practices check
 
 See [Configure Quality of Service for Pods] for more information.
 
-QoS classes are used to make decisions about scheduling and evicting Pods.  
+QoS classes are used to make decisions about scheduling and evicting Pods.<br/>
 When a Pod is created, it is also assigned one of the following QoS classes:
 
 - _Guaranteed_, when **every** Container in the Pod, including init containers, has:

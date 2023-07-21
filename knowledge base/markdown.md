@@ -279,7 +279,7 @@ Include a non-code formatted backtick by escaping it normally (with a `\`).
 
 Render it in an inline code block using double backticks instead of single backticks.
 
-Alternatively, use a code block. This will wrap everything in a `<pre>` HTML tag.  
+Alternatively, use a code block. This will wrap everything in a `<pre>` HTML tag.<br/>
 To do this, either indent 4 spaces to start a code block, or use fenced code blocks if supported.
 
 ### VS Code and mermaid graph in Markdown preview

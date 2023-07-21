@@ -1,6 +1,6 @@
 # Access a jar file's contents
 
-A `.jar` file is nothing more than an archive.  
+A `.jar` file is nothing more than an archive.<br/>
 You can find all the files it contains just unzipping it:
 
 ```sh

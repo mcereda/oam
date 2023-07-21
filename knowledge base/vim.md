@@ -43,7 +43,7 @@
 
 Set different options for a particular file.
 
-> The `modeline` option must be enabled in order to take advantage of this.  
+> The `modeline` option must be enabled in order to take advantage of this.<br/>
 > This option is **set** by default for Vim running in nocompatible mode, but some notable distributions of Vim disable it in the system's `vimrc` for security. In addition, the option is **off** by default when editing as `root`.
 
 See `:help modeline` for more information.

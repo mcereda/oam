@@ -293,11 +293,11 @@ DELIMITER
 - the first line must start with an **optional command** followed by the special redirection operator `<<` and the **delimiting identifier**
 - one can use **any string** as a delimiting identifier, the most commonly used being `EOF` or `END`
 - if the delimiting identifier is **unquoted**, the shell will substitute all variables, commands and special characters before passing the here-document lines to the command
-- appending a **minus sign** to the redirection operator (`<<-`), will cause all leading tab characters to be **ignored**  
-  this allows one to use indentation when writing here-documents in shell scripts  
+- appending a **minus sign** to the redirection operator (`<<-`), will cause all leading tab characters to be **ignored**<br/>
+  this allows one to use indentation when writing here-documents in shell scripts<br/>
   leading whitespace characters are not allowed, only tabs are
 - the here-document block can contain strings, variables, commands and any other type of input
-- the last line must end with the delimiting identifier  
+- the last line must end with the delimiting identifier<br/>
   white space in front of the delimiter is not allowed
 
 ```sh

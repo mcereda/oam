@@ -116,7 +116,7 @@ When one writes an alias, one can also press `ctrl-x` followed by `a` to see the
 
 ## Parameter expansion
 
-Parameter expansions can involve flags like `${(@kv)aliases}` and other operators such as `${PREFIX:-"/usr/local"}`.  
+Parameter expansions can involve flags like `${(@kv)aliases}` and other operators such as `${PREFIX:-"/usr/local"}`.<br/>
 Nested parameters expand from the inside out.
 
 If the parameter is a **scalar** (a number or string) then the value, if any, is substituted:
@@ -153,7 +153,7 @@ hello world
 
 #### Check if a variable is set
 
-Use the form `+parameterName`.  
+Use the form `+parameterName`.<br/>
 If _name_ is set, even to an empty string, then its value is substituted by _1_, otherwise by _0_:
 
 ```sh
@@ -172,7 +172,7 @@ $ echo "${+name}"
 
 #### Provide a default value
 
-Use the forms `parameterName-defaultValue` or `parameterName:-defaultValue`.  
+Use the forms `parameterName-defaultValue` or `parameterName:-defaultValue`.<br/>
 If _name_ is set then substitute its value, otherwise substitute _word_:
 
 ```sh
@@ -213,7 +213,7 @@ word
 
 #### Just substitute with its value if set
 
-Use the forms `parameterName+defaultValue` or `parameterName:+defaultValue`.  
+Use the forms `parameterName+defaultValue` or `parameterName:+defaultValue`.<br/>
 If _name_ is set, then substitute it with its value, otherwise substitute nothing:
 
 ```sh
@@ -248,7 +248,7 @@ $ echo "${name:+word}"
 
 #### Set a default value and substitute
 
-Use the forms `parameterName=defaultValue`, `parameterName:=defaultValue` or `parameterName::=defaultValue`.  
+Use the forms `parameterName=defaultValue`, `parameterName:=defaultValue` or `parameterName::=defaultValue`.<br/>
 In the first form, if _name_ is unset then set it to _word_:
 
 ```sh
@@ -317,7 +317,7 @@ word
 
 #### Fail on missing value
 
-Use the forms `parameterName?defaultValue` or `parameterName:?defaultValue`.  
+Use the forms `parameterName?defaultValue` or `parameterName:?defaultValue`.<br/>
 In the first form, if _name_ is set then substitute its value, otherwise print _word_ and exit from the shell.
 
 ```sh
@@ -423,14 +423,14 @@ bindkey  "^[[3~"  delete-char
 
 ### Config files read order
 
-1. `/etc/zshenv`; this cannot be overridden  
+1. `/etc/zshenv`; this cannot be overridden<br/>
    subsequent behaviour is modified by the `RCS` and `GLOBAL_RCS` options:
 
    - `RCS` affects all startup files
    - `GLOBAL_RCS` only affects global startup files (those shown here with an path starting with a /)
 
-   If one of the options is unset at any point, any subsequent startup file(s) of the corresponding type will not be read.  
-   It is also possible for a file in `$ZDOTDIR` to re-enable `GLOBAL_RCS`.  
+   If one of the options is unset at any point, any subsequent startup file(s) of the corresponding type will not be read.<br/>
+   It is also possible for a file in `$ZDOTDIR` to re-enable `GLOBAL_RCS`.<br/>
    Both `RCS` and `GLOBAL_RCS` are set by default
 
 1. `$ZDOTDIR/.zshenv`
@@ -454,16 +454,16 @@ bindkey  "^[[3~"  delete-char
    1. `$ZDOTDIR/.zlogout`
    1. `/etc/zlogout`
 
-   This happens with either an explicit exit via the `exit` or `logout` commands, or an implicit exit by reading `end-of-file` from the terminal.  
-   However, if the shell terminates due to exec'ing another process, the files are not read. These are also affected by the `RCS` and `GLOBAL_RCS` options.  
+   This happens with either an explicit exit via the `exit` or `logout` commands, or an implicit exit by reading `end-of-file` from the terminal.<br/>
+   However, if the shell terminates due to exec'ing another process, the files are not read. These are also affected by the `RCS` and `GLOBAL_RCS` options.<br/>
    The `RCS` option affects the saving of history files, i.e. if `RCS` is unset when the shell exits, no history file will be saved.
 
 If `ZDOTDIR` is unset, `HOME` is used instead. Files listed above as being in `/etc` may be in another directory, depending on the installation.
 
-`/etc/zshenv` is run for **all** instances of zsh.  
+`/etc/zshenv` is run for **all** instances of zsh.<br/>
 it is a good idea to put code that does not need to be run for every single shell behind a test of the form `if [[ -o rcs ]]; then ...` so that it will not be executed when zsh is invoked with the `-f` option.
 
-When `/etc/zprofile` is installed it will override `PATH` and possibly other variables that a user may set in `~/.zshenv`. Custom `PATH` settings and similar overridden variables can be moved to `~/.zprofile` or other user startup files that are sourced after the `/etc/zprofile`.  
+When `/etc/zprofile` is installed it will override `PATH` and possibly other variables that a user may set in `~/.zshenv`. Custom `PATH` settings and similar overridden variables can be moved to `~/.zprofile` or other user startup files that are sourced after the `/etc/zprofile`.<br/>
 If `PATH` must be set in `~/.zshenv` to affect things like non-login ssh shells, one method is to use a separate path-setting file that is conditionally sourced in `~/.zshenv` and also sourced from `~/.zprofile`.
 
 ### History
