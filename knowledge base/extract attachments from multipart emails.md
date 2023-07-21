@@ -1,6 +1,6 @@
 # Extract attachments from multipart emails
 
-When saved as plain text, emails may be saved as S/MIME files with attachments.  
+When saved as plain text, emails may be saved as S/MIME files with attachments.<br/>
 In such cases the text file itself contains the multipart message body of the email, so the attachments are provided as base64 streams:
 
 ```txt

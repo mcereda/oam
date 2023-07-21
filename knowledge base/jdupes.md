@@ -53,7 +53,7 @@ Short | Long                     | Description
 
 Some filters take no value or multiple values.
 
-Filters that can take a numeric option generally support the size multipliers `K`/`M`/`G`/`T`/`P`/`E`, with or without an added `iB` or `B`.  
+Filters that can take a numeric option generally support the size multipliers `K`/`M`/`G`/`T`/`P`/`E`, with or without an added `iB` or `B`.<br/>
 Multipliers are binary-style unless the `-B` suffix is used, which will use decimal multipliers. For example, 16k or 16kib = 16384; 16kb = 16000. Multipliers are case-insensitive.
 
 Filters have cumulative effects: `jdupes -X size+:99 -X size-:101` will cause only files of exactly 100 bytes in size to be included.

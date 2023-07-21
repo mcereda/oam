@@ -50,7 +50,7 @@ salt -C 'G@os:Ubuntu and minion* or S@192.168.50.*' network.interfaces
 
 ## Key management
 
-Will use `salt-key`.  
+Will use `salt-key`.<br/>
 This needs to be done on the **master** host.
 
 - View all minion connections and whether the connection is accepted, rejected, or pending:

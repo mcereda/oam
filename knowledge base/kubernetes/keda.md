@@ -202,7 +202,7 @@ spec:
 
 `pollingInterval` is the interval in seconds KEDA will check each trigger on.
 
-`successfulJobsHistoryLimit` and `failedJobsHistoryLimit` specify how many _completed_ and _failed_ jobs should be kept, similarly to Jobs History Limits; it allows to learn what the outcome of the jobs are.  
+`successfulJobsHistoryLimit` and `failedJobsHistoryLimit` specify how many _completed_ and _failed_ jobs should be kept, similarly to Jobs History Limits; it allows to learn what the outcome of the jobs are.<br/>
 The actual number of jobs could exceed the limit in a short time, but it is going to resolve in the cleanup period. Currently, the cleanup period is the same as the Polling interval.
 
 `envSourceContainerName` specifies the name of container in the target Job from which KEDA will retrieve the environment properties holding secrets etc. If not defined, KEDA will try to retrieve the environment properties from the first Container in the target resource's definition.

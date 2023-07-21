@@ -29,7 +29,7 @@ Get the admin user's password:
 kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 ```
 
-The Grafana server can be accessed via port 80 on `grafana.monitoring.svc.cluster.local` from within the cluster.  
+The Grafana server can be accessed via port 80 on `grafana.monitoring.svc.cluster.local` from within the cluster.<br/>
 To get the external URL:
 
 ```sh

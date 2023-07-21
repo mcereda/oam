@@ -24,7 +24,7 @@ ffmpeg -y -i 'rec.webm' -vf 'palettegen' 'palette.png'
 ffmpeg -y -i 'rec.webm' -i 'palette.png' -filter_complex 'paletteuse' -r 10 'out.gif'
 ```
 
-Here `rec.webm` is the recorded video.  
+Here `rec.webm` is the recorded video.<br/>
 The first command creates a palette out of the webm file. The second command converts the webm file to gif using the created palette.
 
 ## Sources

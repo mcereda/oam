@@ -94,7 +94,7 @@ find -samefile 'path/to/file'
 
 Primaries used to check the difference between the file last access, creation or modification time and the time `find` was started.
 
-All time specification primaries take a numeric argument, and allow the number to be preceded by a plus sign (`+`) or a minus sign (`-`).  
+All time specification primaries take a numeric argument, and allow the number to be preceded by a plus sign (`+`) or a minus sign (`-`).<br/>
 A preceding plus sign means **more than `n`**, a preceding minus sign means **less than `n`** and neither means **exactly `n`**.
 
 Accepted time information:
@@ -106,7 +106,7 @@ Accepted time information:
 
 With the `-Xmin` form, times are rounded up to the next full **minute**. This is the same as using `-Xtime Nm`.
 
-With the `-Xtime` form, times depend on the given unit; if no unit is given, it defaults to full 24 hours periods (days).  
+With the `-Xtime` form, times depend on the given unit; if no unit is given, it defaults to full 24 hours periods (days).<br/>
 Accepted units:
 
 - `s` for seconds
@@ -117,7 +117,7 @@ Accepted units:
 
 Any number of units may be combined in one `-Xtime` argument.
 
-with the `-newerXY file` form, `find` checks if `file` has a more recent last access time (X=a), inode creation time (X=B), change time (X=c), or modification time (X=m) than the last access time (Y=a), inode creation time (Y=B), change time (Y=c), or modification time (Y=m).  
+with the `-newerXY file` form, `find` checks if `file` has a more recent last access time (X=a), inode creation time (X=B), change time (X=c), or modification time (X=m) than the last access time (Y=a), inode creation time (Y=B), change time (Y=c), or modification time (Y=m).<br/>
 If Y=t, `file` is interpreted as a direct date specification of the form understood by `cvs`. Also, `-newermm` is the same as `-newer`.
 
 ```sh

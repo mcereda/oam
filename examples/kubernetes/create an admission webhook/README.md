@@ -1,6 +1,6 @@
 # Create an admission webhook
 
-The example below will create a webhook which acts as both a `ValidatingAdmissionWebhook` and a `MutatingAdmissionWebhook`, but a real world one can act as only one of them. Or more. Your choice.  
+The example below will create a webhook which acts as both a `ValidatingAdmissionWebhook` and a `MutatingAdmissionWebhook`, but a real world one can act as only one of them. Or more. Your choice.<br/>
 The procedure is executed in a `minikube` cluster, and will use a self signed certificate for the webhook connection.
 
 > Be aware of the pros and cons of an `AdmissionWebhook` before deploying one:

@@ -66,7 +66,7 @@ podman exec \
 
 ## Service execution
 
-`run_keybase` starts the Keybase service, KBFS and the GUI.  
+`run_keybase` starts the Keybase service, KBFS and the GUI.<br/>
 If services are already running, they will be restarted.
 
 Options can also be controlled by setting the related environment variable to 1:
@@ -103,7 +103,7 @@ Use the import form in [Keybase launches encrypted git], or:
 
 ## Run as root
 
-Keybase shouldn't be run as the `root`, and by default it will fail with a message explaining it.  
+Keybase shouldn't be run as the `root`, and by default it will fail with a message explaining it.<br/>
 Under some circumnstances (like Docker or other containers) `root` can be the best or only option; run commands in concert with the `KEYBASE_ALLOW_ROOT=1` environment variable to force the execution.
 
 ## Temporary devices
@@ -123,7 +123,7 @@ keybase oneshot --username user --paperkey 'paper key'
 KEYBASE_PAPERKEY='paper key' KEYBASE_USERNAME='user' keybase oneshot
 ```
 
-Exploding messages work in oneshot mode with the caveat that you cannot run multiple instances of such with the same paperkey at the same time as each instance will try to create ephemeral keys, but require a distinct paperkey to uniquely identify itself as a separate device.  
+Exploding messages work in oneshot mode with the caveat that you cannot run multiple instances of such with the same paperkey at the same time as each instance will try to create ephemeral keys, but require a distinct paperkey to uniquely identify itself as a separate device.<br/>
 In addition, ephemeral keys are **purged entirely** when closing the oneshot session, and you will not be able to access any old ephemeral content when starting keybase up again.
 
 ## Further readings

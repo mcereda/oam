@@ -219,19 +219,19 @@ hQIMAwbYc…
 -----END PGP MESSAGE-----
 ```
 
-OpenPGP defines all text to be in UTF-8, so a comment may be any UTF-8 string.  
+OpenPGP defines all text to be in UTF-8, so a comment may be any UTF-8 string.<br/>
 The whole point of armoring, however, is to provide seven-bit-clean data, so if a comment has characters that are outside the US-ASCII range of UTF they may very well not survive transport.
 
 ## Use a GPG key for SSH authentication
 
 > Shamelessly copied over from [How to enable SSH access using a GPG key for authentication].
 
-This exercise will use a GPG subkey with only the authentication capability enabled to complete SSH connections.  
+This exercise will use a GPG subkey with only the authentication capability enabled to complete SSH connections.<br/>
 You can create multiple subkeys as you would do for SSH key pairs.
 
 ### Create an authentication subkey
 
-You should already have a GPG key. If you don't, read one of the many fine tutorials available on this topic.  
+You should already have a GPG key. If you don't, read one of the many fine tutorials available on this topic.<br/>
 You will create the subkey by editing your existing key **in expert mode** to get access to the appropriate options:
 
 ```sh
@@ -286,12 +286,12 @@ Is this correct? (y/N) y
 Really create? (y/N) y
 
 sec  rsa2048/8715AF32191DB135
-     created: 2019-03-21  expires: 2021-03-20  usage: SC  
+     created: 2019-03-21  expires: 2021-03-20  usage: SC
      trust: ultimate      validity: ultimate
 ssb  rsa2048/150F16909B9AA603
-     created: 2019-03-21  expires: 2021-03-20  usage: E  
+     created: 2019-03-21  expires: 2021-03-20  usage: E
 ssb  rsa2048/17E7403F18CB1123
-     created: 2019-03-21  expires: never       usage: A  
+     created: 2019-03-21  expires: never       usage: A
 [ultimate] (1). Brian Exelbierd
 
 gpg> quit
@@ -300,15 +300,15 @@ Save changes? (y/N) y
 
 ### Enable SSH to use the GPG subkey
 
-When using SSH, `ssh-agent` is used to manage SSH keys. When using a GPG key, `gpg-agent` is used to manage GPG keys.  
+When using SSH, `ssh-agent` is used to manage SSH keys. When using a GPG key, `gpg-agent` is used to manage GPG keys.<br/>
 To get `gpg-agent` to handle requests from SSH, you need to enable its SSH support:
 
 ```sh
 echo "enable-ssh-support" >> ~/.gnupg/gpg-agent.conf
 ```
 
-You can avoid using `ssh-add` to load the keys pre-specifying which GPG keys to use in the `~/.gnupg/sshcontrol` file.  
-The entries in this file are keygrips—internal identifiers that `gpg-agent` uses to refer to the keys. A keygrip refers to both the public and private key.  
+You can avoid using `ssh-add` to load the keys pre-specifying which GPG keys to use in the `~/.gnupg/sshcontrol` file.<br/>
+The entries in this file are keygrips—internal identifiers that `gpg-agent` uses to refer to the keys. A keygrip refers to both the public and private key.<br/>
 To find the keygrip use `gpg -K --with-keygrip`, then add that line to the `~/.gnupg/sshcontrol` file:
 
 ```sh

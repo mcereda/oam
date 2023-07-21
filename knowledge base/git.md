@@ -384,7 +384,7 @@ git config --list --show-scope
 git config --list --global --show-origin
 ```
 
-The configuration is shown in full for the requested scope (or all if not specified), but it might include the same setting multiple times if it shows up in multiple scopes.  
+The configuration is shown in full for the requested scope (or all if not specified), but it might include the same setting multiple times if it shows up in multiple scopes.<br/>
 Render the current value of a setting using the `--get` option:
 
 ```sh
@@ -557,7 +557,7 @@ git diff > 'file.patch'
 git diff --output 'file.patch' --cached
 ```
 
-The output from `git diff` just shows changes to **text** files by default, no metadata or other information about commits or branches.  
+The output from `git diff` just shows changes to **text** files by default, no metadata or other information about commits or branches.<br/>
 To get a whole commit with all its metadata and binary changes, use `git format-patch`:
 
 ```sh
@@ -583,7 +583,7 @@ Use `git apply` to apply a patch file to the current index:
 git apply 'file.patch'
 ```
 
-The changes from the patch are unstaged and no commits are created.  
+The changes from the patch are unstaged and no commits are created.<br/>
 To apply all commits from a patch, use `git am` on a patch created with `git format-patch`:
 
 ```sh
@@ -594,7 +594,7 @@ The commits are applied one after the other and registered in the repository's l
 
 ## The stash stack
 
-The _stash_ is a changelist separated from the one in the current working directory.  
+The _stash_ is a changelist separated from the one in the current working directory.<br/>
 `git stash` will save the current changes there and cleans the working directory. You can (re-)apply changes from the stash at any time:
 
 ```sh
