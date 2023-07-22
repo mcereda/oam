@@ -97,24 +97,25 @@ schnapps delete -t 'post'
 
 ## LED diodes settings
 
-A permanent change of color can be set in the UCI configuration file `/etc/config/rainbow`.
+Permanent changes can be set in `/etc/config/rainbow`, the UCI configuration file.
 
-The `rainbow` utility allows one to change the color and set the status of each diode individually. The setting are `disable` (off), `enable` (on) or `auto`; `auto` leaves the control of the diodes to the hardware, like blinking during data transfer and so on.
+The `rainbow` utility allows to change the color and set the status of each diode individually.<br/>
+The setting are `disable` (off), `enable` (on) or `auto`; `auto` leaves the control of the diodes to the hardware, like blinking during data transfer and so on.
 
 `rainbow`'s `brightness` subcommand uses numbers from 0 to 8, or from 0 to 255 if using the `-p` switch for higher precision.
 
 ### Automatic overnight dimming
 
-Should you want to see the state of individual devices during day but not to be dazzled by the diodes in the night, you can automatically adjust the intensity of LEDs using a cronjob.
+Automatically adjust the intensity of LEDs using a cronjob to be able to see the state of individual devices during the day, but not to be dazzled by the diodes in the night.
 
-Create a text file in the `/etc/cron.d` directory:
+Create the cron file in the `/etc/cron.d` directory:
 
 ```txt
 # File /etc/cron.d/rainbow_night.
 # Set the light intensity to the second lowest degree every day at 11 PM and set
 # it back to maximum every day at 7 AM.
 MAILTO=""   # avoid automatic logging of the output
-0  23  *  *  *  root   rainbow brightness 1
+0  23  *  *  *  root   rainbow brightness -p 3
 0   7  *  *  *  root   rainbow brightness 5
 ```
 
@@ -252,8 +253,8 @@ vim '/etc/config/lxc-auto'
 
 ```txt
 config container
-      option name pi-hole
-      option timeout 60
+  option name pi-hole
+  option timeout 60
 ```
 
 ### Examples
