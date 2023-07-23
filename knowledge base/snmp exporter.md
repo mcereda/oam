@@ -1,4 +1,4 @@
-# SNMP exporter
+# Prometheus' SNMP exporter
 
 ## Table of contents <!-- omit in toc -->
 
