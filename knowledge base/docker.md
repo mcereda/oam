@@ -157,11 +157,16 @@ Those files come from the volume the docker container is using for its root, and
   8eaaae8c0c72   hello-world   "/hello"   45 seconds ago   Exited (0) 10 seconds ago           sleepy_brown
   ```
 
+- Docker's host networking feature is not supported on Mac, even though the `docker run` command doesn't complain about it.<br/>
+  This is due to the fact that the Docker daemon on Mac is running in a virtual machine, and not natively; hence, ports are exposed on the VM and not of the host running it.<br/>
+  One way around it is port forwarding to localhost (the `-p` or `-P` options).
+
 ## Sources
 
 - [Arch Linux Wiki]
 - [Configuring DNS]
 - [Cheatsheet]
+- [Getting around Docker's host network limitation on Mac]
 
 <!--
   References
@@ -171,3 +176,4 @@ Those files come from the volume the docker container is using for its root, and
 [arch linux wiki]: https://wiki.archlinux.org/index.php/Docker
 [cheatsheet]: https://collabnix.com/docker-cheatsheet/
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html
+[getting around docker's host network limitation on mac]: https://medium.com/@lailadahi/getting-around-dockers-host-network-limitation-on-mac-9e4e6bfee44b
