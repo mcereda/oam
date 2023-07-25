@@ -1,0 +1,8 @@
+- .DS_Store
+- .localized
+- .obsidian
+- .terraform*
+- #recycle
+- @eaDir
+- changes_*
++ **
