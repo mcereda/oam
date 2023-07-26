@@ -16,12 +16,17 @@ rsync /data/ nas.lan:/data/ \
 # - .localized
 # - .obsidian
 # - .terraform*
-# - #recycle
-# - @eaDir
-# - changes_*
 # + **
 /opt/homebrew/bin/rsync 'Data' 'nas.lan:Data' \
 	-abchszAFLSUX \
 	--partial --append-verify --fake-super --no-motd \
 	--delete --backup-dir "changes_$(date +'%F_%H-%m-%S')" \
 	--no-inc-recursive --info="progress2"
+
+# .rsync-filter hides files on source, but does nothing for the ones on the remote
+/opt/homebrew/bin/rsync 'Data' 'synology.lan:Data' \
+	-abchszAFLSX \
+	--partial --append-verify --fake-super --no-motd \
+	--delete --backup-dir "changes_$(date +'%F_%H-%m-%S')" \
+	--no-inc-recursive --info="progress2" \
+	--exclude={'@eaDir','#recycle','changes_*'}
