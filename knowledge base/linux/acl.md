@@ -8,6 +8,10 @@
 ## TL;DR
 
 ```sh
+# Install the tool.
+apt install 'acl'
+dnf install 'acl'
+
 # Show acls of files.
 getfacl 'test/declarations.h'
 

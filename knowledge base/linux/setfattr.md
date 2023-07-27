@@ -9,6 +9,10 @@
 ## TL;DR
 
 ```sh
+# Install the tool.
+apt install 'attr'
+dnf install 'attr'
+
 # Add extended attributes.
 setfattr -n 'name' -v 'value' 'path/to/file.1' … 'path/to/file.N'
 
