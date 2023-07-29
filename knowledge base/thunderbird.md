@@ -8,6 +8,8 @@
    1. [Backing up profiles](#backing-up-profiles)
    1. [Restoring profiles from backups](#restoring-profiles-from-backups)
 1. [Troubleshooting](#troubleshooting)
+   1. [Create a dummy account](#create-a-dummy-account)
+   1. [Convert an account's message store type from one file per folder (_mbox_) to one file per message (_maildir_)](#convert-an-accounts-message-store-type-from-one-file-per-folder-mbox-to-one-file-per-message-maildir)
    1. [Rebuild the Global Database for a Profile](#rebuild-the-global-database-for-a-profile)
 1. [Sources](#sources)
 
@@ -76,6 +78,28 @@ ${THUNDERBIRD_BIN_DIR}/thunderbird-bin -P
 
 ## Troubleshooting
 
+### Create a dummy account
+
+1. Go to Menu > _Account Settings_.
+1. _Account Actions_ > _Add Mail Account…_.
+1. Insert any valid, but not necessarily existing, email address in the email field.<br/>
+   `dummy@example.com` is more than fine.
+1. Hit _Configure manually_ as it appears in the wizard.
+1. In the _Incoming Server_ configuration, ensure to set it to `POP3` and not `IMAP`.
+   You can safely ignore the rest of the server configuration as it is not needed.
+1. Hit _Advanced config_ and confirm to create the new dummy account.
+1. In the dummy account settings, under _Server Settings_, disable the automatic check for, and download of, new messages on the server.
+
+### Convert an account's message store type from one file per folder (_mbox_) to one file per message (_maildir_)
+
+1. [Create a new dummy account][create a dummy account].
+1. Move all the messages to the dummy account.
+1. Delete the old account.
+1. Recreate the old account.
+   > Make sure to select its message store type correctly in the advanced options **before** it starts downloading messages.
+1. Move all the messages back.
+1. Delete the dummy account.
+
 ### Rebuild the Global Database for a Profile
 
 The Global Database is the indexing system that enables Thunderbird to search messages.<br/>
@@ -120,6 +144,9 @@ The indexing progress can be monitored through _Tools_ > _Activity Manager_.
 [profile manager - create and remove thunderbird profiles]: https://support.mozilla.org/en-US/kb/profile-manager-create-and-remove-thunderbird-profiles#
 [profiles - where thunderbird stores your messages and other user data]: https://support.mozilla.org/en-US/kb/profiles-where-thunderbird-stores-user-data#
 [rebuilding the global database]: https://support.mozilla.org/en-US/kb/rebuilding-global-database#
+
+<!-- In-article sections -->
+[create a dummy account]: #create-a-dummy-account
 
 <!-- Others -->
 [arch wiki]: https://wiki.archlinux.org/title/thunderbird
