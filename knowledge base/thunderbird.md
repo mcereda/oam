@@ -13,6 +13,13 @@
 
 ## TL;DR
 
+Default directories path:
+
+| Directory | Linux                  | Mac OS X                                       | Windows                                |
+| --------- | ---------------------- | ---------------------------------------------- | -------------------------------------- |
+| Binaries  | `/usr/bin`             | `/Applications/Thunderbird.app/Contents/MacOS` | `C:\Program Files\Mozilla Thunderbird` |
+| Data      | `${HOME}/.thunderbird` | `${HOME}/Library/Thunderbird`                  | `%APPDATA%\Roaming\Thunderbird`        |
+
 ## Profiles
 
 Sets of files where Thunderbird saves personal information such as messages, passwords and user preferences.<br/>
@@ -31,8 +38,8 @@ When Thunderbird is open:
 When Thunderbird is closed:
 
 ```sh
-/Applications/Thunderbird.app/Contents/MacOS/thunderbird-bin --ProfileManager
-${HOME}/Applications/Thunderbird.app/Contents/MacOS/thunderbird-bin -P
+${THUNDERBIRD_BIN_DIR}/thunderbird --ProfileManager
+${THUNDERBIRD_BIN_DIR}/thunderbird-bin -P
 ```
 
 ### Backing up profiles
@@ -40,7 +47,7 @@ ${HOME}/Applications/Thunderbird.app/Contents/MacOS/thunderbird-bin -P
 1. Close Thunderbird if it is open.
 1. Copy the profile folder to another location:
    ```sh
-   cp -a "${HOME}/Library/Thunderbird/Profiles/we12yhij.default" "/Backup/Thunderbird/we12yhij.default"
+   cp -a "${THUNDERBIRD_DATA_DIR}/Profiles/we12yhij.default" "/Backup/Thunderbird/we12yhij.default"
    ```
 
 ### Restoring profiles from backups
@@ -48,8 +55,8 @@ ${HOME}/Applications/Thunderbird.app/Contents/MacOS/thunderbird-bin -P
 1. Close Thunderbird if it is open.
 1. If the existing profile folder and the profile backup folder have the same name, replace the existing profile folder with the profile backup folder:
    ```sh
-   rm -fr "${HOME}/Library/Thunderbird/Profiles/we12yhij.default"
-   cp -a "/Backup/Thunderbird/we12yhij.default" "${HOME}/Library/Thunderbird/Profiles/we12yhij.default"
+   rm -fr "${THUNDERBIRD_DATA_DIR}/Profiles/we12yhij.default"
+   cp -a "/Backup/Thunderbird/we12yhij.default" "${THUNDERBIRD_DATA_DIR}/Profiles/we12yhij.default"
    ```
    > Important: The profile folder names must match exactly for this to work, including the random string of 8 characters.
 1. If the profile folder names do not match, or to move or restore a profile to a different location:
