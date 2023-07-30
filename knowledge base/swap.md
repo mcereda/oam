@@ -32,6 +32,9 @@ vmstat --wide 1
 ## Swappiness
 
 ```sh
+# check the current value
+sysctl vm.swappiness
+
 # change the current value
 sudo sysctl vm.swappiness=10
 sudo sysctl -w vm/swappiness=5
