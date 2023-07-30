@@ -23,6 +23,13 @@ Default directories path:
 | Data      | `${HOME}/.thunderbird` | `${HOME}/Library/Thunderbird`                  | `%APPDATA%\Roaming\Thunderbird`          |
 | Profiles  | `${HOME}/.thunderbird` | `${HOME}/Library/Thunderbird/Profiles`         | `%APPDATA%\Roaming\Thunderbird\Profiles` |
 
+Add-ons:
+
+| Add-on                                       | Description                                                |
+| -------------------------------------------- | ---------------------------------------------------------- |
+| [ImportExportTools NG][importexporttools-ng] | Tools to import/export messages and folders.               |
+| [Remove Duplicate Messages][removedupes]     | Search and remove duplicate messages in your mail folders. |
+
 ## Profiles
 
 Sets of files where Thunderbird saves personal information such as messages, passwords and user preferences.<br/>
@@ -142,9 +149,13 @@ The indexing progress can be monitored through _Tools_ > _Activity Manager_.
   -->
 
 <!-- Upstream -->
+
 [profile manager - create and remove thunderbird profiles]: https://support.mozilla.org/en-US/kb/profile-manager-create-and-remove-thunderbird-profiles#
 [profiles - where thunderbird stores your messages and other user data]: https://support.mozilla.org/en-US/kb/profiles-where-thunderbird-stores-user-data#
 [rebuilding the global database]: https://support.mozilla.org/en-US/kb/rebuilding-global-database#
+
+[importexporttools-ng]: https://addons.thunderbird.net/en-US/thunderbird/addon/importexporttools-ng/
+[removedupes]: https://addons.thunderbird.net/en-US/thunderbird/addon/removedupes/
 
 <!-- In-article sections -->
 [create a dummy account]: #create-a-dummy-account
