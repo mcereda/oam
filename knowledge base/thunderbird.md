@@ -35,7 +35,7 @@ Add-ons:
 Sets of files where Thunderbird saves personal information such as messages, passwords and user preferences.<br/>
 One can have multiple profiles, each containing a separate set of user information.
 
-The Profile Manager allows to create, remove, rename, and switch profiles. 
+The Profile Manager allows to create, remove, rename, and switch profiles.
 
 ### Profile manager
 
