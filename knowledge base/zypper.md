@@ -6,8 +6,10 @@ SUSE and openSUSE GNU/Linux's package management utility and command-line interf
 
 1. [TL;DR](#tldr)
 1. [Concepts](#concepts)
+   1. [Repositories](#repositories)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
+1. [Sources](#sources)
 
 ## TL;DR
 
@@ -92,13 +94,12 @@ zypper dup --details --from 'factory' --from 'packman'
 
 # List currently defined repositories.
 zypper repos
-zypper rl -d
+zypper rl -d --sort-by-priority
 
 # Add repositories.
 zypper addrepo --check --refresh --priority '90' \
-  'https://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Tumbleweed/' \
-  'packman'
-zypper ar …
+  'https://repo.vivaldi.com/archive/vivaldi-suse.repo' 'vivaldi'
+zypper ar -cf -p '89' …
 
 # Remove repositories.
 zypper removerepo 'mozilla'
@@ -139,6 +140,21 @@ They might be **packages**, **patches**, **patterns**, **products**, or basicall
 
 If one does not request specific versions of resolvables during an action, Zypper's dependency solver will pick a _reasonable_ one automatically.
 
+### Repositories
+
+The **lower** the number given to their `priority` setting, the **higher** the precedence of that repository.<br/>
+This means that a repository with priority 90 will have precedence on repositories with the default priority of 99.
+
+[Default (distribution) repositories][package repositories], [additional repositories][additional package repositories].
+
+Repositories of interest:
+
+| Name          | URL                                                                                                                                                    | Description                                                           |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| Packman (all) | <https://ftp.fau.de/packman/suse/opeSUSE_Tumbleweed/><br/><https://ftp.fau.de/packman/suse/openSUSE_Leap_15.5/>                                        | The largest external repository of openSUSE packages                  |
+| Mozilla       | <https://download.opensuse.org/repositories/mozilla/openSUSE_Tumbleweed/><br/><https://download.opensuse.org/repositories/mozilla/openSUSE_Leap_15.5/> | Bleeding edge versions of Firefox, Thunderbird and all things Mozilla |
+| Vivaldi       | <https://repo.vivaldi.com/archive/vivaldi-suse.repo>                                                                                                   | A browser adapting to you, not the other way around.                  |
+
 ## Gotchas
 
 Global options **must** be specified **before** the command name.<br/>
@@ -155,9 +171,23 @@ sudo rpm --query --list 'parallel'
 - [rpm]
 - [How can I list all files which have been installed by an ZYpp/Zypper package?]
 
+## Sources
+
+All the references in the [further readings] section, plus the following:
+
+- [Package repositories]
+- [Additional package repositories]
+
 <!--
   References
   -->
+
+<!-- Upstream -->
+[additional package repositories]: https://en.opensuse.org/Additional_package_repositories
+[package repositories]: https://en.opensuse.org/Package_repositories
+
+<!-- In-article sections -->
+[further readings]: #further-readings
 
 <!-- Knowledge base -->
 [rpm]: rpm.md
