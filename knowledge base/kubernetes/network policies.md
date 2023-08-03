@@ -40,6 +40,7 @@ All the references in the [further readings] section, plus the following:
 <!-- Others -->
 [an introduction to kubernetes network policies for security people]: https://reuvenharrison.medium.com/an-introduction-to-kubernetes-network-policies-for-security-people-ba92dd4c809d
 [get started with kubernetes network policy]: https://docs.tigera.io/calico/latest/network-policy/get-started/kubernetes-policy/kubernetes-network-policy
+[graphical editor]: https://editor.networkpolicy.io/
 [implementing kubernetes network policies: a comprehensive guide]: https://blog.kubesimplify.com/implementing-kubernetes-network-policies-a-comprehensive-guide
 [kubernetes network policy recipes]: https://github.com/ahmetb/kubernetes-network-policy-recipes
 [setting up kubernetes network policies: a detailed guide]: https://www.cncf.io/blog/2019/04/19/setting-up-kubernetes-network-policies-a-detailed-guide/
