@@ -8,14 +8,21 @@
 ## TL;DR
 
 ```sh
-# list all installed packages
+# List all installed packages.
 rpm --query --all
+rpm -qa
 
-# list files installed by a package
-rpm --query --list package
+# List files installed by packages.
+rpm --query --list 'package_name'
+rpm -ql 'parallel'
 
-# find the package owning a file
-rpm --query --file /usr/bin/file
+# Find which package owns a file.
+rpm --query --file '/path/to/file'
+rpm -qf '/usr/bin/realm'
+
+# List the contents of locally available RPM packages.
+rpm --query --list --package 'path/to/file.rpm'
+rpm -qlp 'downloads/foo.rpm'
 ```
 
 ## Further readings
