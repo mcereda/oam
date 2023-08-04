@@ -40,12 +40,12 @@ pip-autoremove
 
 INI format files, on those levels:
 
-Level | Scope | File locations
----|---|---
-global | System-wide, shared | The `pip` subdirectory in any of the directories defined in `XDG_CONFIG_DIRS` if it exists (i.e. `/etc/xdg/pip/pip.conf`)<br/>`/etc/pip.conf`
-user | Per-user | `$HOME/.config/pip/pip.conf`<br/>`$HOME/.pip/pip.conf` (legacy)
-site | Per-environment | `$VIRTUAL_ENV/pip.conf`
-shell | Active shell session | Value of `PIP_CONFIG_FILE`
+| Level  | Scope                | File locations                                                                                                                                 |
+| ------ | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| global | System-wide, shared  | The `pip` subdirectory in any of the directories defined in `XDG_CONFIG_DIRS`, if it exists (i.e. `/etc/xdg/pip/pip.conf`)<br/>`/etc/pip.conf` |
+| user   | Per-user             | `$HOME/.config/pip/pip.conf`<br/>`$HOME/.pip/pip.conf` (legacy)                                                                                |
+| site   | Per-environment      | `$VIRTUAL_ENV/pip.conf`                                                                                                                        |
+| shell  | Active shell session | Value of `PIP_CONFIG_FILE`                                                                                                                     |
 
 When multiple configuration exist, pip **merges** them in the following order:
 
@@ -59,6 +59,7 @@ Latter files override values from previous files, i.e. the global timeout specif
 ## Further readings
 
 - [Configuration]
+- [`pipx`][pipx]
 
 <!--
   References
@@ -66,3 +67,6 @@ Latter files override values from previous files, i.e. the global timeout specif
 
 <!-- Upstream -->
 [configuration]: https://pip.pypa.io/en/stable/topics/configuration/
+
+<!-- Knowledge base -->
+[pipx]: pipx.md

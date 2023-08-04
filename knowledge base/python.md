@@ -183,6 +183,7 @@ See [concurrent execution] for more information.
 
 - [Dictionaries]
 - [PIP]
+- [`pipx`][pipx]
 - [How To Update All Python Packages]
 - [invl/pip-autoremove]
 - [Data types]
@@ -198,6 +199,8 @@ See [concurrent execution] for more information.
 - [Concurrent execution]
 
 ## Sources
+
+All the references in the [further readings] section, plus the following:
 
 - [10 python one-liners for dictionaries]
 - [Logging library]
@@ -215,7 +218,11 @@ See [concurrent execution] for more information.
 [subprocess library]: https://docs.python.org/3/library/subprocess.html
 
 <!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Knowledge base -->
 [pip]: pip.md
+[pipx]: pipx.md
 
 <!-- Others -->
 [*args and **kwargs in python]: https://www.geeksforgeeks.org/args-kwargs-python/
