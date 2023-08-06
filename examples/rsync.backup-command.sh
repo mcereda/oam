@@ -1,32 +1,41 @@
 #!/usr/bin/env bash
 
-rsync /data/ nas.lan:/data/ \
-	--archive --copy-links --protect-args --delete \
-	--acls --xattrs --fake-super \
+# Sync directories from a Linux source to a Linux destination.
+# Expand symlink at the source to their referred files.
+# Assumes the same owner and group at both hosts.
+rsync 'data/' 'nas.lan:data/' \
+	--secluded-args --no-inc-recursive \
+	--archive --copy-links --acls --xattrs --times --atimes --crtimes \
+	--partial --append-verify --sparse \
+	--human-readable --info='progress2' \
+	--delete --backup --backup-dir "changes_$(date +'%F_%H-%M-%S')" --exclude "changes_*"
+rsync 'data/' 'nas.lan:data/' \
+	-abhstALNSUX --no-i-r \
 	--partial --append-verify \
-	--compress --sparse --no-motd \
-	--human-readable --no-inc-recursive --info="progress2" -vv \
-	--exclude ".terraform*" --exclude "obsidian" \
-	--backup --backup-dir "changes_$(date +'%F_%H-%m-%S')" --exclude "changes_*" \
-| grep -Ev -e uptodate -e "/$"
+	--info='progress2' \
+	--delete --backup-dir "changes_$(date +'%F_%H-%M-%S')" --exclude "changes_*"
 
 
-# cat '.rsync-filter'
-# - .DS_Store
-# - .localized
-# - .obsidian
-# - .terraform*
-# + **
-/opt/homebrew/bin/rsync 'Data' 'nas.lan:Data' \
-	-abchszAFLSUX \
-	--partial --append-verify --fake-super --no-motd \
-	--delete --backup-dir "changes_$(date +'%F_%H-%m-%S')" \
-	--no-inc-recursive --info="progress2"
+# Sync directories from a Linux source to a Synology NAS.
+# The above one, just modified to be accepted from those systems.
+rsync 'data/' 'synology.lan:/volume1/data/' \
+	--secluded-args --no-inc-recursive \
+	--archive --copy-links --acls --xattrs \
+	--partial --append-verify --sparse \
+	--human-readable --info='progress2' \
+	--delete --backup --backup-dir "changes_$(date +'%F_%H-%M-%S')" --exclude "changes_*" \
+	--no-motd --fake-super --super --chown='user:users' \
+	--exclude={'@eaDir','#recycle'}
+rsync 'data/' 'synology.lan:/volume1/data/' \
+	-abhsALSX --no-i-r \
+	--partial --append-verify \
+	--info='progress2' \
+	--delete --backup-dir "changes_$(date +'%F_%H-%M-%S')" --exclude "changes_*" \
+	--no-motd --fake-super --super --chown='user:users' \
+	--exclude={'@eaDir','#recycle'}
 
-# .rsync-filter hides files on source, but does nothing for the ones on the remote
-/opt/homebrew/bin/rsync 'Data' 'synology.lan:Data' \
-	-abchszAFLSX \
-	--partial --append-verify --fake-super --no-motd \
-	--delete --backup-dir "changes_$(date +'%F_%H-%m-%S')" \
-	--no-inc-recursive --info="progress2" \
-	--exclude={'@eaDir','#recycle','changes_*'}
+
+# Use the '.rsync-filter' file.
+# The filter file excludes files from the source, but does nothing for the ones
+# on the remote side. To exclude them too, explicitly use the `--exclude` option.
+$ rsync … -F
