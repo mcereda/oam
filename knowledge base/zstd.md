@@ -9,8 +9,15 @@ The `zstd`, `zstdmt`, `unzstd`, `zstdcat` utilities compress or decompress `.zst
 ## TL;DR
 
 ```sh
-zstd -15 -r --compress --rsyncable "folder" -o "folder.zst"
-zstd --test
-zstd --list
-zstd --decompress
+# Compress folders into an archive.
+zstd --compress -15 --rsyncable -r 'folder' -o 'archive.zst'
+
+# Test archives.
+zstd --test 'archive.zst'
+
+# Print information about files in archives.
+zstd --list 'archive.zst'
+
+# Decompress archives.
+zstd --decompress 'archive.zst'
 ```

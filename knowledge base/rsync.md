@@ -4,6 +4,8 @@
 
 1. [TL;DR](#tldr)
 1. [Explored options](#explored-options)
+1. [Filters](#filters)
+   1. [Filter file](#filter-file)
 1. [Sources](#sources)
 
 ## TL;DR
@@ -85,47 +87,69 @@ parallel -q \
 
 ## Explored options
 
-| Long format             | Short format | Description                                                                                  |
-| ----------------------- | ------------ | -------------------------------------------------------------------------------------------- |
-|                         | `-P`         | same as `--partial --progress`                                                               |
-| `--acls`                | `-A`         | preserve ACLs; implies `--perms`                                                             |
-| `--append-verify`       |              | like `--append`, but use the data already there to check the items                           |
-| `--archive`             | `-a`         | archive mode, equals `-rlptgoD`; does **not** imply `-H`, `-A`, nor `-X`                     |
-| `--backup-dir=DIR`      |              | use the specified directory to backup changing items                                         |
-| `--backup`              | `-b`         | backup items changing at the destination; see also `--suffix` and `--backup-dir`             |
-| `--bwlimit=RATE`        |              | limit the socket's I/O bandwidth to _RATE_; with no suffix, the value will be in KBPS        |
-| `--checksum`            | `-c`         | skip files basing on checksum instead of modify time and size                                |
-| `--chown=USER:GROUP`    |              | simple username/groupname mapping                                                            |
-| `--compress`            | `-z`         | compress file data during the transfer                                                       |
-| `--crtimes`             |              | **only available on Mac OS X**                                                               |
-| `--delete-during`       | `--del`      | set the **receiver** to delete files during the transfer                                     |
-| `--delete`              |              | delete items **at the destination** that **don't** exist in the source                       |
-| `--dry-run`             | `-n`         | perform a trial run with no changes made                                                     |
-| `--exclude=PATTERN`     |              | exclude files matching _PATTERN_                                                             |
-| `--executability`       | `-E`         | preserve executability                                                                       |
-| `--fake-super`          |              | store/recover privileged attrs using xattrs                                                  |
-| `--filter=RULE`         | `-f`         | add a file-filtering _RULE_                                                                  |
-| `--hard-links`          | `-H`         | preserve hard links                                                                          |
-| `--human-readable`      | `-h`         | output numbers in a human-readable format                                                    |
-| `--ignore-existing`     |              | skip updating files that already exist at the destination                                    |
-| `--info=FLAGS`          |              | fine-grained informational verbosity; the `progress2` value is available since version 3.1.0 |
-| `--links`               | `-l`         | copy symlinks as symlinks                                                                    |
-| `--no-inc-recursive`    | `--no-i-r`   | scan all directories on startup instead of incrementally                                     |
-| `--no-motd`             |              | suppress daemon-mode MOTD                                                                    |
-| `--no-OPTION`           |              | turn off an **implied** OPTION (e.g. `--no-D`)                                               |
-| `--partial`             |              | keep partially transferred files                                                             |
-| `--progress`            |              | show progress for each file during transfer                                                  |
-| `--protect-args`        | `-s`         | no space-splitting; wildcard chars only                                                      |
-| `--prune-empty-dirs`    | `-m`         | prune empty directory chains from file-list                                                  |
-| `--recursive`           | `-r`         | recurse into directories                                                                     |
-| `--remove-source-files` |              | set the **sender** to remove synchronized files; it does **not** remove directories          |
-| `--rsh=COMMAND`         | `-e`         | specify the remote shell to use (with options, e.g. _ssh -p 1234_)                           |
-| `--sparse`              | `-S`         | turn sequences of nulls into sparse blocks                                                   |
-| `--stats`               |              | give some file-transfer stats                                                                |
-| `--suffix=SUFFIX`       |              | suffix for backups; defaults to `~`                                                          |
-| `--update`              | `-u`         | skip files that are newer on the receiver                                                    |
-| `--verbose`             | `-v`         | increase verbosity once for each copy of this switch                                         |
-| `--xattrs`              | `-X`         | preserve extended attributes                                                                 |
+| Long format             | Short format | Description                                                                                         |
+| ----------------------- | ------------ | --------------------------------------------------------------------------------------------------- |
+|                         | `-F`         | same as `--filter='dir-merge /.rsync-filter'`<br/>if repeated, same as `--filter='- .rsync-filter'` |
+|                         | `-P`         | same as `--partial --progress`                                                                      |
+| `--acls`                | `-A`         | preserve ACLs; implies `--perms`                                                                    |
+| `--append-verify`       |              | like `--append`, but use the data already there to check the items                                  |
+| `--archive`             | `-a`         | archive mode, equals `-rlptgoD`; does **not** imply `-H`, `-A`, nor `-X`                            |
+| `--backup-dir=DIR`      |              | use the specified directory to backup changing items                                                |
+| `--backup`              | `-b`         | backup items changing at the destination; see also `--suffix` and `--backup-dir`                    |
+| `--bwlimit=RATE`        |              | limit the socket's I/O bandwidth to _RATE_; with no suffix, the value will be in KBPS               |
+| `--checksum`            | `-c`         | skip files basing on checksum instead of modify time and size                                       |
+| `--chown=USER:GROUP`    |              | simple username/groupname mapping                                                                   |
+| `--compress`            | `-z`         | compress file data during the transfer                                                              |
+| `--crtimes`             |              | **only available on Mac OS X**                                                                      |
+| `--delete-during`       | `--del`      | set the **receiver** to delete files during the transfer                                            |
+| `--delete`              |              | delete items **at the destination** that **don't** exist in the source                              |
+| `--dry-run`             | `-n`         | perform a trial run with no changes made                                                            |
+| `--exclude=PATTERN`     |              | exclude files matching _PATTERN_                                                                    |
+| `--executability`       | `-E`         | preserve executability                                                                              |
+| `--fake-super`          |              | store/recover privileged attrs using xattrs                                                         |
+| `--filter=RULE`         | `-f`         | add a file-filtering _RULE_                                                                         |
+| `--hard-links`          | `-H`         | preserve hard links                                                                                 |
+| `--human-readable`      | `-h`         | output numbers in a human-readable format                                                           |
+| `--ignore-existing`     |              | skip updating files that already exist at the destination                                           |
+| `--info=FLAGS`          |              | fine-grained informational verbosity; the `progress2` value is available since version 3.1.0        |
+| `--links`               | `-l`         | copy symlinks as symlinks                                                                           |
+| `--no-inc-recursive`    | `--no-i-r`   | scan all directories on startup instead of incrementally                                            |
+| `--no-motd`             |              | suppress daemon-mode MOTD                                                                           |
+| `--no-OPTION`           |              | turn off an **implied** OPTION (e.g. `--no-D`)                                                      |
+| `--partial`             |              | keep partially transferred files                                                                    |
+| `--progress`            |              | show progress for each file during transfer                                                         |
+| `--protect-args`        | `-s`         | no space-splitting; wildcard chars only                                                             |
+| `--prune-empty-dirs`    | `-m`         | prune empty directory chains from file-list                                                         |
+| `--recursive`           | `-r`         | recurse into directories                                                                            |
+| `--remove-source-files` |              | set the **sender** to remove synchronized files; it does **not** remove directories                 |
+| `--rsh=COMMAND`         | `-e`         | specify the remote shell to use (with options, e.g. _ssh -p 1234_)                                  |
+| `--sparse`              | `-S`         | turn sequences of nulls into sparse blocks                                                          |
+| `--stats`               |              | give some file-transfer stats                                                                       |
+| `--suffix=SUFFIX`       |              | suffix for backups; defaults to `~`                                                                 |
+| `--update`              | `-u`         | skip files that are newer on the receiver                                                           |
+| `--verbose`             | `-v`         | increase verbosity once for each copy of this switch                                                |
+| `--xattrs`              | `-X`         | preserve extended attributes                                                                        |
+
+## Filters
+
+### Filter file
+
+Set up a `.rsync-filter` file in any directory. If `rsync` is called with the `-F` option, the filtering rules in that file will be applied from that directory to all its subfolders.
+
+```sh
+$ cat '.rsync-filter'
+- .DS_Store
+- .localized
+- .obsidian
+- .terraform*
+
++ **
+
+$ rsync … -F
+```
+
+The filter file excludes files from the source, but does nothing for the ones on the remote.<br/>
+If one wants to exclude files from the remote, they must be set explicitly using the `--exclude` option.
 
 ## Sources
 
