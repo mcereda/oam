@@ -52,6 +52,11 @@ zypper install 'parallel'
 zypper in --no-confirm 'https://prerelease.keybase.io/keybase_amd64.rpm'
 zypper in --no-recommends 'gv' 'virtualbox-ose=2.0.6' '/root/ansible.rpm'
 
+# Install from specific repositories.
+# Requires the repo to be already added.
+zypper in -r 'packman' 'libavdevice60'
+zypper in -r 'https://repo.vivaldi.com/archive/vivaldi-suse.repo' 'vivaldi'
+
 # Install resolvables from source.
 # The source packages *must* be available in the repositories one is using.
 zypper source-install -d 'dbus-1'

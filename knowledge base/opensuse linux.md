@@ -7,6 +7,7 @@
 1. [Raspberry Pi](#raspberry-pi)
    1. [Firmware update from a running system](#firmware-update-from-a-running-system)
 1. [Rollback from a bootable snapshot](#rollback-from-a-bootable-snapshot)
+1. [Firefox MP4/H.264 video support](#firefox-mp4h264-video-support)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -97,6 +98,19 @@ On the boot screen, choose the **default** boot entry to reboot into the reinsta
 
 A snapshot of the file system status before the rollback is created, and the default subvolume for root will be replaced with a fresh read-write snapshot.
 
+## Firefox MP4/H.264 video support
+
+To deal with [patent problems][information about the h.264 patent license], neither Firefox nor openSUSE provides the H264 codec required by fresh new openSUSE installation to play some video formats on the web.<br/>
+The Packman and VLC repositories provide the needed `libav` packages. Install those libraries to let Firefox use them to decode MP4/H.264 video.
+
+```sh
+zypper install 'libavcodec60' 'libavdevice60' 'libavformat60'
+```
+
+openSUSE provides `ffmpeg` and `libav` packages like `libavcodec56`, but in them all patent related codecs were removed making them unable to play MP4/H.264 video. That is why one needs to upgrade these packages with their version in the Packman or VLC repositories.
+
+Go to this [Simple WebRTC H264 check page] to check if Firefox can play H.264 videos after installation.
+
 ## Further readings
 
 - [Bluetooth]
@@ -111,12 +125,16 @@ All the references in the [further readings] section, plus the following:
 - [OpenSSH basics]
 - [Bluetooth on boot]
 - [Raspberry Pi4]
+- [Firefox MP4/H.264 video support]
+- [Information about the H.264 patent license]
+- [Simple WebRTC H264 check page]
 
 <!--
   References
   -->
 
 <!-- Upstream -->
+[firefox mp4/h.264 video support]: https://en.opensuse.org/SDB:Firefox_MP4/H.264_Video_Support
 [openssh basics]: https://en.opensuse.org/SDB:OpenSSH_basics
 [raspberry pi4]: https://en.opensuse.org/openSUSE:Raspberry_Pi
 [system recovery and snapshot management with snapper]: https://documentation.suse.com/sles/12-SP4/html/SLES-all/cha-snapper.html
@@ -128,3 +146,5 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Others -->
 [bluetooth on boot]: https://www.reddit.com/r/openSUSE/comments/eoozm2/comment/feetqpn/
+[information about the h.264 patent license]: https://www.fsf.org/licensing/h264-patent-license
+[simple webrtc h264 check page]: https://mozilla.github.io/webrtc-landing/pc_test_no_h264
