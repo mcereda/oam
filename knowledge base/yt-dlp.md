@@ -28,12 +28,12 @@ yt-dlp --list-subs rQnNghhPw6o
 # Output templates at https://github.com/yt-dlp/yt-dlp#output-template, or use
 # '-j' to see the json file with all of them.
 yt-dlp --get-filename \
-  -o "%(season_number)d.%(episode_number)02d %(episode)s.%(ext)s" \
+  -o "%(season_number)d.%(episode_number)02d %(episode)U.%(ext)s" \
   https://www.crunchyroll.com/some/good/serie
 
 # Download all videos in a YouTube channel.
 yt-dlp -f "bestvideo+bestaudio/best" -ciw \
-  -o "%(title)s.%(ext)s" -v https://www.youtube.com/c/pbsspacetime/videos
+  -o "%(title)#S.%(ext)s" -v https://www.youtube.com/c/pbsspacetime/videos
 
 # As above with improvements.
 # Slow down the requests to avoid issues in retrieving the data.
@@ -45,7 +45,7 @@ yt-dlp -ciw \
   --sub-langs "(de|en|fr|es|it|ja|nl|zh(-Han.*)?)(-en)?" \
   --sub-format "ass/srt/best" --write-auto-subs \
   -f "bestvideo+bestaudio/best" \
-  -o "%(timestamp>%Y-%m-%d,upload_date>%Y-%m-%d)s  %(title)s.%(ext)s" \
+  -o "%(timestamp>%Y-%m-%d,upload_date>%Y-%m-%d)s  %(title)U.%(ext)s" \
   https://www.youtube.com/c/becausescience/videos
 ```
 
