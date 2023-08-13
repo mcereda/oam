@@ -71,6 +71,12 @@ apt-check policy 'boinc-client'
 # Reconfigure packages.
 sudo dpkg-reconfigure 'mariadb-server'
 sudo dpkg-reconfigure -p 'low' 'unattended-upgrades'
+
+# Stop installing recommended and suggested packages.
+cat > /etc/apt/apt.conf.d/99norecommend << EOF
+APT::Install-Recommends "0";
+APT::Install-Suggests "0";
+EOF
 ```
 
 ## Automate security upgrades
@@ -95,6 +101,12 @@ See [Apt configuration] for more information.
 ```txt
 # /etc/apt/apt.conf.d/90default-release
 APT::Default-Release "stable";
+```
+
+```txt
+# /etc/apt/apt.conf.d/99norecommend
+APT::Install-Recommends "0";
+APT::Install-Suggests "0";
 ```
 
 ```txt
