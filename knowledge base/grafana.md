@@ -140,6 +140,7 @@ $ curl -sS \
 | Name               | Grafana ID | URLs                                                                                                                                                                                           |
 | ------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Node exporter full | 1860       | [grafana](https://grafana.com/grafana/dashboards/1860-node-exporter-full/), [github raw](https://raw.githubusercontent.com/rfmoz/grafana-dashboards/master/prometheus/node-exporter-full.json) |
+| OpenWRT            | 11147      | [grafana](https://grafana.com/grafana/dashboards/11147-openwrt/)                                                                                                                               |
 
 ## Further readings
 
