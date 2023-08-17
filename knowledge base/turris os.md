@@ -15,10 +15,10 @@ Linux distribution based on top of OpenWrt. Check the [website] for more informa
    1. [Start containers](#start-containers)
    1. [Execute a shell into containers](#execute-a-shell-into-containers)
    1. [Start containers at boot](#start-containers-at-boot)
-   1. [Examples](#examples)
-      1. [CFEngine hub](#cfengine-hub)
-      1. [Git server](#git-server)
-      1. [Pi-hole](#pi-hole)
+   1. [Example: cfengine hub](#example-cfengine-hub)
+   1. [Example: git server](#example-git-server)
+   1. [Example: monitoring](#example-monitoring)
+   1. [Example: pi-hole](#example-pi-hole)
 1. [Hardening](#hardening)
 1. [The SFP+ caged module](#the-sfp-caged-module)
    1. [Use the SFP module as a LAN port](#use-the-sfp-module-as-a-lan-port)
@@ -71,9 +71,18 @@ reboot
 # Gracefully shutdown the device.
 poweroff
 
+# List available LXC container images.
+# Default source is 'repo.turris.cz/lxc'.
+lxc-create -n 'test' -t 'download'; lxc-destroy -n 'test'
+lxc-create … -t 'download' -- --server 'images.linuxcontainers.org'
+
 # Create LXC containers.
-lxc-create --name 'ubuntu-focal' --template 'download' -- --dist 'Ubuntu' --release 'Focal' --arch 'armv7l' --server 'repo.turris.cz/lxc'
-lxc-create … -t 'download' -- --dist 'debian' --release 'bullseye' --arch 'armhf' --server 'images.linuxcontainers.org'
+# Default source is 'repo.turris.cz/lxc'.
+# Values are case sensitive and depend from what is on the server.
+lxc-create -n 'alpine' -t 'download' -- -d 'Alpine' -r '3.18' -a 'armv7l'
+lxc-create --name 'ubuntu-focal' --template 'download' -- \
+  --server 'repo.turris.cz/lxc' \
+  --dist 'Ubuntu' --release 'Focal' --arch 'armv7l'
 
 # List snapshots.
 schnapps list
@@ -181,13 +190,18 @@ Unless otherwise specified:
 In shell:
 
 ```sh
+# List available LXC container images.
 # Default source is 'repo.turris.cz/lxc'.
-# Values for the template options are case sensitive.
-lxc-create --name 'test' --template 'download'
-lxc-create -n 'git' -t 'download' -- -d 'Debian' -r 'Bullseye' -a 'armv7l'
-lxc-create -n 'pi-hole' -t 'download' --
-  --server 'images.linuxcontainers.org' \
-  --dist 'debian' --release 'bullseye' --arch 'armhf'
+lxc-create -n 'test' -t 'download'; lxc-destroy -n 'test'
+lxc-create … -t 'download' -- --server 'images.linuxcontainers.org'
+
+# Create LXC containers.
+# Default source is 'repo.turris.cz/lxc'.
+# Values are case sensitive and depend from what is on the server.
+lxc-create -n 'pi-hole' -t 'download' -- -d 'Debian' -r 'Bullseye' -a 'armv7l'
+lxc-create --name 'pi-hole' --template 'download' -- \
+  --server 'repo.turris.cz/lxc' \
+  --dist 'Ubuntu' --release 'Focal' --arch 'armv7l'
 ```
 
 Using the WebUI:
@@ -257,16 +271,15 @@ config container
   option timeout 60
 ```
 
-### Examples
+### Example: cfengine hub
 
-#### CFEngine hub
-
-> CFEngine does not seem to support 32bits ARM processors (but it does support arm64) anymore.
+> CFEngine does not seem to support 32bits ARM processors anymore (but it does support arm64).<br/>
+> Still, since I am using a 32bit processor this is not doable for me.
 
 <details>
   <summary>Old installation test</summary>
 
-  > This procedure assumes an LXC container based upon Debian Bullseye.
+  > This procedure assumes you are using an LXC container based on the Debian Bullseye image.
 
   ```sh
   # Set the correct hostname.
@@ -283,9 +296,9 @@ config container
 
 </details>
 
-#### Git server
+### Example: git server
 
-> This procedure assumes an LXC container based upon Debian Bullseye.
+> This procedure assumes you are using an LXC container based on the Debian Bullseye image.
 
 ```sh
 # Set the correct hostname.
@@ -321,9 +334,45 @@ chsh 'git' -s "$(which 'git-shell')"
 exit
 ```
 
-#### Pi-hole
+### Example: monitoring
 
-> This procedure assumes an LXC container based upon Debian Bullseye.
+> This procedure assumes you are using an LXC container based on the Debian Bullseye image.
+
+```sh
+# Set the correct hostname.
+hostnamectl set-hostname 'monitoring'
+
+# Install the requirements
+DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'unattended-upgrades' 'wget'
+
+# Stop installing recommended and suggested packages.
+cat > /etc/apt/apt.conf.d/99norecommend << EOF
+APT::Install-Recommends "0";
+APT::Install-Suggests "0";
+EOF
+
+# Add Grafana's repository with its key.
+wget -q -O /usr/share/keyrings/grafana.key https://apt.grafana.com/gpg.key
+echo "deb [signed-by=/usr/share/keyrings/grafana.key] https://apt.grafana.com stable main" | tee -a /etc/apt/sources.list.d/grafana.list
+
+# Install Prometheus and Grafana.
+apt update
+DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'grafana-enterprise' 'prometheus'
+
+# Configure Prometheus and Grafana.
+# See the '/docker/monitoring' example.
+
+# Enable the services.
+systemctl enable 'grafana-server.service'
+systemctl enable 'prometheus.service'
+
+# All done!
+exit
+```
+
+### Example: pi-hole
+
+> This procedure assumes you are using an LXC container based on the Debian Bullseye image.
 
 See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turris Omnia] for details.
 

@@ -39,6 +39,9 @@ pipx upgrade 'pip-autoremove'
 
 # Upgrade all installed applications.
 pipx upgrade-all
+
+# Remove installed applications.
+pipx uninstall 'azure-cli'
 ```
 
 ## Further readings
