@@ -17,9 +17,10 @@ Queries (`az … --query …`) use the [JMESPath] query language for JSON.
 ```sh
 # Install the CLI.
 pip install 'azure-cli'
+pipx install 'azure-cli'
 brew install 'azure-cli'
 asdf plugin add 'azure-cli' && asdf install 'azure-cli' '2.43.0'
-docker run -it -v "${HOME}/.ssh:/root/.ssh" 'mcr.microsoft.com/azure-cli'
+docker run -v "${HOME}/.azure:/root/.azure" 'mcr.microsoft.com/azure-cli:2.40.0'
 
 # Disable certificates check upon connection.
 # Use it for proxies with doubtful certificates.

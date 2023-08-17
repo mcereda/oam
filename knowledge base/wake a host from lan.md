@@ -5,11 +5,17 @@ The host needs to support wake-on-LAN and have it enabled.
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
 ## TL;DR
 
-See [`wakeonlan`][wakeonlan].
+See [`wakeonlan`][wakeonlan] or [`wol`][wol].
+
+## Further readings
+
+- [`wakeonlan`][wakeonlan]
+- [`wol`][wol]
 
 ## Sources
 
@@ -29,3 +35,4 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Others -->
 [how to wake up computers using linux by sending magic packets]: https://www.cyberciti.biz/tips/linux-send-wake-on-lan-wol-magic-packets.html
+[wol]: https://sourceforge.net/projects/wake-on-lan/

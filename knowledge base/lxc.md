@@ -19,17 +19,20 @@ ls '/usr/share/lxc/templates'
 # List the options supported by templates.
 lxc-create -t 'download' -h
 
-# Create new containers.
+# Create containers.
 # Use the 'download' template to choose from a list of distribution.
-lxc-create -n 'nas' --template 'download'
+lxc-create -n 'nas' -t 'download'
+lxc-create --name 'nas' --template 'download' -- \
+  --server 'images.linuxcontainers.org'
 
+# Create containers non-interactively.
 # Values are case sensitive and depend from what is on the server.
-lxc-create -n 'pi-hole' -t 'download' -- \
-  --server 'images.linuxcontainers.org' \
-  --dist 'debian' --release 'bullseye' --arch 'armhf' --variant 'cloud'
-lxc-create -n 'git' -t 'download' -- \
+lxc-create -n 'alpine' -t 'download' -- -d 'Alpine' -r '3.18' -a 'armv7l'
+lxc-create --name 'pi-hole' --template 'download' -- \
   --server 'repo.turris.cz/lxc' \
-  -d 'Debian' -r 'Bullseye' -a 'armv7l'
+  --dist 'Ubuntu' --release 'Focal' --arch 'armv7l'
+lxc-create … -t 'download' -- -d 'debian' -r 'bookworm' -a 'amd64' \
+  --server 'images.linuxcontainers.org'
 
 # Start containers.
 lxc-start -n 'pi-hole'
