@@ -67,8 +67,8 @@ zypper verify 'git-lfs'
 zypper ve 'virtualbox'
 
 # Uninstall resolvables.
-zypper remove 'code'
-zypper rm 'zfs'
+zypper remove --clean-deps 'code'
+zypper rm -u 'zfs'
 zypper in '!Firefox' '-htop'
 
 # List available updates.
@@ -95,6 +95,11 @@ zypper patch
 # Perform a distribution upgrade.
 zypper dist-upgrade
 zypper dup --details --from 'factory' --from 'packman'
+
+# List unneded packages.
+# E.g. older dependencies not used anymore.
+zypper packages --unneeded
+zypper pa --unneeded
 
 
 # List currently defined repositories.
@@ -128,6 +133,10 @@ zypper --non-interactive …
 
 # Clean up installed kernel packages.
 zypper purge-kernels --dry-run
+
+# Clean up unneded packages.
+# Always check what is being done.
+zypper packages --unneeded | awk 'NR>4{print $7}' | xargs sudo zypper rm -u
 ```
 
 ## Concepts
@@ -175,6 +184,7 @@ sudo rpm --query --list 'parallel'
 
 - [rpm]
 - [How can I list all files which have been installed by an ZYpp/Zypper package?]
+- [Managing software with command line tools]
 
 ## Sources
 
@@ -182,6 +192,7 @@ All the references in the [further readings] section, plus the following:
 
 - [Package repositories]
 - [Additional package repositories]
+- [Command to clean out all unneeded autoinstalled dependencies]
 
 <!--
   References
@@ -189,6 +200,8 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Upstream -->
 [additional package repositories]: https://en.opensuse.org/Additional_package_repositories
+[command to clean out all unneeded autoinstalled dependencies]: https://github.com/openSUSE/zypper/issues/116
+[managing software with command line tools]: https://documentation.suse.com/sles/15-SP5/html/SLES-all/cha-sw-cl.html
 [package repositories]: https://en.opensuse.org/Package_repositories
 
 <!-- In-article sections -->
