@@ -6,7 +6,8 @@ SUSE and openSUSE GNU/Linux's package management utility and command-line interf
 
 1. [TL;DR](#tldr)
 1. [Concepts](#concepts)
-   1. [Repositories](#repositories)
+1. [Repositories](#repositories)
+1. [Configuration](#configuration)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
@@ -154,7 +155,7 @@ They might be **packages**, **patches**, **patterns**, **products**, or basicall
 
 If one does not request specific versions of resolvables during an action, Zypper's dependency solver will pick a _reasonable_ one automatically.
 
-### Repositories
+## Repositories
 
 The **lower** the number given to their `priority` setting, the **higher** the precedence of that repository.<br/>
 This means that a repository with priority 90 will have precedence on repositories with the default priority of 99.
@@ -168,6 +169,13 @@ Repositories of interest:
 | Packman (all) | <https://ftp.fau.de/packman/suse/opeSUSE_Tumbleweed/><br/><https://ftp.fau.de/packman/suse/openSUSE_Leap_15.5/>                                        | The largest external repository of openSUSE packages                  |
 | Mozilla       | <https://download.opensuse.org/repositories/mozilla/openSUSE_Tumbleweed/><br/><https://download.opensuse.org/repositories/mozilla/openSUSE_Leap_15.5/> | Bleeding edge versions of Firefox, Thunderbird and all things Mozilla |
 | Vivaldi       | <https://repo.vivaldi.com/archive/vivaldi-suse.repo>                                                                                                   | A browser adapting to you, not the other way around.                  |
+
+## Configuration
+
+Default global configuration file: `/etc/zypp/zypp.conf`.<br/>
+An alternate config file can be set using the `ZYPP_CONF=<PATH>` environment variable.
+
+See [zypp configuration options] for details.
 
 ## Gotchas
 
@@ -185,6 +193,7 @@ sudo rpm --query --list 'parallel'
 - [rpm]
 - [How can I list all files which have been installed by an ZYpp/Zypper package?]
 - [Managing software with command line tools]
+- [Zypp configuration options]
 
 ## Sources
 
@@ -203,6 +212,7 @@ All the references in the [further readings] section, plus the following:
 [command to clean out all unneeded autoinstalled dependencies]: https://github.com/openSUSE/zypper/issues/116
 [managing software with command line tools]: https://documentation.suse.com/sles/15-SP5/html/SLES-all/cha-sw-cl.html
 [package repositories]: https://en.opensuse.org/Package_repositories
+[zypp configuration options]: https://doc.opensuse.org/projects/libzypp/HEAD/group__ZyppConfig.html
 
 <!-- In-article sections -->
 [further readings]: #further-readings
