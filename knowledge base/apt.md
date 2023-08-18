@@ -47,9 +47,12 @@ sudo apt purge 'crda'
 sudo apt autoremove --purge
 
 # List packages.
-sudo apt list
-sudo apt list --upgradable
-sudo apt list --installed
+apt list
+apt list --upgradable
+apt list --installed
+
+# Show changelogs for packages.
+apt changelog 'git'
 
 # List explicitly installed packages only.
 sudo apt-mark showmanual
