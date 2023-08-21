@@ -16,11 +16,12 @@ snapper list
 
 # Create a manual standalone snapshot.
 snapper \
-  --config root \
+  --config 'root' \
   create --read-only \
-    --type single \
-    --description "manual checkpoint" \
-    --userdata "important=yes"
+    --type 'single' \
+    --description 'manual checkpoint' \
+    --userdata 'important=yes'
+snapper create -t 'single' -d 'manual checkpoint' -c '' -u 'important=yes'
 
 # Rollback to snapshot #0.
 snapper rollback 0
@@ -42,6 +43,7 @@ snapper modify \
   --userdata 'important=yes' \
   --description 'new description' \
   --cleanup-algorithm '' 12
+snapper modify 12 -u 'important=yes' -d 'new description' -c ''
 ```
 
 ## Further readings
