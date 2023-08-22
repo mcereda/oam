@@ -1,6 +1,6 @@
 # Tag files in GNU/Linux
 
-The more native way is to use extended attributes.<br/>
+The most native way is to use extended attributes.<br/>
 This allows to store the information within the file in its "filesystem entry", and it stays with the file when one moves it on the drive.
 
 Query them with [`getfattr`][getfattr].<br/>
