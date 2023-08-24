@@ -11,6 +11,13 @@ Validates one or more Kubernetes configuration files.
 ## TL;DR
 
 ```sh
+# Installation.
+asdf plugin add 'kubeval' && asdf install 'kubeval' '0.16.0'
+brew tap 'instrumenta/instrumenta' && brew install 'kubeval'
+docker run -v "${PWD}/dir:/dir" 'garethr/kubeval' 'dir/file.yaml'
+scoop bucket add 'instrumenta' 'https://github.com/instrumenta/scoop-instrumenta' && scoop install 'kubeval'
+
+# Usage.
 $ kubeval 'my-invalid-rc.yaml' || echo "Validation failed" >&2
 WARN - my-invalid-rc.yaml contains an invalid ReplicationController - spec.replicas: Invalid type. Expected: integer, given: string
 Validation failed
@@ -18,7 +25,8 @@ Validation failed
 
 ## Further readings
 
-- [Kubeval]
+- [Website]
+- [Github]
 
 ## Sources
 
@@ -31,7 +39,8 @@ All the references in the [further readings] section, plus the following:
   -->
 
 <!-- Upstream -->
-[kubeval]: https://www.kubeval.com
+[github]: https://github.com/instrumenta/kubeval/
+[website]: https://www.kubeval.com
 
 <!-- In-article sections -->
 [further readings]: #further-readings
