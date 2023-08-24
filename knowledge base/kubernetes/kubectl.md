@@ -2,7 +2,7 @@
 
 Command line tool for communicating with a Kubernetes cluster's control plane using the Kubernetes API.
 
-Resource types are case **in**sensitive and can be specified in their singular, plural or abbreviated form for convenience:
+Resource types are case **in**sensitive and can be specified in their _singular_, _plural_ or _abbreviated_ form for convenience:
 
 ```sh
 # The two commands below are equivalent.
@@ -12,13 +12,13 @@ kubectl get deploy,rs,po -A
 
 Use `kubectl api-resources` to check out the available resources and their abbreviations.
 
-Multiple resources types can be specified together, but only one resource name is accepted at a time.<br/>
-Resource names are case sensitive and will filter the requested resources; use the `-l`, `--selector` option to get around filtering:
+Multiple resource types can be specified together, but **only one resource name** is accepted at a time.<br/>
+Resource names are case **sensitive** and will filter the requested resources; use the `-l` (`--selector`) option to play around filtering:
 
 ```sh
 kubectl get deployments,replicasets -A
-kubectl get pod etcd-minikube -n kube-system
-kubectl get pods -l app=nginx,tier=frontend
+kubectl get pod 'etcd-minikube' -n 'kube-system'
+kubectl get pods -l 'app=nginx,tier=frontend'
 ```
 
 One possible output format is [JSONpath].
@@ -39,9 +39,13 @@ One possible output format is [JSONpath].
 ```sh
 # Enable shell completion.
 source <(kubectl completion 'bash')
-echo "[[ $commands[kubectl] ]] && source <(kubectl completion 'zsh')" >> ~/.zshrc
+echo "[[ $commands[kubectl] ]] && source <(kubectl completion 'zsh')" >> "${HOME}/.zshrc"
 
-# Shot the merged configuration.
+# Use multiple configuration files at once.
+# This will *merge* all files in one big temporary configuration file.
+KUBECONFIG="path/to/config1:…:path/to/configN"
+
+# Show the final, merged configuration.
 kubectl config view
 
 # Get specific values from the configuration.
@@ -58,27 +62,23 @@ kubectl config set-credentials \
 # Delete configuration values.
 kubectl config unset 'users.foo'
 
-# Use multiple configuration files at once.
-# This will *merge* all files in one big temporary configuration file.
-KUBECONFIG="path/to/config1:path/to/configN"
-
 # List Contexts.
 kubectl config get-contexts
 kubectl config current-context
 
-# Set given Contexts as the default one.
+# Set Contexts as the default one.
 kubectl config use-context 'docker-desktop'
 kubectl config use-context 'gce'
 
-# Display the cluster's state with FQDNs.
+# Display clusters' state with FQDNs.
 kubectl cluster-info
 
 # Dump the complete current cluster state.
 kubectl cluster-info dump
 kubectl cluster-info dump --output-directory='/path/to/cluster-state'
 
-# List supported resources types along with their short name, API group, Kind,
-# and whether they are namespaced.
+# List supported resource types along with their short name, API group, Kind,
+# and whether they are namespaced or not.
 kubectl api-resources
 kubectl api-resources --namespaced='true'
 kubectl api-resources -o 'name'
@@ -86,7 +86,7 @@ kubectl api-resources -o 'wide'
 kubectl api-resources --verbs='list,get'
 
 # Show the documentation about Resources or their fields.
-kubectl explain 'pods'
+kubectl explain --recursive 'deployment'
 kubectl explain 'pods.spec.containers'
 
 # List and filter Resources.
@@ -114,7 +114,7 @@ kubectl get nodes \
 # List all fields under '.metadata' regardless of their name.
 kubectl get pods -A -o=custom-columns='DATA:metadata.*'
 
-# List images being run in a cluster.
+# List images being run in clusters.
 kubectl get po -A -o=custom-columns='DATA:spec.containers[*].image'
 kubectl get po -A \
   -o=custom-columns='DATA:spec.containers[?(@.image!="k8s.gcr.io/coredns:1.6.2")].image'
@@ -128,31 +128,38 @@ kubectl get nodes \
   -o jsonpath='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}' \
 | grep "Ready=True"
 
-# List all the Secrets currently in use by a Pod.
+# List all Secrets currently used by a Pod.
 kubectl get pods -o 'json' \
 | jq '.items[].spec.containers[].env[]?.valueFrom.secretKeyRef.name' \
 | grep -v 'null' | sort | uniq
 
-# List the name of Pods belonging to a particular RC.
-SELECTOR=${$(kubectl get rc my-rc --output=json | jq -j '.spec.selector | to_entries | .[] | "\(.key)=\(.value),"')%?} kubectl get pods -l=$SELECTOR \
+# List the name of Pods belonging to specific ReplicationControllers.
+SELECTOR=${$(\
+  kubectl get rc 'my-rc' --output='json' \
+  | jq -j '.spec.selector | to_entries | .[] | "\(.key)=\(.value),"' \
+)%?} \
+kubectl get pods -l=$SELECTOR \
   -o=jsonpath='{.items..metadata.name}'
 
-# List the containerID of initContainers from all Pods.
+# List the container ID of initContainers from all Pods.
 # Helpful when cleaning up stopped containers while avoiding the removal of
 # initContainers
 kubectl get pods --all-namespaces \
   -o jsonpath='{range .items[*].status.initContainerStatuses[*]}{.containerID}{"\n"}{end}' \
 | cut -d/ -f3
 
-# Produce a period-delimited tree of all keys returned for nodes.
+# Produce period-delimited trees of all keys returned for Node resources.
 # Helpful when trying to locate a specific key within a complex nested JSON
 # structure.
 kubectl get nodes -o 'json' | jq -c 'path(..)|[.[]|tostring]|join(".")'
 
 # Show detailed information about resources.
 # Also includes the latest events involving them.
-kubectl describe node pi
+kubectl describe node 'pi'
 kubectl describe deploy,rs,po -l 'app=redis'
+
+# Validate manifests.
+kubectl apply -f 'manifest' --dry-run 'client' --validate 'strict'
 
 # Create or update resources from manifests.
 # Missing resources will be created. Existing resources will be updated.
@@ -171,71 +178,76 @@ cat <<-EOF | kubectl apply -f -
     username: $(echo -n "jane" | base64 -w0)
 EOF
 
-# Compare the current state of the cluster against the state it would be in if
-# a manifest was applied
-kubectl diff -f ./manifest.yaml
+# Create or update resources from directories containing kustomizations.
+# File 'dir/kustomization.yaml' *must* be present in the directory and be valid.
+# This option is mutually exclusive with '-f'.
+kubectl apply -k 'dir/'
 
-# Start a Pod.
+# Compare the current state of clusters against the state they would be in if a
+# manifest was applied
+kubectl diff -f './manifest.yaml'
+
+# Start Pods.
 kubectl run 'nginx' --image 'nginx'
 kubectl run 'busybox' --rm -it --image='busybox' -n 'keda' -- sh
 kubectl run 'alpine' --restart=Never -it --image 'alpine' -- sh
-kubectl run 'ephemeral' --image=registry.k8s.io/pause:3.1 --restart=Never
+kubectl run 'ephemeral' --image='registry.k8s.io/pause:3.1' --restart='Never'
 
-# Start a Pod and write its specs into a file.
+# Start Pods and write their specs into a file.
 kubectl run 'nginx' --image='nginx' --dry-run='client' -o 'yaml' > 'pod.yaml'
 
-# Create a single instance deployment of 'nginx'.
+# Create single instance Deployments of 'nginx'.
 kubectl create deployment 'nginx' --image 'nginx'
 
-# Start a Job printing "Hello World".
+# Start Jobs printing "Hello World".
 kubectl create job 'hello' --image 'busybox:1.28' -- echo "Hello World"
 
-# Start a Job using an existing Job as template.
+# Start Jobs using an existing Job as template.
 kubectl create job 'backup-before-upgrade-13.6.2-to-13.9.2' \
   --from=cronjob.batch/backup -n 'gitlab'
 
-# Start a CronJob printing "Hello World" every minute.
-kubectl create cronjob 'hello' --image=busybox:1.28 --schedule="*/1 * * * *" \
+# Start CronJobs printing "Hello World" every minute.
+kubectl create cronjob 'hello' --image='busybox:1.28' --schedule="*/1 * * * *" \
   -- echo "Hello World"
 
-# Wait for a pod to be 'ready'.
-kubectl wait --for 'condition=ready' --timeout 120s \
+# Wait for Pods to be in the 'ready' state.
+kubectl wait --for 'condition=ready' --timeout '120s' \
   pod -l 'app.kubernetes.io/component=controller'
 
-# Update the 'image' field of the 'www' containers from the 'frontend'
+# Update the 'image' field of all 'www' containers from the 'frontend'
 # Deployment.
 # This starts a rolling update.
-kubectl set image deployment/frontend www=image:v2
+kubectl set image 'deployment/frontend' 'www=image:v2'
 
-# Show the history of resources, including the revision.
-kubectl rollout history deployment/frontend
+# Show the history of resources, including their revision.
+kubectl rollout history 'deployment/frontend'
 
-# Rollback resources to the latest previous version.
-kubectl rollout undo deployment/frontend
+# Rollback resources to their latest previous version.
+kubectl rollout undo 'deployment/frontend'
 
-# Rollback resources to a specific revision.
-kubectl rollout undo deployment/frontend --to-revision=2
+# Rollback resources to specific revisions.
+kubectl rollout undo 'deployment/frontend' --to-revision='2'
 
 # Follow the rolling update status of the 'frontend' Deployment until its
 # completion.
-kubectl rollout status -w deployment/frontend
+kubectl rollout status -w 'deployment/frontend'
 
 # Start a rolling restart of the 'frontend' Deployment.
-kubectl rollout restart deployment/frontend
+kubectl rollout restart 'deployment/frontend'
 
-# Replace a Pod based on the JSON passed into stdin.
+# Replace Pods based on the JSON passed into stdin.
 cat 'pod.json' | kubectl replace -f -
 
-# Force replacement, deletion and recreation (in this order) of resources.
-# This Will cause a service outage.
-kubectl replace --force -f ./pod.json
+# Force replacement, deletion and recreation (in *this* order) of resources.
+# This *will* cause a service outage.
+kubectl replace --force -f './pod.json'
 
-# Create a service for a replicated 'nginx'.
+# Create a Service for replicated 'nginx' instances.
 # Set it to serve on port 80 and connect to the containers on port 8000.
-kubectl expose rc nginx --port=80 --target-port=8000
+kubectl expose rc 'nginx' --port='80' --target-port='8000'
 
 # Update a single-container Pod's image tag.
-kubectl get pod mypod -o yaml \
+kubectl get pod 'mypod' -o 'yaml' \
 | sed 's/\(image: myimage\):.*$/\1:v4/' \
 | kubectl replace -f -
 
@@ -244,65 +256,67 @@ kubectl label pods 'nginx' 'custom-name=awesome'
 kubectl label ns 'default' 'pod-security.kubernetes.io/enforce=privileged'
 
 # Add Annotations.
-kubectl annotate pods alpine icon-url=http://goo.gl/XXBTWq
+kubectl annotate pods 'alpine' 'icon-url=http://goo.gl/XXBTWq'
 
 # Autoscale resources.
-kubectl autoscale deployment foo --min=2 --max=10
+kubectl autoscale deployment 'foo' --min='2' --max='10'
 
 # Partially update resources.
-kubectl patch node k8s-node-1 -p '{"spec":{"unschedulable":true}}'
+kubectl patch node 'k8s-node-1' -p '{"spec":{"unschedulable":true}}'
 
-# Update a container's image.
+# Update Containers' images.
 # 'spec.containers[*].name' is required to specify the path of the merged key.
-kubectl patch pod valid-pod \
+kubectl patch pod 'valid-pod' \
   -p '{"spec":{"containers": [{"name": "kubernetes-serve-hostname","image":"new image"}]}}'
 
-# Update a container's image using a JSONPatch with positional arrays.
-kubectl patch pod valid-pod --type='json' \
+# Update Containers' images using JSONPatches with positional arrays.
+kubectl patch pod 'valid-pod' --type='json' \
   -p='[{"op": "replace", "path": "/spec/containers/0/image", "value":"new image"}]'
 
-# Disable a Deployment's livenessProbe using a JSONPatch with positional arrays.
-kubectl patch deployment valid-deployment --type json \
+# Disable Deployments' livenessProbes using JSONPatches with positional arrays.
+kubectl patch deployment 'valid-deployment' --type 'json' \
   -p='[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe"}]'
 
-# Add a new element to a positional array.
-kubectl patch sa default --type='json' \
+# Add new elements to positional arrays.
+kubectl patch sa 'default' --type='json' \
   -p='[{"op": "add", "path": "/secrets/1", "value": {"name": "whatever" } }]'
 
-# Edit the service named docker-registry.
-kubectl edit svc/docker-registry
-KUBE_EDITOR="nano" kubectl edit svc/docker-registry
+# Edit the Service named 'docker-registry'.
+kubectl edit service 'docker-registry'
+KUBE_EDITOR="nano" kubectl edit 'svc/docker-registry'
 
-# Scale a replicaset named 'foo' to 3
-kubectl scale --replicas=3 rs/foo
+# Scale the ReplicaSet named 'foo' to 3 replicas.
+kubectl scale --replicas='3' 'rs/foo'
+kubectl scale --replicas='3' replicaset 'foo'
 
-# Scale a resource specified in "foo.yaml" to 3 replicas.
-kubectl scale --replicas=3 -f foo.yaml
+# Scale resources specified in "foo.yaml" to 3 replicas.
+kubectl scale --replicas=3 -f 'foo.yaml'
 
-# If the Deployment named 'mysql''s current size is 2, scale it to 3.
-kubectl scale --current-replicas=2 --replicas=3 deployment/mysql
+# If the Deployment named 'mysql' has a current size of 2 replicas, scale them
+# to 3.
+kubectl scale --current-replicas='2' --replicas='3' 'deployment/mysql'
 
 # Scale multiple ReplicationControllers at once.
-kubectl scale --replicas=5 rc/foo rc/bar rc/baz
+kubectl scale --replicas='5' 'rc/foo' 'rc/bar' 'rc/baz'
 
 # Delete resources of a single type.
 # Also deletes the resources managed by the specified ones.
 kubectl delete deployment 'bar'
 
-# Delete a Pod using the type and name specified in pod.json.
-kubectl delete -f ./pod.json
+# Delete Pods using the type and name specified in 'pod.json'.
+kubectl delete -f './pod.json'
 
 # Delete Pods and Services named 'baz' and 'foo'.
-kubectl delete pod,service baz foo
+kubectl delete pod,service 'baz' 'foo'
 
-# Delete all Completed Jobs and all Pods in a failed state.
+# Delete all Completed Jobs and all Pods in the Failed state.
 kubectl delete pods --field-selector 'status.phase=Failed'
 
 # Delete all Pods and Services with Label 'name=myLabel'.
-kubectl delete pods,services -l name=myLabel
+kubectl delete pods,services -l 'name=myLabel'
 
 # Delete all Pods and Services in the 'my-ns' Namespace.
-kubectl -n my-ns delete pod,svc --all
+kubectl -n 'my-ns' delete pod,svc --all
 
 # Delete all Pods matching 'pattern1' or 'pattern2'.
 kubectl get pods --no-headers \
@@ -314,77 +328,77 @@ kubectl get serviceaccounts \
   -o jsonpath="{.items[?(@.metadata.name!='default')].metadata.name}" \
 | xargs -n1 kubectl delete serviceaccounts
 
-# Attach to a running Container.
-kubectl attach my-pod -i
+# Attach to running Containers.
+kubectl attach 'my-pod' -i
 
-# Run command in existing Pods.
-kubectl exec my-pod -- ls /
-kubectl exec my-pod -c my-container -- ls /
+# Run commands in existing Pods.
+kubectl exec 'my-pod' -- ls /
+kubectl exec 'my-pod' -c 'my-container' -- ls /
 
-# Show metrics for a given Pod and its containers.
-kubectl top pod busybox --containers
+# Show metrics for Pods and their Containers.
+kubectl top pod 'busybox' --containers
 
 # Get Logs from Resources.
-kubectl logs redis-0
-kubectl logs -l name=myLabel
-kubectl logs my-pod -c my-container
+kubectl logs 'redis-0'
+kubectl logs -l 'name=myLabel'
+kubectl logs 'my-pod' -c 'my-container'
 
 # Follow Logs.
-kubectl logs -f my-pod
-kubectl logs -f my-pod -c my-container
-kubectl logs -f -l name=myLabel --all-containers
+kubectl logs -f 'my-pod'
+kubectl logs -f 'my-pod' -c 'my-container'
+kubectl logs -f -l 'name=myLabel' --all-containers
 
 # Get Logs for a previous instantiation of a Container.
-kubectl logs nginx --previous
+kubectl logs 'nginx' --previous
 
 # Get the Logs of the first Pod matching 'ID'.
 kubectl logs $(kubectl get pods --no-headers | grep $ID | awk '{print $2}')
 
 # Verify the current user's permissions on the cluster.
-kubectl auth can-i create roles
-kubectl auth can-i list pods
+kubectl auth can-i 'create' 'roles'
+kubectl auth can-i 'list' 'pods'
 
-# Taint a Node.
-kubectl taint nodes node1 key1=value1:NoSchedule
+# Taint Nodes.
+kubectl taint nodes 'node1' 'key1=value1:NoSchedule'
 
 # Taint all Nodes in a given node pool (Azure AKS).
-kubectl get no -l "agentpool=nodepool1" -o jsonpath='{.items[*].metadata.name}'
-| xargs -n1 -I{} -p kubectl taint nodes {} key1=value1:NoSchedule
+kubectl get no -l 'agentpool=nodepool1' -o jsonpath='{.items[*].metadata.name}'
+| xargs -n1 -I{} -p kubectl taint nodes {} 'key1=value1:NoSchedule'
 
 # Remove Taints.
 # Notice the '-' sign at the end.
-kubectl taint nodes node1 key1=value1:NoSchedule-
+kubectl taint nodes 'node1' 'key1=value1:NoSchedule-'
 
 # If a Taint with that key and effect already exists, replace its value.
-kubectl taint nodes foo dedicated=special-user:NoSchedule
+kubectl taint nodes 'foo' 'dedicated=special-user:NoSchedule'
 
 # Execute debug Containers.
 # Debug Containers are privileged.
 kubectl debug -it 'node/docker-desktop' --image 'busybox:1.28'
 
 # Mark Nodes as unschedulable.
-kubectl cordon my-node
+kubectl cordon 'my-node'
 
 # Mark Nodes as schedulable.
-kubectl uncordon my-node
+kubectl uncordon 'my-node'
 
 # Drain Nodes in preparation for maintenance.
-kubectl drain my-node
+kubectl drain 'my-node'
 
 # Show metrics for given Nodes.
-kubectl top node my-node
+kubectl top node 'my-node'
 
 # Listen on port 5000 on the local machine and forward connections to port 6000
-# of my-pod
-kubectl port-forward my-pod 5000:6000
+# of 'my-pod'
+kubectl port-forward 'my-pod' '5000:6000'
 
 # Show Containers' status, properties and capabilities from the inside.
 # Run the command from *inside* the container.
-cat /proc/1/status
+cat '/proc/1/status'
 
-# Check a container's capabilities.
+# Check Containers' capabilities.
 # Run the command from *inside* the container.
-grep 'Cap' /proc/1/status
+grep 'Cap' '/proc/1/status'
 ```
 
 ## Configuration
@@ -394,7 +408,7 @@ The configuration files are loaded as follows:
 1. If the `--kubeconfig` flag is set, then only that file is loaded; the flag may only be set **once**, and no merging takes place:
 
    ```sh
-   kubectl config --kubeconfig config.local view
+   kubectl config --kubeconfig 'config.local' view
    ```
 
 2. If the `$KUBECONFIG` environment variable is set, then it is used as a list of paths following the normal path delimiting rules for your system; the files are merged:
@@ -419,11 +433,11 @@ kubectl config view -o jsonpath='{.users[].name}'
 kubectl config view -o jsonpath='{.users[?(@.name == "e2e")].user.password}'
 
 # Add a new user that supports basic auth.
-kubectl config set-credentials kubeuser/foo.kubernetes.com \
-  --username=kubeuser --password=kubepassword
+kubectl config set-credentials 'kubeuser/foo.kubernetes.com' \
+  --username='kubeuser' --password='kubepassword'
 
 # Delete user 'foo'.
-kubectl config unset users.foo
+kubectl config unset 'users.foo'
 
 # List the available contexts.
 kubectl config get-contexts
@@ -432,11 +446,11 @@ kubectl config get-contexts
 kubectl config current-context
 
 # Set the default context.
-kubectl config use-context minikube
+kubectl config use-context 'minikube'
 
 # Permanently setup specific contexts.
-kubectl config set-context --current --namespace=ggckad-s2
-kubectl config set-context gce --user=cluster-admin --namespace=foo
+kubectl config set-context --current --namespace='ggckad-s2'
+kubectl config set-context 'gce' --user='cluster-admin' --namespace='foo'
 ```
 
 ### Configure access to multiple clusters
@@ -478,16 +492,16 @@ spec:
 
 ```sh
 # Apply the manifest.
-kubectl apply -f manifest.yaml
+kubectl apply -f 'manifest.yaml'
 
 # Apply multiple manifests together.
-kubectl apply -f path/to/m1.yaml -f m2.yaml
+kubectl apply -f 'path/to/m1.yaml' -f 'm2.yaml'
 
 # Apply all manifests in a directory.
-kubectl apply -f ./dir
+kubectl apply -f './dir'
 
-# Apply a remote manifest.
-kubectl apply -f https://git.io/vPieo
+# Apply remote manifests.
+kubectl apply -f 'https://git.io/vPieo'
 
 # Define a manifest using HEREDOC and apply it.
 cat <<EOF | kubectl apply -f -
@@ -505,25 +519,25 @@ EOF
 When subsequentially (re-)applying manifests, one can compare the current state of the cluster against the state it would be in if the manifest was applied:
 
 ```sh
-kubectl diff -f manifest.yaml
+kubectl diff -f 'manifest.yaml'
 ```
 
 Resources can also be created using default values or specifying them on the command line:
 
 ```sh
 # Start a Pod.
-kubectl run nginx --image nginx
-kubectl run busybox --rm -it --image=busybox -n keda -- sh
+kubectl run 'nginx' --image 'nginx'
+kubectl run 'busybox' --rm -it --image='busybox' -n 'keda' -- sh
 
 # Start a Pod and write its specs into a file.
-kubectl run nginx --image=nginx --dry-run=client -o yaml > pod.yaml
+kubectl run 'nginx' --image='nginx' --dry-run='client' -o 'yaml' > 'pod.yaml'
 
 # Create a single instance deployment of 'nginx'.
-kubectl create deployment nginx --image=nginx
+kubectl create deployment 'nginx' --image='nginx'
 
 # Start a Job using an existing Job as template
-kubectl create job backup-before-upgrade-13.6.2-to-13.9.2 \
-  --from=cronjob.batch/backup -n gitlab
+kubectl create job 'backup-before-upgrade-13.6.2-to-13.9.2' \
+  --from='cronjob.batch/backup' -n 'gitlab'
 ```
 
 ## Output formatting
