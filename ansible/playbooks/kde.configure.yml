@@ -1,0 +1,78 @@
+---
+
+- name: Set up KDE
+  tags:
+    - config
+    - kde
+  hosts: all
+  tasks:
+    - name: Configure globals
+      tags: globals
+      community.general.kdeconfig:
+        path: "{{ ansible_user_dir }}/.config/kdeglobals"
+        values:
+          - group: KDE
+            key: SingleClick
+            bool_value: false
+    - name: Configure locales
+      tags: locales
+      community.general.kdeconfig:
+        path: "{{ ansible_user_dir }}/.config/plasma-localerc"
+        values:
+          - group: Formats
+            key: LANG
+            value: en_IE.UTF-8
+          - group: Formats
+            key: LC_ADDRESS
+            value: nl_NL.UTF-8
+          - group: Formats
+            key: LC_MEASUREMENT
+            value: nl_NL.UTF-8
+          - group: Formats
+            key: LC_MONETARY
+            value: nl_NL.UTF-8
+          - group: Formats
+            key: LC_NAME
+            value: nl_NL.UTF-8
+          - group: Formats
+            key: LC_NUMERIC
+            value: nl_NL.UTF-8
+          - group: Formats
+            key: LC_PAPER
+            value: nl_NL.UTF-8
+          - group: Formats
+            key: LC_TELEPHONE
+            value: nl_NL.UTF-8
+          - group: Formats
+            key: LC_TIME
+            value: C
+          - group: Translations
+            key: LANGUAGE
+            value: C:en_IE
+    - name: Configure the timezone
+      tags: timezone
+      community.general.kdeconfig:
+        path: "{{ ansible_user_dir }}/.config/ktimezonedrc"
+        values:
+          - group: TimeZones
+            key: LocalZone
+            value: Europe/Amsterdam
+    - name: Configure the system settings app
+      tags: system_settings
+      community.general.kdeconfig:
+        path: "{{ ansible_user_dir }}/.config/systemsettingsrc"
+        values:
+          - group: Main
+            key: ActiveView
+            value: systemsettings_sidebar_mode
+    - name: Configure Dolphin
+      tags: dolphin
+      community.general.kdeconfig:
+        path: "{{ ansible_user_dir }}/.config/dolphinrc"
+        values:
+          - group: General
+            key: AutoExpandFolders
+            bool_value: true
+          - group: VersionControl
+            key: enabledPlugins
+            value: Dropbox,Git
