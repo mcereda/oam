@@ -165,7 +165,7 @@ kubectl apply -f 'manifest' --dry-run 'client' --validate 'strict'
 # Missing resources will be created. Existing resources will be updated.
 kubectl apply -f 'manifest.yaml'
 kubectl apply -f 'path/to/m1.yaml' -f './m2.yaml'
-kubectl apply -f 'dir/' 
+kubectl apply -f 'dir/'
 kubectl apply -f 'https://git.io/vPieo'
 cat <<-EOF | kubectl apply -f -
   apiVersion: v1
