@@ -170,6 +170,16 @@ resolvectl openpgp 'zbyszek@fedoraproject.org'
 
 # Restart the DNS resolver.
 sudo systemctl restart 'systemd-resolved.service'
+
+# See the status of the DNS resolver.
+systemd-resolve --status
+
+# Resolve hostnames or IP addresses.
+systemd-resolve 'google.com'
+systemd-resolve '8.8.8.8'
+
+# Set interface-specific DNS server address and search domain.
+sudo systemd-resolve -i 'wlp2s0' --set-dns '192.168.1.1' --set-domain 'lan'
 ```
 
 ## User services
@@ -249,7 +259,13 @@ Restarting the `systemd-resolved` service seems to not be enough. Restarting the
 
 ### Manually set DNS servers
 
-Set the following lines in the global settings (`/etc/systemd/resolved.conf` or any file in `/etc/systemd/resolved.conf.d/`), or in any network-specific file you want to set DNS servers for (like `/etc/systemd/network/eth0.network`):
+Use the handy command:
+
+```sh
+sudo systemd-resolve -i 'wlp2s0' --set-dns '192.168.1.1' --set-domain 'lan'
+```
+
+or set the following lines in the global settings (`/etc/systemd/resolved.conf` or any file in `/etc/systemd/resolved.conf.d/`), or in any network-specific file you want to set DNS servers for (like `/etc/systemd/network/eth0.network`):
 
 ```ini
 [Resolve]
@@ -267,12 +283,14 @@ Restart the `systemd-resolved` service to apply the new settings.
 - [How to Set Time, Timezone and Synchronize System Clock Using timedatectl Command]
 - [How to Set Hostname Using Hostnamectl Command?]
 - [Suspend and hibernate]
+- [Changing DNS with systemd-resolved]
 
 <!--
   References
   -->
 
 <!-- Others -->
+[changing dns with systemd-resolved]: https://notes.enovision.net/linux/changing-dns-with-resolve
 [how to disable systemd-resolved in ubuntu]: https://askubuntu.com/questions/907246/how-to-disable-systemd-resolved-in-ubuntu
 [how to set hostname using hostnamectl command?]: https://linuxhint.com/set-hostname-using-hostnamectl-command/
 [how to set time, timezone and synchronize system clock using timedatectl command]: https://www.tecmint.com/set-time-timezone-and-synchronize-time-using-timedatectl-command/
