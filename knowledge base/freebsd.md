@@ -80,6 +80,16 @@ pkg install -y 'zsh' 'zsh-autosuggestions'
 pkg upgrade
 pkg install -y 'zsh' 'zsh-autosuggestions'
 
+# List installed packages.
+pkg info
+
+# Show information about installed packages.
+pkg info 'binutils'
+pkg info --list-files 'binutils'
+
+# Find what package installed specific files.
+pkg which '/usr/bin/zstd'
+
 # Check for known vulnerabilities in *installed* applications.
 pkg audit -F
 pkg audit -Fr 'sqlite'
