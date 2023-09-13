@@ -12,7 +12,7 @@
 # Such user and a group of the same name exist on the server.
 # Show permissions on directories as octal 775 and on files as octal 664.
 sudo mount '//nas.lan/shared/folder' 'local/folder' -t 'cifs' \
-  -o 'user=myself,uid=myself,gid=myself,dir_mode=0775,file_mode=0664' 
+  -o 'user=myself,uid=myself,gid=myself,dir_mode=0775,file_mode=0664'
 ```
 
 ## Further readings
