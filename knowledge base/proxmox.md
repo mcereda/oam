@@ -54,5 +54,8 @@ All the references in the [further readings] section, plus the following:
 <!-- In-article sections -->
 [further readings]: #further-readings
 
+<!-- Knowledge base -->
+[disks maintenance]: disks%20maintenance.md
+
 <!-- Others -->
 [how to run truenas on proxmox?]: https://www.youtube.com/watch?v=M3pKprTdNqQ

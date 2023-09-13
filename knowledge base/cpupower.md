@@ -6,7 +6,8 @@ Default governor is _ondemand_ for older CPUs and kernels and _schedutil_ for ne
 
 ```sh
 # Install.
-sudo dnf install kernel-tools
+sudo apt install 'linux-cpupower'
+sudo dnf install 'kernel-tools'
 
 # List the available governors.
 cpupower frequency-info --governors
@@ -15,9 +16,9 @@ cpupower frequency-info --governors
 cpupower frequency-info --policy
 
 # Set a new governor until reboot.
-sudo cpupower frequency-set -g performance
-sudo cpupower frequency-set --governor powersave
-sudo cpupower frequency-set --governor schedutil
+sudo cpupower frequency-set -g 'performance'
+sudo cpupower frequency-set --governor 'powersave'
+sudo cpupower frequency-set --governor 'schedutil'
 ```
 
 ## Further readings
