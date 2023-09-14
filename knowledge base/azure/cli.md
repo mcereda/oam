@@ -8,6 +8,7 @@ Queries (`az … --query …`) use the [JMESPath] query language for JSON.
 1. [Installation](#installation)
 1. [Extensions](#extensions)
 1. [Pipelines](#pipelines)
+1. [AKS](#aks)
 1. [APIs](#apis)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
@@ -16,11 +17,11 @@ Queries (`az … --query …`) use the [JMESPath] query language for JSON.
 
 ```sh
 # Install the CLI.
+asdf plugin add 'azure-cli' && asdf install 'azure-cli' '2.43.0'
+brew install 'azure-cli'
+docker run -v "${HOME}/.azure:/root/.azure" 'mcr.microsoft.com/azure-cli:2.40.0'
 pip install 'azure-cli'
 pipx install 'azure-cli'
-brew install 'azure-cli'
-asdf plugin add 'azure-cli' && asdf install 'azure-cli' '2.43.0'
-docker run -v "${HOME}/.azure:/root/.azure" 'mcr.microsoft.com/azure-cli:2.40.0'
 
 # Disable certificates check upon connection.
 # Use it for proxies with doubtful certificates.
@@ -264,47 +265,6 @@ az acr helm list -n 'acr_name' -s 'subscription_uuid_or_name' -o 'json' \
 # Push a helm chart to an ACR.
 az acr helm push -n 'acr_name' 'chart.tgz' --force
 
-# List the available AKS versions.
-az aks get-versions --location 'location' -o 'table'
-
-# Show the details of an AKS cluster.
-az aks show -g 'resource_group_name' -n 'cluster_name'
-
-# Get credentials for an AKS cluster.
-az aks get-credentials \
-  --resource-group 'resource_group_name' --name 'cluster_name'
-az aks get-credentials … --overwrite-existing --admin
-
-# Wait for the cluster to be ready.
-az aks wait --created --interval 10 --timeout 1800 \
-  -g 'resource_group_name' -n 'cluster_name'
-
-# Move the cluster to its goal state *without* changing its configuration.
-# Can be used to move out of a non succeeded state.
-az aks update --resource-group 'resource_group_name' --name 'cluster_name' --yes
-
-# Delete AKS clusters.
-az aks delete -y -g 'resource_group_name' -n 'cluster_name'
-
-# Validate an ACR is accessible from an AKS cluster.
-az aks check-acr --acr 'acr_name' \
-  --resource-group 'resource_group_name' --name 'cluster_name'
-az aks check-acr … --node-name 'node_name'
-
-# Add a new AKS extensions.
-az aks extension add --name 'k8s-extension'
-
-# Show the details of an installed AKS extensions.
-az aks extension show --name 'k8s-extension'
-
-# List Kubernetes extensions of an AKS cluster.
-az k8s-extension list --cluster-type 'managedClusters' \
-  --resource-group 'resource_group_name' --name 'cluster_name'
-
-# List Flux configurations in an AKS cluster.
-az k8s-configuration flux list --cluster-type 'managedClusters' \
-  --resource-group 'resource_group_name' --name 'cluster_name'
-
 # List the available Features in a Subscription.
 az feature list
 
@@ -469,7 +429,11 @@ az config set 'extension.run_after_dynamic_install=no'
 
 ## Pipelines
 
-See [devops].
+See [DevOps].
+
+## AKS
+
+See [AKS].
 
 ## APIs
 
@@ -523,7 +487,6 @@ All the references in the [further readings] section, plus the following:
 - [How to manage Azure subscriptions with the Azure CLI]
 - [Authenticate with an Azure container registry]
 - [Remove a member]
-- [`az aks` command reference][az aks reference]
 - [Create and manage Azure Pipelines from the command line]
 
 <!--
@@ -532,7 +495,6 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Upstream -->
 [authenticate with an azure container registry]: https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication?tabs=azure-cli
-[az aks reference]: https://learn.microsoft.com/en-us/cli/azure/aks
 [az reference]: https://learn.microsoft.com/en-us/cli/azure/reference-index
 [get started with azure cli]: https://learn.microsoft.com/en-us/cli/azure/get-started-with-azure-cli
 [how to manage azure subscriptions with the azure cli]: https://learn.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli
@@ -545,6 +507,7 @@ All the references in the [further readings] section, plus the following:
 [further readings]: #further-readings
 
 <!-- Knowledge base -->
+[aks]: aks.md
 [az bicep]: bicep.md#tldr
 [devops]: devops.md
 [devops cli extension]: devops.md#tldr
