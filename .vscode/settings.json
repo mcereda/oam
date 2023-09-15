@@ -51,6 +51,7 @@
         "gpgtools",
         "growpart",
         "hadolint",
+        "hdparm",
         "helmfile",
         "imager",
         "istio",
