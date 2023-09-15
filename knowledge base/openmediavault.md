@@ -5,15 +5,22 @@ NAS solution based on [Debian Linux][debian].
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
+1. [First access](#first-access)
 1. [Make other users administrators](#make-other-users-administrators)
 1. [Remove access for the default admin user](#remove-access-for-the-default-admin-user)
+1. [Wake On Lan](#wake-on-lan)
+1. [Power management](#power-management)
+   1. [CPU governor](#cpu-governor)
+   1. [Disk power options](#disk-power-options)
 1. [OMV-Extras](#omv-extras)
 1. [ZFS](#zfs)
-   1. [ZFS plugin](#zfs-plugin)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
 ## TL;DR
+
+Default web UI login: `admin`:`openmediavault`<br/>
+The root password is the one set during installation.
 
 ```sh
 # Make other users administrators.
@@ -35,6 +42,11 @@ mv -v \
   '/etc/apt/sources.list.d/openmediavault-kernel-backports.list' \
   '/etc/apt/sources.list.d/openmediavault-kernel-backports.list.disabled'
 ```
+
+## First access
+
+Default web UI login: `admin`:`openmediavault`<br/>
+The root password is the one set during installation.
 
 ## Make other users administrators
 
@@ -66,6 +78,53 @@ From the safest to the less safe option:
    deluser 'admin'
    ```
 
+## Wake On Lan
+
+The network interface **must** support this feature and it **must** be enabled in the BIOS.
+
+WOL is **not** enabled by default in the kernel driver.<br/>
+Enable the option under _Network_ > _Interfaces_, in **every** NIC's settings you want to respond.
+
+## Power management
+
+### CPU governor
+
+Enabling the _Monitoring_ option under _System_ > _Power Management_ configures `cpufrequtils`.<br/>
+For x86 architectures, this also sets the default governor to `conservative`. If the architecture is different, the governor is set to `ondemand`.
+
+### Disk power options
+
+By default disks have no power management configured.
+
+Editing a disk under _Storage_ > _Disks_ will allow to set these options for it:
+
+- Advanced power management.
+- Automatic acoustic management.<br/>
+  Not all drives support this.
+- Spindown time.
+- Write cache.
+
+All the above options are configured using [`hdparm`][hdparm].
+
+The APM values from the interface are resumed in seven steps.<br/>
+To experiment with intermediate values:
+
+- Edit `/etc/openmediavault/config.xml`.
+- Find the `/storage/hdparm` xpath.
+- Change the values for the disk.
+- Run this command:
+  ```sh
+  omv-salt deploy run hdparm
+  ```
+- Reboot.
+- Check if APM has been set:
+  ```sh
+  hdparm -I "/dev/sdX"
+  ```
+
+When setting a spindown time, make sure the APM value is set lower than `128`. It will not work otherwise.<br/>
+The web framework does not narrow the APM options if the spindown time is set, nor it disables the spindown option when a value higher than 128 is selected for APM.
+
 ## OMV-Extras
 
 From the CLI, as the `root` user:
@@ -79,8 +138,6 @@ From the CLI, as the `root` user:
    ```
 
 ## ZFS
-
-### ZFS plugin
 
 1. [Install OMV-Extras].
 1. Pick one:
@@ -103,9 +160,13 @@ From the CLI, as the `root` user:
 1. Create pools and such.<br/>
    You might need to wipe the disks first.
 
+ZFS provides ACL support, but it is not enabled by default.<br/>
+Just enable property in the pool or dataset.
+
 ## Further readings
 
 - [Website]
+- [Documentation]
 - [Debian]
 - [Proxmox]
 - [OMV-Extras]
@@ -123,6 +184,7 @@ All the references in the [further readings] section, plus the following:
   -->
 
 <!-- Upstream -->
+[documentation]: https://docs.openmediavault.org/en/latest/
 [omv-extras]: https://wiki.omv-extras.org/
 [website]: https://www.openmediavault.org/
 [zfs plugin for omv6]: https://wiki.omv-extras.org/doku.php?id=docs_in_draft:zfs
@@ -138,4 +200,5 @@ All the references in the [further readings] section, plus the following:
 [proxmox]: proxmox.md
 
 <!-- Others -->
+[hdparm]: https://linux.die.net/man/8/hdparm
 [how to lock or disable an user account]: https://www.thegeekdiary.com/unix-linux-how-to-lock-or-disable-an-user-account/
