@@ -30,7 +30,7 @@ repos:
   # - repo: https://github.com/ansible-community/ansible-lint
   #   # FIXME: need to figure this out, too many stupid issues.
   #   # Using `ansible-lint -v ansible` for the time being.
-  #   rev: v6.15.0
+  #   rev: v6.19.0
   #   hooks:
   #     - id: ansible-lint
   #       exclude: .*

@@ -15,16 +15,17 @@ pre-commit sample-config > .pre-commit-config.yaml
 
 # Manually run checks.
 pre-commit run --all-files
-pre-commit run ansible-lint --files ansible/
+pre-commit run "ansible-lint" --files "ansible/"
 
 # Automatically run checks at every commit.
 pre-commit install
 
-# Update all hooks to the latest version.
+# Update all hooks to the latest version available.
+# It is *not* always the latest *stable* release.
 pre-commit autoupdate
 
 # Skip check on commit.
-SKIP=flake8 git commit -m "foo"
+SKIP="flake8" git commit -m "foo"
 ```
 
 ```yaml
@@ -34,25 +35,36 @@ SKIP=flake8 git commit -m "foo"
 # See https://pre-commit.com/hooks.html for more hooks
 # See https://github.com/pre-commit/identify/blob/main/identify/extensions.py for the list of file types by extension
 
+exclude: ^FIXME/.*$                       # ignore all files matching the regexp
+fail_fast: true                           # stop at the first error
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.2.0
+    rev: v4.4.0
     hooks:
+      - id: check-added-large-files
+      - id: check-json
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-xml
       - id: trailing-whitespace
         args:
           - --markdown-linebreak-ext=md   # ignore markdown's line break
       - id: end-of-file-fixer
-      - id: check-yaml
-      - id: check-added-large-files
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.5.0
+    hooks:
+      - id: commitlint
+        stages: [commit-msg]              # limit to specific stages
+        additional_dependencies: ['@commitlint/config-conventional']
   - repo: https://github.com/markdownlint/markdownlint
-    rev: v0.11.0
+    rev: v0.12.0
     hooks:
       - id: markdownlint
         types: [markdown]                 # limit target types
         args:
           - -r "~MD013"                   # ignore line-length rule
   - repo: https://github.com/ansible-community/ansible-lint
-    rev: v6.0.2
+    rev: v6.19.0
     hooks:
       - id: ansible-lint
         name: ansilint                    # use an alias
