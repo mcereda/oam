@@ -50,8 +50,8 @@ parallel --tag "magick compare -metric NCC -quiet {} NULL: 2>&1; echo" \
 
 ## Further readings
 
-- GNU Parallel's [man page]
-- GNU Parallel's [tutorial]
+- [`man` page][man page]
+- [Tutorial]
 - [Obtaining exit status values from GNU parallel]
 
 <!--
