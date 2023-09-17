@@ -121,12 +121,16 @@ zfs snapshot 'pool_name/filesystem_name@snapshot_name'
 zfs destroy  'pool_name/filesystem_name@snapshot_name'
 
 # Query a file system or volume configuration (get properties).
-zfs get all 'pool_name'
-zfs get all 'pool_name/filesystem_name'
+zfs get 'all' 'pool_name'
+zfs get 'aclmode,aclinherit,acltype,xattr' 'pool_name/filesystem_name'
 
 # Enable or change settings on a filesystem.
 zfs set 'compression=on' 'pool_name/filesystem_name'
 zfs set 'mountpoint=/my/mount/path' 'pool_name/filesystem_name'
+
+# Reset properties to default.
+zfs inherit 'compression' 'pool_name/filesystem_name'
+zfs inherit -r 'acltype' 'pool_name/filesystem_name'
 
 # Get more information about zfs volumes properties.
 man zfs
