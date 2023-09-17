@@ -171,6 +171,7 @@ Just enable property in the pool or dataset.
 - [Proxmox]
 - [OMV-Extras]
 - [Disks maintenance]
+- [ZFS]
 
 ## Sources
 
@@ -198,6 +199,7 @@ All the references in the [further readings] section, plus the following:
 [debian]: debian.md
 [disks maintenance]: disks%20maintenance.md
 [proxmox]: proxmox.md
+[zfs]: zfs.md
 
 <!-- Others -->
 [hdparm]: https://linux.die.net/man/8/hdparm

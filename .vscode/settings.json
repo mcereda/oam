@@ -126,6 +126,7 @@
         "userspace",
         "winget",
         "wlan",
+        "xattr",
         "zstd"
     ],
     "markdown.extension.toc.levels": "2..6",
