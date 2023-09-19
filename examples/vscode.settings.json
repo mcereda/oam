@@ -42,6 +42,24 @@
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
     "git.autofetch": true,
+    "json.schemas": [
+        {
+            "fileMatch": ["/.commitlintrc"],
+            "url": "https://json.schemastore.org/commitlintrc.json"
+        },
+        {
+            "fileMatch": ["/.hadolint.yaml"],
+            "url": "https://raw.githubusercontent.com/hadolint/hadolint/master/contrib/hadolint.json"
+        },
+        {
+            "fileMatch": ["/.pre-commit-config.yaml"],
+            "url": "https://json.schemastore.org/pre-commit-config.json"
+        },
+        {
+            "fileMatch": ["/.yamllint.yaml"],
+            "url": "https://json.schemastore.org/yamllint.json"
+        }
+    ],
     "markdown.extension.orderedList.autoRenumber": false,
     "markdown.extension.orderedList.marker": "one",
     "markdown.extension.toc.levels": "2..6",
