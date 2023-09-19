@@ -7,6 +7,7 @@
    1. [Built-in](#built-in)
    1. [Extensions](#extensions)
    1. [Example](#example)
+   1. [Use JSON schemas](#use-json-schemas)
 1. [Network connections](#network-connections)
 1. [Troubleshooting](#troubleshooting)
    1. [_No extensions found_ when running from source](#no-extensions-found-when-running-from-source)
@@ -77,6 +78,29 @@
   "markdown.extension.orderedList.marker": "one",
   "markdown.extension.toc.orderedList": true,
 }
+```
+
+### Use JSON schemas
+
+```json
+"json.schemas": [
+  {
+    "fileMatch": ["/.commitlintrc"],
+    "url": "https://json.schemastore.org/commitlintrc.json"
+  },
+  {
+    "fileMatch": ["/.hadolint.yaml"],
+    "url": "https://raw.githubusercontent.com/hadolint/hadolint/master/contrib/hadolint.json"
+  },
+  {
+    "fileMatch": ["/.pre-commit-config.yaml"],
+    "url": "https://json.schemastore.org/pre-commit-config.json"
+  },
+  {
+    "fileMatch": ["/.yamllint.yaml"],
+    "url": "https://json.schemastore.org/yamllint.json"
+  }
+],
 ```
 
 ## Network connections
