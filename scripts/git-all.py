@@ -15,9 +15,8 @@ from os.path import basename, dirname
 
 logging.basicConfig(level=logging.WARNING)
 
-def git_command(directory, dry_run = False, *args):
-    logging.debug(f"thread for {directory}")
-    logging.debug(f"using args {args}")
+def call_git(directory, dry_run = False, *args):
+    logging.debug(f"received {locals()}")
 
     command = [
         "git",
@@ -25,7 +24,7 @@ def git_command(directory, dry_run = False, *args):
         directory
     ]
     command.extend(args)
-    logging.debug(command)
+    logging.debug(f"executing '{' '.join(command)}'")
 
     if dry_run is False:
         subprocess.call(command)
@@ -34,17 +33,17 @@ def git_command(directory, dry_run = False, *args):
 @click.option('--debug', '-d', is_flag=True, default=False, help='Enable debug mode.')
 @click.option('--dry-run', '-n', is_flag=True, default=False, help='Simulate actions.')
 @click.option('--threads', '-t', default=cpu_count(), help='Number of threads to use.', show_default=True)
-@click.argument('action')
+@click.argument('command')
 @click.argument('root_directories', type=click.Path(exists=True, file_okay=False, resolve_path=True), nargs=-1)
-def main(action, debug, dry_run, root_directories, threads):
+def main(command, debug, dry_run, root_directories, threads):
     """
-    Executes the Git action on all repositories found in the ROOT_DIRECTORIES.
+    Executes the COMMAND on all repositories found in the ROOT_DIRECTORIES.
 
-    ACTION            The git action to execute. Quoted if given with arguments.
+    COMMAND           The git command to execute. Quoted if given with arguments.
     ROOT_DIRECTORIES  The directories to walk while looking for repositories.
     """
 
-    action = tuple(action.split(" "))
+    command_parts = tuple(command.split(" "))
     if len(root_directories) <= 0:
         root_directories = (getcwd(),)
 
@@ -72,7 +71,7 @@ def main(action, debug, dry_run, root_directories, threads):
     with ThreadPoolExecutor(max_workers=threads) as executor:
         for repository in repositories:
             logging.debug(f"submitting thread for {repository}")
-            executor.submit(git_command, repository, dry_run, *action)
+            executor.submit(call_git, repository, dry_run, *command_parts)
 
 if __name__ == "__main__":
     main()
