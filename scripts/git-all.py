@@ -13,8 +13,6 @@ from concurrent.futures import ThreadPoolExecutor
 from os import cpu_count, getcwd, walk
 from os.path import basename, dirname
 
-threads_count = cpu_count()
-
 logging.basicConfig(level=logging.WARNING)
 
 def git_command(directory, dry_run = False, *args):
@@ -35,9 +33,10 @@ def git_command(directory, dry_run = False, *args):
 @click.command()
 @click.option('--debug', '-d', is_flag=True, default=False, help='Enable debug mode.')
 @click.option('--dry-run', '-n', is_flag=True, default=False, help='Simulate actions.')
+@click.option('--threads', '-t', default=cpu_count(), help='Number of threads to use.', show_default=True)
 @click.argument('action')
 @click.argument('root_directories', type=click.Path(exists=True, file_okay=False, resolve_path=True), nargs=-1)
-def main(action, debug, dry_run, root_directories):
+def main(action, debug, dry_run, root_directories, threads):
     """
     Executes the Git action on all repositories found in the ROOT_DIRECTORIES.
 
@@ -70,7 +69,7 @@ def main(action, debug, dry_run, root_directories):
     logging.debug(f"found repositories {', '.join(repositories)}")
 
     logging.debug(f"creating threads")
-    with ThreadPoolExecutor(max_workers=threads_count) as executor:
+    with ThreadPoolExecutor(max_workers=threads) as executor:
         for repository in repositories:
             logging.debug(f"submitting thread for {repository}")
             executor.submit(git_command, repository, dry_run, *action)
