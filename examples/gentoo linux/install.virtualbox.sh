@@ -107,20 +107,20 @@ echo 'hostname="gentoo"' > /etc/conf.d/hostname
 
 echo "sys-kernel/linux-firmware  linux-fw-redistributable no-source-code" > /etc/portage/package.license/kernel
 emerge \
-  --quiet --verbose \
-  sys-kernel/gentoo-sources sys-kernel/genkernel
+	--quiet --verbose \
+	sys-kernel/gentoo-sources sys-kernel/genkernel
 eselect kernel set 1
 genkernel all
 
 emerge \
-  --quiet --verbose \
-  --noreplace \
-  net-misc/netifrc
+	--quiet --verbose \
+	--noreplace \
+	net-misc/netifrc
 echo 'config_enp0s3="dhcp"' > /etc/conf.d/net
 sed -i.bak \
-  -e 's/^127.0.0.1.*/127.0.0.1\tlocalhost gentoo/' \
-  -e 's/^::1.*/::1\t\tlocalhost gentoo/' \
-  /etc/hosts
+	-e 's/^127.0.0.1.*/127.0.0.1\tlocalhost gentoo/' \
+	-e 's/^::1.*/::1\t\tlocalhost gentoo/' \
+	/etc/hosts
 cd /etc/init.d
 ln -s net.lo net.enp0s3
 rc-update add net.enp0s3 default
@@ -128,41 +128,41 @@ cd -
 
 sed -i.bak 's/^enforce=everyone$/enforce=none/' /etc/security/passwdqc.conf
 emerge \
-  --quiet --verbose \
-  app-admin/sudo
+	--quiet --verbose \
+	app-admin/sudo
 echo '%wheel ALL=(ALL) ALL' | tee /etc/sudoers.d/wheel
 useradd -m -G users,wheel,audio -s /bin/bash user
 passwd user
 passwd -l root
 
 emerge \
-  --quiet --verbose \
-  app-admin/sysklogd
+	--quiet --verbose \
+	app-admin/sysklogd
 rc-update add sysklogd default
 
 emerge \
-  --quiet --verbose \
-  sys-process/cronie
+	--quiet --verbose \
+	sys-process/cronie
 rc-update add cronie default
 
 emerge \
-  --quiet --verbose \
-  net-misc/dhcpcd
+	--quiet --verbose \
+	net-misc/dhcpcd
 rc-update add dhcpcd default
 
 rc-update add sshd default
 
 echo 'sys-process/bpytop ~amd64' | tee /etc/portage/package.accept_keywords/bpytop
 emerge \
-  --quiet --verbose \
-  bpytop \
-  nfs-utils \
-  samba \
-  tmux
+	--quiet --verbose \
+	bpytop \
+	nfs-utils \
+	samba \
+	tmux
 
 emerge \
-  --quiet --verbose \
-  sys-boot/grub:2
+	--quiet --verbose \
+	sys-boot/grub:2
 grub-install --target=x86_64-efi --efi-directory=/boot
 grub-mkconfig -o /boot/grub/grub.cfg
 

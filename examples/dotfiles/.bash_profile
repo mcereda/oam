@@ -21,5 +21,5 @@
 : "${BASHRC=$HOME/.bashrc}"
 if [[ -r "$BASHRC" ]]
 then
-        source "$BASHRC"
+	source "$BASHRC"
 fi
