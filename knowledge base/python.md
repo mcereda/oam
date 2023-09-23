@@ -6,6 +6,7 @@
 1. [Dictionaries](#dictionaries)
 1. [F-strings](#f-strings)
 1. [Logging](#logging)
+1. [CLI helpers](#cli-helpers)
 1. [Web servers](#web-servers)
    1. [Flask](#flask)
    1. [WSGI server](#wsgi-server)
@@ -17,7 +18,12 @@
 ## TL;DR
 
 ```py
-# Declare a dictionary.
+# Declare tuples.
+# If only 1 element, it requires the ending ','.
+(1, 'string')
+('element',)
+
+# Declare dictionaries.
 {'spam': 2, 'ham': 1, 'eggs': 3}
 dict(spam=2,ham=1,eggs=3)
 dict([('spam',2),('ham',1),('eggs',3)])
@@ -28,13 +34,14 @@ F"{name.lower()} is funny."
 
 # Make elements in a list unique.
 # Keep the resulting list mutable.
+# Sorts the elements (it is a set "feature").
 unique_elements = list(set(redundant_elements))
 ```
 
 ## Dictionaries
 
 ```py
-# Declare a dictionary.
+# Declare dictionaries.
 d = {'spam': 2, 'ham': 1, 'eggs': 3}
 d = dict(spam=2,ham=1,eggs=3)
 d = dict([('spam',2),('ham',1),('eggs',3)])
@@ -42,13 +49,13 @@ d = {x: x for x in range(5)}
 d = {c.lower(): c + '!' for c in ['SPAM','EGGS','HAM']}
 d = dict.fromkeys('abc',0)
 
-# Change an element.
+# Change elements.
 d['ham'] = ['grill', 'bake', 'fry']
 
-# Add a new element.
+# Add new elements.
 d['brunch'] = 'bacon'
 
-# Delete an element.
+# Delete elements.
 del d['eggs']
 d.pop('eggs')
 
@@ -95,6 +102,26 @@ logging.log(level, "{level} level message")
 ```
 
 See [logging howto] and [logging library] for more information.
+
+## CLI helpers
+
+See [click]:
+
+```py
+import click
+
+@click.command()
+@click.option('--count', default=1, help='Number of greetings.')
+@click.option('--name', prompt='Your name',
+              help='The person to greet.')
+def hello(count, name):
+    """Simple program that greets NAME for a total of COUNT times."""
+    for x in range(count):
+        click.echo(f"Hello {name}!")
+
+if __name__ == '__main__':
+    hello()
+```
 
 ## Web servers
 
@@ -205,6 +232,7 @@ All the references in the [further readings] section, plus the following:
 - [10 python one-liners for dictionaries]
 - [Logging library]
 - [Subprocess library]
+- [Click]
 
 <!--
   References
@@ -228,6 +256,7 @@ All the references in the [further readings] section, plus the following:
 [*args and **kwargs in python]: https://www.geeksforgeeks.org/args-kwargs-python/
 [10 Python One-Liners for Dictionaries]: https://medium.com/codex/10-python-one-liners-for-dictionaries-d58754386a1d
 [an intro to threading in python]: https://realpython.com/intro-to-python-threading/
+[click]: https://click.palletsprojects.com/en/
 [data types]: https://www.w3schools.com/python/python_datatypes.asp
 [f-strings]: https://realpython.com/python-f-strings/
 [flask at first run: do not use the development server in a production environment]: https://stackoverflow.com/questions/51025893/flask-at-first-run-do-not-use-the-development-server-in-a-production-environmen#54381386
