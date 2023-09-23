@@ -1,4 +1,6 @@
 {
+    "editor.formatOnPaste": true,
+
     "cSpell.words": [
         "adduser",
         "airgap",
@@ -129,6 +131,7 @@
         "xattr",
         "zstd"
     ],
+
     "markdown.extension.toc.levels": "2..6",
     "markdown.extension.toc.orderedList": true
 }
