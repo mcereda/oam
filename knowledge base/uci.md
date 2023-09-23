@@ -15,17 +15,6 @@ Command line utility for OpenWrt's UCI system.
 uci show
 uci show 'dhcp'
 
-# Show changes to the settings.
-uci changes
-uci changes 'dhcp'
-
-# Commit changes.
-uci commit
-uci commit 'dhcp'
-
-# Reload the configuration
-reload_config
-
 # Show what interface is the WAN.
 uci show network.wan.device | cut -d "'" -f 2
 
@@ -42,6 +31,20 @@ uci set network.wan.device='lan4'
 uci del_list network.br_lan.ports='lan4'
 uci add_list network.br_lan.ports='eth2'
 uci commit 'network'
+reload_config
+
+# Show pending changes to the settings.
+uci changes
+uci changes 'dhcp'
+
+# Commit pending changes.
+uci commit
+uci commit 'dhcp'
+
+# Discard pending changes.
+uci revert 'dhcp.cfg19fe63'
+
+# Reload the configuration
 reload_config
 ```
 
