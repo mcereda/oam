@@ -28,6 +28,7 @@ sudo mkfs.btrfs --label "data" /dev/sd{a,c,d,f,g} --force \
 sudo btrfs filesystem show
 
 # Show detailed `df` analogue for filesystems.
+# Also show the filesystem specifications, like metadata replication.
 sudo btrfs filesystem df "path/to/filesystem"
 sudo btrfs filesystem df -h "path/to/filesystem"
 
@@ -60,10 +61,18 @@ sudo btrfs subvolume create "path/to/subvolume"
 btrfs subvolume snapshot "${HOME}/path/to/subvolume" "${HOME}/path/to/snapshot"
 sudo btrfs subvolume snapshot -r "path/to/subvolume" "path/to/snapshot"
 
-# Mount subvolumes without mounting their main filesystem.
+# Display the ID of the default subvolume.
+# The default subvolume is the one mounted when no other is specified.
+btrfs subvolume get-default "path/to/subvolume"
+
+# Set the default subvolume for a filesystem.
+btrfs subvolume set-default "subvolume_id" "path/to/root/subvolume"
+
+# Mount specific subvolumes without mounting the default one.
 sudo mount -o 'subvol=sv1' "/dev/sdb" "/mnt"
 
 # Delete subvolumes.
+sudo btrfs subvolume delete -C "path/to/subvolume/1" "path/to/subvolume/n"
 sudo btrfs subvolume delete --commit-each "path/to/subvolume"
 
 # Automatically compress new files and folders in directories in BTRFS mounts.
@@ -87,8 +96,12 @@ btrfs … -ti "path/to/inode"
 btrfs … -td "path/to/device"
 btrfs … "path/to/autoselected/type/of/resource"
 
-# Change RW subvolumes to RO ones on the fly.
+# Change RW subvolumes to RO ones on the fly and viceversa.
 btrfs property set -ts "path/to/subvolume" 'ro' 'true'
+btrfs property set "path/to/subvolume" 'ro' 'false'
+
+# Enable compression on subvolumes.
+btrfs property set "path/to/subvolume" 'compression' 'zstd'
 
 # Show subvolumes' information.
 sudo btrfs subvolume show "path/to/subvolume"
@@ -151,6 +164,13 @@ swapon 'path/to/swapfile'
 # `btrfs` utility >= 6.1 only.
 btrfs filesystem mkswapfile --size '2G' 'path/to/swapfile'
 swapon 'path/to/swapfile'
+
+# Create multiple snapshots at once.
+DATETIME="$(date '+%F_%H-%M-%S')"
+parallel -qt \
+  btrfs subvolume snapshot -r \
+    "${BTRFS_ROOT}/{}" "${BTRFS_ROOT}/.snapshots/${DATETIME}/{}" \
+  ::: $(ls "${BTRFS_ROOT}")
 ```
 
 ## Check differences between 2 snapshots
@@ -171,6 +191,7 @@ sudo snapper -c 'config' diff '445..446'
 - [Swapfile]
 - [Gentoo wiki]
 - [Snapper]
+- [Managing the Btrfs File System]
 
 ## Sources
 
@@ -187,6 +208,7 @@ All the references in the [further readings] section, plus the following:
 <!-- Upstream -->
 [documentation]: https://btrfs.readthedocs.io/en/latest/
 [introduction]: https://btrfs.readthedocs.io/en/latest/Introduction.html
+[managing the btrfs file system]: https://docs.oracle.com/en/operating-systems/oracle-linux/9/fsadmin/fsadmin-ManagingtheBtrfsFileSystem.html#btrfs-main
 [mkfs.btrfs]: https://btrfs.readthedocs.io/en/latest/mkfs.btrfs.html
 [swapfile]: https://btrfs.readthedocs.io/en/latest/Swapfile.html
 
