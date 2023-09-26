@@ -3,6 +3,7 @@
 # Sync directories from a Linux source to a Linux destination.
 # Expand symlink at the source to their referred files.
 # Assumes the same owner and group at both hosts.
+# GNU's `rsync` 3.2.7 does not support ctimes (-N).
 rsync 'data/' 'nas.lan:data/' \
 	--secluded-args --no-inc-recursive \
 	--archive --copy-links --acls --xattrs --times --atimes --crtimes \
