@@ -58,16 +58,16 @@ git config --list \
   | awk -F '=' '{print $1}' | sort -u \
   | xargs -I {} sh -c 'printf "{}=" && git config --get {}'
 
-# Get a default value if the setting has none.
+# Get a default value if the requested key has none.
 # Does not work on sections alone.
 git config --get --default 'not-set' 'filter.lfs.cleaned'
 
-# Create or reinitialize a repository.
+# Create or reinitialize repositories.
 git init
 git init --initial-branch 'main' 'path/to/repo'
 git init --bare 'path/to/repo.git'
 
-# Clone a repository.
+# Clone repositories.
 git clone 'https://github.com:user/repo.git'
 git clone --bare 'git@github.com:user/repo.git' 'path/to/clone'
 git clone --recurse-submodules 'ssh@git.server:user/repo.git'
@@ -77,13 +77,13 @@ git \
   -c http.extraHeader="Authorization: Basic $(echo -n "user:pat" | base64)" \
   clone 'https://dev.azure.com/org/project/_git/repo'
 
-# Convert a normal repository to a bare one.
+# Convert normal repository to bare ones.
 git clone --bare 'repository' 'path/to/bare/clone.git'
 
-# Unshallow a clone.
+# Unshallow clones.
 git pull --unshallow
 
-# Get objects and refs but do not incorporate them.
+# Get changes, but do not incorporate them.
 git fetch
 
 # Get changes and merge them.
@@ -91,11 +91,11 @@ git pull --all
 git pull --verify-signatures
 git pull 'remote' 'branch'
 
-# Show what files changed.
+# Show what files have changed.
 git status
 git status --verbose
 
-# Show changes in a repository.
+# Show details of changes.
 git diff
 git diff --staged 'commit_hash'
 git diff 'commit_hash_1..commit_hash_2'
@@ -136,7 +136,7 @@ git commit --amend --no-edit --gpg-sign
 # Show commits which would be pushed.
 git log @{u}..
 
-# Revert a commit but keep the history of the event as a separate commit.
+# Revert a commit, but keep the history of the event as a separate commit.
 git revert 'commit_hash'
 
 # Interactively rebase the last 7 commits.
@@ -145,23 +145,26 @@ git rebase -i '@~7'
 # List remotes.
 git remote --verbose
 
-# Add a new remote.
+# Add new remotes.
+git remote add 'github' 'git@github.com:user/repo.git'
 git remote add 'gitlab' 'git@gitlab.com:user/repo.git'
 
-# Set a new URL for an existing remote.
+# Set a new URL for existing remotes.
+git remote set-url 'github' 'git@github.com:user/repo.git'
 git remote set-url 'gitlab' 'git@gitlab.com:user/repo.git'
 
 # Push committed changes.
 git push
 git push 'remote' 'branch_1' 'branch_N'
 git push 'git@github.com:user/repo.git'
+git push --set-upstream github --all
 git push --all --force
 
-# Show the repository's history.
+# Show repositories' history.
 git reflog
 git log -p
 
-# Visualize the repository's history.
+# Visualize repositories' history.
 git log --graph --full-history --all --color --decorate --oneline
 
 # Show and verify signatures.
@@ -197,7 +200,7 @@ git format-patch 'HEAD~2' --stdout > 'single/file.patch'
 git add . && git commit -m 'uncommitted' \
 && git format-patch 'HEAD~1' && git reset 'HEAD~1'
 
-# Apply a patch to the current index.
+# Apply patches to the current index.
 git apply 'file.patch'
 
 # Apply commits from a patch.
@@ -213,7 +216,7 @@ git stash list
 # Apply the most recent change and remove them from the stash stack.
 git stash pop
 
-# Apply a stash, but don't remove it from the stack.
+# Apply stashed changes, but don't remove their entry from the stack.
 git stash apply stash@{6}
 
 # Remove a single stash entry from the stash stack.
@@ -221,25 +224,25 @@ git stash apply stash@{6}
 git stash drop
 git stash drop stash@{2}
 
-# Remove all the stash entries.
+# Remove all the stashed entries in the stack.
 # Those will then be pruned and may be impossible to recover.
 git stash clear
 
 # Apply only the changes made within a given commit.
 git cherry-pick 'commit_hash'
 
-# Create a branch.
+# Create branches.
 git branch 'branch_name'
 git switch -c 'branch_name'
 git checkout -b 'local_branch_name' 'remote/branch_name'
 
-# Create a bare branch without any commits.
+# Create bare branches without any commits.
 git checkout --orphan 'branch_name'
 
 # List branches.
 git branch -a
 
-# Rename a branch.
+# Rename branches.
 git branch --move 'old_name' 'new_name'
 
 # Switch branches.
