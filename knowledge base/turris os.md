@@ -71,6 +71,10 @@ reboot
 # Gracefully shutdown the device.
 poweroff
 
+# Get the current temperature.
+cat '/sys/class/thermal/thermal_zone0/temp'
+sensors
+
 # List available LXC container images.
 # Default source is 'repo.turris.cz/lxc'.
 lxc-create -n 'test' -t 'download'; lxc-destroy -n 'test'
@@ -523,6 +527,7 @@ All the references in the [further readings] section, plus the following:
 - [Install Pi-hole]
 - [Pi-Hole on Turris Omnia]
 - [Installing pi-hole on Turris Omnia]
+- [Operating temperature]
 
 <!--
   References
@@ -533,6 +538,7 @@ All the references in the [further readings] section, plus the following:
 [factory reset on turris omnia]: https://docs.turris.cz/hw/omnia/rescue-modes/
 [home nas]: https://wiki.turris.cz/doc/en/howto/nas
 [how to control led diodes]: https://wiki.turris.cz/doc/en/howto/led_settings
+[operating temperature]: https://forum.turris.cz/t/operating-temperature/998
 [supported sfp modules]: https://wiki.turris.cz/doc/en/public/sfp
 [turris wiki]: https://wiki.turris.cz/doc/en/start
 [website]: https://www.turris.com/turris-os/
