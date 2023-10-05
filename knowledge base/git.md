@@ -67,6 +67,9 @@ git init
 git init --initial-branch 'main' 'path/to/repo'
 git init --bare 'path/to/repo.git'
 
+# List available subcommands in specific groups.
+git --list-cmds='main,alias'
+
 # Clone repositories.
 git clone 'https://github.com:user/repo.git'
 git clone --bare 'git@github.com:user/repo.git' 'path/to/clone'
