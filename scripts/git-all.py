@@ -10,40 +10,57 @@ import logging
 import subprocess
 
 from concurrent.futures import ThreadPoolExecutor
-from os import cpu_count, getcwd, walk
+from os import cpu_count, getcwd, walk, EX_DATAERR
 from os.path import basename, dirname
 
 logging.basicConfig(level=logging.WARNING)
 
-def call_git(directory, dry_run = False, *args):
-    logging.debug(f"received {locals()}")
+def call_git(directory, dry_run=False, *args):
+    logging.debug(f"call_git: received {locals()}")
 
-    command = [
+    git_command = [
         "git",
         "-C",
         directory
     ]
-    command.extend(args)
-    logging.debug(f"executing '{' '.join(command)}'")
+    git_command.extend(args)
+    logging.debug(f"call_git: executing '{' '.join(git_command)}'")
 
     if dry_run is False:
-        subprocess.call(command)
+        subprocess.run(git_command)
+
+def pre_flight(git_subcommand):
+    logging.info(f'running pre-flight checks')
+    logging.debug(f'pre_flight: using {locals()}')
+
+    result = subprocess.run(['git', '--list-cmds=main,alias'], stdout=subprocess.PIPE)
+    git_available_subcommands = result.stdout.decode().splitlines()
+    logging.debug(f'pre_flight: available git subcommands: {git_available_subcommands}')
+
+    logging.debug(f'pre_flight: git subcommand to check: {git_subcommand}')
+    try:
+        assert git_subcommand in git_available_subcommands
+    except AssertionError:
+        logging.critical(f"'{git_subcommand}' is not a git subcommand in the main or alias groups")
+        exit(EX_DATAERR)
 
 @click.command()
 @click.option('--debug', '-d', is_flag=True, default=False, help='Enable debug mode.')
 @click.option('--dry-run', '-n', is_flag=True, default=False, help='Simulate actions.')
+@click.option('--recursive/--no-recursive', ' /--no-r', is_flag=True, default=True, help='Recurse from the given directories.', show_default=True)
 @click.option('--threads', '-t', default=cpu_count(), help='Number of threads to use.', show_default=True)
-@click.argument('command')
-@click.argument('root_directories', type=click.Path(exists=True, file_okay=False, resolve_path=True), nargs=-1)
-def main(command, debug, dry_run, root_directories, threads):
+@click.argument('git_subcommand')
+@click.argument('directories', type=click.Path(exists=True, file_okay=False, resolve_path=True), nargs=-1, metavar='DIRECTORY...')
+def main(debug, directories, dry_run, git_subcommand, recursive, threads):
     """
-    Executes the COMMAND on all repositories found in the ROOT_DIRECTORIES.
+    Executes the GIT_SUBCOMMAND in the given DIRECTORIES. With -r, executes it
+    on all repositories found in the given DIRECTORIES.
 
-    COMMAND           The git command to execute. Quoted if given with arguments.
-    ROOT_DIRECTORIES  The directories to walk while looking for repositories.
+    GIT_SUBCOMMAND  The git subcommand to execute, quoted if with arguments.
+    DIRECTORY       The directories to walk while looking for repositories.
     """
 
-    command_parts = tuple(command.split(" "))
+    git_subcommand_parts = tuple(git_subcommand.split())
     if len(root_directories) <= 0:
         root_directories = (getcwd(),)
 
@@ -56,22 +73,25 @@ def main(command, debug, dry_run, root_directories, threads):
     logging.debug(f"using globals {globals()}")
     logging.debug(f"using locals {locals()}")
 
-    repositories = []
-    for directory in root_directories:
-        logging.debug(f"starting from '{directory}'")
+    pre_flight(git_subcommand=git_subcommand_parts[0])
 
-        repositories_in_dir = set(dirname(dirpath) for dirpath, _, _ in walk(directory) if basename(dirpath) == '.git')
-        logging.debug(f"{directory} has repositories {', '.join(repositories_in_dir)}")
+    repositories = list(root_directories)
+    if recursive:
+        for directory in root_directories:
+            logging.debug(f"starting from '{directory}'")
 
-        repositories.extend(repositories_in_dir)
-    repositories = set(repositories)
-    logging.debug(f"found repositories {', '.join(repositories)}")
+            repositories_in_dir = set(dirname(dirpath) for dirpath, _, _ in walk(directory) if basename(dirpath) == '.git')
+            logging.debug(f"{directory} has repositories {', '.join(repositories_in_dir)}")
+
+            repositories.extend(repositories_in_dir)
+        repositories = set(repositories)
+    logging.debug(f"repositories: {', '.join(repositories)}")
 
     logging.debug(f"creating threads")
     with ThreadPoolExecutor(max_workers=threads) as executor:
         for repository in repositories:
             logging.debug(f"submitting thread for {repository}")
-            executor.submit(call_git, repository, dry_run, *command_parts)
+            executor.submit(call_git, repository, dry_run, *git_subcommand_parts)
 
 if __name__ == "__main__":
     main()
