@@ -5,8 +5,8 @@
 1. [Handy keyboard shortcuts](#handy-keyboard-shortcuts)
 1. [Handy settings](#handy-settings)
    1. [Built-in](#built-in)
-   1. [Extensions](#extensions)
-   1. [Recommend extensions](#recommend-extensions)
+   1. [Extensions settings](#extensions-settings)
+1. [Recommend extensions](#recommend-extensions)
    1. [Use JSON schemas](#use-json-schemas)
    1. [Configuration example](#configuration-example)
 1. [Network connections](#network-connections)
@@ -30,30 +30,33 @@
 | Setting                                  | Default value | Scopes          | Location in tree            | Description                                                                                                                    |
 | ---------------------------------------- | ------------- | --------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `editor.copyWithSyntaxHighlighting`      | `true`        | User, Workspace | Text Editor                 | Copy syntax highlighting too when copying something to the clipboard.                                                          |
+| `editor.guides.bracketPairs`             | `false`       | User, Workspace | Text Editor                 | Controls whether bracket pair guides are enabled or not.                                                                       |
 | `extensions.autoCheckUpdates`            | `true`        | User            | Features > Extensions       | Automatically check extensions for updates.                                                                                    |
 | `extensions.autoUpdates`                 | `true`        | User            | Features > Extensions       | Automatically update extensions.                                                                                               |
 | `files.insertFinalNewline`               | `false`       | User, Workspace | Text Editor > Files         | Insert a final newline at the end of the file when saving it.                                                                  |
 | `files.trimFinalNewlines`                | `false`       | User, Workspace | Text Editor > Files         | Trim all new lines after the final new line at the end of the file when saving it.                                             |
 | `settingsSync.ignoredExtensions`         | `[]`          | User            | Application > Settings Sync | List of extensions to ignore while synchronizing.                                                                              |
-| `telemetry.telemetryLevel`               | `all`         | User            | Application > Telemetry     | Controls Visual Studio Code telemetry, first-party extension telemetry, and **participating** third-party extension telemetry. |
+| `telemetry.telemetryLevel`               | `"all"`       | User            | Application > Telemetry     | Controls Visual Studio Code telemetry, first-party extension telemetry, and **participating** third-party extension telemetry. |
 | `terminal.integrated.cursorBlinking`     | `false`       | User, Workspace | Features > Terminal         | Make the cursor blink in the integrated terminal.                                                                              |
-| `terminal.integrated.cursorStyle`        | `block`       | User, Workspace | Features > Terminal         | Show the cursor as a block in the integrated terminal.                                                                         |
+| `terminal.integrated.cursorStyle`        | `"block"`     | User, Workspace | Features > Terminal         | Show the cursor as a block in the integrated terminal.                                                                         |
 | `terminal.integrated.defaultProfile.osx` | `null`        | User, Workspace | Features > Terminal         | The default profile used on macOS.                                                                                             |
 | `terminal.integrated.scrollback`         | `1000`        | User, Workspace | Features > Terminal         | The maximum number of lines the terminal keeps in its buffer.                                                                  |
-| `update.mode`                            | `default`     | User            | Application > Update        | Automatically check for application updates.                                                                                   |
+| `update.mode`                            | `"default"`   | User            | Application > Update        | Automatically check for application updates.                                                                                   |
 
-### Extensions
+### Extensions settings
 
-| Extension                  | Setting                                 | Default value | Scopes          | Location in tree                 | Description                                                                                       |
-| -------------------------- | --------------------------------------- | ------------- | --------------- | -------------------------------- | ------------------------------------------------------------------------------------------------- |
-| angelo-breuer.clock        | `clock.alignment`                       | `Left`        | User, Workspace | Extensions > Status Bar Clock    | Alignment of the clock on the status bar.                                                         |
-| angelo-breuer.clock        | `clock.format`                          | `hh:MM`       | User, Workspace | Extensions > Status Bar Clock    | Date and time format. See https://www.npmjs.com/package/dateformat#mask-options for more options. |
-| yzhang.markdown-all-in-one | `markdown.extension.orderedList.marker` | `ordered`     | User, Workspace | Extensions > Markdown All In One | Auto fix ordered list markers.                                                                    |
-| yzhang.markdown-all-in-one | `markdown.extension.toc.levels`         | `1..6`        | User, Workspace | Extensions > Markdown All In One | Range of levels for the ToC.                                                                      |
-| yzhang.markdown-all-in-one | `markdown.extension.toc.orderedList`    | `false`       | User, Workspace | Extensions > Markdown All In One | Use an ordered list in the ToC.                                                                   |
-| redhat.ansible             | `redhat.telemetry.enabled`              | `true`        | User, Workspace | Extensions > Ansible             | Send telemetry to Red Hat servers.                                                                |
+| Extension                  | Setting                                       | Default value | Scopes          | Location in tree                 | Description                                                                                                                                                  |
+| -------------------------- | --------------------------------------------- | ------------- | --------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| angelo-breuer.clock        | `clock.alignment`                             | `"Left"`      | User, Workspace | Extensions > Status Bar Clock    | Alignment of the clock on the status bar.                                                                                                                    |
+| angelo-breuer.clock        | `clock.format`                                | `"hh:MM"`     | User, Workspace | Extensions > Status Bar Clock    | Date and time format. See https://www.npmjs.com/package/dateformat#mask-options for more options.                                                            |
+| ??                         | `git.autofetch`                               | `true`        | User, Workspace | Extensions > Git                 | When set to true, commits will automatically be fetched from the default remote of the current Git repository. Setting to `all` will fetch from all remotes. |
+| yzhang.markdown-all-in-one | `markdown.extension.orderedList.autoRenumber` | `true`        | User, Workspace | Extensions > Markdown All In One | Auto fix ordered list markers.                                                                                                                               |
+| yzhang.markdown-all-in-one | `markdown.extension.orderedList.marker`       | `"ordered"`   | User, Workspace | Extensions > Markdown All In One | Auto fix ordered list markers.                                                                                                                               |
+| yzhang.markdown-all-in-one | `markdown.extension.toc.levels`               | `"1..6"`      | User, Workspace | Extensions > Markdown All In One | Range of levels for the ToC.                                                                                                                                 |
+| yzhang.markdown-all-in-one | `markdown.extension.toc.orderedList`          | `false`       | User, Workspace | Extensions > Markdown All In One | Use an ordered list in the ToC.                                                                                                                              |
+| redhat.ansible             | `redhat.telemetry.enabled`                    | `true`        | User, Workspace | Extensions > Ansible             | Send telemetry to Red Hat servers.                                                                                                                           |
 
-### Recommend extensions
+## Recommend extensions
 
 Add the `extensions.json` file to the workspace's `.vscode` folder with the following structure:
 
@@ -61,6 +64,7 @@ Add the `extensions.json` file to the workspace's `.vscode` folder with the foll
 {
   "recommendations": [
     "casualjim.gotemplate",
+    "editorconfig.editorconfig",
     "golang.go",
     "ms-python.python",
     "nhoizey.gremlins",
