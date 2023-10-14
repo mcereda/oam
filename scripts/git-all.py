@@ -61,8 +61,8 @@ def main(debug, directories, dry_run, git_subcommand, recursive, threads):
     """
 
     git_subcommand_parts = tuple(git_subcommand.split())
-    if len(root_directories) <= 0:
-        root_directories = (getcwd(),)
+    if len(directories) <= 0:
+        directories = (getcwd(),)
 
     if debug:
         logging.basicConfig(level=logging.DEBUG, force=True)
@@ -75,9 +75,9 @@ def main(debug, directories, dry_run, git_subcommand, recursive, threads):
 
     pre_flight(git_subcommand=git_subcommand_parts[0])
 
-    repositories = list(root_directories)
+    repositories = list(directories)
     if recursive:
-        for directory in root_directories:
+        for directory in directories:
             logging.debug(f"starting from '{directory}'")
 
             repositories_in_dir = set(dirname(dirpath) for dirpath, _, _ in walk(directory) if basename(dirpath) == '.git')
