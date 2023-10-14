@@ -4,6 +4,7 @@
 
 1. [TL;DR](#tldr)
 1. [Apply settings to all connections](#apply-settings-to-all-connections)
+1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
 ## TL;DR
@@ -84,6 +85,12 @@ curl 'http://example.com' --proxy 'socks5://localhost:19999'
 
 # Forcefully resolve a host to a given address.
 curl 'https://example.com' --resolve 'example.com:443:google.com'
+
+# Ask to use HTTP/2.
+curl 'https://example.com' --http2
+
+# Force the use of HTTP/2.
+curl 'https://example.com' --http2-prior-knowledge
 ```
 
 ## Apply settings to all connections
@@ -118,6 +125,10 @@ request = "PUT"
 config: "~/.config/curl"
 ```
 
+## Further readings
+
+- [Book]
+
 ## Sources
 
 All the references in the [further readings] section, plus the following:
@@ -125,15 +136,20 @@ All the references in the [further readings] section, plus the following:
 - [cheat.sh]
 - [How to ignore invalid and self signed ssl connection errors with curl]
 - [Config file]
+- [HTTP2]
 
 <!--
   References
   -->
+
+<!-- Upstream -->
+[book]: https://everything.curl.dev/
+[config file]: https://everything.curl.dev/cmdline/configfile
+[http2]: https://everything.curl.dev/http/http2
 
 <!-- In-article sections -->
 [further readings]: #further-readings
 
 <!-- Others -->
 [cheat.sh]: https://cheat.sh/curl
-[config file]: https://everything.curl.dev/cmdline/configfile
 [how to ignore invalid and self signed ssl connection errors with curl]: https://www.cyberciti.biz/faq/how-to-curl-ignore-ssl-certificate-warnings-command-option/
