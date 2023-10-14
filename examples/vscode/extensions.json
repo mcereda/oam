@@ -1,17 +1,19 @@
 {
     "recommendations": [
+        "editorconfig.editorconfig",
         "nhoizey.gremlins",
         "oderwat.indent-rainbow",
         "streetsidesoftware.code-spell-checker",
 
+        "ms-vscode-remote.remote-ssh-edit",
+        "redhat.vscode-yaml",
         "yzhang.markdown-all-in-one",
 
-        "golang.go",
         "casualjim.gotemplate",
+        "golang.go",
 
         "ms-python.python",
 
-        "redhat.ansible",
-        "redhat.vscode-yaml"
+        "redhat.ansible"
     ]
 }
