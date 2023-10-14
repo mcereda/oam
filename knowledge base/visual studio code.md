@@ -2,13 +2,11 @@
 
 ## Table of contents <!-- omit in toc -->
 
+1. [Configuration](#configuration)
+   1. [Handy settings](#handy-settings)
 1. [Handy keyboard shortcuts](#handy-keyboard-shortcuts)
-1. [Handy settings](#handy-settings)
-   1. [Built-in](#built-in)
-   1. [Extensions settings](#extensions-settings)
 1. [Recommend extensions](#recommend-extensions)
-   1. [Use JSON schemas](#use-json-schemas)
-   1. [Configuration example](#configuration-example)
+1. [Use JSON schemas](#use-json-schemas)
 1. [Network connections](#network-connections)
 1. [Troubleshooting](#troubleshooting)
    1. [Blank window upon launch](#blank-window-upon-launch)
@@ -16,16 +14,17 @@
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
-## Handy keyboard shortcuts
+## Configuration
 
-| Shortcuts | Effect           |
-| --------- | ---------------- |
-| `⌘+N`     | New file         |
-| `⌥+Z`     | Toggle word wrap |
+The configuration consists of the application's defaults, overridden by the user settings first and, if existing, by the workspace settings.<br/>
+See the [settings.json] example.
 
-## Handy settings
+The user configuration is loaded from the `settings.json` file in the user's configuration directory for the application.
+The workspace configuration is loaded from the `.vscode/settings.json` file in the workspace's root directory.
 
-### Built-in
+### Handy settings
+
+Built-in:
 
 | Setting                                  | Default value | Scopes          | Location in tree            | Description                                                                                                                    |
 | ---------------------------------------- | ------------- | --------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -43,7 +42,7 @@
 | `terminal.integrated.scrollback`         | `1000`        | User, Workspace | Features > Terminal         | The maximum number of lines the terminal keeps in its buffer.                                                                  |
 | `update.mode`                            | `"default"`   | User            | Application > Update        | Automatically check for application updates.                                                                                   |
 
-### Extensions settings
+Extensions:
 
 | Extension                  | Setting                                       | Default value | Scopes          | Location in tree                 | Description                                                                                                                                                  |
 | -------------------------- | --------------------------------------------- | ------------- | --------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -56,35 +55,21 @@
 | yzhang.markdown-all-in-one | `markdown.extension.toc.orderedList`          | `false`       | User, Workspace | Extensions > Markdown All In One | Use an ordered list in the ToC.                                                                                                                              |
 | redhat.ansible             | `redhat.telemetry.enabled`                    | `true`        | User, Workspace | Extensions > Ansible             | Send telemetry to Red Hat servers.                                                                                                                           |
 
+## Handy keyboard shortcuts
+
+| Shortcuts | Effect           |
+| --------- | ---------------- |
+| `⌘+N`     | New file         |
+| `⌥+Z`     | Toggle word wrap |
+
 ## Recommend extensions
 
-Add the `extensions.json` file to the workspace's `.vscode` folder with the following structure:
+Add the `extensions.json` file to the workspace's `.vscode` folder.
 
-```json
-{
-  "recommendations": [
-    "editorconfig.editorconfig",
-    "nhoizey.gremlins",
-    "oderwat.indent-rainbow",
-    "streetsidesoftware.code-spell-checker",
+The `recommendations[]` key shall contain the recommended extensions' identifiers from the Visual Studio Marketplace.<br/>
+[Example][extensions.json].
 
-    "ms-vscode-remote.remote-ssh-edit",
-    "redhat.vscode-yaml",
-    "yzhang.markdown-all-in-one",
-
-    "casualjim.gotemplate",
-    "golang.go",
-
-    "ms-python.python",
-
-    "redhat.ansible",
-  ]
-}
-```
-
-The `recommendations[]` key shall contain the recommended extensions' identifiers from the Visual Studio Marketplace.
-
-### Use JSON schemas
+## Use JSON schemas
 
 ```json
 "json.schemas": [
@@ -105,41 +90,6 @@ The `recommendations[]` key shall contain the recommended extensions' identifier
     "url": "https://json.schemastore.org/yamllint.json"
   }
 ],
-```
-
-### Configuration example
-
-```json
-{
-  "clock.alignment": "Right",
-  "clock.format": "yyyy-mm-dd HH:MM",
-  "files.trimFinalNewlines": true,
-  "markdown.extension.toc.levels": "2..6",
-  "redhat.telemetry.enabled": false,
-  "settingsSync.ignoredExtensions": [
-    "casualjim.gotemplate",
-    "golang.go"
-  ],
-  "telemetry.telemetryLevel": "off",
-  "terminal.integrated.cursorBlinking": true,
-  "terminal.integrated.cursorStyle": "line",
-  "terminal.integrated.defaultProfile.osx": "zsh",
-  "terminal.integrated.scrollback": 100000,
-  "[markdown]": {
-    "editor.defaultFormatter": "yzhang.markdown-all-in-one"
-  },
-  "editor.copyWithSyntaxHighlighting": false,
-  "extensions.autoUpdate": false,
-  "files.insertFinalNewline": true,
-  "markdown.extension.orderedList.marker": "one",
-  "markdown.extension.toc.orderedList": true,
-  "json.schemas": [
-    {
-      "fileMatch": ["/.pre-commit-config.yaml"],
-      "url": "https://json.schemastore.org/pre-commit-config.json"
-    },
-  ]
-}
 ```
 
 ## Network connections
@@ -196,6 +146,10 @@ and if not, change them.
 <!-- Upstream -->
 [network connections in visual studio code]: https://code.visualstudio.com/docs/setup/network
 [official product.json]: https://github.com/Microsoft/vscode/blob/master/product.json
+
+<!-- Files -->
+[extensions.json]: ../examples/vscode/extensions.json
+[settings.json]: ../examples/vscode/settings.json
 
 <!-- Others -->
 [electron applications all crash upon launch]: https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/1944468
