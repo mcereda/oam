@@ -54,6 +54,8 @@ extends: relaxed
     indent-sequences: whatever
 ```
 
+[Configuration file example].
+
 ## Further readings
 
 - [GitHub] page
@@ -68,3 +70,6 @@ extends: relaxed
 [documentation]: https://yamllint.readthedocs.io/en/stable
 [github]: https://github.com/adrienverge/yamllint
 [rules]: https://yamllint.readthedocs.io/en/stable/rules.html
+
+<!-- Files -->
+[configuration file example]: ../examples/dotfiles/.yamllint.yaml
