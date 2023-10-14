@@ -28,47 +28,7 @@ pre-commit autoupdate
 SKIP="flake8" git commit -m "foo"
 ```
 
-```yaml
----
-# File .pre-commit-config.yaml
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
-# See https://github.com/pre-commit/identify/blob/main/identify/extensions.py for the list of file types by extension
-
-exclude: ^FIXME/.*$                       # ignore all files matching the regexp
-fail_fast: true                           # stop at the first error
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
-    hooks:
-      - id: check-added-large-files
-      - id: check-json
-      - id: check-yaml
-        args: [--allow-multiple-documents]
-      - id: check-xml
-      - id: trailing-whitespace
-        args:
-          - --markdown-linebreak-ext=md   # ignore markdown's line break
-      - id: end-of-file-fixer
-  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
-    rev: v9.5.0
-    hooks:
-      - id: commitlint
-        stages: [commit-msg]              # limit to specific stages
-        additional_dependencies: ['@commitlint/config-conventional']
-  - repo: https://github.com/markdownlint/markdownlint
-    rev: v0.12.0
-    hooks:
-      - id: markdownlint
-        types: [markdown]                 # limit target types
-        args:
-          - -r "~MD013"                   # ignore line-length rule
-  - repo: https://github.com/ansible-community/ansible-lint
-    rev: v6.19.0
-    hooks:
-      - id: ansible-lint
-        name: ansilint                    # use an alias
-```
+[Config file example].
 
 ## Troubleshooting
 
@@ -89,3 +49,6 @@ Check they are tracked (have been `add`ed to the repository).
 [file types by extension]: https://github.com/pre-commit/identify/blob/main/identify/extensions.py
 [supported hooks]: https://pre-commit.com/hooks.html
 [website]: https://pre-commit.com
+
+<!-- Files -->
+[config file example]: ../examples/dotfiles/.pre-commit-config.yaml
