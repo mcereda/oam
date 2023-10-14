@@ -22,6 +22,19 @@ dig -x '172.217.14.238'
 # Only show the IP from the result.
 dig 'google.com' '+short'
 
+# Do not echo the executed command.
+# This is a global flag, notice the position.
+dig +nocmd 'google.com'
+
+# Clear display flags.
+dig 'google.com' +noall
+
+# Do not display the answer section of replies.
+dig 'google.com' +noanswer
+
+# Print records in a verbose multi-line format with human-readable comments.
+dig 'google.com' +multiline
+
 # See resolution trace.
 dig 'google.com' '+trace'
 
