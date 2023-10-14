@@ -63,16 +63,21 @@ Add the `extensions.json` file to the workspace's `.vscode` folder with the foll
 ```json
 {
   "recommendations": [
-    "casualjim.gotemplate",
     "editorconfig.editorconfig",
-    "golang.go",
-    "ms-python.python",
     "nhoizey.gremlins",
     "oderwat.indent-rainbow",
-    "redhat.ansible",
-    "redhat.vscode-yaml",
     "streetsidesoftware.code-spell-checker",
+
+    "ms-vscode-remote.remote-ssh-edit",
+    "redhat.vscode-yaml",
     "yzhang.markdown-all-in-one",
+
+    "casualjim.gotemplate",
+    "golang.go",
+
+    "ms-python.python",
+
+    "redhat.ansible",
   ]
 }
 ```
@@ -133,6 +138,7 @@ The `recommendations[]` key shall contain the recommended extensions' identifier
       "fileMatch": ["/.pre-commit-config.yaml"],
       "url": "https://json.schemastore.org/pre-commit-config.json"
     },
+  ]
 }
 ```
 
