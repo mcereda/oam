@@ -12,6 +12,11 @@ The host needs to support wake-on-LAN and have it enabled.
 
 See [`wakeonlan`][wakeonlan] or [`wol`][wol].
 
+```sh
+# Check the magic packet arrives on the target machine.
+sudo tcpdump -nXxei any ether proto 0x0842 or udp port 9
+```
+
 ## Further readings
 
 - [`wakeonlan`][wakeonlan]

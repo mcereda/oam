@@ -49,6 +49,9 @@ tcpdump -r 'path/to/capture.file'
 
 # Isolate TCP flags.
 tcpdump 'tcp[tcpflags] == tcp-fin'
+
+# Capture and show Wake-on-Lan magic packets.
+sudo tcpdump -nXxei any ether proto 0x0842 or udp port 9
 ```
 
 ## Sources
