@@ -19,9 +19,9 @@ python3 -m 'pip' install --user 'asciinema'
 
 # Record sessions locally.
 asciinema rec 'path/to/file.cast'
-asciinema rec -i 2 'path/to/file.cast' --overwrite
+asciinema rec -i 2 'path/to/file.cast' -t 'title' --overwrite -c 'command'
 
-# Record sessions and upload them to the website.
+# Record sessions *and* upload them to the website.
 asciinema rec
 
 # Play local sessions.
