@@ -14,20 +14,25 @@ Make a typescript file (a.k.a. log a.k.a. recording) of a terminal session.
 # Start recording.
 # Defaults to a file named "typescript".
 script
-script 'file.log'
+script -T 'timing.script' 'file.script'
+
+# Record quietly.
+# Avoids 'start' and 'done' messages.
+script -q 'file.script'
 
 # Stop recording.
 exit
+^D
 
 # Append to an existing file.
-script -a 'file.log'
-
-# Execute quietly.
-# Avoids 'start' and 'done' messages.
-script -q 'file.log'
+script -a 'file.script'
 
 # Flush output after each write.
 script -f
+
+# Replay the session.
+scriptreplay -t 'timing.script' 'file.script'
+scriptreplay -T 'timing.script' -B 'file.script'
 ```
 
 ## Further readings
@@ -40,6 +45,7 @@ script -f
 All the references in the [further readings] section, plus the following:
 
 - [cheat.sh]
+- [How to replay terminal sessions recorded with the Linux script command]
 
 <!--
   References
@@ -51,4 +57,5 @@ All the references in the [further readings] section, plus the following:
 <!-- Others -->
 [6 more terminal commands you should know]: https://betterprogramming.pub/6-more-terminal-commands-you-should-know-3606cecdf8b6
 [cheat.sh]: https://cheat.sh/script
+[how to replay terminal sessions recorded with the linux script command]: https://www.redhat.com/sysadmin/playback-scriptreplay
 [man]: https://manned.org/script

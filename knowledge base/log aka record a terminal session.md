@@ -2,5 +2,5 @@
 
 See:
 
-- [`script`](script.md)
+- [`script` and `scriptreplay`](script.md)
 - [Asciinema](asciinema.md)
