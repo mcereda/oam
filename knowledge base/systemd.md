@@ -45,6 +45,9 @@ systemctl --user disable --now 'davmail.service'
 # Check a service is currently active.
 systemctl is-active 'wpa_supplicant.service'
 
+# Reboot the system.
+systemctl reboot
+
 # Suspend the system.
 # Saves the state to RAM only.
 systemctl suspend
