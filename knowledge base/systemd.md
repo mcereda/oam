@@ -4,6 +4,7 @@
 
 1. [TL;DR](#tldr)
 1. [User services](#user-services)
+   1. [Failed to connect to bus: No medium found](#failed-to-connect-to-bus-no-medium-found)
 1. [Keep past boots record (persistent logging)](#keep-past-boots-record-persistent-logging)
 1. [Resolved](#resolved)
    1. [Disable systemd-resolved](#disable-systemd-resolved)
@@ -207,6 +208,19 @@ and can be acted upon as normal using `systemctl`'s `--user` switch
 ```sh
 systemctl --user enable --now 'davmail.service'
 systemctl --user status 'davmail.service'
+```
+
+### Failed to connect to bus: No medium found
+
+```sh
+$ systemctl --user status
+Failed to connect to bus: No medium found
+
+$ export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+$ systemctl --user status
+● hostname
+    State: running
+    Units: 228 loaded (incl. loaded aliases)
 ```
 
 ## Keep past boots record (persistent logging)
