@@ -16,6 +16,9 @@
 # Login to Azure DevOps with a PAT.
 az devops login --organization 'https://dev.azure.com/organization_name'
 
+# Clone a repository using a PAT.
+git clone 'https://pat_value@dev.azure.com/organization_name/project_name/_git/repo_name'
+
 # Create new repositories.
 az repos create --name 'repo_name' \
   --org 'https://dev.azure.com/organization_name' --project 'project_name'
