@@ -5,44 +5,78 @@
 ## Gotchas:
 ## - `moreutils` installs its own old version of parallel, which conflicts with
 ##   the `parallel` formula; install `gettext`, `parallel` and `sponge` instead
+## - installing from the API is now the default behaviour; the 'homebrew/core'
+##   and 'homebrew/cask' taps are not needed anymore
 ##
 ## Sources:
 ## - https://github.com/Homebrew/homebrew-bundle
 ################################################################################
 
+# 'brew tap'
 tap "homebrew/bundle"
-tap "homebrew/cask"
-tap "homebrew/core"
+# 'brew tap' with custom Git URL
+tap "user/tap-repo", "https://user@bitbucket.org/user/homebrew-tap-repo.git"
+# 'brew tap' with arguments
+tap "user/tap-repo", "https://user@bitbucket.org/user/homebrew-tap-repo.git", force_auto_update: true
 
+# 'brew install'
 brew "asdf"
 brew "chezmoi"
 brew "diff-pdf"
 brew "git-lfs"
+brew "imagemagick"
 brew "mas"
 brew "parallel"
 brew "pre-commit"
 brew "python-yq"
 brew "rename"
 brew "sponge"
+# 'brew install --with-rmtp', 'brew services restart' on version changes
+brew "denji/nginx/nginx-full", args: ["with-rmtp"], restart_service: :changed
+# 'brew install', always 'brew services restart', 'brew link', 'brew unlink mysql' (if it is installed)
+brew "mysql@5.6", restart_service: true, link: true, conflicts_with: ["mysql"]
+# install only on specified OS
+brew "gnupg" if OS.mac?
+brew "glibc" if OS.linux?
 
-cask_args appdir: "~/Applications"
+# set arguments for all 'brew install --cask' commands
+cask_args appdir: "~/Applications", require_sha: true
 
+
+# 'brew install --cask'
 cask "aldente"
 cask "desmume"
 cask "docker"
 cask "firefox"
+cask "google-chrome"
 cask "gpg-suite-no-mail"
 cask "iterm2"
 cask "keka"
-cask "little-snitch", args: { appdir: "/Applications" }
 cask "monitorcontrol"
 cask "openzfs"
 cask "skype"
 cask "spotify"
 cask "steam"
 cask "vlc"
+# 'brew install --cask --appdir=~/my-apps/Applications'
+cask "firefox", args: { appdir: "~/my-apps/Applications" }
+cask "little-snitch", args: { appdir: "/Applications" }
+# bypass Gatekeeper protections (NOT RECOMMENDED)
+cask "firefox", args: { no_quarantine: true }
+# always upgrade auto-updated or unversioned cask to latest version even if already installed
+cask "opera", greedy: true
+# 'brew install --cask' only if '/usr/libexec/java_home --failfast' fails
+cask "java" unless system "/usr/libexec/java_home --failfast"
 
+# 'mas install'
+mas "1Password", id: 443987910
 mas "be focused", id: 973134470
 mas "prime video", id: 545519333
 mas "whatsapp", id: 1147396723
 mas "xcode", id: 497799835
+
+# 'whalebrew install'
+whalebrew "whalebrew/wget"
+
+# 'vscode --install-extension'
+vscode "GitHub.codespaces"
