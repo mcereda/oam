@@ -4,6 +4,8 @@
 !.vscode/extensions.json
 !.vscode/settings.json
 
+.obsidian/
+
 .vagrant/
 
 .terraform/

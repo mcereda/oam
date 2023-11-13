@@ -191,24 +191,24 @@ Also see [configuration best practices] and the [production best practices check
 - Avoid workloads and nodes fail due limited resources being available.<br/>
   Set [resource requests and limits][resource management for pods and containers] to reserve a minimum amount of resources for pods and limit their hogging abilities.
 - Prefer smaller container images.
-- Prioritize critical workloads.
+- Prioritize critical workloads.<br/>
   Quality of service.
 - Instrument applications to detect and respond to the SIGTERM signal.
 - Avoid using bare pods.<br/>
   Prefer defining them as part of a replica-based resource, like Deployments, StatefulSets, ReplicaSets or DaemonSets.
-- Restrict traffic between objects in the cluster.
-  Network policies.
+- Restrict traffic between objects in the cluster.<br/>
+  [Network policies].
 - Reduce container privileges.
 - Leverage autoscalers.
 - Pod disruption budgets.
-- Try to use all nodes possible.
+- Try to use all nodes possible.<br/>
   Affinities, taint and tolerations.
-- Push for automation.
+- Push for automation.<br/>
   GitOps.
 - Apply the principle of least privilege.<br/>
   Role-based access control (RBAC).
 - Continuously audit events and logs regularly, also for control plane components.
-- Protect the cluster's ingress points.
+- Protect the cluster's ingress points.<br/>
   Firewalls, web application firewalls, application gateways.
 
 ## Quality of service
@@ -519,18 +519,29 @@ Concepts:
 - [Container capabilities in Kubernetes]
 - [Kubernetes SecurityContext Capabilities Explained]
 - [Best practices for pod security in Azure Kubernetes Service (AKS)]
+- [Network policies]
 
 Tools:
 
 - [`kubectl`][kubectl]
 - [`helm`][helm]
 - [`helmfile`][helmfile]
+- [`kustomize`][kustomize]
 - [`kubeval`][kubeval]
 - `kube-score`
 - [`kubectx`+`kubens`][kubectx+kubens] (alternative to [`kubie`][kubie])
 - [`kube-ps1`][kube-ps1]
 - [`kubie`][kubie] (alternative to [`kubectx`+`kubens`][kubectx+kubens] and [`kube-ps1`][kube-ps1])
 - [k3s]
+- [minikube]
+
+Applications:
+
+- [cert-manager]
+- [external-dns]
+- [flux]
+- [istio]
+- [keda]
 
 Others:
 
@@ -589,12 +600,20 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Knowledge base -->
 [azure kubernetes service]: ../azure/aks.md
+[cert-manager]: cert-manager.md
 [create an admission webhook]: ../../examples/kubernetes/create%20an%20admission%20webhook/README.md
+[external-dns]: external-dns.md
+[flux]: flux.md
 [helm]: helm.md
 [helmfile]: helmfile.md
+[istio]: istio.md
 [k3s]: k3s.md
+[keda]: keda.md
 [kubectl]: kubectl.md
 [kubeval]: kubeval.md
+[kustomize]: kustomize.md
+[minikube]: minikube.md
+[network policies]: network%20policies.md
 [prometheus on kubernetes using helm]: ../../examples/kubernetes/prometheus%20on%20k8s%20using%20helm.md
 [terraform]: ../terraform.md
 [velero]: velero.md
