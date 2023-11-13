@@ -5,9 +5,9 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 
 ## Table of content <!-- omit in toc -->
 
-1. [Components overview](#components-overview)
+1. [Basics](#basics)
 1. [The control plane](#the-control-plane)
-   1. [`kube-apiserver`](#kube-apiserver)
+   1. [The API server](#the-api-server)
    1. [`etcd`](#etcd)
    1. [`kube-scheduler`](#kube-scheduler)
    1. [`kube-controller-manager`](#kube-controller-manager)
@@ -40,23 +40,36 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
-## Components overview
+## Basics
 
-Kubernetes clusters consist of:
+When using Kubernetes, one is using a cluster.
 
-- one or more worker hosts (_nodes_), executing containerized applications (_workloads_);<br/>
-  in cloud environments, nodes are also available in grouped sets (_node pools_) capable of automatic scaling;
-- the _control plane_, an orchestration layer spanning one or more nodes and exposing the API and interfaces to define, deploy, and manage the lifecycle of nodes and workloads in the cluster.
+Kubernetes clusters consist of one or more hosts (_nodes_) executing containerized applications. In cloud environments, nodes are also available in grouped sets (_node pools_) capable of automatic scaling.
+
+Nodes host the application workloads in the form of _pods_.
+
+The [_control plane_](#the-control-plane) manages the nodes and the pods in the cluster. It is itself a set of pods which expose the APIs and interfaces used to define, deploy, and manage the lifecycle of the cluster's resources.<br/>
+In higher environments, the control plane usually runs across multiple **dedicated** nodes to provide improved fault-tolerance and high availability.
 
 ![Cluster components](components.svg)
 
 ## The control plane
 
-The control plane's components make global decisions about the cluster (like scheduling), and detect and respond to cluster events (like starting up a new pod when a deployment has less replicas then it requests).
+Makes global decisions about the cluster (like scheduling).<br/>
+Detects and responds to cluster events (like starting up a new pod when a deployment has less replicas then it requests).
 
-Control plane components run on one or more cluster nodes. For simplicity, set up scripts typically start all control plane components on the same host, and avoid running users' workloads on it.
+The control plane is composed by:
 
-### `kube-apiserver`
+- [the API server](#the-api-server);
+- [`etcd`](#etcd);
+- [the scheduler](#kube-scheduler);
+- [the cluster controller](#kube-controller-manager);
+- [the cloud controller](#cloud-controller-manager).
+
+Control plane components run on one or more cluster nodes.<br/>
+For ease of use, setup scripts typically start all control plane components on the **same** host and avoid **running** other workloads on it.
+
+### The API server
 
 The API server exposes the Kubernetes API. It is the front end for, and the core of, the Kubernetes control plane.<br/>
 `kube-apiserver` is the main implementation of the Kubernetes API server, and is designed to scale horizontally (by deploying more instances) and balance traffic between its instances.
@@ -532,16 +545,17 @@ Tools:
 - [`kubectx`+`kubens`][kubectx+kubens] (alternative to [`kubie`][kubie])
 - [`kube-ps1`][kube-ps1]
 - [`kubie`][kubie] (alternative to [`kubectx`+`kubens`][kubectx+kubens] and [`kube-ps1`][kube-ps1])
-- [k3s]
-- [minikube]
+- [K3S]
+- [Minikube]
+- [Kubescape]
 
 Applications:
 
-- [cert-manager]
-- [external-dns]
-- [flux]
-- [istio]
-- [keda]
+- [Certmanager][cert-manager]
+- [ExternalDNS][external-dns]
+- [Flux]
+- [Istio]
+- [KEDA]
 
 Others:
 
@@ -610,6 +624,7 @@ All the references in the [further readings] section, plus the following:
 [k3s]: k3s.md
 [keda]: keda.md
 [kubectl]: kubectl.md
+[kubescape]: kubescape.md
 [kubeval]: kubeval.md
 [kustomize]: kustomize.md
 [minikube]: minikube.md
