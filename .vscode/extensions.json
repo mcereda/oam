@@ -1,13 +1,16 @@
 {
     "recommendations": [
+        "editorconfig.editorconfig",
         "nhoizey.gremlins",
         "oderwat.indent-rainbow",
         "streetsidesoftware.code-spell-checker",
 
-        "ms-vscode-remote.remote-ssh-edit",
+        "ianjsikes.md-graph",
         "yzhang.markdown-all-in-one",
 
         "ms-python.python",
+
+        "ms-vscode-remote.remote-ssh-edit",
 
         "redhat.ansible",
         "redhat.vscode-yaml"
