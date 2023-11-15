@@ -11,14 +11,18 @@ The core idea is having a Git repository that contains **declarative** descripti
 ## Further readings
 
 - [Website]
+- [Reference]
 - [Flux]
+- [Argo CD]
 
 <!--
   References
   -->
 
 <!-- Upstream -->
-[website]: https://www.gitops.tech/
+[reference]: https://www.gitops.tech/
+[website]: https://opengitops.dev/
 
 <!-- Knowledge base -->
+[argo-cd]: kubernetes/argo-cd.md
 [flux]: kubernetes/flux.md
