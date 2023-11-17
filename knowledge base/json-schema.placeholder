@@ -1,0 +1,1 @@
+https://json-schema.org/
