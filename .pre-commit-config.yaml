@@ -46,3 +46,4 @@ repos:
       - id: markdownlint
         args:
           - -r "~MD013"   # ignore line-length rule
+          - -r "~MD033"   # ignore no-inline-html rule
