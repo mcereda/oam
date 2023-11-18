@@ -100,8 +100,8 @@ git status --verbose
 
 # Show details of changes.
 git diff
-git diff --staged 'commit_hash'
-git diff 'commit_hash_1..commit_hash_2'
+git -P diff ---staged 'commit_hash'
+git --no-pager diff 'commit_hash_1..commit_hash_2'
 git diff 'branch_1' 'branch_2'
 git diff --word-diff='color'
 git log -p 'feature' --not 'master'
