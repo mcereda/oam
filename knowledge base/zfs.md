@@ -191,25 +191,25 @@ brew install --cask 'openzfs'
 
 Pool options (`-o option`):
 
-* `ashift=XX`
-  * XX=9 for 512B sectors, XX=12 for 4KB sectors, XX=16 for 8KB sectors
-  * [reference](http://open-zfs.org/wiki/Performance_tuning#Alignment_Shift_.28ashift.29)
-* `version=28`
-  * compatibility with ZFS on Linux
+- `ashift=XX`
+   - XX=9 for 512B sectors, XX=12 for 4KB sectors, XX=16 for 8KB sectors
+   - [reference](http://open-zfs.org/wiki/Performance_tuning#Alignment_Shift_.28ashift.29)
+- `version=28`
+   - compatibility with ZFS on Linux
 
 Filesystem options (`-O option`):
 
-* `atime=off`
-* `compression=on`
-  * activates compression with the default algorithm
-  * pool version 28 cannot use lz4
-* `copies=2`
-  * number of copies of data stored for the dataset
-* `dedup=on`
-  * deduplication
-  * halves write speed
-  * [reference](http://open-zfs.org/wiki/Performance_tuning#Deduplication)
-* `xattr=sa`
+- `atime=off`
+- `compression=on`
+   - activates compression with the default algorithm
+   - pool version 28 cannot use lz4
+- `copies=2`
+   - number of copies of data stored for the dataset
+- `dedup=on`
+   - deduplication
+   - halves write speed
+   - [reference](http://open-zfs.org/wiki/Performance_tuning#Deduplication)
+- `xattr=sa`
 
 ```sh
 sudo zpool \

@@ -411,7 +411,7 @@ The configuration files are loaded as follows:
    kubectl config --kubeconfig 'config.local' view
    ```
 
-2. If the `$KUBECONFIG` environment variable is set, then it is used as a list of paths following the normal path delimiting rules for your system; the files are merged:
+1. If the `$KUBECONFIG` environment variable is set, then it is used as a list of paths following the normal path delimiting rules for your system; the files are merged:
 
    ```sh
    export KUBECONFIG="/tmp/config.local:.kube/config.prod"
@@ -419,7 +419,7 @@ The configuration files are loaded as follows:
 
    When a value is modified, it is modified in the file that defines the stanza; when a value is created, it is created in the first existing file; if no file in the chain exist, then the last file in the list is created with the configuration.
 
-3. If none of the above happens, `~/.kube/config` is used, and no merging takes place.
+1. If none of the above happens, `~/.kube/config` is used, and no merging takes place.
 
 The configuration file can be edited, or acted upon from the command line:
 
@@ -586,7 +586,6 @@ Verbosity | Description
 `--v=7`   | Display HTTP request headers.
 `--v=8`   | Display HTTP request contents.
 `--v=9`   | Display HTTP request contents without truncation of contents.
-
 
 ## Further readings
 

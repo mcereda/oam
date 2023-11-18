@@ -45,6 +45,7 @@ sudo zpool import -a
 ## Use DNF from behind a proxy
 
 Either:
+
 - add the line `sslverify=0` to `/etc/dnf/dnf.conf`; **not suggested**, but a quick fix
 - add the proxie's certificate, in PEM format, to the `/etc/pki/ca-trust/source/anchors/` folder and then run `sudo update-ca-trust`.
 

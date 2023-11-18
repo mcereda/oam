@@ -378,13 +378,13 @@ local COMMAND
 local FOLDERS=()
 for (( I = $# ; I >= 0 ; I-- ))
 do
-	if [[ -d "${@[$I]}" ]]
-	then
-		FOLDERS+="${@[$I]}"
-	else
-		COMMAND="${@[1,-$((${#FOLDERS}+1))]}"
-		break
-	fi
+  if [[ -d "${@[$I]}" ]]
+  then
+    FOLDERS+="${@[$I]}"
+  else
+    COMMAND="${@[1,-$((${#FOLDERS}+1))]}"
+    break
+  fi
 done
 
 # Make entries unique in an array.
@@ -512,11 +512,11 @@ promptinit; prompt theme-name
 : "${ZSH_MODULES_DIR:-$HOME/.zshrc.d}"
 if [[ -d "$ZSH_MODULES_DIR" ]]
 then
-	for ZSH_MODULE in "$ZSH_MODULES_DIR"/*
-	do
-		[[ -r "$ZSH_MODULE" ]] && source "$ZSH_MODULE"
-	done
-	unset ZSH_MODULE
+  for ZSH_MODULE in "$ZSH_MODULES_DIR"/*
+  do
+    [[ -r "$ZSH_MODULE" ]] && source "$ZSH_MODULE"
+  done
+  unset ZSH_MODULE
 fi
 ```
 

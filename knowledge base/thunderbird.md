@@ -56,6 +56,7 @@ ${THUNDERBIRD_BIN_DIR}/thunderbird-bin -P
 
 1. Close Thunderbird if it is open.
 1. Copy the profile folder to another location:
+
    ```sh
    cp -a "${THUNDERBIRD_PROFILES_DIR}/we12yhij.default" "/Backup/Thunderbird/we12yhij.default"
    ```
@@ -64,11 +65,14 @@ ${THUNDERBIRD_BIN_DIR}/thunderbird-bin -P
 
 1. Close Thunderbird if it is open.
 1. If the existing profile folder and the profile backup folder have the same name, replace the existing profile folder with the profile backup folder:
+
    ```sh
    rm -fr "${THUNDERBIRD_PROFILES_DIR}/we12yhij.default"
    cp -a "/Backup/Thunderbird/we12yhij.default" "${THUNDERBIRD_PROFILES_DIR}/we12yhij.default"
    ```
+
    > Important: The profile folder names must match exactly for this to work, including the random string of 8 characters.
+
 1. If the profile folder names do not match, or to move or restore a profile to a different location:
    1. Use the Profile Manager to create a new profile in the desired location, then exit the Profile Manager.
    1. Open the profile's backup folder.
@@ -78,9 +82,11 @@ ${THUNDERBIRD_BIN_DIR}/thunderbird-bin -P
    1. Paste the copied contents into the new profile's folder.<br/>
       Overwrite existing files of the same name.
    1. Open up the `profiles.ini` file in the application data folder in a text editor.
+
       ```sh
       vim "${THUNDERBIRD_DATA_DIR}/profiles.ini"
       ```
+
    1. Check the `Path=` line for the profile is correct.
 1. Start Thunderbird.
 
@@ -127,9 +133,11 @@ Steps to rebuild the Global Database:
 
 1. Quit Thunderbird.
 1. Delete the `global-messages-db.sqlite` file in the Thunderbird Profile you want to rebuild the index for.
+
    ```sh
    rm "${THUNDERBIRD_PROFILES_DIR}/we12yhij.default/global-messages-db.sqlite"
    ```
+
 1. Start Thunderbird.
 
 The re-indexing process will start automatically.<br/>

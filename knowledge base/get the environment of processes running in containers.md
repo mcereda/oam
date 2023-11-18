@@ -18,6 +18,7 @@ kubectl exec 'pod-name' -- cat '/proc/1/environ'
 # This only works if the onboard `ps` is **not** the one from Busybox.
 ps e -p "$PID"
 ```
+
 ## Further readings
 
 - [Kubernetes]

@@ -436,9 +436,9 @@ uci commit 'dhcp' && reload_config && luci-reload
 Suggestions:
 
 - [SSH]:
-  - Change the SSH port from the default `22` value.
-  - Restrict login to specific IP addresses.
-  - Restrict authentication options to keys.
+   - Change the SSH port from the default `22` value.
+   - Restrict login to specific IP addresses.
+   - Restrict authentication options to keys.
 
 ## The SFP+ caged module
 

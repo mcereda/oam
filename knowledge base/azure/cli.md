@@ -347,8 +347,8 @@ az rest -m 'put' \
   --url-parameters 'api-version=7.1-preview.1' \
   --headers Authorization='Bearer ey…pw' Content-Type='application/json' \
   -b '{
-	  "authorizationId": "01234567-abcd-0987-fedc-0123456789ab",
-	  "validTo": "2021-12-31T23:46:23.319Z"
+    "authorizationId": "01234567-abcd-0987-fedc-0123456789ab",
+    "validTo": "2021-12-31T23:46:23.319Z"
   }'
 az rest … -b @'file.json'
 
@@ -457,8 +457,8 @@ az rest \
     'Authorization=Bearer ey…pw' \
     'Content-Type=application/json' \
   -b '{
-	  "authorizationId": "01234567-abcd-0987-fedc-0123456789ab",
-	  "validTo": "2021-12-31T23:46:23.319Z"
+    "authorizationId": "01234567-abcd-0987-fedc-0123456789ab",
+    "validTo": "2021-12-31T23:46:23.319Z"
   }'
 
 az rest \

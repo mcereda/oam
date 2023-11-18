@@ -1,15 +1,16 @@
-# TL;DR
+# TL;DR pages
 
 ## Table of contents <!-- omit in toc -->
 
-1. [TL;DR](#tldr-1)
+1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
 
 ## TL;DR
+
 ```sh
-pip3 install tldr                   # official python client
-brew install tealdeer               # rust client
-sudo port install tldr-cpp-client   # c++ client
+pip3 install 'tldr'                   # official python client
+brew install 'tealdeer'               # rust client
+sudo port install 'tldr-cpp-client'   # c++ client
 ```
 
 ## Further readings

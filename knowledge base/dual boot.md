@@ -102,25 +102,25 @@ The process describes a completely fresh installation with complete repartitioni
    - `sudo dd if=/dev/zero of=/dev/mapper/cryptdrive bs=16M` <-- optional, this is to ensure nothing can be recovered from before this install you're doing. Took 2h on my 652 GiB partition.
 1. Create LVM physical volume, a volume group & logical volumes:
    - Volumes are sized as follows (example, you should create as many partitions as you need):
-     - OS drive: `60GB`
-     - Swap: `16GB`
-     - Home: `rest`
+      - OS drive: `60GB`
+      - Swap: `16GB`
+      - Home: `rest`
    - Commands (add extra lvcreate steps if you have more partitions):
-     - `sudo pvcreate /dev/mapper/cryptdrive`
-     - `sudo vgcreate vglinux /dev/mapper/cryptdrive`
-     - `sudo lvcreate -n root -L 60g vglinux`
-     - `sudo lvcreate -n swap -L 16g vglinux`
-     - `sudo lvcreate -n home -l 100%FREE vglinux`
+      - `sudo pvcreate /dev/mapper/cryptdrive`
+      - `sudo vgcreate vglinux /dev/mapper/cryptdrive`
+      - `sudo lvcreate -n root -L 60g vglinux`
+      - `sudo lvcreate -n swap -L 16g vglinux`
+      - `sudo lvcreate -n home -l 100%FREE vglinux`
 1. Start the installation process using GUI:
    - Connect to WiFi network
    - When asked what to do with the disk, pick the option that allows you to manually repartition stuff (IIRC it was labelled `Something else` on 19.04 installer):
-     - Pick `/dev/mapper/vglinux-root` as `ext4` FS & mount it to `/`
-     - Pick `/dev/mapper/vglinux-home` as `ext4` FS & mount it to `/home`
-     - Pick `/dev/mapper/vglinux-swap` as `swap`
-     - Do the same as above if you have extra partitions
-     - Pick `/dev/nvme0n1p2` (created on step 2.5.1) as `ext4` FS & mount it to `/boot`
-       - Without doing this, installation will fail when configuring GRUB
-     - Pick "boot drive" (the select list at the bottom, this is where GRUB goes) and assign it to `/dev/nvme0n1p2` or `/dev/nvem0n1`
+      - Pick `/dev/mapper/vglinux-root` as `ext4` FS & mount it to `/`
+      - Pick `/dev/mapper/vglinux-home` as `ext4` FS & mount it to `/home`
+      - Pick `/dev/mapper/vglinux-swap` as `swap`
+      - Do the same as above if you have extra partitions
+      - Pick `/dev/nvme0n1p2` (created on step 2.5.1) as `ext4` FS & mount it to `/boot`
+         - Without doing this, installation will fail when configuring GRUB
+      - Pick "boot drive" (the select list at the bottom, this is where GRUB goes) and assign it to `/dev/nvme0n1p2` or `/dev/nvem0n1`
    - Proceed with the installation
 1. After GUI installation completes, stay within the Live USB environment
 1. Check the UUID of the LUKS drive:

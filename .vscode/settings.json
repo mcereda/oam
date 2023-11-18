@@ -82,6 +82,7 @@
         "macports",
         "makepkg",
         "markdownlint",
+        "mdlrc",
         "mktemp",
         "mpiexec",
         "netcat",

@@ -5,4 +5,4 @@
 This helps reloading extensions.
 
 1. press `Alt + F2`
-2. insert `r` and press `Enter`
+1. insert `r` and press `Enter`

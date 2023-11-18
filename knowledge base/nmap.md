@@ -30,6 +30,5 @@ nmap -O 192.168.0.1
 <!-- Upstream -->
 [os detection]: https://nmap.org/book/man-os-detection.html
 
-
 <!-- Others -->
 [cheatsheet]: https://hackertarget.com/nmap-cheatsheet-a-quick-reference-guide/

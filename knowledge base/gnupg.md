@@ -38,7 +38,7 @@ gpg --expert --full-generate-key
 # The non-interactive (--batch) option requires a settings file.
 gpg --generate-key --batch 'setting.txt'
 gpg --generate-key --batch <<-EOF
-	…
+…
 EOF
 
 # Delete a key from the keyring.

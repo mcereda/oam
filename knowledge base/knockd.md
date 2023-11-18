@@ -56,8 +56,8 @@ Each knock/event begins with a title marker in the form `[name]`, with it being 
 
 ```ini
 [options]
-	UseSyslog
-	Interface = enp0s2
+    UseSyslog
+    Interface = enp0s2
 
 # Different sequences for opening and closing.
 [openSSH]
@@ -75,12 +75,12 @@ Each knock/event begins with a title marker in the form `[name]`, with it being 
 # If a sequence setting contains the `cmd_timeout` statement, the `stop_command`
 # will be automatically issued after that amount of seconds.
 [openClose7777]
-	sequence      = 2222:udp,3333:tcp,4444:udp
-	seq_timeout   = 15
-	tcpflags      = syn
-	cmd_timeout   = 10
-	start_command = /usr/bin/firewall-cmd --add-port=7777/tcp --zone=public
-	stop_command  = /usr/bin/firewall-cmd --remove-port=7777/tcp --zone=public
+    sequence      = 2222:udp,3333:tcp,4444:udp
+    seq_timeout   = 15
+    tcpflags      = syn
+    cmd_timeout   = 10
+    start_command = /usr/bin/firewall-cmd --add-port=7777/tcp --zone=public
+    stop_command  = /usr/bin/firewall-cmd --remove-port=7777/tcp --zone=public
 ```
 
 Sequences can also be defined in files.

@@ -35,6 +35,7 @@ Just follow this procedure:
 1. configure SSH on all the hosts to let the **server** node connect to all the **client** nodes **without** using a password
 1. install [MPICH] on all the hosts, possibly the same version
 1. test the installation:
+
    ```sh
    # execute `hostname` on all hosts
    mpiexec -f 'machines_file' -n 'number_of_processes' 'hostname'
@@ -47,9 +48,11 @@ See the [Vagrant example].
 - [Protogonus: The FINAL Labs™ HPC Cluster]
 - [A simple Beowulf cluster]
 - Building a Beowulf cluster from old MacBooks:
-  - [part 1][building a beowulf cluster from old macbooks - part 1]
-  - [part 2][building a beowulf cluster from old macbooks - part 2]
-  - [Parallel computing with custom Beowulf cluster]
+
+   - [part 1][building a beowulf cluster from old macbooks - part 1]
+   - [part 2][building a beowulf cluster from old macbooks - part 2]
+   - [Parallel computing with custom Beowulf cluster]
+
 - [Engineering a Beowulf-style compute cluster]
 - [Parallel and distributed computing with Raspberry Pi clusters]
 - [Sequence analysis on a 216-processor Beowulf cluster]

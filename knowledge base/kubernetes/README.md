@@ -233,44 +233,44 @@ When a Pod is created, it is also assigned one of the following QoS classes:
 
 - _Guaranteed_, when **every** Container in the Pod, including init containers, has:
 
-  - a memory limit **and** a memory request, **and** they are the same
-  - a CPU limit **and** a CPU request, **and** they are the same
+   - a memory limit **and** a memory request, **and** they are the same
+   - a CPU limit **and** a CPU request, **and** they are the same
 
-  ```yaml
-  spec:
-    containers:
-      …
-      resources:
-        limits:
-          cpu: 700m
-          memory: 200Mi
-        requests:
-          cpu: 700m
-          memory: 200Mi
-      …
-  status:
-    qosClass: Guaranteed
-  ```
+   ```yaml
+   spec:
+     containers:
+       …
+       resources:
+         limits:
+           cpu: 700m
+           memory: 200Mi
+         requests:
+           cpu: 700m
+           memory: 200Mi
+       …
+   status:
+     qosClass: Guaranteed
+   ```
 
 - _Burstable_, when
 
-  - the Pod does not meet the criteria for the _Guaranteed_ QoS class
-  - **at least one** Container in the Pod has a memory **or** CPU request spec
+   - the Pod does not meet the criteria for the _Guaranteed_ QoS class
+   - **at least one** Container in the Pod has a memory **or** CPU request spec
 
-  ```yaml
-  spec:
-    containers:
-    - name: qos-demo
-      …
-      resources:
-        limits:
-          memory: 200Mi
-        requests:
-          memory: 100Mi
-    …
-  status:
-    qosClass: Burstable
-  ```
+   ```yaml
+   spec:
+     containers:
+     - name: qos-demo
+       …
+       resources:
+         limits:
+           memory: 200Mi
+         requests:
+           memory: 100Mi
+     …
+   status:
+     qosClass: Burstable
+   ```
 
 - _BestEffort_, when the Pod does not meet the criteria for the other QoS classes (its Containers have **no** memory or CPU limits **nor** requests)
 
@@ -314,6 +314,7 @@ Some capabilities are assigned to all Containers by default, while others (the o
 If a Container is _privileged_ (see [Privileged container vs privilege escalation](#privileged-container-vs-privilege-escalation)), it will have access to **all** the capabilities, with no regards of what are explicitly assigned to it.
 
 Check:
+
 - [Linux capabilities], to see what capabilities can be assigned to a process **in a Linux system**;
 - [Runtime privilege and Linux capabilities in Docker containers] for the capabilities available **inside Kubernetes**, and
 - [Container capabilities in Kubernetes] for a handy table associating capabilities in Kubernetes to their Linux variant.
@@ -383,8 +384,8 @@ Each node pool should:
 
 - have a _meaningful_ **name** (like \<prefix..>-\<randomid>) to make it easy to recognize the workloads running on it or the features of the nodes in it;
 - have a _minimum_ set of _meaningful_ **labels**, like:
-  - cloud provider information;
-  - node information and capabilities;
+   - cloud provider information;
+   - node information and capabilities;
 - sparse nodes on multiple **availability zones**.
 
 ## Edge computing
@@ -517,7 +518,7 @@ Usage:
 - [Configure a Pod to use a ConfigMap]
 - [Distribute credentials securely using Secrets]
 - [Configure a Security Context for a Pod or a Container]
-  - [Set capabilities for a Container]
+   - [Set capabilities for a Container]
 - [Using `sysctls` in a Kubernetes Cluster][Using sysctls in a Kubernetes Cluster]
 
 Concepts:
