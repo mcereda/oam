@@ -22,15 +22,21 @@ gopass config
 
 # Show specific configuration values only.
 gopass config 'core.autoclip'
-gopass config 'core.autopush'
+gopass config --store='foo' 'core.autopush'
 
 # Update specific configuration values.
 gopass config 'core.autoclip' false
 gopass config 'core.autopush' false
+gopass config 'generate.generator' 'xkcd'
 
 # Initiate the *root* store.
 gopass init
 gopass init -p 'path/to/root/store' 'key-id'
+
+# Generate passwords.
+gopass pwgen
+gopass pwgen -1 24
+gopass pwgen -x -xl 'en'
 
 # List entries.
 gopass list
@@ -42,6 +48,10 @@ gopass new
 # Insert new entries.
 gopass insert 'path/to/secret'
 gopass insert -m …
+
+# Create new entries with generated passwords.
+gopass generate 'path/to/secret'
+gopass generate -g 'xkcd' --lang 'en' 'path/to/secret'
 
 # Copy secrets' password to the clipboard.
 # Do *not* print secrets out.
