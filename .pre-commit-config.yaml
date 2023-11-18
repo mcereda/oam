@@ -41,9 +41,8 @@ repos:
   #       exclude: .*
   #       files: ansible/
   - repo: https://github.com/markdownlint/markdownlint
+    # requires `ruby` 2.7.7 or higher and the 'mdl' gem
+    # uses .mdlrc for configuration
     rev: v0.12.0
     hooks:
       - id: markdownlint
-        args:
-          - -r "~MD013"   # ignore line-length rule
-          - -r "~MD033"   # ignore no-inline-html rule
