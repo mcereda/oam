@@ -3,12 +3,12 @@
 ## Table of contents <!-- omit in toc -->
 
 1. [Troubleshooting](#troubleshooting)
-   1. [While loading, a completion fails with error `No such file or directory`.](#while-loading-a-completion-fails-with-error-no-such-file-or-directory)
+   1. [While loading, a completion fails with error `No such file or directory`](#while-loading-a-completion-fails-with-error-no-such-file-or-directory)
 1. [Further readings](#further-readings)
 
 ## Troubleshooting
 
-### While loading, a completion fails with error `No such file or directory`.
+### While loading, a completion fails with error `No such file or directory`
 
 Example:
 

@@ -40,7 +40,6 @@ op list items
 
 - [CLI guide]
 
-
 ## Sources
 
 All the references in the [further readings] section, plus the following:

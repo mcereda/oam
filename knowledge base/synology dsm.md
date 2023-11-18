@@ -88,9 +88,9 @@ Gotchas:
    - the `#snapshot` folder is created in the shared folder's root directory
    - the default snapshots directory for that shared folder is mounted on it in **read only** mode:
 
-     > ```txt
-     > /dev/mapper/cachedev_0 on /volume1/Data/#snapshot type btrfs (ro,nodev,relatime,ssd,synoacl,space_cache=v2,auto_reclaim_space,metadata_ratio=50,block_group_cache_tree,subvolid=266,subvol=/@syno/@sharesnap/Data)
-     > ```
+     ```txt
+     /dev/mapper/cachedev_0 on /volume1/Data/#snapshot type btrfs (ro,nodev,relatime,ssd,synoacl,space_cache=v2,auto_reclaim_space,metadata_ratio=50,block_group_cache_tree,subvolid=266,subvol=/@syno/@sharesnap/Data)
+     ```
 
 ## Encrypt data on a USB disk
 

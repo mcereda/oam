@@ -164,7 +164,6 @@ In `cc_config.xml`:
 [radeon™ software for linux® installation]: https://amdgpu-install.readthedocs.io/en/latest/
 [website]: https://boinc.berkeley.edu/
 
-
 <!-- In-article sections -->
 [boinccmd]: boinccmd.md
 

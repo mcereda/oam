@@ -15,7 +15,7 @@
 1. [Branches](#branches)
    1. [Checkout an existing remote branch](#checkout-an-existing-remote-branch)
    1. [Delete a branch](#delete-a-branch)
-   1. [Delete branches which have been merged or are otherwise absent from a remote.](#delete-branches-which-have-been-merged-or-are-otherwise-absent-from-a-remote)
+   1. [Delete branches which have been merged or are otherwise absent from a remote](#delete-branches-which-have-been-merged-or-are-otherwise-absent-from-a-remote)
    1. [Merge the master branch into a feature branch](#merge-the-master-branch-into-a-feature-branch)
    1. [Rebase a branch on top of another](#rebase-a-branch-on-top-of-another)
 1. [Tags](#tags)
@@ -647,7 +647,7 @@ git push 'remote' --delete 'feat-branch'
 git branch --delete --remotes 'feat-branch'
 ```
 
-### Delete branches which have been merged or are otherwise absent from a remote.
+### Delete branches which have been merged or are otherwise absent from a remote
 
 Command source [here][prune local branches that do not exist on remote anymore].
 

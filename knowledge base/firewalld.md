@@ -3,6 +3,7 @@
 Firewalld is a dynamically managed firewall with support for network/firewall zones that define the trust level of network connections or interfaces. It has support for IPv4, IPv6, firewall settings, ethernet bridges and IP sets. It also offers separation of runtime and permanent configuration options.
 
 It is the default firewall management tool for:
+
 - RHEL and CentOS 7 and newer
 - Fedora 18 and newer
 - (Open)SUSE 15 and newer

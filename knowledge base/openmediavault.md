@@ -64,15 +64,20 @@ Only do this **after** you created another user and [made it an admin][make othe
 From the safest to the less safe option:
 
 1. Lock the account:
+
    ```sh
    chage -E0 'admin'
    ```
+
 1. Remove it from the `openmediavault-admin` group:
+
    ```sh
    gpasswd -d 'admin' 'openmediavault-admin'
    deluser 'admin' 'openmediavault-admin'
    ```
+
 1. Delete it completely:
+
    ```sh
    userdel -r 'admin'
    deluser 'admin'
@@ -113,11 +118,14 @@ To experiment with intermediate values:
 - Find the `/storage/hdparm` xpath.
 - Change the values for the disk.
 - Run this command:
+
   ```sh
   omv-salt deploy run hdparm
   ```
+
 - Reboot.
 - Check if APM has been set:
+
   ```sh
   hdparm -I "/dev/sdX"
   ```

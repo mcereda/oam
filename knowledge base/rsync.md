@@ -78,13 +78,13 @@ rsync -AHPXazv --append-verify --no-motd --rsh ssh --exclude "#*" --exclude "@*"
 rsync -AHPazv --append-verify --no-motd --exclude "#*" --exclude "@*" 'source/dir/' 'user@synology.lan:/shared/folder/' --delete --dry-run
 rsync -AXaz --append-verify --chown='user' --fake-super --info='progress2' --no-i-r --no-motd --partial -e "ssh -i /home/user/.ssh/id_ed25519 -o UserKnownHostsFile=/home/user/.ssh/known_hosts" 'source/dir/' 'user@synology.lan:/shared/folder/' -n
 rsync 'data/' 'synology.lan:/volume1/data/' \
-	-ALSXabhs --no-i-r \
-	--partial --append-verify \
-	--info='progress2' \
-	--delete --backup-dir "changes_$(date +'%F_%H-%M-%S')" --exclude "changes_*" \
-	--no-motd --fake-super --super \
-	--numeric-ids --usermap='1000:1026' --groupmap='1000:100' \
-	--exclude={'@eaDir','#recycle'}
+  -ALSXabhs --no-i-r \
+  --partial --append-verify \
+  --info='progress2' \
+  --delete --backup-dir "changes_$(date +'%F_%H-%M-%S')" --exclude "changes_*" \
+  --no-motd --fake-super --super \
+  --numeric-ids --usermap='1000:1026' --groupmap='1000:100' \
+  --exclude={'@eaDir','#recycle'}
 
 # Parallel sync.
 # Each thread must use a different directory.

@@ -22,7 +22,6 @@ To back up data you need an FAT32 or exFAT-formatted USB drive with at least the
 1. Customize the backup file name and select _Back Up_; this will restart the console and start the backup process;
 1. remove the USB drive once the console has been started up normally again.
 
-
 ## Upgrade the HDD
 
 > This procedure has been tested on a PS4 Pro. Other models have different procedures.
@@ -62,10 +61,10 @@ To back up data you need an FAT32 or exFAT-formatted USB drive with at least the
 
    1. copy the installation file in the _UPDATE_ folder created before; the file **must** be named _PS4UPDATE.PUP_.
 
-2. Plug the USB drive containing the file into the PS4;
-3. start the console in _Safe Mode_ pressing and hold the power button, and releasing it after the second beep;
-4. select Safe Mode's option 7: _Initialize PS4 (Reinstall System Software)_;
-5. confirm at the prompts.
+1. Plug the USB drive containing the file into the PS4;
+1. start the console in _Safe Mode_ pressing and hold the power button, and releasing it after the second beep;
+1. select Safe Mode's option 7: _Initialize PS4 (Reinstall System Software)_;
+1. confirm at the prompts.
 
 If the PS4 does not recognize the file, check that the folder names and file name are correct. Enter the folder names and file name using uppercase letters.
 

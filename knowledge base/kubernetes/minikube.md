@@ -4,8 +4,8 @@
 
 1. [TL;DR](#tldr)
 1. [Troubleshooting](#troubleshooting)
-   1. [What happens if I use the _LoadBalancer_ type with Services?](#what-happens-if-i-use-the-loadbalancer-type-with-services)
-   1. [Can I use custom certificates?](#can-i-use-custom-certificates)
+   1. [What happens if one uses the _LoadBalancer_ type with Services](#what-happens-if-one-uses-the-loadbalancer-type-with-services)
+   1. [Use custom certificates](#use-custom-certificates)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -66,11 +66,11 @@ minikube delete --all --purge
 
 ## Troubleshooting
 
-### What happens if I use the _LoadBalancer_ type with Services?
+### What happens if one uses the _LoadBalancer_ type with Services
 
 On cloud providers that support load balancers, an external IP address would be provisioned to access the Service; on minikube, the _LoadBalancer_ type makes the Service accessible through the `minikube service` command.
 
-### Can I use custom certificates?
+### Use custom certificates
 
 Minikibe's certificates are available in the `~/.minikube/certs` folder.
 

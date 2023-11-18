@@ -29,12 +29,12 @@ pacman --database --asdeps autoconf
 
 # install zsh unsupervisioned (useful in scrips)
 pacman --noconfirm \
-	--sync --needed --noprogressbar --quiet --refresh \
-	fzf zsh-completions
+  --sync --needed --noprogressbar --quiet --refresh \
+  fzf zsh-completions
 # completely remove virtualbox-guest-utils-nox unsupervisioned (useful in scrips)
 pacman --noconfirm \
-	--remove --nosave --noprogressbar --quiet --recursive --unneeded \
-	virtualbox-guest-utils-nox
+  --remove --nosave --noprogressbar --quiet --recursive --unneeded \
+  virtualbox-guest-utils-nox
 ```
 
 ## Further readings

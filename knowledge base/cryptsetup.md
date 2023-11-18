@@ -83,8 +83,8 @@ This is due to the LUKS2 format using by default the Argon2i key derivation func
 The solution is simple; either:
 
 1. switch to LUKS1, or
-2. use LUKS2, but switch to PBKDF2 (the one used in LUKS1); just add the `--pbkdf pbkdf2` option to luksFormat or to any command that creates keyslots, or
-3. use LUKS2 but limit the memory assigned to Argon2i function; for example, to use up to 256kB just add the `--pbkdf-memory 256` option to the command as follows:
+1. use LUKS2, but switch to PBKDF2 (the one used in LUKS1); just add the `--pbkdf pbkdf2` option to luksFormat or to any command that creates keyslots, or
+1. use LUKS2 but limit the memory assigned to Argon2i function; for example, to use up to 256kB just add the `--pbkdf-memory 256` option to the command as follows:
 
    ```sh
    $ sudo cryptsetup luksOpen --pbkdf-memory 256 /dev/sdb1 lacie

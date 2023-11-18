@@ -25,7 +25,7 @@ pre-commit install
 pre-commit autoupdate
 
 # Skip check on commit.
-SKIP="flake8" git commit -m "foo"
+SKIP="check_id" git commit -m "foo"
 ```
 
 [Config file example].
