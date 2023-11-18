@@ -1,0 +1,6 @@
+```sh
+brew install 'ruby'
+```
+```sh
+SSL_CERT_FILE='path/to/ssl.cert'
+```
