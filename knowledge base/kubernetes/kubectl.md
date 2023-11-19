@@ -31,6 +31,7 @@ One possible output format is [JSONpath].
 1. [Create resources](#create-resources)
 1. [Output formatting](#output-formatting)
 1. [Verbosity and debugging](#verbosity-and-debugging)
+1. [Plugins](#plugins)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -587,6 +588,10 @@ Verbosity | Description
 `--v=8`   | Display HTTP request contents.
 `--v=9`   | Display HTTP request contents without truncation of contents.
 
+## Plugins
+
+TODO
+
 ## Further readings
 
 - [Kubernetes]
@@ -596,6 +601,7 @@ Verbosity | Description
 - [Configure access to multiple clusters]
 - [Configure a Security Context for a Pod or Container]
 - [Enforce Pod Security Standards with Namespace Labels]
+- [Krew]
 
 ## Sources
 
@@ -605,6 +611,7 @@ All the references in the [further readings] section, plus the following:
 - [Run a single-instance stateful application]
 - [Run a replicated stateful application]
 - [Accessing an application on Kubernetes in Docker]
+- [Plugins]
 
 <!--
   References
@@ -617,6 +624,7 @@ All the references in the [further readings] section, plus the following:
 [configure a security context for a pod or container]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 [configure access to multiple clusters]: https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
 [enforce pod security standards with namespace labels]: https://kubernetes.io/docs/tasks/configure-pod-container/enforce-standards-namespace-labels/
+[plugins]: https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
 [taints and tolerations]: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
 
 <!-- In-article sections -->
@@ -624,6 +632,7 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Knowledge base -->
 [jsonpath]: ../jsonpath.md
+[krew]: krew.md
 [kubernetes]: README.md
 
 <!-- Others -->
