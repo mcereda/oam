@@ -66,8 +66,10 @@ More examples [here][scripting in postman].
 
 - [Website]
 - [Documentation]
-- [Insomnia], an alternative to Postman
 - [Newman], CLI Collection runner for Postman
+- [Insomnia], an alternative to Postman
+- [Hoppscotch], an alternative to Postman
+- [Bruno], an alternative to Postman
 
 ## Sources
 
@@ -87,5 +89,7 @@ All the references in the [further readings] section, plus the following:
 [website]: https://www.postman.com/
 
 <!-- Knowledge base -->
+[bruno]: bruno.md
+[hoppscotch]: hoppscotch.md
 [insomnia]: insomnia.md
 [newman]: newman.md

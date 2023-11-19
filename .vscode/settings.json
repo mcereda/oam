@@ -63,6 +63,7 @@
         "hadolint",
         "hdparm",
         "helmfile",
+        "hoppscotch",
         "imager",
         "istio",
         "istioctl",

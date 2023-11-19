@@ -1,0 +1,17 @@
+```sh
+brew install --cask 'hoppscotch'
+```
+
+Access the variables in the request section by referencing the variable in the format `<<variable_name>>`.
+
+post-request scripts == tests
+
+Set environment variables to use with a next request:
+
+```js
+const jsonData = pw.response.body;                // Save the JSON payload response
+pw.env.set("accessToken", jsonData.access_token); // Set "accessToken" to the value of "access_token" in the response
+pw.env.set("idToken", jsonData.id_token);         // Set "idToken" to the value of "id_token" in the response
+```
+
+https://docs.hoppscotch.io/
