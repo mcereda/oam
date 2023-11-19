@@ -56,6 +56,7 @@
         "getfacl",
         "getfattr",
         "gettext",
+        "gitops",
         "gopass",
         "gpgconf",
         "gpgtools",

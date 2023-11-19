@@ -1,8 +1,8 @@
 {
     "recommendations": [
         "editorconfig.editorconfig",
+        "gruntfuggly.todo-tree",
         "nhoizey.gremlins",
-        "oderwat.indent-rainbow",
         "streetsidesoftware.code-spell-checker",
 
         "ianjsikes.md-graph",

@@ -6,6 +6,7 @@ Package manager for Kubernetes.
 
 1. [TL;DR](#tldr)
 1. [Start managing existing resources with a specific helm chart](#start-managing-existing-resources-with-a-specific-helm-chart)
+1. [Plugins](#plugins)
 1. [Further readings](#further-readings)
 
 ## TL;DR
@@ -110,6 +111,10 @@ To achieve this:
    ```sh
    helm upgrade 'app-release-name'
    ```
+
+## Plugins
+
+TODO
 
 ## Further readings
 
