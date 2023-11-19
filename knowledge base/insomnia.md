@@ -24,6 +24,8 @@
 - [Documentation]
 - [Inso CLI], runner for Insomnia
 - [Postman], an alternative to Insomnia
+- [Hoppscotch], an alternative to Insomnia
+- [Bruno], an alternative to Insomnia
 
 ## Sources
 
@@ -44,6 +46,8 @@ All the references in the [further readings] section, plus the following:
 [further readings]: #further-readings
 
 <!-- Knowledge base -->
+[bruno]: bruno.md
+[hoppscotch]: hoppscotch.md
 [postman]: postman.md
 
 <!-- Others -->
