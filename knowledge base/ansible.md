@@ -528,6 +528,7 @@ All the references in the [further readings] section, plus the following:
 - [Only do something if another action changed]
 - [How to recursively set directory and file permissions]
 - [Is it possible to use inline templates?]
+- [How to set up and use Python virtual environments for Ansible]
 
 <!--
   References
@@ -550,11 +551,13 @@ All the references in the [further readings] section, plus the following:
 [templating examples]: ../examples/ansible/templating.yml
 
 <!-- Others -->
+
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
 [how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
 [how to install sshpass on mac]: https://stackoverflow.com/questions/32255660/how-to-install-sshpass-on-mac/62623099#62623099
 [how to recursively set directory and file permissions]: https://superuser.com/questions/1024677/ansible-how-to-recursively-set-directory-and-file-permissions#1317715
+[how to set up and use python virtual environments for ansible]: https://www.redhat.com/sysadmin/python-venv-ansible
 [human-readable output format]: https://www.shellhacks.com/ansible-human-readable-output-format/
 [include task only if file exists]: https://stackoverflow.com/questions/28119521/ansible-include-task-only-if-file-exists#comment118578470_62289639
 [is it possible to use inline templates?]: https://stackoverflow.com/questions/33768690/is-it-possible-to-use-inline-templates#33783423
