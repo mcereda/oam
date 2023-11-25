@@ -1,1 +1,11 @@
 https://github.com/tmux/tmux/wiki/
+
+```sh
+# Operate on a background session from another one.
+tmux new-session -d -S 'session-name'
+tmux send-keys -t 'session-name': "command" "Enter"
+tmux capture-pane -t 'session-name': -S - -E - -p | cat -n
+tmux kill-session -t 'session-name'
+```
+https://superuser.com/questions/585398/sending-simulated-keystrokes-in-bash#1606615
+https://unix.stackexchange.com/questions/409861/is-it-possible-to-send-input-to-a-tmux-session-without-connecting-to-it#409863
