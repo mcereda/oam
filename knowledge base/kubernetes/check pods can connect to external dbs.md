@@ -18,7 +18,7 @@
 1. Install the utility applications needed for the tests.
 
    ```sh
-   apk --no-cache add 'mysql-client' 'netcat-openbsd''
+   apk --no-cache add 'mysql-client' 'netcat-openbsd'
    ```
 
 1. Test basic connectivity to the external service.
