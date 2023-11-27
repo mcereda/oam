@@ -1,0 +1,15 @@
+```makefile
+# make override_me=new_value target
+override override_me ?= default_value
+
+target_name: target_specific_variable = value
+target_name: previous_target required_file.ext
+    echoed_command
+    @quiet_command
+    ${MAKE} next_target
+
+previous_target:
+    @quiet_command
+
+next_target:
+```
