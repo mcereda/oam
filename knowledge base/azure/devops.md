@@ -77,6 +77,11 @@ az devops service-endpoint list -o 'tsv' \
   --organization 'https://dev.azure.com/organization_name' --project 'project' \
   --query "[?id=='service_endpoint_id'].name"
 
+# Get the id of the Service Principals linked to Service Endpoints.
+az devops service-endpoint list -o 'tsv' \
+  --organization 'https://dev.azure.com/organization_name' --project 'project' \
+  --query "[?name=='service_endpoint_name'].authorization.parameters.servicePrincipalId"
+
 # Filter out users whose Principal Name starts for X and access Y.
 az devops user list --org 'https://dev.azure.com/organizationName' \
   --query "
