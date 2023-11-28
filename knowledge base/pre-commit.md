@@ -26,6 +26,7 @@ pre-commit autoupdate
 
 # Skip check on commit.
 SKIP="check_id" git commit -m "foo"
+git commit --no-verify -m "foo"
 ```
 
 [Config file example].
