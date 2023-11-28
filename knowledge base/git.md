@@ -281,7 +281,7 @@ git remote prune 'branch_name'
 git branch --merged | grep -vE '(^\*|master|main|dev)' | xargs git branch -d
 git fetch -p \
 && awk '/origin/&&/gone/{print $1}' <(git branch -vv) \
-   | xargs git branch -d
+| xargs git branch -d
 
 # List all tags.
 git tag
@@ -342,6 +342,10 @@ git submodule update --init --recursive
 
 # Show the first commit that has the string "cool" in its message body.
 git show :/cool
+
+# Skip commit hooks.
+# Most useful with a broken `pre-commit` executable.
+git commit --no-verify …
 ```
 
 ## Authentication
@@ -928,7 +932,8 @@ git -c http.sslVerify=false …
 - The official [LFS website]
 - [Getting git on a server]
 - [Setting up the server]
-- [git-config reference]
+- [`git-config` reference][git-config reference]
+- [Hooks]
 
 ## Sources
 
@@ -973,6 +978,7 @@ All the references in the [further readings] section, plus the following:
 [getting git on a server]: https://git-scm.com/book/en/v2/Git-on-the-Server-Getting-Git-on-a-Server
 [git-config reference]: https://git-scm.com/docs/git-config
 [gitignore]: https://git-scm.com/docs/gitignore
+[hooks]: https://git-scm.com/book/fa/v2/Customizing-Git-Git-Hooks
 [setting up the server]: https://git-scm.com/book/en/v2/Git-on-the-Server-Setting-Up-the-Server
 [tagging]: https://git-scm.com/book/en/v2/Git-Basics-Tagging
 
