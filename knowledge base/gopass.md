@@ -33,10 +33,10 @@ gopass config 'generate.generator' 'xkcd'
 gopass init
 gopass init -p 'path/to/root/store' 'key-id'
 
-# Generate passwords.
+# Generate and show passwords in output.
 gopass pwgen
 gopass pwgen -1 24
-gopass pwgen -x -xl 'en'
+gopass pwgen -x --xc --xl 'en' --xn --xs '-' 3
 
 # List entries.
 gopass list
