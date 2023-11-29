@@ -19,6 +19,9 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
    1. [Addons](#addons)
 1. [Workloads](#workloads)
    1. [Pods](#pods)
+1. [Autoscaling](#autoscaling)
+   1. [Pod scaling](#pod-scaling)
+   1. [Node scaling](#node-scaling)
 1. [Best practices](#best-practices)
 1. [Quality of service](#quality-of-service)
 1. [Containers with high privileges](#containers-with-high-privileges)
@@ -185,6 +188,36 @@ Gotchas:
 
 - If a Container specifies a memory or CPU `limit` but does **not** specify a memory or CPU `request`, Kubernetes automatically assigns it a resource `request` spec equal to the given `limit`.
 
+## Autoscaling
+
+Controllers are available to scale Pods or Nodes automatically, both in number or size.
+
+Automatic scaling of Pods is done in number by the HorizontalPodAutoscaler, and in size by the VerticalPodAutoscaler.<br/>
+Automatic scaling of Nodes is done in number by the Cluster Autoscaler, and in size by add-ons like [Karpenter].
+
+> Be aware of mix-and-matching autoscalers for the same kind of resource.<br/>
+> One can easily defy the work done by the other and make that resource behave unexpectedly.
+
+K8S only comes with the HorizontalPodAutoscaler by default.<br/>
+Managed K8S usually also comes with the [Cluster Autoscaler] if autoscaling is enabled on the cluster resource.
+
+### Pod scaling
+
+Autoscaling of Pods by number requires the use of the Horizontal Pod Autoscaler.<br/>
+Autoscaling of Pods by size requires the use of the Vertical Pod Autoscaler.
+
+### Node scaling
+
+Autoscaling of Nodes by number requires the [Cluster Autoscaler].
+
+1. The Cluster Autoscaler routinely checks for pending Pods.
+1. Pods fill up the available Nodes.
+1. When Pods start to fail for lack of available resources, Nodes are added to the cluster.
+1. When Pods are not failing due to lack of available resources and one or more Nodes are underused, the Autoscaler tries to fit the existing Pods in less Nodes.
+1. If one or more Nodes can result unused from the previous step (DaemonSets are usually not taken into consideration), the Autoscaler will terminate them.
+
+Autoscaling of Nodes by size requires add-ons like [Karpenter].
+
 ## Best practices
 
 Also see [configuration best practices] and the [production best practices checklist].
@@ -196,30 +229,31 @@ Also see [configuration best practices] and the [production best practices check
 - Prefer **consistent** versions of Kubernetes components throughout **all** nodes.<br/>
   Components support [version skew][version skew policy] up to a point, with specific tools placing additional restrictions.
 - Consider keeping **separation of ownership and control** and/or group related resources.<br/>
-  [Namespaces].
+  Leverage [Namespaces].
 - Consider **organizing** cluster and workload resources.<br/>
-  [Labels][labels and selectors]; [recommended Labels].
+  Leverage [Labels][labels and selectors]; see [recommended Labels].
 - Avoid sending traffic to pods which are not ready to manage it.<br/>
-  [Readiness probes][Configure Liveness, Readiness and Startup Probes] signal services to not forward requests until the probe verifies its own pod is up. [Liveness probes][configure liveness, readiness and startup probes] ping the pod for a response and check its health; if the check fails, they kill the current pod and launch a new one.
+  [Readiness probes][Configure Liveness, Readiness and Startup Probes] signal services to not forward requests until the probe verifies its own pod is up.<br/>
+  [Liveness probes][configure liveness, readiness and startup probes] ping the pod for a response and check its health; if the check fails, they kill the current pod and launch a new one.
 - Avoid workloads and nodes fail due limited resources being available.<br/>
   Set [resource requests and limits][resource management for pods and containers] to reserve a minimum amount of resources for pods and limit their hogging abilities.
 - Prefer smaller container images.
 - Prioritize critical workloads.<br/>
-  Quality of service.
+  Leverage [quality of service](#quality-of-service).
 - Instrument applications to detect and respond to the SIGTERM signal.
 - Avoid using bare pods.<br/>
   Prefer defining them as part of a replica-based resource, like Deployments, StatefulSets, ReplicaSets or DaemonSets.
 - Restrict traffic between objects in the cluster.<br/>
-  [Network policies].
-- Reduce container privileges.
-- Leverage autoscalers.
+  See [network policies].
+- Leverage [autoscalers](#autoscaling).
 - Pod disruption budgets.
 - Try to use all nodes possible.<br/>
-  Affinities, taint and tolerations.
+  Leverage affinities, taint and tolerations.
 - Push for automation.<br/>
-  GitOps.
+  [GitOps].
 - Apply the principle of least privilege.<br/>
-  Role-based access control (RBAC).
+  Reduce container privileges where possible.<br/>
+  Leverage Role-based access control (RBAC).
 - Continuously audit events and logs regularly, also for control plane components.
 - Protect the cluster's ingress points.<br/>
   Firewalls, web application firewalls, application gateways.
@@ -482,7 +516,7 @@ Leverage the `preStop` hook instead of `postStart`.
 Since kubernetes version 1.9 and forth, volumeMounts behavior on secret, configMap, downwardAPI and projected have changed to Read-Only by default.
 A workaround to the problem is to create an `emtpyDir` Volume and copy the contents into it and execute/write whatever you need:
 
-```sh
+```yaml
   initContainers:
     - name: copy-ro-scripts
       image: busybox
@@ -519,7 +553,7 @@ Usage:
 - [Distribute credentials securely using Secrets]
 - [Configure a Security Context for a Pod or a Container]
    - [Set capabilities for a Container]
-- [Using `sysctls` in a Kubernetes Cluster][Using sysctls in a Kubernetes Cluster]
+- [Using `sysctl`s in a Kubernetes Cluster][using sysctls in a kubernetes cluster]
 
 Concepts:
 
@@ -579,14 +613,16 @@ All the references in the [further readings] section, plus the following:
 - [Configure Liveness, Readiness and Startup Probes]
 - [Configuration best practices]
 - [Cloudzero Kubernetes best practices]
+- [Scaling K8S nodes without breaking the bank or your sanity - Brandon Wagner & Nick Tran, Amazon]
 
 <!--
   References
   -->
 
-<!-- project's documentation -->
+<!-- Upstream -->
 [addons]: https://kubernetes.io/docs/concepts/cluster-administration/addons/
 [api deprecation policy]: https://kubernetes.io/docs/reference/using-api/deprecation-policy/
+[cluster autoscaler]: https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler
 [common labels]: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
 [concepts]: https://kubernetes.io/docs/concepts/
 [configuration best practices]: https://kubernetes.io/docs/concepts/configuration/overview/
@@ -619,6 +655,7 @@ All the references in the [further readings] section, plus the following:
 [create an admission webhook]: ../../examples/kubernetes/create%20an%20admission%20webhook/README.md
 [external-dns]: external-dns.md
 [flux]: flux.md
+[gitops]: ../gitops.md
 [helm]: helm.md
 [helmfile]: helmfile.md
 [istio]: istio.md
@@ -643,6 +680,7 @@ All the references in the [further readings] section, plus the following:
 [elasticsearch]: https://github.com/elastic/helm-charts/issues/689
 [etcd]: https://etcd.io/docs/
 [how to run a command in a pod after initialization]: https://stackoverflow.com/questions/44140593/how-to-run-command-after-initialization/44146351#44146351
+[kubernetes cluster autoscaler]: https://www.kubecost.com/kubernetes-autoscaling/kubernetes-cluster-autoscaler/
 [kubernetes securitycontext capabilities explained]: https://www.golinuxcloud.com/kubernetes-securitycontext-capabilities/
 [linux capabilities]: https://man7.org/linux/man-pages/man7/capabilities.7.html
 [making sense of taints and tolerations]: https://medium.com/kubernetes-tutorials/making-sense-of-taints-and-tolerations-in-kubernetes-446e75010f4e
@@ -652,7 +690,10 @@ All the references in the [further readings] section, plus the following:
 [runtime privilege and linux capabilities in docker containers]: https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities
 [why separate your kubernetes workload with nodepool segregation and affinity options]: https://medium.com/contino-engineering/why-separate-your-kubernetes-workload-with-nodepool-segregation-and-affinity-rules-cb5225953788
 
+[karpenter]: https://karpenter.sh/
 [kubectx+kubens]: https://github.com/ahmetb/kubectx
 [kube-ps1]: https://github.com/jonmosco/kube-ps1
 [kubie]: https://github.com/sbstp/kubie
 [pulumi]: https://www.pulumi.com
+
+[scaling k8s nodes without breaking the bank or your sanity - brandon wagner & nick tran, amazon]: https://www.youtube.com/watch?v=UBb8wbfSc34
