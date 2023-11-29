@@ -98,6 +98,26 @@ az account list-locations -o 'table'
 az account get-access-token
 az account get-access-token --query 'accessToken' -o 'tsv'
 
+# List and show role definitions.
+az role definition list --name 'role_display_name'
+az role definition list -g 'resource_group_name' --custom-role-only true
+
+# Create role definitions.
+az role definition create --role-definition 'full_json_definition'
+
+# Update role definitions.
+az role definition update --role-definition 'full_json_definition'
+az role definition update --role-definition <( \
+  az role definition list -g 'resource_group_name' --name 'role_display_name' \
+  | jq -Mc '
+    .[] | .assignableScopes += [
+      "/subscription/subscription_id/resourceGroups/resource_group_name"
+    ] ' - \
+)
+
+# Delete role definitions.
+az role definition delete --name 'role_display_name'
+
 # List role assignments.
 az role assignment list
 az role assignment list --all
