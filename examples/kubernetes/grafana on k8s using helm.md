@@ -64,6 +64,7 @@ Useful dashboards:
 
 - Official [helm chart]
 - [Set up prometheus and ingress on kubernetes]
+- [How to integrate Prometheus and Grafana on Kubernetes using Helm]
 
 <!--
   References
@@ -73,4 +74,5 @@ Useful dashboards:
 [helm chart]: https://github.com/grafana/helm-charts/tree/main/charts/grafana
 
 <!-- Others -->
+[how to integrate prometheus and grafana on kubernetes using helm]: https://semaphoreci.com/blog/prometheus-grafana-kubernetes-helm
 [set up prometheus and ingress on kubernetes]: https://blog.gojekengineering.com/diy-how-to-set-up-prometheus-and-ingress-on-kubernetes-d395248e2ba

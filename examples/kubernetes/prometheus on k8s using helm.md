@@ -11,7 +11,11 @@
 Installation:
 
 ```sh
-helm upgrade --install --namespace monitoring --create-namespace prometheus prometheus-community/prometheus
+helm repo add \
+  'prometheus-community' 'https://prometheus-community.github.io/helm-charts'
+helm upgrade --install \
+  --namespace 'monitoring' --create-namespace \
+  'prometheus' 'prometheus-community/prometheus'
 ```
 
 The server can be accessed via port 80 on `prometheus-server.monitoring.svc.cluster.local` from within the cluster.
@@ -42,14 +46,15 @@ export POD_NAME=$(kubectl get pods --namespace monitoring -l "app=prometheus,com
 
 ## Further readings
 
-- [Install Prometheus and Grafana with helm 3 on a local machine VM]
-- [Set up prometheus and ingress on kubernetes]
+- [Helm chart]
 
 ## Sources
 
 All the references in the [further readings] section, plus the following:
 
-- [Helm chart]
+- [Install Prometheus and Grafana with helm 3 on a local machine VM]
+- [Set up prometheus and ingress on kubernetes]
+- [How to integrate Prometheus and Grafana on Kubernetes using Helm]
 
 <!--
   References
@@ -62,5 +67,6 @@ All the references in the [further readings] section, plus the following:
 [further readings]: #further-readings
 
 <!-- Others -->
+[how to integrate prometheus and grafana on kubernetes using helm]: https://semaphoreci.com/blog/prometheus-grafana-kubernetes-helm
 [install prometheus and grafana with helm 3 on a local machine vm]: https://dev.to/ko_kamlesh/install-prometheus-grafana-with-helm-3-on-local-machine-vm-1kgj
 [set up prometheus and ingress on kubernetes]: https://blog.gojekengineering.com/diy-how-to-set-up-prometheus-and-ingress-on-kubernetes-d395248e2ba
