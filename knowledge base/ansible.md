@@ -78,6 +78,10 @@ ansible-galaxy install 'namespace.role,v1.0.0'
 ansible-galaxy install 'git+https://github.com/namespace/role.git,commit-hash'
 ansible-galaxy install -r 'requirements.yml'
 
+# Create new roles.
+ansible-galaxy init 'role_name'
+ansible-galaxy role init --type 'container' --init-path 'path/to/role' 'name'
+
 # Remove roles installed from Galaxy.
 ansible-galaxy remove 'namespace.role'
 ```
