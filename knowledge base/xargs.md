@@ -20,4 +20,10 @@ find ~ -type f -printf "'%p' " | xargs -P 5 -n 1 clamscan
 # replace a given string with arguments read from input
 # useful to insert the arguments in the middle of the command to execute
 find ~ -type d -name ".git" -exec dirname {} + | xargs -I // git -C "//" pull
+
+# Use aliases as commands.
+# The 'BASH_ALIASES' array works only in BASH.
+# The 'aliases' array works only in ZSH.
+echo 1 2 3 4 | xargs "${BASH_ALIASES[my-alias]}"
+echo 1 2 3 4 | xargs $aliases['my-alias']
 ```
