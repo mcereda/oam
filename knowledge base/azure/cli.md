@@ -47,10 +47,12 @@ az ad user show --id 'user@email.org'
 # Check a User's permissions.
 az ad user get-member-groups --id 'user@email.org'
 
-# Get the ID of a Service Principal from its Display Name.
-az ad sp list --query 'id' -o 'tsv' --display-name 'service_principal_name'
+# Get IDs of Service Principals from their Display Name.
+# id => object ID, appId => client ID.
+az ad sp list -o 'tsv' --display-name 'service_principal_name' --query '[].id'
+az ad sp list … --query '[].appId'
 
-# Get the Display Name of a Service Principal from its ID.
+# Get the Display Name of Service Principals from their object ID.
 az ad sp show --query 'displayName' -o 'tsv' \
   --id '12345678-abcd-0987-fedc-567890abcdef'
 
@@ -147,6 +149,9 @@ az keyvault secret set … --expires '2024-04-10T12:19:54Z'
 # Get passwords from Key Vaults.
 az keyvault secret show --query 'value' \
   --name 'secret_name' --vault-name 'key_vault_name'
+
+# Show details of Disk Encryption Sets.
+az disk-encryption-set show -g 'resource_group_name' -n 'des_name'
 
 # Get Key ID and Access Policy of Disk Encryption Sets.
 az disk-encryption-set show --ids 'id' \
