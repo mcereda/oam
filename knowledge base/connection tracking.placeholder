@@ -1,0 +1,6 @@
+linux | `conntrack`
+bsd   | `pfctl -s states`
+
+https://manpages.debian.org/testing/conntrack/conntrack.8.en.html
+https://blog.cloudflare.com/conntrack-tales-one-thousand-and-one-flows/
+https://deploy.live/blog/kubernetes-networking-problems-due-to-the-conntrack/
