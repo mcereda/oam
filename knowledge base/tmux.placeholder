@@ -1,3 +1,31 @@
+# Tmux
+
+| Key combination             | Effect                                       |
+| --------------------------- | -------------------------------------------- |
+| `ctrl + b`                  | actuate                                      |
+| `ctrl + b`, then `c`        | create a new window                          |
+| `ctrl + b`, then `d`        | detach from the current session              |
+| `ctrl + b`, then `n`        | pass to the next window                      |
+| `ctrl + b`, then `p`        | pass to the previous window                  |
+| `ctrl + b`, then `0` to `9` | pass to the window identified by that number |
+
+`tmux new -s named-session` to create a new session named `named-session`
+`ctrl + b`, then `d` to detach
+`tmux list-session` to list the active sessions
+`tmux attach` to attach to the last session
+`tmux attach -t named-session` to attach to the session named `named-session`
+
+.tmux.conf
+```conf
+set -g default-terminal "screen-256color"   # set the default terminal mode to 256 colors
+set -g history-limit 100000                 # set the scrollback size
+set -g mouse on                             # enable mouse control (clickable windows, panes, resizable panes)
+set -g xterm-keys on                        # pass xterm keys through
+
+setw -g automatic-rename on   # rename the window to reflect the current program
+set -g renumber-windows on    # renumber all windows when a window is closed
+```
+
 https://github.com/tmux/tmux/wiki/
 
 ```sh

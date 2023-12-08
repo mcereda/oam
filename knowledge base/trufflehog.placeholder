@@ -1,3 +1,5 @@
+# Trufflehog
+
 https://github.com/trufflesecurity/trufflehog
 
 alternatives: detect-secrets, gitleaks, ripsecrets
