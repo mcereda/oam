@@ -8,7 +8,6 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 1. [Basics](#basics)
 1. [The control plane](#the-control-plane)
    1. [The API server](#the-api-server)
-   1. [`etcd`](#etcd)
    1. [`kube-scheduler`](#kube-scheduler)
    1. [`kube-controller-manager`](#kube-controller-manager)
    1. [`cloud-controller-manager`](#cloud-controller-manager)
@@ -47,9 +46,10 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 
 When using Kubernetes, one is using a cluster.
 
-Kubernetes clusters consist of one or more hosts (_nodes_) executing containerized applications. In cloud environments, nodes are also available in grouped sets (_node pools_) capable of automatic scaling.
+Kubernetes clusters consist of one or more hosts (_nodes_) executing containerized applications.<br/>
+In cloud environments, nodes are also available in grouped sets (_node pools_) capable of automatic scaling.
 
-Nodes host the application workloads in the form of _pods_.
+Nodes host application workloads in the form of [_pods_][pods].
 
 The [_control plane_](#the-control-plane) manages the nodes and the pods in the cluster. It is itself a set of pods which expose the APIs and interfaces used to define, deploy, and manage the lifecycle of the cluster's resources.<br/>
 In higher environments, the control plane usually runs across multiple **dedicated** nodes to provide improved fault-tolerance and high availability.
@@ -64,7 +64,8 @@ Detects and responds to cluster events (like starting up a new pod when a deploy
 The control plane is composed by:
 
 - [the API server](#the-api-server);
-- [`etcd`](#etcd);
+- The _distributed store_ for the cluster's configuration data.<br/>
+  The current store of choice is [`etcd`][etcd].
 - [the scheduler](#kube-scheduler);
 - [the cluster controller](#kube-controller-manager);
 - [the cloud controller](#cloud-controller-manager).
@@ -90,11 +91,6 @@ The Kubernetes API can be extended:
 
 - using _custom resources_ to declaratively define how the API server should provide your chosen resource API, or
 - extending the Kubernetes API by implementing an aggregation layer.
-
-### `etcd`
-
-`etcd` is a consistent and highly-available key-value store used as Kubernetes' backing store for all cluster data.<br/>
-See its [website][etcd] for more information.
 
 ### `kube-scheduler`
 
@@ -169,7 +165,7 @@ See [addons] for an extended list of the available addons.
 
 ## Workloads
 
-Workloads consist of groups of containers (_pods_) and a specification for how to run them (_manifest_).<br/>
+Workloads consist of groups of containers ([_pods_][pods]) and a specification for how to run them (_manifest_).<br/>
 Configuration files are written in YAML (preferred) or JSON format and are composed of:
 
 - metadata,
@@ -179,10 +175,10 @@ Configuration files are written in YAML (preferred) or JSON format and are compo
 ### Pods
 
 The smallest deployable unit of computing that one can create and manage in Kubernetes.<br/>
-Pods contain one or more relatively tightly coupled application containers; they are always co-located (executed on the same host) and co-scheduled (executed together), and share context, storage/network resources, and a specification for how to run them.
+Pods contain one or more relatively tightly coupled application containers; they are always co-located (executed on the same host) and co-scheduled (executed together), and **share** context, storage and network resources, and a specification for how to run them.
 
-Pods are usually created trough workload resources (like _Deployments_, _StatefulSets_, or _Jobs_) and **not** directly.<br/>
-Those leverage and manage _ReplicaSets_, which in turn manage copies of the same pod. When deleted, all the resources they manage are deleted with them.
+Pods are (and _should be_) usually created trough other workload resources (like _Deployments_, _StatefulSets_, or _Jobs_) and **not** directly.<br/>
+Such parent resources leverage and manage _ReplicaSets_, which in turn manage copies of the same pod. When deleted, **all** the resources they manage are deleted with them.
 
 Gotchas:
 
@@ -243,18 +239,21 @@ Also see [configuration best practices] and the [production best practices check
 - Instrument applications to detect and respond to the SIGTERM signal.
 - Avoid using bare pods.<br/>
   Prefer defining them as part of a replica-based resource, like Deployments, StatefulSets, ReplicaSets or DaemonSets.
-- Restrict traffic between objects in the cluster.<br/>
-  See [network policies].
 - Leverage [autoscalers](#autoscaling).
-- Pod disruption budgets.
-- Try to use all nodes possible.<br/>
+- Try to avoid workload disruption.<br/>
+  Leverage pod disruption budgets.
+- Try to use all available nodes.<br/>
   Leverage affinities, taint and tolerations.
 - Push for automation.<br/>
   [GitOps].
 - Apply the principle of least privilege.<br/>
   Reduce container privileges where possible.<br/>
   Leverage Role-based access control (RBAC).
+- Restrict traffic between objects in the cluster.<br/>
+  See [network policies].
 - Continuously audit events and logs regularly, also for control plane components.
+- Keep an eye on connection tables.<br/>
+  Specially valid when using [connection tracking].
 - Protect the cluster's ingress points.<br/>
   Firewalls, web application firewalls, application gateways.
 
@@ -416,7 +415,7 @@ All kubernetes clusters should:
 
 Each node pool should:
 
-- have a _meaningful_ **name** (like \<prefix..>-\<randomid>) to make it easy to recognize the workloads running on it or the features of the nodes in it;
+- have a _meaningful_ **name** (like `<prefix…>-<workload_type>-<random_id>`) to make it easy to recognize the workloads running on it or the features of the nodes in it;
 - have a _minimum_ set of _meaningful_ **labels**, like:
    - cloud provider information;
    - node information and capabilities;
@@ -514,7 +513,7 @@ Leverage the `preStop` hook instead of `postStart`.
 > Use a script if you need them. See [container hooks] and [preStop hook doesn't work with env variables]
 
 Since kubernetes version 1.9 and forth, volumeMounts behavior on secret, configMap, downwardAPI and projected have changed to Read-Only by default.
-A workaround to the problem is to create an `emtpyDir` Volume and copy the contents into it and execute/write whatever you need:
+A workaround to the problem is to create an `emptyDir` Volume and copy the contents into it and execute/write whatever you need:
 
 ```yaml
   initContainers:
@@ -652,7 +651,9 @@ All the references in the [further readings] section, plus the following:
 <!-- Knowledge base -->
 [azure kubernetes service]: ../azure/aks.md
 [cert-manager]: cert-manager.md
+[connection tracking]: ../connection%20tracking.placeholder
 [create an admission webhook]: ../../examples/kubernetes/create%20an%20admission%20webhook/README.md
+[etcd]: ../etcd.placeholder
 [external-dns]: external-dns.md
 [flux]: flux.md
 [gitops]: ../gitops.md
@@ -678,7 +679,6 @@ All the references in the [further readings] section, plus the following:
 [cncf]: https://www.cncf.io/
 [container capabilities in kubernetes]: https://unofficial-kubernetes.readthedocs.io/en/latest/concepts/policy/container-capabilities/
 [elasticsearch]: https://github.com/elastic/helm-charts/issues/689
-[etcd]: https://etcd.io/docs/
 [how to run a command in a pod after initialization]: https://stackoverflow.com/questions/44140593/how-to-run-command-after-initialization/44146351#44146351
 [kubernetes cluster autoscaler]: https://www.kubecost.com/kubernetes-autoscaling/kubernetes-cluster-autoscaler/
 [kubernetes securitycontext capabilities explained]: https://www.golinuxcloud.com/kubernetes-securitycontext-capabilities/
