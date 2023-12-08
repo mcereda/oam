@@ -45,7 +45,7 @@
 | GUI     | Graphical User Interface                               |                                                                                                     |
 | HA      | High Availability                                      | Characteristic of a system which aims to ensure better or longer availability for its services      |
 | HPC     | High Performance Computing                             | Collections of systems and tools used to achieve a greater processing capacity than the single unit |
-| IaC     | Infrastructure as Code                                 |                                                                                                     |
+| [IaC]   | [Infrastructure as Code][iac]                          |                                                                                                     |
 | IP      | Internet Protocol                                      |                                                                                                     |
 | IPvX    | Internet Protocol version X                            |                                                                                                     |
 | ISP     | Internet Service Provider                              |                                                                                                     |
@@ -86,5 +86,9 @@
   References
   -->
 
+<!-- Knowledge base -->
+[iac]: iac.placeholder
+
+<!-- Others -->
 [cn (canonicalname vs commonname) in active directory explained]: https://www.itechguides.com/what-is-cn-in-active-directory/
 [kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
