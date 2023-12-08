@@ -51,6 +51,7 @@
 | ISP     | Internet Service Provider                              |                                                                                                     |
 | JDK     | Java Development Kit                                   |                                                                                                     |
 | JRE     | Java Runtime Engine                                    |                                                                                                     |
+| KISS    | Keep It Simple Stupid                                  |                                                                                                     |
 | LAN     | Local Area Network                                     |                                                                                                     |
 | LED     | Light Emitting Diode                                   |                                                                                                     |
 | LIFO    | Last In First Out                                      |                                                                                                     |
@@ -59,6 +60,9 @@
 | ROM     | Read-Only Memory                                       |                                                                                                     |
 | RPM     | Revolutions Per Minute                                 |                                                                                                     |
 | RPM     | RPM Package Manager                                    | Package management system used by Linux distributions like Red Hat, (open)SuSE and Fedora           |
+| SAFE    | Scaled Agile FramEwork                                 |                                                                                                     |
+| SOPS    | Secrets OPerationS                                     |                                                                                                     |
+| SPIFFE  | Secure Production Identity Framework for Everyone      |                                                                                                     |
 | SQL     | Structured Query Language                              |                                                                                                     |
 | TCP     | Transport Control Protocol                             |                                                                                                     |
 | UDP     | User Datagram Protocol                                 |                                                                                                     |
@@ -71,13 +75,16 @@
 | WLAN    | Wireless Local Area Network                            |                                                                                                     |
 | XML     | eXtensible Markup Language                             |                                                                                                     |
 | XSS     | Cross-Site Scripting                                   |                                                                                                     |
+| YAGNI   | You Ain't Gonna Need It                                |                                                                                                     |
 
 ## Sources
 
 - [CN (canonicalName vs CommonName) In Active Directory Explained]
+- [KISS principle is not that simple]
 
 <!--
   References
   -->
 
 [cn (canonicalname vs commonname) in active directory explained]: https://www.itechguides.com/what-is-cn-in-active-directory/
+[kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
