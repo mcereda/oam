@@ -4,6 +4,7 @@
 | ------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
 | ACK     | ACKnowledgement                                        |                                                                                                     |
 | ACL     | Access Control List                                    |                                                                                                     |
+| AD      | Active Directory                                       |                                                                                                     |
 | APK     | Alpine Package Keeper                                  | Package manager used by Alpine Linux                                                                |
 | APT     | Advanced Package Tool                                  | Package manager used by Debian Linux                                                                |
 | ASCII   | American Standard Code for Information Interchange     |                                                                                                     |
@@ -15,10 +16,13 @@
 | BOINC   | Berkeley Open Infrastructure for Network Computing     |                                                                                                     |
 | BSoD    | Blue Screen of Death                                   |                                                                                                     |
 | BYOD    | Bring Your Own Device                                  |                                                                                                     |
+| CD      | Continuous Delivery                                    |                                                                                                     |
+| CD      | Continuous Deployment                                  |                                                                                                     |
+| CI      | Continuous Integration                                 |                                                                                                     |
 | CLI     | Command Line Interface                                 |                                                                                                     |
 | CMS     | Content Management System                              |                                                                                                     |
-| CN      | Canonical Name                                         |                                                                                                     |
-| CN      | Common Name                                            |                                                                                                     |
+| CN      | Canonical Name                                         | In Active Directory, the full path of an object in a canonical format                               |
+| CN      | Common Name                                            | In Active Directory, the last element in an object's Distinguished Name (DN) hierarchy              |
 | COTS    | Commercial Off-The-Shelf                               | Available _as-is_, not optimized for specific scopes or objectives                                  |
 | CSMA    | Carrier-Sense Multiple Access                          |                                                                                                     |
 | CSMA/CD | Carrier-Sense Multiple Access with Collision Detection |                                                                                                     |
@@ -33,6 +37,7 @@
 | EEPROM  | Electronically Erasable Programmable Read-Only Memory  |                                                                                                     |
 | FIFO    | First In First Out                                     |                                                                                                     |
 | FILO    | First In Last Out                                      |                                                                                                     |
+| FQDN    | Fully Qualified Domain Name                            |                                                                                                     |
 | FS      | FileSystem                                             |                                                                                                     |
 | FW      | FireWall                                               |                                                                                                     |
 | GNU     | Gnu is Not Unix                                        |                                                                                                     |
@@ -59,9 +64,20 @@
 | UDP     | User Datagram Protocol                                 |                                                                                                     |
 | UFW     | Uncomplicated FireWall                                 |                                                                                                     |
 | USB     | Universal Serial Bus                                   |                                                                                                     |
+| UT      | Unit Test                                              |                                                                                                     |
 | VIM     | VI iMproved                                            |                                                                                                     |
 | WAN     | Wide Area Network                                      |                                                                                                     |
 | WiMAX   | Worldwide interoperability for Microwave Access        |                                                                                                     |
 | WLAN    | Wireless Local Area Network                            |                                                                                                     |
 | XML     | eXtensible Markup Language                             |                                                                                                     |
 | XSS     | Cross-Site Scripting                                   |                                                                                                     |
+
+## Sources
+
+- [CN (canonicalName vs CommonName) In Active Directory Explained]
+
+<!--
+  References
+  -->
+
+[cn (canonicalname vs commonname) in active directory explained]: https://www.itechguides.com/what-is-cn-in-active-directory/
