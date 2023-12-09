@@ -1,0 +1,34 @@
+# Operations best practices
+
+- Think of KISS to be an invite to keep thinks simple with respect of your ultimate goal.<br/>
+  Avoid simplicity only for the sake of simplicity.
+- Apply the KISS approach wherever possible.
+- Mind [the automation paradox].
+- Remember that _DevOps_, _GitOps_ and all other corporate bullshit terms are just sets of practices, suggestions, or approaches.<br/>
+  They are **not** to be taken literally, and **need** to be adapted to the workplace, not the other way around.
+- Amazon's tenets are double-edge swords and, taken literally, only work for Amazon.
+- Watch out for complex things that should be simple (i.e. the [SAFe] delusion).
+- Pipelines' tasks should be tasks one can execute from one's own computer.
+- Pipelines are meant to be used as last mile steps for specific goals.
+- Keep pipelines' tasks as simple, consistent and reproducible as possible.<br/>
+  Avoid like the plague to put programs or scripts in pipelines.
+- There cannot be a single pipeline for everything, the same way as _one-size-fits-all_ is a big, fat lie.
+
+## Sources
+
+- [A case against "platform teams"]
+- [Culture eats your structure for lunch]
+- [DevOps is bullshit]
+- [Platform teams need a delightfully different approach, not one that sucks less]
+- [We have used too many levels of abstractions and now the future looks bleak]
+- [Why the fuck are we templating YAML?]
+
+[safe]: safe.placeholder
+[the automation paradox]: the%20automation%20paradox.placeholder
+
+[a case against "platform teams"]: https://kislayverma.com/organizations/a-case-against-platform-teams/
+[culture eats your structure for lunch]: https://thoughtmanagement.org/2013/07/10/culture-eats-your-structure-for-lunch/
+[devops is bullshit]: https://blog.massdriver.cloud/posts/devops-is-bullshit/
+[platform teams need a delightfully different approach, not one that sucks less]: https://www.chkk.io/blog/platform-teams-different-approach
+[we have used too many levels of abstractions and now the future looks bleak]: https://unixsheikh.com/articles/we-have-used-too-many-levels-of-abstractions-and-now-the-future-looks-bleak.html
+[why the fuck are we templating yaml?]: https://leebriggs.co.uk/blog/2019/02/07/why-are-we-templating-yaml
