@@ -10,6 +10,15 @@ FIXME
 
 ## TL;DR
 
+```sh
+# validation
+kustomize build ${PROJECT} | kubectl apply --filename - --validate --dry-run=client
+kubeval <(kustomize build ${PROJECT})
+
+# deployment
+kustomize build ${PROJECT} | kubectl apply --filename -
+```
+
 ## Further readings
 
 - [Website]

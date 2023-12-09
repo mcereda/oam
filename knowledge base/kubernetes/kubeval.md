@@ -5,6 +5,7 @@ Validates one or more Kubernetes configuration files.
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
+1. [Usage](#usage)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -18,6 +19,14 @@ docker run -v "${PWD}/dir:/dir" 'garethr/kubeval' 'dir/file.yaml'
 scoop bucket add 'instrumenta' 'https://github.com/instrumenta/scoop-instrumenta' && scoop install 'kubeval'
 
 # Usage.
+kubeval 'manifest_file.yaml' || echo "Validation failed" >&2
+kubeval <(helm template …)
+kubeval <(kustomize build …)
+```
+
+## Usage
+
+```sh
 $ kubeval 'my-invalid-rc.yaml' || echo "Validation failed" >&2
 WARN - my-invalid-rc.yaml contains an invalid ReplicationController - spec.replicas: Invalid type. Expected: integer, given: string
 Validation failed
