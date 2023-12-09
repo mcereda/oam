@@ -12,6 +12,7 @@
   Do **not** adapt your work to specific tools.
 - Backup early, backup often.
 - Keep changes shorts and sweet.
+- Make changes easy, avoid making easy changes.
 - [Branch early, branch often].
 - [Trunk-based development][trunk-based development: a comprehensive guide] and other branching strategies all work but [have different pros and cons][git branching strategies vs. trunk-based development].
 - Refactoring _can_ be an option.<br/>
