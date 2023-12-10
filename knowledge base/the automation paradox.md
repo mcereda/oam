@@ -36,8 +36,14 @@ Possible solutions:
 - [We have used too many levels of abstractions and now the future looks bleak]
 - [Why the fuck are we templating yaml?]
 
+<!--
+  References
+  -->
+
+<!-- Knowledge base -->
 [gitops]: gitops.md
 
+<!-- Others -->
 [automating your source of truth - gitops and terraform]: https://www.youtube.com/watch?v=-K8R1OVXPy0
 [software crisis]: https://www.geeksforgeeks.org/software-engineering-software-crisis/
 [we have used too many levels of abstractions and now the future looks bleak]: https://unixsheikh.com/articles/we-have-used-too-many-levels-of-abstractions-and-now-the-future-looks-bleak.html
