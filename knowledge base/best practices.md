@@ -2,6 +2,7 @@
 
 Based on experience.
 
+- Always think critically.
 - The _one-size-fits-all_ approach is a big fat lie.<br/>
   This proved particularly valid with regards to templates and pipelines.
 - Apply the KISS approach wherever possible, not to keep _all_ things simple but as an invite to keep things simple **with respect of your ultimate goal**.<br/>
@@ -13,24 +14,27 @@ Based on experience.
 - Automate when and where you can, yet mind [the automation paradox].
 - Keep things **de**coupled where possible, the same way _interfaces_ are used in programming.<br/>
   This allows for quick and (as much as possible) painless switch between technologies.
-- Always think critically.
 - Choose tools based on **how helpful** they are to achieve your goals.<br/>
   Do **not** adapt your work to specific tools.
 - Backup your data.<br/>
   Especially when you are about to update something. [Murphy's law] is lurking.
 - [Branch early, branch often].
-- Keep changes short and sweet.<br/>
-  Nobody likes to dive deep into a 1200 lines, 356 files pull request.
+- [Keep changes short and sweet][the art of small pull requests].<br/>
+  Nobody likes to dive deep into a 1200 lines, 356 files pull request ([PR fatigue][how to tackle pull request fatigue], everybody?).
 - Make changes easy, avoid making easy changes.
 - [Trunk-based development][trunk-based development: a comprehensive guide] and other branching strategies all work but [have different pros and cons][git branching strategies vs. trunk-based development].
 - Refactoring _can_ be an option.<br/>
   But do **not** use it mindlessly.
-- _DevOps_, _GitOps_ and other corporate bullshit terms are sets of practices, suggestions, or approaches.<br/>
-  They are **not** to be taken literally and **need** to be adapted to the workplace, not the other way around.
+- _DevOps_, _GitOps_ and other similar terms are sets of practices, suggestions, or approaches.<br/>
+  They are **not** roles or job titles.<br/>
+  They are **not** to be taken literally.<br/>
+  They **need** to be adapted to the workplace, not the other way around.
+- Be aware of [corporate bullshit][from inboxing to thought showers: how business bullshit took over].
 - [Amazon's leadership principles] are double-edge swords and only Amazon can apply them as they are defined.
 - Watch out for complex things that should be simple (i.e. the [SAFe] delusion).
 - Keep _integration_, _delivery_ and _deployment_ separated.<br/>
-  They are different concepts, and as such should require different tasks.
+  They are different concepts, and as such should require different tasks.<br/>
+  This also allows for checkpoints, and to fail fast with less to no unwanted consequence.
 - Keep pipelines' tasks as simple, consistent and reproducible as possible.<br/>
   Avoid like the plague to put programs or scripts in pipelines: they should be glue, not applications.
 - Pipelines' tasks should be able to execute from one's own computer.
@@ -50,6 +54,9 @@ Based on experience.
 - [Branch early, branch often]
 - [Amazon's leadership principles]
 - [Amazon's tenets: supercharging decision-making]
+- [How to tackle Pull Request fatigue]
+- [The art of small Pull Requests]
+- [From inboxing to thought showers: how business bullshit took over]
 
 <!--
   References
@@ -66,9 +73,12 @@ Based on experience.
 [branch early, branch often]: https://medium.com/@huydotnet/branch-early-branch-often-daadaad9468e
 [culture eats your structure for lunch]: https://thoughtmanagement.org/2013/07/10/culture-eats-your-structure-for-lunch/
 [devops is bullshit]: https://blog.massdriver.cloud/posts/devops-is-bullshit/
+[from inboxing to thought showers: how business bullshit took over]: https://www.theguardian.com/news/2017/nov/23/from-inboxing-to-thought-showers-how-business-bullshit-took-over
 [git branching strategies vs. trunk-based development]: https://launchdarkly.com/blog/git-branching-strategies-vs-trunk-based-development/
+[how to tackle pull request fatigue]: https://javascript.plainenglish.io/tackling-pr-fatigue-6865edc205ce
 [murphy's law]: https://en.wikipedia.org/wiki/Murphy%27s_law
 [platform teams need a delightfully different approach, not one that sucks less]: https://www.chkk.io/blog/platform-teams-different-approach
+[the art of small pull requests]: https://essenceofcode.com/2019/10/29/the-art-of-small-pull-requests/
 [trunk-based development: a comprehensive guide]: https://launchdarkly.com/blog/introduction-to-trunk-based-development/
 [we have used too many levels of abstractions and now the future looks bleak]: https://unixsheikh.com/articles/we-have-used-too-many-levels-of-abstractions-and-now-the-future-looks-bleak.html
 [why the fuck are we templating yaml?]: https://leebriggs.co.uk/blog/2019/02/07/why-are-we-templating-yaml
