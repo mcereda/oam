@@ -57,6 +57,8 @@ Based on experience.
 - [How to tackle Pull Request fatigue]
 - [The art of small Pull Requests]
 - [From inboxing to thought showers: how business bullshit took over]
+- [Simple sabotage for software]
+- [Hacking your manager - how to get platform engineering on their radar]
 
 <!--
   References
@@ -75,9 +77,11 @@ Based on experience.
 [devops is bullshit]: https://blog.massdriver.cloud/posts/devops-is-bullshit/
 [from inboxing to thought showers: how business bullshit took over]: https://www.theguardian.com/news/2017/nov/23/from-inboxing-to-thought-showers-how-business-bullshit-took-over
 [git branching strategies vs. trunk-based development]: https://launchdarkly.com/blog/git-branching-strategies-vs-trunk-based-development/
+[hacking your manager - how to get platform engineering on their radar]: https://www.youtube.com/watch?v=8xprsTXKr0w
 [how to tackle pull request fatigue]: https://javascript.plainenglish.io/tackling-pr-fatigue-6865edc205ce
 [murphy's law]: https://en.wikipedia.org/wiki/Murphy%27s_law
 [platform teams need a delightfully different approach, not one that sucks less]: https://www.chkk.io/blog/platform-teams-different-approach
+[simple sabotage for software]: https://erikbern.com/2023/12/13/simple-sabotage-for-software.html
 [the art of small pull requests]: https://essenceofcode.com/2019/10/29/the-art-of-small-pull-requests/
 [trunk-based development: a comprehensive guide]: https://launchdarkly.com/blog/introduction-to-trunk-based-development/
 [we have used too many levels of abstractions and now the future looks bleak]: https://unixsheikh.com/articles/we-have-used-too-many-levels-of-abstractions-and-now-the-future-looks-bleak.html
