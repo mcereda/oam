@@ -649,7 +649,7 @@ All the references in the [further readings] section, plus the following:
 [pods]: #pods
 
 <!-- Knowledge base -->
-[azure kubernetes service]: ../azure/aks.md
+[azure kubernetes service]: ../cloud%20computing/azure/aks.md
 [cert-manager]: cert-manager.md
 [connection tracking]: ../connection%20tracking.placeholder
 [create an admission webhook]: ../../examples/kubernetes/create%20an%20admission%20webhook/README.md
