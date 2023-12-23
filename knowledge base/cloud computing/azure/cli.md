@@ -536,7 +536,7 @@ All the references in the [further readings] section, plus the following:
 [az bicep]: bicep.md#tldr
 [devops]: devops.md
 [devops cli extension]: devops.md#tldr
-[jmespath]: ../jmespath.md
+[jmespath]: ../../jmespath.md
 
 <!-- Others -->
 [create and manage azure pipelines from the command line]: https://devblogs.microsoft.com/devops/create-and-manage-azure-pipelines-from-the-command-line/

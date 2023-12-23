@@ -82,4 +82,4 @@ kubelogin remove-tokens
 
 <!-- Knowledge base -->
 [azure cli]: cli.md
-[kubectl]: ../kubernetes/kubectl.md
+[kubectl]: ../../kubernetes/kubectl.md
