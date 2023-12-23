@@ -159,7 +159,7 @@ All the references in the [further readings] section, plus the following:
 [further readings]: #further-readings
 
 <!-- Knowledge base -->
-[azure cli]: azure%20cli.md
+[azure cli]: cli.md
 
 <!-- Others -->
 [loops in azure devops pipelines]: https://pakstech.com/blog/azure-devops-loops/

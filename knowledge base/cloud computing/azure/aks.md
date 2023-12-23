@@ -72,6 +72,7 @@ Make sure you have enough space in your cluster's Subnet for at least one new No
 - [Kubernetes]
 - [Update or rotate the credentials for an AKS cluster]
 - [Azure Service Operator]
+- [Virtual nodes] (based on [Virtual Kubelet])
 
 ## Sources
 
@@ -87,9 +88,11 @@ All the references in the [further readings] section, plus the following:
 [az aks reference]: https://learn.microsoft.com/en-us/cli/azure/aks
 [azure service operator]: https://azure.github.io/azure-service-operator/
 [update or rotate the credentials for an aks cluster]: https://learn.microsoft.com/en-us/azure/aks/update-credentials
+[virtual nodes]: https://learn.microsoft.com/en-us/azure/aks/virtual-nodes
 
 <!-- In-article sections -->
 [further readings]: #further-readings
 
 <!-- Knowledge base -->
-[kubernetes]: ../kubernetes/README.md
+[kubernetes]: ../../kubernetes/README.md
+[virtual kubelet]: ../../kubernetes/virtual-kubelet.placeholder
