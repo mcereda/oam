@@ -36,5 +36,5 @@ find "$(brew --prefix)/etc" -type 'f' -name 'cert.pem' -path '*/openssl*' -exec 
 [github]: https://github.com/raggi/openssl-osx-ca
 
 <!-- Knowledge base -->
-[homebrew]: homebrew.md
+[homebrew]: ../homebrew.md
 [mac os x]: README.md

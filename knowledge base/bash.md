@@ -391,7 +391,7 @@ All the references in the [further readings] section, plus the following:
 [6 bash tricks you can use daily]: https://medium.com/for-linux-users/6-bash-tricks-you-can-use-daily-a32abdd8b13
 [bash startup files loading order]: https://youngstone89.medium.com/unix-introduction-bash-startup-files-loading-order-562543ac12e9
 [how to detect if a script is being sourced]: https://stackoverflow.com/questions/2683279/how-to-detect-if-a-script-is-being-sourced#28776166
-[speed up your command line navigation]: https://blog.jread.com/speed-up-your-command-line-navigation-d4050207f02c
+[speed up your command line navigation]: https://blog.jread.com/posts/speed-up-your-command-line-navigation-part-1/
 [the bash trap command]: https://www.linuxjournal.com/content/bash-trap-command
 [the essential bash cheat sheet]: https://betterprogramming.pub/the-essential-bash-cheat-sheet-e1c3df06560
 [upper- or lower-casing strings]: https://scriptingosx.com/2019/12/upper-or-lower-casing-strings-in-bash-and-zsh/

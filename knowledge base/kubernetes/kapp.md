@@ -30,4 +30,4 @@ $ kapp -y deploy -a 'my-app' -f <(ytt -f './examples/simple-app-example/config-1
   -->
 
 <!-- Upstream -->
-[website]: https://get-kapp.io
+[website]: https://carvel.dev/kapp/

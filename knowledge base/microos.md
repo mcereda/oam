@@ -37,7 +37,6 @@ See [MicroOS Desktop] for more and updated information.
 
 ## Sources
 
-- [MicroOS Desktop]
 - [MicroOS Portal]
 
 <!--
@@ -45,7 +44,6 @@ See [MicroOS Desktop] for more and updated information.
   -->
 
 <!-- Upstream -->
-[microos desktop]: https://opensuse.github.io/openSUSE-docs-revamped-temp/microos_getting_started/
 [microos portal]: https://en.opensuse.org/Portal:MicroOS
 
 <!-- Knowledge base -->

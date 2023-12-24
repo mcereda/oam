@@ -219,7 +219,7 @@ All the references in the [further readings] section, plus the following:
 [further readings]: #further-readings
 
 <!-- Files -->
-[michelecereda/keybaseio-client]: ../docker/keybaseio-client/README.md
+[michelecereda/keybaseio-client]: ../docker/keybaseio-git-client/README.md
 
 <!-- Others -->
 [configuring deduplication block on the synology]: https://onedrive.live.com/?authkey=%21ACYMJq62iJaU7HY&cid=1E8D74207941B8DD&id=1E8D74207941B8DD%21243&parId=1E8D74207941B8DD%21121&o=OneUp

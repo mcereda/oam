@@ -173,12 +173,12 @@ All the references in the [further readings] section, plus the following:
   -->
 
 <!-- Upstream -->
-[debugging cloud-init]: https://cloudinit.readthedocs.io/en/latest/topics/debugging.html
+[debugging cloud-init]: https://canonical-cloud-init.readthedocs-hosted.com/en/latest/howto/debugging.html
 [examples]: https://cloudinit.readthedocs.io/en/latest/topics/examples.html
-[merging user-data sections]: https://cloudinit.readthedocs.io/en/latest/topics/merging.html
+[merging user-data sections]: https://canonical-cloud-init.readthedocs-hosted.com/en/latest/reference/merging.html
 [modules]: https://cloudinit.readthedocs.io/en/latest/topics/modules.html
 [mime multi part archive]: https://cloudinit.readthedocs.io/en/latest/topics/format.html#mime-multi-part-archive
-[tutorial]: https://cloudinit.readthedocs.io/en/latest/topics/tutorial.html
+[tutorial]: https://canonical-cloud-init.readthedocs-hosted.com/en/latest/tutorial/
 [website]: https://cloud-init.io/
 
 <!-- In-article sections -->

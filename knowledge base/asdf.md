@@ -155,4 +155,4 @@ The versions listed in such file can be:
 [plugins list]: https://github.com/asdf-vm/asdf-plugins
 
 <!-- Files -->
-[.tool-versions example]: ../examples/.tool-versions
+[.tool-versions example]: ../examples/dotfiles/.tool-versions

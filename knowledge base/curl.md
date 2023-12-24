@@ -145,7 +145,7 @@ All the references in the [further readings] section, plus the following:
 <!-- Upstream -->
 [book]: https://everything.curl.dev/
 [config file]: https://everything.curl.dev/cmdline/configfile
-[http2]: https://everything.curl.dev/http/http2
+[http2]: https://everything.curl.dev/http/versions/http2
 
 <!-- In-article sections -->
 [further readings]: #further-readings

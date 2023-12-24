@@ -66,7 +66,7 @@ Based on experience.
 
 <!-- Knowledge base -->
 [safe]: safe.placeholder
-[the automation paradox]: the%20automation%20paradox.placeholder
+[the automation paradox]: the%20automation%20paradox.md
 
 <!-- Others -->
 [a case against "platform teams"]: https://kislayverma.com/organizations/a-case-against-platform-teams/

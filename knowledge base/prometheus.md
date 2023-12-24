@@ -120,7 +120,7 @@ All the references in the [further readings] section, plus the following:
 <!-- Knowledge base -->
 [grafana]: grafana.md
 [node exporter]: node%20exporter.md
-[smnp exporter]: smnp%20exporter.md
+[snmp exporter]: snmp%20exporter.md
 
 <!-- Files -->
 [docker/monitoring]: ../docker/monitoring/README.md

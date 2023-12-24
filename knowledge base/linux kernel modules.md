@@ -56,17 +56,12 @@ options brcmfmac roamoff=1 feature_disable=0x82000
 
 ## Sources
 
-All the references in the [further readings] section, plus the following:
-
 - The [Kernel module][arch wiki kernel module] page in the [Arch wiki]
 - The [Kernel modules][gentoo wiki kernel modules]
 
 <!--
   References
   -->
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Others -->
 [arch wiki]: https://wiki.archlinux.org

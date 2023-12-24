@@ -38,8 +38,8 @@ All the references in the [further readings] section, plus the following:
 [further readings]: #further-readings
 
 <!-- Knowledge base -->
-[kubectl]: kubectl.md
-[kubernetes]: README.md
+[kubectl]: kubernetes/kubectl.md
+[kubernetes]: kubernetes/README.md
 
 <!-- Others -->
 [get the environment variables of running process in container]: https://unix.stackexchange.com/a/412730

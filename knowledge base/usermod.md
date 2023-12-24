@@ -45,4 +45,4 @@ sudo usermod --move-home --home path/to/new_home lonny
   -->
 
 <!-- Others -->
-[cheat.sh]: cheat.sh/usermod
+[cheat.sh]: https://cheat.sh/usermod

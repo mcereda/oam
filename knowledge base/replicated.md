@@ -28,4 +28,4 @@ replicated admin --tty=0 retrieve-iact
 [replicatedctl]: replicatedctl.md
 
 <!-- Files -->
-[configuration file example]: ../examples/terraform%20enterprise/replicated.settings.json
+[configuration file example]: ../examples/terraform/enterprise/replicated.settings.json

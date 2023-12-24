@@ -65,4 +65,4 @@ reload_config
 [the uci system]: https://openwrt.org/docs/guide-user/base-system/uci
 
 <!-- Knowledge base -->
-[Turris Omnia]: turris.md
+[Turris Omnia]: turris%20os.md
