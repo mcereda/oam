@@ -9,6 +9,8 @@
   References
   -->
 
+<!-- Upstream -->
+[fedora silverblue]: https://fedoraproject.org/silverblue/
+
 <!-- Knowledge base -->
-[fedora silverblue]: fedora%20silverblue.md
 [microos]: microos.md

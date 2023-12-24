@@ -46,4 +46,4 @@ sudo useradd --system username
   -->
 
 <!-- Others -->
-[cheat.sh]: cheat.sh/useradd
+[cheat.sh]: https://cheat.sh/useradd

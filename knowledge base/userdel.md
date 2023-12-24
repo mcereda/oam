@@ -29,4 +29,4 @@ sudo userdel --remove username
   -->
 
 <!-- Others -->
-[cheat.sh]: cheat.sh/userdel
+[cheat.sh]: https://cheat.sh/userdel

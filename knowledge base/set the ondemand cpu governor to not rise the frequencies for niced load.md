@@ -25,7 +25,7 @@ echo "w /sys/devices/system/cpu/cpufreq/ondemand/ignore_nice_load - - - - 1" | s
   -->
 
 <!-- Knowledge base -->
-[cpufreq]: cpufreq.md
+[cpupower]: cpupower.md
 
 <!-- Others -->
 [laptop overheating and battery duration reduction]: https://wiki.archlinux.org/?title=BOINC#Laptop_overheating_and_battery_duration_reduction

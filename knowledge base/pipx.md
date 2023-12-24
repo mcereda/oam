@@ -54,7 +54,7 @@ pipx uninstall 'azure-cli'
   -->
 
 <!-- Upstream -->
-[website]: https://pypa.github.io/pipx/
+[website]: https://pipx.pypa.io/stable/
 
 <!-- Knowledge base -->
 [pip]: pip.md

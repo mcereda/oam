@@ -64,5 +64,5 @@ All the references in the [further readings] section, plus the following:
 [encrypted root filesystem]: encrypted%20root%20filesystem.md
 
 <!-- Files -->
-[create an encrypted btrfs device]: scripts/create-an-encrypted-btrfs-device.sh
-[create an encrypted zfs device]: scripts/create-an-encrypted-btrfs-device.sh
+[create an encrypted btrfs device]: ../scripts/create-an-encrypted-btrfs-device.sh
+[create an encrypted zfs device]: ../scripts/create-an-encrypted-zfs-device.sh

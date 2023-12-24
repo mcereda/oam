@@ -28,5 +28,5 @@ uuencode file.txt | mail -s "Subject" recipient@mail.server
   -->
 
 <!-- Others -->
-[linux mail command examples]: https://www.binarytides.com/linux-mail-command-examples
+[linux mail command examples]: https://www.binarytides.com/linux-mail-command-examples/
 [uuencode]: https://linux.101hacks.com/unix/uuencode/

@@ -632,7 +632,7 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Knowledge base -->
 [jsonpath]: ../jsonpath.md
-[krew]: krew.md
+[krew]: krew.placeholder
 [kubernetes]: README.md
 
 <!-- Others -->
