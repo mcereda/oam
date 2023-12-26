@@ -27,3 +27,5 @@ find ~ -type d -name ".git" -exec dirname {} + | xargs -I // git -C "//" pull
 echo 1 2 3 4 | xargs "${BASH_ALIASES[my-alias]}"
 echo 1 2 3 4 | xargs $aliases['my-alias']
 ```
+
+[an opinionated guide to xargs]: https://www.oilshell.org/blog/2021/08/xargs.html

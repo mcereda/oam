@@ -576,9 +576,10 @@ Tools:
 - [`kustomize`][kustomize]
 - [`kubeval`][kubeval]
 - `kube-score`
-- [`kubectx`+`kubens`][kubectx+kubens] (alternative to [`kubie`][kubie])
+- [`kubectx`+`kubens`][kubectx+kubens], alternative to [`kubie`][kubie] and [`kubeswitch`][kubeswitch]
+- [`kubeswitch`][kubeswitch], alternative to [`kubie`][kubie] and [`kubectx`+`kubens`][kubectx+kubens]
 - [`kube-ps1`][kube-ps1]
-- [`kubie`][kubie] (alternative to [`kubectx`+`kubens`][kubectx+kubens] and [`kube-ps1`][kube-ps1])
+- [`kubie`][kubie], alternative to [`kubeswitch`][kubeswitch], and to [`kubectx`+`kubens`][kubectx+kubens] and [`kube-ps1`][kube-ps1]
 - [K3S]
 - [Minikube]
 - [Kubescape]
@@ -613,6 +614,7 @@ All the references in the [further readings] section, plus the following:
 - [Configuration best practices]
 - [Cloudzero Kubernetes best practices]
 - [Scaling K8S nodes without breaking the bank or your sanity - Brandon Wagner & Nick Tran, Amazon]
+- [Kubernetes Troubleshooting - The Complete Guide]
 
 <!--
   References
@@ -682,6 +684,7 @@ All the references in the [further readings] section, plus the following:
 [how to run a command in a pod after initialization]: https://stackoverflow.com/questions/44140593/how-to-run-command-after-initialization/44146351#44146351
 [kubernetes cluster autoscaler]: https://www.kubecost.com/kubernetes-autoscaling/kubernetes-cluster-autoscaler/
 [kubernetes securitycontext capabilities explained]: https://www.golinuxcloud.com/kubernetes-securitycontext-capabilities/
+[kubernetes troubleshooting - the complete guide]: https://komodor.com/learn/kubernetes-troubleshooting-the-complete-guide/
 [linux capabilities]: https://man7.org/linux/man-pages/man7/capabilities.7.html
 [making sense of taints and tolerations]: https://medium.com/kubernetes-tutorials/making-sense-of-taints-and-tolerations-in-kubernetes-446e75010f4e
 [no_new_privs linux kernel documentation]: https://www.kernel.org/doc/Documentation/prctl/no_new_privs.txt
@@ -691,8 +694,9 @@ All the references in the [further readings] section, plus the following:
 [why separate your kubernetes workload with nodepool segregation and affinity options]: https://medium.com/contino-engineering/why-separate-your-kubernetes-workload-with-nodepool-segregation-and-affinity-rules-cb5225953788
 
 [karpenter]: https://karpenter.sh/
-[kubectx+kubens]: https://github.com/ahmetb/kubectx
 [kube-ps1]: https://github.com/jonmosco/kube-ps1
+[kubectx+kubens]: https://github.com/ahmetb/kubectx
+[kubeswitch]: https://github.com/danielfoehrKn/kubeswitch
 [kubie]: https://github.com/sbstp/kubie
 [pulumi]: https://www.pulumi.com
 
