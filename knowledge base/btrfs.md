@@ -19,7 +19,7 @@ sudo mkfs.btrfs --metadata "single" --data "dup" "/dev/sdb"
 
 # Sparse one volume on multiple devices.
 sudo mkfs.btrfs --label "data" /dev/sd{a,c,d,f,g} --force \
-&& echo "LABEL=data  /mnt/data  btrfs  compress=zstd  0  0"
+&& echo "LABEL=data  /mnt/data  btrfs  compress=zstd  0  0" \
    | tee -a /etc/fstab
 ```
 
