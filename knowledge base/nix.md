@@ -9,11 +9,15 @@
 ## TL;DR
 
 ```sh
-# Install Nix.
-# Works on Linux *using systemd* with SELinux *disabled*. Or MacOSX.
+# Install Nix in single-user mode (suggested).
+# Works on most Linux even *without systemd* or with SELinux *enabled*.
+# *Not* supported on MacOSX.
+bash <(curl -L 'https://nixos.org/nix/install') --no-daemon
+
+# Install Nix in multi-user mode.
+# Only works on Linux *using systemd* with SELinux *disabled*. Or MacOSX.
 curl -L 'https://nixos.org/nix/install' | sh
 bash <(curl -L 'https://nixos.org/nix/install') --daemon
-bash <(curl -L 'https://nixos.org/nix/install') --no-daemon
 
 
 # List configured channels.
@@ -75,6 +79,15 @@ nix repl
 # The file path defaults to 'default.nix'.
 nix-instantiate --eval
 nix-instantiate --eval 'path/to/file.nix'
+
+
+# Uninstall Nix in single-user mode.
+# Also remove references from '~/.bash_profile' and '~/.zshenv'.
+rm -rf '/nix'
+
+# Uninstall Nix in multi-user mode.
+# Oooh boi.
+# Check https://nixos.org/manual/nix/stable/installation/uninstall#multi-user.
 ```
 
 ## Further readings
