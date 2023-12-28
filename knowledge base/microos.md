@@ -17,7 +17,7 @@ sudo transactional-update dup
 pkcon update
 
 # Install a package.
-sudo transactional-update pkg install tlp ntfs-3g fuse-exfat nano
+sudo transactional-update pkg install 'tlp' 'ntfs-3g' 'fuse-exfat' 'nano'
 pkcon install gnu_parallel
 
 # Get a shell on the next snapshot.

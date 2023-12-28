@@ -43,6 +43,9 @@ zypper ref 'updates'
 zypper search 'nmap'
 zypper se 'mariadb'
 
+# Show all available versions of resolvables.
+zypper se -s 'kernel-default'
+
 # Display detailed information about resolvables.
 zypper info 'workrave'
 zypper if -t 'patch' 'libzypp'
@@ -57,6 +60,9 @@ zypper in --no-recommends 'gv' 'virtualbox-ose=2.0.6' '/root/ansible.rpm'
 # Requires the repo to be already added.
 zypper in -r 'packman' 'libavdevice60'
 zypper in -r 'https://repo.vivaldi.com/archive/vivaldi-suse.repo' 'vivaldi'
+
+# Reinstall resolvables.
+zypper in -f 'amdgpu-dkms'
 
 # Install resolvables from source.
 # The source packages *must* be available in the repositories one is using.
@@ -121,6 +127,7 @@ zypper renamerepo 'firefox' 'mozilla'
 zypper nr '5' 'packman'
 
 # Modify repositories.
+# Disable with '-d'.
 zypper modifyrepo -er 'updates'
 zypper mr -da
 

@@ -6,8 +6,7 @@
 1. [Client management](#client-management)
    1. [Remote management](#remote-management)
 1. [Use the GPU for computations](#use-the-gpu-for-computations)
-   1. [On OpenSUSE](#on-opensuse)
-   1. [Check the GPU is OpenCL-enabled](#check-the-gpu-is-opencl-enabled)
+   1. [AMD drivers](#amd-drivers)
 1. [Use VirtualBox for computations](#use-virtualbox-for-computations)
 1. [Ask for tasks for alternative platforms](#ask-for-tasks-for-alternative-platforms)
 1. [Gotchas](#gotchas)
@@ -64,39 +63,7 @@ Better solution:
 
 ## Use the GPU for computations
 
-To use the GPU for projects you may need the proprietary nVidia or AMD drivers. See [AMD Linux drivers] and [Radeon™ Software for Linux® Installation].
-
-```sh
-amdgpu-install --usecase=workstation --opencl=rocr
-```
-
-The BOINC client seems to need to be added to the `video` group to be able to use the drivers correctly - this is something I still need to check.
-
-```sh
-gpasswd -a 'boinc' 'video'
-usermod --append --groups 'video' 'boinc'
-```
-
-### On OpenSUSE
-
-Install the `amdgpu-install` package from [AMD's Linux drivers][amd linux drivers] page, then execute it.
-
-```sh
-# Previous versions of the package (like the one in the official documentation
-# at the time of writing) made DKMS fail.
-sudo zypper install 'https://repo.radeon.com/amdgpu-install/22.20.3/sle/15.4/amdgpu-install-22.20.50203-1.noarch.rpm'
-sudo amdgpu-install
-```
-
-At the next restart of the boinc-client, something similar to this line should appear in the client's logs:
-
-```txt
-Oct 09 23:09:40 hostnameHere boinc[1709]: 09-Oct-2022 23:09:40 [---] OpenCL: AMD/ATI GPU 0: gfx90c:xnack- (driver version 3452.0 (HSA1.1,LC), device ve>
-```
-
-### Check the GPU is OpenCL-enabled
-
-Just install and run `clinfo`:
+Check the GPU is OpenCL-enabled installing and running `clinfo`:
 
 ```sh
 $ clinfo
@@ -105,6 +72,39 @@ Number of platforms     1
   Platform Vendor       NVIDIA Corporation
   Platform Version      OpenCL 1.2 CUDA 10.0.132
 …
+```
+
+If the resulting number of platform is `0`, you need to install the proprietary drivers for your card.
+
+The BOINC client seems to need to be added to the `video` group to be able to use the drivers correctly - this is something I still need to check.
+
+```sh
+gpasswd -a 'boinc' 'video'
+usermod --append --groups 'video' 'boinc'
+```
+
+### AMD drivers
+
+See [AMD Linux drivers] and [Radeon™ Software for Linux® Installation] for the AMD drivers.<br/>
+If you want to install also the ROCm component, see also the [AMD ROCm™ documentation].
+
+<details><summary>On OpenSUSE</summary>
+
+Install the `amdgpu-install` package from [AMD's Linux drivers][amd linux drivers] page, then execute it.
+
+```sh
+# Previous versions of the package (like the one in the official documentation
+# at the time of writing) made DKMS fail.
+sudo zypper install 'https://repo.radeon.com/amdgpu-install/22.20.3/sle/15.4/amdgpu-install-22.20.50203-1.noarch.rpm'
+sudo amdgpu-install --usecase=workstation --opencl=rocr
+```
+
+</details><br/>
+
+At the next restart of the BOINC client, something similar to this line should appear in the event logs:
+
+```txt
+Oct 09 23:09:40 hostnameHere boinc[1709]: 09-Oct-2022 23:09:40 [---] OpenCL: AMD/ATI GPU 0: gfx90c:xnack- (driver version 3452.0 (HSA1.1,LC), device ve>
 ```
 
 ## Use VirtualBox for computations
@@ -149,6 +149,7 @@ In `cc_config.xml`:
 - [boinccmd] for the bare CLI utility
 - [boinctui] for a TUI manager
 - [GUI RPC bind to port 31416 failed: 98]
+- [AMD ROCm™ documentation]
 
 <!--
   References
@@ -162,6 +163,7 @@ In `cc_config.xml`:
 [installing or uninstalling the amdgpu stack]: https://amdgpu-install.readthedocs.io/en/latest/install-installing.html
 [platforms]: https://boinc.berkeley.edu/trac/wiki/BoincPlatforms
 [radeon™ software for linux® installation]: https://amdgpu-install.readthedocs.io/en/latest/
+[amd rocm™ documentation]: https://rocm.docs.amd.com/en/latest/
 [website]: https://boinc.berkeley.edu/
 
 <!-- In-article sections -->
