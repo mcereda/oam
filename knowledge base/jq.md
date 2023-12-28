@@ -17,13 +17,14 @@ jq --sort-keys '.' 'input.json' > 'output.json'
 jq --sort-keys '.' 'file.json' | sponge 'file.json'
 
 # Do not fail due to possibly missing keys.
-# Postfix operator '?'.
+# Notice the postfix operator '?'.
 jq '.spec.template.spec.containers[]?.env?' 'manifest.kube.json'
 
-# Add keys.
+# Add elements to lists.
+jq '.orchestrators += [{"orchestratorVersion": "1.24.9"}]'
 jq --arg REGION ${AWS_REGION} '.spec.template.spec.containers[]?.env? += [{name: "AWS_REGION", value: $REGION}]' /tmp/service.kube.json
 
-# Delete keys.
+# Delete keys from objects.
 jq 'del(.items[].spec.clusterIP)' /tmp/service.kube.json
 
 # Print objects as 'key [space] "value"' pairs.
@@ -45,9 +46,9 @@ jq '.extensionsGallery
     | .itemUrl = "https://marketplace.visualstudio.com/items"' \
   /usr/lib/code/product.json
 jq '.extensionsGallery + {
-       serviceUrl: "https://marketplace.visualstudio.com/_apis/public/gallery",
-       cacheUrl: "https://vscode.blob.core.windows.net/gallery/index",
-       itemUrl: "https://marketplace.visualstudio.com/items"
+      serviceUrl: "https://marketplace.visualstudio.com/_apis/public/gallery",
+      cacheUrl: "https://vscode.blob.core.windows.net/gallery/index",
+      itemUrl: "https://marketplace.visualstudio.com/items"
     }' /usr/lib/code/product.json
 
 # Merge objects from 2 files
