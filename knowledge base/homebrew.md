@@ -1,11 +1,20 @@
 # Homebrew
 
+1. [TL;DR](#tldr)
+1. [Configuration](#configuration)
+1. [Downgrade an application to a non-managed version](#downgrade-an-application-to-a-non-managed-version)
+   1. [The easy way](#the-easy-way)
+   1. [The hard way](#the-hard-way)
+1. [Gotchas](#gotchas)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
 ## TL;DR
 
 ```sh
-# Install/uninstall on OS X.
+# Install on OS X.
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+
 
 # Search for formulae.
 brew search 'parallel'
@@ -15,9 +24,6 @@ brew search --cask 'gpg'
 brew install 'gettext'
 brew install --cask 'spotify'
 
-# Uninstall something.
-brew uninstall --zap 'keybase'
-
 # Get formulae's dependencies.
 brew deps
 brew deps --installed 'azure-cli'
@@ -26,16 +32,26 @@ brew deps --tree
 # Get information on formulae.
 brew info 'sponge'
 
+# List all files installed by formulae.
+brew ls -v 'coreutils'
+brew ls -v --cask 'firefox'
+
 # Prevent formulae from upgrading.
 brew pin 'gnupg2'
+
+# Uninstall something.
+brew uninstall --zap 'keybase'
+
 
 # Add taps.
 # Only one at a time.
 brew tap 'homebrew/services'
 
+
 # Manage services.
 # Requires the 'homebrew/services' tap.
 brew services start 'openssl-osx-ca'
+
 
 # Bring an installation up to speed from a Brewfile.
 brew bundle
@@ -45,6 +61,10 @@ brew bundle --file "$HOME/Brewfile" --no-lock
 # Dump all installed casks/formulae/images/taps into a Brewfile in the current
 # directory.
 brew bundle dump
+
+
+# Uninstall from OS X.
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
 ```
 
 ## Configuration
