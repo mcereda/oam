@@ -6,11 +6,17 @@
 1. [Daemon configuration](#daemon-configuration)
 1. [Containers configuration](#containers-configuration)
 1. [Gotchas](#gotchas)
+1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
 ## TL;DR
 
 ```sh
+# Install
+brew install --cask 'docker'
+sudo zypper install 'docker'
+
+
 # Show locally available images.
 docker images -a
 
@@ -161,6 +167,11 @@ Those files come from the volume the docker container is using for its root, and
   This is due to the fact that the Docker daemon on Mac is running in a virtual machine, and not natively; hence, ports are exposed on the VM and not of the host running it.<br/>
   One way around it is port forwarding to localhost (the `-p` or `-P` options).
 
+## Further readings
+
+- [GitHub] page
+- [Podman]
+
 ## Sources
 
 - [Arch Linux Wiki]
@@ -171,6 +182,9 @@ Those files come from the volume the docker container is using for its root, and
 <!--
   References
   -->
+
+<!-- Knowledge base -->
+[podman]: podman.placeholder
 
 <!-- Others -->
 [arch linux wiki]: https://wiki.archlinux.org/index.php/Docker
