@@ -42,8 +42,10 @@ snapper diff 6..21
 snapper modify \
   --userdata 'important=yes' \
   --description 'new description' \
-  --cleanup-algorithm '' 12
-snapper modify 12 -u 'important=yes' -d 'new description' -c ''
+  --cleanup-algorithm '' \
+  12
+snapper modify -u 'important=yes' -d 'new description' -c '' 12
+snapper modify -c '' 2
 ```
 
 ## Further readings
