@@ -1,0 +1,15 @@
+---
+version: "3"
+services:
+  syncthing:
+    image: syncthing/syncthing
+    container_name: syncthing
+    hostname: planck
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./config:/var/syncthing/config
+      - ./data:/var/syncthing/data
+    network_mode: host
+    restart: unless-stopped
