@@ -56,4 +56,4 @@ toolbox rmi -af
 [github]: https://github.com/containers/toolbox
 
 <!-- Knowledge base -->
-[podman]: podman.md
+[podman]: podman.placeholder
