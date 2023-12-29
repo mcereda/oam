@@ -3,6 +3,7 @@
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
+1. [Local hooks](#local-hooks)
 1. [Troubleshooting](#troubleshooting)
    1. [Some files are skipped during a run](#some-files-are-skipped-during-a-run)
 1. [Further readings](#further-readings)
@@ -24,12 +25,31 @@ pre-commit install
 # It is *not* always the latest *stable* release.
 pre-commit autoupdate
 
-# Skip check on commit.
+# Skip checks on commit.
 SKIP="check_id" git commit -m "foo"
 git commit --no-verify -m "foo"
 ```
 
 [Config file example].
+
+## Local hooks
+
+```yml
+# .pre-commit-config.yaml
+repos:
+  - repo: local
+    hooks:
+      - id: do-something-with-make-once
+        name: Do something with GNU Make once
+        language: system
+        entry: make do-something
+        pass_filenames: false
+        require_serial: true
+      - id: call-script-passing-files
+        name: Call a local script passing files as arguments
+        language: script
+        entry: path/to/script.sh
+```
 
 ## Troubleshooting
 
