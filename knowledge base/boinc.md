@@ -7,6 +7,7 @@
    1. [Remote management](#remote-management)
 1. [Use the GPU for computations](#use-the-gpu-for-computations)
    1. [AMD drivers](#amd-drivers)
+   1. [Intel OpenCL support](#intel-opencl-support)
 1. [Use VirtualBox for computations](#use-virtualbox-for-computations)
 1. [Ask for tasks for alternative platforms](#ask-for-tasks-for-alternative-platforms)
 1. [Gotchas](#gotchas)
@@ -97,6 +98,14 @@ Install the `amdgpu-install` package from [AMD's Linux drivers][amd linux driver
 # at the time of writing) made DKMS fail.
 sudo zypper install 'https://repo.radeon.com/amdgpu-install/22.20.3/sle/15.4/amdgpu-install-22.20.50203-1.noarch.rpm'
 sudo amdgpu-install --usecase=workstation --opencl=rocr
+```
+
+### Intel OpenCL support
+
+```sh
+sudo apt install 'intel-opencl-icd' 'ocl-icd-libopencl1'
+sudo pacman -Sy 'ocl-icd'
+sudo zypper install 'intel-opencl'
 ```
 
 </details><br/>
