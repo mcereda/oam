@@ -15,26 +15,43 @@ Useful options:
 ## TL;DR
 
 ```sh
+# Search installed packages.
+pacman -Q -s 'ddc'
 
-# search an installed package
-pacman --query --search ddc
+# List all explicitly (manually) installed packages.
+pacman -Q -e
 
-# list all explicitly installed packages
-pacman --query --explicit
 
-# set a package as explicitly (manually) installed
-pacman --database --asexplicit dkms
-# set a package as installed as dependency (automatically installed)
-pacman --database --asdeps autoconf
+# Set packages as explicitly (manually) installed.
+pacman -D --asexplicit 'dkms'
 
-# install zsh unsupervisioned (useful in scrips)
-pacman --noconfirm \
-  --sync --needed --noprogressbar --quiet --refresh \
-  fzf zsh-completions
-# completely remove virtualbox-guest-utils-nox unsupervisioned (useful in scrips)
-pacman --noconfirm \
-  --remove --nosave --noprogressbar --quiet --recursive --unneeded \
-  virtualbox-guest-utils-nox
+# Set packages as installed as dependency (automatically installed).
+pacman -D --asdeps 'autoconf'
+
+
+# Refresh repositories' cache.
+pacman -Sy
+
+
+# Download packages from repositories.
+# Does *not* install them.
+pacman -Sw 'fzf'
+
+
+# Install packages from repositories.
+pacman -S -qy --needed --noprogressbar 'fzf' 'zsh-completions=0.35.0-1'
+
+# Install packages from local directories.
+pacman -U 'fzf-0.44.1-1-x86_64.pkg.tar.zst'
+
+
+# Completely remove packages.
+pacman -R -nsu --noprogressbar 'virtualbox-guest-utils-nox'
+
+
+# Take actions without supervision.
+# Useful in scripts.
+pacman --noconfirm …
 ```
 
 ## Further readings
