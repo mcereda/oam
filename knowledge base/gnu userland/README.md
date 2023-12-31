@@ -24,14 +24,11 @@ All the references in the [further readings] section, plus the following:
   References
   -->
 
-<!-- Upstream -->
-[software]: https://www.gnu.org/software/
-
 <!-- In-article sections -->
 [further readings]: #further-readings
 
-<!-- Knowledge base -->
-[parallel]: parallel.md
+<!-- Upstream -->
+[software]: https://www.gnu.org/software/
 
 <!-- Others -->
 [gnu userland]: https://www.linux.org/threads/gnu-userland.11066/
