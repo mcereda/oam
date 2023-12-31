@@ -10,14 +10,16 @@ Delete users accounts and their related files.
 ## TL;DR
 
 ```sh
-# Remove a user.
-sudo userdel username
+# Remove users.
+sudo userdel 'username'
 
-# Remove a user in other root directory.
-sudo userdel --root path/to/other/root username
+# Remove users from other (ch)root directories.
+sudo userdel -R 'path/to/other/root' …
+sudo userdel --root 'path/to/other/root' …
 
-# Remove a user along with the home directory and mail spool.
-sudo userdel --remove username
+# Remove users along with their home directory and mail spool.
+sudo userdel -r …
+sudo userdel --remove …
 ```
 
 ## Sources

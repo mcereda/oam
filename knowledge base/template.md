@@ -20,10 +20,10 @@ All the references in the [further readings] section, plus the following:
   References
   -->
 
-<!-- Upstream -->
 <!-- In-article sections -->
 [further readings]: #further-readings
 
 <!-- Knowledge base -->
 <!-- Files -->
+<!-- Upstream -->
 <!-- Others -->
