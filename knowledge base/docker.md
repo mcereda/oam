@@ -184,6 +184,7 @@ Those files come from the volume the docker container is using for its root, and
   -->
 
 <!-- Knowledge base -->
+[containerd]: containerd.placeholder
 [podman]: podman.placeholder
 
 <!-- Others -->
