@@ -23,26 +23,30 @@ The resource share property can be set anywhere from 0 to 1000 for each project,
 ```sh
 # Install.
 flatpak install 'edu.berkeley.BOINC'
+sudo apt install 'boinc-client' 'boinc-manager'     # or 'boinc-client-nvidia-cuda' or similar for more features support
+sudo pacman -S 'boinc'                              # or 'boinc-nox'
 sudo zypper install 'boinc-client' 'boinc-manager'
 
 # Set the GUI RPC communications port.
-boinc --gui_rpc_port 30000
+# Default is '31416'.
+boinc --gui_rpc_port '30000'
 ```
 
 ## Client management
 
-Name            | Type         | Description
---------------- | ------------ | ---
-[BOINC Manager] | Graphical    |
-[boinccmd]      | Command line |
-[boinctui]      | Text         |
+| Name            | Type         |
+| --------------- | ------------ |
+| [BOINC Manager] | Graphical    |
+| [boinccmd]      | Command line |
+| [boinctui]      | Text         |
 
 Local control RPCs are authenticated using the GUI RPC password. This password is located in the `gui_rpc_auth.cfg` configuration file, as the single first line, with a max length of 255 characters.
 
 A password is **required** from version FIXME, and is automatically generated if the file is not found or it is empty.
 
-Resource share is used to help BOINC determine which projects to prioritize. The larger the number, the more it will prioritize work from that project over the other projects. It does not determine anything about how much of your CPU, GPU, etc. are used. If you want to do that, change the relative settings.<br/>
-The number for resource share can be set anywhere from 0 to 1000 for each project. Setting a project's resource share to zero means it will not get any work from that project unless every other project you run is out of work.
+Resource share is used to help BOINC determine which projects to prioritize; the larger the number, the more it will prioritize work from that project over the other projects.<br/>
+This value does **not** determine anything about how much of your CPU, GPU, etc. are used. If you want to do that, change the relative settings.<br/>
+The number for resource share can be set anywhere from `0` to `1000` for each project. Setting a project's resource share to zero means it will **not** get any work from that project **unless** every other project you run is out of work.
 
 ### Remote management
 
@@ -77,13 +81,6 @@ Number of platforms     1
 
 If the resulting number of platform is `0`, you need to install the proprietary drivers for your card.
 
-The BOINC client seems to need to be added to the `video` group to be able to use the drivers correctly - this is something I still need to check.
-
-```sh
-gpasswd -a 'boinc' 'video'
-usermod --append --groups 'video' 'boinc'
-```
-
 ### AMD drivers
 
 See [AMD Linux drivers] and [Radeon™ Software for Linux® Installation] for the AMD drivers.<br/>
@@ -100,12 +97,19 @@ sudo zypper install 'https://repo.radeon.com/amdgpu-install/22.20.3/sle/15.4/amd
 sudo amdgpu-install --usecase=workstation --opencl=rocr
 ```
 
+The BOINC user also needs to be added to the `video` group to be able to use these drivers correctly.
+
+```sh
+gpasswd -a 'boinc' 'video'
+usermod --append --groups 'video' 'boinc'
+```
+
 ### Intel OpenCL support
 
 ```sh
 sudo apt install 'intel-opencl-icd' 'ocl-icd-libopencl1'
-sudo pacman -Sy 'ocl-icd'
-sudo zypper install 'intel-opencl'
+sudo pacman -Sy 'intel-compute-runtime' 'ocl-icd'
+sudo zypper install 'intel-opencl' 'ocl-icd-devel'
 ```
 
 </details><br/>
