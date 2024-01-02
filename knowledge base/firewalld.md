@@ -38,13 +38,17 @@ sudo firewall-cmd --list-services
 sudo firewall-cmd --list-services --zone='public'
 sudo firewall-cmd --list-services --permanent
 
-# Temporarily allow services.
+#  Allow services.
 sudo firewall-cmd --add-service='http'
 sudo firewall-cmd --add-service='ssh' --zone='public'
-
-# Permanently allow services.
 sudo firewall-cmd --add-service='ssh' --permanent
 sudo firewall-cmd --add-service='https' --zone='public' --permanent
+
+#  Remove services.
+sudo firewall-cmd --remove-service='http'
+sudo firewall-cmd --remove-service='ssh' --zone='public'
+sudo firewall-cmd --remove-service='ssh' --permanent
+sudo firewall-cmd --remove-service='https' --zone='public' --permanent
 
 # List the open ports in a zone.
 sudo firewall-cmd --list-ports

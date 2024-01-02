@@ -15,13 +15,13 @@ snapper list-config
 snapper list
 
 # Create a manual standalone snapshot.
+snapper create -t 'single' -d 'manual checkpoint' -c '' -u 'important=yes'
 snapper \
   --config 'root' \
   create --read-only \
     --type 'single' \
     --description 'manual checkpoint' \
     --userdata 'important=yes'
-snapper create -t 'single' -d 'manual checkpoint' -c '' -u 'important=yes'
 
 # Rollback to snapshot #0.
 snapper rollback 0
@@ -39,13 +39,13 @@ snapper diff 6..21
 # '' (empty string, to cancel).
 # Any description must be less than 25 characters.
 # Any userdata must contain KEY=VALUE couples.
+snapper modify -c '' 2
+snapper modify -u 'important=yes' -d 'new description' -c '' 12
 snapper modify \
   --userdata 'important=yes' \
   --description 'new description' \
   --cleanup-algorithm '' \
   12
-snapper modify -u 'important=yes' -d 'new description' -c '' 12
-snapper modify -c '' 2
 ```
 
 ## Further readings
