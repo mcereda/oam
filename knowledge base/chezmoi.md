@@ -5,7 +5,7 @@ A multi-machine dotfile manager, written in Go.
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
-1. [Save the current data to a remote repository](#save-the-current-data-to-a-remote-repository)
+1. [Save the current state to a remote repository](#save-the-current-state-to-a-remote-repository)
 1. [Gotchas](#gotchas)
 1. [Snippets](#snippets)
 1. [Further readings](#further-readings)
@@ -14,55 +14,59 @@ A multi-machine dotfile manager, written in Go.
 ## TL;DR
 
 ```sh
-# initialize chezmoi
-chezmoi init
-chezmoi init https://github.com/username/dotfiles.git
+# Install Chezmoi.
+brew install 'chezmoi'
+sudo zypper install 'chezmoi'
 
-# initialize, checkout and apply
+# Initialize chezmoi.
+chezmoi init
+chezmoi init 'https://github.com/username/dotfiles.git' --branch 'chezmoi'
+
+# Initialize, checkout and apply all at once.
 chezmoi init --apply --verbose https://github.com/username/dotfiles.git
 
-# add a file
-chezmoi add .gitconfig
-chezmoi add --follow --template .vimrc  # follow symlinks, add as template
-chezmoi add --encrypt .ssh/id_ed25519   # add encrypted
+# Add existing files to the managed set.
+chezmoi add '.gitconfig'
+chezmoi add --follow --template '.vimrc'  # follow symlinks, add as template
+chezmoi add --encrypt '.ssh/id_ed25519'   # add encrypted
 
-# edit a file
-# the file needs to be added first
-chezmoi edit .tmux.conf
+# Edit files.
+# The given files need to have been added first.
+chezmoi edit '.tmux.conf'
 
-# check what files would change during an apply
+# Check what files would change during an apply.
 chezmoi apply --dry-run --verbose
 
-# check what contents would change
+# Check what contents would change.
 chezmoi diff
 
-# apply changes
+# Apply changes.
 chezmoi apply
 
-# show the full list of variables
-# includes custom data from the configuration file
+# Show the full list of variables.
+# Includes custom data from the configuration file.
 chezmoi data
 
-# test a template
+# Test templates.
 chezmoi execute-template < .local/share/chezmoi/dot_gitconfig.tmpl
 chezmoi execute-template --init --promptString email=me@home.org < ~/.local/share/chezmoi/.chezmoi.yaml.tmpl
 
-# use git on chezmoi's data storage
-chezmoi git add -- .
-chezmoi git commit -- --message "commit message"
+# Use `git` on chezmoi's data storage.
+chezmoi git add -- '.'
+chezmoi git commit -- -m "commit message"
 chezmoi git pull -- --rebase
-chezmoi git push -- --set-upstream origin main
+chezmoi git push -- --set-upstream 'origin' 'main'
 
-# fetch the latest changes from a remote repository
+# Fetch the latest changes from a remote repository.
 chezmoi update
 ```
 
-## Save the current data to a remote repository
+## Save the current state to a remote repository
 
 ```sh
 $ chezmoi cd
-chezmoi $> git remote add origin https://github.com/username/dotfiles.git
-chezmoi $> git push -u origin main
+chezmoi $> git remote add 'origin' 'https://github.com/username/dotfiles.git'
+chezmoi $> git push -u 'origin' 'main'
 chezmoi $> exit
 $
 ```
@@ -85,7 +89,7 @@ $
 
 ## Snippets
 
-```golang
+```go
 {{- /* Overwrite settings from the host-specific configuration files, if existing. */}}
 
 {{- $hostConfigFiles := list
@@ -131,11 +135,11 @@ All the references in the [further readings] section, plus the following:
   References
   -->
 
-<!-- Upstream -->
-[user guide]: https://www.chezmoi.io/user-guide/setup/
-
 <!-- In-article sections -->
 [further readings]: #further-readings
+
+<!-- Upstream -->
+[user guide]: https://www.chezmoi.io/user-guide/setup/
 
 <!-- Others -->
 [cheat.sh]: https://cheat.sh/chezmoi
