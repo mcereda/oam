@@ -5,6 +5,7 @@
 1. [Downgrade an application to a non-managed version](#downgrade-an-application-to-a-non-managed-version)
    1. [The easy way](#the-easy-way)
    1. [The hard way](#the-hard-way)
+1. [Download packages preemptively](#download-packages-preemptively)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
@@ -128,6 +129,43 @@ git checkout master
 git branch -d ${formula_name}-${formula_version}
 ```
 
+## Download packages preemptively
+
+Sometimes the file will continuously fail to download for some reason (like a badly configured antivirus software that keeps cutting out your download).
+
+You can download the installation file yourself in steps and try the installation again:
+
+```sh
+$ brew install --cask 'docker'
+…
+==> Downloading https://desktop.docker.com/mac/main/amd64/131620/Docker.dmg
+######################################################   36.6%curl: (18) Transferred a partial file
+
+$ brew --cache 'homebrew/cask/docker'
+/Users/username/Library/Caches/Homebrew/downloads/508b…95f1--Docker.dmg
+
+$ curl -L -C - -o "$(brew --cache 'homebrew/cask/docker')" \
+    'https://desktop.docker.com/mac/main/amd64/131620/Docker.dmg'
+** Resuming transfer from byte position 1282048
+…
+curl: (18) Transferred a partial file
+
+$ curl -L -C - -o "$(brew --cache 'homebrew/cask/docker')" \
+    'https://desktop.docker.com/mac/main/amd64/131620/Docker.dmg'
+** Resuming transfer from byte position 242762028
+…
+
+$ brew install --cask 'docker'
+…
+==> Downloading https://desktop.docker.com/mac/main/amd64/131620/Docker.dmg
+Already downloaded: /Users/username/Library/Caches/Homebrew/downloads/508b…95f1--Docker.dmg
+==> Installing Cask docker
+…
+docker was successfully installed!
+```
+
+See also [How to manually download brew package for installation?].
+
 ## Gotchas
 
 - `moreutils` installs its own old version of `parallel`, which conflicts with the `parallel` formulae; install the standalone `gettext`, `parallel` and `sponge` to have their recent version
@@ -141,6 +179,7 @@ git branch -d ${formula_name}-${formula_version}
 
 - [How to stop homebrew from upgrading itself on every run]
 - [macOS migrations with Brewfile]
+- [How to manually download brew package for installation?]
 
 <!--
   References
@@ -151,5 +190,6 @@ git branch -d ${formula_name}-${formula_version}
 [manpage]: https://docs.brew.sh/Manpage
 
 <!-- Others -->
+[how to manually download brew package for installation?]: https://stackoverflow.com/questions/53551665/how-to-manually-download-brew-package-for-installation#53579448
 [how to stop homebrew from upgrading itself on every run]: https://superuser.com/questions/1209053/how-do-i-tell-homebrew-to-stop-running-brew-update-every-time-i-want-to-install/1209068#1209068
 [macos migrations with brewfile]: https://openfolder.sh/macos-migrations-with-brewfile
