@@ -7,8 +7,10 @@ Based on experience.
   This proved particularly valid with regards to templates and pipelines.
 - Apply the KISS approach wherever possible, not to keep _all_ things simple but as an invite to keep things simple **with respect of your ultimate goal**.<br/>
   Be aware of simplicity for the sake of simplicity, specially if this makes things complicated on a higher level.
-- Keep in mind things change constantly: new technologies are given birth often and processes might improve.<br/>
-  Review every decision after some time. Check they are still relevant, or if there is some improvement you can implement.
+- There is no perfect nor correct solution, just different sets of tradeoff.<br/>
+  Find the one that most satisfies you and your **current** necessities.
+- Review every decision after some time. Check they are still relevant, or if there is some improvement you can implement.
+  Things change constantly: new technologies are given birth often, and processes improve.<br/>
 - Focus on what matters, but also set time aside to check up the rest.<br/>
   Mind the Pareto principle (_80-20 rule_, roughly 80% of consequences come from 20% of causes).
 - Automate when and where you can, yet mind [the automation paradox].
