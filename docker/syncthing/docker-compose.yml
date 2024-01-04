@@ -1,13 +1,14 @@
 ---
+# See https://github.com/syncthing/syncthing/blob/main/README-Docker.md
 version: "3"
 services:
   syncthing:
-    image: syncthing/syncthing
+    image: syncthing/syncthing:1.27.2
     container_name: syncthing
-    hostname: planck
+    hostname: ${HOSTNAME}
     environment:
       - PUID=1000
-      - PGID=1000
+      - PGID=100
     volumes:
       - ./config:/var/syncthing/config
       - ./data:/var/syncthing/data
