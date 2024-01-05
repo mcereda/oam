@@ -1,50 +1,65 @@
 # OAM best practices
 
-Based on experience.
+What really worked for me:
 
-- Always think critically.
+- Always think critically.<br/>
+  If you do/think things just bEcAuSe OtHeRs SaId So, all you're doing is admitting **both** that you know no better **and** that you're not willing to consider otherwise.
 - The _one-size-fits-all_ approach is a big fat lie.<br/>
-  This proved particularly valid with regards to templates and pipelines.
-- Apply the KISS approach wherever possible, not to keep _all_ things simple but as an invite to keep things simple **with respect of your ultimate goal**.<br/>
-  Be aware of simplicity for the sake of simplicity, specially if this makes things complicated on a higher level.
+  You'll end up with stiff, hard to change results that satisfy nobody. This proved particularly true with regards to templates and pipelines.
+- Apply the KISS approach wherever possible.<br/>
+  Consider it not as _keeping all things simple because they need to be simple_, but as an invite to keep things simple **with respect of your ultimate goal**.<br/>
+  Beware of simplicity for the sake of simplicity, specially if this makes things complicated on a higher level. Check out [KISS principle is not that simple].
+- Beware of complex things that sHoUlD bE sImPlE.<br/>
+  Check out the [SAFe] delusion.
 - There is no perfect nor correct solution, just different sets of tradeoff.<br/>
   Find the one that most satisfies you and your **current** necessities.
-- Review every decision after some time. Check they are still relevant, or if there is some improvement you can implement.
-  Things change constantly: new technologies are given birth often, and processes improve.<br/>
+- Review every decision after some time. Check they are still relevant, or if there is some improvement you can implement.<br/>
+  Things change constantly: new technologies are given birth often, and processes improve.
 - Focus on what matters, but also set time aside to check up the rest.<br/>
-  Mind the Pareto principle (_80-20 rule_, roughly 80% of consequences come from 20% of causes).
-- Automate when and where you can, yet mind [the automation paradox].
-- Keep things **de**coupled where possible, the same way _interfaces_ are used in programming.<br/>
+  Check [Understanding the pareto principle (the 80/20 rule)].
+- Learn from your (and others') mistakes.
+- Put in place processes to avoid repeating mistakes.<br/>
+  Check out the [5 whys] approach.
+- Automate when and where you can, yet mind [the automation paradox].<br/>
+  Check also out [`pre-commit`][pre-commit].
+- Keep things **de**coupled where possible, the same way [_interfaces_ are used in programming][what does it mean to program to interfaces?].<br/>
   This allows for quick and (as much as possible) painless switch between technologies.
 - Choose tools based on **how helpful** they are to achieve your goals.<br/>
   Do **not** adapt your work to specific tools.
-- Backup your data.<br/>
-  Especially when you are about to update something. [Murphy's law] is lurking.
+- Backup your data, especially when you are about to update something.<br/>
+  [Murphy's law] is lurking. Consider [the 3-2-1 backup strategy].
 - [Branch early, branch often].
 - [Keep changes short and sweet][the art of small pull requests].<br/>
   Nobody likes to dive deep into a 1200 lines, 356 files pull request ([PR fatigue][how to tackle pull request fatigue], everybody?).
-- Make changes easy, avoid making easy changes.
-- [Trunk-based development][trunk-based development: a comprehensive guide] and other branching strategies all work but [have different pros and cons][git branching strategies vs. trunk-based development].
+- Consider keeping changes in _behaviour_ (logic) separated from changes to the structure.<br/>
+  It allows for easier debugging by letting you deal with one great issue at a time.
+- Make changes easy, avoid making easy changes.<br/>
+  Easy changes will build up long term and become a pain to deal with.
+- [Trunk-based development][trunk-based development: a comprehensive guide] and other branching strategies all work.<br/>
+  Consider the [different pros and cons of each][git branching strategies vs. trunk-based development].
 - Refactoring _can_ be an option.<br/>
-  But do **not** use it mindlessly.
+  Just **don't** use it mindlessly.
 - _DevOps_, _GitOps_ and other similar terms are sets of practices, suggestions, or approaches.<br/>
   They are **not** roles or job titles.<br/>
   They are **not** to be taken literally.<br/>
   They **need** to be adapted to the workplace, not the other way around.
 - Be aware of [corporate bullshit][from inboxing to thought showers: how business bullshit took over].
-- [Amazon's leadership principles] are double-edge swords and only Amazon can apply them as they are defined.
-- Watch out for complex things that should be simple (i.e. the [SAFe] delusion).
+- [Amazon's leadership principles] are double-edge swords.<br/>
+  Only Amazon was able to apply them as they are defined, and they still create a lot of discontent.
 - Keep _integration_, _delivery_ and _deployment_ separated.<br/>
   They are different concepts, and as such should require different tasks.<br/>
   This also allows for checkpoints, and to fail fast with less to no unwanted consequence.
+- All pipelines' tasks should be able to execute from one's own local machine.
 - Keep pipelines' tasks as simple, consistent and reproducible as possible.<br/>
-  Avoid like the plague to put programs or scripts in pipelines: they should be glue, not applications.
-- Pipelines' tasks should be able to execute from one's own computer.
+  Avoid like the plague to put programs or scripts in pipelines: they should be _glue_, not applications.
 - Pipelines are meant to be used as **last mile** steps for specific goals.<br/>
-  There **cannot** be a single pipeline for everything, the same way as _one-size-fits-all_ is a big, fat lie.
+  There **cannot** be a single pipeline for everything, the same way as _one-size-fits-all_ never works.
 
 ## Sources
 
+In order of addition:
+
+- Personal experience
 - [A case against "platform teams"]
 - [Culture eats your structure for lunch]
 - [DevOps is bullshit]
@@ -61,16 +76,23 @@ Based on experience.
 - [From inboxing to thought showers: how business bullshit took over]
 - [Simple sabotage for software]
 - [Hacking your manager - how to get platform engineering on their radar]
+- [KISS principle is not that simple] by William Artero
+- [What does it mean to program to interfaces?] by Attila Fejér
+- [Understanding the pareto principle (the 80/20 rule)]
+- [The 3-2-1 backup strategy] by Yev Pusin
+- [5 whys]
 
 <!--
   References
   -->
 
 <!-- Knowledge base -->
+[pre-commit]: pre-commit.md
 [safe]: safe.placeholder
 [the automation paradox]: the%20automation%20paradox.md
 
 <!-- Others -->
+[5 whys]: https://www.mindtools.com/a3mi00v/5-whys
 [a case against "platform teams"]: https://kislayverma.com/organizations/a-case-against-platform-teams/
 [amazon's leadership principles]: https://www.amazon.jobs/content/en/our-workplace/leadership-principles
 [amazon's tenets: supercharging decision-making]: https://aws.amazon.com/blogs/enterprise-strategy/tenets-supercharging-decision-making/
@@ -81,10 +103,14 @@ Based on experience.
 [git branching strategies vs. trunk-based development]: https://launchdarkly.com/blog/git-branching-strategies-vs-trunk-based-development/
 [hacking your manager - how to get platform engineering on their radar]: https://www.youtube.com/watch?v=8xprsTXKr0w
 [how to tackle pull request fatigue]: https://javascript.plainenglish.io/tackling-pr-fatigue-6865edc205ce
+[kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
 [murphy's law]: https://en.wikipedia.org/wiki/Murphy%27s_law
 [platform teams need a delightfully different approach, not one that sucks less]: https://www.chkk.io/blog/platform-teams-different-approach
 [simple sabotage for software]: https://erikbern.com/2023/12/13/simple-sabotage-for-software.html
+[the 3-2-1 backup strategy]: https://www.backblaze.com/blog/the-3-2-1-backup-strategy/
 [the art of small pull requests]: https://essenceofcode.com/2019/10/29/the-art-of-small-pull-requests/
 [trunk-based development: a comprehensive guide]: https://launchdarkly.com/blog/introduction-to-trunk-based-development/
+[understanding the pareto principle (the 80/20 rule)]: https://betterexplained.com/articles/understanding-the-pareto-principle-the-8020-rule/
 [we have used too many levels of abstractions and now the future looks bleak]: https://unixsheikh.com/articles/we-have-used-too-many-levels-of-abstractions-and-now-the-future-looks-bleak.html
+[what does it mean to program to interfaces?]: https://www.baeldung.com/cs/program-to-interface
 [why the fuck are we templating yaml?]: https://leebriggs.co.uk/blog/2019/02/07/why-are-we-templating-yaml
