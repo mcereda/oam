@@ -21,7 +21,7 @@ oci setup config
 oci setup keys
 
 # Show the current configuration.
-cat ~/.oci/config
+cat ~/'.oci/config'
 
 # List available compartments.
 oci iam compartment list
@@ -61,6 +61,7 @@ oci compute instance list -c 'tenancy_id'
 
 ## Further readings
 
+- [Oracle Cloud Infrastructure]
 - [Command Line Interface]
 - [SDK and CLI Configuration File]
 - [Required keys and OCIDs]
@@ -68,6 +69,9 @@ oci compute instance list -c 'tenancy_id'
 <!--
   References
   -->
+
+<!-- Knowledge base -->
+[oracle cloud infrastructure]: README.md
 
 <!-- Upstream -->
 [command line interface]: https://docs.oracle.com/en-us/iaas/Content/API/Concepts/cliconcepts.htm
