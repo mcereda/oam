@@ -1,4 +1,4 @@
-# Oracle Cloud
+# Oracle Cloud Infrastructure
 
 ## Table of contents <!-- omit in toc -->
 
@@ -45,12 +45,12 @@ All the references in the [further readings] section, plus the following:
   References
   -->
 
+<!-- In-article sections -->
+[oci-cli]: oci-cli.md
+
 <!-- Upstream -->
 [compute images]: https://docs.oracle.com/en-us/iaas/images/
 [required keys and ocids]: https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm
-
-<!-- In-article sections -->
-[oci-cli]: oci-cli.md
 
 <!-- Others -->
 [connect to private compute instances using oci bastion service]: https://medium.com/@harjulthakkar/connect-to-private-compute-instance-using-oci-bastion-service-ca96a3ceea49
