@@ -90,21 +90,21 @@ Consider what follows for infrastructure and platform engineering as well.
 In order of addition:
 
 - Personal experience
-- [A case against "platform teams"]
-- [Culture eats your structure for lunch]
-- [DevOps is bullshit]
-- [Platform teams need a delightfully different approach, not one that sucks less]
+- [A case against "platform teams"] by Kislay Verma
+- [Culture eats your structure for lunch] by Lawrence Serewicz
+- [DevOps is bullshit] by Cory O'Daniel
+- [Platform teams need a delightfully different approach, not one that sucks less] by Fawad Khaliq and Ali Khayam
 - [We have used too many levels of abstractions and now the future looks bleak]
-- [Why the fuck are we templating YAML?]
+- [Why the fuck are we templating YAML?] by Lee Briggs
 - [Trunk-based development: a comprehensive guide]
 - [Git Branching Strategies vs. Trunk-Based Development]
 - [Branch early, branch often]
 - [Amazon's leadership principles]
 - [Amazon's tenets: supercharging decision-making]
-- [How to tackle Pull Request fatigue]
-- [The art of small Pull Requests]
-- [From inboxing to thought showers: how business bullshit took over]
-- [Simple sabotage for software]
+- [How to tackle Pull Request fatigue] by Dorian Smiley
+- [The art of small Pull Requests] by David Wilson
+- [From inboxing to thought showers: how business bullshit took over] by André Spicer
+- [Simple sabotage for software] by Erik Bernhardsson
 - [Hacking your manager - how to get platform engineering on their radar]
 - [KISS principle is not that simple] by William Artero
 - [What does it mean to program to interfaces?] by Attila Fejér
