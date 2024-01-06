@@ -1,6 +1,14 @@
 # OAM best practices
 
-What really worked for me:
+What really worked for me.
+
+1. [Generic concepts](#generic-concepts)
+1. [CI/CD specific](#cicd-specific)
+   1. [Pipelining](#pipelining)
+1. [Product engineering](#product-engineering)
+1. [Sources](#sources)
+
+## Generic concepts
 
 - Always think critically.<br/>
   If you do/think things just bEcAuSe OtHeRs SaId So, all you're doing is admitting **both** that you know no better **and** that you're not willing to consider otherwise.
@@ -46,14 +54,36 @@ What really worked for me:
 - Be aware of [corporate bullshit][from inboxing to thought showers: how business bullshit took over].
 - [Amazon's leadership principles] are double-edge swords.<br/>
   Only Amazon was able to apply them as they are defined, and they still create a lot of discontent.
+
+## CI/CD specific
+
 - Keep _integration_, _delivery_ and _deployment_ separated.<br/>
   They are different concepts, and as such should require different tasks.<br/>
   This also allows for checkpoints, and to fail fast with less to no unwanted consequence.
-- All pipelines' tasks should be able to execute from one's own local machine.
-- Keep pipelines' tasks as simple, consistent and reproducible as possible.<br/>
-  Avoid like the plague to put programs or scripts in pipelines: they should be _glue_, not applications.
-- Pipelines are meant to be used as **last mile** steps for specific goals.<br/>
-  There **cannot** be a single pipeline for everything, the same way as _one-size-fits-all_ never works.
+
+### Pipelining
+
+- Differentiate what the concept of pipelines really is from the idea of pipelines in approaches like DevOps.<br/>
+  Pipelines are sequences of actions. Pipelines in DevOps and alike end up being magic tools to take actions away from people.
+- Keep in mind [the automation paradox].<br/>
+  Pipelines tend to easily become complex systems just like Rube Goldberg machines.
+- Keep tasks as simple, consistent and reproducible as possible.<br/>
+  Avoid like the plague to put programs or scripts in pipelines: they should be _glue_, not replace applications.
+- All tasks should be able to execute from one's own local machine.<br/>
+  This allows to fail fast and avoid wasting time waiting for pipelines to run in a blackbox somewhere.
+- DevOps pipelines are meant to be used as **last mile** steps for specific goals.<br/>
+  There **cannot** be a single pipeline for everything, the same way as the _one-size-fits-all_ concept never really works.
+
+## Product engineering
+
+Consider what follows for infrastructure and platform engineering as well.
+
+- Focus on creating things users will want to use.<br/>
+  Tools should solve issues and alleviate pain points, not create additional walls.
+- Focus on small audiences first. Avoid trying appealing lots of users from the beginning.<br/>
+  If you do not have a user base, the product has no reason to exist but your will to create it.
+- Consider and fix users' pain points **before** adding new features.<br/>
+  If users are not happy with your tool, they'll try moving away from it.
 
 ## Sources
 
