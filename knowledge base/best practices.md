@@ -3,6 +3,7 @@
 What really worked for me.
 
 1. [Generic concepts](#generic-concepts)
+1. [Teamwork](#teamwork)
 1. [CI/CD specific](#cicd-specific)
    1. [Pipelining](#pipelining)
 1. [Product engineering](#product-engineering)
@@ -10,28 +11,31 @@ What really worked for me.
 
 ## Generic concepts
 
-- Always think critically.<br/>
-  If you do/think things just bEcAuSe OtHeRs SaId So, all you're doing is admitting **both** that you know no better **and** that you're not willing to consider otherwise.
-- The _one-size-fits-all_ approach is a big fat lie.<br/>
-  You'll end up with stiff, hard to change results that satisfy nobody. This proved particularly true with regards to templates and pipelines.
-- Apply the KISS approach wherever possible.<br/>
-  Consider it not as _keeping all things simple because they need to be simple_, but as an invite to keep things simple **with respect of your ultimate goal**.<br/>
-  Beware of simplicity for the sake of simplicity, specially if this makes things complicated on a higher level. Check out [KISS principle is not that simple].
-- Beware of complex things that sHoUlD bE sImPlE.<br/>
-  Check out the [SAFe] delusion.
+- Always think critically and question all the things. Especially those that don't appear to make any sense.<br/>
+  Don't just follow trends or advice from others. They _might_ know better, but you will be the one dealing with the issues in the end.
+- Try to understand how something really works, may it be a technology, a tool or what else.<br/>
+  Try at least once to do manually what an automation saves you. Look at the source code of tools. Read the fabulous documentation.
+- Stay curious. Experiment. Learn and break things (in a sane and safe way). Dive deeper into what interests you.
 - There is no perfect nor correct solution, just different sets of tradeoff.<br/>
   Find the one that most satisfies you and your **current** necessities.
 - Review every decision after some time. Check they are still relevant, or if there is some improvement you can implement.<br/>
   Things change constantly: new technologies are given birth often, and processes improve.
-- Focus on what matters, but also set time aside to check up the rest.<br/>
+- Keep things simple (KISS approach) **with respect of your ultimate goal** and not only for the sake of simplicity.<br/>
+  Always going for the simple solution makes things complicated on a higher level.<br/>
+  Check out [KISS principle is not that simple].
+- Beware of complex things that _should be simple_.<br/>
+  E.g., [SAFe].
+- Focus on what matters, but also set time aside to work on the rest.<br/>
   Check [Understanding the pareto principle (the 80/20 rule)].
-- Learn from your (and others') mistakes.
-- Put in place processes to avoid repeating mistakes.<br/>
+- Learn from your (and others') mistakes.<br/>
   Check out the [5 whys] approach.
-- Automate when and where you can, yet mind [the automation paradox].<br/>
-  Check also out [`pre-commit`][pre-commit].
-- Keep things **de**coupled where possible, the same way [_interfaces_ are used in programming][what does it mean to program to interfaces?].<br/>
+- Put in place processes to avoid repeating mistakes.
+- Automate when and where you can, yet mind [the automation paradox].
+- Automation does **not** necessarily involve [abstracting away][we have used too many levels of abstractions and now the future looks bleak].
+- Keep different parts **de**coupled where possible, the same way [_interfaces_ are used in programming][what does it mean to program to interfaces?].<br/>
   This allows for quick and (as much as possible) painless switch between technologies.
+- The _one-size-fits-all_ approach is a big fat lie.<br/>
+  You'll end up with stiff, hard to change results that satisfy nobody. This proved particularly true with regards to templates and pipelines.
 - Choose tools based on **how helpful** they are to achieve your goals.<br/>
   Do **not** adapt your work to specific tools.
 - Backup your data, especially when you are about to update something.<br/>
@@ -46,14 +50,24 @@ What really worked for me.
 - [Trunk-based development][trunk-based development: a comprehensive guide] and other branching strategies all work.<br/>
   Consider the [different pros and cons of each][git branching strategies vs. trunk-based development].
 - Refactoring _can_ be an option.<br/>
-  Just **don't** use it mindlessly.
+  Just **don't default** to it nor use it mindlessly.
+- Be aware of [corporate bullshit][from inboxing to thought showers: how business bullshit took over].
 - _DevOps_, _GitOps_ and other similar terms are sets of practices, suggestions, or approaches.<br/>
   They are **not** roles or job titles.<br/>
   They are **not** to be taken literally.<br/>
   They **need** to be adapted to the workplace, not the other way around.
-- Be aware of [corporate bullshit][from inboxing to thought showers: how business bullshit took over].
 - [Amazon's leadership principles] are double-edge swords.<br/>
   Only Amazon was able to apply them as they are defined, and they still create a lot of discontent.
+
+## Teamwork
+
+- Respect what is already there, but strive to improve it.<br/>
+  Current solutions are there for a reason. Learn about their ins and outs **and, most of all, the why**.<br/>
+  Then try to make them better.
+- Don't just dismiss your teammates' customs.<br/>
+  E.g., use [EditorConfig] instead of your editor's specific setting files only.
+- You, your teammates and other teams in your company _should be_ on the same boat and _should be_ shooting for the same goal.<br/>
+  Act like it. You may as well collaborate instead of fighting.
 
 ## CI/CD specific
 
@@ -71,6 +85,8 @@ What really worked for me.
   Avoid like the plague to put programs or scripts in pipelines: they should be _glue_, not replace applications.
 - All tasks should be able to execute from one's own local machine.<br/>
   This allows to fail fast and avoid wasting time waiting for pipelines to run in a blackbox somewhere.
+- Consider using local automation to guarantee basic quality **before** the code reaches the shared repository.<br/>
+  Tools like [`pre-commit`][pre-commit] are a doozy for this.
 - DevOps pipelines are meant to be used as **last mile** steps for specific goals.<br/>
   There **cannot** be a single pipeline for everything, the same way as the _one-size-fits-all_ concept never really works.
 
@@ -117,6 +133,7 @@ In order of addition:
   -->
 
 <!-- Knowledge base -->
+[editorconfig]: editorconfig.md
 [pre-commit]: pre-commit.md
 [safe]: safe.placeholder
 [the automation paradox]: the%20automation%20paradox.md
