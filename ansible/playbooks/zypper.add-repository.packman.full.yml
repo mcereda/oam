@@ -1,10 +1,8 @@
 ---
-
 - name: Add Packman to Zypper's repositories list
   tags:
     - opensuse
     - packman
-    - repository
     - suse
     - zypper
   hosts: all
@@ -18,6 +16,7 @@
       }}
   tasks:
     - name: Add Packman to Zypper's repositories list
+      tags: repository
       become: true
       community.general.zypper_repository:
         repo: "https://ftp.gwdg.de/pub/linux/misc/packman/suse/{{ repo_part_distribution }}/"
@@ -25,3 +24,11 @@
         priority: 90
         overwrite_multiple: true
         auto_import_keys: true
+    - name: Change the vendor for packages from Packman
+      become: true
+      community.general.zypper:
+        update_cache: true
+        state: dist-upgrade
+        name: '*'
+        allow_vendor_change: true
+        clean_deps: true
