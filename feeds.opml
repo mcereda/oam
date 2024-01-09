@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="1.0">
+  <head>
+    <text />
+  </head>
+  <body>
+    <outline id="3937153642" isOpen="false" text="ars technica">
+      <outline xmlUrl="https://feeds.arstechnica.com/arstechnica/index" maxArticleAge="60"
+        maxArticleNumber="1000" text="All content" title="All content" version="RSS" id="2199108629"
+        logoWidth="32" copyright="" type="rss"
+        logoUrl="https://cdn.arstechnica.net/wp-content/uploads/2016/10/cropped-ars-logo-512_480-32x32.png"
+        archiveMode="globalDefault" logoHeight="32" useCustomFetchInterval="false"
+        htmlUrl="https://arstechnica.com" comment="" description="All Ars Technica stories"
+        fetchInterval="30" />
+    </outline>
+    <outline id="124019863" isOpen="false" text="funtoo">
+      <outline maxArticleAge="60" description="News and Announcements Latest Topics" copyright=""
+        id="510893752" maxArticleNumber="1000" type="rss"
+        title="news and announcements  latest topics"
+        htmlUrl="https://forums.funtoo.org/forum/5-news-and-announcements/"
+        useCustomFetchInterval="false" fetchInterval="30" comment="" version="RSS"
+        xmlUrl="https://forums.funtoo.org/forum/5-news-and-announcements.xml/"
+        archiveMode="globalDefault" text="news and announcements  latest topics" />
+    </outline>
+    <outline id="167415554" isOpen="false" text="kde">
+      <outline xmlUrl="https://planet.kde.org/global/atom.xml" maxArticleAge="0"
+        maxArticleNumber="0" text="Planet KDE" title="Planet KDE" version="RSS" faviconWidth="0"
+        id="992875051" faviconUrl="file:///home/mek/.cache/favicons/planet.kde.org.png"
+        logoWidth="0" copyright="" type="rss" logoUrl="https://planet.kde.org/img/planet.png"
+        faviconHeight="0" archiveMode="globalDefault" logoHeight="0" useCustomFetchInterval="false"
+        htmlUrl="https://planet.kde.org/" comment="" description="" fetchInterval="0" />
+      <outline maxArticleAge="0" description="" copyright="" id="3884680416" maxArticleNumber="0"
+        type="rss" title="KDE Dot News" htmlUrl="https://dot.kde.org/frontpage"
+        useCustomFetchInterval="false" fetchInterval="0" comment="" version="RSS"
+        xmlUrl="https://dot.kde.org/rss.xml" archiveMode="globalDefault" text="KDE Dot News" />
+      <outline xmlUrl="https://store.kde.org/content.rdf" maxArticleAge="0" maxArticleNumber="0"
+        text="KDE Apps" title="KDE Apps" version="RSS" id="3217544634"
+        faviconUrl="file:///home/mek/.cache/favicons/store.kde.org.png" logoWidth="0"
+        copyright="All rights reserved. All trademarks are copyright by their respective owners. All contributors are responsible for their uploads."
+        type="rss" logoUrl="https://store.kde.org/stores/media/store_kde/logo.png"
+        archiveMode="globalDefault" logoHeight="0" useCustomFetchInterval="true" htmlUrl=""
+        comment="" description="" fetchInterval="-1" />
+    </outline>
+    <outline xmlUrl="https://9to5linux.com/feed/atom" maxArticleAge="60" maxArticleNumber="1000"
+      text="9to5linux.com" title="9to5linux.com" version="RSS" faviconWidth="0" id="2462573692"
+      faviconUrl="file:///home/mek/.cache/favicons/i0.wp.com_9to5linux.com_wp-content_uploads_2021_04_cropped-9to5linux-logo-mini-copy.png"
+      copyright="" type="rss" faviconHeight="0" archiveMode="globalDefault"
+      useCustomFetchInterval="false" htmlUrl="https://9to5linux.com/" comment=""
+      description="Linux news, reviews, tutorials, and more" fetchInterval="30" />
+    <outline faviconUrl="file:///home/mek/.cache/favicons/aws.amazon.com.png" maxArticleAge="60"
+      description="" copyright="" id="2045356633" maxArticleNumber="1000" type="rss"
+      title="aws open source blog" htmlUrl="https://aws.amazon.com/blogs/opensource/"
+      useCustomFetchInterval="false" fetchInterval="30" comment="" version="RSS"
+      xmlUrl="https://aws.amazon.com/blogs/opensource/feed" archiveMode="globalDefault"
+      text="aws open source blog" />
+    <outline faviconUrl="file:///home/mek/.cache/favicons/azurecomcdn.azureedge.net.png"
+      maxArticleAge="60" description="Azure service updates" copyright="" id="453206659"
+      maxArticleNumber="1000" type="rss" title="azure service updates"
+      htmlUrl="https://azure.microsoft.com/en-us/updates/" useCustomFetchInterval="false"
+      fetchInterval="30" comment="" version="RSS"
+      xmlUrl="https://azurecomcdn.azureedge.net/en-us/updates/feed" archiveMode="globalDefault"
+      text="azure service updates" />
+    <outline
+      faviconUrl="file:///home/mek/.cache/favicons/www.cncf.io_wp_wp-includes_images_w-logo-blue-white-bg.png"
+      maxArticleAge="60" description="" copyright="" id="1811541600" maxArticleNumber="1000"
+      type="rss" title="cloud native computing foundation  cncf.io" htmlUrl="https://www.cncf.io"
+      useCustomFetchInterval="false" fetchInterval="30" comment="" version="RSS"
+      xmlUrl="https://www.cncf.io/feed/" archiveMode="globalDefault"
+      text="cloud native computing foundation  cncf.io" />
+    <outline maxArticleAge="60"
+      description="Guides, information, and news about the Fedora operating system for users, developers, system administrators, and community members."
+      copyright="" id="3773489946" maxArticleNumber="1000" type="rss" title="fedora magazine"
+      htmlUrl="https://fedoramagazine.org/" useCustomFetchInterval="false" fetchInterval="30"
+      comment="" version="RSS" xmlUrl="https://fedoramagazine.org/feed/" archiveMode="globalDefault"
+      text="fedora magazine" />
+    <outline maxArticleAge="60" description="News about Google's Open Source projects and programs."
+      copyright="" id="4186631418" maxArticleNumber="1000" type="rss"
+      title="google open source blog" htmlUrl="http://opensource.googleblog.com/"
+      useCustomFetchInterval="false" fetchInterval="30" comment="" version="RSS"
+      xmlUrl="https://feeds.feedburner.com/GoogleOpenSourceBlog" archiveMode="globalDefault"
+      text="google open source blog" />
+    <outline xmlUrl="https://news.itsfoss.com/latest/rss/" maxArticleAge="60"
+      maxArticleNumber="1000" text="it's foss" title="it's foss" version="RSS" id="3171023909"
+      faviconUrl="file:///home/mek/.cache/favicons/news.itsfoss.com_content_images_size_w256h256_2022_08_android-chrome-192x192.png"
+      logoWidth="88" copyright="" type="rss" logoUrl="https://news.itsfoss.com/favicon.png"
+      archiveMode="globalDefault" logoHeight="31" useCustomFetchInterval="false"
+      htmlUrl="https://news.itsfoss.com/" comment=""
+      description="Latest on Linux, Open Source and More" fetchInterval="30" />
+    <outline xmlUrl="https://kubernetes.io/feed.xml" maxArticleAge="60" maxArticleNumber="1000"
+      text="kubernetes blog" title="kubernetes blog" version="RSS" id="3561868146" logoWidth="88"
+      copyright="" type="rss"
+      logoUrl="https://raw.githubusercontent.com/kubernetes/kubernetes/master/logo/logo.png"
+      archiveMode="globalDefault" logoHeight="31" useCustomFetchInterval="false"
+      htmlUrl="https://kubernetes.io/" comment=""
+      description="The Kubernetes blog is used by the project to communicate new features, community reports, and any news that might be relevant to the Kubernetes community."
+      fetchInterval="30" />
+    <outline
+      faviconUrl="file:///home/mek/.cache/favicons/www.linux.com_wp-includes_images_w-logo-blue-white-bg.png"
+      maxArticleAge="0" loadLinkedWebsite="true" description="News For Open Source Professionals"
+      copyright="" id="2776819144" maxArticleNumber="0" type="rss" title="linux.com"
+      htmlUrl="https://www.linux.com" useCustomFetchInterval="false" fetchInterval="0" comment=""
+      version="RSS" xmlUrl="https://www.linux.com/feed/" archiveMode="keepAllArticles"
+      text="linux.com" />
+    <outline maxArticleAge="60" description="" copyright="" id="146423548" maxArticleNumber="1000"
+      type="rss" title="linux journal" htmlUrl="https://www.linuxjournal.com/"
+      useCustomFetchInterval="false" fetchInterval="30" comment="" version="RSS"
+      xmlUrl="https://www.linuxjournal.com/node/feed" archiveMode="globalDefault"
+      text="linux journal" />
+    <outline
+      faviconUrl="file:///home/mek/.cache/favicons/cloudblogs.microsoft.com_wp-includes_images_w-logo-blue-white-bg.png"
+      maxArticleAge="60"
+      description="Open dialogue about openness at Microsoft - open source, standards, interoperability"
+      copyright="" id="1744451611" maxArticleNumber="1000" type="rss"
+      title="microsoft open source blog" htmlUrl="https://cloudblogs.microsoft.com/opensource/"
+      useCustomFetchInterval="false" fetchInterval="30" comment="" version="RSS"
+      xmlUrl="https://cloudblogs.microsoft.com/opensource/feed/" archiveMode="globalDefault"
+      text="microsoft open source blog" />
+    <outline maxArticleAge="60" description="Latest news from the openSUSE Project" copyright=""
+      id="3132093958" maxArticleNumber="1000" type="rss" title="opensuse news"
+      htmlUrl="https://news.opensuse.org" useCustomFetchInterval="false" fetchInterval="30"
+      comment="" version="RSS" xmlUrl="https://news.opensuse.org/feed.xml"
+      archiveMode="globalDefault" text="opensuse news" />
+    <outline faviconUrl="file:///home/mek/.cache/favicons/www.phoronix.com.png" maxArticleAge="60"
+      description="Linux Hardware Reviews, Benchmarks &amp;amp; Open-Source News" copyright=""
+      id="2349986834" maxArticleNumber="1000" type="rss" title="phoronix"
+      htmlUrl="https://www.phoronix.com/" useCustomFetchInterval="false" fetchInterval="30"
+      comment="" version="RSS" xmlUrl="https://www.phoronix.com/rss.php" archiveMode="globalDefault"
+      text="phoronix" />
+    <outline faviconUrl="file:///home/mek/.cache/favicons/www.gentoo.org.png" maxArticleAge="60"
+      description="Planet Gentoo - https://planet.gentoo.org/" copyright="" id="226557222"
+      maxArticleNumber="1000" type="rss" title="planet gentoo" htmlUrl="https://planet.gentoo.org"
+      useCustomFetchInterval="false" fetchInterval="30" comment="" version="RSS"
+      xmlUrl="https://planet.gentoo.org/rss20.xml" archiveMode="globalDefault" text="planet gentoo" />
+    <outline faviconUrl="file:///home/mek/.cache/favicons/unixsheikh.com.png" maxArticleAge="60"
+      description="Articles (occasional rants) and tutorials about open source, BSD and GNU/Linux system administration, and programming - the pragmatic way."
+      copyright="" id="4217093088" maxArticleNumber="1000" type="rss" title="unixsheikh.com"
+      htmlUrl="https://unixsheikh.com" useCustomFetchInterval="false" fetchInterval="30" comment=""
+      version="RSS" xmlUrl="https://unixsheikh.com/feed.rss" archiveMode="globalDefault"
+      text="unixsheikh.com" />
+  </body>
+</opml>
