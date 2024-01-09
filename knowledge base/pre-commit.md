@@ -11,8 +11,12 @@
 ## TL;DR
 
 ```sh
+# Install.
+pip install --user 'pre-commit'  # has currently issues with `pipx`
+brew install 'pre-commit'
+
 # Generate a very basic configuration.
-pre-commit sample-config > .pre-commit-config.yaml
+pre-commit sample-config > '.pre-commit-config.yaml'
 
 # Manually run checks.
 pre-commit run --all-files

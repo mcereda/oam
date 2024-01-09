@@ -18,6 +18,7 @@ For example, `pipx install 'pycowsay'` makes the `pycowsay` command available gl
 # Installation.
 python3 -m pip install --user 'pipx'
 brew install 'pipx'
+zypper install 'python311-pipx'
 
 # Add pipx's binary folders to PATH.
 pipx ensurepath
