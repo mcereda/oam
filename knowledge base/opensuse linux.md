@@ -8,6 +8,7 @@
    1. [Firmware update from a running system](#firmware-update-from-a-running-system)
 1. [Rollback from a bootable snapshot](#rollback-from-a-bootable-snapshot)
 1. [Firefox MP4/H.264 video support](#firefox-mp4h264-video-support)
+1. [Docker images](#docker-images)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -111,12 +112,22 @@ openSUSE provides `ffmpeg` and `libav` packages like `libavcodec56`, but in them
 
 Go to this [Simple WebRTC H264 check page] to check if Firefox can play H.264 videos after installation.
 
+## Docker images
+
+OpenSUSE's official container images are created and stored in [SUSE's container registry][container images built by the open build service]:
+
+```sh
+docker run -ti --rm --name 'tw' 'registry.opensuse.org/opensuse/tumbleweed'
+```
+
 ## Further readings
 
+- [Zypper]
 - [Bluetooth]
 - [Firewalld]
 - [Systemd]
 - [System Recovery and Snapshot Management with Snapper]
+- [Container Images built by the Open Build Service]
 
 ## Sources
 
@@ -134,6 +145,7 @@ All the references in the [further readings] section, plus the following:
   -->
 
 <!-- Upstream -->
+[container images built by the open build service]: https://registry.opensuse.org/cgi-bin/cooverview
 [firefox mp4/h.264 video support]: https://en.opensuse.org/SDB:Firefox_MP4/H.264_Video_Support
 [openssh basics]: https://en.opensuse.org/SDB:OpenSSH_basics
 [raspberry pi4]: https://en.opensuse.org/openSUSE:Raspberry_Pi
@@ -143,6 +155,7 @@ All the references in the [further readings] section, plus the following:
 [bluetooth]: bluetooth.md#bluetooth-devices-cannot-be-used-at-login
 [firewalld]: firewalld.md
 [systemd]: systemd.md
+[zypper]: zypper.md
 
 <!-- Others -->
 [bluetooth on boot]: https://www.reddit.com/r/openSUSE/comments/eoozm2/comment/feetqpn/
