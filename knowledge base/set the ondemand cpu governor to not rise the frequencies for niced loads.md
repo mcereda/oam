@@ -8,16 +8,16 @@
 ## TL;DR
 
 ```sh
-sudo cpupower frequency-set --governor ondemand
-echo 1 | sudo tee /sys/devices/system/cpu/cpufreq/ondemand/ignore_nice_load
+sudo cpupower frequency-set --governor 'ondemand'
+echo 1 | sudo tee '/sys/devices/system/cpu/cpufreq/ondemand/ignore_nice_load'
 
 # set this on boot
-echo "w /sys/devices/system/cpu/cpufreq/ondemand/ignore_nice_load - - - - 1" | sudo tee /etc/tmpfiles.d/ondemand-ignore-nice.conf
+echo "w /sys/devices/system/cpu/cpufreq/ondemand/ignore_nice_load - - - - 1" | sudo tee '/etc/tmpfiles.d/ondemand-ignore-nice.conf'
 ```
 
 ## Further readings
 
-- [Cpufreq]
+- [`cpupower`][cpupower]
 - [Laptop overheating and battery duration reduction]
 
 <!--

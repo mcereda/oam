@@ -41,7 +41,9 @@
         "configmap",
         "containerd",
         "cowsay",
+        "cpufreq",
         "cpulimit",
+        "cpupower",
         "cryptsetup",
         "csma",
         "datagram",
@@ -109,6 +111,7 @@
         "nvme",
         "ocsp",
         "odhcpd",
+        "ondemand",
         "openpgp",
         "opkg",
         "pacman",
@@ -122,6 +125,8 @@
         "portsnap",
         "posix",
         "poweroff",
+        "powersave",
+        "pstate",
         "pulumi",
         "pvresize",
         "radeon",
@@ -136,6 +141,7 @@
         "runtimes",
         "sata",
         "schedulable",
+        "schedutil",
         "scrollback",
         "setfacl",
         "setfattr",
@@ -168,7 +174,6 @@
         "xkcd",
         "zstd"
     ],
-
     "markdown.extension.toc.levels": "2..6",
     "markdown.extension.toc.orderedList": true
 }
