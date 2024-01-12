@@ -3,9 +3,12 @@
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
+1. [Gotchas](#gotchas)
 1. [Daemon configuration](#daemon-configuration)
 1. [Containers configuration](#containers-configuration)
-1. [Gotchas](#gotchas)
+1. [Advanced build with `buildx`](#advanced-build-with-buildx)
+   1. [Create builders](#create-builders)
+   1. [Build for specific platforms](#build-for-specific-platforms)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -103,31 +106,29 @@ docker image prune -a
 docker system prune -a
 ```
 
-## Daemon configuration
-
-The docker daemon is configured using the `/etc/docker/daemon.json` file:
-
-```json
-{
-    "default-runtime": "runc",
-    "dns": ["8.8.8.8", "1.1.1.1"]
-}
-```
-
-## Containers configuration
-
-Docker mounts specific system files in all containers to forward its settings:
-
 ```sh
-6a95fabde222$ mount
-…
-/dev/disk/by-uuid/1bb…eb5 on /etc/resolv.conf type btrfs (rw,…)
-/dev/disk/by-uuid/1bb…eb5 on /etc/hostname type btrfs (rw,…)
-/dev/disk/by-uuid/1bb…eb5 on /etc/hosts type btrfs (rw,…)
-…
-```
+# List builders.
+docker buildx ls
 
-Those files come from the volume the docker container is using for its root, and are modified on the container's startup with the information from the CLI, the daemon itself and, when missing, the host.
+# Create builders.
+docker buildx create --name 'builder_name'
+
+# Switch between builders.
+docker buildx use 'builder_name'
+docker buildx create --name 'builder_name' --use
+
+# Modify builders.
+docker buildx create --node 'builder_name'
+
+# Build images.
+# '--load' currently only works for builds for a single platform.
+docker buildx build -t 'image:tag' --load '.'
+docker buildx build … --push \
+  --platform 'linux/amd64,linux/arm64,linux/arm/v7' '.'
+
+# Remove builders.
+docker buildx rm 'builder_name'
+```
 
 ## Gotchas
 
@@ -167,6 +168,63 @@ Those files come from the volume the docker container is using for its root, and
   This is due to the fact that the Docker daemon on Mac is running in a virtual machine, and not natively; hence, ports are exposed on the VM and not of the host running it.<br/>
   One way around it is port forwarding to localhost (the `-p` or `-P` options).
 
+## Daemon configuration
+
+The docker daemon is configured using the `/etc/docker/daemon.json` file:
+
+```json
+{
+    "default-runtime": "runc",
+    "dns": ["8.8.8.8", "1.1.1.1"]
+}
+```
+
+## Containers configuration
+
+Docker mounts specific system files in all containers to forward its settings:
+
+```sh
+6a95fabde222$ mount
+…
+/dev/disk/by-uuid/1bb…eb5 on /etc/resolv.conf type btrfs (rw,…)
+/dev/disk/by-uuid/1bb…eb5 on /etc/hostname type btrfs (rw,…)
+/dev/disk/by-uuid/1bb…eb5 on /etc/hosts type btrfs (rw,…)
+…
+```
+
+Those files come from the volume the docker container is using for its root, and are modified on the container's startup with the information from the CLI, the daemon itself and, when missing, the host.
+
+## Advanced build with `buildx`
+
+### Create builders
+
+```sh
+$ docker buildx ls
+NAME/NODE DRIVER/ENDPOINT STATUS  BUILDKIT             PLATFORMS
+default * docker
+  default default         running v0.11.7+d3e6c1360f6e linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/386
+
+$ docker buildx create --name 'multiarch' --use
+multiarch
+
+$ docker buildx ls
+NAME/NODE    DRIVER/ENDPOINT             STATUS   BUILDKIT             PLATFORMS
+multiarch *  docker-container
+  multiarch0 unix:///var/run/docker.sock inactive
+default      docker
+  default    default                     running  v0.11.7+d3e6c1360f6e linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/386
+```
+
+### Build for specific platforms
+
+> The `--load` option currently only works for builds for a single platform.<br/>
+> See <https://github.com/docker/buildx/issues/59>.
+
+```sh
+$ docker buildx build --platform 'linux/amd64,linux/arm64,linux/arm/v7' -t 'image:tag' '.'
+$ docker load …
+```
+
 ## Further readings
 
 - [GitHub] page
@@ -178,6 +236,7 @@ Those files come from the volume the docker container is using for its root, and
 - [Configuring DNS]
 - [Cheatsheet]
 - [Getting around Docker's host network limitation on Mac]
+- [Building multi-arch images for ARM and x86 with Docker Desktop]
 
 <!--
   References
@@ -186,6 +245,9 @@ Those files come from the volume the docker container is using for its root, and
 <!-- Knowledge base -->
 [containerd]: containerd.placeholder
 [podman]: podman.placeholder
+
+<!-- Upstream -->
+[building multi-arch images for arm and x86 with docker desktop]: https://www.docker.com/blog/multi-arch-images/
 
 <!-- Others -->
 [arch linux wiki]: https://wiki.archlinux.org/index.php/Docker
