@@ -1,0 +1,37 @@
+# Talos Linux
+
+Secure, immutable, and minimal Linux distribution designed for Kubernetes.
+
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+1. [Sources](#sources)
+
+## TL;DR
+
+## Further readings
+
+- [Website]
+- [Kubernetes]
+
+## Sources
+
+All the references in the [further readings] section, plus the following:
+
+- [Github]
+
+<!--
+  References
+  -->
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Knowledge base -->
+[kubernetes]: README.md
+
+<!-- Files -->
+<!-- Upstream -->
+[github]: https://github.com/siderolabs/talos
+[website]: https://www.talos.dev/
+
+<!-- Others -->
