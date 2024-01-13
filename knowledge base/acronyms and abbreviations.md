@@ -1,4 +1,4 @@
-# Acronyms index
+# Acronyms and abbreviations
 
 | Acronym | Expansion                                              | Description                                                                                         |
 | ------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
@@ -35,23 +35,25 @@
 | DKIM    | DomainKeys Identified Mail                             |                                                                                                     |
 | EA      | Extended Attributes                                    |                                                                                                     |
 | EEPROM  | Electronically Erasable Programmable Read-Only Memory  |                                                                                                     |
+| ELI5    | Explain Like I'm 5                                     |                                                                                                     |
 | FIFO    | First In First Out                                     |                                                                                                     |
 | FILO    | First In Last Out                                      |                                                                                                     |
 | FQDN    | Fully Qualified Domain Name                            |                                                                                                     |
 | FS      | FileSystem                                             |                                                                                                     |
 | FW      | FireWall                                               |                                                                                                     |
-| GNU     | Gnu is Not Unix                                        |                                                                                                     |
-| GPG     | Gnu Privacy Guard                                      |                                                                                                     |
+| GNU     | GNU is Not Unix                                        |                                                                                                     |
+| GPG     | GNU Privacy Guard                                      |                                                                                                     |
 | GUI     | Graphical User Interface                               |                                                                                                     |
 | HA      | High Availability                                      | Characteristic of a system which aims to ensure better or longer availability for its services      |
 | HPC     | High Performance Computing                             | Collections of systems and tools used to achieve a greater processing capacity than the single unit |
-| [IaC]   | [Infrastructure as Code][iac]                          |                                                                                                     |
+| IaC     | [Infrastructure as Code][iac]                          |                                                                                                     |
 | IP      | Internet Protocol                                      |                                                                                                     |
 | IPvX    | Internet Protocol version X                            |                                                                                                     |
 | ISP     | Internet Service Provider                              |                                                                                                     |
 | JDK     | Java Development Kit                                   |                                                                                                     |
 | JRE     | Java Runtime Engine                                    |                                                                                                     |
-| KISS    | Keep It Simple Stupid                                  |                                                                                                     |
+| K8S     | [Kubernetes]                                           |                                                                                                     |
+| KISS    | Keep It Simple Stupid                                  | Also see [KISS principle is not that simple]                                                        |
 | LAN     | Local Area Network                                     |                                                                                                     |
 | LED     | Light Emitting Diode                                   |                                                                                                     |
 | LIFO    | Last In First Out                                      |                                                                                                     |
@@ -65,11 +67,12 @@
 | SPIFFE  | Secure Production Identity Framework for Everyone      |                                                                                                     |
 | SQL     | Structured Query Language                              |                                                                                                     |
 | TCP     | Transport Control Protocol                             |                                                                                                     |
+| TIL     | Today I Learned                                        |                                                                                                     |
 | UDP     | User Datagram Protocol                                 |                                                                                                     |
 | UFW     | Uncomplicated FireWall                                 |                                                                                                     |
 | USB     | Universal Serial Bus                                   |                                                                                                     |
 | UT      | Unit Test                                              |                                                                                                     |
-| VIM     | VI iMproved                                            |                                                                                                     |
+| VIM     | [VI iMproved][vim]                                     |                                                                                                     |
 | WAN     | Wide Area Network                                      |                                                                                                     |
 | WiMAX   | Worldwide interoperability for Microwave Access        |                                                                                                     |
 | WLAN    | Wireless Local Area Network                            |                                                                                                     |
@@ -88,6 +91,8 @@
 
 <!-- Knowledge base -->
 [iac]: iac.placeholder
+[kubernetes]: kubernetes/README.md
+[vim]: vim.md
 
 <!-- Others -->
 [cn (canonicalname vs commonname) in active directory explained]: https://www.itechguides.com/what-is-cn-in-active-directory/
