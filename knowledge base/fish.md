@@ -1,4 +1,4 @@
-# fish
+# FISH
 
 The friendly interactive shell.
 
@@ -47,14 +47,21 @@ end
 
 ## Prompt
 
-See [Starship] or Tide.
+See [Starship] or [Tide].
 
 ## Further readings
 
 - [Website]
 - [`bash`][bash]
 - [`zsh`][zsh]
+
+Prompts:
+
 - [Starship] (prompt)
+- [Tide] (prompt)
+
+Frameworks:
+
 - [Oh My Fish][oh-my-fish]
 
 ## Sources
@@ -84,3 +91,4 @@ All the references in the [further readings] section, plus the following:
 [website]: https://fishshell.com/
 
 <!-- Others -->
+[tide]: https://github.com/IlanCosman/tide
