@@ -4,6 +4,7 @@ The friendly interactive shell.
 
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
+1. [Prompt](#prompt)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -44,11 +45,17 @@ end
 
 `fish` offers a web-based configuration interface. Open it executing `fish_config`.
 
+## Prompt
+
+See [Starship] or Tide.
+
 ## Further readings
 
 - [Website]
 - [`bash`][bash]
 - [`zsh`][zsh]
+- [Starship] (prompt)
+- [Oh My Fish][oh-my-fish]
 
 ## Sources
 
@@ -66,6 +73,8 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Knowledge base -->
 [bash]: bash.md
+[oh-my-fish]: https://github.com/oh-my-fish/oh-my-fish
+[starship]: starship.md
 [zsh]: zsh.md
 
 <!-- Files -->
