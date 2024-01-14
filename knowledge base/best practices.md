@@ -14,12 +14,12 @@ What really worked for me.
 - Always think critically and question all the things. Especially those that don't appear to make any sense.<br/>
   Don't just follow trends or advice from others. They _might_ know better, but you will be the one dealing with the issues in the end.
 - Try to understand how something really works, may it be a technology, a tool or what else.<br/>
-  Try at least once to do manually what an automation saves you. Look at the source code of tools. Read the fabulous documentation.
+  Try at least once to do manually what an automation would do in your place. Look at the source code of tools. Read the _fabulous_ documentation.
 - Stay curious. Experiment. Learn and break things (in a sane and safe way). Dive deeper into what interests you.
-- There is no perfect nor correct solution, just different sets of tradeoff.<br/>
-  Find the one that most satisfies you and your **current** necessities.
+- Make the **informed** decision that most satisfies your **current** necessities.<br/>
+  There is no _perfect_ nor _correct_ solution, just different sets of tradeoff. Besides, no one will ever have all the information at the start, as some of them only come with experience and looking back at decisions one has already made gives the distorted perspective that those decisions were clearer than they really were.
 - Review every decision after some time. Check they are still relevant, or if there is some improvement you can implement.<br/>
-  Things change constantly: new technologies are given birth often, and processes improve.
+  Things change constantly: new technologies are given birth often, and processes improve. Also, now you know better then before.
 - Keep things simple (KISS approach) **with respect of your ultimate goal** and not only for the sake of simplicity.<br/>
   Always going for the simple solution makes things complicated on a higher level.<br/>
   Check out [KISS principle is not that simple].
@@ -127,6 +127,7 @@ In order of addition:
 - [Understanding the pareto principle (the 80/20 rule)]
 - [The 3-2-1 backup strategy] by Yev Pusin
 - [5 whys]
+- [Thinking about lockdowns] by CGP Grey
 
 <!--
   References
@@ -156,6 +157,7 @@ In order of addition:
 [simple sabotage for software]: https://erikbern.com/2023/12/13/simple-sabotage-for-software.html
 [the 3-2-1 backup strategy]: https://www.backblaze.com/blog/the-3-2-1-backup-strategy/
 [the art of small pull requests]: https://essenceofcode.com/2019/10/29/the-art-of-small-pull-requests/
+[thinking about lockdowns]: https://www.youtube.com/watch?v=SVmEXdGqO-s
 [trunk-based development: a comprehensive guide]: https://launchdarkly.com/blog/introduction-to-trunk-based-development/
 [understanding the pareto principle (the 80/20 rule)]: https://betterexplained.com/articles/understanding-the-pareto-principle-the-8020-rule/
 [we have used too many levels of abstractions and now the future looks bleak]: https://unixsheikh.com/articles/we-have-used-too-many-levels-of-abstractions-and-now-the-future-looks-bleak.html
