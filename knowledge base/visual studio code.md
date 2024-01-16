@@ -1,7 +1,5 @@
 # Visual Studio Code
 
-## Table of contents <!-- omit in toc -->
-
 1. [Configuration](#configuration)
    1. [Handy settings](#handy-settings)
 1. [Handy keyboard shortcuts](#handy-keyboard-shortcuts)
@@ -11,6 +9,7 @@
 1. [Troubleshooting](#troubleshooting)
    1. [Blank window upon launch](#blank-window-upon-launch)
    1. [_No extensions found_ when running from source](#no-extensions-found-when-running-from-source)
+   1. [_Type the name and password of a user in the 'Developer Tools' group to allow Developer Tools Access to make changes_ on Mac OS X](#type-the-name-and-password-of-a-user-in-the-developer-tools-group-to-allow-developer-tools-access-to-make-changes-on-mac-os-x)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -46,9 +45,9 @@ Extensions:
 
 | Extension                  | Setting                                       | Default value | Scopes          | Location in tree                 | Description                                                                                                                                                  |
 | -------------------------- | --------------------------------------------- | ------------- | --------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| vscode.git (built-in)      | `git.autofetch`                               | `true`        | User, Workspace | Extensions > Git                 | When set to true, commits will automatically be fetched from the default remote of the current Git repository. Setting to `all` will fetch from all remotes. |
 | angelo-breuer.clock        | `clock.alignment`                             | `"Left"`      | User, Workspace | Extensions > Status Bar Clock    | Alignment of the clock on the status bar.                                                                                                                    |
 | angelo-breuer.clock        | `clock.format`                                | `"hh:MM"`     | User, Workspace | Extensions > Status Bar Clock    | Date and time format. See https://www.npmjs.com/package/dateformat#mask-options for more options.                                                            |
-| ??                         | `git.autofetch`                               | `true`        | User, Workspace | Extensions > Git                 | When set to true, commits will automatically be fetched from the default remote of the current Git repository. Setting to `all` will fetch from all remotes. |
 | yzhang.markdown-all-in-one | `markdown.extension.orderedList.autoRenumber` | `true`        | User, Workspace | Extensions > Markdown All In One | Auto fix ordered list markers.                                                                                                                               |
 | yzhang.markdown-all-in-one | `markdown.extension.orderedList.marker`       | `"ordered"`   | User, Workspace | Extensions > Markdown All In One | Auto fix ordered list markers.                                                                                                                               |
 | yzhang.markdown-all-in-one | `markdown.extension.toc.levels`               | `"1..6"`      | User, Workspace | Extensions > Markdown All In One | Range of levels for the ToC.                                                                                                                                 |
@@ -128,6 +127,14 @@ jq '.extensionsGallery' /usr/lib/code/product.json
 
 and if not, change them.
 
+### _Type the name and password of a user in the 'Developer Tools' group to allow Developer Tools Access to make changes_ on Mac OS X
+
+One needs to add one's user name to the `_developer` group:
+
+```sh
+sudo dscl . append '/Groups/_developer' GroupMembership "$USER"
+```
+
 ## Further readings
 
 - [Network connections in Visual Studio Code]
@@ -138,20 +145,22 @@ and if not, change them.
 - [Recommending VSCode extensions within your Open Source projects]
 - [VSCode (and some non-patched Electron applications) doesn't run after Tumbleweed update on Nvidia]
 - [Electron applications all crash upon launch]
+- [Authorize a non-admin developer in Xcode / Mac OS]
 
 <!--
   References
   -->
 
-<!-- Upstream -->
-[network connections in visual studio code]: https://code.visualstudio.com/docs/setup/network
-[official product.json]: https://github.com/Microsoft/vscode/blob/master/product.json
-
 <!-- Files -->
 [extensions.json]: ../examples/vscode/extensions.json
 [settings.json]: ../examples/vscode/settings.json
 
+<!-- Upstream -->
+[network connections in visual studio code]: https://code.visualstudio.com/docs/setup/network
+[official product.json]: https://github.com/Microsoft/vscode/blob/master/product.json
+
 <!-- Others -->
+[authorize a non-admin developer in xcode / mac os]: https://stackoverflow.com/questions/1837889/authorize-a-non-admin-developer-in-xcode-mac-os#1837935
 [electron applications all crash upon launch]: https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/1944468
 [recommending vscode extensions within your open source projects]: https://tattoocoder.com/recommending-vscode-extensions-within-your-open-source-projects/
 [using extensions in compiled vscode]: https://stackoverflow.com/questions/44057402/using-extensions-in-compiled-vscode#45291490
