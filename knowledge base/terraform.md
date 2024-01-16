@@ -288,6 +288,7 @@ eval "export $(sed -E 's/([[:graph:]]+)[[:blank:]]*=[[:blank:]]*([[:graph:]]+)/T
 - [References to Named Values]
 - [Environment Variables]
 - [Forcing Re-creation of Resources]
+- [OpenTofu]
 
 ## Sources
 
@@ -301,6 +302,12 @@ All the references in the [further readings] section, plus the following:
   References
   -->
 
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Knowledge base -->
+[opentofu]: opentofu.md
+
 <!-- Upstream -->
 [cli documentation]: https://www.terraform.io/docs/cli/
 [environment variables]: https://www.terraform.io/cli/config/environment-variables
@@ -309,9 +316,6 @@ All the references in the [further readings] section, plus the following:
 [references to named values]: https://www.terraform.io/language/expressions/references
 [version constraints]: https://www.terraform.io/language/expressions/version-constraints
 [website]: https://www.terraform.io
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Others -->
 [azure provider]: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs
