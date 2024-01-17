@@ -24,7 +24,7 @@ What really worked for me.
   Always going for the simple solution makes things complicated on a higher level.<br/>
   Check out [KISS principle is not that simple].
 - Beware of complex things that _should be simple_.<br/>
-  E.g., [SAFe].
+  E.g., google what the _[SAFe] delusion_ is.
 - Focus on what matters, but also set time aside to work on the rest.<br/>
   Check [Understanding the pareto principle (the 80/20 rule)].
 - Learn from your (and others') mistakes.<br/>
@@ -84,7 +84,7 @@ What really worked for me.
 - Keep tasks as simple, consistent and reproducible as possible.<br/>
   Avoid like the plague to put programs or scripts in pipelines: they should be _glue_, not replace applications.
 - All tasks should be able to execute from one's own local machine.<br/>
-  This allows to fail fast and avoid wasting time waiting for pipelines to run in a blackbox somewhere.
+  This allows to fail fast and avoid wasting time waiting for pipelines to run in a black box somewhere.
 - Consider using local automation to guarantee basic quality **before** the code reaches the shared repository.<br/>
   Tools like [`pre-commit`][pre-commit] are a doozy for this.
 - DevOps pipelines are meant to be used as **last mile** steps for specific goals.<br/>
@@ -99,11 +99,14 @@ Consider what follows for infrastructure and platform engineering as well.
 - Focus on small audiences first. Avoid trying appealing lots of users from the beginning.<br/>
   If you do not have a user base, the product has no reason to exist but your will to create it.
 - Consider and fix users' pain points **before** adding new features.<br/>
-  If users are not happy with your tool, they'll try moving away from it.
+  If users are not happy with your tool they'll try moving away from it, bringing the discussion back to the previous point in this list.
+- Avoid creating mindless abstractions, like templates using variables for all their attributes.<br/>
+  Prefer providing one or at most a few simplified solutions that use different [adapters or interfaces][what does it mean to program to interfaces?] in the background instead.<br/>
+  E.g., check out how [Crossplane] works.
 
 ## Sources
 
-In order of addition:
+Listed in order of addition:
 
 - Personal experience
 - [A case against "platform teams"] by Kislay Verma
@@ -128,12 +131,14 @@ In order of addition:
 - [The 3-2-1 backup strategy] by Yev Pusin
 - [5 whys]
 - [Thinking about lockdowns] by CGP Grey
+- [Why your platform monolith is probably a bad idea] by David Leitner
 
 <!--
   References
   -->
 
 <!-- Knowledge base -->
+[crossplane]: https://www.crossplane.io/
 [editorconfig]: editorconfig.md
 [pre-commit]: pre-commit.md
 [safe]: safe.placeholder
@@ -163,3 +168,4 @@ In order of addition:
 [we have used too many levels of abstractions and now the future looks bleak]: https://unixsheikh.com/articles/we-have-used-too-many-levels-of-abstractions-and-now-the-future-looks-bleak.html
 [what does it mean to program to interfaces?]: https://www.baeldung.com/cs/program-to-interface
 [why the fuck are we templating yaml?]: https://leebriggs.co.uk/blog/2019/02/07/why-are-we-templating-yaml
+[why your platform monolith is probably a bad idea]: https://www.youtube.com/watch?v=3B0TbV-Ipmo
