@@ -43,6 +43,10 @@ chezmoi diff
 # Apply changes.
 chezmoi apply
 
+# List the files managed by chezmoi.
+chezmoi managed
+chezmoi list
+
 # Show the full list of variables.
 # Includes custom data from the configuration file.
 chezmoi data
