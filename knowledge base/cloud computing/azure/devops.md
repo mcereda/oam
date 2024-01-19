@@ -145,15 +145,12 @@ The extension will automatically install itself the first time you run an `az de
 All the references in the [further readings] section, plus the following:
 
 - [Loops in Azure DevOps Pipelines]
+- [How to authenticate when I try to git clone from Azure git?]
+- [Use personal access tokens]
 
 <!--
   References
   -->
-
-<!-- Upstream -->
-[expressions]: https://learn.microsoft.com/en-us/azure/devops/pipelines/process/expressions
-[use predefined variables]: https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
-[az devops]: https://learn.microsoft.com/en-us/cli/azure/devops?view=azure-cli-latest
 
 <!-- In-article sections -->
 [further readings]: #further-readings
@@ -161,5 +158,12 @@ All the references in the [further readings] section, plus the following:
 <!-- Knowledge base -->
 [azure cli]: cli.md
 
+<!-- Upstream -->
+[az devops]: https://learn.microsoft.com/en-us/cli/azure/devops
+[expressions]: https://learn.microsoft.com/en-us/azure/devops/pipelines/process/expressions
+[use personal access tokens]: https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate
+[use predefined variables]: https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
+
 <!-- Others -->
+[how to authenticate when i try to git clone from azure git?]: https://stackoverflow.com/questions/62593521/how-to-authenticate-when-i-try-to-git-clone-from-azure-git#62630309
 [loops in azure devops pipelines]: https://pakstech.com/blog/azure-devops-loops/
