@@ -1,7 +1,5 @@
 # Mozilla Thunderbird
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Profiles](#profiles)
    1. [Profile manager](#profile-manager)
@@ -11,6 +9,7 @@
    1. [Create a dummy account](#create-a-dummy-account)
    1. [Convert an account's message store type from one file per folder (_mbox_) to one file per message (_maildir_)](#convert-an-accounts-message-store-type-from-one-file-per-folder-mbox-to-one-file-per-message-maildir)
    1. [Rebuild the Global Database for a Profile](#rebuild-the-global-database-for-a-profile)
+1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
 ## TL;DR
@@ -145,6 +144,10 @@ Depending on the number of messages, it might take some time for the indexing to
 
 The indexing progress can be monitored through _Tools_ > _Activity Manager_.
 
+## Further readings
+
+- [Betterbird]
+
 ## Sources
 
 - [Profile manager - create and remove thunderbird profiles]
@@ -156,8 +159,10 @@ The indexing progress can be monitored through _Tools_ > _Activity Manager_.
   References
   -->
 
-<!-- Upstream -->
+<!-- In-article sections -->
+[create a dummy account]: #create-a-dummy-account
 
+<!-- Upstream -->
 [profile manager - create and remove thunderbird profiles]: https://support.mozilla.org/en-US/kb/profile-manager-create-and-remove-thunderbird-profiles#
 [profiles - where thunderbird stores your messages and other user data]: https://support.mozilla.org/en-US/kb/profiles-where-thunderbird-stores-user-data#
 [rebuilding the global database]: https://support.mozilla.org/en-US/kb/rebuilding-global-database#
@@ -165,8 +170,6 @@ The indexing progress can be monitored through _Tools_ > _Activity Manager_.
 [importexporttools-ng]: https://addons.thunderbird.net/en-US/thunderbird/addon/importexporttools-ng/
 [removedupes]: https://addons.thunderbird.net/en-US/thunderbird/addon/removedupes/
 
-<!-- In-article sections -->
-[create a dummy account]: #create-a-dummy-account
-
 <!-- Others -->
 [arch wiki]: https://wiki.archlinux.org/title/thunderbird
+[betterbird]: https://www.betterbird.eu/
