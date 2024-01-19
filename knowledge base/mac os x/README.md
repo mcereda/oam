@@ -1,7 +1,5 @@
 # Mac OS X
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Hidden settings](#hidden-settings)
 1. [Image manipulation](#image-manipulation)
@@ -23,22 +21,6 @@
 ## TL;DR
 
 ```sh
-# Keep the system awake.
-caffeinate
-caffeinate -t 600
-
-# Do a network speed test.
-networkquality -sv
-
-# List open ports.
-netstat
-netstat -n -p 'tcp'
-lsof -n -i ':443'
-sudo lsof -n -i 'TCP' -s 'TCP:LISTEN'
-
-# Get the PID of processes using specific ports.
-lsof -nt -i ':443'
-
 # Install Xcode CLI tools.
 xcode-select --install
 
@@ -47,6 +29,7 @@ xcode-select -p
 
 # Remove Xcode tools.
 sudo rm -rf $(xcode-select -p)
+
 
 # List all available updates.
 softwareupdate --list --all
@@ -58,54 +41,74 @@ softwareupdate --install --recommended --restart --agree-to-license
 # Download (but not install) recommended updates.
 softwareupdate --download --recommended
 
-# Check an NFS share is available on the network.
+
+# Keep the system awake.
+caffeinate
+caffeinate -t '600'
+
+# Perform network speed tests.
+networkquality -sv
+
+# List open ports.
+netstat
+netstat -n -p 'tcp'
+lsof -n -i ':443'
+sudo lsof -n -i 'TCP' -s 'TCP:LISTEN'
+
+# Get the PID of processes using specific ports.
+lsof -nt -i ':443'
+
+# Clear the DNS cache.
+sudo dscacheutil -flushcache; sudo killall -HUP 'mDNSResponder'
+
+
+# Check NFS shares are available on the network.
 showmount -e 'host'
 
-# Mount an NFS share.
+# Mount NFS shares.
 sudo mount -t 'nfs' 'host:/path/to/share' 'path/to/mount/point'
 sudo mount -t 'nfs' -o 'rw,resvport' 'host:/path/to/share' 'path/to/mount/point'
 
-# Install a .pkg file from CLI.
-# 'target' needs to be a device, not a path.
-installer -pkg /path/to/non-root-package.pkg -target CurrentUserHomeDirectory
-sudo installer -pkg /path/to/root-needed-package.pkg -target /
 
-# Clear the DNS cache.
-sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
+# Install .pkg files from CLI.
+# 'target' needs to be a *device*, not a path.
+installer -pkg '/path/to/nonroot-package.pkg' -target 'CurrentUserHomeDirectory'
+sudo installer -pkg '/path/to/root-needed-package.pkg' -target '/'
 
-# Add a password to the default keychain.
+
+# Add passwords to the default keychain.
 # The password needs to be left last.
-security add-generic-password -a johnny -s github -w 'b.good'
-
-# Add a password to the default keychain giving it some optional data.
-security add-generic-password -a johnny -s github -l work \
+security add-generic-password -a 'johnny' -s 'github' -w 'b.good'
+security add-generic-password -a 'johnny' -s 'github' -l 'work' \
   -j 'my key for work' -w 'b.good'
 
 # Update passwords' value.
-security add-generic-password -a johnny -s github -l work -U -w 'new-pass'
+security add-generic-password -a 'johnny' -s 'github' -l 'work' -U -w 'new-pass'
 
 # Print passwords to stdout.
-security find-generic-password -w -a johnny -s github
-security find-generic-password -w -l work
-security find-generic-password -w -l work -s github
+security find-generic-password -w -a 'johnny' -s 'github'
+security find-generic-password -w -l 'work'
+security find-generic-password -w -l 'work' -s 'github'
 
-# Delete a password from the default keychain.
-security delete-generic-password -a johnny -s github
+# Delete passwords from the default keychain.
+security delete-generic-password -a 'johnny' -s 'github'
+
 
 # Get the host's bonjour name.
 scutil --get LocalHostName
 /usr/libexec/PlistBuddy -c "Print :System:Network:HostNames:LocalHostName" \
-  /Library/Preferences/SystemConfiguration/preferences.plist
+  '/Library/Preferences/SystemConfiguration/preferences.plist'
 
 # Get the host's netbios name.
 defaults read /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName
 /usr/libexec/PlistBuddy -c "Print :NetBIOSName" \
-  /Library/Preferences/SystemConfiguration/com.apple.smb.server.plist
+  '/Library/Preferences/SystemConfiguration/com.apple.smb.server.plist'
 
 # Get the host's computer name.
 scutil --get ComputerName
 /usr/libexec/PlistBuddy -c "Print :System:System:ComputerName" \
-  /Library/Preferences/SystemConfiguration/preferences.plist
+  '/Library/Preferences/SystemConfiguration/preferences.plist'
+
 
 # Get environment variables from inside launchd.
 launchctl getenv 'key'
@@ -127,6 +130,10 @@ launchctl start 'job_label'
 
 # Stop jobs.
 launchctl stop 'job_label'
+
+
+# Enable file trimming on SSD.
+sudo trimforce enable
 ```
 
 ## Hidden settings
