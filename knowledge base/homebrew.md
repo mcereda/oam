@@ -43,6 +43,9 @@ brew pin 'gnupg2'
 # Uninstall something.
 brew uninstall --zap 'keybase'
 
+# (Re)create links for applications.
+brew link 'kubernetes-cli'
+
 
 # Add taps.
 # Only one at a time.
