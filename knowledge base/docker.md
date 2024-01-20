@@ -104,9 +104,27 @@ docker logout
 docker rmi 'alpine'
 docker image prune -a
 docker system prune -a
-```
 
-```sh
+
+# Display a summary of the vulnerabilities in images.
+# If not given any input, it targets the most recently built image.
+docker scout qv
+docker scout quickview 'debian:unstable-slim'
+docker scout quickview 'archive://hw.tar'
+
+# Display vulnerabilities in images.
+docker scout cves
+docker scout cves 'alpine'
+docker scout cves 'archive://alpine.tar'
+docker scout cves --format 'sarif' --output 'alpine.sarif.json' 'oci-dir://alpine'
+docker scout cves --format 'only-packages' --only-package-type 'golang' --only-vuln-packages 'fs://.'
+
+# Display base image update recommendations.
+docker scout recommendations
+docker scout recommendations 'golang:1.19.4' --only-refresh
+docker scout recommendations 'golang:1.19.4' --only-update
+
+
 # List builders.
 docker buildx ls
 
@@ -221,14 +239,16 @@ default      docker
 > See <https://github.com/docker/buildx/issues/59>.
 
 ```sh
-$ docker buildx build --platform 'linux/amd64,linux/arm64,linux/arm/v7' -t 'image:tag' '.'
-$ docker load …
+docker buildx build --platform 'linux/amd64,linux/arm64,linux/arm/v7' -t 'image:tag' '.'
+docker load …
 ```
 
 ## Further readings
 
 - [GitHub] page
 - [Podman]
+- [Dive]
+- [Testcontainers]
 
 ## Sources
 
@@ -244,7 +264,9 @@ $ docker load …
 
 <!-- Knowledge base -->
 [containerd]: containerd.placeholder
+[dive]: dive.placeholder
 [podman]: podman.placeholder
+[testcontainers]: testcontainers.placeholder
 
 <!-- Upstream -->
 [building multi-arch images for arm and x86 with docker desktop]: https://www.docker.com/blog/multi-arch-images/

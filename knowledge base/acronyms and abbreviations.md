@@ -71,6 +71,7 @@
 | RPM     | Revolutions Per Minute                                 |                                                                                                     |
 | RPM     | RPM Package Manager                                    | Package management system used by Linux distributions like Red Hat, (open)SuSE and Fedora           |
 | SAFE    | Scaled Agile FramEwork                                 |                                                                                                     |
+| SBOM    | Software Bill Of Materials                             | See [SBOM at a Glance]                                                                              |
 | SOPS    | Secrets OPerationS                                     |                                                                                                     |
 | SPIFFE  | Secure Production Identity Framework for Everyone      |                                                                                                     |
 | SQL     | Structured Query Language                              |                                                                                                     |
@@ -103,6 +104,7 @@
 
 - [CN (canonicalName vs CommonName) In Active Directory Explained]
 - [KISS principle is not that simple]
+- [SBOM at a Glance]
 
 <!--
   References
@@ -127,3 +129,4 @@
 <!-- Others -->
 [cn (canonicalname vs commonname) in active directory explained]: https://www.itechguides.com/what-is-cn-in-active-directory/
 [kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
+[sbom at a glance]: https://www.ntia.gov/sites/default/files/publications/sbom_at_a_glance_apr2021_0.pdf
