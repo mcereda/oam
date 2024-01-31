@@ -16,6 +16,8 @@
 | BIOS    | Basic Input/Output System                              |                                                                                                     |
 | BOINC   | Berkeley Open Infrastructure for Network Computing     |                                                                                                     |
 | BSoD    | Blue Screen of Death                                   |                                                                                                     |
+| BSS     | Basic Service Set                                      | Group of wireless devices that work with the same AP                                                |
+| BSSID   | Basic Service Set IDentifier                           | An AP's MAC address                                                                                 |
 | BYOD    | Bring Your Own Device                                  |                                                                                                     |
 | CD      | Continuous Delivery                                    |                                                                                                     |
 | CD      | Continuous Deployment                                  |                                                                                                     |
@@ -38,6 +40,8 @@
 | EA      | Extended Attributes                                    |                                                                                                     |
 | EEPROM  | Electronically Erasable Programmable Read-Only Memory  |                                                                                                     |
 | ELI5    | Explain Like I'm 5                                     |                                                                                                     |
+| ESS     | Extended Service Set                                   | Group of WAPs working together to offer the same wireless network                                   |
+| ESSID   | Extended Service Set IDentifier                        | The wireless network name shared in an ESS                                                          |
 | FHS     | [Filesystem Hierarchy Standard][fhs]                   |                                                                                                     |
 | FIFO    | First In First Out                                     |                                                                                                     |
 | FILO    | First In Last Out                                      |                                                                                                     |
@@ -76,6 +80,7 @@
 | SPIFFE  | Secure Production Identity Framework for Everyone      |                                                                                                     |
 | SQL     | Structured Query Language                              |                                                                                                     |
 | SSH     | [Secure SHell][ssh]                                    |                                                                                                     |
+| SSID    | Service Set IDentifier                                 | A wireless network name                                                                             |
 | SSSD    | [System Security Services Daemon][sssd]                |                                                                                                     |
 | TCP     | Transport Control Protocol                             |                                                                                                     |
 | TFE     | [TerraForm Enterprise]                                 |                                                                                                     |
@@ -90,6 +95,7 @@
 | UT      | Unit Test                                              |                                                                                                     |
 | VIM     | [VI iMproved][vim]                                     |                                                                                                     |
 | WAN     | Wide Area Network                                      |                                                                                                     |
+| WAP     | Wireless Access Point                                  |                                                                                                     |
 | WiMAX   | Worldwide interoperability for Microwave Access        |                                                                                                     |
 | WLAN    | Wireless Local Area Network                            |                                                                                                     |
 | XML     | eXtensible Markup Language                             |                                                                                                     |
