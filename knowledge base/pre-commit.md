@@ -70,6 +70,9 @@ Check they are tracked (have been `add`ed to the repository).
   References
   -->
 
+<!-- Knowledge base -->
+[lefthook]: lefthook.md
+
 <!-- Upstream -->
 [file types by extension]: https://github.com/pre-commit/identify/blob/main/identify/extensions.py
 [supported hooks]: https://pre-commit.com/hooks.html

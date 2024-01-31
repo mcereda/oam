@@ -94,6 +94,7 @@
         "kubeval",
         "kubie",
         "kustomize",
+        "lefthook",
         "libexec",
         "localdomain",
         "luci",
