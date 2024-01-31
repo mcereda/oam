@@ -86,7 +86,7 @@ What really worked for me.
 - All tasks should be able to execute from one's own local machine.<br/>
   This allows to fail fast and avoid wasting time waiting for pipelines to run in a black box somewhere.
 - Consider using local automation to guarantee basic quality **before** the code reaches the shared repository.<br/>
-  Tools like [`pre-commit`][pre-commit] are a doozy for this.
+  Tools like [`pre-commit`][pre-commit] or [`lefthook`][lefthook] are a doozy for this.
 - DevOps pipelines are meant to be used as **last mile** steps for specific goals.<br/>
   There **cannot** be a single pipeline for everything, the same way as the _one-size-fits-all_ concept never really works.
 
@@ -140,6 +140,7 @@ Listed in order of addition:
 <!-- Knowledge base -->
 [crossplane]: https://www.crossplane.io/
 [editorconfig]: editorconfig.md
+[lefthook]: lefthook.md
 [pre-commit]: pre-commit.md
 [safe]: safe.placeholder
 [the automation paradox]: the%20automation%20paradox.md
