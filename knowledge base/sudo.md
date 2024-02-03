@@ -1,13 +1,9 @@
 # Sudo
 
-> Avoid modifying the `sudoers` files manually and execute `visudo` instead; it will check the syntax on save, preventing you from screwing up the file.
-
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Drop privileges](#drop-privileges)
-1. [Restrict permissions a little](#restrict-permissions-a-little)
-1. [Avoid providing a password](#avoid-providing-a-password)
+1. [Avoid the need of providing a password](#avoid-the-need-of-providing-a-password)
+1. [Only allow specific commands](#only-allow-specific-commands)
 1. [Execute commands as a specific user](#execute-commands-as-a-specific-user)
 1. [Troubleshooting](#troubleshooting)
    1. [I modified a sudoers file manually, messed it up, and now I cannot use sudo anymore](#i-modified-a-sudoers-file-manually-messed-it-up-and-now-i-cannot-use-sudo-anymore)
@@ -15,13 +11,33 @@
 
 ## TL;DR
 
+> Avoid modifying the `sudoers` files manually, and execute `visudo` instead.<br/>
+> It will check the syntax on save, preventing you from screwing up the file.
+
+Defaults:
+
+| Path                     | Type               | OS       |
+| ------------------------ | ------------------ | -------- |
+| `/etc/sudoers`           | file               | All      |
+| `/etc/sudoers.d`         | included directory | Linux    |
+| `/private/etc/sudoers.d` | included directory | Mac OS X |
+
+Sudoers files use the Extended Backus-Naur Form (EBNF) grammar.
+
+Files in included directories are loaded in sorted lexical order.<br/>
+Files which name ends in `~` or contains `.` are skipped to avoid causing problems with package manager or temporary or backup files.
+
+When multiple entries match for the same user, they are applied in order.<br/>
+Where there are multiple matches, the last match is used (which is not necessarily the most specific one).
+
 ```sh
 # Make changes to a sudoers file.
 visudo
-visudo -f path/to/file
+visudo -f '/etc/sudoers.d/custom'
 
 # Check the syntax of a sudoers file.
-visudo -c path/to/file
+visudo -c
+visudo -csf '/etc/sudoers.d/lana'
 ```
 
 ## Drop privileges
@@ -34,35 +50,34 @@ sudo -k
 sudo -k ls
 ```
 
-## Restrict permissions a little
+## Avoid the need of providing a password
 
-```sh
-# file /etc/sudoers.d/user
-Cmnd_Alias UPGRADE_CMND  = /usr/bin/apt update, /usr/bin/apt list --upgradable, /usr/bin/apt upgrade
-Cmnd_Alias SHUTDOWN_CMND = /sbin/shutdown
-user ALL=(ALL:ALL) NOPASSWD: SHUTDOWN_CMND, UPGRADE_CMND
+```txt
+# file '/etc/sudoers.d/adam'
+adam ALL=(ALL:ALL) NOPASSWD: ALL
 ```
 
-## Avoid providing a password
+## Only allow specific commands
 
-```sh
-# file /etc/sudoers.d/user
-user ALL=(ALL:ALL) NOPASSWD: ALL
+```txt
+# file '/etc/sudoers.d/ginny'
+Cmnd_Alias UPGRADE_CMND  = /usr/bin/apt update, /usr/bin/apt list --upgradable, /usr/bin/apt upgrade
+Cmnd_Alias SHUTDOWN_CMND = /sbin/shutdown
+ginny ALL=(ALL:ALL) SHUTDOWN_CMND, UPGRADE_CMND, ls
 ```
 
 ## Execute commands as a specific user
 
-Invoke a login shell using the `-i, --login` option. When one does not specify a command a login shell prompt is returned, otherwise the output of the command is returned:
+Invoke a login shell using the `-i, --login` option.<br/>
+When not specifying a command, a login shell prompt is returned; otherwise, the output of the given command is returned:
 
 ```sh
-% whoami
-root
-% sudo -i -u user
+% sudo -i -u 'johnny'
 $ whoami
-user
+johnny
 
-% sudo -i -u user whoami
-user
+% sudo -i -u 'cynthia' whoami
+cynthia
 ```
 
 ## Troubleshooting
@@ -81,14 +96,15 @@ sudo: no valid sudoers sources found, quitting
 try using another access method like `PolicyKit` and fix the file up:
 
 ```sh
-pkexec visudo -f /etc/sudoers.d/user
+pkexec visudo -f '/etc/sudoers.d/michael'
 ```
 
 ## Sources
 
 - [How to modify an invalid sudoers file]
 - [sudo as another user with their environment]
-- [sudo: Drop root privileges]
+- [sudo: drop root privileges]
+- [Linux fundamentals: A to Z of a sudoers file]
 
 <!--
   References
@@ -96,5 +112,6 @@ pkexec visudo -f /etc/sudoers.d/user
 
 <!-- Others -->
 [how to modify an invalid sudoers file]: https://askubuntu.com/questions/73864/how-to-modify-an-invalid-etc-sudoers-file
+[linux fundamentals: a to z of a sudoers file]: https://medium.com/kernel-space/linux-fundamentals-a-to-z-of-a-sudoers-file-a5da99a30e7f
 [sudo as another user with their environment]: https://unix.stackexchange.com/questions/176997/sudo-as-another-user-with-their-environment
 [sudo: drop root privileges]: https://coderwall.com/p/x2oica/sudo-drop-root-privileges
