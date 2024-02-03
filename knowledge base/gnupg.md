@@ -23,33 +23,70 @@
 ## TL;DR
 
 ```sh
+# Install on Mac OS X.
+# Choose one.
+brew install --cask 'gpg-suite-no-mail'
+brew install 'gnupg'
+
+
 # List existing keys.
-gpg --list-keys
+gpg -k
 gpg --list-keys --keyid-format 'short'
+gpg -K --with-subkey-fingerprint
 gpg --list-secret-keys --with-keygrip --keyid-format '0xlong'
 
-# Generate a new key.
+# Generate new keys.
 gpg --gen-key
 gpg --generate-key
 gpg --full-generate-key
 gpg --expert --full-generate-key
 
-# Generate a new key unattended.
+# Generate new key in an unattended way.
 # The non-interactive (--batch) option requires a settings file.
 gpg --generate-key --batch 'setting.txt'
 gpg --generate-key --batch <<-EOF
 …
 EOF
 
-# Delete a key from the keyring.
+# Import keys from files.
+gpg --import 'keys.asc'
+
+# Export keys to files.
+gpg --armor --export > 'all.public-keys.asc'
+gpg --armor --export recipient > 'recipient.public-keys.asc'
+gpg --armor --export-secret-keys > 'all.private-keys.asc'
+gpg --armor --export-secret-keys recipient > 'recipient.private-keys.asc'
+
+# Delete keys from the keyring.
 # The non-interactive (--batch) option requires the key fingerprint.
 gpg --delete-secret-key 'recipient'
 gpg --delete-key 'recipient'
 gpg --delete-keys --batch 'key_fingerprint'
 
-# Get a key's fingerprint information.
+# Get keys' fingerprint information.
 gpg --fingerprint
 gpg --fingerprint 'recipient'
+
+# Change keys' expiration date.
+# Use '0', 'never' or 'none' as expiration period to disable expiration.
+# Use '*' as subkey fingerprint to set the expiration date of all non-revoked
+# subkeys.
+gpg --quick-set-expire 'key_fingerprint' '0'
+gpg --quick-set-expire 'key_fingerprint' '2085-11-24'
+gpg --quick-set-expire 'key_fingerprint' '20241101T203012' 'subkey_fingerprint'
+gpg --quick-set-expire 'key_fingerprint' '1y' '*'
+
+# Generate revoking certificates.
+# To actually revoke the key, merge it with the certificate using '--import'.
+# Use the '--edit' command to only revoke a subkey or a key signature.
+gpg --gen-revoke
+gpg --generate-revocation
+
+# Change keys' passphrase.
+# Use '--dry-run' to just check the current password is correct.
+gpg --passwd 'key_fingerprint'
+gpg --change-passphrase --dry-run 'key_fingerprint'
+
 
 # Encrypt files.
 gpg -e -o 'file.out.gpg' -r 'recipient' 'file.in'
@@ -62,17 +99,6 @@ gpg -d -o 'file.out' 'file.in.gpg'
 gpg --decrypt-files --batch 'file.in.gpg.1' 'file.in.gpg.N'
 gpg -d --multifile --batch --yes 'file.in.gpg.1' 'file.in.gpg.N'
 
-# Import keys from a file.
-gpg --import 'keys.asc'
-
-# Export keys to a file.
-gpg --armor --export > 'all.public-keys.asc'
-gpg --armor --export recipient > 'recipient.public-keys.asc'
-gpg --armor --export-secret-keys > 'all.private-keys.asc'
-gpg --armor --export-secret-keys recipient > 'recipient.private-keys.asc'
-
-# Generate a revoke certificate.
-gpg --gen-revoke
 
 # Get the short ID of the signing key only for a user.
 # Primarily usable for git's signingKey configuration.
@@ -81,17 +107,14 @@ gpg --list-keys --keyid-format 'short' 'recipient' \
 | awk '{print $2}' \
 | cut -d '/' -f 2
 
-# Install on Mac OS X.
-# Choose one.
-brew install --cask 'gpg-suite-no-mail'
-brew install 'gnupg'
 
 # Integrate with the SSH agent.
 export SSH_AUTH_SOCK="$(gpgconf --list-dirs 'agent-ssh-socket')" && \
 gpgconf --launch 'gpg-agent'
 
-# Export the SSH public key for identities.
-gpg --export-ssh-key 'identifier'
+# Export keys as SSH keys.
+gpg --export-ssh-key 'key_identifier'
+
 
 # Integrate with Pinentry.
 export GPG_TTY="$(tty)"
