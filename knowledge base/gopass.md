@@ -1,7 +1,5 @@
 # Gopass
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [File formats](#file-formats)
 1. [Browsers integration](#browsers-integration)
@@ -13,23 +11,30 @@
 ## TL;DR
 
 ```sh
+# Installation.
+brew install 'gopass'
+
+# Install shell completions.
+gopass completion 'fish' > "$HOME/.config/fish/completions/gopass.fish"
+source $(gopass completion 'zsh')
+
 # Setup new stores.
 # If no options are given, defaults are used.
 gopass setup
 
 # Show all configuration values.
 gopass config
+gopass config --store 'family'
 
 # Show specific configuration values only.
 gopass config 'core.autoclip'
 gopass config --store='foo' 'core.autopush'
 
 # Update specific configuration values.
-gopass config 'core.autoclip' false
 gopass config 'core.autopush' false
-gopass config 'generate.generator' 'xkcd'
+gopass config --store 'bar' 'generate.generator' 'xkcd'
 
-# Initiate the *root* store.
+# Initialize the *root* store.
 gopass init
 gopass init -p 'path/to/root/store' 'key-id'
 
@@ -98,6 +103,7 @@ gopass search …
 # Find secrets containing the search string when decrypted.
 gopass grep 'search-string'
 
+
 # List mounted stores.
 gopass mounts
 
@@ -116,6 +122,7 @@ gopass mounts remove 'internal/path/to/store-1' … 'store-N'
 gopass mounts rm …
 gopass mounts unmount …
 gopass mounts umount …
+
 
 # List templates.
 gopass templates
@@ -137,6 +144,7 @@ gopass edit -c 'path/to/folder/with/template'/'secret'
 gopass templates remove 'path/to/folder'
 gopass templates rm …
 
+
 # List all recipients.
 gopass recipients
 
@@ -145,15 +153,19 @@ gpg --list-keys --keyid-format '0xlong'
 
 # Add recipients.
 gopass recipients add 'key-id-in-0xlong-format'
-gopass recipients add -s 'store' …
+gopass recipients add --store 'store' …
 
 # Remove recipients
+gopass recipients remove
 gopass recipients remove '0xB5B44266A3683834'
-gopass recipients remove -s 'store' …
+gopass recipients remove --store 'store' …
+
 
 # Check the stores integrity, clean up artifacts and re-encrypt secrets if
-# recipients are missing.
+# recipients are missing or changed.
 gopass fsck
+gopass fsck --decrypt
+
 
 # Sync with remotes.
 gopass sync
@@ -162,6 +174,7 @@ gopass sync -s 'store-1' … 'store-N'
 # Manage git operations manually.
 gopass git pull
 gopass git push --store='foo' 'origin' 'main'
+
 
 # Reset gopass' configuration.
 rm "${HOME}/.config/gopass/config"
