@@ -235,7 +235,7 @@ You should already have a GPG key. If you don't, read one of the many fine tutor
 You will create the subkey by editing your existing key **in expert mode** to get access to the appropriate options:
 
 ```sh
-$ gpg2 --expert --edit-key 'key_fingerprint'
+$ gpg --expert --edit-key 'key_fingerprint'
 gpg> addkey
 Please select what kind of key you want:
    (3) DSA (sign only)
@@ -307,12 +307,12 @@ To get `gpg-agent` to handle requests from SSH, you need to enable its SSH suppo
 echo "enable-ssh-support" >> ~/.gnupg/gpg-agent.conf
 ```
 
-You can avoid using `ssh-add` to load the keys pre-specifying which GPG keys to use in the `~/.gnupg/sshcontrol` file.<br/>
-The entries in this file are keygrips—internal identifiers that `gpg-agent` uses to refer to the keys. A keygrip refers to both the public and private key.<br/>
+You can avoid using `ssh-add` to load the keys by preemptively specifying which GPG keys to use in the `~/.gnupg/sshcontrol` file.<br/>
+Entries in this file need to be keygrips (internal identifiers that `gpg-agent` uses to refer to the keys). A keygrip refers to both the public and private key.<br/>
 To find the keygrip use `gpg -K --with-keygrip`, then add that line to the `~/.gnupg/sshcontrol` file:
 
 ```sh
-$ gpg2 -K --with-keygrip
+$ gpg -K --with-keygrip
 /home/bexelbie/.gnupg/pubring.kbx
 ------------------------------
 sec   rsa2048 2019-03-21 [SC] [expires: 2021-03-20]
