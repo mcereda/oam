@@ -90,6 +90,9 @@ brew install 'gnupg'
 export SSH_AUTH_SOCK="$(gpgconf --list-dirs 'agent-ssh-socket')" && \
 gpgconf --launch 'gpg-agent'
 
+# Export the SSH public key for identities.
+gpg --export-ssh-key 'identifier'
+
 # Integrate with Pinentry.
 export GPG_TTY="$(tty)"
 ```
@@ -324,7 +327,7 @@ ssb   rsa2048 2019-03-21 [E] [expires: 2021-03-20]
 ssb   rsa2048 2019-03-21 [A]
       Keygrip = 7710BA0643CC022B92544181FF2EAC2A290CDC0E
 
-$ echo 7710BA0643CC022B92544181FF2EAC2A290CDC0E >> ~/.gnupg/sshcontrol
+$ echo 7710BA0643CC022B92544181FF2EAC2A290CDC0E >> ~'/.gnupg/sshcontrol'
 ```
 
 Now tell SSH how to access `gpg-agent` by setting the value of the `SSH_AUTH_SOCK` environment variable.
@@ -332,6 +335,15 @@ Now tell SSH how to access `gpg-agent` by setting the value of the `SSH_AUTH_SOC
 ```sh
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
 gpgconf --launch gpg-agent
+```
+
+Check the key has been imported correctly:
+
+```sh
+$ gpg --export-ssh-key 'Brian Exelbierd'
+ssh-rsa AAAAB3NzaC…7SD8UQ== openpgp:0x7BB65DA2
+$ ssh-add -L
+ssh-rsa AAAAB3NzaC…7SD8UQ== (none)
 ```
 
 ### Share the GPG-SSH key
