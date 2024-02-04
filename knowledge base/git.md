@@ -5,6 +5,7 @@
 1. [TL;DR](#tldr)
 1. [Authentication](#authentication)
 1. [Configuration](#configuration)
+   1. [Conditional inclusions](#conditional-inclusions)
    1. [Remotes](#remotes)
       1. [Push to multiple git remotes with the one command](#push-to-multiple-git-remotes-with-the-one-command)
    1. [Aliases](#aliases)
@@ -33,6 +34,8 @@
 1. [Sources](#sources)
 
 ## TL;DR
+
+[Gitconfig example]
 
 ```sh
 # Set your identity.
@@ -365,6 +368,15 @@ git \
 
 ## Configuration
 
+Config files:
+
+| Path                       | Scope  | Description                          |
+| -------------------------- | ------ | ------------------------------------ |
+| `/etc/gitconfig`           | system | System-wide default configuration    |
+| `$HOME/.gitconfig`         | global | Per-user configuration               |
+| `$HOME/.config/git/config` | global | Per-user configuration (alternative) |
+| `.git/config`              | local  | Repository configuration             |
+
 ```sh
 # Required to be able to commit changes.
 git config --local 'user.email' 'me@me.info'
@@ -408,6 +420,24 @@ git config --list \
   | xargs -I {} sh -c 'printf "{}=" && git config --get {}'
 ```
 
+### Conditional inclusions
+
+Paths can be relative or absolute, and one can use `~` as shortcut for the user's `$HOME` directory.
+
+```ini
+# All repositories in the given directory.
+# '/i' makes the match insensitive.
+[includeIf "gitdir/i:work/"]
+  path = /path/to/gitconfig.work
+
+# Only if any remote's URL matches the format.
+# Remotes need to be specified *after* this (i.e. in a local scope).
+[includeIf "hasconfig:remote.*.url:*github.com*/**"]
+  path = gitconfig.github
+[includeIf "hasconfig:remote.*.url:git@gitlab.com:*/**"]
+  path = ~/.gitconfig.gitlab.ssh
+```
+
 ### Remotes
 
 ```sh
@@ -432,7 +462,7 @@ git remote set-url --push --add origin https://exampleuser@example.com/path/to/r
 git remote set-url --push --add origin https://exampleuser@example.com/path/to/repo3
 ```
 
-```txt
+```ini
 [remote "origin"]
     url = https://exampleuser@example.com/path/to/repo1
     pushUrl = https://exampleuser@example.com/path/to/repo1
@@ -443,7 +473,7 @@ git remote set-url --push --add origin https://exampleuser@example.com/path/to/r
 
 To only pull from `repo1` but push to `repo1` and `repo2` for a specific branch `specialBranch`:
 
-```txt
+```ini
 [remote "origin"]
     url = ssh://git@aaa.xxx.com:7999/yyy/repo1.git
     fetch = +refs/heads/*:refs/remotes/origin/*
@@ -968,10 +998,17 @@ All the references in the [further readings] section, plus the following:
 - [Git Config | Setup Git Environment]
 - [1 minute coding tip: git diff-words to see diffs on a per-word basis instead of per line]
 - [Dress up your git diffs with word-level highlights]
+- [Git global config for specific repositories?]
 
 <!--
   References
   -->
+
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Files -->
+[gitconfig example]: ../examples/dotfiles/.config/git/config
 
 <!-- Upstream -->
 [docs]: https://git-scm.com/docs/git
@@ -981,9 +1018,6 @@ All the references in the [further readings] section, plus the following:
 [hooks]: https://git-scm.com/book/fa/v2/Customizing-Git-Git-Hooks
 [setting up the server]: https://git-scm.com/book/en/v2/Git-on-the-Server-Setting-Up-the-Server
 [tagging]: https://git-scm.com/book/en/v2/Git-Basics-Tagging
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Others -->
 [1 minute coding tip: git diff-words to see diffs on a per-word basis instead of per line]: https://www.youtube.com/watch?v=gDkvLxbA5ZE
@@ -996,6 +1030,7 @@ All the references in the [further readings] section, plus the following:
 [dress up your git diffs with word-level highlights]: https://www.viget.com/articles/dress-up-your-git-diffs-with-word-level-highlights/
 [get the repository's root directory]: https://stackoverflow.com/questions/957928/is-there-a-way-to-get-the-git-root-directory-in-one-command/#957978
 [git config | setup git environment]: https://initialcommit.com/blog/git-config
+[git global config for specific repositories?]: https://stackoverflow.com/questions/61983894/git-global-config-for-specific-repositories#71096731
 [git submodules: adding, using, removing, updating]: https://chrisjean.com/git-submodules-adding-using-removing-and-updating/
 [gpg failed to sign the data fatal: failed to write commit object]: https://stackoverflow.com/questions/39494631/gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object-git-2-10-0
 [how do i check out a remote git branch]: https://stackoverflow.com/questions/1783405/how-do-i-check-out-a-remote-git-branch/#1787014

@@ -124,3 +124,11 @@
 	gpgSign = true
 [user]
 	signingKey = 89C324BA
+
+# Conditional inclusions.
+[includeIf "hasconfig:remote.*.url:*github.com*/**"]
+	path = relative.gitconfig.github
+[includeIf "hasconfig:remote.*.url:git@gitlab.com:*/**"]
+	path = ~/.gitconfig.gitlab.ssh
+[includeIf "gitdir/i:work/"]
+	path = /absolute/gitconfig.work
