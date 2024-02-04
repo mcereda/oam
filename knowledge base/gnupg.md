@@ -17,6 +17,7 @@
     1. [Share the GPG-SSH key](#share-the-gpg-ssh-key)
 1. [Troubleshooting](#troubleshooting)
     1. [`gpg failed to sign the data; fatal: failed to write commit object`](#gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object)
+    1. [`sign_and_send_pubkey: signing failed for … from agent: agent refused operation`](#sign_and_send_pubkey-signing-failed-for--from-agent-agent-refused-operation)
     1. [New configuration settings are ineffective](#new-configuration-settings-are-ineffective)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
@@ -407,9 +408,9 @@ Run `ssh-add -L` to list your public keys and copy them over manually to the rem
 
 ### `gpg failed to sign the data; fatal: failed to write commit object`
 
-**Problem:**
+**Context:**
 
-- `git` is instructed to sign a commit with `gpg`
+- `git` is instructed to sign a commit with `gpg`.
 - `git commit` fails with the following error:
 
   > ```txt
@@ -417,17 +418,61 @@ Run `ssh-add -L` to list your public keys and copy them over manually to the rem
   > fatal: failed to write commit object
   > ```
 
-- One should have been prompted to input the key's passphrase (if set), but the prompt did **not** appear.
+- Pinentry should have prompted to input the key's passphrase, but the prompt did **not** appear.
 
-**Solution:** if `gnupg2` and `gpg-agent` 2.x are used, be sure to set the environment variable `GPG_TTY`:
+**Cause:**
+
+The environment variable `GPG_TTY` was not set and Pinentry could not reach the terminal session to prompt for the key's passphrase.
+
+**Solution:**
+
+Make sure the environment variable `GPG_TTY` is set to the current TTY:
 
 ```sh
 export GPG_TTY=$(tty)
 ```
 
+### `sign_and_send_pubkey: signing failed for … from agent: agent refused operation`
+
+**Context:**
+
+- `git pull` fails with the following error:
+
+  > ```txt
+  > sign_and_send_pubkey: signing failed for … from agent: agent refused operation
+  > user@git.server.fqdn: Permission denied (publickey).
+  > fatal: Could not read from remote repository.
+  > ```
+
+- The repository is configured to connect to the remote using SSH.
+- `ssh` is instructed to use a GPG key for authentication.
+- Said GPG key is accepted for the user on the Git server.
+- Pinentry should have prompted to input the key's passphrase, but the prompt did **not** appear.
+
+**Solution:**
+
+- Make sure the environment variable `GPG_TTY` is set to the current TTY:
+
+  ```sh
+  export GPG_TTY=$(tty)
+  ```
+
+- Reload the GPG agent for good measure:
+
+  ```sh
+  gpg-connect-agent reloadagent '/bye'
+  ```
+
 ### New configuration settings are ineffective
 
-Reload the gpg agent:
+**Cause:**
+
+If already running, the GPG agent is still using the old configuration.<br/>
+Changing the configuration file now will have no effect.
+
+**Solution:**
+
+Reload the GPG agent:
 
 ```sh
 gpg-connect-agent reloadagent '/bye'
