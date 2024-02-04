@@ -12,11 +12,12 @@
 1. [Change a key's password](#change-a-keys-password)
 1. [Put comments in a message or file](#put-comments-in-a-message-or-file)
 1. [Use a GPG key for SSH authentication](#use-a-gpg-key-for-ssh-authentication)
-    1. [Create an authentication subkey](#create-an-authentication-subkey)
+    1. [Create an authentication-capable key or subkey](#create-an-authentication-capable-key-or-subkey)
     1. [Enable SSH to use the GPG subkey](#enable-ssh-to-use-the-gpg-subkey)
     1. [Share the GPG-SSH key](#share-the-gpg-ssh-key)
 1. [Troubleshooting](#troubleshooting)
     1. [`gpg failed to sign the data; fatal: failed to write commit object`](#gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object)
+    1. [New configuration settings are ineffective](#new-configuration-settings-are-ineffective)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -52,10 +53,10 @@ EOF
 gpg --import 'keys.asc'
 
 # Export keys to files.
-gpg --armor --export > 'all.public-keys.asc'
-gpg --armor --export recipient > 'recipient.public-keys.asc'
-gpg --armor --export-secret-keys > 'all.private-keys.asc'
-gpg --armor --export-secret-keys recipient > 'recipient.private-keys.asc'
+gpg -a --export > 'all.public-keys.asc'
+gpg --armor --export -o 'given.public-key.asc' 'key_fingerprint'
+gpg -a --export-secret-keys --output 'all.private-keys.asc'
+gpg -a --export-secret-subkeys 'subkey_fingerprint'! > 'given.private-subkey.asc'
 
 # Delete keys from the keyring.
 # The non-interactive (--batch) option requires the key fingerprint.
@@ -80,24 +81,36 @@ gpg --quick-set-expire 'key_fingerprint' '1y' '*'
 # To actually revoke the key, merge it with the certificate using '--import'.
 # Use the '--edit' command to only revoke a subkey or a key signature.
 gpg --gen-revoke
-gpg --generate-revocation
+gpg --generate-revocation -ao 'revoke.cert' 'fingerprint'
 
 # Change keys' passphrase.
 # Use '--dry-run' to just check the current password is correct.
-gpg --passwd 'key_fingerprint'
-gpg --change-passphrase --dry-run 'key_fingerprint'
+gpg --passwd 'fingerprint'
+gpg --change-passphrase --dry-run 'recipient'
 
 
-# Encrypt files.
+# Encrypt files *a*symmetrically.
 gpg -e -o 'file.out.gpg' -r 'recipient' 'file.in'
 gpg --encrypt -o 'file.out.gpg' -u 'sender' -r 'recipient' 'file.in'
 gpg --encrypt-files --batch -r 'recipient' 'file.in.1' 'file.in.N'
 gpg -e --multifile --batch -r 'recipient' --yes 'file.in.1' 'file.in.N'
 
+# Encrypt files *symmetrically*.
+# Simply encrypts data with a passphrase.
+gpg -c 'input.file'
+gpg --symmetric --s2k-cipher-algo 'AES256' --s2k-digest-algo 'SHA512' \
+  --s2k-count '65536' 'input.file'
+
 # Decrypt files.
 gpg -d -o 'file.out' 'file.in.gpg'
 gpg --decrypt-files --batch 'file.in.gpg.1' 'file.in.gpg.N'
 gpg -d --multifile --batch --yes 'file.in.gpg.1' 'file.in.gpg.N'
+
+# Encrypt directories.
+gpgtar -c -o 'dir.gpg' 'input/dir'
+
+# Decrypt directories.
+gpgtar -d 'dir.gpg'
 
 
 # Get the short ID of the signing key only for a user.
@@ -251,15 +264,15 @@ The whole point of armoring, however, is to provide seven-bit-clean data, so if 
 
 ## Use a GPG key for SSH authentication
 
-> Shamelessly copied over from [How to enable SSH access using a GPG key for authentication].
+> See also [How to enable SSH access using a GPG key for authentication].
 
 This exercise will use a GPG subkey with only the authentication capability enabled to complete SSH connections.<br/>
 You can create multiple subkeys as you would do for SSH key pairs.
 
-### Create an authentication subkey
+### Create an authentication-capable key or subkey
 
-You should already have a GPG key. If you don't, read one of the many fine tutorials available on this topic.<br/>
-You will create the subkey by editing your existing key **in expert mode** to get access to the appropriate options:
+To create subkeys, you should already have a GPG key. If you don't, read one of the many fine tutorials available on this topic.<br/>
+Create the subkey by editing your existing key **in expert mode** to get access to the appropriate options:
 
 ```sh
 $ gpg --expert --edit-key 'key_fingerprint'
@@ -317,9 +330,9 @@ sec  rsa2048/8715AF32191DB135
      trust: ultimate      validity: ultimate
 ssb  rsa2048/150F16909B9AA603
      created: 2019-03-21  expires: 2021-03-20  usage: E
-ssb  rsa2048/17E7403F18CB1123
+ssb  rsa4096/17E7403F18CB1123
      created: 2019-03-21  expires: never       usage: A
-[ultimate] (1). Brian Exelbierd
+[ultimate] (1). Johnny B. Good
 
 gpg> quit
 Save changes? (y/N) y
@@ -336,35 +349,51 @@ echo "enable-ssh-support" >> ~/.gnupg/gpg-agent.conf
 
 You can avoid using `ssh-add` to load the keys by preemptively specifying which GPG keys to use in the `~/.gnupg/sshcontrol` file.<br/>
 Entries in this file need to be keygrips (internal identifiers that `gpg-agent` uses to refer to the keys). A keygrip refers to both the public and private key.<br/>
-To find the keygrip use `gpg -K --with-keygrip`, then add that line to the `~/.gnupg/sshcontrol` file:
+Find the keygrips you need, then add them to the `~/.gnupg/sshcontrol` file:
 
 ```sh
 $ gpg -K --with-keygrip
-/home/bexelbie/.gnupg/pubring.kbx
-------------------------------
-sec   rsa2048 2019-03-21 [SC] [expires: 2021-03-20]
-      96F33EA7F4E0F7051D75FC208715AF32191DB135
-      Keygrip = 90E08830BC1AAD225E657AD4FBE638B3D8E50C9E
-uid           [ultimate] Brian Exelbierd
-ssb   rsa2048 2019-03-21 [E] [expires: 2021-03-20]
-      Keygrip = 5FA04ABEBFBC5089E50EDEB43198B4895BCA2136
-ssb   rsa2048 2019-03-21 [A]
-      Keygrip = 7710BA0643CC022B92544181FF2EAC2A290CDC0E
+/home/jbgood/.gnupg/pubring.kbx
+-----------------------------
+sec   rsa4096 2017-11-13 [SC] [expires: 2025-11-12]
+      7425E11D898C449FDD3D1B4A7E747A8618CB109F
+      Keygrip = E045864F555B3432E6DFCA2EF7ED47403A6E399C
+uid           [ultimate] Johnny B. Good <j.b.good@email.com>
+uid           [ultimate] Johnny <johnny@mymail.com>
+ssb   rsa4096 2018-01-03 [E]
+      Keygrip = B4674D4429AE049663BE4FEF9407C6B90F7AF122
+ssb   rsa4096 2018-05-04 [A]
+      Keygrip = B3D630644D14A452502A84FB09E5257CF54C3E04
 
-$ echo 7710BA0643CC022B92544181FF2EAC2A290CDC0E >> ~'/.gnupg/sshcontrol'
+sec   rsa4096 2022-01-03 [SCEA] [expires: 2025-01-02]
+      8B6DC0BF4D73373C2A529C65CC54F9AC6E542DE7
+      Keygrip = 03CE1FCE255AC0BB747BBBF61C9B8378CF78A2FC
+uid           [ unknown] Luna Varasi <luna.var@example.com>
+
+$ echo 'B3D630644D14A452502A84FB09E5257CF54C3E04' >> ~'/.gnupg/sshcontrol'
+$ echo '03CE1FCE255AC0BB747BBBF61C9B8378CF78A2FC' >> ~'/.gnupg/sshcontrol'
 ```
 
-Now tell SSH how to access `gpg-agent` by setting the value of the `SSH_AUTH_SOCK` environment variable.
+Now tell SSH how to access `gpg-agent` by setting the value of the `SSH_AUTH_SOCK` environment variable.<br/>
+Alternatively, and for a more permanent solution, set the option in the `.ssh/config` file:
 
 ```sh
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+
+# alternative
+echo "IdentityAgent $(gpgconf --list-dirs agent-ssh-socket)" >> ~'/.ssh/config'
+```
+
+Now you can launch the gpg agent:
+
+```sh
 gpgconf --launch gpg-agent
 ```
 
 Check the key has been imported correctly:
 
 ```sh
-$ gpg --export-ssh-key 'Brian Exelbierd'
+$ gpg --export-ssh-key 'Johnny B. Good'
 ssh-rsa AAAAB3NzaC…7SD8UQ== openpgp:0x7BB65DA2
 $ ssh-add -L
 ssh-rsa AAAAB3NzaC…7SD8UQ== (none)
@@ -388,16 +417,28 @@ Run `ssh-add -L` to list your public keys and copy them over manually to the rem
   > fatal: failed to write commit object
   > ```
 
+- One should have been prompted to input the key's passphrase (if set), but the prompt did **not** appear.
+
 **Solution:** if `gnupg2` and `gpg-agent` 2.x are used, be sure to set the environment variable `GPG_TTY`:
 
 ```sh
 export GPG_TTY=$(tty)
 ```
 
+### New configuration settings are ineffective
+
+Reload the gpg agent:
+
+```sh
+gpg-connect-agent reloadagent '/bye'
+```
+
 ## Further readings
 
 - [Commonly seen problems]
 - [Unattended key generation]
+- [OpenPGP best practices]
+- [GNU/Linux crypto series]
 
 ## Sources
 
@@ -411,6 +452,8 @@ All the references in the [further readings] section, plus the following:
 - [Can you manually add a comment to a PGP public key block and not break it?]
 - [How to renew a (soon to be) expired GPG key]
 - [Renew GPG key]
+- [Archlinux's GnuPG wiki page]
+- [GPG agent for SSH authentication]
 
 <!--
   References
@@ -424,11 +467,15 @@ All the references in the [further readings] section, plus the following:
 [further readings]: #further-readings
 
 <!-- Others -->
+[archlinux's gnupg wiki page]: https://wiki.archlinux.org/title/GnuPG
 [ask redhat]: https://access.redhat.com/solutions/2115511
 [can you manually add a comment to a pgp public key block and not break it?]: https://stackoverflow.com/questions/58696139/can-you-manually-add-a-comment-to-a-pgp-public-key-block-and-not-break-it#58696634
 [decrypt multiple openpgp files in a directory]: https://stackoverflow.com/questions/18769290/decrypt-multiple-openpgp-files-in-a-directory/42431810#42431810
+[gnu/linux crypto series]: https://blog.sanctum.geek.nz/series/gnu-linux-crypto/
+[gpg agent for ssh authentication]: https://mlohr.com/gpg-agent-for-ssh-authentication-update/
 [gpg failed to sign the data fatal: failed to write commit object]: https://stackoverflow.com/questions/39494631/gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object-git-2-10-0#42265848
 [how can i remove the passphrase from a gpg2 private key?]: https://unix.stackexchange.com/a/550538
 [how to enable ssh access using a gpg key for authentication]: https://opensource.com/article/19/4/gpg-subkeys-ssh
 [how to renew a (soon to be) expired gpg key]: https://filipe.kiss.ink/renew-expired-gpg-key/
+[openpgp best practices]: https://help.riseup.net/en/security/message-security/openpgp/gpg-best-practices
 [renew gpg key]: https://gist.github.com/krisleech/760213ed287ea9da85521c7c9aac1df0
