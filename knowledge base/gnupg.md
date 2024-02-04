@@ -112,8 +112,9 @@ gpg --list-keys --keyid-format 'short' 'recipient' \
 export SSH_AUTH_SOCK="$(gpgconf --list-dirs 'agent-ssh-socket')" && \
 gpgconf --launch 'gpg-agent'
 
-# Export keys as SSH keys.
+# Export keys in OpenSSH format.
 gpg --export-ssh-key 'key_identifier'
+gpg --export-ssh-key 'ed25519_key' > ~'/.ssh/id_ed25519.pub'
 
 
 # Integrate with Pinentry.
