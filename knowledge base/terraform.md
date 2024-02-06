@@ -289,6 +289,7 @@ eval "export $(sed -E 's/([[:graph:]]+)[[:blank:]]*=[[:blank:]]*([[:graph:]]+)/T
 - [Environment Variables]
 - [Forcing Re-creation of Resources]
 - [OpenTofu]
+- [Pulumi]
 
 ## Sources
 
@@ -307,6 +308,7 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Knowledge base -->
 [opentofu]: opentofu.md
+[pulumi]: pulumi.md
 
 <!-- Upstream -->
 [cli documentation]: https://www.terraform.io/docs/cli/
