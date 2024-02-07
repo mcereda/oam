@@ -11,6 +11,27 @@
 brew install 'pulumi/tap/pulumi'
 choco install 'pulumi'
 
+# Create completions for the shell.
+source <(pulumi gen-completion 'zsh')
+pulumi completion 'fish' > "$HOME/.config/fish/completions/pulumi.fish"
+
+
+# Operate entirely from the local machine (local-only mode).
+# Stores the state under the '.pulumi' folder in the given directory.
+pulumi login --local
+pulumi login "file://~"
+pulumi login "file://."
+pulumi login "file://path/to/folder"
+
+# Store the state in object storage backends.
+pulumi login 'azblob://state-bucket'
+pulumi login 'gs://state-bucket'
+pulumi login 's3://state-bucket'
+
+# List available templates.
+pulumi new -l
+pulumi new --list-templates
+
 # Create new projects in the current directory.
 # Creates basic scaffolding files based on the specified cloud and language.
 pulumi new
@@ -18,6 +39,7 @@ pulumi new 'aws-go' -d 'description' -n 'name'
 pulumi new 'azure-python' --dir '.' -s 'stack' --name 'name'
 pulumi new 'gcp-typescript' --description 'description' --stack 'stack'
 pulumi new 'kubernetes-yaml'
+pulumi new 'oci-java'
 
 # Get a summary of what would be deployed.
 pulumi preview
