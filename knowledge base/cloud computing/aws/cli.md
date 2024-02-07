@@ -10,14 +10,24 @@
 
 ```sh
 # Install the CLI.
-brew install awscli
+brew install 'awscli'
 
-# Configure a profile.
+
+# Configure profiles.
 aws configure
-aws configure --profile work
+aws configure --profile 'work'
 
-# Use a specific profile for the rest of this shell session.
-export AWS_PROFILE="work"
+# Use specific profiles for the rest of the shell session.
+export AWS_PROFILE='work'
+
+
+# List all SageMaker EndpointConfigurations' names.
+aws sagemaker list-endpoint-configs --output 'yaml-stream' | yq -r '.[].EndpointConfigs[].EndpointConfigName' -
+aws sagemaker list-endpoint-configs --output 'yaml-stream' --query 'EndpointConfigs[].EndpointConfigName' | yq -r '.[].[]' -
+aws sagemaker list-endpoint-configs --output 'json' --query 'EndpointConfigs[].EndpointConfigName' | jq -r '.[]' -
+
+# Describe all SageMaker EndpointConfigurations.
+aws sagemaker list-endpoint-configs … | xargs -n '1' aws sagemaker describe-endpoint-config --endpoint-config-name
 ```
 
 ## Profiles
