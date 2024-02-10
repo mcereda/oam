@@ -1,0 +1,12 @@
+################################################################################
+## '.ansible-lint-ignore' or '.config/ansible-lint-ignore.txt'
+##
+## List of tags per file for ansible-lint to ignore.
+##
+## Sources:
+## - https://ansible.readthedocs.io/projects/lint/configuring/#ignoring-rules-for-entire-files
+## - https://ansible.readthedocs.io/projects/lint/usage/#using-commands
+################################################################################
+
+playbook.yml package-latest       # disables the 'package-latest' rule for the 'playbook.yml' file only
+playbook-2.yml deprecated-module  # disables the 'deprecated-module' rule for the 'playbook-2.yml' file only
