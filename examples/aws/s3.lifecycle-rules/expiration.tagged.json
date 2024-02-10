@@ -1,0 +1,26 @@
+{
+    "Rules": [
+        {
+            "ID": "ExpirationOfTaggedObjects",
+            "Filter": {
+                "And": {
+                    "Prefix": "start/here",
+                    "Tags": [
+                        {
+                            "Value": "mytagvalue1",
+                            "Key": "mytagkey1"
+                        },
+                        {
+                            "Value": "mytagvalue2",
+                            "Key": "mytagkey2"
+                        }
+                    ]
+                }
+            },
+            "Status": "Enabled",
+            "Expiration": {
+                "Days": 1
+            }
+        }
+    ]
+}
