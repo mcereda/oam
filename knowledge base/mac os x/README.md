@@ -16,7 +16,7 @@
     1. [Upgrade](#upgrade)
 1. [Boot keys cheatsheet](#boot-keys-cheatsheet)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -94,20 +94,26 @@ security find-generic-password -w -l 'work' -s 'github'
 security delete-generic-password -a 'johnny' -s 'github'
 
 
+# Get the host's computer name.
+scutil --get 'ComputerName'
+/usr/libexec/PlistBuddy -c "Print :System:System:ComputerName" \
+  '/Library/Preferences/SystemConfiguration/preferences.plist'
+
+# Set the host's computer name.
+scutil --set 'ComputerName' 'newComputerName'
+
 # Get the host's bonjour name.
-scutil --get LocalHostName
+scutil --get 'LocalHostName'
 /usr/libexec/PlistBuddy -c "Print :System:Network:HostNames:LocalHostName" \
   '/Library/Preferences/SystemConfiguration/preferences.plist'
+
+# Get the host's bonjour name.
+scutil --set 'LocalHostName' 'newLocalHostName'
 
 # Get the host's netbios name.
 defaults read /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName
 /usr/libexec/PlistBuddy -c "Print :NetBIOSName" \
   '/Library/Preferences/SystemConfiguration/com.apple.smb.server.plist'
-
-# Get the host's computer name.
-scutil --get ComputerName
-/usr/libexec/PlistBuddy -c "Print :System:System:ComputerName" \
-  '/Library/Preferences/SystemConfiguration/preferences.plist'
 
 
 # Get environment variables from inside launchd.
@@ -138,30 +144,7 @@ sudo trimforce enable
 
 ## Hidden settings
 
-> **Note:** once set something, you'll probably need to restart the dock with `killall Dock`
-
-```sh
-# Show hidden apps indicators in the dock.
-defaults write com.apple.dock showhidden -bool TRUE
-
-# Reset changes to the dock.
-defaults delete com.apple.dock
-
-# Change the number of columns and rows in the springboard.
-defaults write com.apple.dock springboard-columns -int 9
-defaults write com.apple.dock springboard-rows -int 7
-
-# Reset changes to the launchpad.
-defaults delete com.apple.dock springboard-rows
-defaults delete com.apple.dock springboard-columns
-defaults write com.apple.dock ResetLaunchPad -bool TRUE
-
-# Force Finder to always display hidden files.
-defaults write com.apple.finder AppleShowAllFiles TRUE
-
-# Prevent Finder to create .DS_Store files on network shares.
-defaults write com.apple.desktopservices DSDontWriteNetworkStores true
-```
+See the [`defaults`][defaults] command.
 
 ## Image manipulation
 
@@ -386,10 +369,9 @@ To use any of these key combinations, press and hold the keys immediately after 
 - [`macports`][macports]
 - [`openssl-osx-ca`][openssl-osx-ca]
 - [Little Snitch]
+- [macOS default values command reference]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Boot a Mac from USB Drive]
 - [Mac startup key combinations]
@@ -442,6 +424,7 @@ All the references in the [further readings] section, plus the following:
 [installing .pkg with terminal?]: https://apple.stackexchange.com/questions/72226/installing-pkg-with-terminal#394976
 [launchctl man page]: https://www.unix.com/man-page/osx/1/launchctl
 [list of xcode command line tools]: https://mac.install.guide/commandlinetools/8.html
+[macos default values command reference]: https://github.com/kevinSuttle/macOS-Defaults/blob/master/REFERENCE.md
 [macos network quality tool]: https://www.theapplegeek.co.uk/blog/networkquality
 [mdls]: https://ss64.com/osx/mdls.html
 [pam_reattach]: https://github.com/fabianishere/pam_reattach
