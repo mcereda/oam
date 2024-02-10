@@ -22,12 +22,14 @@ If a default isn't specified in the application's domain but is specified in NSG
 # List available domains.
 defaults domains
 
+
 # Read values.
 # defaults read 'domain'
 # defaults read 'domain' 'key'
 defaults read 'com.apple.dock'
 defaults read -app 'Docker' 'SUHasLaunchedBefore'
 defaults read '/Library/Preferences/SystemConfiguration/com.apple.smb.server' 'NetBIOSName'
+
 
 # Write or overwrite values.
 # defaults write 'domain' 'key' 'value'
@@ -36,17 +38,41 @@ defaults write 'com.apple.dock' 'springboard-columns' -int '9'
 defaults write -app 'DeSmuME' 'CoreControl_EnableCheats' -bool 'TRUE'
 defaults write '/Users/user/Library/Preferences/org.raspberrypi.Imager' 'imagecustomization.keyboardLayout' 'us'
 
+# Show hidden apps indicators in the dock.
+defaults write 'com.apple.dock' 'showhidden' -bool 'TRUE'
+
+# Change the number of columns and rows in the springboard.
+defaults write 'com.apple.dock' 'springboard-columns' -int '9'
+defaults write 'com.apple.dock' 'springboard-rows' -int '7'
+
+# Force Finder to always display hidden files.
+defaults write 'com.apple.finder' 'AppleShowAllFiles' 'TRUE'
+
+# Prevent Finder to create .DS_Store files on network shares.
+defaults write 'com.apple.desktopservices' 'DSDontWriteNetworkStores' true
+
+
 # Delete values.
+# This resets changes done previously.
 # defaults delete 'domain'
 # defaults delete 'domain' 'key'
+defaults delete 'com.apple.dock'
 defaults delete 'com.apple.dock' 'springboard-columns'
-defaults write -app 'VLC'
+defaults delete -app 'VLC'
+
+# Reset changes to the launchpad.
+defaults delete 'com.apple.dock' 'springboard-rows'
+defaults delete 'com.apple.dock' 'springboard-columns'
+defaults write 'com.apple.dock' 'ResetLaunchPad' -bool 'TRUE'
 ```
+
+> **Note:** once set something related to the dock, one'll probably need to restart it with `killall Dock`.
 
 ## Further readings
 
 - [`man` page][man page]
 - [Mac OS X]
+- [Mac OS defaults list]
 
 <!--
   References
@@ -56,4 +82,5 @@ defaults write -app 'VLC'
 [mac os x]: README.md
 
 <!-- Others -->
+[mac os defaults list]: https://macos-defaults.com/
 [man page]: https://ss64.com/osx/defaults.html
