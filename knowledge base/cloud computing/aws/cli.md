@@ -28,7 +28,22 @@ aws sagemaker list-endpoint-configs --output 'json' --query 'EndpointConfigs[].E
 
 # Describe all SageMaker EndpointConfigurations.
 aws sagemaker list-endpoint-configs … | xargs -n '1' aws sagemaker describe-endpoint-config --endpoint-config-name
+
+
+# List secrets stored in Secret Manager.
+aws secretsmanager list-secrets
+
+# Get information about secrets stored in Secret Manager.
+aws secretsmanager describe-secret --secret-id 'ecr-pullthroughcache/docker-hub'
+
+# Get secrets from Secret Manager.
+aws secretsmanager get-secret-value --secret-id 'ecr-pullthroughcache/github'
 ```
+
+Non listed subcommand:
+
+- [`aws ecr`][ecr tldr]
+- [`aws s3`][s3 tldr]
 
 ## Profiles
 
@@ -54,12 +69,18 @@ $ export AWS_PROFILE="work"
 
 ## Further readings
 
+- [AWS]
 - CLI [quickstart]
 - [Configure profiles] in the CLI
 
 <!--
   References
   -->
+
+<!-- Knowledge base -->
+[aws]: README.md
+[ecr tldr]: ecr.md#tldr
+[s3 tldr]: s3.md#tldr
 
 <!-- Upstream -->
 [quickstart]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html
