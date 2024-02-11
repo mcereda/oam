@@ -50,7 +50,7 @@ docker run -d --name 'boinc' --network='host' --pid='host' -v 'boinc:/var/lib/bo
 
 # Gracefully stop containers.
 docker stop 'alpine-test'
-docker stop 'bdbe3f45'
+docker stop -t '0' 'bdbe3f45'
 
 # Kill containers.
 docker kill 'alpine-test'
