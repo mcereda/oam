@@ -3,14 +3,14 @@
 version: "3"
 services:
   syncthing:
-    image: syncthing/syncthing:1.27.2
+    image: syncthing/syncthing:1.27.3
     container_name: syncthing
     hostname: ${HOSTNAME}
     environment:
       - PUID=1000
       - PGID=100
     volumes:
-      - ./config:/var/syncthing/config
-      - ./data:/var/syncthing/data
+      - ${PWD}/config:/var/syncthing/config
+      - ${PWD}/data:/var/syncthing/data
     network_mode: host
     restart: unless-stopped
