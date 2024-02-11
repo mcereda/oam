@@ -1,5 +1,7 @@
 # Boinc client on Docker
 
+> See my custom image at [container-image-boinc-client](https://gitlab.com/mckie/container-image-boinc-client).
+
 ## Table of contents <!-- omit in toc -->
 
 1. [Parameters](#parameters)
