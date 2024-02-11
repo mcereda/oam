@@ -41,10 +41,15 @@ zypper ref 'updates'
 
 # Search for resolvables.
 zypper search 'nmap'
-zypper se 'mariadb'
+zypper se -r 'repository' 'mariadb'
 
 # Show all available versions of resolvables.
 zypper se -s 'kernel-default'
+zypper se --details 'boinc-client'
+
+# Look up what package provides a file.
+# 'what-provides' has been replaced by 'search -x --provides'
+zypper se --provides '/usr/sbin/useradd'
 
 # Display detailed information about resolvables.
 zypper info 'workrave'
@@ -116,7 +121,7 @@ zypper rl -d --sort-by-priority
 # Add repositories.
 zypper addrepo --check --refresh --priority '90' \
   'https://repo.vivaldi.com/archive/vivaldi-suse.repo' 'vivaldi'
-zypper ar -cf -p '89' …
+zypper ar -cfp '89' …
 
 # Remove repositories.
 zypper removerepo 'mozilla'
@@ -144,7 +149,9 @@ zypper purge-kernels --dry-run
 
 # Clean up unneded packages.
 # Always check what is being done.
-zypper packages --unneeded | awk 'NR>4{print $7}' | xargs sudo zypper rm -u
+zypper packages --unneeded \
+| awk -F'|' 'NR>4{gsub(" ", "", $0);print $3"="$4}' \
+| sort -u | sudo xargs zypper rm -u
 ```
 
 ## Concepts
