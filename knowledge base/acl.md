@@ -17,9 +17,10 @@ BSD systems use NFSv4 ACLs by default in ZFS.
 List of **NFSv4** [permission tags][syntax descriptions for setting acls] and [inheritance options][acl inheritance].
 
 ```sh
-# Install the tool.
+# Install the tools.
 apt install 'acl'
 dnf install 'acl'
+zypper install 'acl'
 
 # Show ACLs.
 getfacl 'path/to/file'
@@ -127,10 +128,14 @@ setfacl -a '5' 'everyone@:r-x---a-R-c---:-d-----:allow' 'path/to/dir'
 - [`setfacl` FreeBSD manual page][setfacl freebsd manual page]
 - [Syntax descriptions for setting ACLs]
 - [ACL inheritance]
+- [`chmod`][chmod] for how to force new files to be owned by specific users or groups
 
 <!--
   References
   -->
+
+<!-- Knowledge base -->
+[chmod]: chmod.md
 
 <!-- Others -->
 [access control lists (acl) in linux]: https://www.geeksforgeeks.org/access-control-listsacl-linux/
