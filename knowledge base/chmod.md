@@ -9,10 +9,12 @@ chmod 'u=rw' "path/to/dir"
 chmod 'go+x' "path/to/file"
 
 # Set 'setuid' bit.
+# Set on directories, forces new files to be owned by the same user by default.
 chmod '04755' "path/to/dir"
 chmod 'u-s' "path/to/file"
 
 # Set 'setgid' bit.
+# Set on directories, forces new files to be owned by the same group by default.
 chmod '02775' "path/to/dir"
 chmod 'g+s' "path/to/file"
 
