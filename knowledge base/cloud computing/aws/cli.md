@@ -5,6 +5,7 @@
 1. [TL;DR](#tldr)
 1. [Profiles](#profiles)
 1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -19,6 +20,11 @@ aws configure --profile 'work'
 
 # Use specific profiles for the rest of the shell session.
 export AWS_PROFILE='work'
+
+
+# Enable auto-prompt mode (like aws-shell).
+aws configure set 'cli_auto_prompt' 'on-partial'
+export AWS_CLI_AUTO_PROMPT='on'
 
 
 # List all SageMaker EndpointConfigurations' names.
@@ -73,6 +79,10 @@ $ export AWS_PROFILE="work"
 - CLI [quickstart]
 - [Configure profiles] in the CLI
 
+### Sources
+
+- [Improved CLI auto-prompt mode]
+
 <!--
   References
   -->
@@ -85,3 +95,4 @@ $ export AWS_PROFILE="work"
 <!-- Upstream -->
 [quickstart]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html
 [configure profiles]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html
+[improved cli auto-prompt mode]: https://github.com/aws/aws-cli/issues/5664
