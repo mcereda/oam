@@ -9,6 +9,7 @@
    1. [Create a dummy account](#create-a-dummy-account)
    1. [Convert an account's message store type from one file per folder (_mbox_) to one file per message (_maildir_)](#convert-an-accounts-message-store-type-from-one-file-per-folder-mbox-to-one-file-per-message-maildir)
    1. [Rebuild the Global Database for a Profile](#rebuild-the-global-database-for-a-profile)
+   1. [You are already subscribed to this feed](#you-are-already-subscribed-to-this-feed)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -143,6 +144,17 @@ The re-indexing process will start automatically.<br/>
 Depending on the number of messages, it might take some time for the indexing to complete; performance might be affected, and the search will return only partial results or even no results until the indexing is complete.
 
 The indexing progress can be monitored through _Tools_ > _Activity Manager_.
+
+### You are already subscribed to this feed
+
+The feed list file is still containing the URL of the feed one is trying to add.
+
+Remove the feed object from the `'Mail/Blog & News Feeds/feeds.json'` file in your profile:
+
+```sh
+# Just examples. Check what the command does.
+jq 'del(.[1:4])' 'Mail/Blog & News Feeds/feeds.json'
+```
 
 ## Further readings
 

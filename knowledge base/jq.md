@@ -26,6 +26,10 @@ jq --arg REGION ${AWS_REGION} '.spec.template.spec.containers[]?.env? += [{name:
 
 # Delete keys from objects.
 jq 'del(.items[].spec.clusterIP)' /tmp/service.kube.json
+jq 'del(.country, .number, .language)' …
+# Remember ranges are **exclusive** of the end index.
+jq 'del(.[0,1,2])' …
+jq 'del(.[0:3])' …
 
 # Print objects as 'key [space] "value"' pairs.
 jq -r 'to_entries[] | "\(.key) \"\(.value)\""' 'file.json'
@@ -106,6 +110,8 @@ All the references in the [further readings] section, plus the following:
 - [Filter objects list with regex]
 - [Select multiple conditions]
 - [Change multiple values at once]
+- [jq Select range]
+- [Deleting multiple keys at once with jq]
 
 <!--
   References
@@ -116,5 +122,7 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Others -->
 [change multiple values at once]: https://stackoverflow.com/questions/47355901/jq-change-multiple-values#47357956
+[deleting multiple keys at once with jq]: https://stackoverflow.com/questions/36227245/deleting-multiple-keys-at-once-with-jq
 [filter objects list with regex]: https://til.hashrocket.com/posts/uv0bjiokwk-use-jq-to-filter-objects-list-with-regex
+[jq select range]: https://stackoverflow.com/questions/45548604/jq-select-range
 [select multiple conditions]: https://stackoverflow.com/questions/33057420/jq-select-multiple-conditions#33059058
