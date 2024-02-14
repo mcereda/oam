@@ -21,7 +21,7 @@ services:
       - /dev/dri:/dev/dri
     volumes:
       - /etc/resolv.conf:/etc/resolv.conf:ro
-      - ./data:/var/lib/boinc
+      - ${PWD}/data:/var/lib/boinc
     environment:
       - BOINC_CMD_LINE_OPTIONS=--allow_remote_gui_rpc
       - BOINC_GUI_RPC_PASSWORD=123

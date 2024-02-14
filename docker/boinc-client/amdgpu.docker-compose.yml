@@ -24,9 +24,8 @@ services:
       - video
     volumes:
       - /etc/resolv.conf:/etc/resolv.conf:ro
-      - ./data:/var/lib/boinc
+      - ${PWD}/data:/var/lib/boinc
     environment:
       - BOINC_CMD_LINE_OPTIONS=--allow_remote_gui_rpc
       - BOINC_GUI_RPC_PASSWORD=123
-      - BOINC_REMOTE_HOST=192.168.1.1
       - TZ=Europe/Dublin
