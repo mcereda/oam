@@ -34,10 +34,14 @@ chezmoi add --encrypt '.ssh/id_ed25519'   # add encrypted
 # The given files need to have been added first.
 chezmoi edit '.tmux.conf'
 
+# List files with changes.
+chezmoi status
+
 # Check what files would change during an apply.
 chezmoi apply --dry-run --verbose
+chezmoi apply -nv
 
-# Check what contents would change.
+# Check what content would change.
 chezmoi diff
 
 # Apply changes.
