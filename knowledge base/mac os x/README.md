@@ -109,9 +109,11 @@ scutil --get 'LocalHostName'
 
 # Get the host's bonjour name.
 scutil --set 'LocalHostName' 'newLocalHostName'
+scutil --set 'LocalHostName' \
+  "$(defaults read /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName)"
 
 # Get the host's netbios name.
-defaults read /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName
+defaults read '/Library/Preferences/SystemConfiguration/com.apple.smb.server' 'NetBIOSName'
 /usr/libexec/PlistBuddy -c "Print :NetBIOSName" \
   '/Library/Preferences/SystemConfiguration/com.apple.smb.server.plist'
 
