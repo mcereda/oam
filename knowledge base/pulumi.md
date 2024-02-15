@@ -69,6 +69,8 @@ pulumi config get
 
 # Set up secrets.
 pulumi config set --secret 'dbPassword' 'S3cr37'
+pulumi config set --secret 'ecr:dockerHub' \
+  '{"username":"marcus","accessToken":"dckr_pat_polus"}'
 
 # Read secrets.
 pulumi config get 'dbPassword'
@@ -109,10 +111,21 @@ pulumi stack ls
 pulumi stack ls -o 'organization' -p 'project' -t 'tag'
 pulumi stack ls -a
 
+# Create graphs of the dependency relations.
+pulumi stack graph 'path/to/graph.dot'
+pulumi stack graph -s 'dev' 'dev.dot' --short-node-name
+
 # Delete stacks.
 pulumi stack rm
 pulumi stack rm -fy
 pulumi stack rm --preserve-config --yes --stack 'stack'
+
+
+# Rename resources in states.
+pulumi rename 'resourceUrn' 'newName'
+
+# Unprotect resources that are protected in states.
+pulumi state unprotect 'resourceUrn'
 ```
 
 </details>

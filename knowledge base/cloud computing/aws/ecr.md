@@ -46,6 +46,10 @@ aws ecr validate-pull-through-cache-rule \
 docker pull 'aws_account_id.dkr.ecr.region.amazonaws.com/prefix/repository_name/image_name:tag'
 docker pull '123456789012.dkr.ecr.us-east-2.amazonaws.com/ecr-public/repository_name/image_name:tag'
 docker pull '123456789012.dkr.ecr.eu-west-1.amazonaws.com/quay/argoproj/argocd:v2.10.0'
+# DockerHub cache repositories require the full path.
+# E.g., 'library/alpine' instead of just 'alpine'.
+docker pull '123456789012.dkr.ecr.eu-south-1.amazonaws.com/docker-hub/library/nginx:perl'
+docker pull '123456789012.dkr.ecr.us-west-2.amazonaws.com/docker-hub/grafana/grafana'
 ```
 
 ## Pull through cache feature

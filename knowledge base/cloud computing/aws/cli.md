@@ -33,7 +33,8 @@ aws sagemaker list-endpoint-configs --output 'yaml-stream' --query 'EndpointConf
 aws sagemaker list-endpoint-configs --output 'json' --query 'EndpointConfigs[].EndpointConfigName' | jq -r '.[]' -
 
 # Describe all SageMaker EndpointConfigurations.
-aws sagemaker list-endpoint-configs … | xargs -n '1' aws sagemaker describe-endpoint-config --endpoint-config-name
+aws sagemaker list-endpoint-configs … \
+| xargs -n '1' aws sagemaker describe-endpoint-config --endpoint-config-name
 
 
 # List secrets stored in Secret Manager.
