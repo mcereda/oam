@@ -57,23 +57,24 @@ brew tap 'homebrew/services'
 brew services start 'openssl-osx-ca'
 
 
-# Bring an installation up to speed from a Brewfile.
+# Bring an installation up to speed from Brewfiles.
 brew bundle
 brew bundle --global
 brew bundle --no-lock install --file "$HOME/Brewfile"
 
-# Check what changes from a Brewfile.
+# Check what changes from Brewfiles.
+# Multiple files are merged in order.
 brew bundle check
-brew bundle … check --file "$HOME/Brewfile"
+brew bundle … check --file "$HOME/Brewfile" --file "$HOME/Work/Brewfile"
 
-# Check what items not listed in a Brewfile would be removed.
+# Check what items not listed in Brewfiles would be removed.
 brew bundle cleanup
 brew bundle … cleanup --file "$HOME/Brewfile"
 
-# Remove items not listed in a Brewfile.
+# Remove items not listed in Brewfiles.
 brew bundle … --cleanup --zap
 
-# Dump all installed casks/formulae/images/taps into a Brewfile.
+# Dump all installed casks/formulae/images/taps into Brewfiles.
 brew bundle dump
 
 
