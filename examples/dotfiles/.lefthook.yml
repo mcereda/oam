@@ -3,32 +3,49 @@
 assert_lefthook_installed: true
 no_tty: true
 
-# pre-commit:
-#   parallel: true
-#   commands:
-#     eslint:
-#       glob: "*.{js,ts,jsx,tsx}"
-#       run: yarn eslint {staged_files}
-#     rubocop:
-#       tags: backend style
-#       glob: "*.rb"
-#       exclude: '(^|/)(application|routes)\.rb$'
-#       run: bundle exec rubocop --force-exclusion {all_files}
-#     govet:
-#       tags: backend style
-#       files: git ls-files -m
-#       glob: "*.go"
-#       run: go vet {files}
-#   scripts:
-#     "hello.js":
-#       runner: node
-#     "any.go":
-#       runner: go run
-# pre-push:
-#   commands:
-#     packages-audit:
-#       tags: frontend security
-#       run: yarn audit
-#     gems-audit:
-#       tags: backend security
-#       run: bundle audit
+lint:               # name of a (custom in this case) hook
+  parallel: true    # unleash the powaaaaaa!!
+  commands:
+    markdownlint: &markdownlint   # command id, using some yaml shenanigans here
+      glob: "*.md"                # limit the command to markdown files
+      run: docker run --rm -v "$PWD:/workdir" 'ghcr.io/igorshubovych/markdownlint-cli:latest' "*.md"
+    tslint:
+      files: find $PWD -type f -name "*.ts"
+      run: >-
+        docker run --rm -v "$PWD:/code" 'pipelinecomponents/eslint:latest'
+        eslint $( [[ -e .eslintrc ]] || echo '--no-eslintrc' ) --color {files}
+
+pre-commit:
+  parallel: true
+  commands:
+    eslint:
+      glob: "*.{js,ts,jsx,tsx}"
+      run: yarn eslint {staged_files}
+    rubocop:
+      tags: backend style
+      glob: "*.rb"
+      exclude: '(^|/)(application|routes)\.rb$'
+      run: bundle exec rubocop --force-exclusion {all_files}
+    govet:
+      tags: backend style
+      files: git ls-files -m
+      glob: "*.go"
+      run: go vet {files}
+    markdownlint:
+      <<: *markdownlint   # reuse the bits from above …
+      run: >-             # … but change the command to limit the files to work with
+        docker run --rm -v "$PWD:/workdir" 'ghcr.io/igorshubovych/markdownlint-cli:latest'
+        {push_files}
+  scripts:
+    "hello.js":
+      runner: node
+    "any.go":
+      runner: go run
+pre-push:
+  commands:
+    packages-audit:
+      tags: frontend security
+      run: yarn audit
+    gems-audit:
+      tags: backend security
+      run: bundle audit
