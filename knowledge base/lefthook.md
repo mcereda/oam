@@ -36,6 +36,7 @@ lefthook add -dv 'commit-msg'
 
 # Execute groups of hooks.
 lefthook run 'pre-push'
+lefthook run -v 'lint' --all-files
 lefthook run 'pre-commit' -n --commands 'lint' --files 'lefthook.yml'
 
 # Remove configured hooks from the current git repository.
