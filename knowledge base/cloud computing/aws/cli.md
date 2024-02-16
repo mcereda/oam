@@ -4,6 +4,7 @@
 
 1. [TL;DR](#tldr)
 1. [Profiles](#profiles)
+1. [Configuration](#configuration)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -74,6 +75,15 @@ Default output format [None]: json
 $ export AWS_PROFILE="work"
 ```
 
+## Configuration
+
+| File                 | Description   |
+| -------------------- | ------------- |
+| `~/.aws/config`      | Configuration |
+| `~/.aws/credentials` | Credentials   |
+
+See [CLI config files] for examples.
+
 ## Further readings
 
 - [AWS]
@@ -92,6 +102,9 @@ $ export AWS_PROFILE="work"
 [aws]: README.md
 [ecr tldr]: ecr.md#tldr
 [s3 tldr]: s3.md#tldr
+
+<!-- Files -->
+[cli config files]: ../../../examples/dotfiles/.aws
 
 <!-- Upstream -->
 [quickstart]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html
