@@ -142,6 +142,10 @@ launchctl stop 'job_label'
 
 # Enable file trimming on SSD.
 sudo trimforce enable
+
+
+# Get information about users.
+dscl '.' -read "/Users/$USER" 'UserShell'
 ```
 
 ## Hidden settings
