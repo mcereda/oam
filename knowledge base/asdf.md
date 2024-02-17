@@ -66,6 +66,7 @@ brew install 'asdf'
 # Load ASDF's environment and completion.
 # Alternatively, just load oh-my-zsh's plugin for it.
 . "$(brew --prefix 'asdf')/asdf.sh"
+echo -e "source "(brew --prefix asdf)"/libexec/asdf.fish" | tee ~/'.config/fish/conf.d/asdf.fish'
 ```
 
 ## Plugins management

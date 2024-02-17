@@ -19,10 +19,22 @@
 
 ## TL;DR
 
+<details>
+  <summary>Installation</summary>
+
+```sh
+brew install 'terraform'
+```
+
+</details>
+
+<details>
+  <summary>Usage</summary>
+
 ```sh
 # Initialization.
 terraform init
-terraform init -reconfigure
+terraform init -reconfigure -update
 
 # Validate files.
 terraform validate
@@ -30,7 +42,7 @@ terraform validate
 # Show what would be done.
 terraform plan
 terraform plan -state 'path/to/file.tfstate' -var-file 'path/to/var.tfvars'
-terraform plan -out 'path/to/file.tfstate' -parallelism '50'
+terraform plan -destroy -out 'path/to/file.tfstate' -parallelism '50'
 
 # Make the changes.
 terraform apply
@@ -85,6 +97,8 @@ terraform graph | dot -Tsvg > 'graph.svg'
 # `get` is being deprecated in favour of `init`
 terraform get -update -no-color
 ```
+
+</details>
 
 ## Modules
 
