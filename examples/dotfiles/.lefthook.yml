@@ -41,6 +41,12 @@ pre-commit:
       runner: node
     "any.go":
       runner: go run
+
+commit-msg:
+  commands:
+    commitlint:
+      run: commitlint --edit
+
 pre-push:
   commands:
     packages-audit:
