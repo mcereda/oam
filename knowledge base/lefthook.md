@@ -37,12 +37,14 @@ lefthook add -dv 'commit-msg'
 # Execute groups of hooks.
 lefthook run 'pre-push'
 lefthook run -v 'lint' --all-files
-lefthook run 'pre-commit' -n --commands 'lint' --files 'lefthook.yml'
+lefthook run 'pre-commit' -n --commands 'hadolint' --files 'lefthook.yml'
 
 # Remove configured hooks from the current git repository.
 lefthook uninstall
 lefthook uninstall -cv
 ```
+
+Uses the [glob library] for glob patterns.
 
 ## Configuration
 
@@ -93,3 +95,6 @@ All the references in the [further readings] section, plus the following:
 [configuration]: https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
 [github]: https://github.com/evilmartians/lefthook
 [lefthook: knock your team's code back into shape]: https://evilmartians.com/chronicles/lefthook-knock-your-teams-code-back-into-shape
+
+<!-- Others -->
+[glob library]: https://github.com/gobwas/glob

@@ -1,21 +1,36 @@
+assert_lefthook_installed: true
 no_tty: true
 
 lint:
   parallel: true
   commands:
+    hadolint: &hadolint
+      # The official docker image is based on scratch and only takes only one
+      # input file at a time. I have no clue how to fix that for now so let's
+      # just use the local command.
+      glob: "*Dockerfile*"
+      run: hadolint {all_files}
     yamllint: &yamllint
       glob: "*.{yaml,yml}"
       run: >-
         docker run --rm -v "$PWD:/code" 'registry.gitlab.com/pipeline-components/yamllint:latest'
-        yamllint '.'
+        yamllint {all_files}
 
 pre-commit:
   parallel: true
   commands:
+    hadolint:
+      <<: *hadolint
+      run: hadolint {staged_files}
     yamllint:
       <<: *yamllint
+      run: >-
+        docker run --rm -v "$PWD:/code" 'registry.gitlab.com/pipeline-components/yamllint:latest'
+        yamllint {staged_files}
 
-# commit-msg:
-#   commands:
-#     commitlint:
-#       run: commitlint --edit
+commit-msg:
+  commands:
+    commitlint:
+      # No official docker image available for now, falling back to the local
+      # command.
+      run: commitlint --edit
