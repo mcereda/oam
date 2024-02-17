@@ -1,0 +1,21 @@
+no_tty: true
+
+lint:
+  parallel: true
+  commands:
+    yamllint: &yamllint
+      glob: "*.{yaml,yml}"
+      run: >-
+        docker run --rm -v "$PWD:/code" 'registry.gitlab.com/pipeline-components/yamllint:latest'
+        yamllint '.'
+
+pre-commit:
+  parallel: true
+  commands:
+    yamllint:
+      <<: *yamllint
+
+# commit-msg:
+#   commands:
+#     commitlint:
+#       run: commitlint --edit

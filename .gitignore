@@ -1,8 +1,16 @@
 .DS_Store
 
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
+/.vscode/*
+!/.vscode/extensions.json
+!/.vscode/settings.json
+
+/.lefthook-local.yml
+
+/node_modules/
+/package.json
+/package-lock.json
+
+__pycache__/
 
 .obsidian/
 
@@ -15,5 +23,3 @@
 *.tfstate.backup
 
 .pulumi/
-
-__pycache__/
