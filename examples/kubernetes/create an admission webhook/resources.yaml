@@ -16,18 +16,18 @@ spec:
         app: webhook
     spec:
       containers:
-      - name: webhook
-        image: webhook
-        imagePullPolicy: Never  # only needed locally
-        ports:
-        - containerPort: 8443
-        volumeMounts:
-        - mountPath: /cert
-          name: cert
+        - name: webhook
+          image: webhook
+          imagePullPolicy: Never  # only needed locally
+          ports:
+            - containerPort: 8443
+          volumeMounts:
+            - mountPath: /cert
+              name: cert
       volumes:
-      - name: cert
-        secret:
-          secretName: webhook
+        - name: cert
+          secret:
+            secretName: webhook
 ---
 apiVersion: v1
 kind: Service
