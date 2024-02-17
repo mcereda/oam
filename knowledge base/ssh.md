@@ -8,6 +8,7 @@
 1. [Client configuration](#client-configuration)
    1. [Append domains to a hostname before attempting to check if they exist](#append-domains-to-a-hostname-before-attempting-to-check-if-they-exist)
    1. [Optimize connection handling](#optimize-connection-handling)
+   1. [Integrate with GnuPG](#integrate-with-gnupg)
 1. [Server configuration](#server-configuration)
    1. [Change port](#change-port)
    1. [Disable password authentication](#disable-password-authentication)
@@ -227,6 +228,22 @@ Host  *.yyy.auckland.ac.nz
 ControlMaster auto
 ControlPath ~/.ssh/control-%C
 ControlPersist 30s
+```
+
+### Integrate with GnuPG
+
+```sh
+# In BASH and alike.
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs 'agent-ssh-socket')
+
+# In FISH.
+set -x 'SSH_AUTH_SOCK' (gpgconf --list-dirs 'agent-ssh-socket')
+```
+
+```ssh-config
+# In ~/.ssh/config.
+# Value is from `gpgconf --list-dirs 'agent-ssh-socket'`.
+IdentityAgent ~/.gnupg/S.gpg-agent.ssh
 ```
 
 ## Server configuration

@@ -379,10 +379,11 @@ Now tell SSH how to access `gpg-agent` by setting the value of the `SSH_AUTH_SOC
 Alternatively, and for a more permanent solution, set the option in the `.ssh/config` file:
 
 ```sh
-export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs 'agent-ssh-socket')
 
 # alternative
-echo "IdentityAgent $(gpgconf --list-dirs agent-ssh-socket)" >> ~'/.ssh/config'
+echo "\nIdentityAgent $(gpgconf --list-dirs 'agent-ssh-socket')" \
+| tee -a ~'/.ssh/config'
 ```
 
 Now you can launch the gpg agent:
