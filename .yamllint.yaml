@@ -6,5 +6,6 @@ extends: default
 
 rules:
   line-length:
-    allow-non-breakable-inline-mappings: true
+    level: warning
     max: 120
+    allow-non-breakable-inline-mappings: true
