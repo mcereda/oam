@@ -86,3 +86,6 @@ HashKnownHosts       no
 ServerAliveCountMax  2
 ServerAliveInterval  300
 UseKeyChain          yes
+
+# GnuPG integration
+IdentityAgent  ~/.gnupg/S.gpg-agent.ssh
