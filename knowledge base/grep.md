@@ -23,6 +23,9 @@ grep -R --exclude-dir 'excluded/dir' 'pattern' 'path/to/search/recursively'   # 
 # Show line numbers.
 grep -n 'pattern' 'path/to/search'
 
+# Only print the part matching the pattern.
+ps | grep -o '/.*/fish' | head -n '1'
+
 # Multiple parallel searches.
 # Mind files with spaces in their name.
 find . -type f | parallel -j +100% grep 'pattern'
@@ -34,15 +37,15 @@ grep --color '[[:digit:]]' 'file.txt'
 
 ## Variants
 
-- [`egrep`](#egrep) to use regular expressions in search patterns, same as `grep -E`
-- [`fgrep`](#fgrep) to use patterns as fixed strings, same as `grep -F`
+- `egrep` to use regular expressions in search patterns, same as `grep -E`
+- `fgrep`] to use patterns as fixed strings, same as `grep -F`
 - [archive-related variants](#archive-related-variants) for searching into compressed files
 - [`pdfgrep`](#pdfgrep) for searching into PDF files
 
 ### Archive-related variants
 
-- [`xzgrep`](#xzgrep) (with `xzegrep` and `xzfgrep`)
-- [`zstdgrep`](#zstdgrep) for zstd archives
+- `xzgrep` (with `xzegrep` and `xzfgrep`)
+- `zstdgrep` for zstd archives
 - many many others
 
 ### PDFgrep
