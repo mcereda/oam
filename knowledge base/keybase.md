@@ -7,8 +7,10 @@
 1. [Import an existing repository in Keybase](#import-an-existing-repository-in-keybase)
 1. [Run as root](#run-as-root)
 1. [Temporary devices](#temporary-devices)
+1. [Troubleshooting](#troubleshooting)
+   1. [`git: 'remote-keybase' is not a git command`](#git-remote-keybase-is-not-a-git-command)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -126,6 +128,18 @@ KEYBASE_PAPERKEY='paper key' KEYBASE_USERNAME='user' keybase oneshot
 Exploding messages work in oneshot mode with the caveat that you cannot run multiple instances of such with the same paperkey at the same time as each instance will try to create ephemeral keys, but require a distinct paperkey to uniquely identify itself as a separate device.<br/>
 In addition, ephemeral keys are **purged entirely** when closing the oneshot session, and you will not be able to access any old ephemeral content when starting keybase up again.
 
+## Troubleshooting
+
+### `git: 'remote-keybase' is not a git command`
+
+Make sure the path to `git-remote-keybase` is in your PATH:
+
+```sh
+export PATH="${PATH}:$(
+  find '/' -type 'f' -name 'git-remote-keybase' -exec dirname {} '+' \
+)"
+```
+
 ## Further readings
 
 - [Website]
@@ -134,9 +148,7 @@ In addition, ephemeral keys are **purged entirely** when closing the oneshot ses
 [linux guide]: https://book.keybase.io/guides/linux
 [website]: https://keybase.io/
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Keybase LFS support]
 - [Keybase launches encrypted git]
