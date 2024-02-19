@@ -1,0 +1,96 @@
+{
+    "description": "Michele Cereda's collection of common strict Little Snitch rules.\nAssumes a deny-all default policy.",
+    "name": "Michele Cereda's strict Rules List",
+    "rules": [
+        {
+            "action": "allow",
+            "notes": "Allow Betterbird to connect to check for updates.",
+            "ports": "443",
+            "process": "/Applications/Betterbird.app/Contents/MacOS/betterbird",
+            "protocol": "tcp",
+            "remote-hosts": "www.betterbird.eu"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Betterbird to connect to Mozilla's servers.",
+            "ports": "443",
+            "process": "/Applications/Betterbird.app/Contents/MacOS/betterbird",
+            "protocol": "tcp",
+            "remote-domains": "prod.mozaws.net"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Betterbird to connect to Mozilla's servers.",
+            "ports": "443",
+            "process": "/Applications/Betterbird.app/Contents/MacOS/betterbird",
+            "protocol": "tcp",
+            "remote-hosts": [
+                "autoconfig.thunderbird.net",
+                "live.thunderbird.net",
+                "location.services.mozilla.com",
+                "thunderbird-settings.thunderbird.net"
+            ]
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Betterbird to connect to Mozilla's servers.",
+            "ports": "443",
+            "process": "/Applications/Betterbird.app/Contents/MacOS/betterbird",
+            "protocol": "udp",
+            "remote-hosts": [
+                "autoconfig.thunderbird.net",
+                "live.thunderbird.net",
+                "thunderbird-settings.thunderbird.net"
+            ]
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Betterbird to connect to Google's mail servers.",
+            "ports": "993",
+            "process": "/Applications/Betterbird.app/Contents/MacOS/betterbird",
+            "protocol": "tcp",
+            "remote-hosts": "imap.gmail.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Thunderbird to connect to Mozilla's servers.",
+            "ports": "443",
+            "process": "/Applications/Thunderbird.app/Contents/MacOS/thunderbird",
+            "protocol": "tcp",
+            "remote-domains": "prod.cloudops.mozgcp.net"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Thunderbird to connect to Mozilla's servers.",
+            "ports": "443",
+            "process": "/Applications/Thunderbird.app/Contents/MacOS/thunderbird",
+            "protocol": "tcp",
+            "remote-hosts": [
+                "autoconfig.thunderbird.net",
+                "live.thunderbird.net",
+                "thunderbird-settings.thunderbird.net",
+                "www.mozorg.moz.works"
+            ]
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Thunderbird to connect to Mozilla's servers.",
+            "ports": "443",
+            "process": "/Applications/Thunderbird.app/Contents/MacOS/thunderbird",
+            "protocol": "udp",
+            "remote-hosts": [
+                "autoconfig.thunderbird.net",
+                "live.thunderbird.net",
+                "thunderbird-settings.thunderbird.net"
+            ]
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Thunderbird to connect to Google's mail servers.",
+            "ports": "993",
+            "process": "/Applications/Thunderbird.app/Contents/MacOS/thunderbird",
+            "protocol": "tcp",
+            "remote-hosts": "imap.gmail.com"
+        }
+    ]
+}
