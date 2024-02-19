@@ -1,2 +1,12 @@
+```sh
+# Get the IDs of running nginx instances in 'dev'.
+aws ec2 describe-instances --output 'text' \
+  --filters \
+    'Name=instance-state-name,Values=running' \
+    'Name=tag:env,Values=dev' \
+    'Name=tag:app,Values=nginx' \
+  --query 'Reservations[].Instances[].InstanceId[]'
+```
+
 https://instances.vantage.sh/
 https://ec2instances.github.io/

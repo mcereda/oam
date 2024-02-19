@@ -5,6 +5,7 @@
 1. [TL;DR](#tldr)
 1. [Profiles](#profiles)
 1. [Configuration](#configuration)
+1. [Session Manager integration](#session-manager-integration)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -46,6 +47,10 @@ aws secretsmanager describe-secret --secret-id 'ecr-pullthroughcache/docker-hub'
 
 # Get secrets from Secret Manager.
 aws secretsmanager get-secret-value --secret-id 'ecr-pullthroughcache/github'
+
+
+# Start sessions via Session Manager.
+aws ssm start-session --target 'i-0123456789abcdef0'
 ```
 
 Non listed subcommand:
@@ -84,6 +89,41 @@ $ export AWS_PROFILE="work"
 
 See [CLI config files] for examples.
 
+## Session Manager integration
+
+> The instance's IAM role must have at least the required permissions to allow to login.<br/>
+> The bare minimum is for it to have the _SSM Minimum_ role attached:
+>
+> ```sh
+> $ aws iam list-attached-role-policies --role-name 'whatevah'
+> AttachedPolicies:
+>   - PolicyName: SSMMinimum
+>     PolicyArn: arn:aws:iam::111122223333:policy/SSMMinimum
+> ```
+
+Install the Session Manager plugin:
+
+```sh
+# Install the signed package.
+curl -O "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac_arm64/session-manager-plugin.pkg"
+sudo installer -pkg 'session-manager-plugin.pkg' -target '/'
+
+# Make the binary available to users.
+# Pick one.
+sudo ln -s '/usr/local/sessionmanagerplugin/bin/session-manager-plugin' '/usr/local/bin/session-manager-plugin'
+ln -s '/usr/local/sessionmanagerplugin/bin/session-manager-plugin' "${HOME}/bin/session-manager-plugin"
+
+# Verify it installed correctly.
+session-manager-plugin
+```
+
+Then use it to get a session on the instance:
+
+```sh
+# Start sessions via Session Manager.
+aws ssm start-session --target 'i-0123456789abcdef0'
+```
+
 ## Further readings
 
 - [AWS]
@@ -93,6 +133,7 @@ See [CLI config files] for examples.
 ### Sources
 
 - [Improved CLI auto-prompt mode]
+- [Install the Session Manager plugin for the AWS CLI]
 
 <!--
   References
@@ -107,6 +148,7 @@ See [CLI config files] for examples.
 [cli config files]: ../../../examples/dotfiles/.aws
 
 <!-- Upstream -->
-[quickstart]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html
 [configure profiles]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html
 [improved cli auto-prompt mode]: https://github.com/aws/aws-cli/issues/5664
+[install the session manager plugin for the aws cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-macos-overview.html#install-plugin-macos-signed
+[quickstart]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html
