@@ -102,8 +102,12 @@ gpg -c 'input.file'
 gpg --symmetric --s2k-cipher-algo 'AES256' --s2k-digest-algo 'SHA512' \
   --s2k-count '65536' 'input.file'
 
+# Encrypt files for multiple recipients.
+gpg -e … -r 'recipient_1' -r 'key_fingerprint' -r 'recipient_N'
+
 # Decrypt files.
-gpg -d -o 'file.out' 'file.in.gpg'
+gpg -d 'file.gpg'
+gpg --decrypt -o 'file.out' 'file.in.gpg'
 gpg --decrypt-files --batch 'file.in.gpg.1' 'file.in.gpg.N'
 gpg -d --multifile --batch --yes 'file.in.gpg.1' 'file.in.gpg.N'
 
@@ -151,6 +155,7 @@ find . -type 'f' -name 'secret.txt' \
 
 ```sh
 # Single file.
+gpg -d 'file.gpg'
 gpg --output 'file.out' --decrypt 'file.in.gpg'
 
 # All files found.
