@@ -88,6 +88,10 @@ find -type 'f' -links '+1'
 # Show files hard linked to a given file.
 # GNU extension.
 find -samefile 'path/to/file'
+
+# Hide permission errors.
+find … 2>/dev/null
+find … 2> >(grep -v 'Permission denied' >&2)   # BASH and ZSH only
 ```
 
 ## Time specifications
@@ -180,6 +184,7 @@ find / -newer file.txt -user wnj -print
 - [find . -type f -exec chmod 644 {} ;]
 - [How to output file names surrounded with quotes in SINGLE line?]
 - [How to find all hardlinks in a folder?]
+- [How can I exclude all "permission denied" messages from "find"?]
 
 <!--
   References
@@ -187,6 +192,7 @@ find / -newer file.txt -user wnj -print
 
 <!-- Others -->
 [find . -type f -exec chmod 644 {} ;]: https://stackoverflow.com/questions/19737525/find-type-f-exec-chmod-644#22083532
+[how can i exclude all "permission denied" messages from "find"?]: https://stackoverflow.com/questions/762348/how-can-i-exclude-all-permission-denied-messages-from-find#40336333
 [how can i find broken symlinks?]: https://unix.stackexchange.com/questions/34248/how-can-i-find-broken-symlinks
 [how to find all hardlinks in a folder?]: https://askubuntu.com/questions/972121/how-to-find-all-hardlinks-in-a-folder#972244
 [how to output file names surrounded with quotes in single line?]: https://stackoverflow.com/questions/6041596/how-to-output-file-names-surrounded-with-quotes-in-single-line#15137696
