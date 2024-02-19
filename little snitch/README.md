@@ -1,10 +1,8 @@
 # Little Snitch
 
-## Table of contents <!-- omit in toc -->
-
 1. [Rules](#rules)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## Rules
 
@@ -14,9 +12,7 @@ Available [complete][full ruleset] or in [parts].
 
 - [Little Snitch]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Commonly whitelisted domains]
 

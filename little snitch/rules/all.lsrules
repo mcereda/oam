@@ -4,6 +4,30 @@
     "rules": [
         {
             "action": "allow",
+            "notes": "Allow Betterbird to connect to Google's mail servers.",
+            "ports": "993",
+            "process": "/Applications/Betterbird.app/Contents/MacOS/betterbird",
+            "protocol": "tcp",
+            "remote-hosts": "imap.gmail.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Betterbird to securely connect to websites.\nUsually used by images in email, and feeds.",
+            "ports": "443",
+            "process": "/Applications/Betterbird.app/Contents/MacOS/betterbird",
+            "protocol": "tcp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Betterbird to securely connect to websites.\nUsually used by images in email, and feeds.",
+            "ports": "443",
+            "process": "/Applications/Betterbird.app/Contents/MacOS/betterbird",
+            "protocol": "udp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
             "notes": "Allow Bitwarden to connect to its servers.",
             "ports": "443",
             "process": "/Applications/Bitwarden.app/Contents/MacOS/Bitwarden",
@@ -198,6 +222,30 @@
             "process": "/Applications/Spotify.app/Contents/MacOS/Spotify",
             "protocol": "udp",
             "remote-addresses": "239.255.255.250"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Thunderbird to connect to Google's mail servers.",
+            "ports": "993",
+            "process": "/Applications/Thunderbird.app/Contents/MacOS/thunderbird",
+            "protocol": "tcp",
+            "remote-hosts": "imap.gmail.com"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Thunderbird to securely connect to websites.\nUsually used by images in email, and feeds.",
+            "ports": "443",
+            "process": "/Applications/Thunderbird.app/Contents/MacOS/thunderbird",
+            "protocol": "tcp",
+            "remote": "any"
+        },
+        {
+            "action": "allow",
+            "notes": "Allow Thunderbird to securely connect to websites.\nUsually used by images in email, and feeds.",
+            "ports": "443",
+            "process": "/Applications/Thunderbird.app/Contents/MacOS/thunderbird",
+            "protocol": "udp",
+            "remote": "any"
         },
         {
             "action": "allow",
