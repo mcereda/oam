@@ -1,11 +1,19 @@
 ```sh
 # Get the IDs of running nginx instances in 'dev'.
 aws ec2 describe-instances --output 'text' \
+  --query 'Reservations[].Instances[].InstanceId[]'
   --filters \
     'Name=instance-state-name,Values=running' \
     'Name=tag:env,Values=dev' \
     'Name=tag:app,Values=nginx' \
-  --query 'Reservations[].Instances[].InstanceId[]'
+
+# Start SSM sessions to specific machines.
+aws ec2 describe-instances --output text \
+  --query 'Reservations[].Instances[].InstanceId' \
+  --filters \
+    'Name=app,Values=mysql' \
+    'Name=instance-state-name,Values=running' \
+| xargs -ot aws ssm start-session --target
 ```
 
 https://instances.vantage.sh/
