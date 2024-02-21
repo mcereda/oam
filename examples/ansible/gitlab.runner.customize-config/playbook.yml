@@ -4,7 +4,7 @@
   vars:
     config_base: >
       {{
-        lookup('ansible.builtin.file', 'initial.example.toml')
+        lookup('ansible.builtin.file', 'initial.toml')
         | sivel.toiletwater.from_toml
       }}
     config_overrides:
@@ -13,6 +13,7 @@
       runners:
         - name: gitlab-runner-1
           limit: 10
+          executor: docker+machine
           machine:
             IdleCount: 1
             IdleCountMin: 0
