@@ -1,13 +1,13 @@
 ---
-- name: Customize the given configuration of Gitlab runners
+- name: Customize a given TOML file
   hosts: all
   vars:
-    config_base: >
+    toml_base: >
       {{
         lookup('ansible.builtin.file', 'initial.toml')
         | sivel.toiletwater.from_toml
       }}
-    config_overrides:
+    toml_overrides:
       concurrent: 10
       listen_address: '0.0.0.0:9090'
       runners:
@@ -31,7 +31,7 @@
               - 'amazonec2-private-address-only=true'
             MaxBuilds: 150
             MaxGrowthRate: 2
-    config_final:
+    toml_final:
       # There is no filter to automagically merge the objects in the 'runners'
       # list. This updates the base with the overrides at top level only,
       # (notice 'recursive=false'), then updates the result's list with a merged
@@ -40,14 +40,14 @@
       # the 'name' attribute for this.
       >
       {{
-        config_base
+        toml_base
         | ansible.builtin.combine(
-          config_overrides,
+          toml_overrides,
           {
             "runners": (
-              config_base.runners
+              toml_base.runners
               | community.general.lists_mergeby(
-                  config_overrides.runners,
+                  toml_overrides.runners,
                   'name'
                 )
             )
@@ -60,7 +60,7 @@
       ansible.builtin.debug:
         var: item
       with_items:
-        - "{{ config_base }}"
-        - "{{ config_overrides }}"
-        - "{{ config_final }}"
-        - "{{ config_final | sivel.toiletwater.to_toml }}"
+        - "{{ toml_base }}"
+        - "{{ toml_overrides }}"
+        - "{{ toml_final }}"
+        - "{{ toml_final | sivel.toiletwater.to_toml }}"

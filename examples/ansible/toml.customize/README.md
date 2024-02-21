@@ -1,4 +1,6 @@
-# Customize the given configuration of Gitlab runners
+# Customize a given TOML file
+
+The example takes the configuration of a Gitlab runner as example just because it is a TOML file with known values.
 
 ## Requirements
 
