@@ -2,7 +2,7 @@
   name = "gitlab-runner-1"
   url = "https://example.com"
   token = "x"
-  executor = "docker-machine"
+  executor = "docker"
   [runners.custom_build_dir]
   [runners.cache]
     [runners.cache.s3]
