@@ -1,0 +1,65 @@
+---
+- name: Customize the given configuration of Gitlab runners
+  hosts: all
+  vars:
+    config_base: >
+      {{
+        lookup('ansible.builtin.file', 'initial.example.toml')
+        | sivel.toiletwater.from_toml
+      }}
+    config_overrides:
+      concurrent: 10
+      listen_address: '0.0.0.0:9090'
+      runners:
+        - name: gitlab-runner-1
+          limit: 10
+          machine:
+            IdleCount: 1
+            IdleCountMin: 0
+            IdleTime: 60
+            MachineDriver: amazonec2
+            MachineName: gitlab-runner-%s
+            MachineOptions:
+              # See https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/blob/main/docs/drivers/aws.md.
+              - 'amazonec2-iam-instance-profile=GitlabRunnerRole'
+              - 'amazonec2-instance-type=m7g.medium'
+              - 'amazonec2-vpc-id=vpc-01234567890abcdef'
+              - 'amazonec2-subnet-id=subnet-01234567890abcdef'
+              - 'amazonec2-tags=Application,gitlab_runner'
+              - 'amazonec2-use-private-address=true'
+              - 'amazonec2-private-address-only=true'
+            MaxBuilds: 150
+            MaxGrowthRate: 2
+    config_final:
+      # There is no filter to automagically merge the objects in the 'runners'
+      # list. This updates the base with the overrides at top level only,
+      # (notice 'recursive=false'), then updates the result's list with a merged
+      # version of it.
+      # Merging lists requires an attribute to merge the correct element. Using
+      # the 'name' attribute for this.
+      >
+      {{
+        config_base
+        | ansible.builtin.combine(
+          config_overrides,
+          {
+            "runners": (
+              config_base.runners
+              | community.general.lists_mergeby(
+                  config_overrides.runners,
+                  'name'
+                )
+            )
+          },
+          recursive=false
+        )
+      }}
+  tasks:
+    - name: Show changes
+      ansible.builtin.debug:
+        var: item
+      with_items:
+        - "{{ config_base }}"
+        - "{{ config_overrides }}"
+        - "{{ config_final }}"
+        - "{{ config_final | sivel.toiletwater.to_toml }}"

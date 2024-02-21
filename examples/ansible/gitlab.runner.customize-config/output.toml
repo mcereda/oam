@@ -1,0 +1,18 @@
+concurrent = 10
+listen_address = "0.0.0.0:9090"
+[[runners]]
+name = "gitlab-runner-1"
+url = "https://example.com"
+token = "x"
+executor = "docker-machine"
+limit = 10
+
+[runners.machine]
+IdleCount = 1
+IdleCountMin = 0
+IdleTime = 60
+MachineDriver = "amazonec2"
+MachineName = "gitlab-runner-%s"
+MachineOptions = [ "amazonec2-iam-instance-profile=GitlabRunnerRole", "amazonec2-instance-type=m7g.medium", "amazonec2-vpc-id=vpc-01234567890abcdef", "amazonec2-subnet-id=subnet-01234567890abcdef", "amazonec2-tags=Application,gitlab_runner", "amazonec2-use-private-address=true", "amazonec2-private-address-only=true",]
+MaxBuilds = 150
+MaxGrowthRate = 2
