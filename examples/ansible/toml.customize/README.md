@@ -29,6 +29,10 @@ Not perfect, but still good enough.
 
 - [Runners' configuration values]
 
+### Sources
+
+- [Merging two dictionaries by key in Ansible]
+
 <!--
   References
   -->
@@ -43,3 +47,4 @@ Not perfect, but still good enough.
 [toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
 
 <!-- Others -->
+[merging two dictionaries by key in ansible]: https://serverfault.com/questions/1084157/merging-two-dictionaries-by-key-in-ansible#1084164

@@ -1,7 +1,5 @@
 # Ansible
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
 1. [Templating](#templating)
@@ -26,7 +24,7 @@
    1. [Force a task or play to use a specific Python interpreter](#force-a-task-or-play-to-use-a-specific-python-interpreter)
    1. [Provide a template file content inline](#provide-a-template-file-content-inline)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -86,6 +84,15 @@ ansible-galaxy role init --type 'container' --init-path 'path/to/role' 'name'
 ansible-galaxy remove 'namespace.role'
 ```
 
+<details>
+  <summary>Galaxy collections and roles worth a check</summary>
+
+| ID                                             | Type       | Description           |
+| ---------------------------------------------- | ---------- | --------------------- |
+| [sivel.toiletwater][galaxy  sivel.toiletwater] | collection | Extra filters, mostly |
+
+</details>
+
 ## Configuration
 
 Ansible can be configured using INI files named `ansible.cfg`, environment variables, command-line options, playbook keywords, and variables.
@@ -120,7 +127,7 @@ All Jinja2's standard filters and tests can be used, with the addition of:
 
 All templating happens **on the Ansible controller**, **before** the task is sent and executed on the target machine.
 
-Updated [examples][templating examples] are available.
+Updated [examples][examples  templating] are available.
 
 ```yaml
 # Remove empty or false values from a list piping it to 'select()'.
@@ -506,10 +513,12 @@ Use the `ansible.builtin.copy` instead of `ansible.builtin.template`:
 
 - [Configuration]
 - [Templating]
-- [Templating examples]
+- [Examples]
 - [Roles]
 - [Tests]
 - [Special variables]
+- [Collections index]<br/>
+  Each also shows the list of connection types, filters, modules, etc it adds.
 - [Automating Helm using Ansible]
 - [Edit .ini file in other servers using Ansible PlayBook]
 - [Yes and No, True and False]
@@ -517,9 +526,7 @@ Use the `ansible.builtin.copy` instead of `ansible.builtin.template`:
 - [Ansible Galaxy user guide]
 - [Windows playbook example]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Removing empty values from a list and assigning it to a new list]
 - [Human-Readable Output Format]
@@ -533,29 +540,32 @@ All the references in the [further readings] section, plus the following:
 - [How to recursively set directory and file permissions]
 - [Is it possible to use inline templates?]
 - [How to set up and use Python virtual environments for Ansible]
+- [Merging two dictionaries by key in Ansible]
 
 <!--
   References
   -->
 
+<!-- In-article sections -->
+[further readings]: #further-readings
+
+<!-- Files -->
+[examples]: ../examples/ansible/
+[examples  templating]: ../examples/ansible/templating.yml
+
 <!-- Upstream -->
 [ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
+[collections index]: https://docs.ansible.com/ansible/latest/collections/index.html
 [configuration]: https://docs.ansible.com/ansible/latest/reference_appendices/config.html
 [galaxy]: https://galaxy.ansible.com/
+[galaxy  sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
 [roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
 [special variables]: https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
 [templating]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html
 [tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
 
-<!-- In-article sections -->
-[further readings]: #further-readings
-
-<!-- Files -->
-[templating examples]: ../examples/ansible/templating.yml
-
 <!-- Others -->
-
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
 [how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
@@ -566,6 +576,7 @@ All the references in the [further readings] section, plus the following:
 [include task only if file exists]: https://stackoverflow.com/questions/28119521/ansible-include-task-only-if-file-exists#comment118578470_62289639
 [is it possible to use inline templates?]: https://stackoverflow.com/questions/33768690/is-it-possible-to-use-inline-templates#33783423
 [jinja2 templating]: https://jinja.palletsprojects.com/en/3.1.x/templates/
+[merging two dictionaries by key in ansible]: https://serverfault.com/questions/1084157/merging-two-dictionaries-by-key-in-ansible#1084164
 [only do something if another action changed]: https://raymii.org/s/tutorials/Ansible_-_Only-do-something-if-another-action-changed.html
 [removing empty values from a list and assigning it to a new list]: https://stackoverflow.com/questions/60525961/ansible-removing-empty-values-from-a-list-and-assigning-it-to-a-new-list#60526774
 [unique filter of list in jinja2]: https://stackoverflow.com/questions/44329598/unique-filter-of-list-in-jinja2
