@@ -5,6 +5,16 @@
 extends: default
 
 rules:
+  comments:
+    ignore:
+      - 'cloud-init/*'
+      - 'examples/cloud-init/*'
+      - 'examples/terraform/multi-part cloud-init/*'
+  document-start:
+    ignore:
+      - 'cloud-init/*'
+      - 'examples/cloud-init/*'
+      - 'examples/terraform/multi-part cloud-init/*'
   line-length:
     level: warning
     max: 120
