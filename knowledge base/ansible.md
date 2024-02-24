@@ -9,6 +9,7 @@
    1. [Get roles](#get-roles)
    1. [Role dependencies](#role-dependencies)
 1. [Output formatting](#output-formatting)
+1. [Create custom filter plugins](#create-custom-filter-plugins)
 1. [Troubleshooting](#troubleshooting)
    1. [Print all known variables](#print-all-known-variables)
    1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
@@ -331,6 +332,10 @@ $ ANSIBLE_STDOUT_CALLBACK='json' ansible-playbook --inventory='localhost.localdo
 }
 ```
 
+## Create custom filter plugins
+
+See [Creating your own Ansible filter plugins].
+
 ## Troubleshooting
 
 ### Print all known variables
@@ -541,6 +546,7 @@ Use the `ansible.builtin.copy` instead of `ansible.builtin.template`:
 - [Is it possible to use inline templates?]
 - [How to set up and use Python virtual environments for Ansible]
 - [Merging two dictionaries by key in Ansible]
+- [Creating your own Ansible filter plugins]
 
 <!--
   References
@@ -567,6 +573,7 @@ Use the `ansible.builtin.copy` instead of `ansible.builtin.template`:
 
 <!-- Others -->
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
+[creating your own ansible filter plugins]: https://www.dasblinkenlichten.com/creating-ansible-filter-plugins/
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
 [how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
 [how to install sshpass on mac]: https://stackoverflow.com/questions/32255660/how-to-install-sshpass-on-mac/62623099#62623099
