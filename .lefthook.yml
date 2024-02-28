@@ -1,6 +1,25 @@
 ---
-# assert_lefthook_installed: true
+assert_lefthook_installed: true
 no_tty: true
+skip_output:
+  - meta
+  - skips
+  - execution_out
+
+validate:
+  parallel: true
+  commands:
+    json: &jq
+      # No official docker image available for now, falling back to the local
+      # command.
+      glob: "*.json"
+      run: jq -c '.' {all_files}
+    yaml: &yq
+      # Python's one, not mikefarah's.
+      # No official docker image available for now, falling back to the local
+      # command.
+      glob: "*.{yaml,yml}"
+      run: yq -c '.' {all_files}
 
 lint:
   parallel: true
@@ -20,10 +39,16 @@ lint:
 pre-commit:
   parallel: true
   commands:
-    hadolint:
+    validate-json:
+      <<: *jq
+      run: jq -c '.' {staged_files}
+    validate-yaml:
+      <<: *yq
+      run: yq -c '.' {staged_files}
+    lint-docker:
       <<: *hadolint
       run: hadolint {staged_files}
-    yamllint:
+    lint-yaml:
       <<: *yamllint
       run: >-
         docker run --rm -v "$PWD:/code" 'registry.gitlab.com/pipeline-components/yamllint:latest'
@@ -34,4 +59,4 @@ commit-msg:
     commitlint:
       # No official docker image available for now, falling back to the local
       # command.
-      run: commitlint --edit
+      run: commitlint -c '.commitlintrc.js' --edit
