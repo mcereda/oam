@@ -1,7 +1,5 @@
 # Docker
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Gotchas](#gotchas)
 1. [Daemon configuration](#daemon-configuration)
@@ -10,7 +8,7 @@
    1. [Create builders](#create-builders)
    1. [Build for specific platforms](#build-for-specific-platforms)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -245,12 +243,12 @@ docker load …
 
 ## Further readings
 
-- [GitHub] page
+- [GitHub]
 - [Podman]
 - [Dive]
 - [Testcontainers]
 
-## Sources
+### Sources
 
 - [Arch Linux Wiki]
 - [Configuring DNS]
@@ -270,6 +268,7 @@ docker load …
 
 <!-- Upstream -->
 [building multi-arch images for arm and x86 with docker desktop]: https://www.docker.com/blog/multi-arch-images/
+[github]: https://github.com/docker
 
 <!-- Others -->
 [arch linux wiki]: https://wiki.archlinux.org/index.php/Docker
