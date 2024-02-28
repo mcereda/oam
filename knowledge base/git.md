@@ -31,7 +31,7 @@
     1. [GPG cannot sign a commit](#gpg-cannot-sign-a-commit)
     1. [Git does not accept self-signed certificates](#git-does-not-accept-self-signed-certificates)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -965,9 +965,7 @@ git -c http.sslVerify=false …
 - [`git-config` reference][git-config reference]
 - [Hooks]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [How to get the current branch name in Git?]
 - [Git Submodules: Adding, Using, Removing, Updating]
