@@ -31,9 +31,9 @@
 
 ```sh
 # Install.
-pip3 install 'ansible'
-pip3 install --user 'ansible' && port install 'sshpass'   # darwin
-sudo pamac install 'ansible' 'sshpass'                    # manjaro linux
+pip3 install --user 'ansible'
+brew install 'ansible' 'sshpass'         # darwin
+sudo pamac install 'ansible' 'sshpass'   # manjaro linux
 
 # Generate an example configuration file with all entries disabled.
 ansible-config init --disabled > 'ansible.cfg'
