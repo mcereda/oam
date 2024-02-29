@@ -15,7 +15,7 @@
    1. [Export the contents of a tfvars file as shell variables](#export-the-contents-of-a-tfvars-file-as-shell-variables)
    1. [Print sensitive values in output](#print-sensitive-values-in-output)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -73,7 +73,7 @@ terraform state show 'module.foo.packet_device.worker'
 
 # Remove registered resources from states.
 terraform state rm 'oci_core_instance.ampere'
-terraform state -state 'path/to/file.tfstate' \
+terraform state -state 'path/to/file.tfstate' rm \
   'module.foo.packet_device.worker' 'tfe_team.robots[1]'
 
 # Remove all resources from the current state.
@@ -305,9 +305,7 @@ eval "export $(sed -E 's/([[:graph:]]+)[[:blank:]]*=[[:blank:]]*([[:graph:]]+)/T
 - [OpenTofu]
 - [Pulumi]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [`for_each` vs `count`][for_each vs count]
 - [Azure Provider]
