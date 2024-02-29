@@ -8,7 +8,11 @@
    1. [Make a job in a pipeline run only when some specific files change](#make-a-job-in-a-pipeline-run-only-when-some-specific-files-change)
    1. [Get the version of the helper image to use for a runner](#get-the-version-of-the-helper-image-to-use-for-a-runner)
 1. [Manage kubernetes clusters](#manage-kubernetes-clusters)
-1. [Gotchas](#gotchas)
+1. [Runners](#runners)
+   1. [Autoscaling](#autoscaling)
+      1. [Docker Machine](#docker-machine)
+1. [Troubleshooting](#troubleshooting)
+   1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -21,6 +25,7 @@
 # Edit and validate.
 sudo vim '/etc/gitlab/gitlab.rb'
 sudo ruby -c '/etc/gitlab/gitlab.rb'
+sudo gitlab-ctl check-config
 
 # Make Gitlab aware of the changes.
 sudo gitlab-ctl reconfigure
@@ -56,6 +61,9 @@ gitlab_rails['backup_keep_time'] = 604800
   <summary>Maintenance</summary>
 
 ```sh
+# Check the components' state.
+sudo gitlab-ctl status
+
 # Create backups.
 sudo gitlab-backup create BACKUP='prefix_override' STRATEGY='copy'
 
@@ -415,13 +423,26 @@ See [adding and removing kubernetes clusters] for more information.
 
 For now the Gitlab instance can manage only kubernetes clusters external to the one it is running into.
 
-## Gotchas
+## Runners
 
-- Use access tokens to clone projects:
+### Autoscaling
 
-  ```sh
-  git clone "https://oauth2:${ACCESS_TOKEN}@somegitlab.com/vendor/package.git"
-  ```
+#### Docker Machine
+
+[Supported cloud providers][docker machine's supported cloud providers].
+
+Pitfalls:
+
+- On AWS, the driver supports only one subnet.<br/>
+  See [AWS driver does not support multiple non default subnets] and [Docker Machine's AWS driver's options].
+
+## Troubleshooting
+
+### Use access tokens to clone projects
+
+```sh
+git clone "https://oauth2:${ACCESS_TOKEN}@somegitlab.com/vendor/package.git"
+```
 
 ## Further readings
 
@@ -441,6 +462,8 @@ For now the Gitlab instance can manage only kubernetes clusters external to the 
 - [Back up GitLab Using Amazon S3]
 - [Support object storage bucket prefixes]
 - [Back up GitLab excluding specific data from the backup]
+- [AWS driver does not support multiple non default subnets]
+- [Autoscaling GitLab Runner on AWS EC2]
 
 <!--
   References
@@ -448,11 +471,14 @@ For now the Gitlab instance can manage only kubernetes clusters external to the 
 
 <!-- Upstream -->
 [adding and removing kubernetes clusters]: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
+[autoscaling gitlab runner on aws ec2]: https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/
 [back up gitlab excluding specific data from the backup]: https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html#excluding-specific-data-from-the-backup
 [back up gitlab using amazon s3]: https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html?tab=Linux+package+%28Omnibus%29#using-amazon-s3
 [chart]: https://docs.gitlab.com/charts/
 [command-line options]: https://docs.gitlab.com/charts/installation/command-line-options.html
 [deployment]: https://docs.gitlab.com/charts/installation/deployment.html
+[docker machine's aws driver's options]: https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/blob/main/docs/drivers/aws.md#options
+[docker machine's supported cloud providers]: https://docs.gitlab.com/runner/configuration/autoscale.html#supported-cloud-providers
 [global settings]: https://docs.gitlab.com/charts/charts/globals.html
 [minimal minikube example values file]: https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/values-minikube-minimum.yaml
 [operator code]: https://gitlab.com/gitlab-org/cloud-native/gitlab-operator
@@ -462,5 +488,6 @@ For now the Gitlab instance can manage only kubernetes clusters external to the 
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
 
 <!-- Others -->
+[aws driver does not support multiple non default subnets]: https://github.com/docker/machine/issues/4700
 [configuring private dns zones and upstream nameservers in kubernetes]: https://kubernetes.io/blog/2017/04/configuring-private-dns-zones-upstream-nameservers-kubernetes/
 [using gitlab token to clone without authentication]: https://stackoverflow.com/questions/25409700/using-gitlab-token-to-clone-without-authentication#29570677
