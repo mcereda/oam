@@ -1,6 +1,8 @@
 # Pulumi
 
 1. [TL;DR](#tldr)
+1. [Migrate to different backends](#migrate-to-different-backends)
+1. [Ignore changes](#ignore-changes)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -37,7 +39,7 @@ yq '. += {"backend": {"url": "file://."}}' 'path/to/program/Pulumi.yaml' \
 # Store the state in object storage backends.
 pulumi login 'azblob://state-bucket'
 pulumi login 'gs://state-bucket'
-pulumi login 's3://state-bucket'
+pulumi login 's3://state-bucket/prefix'
 
 # Display the current logged in user.
 # The '-v' option shows the current backend too.
@@ -67,7 +69,7 @@ pulumi new 'oci-java'
 pulumi config get
 
 
-# Set up secrets.
+# Set secrets.
 pulumi config set --secret 'dbPassword' 'S3cr37'
 pulumi config set --secret 'ecr:dockerHub' \
   '{"username":"marcus","accessToken":"dckr_pat_polus"}'
@@ -77,14 +79,15 @@ pulumi config get 'dbPassword'
 
 
 # Get a summary of what would be deployed.
-pulumi preview
-pulumi preview --diff -p '10' -m 'message' -s 'stack'
+pulumi pre
+pulumi pre --diff -p '10' -m 'message' -s 'stack'
 pulumi pre --expect-no-changes --parallel '10' --show-reads
+pulumi preview -t 'targetResourceUrn'
 
 # Deploy resources.
 pulumi up
 pulumi up -ry --show-config --replace 'resourceUrn'
-pulumi up --target 'resourceUrn'
+pulumi up --target 'targetResourceUrn'
 pulumi update --refresh --yes -f --secrets-provider 'hashivault'
 
 # Access outputs.
@@ -94,7 +97,7 @@ pulumi stack output 'subnetName' --show-secrets -s 'stack'
 # Import existing resources.
 pulumi import 'aws:ecr/pullThroughCacheRule:PullThroughCacheRule' 'resourceName' 'prefix'
 pulumi import 'aws:secretsmanager/secret:Secret' 'resourceName' 'secretArn'
-pulumi import 'aws:secretsmanager/secretVersion:SecretVersion resourceName' 'secretArn|versionId'
+pulumi import 'aws:secretsmanager/secretVersion:SecretVersion' 'resourceName' 'secretArn|versionId'
 
 # Destroy resources.
 pulumi destroy
@@ -111,6 +114,10 @@ pulumi stack ls
 pulumi stack ls -o 'organization' -p 'project' -t 'tag'
 pulumi stack ls -a
 
+# Export stacks.
+pulumi stack export
+pulumi stack export -s 'dev' --show-secrets --file 'dev.stack.json'
+
 # Create graphs of the dependency relations.
 pulumi stack graph 'path/to/graph.dot'
 pulumi stack graph -s 'dev' 'dev.dot' --short-node-name
@@ -122,13 +129,64 @@ pulumi stack rm --preserve-config --yes --stack 'stack'
 
 
 # Rename resources in states.
-pulumi rename 'resourceUrn' 'newName'
+pulumi state rename 'resourceUrn' 'newName'
+pulumi state rename \
+  'urn:pulumi:dev::whatevah::aws:rds/parameterGroup:ParameterGroup::mariadb-slow' \
+  'mariadb-slower'
+
 
 # Unprotect resources that are protected in states.
 pulumi state unprotect 'resourceUrn'
 ```
 
 </details>
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
+# Import resources.
+pulumi import \
+  'aws:s3/bucket:Bucket'
+  'myBucket' 'my-bucket'
+pulumi import \
+  'aws:ecr/pullThroughCacheRule:PullThroughCacheRule' \
+  'pullThroughCacheRule_dockerHub' 'cache/docker-hub'
+pulumi import \
+  'aws:secretsmanager/secret:Secret' \
+  'ecr-pullthroughcache/docker-hub' \
+  'arn:aws:secretsmanager:eu-west-1:000011112222:secret:ecr-pullthroughcache/docker-hub'
+pulumi import \
+  'aws:secretsmanager/secretVersion:SecretVersion' \
+  'ecr-pullthroughcache/docker-hub' \
+  'arn:aws:secretsmanager:eu-west-1:000011112222:secret:ecr-pullthroughcache/docker-hub-|fb4caa30-55ca-4351-2bc9-5c866ddde3f4'
+
+# Check resources up.
+pulumi stack export | yq -y '.deployment.resources[]' -
+pulumi stack export | jq -r '.deployment.resources[]|select(.id=="myBucket").urn' -
+
+# Rename protected resources.
+pulumi state unprotect 'urn:pulumi:all::s3_lifecycle_bucketv2::aws:s3/bucketV2:BucketV2::org-infra'
+pulumi state rename 'urn:pulumi:all::s3_lifecycle_bucketv2::aws:s3/bucketV2:BucketV2::org-infra' 'org-infra_lifecycle'
+
+# Act on resources by their name.
+pulumi stack export \
+| yq -r '.deployment.resources[]|select(.id=="myBucket").urn' - \
+| xargs -n 1 pulumi refresh --preview-only -t
+
+# Change backend.
+# From Pulumi Cloud to S3.
+pulumi login \
+&& pulumi stack select 'myOrg/dev' \
+&& pulumi stack export --show-secrets --file 'dev.stack.json' \
+&& pulumi logout \
+&& pulumi login 's3://myBucket/myOrg/dev' \
+&& pulumi stack init 'dev' \
+&& pulumi stack import --file 'dev.stack.json'
+```
+
+</details>
+<br/>
 
 Commands comparison:
 
@@ -142,12 +200,76 @@ Commands comparison:
 | `pulumi stack`                  | `terraform workspace show`                      |
 | `pulumi stack ls`               | `terraform workspace list`                      |
 | `pulumi stack rm`               | `terraform workspace delete …`                  |
+| `pulumi state export`           | `terraform state list`                          |
+| `pulumi state delete …`         | `terraform state rm …`                          |
 
+<br/>
 Learning resources:
 
 - [Blog]
 - [Code examples]
 - [Resources reference]
+
+## Migrate to different backends
+
+1. Get to the current backend:
+
+   ```sh
+   pulumi login
+   pulumi whoami -v
+   ```
+
+1. Select the stack to export:
+
+   ```sh
+   pulumi stack select 'superbros-galaxy2/mario'
+   ```
+
+1. Export the stack's state to file:
+
+   ```sh
+   pulumi stack export --show-secrets --file 'mario.stack.json'
+   ```
+
+1. Logout from the current backend, and login to the new one:
+
+   ```sh
+   pulumi logout
+   pulumi login 's3://super-bros/galaxy2'
+   pulumi whoami -v
+   ```
+
+1. Create a new stack with the same name on the new backend:
+
+   ```sh
+   pulumi stack init 'mario'
+   ```
+
+1. Import the existing state into the new backend:
+
+   ```sh
+   pulumi stack import --file 'mario.stack.json'
+   ```
+
+1. Check the secrets provider and the key are fine:
+
+   ```sh
+   cat 'Pulumi.mario.yaml'
+   ```
+
+## Ignore changes
+
+Add the [`ignoreChanges` option][ignorechanges] to the resource.
+
+```ts
+const resource = new.aws.s3.Bucket("bucket", {
+  …
+}, {
+  ignoreChanges: [
+    "tags['last-deploy-at']"
+  ]
+});
+```
 
 ## Further readings
 
@@ -174,6 +296,7 @@ Learning resources:
 [blog]: https://www.pulumi.com/blog
 [code examples]: https://github.com/pulumi/examples
 [documentation]: https://www.pulumi.com/docs/
+[ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
 [resources reference]: https://www.pulumi.com/resources
 [state]: https://www.pulumi.com/docs/concepts/state/
 [website]: https://www.pulumi.com/
