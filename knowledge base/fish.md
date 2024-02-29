@@ -27,6 +27,12 @@ chsh -s "$(which fish)"   # from `{ba,z}sh`
 # Open the web-based configuration interface.
 fish_config
 fish_config browse
+
+# Process substitution.
+# What in BASH or ZSH would be `<(echo …)`.
+diff -y -W 200 \
+  (aws … --output 'json' | psub) \
+  (aws … --output 'json' | psub)
 ```
 
 ## Configuration
