@@ -1,8 +1,9 @@
 # GNU Make
 
 1. [TL;DR](#tldr)
+1. [Load .env files in the Makefile](#load-env-files-in-the-makefile)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -79,15 +80,31 @@ apply: plan ${tf_plan_file}
     @terraform apply '${tf_plan_file}'
 ```
 
+## Load .env files in the Makefile
+
+Use this at top of a Makefile to export all variables in `.env`:
+
+```makefile
+ifneq (,$(wildcard ./.env))
+  include .env
+  export
+endif
+```
+
+`ifneq` + `wildcard` is a typical way to check a file exists.<br/>
+`include .env` imports `.env` into the Makefile variables.<br/>
+`export` without parameters exports all variables set until now.
+
+
+
 ## Further readings
 
 - [Conditional syntax]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Makefile variable initialization and export]
+- [How to load and export variables from an .env file in Makefile?]
 
 <!--
   References
@@ -96,8 +113,6 @@ All the references in the [further readings] section, plus the following:
 <!-- Upstream -->
 [conditional syntax]: https://www.gnu.org/software/make/manual/html_node/Conditional-Syntax.html
 
-<!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Others -->
+[how to load and export variables from an .env file in makefile?]: https://stackoverflow.com/questions/44628206/how-to-load-and-export-variables-from-an-env-file-in-makefile#70663753
 [makefile variable initialization and export]: https://stackoverflow.com/questions/2838715/makefile-variable-initialization-and-export
