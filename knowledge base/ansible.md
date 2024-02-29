@@ -24,6 +24,10 @@
    1. [Define different values for `true`/`false`/`null`](#define-different-values-for-truefalsenull)
    1. [Force a task or play to use a specific Python interpreter](#force-a-task-or-play-to-use-a-specific-python-interpreter)
    1. [Provide a template file content inline](#provide-a-template-file-content-inline)
+   1. [Python breaks in OS X](#python-breaks-in-os-x)
+   1. [Load files' content into variables](#load-files-content-into-variables)
+   1. [Only run a task when explicitly requested](#only-run-a-task-when-explicitly-requested)
+   1. [Using AWS' SSM with Ansible fails with error _Failed to create temporary directory_](#using-aws-ssm-with-ansible-fails-with-error-failed-to-create-temporary-directory)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -514,6 +518,71 @@ Use the `ansible.builtin.copy` instead of `ansible.builtin.template`:
         UseSyslog
 ```
 
+### Python breaks in OS X
+
+Root Cause:
+
+> Mac OS High Sierra and later versions have restricted multithreading for improved security.<br/>
+> Apple has defined some rules on what is allowed and not is not after forking processes, and have also added `async-signal-safety` to a limited number of APIs.
+
+Solution:
+
+Disable fork initialization safety features as shown in [Why Ansible and Python fork break on macOS High Sierra+ and how to solve]:
+
+```sh
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+```
+
+### Load files' content into variables
+
+For **local** files, use lookups:
+
+```yaml
+user_data: "{{ lookup('file', 'path/to/file') }}"
+```
+
+For **remote** files, use the [`slurp` module][slurp]:
+
+```yaml
+- ansible.builtin.slurp:
+    src: "{{ user_data_file }}"
+  register: slurped_user_data
+- ansible.builtin.set_fact:
+    user_data: "{{ slurped_user_data.content | ansible.builtin.b64decode }}"
+```
+
+### Only run a task when explicitly requested
+
+Leverage the [`never` tag][special tags: always and never] to never execute the task unless requested by using the `--tags 'never'` option:
+
+```yaml
+- tags: never
+  ansible.builtin.debug:
+    msg: …
+```
+
+Conversely, one can achieve the opposite by using the `always` tag and the `--skip 'always'` option:
+
+```yaml
+- tags: always
+  ansible.builtin.command: …
+```
+
+### Using AWS' SSM with Ansible fails with error _Failed to create temporary directory_
+
+Message example:
+
+> fatal: [i-4ccab452bb7743336]: UNREACHABLE! => {"changed": false, "msg": "Failed to create temporary directory. In some cases, you may have been able to authenticate and did not have permissions on the target directory. Consider changing the remote tmp path in ansible.cfg to a path rooted in \"/tmp\", for more error information use -vvv. Failed command was: ( umask 77 && mkdir -p \"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp `\"&& mkdir \"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp/ansible-tmp-1708603630.2433128-49665-225488680421418 `\" && echo ansible-tmp-1708603630.2433128-49665-225488680421418=\"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp/ansible-tmp-1708603630.2433128-49665-225488680421418 `\" ), exited with result 1, stdout output: \u001b]0;@ip-192-168-42-42:/usr/bin\u0007bash: @ip-192-168-42-42:/usr/bin/home/centos/.ansible/tmp: No such file or directory\r\r\nmkdir: cannot create directory '0': Permission denied\r\r", "unreachable": true}
+
+Root cause:
+
+By default, SSM starts sessions in the `/usr/bin` directory.
+
+Solution:
+
+Explicitly set Ansible's temporary directory to a folder the remote user can write to.<br/>
+See [Integration with AWS SSM].
+
 ## Further readings
 
 - [Configuration]
@@ -530,6 +599,8 @@ Use the `ansible.builtin.copy` instead of `ansible.builtin.template`:
 - [Galaxy]
 - [Ansible Galaxy user guide]
 - [Windows playbook example]
+- [Special tags: `always` and `never`][special tags: always and never]
+- [Integration with AWS SSM]
 
 ### Sources
 
@@ -547,13 +618,16 @@ Use the `ansible.builtin.copy` instead of `ansible.builtin.template`:
 - [How to set up and use Python virtual environments for Ansible]
 - [Merging two dictionaries by key in Ansible]
 - [Creating your own Ansible filter plugins]
+- [Why Ansible and Python fork break on macOS High Sierra+ and how to solve]
+- [Ansible: Set variable to file content]
+- [How can I hide skipped tasks output in Ansible]
 
 <!--
   References
   -->
 
-<!-- In-article sections -->
-[further readings]: #further-readings
+<!-- Knowledge base -->
+[integration with aws ssm]: cloud%20computing/aws/ssm.md##integrate-with-ansible
 
 <!-- Files -->
 [examples]: ../examples/ansible/
@@ -564,17 +638,20 @@ Use the `ansible.builtin.copy` instead of `ansible.builtin.template`:
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
 [collections index]: https://docs.ansible.com/ansible/latest/collections/index.html
 [configuration]: https://docs.ansible.com/ansible/latest/reference_appendices/config.html
-[galaxy]: https://galaxy.ansible.com/
 [galaxy  sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
+[galaxy]: https://galaxy.ansible.com/
 [roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
+[special tags: always and never]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html#special-tags-always-and-never
 [special variables]: https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
 [templating]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html
 [tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
 
 <!-- Others -->
+[ansible: set variable to file content]: https://stackoverflow.com/questions/24003880/ansible-set-variable-to-file-content
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
 [creating your own ansible filter plugins]: https://www.dasblinkenlichten.com/creating-ansible-filter-plugins/
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
+[how can i hide skipped tasks output in ansible]: https://stackoverflow.com/questions/39189549/how-can-i-hide-skipped-tasks-output-in-ansible#76147924
 [how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
 [how to install sshpass on mac]: https://stackoverflow.com/questions/32255660/how-to-install-sshpass-on-mac/62623099#62623099
 [how to recursively set directory and file permissions]: https://superuser.com/questions/1024677/ansible-how-to-recursively-set-directory-and-file-permissions#1317715
@@ -587,6 +664,7 @@ Use the `ansible.builtin.copy` instead of `ansible.builtin.template`:
 [only do something if another action changed]: https://raymii.org/s/tutorials/Ansible_-_Only-do-something-if-another-action-changed.html
 [removing empty values from a list and assigning it to a new list]: https://stackoverflow.com/questions/60525961/ansible-removing-empty-values-from-a-list-and-assigning-it-to-a-new-list#60526774
 [unique filter of list in jinja2]: https://stackoverflow.com/questions/44329598/unique-filter-of-list-in-jinja2
+[why ansible and python fork break on macos high sierra+ and how to solve]: https://ansiblepilot.medium.com/why-ansible-and-python-fork-break-on-macos-high-sierra-and-how-to-solve-d11540cd2a1b
 [windows playbook example]: https://geekflare.com/ansible-playbook-windows-example/
 [working with versions]: https://docs.ansible.com/ansible/latest/collections/community/general/docsite/filter_guide_working_with_versions.html
 [yes and no, true and false]: https://chronicler.tech/red-hat-ansible-yes-no-and/
