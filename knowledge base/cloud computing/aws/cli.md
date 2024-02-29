@@ -24,9 +24,26 @@ aws configure --profile 'work'
 export AWS_PROFILE='work'
 
 
-# Enable auto-prompt mode (like aws-shell).
+# Enable auto-prompt mode (like `aws-shell` does).
 aws configure set 'cli_auto_prompt' 'on-partial'
 export AWS_CLI_AUTO_PROMPT='on'
+
+
+# List applications in CodeDeploy.
+aws deploy list-applications
+
+# List deployment groups defined for applications.
+aws deploy list-deployment-groups --application-name 'batman'
+
+# Show details of deployment groups.
+aws deploy get-deployment-group --application-name 'batman' \
+  --deployment-group-name 'production'
+
+
+
+# Show RDS instances.
+aws rds describe-db-instances
+aws rds describe-db-instances --output 'json' --query "DBInstances[?(DBInstanceIdentifier=='master-prod')]"
 
 
 # List all SageMaker EndpointConfigurations' names.
@@ -47,6 +64,10 @@ aws secretsmanager describe-secret --secret-id 'ecr-pullthroughcache/docker-hub'
 
 # Get secrets from Secret Manager.
 aws secretsmanager get-secret-value --secret-id 'ecr-pullthroughcache/github'
+
+
+# List SNS queues (a.k.a. 'topics').
+aws sns list-topics
 
 
 # Start sessions via Session Manager.
