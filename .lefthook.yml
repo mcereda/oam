@@ -4,7 +4,22 @@ no_tty: true
 skip_output:
   - meta
   - skips
-  - execution_out
+
+
+lint:
+  parallel: true
+  commands:
+    docker: &hadolint
+      # The official docker image is based on scratch and only takes only one
+      # input file at a time. I have no clue how to fix that for now so let's
+      # just use the local command.
+      glob: "*Dockerfile*"
+      run: hadolint {all_files}
+    yaml: &yamllint
+      glob: "*.{yaml,yml}"
+      run: >-
+        docker run --rm -v "$PWD:/code" 'registry.gitlab.com/pipeline-components/yamllint:latest'
+        yamllint {all_files}
 
 validate:
   parallel: true
@@ -12,39 +27,29 @@ validate:
     json: &jq
       # No official docker image available for now, falling back to the local
       # command.
-      glob: "*.json"
-      run: jq -c '.' {all_files}
+      glob: '*.json'
+      run: jq -r 'input_filename' {all_files}
     yaml: &yq
       # Python's one, not mikefarah's.
       # No official docker image available for now, falling back to the local
       # command.
-      glob: "*.{yaml,yml}"
-      run: yq -c '.' {all_files}
-
-lint:
-  parallel: true
-  commands:
-    hadolint: &hadolint
-      # The official docker image is based on scratch and only takes only one
-      # input file at a time. I have no clue how to fix that for now so let's
-      # just use the local command.
-      glob: "*Dockerfile*"
-      run: hadolint {all_files}
-    yamllint: &yamllint
-      glob: "*.{yaml,yml}"
+      glob: '*.{yaml,yml}'
       run: >-
-        docker run --rm -v "$PWD:/code" 'registry.gitlab.com/pipeline-components/yamllint:latest'
-        yamllint {all_files}
+        echo '{all_files}'
+        | xargs -t yq '.'
+
 
 pre-commit:
   parallel: true
   commands:
     validate-json:
       <<: *jq
-      run: jq -c '.' {staged_files}
+      run: jq -r 'input_filename' {staged_files}
     validate-yaml:
       <<: *yq
-      run: yq -c '.' {staged_files}
+      run: >-
+        yq '.' {staged_files} > /dev/null
+        && echo 'All YAML files are readable'
     lint-docker:
       <<: *hadolint
       run: hadolint {staged_files}
@@ -59,4 +64,4 @@ commit-msg:
     commitlint:
       # No official docker image available for now, falling back to the local
       # command.
-      run: commitlint -c '.commitlintrc.js' --edit
+      run: commitlint --edit

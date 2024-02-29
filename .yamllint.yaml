@@ -1,6 +1,6 @@
 ---
 # See https://yamllint.readthedocs.io/en/stable/configuration.html for
-# more information
+# more information.
 
 extends: default
 
