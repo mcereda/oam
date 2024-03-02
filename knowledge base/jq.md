@@ -31,6 +31,10 @@ jq 'del(.country, .number, .language)' …
 jq 'del(.[0,1,2])' …
 jq 'del(.[0:3])' …
 
+# Remove all null values.
+jq 'del(..|nulls)' …
+jq 'del(recurse(.[]?;true)|select(. == null))' …
+
 # Print objects as 'key [space] "value"' pairs.
 jq -r 'to_entries[] | "\(.key) \"\(.value)\""' 'file.json'
 
@@ -112,6 +116,7 @@ All the references in the [further readings] section, plus the following:
 - [Change multiple values at once]
 - [jq Select range]
 - [Deleting multiple keys at once with jq]
+- [Remove all null values]
 
 <!--
   References
@@ -125,4 +130,5 @@ All the references in the [further readings] section, plus the following:
 [deleting multiple keys at once with jq]: https://stackoverflow.com/questions/36227245/deleting-multiple-keys-at-once-with-jq
 [filter objects list with regex]: https://til.hashrocket.com/posts/uv0bjiokwk-use-jq-to-filter-objects-list-with-regex
 [jq select range]: https://stackoverflow.com/questions/45548604/jq-select-range
+[remove all null values]: https://stackoverflow.com/questions/39500608/remove-all-null-values
 [select multiple conditions]: https://stackoverflow.com/questions/33057420/jq-select-multiple-conditions#33059058
