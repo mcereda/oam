@@ -5,7 +5,8 @@
 1. [TL;DR](#tldr)
 1. [Authentication](#authentication)
 1. [Configuration](#configuration)
-   1. [Conditional inclusions](#conditional-inclusions)
+   1. [Inclusions](#inclusions)
+      1. [Conditional inclusions](#conditional-inclusions)
    1. [Remotes](#remotes)
       1. [Push to multiple git remotes with the one command](#push-to-multiple-git-remotes-with-the-one-command)
    1. [Aliases](#aliases)
@@ -321,7 +322,7 @@ git rebase 'branch_name'
 git rebase 'remote_name/upstream_branch_name' 'local-branch_name'
 git pull --rebase='interactive' 'remote_name' 'branch_name'
 
-# Change the date of an existing commit.
+# Change the date of existing commits.
 git filter-branch --env-filter \
   'if [ $GIT_COMMIT = 119f9ecf58069b265ab22f1f97d2b648faf932e0 ]
    then
@@ -347,7 +348,7 @@ git submodule update --init --recursive
 git show :/cool
 
 # Skip commit hooks.
-# Most useful with a broken `pre-commit` executable.
+# Most useful with a broken `pre-commit` or `lefthook` executable or config.
 git commit --no-verify …
 ```
 
@@ -370,12 +371,13 @@ git \
 
 Config files:
 
-| Path                       | Scope  | Description                          |
-| -------------------------- | ------ | ------------------------------------ |
-| `/etc/gitconfig`           | system | System-wide default configuration    |
-| `$HOME/.gitconfig`         | global | Per-user configuration               |
-| `$HOME/.config/git/config` | global | Per-user configuration (alternative) |
-| `.git/config`              | local  | Repository configuration             |
+| Path                                              | Scope  | Description                       |
+| ------------------------------------------------- | ------ | --------------------------------- |
+| `/etc/gitconfig`                                  | system | System-wide default configuration |
+| `$HOME/.gitconfig`<br/>`$HOME/.config/git/config` | global | Per-user configuration            |
+| `.git/config`                                     | local  | Repository configuration          |
+
+The file is in [INI format](https://en.wikipedia.org/wiki/INI_file).
 
 ```sh
 # Required to be able to commit changes.
@@ -385,6 +387,7 @@ git config --local 'user.name' 'Me'
 # Avoid issues when collaborating from different platforms.
 # 'input' on unix, 'true' on windows, 'false' only if you know what you are doing.
 git config --local 'core.autocrlf' 'input'
+git config --local 'core.autocrlf' 'true'
 
 # Sign commits by default.
 # Get the GPG key short ID with `gpg --list-keys --keyid-format short`.
@@ -416,13 +419,22 @@ git config --get 'user.name'
 # Render all current settings' values.
 # Gets the settings names, then requests the current value for each.
 git config --list \
-  | awk -F '=' '{print $1}' | sort -u \
-  | xargs -I {} sh -c 'printf "{}=" && git config --get {}'
+| awk -F '=' '{print $1}' | sort -u \
+| xargs -I {} sh -c 'printf "{}=" && git config --get {}'
 ```
 
-### Conditional inclusions
+### Inclusions
 
 Paths can be relative or absolute, and one can use `~` as shortcut for the user's `$HOME` directory.
+
+```ini
+[include]
+  path = /path/to/file.inc
+  path = path/to/inc.file
+  path = ~/path/to/incfile
+```
+
+#### Conditional inclusions
 
 ```ini
 # All repositories in the given directory.
@@ -432,8 +444,10 @@ Paths can be relative or absolute, and one can use `~` as shortcut for the user'
 
 # Only if any remote's URL matches the format.
 # Remotes need to be specified *after* this (i.e. in a local scope).
+# Specifying a remote name instead of the '*' does not seem to work.
 [includeIf "hasconfig:remote.*.url:*github.com*/**"]
   path = gitconfig.github
+  path = ~/.gitconfig.github.ssh
 [includeIf "hasconfig:remote.*.url:git@gitlab.com:*/**"]
   path = ~/.gitconfig.gitlab.ssh
 ```
