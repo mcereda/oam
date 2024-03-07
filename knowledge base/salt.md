@@ -1,4 +1,4 @@
-# Saltstack
+# Salt
 
 ## Table of contents <!-- omit in toc -->
 
@@ -91,7 +91,7 @@ salt '*' network.interfaces
 
 ## Targeting
 
-_Targeting_ is how you select minions when running commands, applying configurations, and when doing almost anything else in SaltStack that involves a minion.
+_Targeting_ is how one selects minions when running commands, applying configurations, and when doing almost anything else in Salt that involves a minion.
 
 ```sh
 # Target specific minions.
@@ -113,7 +113,7 @@ salt -C 'G@os:Ubuntu and minion* or S@192.168.50.*' test.ping
 
 ## States
 
-SaltStack configuration management lets you create re-usable configuration templates, called _states_, that describe everything required to put a system component or application into a known configuration.<br/>
+Configuration management lets you create re-usable configuration templates, called _states_, that describe everything required to put a system component or application into a known configuration.<br/>
 States are described using YAML, making them simpler to create and read.
 
 Commands in state files are executed from top to bottom. The requisite system lets you explicitly determine the order.
@@ -218,6 +218,8 @@ salt --batch-size 10 '*' state.apply
 
 ## Further readings
 
+- [Website]
+- [Github]
 - [Installation]
 - [States]
 - [Targeting]
@@ -228,7 +230,9 @@ salt --batch-size 10 '*' state.apply
   -->
 
 <!-- Upstream -->
-[installation]: https://docs.saltstack.com/en/getstarted/fundamentals/install.html
-[states]: https://docs.saltstack.com/en/getstarted/fundamentals/states.html
-[targeting]: https://docs.saltstack.com/en/getstarted/fundamentals/targeting.html
-[top]: https://docs.saltstack.com/en/getstarted/fundamentals/top.html
+[installation]: https://docs.saltproject.io/en/getstarted/fundamentals/install.html
+[states]: https://docs.saltproject.io/en/getstarted/fundamentals/states.html
+[targeting]: https://docs.saltproject.io/en/getstarted/fundamentals/targeting.html
+[top]: https://docs.saltproject.io/en/getstarted/fundamentals/top.html
+[website]: https://saltproject.io/
+[github]: https://github.com/saltstack
