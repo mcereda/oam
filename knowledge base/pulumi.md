@@ -84,6 +84,10 @@ pulumi pre --diff -p '10' -m 'message' -s 'stack'
 pulumi pre --expect-no-changes --parallel '10' --show-reads
 pulumi preview -t 'targetResourceUrn'
 
+# Save any resource creation seen during the preview into an import file to use
+# with the `import` subcommand.
+pulumi preview --import-file 'resources.to.import.json'
+
 # Deploy resources.
 pulumi up
 pulumi up -ry --show-config --replace 'resourceUrn'
@@ -96,8 +100,11 @@ pulumi stack output 'subnetName' --show-secrets -s 'stack'
 
 # Import existing resources.
 pulumi import 'aws:ecr/pullThroughCacheRule:PullThroughCacheRule' 'resourceName' 'prefix'
-pulumi import 'aws:secretsmanager/secret:Secret' 'resourceName' 'secretArn'
-pulumi import 'aws:secretsmanager/secretVersion:SecretVersion' 'resourceName' 'secretArn|versionId'
+pulumi import 'aws:secretsmanager/secret:Secret' 'resourceName' 'secretArn' --protect false
+pulumi import \
+  'aws:secretsmanager/secretVersion:SecretVersion' 'resourceName' 'secretArn|versionId' \
+  --skip-preview -o 'imported.resources.ts'
+pulumi import -f 'resources.to.import.json'
 
 # Destroy resources.
 pulumi destroy
