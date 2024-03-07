@@ -170,6 +170,8 @@ In the Preview app:
 1. Click the _Quartz Filter_ pop-up menu, then choose _Reduce File Size_.
 1. Click the _Export_ button.
 
+Alternatively, check [ImageMagick] or [Ghostscript] out.
+
 ## Manage tags
 
 Tags are stored both in a file's or folder's `com.apple.metadata:_kMDItemUserTags` extended attribute.
@@ -410,6 +412,7 @@ To use any of these key combinations, press and hold the keys immediately after 
 
 <!-- Knowledge base -->
 [defaults]: defaults.md
+[ghostscript]: ../ghostscript.md
 [imagemagick]: ../imagemagick.md
 [jdberry/tag]: tag.md
 [little snitch]: little%20snitch.md

@@ -16,6 +16,7 @@ Components:
 ```sh
 # Scale images to 50% its original size.
 magick convert -adaptive-resize '50%' 'in.jpg' 'out.jpg'
+ls -1 *.jpeg | parallel -qt magick convert -adaptive-resize '50%' {} scaled_{}
 
 # Create GIFs from single images.
 magick *.jpg 'out.gif'
