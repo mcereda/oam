@@ -18,6 +18,13 @@ gs -dNOPAUSE -dQUIET -dBATCH \
   -sDEVICE=pdfwrite -dPDFSETTINGS=/ebook -dCompatibilityLevel=1.4 \
   -sOutputFile=path/to/small/file.pdf \
   path/to/massive/file.pdf
+gs \
+  -o /path/to/resized.pdf \
+  -sDEVICE=pdfwrite \
+  -dPDFFitPage \
+  -r300x300 \
+  -g2550x3300 \
+  /path/to/original.pdf
 ```
 
 ## Reduce the size of PDF files
