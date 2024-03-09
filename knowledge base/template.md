@@ -11,6 +11,24 @@ Intro
 
 ## TL;DR
 
+<!-- Uncomment if needed
+<details>
+  <summary>Installation</summary>
+</details>
+-->
+
+<!-- Uncomment if needed
+<details>
+  <summary>Usage</summary>
+</details>
+-->
+
+<!-- Uncomment if needed
+<details>
+  <summary>Real world use cases</summary>
+</details>
+-->
+
 ## Further readings
 
 ### Sources
