@@ -8,6 +8,9 @@
 
 ## TL;DR
 
+<details>
+  <summary>Usage</summary>
+
 ```sh
 # Start sessions.
 aws ssm start-session --target 'instance-id'
@@ -18,6 +21,12 @@ aws ssm start-session \
   --document-name 'CustomCommandSessionDocument' \
   --parameters '{"logpath":["/var/log/amazon/ssm/amazon-ssm-agent.log"]}'
 ```
+
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
+</details>
 
 ## Gotchas
 
