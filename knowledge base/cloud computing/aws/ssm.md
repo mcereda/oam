@@ -97,7 +97,7 @@ Pitfalls:
 
 <!-- Knowledge base -->
 [ansible]: ../../ansible.md
-[ec2]: ec2.placeholder
+[ec2]: ec2.md
 
 <!-- Upstream -->
 [start a session]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-sessions-start.html
