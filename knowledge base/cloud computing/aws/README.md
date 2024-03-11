@@ -1,17 +1,41 @@
 # Amazon Web Services
 
-1. [Constraints](#constraints)
+1. [Services](#services)
+   1. [CloudWatch](#cloudwatch)
+1. [Resource constraints](#resource-constraints)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
-## Constraints
+## Services
 
-| data type | component | summary                        | description                                                                                                                                                                                                                                                | type   | length   | pattern                           | required |
-| --------- | --------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | --------------------------------- | -------- |
-| tag       | key       | Required name of the tag       | The string value can be Unicode characters and cannot be prefixed with "aws:".<br/>The string can contain only the set of Unicode letters, digits, white-space, `_`,' `.`, `/`, `=`, `+`, `-`, `:`, `@` (Java regex: `^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-]*)$`) | String | 1 to 128 | `^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$` | Yes      |
-| tag       | value     | The optional value of the tag. | The string value can be Unicode characters. The string can contain only the set of Unicode letters, digits, white-space, `_`, `.`, `/`, `=`, `+`, `-`, `:`, `@` (Java regex: `^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-]*)$"`)                                        | String | 0 to 256 | `^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$` | Yes      |
+| Service      | Description                                   |
+| ------------ | --------------------------------------------- |
+| [CloudWatch] | Observability (logging, monitoring, alerting) |
+| [EC2]        | Virtual machines                              |
+
+### CloudWatch
+
+Observability service. with functions for logging, monitoring and alerting.
+
+_Metrics_ are whatever needs to be monitored (e.g. CPU usage). _Data points_ are the values of a metric over time.
+_Namespaces_ are containers for metrics.
+
+Metrics only exist in the region in which they are created.
+
+[Many AWS services][services that publish cloudwatch metrics] offer basic monitoring by publishing a default set of metrics to CloudWatch with no charge.<br/>
+This feature is automatically enabled by default when one starts using one of these services.
+
+## Resource constraints
+
+| data type | component | summary                       | description                                                                                                                                                                                                                                                | type   | length   | pattern                           | required |
+| --------- | --------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | --------------------------------- | -------- |
+| tag       | key       | Required name of the tag      | The string value can be Unicode characters and cannot be prefixed with "aws:".<br/>The string can contain only the set of Unicode letters, digits, white-space, `_`,' `.`, `/`, `=`, `+`, `-`, `:`, `@` (Java regex: `^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-]*)$`) | String | 1 to 128 | `^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$` | Yes      |
+| tag       | value     | The optional value of the tag | The string value can be Unicode characters. The string can contain only the set of Unicode letters, digits, white-space, `_`, `.`, `/`, `=`, `+`, `-`, `:`, `@` (Java regex: `^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-]*)$"`)                                        | String | 0 to 256 | `^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$` | Yes      |
 
 ## Further readings
+
+- [EC2]
+- [Services that publish CloudWatch metrics]
 
 ### Sources
 
@@ -22,9 +46,12 @@
   -->
 
 <!-- In-article sections -->
+[cloudwatch]: #cloudwatch
+
 <!-- Knowledge base -->
-<!-- Files -->
+[ec2]: ec2.md
+
 <!-- Upstream -->
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
-
-<!-- Others -->
+[services that publish cloudwatch metrics]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
+[what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
