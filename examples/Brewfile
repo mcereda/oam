@@ -42,9 +42,9 @@ brew "glibc" if OS.linux?
 # set arguments for all 'brew install --cask' commands
 cask_args appdir: "~/Applications", require_sha: true
 
-
 # 'brew install --cask'
 cask "aldente"
+cask "bluesnooze"
 cask "desmume"
 cask "docker"
 cask "firefox"
