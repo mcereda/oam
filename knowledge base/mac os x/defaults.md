@@ -53,7 +53,7 @@ defaults write 'com.apple.desktopservices' 'DSDontWriteNetworkStores' true
 
 
 # Delete values.
-# This resets changes done previously.
+# This resets changes done previously (a.k.a. restores defaults).
 # defaults delete 'domain'
 # defaults delete 'domain' 'key'
 defaults delete 'com.apple.dock'
@@ -64,6 +64,14 @@ defaults delete -app 'VLC'
 defaults delete 'com.apple.dock' 'springboard-rows'
 defaults delete 'com.apple.dock' 'springboard-columns'
 defaults write 'com.apple.dock' 'ResetLaunchPad' -bool 'TRUE'
+```
+
+```sh
+# Hide Bluesnooze's menu bar icon.
+defaults write 'com.oliverpeate.Bluesnooze' 'hideIcon' -bool true && killall 'Bluesnooze'
+
+# Restore Bluesnooze's menu bar icon.
+defaults delete 'com.oliverpeate.Bluesnooze' 'hideIcon' && killall 'Bluesnooze'
 ```
 
 > **Note:** once set something related to the dock, one'll probably need to restart it with `killall Dock`.
