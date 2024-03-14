@@ -33,6 +33,10 @@ fish_config browse
 diff -y -W 200 \
   (aws … --output 'json' | psub) \
   (aws … --output 'json' | psub)
+
+# Math.
+math 2 '+' 6
+time pulumi pre --parallel (math 2 '*' (nproc))
 ```
 
 ## Configuration
@@ -60,6 +64,7 @@ See [Starship] or [Tide].
 - [Website]
 - [`bash`][bash]
 - [`zsh`][zsh]
+- [Fish shell cheatsheet]
 
 Prompts:
 
@@ -97,4 +102,5 @@ All the references in the [further readings] section, plus the following:
 [website]: https://fishshell.com/
 
 <!-- Others -->
+[fish shell cheatsheet]: https://devhints.io/fish-shell
 [tide]: https://github.com/IlanCosman/tide
