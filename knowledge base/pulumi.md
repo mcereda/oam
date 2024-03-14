@@ -8,6 +8,9 @@
 
 ## TL;DR
 
+When a stack is not explicitly requested in a command (`-s`, `--stack`), Pulumi defaults to the current one.<br/>
+Target single resources with `-t`, `--target`. Target also their dependencies with `--target-dependents`.
+
 <details>
   <summary>Installation</summary>
 
@@ -27,14 +30,27 @@ pulumi completion 'fish' > "$HOME/.config/fish/completions/pulumi.fish"
   <summary>Usage</summary>
 
 ```sh
+# List available templates.
+pulumi new -l
+pulumi new --list-templates
+
+# Create new projects in the current directory.
+# Creates basic scaffolding files based on the specified cloud and language.
+pulumi new
+pulumi new 'aws-go' -d 'description' -n 'name'
+pulumi new 'azure-python' --dir '.' -s 'stack' --name 'name'
+pulumi new 'gcp-typescript' --description 'description' --stack 'stack'
+pulumi new 'kubernetes-yaml' --generate-only
+pulumi new 'oci-java'
+
+
 # Operate entirely from the local machine (local-only mode).
 # Stores the state under the '.pulumi' folder in the given directory.
 pulumi login --local
 pulumi login "file://~"
 pulumi login "file://."
 pulumi login "file://path/to/folder"
-yq '. += {"backend": {"url": "file://."}}' 'path/to/program/Pulumi.yaml' \
-  | sponge 'path/to/program/Pulumi.yaml'
+yq -iy '. += {"backend": {"url": "file://."}}' 'Pulumi.yaml'
 
 # Store the state in object storage backends.
 pulumi login 'azblob://state-bucket'
@@ -50,23 +66,17 @@ pulumi whoami -v
 pulumi logout
 
 
-# List available templates.
-pulumi new -l
-pulumi new --list-templates
-
-# Create new projects in the current directory.
-# Creates basic scaffolding files based on the specified cloud and language.
-pulumi new
-pulumi new 'aws-go' -d 'description' -n 'name'
-pulumi new 'azure-python' --dir '.' -s 'stack' --name 'name'
-pulumi new 'gcp-typescript' --description 'description' --stack 'stack'
-pulumi new 'kubernetes-yaml'
-pulumi new 'oci-java'
-
-
 # Get the full program configuration.
 # Secrets are obscured.
 pulumi config get
+
+# Set configuration values.
+pulumi config set
+
+# Copy the configuration over to other stacks.
+pulumi config cp -d 'local'
+pulumi config cp -s 'prod' -d 'dev'
+
 
 
 # Set secrets.
@@ -82,7 +92,7 @@ pulumi config get 'dbPassword'
 pulumi pre
 pulumi pre --diff -p '10' -m 'message' -s 'stack'
 pulumi pre --expect-no-changes --parallel '10' --show-reads
-pulumi preview -t 'targetResourceUrn'
+pulumi preview -t 'targetResourceUrn' --target-dependents
 
 # Save any resource creation seen during the preview into an import file to use
 # with the `import` subcommand.
@@ -121,18 +131,29 @@ pulumi stack ls
 pulumi stack ls -o 'organization' -p 'project' -t 'tag'
 pulumi stack ls -a
 
-# Export stacks.
+# Create stacks.
+pulumi stack init 'prod'
+pulumi stack init 'local' --copy-config-from 'dev' --no-select
+
+# Export stacks' state.
 pulumi stack export
 pulumi stack export -s 'dev' --show-secrets --file 'dev.stack.json'
 
-# Create graphs of the dependency relations.
-pulumi stack graph 'path/to/graph.dot'
-pulumi stack graph -s 'dev' 'dev.dot' --short-node-name
+# Import stacks' state.
+pulumi stack import --file 'dev.stack.json'
+pulumi stack import -s 'local' --file 'dev.stack.json'
+
+# Change the current stack.
+pulumi select 'prod'
 
 # Delete stacks.
 pulumi stack rm
 pulumi stack rm -fy
 pulumi stack rm --preserve-config --yes --stack 'stack'
+
+# Create graphs of the dependency relations.
+pulumi stack graph 'path/to/graph.dot'
+pulumi stack graph -s 'dev' 'dev.dot' --short-node-name
 
 
 # Rename resources in states.
@@ -181,15 +202,25 @@ pulumi stack export \
 | yq -r '.deployment.resources[]|select(.id=="myBucket").urn' - \
 | xargs -n 1 pulumi refresh --preview-only -t
 
-# Change backend.
+# Migrate backend.
 # From Pulumi Cloud to S3.
 pulumi login \
 && pulumi stack select 'myOrg/dev' \
 && pulumi stack export --show-secrets --file 'dev.stack.json' \
 && pulumi logout \
-&& pulumi login 's3://myBucket/myOrg/dev' \
+&& pulumi login 's3://myBucket/prefix' \
 && pulumi stack init 'dev' \
 && pulumi stack import --file 'dev.stack.json'
+
+# Use a local state for testing.
+# Remote state on S3.
+mkdir -pv '.pulumi/stacks/myWonderfulInfra' \
+&& aws s3 cp \
+    's3://myBucket/prefix/.pulumi/stacks/myWonderfulInfra/prod.json' \
+    '.pulumi/stacks/myWonderfulInfra/' \
+&& yq -iy '. += {"backend": {"url": "file://."}}' 'Pulumi.yaml'
+# Revert to the remote state.
+yq -iy '. += {"backend": {"url": "s3://myBucket/prefix"}}' 'Pulumi.yaml'
 ```
 
 </details>
