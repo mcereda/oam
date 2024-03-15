@@ -114,7 +114,7 @@ pulumi import 'aws:secretsmanager/secret:Secret' 'resourceName' 'secretArn' --pr
 pulumi import \
   'aws:secretsmanager/secretVersion:SecretVersion' 'resourceName' 'secretArn|versionId' \
   --skip-preview -o 'imported.resources.ts'
-pulumi import -f 'resources.to.import.json'
+pulumi import -f 'resources.to.import.json' --generate-code=false -y
 
 # Destroy resources.
 pulumi destroy
@@ -170,9 +170,38 @@ pulumi state unprotect 'resourceUrn'
 </details>
 
 <details>
+  <summary>Data resources</summary>
+
+```ts
+const cluster_role = aws.iam.getRoleOutput({
+    name: "AWSServiceRoleForAmazonEKS",
+});
+
+const cluster = new aws.eks.Cluster("cluster", {
+  roleArn: cluster_role.arn,
+  …
+});
+```
+
+</details>
+
+<details>
   <summary>Real world use cases</summary>
 
 ```sh
+# Programmatic initialization with local state.
+pulumi new -gy 'typescript' -n 'name' --dir 'dirname' \
+&& cd 'dirname' \
+&& npm install \
+&& yq -iy '. += {"backend": {"url": "file://."}}' 'Pulumi.yaml' \
+&& PULUMI_CONFIG_PASSPHRASE='test123' pulumi stack init 'stack-name' \
+&& cd -
+
+# Using the same number of threads of the machine seems to give the best
+# performance ratio.
+pulumi pre --parallel "$(nproc)" --diff
+pulumi up --parallel "$(nproc)"
+
 # Import resources.
 pulumi import \
   'aws:s3/bucket:Bucket'
@@ -197,10 +226,10 @@ pulumi stack export | jq -r '.deployment.resources[]|select(.id=="myBucket").urn
 pulumi state unprotect 'urn:pulumi:all::s3_lifecycle_bucketv2::aws:s3/bucketV2:BucketV2::org-infra'
 pulumi state rename 'urn:pulumi:all::s3_lifecycle_bucketv2::aws:s3/bucketV2:BucketV2::org-infra' 'org-infra_lifecycle'
 
-# Act on resources by their name.
+# Act on resources by their id.
 pulumi stack export \
 | yq -r '.deployment.resources[]|select(.id=="myBucket").urn' - \
-| xargs -n 1 pulumi refresh --preview-only -t
+| xargs -n 1 pulumi refresh --preview-only -t --target-dependents
 
 # Migrate backend.
 # From Pulumi Cloud to S3.
@@ -212,6 +241,7 @@ pulumi login \
 && pulumi stack init 'dev' \
 && pulumi stack import --file 'dev.stack.json'
 
+
 # Use a local state for testing.
 # Remote state on S3.
 mkdir -pv '.pulumi/stacks/myWonderfulInfra' \
@@ -219,8 +249,12 @@ mkdir -pv '.pulumi/stacks/myWonderfulInfra' \
     's3://myBucket/prefix/.pulumi/stacks/myWonderfulInfra/prod.json' \
     '.pulumi/stacks/myWonderfulInfra/' \
 && yq -iy '. += {"backend": {"url": "file://."}}' 'Pulumi.yaml'
+
 # Revert to the remote state.
 yq -iy '. += {"backend": {"url": "s3://myBucket/prefix"}}' 'Pulumi.yaml'
+
+# Diff the two states
+# TODO
 ```
 
 </details>
