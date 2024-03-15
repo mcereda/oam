@@ -7,6 +7,8 @@
 
 ## TL;DR
 
+Use an instance profile to pass an IAM role to an EC2 instance.
+
 <details>
   <summary>Real world use cases</summary>
 
@@ -41,6 +43,8 @@ See [EBS].
 
 ### Sources
 
+- [Using instance profiles]
+
 <!--
   References
   -->
@@ -52,6 +56,8 @@ See [EBS].
 
 <!-- Files -->
 <!-- Upstream -->
+[using instance profiles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
+
 <!-- Others -->
 [aws ec2 instance pricing comparison]: https://ec2instances.github.io/
 [ec2instances.info on vantage.sh]: https://instances.vantage.sh/
