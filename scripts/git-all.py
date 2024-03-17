@@ -49,9 +49,11 @@ def pre_flight(git_subcommand):
 @click.option('--dry-run', '-n', is_flag=True, default=False, help='Simulate actions.')
 @click.option('--recursive/--no-recursive', ' /--no-r', is_flag=True, default=True, help='Recurse from the given directories.', show_default=True)
 @click.option('--threads', '-t', default=cpu_count(), help='Number of threads to use.', show_default=True)
+@click.option('--verbose', '-v', is_flag=True, default=False, help='Enable verbose mode.')
 @click.argument('git_subcommand')
 @click.argument('directories', type=click.Path(exists=True, file_okay=False, resolve_path=True), nargs=-1, metavar='DIRECTORY...')
-def main(debug, directories, dry_run, git_subcommand, recursive, threads):
+
+def main(debug, directories, dry_run, git_subcommand, recursive, threads, verbose):
     """
     Executes the GIT_SUBCOMMAND in the given DIRECTORIES. With -r, executes it
     on all repositories found in the given DIRECTORIES.
@@ -67,6 +69,9 @@ def main(debug, directories, dry_run, git_subcommand, recursive, threads):
     if debug:
         logging.basicConfig(level=logging.DEBUG, force=True)
         logging.warning("debug mode enabled")
+    if verbose:
+        logging.basicConfig(level=logging.INFO, force=True)
+        logging.warning("verbose mode enabled")
     if dry_run:
         logging.warning("dry-run mode enabled")
 
@@ -78,7 +83,7 @@ def main(debug, directories, dry_run, git_subcommand, recursive, threads):
     repositories = list(directories)
     if recursive:
         for directory in directories:
-            logging.debug(f"starting from '{directory}'")
+            logging.info(f"starting from '{directory}'")
 
             repositories_in_dir = set(dirname(dirpath) for dirpath, _, _ in walk(directory) if basename(dirpath) == '.git')
             logging.debug(f"{directory} has repositories {', '.join(repositories_in_dir)}")
@@ -90,7 +95,7 @@ def main(debug, directories, dry_run, git_subcommand, recursive, threads):
     logging.debug(f"creating threads")
     with ThreadPoolExecutor(max_workers=threads) as executor:
         for repository in repositories:
-            logging.debug(f"submitting thread for {repository}")
+            logging.info(f"submitting thread for {repository}")
             executor.submit(call_git, repository, dry_run, *git_subcommand_parts)
 
 if __name__ == "__main__":
