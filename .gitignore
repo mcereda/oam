@@ -10,6 +10,7 @@
 /package.json
 /package-lock.json
 
+.venv/
 __pycache__/
 
 .obsidian/
