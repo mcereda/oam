@@ -13,23 +13,23 @@
 
 ## TL;DR
 
-When one creates a [_cluster_][amazon eks clusters], one really creates just the cluster's control plane and its dedicated nodes.<br/>
-Pods can be scheduled on any combination of [self-managed nodes], [managed node groups] and [Fargate], depending on the cluster's properties.
+When one creates a [_cluster_][amazon eks clusters], one really only creates the cluster's control plane and the dedicated nodes underneath it.<br/>
+Worker nodes can consist in any combination of [self-managed nodes], [managed node groups] and [Fargate], and depend on the control plane.
 
 EKS automatically installs [self-managed add-ons][amazon eks add-ons] like the AWS VPC CNI plugin, `kube-proxy` and CoreDNS.<br/>
 Disable them in the cluster's definition.
 
-EKS [automatically creates a Security Group for the control plane][amazon eks security group requirements and considerations] upon cluster creation.<br/>
-This apparently cannot be avoided or customized in the cluster's definition (e.g. using IaC tools like [Pulumi] or [Terraform]):
+Upon cluster creation, EKS [automatically creates a security group][amazon eks security group requirements and considerations] and applies it to both the control plane and nodes.<br/>
+Such security group cannot be avoided nor customized in the cluster's definition (e.g. using IaC tools like [Pulumi] or [Terraform]):
 
 > ```txt
 > error: aws:eks/cluster:Cluster resource 'cluster' has a problem: Value for unconfigurable attribute. Can't configure a value for "vpc_config.0.cluster_security_group_id": its value will be decided automatically based on the result of applying this configuration.
 > ```
 
-For some reason, giving resources a tag like `aks:eks:cluster-name` succeeds, but has no effect (it is not applied).
+For some reason, giving resources a tag like `aks:eks:cluster-name=value` succeeds, but has no effect (it is not really applied).
 
-By default, the IAM principal that created the cluster is the only principal that can make calls to the Kubernetes API server.<br/>
-To let other IAM principals have access to the cluster, one needs to add them to it. See [Enabling IAM principal access to your cluster](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html) and [Required permissions](https://docs.aws.amazon.com/eks/latest/userguide/view-kubernetes-resources.html#view-kubernetes-resources-permissions).
+By default, the IAM principal creating the cluster is the only one able to make calls to the cluster's API server.<br/>
+To let other IAM principals have access to the cluster, one needs to add them to it. See [Enabling IAM principal access to your cluster](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html) and [Required permissions](https://docs.aws.amazon.com/eks/latest/userguide/view-kubernetes-resources.html#view-kubernetes-resources-permissions) to do so.
 
 <details>
   <summary>Usage</summary>
@@ -80,13 +80,10 @@ To let other IAM principals have access to the cluster, one needs to add them to
 
 ## Requirements
 
-- [suggestion] 1 (one) custom _Cluster Service Role_ with the `AmazonEKSClusterPolicy` policy attached or similar permissions.
+- [suggestion] 1 (one) custom _Cluster Service Role_ with the `AmazonEKSClusterPolicy` policy attached or similar custom permissions.
 
-  Kubernetes clusters managed by EKS make calls to other AWS services on the user behalf to manage the resources that the cluster uses.<br/>
-  For a cluster to be allowed to make those calls, it **requires** to have an IAM role assigned, and this role must have:
-
-  - The `AmazonEKSClusterPolicy` policy attached to it, or
-  - Comparable permissions.
+  Kubernetes clusters managed by EKS make calls to other AWS services on the user's behalf to manage the resources that the cluster uses.<br/>
+  For a cluster to be allowed to make those calls, it **requires** to have the aforementioned permissions.
 
   To create clusters which would **not** require access to any other AWS resource, one can assign the cluster the `AWSServiceRoleForAmazonEKS` service-linked role directly <sup>[1][service-linked role permissions for amazon eks],[2][amazon eks cluster iam role]</sup>.
 
@@ -119,6 +116,9 @@ To let other IAM principals have access to the cluster, one needs to add them to
 - Private clusters have [more special requirements][private cluster requirements] of their own.
 
 ## Creation procedure
+
+The Internet is full of guides and abstractions which do not work, are confusing, or rely on other code.<br/>
+Some create Cloudformation stacks in the process.
 
 1. Create a VPC, if one does not have them already, with public and private subnets that meet [EKS' requirements][amazon eks vpc and subnet requirements and considerations].
 
@@ -234,15 +234,12 @@ See [Choosing an Amazon EC2 instance type] and [Managed node groups] for more in
 
 Additional requirements:
 
-- [suggestion] 1 (one) custom _Node Service Role_ with the `AmazonEKSFargatePodExecutionRolePolicy` policy attached or similar permissions.
+- [suggestion] 1 (one) custom _Node Service Role_ with the `AmazonEKSWorkerNodePolicy`, `AmazonEC2ContainerRegistryReadOnly` and `AmazonEKS_CNI_Policy` policies attached or similar permissions.
 
   The EKS nodes' `kubelet` makes calls to the AWS APIs on one's behalf.<br/>
   Nodes receive permissions for these API calls through an IAM instance profile and associated policies.
 
-  For a node to be allowed to make those calls, it **requires** to have an IAM instance profile assigned, and this profile must use a role with:
-
-  - The `AmazonEKSWorkerNodePolicy`, `AmazonEC2ContainerRegistryReadOnly` and `AmazonEKS_CNI_Policy` policies attached to it, or
-  - Comparable permissions.
+  For a node to be allowed to make those calls, it **requires** to have the aforementioned permissions.
 
 - When deploying a managed node group in **private** subnets, one must ensure that it can access Amazon ECR for pulling container images.<br/>
   Do this by connecting a NAT gateway to the route table of the subnet, or by adding the following AWS PrivateLink VPC endpoints:
