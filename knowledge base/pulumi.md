@@ -3,6 +3,7 @@
 1. [TL;DR](#tldr)
 1. [Migrate to different backends](#migrate-to-different-backends)
 1. [Ignore changes](#ignore-changes)
+1. [Delete before replacing](#delete-before-replacing)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -100,7 +101,7 @@ pulumi preview --import-file 'resources.to.import.json'
 
 # Deploy resources.
 pulumi up
-pulumi up -ry --show-config --replace 'resourceUrn'
+pulumi up -ry --show-config --replace 'targetResourceUrn'
 pulumi up --target 'targetResourceUrn'
 pulumi update --refresh --yes -f --secrets-provider 'hashivault'
 
@@ -118,7 +119,8 @@ pulumi import -f 'resources.to.import.json' --generate-code=false -y
 
 # Destroy resources.
 pulumi destroy
-pulumi down -s 'stack' --exclude-protected
+pulumi down -t 'targetResourceUrn'
+pulumi dn -s 'stack' --exclude-protected
 
 
 # View stacks' state.
@@ -343,6 +345,18 @@ const resource = new.aws.s3.Bucket("bucket", {
 });
 ```
 
+## Delete before replacing
+
+Add the [`deleteBeforeReplace` option][deletebeforereplace] to the resource.
+
+```ts
+const cluster = new aws.eks.Cluster("cluster", {
+  …
+}, {
+  deleteBeforeReplace: true
+});
+```
+
 ## Further readings
 
 - [Website]
@@ -367,6 +381,7 @@ const resource = new.aws.s3.Bucket("bucket", {
 <!-- Upstream -->
 [blog]: https://www.pulumi.com/blog
 [code examples]: https://github.com/pulumi/examples
+[deletebeforereplace]: https://www.pulumi.com/docs/concepts/options/deletebeforereplace/
 [documentation]: https://www.pulumi.com/docs/
 [ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
 [resources reference]: https://www.pulumi.com/resources
