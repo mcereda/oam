@@ -1,6 +1,8 @@
 # OAM
 
-A.K.A. _Operations, administration and management_ or _operations, administration and maintenance_, the processes, activities, tools, and standards involved with operating, administering, managing and maintaining any system. This commonly applies to telecommunication, computer networks, and computer hardware.
+A.K.A. _Operations, administration and management_ or _operations, administration and maintenance_, the processes,
+activities, tools, and standards involved with operating, administering, managing and maintaining any system.<br/>.
+This commonly applies to telecommunication, computer networks, and computer hardware.
 
 In short, my private collection of notes and scripts. I use them to ease my tech life.
 
