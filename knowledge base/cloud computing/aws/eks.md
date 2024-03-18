@@ -28,15 +28,46 @@ This apparently cannot be avoided or customized in the cluster's definition (e.g
 
 For some reason, giving resources a tag like `aks:eks:cluster-name` succeeds, but has no effect (it is not applied).
 
+By default, the IAM principal that created the cluster is the only principal that can make calls to the Kubernetes API server.<br/>
+To let other IAM principals have access to the cluster, one needs to add them to it. See [Enabling IAM principal access to your cluster](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html) and [Required permissions](https://docs.aws.amazon.com/eks/latest/userguide/view-kubernetes-resources.html#view-kubernetes-resources-permissions).
+
 <details>
   <summary>Usage</summary>
 
   ```sh
   # Create clusters.
   aws eks create-cluster \
-     --name 'DeepThought' \
-     --role-arn 'arn:aws:iam::000011112222:role/aws-service-role/eks.amazonaws.com/AWSServiceRoleForAmazonEKS' \
-     --resources-vpc-config 'subnetIds=subnet-11112222333344445,subnet-66667777888899990'
+    --name 'DeepThought' \
+    --role-arn 'arn:aws:iam::000011112222:role/aws-service-role/eks.amazonaws.com/AWSServiceRoleForAmazonEKS' \
+    --resources-vpc-config 'subnetIds=subnet-11112222333344445,subnet-66667777888899990'
+
+  # Connect to clusters.
+  aws eks update-kubeconfig --name 'name' && kubectl cluster-info
+
+  # Change encryption configuration.
+  aws eks associate-encryption-config \
+    --cluster-name 'DeepThought' \
+    --encryption-config '[{
+      "provider": { "keyArn": "arn:aws:kms:eu-west-1:000011112222:key/33334444-5555-6666-7777-88889999aaaa" },
+      "resources": [ "secrets" ]
+    }]'
+
+
+  # Create EC2 node groups.
+  aws eks create-nodegroup \
+    --cluster-name 'DeepThought' \
+    --nodegroup-name 'alpha' \
+    --scaling-config 'minSize=1,maxSize=3,desiredSize=1' \
+    --node-role-arn 'arn:aws:iam::000011112222:role/DeepThinkerNodeRole' \
+    --subnets 'subnet-11112222333344445' 'subnet-66667777888899990'
+
+  # Create Fargate profiles.
+  aws eks create-fargate-profile \
+    --cluster-name 'DeepThought' \
+    --fargate-profile-name 'alpha' \
+    --pod-execution-role-arn 'arn:aws:iam::000011112222:role/DeepThinkerFargate' \
+    --subnets 'subnet-11112222333344445' 'subnet-66667777888899990' \
+    --selectors 'namespace=string'
   ```
 
 </details>
@@ -73,7 +104,7 @@ For some reason, giving resources a tag like `aks:eks:cluster-name` succeeds, bu
   ">
   <header style="font-weight: bold; margin-bottom: 0.5em">Pro tip</header>
 
-  Should one want to use more advanced features like [encryption with managed keys][enabling secret encryption on an existing cluster], the role will need access to the referenced resources.<br/>
+  Should one want to use more advanced features like [encryption with managed keys][secrets encryption through kms], the role will need access to the referenced resources.<br/>
   In this case it would probably be better to create a custom role instead of assigning permissions to the built-in one.
 
   </div>
@@ -81,7 +112,11 @@ For some reason, giving resources a tag like `aks:eks:cluster-name` succeeds, bu
 - [suggestion] 1+ (one or more) custom service role(s) for the pod executors, with the required policies attached or similar permissions.
 
   The reasons and required permissions vary depending on the type of executor.<br/>
+  It would probably be better to create a custom role instead of assigning permissions to the built-in one.
+
   See the corresponding section under [Create worker nodes].
+
+- Private clusters have [more special requirements][private cluster requirements] of their own.
 
 ## Creation procedure
 
@@ -130,6 +165,7 @@ For some reason, giving resources a tag like `aks:eks:cluster-name` succeeds, bu
        },
      }],
    });
+
    const cluster_service_role = new aws.iam.Role("cluster-service-role", {
      assumeRolePolicy: cluster_assumeRole_policy,
      name: "DeepThinker",
@@ -194,7 +230,7 @@ See [step 3](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-co
 
 ### Create managed node groups
 
-> See [Choosing an Amazon EC2 instance type].
+See [Choosing an Amazon EC2 instance type] and [Managed node groups] for more information.
 
 Additional requirements:
 
@@ -208,7 +244,14 @@ Additional requirements:
   - The `AmazonEKSWorkerNodePolicy`, `AmazonEC2ContainerRegistryReadOnly` and `AmazonEKS_CNI_Policy` policies attached to it, or
   - Comparable permissions.
 
-- If the nodes are to be created in private subnets, the cluster **must** provide its private API server endpoint.<br/>
+- When deploying a managed node group in **private** subnets, one must ensure that it can access Amazon ECR for pulling container images.<br/>
+  Do this by connecting a NAT gateway to the route table of the subnet, or by adding the following AWS PrivateLink VPC endpoints:
+
+  - Amazon ECR API endpoint interface: `com.amazonaws.{region}.ecr.api`.
+  - Amazon ECR Docker registry API endpoint interface: `com.amazonaws.{region}.ecr.dkr`.
+  - Amazon S3 gateway endpoint: `com.amazonaws.{region}.s3`.
+
+- If the nodes are to be created in private subnets, the cluster [**must** provide its private API server endpoint](https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html).<br/>
   Set the cluster's `vpc_config.0.endpoint_private_access` attribute to `true`.
 
 Procedure:
@@ -265,7 +308,8 @@ Procedure:
        },
      }],
    });
-   const nodes_service_role = new aws.iam.Role("nodes-service-role", {
+
+   const node_service_role = new aws.iam.Role("node-service-role", {
      assumeRolePolicy: nodes_assumeRole_policy,
      managedPolicyArns: [
        // alternatively, use RolePolicyAttachments
@@ -291,7 +335,7 @@ Procedure:
      --cluster-name 'DeepThought' \
      --nodegroup-name 'alpha' \
      --scaling-config 'minSize=1,maxSize=3,desiredSize=1' \
-     --node-role-arn 'arn:aws:iam::000011112222:role/DeepThinkerNodeRole' \
+     --node-role-arn 'arn:aws:iam::000011112222:role/DeepThinkerNode' \
      --subnets 'subnet-11112222333344445' 'subnet-66667777888899990'
    ```
 
@@ -301,9 +345,10 @@ Procedure:
      <summary>Example in Pulumi</summary>
 
    ```ts
-   const ec2Nodes_group0 = new aws.eks.NodeGroup("ec2Nodes_group0", {
+   const nodeGroup_alpha = new aws.eks.NodeGroup("nodeGroup-alpha", {
+     nodeGroupName: "nodeGroup-alpha",
      clusterName: cluster.name,
-     nodeRoleArn: nodes_service_role.arn,
+     nodeRoleArn: node_service_role.arn,
      scalingConfig: {
        minSize: 1,
        maxSize: 3,
@@ -315,7 +360,6 @@ Procedure:
    ```
 
    </details>
-   <br/>
 
 ### Schedule pods on Fargate
 
@@ -340,7 +384,6 @@ Procedure:
 
    <details>
      <summary>Example in CLI</summary>
-     <br/>
 
    ```json
    {
@@ -364,17 +407,83 @@ Procedure:
 
    ```sh
    aws iam create-role \
-     --role-name 'DeepThinker' \
+     --role-name 'DeepThinkerFargate' \
      --assume-role-policy-document 'file://eks-cluster-role-trust-policy.json'
    aws iam attach-role-policy \
-     --policy-arn 'arn:aws:iam::aws:policy/AmazonEKSClusterPolicy' \
-     --role-name 'DeepThinker'
+     --role-name 'DeepThinkerFargate' \
+     --policy-arn 'arn:aws:iam::aws:policy/AmazonEKSClusterPolicy'
+   ```
+
+   </details>
+
+   <details>
+     <summary>Example in Pulumi</summary>
+
+   ```ts
+   const fargate_assumeRole_policy = JSON.stringify({
+     Version: "2012-10-17",
+     Statement: [{
+       Effect: "Allow",
+       Action: "sts:AssumeRole",
+       Principal: {
+         Service:  "eks-fargate-pods.amazonaws.com",
+       },
+       Condition: {
+         ArnLike: {
+           "aws:SourceArn": `arn:aws:eks:${region}:${account}:fargateprofile/${cluster.name}/*`
+         }
+       },
+     }],
+   });
+
+   const fargate_service_role = new aws.iam.Role("fargate-service-role", {
+     assumeRolePolicy: fargate_assumeRole_policy,
+     managedPolicyArns: [
+       // alternatively, use RolePolicyAttachments
+       "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy",
+     ],
+     name: "DeepThinkerFargate",
+     …
+   });
    ```
 
    </details>
    <br/>
 
-1. TODO
+1. Create the desired Fargate profiles.
+
+   <details>
+     <summary>Example in CLI</summary>
+
+   ```sh
+   aws eks create-fargate-profile \
+     --cluster-name 'DeepThought' \
+     --fargate-profile-name 'alpha' \
+     --pod-execution-role-arn 'arn:aws:iam::000011112222:role/DeepThinkerFargate' \
+     --subnets 'subnet-11112222333344445' 'subnet-66667777888899990' \
+     --selectors 'namespace=string'
+   ```
+
+   </details>
+
+   <details>
+     <summary>Example in Pulumi</summary>
+
+   ```ts
+   const fargateProfile_alpha = new aws.eks.FargateProfile("fargateProfile-alpha", {
+     fargateProfileName: "fargateProfile-alpha",
+     clusterName: cluster.name,
+     podExecutionRoleArn: fargate_service_role.arn,
+     selectors: [
+       { namespace: "monitoring" },
+       { namespace: "default" },
+     ],
+     subnetIds: cluster.vpcConfig.subnetIds,
+     …
+   });
+   ```
+
+   </details>
 
 ## Secrets encryption through KMS
 
@@ -399,6 +508,21 @@ TL;DR:
 
    </details>
 
+   <details>
+     <summary>Example in Pulumi</summary>
+
+   ```ts
+   const cluster = new aws.eks.Cluster("cluster", {
+     encryptionConfig: {
+       provider: { keyArn: `arn:aws:kms:${region}:${account}:key/${key_id}` },
+       resources: [ "secrets" ],
+     },
+     …
+   });
+   ```
+
+   </details>
+
 ## Troubleshooting
 
 See [Amazon EKS troubleshooting].
@@ -415,6 +539,7 @@ See [Amazon EKS troubleshooting].
 - [Getting started with Amazon EKS - AWS Management Console and AWS CLI]
 - [`aws eks create-cluster`][aws eks create-cluster]
 - [`aws eks create-nodegroup`][aws eks create-nodegroup]
+- [`aws eks create-fargate-profile`][aws eks create-fargate-profile]
 - [Using service-linked roles for Amazon EKS]
 - [Service-linked role permissions for Amazon EKS]
 - [Amazon EKS cluster IAM role]
@@ -424,6 +549,7 @@ See [Amazon EKS troubleshooting].
 - [Amazon EKS add-ons]
 - [Enabling secret encryption on an existing cluster]
 - [Choosing an Amazon EC2 instance type]
+- [Private cluster requirements]
 
 <!--
   References
@@ -432,6 +558,7 @@ See [Amazon EKS troubleshooting].
 <!-- In-article sections -->
 [create worker nodes]: #create-worker-nodes
 [requirements]: #requirements
+[secrets encryption through kms]: #secrets-encryption-through-kms
 
 <!-- Knowledge base -->
 [kubernetes]: ../../kubernetes/README.md
@@ -449,6 +576,7 @@ See [Amazon EKS troubleshooting].
 [amazoneksclusterpolicy]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonEKSClusterPolicy.html
 [amazoneksservicepolicy]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonEKSServicePolicy.html
 [aws eks create-cluster]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-cluster.html
+[aws eks create-fargate-profile]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-fargate-profile.html
 [aws eks create-nodegroup]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-nodegroup.html
 [choosing an amazon ec2 instance type]: https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html
 [eks workshop]: https://www.eksworkshop.com/
@@ -456,6 +584,7 @@ See [Amazon EKS troubleshooting].
 [fargate]: https://docs.aws.amazon.com/eks/latest/userguide/fargate.html
 [getting started with amazon eks - aws management console and aws cli]: https://docs.aws.amazon.com/eks/latest/userguide/getting-started-console.html
 [managed node groups]: https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html
+[private cluster requirements]: https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html
 [self-managed nodes]: https://docs.aws.amazon.com/eks/latest/userguide/worker.html
 [service-linked role permissions for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles-eks.html#service-linked-role-permissions-eks
 [using service-linked roles for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles.html
