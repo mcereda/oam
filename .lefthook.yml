@@ -15,6 +15,11 @@ lint:
       # just use the local command.
       glob: "*Dockerfile*"
       run: hadolint {all_files}
+    md: &markdownlint
+      glob: "*.md"
+      run: >-  # '{all_files}' and {files} only include ones managed by git for some reason
+        docker run --rm -v "$PWD:/workdir" 'ghcr.io/igorshubovych/markdownlint-cli:latest'
+        **.md
     yaml: &yamllint
       glob: "*.{yaml,yml}"
       run: >-
@@ -53,6 +58,11 @@ pre-commit:
     lint-docker:
       <<: *hadolint
       run: hadolint {staged_files}
+    lint-md:
+      <<: *markdownlint
+      run: >-
+        docker run --rm -v "$PWD:/workdir" 'ghcr.io/igorshubovych/markdownlint-cli:latest'
+        {staged_files}
     lint-yaml:
       <<: *yamllint
       run: >-

@@ -2,10 +2,37 @@
     "editor.formatOnPaste": true,
     "json.schemas": [
         {
+            "fileMatch": [
+                ".lefthook.yaml",
+                ".lefthook.yml"
+            ],
+            "url": "https: //json.schemastore.org/lefthook.json"
+        },
+        {
+            "fileMatch": [
+                ".markdownlint.js",
+                ".markdownlint.json",
+                ".markdownlint.jsonc",
+                ".markdownlint.yaml"
+            ],
+            "url": "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json"
+        },
+        {
             "fileMatch": [ ".pre-commit-config.yaml" ],
             "url": "https://json.schemastore.org/pre-commit-config.json"
+        },
+        {
+            "fileMatch": [ "package.json" ],
+            "url": "https://json.schemastore.org/package.json"
+        },
+        {
+            "fileMatch": [ "Pulumi.yaml" ],
+            "url": "https://json.schemastore.org/pulumi.json"
         }
     ],
+
+    "markdown.extension.toc.levels": "2..6",
+    "markdown.extension.toc.orderedList": true,
 
     "cSpell.language": "en,en-GB",
     "cSpell.words": [
@@ -57,6 +84,7 @@
         "eeprom",
         "epel",
         "fallocate",
+        "fargate",
         "fastboot",
         "fdupes",
         "firewalld",
@@ -90,6 +118,7 @@
         "keygrip",
         "kivi",
         "knockd",
+        "kubeconfig",
         "kubectx",
         "kubelet",
         "kubens",
@@ -177,7 +206,5 @@
         "xattr",
         "xkcd",
         "zstd"
-    ],
-    "markdown.extension.toc.levels": "2..6",
-    "markdown.extension.toc.orderedList": true
+    ]
 }
