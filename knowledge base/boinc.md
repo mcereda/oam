@@ -12,6 +12,7 @@
 1. [Ask for tasks for alternative platforms](#ask-for-tasks-for-alternative-platforms)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -31,6 +32,25 @@ sudo zypper install 'boinc-client' 'boinc-manager'
 # Default is '31416'.
 boinc --gui_rpc_port '30000'
 ```
+
+<details>
+  <summary>Laptop-like platforms energy management</summary>
+
+```sh
+# Do not boost the CPU frequency for niced loads.
+# The governor must support it - check if the file exists.
+echo 1 | sudo tee '/sys/devices/system/cpu/cpufreq/ondemand/ignore_nice_load'
+
+# Disable (1) or enable (0) turbo boost for Intel CPUs.
+echo 1 | sudo tee '/sys/devices/system/cpu/intel_pstate/no_turbo'
+
+# Suspend computing when the computer is in use by giving the `boinc` user
+# access to the X session (so that mouse and keyboard input can be communicated
+# to the client).
+xhost +SI:localuser:boinc
+```
+
+</details>
 
 ## Client management
 
@@ -163,24 +183,35 @@ In `cc_config.xml`:
 - [boinctui] for a TUI manager
 - [GUI RPC bind to port 31416 failed: 98]
 - [AMD ROCm™ documentation]
+- [Check or set the CPU frequency or governor]
+
+### Sources
+
+- [Client configuration]
+- [Controlling BOINC remotely]
+- [Installing or uninstalling the amdgpu stack]
+- [Platforms]
+- Arch Wiki's [BOINC page][boinc on arch wiki]
+- [Linux suspend when computer is in use bug]
 
 <!--
   References
   -->
 
+<!-- Knowledge base -->
+[boinccmd]: boinccmd.md
+[check or set the cpu frequency or governor]: check%20or%20set%20the%20CPU%20frequency%20or%20governor.md
+
 <!-- Upstream -->
 [amd linux drivers]: https://www.amd.com/en/support/linux-drivers
+[amd rocm™ documentation]: https://rocm.docs.amd.com/en/latest/
 [boinc manager]: https://boinc.berkeley.edu/wiki/BOINC_Manager
 [client configuration]: https://boinc.berkeley.edu/wiki/Client_configuration
 [controlling boinc remotely]: https://boinc.berkeley.edu/wiki/Controlling_BOINC_remotely
 [installing or uninstalling the amdgpu stack]: https://amdgpu-install.readthedocs.io/en/latest/install-installing.html
 [platforms]: https://boinc.berkeley.edu/trac/wiki/BoincPlatforms
 [radeon™ software for linux® installation]: https://amdgpu-install.readthedocs.io/en/latest/
-[amd rocm™ documentation]: https://rocm.docs.amd.com/en/latest/
 [website]: https://boinc.berkeley.edu/
-
-<!-- In-article sections -->
-[boinccmd]: boinccmd.md
 
 <!-- Others -->
 [boinc on arch wiki]: https://wiki.archlinux.org/title/BOINC
