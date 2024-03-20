@@ -11,10 +11,12 @@
 
 ## TL;DR
 
+<details>
+  <summary>Installation and configuration</summary>
+
 ```sh
 # Install the CLI.
 brew install 'awscli'
-
 
 # Configure profiles.
 aws configure
@@ -23,12 +25,17 @@ aws configure --profile 'work'
 # Use specific profiles for the rest of the shell session.
 export AWS_PROFILE='work'
 
-
 # Enable auto-prompt mode (like `aws-shell` does).
 aws configure set 'cli_auto_prompt' 'on-partial'
 export AWS_CLI_AUTO_PROMPT='on'
+```
 
+</details>
 
+<details>
+  <summary>Usage</summary>
+
+```sh
 # List applications in CodeDeploy.
 aws deploy list-applications
 
@@ -38,7 +45,6 @@ aws deploy list-deployment-groups --application-name 'batman'
 # Show details of deployment groups.
 aws deploy get-deployment-group --application-name 'batman' \
   --deployment-group-name 'production'
-
 
 
 # Show RDS instances.
@@ -70,14 +76,37 @@ aws secretsmanager get-secret-value --secret-id 'ecr-pullthroughcache/github'
 aws sns list-topics
 
 
-# Start sessions via Session Manager.
-aws ssm start-session --target 'i-0123456789abcdef0'
+# Get information about the current user.
+aws sts get-caller-identity
 ```
 
-Non listed subcommand:
+Subcommands not listed here are in their own service-specific article:
 
-- [`aws ecr`][ecr tldr]
-- [`aws s3`][s3 tldr]
+[`ebs`][ebs tldr] |
+[`ec2`][ec2 tldr] |
+[`ecr`][ecr tldr] |
+[`eks`][eks tldr] |
+[`s3`][s3 tldr] |
+[`ssm`][ssm tldr]
+
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
+# Get roles' ARN from their name.
+aws iam list-roles --query "Roles[?RoleName == 'EKSRole'].[RoleName, Arn]"
+
+# Assume roles given their name.
+aws iam list-roles --query "Roles[?RoleName == 'EKSRole'].Arn" --output 'text' \
+| xargs -I {} \
+  aws sts assume-role \
+    --role-arn "{}" \
+    --role-session-name "AWSCLI-Session"
+```
+
+</details>
 
 ## Profiles
 
@@ -150,6 +179,7 @@ aws ssm start-session --target 'i-0123456789abcdef0'
 - [AWS]
 - CLI [quickstart]
 - [Configure profiles] in the CLI
+- [How do I assume an IAM role using the AWS CLI?]
 
 ### Sources
 
@@ -162,14 +192,19 @@ aws ssm start-session --target 'i-0123456789abcdef0'
 
 <!-- Knowledge base -->
 [aws]: README.md
+[ebs tldr]: ebs.md#tldr
+[ec2 tldr]: ec2.md#tldr
 [ecr tldr]: ecr.md#tldr
+[eks tldr]: eks.md#tldr
 [s3 tldr]: s3.md#tldr
+[ssm tldr]: ssm.md#tldr
 
 <!-- Files -->
 [cli config files]: ../../../examples/dotfiles/.aws
 
 <!-- Upstream -->
 [configure profiles]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html
+[how do i assume an iam role using the aws cli?]: https://repost.aws/knowledge-center/iam-assume-role-cli
 [improved cli auto-prompt mode]: https://github.com/aws/aws-cli/issues/5664
 [install the session manager plugin for the aws cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-macos-overview.html#install-plugin-macos-signed
 [quickstart]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html

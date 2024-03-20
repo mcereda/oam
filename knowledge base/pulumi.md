@@ -175,13 +175,30 @@ pulumi state unprotect 'resourceUrn'
   <summary>Data resources</summary>
 
 ```ts
-const cluster_role = aws.iam.getRoleOutput({
-    name: "AWSServiceRoleForAmazonEKS",
-});
-
+const cluster_role = aws.iam.getRoleOutput({ name: "AWSServiceRoleForAmazonEKS" });
 const cluster = new aws.eks.Cluster("cluster", {
   roleArn: cluster_role.arn,
   …
+});
+
+// If used in JSON documents, the function needs to cover the whole document.
+const encryptionKey = aws.kms.getKeyOutput({
+    keyId: "00001111-2222-3333-4444-555566667777",
+});
+const clusterServiceRole = new aws.iam.Role("clusterServiceRole", {
+    inlinePolicies: [{
+        policy: encryptionKey.arn.apply(arn => JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [{
+                Effect: "Allow",
+                Action: [
+                    "kms:CreateGrant",
+                    "kms:DescribeKey",
+                ],
+                Resource: arn,
+            }],
+        })),
+    }]
 });
 ```
 
@@ -257,6 +274,42 @@ yq -iy '. += {"backend": {"url": "s3://myBucket/prefix"}}' 'Pulumi.yaml'
 
 # Diff the two states
 # TODO
+```
+
+```ts
+// Merge objects.
+tags_base = {
+    ManagedBy: "Pulumi",
+    Prod: false,
+};
+const fargateProfile = new aws.eks.FargateProfile("fargateProfile", {
+    tags: {
+        ...tags_base,
+        ...{
+            Description: "Fargate profile for EKS cluster EksTest",
+            EksComponent: "Fargate profile",
+            Name: "eksTest-fargateProfile",
+        },
+    },
+    …
+});
+
+// Default tags with explicit provider.
+const provider = new aws.Provider("provider", {
+    defaultTags: {
+        tags: {
+            ManagedBy: "Pulumi",
+            Owner: "user@company.com",
+            Team: "Infra",
+        },
+    },
+});
+const fargateProfile = new aws.eks.FargateProfile("fargateProfile", {
+    …
+}, {
+    provider: provider,
+    …
+});
 ```
 
 </details>
@@ -368,6 +421,7 @@ const cluster = new aws.eks.Cluster("cluster", {
 
 - [Documentation]
 - [State]
+- [Assigning tags by default on AWS with Pulumi]
 
 <!--
   References
@@ -389,3 +443,4 @@ const cluster = new aws.eks.Cluster("cluster", {
 [website]: https://www.pulumi.com/
 
 <!-- Others -->
+[assigning tags by default on aws with pulumi]: https://blog.scottlowe.org/2023/09/11/assigning-tags-by-default-on-aws-with-pulumi/

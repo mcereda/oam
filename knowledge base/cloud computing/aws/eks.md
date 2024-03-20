@@ -6,8 +6,11 @@
 1. [Create worker nodes](#create-worker-nodes)
    1. [Create managed node groups](#create-managed-node-groups)
    1. [Schedule pods on Fargate](#schedule-pods-on-fargate)
+1. [Access management](#access-management)
 1. [Secrets encryption through KMS](#secrets-encryption-through-kms)
 1. [Troubleshooting](#troubleshooting)
+   1. [Identify common issues](#identify-common-issues)
+   1. [The worker nodes fail to join the cluster.](#the-worker-nodes-fail-to-join-the-cluster)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -132,14 +135,14 @@ Some create Cloudformation stacks in the process.
 
    ```json
    {
-     "Version": "2012-10-17",
-     "Statement": [{
-       "Effect": "Allow",
-       "Action": "sts:AssumeRole",
-       "Principal": {
-         "Service": "eks.amazonaws.com"
-       }
-     }]
+       "Version": "2012-10-17",
+       "Statement": [{
+           "Effect": "Allow",
+           "Action": "sts:AssumeRole",
+           "Principal": {
+               "Service": "eks.amazonaws.com"
+           }
+       }]
    }
    ```
 
@@ -147,6 +150,9 @@ Some create Cloudformation stacks in the process.
    aws iam create-role \
      --role-name 'DeepThinker' \
      --assume-role-policy-document 'file://eks-cluster-role-trust-policy.json'
+   aws iam attach-role-policy \
+     --role-name 'DeepThinker' \
+     --policy-arn 'arn:aws:iam::aws:policy/AmazonEKSClusterPolicy'
    ```
 
    </details>
@@ -156,20 +162,24 @@ Some create Cloudformation stacks in the process.
 
    ```ts
    const cluster_assumeRole_policy = JSON.stringify({
-     Version: "2012-10-17",
-     Statement: [{
-       Effect: "Allow",
-       Action: "sts:AssumeRole",
-       Principal: {
-         Service: "eks.amazonaws.com",
-       },
-     }],
+       Version: "2012-10-17",
+       Statement: [{
+           Effect: "Allow",
+           Action: "sts:AssumeRole",
+           Principal: {
+               Service: "eks.amazonaws.com",
+           },
+       }],
    });
 
    const cluster_service_role = new aws.iam.Role("cluster-service-role", {
-     assumeRolePolicy: cluster_assumeRole_policy,
-     name: "DeepThinker",
-     …
+       assumeRolePolicy: cluster_assumeRole_policy,
+       managedPolicyArns: [
+           // alternatively, use RolePolicyAttachments
+           "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+       ],
+       name: "DeepThinker",
+       …
    });
    ```
 
@@ -195,15 +205,15 @@ Some create Cloudformation stacks in the process.
 
    ```ts
    const cluster = new aws.eks.Cluster("cluster", {
-     name: "DeepThought",
-     roleArn: cluster_service_role.arn,
-     vpcConfig: {
-       subnetIds: [
-         "subnet-11112222333344445",
-         "subnet-66667777888899990",
-       ],
-     },
-     …
+       name: "DeepThought",
+       roleArn: cluster_service_role.arn,
+       vpcConfig: {
+           subnetIds: [
+               "subnet-11112222333344445",
+               "subnet-66667777888899990",
+           ],
+       },
+       …
    });
    ```
 
@@ -261,16 +271,16 @@ Procedure:
 
    ```json
    {
-     "Version": "2012-10-17",
-     "Statement": [
-       {
-         "Effect": "Allow",
-         "Action": "sts:AssumeRole",
-         "Principal": {
-           "Service": "ec2.amazonaws.com"
-         }
-       }
-     ]
+       "Version": "2012-10-17",
+       "Statement": [
+           {
+               "Effect": "Allow",
+               "Action": "sts:AssumeRole",
+               "Principal": {
+                   "Service": "ec2.amazonaws.com"
+               }
+           }
+       ]
    }
    ```
 
@@ -296,26 +306,26 @@ Procedure:
 
    ```ts
    const nodes_assumeRole_policy = JSON.stringify({
-     Version: "2012-10-17",
-     Statement: [{
-       Effect: "Allow",
-       Action: "sts:AssumeRole",
-       Principal: {
-         Service: "ec2.amazonaws.com",
-       },
-     }],
+       Version: "2012-10-17",
+       Statement: [{
+           Effect: "Allow",
+           Action: "sts:AssumeRole",
+           Principal: {
+               Service: "ec2.amazonaws.com",
+           },
+       }],
    });
 
    const node_service_role = new aws.iam.Role("node-service-role", {
-     assumeRolePolicy: nodes_assumeRole_policy,
-     managedPolicyArns: [
-       // alternatively, use RolePolicyAttachments
-       "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-       "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-       "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-     ],
-     name: "DeepThinkerNode",
-     …
+       assumeRolePolicy: nodes_assumeRole_policy,
+       managedPolicyArns: [
+           // alternatively, use RolePolicyAttachments
+           "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+           "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+           "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+       ],
+       name: "DeepThinkerNode",
+       …
    });
    ```
 
@@ -343,16 +353,16 @@ Procedure:
 
    ```ts
    const nodeGroup_alpha = new aws.eks.NodeGroup("nodeGroup-alpha", {
-     nodeGroupName: "nodeGroup-alpha",
-     clusterName: cluster.name,
-     nodeRoleArn: node_service_role.arn,
-     scalingConfig: {
-       minSize: 1,
-       maxSize: 3,
-       desiredSize: 1,
-     },
-     subnetIds: cluster.vpcConfig.subnetIds,
-     …
+       nodeGroupName: "nodeGroup-alpha",
+       clusterName: cluster.name,
+       nodeRoleArn: node_service_role.arn,
+       scalingConfig: {
+           minSize: 1,
+           maxSize: 3,
+           desiredSize: 1,
+       },
+       subnetIds: cluster.vpcConfig.subnetIds,
+       …
    });
    ```
 
@@ -384,21 +394,21 @@ Procedure:
 
    ```json
    {
-     "Version": "2012-10-17",
-     "Statement": [
-       {
-         "Effect": "Allow",
-         "Action": "sts:AssumeRole",
-         "Principal": {
-           "Service": "eks-fargate-pods.amazonaws.com"
-         },
-         "Condition": {
-            "ArnLike": {
-               "aws:SourceArn": "arn:aws:eks:region-code:111122223333:fargateprofile/my-cluster/*"
-            }
-         }
-       }
-     ]
+       "Version": "2012-10-17",
+       "Statement": [
+           {
+               "Effect": "Allow",
+               "Action": "sts:AssumeRole",
+               "Principal": {
+                   "Service": "eks-fargate-pods.amazonaws.com"
+               },
+               "Condition": {
+                    "ArnLike": {
+                         "aws:SourceArn": "arn:aws:eks:region-code:111122223333:fargateprofile/my-cluster/*"
+                    }
+               }
+           }
+       ]
    }
    ```
 
@@ -418,29 +428,29 @@ Procedure:
 
    ```ts
    const fargate_assumeRole_policy = JSON.stringify({
-     Version: "2012-10-17",
-     Statement: [{
-       Effect: "Allow",
-       Action: "sts:AssumeRole",
-       Principal: {
-         Service:  "eks-fargate-pods.amazonaws.com",
-       },
-       Condition: {
-         ArnLike: {
-           "aws:SourceArn": `arn:aws:eks:${region}:${account}:fargateprofile/${cluster.name}/*`
-         }
-       },
-     }],
+       Version: "2012-10-17",
+       Statement: [{
+           Effect: "Allow",
+           Action: "sts:AssumeRole",
+           Principal: {
+               Service:  "eks-fargate-pods.amazonaws.com",
+           },
+           Condition: {
+               ArnLike: {
+                   "aws:SourceArn": `arn:aws:eks:${region}:${account}:fargateprofile/${cluster.name}/*`
+               }
+           },
+       }],
    });
 
    const fargate_service_role = new aws.iam.Role("fargate-service-role", {
-     assumeRolePolicy: fargate_assumeRole_policy,
-     managedPolicyArns: [
-       // alternatively, use RolePolicyAttachments
-       "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy",
-     ],
-     name: "DeepThinkerFargate",
-     …
+       assumeRolePolicy: fargate_assumeRole_policy,
+       managedPolicyArns: [
+           // alternatively, use RolePolicyAttachments
+           "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy",
+       ],
+       name: "DeepThinkerFargate",
+       …
    });
    ```
 
@@ -468,19 +478,32 @@ Procedure:
 
    ```ts
    const fargateProfile_alpha = new aws.eks.FargateProfile("fargateProfile-alpha", {
-     fargateProfileName: "fargateProfile-alpha",
-     clusterName: cluster.name,
-     podExecutionRoleArn: fargate_service_role.arn,
-     selectors: [
-       { namespace: "monitoring" },
-       { namespace: "default" },
-     ],
-     subnetIds: cluster.vpcConfig.subnetIds,
-     …
+       fargateProfileName: "fargateProfile-alpha",
+       clusterName: cluster.name,
+       podExecutionRoleArn: fargate_service_role.arn,
+       selectors: [
+           { namespace: "monitoring" },
+           { namespace: "default" },
+       ],
+       subnetIds: cluster.vpcConfig.subnetIds,
+       …
    });
    ```
 
    </details>
+
+## Access management
+
+By default, the IAM principal creating the cluster is the only one able to make calls to the cluster's API server.<br/>
+To let other IAM principals have access to the cluster, one needs to add them to it.
+
+See the following to allow others:
+
+- [Required permissions to view EKS resources].
+- [Enabling IAM principal access to your cluster].
+- [Allowing IAM roles or users access to Kubernetes objects on your Amazon EKS cluster].
+- [How do I resolve the error "You must be logged in to the server (Unauthorized)" when I connect to the Amazon EKS API server?]
+- https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html
 
 ## Secrets encryption through KMS
 
@@ -510,11 +533,11 @@ TL;DR:
 
    ```ts
    const cluster = new aws.eks.Cluster("cluster", {
-     encryptionConfig: {
-       provider: { keyArn: `arn:aws:kms:${region}:${account}:key/${key_id}` },
-       resources: [ "secrets" ],
-     },
-     …
+       encryptionConfig: {
+           provider: { keyArn: `arn:aws:kms:${region}:${account}:key/${key_id}` },
+           resources: [ "secrets" ],
+       },
+       …
    });
    ```
 
@@ -524,12 +547,41 @@ TL;DR:
 
 See [Amazon EKS troubleshooting].
 
+### Identify common issues
+
+Use the [AWSSupport-TroubleshootEKSWorkerNode](https://docs.aws.amazon.com/systems-manager-automation-runbooks/latest/userguide/automation-awssupport-troubleshooteksworkernode.html) runbook.
+
+> For the automation to work, worker nodes **must** have permission to access Systems Manager and have Systems Manager running.<br/>
+> Grant this permission by attaching the [`AmazonSSMManagedInstanceCore`](https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-policies-overview) policy to the node role.
+
+Procedure:
+
+1. Open the [runbook](https://console.aws.amazon.com/systems-manager/automation/execute/AWSSupport-TroubleshootEKSWorkerNode).
+1. Check that the AWS Region in the Management Console is set to the same Region as your cluster.
+1. In the Input parameters section, specify the name of the cluster and the EC2 instance ID.
+1. [optional] In the `AutomationAssumeRole` field, specify a role to allow Systems Manager to perform actions.<br/>
+   If left empty, the permissions of your current IAM entity are used to perform the actions in the runbook.
+1. Choose `Execute`.
+1. Check the `Outputs` section.
+
+### The worker nodes fail to join the cluster.
+
+Error message example:
+
+> NodeCreationFailure: Instances failed to join the kubernetes cluster.
+
+Debug: see [Identify common issues].
+
 ## Further readings
 
 - [Kubernetes]
 - [EKS Workshop]
 - [Pulumi]
 - [Terraform]
+- [How can I get my worker nodes to join my Amazon EKS cluster?]
+- [Enabling IAM principal access to your cluster]
+- [Allowing IAM roles or users access to Kubernetes objects on your Amazon EKS cluster]
+- [How do I resolve the error "You must be logged in to the server (Unauthorized)" when I connect to the Amazon EKS API server?]
 
 ### Sources
 
@@ -547,6 +599,7 @@ See [Amazon EKS troubleshooting].
 - [Enabling secret encryption on an existing cluster]
 - [Choosing an Amazon EC2 instance type]
 - [Private cluster requirements]
+- [De-mystifying cluster networking for Amazon EKS worker nodes]
 
 <!--
   References
@@ -554,6 +607,7 @@ See [Amazon EKS troubleshooting].
 
 <!-- In-article sections -->
 [create worker nodes]: #create-worker-nodes
+[identify common issues]: #identify-common-issues
 [requirements]: #requirements
 [secrets encryption through kms]: #secrets-encryption-through-kms
 
@@ -564,6 +618,7 @@ See [Amazon EKS troubleshooting].
 
 <!-- Files -->
 <!-- Upstream -->
+[allowing iam roles or users access to kubernetes objects on your amazon eks cluster]: https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html
 [amazon eks add-ons]: https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html
 [amazon eks cluster iam role]: https://docs.aws.amazon.com/eks/latest/userguide/service_IAM_role.html
 [amazon eks clusters]: https://docs.aws.amazon.com/eks/latest/userguide/clusters.html
@@ -576,12 +631,17 @@ See [Amazon EKS troubleshooting].
 [aws eks create-fargate-profile]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-fargate-profile.html
 [aws eks create-nodegroup]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-nodegroup.html
 [choosing an amazon ec2 instance type]: https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html
+[de-mystifying cluster networking for amazon eks worker nodes]: https://aws.amazon.com/blogs/containers/de-mystifying-cluster-networking-for-amazon-eks-worker-nodes/
 [eks workshop]: https://www.eksworkshop.com/
+[enabling iam principal access to your cluster]: https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html
 [enabling secret encryption on an existing cluster]: https://docs.aws.amazon.com/eks/latest/userguide/enable-kms.html
 [fargate]: https://docs.aws.amazon.com/eks/latest/userguide/fargate.html
 [getting started with amazon eks - aws management console and aws cli]: https://docs.aws.amazon.com/eks/latest/userguide/getting-started-console.html
+[how can i get my worker nodes to join my amazon eks cluster?]: https://repost.aws/knowledge-center/eks-worker-nodes-cluster
+[how do i resolve the error "you must be logged in to the server (unauthorized)" when i connect to the amazon eks api server?]: https://repost.aws/knowledge-center/eks-api-server-unauthorized-error
 [managed node groups]: https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html
 [private cluster requirements]: https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html
+[required permissions to view eks resources]: https://docs.aws.amazon.com/eks/latest/userguide/view-kubernetes-resources.html#view-kubernetes-resources-permissions
 [self-managed nodes]: https://docs.aws.amazon.com/eks/latest/userguide/worker.html
 [service-linked role permissions for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles-eks.html#service-linked-role-permissions-eks
 [using service-linked roles for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles.html

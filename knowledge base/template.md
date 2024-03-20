@@ -13,7 +13,7 @@ Intro
 
 <!-- Uncomment if needed
 <details>
-  <summary>Installation</summary>
+  <summary>Installation and configuration</summary>
 </details>
 -->
 
