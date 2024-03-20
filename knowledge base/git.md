@@ -697,7 +697,7 @@ git branch --delete --remotes 'feat-branch'
 
 ### Delete branches which have been merged or are otherwise absent from a remote
 
-Command source [here][prune local branches that do not exist on remote anymore].
+Command source [here][prune local tracking branches that do not exist on remote anymore].
 
 ```sh
 # Branches merged on the remote are tagged as 'gone' in `git branch -vv`'s output.
@@ -978,6 +978,8 @@ git -c http.sslVerify=false …
 - [Setting up the server]
 - [`git-config` reference][git-config reference]
 - [Hooks]
+- [Gitignore]
+- [Git-extras]
 
 ### Sources
 
@@ -1011,13 +1013,11 @@ git -c http.sslVerify=false …
 - [1 minute coding tip: git diff-words to see diffs on a per-word basis instead of per line]
 - [Dress up your git diffs with word-level highlights]
 - [Git global config for specific repositories?]
+- [cheat.sh]
 
 <!--
   References
   -->
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Files -->
 [gitconfig example]: ../examples/dotfiles/.config/git/config
@@ -1044,6 +1044,7 @@ git -c http.sslVerify=false …
 [git config | setup git environment]: https://initialcommit.com/blog/git-config
 [git global config for specific repositories?]: https://stackoverflow.com/questions/61983894/git-global-config-for-specific-repositories#71096731
 [git submodules: adding, using, removing, updating]: https://chrisjean.com/git-submodules-adding-using-removing-and-updating/
+[git-extras]: https://github.com/tj/git-extras/
 [gpg failed to sign the data fatal: failed to write commit object]: https://stackoverflow.com/questions/39494631/gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object-git-2-10-0
 [how do i check out a remote git branch]: https://stackoverflow.com/questions/1783405/how-do-i-check-out-a-remote-git-branch/#1787014
 [how to add and update git submodules]: https://devconnected.com/how-to-add-and-update-git-submodules/

@@ -28,7 +28,7 @@
 # Install on Mac OS X.
 # Choose one.
 brew install --cask 'gpg-suite-no-mail'
-brew install 'gnupg'
+brew install 'gnupg' 'pinentry-mac'
 
 
 # List existing keys.
