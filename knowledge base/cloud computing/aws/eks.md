@@ -10,7 +10,7 @@
 1. [Secrets encryption through KMS](#secrets-encryption-through-kms)
 1. [Troubleshooting](#troubleshooting)
    1. [Identify common issues](#identify-common-issues)
-   1. [The worker nodes fail to join the cluster.](#the-worker-nodes-fail-to-join-the-cluster)
+   1. [The worker nodes fail to join the cluster](#the-worker-nodes-fail-to-join-the-cluster)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -91,7 +91,9 @@ To let other IAM principals have access to the cluster, one needs to add them to
   To create clusters which would **not** require access to any other AWS resource, one can assign the cluster the `AWSServiceRoleForAmazonEKS` service-linked role directly <sup>[1][service-linked role permissions for amazon eks],[2][amazon eks cluster iam role]</sup>.
 
   > Amazon EKS uses the service-linked role named `AWSServiceRoleForAmazonEKS` - The role allows Amazon EKS to manage clusters in your account. The attached policies allow the role to manage the following resources: network interfaces, security groups, logs, and VPCs.
-
+  >
+  > ---
+  >
   > Prior to October 3, 2023, [AmazonEKSClusterPolicy] was required on the IAM role for each cluster.
   >
   > Prior to April 16, 2020, [AmazonEKSServicePolicy] was also required and the suggested name was `eksServiceRole`. With the `AWSServiceRoleForAmazonEKS` service-linked role, that policy is no longer required for clusters created on or after April 16, 2020.
@@ -503,7 +505,7 @@ See the following to allow others:
 - [Enabling IAM principal access to your cluster].
 - [Allowing IAM roles or users access to Kubernetes objects on your Amazon EKS cluster].
 - [How do I resolve the error "You must be logged in to the server (Unauthorized)" when I connect to the Amazon EKS API server?]
-- https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html
+- [Identity and Access Management]
 
 ## Secrets encryption through KMS
 
@@ -564,7 +566,7 @@ Procedure:
 1. Choose `Execute`.
 1. Check the `Outputs` section.
 
-### The worker nodes fail to join the cluster.
+### The worker nodes fail to join the cluster
 
 Error message example:
 
@@ -582,6 +584,7 @@ Debug: see [Identify common issues].
 - [Enabling IAM principal access to your cluster]
 - [Allowing IAM roles or users access to Kubernetes objects on your Amazon EKS cluster]
 - [How do I resolve the error "You must be logged in to the server (Unauthorized)" when I connect to the Amazon EKS API server?]
+- [Identity and Access Management]
 
 ### Sources
 
@@ -639,6 +642,7 @@ Debug: see [Identify common issues].
 [getting started with amazon eks - aws management console and aws cli]: https://docs.aws.amazon.com/eks/latest/userguide/getting-started-console.html
 [how can i get my worker nodes to join my amazon eks cluster?]: https://repost.aws/knowledge-center/eks-worker-nodes-cluster
 [how do i resolve the error "you must be logged in to the server (unauthorized)" when i connect to the amazon eks api server?]: https://repost.aws/knowledge-center/eks-api-server-unauthorized-error
+[identity and access management]: https://aws.github.io/aws-eks-best-practices/security/docs/iam/
 [managed node groups]: https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html
 [private cluster requirements]: https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html
 [required permissions to view eks resources]: https://docs.aws.amazon.com/eks/latest/userguide/view-kubernetes-resources.html#view-kubernetes-resources-permissions
