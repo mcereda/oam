@@ -1,5 +1,7 @@
 {
     "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "modificationsIfAvailable",
     "json.schemas": [
         {
             "fileMatch": [
@@ -18,21 +20,34 @@
             "url": "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json"
         },
         {
-            "fileMatch": [ ".pre-commit-config.yaml" ],
+            "fileMatch": [
+                ".pre-commit-config.yaml"
+            ],
             "url": "https://json.schemastore.org/pre-commit-config.json"
         },
         {
-            "fileMatch": [ "package.json" ],
+            "fileMatch": [
+                "package.json"
+            ],
             "url": "https://json.schemastore.org/package.json"
         },
         {
-            "fileMatch": [ "Pulumi.yaml" ],
+            "fileMatch": [
+                "Pulumi.yaml"
+            ],
             "url": "https://json.schemastore.org/pulumi.json"
         }
     ],
 
     "markdown.extension.toc.levels": "2..6",
     "markdown.extension.toc.orderedList": true,
+    "markdown.validate.enabled": true,
+    "[markdown]": {
+        "editor.rulers": [
+            120
+        ],
+        "editor.wordWrap": "off"
+    },
 
     "cSpell.language": "en,en-GB",
     "cSpell.words": [
@@ -40,6 +55,8 @@
         "airgap",
         "airgapped",
         "apiserver",
+        "asciicast",
+        "asciinema",
         "autoscaler",
         "autoscalers",
         "awscli",
@@ -169,6 +186,7 @@
         "roff",
         "rootlv",
         "rootvg",
+        "runbook",
         "runcmd",
         "runtimes",
         "sata",
@@ -188,7 +206,7 @@
         "sysrc",
         "systool",
         "tclsh",
-        "TCSH",
+        "tcsh",
         "templating",
         "tfvars",
         "tmpfs",

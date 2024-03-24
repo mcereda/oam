@@ -1,6 +1,7 @@
 # EditorConfig is awesome: https://EditorConfig.org
+# Config file specs: https://spec.editorconfig.org
 
-# top-most EditorConfig file
+# This shall be the top-most EditorConfig file
 root = true
 
 # Unix-style newlines with a newline ending every file
@@ -8,12 +9,13 @@ root = true
 end_of_line = lf
 insert_final_newline = true
 
-# Matches multiple files with brace expansion notation
-# Set default charset
+# Match multiple files with brace expansion notation
+# Set the default charset and spelling check language
 [*.{js,py}]
 charset = utf-8
+spelling_language = en-US
 
-# 4 space indentation
+# 4 spaces indentation
 [*.py]
 indent_style = space
 indent_size = 4
@@ -28,6 +30,13 @@ indent_style = space
 indent_size = 2
 
 # Matches the exact files either package.json or .travis.yml
+# Tab indentation (size specified)
 [{package.json,.travis.yml}]
-indent_style = space
-indent_size = 2
+indent_style = tab
+tab_width = 4
+
+# Allow the use of double spaces for line breaks
+# Stop using spell checking
+[*.md]
+trim_trailing_whitespace = false
+spelling_language = unset
