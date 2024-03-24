@@ -16,7 +16,7 @@ insert_final_newline = false
 
 [*.{ba,,z}sh]
 indent_style = tab
-indent_size = 4
+tab_width = 4
 
 [*.json]
 indent_size = 4
