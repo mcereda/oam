@@ -47,7 +47,7 @@ Extensions:
 | -------------------------- | --------------------------------------------- | ------------- | --------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | vscode.git (built-in)      | `git.autofetch`                               | `true`        | User, Workspace | Extensions > Git                 | When set to true, commits will automatically be fetched from the default remote of the current Git repository. Setting to `all` will fetch from all remotes. |
 | angelo-breuer.clock        | `clock.alignment`                             | `"Left"`      | User, Workspace | Extensions > Status Bar Clock    | Alignment of the clock on the status bar.                                                                                                                    |
-| angelo-breuer.clock        | `clock.format`                                | `"hh:MM"`     | User, Workspace | Extensions > Status Bar Clock    | Date and time format. See https://www.npmjs.com/package/dateformat#mask-options for more options.                                                            |
+| angelo-breuer.clock        | `clock.format`                                | `"hh:MM"`     | User, Workspace | Extensions > Status Bar Clock    | Date and time format. See <https://www.npmjs.com/package/dateformat#mask-options> for more options.                                                          |
 | yzhang.markdown-all-in-one | `markdown.extension.orderedList.autoRenumber` | `true`        | User, Workspace | Extensions > Markdown All In One | Auto fix ordered list markers.                                                                                                                               |
 | yzhang.markdown-all-in-one | `markdown.extension.orderedList.marker`       | `"ordered"`   | User, Workspace | Extensions > Markdown All In One | Auto fix ordered list markers.                                                                                                                               |
 | yzhang.markdown-all-in-one | `markdown.extension.toc.levels`               | `"1..6"`      | User, Workspace | Extensions > Markdown All In One | Range of levels for the ToC.                                                                                                                                 |
@@ -137,12 +137,14 @@ sudo dscl . append '/Groups/_developer' GroupMembership "$USER"
 
 ## Further readings
 
+- [Documentation]
 - [Network connections in Visual Studio Code]
 
 ## Sources
 
 - [Using extensions in compiled VSCode]
 - [Recommending VSCode extensions within your Open Source projects]
+- [Official product.json]
 - [VSCode (and some non-patched Electron applications) doesn't run after Tumbleweed update on Nvidia]
 - [Electron applications all crash upon launch]
 - [Authorize a non-admin developer in Xcode / Mac OS]
@@ -156,6 +158,7 @@ sudo dscl . append '/Groups/_developer' GroupMembership "$USER"
 [settings.json]: ../examples/vscode/settings.json
 
 <!-- Upstream -->
+[documentation]: https://code.visualstudio.com/docs
 [network connections in visual studio code]: https://code.visualstudio.com/docs/setup/network
 [official product.json]: https://github.com/Microsoft/vscode/blob/master/product.json
 
