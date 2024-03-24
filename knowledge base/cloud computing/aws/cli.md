@@ -11,6 +11,9 @@
 
 ## TL;DR
 
+Do *not* use '--max-items' with '--query': the items limit is applied before the query filter, and could lead to no
+results.
+
 <details>
   <summary>Installation and configuration</summary>
 
@@ -78,6 +81,12 @@ aws sns list-topics
 
 # Get information about the current user.
 aws sts get-caller-identity
+
+# List IAM users.
+aws iam list-users
+aws iam list-users --max-items '1'
+aws iam list-users --query "Users[?(UserName=='mario')]"
+aws iam list-users --query "Users[?(UserId=='AIDA…')].UserName"
 ```
 
 Subcommands not listed here are in their own service-specific article:
@@ -142,7 +151,7 @@ See [CLI config files] for examples.
 ## Session Manager integration
 
 > The instance's IAM role must have at least the required permissions to allow to login.<br/>
-> The bare minimum is for it to have the _SSM Minimum_ role attached:
+> The bare minimum is for it to have the *SSM Minimum* role attached:
 >
 > ```sh
 > $ aws iam list-attached-role-policies --role-name 'whatevah'
