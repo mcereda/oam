@@ -1,18 +1,17 @@
 # Pulumi
 
 1. [TL;DR](#tldr)
-1. [Concepts](#concepts)
-   1. [Project](#project)
-   1. [Program](#program)
-   1. [Stack](#stack)
-      1. [Monolith vs micro-stack](#monolith-vs-micro-stack)
-      1. [State](#state)
-      1. [Configuration](#configuration)
-   1. [Backend](#backend)
-1. [Migrate to different backends](#migrate-to-different-backends)
-1. [Ignore changes](#ignore-changes)
-1. [Delete before replacing](#delete-before-replacing)
-1. [Outputs](#outputs)
+1. [Project](#project)
+1. [Program](#program)
+   1. [Ignore changes](#ignore-changes)
+   1. [Delete before replacing](#delete-before-replacing)
+   1. [Outputs](#outputs)
+1. [Stack](#stack)
+   1. [Monolith vs micro-stack](#monolith-vs-micro-stack)
+   1. [State](#state)
+   1. [Configuration](#configuration)
+1. [Backend](#backend)
+   1. [Migrate to different backends](#migrate-to-different-backends)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -358,9 +357,7 @@ Learning resources:
 - [Code examples]
 - [Resources reference]
 
-## Concepts
-
-### Project
+## Project
 
 Refer to [projects] for more and updated information.
 
@@ -386,12 +383,44 @@ pulumi new 'kubernetes-yaml' --generate-only
 pulumi new 'oci-java'
 ```
 
-### Program
+## Program
 
 Programs are the the files containing the resources' definitions.<br/>
 They are deployed into [stacks][stack].
 
-### Stack
+### Ignore changes
+
+Add the [`ignoreChanges` option][ignorechanges] to the resource.
+
+```ts
+const resource = new.aws.s3.Bucket("bucket", {
+  …
+}, {
+  ignoreChanges: [
+    "tags['last-deploy-at']"
+  ]
+});
+```
+
+### Delete before replacing
+
+Add the [`deleteBeforeReplace` option][deletebeforereplace] to the resource.
+
+```ts
+const cluster = new aws.eks.Cluster("cluster", {
+  …
+}, {
+  deleteBeforeReplace: true
+});
+```
+
+If a resource is assigned a static name, the `deleteBeforeReplace` option _should be_ implicitly enabled.
+
+### Outputs
+
+TODO
+
+## Stack
 
 Refer to [stacks] for more and updated information.
 
@@ -412,7 +441,7 @@ The stack name can be specified in one of these formats:
 For self-managed [backends][backend], the `orgName` portion of the stack name must always be the constant string value
 `organization`.
 
-#### Monolith vs micro-stack
+### Monolith vs micro-stack
 
 Refer to [organizing pulumi projects & stacks] for more and updated information.
 
@@ -462,9 +491,10 @@ const nested = new pulumi.StackReference("organization/nested/dev");
 const eks = nested.getOutput("eks");
 ```
 
-> All involved stacks must be stored in the same [backend] for [stack references] to be found.
+> All involved stacks must be stored in the same backend for them to be able to find the correct [stack references].<br/>
+> See [backend].
 
-#### State
+### State
 
 Refer to [state] for more and updated information.
 
@@ -475,11 +505,11 @@ Pulumi records checkpoints early and often, so that it can execute similarly to 
 Checkpoints are stored in the [backend], under the `.pulumi/stacks/{project.name}` folder. See the
 [backend] section for details.
 
-#### Configuration
+### Configuration
 
 TODO
 
-### Backend
+## Backend
 
 Refer to [state] for more and updated information.
 
@@ -549,7 +579,26 @@ $ aws s3 ls --recursive s3://organization-backend/prefix/
 2024-03-19 17:21:28    2584430 prefix/.pulumi/stacks/test/dev.json.bak
 ```
 
-## Migrate to different backends
+All involved stacks must be stored in the same backend for them to be able to find the correct [stack references]:
+
+```txt
+$ # Only showing files of interest
+$ tree
+root/
+├── infra/
+│   ├── Pulumi.yaml  ───>  backend.url: "file://.."
+│   └── index.ts     ───>  export const eks = eks_cluster;
+├── app/
+│   ├── Pulumi.yaml  ───>  backend.url: "file://.."
+│   └── index.ts     ───>  const infraStack = new pulumi.StackReference(`organization/infra/${env}`);
+│                    └──>  const eks = infraStack.getOutput("eks");
+└── .pulumi/
+    └── stacks/
+        ├── infra/…
+        └── app/…
+```
+
+### Migrate to different backends
 
 1. Get to the current backend:
 
@@ -595,38 +644,6 @@ $ aws s3 ls --recursive s3://organization-backend/prefix/
    ```sh
    cat 'Pulumi.mario.yaml'
    ```
-
-## Ignore changes
-
-Add the [`ignoreChanges` option][ignorechanges] to the resource.
-
-```ts
-const resource = new.aws.s3.Bucket("bucket", {
-  …
-}, {
-  ignoreChanges: [
-    "tags['last-deploy-at']"
-  ]
-});
-```
-
-## Delete before replacing
-
-Add the [`deleteBeforeReplace` option][deletebeforereplace] to the resource.
-
-```ts
-const cluster = new aws.eks.Cluster("cluster", {
-  …
-}, {
-  deleteBeforeReplace: true
-});
-```
-
-If a resource is assigned a static name, the `deleteBeforeReplace` option _should be_ implicitly enabled.
-
-## Outputs
-
-TODO
 
 ## Further readings
 
