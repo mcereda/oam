@@ -83,7 +83,7 @@ To let other IAM principals have access to the cluster, one needs to add them to
 
 ## Requirements
 
-- [suggestion] 1 (one) custom _Cluster Service Role_ with the `AmazonEKSClusterPolicy` policy attached or similar custom permissions.
+- \[suggestion] 1 (one) custom _Cluster Service Role_ with the `AmazonEKSClusterPolicy` policy attached or similar custom permissions.
 
   Kubernetes clusters managed by EKS make calls to other AWS services on the user's behalf to manage the resources that the cluster uses.<br/>
   For a cluster to be allowed to make those calls, it **requires** to have the aforementioned permissions.
@@ -111,7 +111,7 @@ To let other IAM principals have access to the cluster, one needs to add them to
 
   </div>
 
-- [suggestion] 1+ (one or more) custom service role(s) for the pod executors, with the required policies attached or similar permissions.
+- \[suggestion] 1+ (one or more) custom service role(s) for the pod executors, with the required policies attached or similar permissions.
 
   The reasons and required permissions vary depending on the type of executor.<br/>
   It would probably be better to create a custom role instead of assigning permissions to the built-in one.
@@ -222,6 +222,7 @@ Some create Cloudformation stacks in the process.
    </details>
    <br/>
 
+1. [Give access to users][access management].
 1. Connect to the cluster.
 
    ```sh
@@ -246,7 +247,7 @@ See [Choosing an Amazon EC2 instance type] and [Managed node groups] for more in
 
 Additional requirements:
 
-- [suggestion] 1 (one) custom _Node Service Role_ with the `AmazonEKSWorkerNodePolicy`, `AmazonEC2ContainerRegistryReadOnly` and `AmazonEKS_CNI_Policy` policies attached or similar permissions.
+- \[suggestion] 1 (one) custom _Node Service Role_ with the `AmazonEKSWorkerNodePolicy`, `AmazonEC2ContainerRegistryReadOnly` and `AmazonEKS_CNI_Policy` policies attached or similar permissions.
 
   The EKS nodes' `kubelet` makes calls to the AWS APIs on one's behalf.<br/>
   Nodes receive permissions for these API calls through an IAM instance profile and associated policies.
@@ -374,7 +375,7 @@ Procedure:
 
 Additional requirements:
 
-- [suggestion] 1 (one) custom _Fargate Service Role_ with the `AmazonEKSFargatePodExecutionRolePolicy` policy attached or similar permissions.
+- \[suggestion] 1 (one) custom _Fargate Service Role_ with the `AmazonEKSFargatePodExecutionRolePolicy` policy attached or similar permissions.
 
   To create pods on Fargate, the components running on Fargate must make calls to the AWS APIs on one's behalf.<br/>
   This is so that it can take actions such as pull container images from ECR or route logs to other AWS services.
@@ -506,6 +507,7 @@ See the following to allow others:
 - [Allowing IAM roles or users access to Kubernetes objects on your Amazon EKS cluster].
 - [How do I resolve the error "You must be logged in to the server (Unauthorized)" when I connect to the Amazon EKS API server?]
 - [Identity and Access Management]
+- [Using IAM Groups to manage Kubernetes cluster access]
 
 ## Secrets encryption through KMS
 
@@ -561,7 +563,7 @@ Procedure:
 1. Open the [runbook](https://console.aws.amazon.com/systems-manager/automation/execute/AWSSupport-TroubleshootEKSWorkerNode).
 1. Check that the AWS Region in the Management Console is set to the same Region as your cluster.
 1. In the Input parameters section, specify the name of the cluster and the EC2 instance ID.
-1. [optional] In the `AutomationAssumeRole` field, specify a role to allow Systems Manager to perform actions.<br/>
+1. \[optional] In the `AutomationAssumeRole` field, specify a role to allow Systems Manager to perform actions.<br/>
    If left empty, the permissions of your current IAM entity are used to perform the actions in the runbook.
 1. Choose `Execute`.
 1. Check the `Outputs` section.
@@ -609,6 +611,7 @@ Debug: see [Identify common issues].
   -->
 
 <!-- In-article sections -->
+[access management]: #access-management
 [create worker nodes]: #create-worker-nodes
 [identify common issues]: #identify-common-issues
 [requirements]: #requirements
@@ -649,5 +652,6 @@ Debug: see [Identify common issues].
 [self-managed nodes]: https://docs.aws.amazon.com/eks/latest/userguide/worker.html
 [service-linked role permissions for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles-eks.html#service-linked-role-permissions-eks
 [using service-linked roles for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles.html
+[using iam groups to manage kubernetes cluster access]: https://archive.eksworkshop.com/beginner/091_iam-groups/
 
 <!-- Others -->

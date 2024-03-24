@@ -25,7 +25,7 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 1. [Quality of service](#quality-of-service)
 1. [Containers with high privileges](#containers-with-high-privileges)
    1. [Capabilities](#capabilities)
-   1. [Privileged containers vs privilege escalation](#privileged-containers-vs-privilege-escalation)
+   1. [Privileged container vs privilege escalation](#privileged-container-vs-privilege-escalation)
 1. [Sysctl settings](#sysctl-settings)
 1. [Backup and restore](#backup-and-restore)
 1. [Managed Kubernetes Services](#managed-kubernetes-services)
@@ -40,7 +40,7 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
     1. [Create an admission webhook](#create-an-admission-webhook)
     1. [Prometheus on Kubernetes using Helm](#prometheus-on-kubernetes-using-helm)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## Basics
 
@@ -266,44 +266,44 @@ When a Pod is created, it is also assigned one of the following QoS classes:
 
 - _Guaranteed_, when **every** Container in the Pod, including init containers, has:
 
-   - a memory limit **and** a memory request, **and** they are the same
-   - a CPU limit **and** a CPU request, **and** they are the same
+  - a memory limit **and** a memory request, **and** they are the same
+  - a CPU limit **and** a CPU request, **and** they are the same
 
-   ```yaml
-   spec:
-     containers:
-       …
-       resources:
-         limits:
-           cpu: 700m
-           memory: 200Mi
-         requests:
-           cpu: 700m
-           memory: 200Mi
-       …
-   status:
-     qosClass: Guaranteed
-   ```
+  ```yaml
+  spec:
+    containers:
+      …
+      resources:
+        limits:
+          cpu: 700m
+          memory: 200Mi
+        requests:
+          cpu: 700m
+          memory: 200Mi
+      …
+  status:
+    qosClass: Guaranteed
+  ```
 
 - _Burstable_, when
 
-   - the Pod does not meet the criteria for the _Guaranteed_ QoS class
-   - **at least one** Container in the Pod has a memory **or** CPU request spec
+  - the Pod does not meet the criteria for the _Guaranteed_ QoS class
+  - **at least one** Container in the Pod has a memory **or** CPU request spec
 
-   ```yaml
-   spec:
-     containers:
-     - name: qos-demo
-       …
-       resources:
-         limits:
-           memory: 200Mi
-         requests:
-           memory: 100Mi
-     …
-   status:
-     qosClass: Burstable
-   ```
+  ```yaml
+  spec:
+    containers:
+    - name: qos-demo
+      …
+      resources:
+        limits:
+          memory: 200Mi
+        requests:
+          memory: 100Mi
+    …
+  status:
+    qosClass: Burstable
+  ```
 
 - _BestEffort_, when the Pod does not meet the criteria for the other QoS classes (its Containers have **no** memory or CPU limits **nor** requests)
 
@@ -344,7 +344,7 @@ From the feature's `man` page:
 This also means a Container will be **limited** to its contents, plus the capabilities it has been assigned.
 
 Some capabilities are assigned to all Containers by default, while others (the ones which could cause more issues) require to be **explicitly** set using the Containers' `securityContext.capabilities.add` property.<br/>
-If a Container is _privileged_ (see [Privileged container vs privilege escalation](#privileged-container-vs-privilege-escalation)), it will have access to **all** the capabilities, with no regards of what are explicitly assigned to it.
+If a Container is _privileged_ (see [Privileged container vs privilege escalation]), it will have access to **all** the capabilities, with no regards of what are explicitly assigned to it.
 
 Check:
 
@@ -352,7 +352,7 @@ Check:
 - [Runtime privilege and Linux capabilities in Docker containers] for the capabilities available **inside Kubernetes**, and
 - [Container capabilities in Kubernetes] for a handy table associating capabilities in Kubernetes to their Linux variant.
 
-### Privileged containers vs privilege escalation
+### Privileged container vs privilege escalation
 
 A _privileged container_ is very different from a _container leveraging privilege escalation_.
 
@@ -417,8 +417,8 @@ Each node pool should:
 
 - have a _meaningful_ **name** (like `<prefix…>-<workload_type>-<random_id>`) to make it easy to recognize the workloads running on it or the features of the nodes in it;
 - have a _minimum_ set of _meaningful_ **labels**, like:
-   - cloud provider information;
-   - node information and capabilities;
+  - cloud provider information;
+  - node information and capabilities;
 - sparse nodes on multiple **availability zones**.
 
 ## Edge computing
@@ -551,7 +551,7 @@ Usage:
 - [Configure a Pod to use a ConfigMap]
 - [Distribute credentials securely using Secrets]
 - [Configure a Security Context for a Pod or a Container]
-   - [Set capabilities for a Container]
+  - [Set capabilities for a Container]
 - [Using `sysctl`s in a Kubernetes Cluster][using sysctls in a kubernetes cluster]
 
 Concepts:
@@ -596,10 +596,9 @@ Others:
 
 - The [Build your very own self-hosting platform with Raspberry Pi and Kubernetes] series of articles
 - [Why separate your Kubernetes workload with nodepool segregation and affinity options]
+- [RBAC.dev]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - Kubernetes' [concepts]
 - [How to run a command in a Pod after initialization]
@@ -615,6 +614,8 @@ All the references in the [further readings] section, plus the following:
 - [Cloudzero Kubernetes best practices]
 - [Scaling K8S nodes without breaking the bank or your sanity - Brandon Wagner & Nick Tran, Amazon]
 - [Kubernetes Troubleshooting - The Complete Guide]
+- [Kubernetes cluster autoscaler]
+- [Common labels]
 
 <!--
   References
@@ -647,8 +648,8 @@ All the references in the [further readings] section, plus the following:
 [version skew policy]: https://kubernetes.io/releases/version-skew-policy/
 
 <!-- In-article sections -->
-[further readings]: #further-readings
 [pods]: #pods
+[privileged container vs privilege escalation]: #privileged-container-vs-privilege-escalation
 
 <!-- Knowledge base -->
 [azure kubernetes service]: ../cloud%20computing/azure/aks.md
@@ -689,6 +690,7 @@ All the references in the [further readings] section, plus the following:
 [making sense of taints and tolerations]: https://medium.com/kubernetes-tutorials/making-sense-of-taints-and-tolerations-in-kubernetes-446e75010f4e
 [no_new_privs linux kernel documentation]: https://www.kernel.org/doc/Documentation/prctl/no_new_privs.txt
 [prestop hook doesn't work with env variables]: https://stackoverflow.com/questions/61929055/kubernetes-prestop-hook-doesnt-work-with-env-variables#62135231
+[rbac.dev]: https://rbac.dev/
 [read-only filesystem error]: https://stackoverflow.com/questions/49614034/kubernetes-deployment-read-only-filesystem-error/51478536#51478536
 [runtime privilege and linux capabilities in docker containers]: https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities
 [why separate your kubernetes workload with nodepool segregation and affinity options]: https://medium.com/contino-engineering/why-separate-your-kubernetes-workload-with-nodepool-segregation-and-affinity-rules-cb5225953788
