@@ -1,0 +1,7 @@
+name: aws-eks-cluster
+runtime: nodejs
+description: A minimal EKS cluster in AWS
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: aws-typescript
