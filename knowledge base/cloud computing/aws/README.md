@@ -49,10 +49,12 @@ From [Using service-linked roles]:
 - [EC2]
 - [Services that publish CloudWatch metrics]
 - [Using service-linked roles]
+- [Best Practices for Tagging AWS Resources]
 
 ### Sources
 
 - [Constraints for tags][constraints  tag]
+- [What is cloudWatch]
 
 <!--
   References
@@ -65,7 +67,8 @@ From [Using service-linked roles]:
 [ec2]: ec2.md
 
 <!-- Upstream -->
+[best practices for tagging aws resources]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
 [services that publish cloudwatch metrics]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
-[what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
 [using service-linked roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/using-service-linked-roles.html
+[what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html

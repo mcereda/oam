@@ -31,6 +31,9 @@ export AWS_PROFILE='work'
 # Enable auto-prompt mode (like `aws-shell` does).
 aws configure set 'cli_auto_prompt' 'on-partial'
 export AWS_CLI_AUTO_PROMPT='on'
+
+# Clear cached credentials.
+rm -r ~'/.aws/cli/cache'
 ```
 
 </details>
@@ -48,6 +51,35 @@ aws deploy list-deployment-groups --application-name 'batman'
 # Show details of deployment groups.
 aws deploy get-deployment-group --application-name 'batman' \
   --deployment-group-name 'production'
+
+
+# Access shells on containers in ECS.
+aws ecs execute-command \
+  --cluster 'clusterName' --task 'taskId' --container 'containerName' \
+  --interactive --command '/bin/bash'
+
+
+# Get information about the current user.
+aws sts get-caller-identity
+
+# List IAM users.
+aws iam list-users
+aws iam list-users --max-items '1'
+aws iam list-users --query "Users[?(UserName=='mario')]"
+aws iam list-users --query "Users[?(UserId=='AIDA…')].UserName"
+
+# Create IAM users.
+aws iam create-user --user-name 'luigi'
+
+# Create access keys.
+# Defaults to the current user if no user name is specified.
+aws iam create-access-key
+aws iam create-access-key --user-name 'luigi'
+
+# List access keys.
+# Defaults to the current user if no user name is specified.
+aws iam list-access-keys
+aws iam list-access-keys --user-name 'mario'
 
 
 # Show RDS instances.
@@ -77,16 +109,6 @@ aws secretsmanager get-secret-value --secret-id 'ecr-pullthroughcache/github'
 
 # List SNS queues (a.k.a. 'topics').
 aws sns list-topics
-
-
-# Get information about the current user.
-aws sts get-caller-identity
-
-# List IAM users.
-aws iam list-users
-aws iam list-users --max-items '1'
-aws iam list-users --query "Users[?(UserName=='mario')]"
-aws iam list-users --query "Users[?(UserId=='AIDA…')].UserName"
 ```
 
 Subcommands not listed here are in their own service-specific article:
@@ -194,6 +216,7 @@ aws ssm start-session --target 'i-0123456789abcdef0'
 
 - [Improved CLI auto-prompt mode]
 - [Install the Session Manager plugin for the AWS CLI]
+- [Use an IAM role in the AWS CLI]
 
 <!--
   References
@@ -217,3 +240,4 @@ aws ssm start-session --target 'i-0123456789abcdef0'
 [improved cli auto-prompt mode]: https://github.com/aws/aws-cli/issues/5664
 [install the session manager plugin for the aws cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-macos-overview.html#install-plugin-macos-signed
 [quickstart]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html
+[use an iam role in the aws cli]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html
