@@ -5,7 +5,9 @@
 1. [Program](#program)
    1. [Ignore changes](#ignore-changes)
    1. [Delete before replacing](#delete-before-replacing)
+   1. [Assign tags to resources by default](#assign-tags-to-resources-by-default)
    1. [Outputs](#outputs)
+   1. [Policy enforcement](#policy-enforcement)
 1. [Stack](#stack)
    1. [Monolith vs micro-stack](#monolith-vs-micro-stack)
    1. [State](#state)
@@ -416,9 +418,49 @@ const cluster = new aws.eks.Cluster("cluster", {
 
 If a resource is assigned a static name, the `deleteBeforeReplace` option _should be_ implicitly enabled.
 
+### Assign tags to resources by default
+
+Read [Assigning tags by default on AWS with Pulumi] first to get an idea of pros and cons of the options, then pick one:
+
+1. Assign the tags to the default provider in the stack's configuration file (`Pulumi.{stackName}.yaml`):
+
+   ```yaml
+   config:
+     aws:defaultTags:
+       tags:
+         ManagedBy: "Pulumi",
+         Owner: "user@company.com",
+         Team: "Infra",
+   ```
+
+1. Create a provider with the wanted tags defined in it, then explicitly use that provider for all the resources
+   involved:
+
+   ```ts
+   const provider = new aws.Provider("provider", {
+       defaultTags: {
+           tags: {
+               ManagedBy: "Pulumi",
+               Owner: "user@company.com",
+               Team: "Infra",
+           },
+       },
+   });
+   const fargateProfile = new aws.eks.FargateProfile("fargateProfile", {
+       …
+   }, {
+       provider: provider,
+       …
+   });
+   ```
+
 ### Outputs
 
 TODO
+
+### Policy enforcement
+
+TODO: [Automatically Enforcing AWS Resource Tagging Policies], [Get started with Pulumi policy as code]
 
 ## Stack
 
@@ -491,8 +533,24 @@ const nested = new pulumi.StackReference("organization/nested/dev");
 const eks = nested.getOutput("eks");
 ```
 
-> All involved stacks must be stored in the same backend for them to be able to find the correct [stack references].<br/>
-> See [backend].
+All involved stacks must be stored in the same backend for them to be able to find the correct [stack references]:
+
+```txt
+$ # Only showing files of interest
+$ tree
+root/
+├── infra/
+│   ├── Pulumi.yaml  ───>  backend.url: "file://.."
+│   └── index.ts     ───>  export const eks = eks_cluster;
+├── app/
+│   ├── Pulumi.yaml  ───>  backend.url: "file://.."
+│   └── index.ts     ───>  const infraStack = new pulumi.StackReference(`organization/infra/${env}`);
+│                    └──>  const eks = infraStack.getOutput("eks");
+└── .pulumi/
+    └── stacks/
+        ├── infra/…
+        └── app/…
+```
 
 ### State
 
@@ -579,25 +637,6 @@ $ aws s3 ls --recursive s3://organization-backend/prefix/
 2024-03-19 17:21:28    2584430 prefix/.pulumi/stacks/test/dev.json.bak
 ```
 
-All involved stacks must be stored in the same backend for them to be able to find the correct [stack references]:
-
-```txt
-$ # Only showing files of interest
-$ tree
-root/
-├── infra/
-│   ├── Pulumi.yaml  ───>  backend.url: "file://.."
-│   └── index.ts     ───>  export const eks = eks_cluster;
-├── app/
-│   ├── Pulumi.yaml  ───>  backend.url: "file://.."
-│   └── index.ts     ───>  const infraStack = new pulumi.StackReference(`organization/infra/${env}`);
-│                    └──>  const eks = infraStack.getOutput("eks");
-└── .pulumi/
-    └── stacks/
-        ├── infra/…
-        └── app/…
-```
-
 ### Migrate to different backends
 
 1. Get to the current backend:
@@ -659,6 +698,8 @@ root/
 - [State]
 - [Assigning tags by default on AWS with Pulumi]
 - [Organizing Pulumi projects & stacks]
+- [Automatically Enforcing AWS Resource Tagging Policies]
+- [Get started with Pulumi policy as code]
 
 <!--
   References
@@ -677,10 +718,12 @@ root/
 
 <!-- Files -->
 <!-- Upstream -->
+[automatically enforcing aws resource tagging policies]: https://www.pulumi.com/blog/automatically-enforcing-aws-resource-tagging-policies/
 [blog]: https://www.pulumi.com/blog
 [code examples]: https://github.com/pulumi/examples
 [deletebeforereplace]: https://www.pulumi.com/docs/concepts/options/deletebeforereplace/
 [documentation]: https://www.pulumi.com/docs/
+[get started with pulumi policy as code]: https://www.pulumi.com/docs/using-pulumi/crossguard/get-started/
 [ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
 [organizing pulumi projects & stacks]: https://www.pulumi.com/docs/using-pulumi/organizing-projects-stacks/
 [projects]: https://www.pulumi.com/docs/concepts/projects/
