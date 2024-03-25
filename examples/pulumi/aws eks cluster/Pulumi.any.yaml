@@ -1,0 +1,7 @@
+encryptionsalt: v1:iA3XmpOvico=:v1:XCz1yi4Ve/38v0D/:9v7XaYgqAGnZ4FJqGIaNT9uaFFec5Q==
+config:
+  aws:defaultTags:
+    tags:
+      ManagedBy: pulumi
+      PulumiProject: eks-cluster
+  aws:region: eu-west-1
