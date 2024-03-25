@@ -616,6 +616,7 @@ Others:
 - [Kubernetes Troubleshooting - The Complete Guide]
 - [Kubernetes cluster autoscaler]
 - [Common labels]
+- [What is Kubernetes?]
 
 <!--
   References
@@ -703,3 +704,4 @@ Others:
 [pulumi]: https://www.pulumi.com
 
 [scaling k8s nodes without breaking the bank or your sanity - brandon wagner & nick tran, amazon]: https://www.youtube.com/watch?v=UBb8wbfSc34
+[what is kubernetes?]: https://www.youtube.com/watch?v=a2gfpZE8vXY
