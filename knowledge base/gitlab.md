@@ -13,6 +13,7 @@
       1. [Docker Machine](#docker-machine)
 1. [Troubleshooting](#troubleshooting)
    1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
+   1. [Pipeline fails with error `You are not allowed to download code from this project`](#pipeline-fails-with-error-you-are-not-allowed-to-download-code-from-this-project)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -443,6 +444,22 @@ Pitfalls:
 ```sh
 git clone "https://oauth2:${ACCESS_TOKEN}@somegitlab.com/vendor/package.git"
 ```
+
+### Pipeline fails with error `You are not allowed to download code from this project`
+
+Error message example:
+
+```txt
+Getting source from Git repository 00:00
+Fetching changes with git depth set to 20...
+Reinitialized existing Git repository in /builds/myProj/myRepo/.git/
+remote: You are not allowed to download code from this project.
+fatal: unable to access 'https://gitlab.com/myProj/myRepo.git/': The requested URL returned error: 403
+```
+
+Root cause: the user starting the pipeline does not have enough privileges to the repository.
+
+Solution: give that user _developer_ access or have somebody else with enough privileges run it.
 
 ## Further readings
 
