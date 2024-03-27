@@ -13,7 +13,13 @@
    1. [State](#state)
    1. [Configuration](#configuration)
 1. [Backend](#backend)
+   1. [Enforce specific backends for projects](#enforce-specific-backends-for-projects)
    1. [Migrate to different backends](#migrate-to-different-backends)
+1. [Troubleshooting](#troubleshooting)
+   1. [A project with the same name already exists](#a-project-with-the-same-name-already-exists)
+   1. [Stack init fails because the stack supposedly already exists](#stack-init-fails-because-the-stack-supposedly-already-exists)
+   1. [Stack init fails due to missing scheme](#stack-init-fails-due-to-missing-scheme)
+   1. [Stack init fails due to invalid key identifier](#stack-init-fails-due-to-invalid-key-identifier)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -304,7 +310,7 @@ tags_base = {
     ManagedBy: "Pulumi",
     Prod: false,
 };
-const fargateProfile = new aws.eks.FargateProfile("fargateProfile", {
+new aws.eks.FargateProfile("fargateProfile", {
     tags: {
         ...tags_base,
         ...{
@@ -326,12 +332,32 @@ const provider = new aws.Provider("provider", {
         },
     },
 });
-const fargateProfile = new aws.eks.FargateProfile("fargateProfile", {
+new aws.eks.FargateProfile("fargateProfile", {
     …
 }, {
     provider: provider,
     …
 });
+
+// Use outputs from other stacks.
+const currentStack = pulumi.getStack();
+const infraStack = new pulumi.StackReference(`organization/infra/${currentStack}`);
+const subnets_private = infraStack.getOutput("subnets_private");  // list of aws.ec2.Subnets
+new aws.eks.Cluster("cluster", {
+    vpcConfig: {
+        subnetIds: subnets_private.apply((subnets: aws.ec2.Subnet[]) => subnets.map(subnet => subnet.id)),
+        …
+    },
+    …
+});
+
+// Debug the .apply() result of Outputs.
+subnets_private.apply(
+  (subnets: aws.ec2.Subnet[]) => subnets.map(subnet => console.log(subnet.id)),
+);  // subnet-00001111222233334 …
+subnets_private.apply(
+  (subnets: aws.ec2.Subnet[]) => console.log(subnets.map(subnet => subnet.id)),
+);  // [ 'subnet-00001111222233334', … ]
 ```
 
 </details>
@@ -420,9 +446,10 @@ If a resource is assigned a static name, the `deleteBeforeReplace` option _shoul
 
 ### Assign tags to resources by default
 
-Read [Assigning tags by default on AWS with Pulumi] first to get an idea of pros and cons of the options, then pick one:
+Read [Assigning tags by default on AWS with Pulumi] first to get an idea of pros and cons of the options, then pick one
+(or both):
 
-1. Assign the tags to the default provider in the stack's configuration file (`Pulumi.{stackName}.yaml`):
+1. Assign the wanted tags to the default provider in the stack's configuration file (`Pulumi.{stackName}.yaml`):
 
    ```yaml
    config:
@@ -433,7 +460,7 @@ Read [Assigning tags by default on AWS with Pulumi] first to get an idea of pros
          Team: "Infra",
    ```
 
-1. Create a provider with the wanted tags defined in it, then explicitly use that provider for all the resources
+1. Create a new provider with the wanted tags defined in it, then explicitly use that provider with all the resources
    involved:
 
    ```ts
@@ -544,7 +571,7 @@ root/
 │   └── index.ts     ───>  export const eks = eks_cluster;
 ├── app/
 │   ├── Pulumi.yaml  ───>  backend.url: "file://.."
-│   └── index.ts     ───>  const infraStack = new pulumi.StackReference(`organization/infra/${env}`);
+│   └── index.ts     ┬──>  const infraStack = new pulumi.StackReference(`organization/infra/${env}`);
 │                    └──>  const eks = infraStack.getOutput("eks");
 └── .pulumi/
     └── stacks/
@@ -572,6 +599,23 @@ TODO
 Refer to [state] for more and updated information.
 
 > Pulumi is designed to use only a single backend at a time.
+
+The default backend is Pulumi Cloud.<br/>
+Change it by:
+
+- Specifying the new backend in the login command:
+
+  ```sh
+  pulumi login 's3://myBucket/prefix'
+  ```
+
+- Setting up the related environment variable:
+
+  ```sh
+  export PULUMI_BACKEND_URL="file://."
+  ```
+
+- [Enforcing the new backend in the project's `Pulumi.yaml` file][enforce specific backends for projects].
 
 The Pulumi Cloud backend records every checkpoint to allow to recover from exotic failure scenarios.<br/>
 Self-managed backends may have more trouble recovering from these situations, as they typically store a single state
@@ -637,6 +681,20 @@ $ aws s3 ls --recursive s3://organization-backend/prefix/
 2024-03-19 17:21:28    2584430 prefix/.pulumi/stacks/test/dev.json.bak
 ```
 
+### Enforce specific backends for projects
+
+Set the projects' `backend.url` property in their `Pulumi.yaml` file:
+
+```sh
+yq -iy '. += {"backend": {"url": "s3://myBucket"}}' 'Pulumi.yaml'
+```
+
+```yaml
+name: my-proj
+backend:
+  url: s3://myBucket
+```
+
 ### Migrate to different backends
 
 1. Get to the current backend:
@@ -684,6 +742,57 @@ $ aws s3 ls --recursive s3://organization-backend/prefix/
    cat 'Pulumi.mario.yaml'
    ```
 
+## Troubleshooting
+
+### A project with the same name already exists
+
+Context: during project creation, Pulumi issues a warning saying that a project with the same name already exists.
+
+Error message example:
+
+> A project with the name infra already exists.
+
+Root cause: Pulumi found a project with the same name saved in the backend.
+
+Solution: Continue using the name if you are repurposing the project. Consider using a different name otherwise.
+
+### Stack init fails because the stack supposedly already exists
+
+Context: a stack fails to initialize.
+
+Error message example:
+
+> Sorry, could not create stack 'dev': stack 'organization/infra/dev' already exists
+
+Root cause: Pulumi found a stack with the same name saved in the backend.
+
+Solution: Delete the residual files for the stack from the backend and retry.
+
+### Stack init fails due to missing scheme
+
+Context: a stack fails to initialize.
+
+Error message example:
+
+> Sorry, could not create stack 'dev': open secrets.Keeper: no scheme in URL "awskms"
+
+Root cause: the secrets provider is set to use a KMS key, but one did not provide any key identifier.
+
+Solution: Read [secrets] and fix the configuration by providing a key identifier.
+
+### Stack init fails due to invalid key identifier
+
+Context: a stack fails to initialize.
+
+Error message example:
+
+> Sorry, could not create stack 'dev': unable to parse the secrets provider URL: parse
+> "awskms://arn:aws:kms:eu-east-2:123456789012:key/aaaabbbb-cccc-dddd-eeee-ffff00001111": invalid port ":key" after host
+
+Root cause: the secrets provider is set to use a KMS key, but one did not provide a correct key identifier.
+
+Solution: Read [secrets] and fix the configuration by providing a correct key identifier.
+
 ## Further readings
 
 - [Website]
@@ -698,6 +807,7 @@ $ aws s3 ls --recursive s3://organization-backend/prefix/
 - [State]
 - [Assigning tags by default on AWS with Pulumi]
 - [Organizing Pulumi projects & stacks]
+- [Aligning Projects between Service and Self-Managed Backends]
 - [Automatically Enforcing AWS Resource Tagging Policies]
 - [Get started with Pulumi policy as code]
 
@@ -708,6 +818,7 @@ $ aws s3 ls --recursive s3://organization-backend/prefix/
 <!-- In-article sections -->
 [backend]: #backend
 [configuration]: #configuration
+[enforce specific backends for projects]: #enforce-specific-backends-for-projects
 [monolith vs micro-stack]: #monolith-vs-micro-stack
 [program]: #program
 [project]: #project
@@ -718,6 +829,7 @@ $ aws s3 ls --recursive s3://organization-backend/prefix/
 
 <!-- Files -->
 <!-- Upstream -->
+[aligning projects between service and self-managed backends]: https://www.pulumi.com/blog/project-scoped-stacks-in-self-managed-backend/
 [automatically enforcing aws resource tagging policies]: https://www.pulumi.com/blog/automatically-enforcing-aws-resource-tagging-policies/
 [blog]: https://www.pulumi.com/blog
 [code examples]: https://github.com/pulumi/examples
@@ -728,6 +840,7 @@ $ aws s3 ls --recursive s3://organization-backend/prefix/
 [organizing pulumi projects & stacks]: https://www.pulumi.com/docs/using-pulumi/organizing-projects-stacks/
 [projects]: https://www.pulumi.com/docs/concepts/projects/
 [resources reference]: https://www.pulumi.com/resources
+[secrets]: https://www.pulumi.com/docs/concepts/secrets/
 [stack references]: https://www.pulumi.com/docs/concepts/stack/#stackreferences
 [stacks]: https://www.pulumi.com/docs/concepts/stack/
 [state]: https://www.pulumi.com/docs/concepts/state/
