@@ -93,6 +93,7 @@
 | URN     | Uniform Resource Name                                  |                                                                                                     |
 | USB     | Universal Serial Bus                                   |                                                                                                     |
 | UT      | Unit Test                                              |                                                                                                     |
+| UX      | User eXperience                                        |                                                                                                     |
 | VIM     | [VI iMproved][vim]                                     |                                                                                                     |
 | WAN     | Wide Area Network                                      |                                                                                                     |
 | WAP     | Wireless Access Point                                  |                                                                                                     |
@@ -125,6 +126,8 @@
 [fish]: fish.md
 [iac]: iac.placeholder
 [kubernetes]: kubernetes/README.md
+[ssh]: ssh.md
+[sssd]: sssd.md
 [terraform enterprise]: terraform%20enterprise.md
 [vim]: vim.md
 [yaml]: yaml.md
