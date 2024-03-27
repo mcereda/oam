@@ -122,7 +122,7 @@ const cluster = new aws.eks.Cluster("cluster", {
 const cluster_admin_accessEntry = new aws.eks.AccessEntry("cluster-admin-accessEntry", {
     clusterName: cluster.name,
 
-    principalArn: callerIdentity.then(callerIdentity => callerIdentity.arn),
+    principalArn: callerIdentity.then(callerIdentity => callerIdentity.arn),  // only users or roles, no groups
     kubernetesGroups: [
         // No 'system:…', 'amazon:…', 'aws:…', 'eks:…' nor 'iam:…'.
         // See reference page.
