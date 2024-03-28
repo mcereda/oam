@@ -28,6 +28,9 @@ docker search 'boinc'
 docker pull 'alpine:3.14'
 docker pull 'boinc/client:latest'
 
+# Get the SHAsum of images.
+docker inspect --format='{{index .RepoDigests 0}}' 'node:18-buster'
+
 # Login to registries.
 docker login
 docker login -u 'username' -p 'password'
@@ -41,7 +44,7 @@ docker start 'bdbe3f45'
 
 # Create and start containers.
 docker run 'hello-world'
-docker run -ti --rm 'alpine' cat '/etc/apk/repositories'
+docker run -ti --rm --platform 'linux/amd64' 'alpine:3.19' cat '/etc/apk/repositories'
 docker run -d --name 'boinc' --network='host' --pid='host' -v 'boinc:/var/lib/boinc' \
   -e BOINC_GUI_RPC_PASSWORD='123' -e BOINC_CMD_LINE_OPTIONS='--allow_remote_gui_rpc' \
   'boinc/client'
@@ -247,6 +250,7 @@ docker load …
 - [Podman]
 - [Dive]
 - [Testcontainers]
+- [Containerd]
 
 ### Sources
 
