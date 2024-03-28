@@ -203,6 +203,15 @@ docker run … -it \
   -e 'AWS_ACCESS_KEY_ID' -e 'AWS_SECRET_ACCESS_KEY' -e 'AWS_REGION' \
   'pulumi/pulumi-nodejs:3.111.1-debian' \
   bash -c "npm ci && pulumi login 's3://bucket/prefix' && pulumi pre --parallel $(nproc)"
+
+
+# Plans
+# *Experimental* feature at the time of writing.
+# Has issues with apply operations?
+pulumi pre … --save-plan 'plan.json'
+pulumi up --yes --non-interactive --stack 'stackname' \
+  --skip-preview --plan 'plan.json' \
+  --logtostderr --logflow --verbose 9 1> pulumi-up.txt 2> pulumi-error.txt || exit_code=$?
 ```
 
 </details>
@@ -821,6 +830,8 @@ Solution: Read [secrets] and fix the configuration by providing a correct key id
 - [Automatically Enforcing AWS Resource Tagging Policies]
 - [Get started with Pulumi policy as code]
 - [IaC Recommended Practices: Developer Stacks and Git Branches]
+- [Update plans]
+- [Pulumi up --plan without error message (exit code 255)]
 
 <!--
   References
@@ -851,11 +862,13 @@ Solution: Read [secrets] and fix the configuration by providing a correct key id
 [ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
 [organizing pulumi projects & stacks]: https://www.pulumi.com/docs/using-pulumi/organizing-projects-stacks/
 [projects]: https://www.pulumi.com/docs/concepts/projects/
+[pulumi up --plan without error message (exit code 255)]: https://github.com/pulumi/pulumi/issues/11303#issuecomment-1311365793
 [resources reference]: https://www.pulumi.com/resources
 [secrets]: https://www.pulumi.com/docs/concepts/secrets/
 [stack references]: https://www.pulumi.com/docs/concepts/stack/#stackreferences
 [stacks]: https://www.pulumi.com/docs/concepts/stack/
 [state]: https://www.pulumi.com/docs/concepts/state/
+[update plans]: https://www.pulumi.com/docs/concepts/update-plans/
 [website]: https://www.pulumi.com/
 
 <!-- Others -->
