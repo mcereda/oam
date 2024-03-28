@@ -195,6 +195,14 @@ pulumi state rename \
 
 # Unprotect resources that are protected in states.
 pulumi state unprotect 'resourceUrn'
+
+
+# Run in Docker.
+docker run … -it \
+  -v "$(pwd):/pulumi/projects" \
+  -e 'AWS_ACCESS_KEY_ID' -e 'AWS_SECRET_ACCESS_KEY' -e 'AWS_REGION' \
+  'pulumi/pulumi-nodejs:3.111.1-debian' \
+  bash -c "npm ci && pulumi login 's3://bucket/prefix' && pulumi pre --parallel $(nproc)"
 ```
 
 </details>
@@ -487,7 +495,9 @@ TODO
 
 ### Policy enforcement
 
-TODO: [Automatically Enforcing AWS Resource Tagging Policies], [Get started with Pulumi policy as code]
+TODO
+
+See [Automatically Enforcing AWS Resource Tagging Policies], [Get started with Pulumi policy as code].
 
 ## Stack
 
@@ -810,6 +820,7 @@ Solution: Read [secrets] and fix the configuration by providing a correct key id
 - [Aligning Projects between Service and Self-Managed Backends]
 - [Automatically Enforcing AWS Resource Tagging Policies]
 - [Get started with Pulumi policy as code]
+- [IaC Recommended Practices: Developer Stacks and Git Branches]
 
 <!--
   References
@@ -836,6 +847,7 @@ Solution: Read [secrets] and fix the configuration by providing a correct key id
 [deletebeforereplace]: https://www.pulumi.com/docs/concepts/options/deletebeforereplace/
 [documentation]: https://www.pulumi.com/docs/
 [get started with pulumi policy as code]: https://www.pulumi.com/docs/using-pulumi/crossguard/get-started/
+[iac recommended practices: developer stacks and git branches]: https://www.pulumi.com/blog/iac-recommended-practices-developer-stacks-git-branches/
 [ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
 [organizing pulumi projects & stacks]: https://www.pulumi.com/docs/using-pulumi/organizing-projects-stacks/
 [projects]: https://www.pulumi.com/docs/concepts/projects/
