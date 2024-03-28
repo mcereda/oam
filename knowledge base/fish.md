@@ -39,6 +39,11 @@ math 2 '+' 6
 time pulumi pre --parallel (math 2 '*' (nproc))
 ```
 
+For functions defined in files in `~/.config/fish/functions/` to be automatically available, the files need to:
+
+- Host **a single** function each.
+- Be named as the function they host.
+
 ## Configuration
 
 Shell configuration file: `~/.config/fish/config.fish`.<br/>
