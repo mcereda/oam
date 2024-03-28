@@ -426,6 +426,19 @@ For now the Gitlab instance can manage only kubernetes clusters external to the 
 
 ## Runners
 
+```sh
+brew install 'gitlab-runner'
+```
+
+```sh
+gitlab-runner exec docker 'job-name'
+gitlab-runner exec docker \
+  --env 'AWS_ACCESS_KEY_ID=AKIA…' --env 'AWS_SECRET_ACCESS_KEY=F…s' --env 'AWS_REGION=eu-east-1' \
+  --env 'DOCKER_AUTH_CONFIG={ "credsStore": "ecr-login" }' \
+  --docker-volumes "$HOME/.aws/credentials:/root/.aws/credentials:ro"
+  'job-requiring-ecr-access'
+```
+
 ### Autoscaling
 
 #### Docker Machine
@@ -481,6 +494,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 - [Back up GitLab excluding specific data from the backup]
 - [AWS driver does not support multiple non default subnets]
 - [Autoscaling GitLab Runner on AWS EC2]
+- [Authenticating your GitLab CI runner to an AWS ECR registry using Amazon ECR Docker Credential Helper]
 
 <!--
   References
@@ -505,6 +519,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
 
 <!-- Others -->
+[authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb
 [aws driver does not support multiple non default subnets]: https://github.com/docker/machine/issues/4700
 [configuring private dns zones and upstream nameservers in kubernetes]: https://kubernetes.io/blog/2017/04/configuring-private-dns-zones-upstream-nameservers-kubernetes/
 [using gitlab token to clone without authentication]: https://stackoverflow.com/questions/25409700/using-gitlab-token-to-clone-without-authentication#29570677
