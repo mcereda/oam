@@ -28,6 +28,9 @@ aws ec2 describe-instances --output text \
     'Name=app,Values=mysql' \
     'Name=instance-state-name,Values=running' \
 | xargs -ot aws ssm start-session --target
+
+# Describe images by ID.
+aws ec2 describe-images --image-ids 'ami-8b8c57f8'
 ```
 
 </details>
@@ -40,6 +43,7 @@ See [EBS].
 
 - [AWS EC2 Instance pricing comparison]
 - [EC2Instances.info on vantage.sh]
+- [SSM]
 
 ### Sources
 
