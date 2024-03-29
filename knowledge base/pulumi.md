@@ -95,6 +95,11 @@ pulumi whoami -v
 pulumi logout
 
 
+# Print information about the project and stack.
+pulumi about
+pulumi about -s 'dev'
+
+
 # Get the full program configuration.
 # Secrets are obscured.
 pulumi config get
@@ -202,7 +207,8 @@ docker run … -it \
   -v "$(pwd):/pulumi/projects" \
   -e 'AWS_ACCESS_KEY_ID' -e 'AWS_SECRET_ACCESS_KEY' -e 'AWS_REGION' \
   'pulumi/pulumi-nodejs:3.111.1-debian' \
-  bash -c "npm ci && pulumi login 's3://bucket/prefix' && pulumi pre --parallel $(nproc)"
+  bash -c "npm ci && pulumi login 's3://bucket/prefix' && pulumi pre --parallel $(nproc) -s 'dev'"
+
 
 
 # Plans
