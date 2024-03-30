@@ -7,17 +7,21 @@
    1. [Networking](#networking)
       1. [Access to the Internet](#access-to-the-internet)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## Concepts
 
 ### Compartments
 
-Compartments are tenancy-wide and extend across regions. They can also be nested to create hierarchies up to 6 levels deep.
+Compartments are tenancy-wide and extend across regions.<br/>
+They can be nested to create hierarchies up to 6 levels deep.
 
-After creating a compartment, you need to write at least one policy for it; until then, no one can access it except administrators or users who have permissions set at the tenancy level. When creating sub-compartments, they inherit access permissions from compartments higher up their hierarchy.
+After creating a compartment, one needs to write at least one (access) policy for it; until then, no one can access it
+but administrators or users with permissions at the _tenancy_ level.<br/>
+When creating sub-compartments, users inherit access permissions from compartments higher up their hierarchy.
 
-Before deleting a compartment, all its resources must have been moved, deleted or terminated, including any policies attached to the compartment itself.
+Before deleting a compartment, all resources in it **must** have been moved, deleted or terminated.<br/>
+This includes **any policies** attached to the compartment itself.
 
 ### Networking
 
@@ -35,9 +39,7 @@ Before deleting a compartment, all its resources must have been moved, deleted o
 - [Compute images]
 - [Connect to private compute instances using OCI Bastion Service]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Required keys and OCIDs]
 

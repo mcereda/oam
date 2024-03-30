@@ -1,11 +1,31 @@
 # Amazon Web Services
 
+1. [Networking](#networking)
 1. [Services](#services)
    1. [CloudWatch](#cloudwatch)
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
+
+## Networking
+
+VPCs define isolated virtual networking environments.<br/>
+AWS accounts include one default VPC for each AWS Region. These allow for immediate launch and connection to EC2
+instances.
+
+Subnets are ranges of IP addresses in VPCs.<br/>
+Each subnet resides in a single Availability Zone.<br/>
+_Public_ subnets have a direct route to an Internet gateway. Resources in public subnets **can** access the public
+Internet.<br/>
+_Private_ subnets do **not** have a direct route to an Internet gateway. Resources in private subnets **require** a NAT
+device to access the public internet.
+
+Gateways connect VPCs to other networks.<br/>
+[_Internet gateways_][connect to the internet using an internet gateway] connect VPCs to the Internet.<br/>
+[_NAT gateways_][nat gateways] allow resources in private subnets to connect to the Internet, other VPCs, or on-premises
+networks. They can communicate with services outside the VPC, but cannot receive unsolicited connection requests.<br/>
+[_VPC endpoints_][access aws services through aws privatelink] connect VPCs to AWS services privately, without the need of Internet gateways or NAT devices.
 
 ## Services
 
@@ -67,6 +87,7 @@ From [Using service-linked roles]:
 
 - [Constraints for tags][constraints  tag]
 - [What is CloudWatch]
+- [What is Amazon VPC?]
 - [Introduction to AWS IAM AssumeRole]
 - [AWS JSON policy elements: Principal]
 
@@ -81,11 +102,15 @@ From [Using service-linked roles]:
 [ec2]: ec2.md
 
 <!-- Upstream -->
+[access aws services through aws privatelink]: https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-access-aws-services.html
 [aws json policy elements: principal]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html
 [best practices for tagging aws resources]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html
+[connect to the internet using an internet gateway]: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
+[nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [services that publish cloudwatch metrics]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
 [using service-linked roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/using-service-linked-roles.html
+[what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
 
 <!-- Others -->
