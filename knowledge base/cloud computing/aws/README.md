@@ -88,6 +88,7 @@ From [Using service-linked roles]:
 - [Constraints for tags][constraints  tag]
 - [What is CloudWatch]
 - [What is Amazon VPC?]
+- [Subnets for your VPC]
 - [Introduction to AWS IAM AssumeRole]
 - [AWS JSON policy elements: Principal]
 
@@ -109,6 +110,7 @@ From [Using service-linked roles]:
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [services that publish cloudwatch metrics]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
+[subnets for your vpc]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html
 [using service-linked roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/using-service-linked-roles.html
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
