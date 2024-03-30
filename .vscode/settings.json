@@ -27,6 +27,13 @@
         },
         {
             "fileMatch": [
+                "docker-compose.yaml",
+                "docker-compose.yml"
+            ],
+            "url": "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"
+        },
+        {
+            "fileMatch": [
                 "package.json"
             ],
             "url": "https://json.schemastore.org/package.json"

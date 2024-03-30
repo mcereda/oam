@@ -1,0 +1,37 @@
+<config>
+
+  <!-- Client Control
+       Don't fold anonymously, provide user info. -->
+  <fold-anon v='false' />
+  <!-- Set with your user, passkey, team-->
+  <user value="CHANGEME" />
+  <passkey value="CHANGEME" />
+  <team value="0" />
+
+  <!-- Slot Control
+       Options: light, medium or full
+       Watch out for high load -->
+  <power value="light" />
+  <exit-when-done v='true' />
+  <idle v='true' />  <!-- Only run slot when idle. -->
+
+  <!-- Folding Slot Configuration -->
+  <gpu v='true' />  <!-- If true, attempt to autoconfigure GPUs -->
+  <!--slot id='0' type='GPU' /-->
+  <!--slot id='0' type='CPU'/-->
+  <!--cpus v='1'--> <!-- How many CPUs a slot should use. <= 0 will use all the CPUs detected in the
+  system. -->
+
+  <!-- Grant Remote Web Access
+       access web UI at 192.168.1.63:7396 -->
+  <allow>127.0.0.1 192.168.1.63</allow>
+  <web-allow>127.0.0.1 192.168.54.0</web-allow>
+
+  <!-- Disable unwanted services -->
+  <!--web-enable v='false'/-->
+  <disable-viz v='true' />
+  <gui-enabled v='false' />
+
+</config>
+
+<!-- vim: set sw=2 ts=2: -->

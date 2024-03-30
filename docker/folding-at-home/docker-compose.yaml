@@ -1,0 +1,30 @@
+---
+# docker run --rm -it \
+#   --device=/dev/kfd --device=/dev/dri \
+#   --security-opt seccomp=unconfined --group-add video \
+#   --name fah0 --user (id -u):(id -g) \
+#   --volume $PWD/data:/fah \
+#   foldingathome/fah-gpu-amd:latest --verbose
+
+version: '2.2'
+services:
+  fah-client:
+    #image: foldingathome/fah-gpu-amd:7.6.21  # apparently there is no versioned image
+    image: foldingathome/fah-gpu-amd:latest
+    container_name: fah-client
+    restart: unless-stopped
+    # network_mode: host
+    # pid: host
+    mem_swappiness: 1
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/kfd:/dev/kfd
+    group_add:
+      - video
+    user: ${CURRENT_UID}
+    volumes:
+      - ${PWD}/data:/fah
+    ports:
+      - "7396:7396"
+    security_opt:
+      - seccomp:unconfined
