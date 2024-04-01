@@ -147,6 +147,24 @@ docker buildx build … --push \
 
 # Remove builders.
 docker buildx rm 'builder_name'
+
+
+# Pull images used in compositions.
+docker compose pull
+
+# Start compositions.
+docker compose up
+docker compose up -d
+
+# Execute commands in compositions' containers
+docker compose exec 'service-name' 'ls' '-Al'
+
+# Get logs.
+docker compose logs
+docker compose logs -f --index='3' 'service-name'
+
+# End compositions.
+docker compose down
 ```
 
 ## Gotchas
