@@ -148,6 +148,8 @@
         "kubectx",
         "kubelet",
         "kubens",
+        "kubescape",
+        "kubeswitch",
         "kubeval",
         "kubie",
         "kustomize",
