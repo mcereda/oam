@@ -1,10 +1,8 @@
 # JQ
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -16,7 +14,7 @@ jq 'keys' 'file.json'
 jq --sort-keys '.' 'input.json' > 'output.json'
 jq --sort-keys '.' 'file.json' | sponge 'file.json'
 
-# Do not fail due to possibly missing keys.
+# Avoid failure due to possibly missing keys.
 # Notice the postfix operator '?'.
 jq '.spec.template.spec.containers[]?.env?' 'manifest.kube.json'
 
@@ -61,6 +59,9 @@ jq '.extensionsGallery + {
 
 # Merge objects from 2 files
 jq '.[0] * .[1]' '1.json' '2.json'
+
+# Only show ('select') elements which specific attribute's value is in a list.
+jq '.[]|select(.PrivateIpAddress|IN("172.31.6.209","172.31.6.229"))|.PrivateDnsName'
 
 # Add elements from arrays with the same name from other files.
 jq '.rules=([input.rules]|flatten)' starting-rule-set.json ending-rule-set.json
@@ -107,9 +108,7 @@ helm template chartName \
 
 [jq recipes]: https://remysharp.com/drafts/jq-recipes
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Filter objects list with regex]
 - [Select multiple conditions]
@@ -117,18 +116,18 @@ All the references in the [further readings] section, plus the following:
 - [jq Select range]
 - [Deleting multiple keys at once with jq]
 - [Remove all null values]
+- [jq: select where .attribute in list]
 
 <!--
   References
   -->
 
 <!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Others -->
 [change multiple values at once]: https://stackoverflow.com/questions/47355901/jq-change-multiple-values#47357956
 [deleting multiple keys at once with jq]: https://stackoverflow.com/questions/36227245/deleting-multiple-keys-at-once-with-jq
 [filter objects list with regex]: https://til.hashrocket.com/posts/uv0bjiokwk-use-jq-to-filter-objects-list-with-regex
 [jq select range]: https://stackoverflow.com/questions/45548604/jq-select-range
+[jq: select where .attribute in list]: https://stackoverflow.com/questions/50750688/jq-select-where-attribute-in-list
 [remove all null values]: https://stackoverflow.com/questions/39500608/remove-all-null-values
 [select multiple conditions]: https://stackoverflow.com/questions/33057420/jq-select-multiple-conditions#33059058
