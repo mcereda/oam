@@ -568,6 +568,12 @@ Concepts:
 - [Best practices for pod security in Azure Kubernetes Service (AKS)]
 - [Network policies]
 
+Distributions:
+
+- [K3S]
+- [RKE2]
+- [K0S]
+
 Tools:
 
 - [`kubectl`][kubectl]
@@ -580,7 +586,6 @@ Tools:
 - [`kubeswitch`][kubeswitch], alternative to [`kubie`][kubie] and [`kubectx`+`kubens`][kubectx+kubens]
 - [`kube-ps1`][kube-ps1]
 - [`kubie`][kubie], alternative to [`kubeswitch`][kubeswitch], and to [`kubectx`+`kubens`][kubectx+kubens] and [`kube-ps1`][kube-ps1]
-- [K3S]
 - [Minikube]
 - [Kubescape]
 
@@ -622,6 +627,36 @@ Others:
   References
   -->
 
+<!-- In-article sections -->
+[pods]: #pods
+[privileged container vs privilege escalation]: #privileged-container-vs-privilege-escalation
+
+<!-- Knowledge base -->
+[azure kubernetes service]: ../cloud%20computing/azure/aks.md
+[cert-manager]: cert-manager.md
+[connection tracking]: ../connection%20tracking.placeholder
+[create an admission webhook]: ../../examples/kubernetes/create%20an%20admission%20webhook/README.md
+[etcd]: ../etcd.placeholder
+[external-dns]: external-dns.md
+[flux]: flux.md
+[gitops]: ../gitops.md
+[helm]: helm.md
+[helmfile]: helmfile.md
+[istio]: istio.md
+[k0s]: k0s.placeholder
+[k3s]: k3s.md
+[keda]: keda.md
+[kubectl]: kubectl.md
+[kubescape]: kubescape.md
+[kubeval]: kubeval.md
+[kustomize]: kustomize.md
+[minikube]: minikube.md
+[network policies]: network%20policies.md
+[prometheus on kubernetes using helm]: ../../examples/kubernetes/prometheus%20on%20k8s%20using%20helm.md
+[rke2]: rke2.md
+[terraform]: ../terraform.md
+[velero]: velero.md
+
 <!-- Upstream -->
 [addons]: https://kubernetes.io/docs/concepts/cluster-administration/addons/
 [api deprecation policy]: https://kubernetes.io/docs/reference/using-api/deprecation-policy/
@@ -647,34 +682,6 @@ Others:
 [set capabilities for a container]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container
 [using sysctls in a kubernetes cluster]: https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/
 [version skew policy]: https://kubernetes.io/releases/version-skew-policy/
-
-<!-- In-article sections -->
-[pods]: #pods
-[privileged container vs privilege escalation]: #privileged-container-vs-privilege-escalation
-
-<!-- Knowledge base -->
-[azure kubernetes service]: ../cloud%20computing/azure/aks.md
-[cert-manager]: cert-manager.md
-[connection tracking]: ../connection%20tracking.placeholder
-[create an admission webhook]: ../../examples/kubernetes/create%20an%20admission%20webhook/README.md
-[etcd]: ../etcd.placeholder
-[external-dns]: external-dns.md
-[flux]: flux.md
-[gitops]: ../gitops.md
-[helm]: helm.md
-[helmfile]: helmfile.md
-[istio]: istio.md
-[k3s]: k3s.md
-[keda]: keda.md
-[kubectl]: kubectl.md
-[kubescape]: kubescape.md
-[kubeval]: kubeval.md
-[kustomize]: kustomize.md
-[minikube]: minikube.md
-[network policies]: network%20policies.md
-[prometheus on kubernetes using helm]: ../../examples/kubernetes/prometheus%20on%20k8s%20using%20helm.md
-[terraform]: ../terraform.md
-[velero]: velero.md
 
 <!-- Others -->
 [best practices for pod security in azure kubernetes service (aks)]: https://learn.microsoft.com/en-us/azure/aks/developer-best-practices-pod-security

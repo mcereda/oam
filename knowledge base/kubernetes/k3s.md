@@ -2,20 +2,49 @@
 
 Lightweight Kubernetes distribution built for IoT and Edge computing.
 
-## Table of contents <!-- omit in toc -->
-
+1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
+
+## TL;DR
+
+<details>
+  <summary>Installation and configuration</summary>
+
+```sh
+curl -sfL 'https://get.k3s.io' | sudo sh -
+```
+
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
+# Use the provided `kubectl`.
+k3s kubectl get pods
+
+# Restore clusters from snapshots.
+k3s server --cluster-reset \
+  --cluster-reset-restore-path="/var/lib/rancher/k3s/server/db/etcd-old-${BACKUP_DATE}"
+```
+
+</details>
+
+<!-- Uncomment if needed
+<details>
+  <summary>Real world use cases</summary>
+</details>
+-->
 
 ## Further readings
 
 - [Website]
 - [Documentation]
 - [Kubernetes]
+- [When to use K3s and RKE2]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - The [Build your very own self-hosting platform with Raspberry Pi and Kubernetes] series of articles
 - [Run Kubernetes on a Raspberry Pi with k3s]
@@ -24,15 +53,13 @@ All the references in the [further readings] section, plus the following:
   References
   -->
 
+<!-- Knowledge base -->
+[kubernetes]: README.md
+
 <!-- Upstream -->
 [documentation]: https://docs.k3s.io/
 [website]: https://k3s.io/
-
-<!-- In-article sections -->
-[further readings]: #further-readings
-
-<!-- Knowledge base -->
-[kubernetes]: README.md
+[when to use k3s and rke2]: https://www.suse.com/c/rancher_blog/when-to-use-k3s-and-rke2/
 
 <!-- Others -->
 [build your very own self-hosting platform with raspberry pi and kubernetes]: https://kauri.io/build-your-very-own-self-hosting-platform-with-raspberry-pi-and-kubernetes/5e1c3fdc1add0d0001dff534/c
