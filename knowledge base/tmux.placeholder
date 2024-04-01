@@ -29,6 +29,12 @@ set -g renumber-windows on    # renumber all windows when a window is closed
 https://github.com/tmux/tmux/wiki/
 
 ```sh
+# Dedicate sessions to commands.
+# Attach to the session if it already exists, or create it otherwise.
+tmux new-session -As 'gitlab-upgrade' "dnf update 'gitlab-ee'"
+```
+
+```sh
 # Operate on a background session from another one.
 tmux new-session -d -S 'session-name'
 tmux send-keys -t 'session-name': "command" "Enter"
