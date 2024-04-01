@@ -91,8 +91,8 @@ gpg --change-passphrase --dry-run 'recipient'
 
 
 # Encrypt files *a*symmetrically.
-gpg -e -o 'file.out.gpg' -r 'recipient' 'file.in'
-gpg --encrypt -o 'file.out.gpg' -u 'sender' -r 'recipient' 'file.in'
+gpg -o 'file.out.gpg' -r 'recipient' -e 'file.in'
+gpg -o 'file.out.gpg' -u 'sender' -r 'recipient' --encrypt 'file.in'
 gpg --encrypt-files --batch -r 'recipient' 'file.in.1' 'file.in.N'
 gpg -e --multifile --batch -r 'recipient' --yes 'file.in.1' 'file.in.N'
 
@@ -107,15 +107,16 @@ gpg -e … -r 'recipient_1' -r 'key_fingerprint' -r 'recipient_N'
 
 # Decrypt files.
 gpg -d 'file.gpg'
-gpg --decrypt -o 'file.out' 'file.in.gpg'
+gpg -o 'file.out' --decrypt 'file.in.gpg'
 gpg --decrypt-files --batch 'file.in.gpg.1' 'file.in.gpg.N'
 gpg -d --multifile --batch --yes 'file.in.gpg.1' 'file.in.gpg.N'
 
 # Encrypt directories.
-gpgtar -c -o 'dir.gpg' 'input/dir'
+gpgtar -o 'dir.tar.gpg' -c 'input/dir'
 
 # Decrypt directories.
-gpgtar -d 'dir.gpg'
+gpgtar -d 'dir.tar.gpg'
+gpgtar -o 'dir' -d 'dir.tar.gpg'
 
 
 # Get the short ID of the signing key only for a user.
