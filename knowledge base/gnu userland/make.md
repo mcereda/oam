@@ -8,8 +8,8 @@
 ## TL;DR
 
 ```makefile
-# assign default values, but allow override
-# usage: make override_me=new_value target
+# Assign default values, but allow override.
+# Usage: `make override_me=new_value target`.
 override override_me ?= default_value
 
 
@@ -19,18 +19,21 @@ include .env
 -include .env.local .env.extra
 
 
-# export variables for all programs to see
-# only exported in the commands' sub-shells
+# Export variables for all programs to see.
+# Only exported in the commands' sub-shells.
 export
 
-# export specific variables only
+# Export specific variables only.
 export override_me
 
 
-# assign shell command output as values
+# Assign shell command outputs as values.
 command_output = ${shell command with args}
 
 
+# Target-specific variables.
+# Call targets from targets.
+# Check variables are set.
 target_name: target_specific_variable = value
 target_name: dash_instead_of_underscore = ${subst _,-,${override_me}}
 target_name: previous_target required_file.ext
@@ -43,9 +46,10 @@ previous_target:
     @quiet_command
 
 next_target:
+    @[ "${var}" ] && echo "all good" || ( echo "var is not set"; exit 1 )
 
 
-# conditionals
+# Conditionals.
 ifeq "${shell uname}" "Darwin"
 expiration_date = ${shell date -v "+365d" "+%FT%TZ"}
 else ifeq "${shell uname}" "Linux"
@@ -113,6 +117,7 @@ If prefixed with '-' (`-include`), it does not error nor warning should any of t
 
 - [Makefile variable initialization and export]
 - [How to load and export variables from an .env file in Makefile?]
+- [Check a variable is set and fail otherwise]
 
 <!--
   References
@@ -123,5 +128,6 @@ If prefixed with '-' (`-include`), it does not error nor warning should any of t
 [include]: https://www.gnu.org/software/make/manual/html_node/Include.html
 
 <!-- Others -->
+[Check a variable is set and fail otherwise]: https://stackoverflow.com/questions/38801796/how-to-conditionally-set-makefile-variable-to-something-if-it-is-empty#56193440
 [how to load and export variables from an .env file in makefile?]: https://stackoverflow.com/questions/44628206/how-to-load-and-export-variables-from-an-env-file-in-makefile#70663753
 [makefile variable initialization and export]: https://stackoverflow.com/questions/2838715/makefile-variable-initialization-and-export
