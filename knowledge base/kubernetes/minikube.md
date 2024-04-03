@@ -77,10 +77,14 @@ minikube ssh
 minikube pause
 minikube -p 'profile' pause -A
 
+# Unpause paused instances.
+minikube unpause
+
 # Halt clusters.
 minikube stop
 
-# Delete all the clusters.
+# Delete clusters.
+minikube delete
 minikube delete --all --purge
 ```
 
