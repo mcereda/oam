@@ -22,6 +22,10 @@
 <details>
   <summary>Configuration</summary>
 
+The application of configuration changes is handled by [Chef Infra].<br/>
+It runs checks, ensures directories, permissions, and services are in place and working, and restarts components if any
+of their configuration files have changed.
+
 ```sh
 # Edit and validate.
 sudo vim '/etc/gitlab/gitlab.rb'
@@ -495,6 +499,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 - [AWS driver does not support multiple non default subnets]
 - [Autoscaling GitLab Runner on AWS EC2]
 - [Authenticating your GitLab CI runner to an AWS ECR registry using Amazon ECR Docker Credential Helper]
+- [How to restart GitLab]
 
 <!--
   References
@@ -511,6 +516,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [docker machine's aws driver's options]: https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/blob/main/docs/drivers/aws.md#options
 [docker machine's supported cloud providers]: https://docs.gitlab.com/runner/configuration/autoscale.html#supported-cloud-providers
 [global settings]: https://docs.gitlab.com/charts/charts/globals.html
+[how to restart gitlab]: https://docs.gitlab.com/ee/administration/restart_gitlab.html
 [minimal minikube example values file]: https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/values-minikube-minimum.yaml
 [operator code]: https://gitlab.com/gitlab-org/cloud-native/gitlab-operator
 [operator guide]: https://docs.gitlab.com/operator/
@@ -521,5 +527,6 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 <!-- Others -->
 [authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb
 [aws driver does not support multiple non default subnets]: https://github.com/docker/machine/issues/4700
+[chef infra]: https://www.chef.io/products/chef-infra
 [configuring private dns zones and upstream nameservers in kubernetes]: https://kubernetes.io/blog/2017/04/configuring-private-dns-zones-upstream-nameservers-kubernetes/
 [using gitlab token to clone without authentication]: https://stackoverflow.com/questions/25409700/using-gitlab-token-to-clone-without-authentication#29570677
