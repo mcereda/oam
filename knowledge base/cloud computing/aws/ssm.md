@@ -44,20 +44,20 @@ It needs to be named like that to be found by the ['community.aws.aws_ssm' conne
 # File: 'aws_ec2.yml'.
 plugin: aws_ec2
 regions:
-  - eu-west-1
+  - eu-east-2
 keyed_groups:
-  - key: tags.application
-    # add hosts to tag_application_<tag_value> groups for each aws_ec2 host's
-    # tags.application attribute
-    prefix: tag_application_
-    separator: ""
   - key: tags.Name
-    # add hosts to tag_Name_<tag_value> groups for each aws_ec2 host's tags.Name
-    # attribute
+    # add hosts to 'tag_Name_<tag_value>' groups for each aws_ec2 host's 'Tags.Name' attribute
     prefix: tag_Name_
     separator: ""
+  - key: tags.application
+    # add hosts to 'tag_application_<tag_value>' groups for each aws_ec2 host's 'Tags.application' attribute
+    prefix: tag_application_
+    separator: ""
 hostnames:
-  - <instance-id>
+  - instance-id
+    # acts as keyword to use the instances' 'InstanceId' attribute
+    # use 'private-ip-address' to use the instances' 'PrivateIpAddress' attribute instead
 ```
 
 Pitfalls:
@@ -65,9 +65,13 @@ Pitfalls:
 - One **shall not use the `remote_user` connection option**, as it is not supported by the plugin.<br/>
   From the [plugin notes][aws_ssm connection plugin notes]:
 
-  > The `community.aws.aws_ssm` connection plugin does not support using the `remote_user` and `ansible_user` variables to configure the remote user.  The ``become_user`` parameter should be used to configure which user to run commands as. Remote commands will often default to running as the `ssm-agent` user, however this will also depend on how SSM has been configured.
+  > The `community.aws.aws_ssm` connection plugin does not support using the `remote_user` and `ansible_user` variables
+  > to configure the remote user.  The ``become_user`` parameter should be used to configure which user to run commands
+  > as. Remote commands will often default to running as the `ssm-agent` user, however this will also depend on how SSM
+  > has been configured.
 
-- Since [SSM starts shell sessions under `/usr/bin`][gotchas], one must explicitly set Ansible's temporary directory to a folder the remote user can write to ([source][ansible temp dir change]):
+- Since [SSM starts shell sessions under `/usr/bin`][gotchas], one must explicitly set Ansible's temporary directory to
+  a folder the remote user can write to ([source][ansible temp dir change]):
 
   ```sh
   ANSIBLE_REMOTE_TMP='/tmp' ansible…
@@ -84,6 +88,9 @@ Pitfalls:
   +    ansible_remote_tmp: /tmp
      tasks: …
   ```
+
+  This, or use the shell profiles in [SSM's preferences][session manager preferences] to change the directory when
+  logged in.
 
 ## Further readings
 
@@ -110,8 +117,9 @@ Pitfalls:
 
 <!-- Upstream -->
 [start a session]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-sessions-start.html
-[session manager preferences]: https://eu-west-1.console.aws.amazon.com/systems-manager/session-manager/preferences?region=eu-west-1
+[session manager preferences]: https://console.aws.amazon.com/systems-manager/session-manager/preferences
 [aws_ssm connection plugin notes]: https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html#notes
+[community.aws.aws_ssm connection]: https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html
 
 <!-- Others -->
 [ansible temp dir change]: https://devops.stackexchange.com/questions/10703/ansible-temp-dir-change

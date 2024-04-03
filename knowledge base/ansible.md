@@ -572,7 +572,7 @@ Conversely, one can achieve the opposite by using the `always` tag and the `--sk
 
 Message example:
 
-> fatal: [i-4ccab452bb7743336]: UNREACHABLE! => {"changed": false, "msg": "Failed to create temporary directory. In some cases, you may have been able to authenticate and did not have permissions on the target directory. Consider changing the remote tmp path in ansible.cfg to a path rooted in \"/tmp\", for more error information use -vvv. Failed command was: ( umask 77 && mkdir -p \"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp `\"&& mkdir \"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp/ansible-tmp-1708603630.2433128-49665-225488680421418 `\" && echo ansible-tmp-1708603630.2433128-49665-225488680421418=\"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp/ansible-tmp-1708603630.2433128-49665-225488680421418 `\" ), exited with result 1, stdout output: \u001b]0;@ip-192-168-42-42:/usr/bin\u0007bash: @ip-192-168-42-42:/usr/bin/home/centos/.ansible/tmp: No such file or directory\r\r\nmkdir: cannot create directory '0': Permission denied\r\r", "unreachable": true}
+> fatal: \[i-4ccab452bb7743336]: UNREACHABLE! => {"changed": false, "msg": "Failed to create temporary directory. In some cases, you may have been able to authenticate and did not have permissions on the target directory. Consider changing the remote tmp path in ansible.cfg to a path rooted in \"/tmp\", for more error information use -vvv. Failed command was: ( umask 77 && mkdir -p \"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp `\"&& mkdir \"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp/ansible-tmp-1708603630.2433128-49665-225488680421418 `\" && echo ansible-tmp-1708603630.2433128-49665-225488680421418=\"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp/ansible-tmp-1708603630.2433128-49665-225488680421418 `\" ), exited with result 1, stdout output: \u001b]0;@ip-192-168-42-42:/usr/bin\u0007bash: @ip-192-168-42-42:/usr/bin/home/centos/.ansible/tmp: No such file or directory\r\r\nmkdir: cannot create directory '0': Permission denied\r\r", "unreachable": true}
 
 Root cause:
 
@@ -581,7 +581,7 @@ By default, SSM starts sessions in the `/usr/bin` directory.
 Solution:
 
 Explicitly set Ansible's temporary directory to a folder the remote user can write to.<br/>
-See [Integration with AWS SSM].
+See [Integrate with AWS SSM].
 
 ## Further readings
 
@@ -600,7 +600,7 @@ See [Integration with AWS SSM].
 - [Ansible Galaxy user guide]
 - [Windows playbook example]
 - [Special tags: `always` and `never`][special tags: always and never]
-- [Integration with AWS SSM]
+- [Integrate with AWS SSM]
 
 ### Sources
 
@@ -627,7 +627,7 @@ See [Integration with AWS SSM].
   -->
 
 <!-- Knowledge base -->
-[integration with aws ssm]: cloud%20computing/aws/ssm.md##integrate-with-ansible
+[integrate with aws ssm]: cloud%20computing/aws/ssm.md#integrate-with-ansible
 
 <!-- Files -->
 [examples]: ../examples/ansible/
@@ -645,6 +645,7 @@ See [Integration with AWS SSM].
 [special variables]: https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
 [templating]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html
 [tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
+[slurp]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/slurp_module.html
 
 <!-- Others -->
 [ansible: set variable to file content]: https://stackoverflow.com/questions/24003880/ansible-set-variable-to-file-content
