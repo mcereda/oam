@@ -100,6 +100,9 @@ helm template chartName \
     | select(.)
     | select(.|test(".*:.*")|not), select(.|test(".*:$")), select(.|test(".*:latest"))' \
     -
+
+# Check that the 'backend.url key' in a 'Pulumi.yaml' file is not 'file://' and fail otherwise.
+yq -e '(.backend.url|test("^file://")?)|not' 'Pulumi.yaml'
 ```
 
 ## Further readings
