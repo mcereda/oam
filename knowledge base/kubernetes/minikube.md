@@ -1,15 +1,16 @@
 # Minikube
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Troubleshooting](#troubleshooting)
    1. [What happens if one uses the _LoadBalancer_ type with Services](#what-happens-if-one-uses-the-loadbalancer-type-with-services)
    1. [Use custom certificates](#use-custom-certificates)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
+
+<details>
+  <summary>Installation and configuration</summary>
 
 ```sh
 # Install minikube.
@@ -18,51 +19,92 @@ brew install 'docker' 'minikube'
 
 # Shell completion.
 source <(minikube completion "$(basename $SHELL)")
+```
 
-# Disable emojis in the commands.
-export MINIKUBE_IN_STYLE=false
+User configuration options are overridden by command flags.
 
-# Start the cluster.
+```sh
+# See defaults for individual configuration values.
+minikube config defaults 'disk-size'
+minikube config defaults 'container-runtime'
+
+# Get individual user configuration values.
+minikube config get 'cache'
+minikube config get 'driver'
+minikube config get 'kubernetes-version'
+
+# Set individual user configuration values.
+minikube config set 'cpus' '4'
+minikube config set 'profile' 'awx-cluster'
+minikube config set 'rootless' true
+
+# View the current user configuration.
+minikube config view
+
+# Unset user configuration values.
+minikube config unset 'memory'
+```
+
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
+# Start clusters.
 minikube start
-minikube start --cpus '4' --memory '8192'
+minikube -p 'profile' start --cpus '4' --memory '8192' --vm --addons 'ingress'
+minikube start --driver='docker' --kubernetes-version='v1.29.0'
 
-# Pause the cluster without impacting deployed applications
-minikube pause
-
-# Halt the cluster.
-minikube stop
-
-# Permanently increase the default memory limit.
-# Requires the cluster to restart.
-minikube config set 'memory' '16384'
-
-# Browse the catalog of easily installable Kubernetes services.
+# Browse the addons catalog, with their current status.
 minikube addons list
 
-# Create a(nother) cluster running a specific Kubernetes version.
-minikube start -p 'old-k8s' --kubernetes-version='v1.16.1'
-minikube config set 'kubernetes-version' 'v1.16.15' && minikube start
+# Enable addons.
+minikube addons enable 'dashboard'
+minikube --profile 'profile' addons enable 'dashboard'
 
-# Use a specific docker driver.
-minikube start --driver='docker'
-minikube config set 'driver' 'docker' && minikube start
-
-# Disable new update notifications.
-minikube config set 'WantUpdateNotification' false
-
-# Get IP and port of a service of type NodePort.
+# Get IP and port of services of type NodePort.
 minikube service --url 'nextcloud'
 minikube service --url 'nextcloud' --namespace 'nextcloud'
 
-# Use the integrated kubectl command.
+# Use the equipped 'kubectl' executable.
 minikube kubectl -- get pods
 
 # Log into the minikube environment (for debugging).
 minikube ssh
 
+# Pause clusters without impacting deployed applications.
+minikube pause
+minikube -p 'profile' pause -A
+
+# Halt clusters.
+minikube stop
+
 # Delete all the clusters.
 minikube delete --all --purge
 ```
+
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
+# Permanently increase the default memory limit.
+# Requires the cluster to restart.
+minikube config set 'memory' '16384'
+
+# Disable new update notifications.
+minikube config set 'WantUpdateNotification' false
+
+# Disable emojis in the commands.
+export MINIKUBE_IN_STYLE=false
+
+# Create (other) clusters running specific Kubernetes versions.
+minikube start -p 'old-k8s' --kubernetes-version='v1.27.1'
+```
+
+</details>
 
 ## Troubleshooting
 
@@ -81,9 +123,7 @@ Minikibe's certificates are available in the `~/.minikube/certs` folder.
 - [Kubernetes]
 - [`kubectl`][kubectl]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Accessing] the services
 - [Getting started] guide
@@ -111,8 +151,6 @@ All the references in the [further readings] section, plus the following:
 [website]: https://minikube.sigs.k8s.io
 
 <!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Knowledge base -->
 [kubectl]: kubectl.md
 [kubernetes]: README.md
