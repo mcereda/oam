@@ -197,6 +197,10 @@ pulumi state rename \
   'urn:pulumi:dev::whatevah::aws:rds/parameterGroup:ParameterGroup::mariadb-slow' \
   'mariadb-slower'
 
+# Delete resources from states.
+pulumi state delete 'resourceUrn'
+pulumi state delete --force --target-dependents \
+  'urn:pulumi:dev::whatevah::aws:rds/parameterGroup:ParameterGroup::mariadb-slow'
 
 # Unprotect resources that are protected in states.
 pulumi state unprotect 'resourceUrn'

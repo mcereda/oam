@@ -20,7 +20,8 @@ jq '.spec.template.spec.containers[]?.env?' 'manifest.kube.json'
 
 # Add elements to lists.
 jq '.orchestrators += [{"orchestratorVersion": "1.24.9"}]'
-jq --arg REGION ${AWS_REGION} '.spec.template.spec.containers[]?.env? += [{name: "AWS_REGION", value: $REGION}]' /tmp/service.kube.json
+jq --arg REGION ${AWS_REGION} '.spec.template.spec.containers[]?.env? += [{name: "AWS_REGION", value: $REGION}]' '/tmp/service.kube.json'
+yq -iy '.resources+=["awx.yaml"]' 'kustomization.yaml'
 
 # Delete keys from objects.
 jq 'del(.items[].spec.clusterIP)' /tmp/service.kube.json

@@ -34,6 +34,7 @@ tcpdump greater '64'
 tcpdump <= '128'
 
 # Combine filters.
+# Parenthesis must escaped, or the filter quoted.
 tcpdump src port '1025'
 tcpdump -nnvvS src '10.5.2.3' and dst port '3389'
 tcpdump -nX src net '192.168.0.0/16' and dst net '10.0.0.0/8' or '172.16.0.0/16'
