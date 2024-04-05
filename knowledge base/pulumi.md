@@ -38,7 +38,7 @@ When a stack is not explicitly requested in a command (`-s`, `--stack`), Pulumi 
 one.<br/>
 Projects (and hence stacks) [can be nested][monolith vs micro-stack].
 
-Target single resources with `-t`, `--target`. Target also their dependencies with `--target-dependents`.
+Target single resources with `-t`, `--target`. Target also those that depend on them with `--target-dependents`.
 
 <details>
   <summary>Installation</summary>
@@ -126,7 +126,7 @@ pulumi config get 'dbPassword'
 pulumi pre
 pulumi pre --diff -p '10' -m 'message' -s 'stack'
 pulumi pre --expect-no-changes --parallel '10' --show-reads
-pulumi preview -t 'targetResourceUrn' --target-dependents
+pulumi preview -t 'targetResourceUrn' --target-dependents -v '2'
 
 # Save any resource creation seen during the preview into an import file to use
 # with the `import` subcommand.
@@ -221,7 +221,7 @@ docker run … -it \
 pulumi pre … --save-plan 'plan.json'
 pulumi up --yes --non-interactive --stack 'stackname' \
   --skip-preview --plan 'plan.json' \
-  --logtostderr --logflow --verbose 9 1> pulumi-up.txt 2> pulumi-error.txt || exit_code=$?
+  --logtostderr --logflow --verbose '9' 1> pulumi-up.txt 2> pulumi-error.txt || exit_code=$?
 ```
 
 </details>
