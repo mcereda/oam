@@ -152,6 +152,7 @@
         "kubeswitch",
         "kubeval",
         "kubie",
+        "kustomization",
         "kustomize",
         "lefthook",
         "libexec",

@@ -19,6 +19,9 @@ brew install 'docker' 'minikube'
 
 # Shell completion.
 source <(minikube completion "$(basename $SHELL)")
+
+# Convenience alias.
+alias kubectl="minikube kubectl --"
 ```
 
 User configuration options are overridden by command flags.
