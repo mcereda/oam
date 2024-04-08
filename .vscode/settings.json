@@ -188,6 +188,7 @@
         "posix",
         "poweroff",
         "powersave",
+        "psql",
         "pstate",
         "pulumi",
         "pvresize",
