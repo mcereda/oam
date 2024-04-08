@@ -207,6 +207,7 @@
         "schedulable",
         "schedutil",
         "scrollback",
+        "sdkman",
         "setfacl",
         "setfattr",
         "slurm",
