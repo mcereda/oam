@@ -4,7 +4,7 @@
 1. [Kubernetes](#kubernetes)
    1. [Helm chart](#helm-chart)
    1. [Operator](#operator)
-1. [CI/CD](#cicd)
+1. [CI/CD pipelines](#cicd-pipelines)
    1. [Make a job in a pipeline run only when some specific files change](#make-a-job-in-a-pipeline-run-only-when-some-specific-files-change)
    1. [Get the version of the helper image to use for a runner](#get-the-version-of-the-helper-image-to-use-for-a-runner)
 1. [Manage kubernetes clusters](#manage-kubernetes-clusters)
@@ -367,7 +367,9 @@ or consider using the [minimal Minikube example values file] as reference, as st
 
 See the [operator guide] and the [operator code] for details.
 
-## CI/CD
+## CI/CD pipelines
+
+Refer to [CI/CD pipelines].
 
 ### Make a job in a pipeline run only when some specific files change
 
@@ -488,6 +490,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 - [TLS] configuration
 - [Adding and removing Kubernetes clusters]
 - Gitlab's [operator code] and relative [guide][operator guide]
+- [CI/CD pipelines]
 
 ### Sources
 
@@ -500,6 +503,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 - [Autoscaling GitLab Runner on AWS EC2]
 - [Authenticating your GitLab CI runner to an AWS ECR registry using Amazon ECR Docker Credential Helper]
 - [How to restart GitLab]
+- [Customize pipeline configuration]
 
 <!--
   References
@@ -511,7 +515,9 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [back up gitlab excluding specific data from the backup]: https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html#excluding-specific-data-from-the-backup
 [back up gitlab using amazon s3]: https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html?tab=Linux+package+%28Omnibus%29#using-amazon-s3
 [chart]: https://docs.gitlab.com/charts/
+[ci/cd pipelines]: https://docs.gitlab.com/ee/ci/pipelines/
 [command-line options]: https://docs.gitlab.com/charts/installation/command-line-options.html
+[customize pipeline configuration]: https://docs.gitlab.com/ee/ci/pipelines/settings.html
 [deployment]: https://docs.gitlab.com/charts/installation/deployment.html
 [docker machine's aws driver's options]: https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/blob/main/docs/drivers/aws.md#options
 [docker machine's supported cloud providers]: https://docs.gitlab.com/runner/configuration/autoscale.html#supported-cloud-providers
