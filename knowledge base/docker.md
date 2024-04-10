@@ -3,6 +3,7 @@
 1. [TL;DR](#tldr)
 1. [Gotchas](#gotchas)
 1. [Daemon configuration](#daemon-configuration)
+1. [Images configuration](#images-configuration)
 1. [Containers configuration](#containers-configuration)
 1. [Advanced build with `buildx`](#advanced-build-with-buildx)
    1. [Create builders](#create-builders)
@@ -12,12 +13,21 @@
 
 ## TL;DR
 
+<details>
+  <summary>Installation and configuration</summary>
+
 ```sh
 # Install
 brew install --cask 'docker'
 sudo zypper install 'docker'
+```
 
+</details>
 
+<details>
+  <summary>Usage</summary>
+
+```sh
 # Show locally available images.
 docker images -a
 
@@ -27,9 +37,13 @@ docker search 'boinc'
 # Pull images.
 docker pull 'alpine:3.14'
 docker pull 'boinc/client:latest'
+docker pull 'moby/buildkit@sha256:00d2…'
+docker pull 'pulumi/pulumi-nodejs:3.112.0@sha256:37a0…'
 
-# Get the SHAsum of images.
-docker inspect --format='{{index .RepoDigests 0}}' 'node:18-buster'
+# Remove images.
+docker rmi 'node'
+docker rmi 'alpine:3.14'
+docker rmi 'f91a431c5276'
 
 # Login to registries.
 docker login
@@ -79,12 +93,14 @@ docker top 'alpine-test'
 
 # Show information on containers.
 docker inspect 'alpine-test'
+docker inspect --format='{{index .RepoDigests 0}}' 'pulumi/pulumi-nodejs:3.112.0'
 
 # Build a docker image.
 docker build -t 'private/alpine:3.14' .
 
 # Tag images.
 docker tag 'alpine:3.14' 'private/alpine:3.14'
+docker tag 'f91a431c5276' 'pulumi/pulumi-nodejs:3.112.0'
 
 # Push images.
 docker push 'private/alpine:3.14'
@@ -142,6 +158,7 @@ docker buildx create --node 'builder_name'
 # Build images.
 # '--load' currently only works for builds for a single platform.
 docker buildx build -t 'image:tag' --load '.'
+docker buildx build … -t 'image:tag' --load --platform 'linux/amd64' '.'
 docker buildx build … --push \
   --platform 'linux/amd64,linux/arm64,linux/arm/v7' '.'
 
@@ -166,6 +183,18 @@ docker compose logs -f --index='3' 'service-name'
 # End compositions.
 docker compose down
 ```
+
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
+# Get the SHAsum of images.
+docker inspect --format='{{index .RepoDigests 0}}' 'node:18-buster'
+```
+
+</details>
 
 ## Gotchas
 
@@ -215,6 +244,10 @@ The docker daemon is configured using the `/etc/docker/daemon.json` file:
     "dns": ["8.8.8.8", "1.1.1.1"]
 }
 ```
+
+## Images configuration
+
+One should follow the [OpenContainers Image Spec].
 
 ## Containers configuration
 
@@ -277,6 +310,7 @@ docker load …
 - [Cheatsheet]
 - [Getting around Docker's host network limitation on Mac]
 - [Building multi-arch images for ARM and x86 with Docker Desktop]
+- [OpenContainers Image Spec]
 
 <!--
   References
@@ -297,3 +331,4 @@ docker load …
 [cheatsheet]: https://collabnix.com/docker-cheatsheet/
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html
 [getting around docker's host network limitation on mac]: https://medium.com/@lailadahi/getting-around-dockers-host-network-limitation-on-mac-9e4e6bfee44b
+[opencontainers image spec]: https://specs.opencontainers.org/image-spec/
