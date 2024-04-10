@@ -190,6 +190,10 @@ pulumi stack rm --preserve-config --yes --stack 'stack'
 pulumi stack graph 'path/to/graph.dot'
 pulumi stack graph -s 'dev' 'dev.dot' --short-node-name
 
+# Rename stacks.
+pulumi stack rename 'new-name'
+pulumi stack rename 'new-dev' -s 'dev'
+
 
 # Rename resources in states.
 pulumi state rename 'resourceUrn' 'newName'
@@ -206,13 +210,20 @@ pulumi state delete --force --target-dependents \
 pulumi state unprotect 'resourceUrn'
 
 
+# Rename projects.
+# Requires the use of fully-qualified stack names.
+# To update the stack again, one also needs to update the 'name' field of the projects' 'Pulumi.yaml' file to match the
+# new name.
+pulumi stack rename 'org/new-project/dev'
+pulumi stack rename 'org/new-project/dev' -s 'dev'
+
+
 # Run in Docker.
 docker run … -it \
   -v "$(pwd):/pulumi/projects" \
   -e 'AWS_ACCESS_KEY_ID' -e 'AWS_SECRET_ACCESS_KEY' -e 'AWS_REGION' \
   'pulumi/pulumi-nodejs:3.111.1-debian' \
   bash -c "npm ci && pulumi login 's3://bucket/prefix' && pulumi pre --parallel $(nproc) -s 'dev'"
-
 
 
 # Plans
