@@ -75,6 +75,7 @@
         "bootloader",
         "bssid",
         "btrfs",
+        "buildkit",
         "burstable",
         "byod",
         "celeron",
