@@ -3,31 +3,9 @@
 1. [Installation](#installation)
 1. [Uninstallation](#uninstallation)
 1. [Testing](#testing)
-   1. [Create a demo instance in minikube](#create-a-demo-instance-in-minikube)
+   1. [Create a demo instance](#create-a-demo-instance)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
-
-<!-- Uncomment if needed
-## TL;DR
--->
-
-<!-- Uncomment if needed
-<details>
-  <summary>Installation and configuration</summary>
-</details>
--->
-
-<!-- Uncomment if needed
-<details>
-  <summary>Usage</summary>
-</details>
--->
-
-<!-- Uncomment if needed
-<details>
-  <summary>Real world use cases</summary>
-</details>
--->
 
 ## Installation
 
@@ -202,7 +180,7 @@ kubectl delete ns 'awx'
 
 ## Testing
 
-### Create a demo instance in [minikube]
+### Create a demo instance
 
 <details>
   <summary>Run: follow the basic installation guide</summary>
@@ -210,7 +188,7 @@ kubectl delete ns 'awx'
 [Guide][basic install]
 
   <details>
-    <summary>1. ARM, Mac OS X, Kustomize: failed: ARM images for AWX not available</summary>
+    <summary>1. ARM, Mac OS X, Minikube, Kustomize: failed: ARM images for AWX not available</summary>
 
 ```sh
 $ minikube start --cpus=4 --memory=6g --addons=ingress
@@ -246,7 +224,7 @@ namespace/awx created
 deployment.apps/awx-operator-controller-manager created
 $ kubectl -n 'awx' get pods
 NAME                                              READY   STATUS    RESTARTS   AGE
-awx-operator-controller-manager-8b7dfcb58-k7jt8   2/2     Running   0          3m
+awx-operator-controller-manager-8b7dfcb58-k7jt8   2/2     Running   0          3m42s
 
 $ cat <<EOF > 'awx-demo.yaml'
 ---
@@ -273,10 +251,11 @@ $ # (ノಠ益ಠ)ノ彡┻━┻
   </details>
 
   <details>
-    <summary>2. AMD64, OpenSUSE Leap, Kustomize</summary>
+    <summary>2. AMD64, OpenSUSE Leap 15.5, Minikube, Kustomize</summary>
 
 ```sh
 $ minikube start --cpus=4 --memory=6g --addons=ingress
+😄  minikube v1.29.0 on Opensuse-Leap 15.5
 …
 🌟  Enabled addons: storage-provisioner, default-storageclass, ingress
 🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
@@ -304,8 +283,8 @@ namespace/awx created
 …
 deployment.apps/awx-operator-controller-manager created
 $ minikube kubectl -- -n 'awx' get pods
-NAME                                              READY   STATUS    RESTARTS   AGE
-awx-operator-controller-manager-8b7dfcb58-k7jt8   2/2     Running   0          10m
+NAME                                               READY   STATUS    RESTARTS   AGE
+awx-operator-controller-manager-75b667b745-hjfc7   2/2     Running   0          3m43s
 
 $ cat <<EOF > 'awx-demo.yaml'
 ---
@@ -318,6 +297,17 @@ spec:
 EOF
 $ yq -iy '.resources+=["awx-demo.yaml"]' 'kustomization.yaml'
 $ minikube kubectl -- apply -k '.'
+serviceaccount/awx-operator-controller-manager unchanged
+…
+deployment.apps/awx-operator-controller-manager unchanged
+awx.awx.ansible.com/awx-demo created
+$ minikube kubectl -- -n 'awx' get podsminikube kubectl -- -n 'awx' get pods
+NAME                                               READY   STATUS      RESTARTS   AGE
+awx-demo-migration-24.1.0-kqxcj                    0/1     Completed   0          9s
+awx-demo-postgres-15-0                             1/1     Running     0          61s
+awx-demo-task-7fcbb46c5d-ckf9d                     4/4     Running     0          48s
+awx-demo-web-58668794c8-rfd7d                      3/3     Running     0          49s
+awx-operator-controller-manager-75b667b745-hjfc7   2/2     Running     0          93s
 
 $ # Default user is 'admin'.
 $ minikube kubectl -- -n 'awx' get secret 'awx-demo-admin-password' -o jsonpath="{.data.password}" | base64 --decode
@@ -327,7 +317,7 @@ $ xdg-open $(minikube service -n 'awx' 'awx-demo-service' --url)
 $ minikube kubectl -- delete -k '.'
 ```
 
-  </details>
+  </details><br/>
 </details>
 
 <details>
@@ -336,10 +326,11 @@ $ minikube kubectl -- delete -k '.'
 [Guide][helm install on existing cluster]
 
   <details>
-    <summary>1. AMD64, OpenSUSE Leap, Helm</summary>
+    <summary>1. AMD64, OpenSUSE Leap 15.5, Minikube, Helm</summary>
 
 ```sh
 $ minikube start --cpus=4 --memory=6g --addons=ingress
+😄  minikube v1.29.0 on Opensuse-Leap 15.5
 …
 🌟  Enabled addons: storage-provisioner, default-storageclass, ingress
 🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
@@ -365,7 +356,7 @@ REVISION: 1
 TEST SUITE: None
 NOTES:
 AWX Operator installed with Helm Chart version 2.14.0
-$ kubectl -n 'awx' get pods
+$ minikube kubectl -- -n 'awx' get pods
 NAME                                              READY   STATUS    RESTARTS   AGE
 awx-operator-controller-manager-8b7dfcb58-k7jt8   2/2     Running   0          3m
 
@@ -381,26 +372,115 @@ TEST SUITE: None
 NOTES:
 AWX Operator installed with Helm Chart version 2.14.0
 $ minikube kubectl -- -n 'awx' get pods
-NAME                                               READY   STATUS      RESTARTS   AGE
-awx-demo-migration-24.1.0-qhbq2                    0/1     Completed   0          12m
-awx-demo-postgres-15-0                             1/1     Running     0          13m
-awx-demo-task-87756dfbc-chx9t                      4/4     Running     0          12m
-awx-demo-web-69d6d5d6c-wdxlv                       3/3     Running     0          12m
-awx-operator-controller-manager-75b667b745-g9g9c   2/2     Running     0          17m
+NAME                                              READY   STATUS      RESTARTS   AGE
+awx-demo-migration-24.1.0-qhbq2                   0/1     Completed   0          12m
+awx-demo-postgres-15-0                            1/1     Running     0          13m
+awx-demo-task-87756dfbc-chx9t                     4/4     Running     0          12m
+awx-demo-web-69d6d5d6c-wdxlv                      3/3     Running     0          12m
+awx-operator-controller-manager-8b7dfcb58-k7jt8   2/2     Running     0          17m
+
+$ # Default user is 'admin'.
+$ minikube kubectl -- -n 'awx' get secret 'awx-demo-admin-password' -o jsonpath="{.data.password}" | base64 --decode
+PoU9pFR2J5oFqymgX9I3I8swFgfZVkam
+$ xdg-open $(minikube service -n 'awx' 'awx-demo-service' --url)
 
 $ helm -n 'awx' uninstall 'my-awx-operator'
 $ minikube kubectl -- delete ns 'awx'
 ```
 
-  </details>
-
+  </details><br/>
 </details>
 
 <details>
   <summary>Run: kustomized helm chart</summary>
 
-TODO
+  <details>
+    <summary>1. AMD64, OpenSUSE Leap 15.5, Minikube</summary>
 
+<div class="warning" style="
+  background-color: rgba(255,255,0,0.0625);
+  border: solid yellow;  /* #FFFF00 */
+  margin: 1em 0;
+  padding: 1em 1em 0;
+">
+<header style="font-weight: bold; margin-bottom: 0.5em">⚠ Warning ⚠️</header>
+
+Mind including the CRDs from the helm chart.
+
+</div>
+
+```sh
+$ minikube start --cpus=4 --memory=6g --addons=ingress
+😄  minikube v1.29.0 on Opensuse-Leap 15.5
+…
+🌟  Enabled addons: storage-provisioner, default-storageclass, ingress
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+
+$ mkdir -p '/tmp/awx'
+$ cd '/tmp/awx'
+
+$ cat <<EOF > 'namespace.yaml'
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: awx
+EOF
+$ cat <<EOF > 'kustomization.yaml'
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: awx
+resources:
+  - namespace.yaml
+helmCharts:
+  - name: awx-operator
+    repo: https://ansible.github.io/awx-operator/
+    version: 2.14.0
+    releaseName: awx-operator
+    includeCRDs: true
+EOF
+$ minikube kubectl -- apply -f <(minikube kubectl -- kustomize --enable-helm)
+namespace/awx created
+customresourcedefinition.apiextensions.k8s.io/awxbackups.awx.ansible.com created
+…
+deployment.apps/awx-operator-controller-manager created
+$ minikube kubectl -- -n 'awx' get pods
+NAME                                               READY   STATUS    RESTARTS   AGE
+awx-operator-controller-manager-787d4945fb-fdffx   2/2     Running   0          3m36s
+
+$ cat <<EOF > 'awx-demo.yaml'
+---
+apiVersion: awx.ansible.com/v1beta1
+kind: AWX
+metadata:
+  name: awx-demo
+spec:
+  service_type: nodeport
+EOF
+$ yq -iy '.resources+=["awx-demo.yaml"]' 'kustomization.yaml'
+$ minikube kubectl -- apply -f <(minikube kubectl -- kustomize --enable-helm)
+namespace/awx unchanged
+…
+deployment.apps/awx-operator-controller-manager unchanged
+awx.awx.ansible.com/awx-demo created
+$ minikube kubectl -- -n 'awx' get pods
+NAME                                               READY   STATUS      RESTARTS   AGE
+awx-demo-migration-24.1.0-zwv8w                    0/1     Completed   0          115s
+awx-demo-postgres-15-0                             1/1     Running     0          10m
+awx-demo-task-9c4655cb9-cmz87                      4/4     Running     0          8m3s
+awx-demo-web-77f65cc65f-qhqrm                      3/3     Running     0          8m4s
+awx-operator-controller-manager-787d4945fb-fdffx   2/2     Running     0          14m
+
+$ # Default user is 'admin'.
+$ minikube kubectl -- -n 'awx' get secret 'awx-demo-admin-password' -o jsonpath="{.data.password}" | base64 --decode
+DgHIaA9onZj106osEmvECigzsBqutHqI
+$ xdg-open $(minikube service -n 'awx' 'awx-demo-service' --url)
+
+$ minikube kubectl -- delete -f <(minikube kubectl -- kustomize --enable-helm)
+```
+
+  </details>
 </details>
 
 ## Further readings
