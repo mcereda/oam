@@ -4,6 +4,8 @@
 1. [Kubernetes](#kubernetes)
    1. [Helm chart](#helm-chart)
    1. [Operator](#operator)
+1. [Repository management](#repository-management)
+   1. [Different owners for parts of the code base](#different-owners-for-parts-of-the-code-base)
 1. [CI/CD pipelines](#cicd-pipelines)
    1. [Make a job in a pipeline run only when some specific files change](#make-a-job-in-a-pipeline-run-only-when-some-specific-files-change)
    1. [Get the version of the helper image to use for a runner](#get-the-version-of-the-helper-image-to-use-for-a-runner)
@@ -367,6 +369,39 @@ or consider using the [minimal Minikube example values file] as reference, as st
 
 See the [operator guide] and the [operator code] for details.
 
+## Repository management
+
+### Different owners for parts of the code base
+
+Refer to [code owners] for more and updated information.
+
+Leverage _code owners_.
+
+By adding code owners to the repository, they become eligible approvers in the project for MRs that contain those files.
+<br/>
+Enable the _eligible approvers_ merge request approval rule in the project's _Settings_ > _Merge requests_.
+
+<div class="tip" style="
+  background-color: rgba(0,255,0,0.0625);
+  border: solid lightGreen;  /* #90EE90 */
+  margin: 1em 0;
+  padding: 1em 1em 0;
+">
+<header style="font-weight: bold; margin-bottom: 0.5em">Pro tip</header>
+
+Require code owner approval for protected branches in the project's _Settings_ > _Repository_ > _Protected branches_.
+
+</div>
+
+Gotchas:
+
+- Specifying owners for paths **overwrites** the previous owners list.<br/>
+  There seems to be no way to **inherit and add** (and not just overwrite) owners that would not require the list being
+  repeated.
+- There is as of 2024-04-10 no way to assign ownership by using aliases for roles (like maintainers or developers); only
+  groups or users are allowed.<br/>
+  This feature is being added, but it has been open for over 3y now. See [Ability to reference Maintainers or Developers from CODEOWNERS].
+
 ## CI/CD pipelines
 
 Refer to [CI/CD pipelines].
@@ -504,18 +539,26 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 - [Authenticating your GitLab CI runner to an AWS ECR registry using Amazon ECR Docker Credential Helper]
 - [How to restart GitLab]
 - [Customize pipeline configuration]
+- [Code owners]
+- [Ability to reference Maintainers or Developers from CODEOWNERS]
+- [Merge request approval rules]
+- [Caching in CI/CD]
+- [Predefined CI/CD variables reference]
 
 <!--
   References
   -->
 
 <!-- Upstream -->
+[ability to reference maintainers or developers from codeowners]: https://gitlab.com/gitlab-org/gitlab/-/issues/282438
 [adding and removing kubernetes clusters]: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
 [autoscaling gitlab runner on aws ec2]: https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/
 [back up gitlab excluding specific data from the backup]: https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html#excluding-specific-data-from-the-backup
 [back up gitlab using amazon s3]: https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html?tab=Linux+package+%28Omnibus%29#using-amazon-s3
+[caching in ci/cd]: https://docs.gitlab.com/ee/ci/caching/
 [chart]: https://docs.gitlab.com/charts/
 [ci/cd pipelines]: https://docs.gitlab.com/ee/ci/pipelines/
+[code owners]: https://docs.gitlab.com/ee/user/project/codeowners/
 [command-line options]: https://docs.gitlab.com/charts/installation/command-line-options.html
 [customize pipeline configuration]: https://docs.gitlab.com/ee/ci/pipelines/settings.html
 [deployment]: https://docs.gitlab.com/charts/installation/deployment.html
@@ -523,9 +566,11 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [docker machine's supported cloud providers]: https://docs.gitlab.com/runner/configuration/autoscale.html#supported-cloud-providers
 [global settings]: https://docs.gitlab.com/charts/charts/globals.html
 [how to restart gitlab]: https://docs.gitlab.com/ee/administration/restart_gitlab.html
+[merge request approval rules]: https://gitlab.ops.apolloagriculture.com/help/user/project/merge_requests/approvals/rules
 [minimal minikube example values file]: https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/values-minikube-minimum.yaml
 [operator code]: https://gitlab.com/gitlab-org/cloud-native/gitlab-operator
 [operator guide]: https://docs.gitlab.com/operator/
+[predefined ci/cd variables reference]: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
 [runners on kubernetes]: https://docs.gitlab.com/runner/install/kubernetes.html
 [support object storage bucket prefixes]: https://gitlab.com/gitlab-org/charts/gitlab/-/issues/3376
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
