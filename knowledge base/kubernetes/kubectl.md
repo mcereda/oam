@@ -6,7 +6,7 @@ Resource types are case **in**sensitive and can be specified in their _singular_
 
 ```sh
 # The two commands below are equivalent.
-kubectl get deployment,replicasets,pods -A
+kubectl get deployment,replicaSets,pods -A
 kubectl get deploy,rs,po -A
 ```
 
@@ -16,7 +16,7 @@ Multiple resource types can be specified together, but **only one resource name*
 Resource names are case **sensitive** and will filter the requested resources; use the `-l` (`--selector`) option to play around filtering:
 
 ```sh
-kubectl get deployments,replicasets -A
+kubectl get deployments,replicaSets -A
 kubectl get pod 'etcd-minikube' -n 'kube-system'
 kubectl get pods -l 'app=nginx,tier=frontend'
 ```
@@ -37,7 +37,13 @@ One possible output format is [JSONpath].
 
 ## TL;DR
 
+<details>
+  <summary>Installation and configuration</summary>
+
 ```sh
+# Installation.
+brew install 'kubernetes-cli'
+
 # Enable shell completion.
 source <(kubectl completion 'bash')
 echo "[[ $commands[kubectl] ]] && source <(kubectl completion 'zsh')" >> "${HOME}/.zshrc"
@@ -45,7 +51,14 @@ echo "[[ $commands[kubectl] ]] && source <(kubectl completion 'zsh')" >> "${HOME
 # Use multiple configuration files at once.
 # This will *merge* all files in one big temporary configuration file.
 KUBECONFIG="path/to/config1:…:path/to/configN"
+```
 
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
 # Show the final, merged configuration.
 kubectl config view
 
@@ -101,7 +114,7 @@ kubectl get po --sort-by='.status.containerStatuses[0].restartCount'
 kubectl get events --sort-by '.metadata.creationTimestamp'
 kubectl get pods --field-selector='status.phase=Running'
 kubectl get node -l='!node-role.kubernetes.io/master'
-kubectl get replicasets -l 'environment in (prod, qa)'
+kubectl get replicaSets -l 'environment in (prod, qa)'
 kubectl get deploy --selector 'tier,tier notin (frontend)'
 
 # Extract information from Resources' definition.
@@ -160,7 +173,7 @@ kubectl describe node 'pi'
 kubectl describe deploy,rs,po -l 'app=redis'
 
 # Validate manifests.
-kubectl apply -f 'manifest' --dry-run 'client' --validate 'strict'
+kubectl apply -f 'manifest.yaml' --dry-run='client' --validate='strict'
 
 # Create or update resources from manifests.
 # Missing resources will be created. Existing resources will be updated.
@@ -172,7 +185,7 @@ cat <<-EOF | kubectl apply -f -
   apiVersion: v1
   kind: Secret
   metadata:
-    name: mysecret
+    name: mySecret
   type: Opaque
   data:
     password: $(echo -n "s33msi4" | base64 -w0)
@@ -288,7 +301,7 @@ KUBE_EDITOR="nano" kubectl edit 'svc/docker-registry'
 
 # Scale the ReplicaSet named 'foo' to 3 replicas.
 kubectl scale --replicas='3' 'rs/foo'
-kubectl scale --replicas='3' replicaset 'foo'
+kubectl scale --replicas='3' replicaSet 'foo'
 
 # Scale resources specified in "foo.yaml" to 3 replicas.
 kubectl scale --replicas=3 -f 'foo.yaml'
@@ -325,9 +338,9 @@ kubectl get pods --no-headers \
 | xargs -n1 kubectl delete pods
 
 # Delete non-default Service Accounts.
-kubectl get serviceaccounts \
+kubectl get serviceAccounts \
   -o jsonpath="{.items[?(@.metadata.name!='default')].metadata.name}" \
-| xargs -n1 kubectl delete serviceaccounts
+| xargs -n1 kubectl delete serviceAccounts
 
 # Attach to running Containers.
 kubectl attach 'my-pod' -i
@@ -392,6 +405,16 @@ kubectl top node 'my-node'
 # Listen on port 5000 on the local machine and forward connections to port 6000
 # of 'my-pod'
 kubectl port-forward 'my-pod' '5000:6000'
+```
+
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
+# Delete leftovers CRDs from helm charts by release name.
+kubectl delete crds -l "helm.sh/chart=awx-operator"
 
 # Show Containers' status, properties and capabilities from the inside.
 # Run the command from *inside* the container.
@@ -401,6 +424,8 @@ cat '/proc/1/status'
 # Run the command from *inside* the container.
 grep 'Cap' '/proc/1/status'
 ```
+
+</details>
 
 ## Configuration
 
