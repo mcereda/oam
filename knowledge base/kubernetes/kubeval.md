@@ -1,5 +1,20 @@
 # Kubeval
 
+<div class="alert" style="
+  background-color: rgba(255,0,0,0.0625);
+  border: solid tomato;  /* #FF6347 */
+  margin: 1em 0;
+  padding: 1em 1em 0;
+">
+<header style="
+  font-weight: bold;
+  margin-bottom: 0.5em;
+">Deprecated</header>
+
+Check out [`kubeconform`][kubeconform] or other tools.
+
+</div>
+
 Validates one or more Kubernetes configuration files.
 
 ## Table of contents <!-- omit in toc -->
@@ -7,7 +22,7 @@ Validates one or more Kubernetes configuration files.
 1. [TL;DR](#tldr)
 1. [Usage](#usage)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -36,10 +51,10 @@ Validation failed
 
 - [Website]
 - [Github]
+- [Kubernetes]
+- [`kubeconform`][kubeconform]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Validating kubernetes YAML files with kubeval]
 
@@ -52,9 +67,8 @@ All the references in the [further readings] section, plus the following:
 [website]: https://www.kubeval.com
 
 <!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Knowledge base -->
+[kubeconform]: kubeconform.md
 [kubernetes]: README.md
 
 <!-- Others -->
