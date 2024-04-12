@@ -28,7 +28,7 @@ dnf install 'vim' 'jq-0.5.6-1.fc24'
 dnf -y install 'Downloads/tito-0.6.2-1.fc22.noarch.rpm' \
   --setopt='install_weak_deps=False'
 dnf install 'https://kojipkgs.fedoraproject.org/packages/tito/0.6.0/1.fc22/noarch/tito-0.6.0-1.fc22.noarch.rpm'
-dnf install --advisory='FEDORA-2018-b7b99fe852' \*
+dnf install --advisory='FEDORA-2018-b7b99fe852' '*'
 
 # Install groups of packages.
 dnf install '@docker'
@@ -125,15 +125,20 @@ Use DNF's _versionlock_ plugin:
 ```sh
 # Installation.
 dnf install 'python3-dnf-plugin-versionlock'
+```
+
+```sh
+# List locked versions.
+dnf versionlock
+dnf versionlock list
 
 # Lock versions.
 dnf versionlock 'kernel-5.2.17-200.fc30'
 dnf versionlock add 'docker-ce' 'docker-ce-cli' 'docker-ce-rootless-extras'
 
-# List locked versions.
-
 # Unlock versions.
 dnf versionlock delete 'kernel' 'docker-ce-20.10.23-3.el8'
+dnf versionlock clear
 ```
 
 The _versionlock_ plugin maintains the constraints in its configuration file and automatically checks the constraints on every run.
