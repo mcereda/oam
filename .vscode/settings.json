@@ -146,6 +146,7 @@
         "kivi",
         "knockd",
         "kubeconfig",
+        "kubeconform",
         "kubectx",
         "kubelet",
         "kubens",
