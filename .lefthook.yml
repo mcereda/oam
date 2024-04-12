@@ -6,6 +6,13 @@ skip_output:
   - skips
 
 
+debug:
+  parallel: true
+  commands:
+    commitlint-config:
+      glob: '.commitlintrc.js'
+      run: commitlint --print-config
+
 lint:
   parallel: true
   commands:
