@@ -404,7 +404,8 @@ Gotchas:
 
 ## CI/CD pipelines
 
-Refer to [CI/CD pipelines].
+Refer to [CI/CD pipelines] and [CI/CD pipeline templates].<br/>
+Also check [Use CI/CD configuration from other files] and [Use extends to reuse configuration sections].
 
 ### Make a job in a pipeline run only when some specific files change
 
@@ -557,6 +558,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [back up gitlab using amazon s3]: https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html?tab=Linux+package+%28Omnibus%29#using-amazon-s3
 [caching in ci/cd]: https://docs.gitlab.com/ee/ci/caching/
 [chart]: https://docs.gitlab.com/charts/
+[ci/cd pipeline templates]: https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates
 [ci/cd pipelines]: https://docs.gitlab.com/ee/ci/pipelines/
 [code owners]: https://docs.gitlab.com/ee/user/project/codeowners/
 [command-line options]: https://docs.gitlab.com/charts/installation/command-line-options.html
@@ -574,6 +576,8 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [runners on kubernetes]: https://docs.gitlab.com/runner/install/kubernetes.html
 [support object storage bucket prefixes]: https://gitlab.com/gitlab-org/charts/gitlab/-/issues/3376
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
+[use ci/cd configuration from other files]: https://docs.gitlab.com/ee/ci/yaml/includes.html
+[use extends to reuse configuration sections]: https://docs.gitlab.com/ee/ci/yaml/yaml_optimization.html#use-extends-to-reuse-configuration-sections
 
 <!-- Others -->
 [authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb
