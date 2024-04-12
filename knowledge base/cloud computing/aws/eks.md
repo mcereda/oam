@@ -8,6 +8,7 @@
    1. [Schedule pods on Fargate](#schedule-pods-on-fargate)
 1. [Access management](#access-management)
 1. [Secrets encryption through KMS](#secrets-encryption-through-kms)
+1. [Storage](#storage)
 1. [Troubleshooting](#troubleshooting)
    1. [Identify common issues](#identify-common-issues)
    1. [The worker nodes fail to join the cluster](#the-worker-nodes-fail-to-join-the-cluster)
@@ -640,6 +641,11 @@ TL;DR:
 
    </details>
 
+## Storage
+
+Refer [How do I use persistent storage in Amazon EKS?], [Fargate storage] and
+[Running stateful workloads with Amazon EKS on AWS Fargate using Amazon EFS] for this.
+
 ## Troubleshooting
 
 See [Amazon EKS troubleshooting].
@@ -681,6 +687,8 @@ Debug: see [Identify common issues].
 - [Allowing IAM roles or users access to Kubernetes objects on your Amazon EKS cluster]
 - [How do I resolve the error "You must be logged in to the server (Unauthorized)" when I connect to the Amazon EKS API server?]
 - [Identity and Access Management]
+- [How do I use persistent storage in Amazon EKS?]
+- [Running stateful workloads with Amazon EKS on AWS Fargate using Amazon EFS]
 
 ### Sources
 
@@ -736,14 +744,17 @@ Debug: see [Identify common issues].
 [eks workshop]: https://www.eksworkshop.com/
 [enabling iam principal access to your cluster]: https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html
 [enabling secret encryption on an existing cluster]: https://docs.aws.amazon.com/eks/latest/userguide/enable-kms.html
+[fargate storage]: https://docs.aws.amazon.com/eks/latest/userguide/fargate-pod-configuration.html#fargate-storage
 [fargate]: https://docs.aws.amazon.com/eks/latest/userguide/fargate.html
 [getting started with amazon eks - aws management console and aws cli]: https://docs.aws.amazon.com/eks/latest/userguide/getting-started-console.html
 [how can i get my worker nodes to join my amazon eks cluster?]: https://repost.aws/knowledge-center/eks-worker-nodes-cluster
 [how do i resolve the error "you must be logged in to the server (unauthorized)" when i connect to the amazon eks api server?]: https://repost.aws/knowledge-center/eks-api-server-unauthorized-error
+[how do i use persistent storage in amazon eks?]: https://repost.aws/knowledge-center/eks-persistent-storage
 [identity and access management]: https://aws.github.io/aws-eks-best-practices/security/docs/iam/
 [managed node groups]: https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html
 [private cluster requirements]: https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html
 [required permissions to view eks resources]: https://docs.aws.amazon.com/eks/latest/userguide/view-kubernetes-resources.html#view-kubernetes-resources-permissions
+[running stateful workloads with amazon eks on aws fargate using amazon efs]: https://aws.amazon.com/blogs/containers/running-stateful-workloads-with-amazon-eks-on-aws-fargate-using-amazon-efs/
 [self-managed nodes]: https://docs.aws.amazon.com/eks/latest/userguide/worker.html
 [service-linked role permissions for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles-eks.html#service-linked-role-permissions-eks
 [simplified amazon eks access - new cluster access management controls]: https://www.youtube.com/watch?v=ae25cbV5Lxo

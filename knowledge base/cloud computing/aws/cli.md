@@ -81,6 +81,9 @@ aws iam create-access-key --user-name 'luigi'
 aws iam list-access-keys
 aws iam list-access-keys --user-name 'mario'
 
+# List configured OIDC providers.
+aws iam list-open-id-connect-providers
+
 
 # Show RDS instances.
 aws rds describe-db-instances
