@@ -83,6 +83,14 @@ plan: pre-flight ${tf_vars_file}
 apply: plan ${tf_plan_file}
     ${info applying ${environment_id}'s plan}
     @terraform apply '${tf_plan_file}'
+
+ifeq "test-db-connection" "$(findstring test-db-connection,$(MAKECMDGOALS))"
+-include db.env db.secret.env
+endif
+test-db-connection: override PSQL ?= psql
+test-db-connection: override PGPASSWORD ?= ${password}
+test-db-connection: ${shell which 'psql'}
+    @${PSQL} -h '${host}' -p '${port}' -U '${username}' '${database}' -c '\q'
 ```
 
 ## Load .env files in the Makefile
