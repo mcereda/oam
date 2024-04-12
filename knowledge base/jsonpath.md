@@ -17,12 +17,12 @@ kubectl get serviceaccounts \
 ## Further readings
 
 - [JSONPath Syntax]
-- [Live editor]
+- [How to extract values using a JSON Path Expression from the Response Body in Rungutan]
 
 <!--
   References
   -->
 
 <!-- Others -->
+[how to extract values using a json path expression from the response body in rungutan]: https://rungutan.com/blog/extract-value-json-path-expression/
 [jsonpath syntax]: https://support.smartbear.com/alertsite/docs/monitors/api/endpoint/jsonpath.html
-[live editor]: https://json8.github.io/patch/demos/apply/
