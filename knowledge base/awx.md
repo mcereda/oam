@@ -1,13 +1,31 @@
 # Ansible AWX
 
-1. [Installation](#installation)
-1. [Uninstallation](#uninstallation)
+1. [Deployment](#deployment)
+1. [Removal](#removal)
 1. [Testing](#testing)
    1. [Create a demo instance](#create-a-demo-instance)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
-## Installation
+## Deployment
+
+<div class="warning" style="
+  background-color: rgba(255,255,0,0.0625);
+  border: solid yellow;  /* #FFFF00 */
+  margin: 1em 0;
+  padding: 1em 1em 0;
+">
+<header style="
+  font-weight: bold;
+  margin-bottom: 0.5em;
+">Incomplete ARM64 image collection</header>
+
+Consider using only AMD64 nodes to host the containers for AWX.
+
+As of 2024-04-11, AWX does **not** appear to provide ARM64 images for all its containers.<br/>
+One'll need to build their own missing ARM64 images and specify those during deployment. Good luck!
+
+</div>
 
 Starting from version 18.0, the [AWX Operator][operator's documentation] is the preferred way to install AWX.<br/>
 It is meant to provide a Kubernetes-native installation method for AWX via an AWX Custom Resource Definition (CRD).
@@ -16,7 +34,7 @@ The operator will use an Ansible role to create all the AWX resources under its 
 See [Iterating on the installer without deploying the operator].
 
 <details>
-  <summary>Using kustomize</summary>
+  <summary>Using <code>kustomize</code></summary>
 
 ```sh
 $ mkdir -p '/tmp/awx'
@@ -46,7 +64,7 @@ awx-operator-controller-manager-8b7dfcb58-k7jt8   2/2     Running   0          1
 </details>
 
 <details style="margin-bottom: 1em;">
-  <summary>Using the helm chart</summary>
+  <summary>Using <code>helm</code></summary>
 
 ```sh
 # Add the operator's repository.
@@ -79,16 +97,8 @@ awx-operator-controller-manager-75b667b745-g9g9c   2/2     Running     0        
 
 </details>
 
-The default user is 'admin'.<br/>
-Get the password from the `{instance}-admin-password` secret:
-
-```sh
-$ kubectl -n 'awx' get secret 'awx-demo-admin-password' -o jsonpath="{.data.password}" | base64 --decode
-L2ZUgNTwtswVW3gtficG1Hd443l3Kicq
-```
-
-Once the operator is installed, AWX instances can be created by leveraging the `awx` CRD.
-The basic definition is as follows:
+Once the operator is installed, AWX instances can be created by leveraging the `AWX` CRD.<br/>
+The basic definition for a quick testing instance is as follows:
 
 ```yaml
 ---
@@ -98,14 +108,26 @@ kind: AWX
 metadata:
   name: awx-demo
 spec:
+  no_log: false
   service_type: nodeport
+  node_selector: |
+    kubernetes.io/arch: amd64
 ```
 
-Settings are configured through the `spec`key.<br/>
-See any page under the Advanced configuration section in the [operator's documentation].
+Due to the operator being the one creating its resources, one's control is limited to what one can define in the AWX
+resource's `spec` key.<br/>
+See the [installer role's defaults] and any page under the _Advanced configuration_ section in the
+[operator's documentation] for details.
+
+Useful specs:
+
+| Spec               | Description                                               | Reason                                                 |
+| ------------------ | --------------------------------------------------------- | ------------------------------------------------------ |
+| `no_log: false`    | See resource creation tasks' output in the operators'logs | Debug                                                  |
+| `node_selector: …` | Select nodes to run on                                    | Use only specific nodes (see warning at the beginning) |
 
 <details>
-  <summary>Using kubectl</summary>
+  <summary>Using <code>kubectl</code></summary>
 
 ```sh
 $ cd '/tmp/awx'
@@ -115,7 +137,7 @@ $ cd '/tmp/awx'
 </details>
 
 <details>
-  <summary>Using kustomize</summary>
+  <summary>Using <code>kustomize</code></summary>
 
 ```sh
 $ cd '/tmp/awx'
@@ -151,18 +173,33 @@ awx-demo-web-69d6d5d6c-wdxlv                       3/3     Running     0        
 awx-operator-controller-manager-75b667b745-g9g9c   2/2     Running     0          17m
 ```
 
-</details>
+</details><br/>
 
-## Uninstallation
+The default user is `admin`.<br/>
+Get the password from the `{instance}-admin-password` secret:
 
-Remove the `awx` resource associated to the instance to remove AWX:
+```sh
+$ kubectl -n 'awx' get secret 'awx-demo-admin-password' -o jsonpath="{.data.password}" | base64 --decode
+L2ZUgNTwtswVW3gtficG1Hd443l3Kicq
+```
+
+Connection:
+
+```sh
+kubectl -n 'awx' port-forward 'service/awx-service' '8080:http'
+open 'http://localhost:8080'
+```
+
+## Removal
+
+Remove the `AWX` resource associated to the instance to delete it:
 
 ```sh
 $ kubectl delete awx 'awx-demo'
 awx.awx.ansible.com "awx-demo" deleted
 ```
 
-Remove the operator:
+Remove the operator if not needed anymore:
 
 ```sh
 # Using `kustomize`.
@@ -172,7 +209,7 @@ kubectl delete -k '/tmp/awx'
 helm -n 'awx' uninstall 'my-awx-operator'
 ```
 
-Eventually, remove the namespace too:
+Eventually, remove the namespace too to clean all things up:
 
 ```sh
 kubectl delete ns 'awx'
@@ -188,7 +225,7 @@ kubectl delete ns 'awx'
 [Guide][basic install]
 
   <details>
-    <summary>1. ARM, Mac OS X, Minikube, Kustomize: failed: ARM images for AWX not available</summary>
+    <summary>1. ARM, Mac OS X, <code>minikube</code>, <code>kustomize</code>: failed: ARM images for AWX not available</summary>
 
 ```sh
 $ minikube start --cpus=4 --memory=6g --addons=ingress
@@ -251,7 +288,7 @@ $ # (ノಠ益ಠ)ノ彡┻━┻
   </details>
 
   <details>
-    <summary>2. AMD64, OpenSUSE Leap 15.5, Minikube, Kustomize</summary>
+    <summary>2. AMD64, OpenSUSE Leap 15.5, <code>minikube</code>, <code>kustomize</code></summary>
 
 ```sh
 $ minikube start --cpus=4 --memory=6g --addons=ingress
@@ -326,7 +363,7 @@ $ minikube kubectl -- delete -k '.'
 [Guide][helm install on existing cluster]
 
   <details>
-    <summary>1. AMD64, OpenSUSE Leap 15.5, Minikube, Helm</summary>
+    <summary>1. AMD64, OpenSUSE Leap 15.5, <code>minikube</code>, <code>helm</code></summary>
 
 ```sh
 $ minikube start --cpus=4 --memory=6g --addons=ingress
@@ -395,7 +432,7 @@ $ minikube kubectl -- delete ns 'awx'
   <summary>Run: kustomized helm chart</summary>
 
   <details>
-    <summary>1. AMD64, OpenSUSE Leap 15.5, Minikube</summary>
+    <summary>1. AMD64, OpenSUSE Leap 15.5, <code>minikube</code></summary>
 
 <div class="warning" style="
   background-color: rgba(255,255,0,0.0625);
@@ -403,7 +440,10 @@ $ minikube kubectl -- delete ns 'awx'
   margin: 1em 0;
   padding: 1em 1em 0;
 ">
-<header style="font-weight: bold; margin-bottom: 0.5em">⚠ Warning ⚠️</header>
+<header style="
+  font-weight: bold;
+  margin-bottom: 0.5em;
+">Warning</header>
 
 Mind including the CRDs from the helm chart.
 
@@ -501,6 +541,7 @@ $ minikube kubectl -- delete -f <(minikube kubectl -- kustomize --enable-helm)
 - [arm64 image pulled shows amd64 as its arch]
 - [Helm install on existing cluster]
 - [Iterating on the installer without deploying the operator]
+- [Installer role's defaults]
 
 <!--
   References
@@ -519,6 +560,7 @@ $ minikube kubectl -- delete -f <(minikube kubectl -- kustomize --enable-helm)
 [awx's repository]: https://github.com/ansible/awx/
 [basic install]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/installation/basic-install.html
 [helm install on existing cluster]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/installation/helm-install-on-existing-cluster.html
+[installer role's defaults]: https://github.com/ansible/awx-operator/blob/ffba1b4712a0b03f1faedfa70e3a9ef0d443e4a6/roles/installer/defaults/main.yml
 [iterating on the installer without deploying the operator]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/troubleshooting/debugging.html#iterating-on-the-installer-without-deploying-the-operator
 [operator's documentation]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/
 [operator's repository]: https://github.com/ansible/awx-operator/
