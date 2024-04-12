@@ -402,9 +402,9 @@ kubectl drain 'my-node'
 # Show metrics for given Nodes.
 kubectl top node 'my-node'
 
-# Listen on port 5000 on the local machine and forward connections to port 6000
-# of 'my-pod'
+# Forward local connections to cluster resources.
 kubectl port-forward 'my-pod' '5000:6000'
+kubectl -n 'default' port-forward 'service/my-service' '8443:https'
 ```
 
 </details>
@@ -413,6 +413,12 @@ kubectl port-forward 'my-pod' '5000:6000'
   <summary>Real world use cases</summary>
 
 ```sh
+# Get the 'IP:port' address of NodePort services.
+kubectl -n 'awx' get service 'awx-service' -o 'json' | jq -r '.spec|[.clusterIP,.ports[].nodePort]|join(":")' -
+
+# Forward local connections to cluster resources.
+kubectl -n 'awx' port-forward 'service/awx-service' '8080:http'
+
 # Delete leftovers CRDs from helm charts by release name.
 kubectl delete crds -l "helm.sh/chart=awx-operator"
 

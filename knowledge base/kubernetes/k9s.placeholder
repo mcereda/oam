@@ -1,1 +1,23 @@
 https://k9scli.io/
+https://k9scli.io/topics/commands/
+
+```sh
+# List all available CLI options.
+k9s help
+
+# Get info about K9s runtime (logs, configs, etc…).
+k9s info
+
+# Run K9S in specific namespaces.
+k9s -n 'namespace-name'
+
+# Run K9S and launch in pod view via the pod command.
+k9s -c pod
+
+# Start K9S using specific KubeConfig contexts.
+k9s --context 'context-name'
+
+# Start K9S in readonly mode.
+# Disables all modification commands.
+k9s --readonly
+```
