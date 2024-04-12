@@ -19,7 +19,7 @@
 | BSS     | Basic Service Set                                      | Group of wireless devices that work with the same AP                                                |
 | BSSID   | Basic Service Set IDentifier                           | An AP's MAC address                                                                                 |
 | BYOD    | Bring Your Own Device                                  |                                                                                                     |
-| CD      | Continuous Delivery                                    |                                                                                                     |
+| CD      | Continuous Delivery                                    | Continuous creation and testing of artifacts, ready to be deployed at the end of the process        |
 | CD      | Continuous Deployment                                  |                                                                                                     |
 | CI      | Continuous Integration                                 |                                                                                                     |
 | CLI     | Command Line Interface                                 |                                                                                                     |
@@ -68,6 +68,7 @@
 | LED     | Light Emitting Diode                                   |                                                                                                     |
 | LIFO    | Last In First Out                                      |                                                                                                     |
 | M2COTS  | Mass Market COTS                                       | Widely available COTS products                                                                      |
+| OIDC    | OpenID Connect                                         |                                                                                                     |
 | PDF     | Portable Document Format                               |                                                                                                     |
 | PEBCAK  | Problem Exists Between Chair And Keyboard              |                                                                                                     |
 | PGP     | Pretty Good Privacy                                    |                                                                                                     |
@@ -112,6 +113,8 @@
 - [CN (canonicalName vs CommonName) In Active Directory Explained]
 - [KISS principle is not that simple]
 - [SBOM at a Glance]
+- [What is OpenID Connect]
+- [Continuous delivery]
 
 <!--
   References
@@ -137,5 +140,7 @@
 
 <!-- Others -->
 [cn (canonicalname vs commonname) in active directory explained]: https://www.itechguides.com/what-is-cn-in-active-directory/
+[continuous delivery]: https://en.wikipedia.org/wiki/Continuous_delivery
 [kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
 [sbom at a glance]: https://www.ntia.gov/sites/default/files/publications/sbom_at_a_glance_apr2021_0.pdf
+[what is openid connect]: https://openid.net/developers/how-connect-works/
