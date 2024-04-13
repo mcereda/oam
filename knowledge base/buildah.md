@@ -58,6 +58,14 @@ buildah from '012345678901.dkr.ecr.eu-east-2.amazonaws.com/library/amazoncorrett
 # List working containers.
 buildah containers
 
+# Start working containers.
+buildah run 'wc-fedora' -- dnf -y install 'lighttpd'
+
+# Configure started working containers.
+buildah config --annotation "com.example.build.host=$(uname -n)" 'wc-fedora'
+buildah config --cmd '/usr/sbin/lighttpd -D -f /etc/lighttpd/lighttpd.conf' 'wc-fedora'
+buildah config --port '80' 'wc-fedora'
+
 # Create images from working containers.
 buildah commit 'starting-working-container' 'alpine-custom'
 buildah commit --rm 'working-container-removed-after-commit' 'oci-archive:/tmp/alpine-custom.tar'
@@ -71,6 +79,20 @@ buildah build --pull -t '012345678901.dkr.ecr.eu-east-2.amazonaws.com/me/my-alpi
 buildah push 'cfde91e4763f' 'docker://registry.example.com/repository:tag'
 buildah push --disable-compression 'localhost/test-image' 'docker-daemon:test-image:3.0'
 buildah push --creds 'kevin:secretWord' --sign-by '7425…109F' 'docker.io/library/debian' 'oci:/path/to/layout:image:tag'
+
+# Remove working containers.
+buildah rm 'fedora-http-server'
+buildah delete 'starting-working-container' … 'debian-working-container'
+buildah rm --all
+
+# Remove images.
+buildah rmi 'localhost/test-image'
+buildah rmi --all --force
+buildah rmi --prune 'cfde91e4763f' … 'boinc/client:amd'
+
+# Remove .
+buildah prune
+buildah prune --all
 ```
 
 </details>
@@ -86,6 +108,10 @@ CONTAINER=$(buildah from 'fedora') \
 && buildah config --cmd '/usr/sbin/lighttpd -D -f /etc/lighttpd/lighttpd.conf' "$CONTAINER" \
 && buildah config --port '80' "$CONTAINER" \
 && buildah commit "$CONTAINER" 'company/lighttpd:testing'
+
+# Clean everything up.
+buildah rm --all \
+&& buildah prune --all
 ```
 
 </details>
