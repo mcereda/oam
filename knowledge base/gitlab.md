@@ -527,6 +527,8 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 - [Adding and removing Kubernetes clusters]
 - Gitlab's [operator code] and relative [guide][operator guide]
 - [CI/CD pipelines]
+- [Buildah]
+- [Kaniko]
 
 ### Sources
 
@@ -545,11 +547,18 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 - [Merge request approval rules]
 - [Caching in CI/CD]
 - [Predefined CI/CD variables reference]
+- [Tutorial: Use Buildah in a rootless container with GitLab Runner Operator on OpenShift]
 
 <!--
   References
   -->
 
+<!-- In-article sections -->
+<!-- Knowledge base -->
+[buildah]: buildah.md
+[kaniko]: kubernetes/kaniko.placeholder
+
+<!-- Files -->
 <!-- Upstream -->
 [ability to reference maintainers or developers from codeowners]: https://gitlab.com/gitlab-org/gitlab/-/issues/282438
 [adding and removing kubernetes clusters]: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
@@ -576,6 +585,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [runners on kubernetes]: https://docs.gitlab.com/runner/install/kubernetes.html
 [support object storage bucket prefixes]: https://gitlab.com/gitlab-org/charts/gitlab/-/issues/3376
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
+[tutorial: use buildah in a rootless container with gitlab runner operator on openshift]: https://docs.gitlab.com/ee/ci/docker/buildah_rootless_tutorial.html
 [use ci/cd configuration from other files]: https://docs.gitlab.com/ee/ci/yaml/includes.html
 [use extends to reuse configuration sections]: https://docs.gitlab.com/ee/ci/yaml/yaml_optimization.html#use-extends-to-reuse-configuration-sections
 
