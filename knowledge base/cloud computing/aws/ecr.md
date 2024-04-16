@@ -10,6 +10,11 @@
 ```sh
 # List and get information about the repositories in ECRs.
 aws ecr describe-repositories
+aws ecr describe-repositories --repository-names 'docker-tools/image-builder'
+aws ecr describe-repositories --registry-id '123456789012' --query 'repositories[].repositoryName'
+
+# Create repositories.
+aws ecr create-repository --repository-name 'docker-tools/image-builder'
 
 # List images in ECRs.
 aws ecr list-images --repository-name 'repository'
@@ -21,7 +26,7 @@ aws ecr get-login-password \
 | docker login --username 'AWS' --password-stdin 'aws_account_id.dkr.ecr.region.amazonaws.com' \
 
 # Pull images from ECRs.
-docker 'pull aws_account_id.dkr.ecr.region.amazonaws.com/repository_name/image_name:tag'
+docker pull 'aws_account_id.dkr.ecr.region.amazonaws.com/repository_name/image_name:tag'
 
 
 # List and show pull through cache rules.
@@ -50,6 +55,11 @@ docker pull '123456789012.dkr.ecr.eu-west-1.amazonaws.com/quay/argoproj/argocd:v
 # E.g., 'library/alpine' instead of just 'alpine'.
 docker pull '123456789012.dkr.ecr.eu-south-1.amazonaws.com/docker-hub/library/nginx:perl'
 docker pull '123456789012.dkr.ecr.us-west-2.amazonaws.com/docker-hub/grafana/grafana'
+```
+
+```sh
+aws ecr describe-repositories --repository-names 'docker-tools/image-builder' \
+|| aws ecr create-repository --repository-name 'docker-tools/image-builder'
 ```
 
 ## Pull through cache feature

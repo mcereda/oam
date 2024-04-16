@@ -309,8 +309,10 @@ docker load …
 - [Configuring DNS]
 - [Cheatsheet]
 - [Getting around Docker's host network limitation on Mac]
+- [Dockerfile reference]
 - [Building multi-arch images for ARM and x86 with Docker Desktop]
 - [OpenContainers Image Spec]
+- [Docker ARG, ENV and .env - a Complete Guide]
 
 <!--
   References
@@ -324,11 +326,13 @@ docker load …
 
 <!-- Upstream -->
 [building multi-arch images for arm and x86 with docker desktop]: https://www.docker.com/blog/multi-arch-images/
+[dockerfile reference]: https://docs.docker.com/reference/dockerfile/
 [github]: https://github.com/docker
 
 <!-- Others -->
 [arch linux wiki]: https://wiki.archlinux.org/index.php/Docker
 [cheatsheet]: https://collabnix.com/docker-cheatsheet/
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html
+[docker arg, env and .env - a complete guide]: https://vsupalov.com/docker-arg-env-variable-guide/
 [getting around docker's host network limitation on mac]: https://medium.com/@lailadahi/getting-around-dockers-host-network-limitation-on-mac-9e4e6bfee44b
 [opencontainers image spec]: https://specs.opencontainers.org/image-spec/
