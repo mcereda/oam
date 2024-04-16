@@ -143,6 +143,14 @@ git commit --amend --no-edit --gpg-sign
 # Show commits which would be pushed.
 git log @{u}..
 
+# Get the current commit SHA.
+git rev-parse 'HEAD'
+git show -s --format=%H
+
+# Get the current commit SHA in short form.
+git rev-parse --short 'HEAD'
+git show -s --format=%h
+
 # Revert a commit, but keep the history of the event as a separate commit.
 git revert 'commit_hash'
 
@@ -1003,7 +1011,7 @@ git -c http.sslVerify=false …
 - [How to manage your secrets with git-crypt]
 - Question about [how to rebase a local branch with remote master]
 - Question about how to [merge master into a feature branch]
-- Question about how to [prune local branches that do not exist on remote anymore]
+- Question about how to [prune local tracking branches that do not exist on remote anymore]
 - Question about how to [rebase remote branches]
 - Quick guide about [git rebase][rebase quick guide]
 - Quick guide about how to [remove files from git commit]

@@ -548,6 +548,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 - [Caching in CI/CD]
 - [Predefined CI/CD variables reference]
 - [Tutorial: Use Buildah in a rootless container with GitLab Runner Operator on OpenShift]
+- [Use kaniko to build Docker images]
 
 <!--
   References
@@ -588,6 +589,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [tutorial: use buildah in a rootless container with gitlab runner operator on openshift]: https://docs.gitlab.com/ee/ci/docker/buildah_rootless_tutorial.html
 [use ci/cd configuration from other files]: https://docs.gitlab.com/ee/ci/yaml/includes.html
 [use extends to reuse configuration sections]: https://docs.gitlab.com/ee/ci/yaml/yaml_optimization.html#use-extends-to-reuse-configuration-sections
+[use kaniko to build docker images]: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
 
 <!-- Others -->
 [authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb

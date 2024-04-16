@@ -70,15 +70,22 @@ buildah config --port '80' 'wc-fedora'
 buildah commit 'starting-working-container' 'alpine-custom'
 buildah commit --rm 'working-container-removed-after-commit' 'oci-archive:/tmp/alpine-custom.tar'
 
-# Create images from Dockerfiles.
-# The current directory is used as default context path.
+# Create images.
 buildah build -t 'fedora-http-server'
 buildah build --pull -t '012345678901.dkr.ecr.eu-east-2.amazonaws.com/me/my-alpine:0.0.1' 'dockerfile-dir'
+buildah build --manifest 'me/my-alpine:0.0.1' --platform 'linux/amd64,linux/arm64/v8'
+buildah build … --output 'type=tar,dest=/tmp/alpine.tar'
+
+# Inspect stuff.
+buildah inspect 'fedora-http-server'
+buildah inspect -t 'image' 'cfde91e4763f'
+buildah manifest inspect 'me/my-alpine:0.0.1'
 
 # Push images.
 buildah push 'cfde91e4763f' 'docker://registry.example.com/repository:tag'
 buildah push --disable-compression 'localhost/test-image' 'docker-daemon:test-image:3.0'
 buildah push --creds 'kevin:secretWord' --sign-by '7425…109F' 'docker.io/library/debian' 'oci:/path/to/layout:image:tag'
+buildah manifest push
 
 # Remove working containers.
 buildah rm 'fedora-http-server'
@@ -126,7 +133,9 @@ buildah rm --all \
 
 - [Tutorial: Use Buildah in a rootless container with GitLab Runner Operator on OpenShift]
 - [Building container image in AWS CodeBuild with buildah]
+- [Building multi-architecture containers with Buildah]
 - [Use Buildah to build OCI container images]
+- [Containers-transports man page]
 
 <!--
   References
@@ -143,5 +152,7 @@ buildah rm --all \
 
 <!-- Others -->
 [building container image in aws codebuild with buildah]: https://dev.to/leonards/building-container-image-in-aws-codebuild-with-buildah-8gk
+[building multi-architecture containers with buildah]: https://medium.com/oracledevs/building-multi-architecture-containers-with-buildah-44ed100ec3f3
+[containers-transports man page]: https://man.archlinux.org/man/extra/containers-common/containers-transports.5.en
 [tutorial: use buildah in a rootless container with gitlab runner operator on openshift]: https://docs.gitlab.com/ee/ci/docker/buildah_rootless_tutorial.html
 [use buildah to build oci container images]: https://www.linode.com/docs/guides/using-buildah-oci-images/
