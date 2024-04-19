@@ -7,7 +7,8 @@
 1. [Repository management](#repository-management)
    1. [Different owners for parts of the code base](#different-owners-for-parts-of-the-code-base)
 1. [CI/CD pipelines](#cicd-pipelines)
-   1. [Make a job in a pipeline run only when some specific files change](#make-a-job-in-a-pipeline-run-only-when-some-specific-files-change)
+   1. [Specify when to run jobs](#specify-when-to-run-jobs)
+      1. [Make a job in a pipeline run only when some specific files change](#make-a-job-in-a-pipeline-run-only-when-some-specific-files-change)
    1. [Get the version of the helper image to use for a runner](#get-the-version-of-the-helper-image-to-use-for-a-runner)
 1. [Manage kubernetes clusters](#manage-kubernetes-clusters)
 1. [Runners](#runners)
@@ -249,7 +250,8 @@ minikube start --kubernetes-version "${K8S_VERSION}" --cpus '8' --memory '12GiB'
 minikube start --kubernetes-version "${K8S_VERSION}" --cpus '8' --memory '12GiB' --vm  # hyperkit vm (to be able to use Ingresses)
 ```
 
-or consider using the [minimal Minikube example values file] as reference, as stated in [CPU and RAM Resource Requirements](https://docs.gitlab.com/charts/installation/deployment.html#cpu-and-ram-resource-requirements)
+or consider using the [minimal Minikube example values file] as reference, as stated in
+[CPU and RAM Resource Requirements][chart cpu and ram resource requirements]
 
 1. Finish preparing the environment:
 
@@ -264,7 +266,8 @@ or consider using the [minimal Minikube example values file] as reference, as st
    minikube addons enable 'metrics-server'
    ```
 
-1. When using the `LoadBalancer` Ingress type (the default), start a tunnel in a different shell to let the installation finish:
+1. When using the `LoadBalancer` Ingress type (the default), start a tunnel in a different shell to let the installation
+   finish:
 
    ```sh
    minikube tunnel -c
@@ -381,17 +384,7 @@ By adding code owners to the repository, they become eligible approvers in the p
 <br/>
 Enable the _eligible approvers_ merge request approval rule in the project's _Settings_ > _Merge requests_.
 
-<div class="tip" style="
-  background-color: rgba(0,255,0,0.0625);
-  border: solid lightGreen;  /* #90EE90 */
-  margin: 1em 0;
-  padding: 1em 1em 0;
-">
-<header style="font-weight: bold; margin-bottom: 0.5em">Pro tip</header>
-
-Require code owner approval for protected branches in the project's _Settings_ > _Repository_ > _Protected branches_.
-
-</div>
+> Require code owner approval for protected branches in the project's _Settings_ > _Repository_ > _Protected branches_.
 
 Gotchas:
 
@@ -400,20 +393,27 @@ Gotchas:
   repeated.
 - There is as of 2024-04-10 no way to assign ownership by using aliases for roles (like maintainers or developers); only
   groups or users are allowed.<br/>
-  This feature is being added, but it has been open for over 3y now. See [Ability to reference Maintainers or Developers from CODEOWNERS].
+  This feature is being added, but it has been open for over 3y now. See
+  [Ability to reference Maintainers or Developers from CODEOWNERS].
 
 ## CI/CD pipelines
 
 Refer to [CI/CD pipelines] and [CI/CD pipeline templates].<br/>
 Also check [Use CI/CD configuration from other files] and [Use extends to reuse configuration sections].
 
-### Make a job in a pipeline run only when some specific files change
+### Specify when to run jobs
 
-Use the `only` and `except` keywords to specify a condition to run. Alternatively, use the `rules` keyword.
+Refer [Specify when jobs run with `rules`][specify when jobs run with rules].
 
-> The `only`/`except` keywords have been deprecated by the `rules` keyword, and cannot be used together. This means you might be forced to use `only`/`except` if you are including a pipeline that is already using them.
+Use the `rules` key and specify the conditions the job needs.
 
-Let's use a job named `docker-build` as example:
+> The `only`/`except` keywords have been deprecated by the `rules` keyword, and cannot be used together.<br/>
+> This means one might be forced to use `only`/`except` if one is including a pipeline that is already using them.
+
+Conditions are validated **in order** until one applies. The rest are ignored.<br/>
+If no condition applies, the job is skipped.
+
+#### Make a job in a pipeline run only when some specific files change
 
 ```yaml
 docker-build:
@@ -424,7 +424,8 @@ docker-build:
       - Dockerfile
 ```
 
-Multiple entries in the condition are validated in an `OR` fashion. In this example, the condition will make the job run only when a change occurs:
+Multiple entries in the condition are validated in an `OR` fashion. In the example above, the condition will make the
+job run only when a change occurs:
 
 - to any file in the `cmd` directory
 - to any file in the repository's root directory which name starts with `go` (like `go.mod` or `go.sum`)
@@ -434,7 +435,7 @@ Multiple entries in the condition are validated in an `OR` fashion. In this exam
 
 The `gitlab/gitlab-runner-helper` images are tagged using the runner's **os**, **architecture**, and **git revision**.
 
-One needs to know the version of Gitlab and of the runner one wants to use.
+One needs to know the version of Gitlab and of the runner one wants to use.<br/>
 Usually, the runner's version is the one most similar to Gitlab's version (e.g. Gitlab: 13.6.2 → gitlab-runner: 13.6.0).
 
 To get the tag to use for the helper, check the runner's version:
@@ -449,7 +450,8 @@ Built:        2020-11-21T06:16:31+0000
 OS/Arch:      linux/amd64
 ```
 
-In this case, the os is _Linux_, the architecture is _amd64_ and the revision is _8fa89735_. So, following their instructions, the tag will be _x86_64-8fa89735_:
+In this case, the os is _Linux_, the architecture is _amd64_ and the revision is _8fa89735_. So, following their
+instructions, the tag will be _x86_64-8fa89735_:
 
 ```sh
 $ docker pull 'gitlab/gitlab-runner-helper:x86_64-8fa89735'
@@ -549,6 +551,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 - [Predefined CI/CD variables reference]
 - [Tutorial: Use Buildah in a rootless container with GitLab Runner Operator on OpenShift]
 - [Use kaniko to build Docker images]
+- [Specify when jobs run with `rules`][specify when jobs run with rules]
 
 <!--
   References
@@ -567,6 +570,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [back up gitlab excluding specific data from the backup]: https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html#excluding-specific-data-from-the-backup
 [back up gitlab using amazon s3]: https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html?tab=Linux+package+%28Omnibus%29#using-amazon-s3
 [caching in ci/cd]: https://docs.gitlab.com/ee/ci/caching/
+[chart cpu and ram resource requirements]: https://docs.gitlab.com/charts/installation/deployment.html#cpu-and-ram-resource-requirements
 [chart]: https://docs.gitlab.com/charts/
 [ci/cd pipeline templates]: https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates
 [ci/cd pipelines]: https://docs.gitlab.com/ee/ci/pipelines/
@@ -584,6 +588,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [operator guide]: https://docs.gitlab.com/operator/
 [predefined ci/cd variables reference]: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
 [runners on kubernetes]: https://docs.gitlab.com/runner/install/kubernetes.html
+[specify when jobs run with rules]: https://docs.gitlab.com/ee/ci/jobs/job_rules.html
 [support object storage bucket prefixes]: https://gitlab.com/gitlab-org/charts/gitlab/-/issues/3376
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
 [tutorial: use buildah in a rootless container with gitlab runner operator on openshift]: https://docs.gitlab.com/ee/ci/docker/buildah_rootless_tutorial.html
