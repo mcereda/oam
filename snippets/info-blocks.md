@@ -2,6 +2,8 @@
 
 The idea here is to mimic Confluence's Info panel.
 
+This only worked for Azure Devops' wikis.
+
 <style>
   .info-block {
     margin: 1em 0;
