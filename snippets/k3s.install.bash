@@ -5,8 +5,7 @@
 set -e
 
 curl "https://github.com/k3s-io/k3s/releases/download/v1.19.7%2Bk3s1/k3s" \
-  --location \
-  --remote-name
+	--location --remote-name
 
 sudo k3s server &
 # Kubeconfig is written to /etc/rancher/k3s/k3s.yaml
