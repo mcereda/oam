@@ -58,6 +58,8 @@ What really worked for me.
   They **need** to be adapted to the workplace, not the other way around.
 - [Amazon's leadership principles] are double-edge swords.<br/>
   Only Amazon was able to apply them as they are defined, and they still create a lot of discontent.
+- Keep Goodhart's law in mind:
+  > When a measure becomes a target, it ceases to be a good measure.
 
 ## Teamwork
 
@@ -132,6 +134,7 @@ Listed in order of addition:
 - [5 whys]
 - [Thinking about lockdowns] by CGP Grey
 - [Why your platform monolith is probably a bad idea] by David Leitner
+- [How to mind Goodhart's law and avoid unintended consequences]
 
 <!--
   References
@@ -156,6 +159,7 @@ Listed in order of addition:
 [from inboxing to thought showers: how business bullshit took over]: https://www.theguardian.com/news/2017/nov/23/from-inboxing-to-thought-showers-how-business-bullshit-took-over
 [git branching strategies vs. trunk-based development]: https://launchdarkly.com/blog/git-branching-strategies-vs-trunk-based-development/
 [hacking your manager - how to get platform engineering on their radar]: https://www.youtube.com/watch?v=8xprsTXKr0w
+[how to mind goodhart's law and avoid unintended consequences]: https://builtin.com/data-science/goodharts-law
 [how to tackle pull request fatigue]: https://javascript.plainenglish.io/tackling-pr-fatigue-6865edc205ce
 [kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
 [murphy's law]: https://en.wikipedia.org/wiki/Murphy%27s_law
