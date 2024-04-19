@@ -3,6 +3,7 @@
 1. [Networking](#networking)
 1. [Services](#services)
    1. [CloudWatch](#cloudwatch)
+1. [Config](#config)
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
 1. [Further readings](#further-readings)
@@ -32,7 +33,12 @@ networks. They can communicate with services outside the VPC, but cannot receive
 | Service      | Description                                   |
 | ------------ | --------------------------------------------- |
 | [CloudWatch] | Observability (logging, monitoring, alerting) |
+| [Config]     | FIXME                                         |
 | [EC2]        | Virtual machines                              |
+| [ECR]        | Container registry                            |
+| [EKS]        | Kubernetes clusters                           |
+| [S3]         | Storage                                       |
+| [Sagemaker]  | Machine learning                              |
 
 ### CloudWatch
 
@@ -46,6 +52,25 @@ Metrics only exist in the region in which they are created.
 [Many AWS services][services that publish cloudwatch metrics] offer basic monitoring by publishing a default set of
 metrics to CloudWatch with no charge.<br/>
 This feature is automatically enabled by default when one starts using one of these services.
+
+## Config
+
+Compliance service for assessing and auditing AWS resources.
+
+Records and monitors resource configurations.
+
+Uses rules to evaluate whether the resources comply. Marks them with the evaluation result (_compliant_,
+_non-compliant_).
+
+Custom rules can be used to evaluate for uncommon requirements.<br/>
+Custom rules leverage lambda functions.
+
+Allows for automatic remediation for non-compliant resources by leveraging Systems Manager Automation documents.
+
+_Conformance packs_ are set of rules bundled together as a deployable single entity.<br/>
+Defined as YAML templates.<br/>
+Immutable: users cannot make changes without updating the whole rule package.<br/>
+Sample templates for compliance standards and benchmarks are available.
 
 ## Resource constraints
 
@@ -98,9 +123,14 @@ From [Using service-linked roles]:
 
 <!-- In-article sections -->
 [cloudwatch]: #cloudwatch
+[config]: #config
 
 <!-- Knowledge base -->
 [ec2]: ec2.md
+[ecr]: ecr.md
+[eks]: eks.md
+[s3]: s3.md
+[sagemaker]: sagemaker.md
 
 <!-- Upstream -->
 [access aws services through aws privatelink]: https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-access-aws-services.html
