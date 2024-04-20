@@ -19,7 +19,7 @@
 1. [Troubleshooting](#troubleshooting)
    1. [No matching host key type found](#no-matching-host-key-type-found)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -178,7 +178,8 @@ When connecting to a host, the SSH client will use settings:
 1. from the user's `~/.ssh/config` file,
 1. from the `/etc/ssh/ssh_config` file
 
-Settings are loaded in a first-come-first-served way. They should hence appear from the most specific to the most generic, both by file and by position in those files:
+Settings are loaded in a **first-come-first-served** way. They should hence appear from the most specific to the most
+generic, both by file and by position in those files:
 
 ```ssh-config
 Host targaryen
@@ -286,7 +287,8 @@ Notable options:
 
 - `auto_cache` enables caching based on modification times;
 - `reconnect` reconnects to the server;
-- `defer_permissions` works around the issue where certain shares may mount properly, but cause _permissions denied_ errors when accessed (caused by how Mac OS X's Finder translates and interprets permissions;
+- `defer_permissions` works around the issue where certain shares may mount properly, but cause _permissions denied_
+  errors when accessed (caused by how Mac OS X's Finder translates and interprets permissions;
 - `noappledouble` prevents Mac OS X to write `.DS_Store` files on the remote file system;
 - `volname` defines the name to use for the volume.
 
@@ -314,7 +316,8 @@ Error message example:
 
 > `Unable to negotiate with XXX port 22: no matching host key type found. Their offer: ssh-rsa.`
 
-Cause: the server only supports the kind of RSA with SHA-1, which is considered weak and deprecated in newer SSH versions.
+Cause: the server only supports the kind of RSA with SHA-1, which is considered weak and deprecated in newer SSH
+versions.
 
 Workaround: explicitly set your client to use the specified key type adding
 
@@ -342,10 +345,9 @@ Solution: update the SSH server.
 - [`SSHD_CONFIG(5)`][sshd_config man page] man page
 - [`sshd_config`][sshd_config example] example
 - [ssh-agent]
+- [Use GPG keys for SSH authentication]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Use SSHFS to mount a remote directory as a volume on OSX]
 - [Using the SSH config file]
@@ -361,17 +363,18 @@ All the references in the [further readings] section, plus the following:
   References
   -->
 
-<!-- Upstream -->
-[ssh_config man page]: https://man.openbsd.org/ssh_config
-[ssh-agent]: https://www.ssh.com/academy/ssh/agent
-[sshd_config man page]: https://man.openbsd.org/sshd_config
-
 <!-- In-article sections -->
-[further readings]: #further-readings
+<!-- Knowledge base -->
+[use gpg keys for ssh authentication]: gnupg.md#use-gpg-keys-for-ssh-authentication
 
 <!-- Files -->
 [ssh_config example]: ../examples/ssh/ssh_config
 [sshd_config example]: ../examples/ssh/sshd_config
+
+<!-- Upstream -->
+[ssh_config man page]: https://man.openbsd.org/ssh_config
+[ssh-agent]: https://www.ssh.com/academy/ssh/agent
+[sshd_config man page]: https://man.openbsd.org/sshd_config
 
 <!-- Others -->
 [get started with openssh for windows]: https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=gui

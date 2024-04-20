@@ -12,6 +12,9 @@
 ## - host sections only apply to the matched names
 ## - canonicalization forces a configuration reload to check the now canonical
 ##   host name against the configuration
+##
+## Sources:
+## - https://man.openbsd.org/ssh_config
 ################################################################################
 
 # Canonicalize host names as first thing
