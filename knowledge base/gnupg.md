@@ -11,10 +11,10 @@
 1. [Unattended key generation](#unattended-key-generation)
 1. [Change a key's password](#change-a-keys-password)
 1. [Put comments in a message or file](#put-comments-in-a-message-or-file)
-1. [Use a GPG key for SSH authentication](#use-a-gpg-key-for-ssh-authentication)
-    1. [Create an authentication-capable key or subkey](#create-an-authentication-capable-key-or-subkey)
-    1. [Enable SSH to use the GPG subkey](#enable-ssh-to-use-the-gpg-subkey)
-    1. [Share the GPG-SSH key](#share-the-gpg-ssh-key)
+1. [Use GPG keys for SSH authentication](#use-gpg-keys-for-ssh-authentication)
+    1. [Create authentication-capable keys or subkeys](#create-authentication-capable-keys-or-subkeys)
+    1. [Enable SSH to use GPG (sub)keys](#enable-ssh-to-use-gpg-subkeys)
+    1. [Share GPG-SSH keys](#share-gpg-ssh-keys)
 1. [Troubleshooting](#troubleshooting)
     1. [`gpg failed to sign the data; fatal: failed to write commit object`](#gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object)
     1. [`sign_and_send_pubkey: signing failed for … from agent: agent refused operation`](#sign_and_send_pubkey-signing-failed-for--from-agent-agent-refused-operation)
@@ -163,7 +163,8 @@ gpg --output 'file.out' --decrypt 'file.in.gpg'
 find . -type f -name "*.gpg" -exec gpg --decrypt-files {} +
 ```
 
-The second command will create the decrypted version of all files in the same directory. Each file will have the same name of the encrypted version, minus the `.gpg` extension.
+The second command will create the decrypted version of all files in the same directory. Each file will have the same
+name of the encrypted version, minus the `.gpg` extension.
 
 ## Key export
 
@@ -179,7 +180,8 @@ gpg --output 'file.out.gpg' --encrypt --recipient 'recipient' 'file.in'
 gpg --armor --symmetric --output 'file.out.gpg' 'file.in'
 ```
 
-Export all encrypted private keys (which will also include corresponding public keys) to a text file and create an encrypted version of that file:
+Export all encrypted private keys (which will also include corresponding public keys) to a text file and create an
+encrypted version of that file:
 
 ```sh
 # Export.
@@ -199,7 +201,8 @@ gpg --export-ownertrust > 'otrust.txt'
 
 ## Key import
 
-As the new user execute `gpg --import` commands against the secured files, or the decrypted content of those files, and then check for the new keys with `gpg -k` and `gpg -K`, e.g.:
+As the new user execute `gpg --import` commands against the secured files, or the decrypted content of those files, and
+then check for the new keys with `gpg -k` and `gpg -K`, e.g.:
 
 ```sh
 gpg --output 'myprivatekeys.asc' --decrypt 'mysecretatedprivatekeys.sec.asc' && \
@@ -267,18 +270,20 @@ hQIMAwbYc…
 ```
 
 OpenPGP defines all text to be in UTF-8, so a comment may be any UTF-8 string.<br/>
-The whole point of armoring, however, is to provide seven-bit-clean data, so if a comment has characters that are outside the US-ASCII range of UTF they may very well not survive transport.
+The whole point of armoring, however, is to provide seven-bit-clean data, so if a comment has characters that are
+outside the US-ASCII range of UTF they may very well not survive transport.
 
-## Use a GPG key for SSH authentication
+## Use GPG keys for SSH authentication
 
 > See also [How to enable SSH access using a GPG key for authentication].
 
 This exercise will use a GPG subkey with only the authentication capability enabled to complete SSH connections.<br/>
 You can create multiple subkeys as you would do for SSH key pairs.
 
-### Create an authentication-capable key or subkey
+### Create authentication-capable keys or subkeys
 
-To create subkeys, you should already have a GPG key. If you don't, read one of the many fine tutorials available on this topic.<br/>
+To create subkeys, you should already have a GPG key. If you don't, read one of the many fine tutorials available on
+this topic.<br/>
 Create the subkey by editing your existing key **in expert mode** to get access to the appropriate options:
 
 ```sh
@@ -345,17 +350,20 @@ gpg> quit
 Save changes? (y/N) y
 ```
 
-### Enable SSH to use the GPG subkey
+### Enable SSH to use GPG (sub)keys
 
-When using SSH, `ssh-agent` is used to manage SSH keys. When using a GPG key, `gpg-agent` is used to manage GPG keys.<br/>
+When using SSH, `ssh-agent` is used to manage SSH keys. When using a GPG key, `gpg-agent` is used to manage GPG
+keys.<br/>
 To get `gpg-agent` to handle requests from SSH, you need to enable its SSH support:
 
 ```sh
 echo "enable-ssh-support" >> ~/.gnupg/gpg-agent.conf
 ```
 
-You can avoid using `ssh-add` to load the keys by preemptively specifying which GPG keys to use in the `~/.gnupg/sshcontrol` file.<br/>
-Entries in this file need to be keygrips (internal identifiers that `gpg-agent` uses to refer to the keys). A keygrip refers to both the public and private key.<br/>
+You can avoid using `ssh-add` to load the keys by preemptively specifying which GPG keys to use in the
+`~/.gnupg/sshcontrol` file.<br/>
+Entries in this file need to be keygrips (internal identifiers that `gpg-agent` uses to refer to the keys). A keygrip
+refers to both the public and private key.<br/>
 Find the keygrips you need, then add them to the `~/.gnupg/sshcontrol` file:
 
 ```sh
@@ -407,9 +415,10 @@ $ ssh-add -L
 ssh-rsa AAAAB3NzaC…7SD8UQ== (none)
 ```
 
-### Share the GPG-SSH key
+### Share GPG-SSH keys
 
-Run `ssh-add -L` to list your public keys and copy them over manually to the remote host, or use `ssh-copy-id` as you would normally do.
+Run `ssh-add -L` to list one's public keys, then copy them over manually to the remote host.<br/>
+Alternatively, use `ssh-copy-id` as one would normally do.
 
 ## Troubleshooting
 
@@ -429,7 +438,8 @@ Run `ssh-add -L` to list your public keys and copy them over manually to the rem
 
 **Cause:**
 
-The environment variable `GPG_TTY` was not set and Pinentry could not reach the terminal session to prompt for the key's passphrase.
+The environment variable `GPG_TTY` was not set and Pinentry could not reach the terminal session to prompt for the key's
+passphrase.
 
 **Solution:**
 
