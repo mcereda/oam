@@ -79,6 +79,10 @@ sudo gitlab-backup create BACKUP='prefix_override' STRATEGY='copy'
 # See https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html#excluding-specific-data-from-the-backup
 sudo gitlab-backup create … \
   SKIP='db,repositories,uploads,builds,artifacts,pages,lfs,terraform_state,registry,packages,ci_secure_files'
+
+# Package upgrade.
+sudo yum check-update
+tmux new-session -A -s 'gitlab-upgrade' "sudo yum update 'gitlab-ee'"
 ```
 
 </details>
