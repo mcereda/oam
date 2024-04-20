@@ -9,9 +9,29 @@
 ## TL;DR
 
 <details>
+  <summary>Requirements</summary>
+
+- The IAM instance profile must have the correct permissions.<br/>
+  FIXME: specify.
+- One's instance's security group and VPC must allow HTTPS outbound traffic on port 443 to the Systems Manager's
+  endpoints:
+
+  - `ssm.eu-west-1.amazonaws.com`
+  - `ec2messages.eu-west-1.amazonaws.com`
+  - `ssmmessages.eu-west-1.amazonaws.com`
+
+  If the VPC does not have internet access, one must have enabled VPC endpoints to allow that outbound traffic from the
+  instance.
+- Also see <https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-with-ec2-instance-connect-endpoint.html>
+
+</details>
+<details>
   <summary>Usage</summary>
 
 ```sh
+# Get connection statuses.
+aws ssm get-connection-status --target 'instance-id'
+
 # Start sessions.
 aws ssm start-session --target 'instance-id'
 
@@ -23,14 +43,23 @@ aws ssm start-session \
 ```
 
 </details>
-
 <details>
   <summary>Real world use cases</summary>
+
+```sh
+# Connect to instances if they are available.
+instance_id='i-08fc83ad07487d72f' \
+&& eval $(aws ssm get-connection-status --target "$instance_id" --query "Status=='connected'" --output text) \
+&& aws ssm start-session --target "$instance_id" \
+|| (echo "instance ${instance_id} not available" >&2 && false)
+```
+
 </details>
 
 ## Gotchas
 
-- SSM starts shell sessions under `/usr/bin` ([source][how can i change the session manager shell to bash on ec2 linux instances?]):
+- SSM starts shell sessions under `/usr/bin`
+  ([source][how can i change the session manager shell to bash on ec2 linux instances?]):
 
   > **Other shell profile configuration options**<br/>
   > By default, Session Manager starts in the "/usr/bin" directory.
@@ -38,7 +67,8 @@ aws ssm start-session \
 ## Integrate with Ansible
 
 Create a dynamic inventory named `aws_ec2.yml`.<br/>
-It needs to be named like that to be found by the ['community.aws.aws_ssm' connection plugin][community.aws.aws_ssm connection].
+It needs to be named like that to be found by the
+['community.aws.aws_ssm' connection plugin][community.aws.aws_ssm connection].
 
 ```yml
 # File: 'aws_ec2.yml'.

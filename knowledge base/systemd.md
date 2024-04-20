@@ -46,6 +46,9 @@ systemctl --user disable --now 'davmail.service'
 # Check a service is currently active.
 systemctl is-active 'wpa_supplicant.service'
 
+# Check a service is currently enabled.
+systemctl is-enabled 'wpa_supplicant.service'
+
 # Reboot the system.
 systemctl reboot
 

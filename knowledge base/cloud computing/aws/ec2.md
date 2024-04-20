@@ -29,8 +29,13 @@ aws ec2 describe-instances --output text \
     'Name=instance-state-name,Values=running' \
 | xargs -ot aws ssm start-session --target
 
-# Describe images by ID.
+# Show images details.
 aws ec2 describe-images --image-ids 'ami-8b8c57f8'
+aws ec2 describe-images --filters \
+  'Name=name,Values=["al2023-ami-*"]' \
+  'Name=owner-alias,Values=["amazon"]' \
+  'Name=architecture,Values=["arm64","x86_64"]' \
+  'Name=block-device-mapping.volume-type,Values=["gp3"]'
 ```
 
 </details>
@@ -48,6 +53,8 @@ See [EBS].
 ### Sources
 
 - [Using instance profiles]
+- [DescribeImages] API
+- [`describe-images`][describe-images] CLI subcommand
 
 <!--
   References
@@ -60,6 +67,8 @@ See [EBS].
 
 <!-- Files -->
 <!-- Upstream -->
+[describe-images]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-images.html
+[describeimages]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
 [using instance profiles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
 
 <!-- Others -->
