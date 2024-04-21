@@ -23,17 +23,32 @@
 ## Omnibus
 
 <details>
+  <summary>Installation</summary>
+
+Refer [Install self-managed GitLab].
+
+</details>
+<details>
   <summary>Configuration</summary>
+
+[Template][omnibus configuration template]
 
 The application of configuration changes is handled by [Chef Infra].<br/>
 It runs checks, ensures directories, permissions, and services are in place and working, and restarts components if any
 of their configuration files have changed.
 
 ```sh
-# Edit and validate.
+# Validate.
+# Just makes sure the file is readable from a ruby app.
+# Gitlab's internal checks do not really do anything.
 sudo vim '/etc/gitlab/gitlab.rb'
 sudo ruby -c '/etc/gitlab/gitlab.rb'
+sudo gitlab-ctl show-config
+
+# Check if there are any configuration in the configuration file that is removed in specified versions.
+# Useless by experience.
 sudo gitlab-ctl check-config
+sudo gitlab-ctl check-config -v '16.11.0'
 
 # Make Gitlab aware of the changes.
 sudo gitlab-ctl reconfigure
@@ -556,6 +571,8 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 - [Tutorial: Use Buildah in a rootless container with GitLab Runner Operator on OpenShift]
 - [Use kaniko to build Docker images]
 - [Specify when jobs run with `rules`][specify when jobs run with rules]
+- [Install self-managed GitLab]
+- [Omnibus configuration template]
 
 <!--
   References
@@ -586,8 +603,10 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [docker machine's supported cloud providers]: https://docs.gitlab.com/runner/configuration/autoscale.html#supported-cloud-providers
 [global settings]: https://docs.gitlab.com/charts/charts/globals.html
 [how to restart gitlab]: https://docs.gitlab.com/ee/administration/restart_gitlab.html
+[install self-managed gitlab]: https://about.gitlab.com/install
 [merge request approval rules]: https://gitlab.ops.apolloagriculture.com/help/user/project/merge_requests/approvals/rules
 [minimal minikube example values file]: https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/values-minikube-minimum.yaml
+[omnibus configuration template]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/raw/master/files/gitlab-config-template/gitlab.rb.template
 [operator code]: https://gitlab.com/gitlab-org/cloud-native/gitlab-operator
 [operator guide]: https://docs.gitlab.com/operator/
 [predefined ci/cd variables reference]: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html

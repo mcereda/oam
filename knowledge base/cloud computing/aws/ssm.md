@@ -40,6 +40,10 @@ aws ssm start-session \
   --target 'instance-id' \
   --document-name 'CustomCommandSessionDocument' \
   --parameters '{"logpath":["/var/log/amazon/ssm/amazon-ssm-agent.log"]}'
+aws ssm send-command \
+  --instance-ids 'i-0123456789abcdef0' \
+  --document-name 'AWS-RunShellScript' \
+  --parameters commands="echo 'hallo!'"
 ```
 
 </details>
@@ -52,6 +56,9 @@ instance_id='i-08fc83ad07487d72f' \
 && eval $(aws ssm get-connection-status --target "$instance_id" --query "Status=='connected'" --output text) \
 && aws ssm start-session --target "$instance_id" \
 || (echo "instance ${instance_id} not available" >&2 && false)
+
+aws ssm send-command --instance-ids "i-08fc83ad07487d72f" \
+  --document-name "AWS-RunShellScript" --parameters commands="echo 'hallo!'"
 ```
 
 </details>
