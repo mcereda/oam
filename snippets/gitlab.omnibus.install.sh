@@ -38,10 +38,4 @@ sudo EXTERNAL_URL="http://ip-172-31-73-256.eu-south-2.compute.internal" dnf inst
 # File automatically removed after 24h.
 sudo cat '/etc/gitlab/initial_root_password'
 
-# Should one need to tune the configuration.
-sudo dnf -y install 'vim'
-sudo vim '/etc/gitlab/gitlab.rb'
-sudo gitlab-ctl check-config
-sudo gitlab-ctl reconfigure
-
 xdg-open 'http://ip-172-31-73-256.eu-south-2.compute.internal'
