@@ -1,0 +1,39 @@
+---
+- name: Enable SSM management through agent
+  hosts: all
+  tasks:
+    - name: Install the SSM Agent
+      tags:
+        - agent
+        - package
+      become: true
+      ansible.builtin.package:
+        name: amazon-ssm-agent
+        state: latest
+      register: package
+    - name: Enable required services
+      tags:
+        - agent
+        - service
+      become: true
+      ansible.builtin.service:
+        name: amazon-ssm-agent.service
+        state: started
+        enabled: true
+      register: service
+  post_tasks:
+    - name: Check everything is working from the instance
+      tags:
+        - check
+      when:
+        - package is not failed
+        - service is not failed
+      block:
+        - name: Run the diagnostic command
+          become: true
+          ansible.builtin.command: ssm-cli get-diagnostics --output 'json'
+          register: diagnostics
+          changed_when: false
+        - name: Show the results
+          ansible.builtin.debug:
+            var: diagnostics.stdout

@@ -100,9 +100,11 @@ ansible-galaxy remove 'namespace.role'
 
 ## Configuration
 
-Ansible can be configured using INI files named `ansible.cfg`, environment variables, command-line options, playbook keywords, and variables.
+Ansible can be configured using INI files named `ansible.cfg`, environment variables, command-line options, playbook
+keywords, and variables.
 
-The `ansible-config` utility allows to see all the configuration settings available, their defaults, how to set them and where their current value comes from.
+The `ansible-config` utility allows to see all the configuration settings available, their defaults, how to set them and
+where their current value comes from.
 
 Ansible will process the following list and use the first file found; all the other files are ignored even if existing:
 
@@ -111,7 +113,7 @@ Ansible will process the following list and use the first file found; all the ot
 1. the `~/.ansible.cfg` file in the user's home directory;
 1. the `/etc/ansible/ansible.cfg` file.
 
-One can generate a fully commented-out example of the `ansible.cfg` file:
+Generate a fully commented-out example of the `ansible.cfg` file:
 
 ```sh
 ansible-config init --disabled > 'ansible.cfg'
@@ -199,6 +201,12 @@ Return a boolean result.
 # Compare semver version numbers.
 - ansible.builtin.debug:
     var: "'2.0.0-rc.1+build.123' is version('2.1.0-rc.2+build.423', 'ge', version_type='semver')"
+
+# Find specific values in JSON objects.
+- ansible.builtin.command: ssm-cli get-diagnostics --output 'json'
+  become: true
+  register: diagnostics
+  failed_when: diagnostics.stdout | to_json | community.general.json_query('DiagnosticsOutput[*].Status=="Failed"')
 ```
 
 ### Loops
@@ -293,12 +301,12 @@ stdout_callback = json
 `yaml` will set tasks output only to be in the defined format:
 
 ```sh
-$ ANSIBLE_STDOUT_CALLBACK='yaml' ansible-playbook --inventory='localhost.localdomain,' 'localhost.configure.yml' -vv --check
+$ ANSIBLE_STDOUT_CALLBACK='yaml' ansible-playbook --inventory='localhost,' 'localhost.configure.yml' -vv --check
 PLAY [Configure localhost] *******************************************************************
 
 TASK [Upgrade system packages] ***************************************************************
 task path: /home/user/localhost.configure.yml:7
-ok: [localhost.localdomain] => changed=false
+ok: [localhost] => changed=false
   cmd:
   - /usr/bin/zypper
   - --quiet
@@ -310,7 +318,7 @@ ok: [localhost.localdomain] => changed=false
 The `json` output format will be a single, long JSON file:
 
 ```sh
-$ ANSIBLE_STDOUT_CALLBACK='json' ansible-playbook --inventory='localhost.localdomain,' 'localhost.configure.yml' -vv --check
+$ ANSIBLE_STDOUT_CALLBACK='json' ansible-playbook --inventory='localhost,' 'localhost.configure.yml' -vv --check
 {
     "custom_stats": {},
     "global_custom_stats": {},
@@ -323,7 +331,7 @@ $ ANSIBLE_STDOUT_CALLBACK='json' ansible-playbook --inventory='localhost.localdo
             "tasks": [
                 {
                     "hosts": {
-                        "localhost.localdomain": {
+                        "localhost": {
                             …
                             "action": "community.general.zypper",
                             "changed": false,
@@ -397,7 +405,8 @@ Use the special `X` mode setting in the `file` plugin:
 
 ### Only run a task when another has a specific result
 
-When a task executes, it also stores the two special values `changed` and `failed` in its results. You can use those as conditions to execute the next ones:
+When a task executes, it also stores the two special values `changed` and `failed` in its results.<br/>
+One can use those as conditions to execute the next ones:
 
 ```yaml
 - name: Trigger task
@@ -463,7 +472,9 @@ Environment variables can be set at a play, block, or task level using the `envi
   ansible.builtin.command: curl ifconfig.io
 ```
 
-The `environment` keyword does not affect Ansible itself or its configuration settings, the environment for other users, or the execution of other plugins like lookups and filters; variables set with `environment` do not automatically become Ansible facts, even when set at the play level.
+The `environment` keyword does **not** affect Ansible itself or its configuration settings, the environment for other
+users, or the execution of other plugins like lookups and filters.<br/>
+Variables set with `environment` do **not** automatically become Ansible facts, even when set at the play level.
 
 ### Set variables to the value of environment variables
 
@@ -484,7 +495,8 @@ Use the `lookup()` plugin with the `env` option:
 
 ### Define different values for `true`/`false`/`null`
 
-Create a test and define two values: the first will be returned when the test returns `true`, the second will be returned when the test returns `false` (Ansible 1.9+):
+Create a test and define two values: the first will be returned when the test returns `true`, the second will be
+returned when the test returns `false` (Ansible 1.9+):
 
 ```yaml
 {{ (ansible_pkg_mgr == 'zypper') | ternary('gnu_parallel', 'parallel')) }}
@@ -523,11 +535,13 @@ Use the `ansible.builtin.copy` instead of `ansible.builtin.template`:
 Root Cause:
 
 > Mac OS High Sierra and later versions have restricted multithreading for improved security.<br/>
-> Apple has defined some rules on what is allowed and not is not after forking processes, and have also added `async-signal-safety` to a limited number of APIs.
+> Apple has defined some rules on what is allowed and not is not after forking processes, and have also added
+> `async-signal-safety` to a limited number of APIs.
 
 Solution:
 
-Disable fork initialization safety features as shown in [Why Ansible and Python fork break on macOS High Sierra+ and how to solve]:
+Disable fork initialization safety features as shown in
+[Why Ansible and Python fork break on macOS High Sierra+ and how to solve]\:
 
 ```sh
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
@@ -553,7 +567,8 @@ For **remote** files, use the [`slurp` module][slurp]:
 
 ### Only run a task when explicitly requested
 
-Leverage the [`never` tag][special tags: always and never] to never execute the task unless requested by using the `--tags 'never'` option:
+Leverage the [`never` tag][special tags: always and never] to never execute the task unless requested by using the
+`--tags 'never'` option:
 
 ```yaml
 - tags: never
@@ -572,7 +587,13 @@ Conversely, one can achieve the opposite by using the `always` tag and the `--sk
 
 Message example:
 
-> fatal: \[i-4ccab452bb7743336]: UNREACHABLE! => {"changed": false, "msg": "Failed to create temporary directory. In some cases, you may have been able to authenticate and did not have permissions on the target directory. Consider changing the remote tmp path in ansible.cfg to a path rooted in \"/tmp\", for more error information use -vvv. Failed command was: ( umask 77 && mkdir -p \"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp `\"&& mkdir \"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp/ansible-tmp-1708603630.2433128-49665-225488680421418 `\" && echo ansible-tmp-1708603630.2433128-49665-225488680421418=\"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp/ansible-tmp-1708603630.2433128-49665-225488680421418 `\" ), exited with result 1, stdout output: \u001b]0;@ip-192-168-42-42:/usr/bin\u0007bash: @ip-192-168-42-42:/usr/bin/home/centos/.ansible/tmp: No such file or directory\r\r\nmkdir: cannot create directory '0': Permission denied\r\r", "unreachable": true}
+> ```plaintext
+> fatal: [i-4ccab452bb7743336]: UNREACHABLE! => {
+>   "changed": false,
+>   "msg": "Failed to create temporary directory. In some cases, you may have been able to authenticate and did not have permissions on the target directory. Consider changing the remote tmp path in ansible.cfg to a path rooted in \"/tmp\", for more error information use -vvv. Failed command was: ( umask 77 && mkdir -p \"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp `\"&& mkdir \"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp/ansible-tmp-1708603630.2433128-49665-225488680421418 `\" && echo ansible-tmp-1708603630.2433128-49665-225488680421418=\"` echo \u001b]0;@ip-192-168-42-42:/usr/bin\u0007/home/centos/.ansible/tmp/ansible-tmp-1708603630.2433128-49665-225488680421418 `\" ), exited with result 1, stdout output: \u001b]0;@ip-192-168-42-42:/usr/bin\u0007bash: @ip-192-168-42-42:/usr/bin/home/centos/.ansible/tmp: No such file or directory\r\r\nmkdir: cannot create directory '0': Permission denied\r\r",
+>   "unreachable": true
+> }
+> ```
 
 Root cause:
 

@@ -1,30 +1,16 @@
 # SSM
 
 1. [TL;DR](#tldr)
+1. [Requirements](#requirements)
 1. [Gotchas](#gotchas)
 1. [Integrate with Ansible](#integrate-with-ansible)
+1. [Troubleshooting](#troubleshooting)
+   1. [Check node availability using `ssm-cli`](#check-node-availability-using-ssm-cli)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
 ## TL;DR
 
-<details>
-  <summary>Requirements</summary>
-
-- The IAM instance profile must have the correct permissions.<br/>
-  FIXME: specify.
-- One's instance's security group and VPC must allow HTTPS outbound traffic on port 443 to the Systems Manager's
-  endpoints:
-
-  - `ssm.eu-west-1.amazonaws.com`
-  - `ec2messages.eu-west-1.amazonaws.com`
-  - `ssmmessages.eu-west-1.amazonaws.com`
-
-  If the VPC does not have internet access, one must have enabled VPC endpoints to allow that outbound traffic from the
-  instance.
-- Also see <https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-with-ec2-instance-connect-endpoint.html>
-
-</details>
 <details>
   <summary>Usage</summary>
 
@@ -59,6 +45,75 @@ instance_id='i-08fc83ad07487d72f' \
 
 aws ssm send-command --instance-ids "i-08fc83ad07487d72f" \
   --document-name "AWS-RunShellScript" --parameters commands="echo 'hallo!'"
+```
+
+</details>
+
+## Requirements
+
+For instances to be managed by Systems Manager and be available in lists of managed nodes, it must:
+
+- Run a supported operating system.
+- Have the SSM Agent installed **and running**.
+
+  ```sh
+  sudo dnf -y install 'amazon-ssm-agent'
+  sudo systemctl enable --now 'amazon-ssm-agent.service'
+  ```
+
+- Have an AWS IAM instance profile attached with the correct permissions.<br/>
+  The instance profile enables the instance to communicate with the Systems Manager service.
+  **Alternatively**, the instance must be registered to Systems Manager using hybrid activation.
+
+  The minimum permissions required are given by the Amazon-provided `AmazonSSMManagedInstanceCore` policy
+  (`arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore`).
+
+- Be able to to connect to a Systems Manager endpoint through the SSM Agent in order to register with the service.<br/>
+  From there, the instance must be available to the service. This is confirmed by the service by sending a signal every
+  five minutes to check the instance's health.
+
+  After the status of a managed node has been `Connection Lost` for at least 30 days, the node could be removed from the
+  Fleet Manager console.<br/>
+  To restore it to the list, resolve the issues that caused the lost connection.
+
+Check whether SSM Agent successfully registered with the Systems Manager service by executing the `aws ssm
+describe-instance-associations-status` command.<br/>
+It won't return results until a successful registration has taken place.
+
+```sh
+aws ssm describe-instance-associations-status --instance-id 'instance-id'
+```
+
+<details>
+  <summary>Failed invocation</summary>
+
+```json
+{
+  "InstanceAssociationStatusInfos": []
+}
+```
+
+</details>
+<details>
+  <summary>Successful invocation</summary>
+
+```json
+{
+  "InstanceAssociationStatusInfos": [
+    {
+      "AssociationId": "51f0ed7e-c236-4c34-829d-e8f2a7a3bb4a",
+      "Name": "AWS-GatherSoftwareInventory",
+      "DocumentVersion": "1",
+      "AssociationVersion": "2",
+      "InstanceId": "i-0123456789abcdef0",
+      "ExecutionDate": "2024-04-22T14:41:37.313000+02:00",
+      "Status": "Success",
+      "ExecutionSummary": "1 out of 1 plugin processed, 1 success, 0 failed, 0 timedout, 0 skipped. ",
+      "AssociationName": "InspectorInventoryCollection-do-not-delete"
+    },
+    …
+  ]
+}
 ```
 
 </details>
@@ -129,6 +184,58 @@ Pitfalls:
   This, or use the shell profiles in [SSM's preferences][session manager preferences] to change the directory when
   logged in.
 
+## Troubleshooting
+
+Refer [Troubleshooting managed node availability].
+
+1. Check the [Requirements] are satisfied.
+1. [Check node availability using `ssm-cli`][check node availability using ssm-cli].
+
+### Check node availability using `ssm-cli`
+
+Refer
+[Troubleshooting managed node availability using `ssm-cli`][troubleshooting managed node availability using ssm-cli].
+
+From the managed instance:
+
+```sh
+$ sudo dnf -y install 'amazon-ssm-agent'
+$ sudo systemctl enable --now 'amazon-ssm-agent.service'
+$ sudo ssm-cli get-diagnostics --output 'table'
+┌──────────────────────────────────────┬─────────┬─────────────────────────────────────────────────────────────────────┐
+│ Check                                │ Status  │ Note                                                                │
+├──────────────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────┤
+│ EC2 IMDS                             │ Success │ IMDS is accessible and has instance id i-0123456789abcdef0 in       │
+│                                      │         │ region eu-west-1                                                    │
+├──────────────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────┤
+│ Hybrid instance registration         │ Skipped │ Instance does not have hybrid registration                          │
+├──────────────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────┤
+│ Connectivity to ssm endpoint         │ Success │ ssm.eu-west-1.amazonaws.com is reachable                            │
+├──────────────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────┤
+│ Connectivity to ec2messages endpoint │ Success │ ec2messages.eu-west-1.amazonaws.com is reachable                    │
+├──────────────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────┤
+│ Connectivity to ssmmessages endpoint │ Success │ ssmmessages.eu-west-1.amazonaws.com is reachable                    │
+├──────────────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────┤
+│ Connectivity to s3 endpoint          │ Success │ s3.eu-west-1.amazonaws.com is reachable                             │
+├──────────────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────┤
+│ Connectivity to kms endpoint         │ Success │ kms.eu-west-1.amazonaws.com is reachable                            │
+├──────────────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────┤
+│ Connectivity to logs endpoint        │ Success │ logs.eu-west-1.amazonaws.com is reachable                           │
+├──────────────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────┤
+│ Connectivity to monitoring endpoint  │ Success │ monitoring.eu-west-1.amazonaws.com is reachable                     │
+├──────────────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────┤
+│ AWS Credentials                      │ Success │ Credentials are for                                                 │
+│                                      │         │ arn:aws:sts::012345678901:assumed-role/managed/i-0123456789abcdef0  │
+│                                      │         │ and will expire at 2024-04-22 18:19:48 +0000 UTC                    │
+├──────────────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────┤
+│ Agent service                        │ Success │ Agent service is running and is running as expected user            │
+├──────────────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────┤
+│ Proxy configuration                  │ Skipped │ No proxy configuration detected                                     │
+├──────────────────────────────────────┼─────────┼─────────────────────────────────────────────────────────────────────┤
+│ SSM Agent version                    │ Success │ SSM Agent version is 3.3.131.0 which is the latest version          │
+└──────────────────────────────────────┴─────────┴─────────────────────────────────────────────────────────────────────┘
+```
+
 ## Further readings
 
 - [Ansible]
@@ -140,23 +247,29 @@ Pitfalls:
 - [Using Ansible in AWS]
 - [How can i change the session manager shell to BASH on EC2 linux instances?]
 - [Using Ansible in AWS]
+- [Troubleshooting managed node availability]
+- [Troubleshooting managed node availability using `ssm-cli`][troubleshooting managed node availability using ssm-cli]
 
 <!--
   References
   -->
 
 <!-- In-article sections -->
+[check node availability using ssm-cli]: #check-node-availability-using-ssm-cli
 [gotchas]: #gotchas
+[requirements]: #requirements
 
 <!-- Knowledge base -->
 [ansible]: ../../ansible.md
 [ec2]: ec2.md
 
 <!-- Upstream -->
-[start a session]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-sessions-start.html
-[session manager preferences]: https://console.aws.amazon.com/systems-manager/session-manager/preferences
 [aws_ssm connection plugin notes]: https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html#notes
 [community.aws.aws_ssm connection]: https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html
+[session manager preferences]: https://console.aws.amazon.com/systems-manager/session-manager/preferences
+[start a session]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-sessions-start.html
+[troubleshooting managed node availability using ssm-cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-cli.html
+[troubleshooting managed node availability]: https://docs.aws.amazon.com/systems-manager/latest/userguide/troubleshooting-managed-instances.html
 
 <!-- Others -->
 [ansible temp dir change]: https://devops.stackexchange.com/questions/10703/ansible-temp-dir-change

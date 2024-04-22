@@ -29,6 +29,7 @@
         - name: Get the tools' label
           register: cli_tools_label
           ansible.builtin.shell: >-
+            set -o pipefail && \
             /usr/sbin/softwareupdate --list
             | grep -B 1 -E 'Command Line Tools'
             | awk -F'*' '/^ *\\*/ {print $2}'
