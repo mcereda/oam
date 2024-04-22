@@ -1,0 +1,9 @@
+name: cloud-init.multi-part
+runtime: nodejs
+description: Simple example of multi-part cloud-init usage
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: typescript
+backend:
+  url: file://.
