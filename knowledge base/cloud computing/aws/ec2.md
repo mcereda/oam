@@ -32,7 +32,7 @@ aws ec2 describe-instances --output text \
 # Show images details.
 aws ec2 describe-images --image-ids 'ami-8b8c57f8'
 aws ec2 describe-images --filters \
-  'Name=name,Values=["al2023-ami-*"]' \
+  'Name=name,Values=["al2023-ami-minimal-*"]' \
   'Name=owner-alias,Values=["amazon"]' \
   'Name=architecture,Values=["arm64","x86_64"]' \
   'Name=block-device-mapping.volume-type,Values=["gp3"]'
@@ -49,6 +49,7 @@ See [EBS].
 - [AWS EC2 Instance pricing comparison]
 - [EC2Instances.info on vantage.sh]
 - [SSM]
+- [Connect to your instances without requiring a public IPv4 address using EC2 Instance Connect Endpoint]
 
 ### Sources
 
@@ -67,6 +68,7 @@ See [EBS].
 
 <!-- Files -->
 <!-- Upstream -->
+[connect to your instances without requiring a public ipv4 address using ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-with-ec2-instance-connect-endpoint.html
 [describe-images]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-images.html
 [describeimages]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
 [using instance profiles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
