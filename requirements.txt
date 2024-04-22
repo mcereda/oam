@@ -1,2 +1,3 @@
-ansible==9.3.0
+ansible==9.4.0
 click==8.1.7
+pyinilint==0.17
