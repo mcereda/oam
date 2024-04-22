@@ -853,6 +853,7 @@ Solution: Read [secrets] and fix the configuration by providing a correct key id
 - [IaC Recommended Practices: Developer Stacks and Git Branches]
 - [Update plans]
 - [Pulumi up --plan without error message (exit code 255)]
+- [Workshops]
 
 <!--
   References
@@ -891,6 +892,7 @@ Solution: Read [secrets] and fix the configuration by providing a correct key id
 [state]: https://www.pulumi.com/docs/concepts/state/
 [update plans]: https://www.pulumi.com/docs/concepts/update-plans/
 [website]: https://www.pulumi.com/
+[workshops]: https://github.com/pulumi/workshops
 
 <!-- Others -->
 [assigning tags by default on aws with pulumi]: https://blog.scottlowe.org/2023/09/11/assigning-tags-by-default-on-aws-with-pulumi/
