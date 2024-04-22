@@ -1,13 +1,16 @@
 # DNF
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Lock packages versions](#lock-packages-versions)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
+
+Global configuration file at `/etc/dnf/dnf.conf`.<br/>
+Repositories `.repo` files reside under `/etc/yum.repos.d/`.<br/>
+Configuration files use the INI format. **Some** options in the repository definition override the global settings for
+DNF.
 
 ```sh
 # Check whether updates are available.
@@ -66,10 +69,9 @@ dnf makecache
 dnf updateinfo
 dnf updateinfo list --security
 
-# Upgrade packages to the latest version of theirs that is both available and
-# resolvable.
+# Upgrade packages to the latest version of theirs that is both available and resolvable.
 dnf upgrade
-dnf upgrade --bugfix
+dnf upgrade --bugfix --exclude 'sshpass'
 dnf upgrade --nobest --security
 dnf upgrade --advisories='FEDORA-2021-74ebf2f06f,FEDORA-2021-83fdddca0f'
 
@@ -151,13 +153,14 @@ Not to mention,
 
 ## Further readings
 
+- [DNF Command Reference]
 - [Man page]
+- [DNF Configuration Reference]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [cheat.sh]
+- [Using the DNF software package manager]
 - [How to install only security and bugfixes updates with DNF]
 - [How to use YUM/DNF to downgrade or rollback some package updates?]
 - [How to lock kernel (or another package) on Fedora]
@@ -167,7 +170,10 @@ All the references in the [further readings] section, plus the following:
   -->
 
 <!-- In-article sections -->
-[further readings]: #further-readings
+<!-- Upstream -->
+[dnf command reference]: https://dnf.readthedocs.io/en/latest/command_ref.html
+[dnf configuration reference]: https://dnf.readthedocs.io/en/latest/conf_ref.html
+[using the dnf software package manager]: https://docs.fedoraproject.org/en-US/quick-docs/dnf/
 
 <!-- Others -->
 [cheat.sh]: https://cheat.sh/dnf
