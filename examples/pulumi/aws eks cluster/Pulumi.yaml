@@ -5,3 +5,5 @@ config:
   pulumi:tags:
     value:
       pulumi:template: aws-typescript
+backend:
+  url: file://.
