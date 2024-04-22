@@ -4,9 +4,8 @@
 
 1. [TL;DR](#tldr)
 1. [Merge 2 or more files or parts](#merge-2-or-more-files-or-parts)
-   1. [In Terraform](#in-terraform)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -76,8 +75,6 @@ runcmd:
 
 ## Merge 2 or more files or parts
 
-FIXME
-
 See [Merging User-Data sections] for details.
 
 ```yaml
@@ -103,9 +100,50 @@ packages:
 merge_type: 'list(append)+dict(recurse_array)+str()'
 ```
 
-### In Terraform
+<details>
+  <summary>In Pulumi</summary>
 
-1. create a data resource containing the files in order, one per part:
+1. Create a data resource containing the files in order, one per part:
+
+   ```ts
+   new cloudinit.Config("example", {
+     gzip: false,
+     base64Encode: false,
+     parts: [
+       {
+         contentType: "text/cloud-config",
+         content: fs.readFileSync("cloud-init/aws.ssm.yaml", "utf8"),
+         filename: "cloud-config.ssm.yml",
+       },
+       {
+         contentType: "text/cloud-config",
+         content: YAML.stringify({
+           number: 3,
+           plain: 'string',
+           block: 'two\nlines\n'
+         }),
+         filename: "cloud-config.inline.yml",
+         mergeType: "dict(recurse_array,no_replace)+list(append)",
+       },
+     ],
+   });
+   ```
+
+1. Give its rendered form as input to a virtual machine's `userdata` attribute, or export it:
+
+   ```ts
+   let userData = new cloudinit.Config("userData", { … });
+   new aws.ec2.Instance("instance", {
+     userData: userData.rendered,
+     …
+   })
+   ```
+
+</details>
+<details>
+  <summary>In Terraform</summary>
+
+1. Create a data resource containing the files in order, one per part:
 
    ```hcl
    # https://registry.terraform.io/providers/hashicorp/cloudinit/latest/docs
@@ -134,7 +172,7 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
    }
    ```
 
-1. give its rendered form as input to a vm's userdata attribute or an output resource:
+1. Give its rendered form as input to a virtual machine's `userdata` attribute or an output resource:
 
    ```hcl
    resource "azurerm_linux_virtual_machine" "vm" {
@@ -147,6 +185,8 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
    }
    ```
 
+</details>
+
 ## Further readings
 
 - [Website]
@@ -158,9 +198,7 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
 - [Mime Multi Part Archive] format
 - [Docker cloud init example]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Debugging cloud-init]
 - [Tutorial]
@@ -172,20 +210,18 @@ All the references in the [further readings] section, plus the following:
   References
   -->
 
-<!-- Upstream -->
-[debugging cloud-init]: https://canonical-cloud-init.readthedocs-hosted.com/en/latest/howto/debugging.html
-[examples]: https://cloudinit.readthedocs.io/en/latest/topics/examples.html
-[merging user-data sections]: https://canonical-cloud-init.readthedocs-hosted.com/en/latest/reference/merging.html
-[modules]: https://cloudinit.readthedocs.io/en/latest/topics/modules.html
-[mime multi part archive]: https://cloudinit.readthedocs.io/en/latest/topics/format.html#mime-multi-part-archive
-[tutorial]: https://canonical-cloud-init.readthedocs-hosted.com/en/latest/tutorial/
-[website]: https://cloud-init.io/
-
 <!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Files -->
 [docker cloud init example]: ../examples/cloud-init/docker.yum.yaml
+
+<!-- Upstream -->
+[debugging cloud-init]: https://docs.cloud-init.io/en/latest/howto/debugging.html
+[examples]: https://docs.cloud-init.io/en/latest/reference/examples.html
+[merging user-data sections]: https://docs.cloud-init.io/en/latest/reference/merging.html
+[modules]: https://cloudinit.readthedocs.io/en/latest/topics/modules.html
+[mime multi part archive]: https://cloudinit.readthedocs.io/en/latest/topics/format.html#mime-multi-part-archive
+[tutorial]: https://docs.cloud-init.io/en/latest/tutorial/
+[website]: https://cloud-init.io/
 
 <!-- Others -->
 [cloud-init configuration merging]: https://jen20.dev/post/cloudinit-configuration-merging/

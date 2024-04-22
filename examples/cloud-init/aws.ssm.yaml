@@ -1,0 +1,14 @@
+#cloud-config
+
+# Install and enable the SSM agent on supported instances.
+
+# Tested on:
+# - Amazon Linux 2023.4.20240416
+
+package_upgrade: false
+packages:
+  - amazon-ssm-agent
+
+runcmd:
+  - systemctl daemon-reload
+  - systemctl enable --now 'amazon-ssm-agent.service'

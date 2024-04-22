@@ -1,0 +1,11 @@
+{
+    "name": "cloud-init.multi-part",
+    "main": "index.ts",
+    "devDependencies": {
+        "@types/node": "^18"
+    },
+    "dependencies": {
+        "@pulumi/cloudinit": "^1.4.1",
+        "typescript": "^5.0.0"
+    }
+}

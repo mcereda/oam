@@ -1,0 +1,7 @@
+encryptionsalt: v1:Tl2L4ymfbTk=:v1:PNPJ5bUKKgCFe8G/:hrgipeFmFMPSAYcf5lgS6dUCe33WtA==
+config:
+  aws:defaultTags:
+    tags:
+      ManagedBy: pulumi
+      PulumiProject: cloud-init.multi-part
+  aws:region: eu-west-1
