@@ -26,6 +26,7 @@ lint:
   parallel: true
   commands:
     ansible: &ansible-lint
+      glob: '*ansible*'
       run: .venv/bin/ansible-lint
     docker: &hadolint
       # The official docker image is based on scratch and only takes only one
