@@ -13,15 +13,28 @@ debug:
       glob: '.commitlintrc.js'
       run: commitlint --print-config
 
+pre-flight:
+  parallel: true
+  commands:
+    commitlint:
+      run: npm install --save-dev '@commitlint/cli' '@commitlint/config-conventional'
+    venv:
+      run: make recreate-venv
+
+
 lint:
   parallel: true
   commands:
+    ansible: &ansible-lint
+      run: .venv/bin/ansible-lint
     docker: &hadolint
       # The official docker image is based on scratch and only takes only one
       # input file at a time. I have no clue how to fix that for now so let's
       # just use the local command.
       glob: "*Dockerfile*"
       run: hadolint {all_files}
+    # ini: &pyinilint  # FIXME
+    #   run: pyinilint 'file'
     md: &markdownlint
       glob: "*.md"
       run: >-  # '{all_files}' and {files} only include ones managed by git for some reason
@@ -36,6 +49,9 @@ lint:
 validate:
   parallel: true
   commands:
+    ansible-playbook: &ansible-playbook-syntax-check
+      glob: "*ansible*/play*.{yaml,yml}"
+      run: .venv/bin/ansible-playbook -i localhost, --syntax-check {all_files}
     json: &jq
       # No official docker image available for now, falling back to the local
       # command.
@@ -62,6 +78,10 @@ pre-commit:
       run: >-
         yq '.' {staged_files} > /dev/null
         && echo 'All YAML files are readable'
+    validate-ansible-playbooks:
+      <<: *ansible-playbook-syntax-check
+    lint-ansible:
+      <<: *ansible-lint
     lint-docker:
       <<: *hadolint
       run: hadolint {staged_files}
@@ -78,7 +98,7 @@ pre-commit:
 
 commit-msg:
   commands:
-    commitlint:
+    lint: &commitlint
       # No official docker image available for now, falling back to the local
       # command.
       run: commitlint --edit
