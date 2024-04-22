@@ -11,7 +11,7 @@ debug:
   commands:
     commitlint-config:
       glob: '.commitlintrc.js'
-      run: commitlint --print-config
+      run: node_modules/.bin/commitlint --print-config
 
 pre-flight:
   parallel: true
@@ -102,4 +102,4 @@ commit-msg:
     lint: &commitlint
       # No official docker image available for now, falling back to the local
       # command.
-      run: commitlint --edit
+      run: node_modules/.bin/commitlint --edit
