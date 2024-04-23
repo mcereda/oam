@@ -30,6 +30,22 @@
 brew install --cask 'gpg-suite-no-mail'
 brew install 'gnupg' 'pinentry-mac'
 
+# Launch components.
+gpgconf --launch
+gpgconf --launch 'gpg-agent'
+
+# Reload components.
+gpgconf -R
+gpgconf --reload 'gpg-agent'
+
+# Kill components.
+gpgconf -K 'all'
+gpgconf --kill 'gpg-agent'
+
+# FIXME
+gpg-connect-agent updatestartuptty /bye
+gpg-connect-agent reloadagent '/bye'
+
 
 # List existing keys.
 gpg -k
@@ -516,6 +532,7 @@ All the references in the [further readings] section, plus the following:
 - [Renew GPG key]
 - [Archlinux's GnuPG wiki page]
 - [GPG agent for SSH authentication]
+- [Modify .gnupg home directories]
 
 <!--
   References
@@ -523,6 +540,7 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Upstream -->
 [commonly seen problems]: https://www.gnupg.org/documentation/manuals/gnupg/Common-Problems.html
+[modify .gnupg home directories]: https://www.gnupg.org/documentation/manuals/gnupg/gpgconf.html
 [unattended key generation]: https://www.gnupg.org/documentation/manuals/gnupg/Unattended-GPG-key-generation.html
 
 <!-- In-article sections -->
