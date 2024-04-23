@@ -3,7 +3,11 @@
 1. [Networking](#networking)
 1. [Services](#services)
    1. [CloudWatch](#cloudwatch)
-1. [Config](#config)
+   1. [Config](#config)
+   1. [Detective](#detective)
+   1. [GuardDuty](#guardduty)
+   1. [Inspector](#inspector)
+   1. [Security Hub](#security-hub)
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
 1. [Further readings](#further-readings)
@@ -30,15 +34,19 @@ networks. They can communicate with services outside the VPC, but cannot receive
 
 ## Services
 
-| Service      | Description                                   |
-| ------------ | --------------------------------------------- |
-| [CloudWatch] | Observability (logging, monitoring, alerting) |
-| [Config]     | FIXME                                         |
-| [EC2]        | Virtual machines                              |
-| [ECR]        | Container registry                            |
-| [EKS]        | Kubernetes clusters                           |
-| [S3]         | Storage                                       |
-| [Sagemaker]  | Machine learning                              |
+| Service        | Description                                   |
+| -------------- | --------------------------------------------- |
+| [CloudWatch]   | Observability (logging, monitoring, alerting) |
+| [Config]       | Compliance                                    |
+| [Detective]    | FIXME                                         |
+| [EC2]          | Virtual machines                              |
+| [ECR]          | Container registry                            |
+| [EKS]          | Kubernetes clusters                           |
+| [GuardDuty]    | Threat detection                              |
+| [Inspector]    | FIXME                                         |
+| [S3]           | Storage                                       |
+| [Sagemaker]    | Machine learning                              |
+| [Security Hub] | Aggregator for security findings              |
 
 ### CloudWatch
 
@@ -53,14 +61,19 @@ Metrics only exist in the region in which they are created.
 metrics to CloudWatch with no charge.<br/>
 This feature is automatically enabled by default when one starts using one of these services.
 
-## Config
+### Config
+
+FIXME
 
 Compliance service for assessing and auditing AWS resources.
 
-Records and monitors resource configurations.
-
-Uses rules to evaluate whether the resources comply. Marks them with the evaluation result (_compliant_,
-_non-compliant_).
+Provides an inventory of resources.<br/>
+Records and monitors resource configurations and their changes.<br/>
+The data is stored in a bucket (default name `config-bucket-{aws-account-number}`)<br/>
+Changes can be streamed to 1 SNS topic for notification purposes.<br/>
+Uses _rules_ to evaluate whether the resources configurations comply.<br/>
+Rule evaluation is done once every time a configuration changes, or periodically.<br/>
+Resources are marked with the evaluation result (_compliant_, _non-compliant_).
 
 Custom rules can be used to evaluate for uncommon requirements.<br/>
 Custom rules leverage lambda functions.
@@ -71,6 +84,62 @@ _Conformance packs_ are set of rules bundled together as a deployable single ent
 Defined as YAML templates.<br/>
 Immutable: users cannot make changes without updating the whole rule package.<br/>
 Sample templates for compliance standards and benchmarks are available.
+
+### Detective
+
+FIXME
+
+Uses ML and graphs to try and identify the root cause of security issues.<br/>
+Creates visualizations with details and context by leveraging events from VPC Flow Logs, CloudTrail and GuardDuty.
+
+### GuardDuty
+
+FIXME
+
+Threat detection service.
+
+It continuously monitors accounts and workloads for malicious activity and delivers security findings for visibility and
+remediation.<br/>
+Done by pulling streams of data from CloudTrail, VPC Flow Logs or EKS.
+
+Member accounts can administer GuardDuty by delegation if given the permissions to do so.
+
+_Findings_ are **potential** security issues for malicious events.<br/>
+Those are also sent to EventBridge for notification (leveraging SNS).<br/>
+Each is assigned a severity value (0.1 to 8+).
+
+_Trusted IP List_ is a whitelist of **public IPs** that will be ignored by the rules.<br/>
+_Threat IP List_ is a blacklist of **public IPs and CIDRs** that will be used by the rules.<br/>
+
+### Inspector
+
+FIXME
+
+### Security Hub
+
+FIXME
+
+Aggregator of findings for security auditing.
+
+> Uses [Config] to check resources' configuration by leveraging compliancy rules.
+
+Security standards are offered as ret of rules for [Config].
+
+Data can be aggregated from different regions.<br/>
+If the integration is enabled, findings from AWS services ([GuardDuty]) are used too within 5 minutes on average, while
+ones from 3rd parties can take longer.
+
+Data can be imported from or exported to 3rd parties if the integration is enabled.<br/>
+Kinda acts as a middle layer for AWS accounts.
+
+Findings are consumed in _AWS Security Finding Format_ (ASFF).<br/>
+Those are automatically updated and deleted. Findings after 90 days are automatically deleted even if **not** resolved.
+
+Can use custom insights.
+
+Custom actions can be sent to EventBridge for automation.
+
+Member accounts can administer Security Hub by delegation if given the permissions to do so.
 
 ## Resource constraints
 
@@ -116,6 +185,8 @@ From [Using service-linked roles]:
 - [Subnets for your VPC]
 - [Introduction to AWS IAM AssumeRole]
 - [AWS JSON policy elements: Principal]
+- [What is AWS Config?]
+- [AWS Config tutorial by Stephane Maarek]
 
 <!--
   References
@@ -124,6 +195,10 @@ From [Using service-linked roles]:
 <!-- In-article sections -->
 [cloudwatch]: #cloudwatch
 [config]: #config
+[detective]: #detective
+[guardduty]: #guardduty
+[inspector]: #inspector
+[security hub]: #security-hub
 
 <!-- Knowledge base -->
 [ec2]: ec2.md
@@ -143,7 +218,9 @@ From [Using service-linked roles]:
 [subnets for your vpc]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html
 [using service-linked roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/using-service-linked-roles.html
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
+[what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
 [what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
 
 <!-- Others -->
+[aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
 [introduction to aws iam assumerole]: https://aws.plainenglish.io/introduction-to-aws-iam-assumerole-fbef3ce8e90b
