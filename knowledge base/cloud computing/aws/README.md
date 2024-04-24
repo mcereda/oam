@@ -10,6 +10,7 @@
    1. [Security Hub](#security-hub)
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
+   1. [IAM policies](#iam-policies)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -169,6 +170,44 @@ From [Using service-linked roles]:
 > The service can assume the role to perform an action on your behalf.<br/>
 > Service-linked roles appear in your AWS account and are owned by the service. An IAM administrator can view, but not
 > edit the permissions for service-linked roles.
+
+### IAM policies
+
+Examples:
+
+<details>
+  <summary>Give a user temporary RO access to a bucket</summary>
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": {
+      "AWS": [
+        "arn:aws:iam::012345678901:user/my-user"
+      ],
+    },
+    "Action": [
+      "s3:GetObject",
+      "s3:GetObjectAttributes",
+      "s3:ListBucket",
+      "s3:ListBucketVersions",
+    ],
+    "Resource": [
+      "arn:aws:s3:::my-bucket",
+      "arn:aws:s3:::my-bucket/*",
+    ],
+    "Condition": {
+      "DateLessThan": {
+        "aws:CurrentTime": "2024-03-01T00:00:00Z",
+      },
+    },
+  }],
+}
+```
+
+</details>
 
 ## Further readings
 
