@@ -37,10 +37,13 @@ lint:
     # ini: &pyinilint  # FIXME
     #   run: pyinilint 'file'
     md: &markdownlint
-      glob: "*.md"
-      run: >-  # '{all_files}' and {files} only include ones managed by git for some reason
+      files: >-
+        find . -type 'f'
+        \( -name '*.md' -or -name '*.markdown' \)
+        -not \( -path '*/node_modules/*' -or -path '*/venv/*' \)
+      run: >-
         docker run --rm -v "$PWD:/workdir" 'ghcr.io/igorshubovych/markdownlint-cli:latest'
-        **.md
+        {files}
     yaml: &yamllint
       glob: "*.{yaml,yml}"
       run: >-
@@ -87,7 +90,7 @@ pre-commit:
       <<: *hadolint
       run: hadolint {staged_files}
     lint-md:
-      <<: *markdownlint
+      glob: '*.{markdown,md}'
       run: >-
         docker run --rm -v "$PWD:/workdir" 'ghcr.io/igorshubovych/markdownlint-cli:latest'
         {staged_files}

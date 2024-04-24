@@ -2,6 +2,8 @@
 
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
+   1. [Extend other files](#extend-other-files)
+   1. [Use files from other repositories](#use-files-from-other-repositories)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -65,6 +67,68 @@ $ ls -A1 *lefthook*
 [Configuration file example]
 
 Configuration files can extend other files recursively.
+
+### Extend other files
+
+```yaml
+extends:
+  - .lefthook/commitlint.yml
+  - .lefthook/docker.yml
+  - .lefthook/json.yml
+```
+
+### Use files from other repositories
+
+Refer the [configuration] page.
+
+Use the `remotes` key to include configuration files from this repository.<br/>
+The configuration from remotes will be merged to the local config using the following priority:
+
+- Local main config (`lefthook.yml`).
+- Remote configs (`remotes`).
+- Local overrides (`lefthook-local.yml`).
+
+```yaml
+# lefthook.yml
+lint:
+  parallel: true
+  commands:
+    yaml:
+      glob: "*.{yaml,yml}"
+      run: >-
+        docker run --rm -v "$PWD:/code" 'registry.gitlab.com/pipeline-components/yamllint:latest'
+        yamllint {all_files}
+remotes:
+  - git_url: https://gitlab.com/mine/oam.git
+    ref: main
+    configs:
+      - quality-assurance/lefthook/commitlint.yml
+      - quality-assurance/lefthook/docker.yml
+      - quality-assurance/lefthook/json.yml
+```
+
+```yaml
+# lefthook-local.yml
+no_tty: false
+lint:
+  commands:
+    yaml:
+      run: .venv/bin/yamllint {all_files}
+```
+
+```sh
+$ lefthook dump
+…
+lint:
+  commands:
+    docker:
+      run: hadolint {all_files}
+      glob: "*[Dd]ockerfile*"
+    yaml:
+      run: .venv/bin/yamllint {all_files}
+      glob: "*.{yaml,yml}"
+  parallel: true
+```
 
 ## Further readings
 
