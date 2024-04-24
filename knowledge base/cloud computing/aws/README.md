@@ -186,24 +186,24 @@ Examples:
     "Principal": {
       "AWS": [
         "arn:aws:iam::012345678901:user/my-user"
-      ],
+      ]
     },
     "Action": [
       "s3:GetObject",
       "s3:GetObjectAttributes",
       "s3:ListBucket",
-      "s3:ListBucketVersions",
+      "s3:ListBucketVersions"
     ],
     "Resource": [
       "arn:aws:s3:::my-bucket",
-      "arn:aws:s3:::my-bucket/*",
+      "arn:aws:s3:::my-bucket/*"
     ],
     "Condition": {
       "DateLessThan": {
-        "aws:CurrentTime": "2024-03-01T00:00:00Z",
-      },
-    },
-  }],
+        "aws:CurrentTime": "2024-03-01T00:00:00Z"
+      }
+    }
+  }]
 }
 ```
 
@@ -226,6 +226,7 @@ Examples:
 - [AWS JSON policy elements: Principal]
 - [What is AWS Config?]
 - [AWS Config tutorial by Stephane Maarek]
+- [Date & time policy conditions at AWS - 1-minute IAM lesson]
 
 <!--
   References
@@ -262,4 +263,5 @@ Examples:
 
 <!-- Others -->
 [aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
+[date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
 [introduction to aws iam assumerole]: https://aws.plainenglish.io/introduction-to-aws-iam-assumerole-fbef3ce8e90b
