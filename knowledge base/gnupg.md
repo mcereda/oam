@@ -533,6 +533,7 @@ All the references in the [further readings] section, plus the following:
 - [Archlinux's GnuPG wiki page]
 - [GPG agent for SSH authentication]
 - [Modify .gnupg home directories]
+- [Stick with security: YubiKey, SSH, GnuPG, macOS]
 
 <!--
   References
@@ -559,3 +560,4 @@ All the references in the [further readings] section, plus the following:
 [how to renew a (soon to be) expired gpg key]: https://filipe.kiss.ink/renew-expired-gpg-key/
 [openpgp best practices]: https://help.riseup.net/en/security/message-security/openpgp/gpg-best-practices
 [renew gpg key]: https://gist.github.com/krisleech/760213ed287ea9da85521c7c9aac1df0
+[stick with security: yubikey, ssh, gnupg, macos]: https://evilmartians.com/chronicles/stick-with-security-yubikey-ssh-gnupg-macos
