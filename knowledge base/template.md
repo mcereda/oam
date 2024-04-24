@@ -34,7 +34,8 @@ Intro
 ### Sources
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
