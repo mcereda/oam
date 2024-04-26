@@ -839,6 +839,7 @@ Solution: Read [secrets] and fix the configuration by providing a correct key id
 - [Terraform]
 - [Code examples]
 - [Resources reference]
+- [Things I wish I knew earlier about Pulumi]
 
 ### Sources
 
@@ -896,3 +897,4 @@ Solution: Read [secrets] and fix the configuration by providing a correct key id
 
 <!-- Others -->
 [assigning tags by default on aws with pulumi]: https://blog.scottlowe.org/2023/09/11/assigning-tags-by-default-on-aws-with-pulumi/
+[things i wish i knew earlier about pulumi]: https://vsupalov.com/pulumi-learnings/
