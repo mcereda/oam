@@ -44,6 +44,9 @@ lefthook run 'pre-commit' -n --commands 'hadolint' --files 'lefthook.yml'
 # Remove configured hooks from the current git repository.
 lefthook uninstall
 lefthook uninstall -cv
+
+# Reset lefthook-managed git hooks and start from the beginning.
+lefthook uninstall && lefthook install
 ```
 
 Uses the [glob library] for glob patterns.
