@@ -84,6 +84,24 @@ aws iam list-access-keys --user-name 'mario'
 # List configured OIDC providers.
 aws iam list-open-id-connect-providers
 
+# Create policies.
+aws iam create-policy \
+  --policy-name 'ro-access-bucket' --policy-document 'file://bucket.ro-access.policy.json'
+
+# Delete policies.
+aws iam delete-policy --policy-arn 'arn:aws:iam::012345678901:policy/ro-access-bucket'
+
+# Attach policies.
+aws iam attach-user-policy --user-name 'me-user' \
+  --policy-arn 'arn:aws:iam::012345678901:policy/ro-access-bucket'
+
+# Detach policies.
+aws iam detach-user-policy --user-name 'me-user' \
+  --policy-arn 'arn:aws:iam::012345678901:policy/ro-access-bucket'
+
+# Delete user policies.
+aws iam delete-user-policy --user-name 'me-user' --policy-name 'user-ro-access-bucket'
+
 
 # Show RDS instances.
 aws rds describe-db-instances

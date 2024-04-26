@@ -6,6 +6,7 @@
    1. [Config](#config)
    1. [Detective](#detective)
    1. [GuardDuty](#guardduty)
+   1. [EventBridge](#eventbridge)
    1. [Inspector](#inspector)
    1. [Security Hub](#security-hub)
 1. [Resource constraints](#resource-constraints)
@@ -43,11 +44,14 @@ networks. They can communicate with services outside the VPC, but cannot receive
 | [EC2]          | Virtual machines                              |
 | [ECR]          | Container registry                            |
 | [EKS]          | Kubernetes clusters                           |
+| [EventBridge]  | FIXME                                         |
 | [GuardDuty]    | Threat detection                              |
 | [Inspector]    | FIXME                                         |
 | [S3]           | Storage                                       |
 | [Sagemaker]    | Machine learning                              |
 | [Security Hub] | Aggregator for security findings              |
+
+[Service icons][icons]
 
 ### CloudWatch
 
@@ -112,6 +116,10 @@ Each is assigned a severity value (0.1 to 8+).
 _Trusted IP List_ is a whitelist of **public IPs** that will be ignored by the rules.<br/>
 _Threat IP List_ is a blacklist of **public IPs and CIDRs** that will be used by the rules.<br/>
 
+### EventBridge
+
+FIXME
+
 ### Inspector
 
 FIXME
@@ -144,10 +152,11 @@ Member accounts can administer Security Hub by delegation if given the permissio
 
 ## Resource constraints
 
-| Data type | Component | Summary                       | Description                                                                                                                                                                                                                                                | Type   | Length   | Pattern                           | Required |
-| --------- | --------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | --------------------------------- | -------- |
-| Tag       | Key       | Required name of the tag      | The string value can be Unicode characters and cannot be prefixed with "aws:".<br/>The string can contain only the set of Unicode letters, digits, white-space, `_`,' `.`, `/`, `=`, `+`, `-`, `:`, `@` (Java regex: `^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-]*)$`) | String | 1 to 128 | `^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$` | Yes      |
-| Tag       | Value     | The optional value of the tag | The string value can be Unicode characters. The string can contain only the set of Unicode letters, digits, white-space, `_`, `.`, `/`, `=`, `+`, `-`, `:`, `@` (Java regex: `^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-]*)$"`, `[\p{L}\p{Z}\p{N}_.:\/=+\-@]*` on AWS) | String | 0 to 256 | `^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$` | Yes      |
+| Data type    | Component | Summary                                    | Description                                                                                                                                                                                                                                                | Type   | Length   | Pattern                           | Required |
+| ------------ | --------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | --------------------------------- | -------- |
+| Statement ID | Value     | Optional identifier for a policy statement | The element supports only ASCII uppercase letters (A-Z), lowercase letters (a-z), and numbers (0-9).                                                                                                                                                       | String | FIXME    | `[A-Za-z0-9]`                     | No       |
+| Tag          | Key       | Required name of the tag                   | The string value can be Unicode characters and cannot be prefixed with "aws:".<br/>The string can contain only the set of Unicode letters, digits, white-space, `_`,' `.`, `/`, `=`, `+`, `-`, `:`, `@` (Java regex: `^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-]*)$`) | String | 1 to 128 | `^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$` | Yes      |
+| Tag          | Value     | The optional value of the tag              | The string value can be Unicode characters. The string can contain only the set of Unicode letters, digits, white-space, `_`, `.`, `/`, `=`, `+`, `-`, `:`, `@` (Java regex: `^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-]*)$"`, `[\p{L}\p{Z}\p{N}_.:\/=+\-@]*` on AWS) | String | 0 to 256 | `^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$` | Yes      |
 
 ## Access control
 
@@ -173,39 +182,62 @@ From [Using service-linked roles]:
 
 ### IAM policies
 
+IAM does not expose policies' `Sid` element in the IAM API, so it can't be used to retrieve statements.
+
 Examples:
 
 <details>
   <summary>Give a user temporary RO access to a bucket</summary>
 
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [{
-    "Effect": "Allow",
-    "Principal": {
-      "AWS": [
-        "arn:aws:iam::012345678901:user/my-user"
-      ]
-    },
-    "Action": [
-      "s3:GetObject",
-      "s3:GetObjectAttributes",
-      "s3:ListBucket",
-      "s3:ListBucketVersions"
-    ],
-    "Resource": [
-      "arn:aws:s3:::my-bucket",
-      "arn:aws:s3:::my-bucket/*"
-    ],
-    "Condition": {
-      "DateLessThan": {
-        "aws:CurrentTime": "2024-03-01T00:00:00Z"
-      }
-    }
-  }]
-}
-```
+1. Create the policy:
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [{
+       "Sid": "AllowAttachedPrincipalsTemporaryROAccessToBucket",
+       "Effect": "Allow",
+       "Action": [
+         "s3:GetObject",
+         "s3:GetObjectAttributes",
+         "s3:ListBucket",
+         "s3:ListBucketVersions"
+       ],
+       "Resource": [
+         "arn:aws:s3:::my-bucket",
+         "arn:aws:s3:::my-bucket/*"
+       ],
+       "Condition": {
+         "DateLessThan": {
+           "aws:CurrentTime": "2024-03-01T00:00:00Z"
+         }
+       }
+     }]
+   }
+   ```
+
+   ```sh
+   $ aws iam create-policy --output 'yaml' \
+     --policy-name 'temp-ro-access-my-bucket' --policy-document 'file://policy.json'
+   - Policy:
+       Arn: arn:aws:iam::012345678901:policy/temp-ro-access-my-bucket
+       AttachmentCount: 0
+       CreateDate: '2024-02-25T09:34:12+00:00'
+       DefaultVersionId: v1
+       IsAttachable: true
+       Path: /
+       PermissionsBoundaryUsageCount: 0
+       PolicyId: ANPA2HKHE74L11PTJGB3V
+       PolicyName: temp-ro-access-my-bucket
+       UpdateDate: '2024-02-25T09:34:12+00:00'
+   ```
+
+1. Attach the newly created policy to the user:
+
+   ```sh
+   aws iam attach-user-policy \
+     --user-name 'my-user' --policy-arn 'arn:aws:iam::012345678901:policy/temp-ro-access-my-bucket'
+   ```
 
 </details>
 
@@ -227,6 +259,7 @@ Examples:
 - [What is AWS Config?]
 - [AWS Config tutorial by Stephane Maarek]
 - [Date & time policy conditions at AWS - 1-minute IAM lesson]
+- [IAM JSON policy elements: Sid]
 
 <!--
   References
@@ -236,6 +269,7 @@ Examples:
 [cloudwatch]: #cloudwatch
 [config]: #config
 [detective]: #detective
+[eventbridge]: #eventbridge
 [guardduty]: #guardduty
 [inspector]: #inspector
 [security hub]: #security-hub
@@ -253,6 +287,7 @@ Examples:
 [best practices for tagging aws resources]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html
 [connect to the internet using an internet gateway]: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
+[iam json policy elements: sid]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_sid.html
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [services that publish cloudwatch metrics]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
 [subnets for your vpc]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html
@@ -263,5 +298,6 @@ Examples:
 
 <!-- Others -->
 [aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
+[icons]: https://aws-icons.com/
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
 [introduction to aws iam assumerole]: https://aws.plainenglish.io/introduction-to-aws-iam-assumerole-fbef3ce8e90b
