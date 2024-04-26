@@ -2,12 +2,8 @@
     "Version": "2012-10-17",
     "Statement": [
         {
+            "Sid": "AllowAttachedPrincipalsTemporaryROAccessToBucket",
             "Effect": "Allow",
-            "Principal": {
-                "AWS": [
-                    "arn:aws:iam::012345678901:user/my-user"
-                ]
-            },
             "Action": [
                 "s3:GetObject",
                 "s3:GetObjectAttributes",
