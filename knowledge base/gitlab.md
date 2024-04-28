@@ -604,7 +604,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [global settings]: https://docs.gitlab.com/charts/charts/globals.html
 [how to restart gitlab]: https://docs.gitlab.com/ee/administration/restart_gitlab.html
 [install self-managed gitlab]: https://about.gitlab.com/install
-[merge request approval rules]: https://gitlab.ops.apolloagriculture.com/help/user/project/merge_requests/approvals/rules
+[merge request approval rules]: https://docs.gitlab.com/ee/user/project/merge_requests/approvals/rules.html
 [minimal minikube example values file]: https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/values-minikube-minimum.yaml
 [omnibus configuration template]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/raw/master/files/gitlab-config-template/gitlab.rb.template
 [operator code]: https://gitlab.com/gitlab-org/cloud-native/gitlab-operator

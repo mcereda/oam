@@ -1,0 +1,49 @@
+---
+
+- name: Check the requested install method is supported by the role
+  ansible.builtin.assert:
+    that: install_method in supported_install_methods
+    fail_msg: >-
+      Install method '{{ install_method }}' not supported by the role, 'install_method' must be one of
+      {{ supported_install_methods }}
+    success_msg: Install method '{{ install_method }}' supported by the role
+
+- name: Check the initial password is null or a valid string
+  ansible.builtin.assert:
+    that: initial_password != ''
+    fail_msg: Initial password setting not supported by the role, 'initial_password' must be either null or not empty
+    success_msg: Initial password setting supported by the role
+
+- name: Check the given external URL is valid
+  block:
+    - name: Check the external URL is a valid URL
+      ansible.builtin.assert:
+        that: external_url is ansible.builtin.url
+        fail_msg: External URL '{{ external_url }}' is not a valid URL, set 'external_url' to a valid one
+        success_msg: External URL '{{ external_url }}' is a valid URL
+    - name: Check the external URL's scheme is supported by the role
+      ansible.builtin.assert:
+        that: external_url_scheme in supported_external_url_schemes
+        fail_msg: >-
+          External URL scheme '{{ external_url_scheme }}' not supported by the role, set 'external_url' to have one of
+          {{ supported_external_url_schemes }}
+        success_msg: External URL scheme '{{ external_url_scheme }}' supported by the role
+
+- name: "Check the DNS entries required by Let's Encrypt exist"
+  when: letsencrypt_enabled
+  block:
+    - name: AAAA
+      tags:
+        - debug
+        - never
+      ansible.builtin.debug:
+        msg: "{{ query('community.dns.lookup', external_url_hostname) }}"
+    - name: Check an A or AAAA DNS record for '{{ external_url_hostname }}' exist
+      ansible.builtin.assert:
+        that: >-
+          query('community.dns.lookup', external_url_hostname) != [] or
+          query('community.dns.lookup', external_url_hostname, type='AAAA') != []
+        fail_msg: >-
+          Let's Encrypt feature enabled but no DNS entry of type 'A' or 'AAAA' found for '{{ external_url_hostname }}',
+          create one first
+        success_msg: Required DNS entry found for '{{ external_url_hostname }}'

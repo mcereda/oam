@@ -1,0 +1,45 @@
+---
+
+- name: Install and configure Gitlab
+  hosts: tag_Name_Gitlab_Omnibus
+  vars:
+    ansible_connection: community.aws.aws_ssm
+    ansible_aws_ssm_region: eu-east-2
+  handlers:
+    - name: "Start AWS' SSM agent"
+      tags:
+        - aws
+        - service
+        - ssm
+      become: true
+      ansible.builtin.service:
+        name: amazon-ssm-agent.service
+        state: started
+        enabled: true
+  pre_tasks:
+    - name: Update the system
+      tags:
+        - maintenance
+        - never
+      become: true
+      ansible.builtin.package:
+        name: '*'
+        state: latest
+    - name: Install required packages
+      tags: maintenance
+      become: true
+      ansible.builtin.package:
+        name:
+          - amazon-ssm-agent
+          - ruby
+          - vim
+      notify: "Start AWS' SSM agent"
+  roles:
+    - role: ansible-role-gitlab-omnibus-on-ec2
+      vars:
+        external_url: 'https://gitlab.company.com'
+        # initial_password: null
+        # install_method: 'omnibus'
+
+        # Use the custom certificates from dns challenge, see 'userData' in pulumi code.
+        # letsencrypt_enabled: false

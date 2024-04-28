@@ -1,0 +1,7 @@
+---
+
+install_method: omnibus
+
+external_url: https://{{ ansible_fqdn }}
+initial_password: null
+letsencrypt_enabled: false

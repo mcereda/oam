@@ -1,0 +1,7 @@
+encryptionsalt: v1:C8omJ1iHsso=:v1:6+WUBXXf7EybHcNa:0UOUSLZ3p58s7/o+aNHOKJ6hO2Nz2A==
+config:
+  acme:serverUrl: https://acme-v02.api.letsencrypt.org/directory
+  aws:defaultTags:
+    tags:
+      ManagedBy: Pulumi
+      PulumiProject: gitlab-omnibus-on-aws-ec2
