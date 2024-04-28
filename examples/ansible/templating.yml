@@ -11,6 +11,24 @@
     - name: Get back a conditional value.
       ansible.builtin.debug:
         var: "{{ 'true' if 'test me a lot' is match('test') else 'false' }}"
+    - name: Use the ternary operator.
+      ansible.builtin.debug:
+        msg: >-
+          {{
+            'test me a lot' is match('test')
+            | ternary(
+              'what_if_true',
+              'what_if_false'
+            )
+          }}
+          {{
+            'test me a lot' is match('test')
+            | ternary(
+              'what_if_true',
+              'what_if_false',
+              'what_if_null'
+            )
+          }}
 
     # Returns ["string"] from ["", "string", 0, false].
     - name: Remove empty or false values from a list piping it to 'select()'.
@@ -117,6 +135,19 @@
         - "{{ resource_url is search('users/.*/resources/.*') }}"
         - "{{ resource_url is search('USERS', ignorecase=true) }}"
         - "{{ resource_url is regex('example\\.com/\\w+/foo') }}"
+
+    - name: Get specific lines from walls of text.
+      ansible.builtin.debug:
+        msg: "{{ previous_task.stdout | regex_findall('Infra Phase complete, .*') }}"
+    - name: Test specific lines from walls of text.
+      ansible.builtin.debug:
+        msg: >-
+          {{
+            (
+              previous_task.stdout
+              | regex_findall('Infra Phase complete, .*')
+            ) is not search('0/')
+          }}"
 
 - name: Show off Ansible's loops
   hosts: all

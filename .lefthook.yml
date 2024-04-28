@@ -26,8 +26,9 @@ lint:
   parallel: true
   commands:
     ansible: &ansible-lint
-      glob: '*ansible*'
-      run: .venv/bin/ansible-lint
+      files: find . -type f -path "*ansible*" -not -path "*venv*"
+      glob: '*.{yaml,yml}'
+      run: .venv/bin/ansible-lint {files}
     docker: &hadolint
       # The official docker image is based on scratch and only takes only one
       # input file at a time. I have no clue how to fix that for now so let's

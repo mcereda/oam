@@ -37,15 +37,15 @@
         dest: /etc/knockd.conf
         content: |
           [options]
-          	UseSyslog
-          	Interface = {{ ansible_default_ipv4.alias }}
+            UseSyslog
+            Interface = {{ ansible_default_ipv4.alias }}
 
           [openClose7777]
-          	sequence      = 2222:udp,3333:tcp,4444:udp
-          	seq_timeout   = 15
-          	tcpflags      = syn
-          	cmd_timeout   = 10
-          	start_command = /usr/bin/firewall-cmd --add-port=7777/tcp --zone=public
-          	stop_command  = /usr/bin/firewall-cmd --remove-port=7777/tcp --zone=public
+            sequence      = 2222:udp,3333:tcp,4444:udp
+            seq_timeout   = 15
+            tcpflags      = syn
+            cmd_timeout   = 10
+            start_command = /usr/bin/firewall-cmd --add-port=7777/tcp --zone=public
+            stop_command  = /usr/bin/firewall-cmd --remove-port=7777/tcp --zone=public
         backup: true
         mode: '0600'
