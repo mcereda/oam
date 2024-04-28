@@ -10,6 +10,7 @@
 1. [Mount an NFS share](#mount-an-nfs-share)
 1. [Use TouchID to authenticate in the terminal](#use-touchid-to-authenticate-in-the-terminal)
    1. [Fix iTerm2](#fix-iterm2)
+1. [Create custom DNS resolvers](#create-custom-dns-resolvers)
 1. [Xcode CLI tools](#xcode-cli-tools)
     1. [Headless installation](#headless-installation)
     1. [Removal](#removal)
@@ -63,6 +64,8 @@ sudo dscacheutil -flushcache; sudo killall -HUP 'mDNSResponder'
 
 # Resolve names.
 dscacheutil -q 'host' -a 'name' 'hostname.or.fqdn'
+dscacheutil -q 'host' -a 'name' '192.168.1.35'
+dscacheutil -q 'host' -a 'name' 'gitlab.lan'
 
 
 # Check NFS shares are available on the network.
@@ -311,6 +314,46 @@ You can either:
 
   > Note that when the module is not installed in `/usr/lib/pam` or `/usr/local/lib/pam` (e.g. on M1 Macs where Homebrew is installed in `/opt/homebrew`), you must specify the full path to the module in the PAM service file.
 
+## Create custom DNS resolvers
+
+Refer [macOS: Using Custom DNS Resolvers].
+
+Avoid adding custom DNS servers to `/etc/resolv.conf` as it often gets overwritten or otherwise edited by VPN clients
+and such.
+
+Instead:
+
+1. Create the `/etc/resolver/` folder.
+1. Inside that folder, create new files with the name of the domains one wants custom DNS settings for<br/>
+   In this example, `lab.local`.
+1. Edit those files by adding one's custom domain, search path and nameservers:
+
+   ```plaintext
+   domain lab.local
+   search lab.local
+   nameserver 192.168.1.254
+   nameserver 192.168.1.1
+   ```
+
+1. Force a DNS refresh:
+
+   ```sh
+   sudo dscacheutil -flushcache; sudo killall -HUP 'mDNSResponder'
+   ```
+
+1. Verify the new DNS settings are in place:
+
+   ```sh
+   scutil --dns | grep -C '3' '192.168.1.254'
+   ```
+
+1. Check that name resolution works:
+
+   ```sh
+   dscacheutil -q 'host' -a 'name' '192.168.1.35'
+   dscacheutil -q 'host' -a 'name' 'gitlab.lan'
+   ```
+
 ## Xcode CLI tools
 
 ```sh
@@ -409,6 +452,7 @@ To use any of these key combinations, press and hold the keys immediately after 
 - [Resize, rotate, or flip an image in Preview on Mac]
 - [Who is listening on a given TCP port on Mac OS X?]
 - [Tagging files from the macOS command line]
+- [macOS: Using Custom DNS Resolvers]
 
 <!--
   References
@@ -445,6 +489,7 @@ To use any of these key combinations, press and hold the keys immediately after 
 [list of xcode command line tools]: https://mac.install.guide/commandlinetools/8.html
 [macos default values command reference]: https://github.com/kevinSuttle/macOS-Defaults/blob/master/REFERENCE.md
 [macos network quality tool]: https://www.theapplegeek.co.uk/blog/networkquality
+[macOS: Using Custom DNS Resolvers]: https://vninja.net/2020/02/06/macos-custom-dns-resolvers/
 [mdls]: https://ss64.com/osx/mdls.html
 [pam_reattach]: https://github.com/fabianishere/pam_reattach
 [tagging files from the macos command line]: https://brettterpstra.com/2017/08/22/tagging-files-from-the-command-line/
