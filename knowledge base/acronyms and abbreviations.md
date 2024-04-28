@@ -2,6 +2,7 @@
 
 | Acronym | Expansion                                              | Description                                                                                         |
 | ------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| ACME    | [Automatic Certificate Management Environment]         | Protocol to automate the issuance and renewal of certificates without human interaction             |
 | ACK     | ACKnowledgement                                        |                                                                                                     |
 | ACL     | [Access Control List][acl]                             |                                                                                                     |
 | AD      | Active Directory                                       |                                                                                                     |
@@ -139,7 +140,8 @@
 [zstd]: zstd.md
 
 <!-- Others -->
-[cn (canonicalname vs commonname) in active directory explained]: https://www.itechguides.com/what-is-cn-in-active-directory/
+[automatic certificate management environment]: https://en.wikipedia.org/wiki/Automatic_Certificate_Management_Environment
+[cn (canonicalName vs commonName) in active directory explained]: https://www.itechguides.com/what-is-cn-in-active-directory/
 [continuous delivery]: https://en.wikipedia.org/wiki/Continuous_delivery
 [kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
 [sbom at a glance]: https://www.ntia.gov/sites/default/files/publications/sbom_at_a_glance_apr2021_0.pdf
