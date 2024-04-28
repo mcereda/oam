@@ -864,6 +864,7 @@ Solution: Read [secrets] and fix the configuration by providing a correct key id
 - [Update plans]
 - [Pulumi up --plan without error message (exit code 255)]
 - [Workshops]
+- [Pulumi troubleshooting]
 
 <!--
   References
@@ -894,6 +895,7 @@ Solution: Read [secrets] and fix the configuration by providing a correct key id
 [ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
 [organizing pulumi projects & stacks]: https://www.pulumi.com/docs/using-pulumi/organizing-projects-stacks/
 [projects]: https://www.pulumi.com/docs/concepts/projects/
+[pulumi troubleshooting]: https://www.pulumi.com/docs/support/troubleshooting/
 [pulumi up --plan without error message (exit code 255)]: https://github.com/pulumi/pulumi/issues/11303#issuecomment-1311365793
 [resources reference]: https://www.pulumi.com/resources
 [secrets]: https://www.pulumi.com/docs/concepts/secrets/
