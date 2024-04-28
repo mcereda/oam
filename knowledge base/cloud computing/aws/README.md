@@ -1,6 +1,7 @@
 # Amazon Web Services
 
 1. [Networking](#networking)
+   1. [Elastic IP addresses](#elastic-ip-addresses)
 1. [Services](#services)
    1. [CloudWatch](#cloudwatch)
    1. [Config](#config)
@@ -32,7 +33,15 @@ Gateways connect VPCs to other networks.<br/>
 [_Internet gateways_][connect to the internet using an internet gateway] connect VPCs to the Internet.<br/>
 [_NAT gateways_][nat gateways] allow resources in private subnets to connect to the Internet, other VPCs, or on-premises
 networks. They can communicate with services outside the VPC, but cannot receive unsolicited connection requests.<br/>
-[_VPC endpoints_][access aws services through aws privatelink] connect VPCs to AWS services privately, without the need of Internet gateways or NAT devices.
+[_VPC endpoints_][access aws services through aws privatelink] connect VPCs to AWS services privately, without the need
+of Internet gateways or NAT devices.
+
+### Elastic IP addresses
+
+Refer [Elastic IP addresses].
+
+**Static**, **public** IPv4 addresses allocated to one's AWS account until one releases it.<br/>
+One can can rapidly remapping addresses to other instances in one's account and use them as targets in DNS records.
 
 ## Services
 
@@ -51,7 +60,7 @@ networks. They can communicate with services outside the VPC, but cannot receive
 | [Sagemaker]    | Machine learning                              |
 | [Security Hub] | Aggregator for security findings              |
 
-[Service icons][icons]
+[Service icons][aws icons] are publicly available for diagrams and such.
 
 ### CloudWatch
 
@@ -247,6 +256,7 @@ Examples:
 - [Services that publish CloudWatch metrics]
 - [Using service-linked roles]
 - [Best Practices for Tagging AWS Resources]
+- [Automating DNS-challenge based LetsEncrypt certificates with AWS Route 53]
 
 ### Sources
 
@@ -260,6 +270,7 @@ Examples:
 - [AWS Config tutorial by Stephane Maarek]
 - [Date & time policy conditions at AWS - 1-minute IAM lesson]
 - [IAM JSON policy elements: Sid]
+- [Elastic IP addresses]
 
 <!--
   References
@@ -287,6 +298,7 @@ Examples:
 [best practices for tagging aws resources]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html
 [connect to the internet using an internet gateway]: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
+[elastic ip addresses]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html
 [iam json policy elements: sid]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_sid.html
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [services that publish cloudwatch metrics]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
@@ -297,7 +309,8 @@ Examples:
 [what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
 
 <!-- Others -->
+[automating dns-challenge based letsencrypt certificates with aws route 53]: https://johnrix.medium.com/automating-dns-challenge-based-letsencrypt-certificates-with-aws-route-53-8ba799dd207b
 [aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
-[icons]: https://aws-icons.com/
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
+[aws icons]: https://aws-icons.com/
 [introduction to aws iam assumerole]: https://aws.plainenglish.io/introduction-to-aws-iam-assumerole-fbef3ce8e90b
