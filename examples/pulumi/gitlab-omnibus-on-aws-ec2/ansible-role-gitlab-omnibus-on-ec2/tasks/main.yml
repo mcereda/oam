@@ -1,0 +1,25 @@
+---
+
+- name: Pre-flight checks
+  tags:
+    - check
+    - checks
+    - pre-flight
+    - preflight
+  ansible.builtin.import_tasks:
+    file: pre-flight.yml
+
+- name: Install Gitlab
+  tags:
+    - "{{ install_method }}"
+    - gitlab
+    - install
+  ansible.builtin.import_tasks:
+    file: "{{ role_path }}/tasks/install/{{ install_method }}.yml"
+- name: Configure Gitlab
+  tags:
+    - "{{ install_method }}"
+    - configure
+    - gitlab
+  ansible.builtin.import_tasks:
+    file: "{{ role_path }}/tasks/configure/{{ install_method }}.yml"

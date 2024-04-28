@@ -1,0 +1,9 @@
+name: gitlab-omnibus-on-aws-ec2
+runtime: nodejs
+description: Gitlab Omnibus on AWS EC2
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: typescript
+backend:
+  url: file://.

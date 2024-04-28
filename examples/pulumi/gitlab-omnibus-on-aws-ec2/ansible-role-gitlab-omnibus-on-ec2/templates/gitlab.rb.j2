@@ -1,0 +1,12 @@
+## GitLab configuration settings
+## -------------------------------------
+## Template for the local installation available at
+## /opt/gitlab/etc/gitlab.rb.template
+
+# URL on which GitLab will be reachable.
+# During installation/upgrades, the value of the environment variable 'EXTERNAL_URL' will be used to populate/replace
+# this value.
+external_url '{{ external_url }}'
+
+# LetsEncrypt integration
+letsencrypt['enable'] = {{ letsencrypt_enabled | bool |lower }}

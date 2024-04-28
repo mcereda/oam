@@ -1,0 +1,93 @@
+---
+
+# Follow 'https://about.gitlab.com/install/#amazonlinux-2023'.
+
+- name: Add Gitlab's repositories
+  tags:
+    - repo
+    - repository
+    - repositories
+  become: true
+  block:
+    # Refer 'files/gitlab_gitlab-ee.repo'.
+    - name: Add Gitlab's package repository
+      ansible.builtin.yum_repository:
+        name: gitlab-ee
+        description: gitlab-ee
+        baseurl: https://packages.gitlab.com/gitlab/gitlab-ee/amazon/2023/$basearch
+        repo_gpgcheck: true
+        gpgcheck: true
+        gpgkey: |-
+          https://packages.gitlab.com/gitlab/gitlab-ee/gpgkey
+          https://packages.gitlab.com/gitlab/gitlab-ee/gpgkey/gitlab-gitlab-ee-3D645A26AB9FBD22.pub.gpg
+        sslverify: true
+        sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+        metadata_expire: 300
+    - name: Add Gitlab's sources repository
+      ansible.builtin.yum_repository:
+        name: gitlab-ee-source
+        description: gitlab-ee-source
+        baseurl: https://packages.gitlab.com/gitlab/gitlab-ee/amazon/2023/SRPMS
+        repo_gpgcheck: true
+        gpgcheck: true
+        gpgkey: |-
+          https://packages.gitlab.com/gitlab/gitlab-ee/gpgkey
+          https://packages.gitlab.com/gitlab/gitlab-ee/gpgkey/gitlab-gitlab-ee-3D645A26AB9FBD22.pub.gpg
+        sslverify: true
+        sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+        metadata_expire: 300
+
+- name: Install Gitlab's omnibus package
+  tags:
+    - package
+  become: true
+  environment:
+    EXTERNAL_URL: "{{ external_url }}"
+    GITLAB_ROOT_PASSWORD: "{{ initial_password | ternary(initial_password, omit, omit) }}"
+  ansible.builtin.package:
+    name: gitlab-ee
+
+- name: Print the administrator's credentials
+  tags:
+    - credentials
+    - password
+  block:
+    - name: Check whether the auto-generated administrator's initial password file exists
+      ansible.builtin.stat:
+        path: /etc/gitlab/initial_root_password
+      register: initial_password_file_stat
+    - name: Recover the auto-generated administrator's initial password
+      block:
+        - name: Read the initial password file
+          when: initial_password_file_stat.stat.exists
+          block:
+            - name: Read the initial password file
+              become: true
+              ansible.builtin.slurp:
+                src: /etc/gitlab/initial_root_password
+              register: initial_password_file
+            - name: Save the initial login credentials
+              ansible.builtin.set_fact:
+                initial_password: |-
+                  {{
+                    initial_password_file['content']
+                    | b64decode
+                    | regex_findall('Password: .*')
+                    | first
+                    | split(': ')
+                    | last
+                  }}
+        - name: Report that the password is not available anymore
+          when: not initial_password_file_stat.stat.exists
+          ansible.builtin.set_fact:
+            initial_password: NOT_AVAILABLE_ANYMORE
+    - name: Print the administrator's credentials
+      ansible.builtin.debug:
+        msg: >-
+          {{
+            dict([
+              [ 'URL', external_url ],
+              [ 'Username', 'root' ],
+              [ 'Initial Password', initial_password ]
+            ])
+          }}

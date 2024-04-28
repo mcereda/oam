@@ -1,0 +1,10 @@
+---
+
+external_url_hostname: "{{ external_url | ansible.builtin.urlsplit('hostname') }}"
+external_url_scheme: "{{ external_url | ansible.builtin.urlsplit('scheme') }}"
+supported_external_url_schemes:
+  - http
+  - https
+
+supported_install_methods:
+  - omnibus
