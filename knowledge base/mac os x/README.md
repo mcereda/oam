@@ -61,6 +61,9 @@ lsof -nt -i ':443'
 # Clear the DNS cache.
 sudo dscacheutil -flushcache; sudo killall -HUP 'mDNSResponder'
 
+# Resolve names.
+dscacheutil -q 'host' -a 'name' 'hostname.or.fqdn'
+
 
 # Check NFS shares are available on the network.
 showmount -e 'host'
@@ -116,6 +119,15 @@ scutil --set 'LocalHostName' \
 defaults read '/Library/Preferences/SystemConfiguration/com.apple.smb.server' 'NetBIOSName'
 /usr/libexec/PlistBuddy -c "Print :NetBIOSName" \
   '/Library/Preferences/SystemConfiguration/com.apple.smb.server.plist'
+
+# Get the DNS configuration.
+scutil --dns
+
+# Get the proxy configuration.
+scutil --proxy
+
+# Get network information.
+scutil --nwi
 
 
 # Get environment variables from inside launchd.
@@ -408,8 +420,6 @@ To use any of these key combinations, press and hold the keys immediately after 
 [resize, rotate, or flip an image in preview on mac]: https://support.apple.com/guide/preview/resize-rotate-or-flip-an-image-prvw2015/11.0/mac/13.0
 
 <!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Knowledge base -->
 [defaults]: defaults.md
 [ghostscript]: ../ghostscript.md
