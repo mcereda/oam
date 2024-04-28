@@ -249,22 +249,22 @@ const cluster = new aws.eks.Cluster("cluster", {
 
 // If used in JSON documents, the function needs to cover the whole document.
 const encryptionKey = aws.kms.getKeyOutput({
-    keyId: "00001111-2222-3333-4444-555566667777",
+  keyId: "00001111-2222-3333-4444-555566667777",
 });
 const clusterServiceRole = new aws.iam.Role("clusterServiceRole", {
-    inlinePolicies: [{
-        policy: encryptionKey.arn.apply(arn => JSON.stringify({
-            Version: "2012-10-17",
-            Statement: [{
-                Effect: "Allow",
-                Action: [
-                    "kms:CreateGrant",
-                    "kms:DescribeKey",
-                ],
-                Resource: arn,
-            }],
-        })),
-    }]
+  inlinePolicies: [{
+    policy: encryptionKey.arn.apply(arn => JSON.stringify({
+      Version: "2012-10-17",
+      Statement: [{
+        Effect: "Allow",
+        Action: [
+          "kms:CreateGrant",
+          "kms:DescribeKey",
+        ],
+        Resource: arn,
+      }],
+    })),
+  }]
 });
 ```
 
@@ -345,36 +345,36 @@ yq -iy '. += {"backend": {"url": "s3://myBucket/prefix"}}' 'Pulumi.yaml'
 ```ts
 // Merge objects.
 tags_base = {
-    ManagedBy: "Pulumi",
-    Prod: false,
+  ManagedBy: "Pulumi",
+  Prod: false,
 };
 new aws.eks.FargateProfile("fargateProfile", {
-    tags: {
-        ...tags_base,
-        ...{
-            Description: "Fargate profile for EKS cluster EksTest",
-            EksComponent: "Fargate profile",
-            Name: "eksTest-fargateProfile",
-        },
+  tags: {
+    ...tags_base,
+    ...{
+      Description: "Fargate profile for EKS cluster EksTest",
+      EksComponent: "Fargate profile",
+      Name: "eksTest-fargateProfile",
     },
-    …
+  },
+  …
 });
 
 // Default tags with explicit provider.
 const provider = new aws.Provider("provider", {
-    defaultTags: {
-        tags: {
-            ManagedBy: "Pulumi",
-            Owner: "user@company.com",
-            Team: "Infra",
-        },
+  defaultTags: {
+    tags: {
+      ManagedBy: "Pulumi",
+      Owner: "user@company.com",
+      Team: "Infra",
     },
+  },
 });
 new aws.eks.FargateProfile("fargateProfile", {
-    …
+  …
 }, {
-    provider: provider,
-    …
+  provider: provider,
+  …
 });
 
 // Use outputs from other stacks.
@@ -382,11 +382,11 @@ const currentStack = pulumi.getStack();
 const infraStack = new pulumi.StackReference(`organization/infra/${currentStack}`);
 const subnets_private = infraStack.getOutput("subnets_private");  // list of aws.ec2.Subnets
 new aws.eks.Cluster("cluster", {
-    vpcConfig: {
-        subnetIds: subnets_private.apply((subnets: aws.ec2.Subnet[]) => subnets.map(subnet => subnet.id)),
-        …
-    },
+  vpcConfig: {
+    subnetIds: subnets_private.apply((subnets: aws.ec2.Subnet[]) => subnets.map(subnet => subnet.id)),
     …
+  },
+  …
 });
 
 // Debug the .apply() result of Outputs.
@@ -396,6 +396,15 @@ subnets_private.apply(
 subnets_private.apply(
   (subnets: aws.ec2.Subnet[]) => console.log(subnets.map(subnet => subnet.id)),
 );  // [ 'subnet-00001111222233334', … ]
+
+// Use multiple Outputs.
+pulumi.all([
+  aws.getRegionOutput().apply(region => region.id),
+  aws.getCallerIdentityOutput().apply(callerIdentity => callerIdentity.accountId),
+  cluster.name,
+]).apply(
+  ([regionId, accountId, clusterName]) => `arn:aws:eks:${regionId}:${accountId}:fargateprofile/${clusterName}/*`
+);
 ```
 
 </details>
@@ -503,19 +512,19 @@ Read [Assigning tags by default on AWS with Pulumi] first to get an idea of pros
 
    ```ts
    const provider = new aws.Provider("provider", {
-       defaultTags: {
-           tags: {
-               ManagedBy: "Pulumi",
-               Owner: "user@company.com",
-               Team: "Infra",
-           },
+     defaultTags: {
+       tags: {
+         ManagedBy: "Pulumi",
+         Owner: "user@company.com",
+         Team: "Infra",
        },
+     },
    });
    const fargateProfile = new aws.eks.FargateProfile("fargateProfile", {
-       …
+     …
    }, {
-       provider: provider,
-       …
+     provider: provider,
+     …
    });
    ```
 

@@ -19,28 +19,42 @@ sudo cloud-init query userdata
 sudo cat /var/lib/cloud/instance/user-data.txt | gunzip
 
 # Assert the user data we provided is a valid cloud-config.
-# From version 22.2, drops the 'devel' command.
-sudo cloud-init devel schema --system --annotate
-sudo cloud-init devel schema --config-file '/tmp/user-data'
+# A.K.A. validate files.
+# Versions <22.2 require 'devel schema' instead of only 'schema'.
+sudo cloud-init schema -c '/var/lib/cloud/instance/user-data.txt'
+sudo cloud-init schema --system --annotate
+
+# Check the user scripts.
+ls '/var/lib/cloud/instance/scripts'
 
 # Check the raw logs.
-cat '/var/log/cloud-init.log'
 cat '/var/log/cloud-init-output.log'
+tail -f '/var/log/cloud-init.log' '/var/log/cloud-init-output.log'
 
 # Parse and organize the events in the log file by stage.
 cloud-init analyze show
-
-# Manually run a single cloud-config module once after the instance has booted.
-sudo cloud-init single --name 'cc_ssh' --frequency 'always'
 
 # Clean up everything so `cloud-init` can run again.
 sudo cloud-init clean
 
 # Re-run everything.
-sudo cloud-init init
+# 1. Clean the existing configuration.
+# 2. Detect local data sources.
+# 3. Detect any data source requiring the network and run the 'initialization' modules.
+# 4. Run the 'configuration' modules.
+# 5. Run the 'final' modules.
+sudo cloud-init clean --logs \
+&& sudo cloud-init init --local \
+&& sudo cloud-init init \
+&& sudo cloud-init modules --mode='config' \
+&& sudo cloud-init modules -m 'final'
 
-# Check the user scripts.
-ls '/var/lib/cloud/instance/scripts'
+# Manually run a single cloud-config module once after the instance has booted.
+# Requires one to delete the semaphores in /var/lib/cloud/instances/hostname/sem. Cloud-init will not re-run if these
+# files are present.
+sudo rm -fv '/var/lib/cloud/instances'/*/'sem/config_ssh' && sudo cloud-init single --name 'cc_ssh' --frequency 'always'
+sudo rm -fv '/var/lib/cloud/instances'/*/'sem/config_write_files_deferred' \
+&& sudo cloud-init single -n 'write_files_deferred' --frequency 'once'
 ```
 
 ```yaml
@@ -107,8 +121,8 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
 
    ```ts
    new cloudinit.Config("example", {
-     gzip: false,
-     base64Encode: false,
+     gzip: true,
+     base64Encode: true,
      parts: [
        {
          contentType: "text/cloud-config",
@@ -125,6 +139,32 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
          filename: "cloud-config.inline.yml",
          mergeType: "dict(recurse_array,no_replace)+list(append)",
        },
+      {
+        contentType: "text/cloud-config",
+        content: pulumi.all([
+          certificate.certificateDomain.apply(v => v),
+          certificate.certificatePem.apply(v => v),
+          certificate.privateKeyPem.apply(v => v),
+        ]).apply(([domain, certificate, privateKey]) => yaml.stringify({
+          write_files: [
+            {
+              path: `/etc/gitlab/ssl/${domain}.crt`,
+              content: certificate,
+              permissions: "0o600",
+              defer: true,
+            },
+            {
+              path: `/etc/gitlab/ssl/${domain}.key`,
+              content: btoa(privateKey),
+              permissions: "0o600",
+              encoding: "base64",
+              defer: true,
+            },
+          ],
+        })),
+        filename: "letsencrypt.certificate.yml",
+        mergeType: "dict(recurse_array,no_replace)+list(append)",
+      },
      ],
    });
    ```
@@ -205,6 +245,7 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
 - [Cloud-Init configuration merging]
 - [Terraform's cloud-init provider]
 - [How to test cloud-init locally with Vagrant]
+- [How to re-run cloud-init without reboot]
 
 <!--
   References
@@ -226,6 +267,7 @@ merge_type: 'list(append)+dict(recurse_array)+str()'
 <!-- Others -->
 [cloud-init configuration merging]: https://jen20.dev/post/cloudinit-configuration-merging/
 [cloud-init multipart encoding issues]: https://github.com/hashicorp/terraform/issues/4794
+[how to re-run cloud-init without reboot]: https://stackoverflow.com/questions/23065673/how-to-re-run-cloud-init-without-reboot#71152408
 [how to test cloud-init locally with vagrant]: https://www.grzegorowski.com/how-to-test-cloud-init-locally-with-vagrant
 [terraform's cloud-init provider]: https://registry.terraform.io/providers/hashicorp/cloudinit/latest/docs/data-sources/cloudinit_config
 [test cloud-init with a multipass container]: https://medium.com/open-devops-academy/test-cloud-init-with-a-multipass-containers-e3e3bb740604
