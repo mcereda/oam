@@ -38,7 +38,7 @@
         - never
       ansible.builtin.debug:
         msg: "{{ query('community.dns.lookup', external_url_hostname) }}"
-    - name: Check an A or AAAA DNS record for '{{ external_url_hostname }}' exist
+    - name: Check an A or AAAA DNS record already exists for '{{ external_url_hostname }}'
       ansible.builtin.assert:
         that: >-
           query('community.dns.lookup', external_url_hostname) != [] or
