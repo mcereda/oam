@@ -358,6 +358,7 @@ Solution: update the SSH server.
 - [How to reuse SSH connection to speed up remote login process using multiplexing]
 - [Get started with OpenSSH for Windows]
 - [Restrict SSH login to a specific IP or host]
+- [Stick with security: YubiKey, SSH, GnuPG, macOS]
 
 <!--
   References
@@ -384,5 +385,6 @@ Solution: update the SSH server.
 [how to reuse ssh connection to speed up remote login process using multiplexing]: https://www.cyberciti.biz/faq/linux-unix-reuse-openssh-connection/
 [multiple similar entries in ssh config]: https://unix.stackexchange.com/questions/61655/multiple-similar-entries-in-ssh-config
 [restrict ssh login to a specific ip or host]: https://docs.rackspace.com/support/how-to/restrict-ssh-login-to-a-specific-ip-or-host/
+[stick with security: yubikey, ssh, gnupg, macos]: https://evilmartians.com/chronicles/stick-with-security-yubikey-ssh-gnupg-macos
 [use sshfs to mount a remote directory as a volume on osx]: https://benohead.com/mac-os-x-use-sshfs-to-mount-a-remote-directory-as-a-volume/
 [using the ssh config file]: https://linuxize.com/post/using-the-ssh-config-file/
