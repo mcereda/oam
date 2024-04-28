@@ -58,7 +58,7 @@
       register: initial_password_file_stat
     - name: Recover the auto-generated administrator's initial password
       block:
-        - name: Read the initial password file
+        - name: Recover the password from the initial password file
           when: initial_password_file_stat.stat.exists
           block:
             - name: Read the initial password file

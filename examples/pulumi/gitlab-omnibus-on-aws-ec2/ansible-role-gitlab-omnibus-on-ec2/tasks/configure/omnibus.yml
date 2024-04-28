@@ -10,32 +10,6 @@
     mode: u=rw,g=,o=
     backup: true
   register: config_file
-
-- name: Validate the configuration file
-  # Since it cannot be validated by the 'template' module as it requires a file name to be specified.
-  when: config_file is changed
-  become: true
-  ansible.builtin.command: >-
-    gitlab-ctl show-config
-  register: config_file_validation
-  changed_when: false
-  failed_when: config_file_validation.rc != 0
-
-- name: Reconfigure Gitlab
-  when:
-    - config_file is changed
-    - config_file_validation is not failed
-  become: true
-  ansible.builtin.command: >-
-    gitlab-ctl reconfigure
-  register: reconfiguration
-  changed_when:
-    - reconfiguration.rc == 0
-    - >-
-        {{
-          (
-            reconfiguration.stdout
-            | regex_findall('Infra Phase complete, .*')
-          ) is not search('0/')
-        }}
-  failed_when: reconfiguration.rc != 0
+  notify:
+    - "Validate Gitlab's configuration file"
+    - Reconfigure Gitlab
