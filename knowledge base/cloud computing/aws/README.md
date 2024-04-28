@@ -9,6 +9,7 @@
    1. [GuardDuty](#guardduty)
    1. [EventBridge](#eventbridge)
    1. [Inspector](#inspector)
+   1. [RDS](#rds)
    1. [Security Hub](#security-hub)
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
@@ -56,6 +57,7 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | [EventBridge]  | FIXME                                         |
 | [GuardDuty]    | Threat detection                              |
 | [Inspector]    | FIXME                                         |
+| [RDS]          | Databases                                     |
 | [S3]           | Storage                                       |
 | [Sagemaker]    | Machine learning                              |
 | [Security Hub] | Aggregator for security findings              |
@@ -132,6 +134,11 @@ FIXME
 ### Inspector
 
 FIXME
+
+### RDS
+
+Read replicas **can** be promoted to standalone DB instances.<br/>
+See [Working with DB instance read replicas].
 
 ### Security Hub
 
@@ -257,6 +264,7 @@ Examples:
 - [Using service-linked roles]
 - [Best Practices for Tagging AWS Resources]
 - [Automating DNS-challenge based LetsEncrypt certificates with AWS Route 53]
+- [Working with DB instance read replicas]
 
 ### Sources
 
@@ -307,6 +315,7 @@ Examples:
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
 [what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
+[working with db instance read replicas]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html
 
 <!-- Others -->
 [automating dns-challenge based letsencrypt certificates with aws route 53]: https://johnrix.medium.com/automating-dns-challenge-based-letsencrypt-certificates-with-aws-route-53-8ba799dd207b
