@@ -1,2 +1,3 @@
 ansible/playbooks/aws.ec2.enable-ssm-agent.yml package-latest
 ansible/playbooks/keybase.register-device.yml  no-changed-when
+examples/ansible/aws_ec2.yml                   yaml[comments-indentation]

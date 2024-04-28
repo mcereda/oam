@@ -11,11 +11,12 @@
    1. [_No extensions found_ when running from source](#no-extensions-found-when-running-from-source)
    1. [_Type the name and password of a user in the 'Developer Tools' group to allow Developer Tools Access to make changes_ on Mac OS X](#type-the-name-and-password-of-a-user-in-the-developer-tools-group-to-allow-developer-tools-access-to-make-changes-on-mac-os-x)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## Configuration
 
-The configuration consists of the application's defaults, overridden by the user settings first and, if existing, by the workspace settings.<br/>
+The configuration consists of the application's defaults, overridden by the user settings first and, if existing, by the
+workspace settings.<br/>
 See the [settings.json] example.
 
 The user configuration is loaded from the `settings.json` file in the user's configuration directory for the application.
@@ -43,16 +44,17 @@ Built-in:
 
 Extensions:
 
-| Extension                  | Setting                                       | Default value | Scopes          | Location in tree                 | Description                                                                                                                                                  |
-| -------------------------- | --------------------------------------------- | ------------- | --------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| vscode.git (built-in)      | `git.autofetch`                               | `true`        | User, Workspace | Extensions > Git                 | When set to true, commits will automatically be fetched from the default remote of the current Git repository. Setting to `all` will fetch from all remotes. |
-| angelo-breuer.clock        | `clock.alignment`                             | `"Left"`      | User, Workspace | Extensions > Status Bar Clock    | Alignment of the clock on the status bar.                                                                                                                    |
-| angelo-breuer.clock        | `clock.format`                                | `"hh:MM"`     | User, Workspace | Extensions > Status Bar Clock    | Date and time format. See <https://www.npmjs.com/package/dateformat#mask-options> for more options.                                                          |
-| yzhang.markdown-all-in-one | `markdown.extension.orderedList.autoRenumber` | `true`        | User, Workspace | Extensions > Markdown All In One | Auto fix ordered list markers.                                                                                                                               |
-| yzhang.markdown-all-in-one | `markdown.extension.orderedList.marker`       | `"ordered"`   | User, Workspace | Extensions > Markdown All In One | Auto fix ordered list markers.                                                                                                                               |
-| yzhang.markdown-all-in-one | `markdown.extension.toc.levels`               | `"1..6"`      | User, Workspace | Extensions > Markdown All In One | Range of levels for the ToC.                                                                                                                                 |
-| yzhang.markdown-all-in-one | `markdown.extension.toc.orderedList`          | `false`       | User, Workspace | Extensions > Markdown All In One | Use an ordered list in the ToC.                                                                                                                              |
-| redhat.ansible             | `redhat.telemetry.enabled`                    | `true`        | User, Workspace | Extensions > Ansible             | Send telemetry to Red Hat servers.                                                                                                                           |
+| Extension                  | Setting                                       | Default value | Scopes          | Location in tree                  | Description                                                                                                                                                  |
+| -------------------------- | --------------------------------------------- | ------------- | --------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| vscode.git (built-in)      | `git.autofetch`                               | `true`        | User, Workspace | Extensions > Git                  | When set to true, commits will automatically be fetched from the default remote of the current Git repository. Setting to `all` will fetch from all remotes. |
+| angelo-breuer.clock        | `clock.alignment`                             | `"Left"`      | User, Workspace | Extensions > Status Bar Clock     | Alignment of the clock on the status bar.                                                                                                                    |
+| angelo-breuer.clock        | `clock.format`                                | `"hh:MM"`     | User, Workspace | Extensions > Status Bar Clock     | Date and time format. See <https://www.npmjs.com/package/dateformat#mask-options> for more options.                                                          |
+| yzhang.markdown-all-in-one | `markdown.extension.orderedList.autoRenumber` | `true`        | User, Workspace | Extensions > Markdown All In One  | Auto fix ordered list markers.                                                                                                                               |
+| yzhang.markdown-all-in-one | `markdown.extension.orderedList.marker`       | `"ordered"`   | User, Workspace | Extensions > Markdown All In One  | Auto fix ordered list markers.                                                                                                                               |
+| yzhang.markdown-all-in-one | `markdown.extension.toc.levels`               | `"1..6"`      | User, Workspace | Extensions > Markdown All In One  | Range of levels for the ToC.                                                                                                                                 |
+| yzhang.markdown-all-in-one | `markdown.extension.toc.orderedList`          | `false`       | User, Workspace | Extensions > Markdown All In One  | Use an ordered list in the ToC.                                                                                                                              |
+| redhat.ansible             | `redhat.telemetry.enabled`                    | `true`        | User, Workspace | Extensions > Ansible > Telemetry  | Send telemetry to Red Hat servers.                                                                                                                           |
+| redhat.ansible             | `ansible.validation.lint.enabled`             | `true`        | User, Workspace | Extensions > Ansible > Validation | USe ansible-lint if found to lint Ansible files. Kinda a nuisance when enabled.                                                                              |
 
 ## Handy keyboard shortcuts
 
@@ -140,7 +142,7 @@ sudo dscl . append '/Groups/_developer' GroupMembership "$USER"
 - [Documentation]
 - [Network connections in Visual Studio Code]
 
-## Sources
+### Sources
 
 - [Using extensions in compiled VSCode]
 - [Recommending VSCode extensions within your Open Source projects]
@@ -148,6 +150,7 @@ sudo dscl . append '/Groups/_developer' GroupMembership "$USER"
 - [VSCode (and some non-patched Electron applications) doesn't run after Tumbleweed update on Nvidia]
 - [Electron applications all crash upon launch]
 - [Authorize a non-admin developer in Xcode / Mac OS]
+- [Deep dive on Ansible VScode extension]
 
 <!--
   References
@@ -164,6 +167,7 @@ sudo dscl . append '/Groups/_developer' GroupMembership "$USER"
 
 <!-- Others -->
 [authorize a non-admin developer in xcode / mac os]: https://stackoverflow.com/questions/1837889/authorize-a-non-admin-developer-in-xcode-mac-os#1837935
+[deep dive on ansible vscode extension]: https://www.ansible.com/blog/deep-dive-on-ansible-vscode-extension/
 [electron applications all crash upon launch]: https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/1944468
 [recommending vscode extensions within your open source projects]: https://tattoocoder.com/recommending-vscode-extensions-within-your-open-source-projects/
 [using extensions in compiled vscode]: https://stackoverflow.com/questions/44057402/using-extensions-in-compiled-vscode#45291490

@@ -99,7 +99,9 @@
             minute: 0
             hour: 3     # 3 AM
             weekday: 0  # Sunday
-            job: docker ps -f 'name=pihole' -f 'status=running' -f 'health=healthy' -q | xargs -I{} docker exec {} pihole -g
+            job: >-
+              docker ps -f 'name=pihole' -f 'status=running' -f 'health=healthy' -q
+              | xargs -I{} docker exec {} pihole -g
         - name: Create the cron job for automatic backups
           tags:
             - backup
@@ -119,9 +121,10 @@
             - graviton
           community.docker.docker_container_exec:
             container: pihole
-            command: >
+            command: >-
               sqlite3 '/etc/pihole/gravity.db'
-              "INSERT OR IGNORE INTO adlist (address, enabled, comment) VALUES ('{{ item }}', 1, 'Listed on v.firebog.net');"
+              "INSERT OR IGNORE INTO adlist (address, enabled, comment)
+              VALUES ('{{ item }}', 1, 'Listed on v.firebog.net');"
           # on M1 macs execute `export NO_PROXY=*` first
           loop: "{{ lookup('ansible.builtin.url', 'https://v.firebog.net/hosts/lists.php?type=tick', wantlist=True) }}"
           async: 600
