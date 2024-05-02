@@ -53,12 +53,6 @@ aws deploy get-deployment-group --application-name 'batman' \
   --deployment-group-name 'production'
 
 
-# Access shells on containers in ECS.
-aws ecs execute-command \
-  --cluster 'clusterName' --task 'taskId' --container 'containerName' \
-  --interactive --command '/bin/bash'
-
-
 # Get information about the current user.
 aws sts get-caller-identity
 
@@ -228,7 +222,7 @@ aws ssm start-session --target 'i-0123456789abcdef0'
 
 ## Further readings
 
-- [AWS]
+- [Amazon Web Services]
 - CLI [quickstart]
 - [Configure profiles] in the CLI
 - [How do I assume an IAM role using the AWS CLI?]
@@ -244,7 +238,7 @@ aws ssm start-session --target 'i-0123456789abcdef0'
   -->
 
 <!-- Knowledge base -->
-[aws]: README.md
+[amazon web services]: README.md
 [ebs tldr]: ebs.md#tldr
 [ec2 tldr]: ec2.md#tldr
 [ecr tldr]: ecr.md#tldr

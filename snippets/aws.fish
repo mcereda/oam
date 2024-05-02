@@ -25,3 +25,18 @@ alias aws-ssm-gitlabAutoscalingManager-ita-b "aws ec2 describe-instances --outpu
 		'Name=tag:Name,Values=Gitlab Autoscaling Manager' \
 	--query 'Reservations[].Instances[0].InstanceId' \
 | xargs -ot aws ssm start-session --target"
+
+aws s3 rm 's3://bucket-name/prefix' --recursive --dry-run
+
+aws ecs list-tasks --cluster 'testCluster' --family 'testService' --output 'text' --query 'taskArns' \
+| xargs -p aws ecs wait tasks-running --cluster 'testCluster' --tasks
+while [[ $$(aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --service-name 'testService') == "" ]]; do sleep 1; done
+
+@aws ecs list-task-definitions --family-prefix 'testService' --output 'text' --query 'taskDefinitionArns' \
+| xargs -pn '1' aws ecs deregister-task-definition --task-definition
+
+aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --service-name 'testService' \
+| tee \
+| xargs -t aws ecs describe-tasks --query "tasks[].attachments[].details[?(name=='privateIPv4Address')].value" --output 'text' --cluster 'testCluster' --tasks \
+| tee \
+| xargs -I{} curl -fs "http://{}:8080"

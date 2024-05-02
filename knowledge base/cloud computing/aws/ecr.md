@@ -69,6 +69,7 @@ aws ecr describe-repositories --repository-names 'docker-tools/image-builder' \
 
 ## Further readings
 
+- [Amazon Web Services]
 - AWS' [CLI]
 
 ### Sources
@@ -83,6 +84,7 @@ aws ecr describe-repositories --repository-names 'docker-tools/image-builder' \
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[amazon web services]: README.md
 [cli]: cli.md
 
 <!-- Files -->

@@ -678,10 +678,12 @@ Debug: see [Identify common issues].
 
 ## Further readings
 
+- [Amazon Web Services]
 - [Kubernetes]
 - [EKS Workshop]
 - [Pulumi]
 - [Terraform]
+- AWS' [CLI]
 - [How can I get my worker nodes to join my Amazon EKS cluster?]
 - [Enabling IAM principal access to your cluster]
 - [Allowing IAM roles or users access to Kubernetes objects on your Amazon EKS cluster]
@@ -721,6 +723,8 @@ Debug: see [Identify common issues].
 [secrets encryption through kms]: #secrets-encryption-through-kms
 
 <!-- Knowledge base -->
+[amazon web services]: README.md
+[cli]: cli.md
 [kubernetes]: ../../kubernetes/README.md
 [pulumi]: ../../pulumi.md
 [terraform]: ../../pulumi.md

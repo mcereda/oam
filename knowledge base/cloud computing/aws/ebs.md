@@ -22,7 +22,9 @@ aws ec2 describe-volumes --output 'text' \
 
 ## Further readings
 
+- [Amazon Web Services]
 - [What is block storage?]
+- AWS' [CLI]
 
 ### Sources
 
@@ -36,6 +38,8 @@ aws ec2 describe-volumes --output 'text' \
   -->
 
 <!-- Knowledge base -->
+[amazon web services]: README.md
+[cli]: cli.md
 [ec2]: ec2.md
 
 <!-- Upstream -->
