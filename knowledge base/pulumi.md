@@ -287,8 +287,8 @@ pulumi new -gy 'typescript' -n 'name' --dir 'dirname' \
 # Set configuration values.
 pulumi config set --secret 'ecr:dockerHub' '{"username":"marcus","accessToken":"dckr_pat_polus"}'
 pulumi config set-all --path \
-	--plaintext 'aws:defaultTags.tags.Owner=SomeOne' \
-	--plaintext 'aws:defaultTags.tags.Team=SomeTeam'
+  --plaintext 'aws:defaultTags.tags.Owner=SomeOne' \
+  --plaintext 'aws:defaultTags.tags.Team=SomeTeam'
 
 # Using the same number of threads of the machine seems to give the best
 # performance ratio.
