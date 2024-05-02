@@ -20,6 +20,13 @@ zypper install 'fish'
 fish
 fish -Pil
 
+# Set variables.
+set 'MyVAR' 'someValue'
+set -x 'MyExportedVAR' 'someValue'
+
+# Unset variables.
+set -e 'MyVAR'
+
 # Change one's default shell to `fish`.
 chsh -s (which fish)      # from `fish`
 chsh -s "$(which fish)"   # from `{ba,z}sh`
