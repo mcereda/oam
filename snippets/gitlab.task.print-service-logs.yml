@@ -1,0 +1,16 @@
+---
+
+print-postgis-service-logs:
+  when: manual
+  variables:
+    CI_DEBUG_SERVICES: "true"
+  services:
+    - name: "postgis/postgis:15-3.3"
+      alias: db
+      variables:
+        POSTGRES_DB: postgres
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: "postgres"
+        POSTGRES_HOST_AUTH_METHOD: trust
+  script:
+    - echo 'hello!!'
