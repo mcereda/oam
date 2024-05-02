@@ -9,6 +9,9 @@
 ## TL;DR
 
 ```sh
+# Quote any set of characters that is not a space.
+sed -E 's|([[:graph:]]+)|"\1"|g'
+
 # Delete lines matching "OAM" from a file.
 # Overwrite the source file with the changes.
 sed '/OAM/d' -i .bash_history
