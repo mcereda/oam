@@ -70,7 +70,7 @@ pulumi new 'aws-go' -d 'description' -n 'name'
 pulumi new 'azure-python' --dir '.' -s 'stack' --name 'name'
 pulumi new 'gcp-typescript' --description 'description' --stack 'stack'
 pulumi new 'kubernetes-yaml' --generate-only
-pulumi new 'oci-java'
+pulumi new 'oci-java' --secrets-provider 'hashivault://myKey'
 
 
 # Operate entirely from the local machine (local-only mode).
@@ -105,18 +105,14 @@ pulumi about -s 'dev'
 pulumi config get
 
 # Set configuration values.
-pulumi config set
+pulumi config set 'varName' 'value'
+pulumi config set 'namespace:varName' 'value'
+pulumi config set --secret 'secretName' 'secretValue'
+pulumi config set --secret 'namespace:secretName' 'secretValue'
 
 # Copy the configuration over to other stacks.
 pulumi config cp -d 'local'
 pulumi config cp -s 'prod' -d 'dev'
-
-
-
-# Set secrets.
-pulumi config set --secret 'dbPassword' 'S3cr37'
-pulumi config set --secret 'ecr:dockerHub' \
-  '{"username":"marcus","accessToken":"dckr_pat_polus"}'
 
 # Read secrets.
 pulumi config get 'dbPassword'
@@ -193,6 +189,12 @@ pulumi stack graph -s 'dev' 'dev.dot' --short-node-name
 # Rename stacks.
 pulumi stack rename 'new-name'
 pulumi stack rename 'new-dev' -s 'dev'
+
+# Change secrets providers.
+pulumi stack change-secrets-provider 'awskms://1234abcd-12ab-34cd-56ef-1234567890ab?region=us-east-1'
+pulumi stack change-secrets-provider 'awskms:///arn:aws:kms:eu-east-2:012345678901:key/01234567-890a-bcde-f012-34567890abcd'
+pulumi stack change-secrets-provider "azurekeyvault://mykeyvaultname.vault.azure.net/keys/mykeyname"
+pulumi stack change-secrets-provider 'hashivault://deezKeyz'
 
 
 # Rename resources in states.
@@ -281,6 +283,12 @@ pulumi new -gy 'typescript' -n 'name' --dir 'dirname' \
 && yq -iy '. += {"backend": {"url": "file://."}}' 'Pulumi.yaml' \
 && PULUMI_CONFIG_PASSPHRASE='test123' pulumi stack init 'stack-name' \
 && cd -
+
+# Set configuration values.
+pulumi config set --secret 'ecr:dockerHub' '{"username":"marcus","accessToken":"dckr_pat_polus"}'
+pulumi config set-all --path \
+	--plaintext 'aws:defaultTags.tags.Owner=SomeOne' \
+	--plaintext 'aws:defaultTags.tags.Team=SomeTeam'
 
 # Using the same number of threads of the machine seems to give the best
 # performance ratio.
@@ -865,6 +873,8 @@ Solution: Read [secrets] and fix the configuration by providing a correct key id
 - [Pulumi up --plan without error message (exit code 255)]
 - [Workshops]
 - [Pulumi troubleshooting]
+- [`pulumi new`][pulumi new]
+- [`pulumi config set-all`][pulumi config set-all]
 
 <!--
   References
@@ -895,6 +905,8 @@ Solution: Read [secrets] and fix the configuration by providing a correct key id
 [ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
 [organizing pulumi projects & stacks]: https://www.pulumi.com/docs/using-pulumi/organizing-projects-stacks/
 [projects]: https://www.pulumi.com/docs/concepts/projects/
+[pulumi config set-all]: https://www.pulumi.com/docs/cli/commands/pulumi_config_set-all/
+[pulumi new]: https://www.pulumi.com/docs/cli/commands/pulumi_new/
 [pulumi troubleshooting]: https://www.pulumi.com/docs/support/troubleshooting/
 [pulumi up --plan without error message (exit code 255)]: https://github.com/pulumi/pulumi/issues/11303#issuecomment-1311365793
 [resources reference]: https://www.pulumi.com/resources
