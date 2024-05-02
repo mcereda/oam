@@ -112,6 +112,7 @@ git log -p 'feature' --not 'master'
 
 # Just show changes between two files.
 git diff --no-index 'path/to/file/a' 'path/to/file/b'
+git diff --no-index --word-diff --patience 'path/to/file/A' 'path/to/file/B'
 
 # Stage changes for commit.
 git add .
@@ -584,6 +585,7 @@ git diff --word-diff='porcelain'
 # DO NOT consider them part of of the repository.
 # This can be used to diff any two files.
 git diff --no-index 'path/to/file/A' 'path/to/file/B'
+git diff --no-index --word-diff --patience 'path/to/file/A' 'path/to/file/B'
 ```
 
 Better word-aware diff:
