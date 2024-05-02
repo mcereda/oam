@@ -1,4 +1,4 @@
-# SSM
+# AWS Systems Manager
 
 1. [TL;DR](#tldr)
 1. [Requirements](#requirements)
@@ -238,6 +238,8 @@ $ sudo ssm-cli get-diagnostics --output 'table'
 
 ## Further readings
 
+- [Amazon Web Services]
+- AWS' [CLI]
 - [Ansible]
 - [EC2]
 
@@ -261,6 +263,8 @@ $ sudo ssm-cli get-diagnostics --output 'table'
 
 <!-- Knowledge base -->
 [ansible]: ../../ansible.md
+[amazon web services]: README.md
+[cli]: cli.md
 [ec2]: ec2.md
 
 <!-- Upstream -->

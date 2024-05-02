@@ -53,6 +53,7 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | [Detective]    | FIXME                                         |
 | [EC2]          | Virtual machines                              |
 | [ECR]          | Container registry                            |
+| [ECS]          | Containers as a service                       |
 | [EKS]          | Kubernetes clusters                           |
 | [EventBridge]  | FIXME                                         |
 | [GuardDuty]    | Threat detection                              |
@@ -265,6 +266,7 @@ Examples:
 - [Best Practices for Tagging AWS Resources]
 - [Automating DNS-challenge based LetsEncrypt certificates with AWS Route 53]
 - [Working with DB instance read replicas]
+- AWS' [CLI]
 
 ### Sources
 
@@ -291,11 +293,14 @@ Examples:
 [eventbridge]: #eventbridge
 [guardduty]: #guardduty
 [inspector]: #inspector
+[rds]: #rds
 [security hub]: #security-hub
 
 <!-- Knowledge base -->
+[cli]: cli.md
 [ec2]: ec2.md
 [ecr]: ecr.md
+[ecs]: ecs.md
 [eks]: eks.md
 [s3]: s3.md
 [sagemaker]: sagemaker.md

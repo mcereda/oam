@@ -1,4 +1,4 @@
-# awscurl
+# `awscurl`
 
 [`curl`][curl]-like tool with AWS Signature Version 4 request signing.
 
@@ -45,6 +45,7 @@ docker run --rm -it 'okigan/awscurl' \
 
 ## Further readings
 
+- [Amazon Web Services]
 - [Github]
 
 ### Sources
@@ -56,6 +57,7 @@ docker run --rm -it 'okigan/awscurl' \
   -->
 
 <!-- Knowledge base -->
+[amazon web services]: README.md
 [curl]: ../../curl.md
 
 <!-- Upstream -->

@@ -1,4 +1,4 @@
-# Title
+# Elastic Compute Cloud
 
 1. [TL;DR](#tldr)
 1. [Disks](#disks)
@@ -36,6 +36,14 @@ aws ec2 describe-images --filters \
   'Name=owner-alias,Values=["amazon"]' \
   'Name=architecture,Values=["arm64","x86_64"]' \
   'Name=block-device-mapping.volume-type,Values=["gp3"]'
+
+
+# Describe security groups.
+aws ec2 describe-security-groups --group-names 'pulumi-workshop'
+
+# Delete security groups.
+aws ec2 delete-security-group --group-name 'pulumi-workshop'
+aws ec2 delete-security-group --group-id 'sg-0773aa724d0c2dd51'
 ```
 
 </details>
@@ -46,8 +54,10 @@ See [EBS].
 
 ## Further readings
 
+- [Amazon Web Services]
 - [AWS EC2 Instance pricing comparison]
 - [EC2Instances.info on vantage.sh]
+- AWS' [CLI]
 - [SSM]
 - [Connect to your instances without requiring a public IPv4 address using EC2 Instance Connect Endpoint]
 
@@ -63,6 +73,8 @@ See [EBS].
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[amazon web services]: README.md
+[cli]: cli.md
 [ebs]: ebs.md
 [ssm]: ssm.md
 

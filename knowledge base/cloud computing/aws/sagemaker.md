@@ -13,6 +13,8 @@
 
 ## Further readings
 
+- [Amazon Web Services]
+
 ### Sources
 
 <!--
@@ -21,6 +23,8 @@
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[amazon web services]: README.md
+
 <!-- Files -->
 <!-- Upstream -->
 <!-- Others -->
