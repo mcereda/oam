@@ -21,6 +21,7 @@ agg --rows '48' --speed '1.25' --renderer resvg --no-loop 'in.cast' 'out.gif'
 ## Further readings
 
 - [Asciinema] to record terminal sessions
+- [VHS] as an alternative to Asciinema
 
 <!--
   References
@@ -28,3 +29,4 @@ agg --rows '48' --speed '1.25' --renderer resvg --no-loop 'in.cast' 'out.gif'
 
 <!-- Knowledge base -->
 [asciinema]: asciinema.md
+[vhs]: vhs.md
