@@ -78,6 +78,10 @@ gitlab_rails['backup_multipart_chunk_size'] = 104857600
 gitlab_rails['backup_keep_time'] = 604800
 ```
 
+Omnibus' installation procedure generates keys and a certificate for the external URL even when LetsEncrypt's support is
+explicitly disabled.<br/>
+These keys are in the OpenSSH format and are password protected.
+
 </details>
 
 <details>
