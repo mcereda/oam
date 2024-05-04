@@ -1,5 +1,10 @@
 #cloud-config
 
+##
+# Tested on:
+# - RHEL 8.6
+##
+
 write_files:
   - path: /etc/cron.daily/security-updates
     permissions: '0755'
