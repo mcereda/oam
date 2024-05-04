@@ -1,5 +1,10 @@
 #cloud-config
 
+##
+# Tested on:
+# - RHEL 8.6
+##
+
 yum_repos:
   docker-ce-stable:
     name: Docker CE Stable - $basearch
@@ -10,7 +15,7 @@ yum_repos:
     gpgkey: https://download.docker.com/linux/centos/gpg
 
 packages:
-  - docker-ce
+  - docker-ce  # brings in 'docker-ce-cli' and 'containerd.io' too
   - docker-compose-plugin
 
 runcmd:
