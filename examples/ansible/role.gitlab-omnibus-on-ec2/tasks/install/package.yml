@@ -1,0 +1,46 @@
+---
+
+# Follow 'https://about.gitlab.com/install/#amazonlinux-2023'.
+
+- name: Add Gitlab's repositories
+  tags:
+    - repo
+    - repository
+    - repositories
+  become: true
+  ansible.builtin.yum_repository:
+    # Refer 'files/yum.gitlab_gitlab-ee.repo'.
+    name: "{{ item.name }}"
+    description: "{{ item.description }}"
+    baseurl: "{{ item.baseurl }}"
+    repo_gpgcheck: true
+    gpgcheck: true
+    gpgkey: |-
+      https://packages.gitlab.com/gitlab/gitlab-ee/gpgkey
+      https://packages.gitlab.com/gitlab/gitlab-ee/gpgkey/gitlab-gitlab-ee-3D645A26AB9FBD22.pub.gpg
+    sslverify: true
+    sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+    metadata_expire: 300
+    protect: true
+  with_items:
+    - name: gitlab-ee
+      description: gitlab-ee
+      baseurl: https://packages.gitlab.com/gitlab/gitlab-ee/amazon/2023/$basearch
+    - name: gitlab-ee-source
+      description: gitlab-ee-source
+      baseurl: https://packages.gitlab.com/gitlab/gitlab-ee/amazon/2023/SRPMS
+
+- name: Install Gitlab's omnibus package
+  tags:
+    - package
+  environment:
+    EXTERNAL_URL: "{{ external_url }}"
+    GITLAB_ROOT_PASSWORD: "{{ initial_password }}"
+  become: true
+  ansible.builtin.package:
+    name: >-
+      {{
+        (gitlab_version is ansible.builtin.version('16.9.0', '>=', version_type='semver'))
+        | ternary(['gitlab-ee', gitlab_version] | join('-'), 'gitlab-ee')
+      }}
+  notify: Show the settings for initial access

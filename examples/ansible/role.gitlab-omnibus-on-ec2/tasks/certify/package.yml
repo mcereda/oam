@@ -1,0 +1,52 @@
+---
+
+- name: Set up the requirements
+  block:
+    - name: Install required python libraries
+      become: true
+      ansible.builtin.package:
+        name: python3-boto3
+    - name: Ensure the destination folder exists
+      check_mode: false
+      become: true
+      ansible.builtin.file:
+        path: "{{ certificate_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: u=rwx,g=rx,o=rx
+
+- name: Generate OpenSSL private keys for the account and the certificate
+  become: true
+  community.crypto.openssl_privatekey:
+    path: "{{ item }}"
+    type: "{{ certificate_privatekey_type }}"
+    size: "{{ (certificate_privatekey_type == 'RSA') | ternary(certificate_privatekey_rsa_size, omit) }}"
+    regenerate: partial_idempotence
+    backup: true
+  with_items:
+    - "{{ certificate_privatekey_path }}"
+    - "{{ letsencrypt_privatekey_path }}"
+
+
+- name: Generate the CRS for the certificate
+  become: true
+  community.crypto.openssl_csr:
+    path: "{{ certificate_csr_path }}"
+    privatekey_path: "{{ certificate_privatekey_path }}"
+    common_name: "{{ certificate_csr_commonname }}"
+
+- name: Create the DNS challenge for '{{ external_url_hostname }}'
+  become: true
+  community.crypto.acme_certificate:
+    challenge: dns-01
+    acme_version: 2
+    acme_directory: https://acme-v02.api.letsencrypt.org/directory
+    account_key_src: "{{ letsencrypt_privatekey_path }}"
+    account_email: "{{ acme_account_email }}"
+    csr: "{{ certificate_csr_path }}"
+    cert: "{{ certificate_path }}"
+    terms_agreed: true
+    remaining_days: 29
+  register: dns_challenge
+  notify: Create the DNS TXT record for challenge validation

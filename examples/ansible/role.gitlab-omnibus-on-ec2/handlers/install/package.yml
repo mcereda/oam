@@ -1,0 +1,16 @@
+---
+
+- name: Show the settings for initial access
+  tags:
+    - credentials
+    - initial
+    - password
+  ansible.builtin.debug:
+    msg: >-
+      {{
+        dict([
+          [ 'URL', external_url ],
+          [ 'Username', 'root' ],
+          [ 'Initial Password', initial_password ]
+        ])
+      }}

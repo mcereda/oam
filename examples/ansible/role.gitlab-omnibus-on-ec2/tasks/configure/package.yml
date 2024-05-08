@@ -1,0 +1,32 @@
+---
+
+- name: Ensure the destination folder exists
+  check_mode: false
+  become: true
+  ansible.builtin.file:
+    path: /etc/gitlab
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rwx,o=rx
+
+- name: Create the configuration file
+  become: true
+  ansible.builtin.template:
+    src: gitlab.rb.j2
+    dest: /etc/gitlab/gitlab.rb
+    owner: root
+    group: root
+    mode: u=rw,g=,o=
+    backup: true
+  notify:
+    - "Validate Gitlab's configuration file"
+    - Reconfigure Gitlab
+
+- name: Configure settings that are unreachable from the configuration file
+  become: true
+  ansible.builtin.command: >-
+    gitlab-rails runner '
+      ::Gitlab::CurrentSettings.update!(signup_enabled: false);
+    '
+  changed_when: true

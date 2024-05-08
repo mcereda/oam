@@ -23,3 +23,11 @@
     - gitlab
   ansible.builtin.import_tasks:
     file: "{{ role_path }}/tasks/configure/{{ install_method }}.yml"
+- name: Validate certificate for '{{ external_url_hostname }}'
+  tags:
+    - "{{ install_method }}"
+    - certificate
+    - certify
+    - gitlab
+  ansible.builtin.import_tasks:
+    file: "{{ role_path }}/tasks/certify/{{ install_method }}.yml"

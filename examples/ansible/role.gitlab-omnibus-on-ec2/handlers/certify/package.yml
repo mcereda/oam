@@ -1,0 +1,65 @@
+---
+
+- name: Create the DNS TXT record for challenge validation
+  when: external_url_hostname in dns_challenge.challenge_data
+  tags:
+    - aws
+    - route53
+  become: true
+  amazon.aws.route53:
+    zone: apolloagriculture.com  # FIXME
+    record: "{{ dns_challenge.challenge_data[external_url_hostname]['dns-01'].record }}"
+    type: TXT
+    ttl: 60
+    state: present
+    overwrite: true
+    wait: true
+    value:
+      # Value should be enclosed in quotation marks
+      >-
+      {{
+        dns_challenge.challenge_data[external_url_hostname]['dns-01'].resource_value
+        | regex_replace('^(.*)$', '"\1"')
+      }}
+  notify:
+    - Validate the challenge and issue the certificate
+    - Remove the TXT record for challenge validation from the DNS
+    - "Restart Gitlab's nginx"
+
+- name: Validate the challenge and issue the certificate
+  become: true
+  community.crypto.acme_certificate:
+    challenge: dns-01
+    acme_version: 2
+    acme_directory: https://acme-v02.api.letsencrypt.org/directory
+    account_key_src: "{{ letsencrypt_privatekey_path }}"
+    account_email: "{{ acme_account_email }}"
+    csr: "{{ certificate_csr_path }}"
+    cert: "{{ certificate_path }}"
+    remaining_days: 29
+    terms_agreed: true
+    data: "{{ dns_challenge }}"
+    force: true  # required to overwrite existing certificates
+  register: certificate_validation
+
+- name: Remove the TXT record for challenge validation from the DNS
+  vars:
+    validation_record: "{{ ['_acme-challenge', external_url_hostname] | join('.') }}"
+  when:
+    - certificate_validation is not failed
+    - query('community.dns.lookup', validation_record, type='TXT') != []
+  tags:
+    - aws
+    - route53
+  become: true
+  amazon.aws.route53:
+    zone: apolloagriculture.com  # FIXME
+    record: "{{ validation_record }}"
+    type: TXT
+    state: absent
+    wait: true
+
+- name: "Restart Gitlab's nginx"
+  when: certificate_validation is not failed
+  become: true
+  ansible.builtin.command: gitlab-ctl restart 'nginx'

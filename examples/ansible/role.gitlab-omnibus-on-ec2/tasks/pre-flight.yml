@@ -29,21 +29,21 @@
           {{ supported_external_url_schemes }}
         success_msg: External URL scheme '{{ external_url_scheme }}' supported by the role
 
-- name: "Check the DNS entries required by Let's Encrypt exist"
-  when: letsencrypt_enabled
+- name: Check the requirements for certificate validation
+  when: external_url_scheme == 'https'
   block:
-    - name: AAAA
-      tags:
-        - debug
-        - never
-      ansible.builtin.debug:
-        msg: "{{ query('community.dns.lookup', external_url_hostname) }}"
+    - name: Check the given acme account email is in a valid email format
+      ansible.builtin.assert:
+        that: ('mailto://' + acme_account_email) is ansible.builtin.url
+        fail_msg: >-
+          Acme account email '{{ acme_account_email }}' is not a valid email, set 'acme_account_email' to a valid one
+        success_msg: Acme account email '{{ acme_account_email }}' is a valid email
     - name: Check an A or AAAA DNS record already exists for '{{ external_url_hostname }}'
       ansible.builtin.assert:
         that: >-
           query('community.dns.lookup', external_url_hostname) != [] or
           query('community.dns.lookup', external_url_hostname, type='AAAA') != []
         fail_msg: >-
-          Let's Encrypt feature enabled but no DNS entry of type 'A' or 'AAAA' found for '{{ external_url_hostname }}',
-          create one first
+          Certificate validation requested but no required DNS entry of type 'A' or 'AAAA' found for
+          '{{ external_url_hostname }}', create one first
         success_msg: Required DNS entry found for '{{ external_url_hostname }}'

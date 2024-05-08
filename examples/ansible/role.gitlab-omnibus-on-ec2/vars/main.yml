@@ -1,0 +1,24 @@
+---
+
+external_url_hostname: "{{ external_url | ansible.builtin.urlsplit('hostname') }}"
+external_url_scheme: "{{ external_url | ansible.builtin.urlsplit('scheme') }}"
+supported_external_url_schemes:
+  - http
+  - https
+
+supported_install_methods:
+  - package
+
+certificate_csr_commonname: >-
+  {{
+    certificate_must_be_wildcard
+    | ternary(['*', external_url_hostname] | join('.'), external_url_hostname)
+  }}
+certificate_csr_name: "{{ [external_url_hostname, 'csr'] | join('.') }}"
+certificate_csr_path: "{{ [certificate_dir, certificate_csr_name] | path_join }}"
+certificate_name: "{{ [external_url_hostname, 'crt'] | join('.') }}"
+certificate_path: "{{ [certificate_dir, certificate_name] | path_join }}"
+certificate_privatekey_name: "{{ [external_url_hostname, 'key'] | join('.') }}"
+certificate_privatekey_path: "{{ [certificate_dir, certificate_privatekey_name] | path_join }}"
+letsencrypt_privatekey_name: letsencrypt_account_private_key.pem
+letsencrypt_privatekey_path: "{{ [certificate_dir, letsencrypt_privatekey_name] | path_join }}"
