@@ -20,6 +20,7 @@
    1. [Stack init fails because the stack supposedly already exists](#stack-init-fails-because-the-stack-supposedly-already-exists)
    1. [Stack init fails due to missing scheme](#stack-init-fails-due-to-missing-scheme)
    1. [Stack init fails due to invalid key identifier](#stack-init-fails-due-to-invalid-key-identifier)
+   1. [Change your program back to the original providers](#change-your-program-back-to-the-original-providers)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -849,6 +850,26 @@ Error message example:
 Root cause: the secrets provider is set to use a KMS key, but one did not provide a correct key identifier.
 
 Solution: Read [secrets] and fix the configuration by providing a correct key identifier.
+
+### Change your program back to the original providers
+
+Context: Typescript project, `preview` or `update` action.
+
+Error message example:
+
+> error: provider
+> urn:pulumi:dev::projectName::pulumi:providers:aws::default_6_29_0::159e5843-63ae-4789-b332-4658578ba34c for resource
+> urn:pulumi:dev::projectName::aws:ec2/instance:Instance::instanceName has not been registered yet, this is due to a
+> change of providers mixed with --target. Change your program back to the original providers
+
+Root cause: one is using a different provider version than the one the resource has been created with.
+
+Solution:
+
+1. Get the provider version the resource wants from the run output.
+1. Fix the provider's version to the one wanted by the resource.
+1. Run `pulumi install` to gather the required version.
+1. Try the action again now.
 
 ## Further readings
 

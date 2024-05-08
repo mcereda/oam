@@ -214,6 +214,7 @@
         "psql",
         "pstate",
         "pulumi",
+        "pulumiverse",
         "pvresize",
         "radeon",
         "replicatedctl",
