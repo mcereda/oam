@@ -41,6 +41,8 @@ Refer [Install self-managed GitLab].
 ```sh
 sudo dnf install 'gitlab-ee'
 sudo EXTERNAL_URL='http://gitlab.example.com' GITLAB_ROOT_PASSWORD='smthng_Strong_0r_it_llfail' apt install 'gitlab-ee'
+
+sudo gitlab-rake 'gitlab:env:info'
 ```
 
 </details>
@@ -129,6 +131,9 @@ sudo gitlab-ctl tail 'nginx'
 sudo gitlab-ctl restart
 sudo gitlab-ctl restart 'nginx'
 
+# Run checks for the whole system.
+sudo gitlab-rake 'gitlab:check'
+
 # Create backups.
 sudo gitlab-backup create BACKUP='prefix_override' STRATEGY='copy'
 
@@ -155,6 +160,7 @@ sudo aws s3 cp 's3://backups/gitlab/gitlab-secrets.json' '/etc/gitlab/gitlab-sec
 
 # Upgrade the package.
 sudo yum check-update
+sudo gitlab-backup create
 tmux new-session -As 'gitlab-upgrade' "sudo yum update 'gitlab-ee'"
 
 # Reset the root user's password.
@@ -675,9 +681,11 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 - [Sign-up restrictions]
 - [Restore GitLab]
 - [How to disable the Two-factor authentication in GitLab?]
+- [How to Upgrade Your Omnibus GitLab]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
@@ -732,4 +740,5 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [chef infra]: https://www.chef.io/products/chef-infra
 [configuring private dns zones and upstream nameservers in kubernetes]: https://kubernetes.io/blog/2017/04/configuring-private-dns-zones-upstream-nameservers-kubernetes/
 [how to disable the two-factor authentication in gitlab?]: https://stackoverflow.com/questions/31024771/how-to-disable-the-two-factor-authentication-in-gitlab
+[how to upgrade your omnibus gitlab]: https://medium.com/kocsistem/how-to-upgrade-your-omnibus-gitlab-9179bb710ca
 [using gitlab token to clone without authentication]: https://stackoverflow.com/questions/25409700/using-gitlab-token-to-clone-without-authentication#29570677
