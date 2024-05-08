@@ -27,6 +27,7 @@ alias aws-ssm-gitlabAutoscalingManager-ita-b "aws ec2 describe-instances --outpu
 | xargs -ot aws ssm start-session --target"
 
 aws s3 rm 's3://bucket-name/prefix' --recursive --dry-run
+aws s3 cp 's3://my-first-bucket/test.txt' 's3://my-other-bucket/'
 
 aws ecs list-tasks --cluster 'testCluster' --family 'testService' --output 'text' --query 'taskArns' \
 | xargs -p aws ecs wait tasks-running --cluster 'testCluster' --tasks

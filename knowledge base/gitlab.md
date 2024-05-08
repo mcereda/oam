@@ -1,6 +1,7 @@
 # Gitlab
 
-1. [Omnibus](#omnibus)
+1. [TL;DR](#tldr)
+1. [Package](#package)
 1. [Kubernetes](#kubernetes)
    1. [Helm chart](#helm-chart)
    1. [Operator](#operator)
@@ -20,22 +21,50 @@
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
-## Omnibus
+## TL;DR
+
+```sh
+# List the current application settings of the GitLab instance.
+curl --header 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings'
+curl --header 'Authorization: bearer glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings'
+```
+
+## Package
+
+Previously known as 'Omnibus'.
 
 <details>
   <summary>Installation</summary>
 
 Refer [Install self-managed GitLab].
 
+```sh
+sudo dnf install 'gitlab-ee'
+sudo EXTERNAL_URL='http://gitlab.example.com' GITLAB_ROOT_PASSWORD='smthng_Strong_0r_it_llfail' apt install 'gitlab-ee'
+```
+
 </details>
 <details>
   <summary>Configuration</summary>
 
-[Template][omnibus configuration template]
+[Template][package configuration file template]
 
 The application of configuration changes is handled by [Chef Infra].<br/>
 It runs checks, ensures directories, permissions, and services are in place and working, and restarts components if any
 of their configuration files have changed.
+
+```sh
+# Change application settings.
+# Useful to reach those ones not available in the configuration file.
+sudo gitlab-rails runner '
+  ::Gitlab::CurrentSettings.update!(gravatar_enabled: false);
+  ::Gitlab::CurrentSettings.update!(remember_me_enabled: false);
+  ::Gitlab::CurrentSettings.update!(email_confirmation_setting: "hard");
+'
+
+# Disable public registration.
+sudo gitlab-rails runner '::Gitlab::CurrentSettings.update!(signup_enabled: false)'
+```
 
 ```sh
 # Validate.
@@ -78,9 +107,10 @@ gitlab_rails['backup_multipart_chunk_size'] = 104857600
 gitlab_rails['backup_keep_time'] = 604800
 ```
 
-Omnibus' installation procedure generates keys and a certificate for the external URL even when LetsEncrypt's support is
-explicitly disabled.<br/>
-These keys are in the OpenSSH format and are password protected.
+The package's included nginx generates keys and a **self-signed** certificate for the external URL upon start if the
+given URL's schema is HTTPS.<br/>
+The Let's Encrypt account key is in OpenSSL format, while the certificate's key is in OpenSSH format. Both are **not**
+password protected.
 
 </details>
 
@@ -91,6 +121,14 @@ These keys are in the OpenSSH format and are password protected.
 # Check the components' state.
 sudo gitlab-ctl status
 
+# Get the services' logs.
+sudo gitlab-ctl tail
+sudo gitlab-ctl tail 'nginx'
+
+# Restart services.
+sudo gitlab-ctl restart
+sudo gitlab-ctl restart 'nginx'
+
 # Create backups.
 sudo gitlab-backup create BACKUP='prefix_override' STRATEGY='copy'
 
@@ -99,9 +137,51 @@ sudo gitlab-backup create BACKUP='prefix_override' STRATEGY='copy'
 sudo gitlab-backup create … \
   SKIP='db,repositories,uploads,builds,artifacts,pages,lfs,terraform_state,registry,packages,ci_secure_files'
 
-# Package upgrade.
+# Restore backups.
+sudo gitlab-ctl stop 'puma' \
+&& sudo gitlab-ctl stop 'sidekiq'
+
+# Upgrade the package.
 sudo yum check-update
-tmux new-session -A -s 'gitlab-upgrade' "sudo yum update 'gitlab-ee'"
+tmux new-session -As 'gitlab-upgrade' "sudo yum update 'gitlab-ee'"
+
+# Reset the root user's password.
+sudo gitlab-rake 'gitlab:password:reset[root]'
+sudo gitlab-rails console  \
+  # --> user = User.find_by_username 'root'
+  # --> user.password = 'QwerTy184'
+  # --> user.password_confirmation = 'QwerTy184'
+  # --> user.password_automatically_set = false
+  # --> user.save!
+  # --> quit
+sudo gitlab-rails runner '
+  user = User.find_by_username "anUsernameHere";
+  new_password = "QwerTy184";
+  user.password = new_password;
+  user.password_confirmation = new_password;
+  user.password_automatically_set = false;
+  user.save!
+'
+
+# Disable users' two factor authentication.
+sudo gitlab-rails runner 'User.where(username: "anUsernameHere").each(&:disable_two_factor!)'
+```
+
+</details>
+
+<details>
+  <summary>Removal</summary>
+
+```sh
+# Remove all users and groups created by the package.
+sudo gitlab-ctl stop && sudo gitlab-ctl remove-accounts
+
+# Remove all data.
+sudo gitlab-ctl cleanse && sudo rm -r '/opt/gitlab'
+
+# Uninstall the package.
+sudo apt remove 'gitlab-ee'
+sudo dnf remove 'gitlab-ee'
 ```
 
 </details>
@@ -576,7 +656,13 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 - [Use kaniko to build Docker images]
 - [Specify when jobs run with `rules`][specify when jobs run with rules]
 - [Install self-managed GitLab]
-- [Omnibus configuration template]
+- [Package configuration file template]
+- [Install GitLab with the Linux package]
+- [Reset a user's password]
+- [Environment variables]
+- [Sign-up restrictions]
+- [Restore GitLab]
+- [How to disable the Two-factor authentication in GitLab?]
 
 <!--
   References
@@ -605,16 +691,21 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [deployment]: https://docs.gitlab.com/charts/installation/deployment.html
 [docker machine's aws driver's options]: https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/blob/main/docs/drivers/aws.md#options
 [docker machine's supported cloud providers]: https://docs.gitlab.com/runner/configuration/autoscale.html#supported-cloud-providers
+[environment variables]: https://docs.gitlab.com/ee/administration/environment_variables.html
 [global settings]: https://docs.gitlab.com/charts/charts/globals.html
 [how to restart gitlab]: https://docs.gitlab.com/ee/administration/restart_gitlab.html
+[install gitlab with the linux package]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/doc/installation/index.md
 [install self-managed gitlab]: https://about.gitlab.com/install
 [merge request approval rules]: https://docs.gitlab.com/ee/user/project/merge_requests/approvals/rules.html
 [minimal minikube example values file]: https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/values-minikube-minimum.yaml
-[omnibus configuration template]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/raw/master/files/gitlab-config-template/gitlab.rb.template
 [operator code]: https://gitlab.com/gitlab-org/cloud-native/gitlab-operator
 [operator guide]: https://docs.gitlab.com/operator/
+[package configuration file template]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/raw/master/files/gitlab-config-template/gitlab.rb.template
 [predefined ci/cd variables reference]: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
+[reset a user's password]: https://docs.gitlab.com/ee/security/reset_user_password.html
+[restore gitlab]: https://docs.gitlab.com/ee/administration/backup_restore/restore_gitlab.html
 [runners on kubernetes]: https://docs.gitlab.com/runner/install/kubernetes.html
+[sign-up restrictions]: https://docs.gitlab.com/ee/administration/settings/sign_up_restrictions.html
 [specify when jobs run with rules]: https://docs.gitlab.com/ee/ci/jobs/job_rules.html
 [support object storage bucket prefixes]: https://gitlab.com/gitlab-org/charts/gitlab/-/issues/3376
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
@@ -628,4 +719,5 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [aws driver does not support multiple non default subnets]: https://github.com/docker/machine/issues/4700
 [chef infra]: https://www.chef.io/products/chef-infra
 [configuring private dns zones and upstream nameservers in kubernetes]: https://kubernetes.io/blog/2017/04/configuring-private-dns-zones-upstream-nameservers-kubernetes/
+[how to disable the two-factor authentication in gitlab?]: https://stackoverflow.com/questions/31024771/how-to-disable-the-two-factor-authentication-in-gitlab
 [using gitlab token to clone without authentication]: https://stackoverflow.com/questions/25409700/using-gitlab-token-to-clone-without-authentication#29570677
