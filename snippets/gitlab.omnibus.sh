@@ -126,8 +126,13 @@ sudo aws s3 cp \
 	'/var/opt/gitlab/backups/'
 sudo gitlab-ctl stop 'puma'
 sudo gitlab-ctl stop 'sidekiq'
-sudo gitlab-backup restore BACKUP='11493107454_2018_04_25_10.6.4-ce'
-sudo gitlab-ctl start
+sudo GITLAB_ASSUME_YES=1 gitlab-backup restore BACKUP='11493107454_2018_04_25_10.6.4-ce'
+sudo gitlab-ctl restart
+sudo gitlab-rake 'gitlab:check' SANITIZE=true
+sudo gitlab-rake 'gitlab:doctor:secrets'
+sudo gitlab-rake 'gitlab:artifacts:check'
+sudo gitlab-rake 'gitlab:lfs:check'
+sudo gitlab-rake 'gitlab:uploads:check'
 
 ## Restore backups - end ------------- #
 

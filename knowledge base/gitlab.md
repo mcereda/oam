@@ -138,8 +138,20 @@ sudo gitlab-backup create … \
   SKIP='db,repositories,uploads,builds,artifacts,pages,lfs,terraform_state,registry,packages,ci_secure_files'
 
 # Restore backups.
-sudo gitlab-ctl stop 'puma' \
-&& sudo gitlab-ctl stop 'sidekiq'
+sudo aws s3 cp 's3://backups/gitlab/gitlab-secrets.json' '/etc/gitlab/gitlab-secrets.json' \
+&& sudo aws s3 cp 's3://backups/gitlab/gitlab.rb' '/etc/gitlab/gitlab.rb' \
+&& sudo aws s3 cp \
+  's3://backups/gitlab/11493107454_2018_04_25_10.6.4-ce_gitlab_backup.tar' \
+  '/var/opt/gitlab/backups/' \
+&& sudo gitlab-ctl stop 'puma' \
+&& sudo gitlab-ctl stop 'sidekiq' \
+&& sudo GITLAB_ASSUME_YES=1 gitlab-backup restore BACKUP='11493107454_2018_04_25_10.6.4-ce' \
+&& sudo gitlab-ctl restart \
+&& sudo gitlab-rake 'gitlab:check' SANITIZE=true \
+&& sudo gitlab-rake 'gitlab:doctor:secrets' \
+&& sudo gitlab-rake 'gitlab:artifacts:check' \
+&& sudo gitlab-rake 'gitlab:lfs:check' \
+&& sudo gitlab-rake 'gitlab:uploads:check'
 
 # Upgrade the package.
 sudo yum check-update
