@@ -2,7 +2,7 @@
 
 The idea here is to mimic Confluence's Info panel.
 
-This only worked for Azure Devops' wikis.
+This only worked for Azure Devops' wikis so far.
 
 <style>
   .info-block {
