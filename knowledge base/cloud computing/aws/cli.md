@@ -32,6 +32,9 @@ export AWS_PROFILE='work'
 aws configure set 'cli_auto_prompt' 'on-partial'
 export AWS_CLI_AUTO_PROMPT='on'
 
+# Check the current configuration.
+aws configure list
+
 # Clear cached credentials.
 rm -r ~'/.aws/cli/cache'
 ```
@@ -100,6 +103,10 @@ aws iam delete-user-policy --user-name 'me-user' --policy-name 'user-ro-access-b
 # Show RDS instances.
 aws rds describe-db-instances
 aws rds describe-db-instances --output 'json' --query "DBInstances[?(DBInstanceIdentifier=='master-prod')]"
+
+
+# List hosted zones.
+aws route53 list-hosted-zones
 
 
 # List all SageMaker EndpointConfigurations' names.

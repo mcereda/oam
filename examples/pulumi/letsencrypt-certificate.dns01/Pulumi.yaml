@@ -1,0 +1,9 @@
+name: letsencrypt-certificate.dns01
+runtime: nodejs
+description: DNS01 challenge with ACME leveraging Let's Encrypt
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: typescript
+backend:
+  url: file://.

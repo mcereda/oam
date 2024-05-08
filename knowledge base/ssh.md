@@ -61,12 +61,16 @@ ssh-copy-id -i "${HOME}/.ssh/id_rsa.pub" 'user@host.fqdn'
 # Preload trusted keys.
 ssh-keyscan 'host.fqdn' >> "${HOME}/.ssh/known_hosts"
 
-# Connect to an unreachable host tunnelling the session through a bastion.
+# Connect to a directly unreachable host by tunnelling sessions.
 ssh -t 'bastion-host' ssh 'unreachable-host'
 
-# Mount a remote folder.
+# Mount remote folders.
 sshfs 'nas.lan:/mnt/data' 'Data' \
   -o 'auto_cache,reconnect,defer_permissions,noappledouble,volname=Data'
+
+# Validate keys.
+ssh-keygen -yef 'path/to/key'
+openssl rsa -check -in 'path/to/key' -noout
 ```
 
 ## Server installation on Windows
@@ -359,6 +363,7 @@ Solution: update the SSH server.
 - [Get started with OpenSSH for Windows]
 - [Restrict SSH login to a specific IP or host]
 - [Stick with security: YubiKey, SSH, GnuPG, macOS]
+- [How to check if an RSA public / private key pair match]
 
 <!--
   References
@@ -379,6 +384,7 @@ Solution: update the SSH server.
 
 <!-- Others -->
 [get started with openssh for windows]: https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=gui
+[how to check if an rsa public / private key pair match]: https://serverfault.com/questions/426394/how-to-check-if-an-rsa-public-private-key-pair-match#426429
 [how to enable ssh access using a gpg key for authentication]: https://opensource.com/article/19/4/gpg-subkeys-ssh
 [how to list keys added to ssh-agent with ssh-add?]: https://unix.stackexchange.com/questions/58969/how-to-list-keys-added-to-ssh-agent-with-ssh-add
 [how to perform hostname canonicalization]: https://sleeplessbeastie.eu/2020/08/24/how-to-perform-hostname-canonicalization/

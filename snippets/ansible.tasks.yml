@@ -1,0 +1,7 @@
+---
+
+# Directories are created recursively.
+- name: Create a whole directory tree
+  ansible.builtin.file:
+    path: /tmp/path/to/final/dir
+    state: directory
