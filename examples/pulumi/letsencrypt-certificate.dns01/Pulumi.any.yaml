@@ -1,0 +1,4 @@
+encryptionsalt: v1:rsWIsa8WSik=:v1:D517hSFtoEVILMBz:wB9tX0Bu0Y0WqsXEYenywicAjnTHJw==
+
+config:
+  acme:serverUrl: https://acme-v02.api.letsencrypt.org/directory

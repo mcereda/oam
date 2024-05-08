@@ -1,0 +1,95 @@
+---
+
+- name: Create and validate an HTTPS certificate
+  hosts: all
+
+  vars:
+    common_name: service.example.org
+
+  pre_tasks:
+
+    - name: Generate private keys for an account and the certificate
+      community.crypto.openssl_privatekey:
+        path: "{{ item }}"
+        type: RSA
+        size: 4096
+      with_items:
+        - /tmp/{{ common_name }}.key
+        - /tmp/letsencrypt.account.key.pem
+
+  # - name: Generate private keys for an account and the certificate - OpenSSH alternative
+  #   community.crypto.openssh_keypair:
+  #     path: "{{ item }}"
+  #     type: rsa
+  #     size: 4096
+  #   with_items:
+  #     - /tmp/{{ common_name }}.key
+  #     - /tmp/letsencrypt.account.key.pem
+
+  tasks:
+
+    - name: Generate the CRS for the certificate
+      community.crypto.openssl_csr:
+        path: /tmp/{{ common_name }}.crs
+        privatekey_path: /tmp/{{ common_name }}.key
+        common_name: "{{ common_name }}"
+
+    - name: Create the DNS challenge for '{{ common_name }}'
+      community.crypto.acme_certificate:
+        challenge: dns-01
+        acme_version: 2
+        acme_directory: https://acme-v02.api.letsencrypt.org/directory
+        account_key_src: /tmp/letsencrypt.account.key.pem
+        account_email: someone@example.org
+        csr: /tmp/{{ common_name }}.crs
+        cert: /tmp/{{ common_name }}.crt
+        terms_agreed: true
+        remaining_days: 21
+      register: dns_challenge
+      notify: Create TXT records for challenge validation
+
+  handlers:
+
+    - name: Create TXT records for challenge validation
+      when: common_name in dns_challenge.challenge_data
+      amazon.aws.route53:
+        zone: example.org
+        record: "{{ dns_challenge.challenge_data[common_name]['dns-01'].record }}"
+        type: TXT
+        ttl: 60
+        state: present
+        overwrite: true
+        wait: true
+        value:
+          # Value should be enclosed in quotation marks
+          >-
+          {{
+            dns_challenge.challenge_data[common_name]['dns-01'].resource_value
+            | regex_replace('^(.*)$', '"\1"')
+          }}
+      notify: Validate the challenge and create the certificate
+
+    - name: Validate the challenge and create the certificate
+      community.crypto.acme_certificate:
+        challenge: dns-01
+        acme_version: 2
+        acme_directory: https://acme-v02.api.letsencrypt.org/directory
+        account_key_src: /tmp/letsencrypt.account.key.pem
+        account_email: someone@example.org
+        csr: /tmp/{{ common_name }}.crs
+        cert: /tmp/{{ common_name }}.crt
+        remaining_days: 21
+        terms_agreed: true
+        data: "{{ dns_challenge }}"
+
+  post_tasks:
+    - name: Delete TXT records for challenge validation
+      vars:
+        validation_record: "{{ ['_acme-challenge', common_name] | join('.') }}"
+      when: query('community.dns.lookup', validation_record, type='TXT') != []
+      amazon.aws.route53:
+        zone: example.org
+        record: "{{ validation_record }}"
+        type: TXT
+        state: absent
+        wait: true

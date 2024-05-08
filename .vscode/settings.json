@@ -173,6 +173,7 @@
         "kustomization",
         "kustomize",
         "lefthook",
+        "letsencrypt",
         "libexec",
         "lighttpd",
         "localdomain",

@@ -48,8 +48,9 @@ openssl req -text -noout -verify -in 'request.csr'
 # Check existing keys and verify their consistency.
 openssl rsa -check -in 'file.key'
 
-# Check certificates and return information about them.
+# Check certificates or keys and return information about them.
 openssl x509 -text -noout -in 'certificate.crt'
+openssl rsa -text -noout -in 'private.key'
 
 # Verify certificate chains.
 # If a certificate is its own issuer, it is assumed to be the root CA.
@@ -75,6 +76,14 @@ openssl x509 -noout -modulus -in 'certificate.crt' | openssl md5
 
 # Remove password protection from keys.
 openssl rsa -in 'protected.key' -out 'unprotected.key'
+
+# Protect keys with passwords.
+openssl rsa -aes192 -in 'unprotected.key' -out 'protected.key'
+
+
+# Print the public key corresponding to private ones.
+openssl rsa -in private.pem -pubout
+openssl rsa -in private.pem -pubout -out public.pem
 
 
 # Convert DER-formatted files (.crt .cer .der) to the PEM format.
@@ -206,6 +215,7 @@ All the references in the [further readings] section, plus the following:
 - [How to generate a self-signed SSL certificate using OpenSSL]
 - [OpenSSL unable to verify the first certificate for Experian URL]
 - [Verify certificate chain with OpenSSL]
+- [How to put domain correctly in CSR?]
 
 <!--
   References
@@ -219,6 +229,7 @@ All the references in the [further readings] section, plus the following:
 [create a self signed certificate]: https://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl#10176685
 [display the contents of a ssl certificate]: https://support.qacafe.com/knowledge-base/how-do-i-display-the-contents-of-a-ssl-certificate/
 [how to generate a self-signed ssl certificate using openssl]: https://stackoverflow.com/questions/10175812/how-to-generate-a-self-signed-ssl-certificate-using-openssl#10176685
+[how to put domain correctly in csr?]: https://www.namecheap.com/support/knowledgebase/article.aspx/9641/2290/how-to-put-domain-correctly-in-csr/
 [openssl commands to check and verify your ssl certificate, key and csr]: https://www.ibm.com/support/pages/openssl-commands-check-and-verify-your-ssl-certificate-key-and-csr
 [openssl unable to verify the first certificate for experian url]: https://stackoverflow.com/questions/7587851/openssl-unable-to-verify-the-first-certificate-for-experian-url
 [the most common openssl commands]: https://www.sslshopper.com/article-most-common-openssl-commands.html
