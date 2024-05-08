@@ -84,9 +84,11 @@ gitlab-rails runner '
 
 # Package upgrade
 sudo yum check-update
-sudo yum info 'gitlab-ee'
-sudo rpm -qa | grep 'gitlab-ee'
+sudo yum info 'gitlab-ee'        # informational
+sudo rpm -qa | grep 'gitlab-ee'  # informational
+sudo gitlab-backup create        # not strictly necessary: the upgrade will create a partial one
 tmux new-session -A -s 'gitlab-upgrade' "sudo yum update 'gitlab-ee'"
+sudo gitlab-rake 'gitlab:check'
 
 # Password reset
 sudo gitlab-rake 'gitlab:password:reset[root]'
