@@ -1,0 +1,27 @@
+---
+
+- name: Load installation handlers
+  tags:
+    - "{{ install_method }}"
+    - gitlab
+    - install
+  ansible.builtin.import_tasks:
+    file: "{{ role_path }}/handlers/install/{{ install_method }}.yml"
+
+- name: Load configuration handlers
+  tags:
+    - "{{ install_method }}"
+    - configuration
+    - configure
+    - gitlab
+  ansible.builtin.import_tasks:
+    file: "{{ role_path }}/handlers/configure/{{ install_method }}.yml"
+
+- name: Load certification handlers
+  tags:
+    - "{{ install_method }}"
+    - certificate
+    - certify
+    - gitlab
+  ansible.builtin.import_tasks:
+    file: "{{ role_path }}/handlers/certify/{{ install_method }}.yml"

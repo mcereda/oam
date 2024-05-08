@@ -1,0 +1,14 @@
+---
+
+install_method: package
+external_url: https://{{ ansible_fqdn }}
+gitlab_version: null
+
+# Random but idempotent, so it will not change every time the role is applied.
+# It is only used for installation anyways.
+initial_password: "{{ lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname) }}"
+
+certificate_privatekey_type: RSA
+certificate_privatekey_rsa_size: 2048
+certificate_must_be_wildcard: false
+certificate_dir: /etc/gitlab/ssl

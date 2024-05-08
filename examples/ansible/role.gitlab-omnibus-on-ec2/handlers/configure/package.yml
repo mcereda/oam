@@ -2,8 +2,7 @@
 
 - name: "Validate Gitlab's configuration file"
   become: true
-  ansible.builtin.command: >-
-    gitlab-ctl show-config
+  ansible.builtin.command: gitlab-ctl show-config
   register: config_file_validation
   changed_when: false
   failed_when: config_file_validation.rc != 0
@@ -11,8 +10,7 @@
 - name: Reconfigure Gitlab
   when: config_file_validation is not failed
   become: true
-  ansible.builtin.command: >-
-    gitlab-ctl reconfigure
+  ansible.builtin.command: gitlab-ctl reconfigure
   register: reconfiguration
   changed_when:
     - reconfiguration.rc == 0
