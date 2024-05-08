@@ -1,0 +1,1 @@
+set -x 'PULUMI_CONFIG_PASSPHRASE' 'test123'
