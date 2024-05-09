@@ -1,0 +1,19 @@
+---
+
+# sources:
+# - https://docs.gitea.com/installation/install-with-docker-rootless
+
+version: '2'
+
+services:
+  server:
+    image: gitea/gitea:1.21.11-rootless
+    restart: unless-stopped
+    volumes:
+      - ${PWD}/data:/var/lib/gitea
+      - ${PWD}/config:/etc/gitea
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 3000:3000
+      - 2222:2222
