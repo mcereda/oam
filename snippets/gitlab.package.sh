@@ -108,6 +108,13 @@ sudo gitlab-rails runner '
 	user.save!
 '
 
+# Create tokens
+sudo gitlab-rails runner '
+	token = User.find_by_username('root').personal_access_tokens.create(scopes: [:api, :sudo], name: 'Automation');
+	token.set_token('TwentyCharacterToken.');
+	token.save!
+'
+
 # Disable users' two factor authentication.
 sudo gitlab-rails runner 'User.where(username: "anUsernameHere").each(&:disable_two_factor!)'
 sudo gitlab-rails runner 'User.update_all(otp_required_for_login: false, encrypted_otp_secret: nil)'

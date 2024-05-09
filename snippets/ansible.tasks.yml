@@ -5,3 +5,74 @@
   ansible.builtin.file:
     path: /tmp/path/to/final/dir
     state: directory
+
+- name: Import tasks
+  block:
+    - name: By using absolute paths and special variables (preferred)
+      ansible.builtin.import_tasks:
+      file: "{{ role_path }}/tasks/install/{{ install_method }}.yml"
+    - name: By using paths relative to the including file
+      ansible.builtin.import_tasks:
+      file: pre-flight.yml
+
+- name: Conditionally include tasks
+  block:
+    - name: by leveraging the 'with_fileglob' loop filter (preferred)
+      ansible.builtin.include_tasks:
+        file: "{{ item }}"
+      with_fileglob: "{{ install_method }}.yml"
+    - name: by checking the files' existence
+      vars:
+        filename: "{{ install_method }}.yml"
+      when: lookup('ansible.builtin.fileglob', filename) != []
+      ansible.builtin.import_tasks:
+        file: "{{ filename }}"
+
+- name: Assertions
+  ansible.builtin.assert:
+    that:
+      - install_method in supported_install_methods
+      - external_url is ansible.builtin.url
+    fail_msg: What to say if any of the above conditions fail
+    success_msg: What to say if all of the above conditions succeed
+
+- name: Pretty print information
+  ansible.builtin.debug:
+    msg: >-
+      {{
+        dict([
+          [ 'install_method', install_method ],
+          [ 'install_method in supported_install_methods', install_method in supported_install_methods ],
+        ])
+      }}
+
+- name: Generate passwords
+  block:
+    - name: Randomly
+      ansible.builtin.debug:
+        msg: "{{ lookup('ansible.builtin.password', '/dev/null') }}"
+    - name: Specifying requirements
+      ansible.builtin.debug:
+        msg: "{{ lookup('ansible.builtin.password', '/dev/null length=32 chars=ascii_letters,digits,punctuation') }}"
+    - name: Random but idempotent, so it will not change at every execution
+      ansible.builtin.debug:
+        msg: "{{ lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname) }}"
+
+- name: Run containers
+  community.docker.docker_container:
+    name: gitlab
+    image: gitlab/gitlab-ce:16.11.2-ce.0
+    hostname: gitlab.lan
+    published_ports:
+      - "8022:22"
+      - "8080:80"
+      - "8443:443"
+    env:
+      GITLAB_OMNIBUS_CONFIG: >-
+        external_url 'http://gitlab.lan';
+    shm_size: 256m
+    volumes:
+      - ./config:/etc/gitlab:Z
+      - ./logs:/var/log/gitlab:Z
+      - ./data:/var/opt/gitlab:Z
+    auto_remove: true
