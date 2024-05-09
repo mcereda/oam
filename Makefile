@@ -1,8 +1,8 @@
-#!make
+#!/usr/bin/env make
 
 override venv ?= ${shell git rev-parse --show-toplevel}/.venv
 
-create-venv: override python_version ?= 3.12
+create-venv: override python_version ?= 3
 create-venv: ${shell which 'python${python_version}'}
 	@python${python_version} -m 'venv' '${venv}'
 	@${venv}/bin/pip --require-virtualenv install -r 'requirements.txt'
