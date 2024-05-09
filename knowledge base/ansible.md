@@ -52,7 +52,7 @@ ansible -i 'localhost,' -c 'local' -km 'setup' 'localhost'
 # This will *not* execute the plays inside it.
 ansible-playbook 'path/to/playbook.yml' --syntax-check
 
-# Execute a playbook.
+# Execute playbooks.
 ansible-playbook 'path/to/playbook.yml' -i 'hosts.list'
 ansible-playbook … -i 'host1,host2,hostN,' -l 'hosts,list'
 ansible-playbook … -i 'host1,host2,other,' -l 'hosts-pattern'
@@ -70,6 +70,9 @@ ansible-playbook 'path/to/playbook.yml' --skip-tags 'system,user'
 ansible-playbook 'path/to/playbook.yml' --list-tasks
 ansible-playbook … --list-tasks --tags 'configuration,packages'
 ansible-playbook … --list-tasks --skip-tags 'system,user'
+
+# Debug playbooks.
+ANSIBLE_ENABLE_TASK_DEBUGGER=True ansible-playbook …
 
 # List roles installed from Galaxy.
 ansible-galaxy list
@@ -269,9 +272,10 @@ ansible-galaxy install -r 'requirements.yml'
 
 ### Role dependencies
 
+Set them up in `role/meta/main.yml`:
+
 ```yaml
 ---
-# role/meta/main.yml
 dependencies:
   - role: common
     vars:
@@ -280,6 +284,14 @@ dependencies:
     vars:
       dbname: blarg
       other_parameter: 12
+```
+
+and/or in `role/meta/requirements.yml`:
+
+```yaml
+---
+collections:
+  - community.dns
 ```
 
 ## Output formatting

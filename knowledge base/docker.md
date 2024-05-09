@@ -5,6 +5,7 @@
 1. [Daemon configuration](#daemon-configuration)
 1. [Images configuration](#images-configuration)
 1. [Containers configuration](#containers-configuration)
+1. [Health checks](#health-checks)
 1. [Advanced build with `buildx`](#advanced-build-with-buildx)
    1. [Create builders](#create-builders)
    1. [Build for specific platforms](#build-for-specific-platforms)
@@ -262,7 +263,55 @@ Docker mounts specific system files in all containers to forward its settings:
 …
 ```
 
-Those files come from the volume the docker container is using for its root, and are modified on the container's startup with the information from the CLI, the daemon itself and, when missing, the host.
+Those files come from the volume the docker container is using for its root, and are modified on the container's startup
+with the information from the CLI, the daemon itself and, when missing, the host.
+
+## Health checks
+
+The following have the same effect:
+
+<details><summary>Command line</summary>
+
+```sh
+docker run … \
+  --health-cmd 'curl --fail --insecure --silent --show-error http://localhost/ || exit 1' \
+  --health-interval '5m' \
+  --health-timeout '3s' \
+  --health-retries '4' \
+  --health-start-period '10s'
+```
+
+</details>
+<details><summary>Dockerfile</summary>
+
+```Dockerfile
+HEALTHCHECK --interval=5m --timeout=3s --start-period=10s --retries=4 \
+  CMD curl --fail --insecure --silent --show-error http://localhost/ || exit 1
+```
+
+</details>
+<details><summary>Docker-compose file</summary>
+
+```yaml
+version: '3.6'
+services:
+  web-server:
+    healthcheck:
+      test: curl --fail --insecure --silent --show-error http://localhost/ || exit 1
+      interval: 5m
+      timeout: 3s
+      retries: 4
+      start_period: 10s
+    …
+```
+
+</details><br/>
+
+The command's exit status indicates the health status of the container. The possible values are:
+
+- `0`: success - the container is healthy and ready for use
+- `1`: unhealthy - the container isn't working correctly
+- `2`: reserved - don't use this exit code
 
 ## Advanced build with `buildx`
 
@@ -313,6 +362,7 @@ docker load …
 - [Building multi-arch images for ARM and x86 with Docker Desktop]
 - [OpenContainers Image Spec]
 - [Docker ARG, ENV and .env - a Complete Guide]
+- [Configuring HealthCheck in docker-compose]
 
 <!--
   References
@@ -333,6 +383,7 @@ docker load …
 [arch linux wiki]: https://wiki.archlinux.org/index.php/Docker
 [cheatsheet]: https://collabnix.com/docker-cheatsheet/
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html
+[configuring healthcheck in docker-compose]: https://medium.com/@saklani1408/configuring-healthcheck-in-docker-compose-3fa6439ee280
 [docker arg, env and .env - a complete guide]: https://vsupalov.com/docker-arg-env-variable-guide/
 [getting around docker's host network limitation on mac]: https://medium.com/@lailadahi/getting-around-dockers-host-network-limitation-on-mac-9e4e6bfee44b
 [opencontainers image spec]: https://specs.opencontainers.org/image-spec/

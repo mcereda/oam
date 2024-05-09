@@ -18,6 +18,7 @@
 1. [Troubleshooting](#troubleshooting)
    1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
    1. [Pipeline fails with error `You are not allowed to download code from this project`](#pipeline-fails-with-error-you-are-not-allowed-to-download-code-from-this-project)
+   1. [Gitlab keeps answering with code 502](#gitlab-keeps-answering-with-code-502)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -639,6 +640,24 @@ Root cause: the user starting the pipeline does not have enough privileges to th
 
 Solution: give that user _developer_ access or have somebody else with enough privileges run it.
 
+### Gitlab keeps answering with code 502
+
+Refer [The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership].
+
+Error message example:
+
+> ==> /var/log/gitlab/nginx/gitlab_error.log <==<br/>
+> 2024/05/09 20:57:57 \[crit] 617#0: *26 connect() to unix:/var/opt/gitlab/gitlab-workhorse/sockets/socket failed (13:
+> Permission denied) while connecting to upstream, client: 172.21.0.1, server: gitlab.lan, request: "GET / HTTP/2.0",
+> upstream: "http\://unix:/var/opt/gitlab/gitlab-workhorse/sockets/socket:/", host: "gitlab.lan:8443"
+
+Context: Gitlab 16.11.2 CE running from Docker image.
+
+Root cause: the socket's permissions are mapped incorrectly.
+
+Solution: set the correct ownership with
+`docker exec 'gitlab' chown 'gitlab-www:git' '/var/opt/gitlab/gitlab-workhorse/sockets/socket'`.
+
 ## Further readings
 
 - Gitlab's helm [chart]
@@ -682,6 +701,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 - [Restore GitLab]
 - [How to disable the Two-factor authentication in GitLab?]
 - [How to Upgrade Your Omnibus GitLab]
+- [The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership]
 
 <!--
   Reference
@@ -728,6 +748,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [sign-up restrictions]: https://docs.gitlab.com/ee/administration/settings/sign_up_restrictions.html
 [specify when jobs run with rules]: https://docs.gitlab.com/ee/ci/jobs/job_rules.html
 [support object storage bucket prefixes]: https://gitlab.com/gitlab-org/charts/gitlab/-/issues/3376
+[the docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership]: https://gitlab.com/gitlab-org/gitlab/-/issues/349846#note_1516339762
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
 [tutorial: use buildah in a rootless container with gitlab runner operator on openshift]: https://docs.gitlab.com/ee/ci/docker/buildah_rootless_tutorial.html
 [use ci/cd configuration from other files]: https://docs.gitlab.com/ee/ci/yaml/includes.html
