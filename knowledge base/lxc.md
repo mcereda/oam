@@ -19,6 +19,10 @@ ls '/usr/share/lxc/templates'
 # List the options supported by templates.
 lxc-create -t 'download' -h
 
+# List the available images.
+lxc-create -t 'download' -- -l
+lxc-create -t 'download' -- --list
+
 # Create containers.
 # Use the 'download' template to choose from a list of distribution.
 lxc-create -n 'nas' -t 'download'
