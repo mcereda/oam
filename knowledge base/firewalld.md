@@ -38,6 +38,14 @@ sudo firewall-cmd --list-services
 sudo firewall-cmd --list-services --zone='public'
 sudo firewall-cmd --list-services --permanent
 
+# Create service definitions.
+sudo firewall-cmd --permanent --new-service 'gitea' \
+&& sudo firewall-cmd --permanent --service 'gitea' --set-description \
+  'Painless self-hosted all-in-one software development service similar to GitHub, Bitbucket and GitLab.' \
+&& sudo firewall-cmd --permanent --service 'gitea' --set-short 'Private, fast and reliable DevOps platform' \
+&& sudo firewall-cmd --permanent --service 'gitea' --add-port '2222/tcp' \
+&& sudo firewall-cmd --permanent --service 'gitea' --add-port '3000/tcp'
+
 #  Allow services.
 sudo firewall-cmd --add-service='http'
 sudo firewall-cmd --add-service='ssh' --zone='public'
@@ -71,11 +79,19 @@ sudo firewall-cmd --permanent --remove-service='ssh'
 # Create a new zone.
 sudo firewall-cmd --new-zone='publicweb' --permanent
 
-# Make changes permanent.
+# Make temporary changes permanent.
 sudo firewall-cmd --runtime-to-permanent
 
-# Reload the firewall.
+# Reload firewall rules from the permanent configuration.
+# Keep the state's information.
 sudo firewall-cmd --reload
+
+# Reload the firewall completely.
+# Includes netfilter kernel modules.
+# Loses state information, likely terminating all active connections.
+# Should only be used when issues arise.
+sudo firewall-cmd --complete-reload
+sudo killall -HUP 'firewalld'
 
 # Use the offline version.
 # '--permanent' does not work here.
@@ -87,23 +103,21 @@ sudo firewall-offline-cmd --add-port='22/tcp' && sudo firewall-cmd --reload
 - [Website]
 - [Documentation]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Open TCP Port on openSUSE Firewall]
 - [How To Set Up a Firewall Using firewalld on CentOS 8]
+- [Add a Service]
 
 <!--
   References
   -->
 
+<!-- In-article sections -->
 <!-- Upstream -->
+[add a service]: https://firewalld.org/documentation/howto/add-a-service.html
 [documentation]: https://firewalld.org/documentation/
 [website]: https://firewalld.org/
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Others -->
 [how to set up a firewall using firewalld on centos 8]: https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-using-firewalld-on-centos-8
