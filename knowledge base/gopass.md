@@ -6,13 +6,15 @@
    1. [Browserpass](#browserpass)
 1. [Troubleshooting](#troubleshooting)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
 ```sh
 # Installation.
 brew install 'gopass'
+go install 'github.com/gopasspw/gopass@latest'
+go install 'github.com/gopasspw/gopass@v1.15.11'
 
 # Install shell completions.
 gopass completion 'fish' > "$HOME/.config/fish/completions/gopass.fish"
@@ -209,11 +211,10 @@ See the [FAQ] page.
 - GoPass' [documentation]
 - [woile's cheatsheet]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [BrowserPass extension installation guide]
+- [Configuration][config]
 
 <!--
   References
@@ -226,9 +227,6 @@ All the references in the [further readings] section, plus the following:
 [features]: https://github.com/gopasspw/gopass/blob/master/docs/features.md
 [secrets]: https://github.com/gopasspw/gopass/blob/master/docs/secrets.md
 [website]: https://www.gopass.pw/
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Others -->
 [browserpass extension installation guide]: https://github.com/browserpass/browserpass-extension#
