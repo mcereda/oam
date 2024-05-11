@@ -2,8 +2,6 @@
 
 Leverages Prometheus and Grafana.
 
-## Table of contents <!-- omit in toc -->
-
 1. [Pre-flight operations](#pre-flight-operations)
 1. [Further readings](#further-readings)
 
@@ -18,12 +16,11 @@ Since the Node Exporter container runs in host mode, the host's IP or FQDN must 
 - [Prometheus]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Knowledge base -->
 [grafana]: ../../knowledge%20base/grafana.md
 [prometheus]: ../../knowledge%20base/prometheus.md
