@@ -1,0 +1,17 @@
+---
+
+# sources:
+# - https://github.com/prometheus/node_exporter
+
+version: '3.8'
+services:
+  node_exporter:
+    container_name: node_exporter
+    image: quay.io/prometheus/node-exporter:v1.8.0
+    command:
+      - '--path.rootfs=/host'
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro,rslave'
