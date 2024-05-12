@@ -1,5 +1,8 @@
 #!/usr/bin/env make
 
+composition-go-brrr: ${shell which 'docker-compose'}
+	@docker-compose up -d
+
 firewalld-open-node-exporter: override service_name ?= prometheus-node-exporter
 firewalld-open-node-exporter: override port ?= 9100
 firewalld-open-node-exporter: ${shell which 'firewall-cmd'}
@@ -20,5 +23,16 @@ firewalld-open-grafana: ${shell which 'firewall-cmd'}
 
 firewalld-open: firewalld-open-node-exporter firewalld-open-prometheus firewalld-open-grafana
 
-composition-go-brrr: ${shell which 'docker-compose'}
-	@docker-compose up -d
+grafana-fix-files-permissions: ${shell which 'docker-compose'}
+	@docker compose run --rm --user 'root' --entrypoint chown 'grafana' -Rv 'grafana' '/etc/grafana' '/var/lib/grafana'
+
+prometheus-fix-files-permissions: ${shell which 'docker-compose'}
+	@docker compose run --rm --user 'root' --entrypoint chown 'prometheus' -Rv 'nobody:nobody' '/etc/prometheus'
+
+me-fix-grafana-files-permissions:
+	@sudo chown -R '472:0' 'grafana'
+
+me-fix-prometheus-files-permissions:
+	@sudo chown -R '65534:65534' 'prometheus'
+
+pre-flight: grafana-fix-files-permissions prometheus-fix-files-permissions
