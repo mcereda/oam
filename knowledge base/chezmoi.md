@@ -9,7 +9,7 @@ A multi-machine dotfile manager, written in Go.
 1. [Gotchas](#gotchas)
 1. [Snippets](#snippets)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -132,22 +132,20 @@ $
 - [Go text/template]
 - [Sprig]
 
-## Sources
+### Sources
 
-All the references in the [further readings] section, plus the following:
-
+- [Source state attributes]
 - [cheat.sh]
-- [custom data fields appear as all lowercase strings]
+- [Custom data fields appear as all lowercase strings]
 
 <!--
   References
   -->
 
 <!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Upstream -->
 [user guide]: https://www.chezmoi.io/user-guide/setup/
+[source state attributes]: https://www.chezmoi.io/reference/source-state-attributes/
 
 <!-- Others -->
 [cheat.sh]: https://cheat.sh/chezmoi
