@@ -124,6 +124,13 @@ docker image prune -a
 docker system prune -a
 
 
+# List networks.
+docker network ls
+
+# Inspect networks.
+docker network inspect 'monitoring_default'
+
+
 # Display a summary of the vulnerabilities in images.
 # If not given any input, it targets the most recently built image.
 docker scout qv
