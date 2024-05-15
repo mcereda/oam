@@ -41,3 +41,5 @@ aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --
 | xargs -t aws ecs describe-tasks --query "tasks[].attachments[].details[?(name=='privateIPv4Address')].value" --output 'text' --cluster 'testCluster' --tasks \
 | tee \
 | xargs -I{} curl -fs "http://{}:8080"
+
+aws ecr delete-repository --repository-name 'bananaslug'
