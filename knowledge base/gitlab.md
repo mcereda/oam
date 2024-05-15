@@ -671,6 +671,7 @@ Solution: set the correct ownership with
 - [CI/CD pipelines]
 - [Buildah]
 - [Kaniko]
+- [The GitLab Handbook]
 
 ### Sources
 
@@ -749,6 +750,7 @@ Solution: set the correct ownership with
 [specify when jobs run with rules]: https://docs.gitlab.com/ee/ci/jobs/job_rules.html
 [support object storage bucket prefixes]: https://gitlab.com/gitlab-org/charts/gitlab/-/issues/3376
 [the docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership]: https://gitlab.com/gitlab-org/gitlab/-/issues/349846#note_1516339762
+[the gitlab handbook]: https://handbook.gitlab.com/
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
 [tutorial: use buildah in a rootless container with gitlab runner operator on openshift]: https://docs.gitlab.com/ee/ci/docker/buildah_rootless_tutorial.html
 [use ci/cd configuration from other files]: https://docs.gitlab.com/ee/ci/yaml/includes.html
