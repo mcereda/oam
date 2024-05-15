@@ -622,9 +622,11 @@ Others:
 - [Kubernetes cluster autoscaler]
 - [Common labels]
 - [What is Kubernetes?]
+- [Using RBAC Authorization]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
@@ -680,6 +682,7 @@ Others:
 [security context design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security_context.md
 [security design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security.md
 [set capabilities for a container]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container
+[using rbac authorization]: https://kubernetes.io/docs/reference/access-authn-authz/rbac/
 [using sysctls in a kubernetes cluster]: https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/
 [version skew policy]: https://kubernetes.io/releases/version-skew-policy/
 

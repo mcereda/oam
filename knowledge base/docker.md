@@ -370,9 +370,11 @@ docker load …
 - [OpenContainers Image Spec]
 - [Docker ARG, ENV and .env - a Complete Guide]
 - [Configuring HealthCheck in docker-compose]
+- [Docker Buildx Bake + Gitlab CI Matrix]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
@@ -392,5 +394,6 @@ docker load …
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html
 [configuring healthcheck in docker-compose]: https://medium.com/@saklani1408/configuring-healthcheck-in-docker-compose-3fa6439ee280
 [docker arg, env and .env - a complete guide]: https://vsupalov.com/docker-arg-env-variable-guide/
+[docker buildx bake + gitlab ci matrix]: https://teymorian.medium.com/docker-buildx-bake-gitlab-ci-matrix-77edb6b9863f
 [getting around docker's host network limitation on mac]: https://medium.com/@lailadahi/getting-around-dockers-host-network-limitation-on-mac-9e4e6bfee44b
 [opencontainers image spec]: https://specs.opencontainers.org/image-spec/

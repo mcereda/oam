@@ -710,9 +710,12 @@ Debug: see [Identify common issues].
 - [Private cluster requirements]
 - [De-mystifying cluster networking for Amazon EKS worker nodes]
 - [Simplified Amazon EKS Access - NEW Cluster Access Management Controls]
+- [Visualizing AWS EKS Kubernetes Clusters with Relationship Graphs]
+- [How to Add IAM User and IAM Role to AWS EKS Cluster?]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
@@ -766,3 +769,5 @@ Debug: see [Identify common issues].
 [using service-linked roles for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles.html
 
 <!-- Others -->
+[how to add iam user and iam role to aws eks cluster?]: https://antonputra.com/kubernetes/add-iam-user-and-iam-role-to-eks/
+[visualizing aws eks kubernetes clusters with relationship graphs]: https://dev.to/aws-builders/visualizing-aws-eks-kubernetes-clusters-with-relationship-graphs-46a4
