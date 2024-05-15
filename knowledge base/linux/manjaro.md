@@ -1,11 +1,9 @@
-# Manjaro GNU/Linux
-
-## Table of contents <!-- omit in toc -->
+# Manjaro
 
 1. [Repositories](#repositories)
 1. [Printing](#printing)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## Repositories
 
@@ -35,26 +33,22 @@ pamac install system-config-printer
 - [Switching branches]
 - [Printing]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Kde Plasma 5.23 not updating]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[arch linux]: arch.md
 
 <!-- Upstream -->
 [branch comparison]: https://manjaro.org/branch-compare
 [printing]: https://wiki.manjaro.org/index.php/Printing
 [switching branches]: https://wiki.manjaro.org/index.php/Switching_Branches
-
-<!-- In-article sections -->
-[further readings]: #further-readings
-
-<!-- Knowledge base -->
-[arch linux]: arch%20linux.md
 
 <!-- Others -->
 [kde plasma 5.23 not updating]: https://forum.manjaro.org/t/kde-plasma-5-23-not-updating/88297/4

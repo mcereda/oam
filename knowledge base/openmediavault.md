@@ -208,7 +208,7 @@ Just enable property in the pool or dataset.
 [omv extras]: #omv-extras
 
 <!-- Knowledge base -->
-[debian]: debian.md
+[debian]: linux/debian.md
 [disks maintenance]: disks%20maintenance.md
 [proxmox]: proxmox.md
 [zfs]: zfs.md

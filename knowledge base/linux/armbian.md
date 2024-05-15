@@ -3,11 +3,9 @@
 Ultralight Linux distribution optimized for custom ARM, RISC-V or Intel hardware.<br/>
 Based on Debian.
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -41,13 +39,18 @@ sudo usermod -aG 'docker' "$USER"
 - [Debian] GNU/Linux
 - [Raspberry Pi OS]
 
-## Sources
+### Sources
 
 - [How to run Docker]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[debian]: debian.md
+[raspberry pi os]: ../raspberry%20pi%20os.md
 
 <!-- Upstream -->
 [documentation]: https://docs.armbian.com/
@@ -55,13 +58,6 @@ sudo usermod -aG 'docker' "$USER"
 [how to run docker]: https://docs.armbian.com/User-Guide_Advanced-Features/#how-to-run-docker
 [pi4b image]: https://www.armbian.com/rpi4b/
 [website]: https://www.armbian.com/
-
-<!-- In-article sections -->
-[further readings]: #further-readings
-
-<!-- Knowledge base -->
-[debian]: debian.md
-[raspberry pi os]: raspberry%20pi%20os.md
 
 <!-- Others -->
 [balenaetcher]: https://etcher.balena.io/

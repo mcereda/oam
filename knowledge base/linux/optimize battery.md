@@ -1,6 +1,4 @@
-# Optimize battery on a linux system
-
-## Table of contents <!-- omit in toc -->
+# Optimize battery
 
 1. [TL;DR](#tldr)
 1. [Disable unused services](#disable-unused-services)
@@ -64,7 +62,8 @@ sudo 'powertop'
 - [laptop-mode-tools in the Arch Wiki]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Others -->

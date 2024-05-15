@@ -1,7 +1,5 @@
 # Arch linux
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
 
@@ -21,7 +19,8 @@ git clone https://aur.archlinux.org/jdupes.git \
 - [Arch User Repository]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Upstream -->

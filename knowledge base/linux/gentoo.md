@@ -6,9 +6,10 @@
 - [Funtoo Linux]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
-[funtoo linux]: funtoo%20linux.md
-[portage]: portage.md
+[funtoo linux]: funtoo.md
+[portage]: ../portage.md

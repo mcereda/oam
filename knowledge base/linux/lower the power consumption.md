@@ -1,6 +1,4 @@
-# Lower the power consumption on Linux
-
-## Table of contents <!-- omit in toc -->
+# Lower the power consumption
 
 1. [TL;DR](#tldr)
 1. [Sources](#sources)
@@ -23,7 +21,8 @@ sudo sysctl vm.dirty_writeback_centisecs=6000
 - Arch Wiki's [power management][arch wiki power management] page
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Others -->

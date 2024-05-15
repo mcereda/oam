@@ -1,6 +1,4 @@
-# Fedora GNU/Linux
-
-## Table of contents <!-- omit in toc -->
+# Fedora
 
 1. [Enable the RPM Fusion repositories](#enable-the-rpm-fusion-repositories)
 1. [Broadcom Wi-Fi drivers](#broadcom-wi-fi-drivers)
@@ -55,7 +53,8 @@ Either:
 - [DNF update from behind SSL inspection proxy]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Others -->

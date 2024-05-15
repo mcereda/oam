@@ -1,7 +1,5 @@
 # OpenSUSE
 
-## Table of contents <!-- omit in toc -->
-
 1. [Enable Bluetooth pairing on boot](#enable-bluetooth-pairing-on-boot)
 1. [Enable SSH access from outside after installation](#enable-ssh-access-from-outside-after-installation)
 1. [Raspberry Pi](#raspberry-pi)
@@ -10,7 +8,7 @@
 1. [Firefox MP4/H.264 video support](#firefox-mp4h264-video-support)
 1. [Docker images](#docker-images)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## Enable Bluetooth pairing on boot
 
@@ -58,7 +56,8 @@ xzcat opensuse.raw.xz \
  && sync
 ```
 
-Insert the SD card in the Raspberry Pi and power it on. The network is configured to get an IP address on `eth0` using DHCP.
+Insert the SD card in the Raspberry Pi and power it on. The network is configured to get an IP address on `eth0` using
+DHCP.
 
 Connect using SSH and login using `root:linux`.
 
@@ -78,15 +77,18 @@ Do as follows:
 
 1. boot the system
 1. in GRUB's boot menu, choose _Bootable snapshots_
-1. select the snapshot you want to boot into; the list of snapshots is listed by date, the most recent snapshot being listed first
+1. select the snapshot you want to boot into; the list of snapshots is listed by date, the most recent snapshot being
+   listed first
 1. log in to the system
 1. carefully check whether everything works as expected
 
-   > You cannot write to any directory that is part of the snapshot. Data you write to other directories will not get lost, regardless of what you do next.
+   > You cannot write to any directory that is part of the snapshot. Data you write to other directories will not get
+   > lost, regardless of what you do next.
 
 Depending on whether you want to perform the rollback or not, choose your next step:
 
-- if the system is in a state where you do **not** want to do a rollback, reboot and boot again into a different snapshot, or start the rescue system.
+- if the system is in a state where you do **not** want to do a rollback, reboot and boot again into a different
+  snapshot, or start the rescue system.
 - to perform the rollback, run
 
   ```sh
@@ -97,24 +99,30 @@ Depending on whether you want to perform the rollback or not, choose your next s
 
 On the boot screen, choose the **default** boot entry to reboot into the reinstated system.
 
-A snapshot of the file system status before the rollback is created, and the default subvolume for root will be replaced with a fresh read-write snapshot.
+A snapshot of the file system status before the rollback is created, and the default subvolume for root will be replaced
+with a fresh read-write snapshot.
 
 ## Firefox MP4/H.264 video support
 
-To deal with [patent problems][information about the h.264 patent license], neither Firefox nor openSUSE provides the H264 codec required by fresh new openSUSE installation to play some video formats on the web.<br/>
-The Packman and VLC repositories provide the needed `libav` packages. Install those libraries to let Firefox use them to decode MP4/H.264 video.
+To deal with [patent problems][information about the h.264 patent license], neither Firefox nor openSUSE provides the
+H264 codec required by fresh new openSUSE installation to play some video formats on the web.<br/>
+The Packman and VLC repositories provide the needed `libav` packages. Install those libraries to let Firefox use them to
+decode MP4/H.264 video.
 
 ```sh
 zypper install 'libavcodec60' 'libavdevice60' 'libavformat60'
 ```
 
-openSUSE provides `ffmpeg` and `libav` packages like `libavcodec56`, but in them all patent related codecs were removed making them unable to play MP4/H.264 video. That is why one needs to upgrade these packages with their version in the Packman or VLC repositories.
+openSUSE provides `ffmpeg` and `libav` packages like `libavcodec56`, but in them all patent related codecs were removed
+making them unable to play MP4/H.264 video. That is why one needs to upgrade these packages with their version in the
+Packman or VLC repositories.
 
 Go to this [Simple WebRTC H264 check page] to check if Firefox can play H.264 videos after installation.
 
 ## Docker images
 
-OpenSUSE's official container images are created and stored in [SUSE's container registry][container images built by the open build service]:
+OpenSUSE's official container images are created and stored in
+[SUSE's container registry][container images built by the open build service]:
 
 ```sh
 docker run -ti --rm --name 'tw' 'registry.opensuse.org/opensuse/tumbleweed'
@@ -129,9 +137,7 @@ docker run -ti --rm --name 'tw' 'registry.opensuse.org/opensuse/tumbleweed'
 - [System Recovery and Snapshot Management with Snapper]
 - [Container Images built by the Open Build Service]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [OpenSSH basics]
 - [Bluetooth on boot]
@@ -141,8 +147,15 @@ All the references in the [further readings] section, plus the following:
 - [Simple WebRTC H264 check page]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[bluetooth]: ../bluetooth.md#bluetooth-devices-cannot-be-used-at-login
+[firewalld]: ../firewalld.md
+[systemd]: ../systemd.md
+[zypper]: ../zypper.md
 
 <!-- Upstream -->
 [container images built by the open build service]: https://registry.opensuse.org/cgi-bin/cooverview
@@ -150,12 +163,6 @@ All the references in the [further readings] section, plus the following:
 [openssh basics]: https://en.opensuse.org/SDB:OpenSSH_basics
 [raspberry pi4]: https://en.opensuse.org/openSUSE:Raspberry_Pi
 [system recovery and snapshot management with snapper]: https://documentation.suse.com/sles/12-SP4/html/SLES-all/cha-snapper.html
-
-<!-- Knowledge base -->
-[bluetooth]: bluetooth.md#bluetooth-devices-cannot-be-used-at-login
-[firewalld]: firewalld.md
-[systemd]: systemd.md
-[zypper]: zypper.md
 
 <!-- Others -->
 [bluetooth on boot]: https://www.reddit.com/r/openSUSE/comments/eoozm2/comment/feetqpn/
