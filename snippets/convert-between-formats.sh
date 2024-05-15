@@ -10,3 +10,7 @@ ffmpeg -y -i 'rec.webm' -i 'palette.png' -filter_complex 'paletteuse' -r 10 'out
 # webm to mp4
 ffmpeg -i 'input.webm' -c 'copy' 'output.mp4'
 ffmpeg -fflags '+genpts' -r '24' -i 'input.webm' 'output.mp4'
+
+# webp to png
+dwebp 'input.webp' -o 'output.png'
+dwebp 'input.webp' -mt -o 'output.png' -resize '192' '192'
