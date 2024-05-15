@@ -1,10 +1,8 @@
 # Linux kernel modules
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Permanent modules configuration](#permanent-modules-configuration)
-1. [Sources](#sources)
+1. [Further readings](#further-readings)
 
 ## TL;DR
 
@@ -54,13 +52,14 @@ Write the options in a `.conf` file in `/etc/modprobe.d/`:
 options brcmfmac roamoff=1 feature_disable=0x82000
 ```
 
-## Sources
+## Further readings
 
 - The [Kernel module][arch wiki kernel module] page in the [Arch wiki]
-- The [Kernel modules][gentoo wiki kernel modules]
+- The [Kernel modules][gentoo wiki kernel modules] page in the [Gentoo wiki]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Others -->

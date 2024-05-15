@@ -3,7 +3,8 @@
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
-1. [Sources](#sources)
+1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -62,13 +63,21 @@ apk info -s 'top'
 apk info -d 'parallel'
 ```
 
-## Sources
+## Further readings
 
-- [10 alpine linux apk command examples]
+- [Alpine] Linux
+
+### Sources
+
+- [10 Alpine Linux apk command examples]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[alpine]: linux/alpine.md
 
 <!-- Others -->
 [10 alpine linux apk command examples]: https://www.cyberciti.biz/faq/10-alpine-linux-apk-command-examples/

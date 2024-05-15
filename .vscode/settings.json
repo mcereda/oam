@@ -61,6 +61,7 @@
         "aclinherit",
         "aclmode",
         "acltype",
+        "addgroup",
         "adduser",
         "airgap",
         "airgapped",
