@@ -16,6 +16,9 @@ aws ecr describe-repositories --registry-id '123456789012' --query 'repositories
 # Create repositories.
 aws ecr create-repository --repository-name 'docker-tools/image-builder'
 
+# Delete repositories.
+aws ecr delete-repository --repository-name 'banana/slug'
+
 # List images in ECRs.
 aws ecr list-images --repository-name 'repository'
 aws ecr list-images --registry-id '123456789012' --repository-name 'my-image'
