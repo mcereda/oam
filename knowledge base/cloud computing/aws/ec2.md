@@ -66,23 +66,26 @@ See [EBS].
 - [Using instance profiles]
 - [DescribeImages] API
 - [`describe-images`][describe-images] CLI subcommand
+- [Best practices for handling EC2 Spot Instance interruptions]
+- [IAM roles for Amazon EC2]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
-<!-- In-article sections -->
 <!-- Knowledge base -->
 [amazon web services]: README.md
 [cli]: cli.md
 [ebs]: ebs.md
 [ssm]: ssm.md
 
-<!-- Files -->
 <!-- Upstream -->
+[best practices for handling ec2 spot instance interruptions]: https://aws.amazon.com/blogs/compute/best-practices-for-handling-ec2-spot-instance-interruptions/
 [connect to your instances without requiring a public ipv4 address using ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-with-ec2-instance-connect-endpoint.html
 [describe-images]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-images.html
 [describeimages]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
+[iam roles for amazon ec2]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
 [using instance profiles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
 
 <!-- Others -->

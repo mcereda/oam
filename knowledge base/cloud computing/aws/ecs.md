@@ -96,19 +96,22 @@ while [[ $(aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'test
 
 ### Sources
 
+- [Identity and Access Management for Amazon Elastic Container Service]
+- [Amazon ECS task role]
+- [How Amazon Elastic Container Service works with IAM]
+
 <!--
   Reference
   ═╬═Time══
   -->
 
-<!-- In-article sections -->
 <!-- Knowledge base -->
 [amazon web services]: README.md
 [cli]: cli.md
 
-<!-- Files -->
 <!-- Upstream -->
 [amazon ecs task lifecycle]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html
+[amazon ecs task role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
+[how amazon elastic container service works with iam]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security_iam_service-with-iam.html
+[identity and access management for amazon elastic container service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security-iam.html
 [troubleshoot amazon ecs deployment issues]: https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ecs.html
-
-<!-- Others -->

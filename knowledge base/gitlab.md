@@ -703,6 +703,7 @@ Solution: set the correct ownership with
 - [How to disable the Two-factor authentication in GitLab?]
 - [How to Upgrade Your Omnibus GitLab]
 - [The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership]
+- [GitLab HA Scaling Runner Vending Machine for AWS EC2 ASG]
 
 <!--
   Reference
@@ -733,6 +734,7 @@ Solution: set the correct ownership with
 [docker machine's aws driver's options]: https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/blob/main/docs/drivers/aws.md#options
 [docker machine's supported cloud providers]: https://docs.gitlab.com/runner/configuration/autoscale.html#supported-cloud-providers
 [environment variables]: https://docs.gitlab.com/ee/administration/environment_variables.html
+[gitlab ha scaling runner vending machine for aws ec2 asg]: https://gitlab.com/guided-explorations/aws/gitlab-runner-autoscaling-aws-asg#gitlab-runners-on-aws-spot-best-practices
 [global settings]: https://docs.gitlab.com/charts/charts/globals.html
 [how to restart gitlab]: https://docs.gitlab.com/ee/administration/restart_gitlab.html
 [install gitlab with the linux package]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/doc/installation/index.md
