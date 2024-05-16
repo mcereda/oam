@@ -1,6 +1,8 @@
 # Mac OS X
 
 1. [TL;DR](#tldr)
+1. [Taking screenshots](#taking-screenshots)
+1. [Record the screen](#record-the-screen)
 1. [Hidden settings](#hidden-settings)
 1. [Image manipulation](#image-manipulation)
 1. [Resize PDF files](#resize-pdf-files)
@@ -9,12 +11,13 @@
 1. [Keychain access from CLI](#keychain-access-from-cli)
 1. [Mount an NFS share](#mount-an-nfs-share)
 1. [Use TouchID to authenticate in the terminal](#use-touchid-to-authenticate-in-the-terminal)
-   1. [Fix iTerm2](#fix-iterm2)
+    1. [Fix iTerm2](#fix-iterm2)
 1. [Create custom DNS resolvers](#create-custom-dns-resolvers)
 1. [Xcode CLI tools](#xcode-cli-tools)
     1. [Headless installation](#headless-installation)
     1. [Removal](#removal)
     1. [Upgrade](#upgrade)
+1. [Apps of interest](#apps-of-interest)
 1. [Boot keys cheatsheet](#boot-keys-cheatsheet)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
@@ -45,6 +48,7 @@ softwareupdate --download --recommended
 
 # Keep the system awake.
 caffeinate
+caffeinate -dis
 caffeinate -t '600'
 
 # Perform network speed tests.
@@ -162,6 +166,24 @@ sudo trimforce enable
 # Get information about users.
 dscl '.' -read "/Users/$USER" 'UserShell'
 ```
+
+## Taking screenshots
+
+Shortcuts:
+
+| Combination               | Effect                                                                                                                            |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `command` + `shift` + `3` | Takes a picture of one's entire screen. If using multiple screens, it will create an image for each.                              |
+| `command` + `shift` + `4` | Allows to select an area on the screen to take a picture of, and it will create one image of the area one selected.               |
+| `command` + `shift` + `5` | Brings up a tool that allows you to do all the above things as well as creating videos (with audio) of all or part of the screen. |
+
+In the case of the first 2 options one can also hold the `control` key (e.g.: `command` + `shift` + `control` + `3`) to
+send the screenshot to the clipboard instead.
+
+## Record the screen
+
+Use Quicktime Player to capture an area or the full screen by opening the application and selecting
+`New Screen Recording` under the `File` menu, or by pressing `command` + `control` + `n`.
 
 ## Hidden settings
 
@@ -397,6 +419,22 @@ sudo rm -rf "$(xcode-select -p)"
 xcode-select --install
 ```
 
+## Apps of interest
+
+| Name                                                                                                          | Description                                                              |
+| ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| [BlueSnooze](https://github.com/odlp/bluesnooze)                                                              | Prevents your sleeping computer from connecting to Bluetooth accessories |
+| [Clocker](https://apps.apple.com/en/app/clocker/id1056643111)                                                 | Menu bar timezone tracker and compact calendar                           |
+| [iBar - menubar icon control tool](https://apps.apple.com/en/app/ibar-menubar-icon-control-tool/id6443843900) | Hide and show menu bar icons                                             |
+| [Itsycal](https://www.mowglii.com/itsycal/)                                                                   | Menu bar calendar                                                        |
+| [KeepingYouAwake](https://keepingyouawake.app/)                                                               | Prevent the mac from sleeping                                            |
+| [KeyboardCleanTool](https://folivora.ai/keyboardcleantool)                                                    | Blocks all Keyboard and TouchBar input                                   |
+| [Liuhai - hide topnotch](https://apps.apple.com/en/app/liuhai-hide-topnotch/id1592293770)                     | Hide the annoying notch on laptops                                       |
+| [Maccy](https://maccy.app/)                                                                                   | Clipboard manager                                                        |
+| [MonitorControl](https://github.com/MonitorControl/MonitorControl)                                            | Tool to control external monitor brightness & volume                     |
+| [Mos](https://mos.caldis.me/)                                                                                 | Smooths scrolling and set mouse scroll directions independently          |
+| [Rectangle](https://rectangleapp.com/)                                                                        | Move and resize windows in macOS using keyboard shortcuts or snap areas  |
+
 ## Boot keys cheatsheet
 
 > Only available on Intel based Macs.
@@ -453,6 +491,7 @@ To use any of these key combinations, press and hold the keys immediately after 
 - [Who is listening on a given TCP port on Mac OS X?]
 - [Tagging files from the macOS command line]
 - [macOS: Using Custom DNS Resolvers]
+- [macOS tools and tips]
 
 <!--
   References
@@ -489,7 +528,8 @@ To use any of these key combinations, press and hold the keys immediately after 
 [list of xcode command line tools]: https://mac.install.guide/commandlinetools/8.html
 [macos default values command reference]: https://github.com/kevinSuttle/macOS-Defaults/blob/master/REFERENCE.md
 [macos network quality tool]: https://www.theapplegeek.co.uk/blog/networkquality
-[macOS: Using Custom DNS Resolvers]: https://vninja.net/2020/02/06/macos-custom-dns-resolvers/
+[macos tools and tips]: https://handbook.gitlab.com/handbook/tools-and-tips/mac/
+[macos: using custom dns resolvers]: https://vninja.net/2020/02/06/macos-custom-dns-resolvers/
 [mdls]: https://ss64.com/osx/mdls.html
 [pam_reattach]: https://github.com/fabianishere/pam_reattach
 [tagging files from the macos command line]: https://brettterpstra.com/2017/08/22/tagging-files-from-the-command-line/
