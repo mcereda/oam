@@ -30,3 +30,7 @@ function pulumi-urnRegex2urn
 	pulumi stack export \
 	| jq -r --arg regex "$argv[1]" '.deployment.resources[]|select(.urn|test($regex)).urn' -
 end
+
+# Get the URN (or other stuff) of resources that would be deleted
+pulumi preview --json | jq -r '.steps[]|select(.op=="delete").urn' -
+pulumi preview --json | jq -r '.steps[]|select(.op=="delete").oldState.id' -
