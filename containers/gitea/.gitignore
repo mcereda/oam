@@ -1,6 +1,0 @@
-/config/*
-!/config/*.defaults.ini
-!/config/*.example.ini
-
-/data/*
-!/data/.gitkeep
