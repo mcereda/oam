@@ -10,10 +10,14 @@ services:
     image: gitea/gitea:1.21.11-rootless
     restart: unless-stopped
     volumes:
-      - ${PWD}/data:/var/lib/gitea
-      - ${PWD}/config:/etc/gitea
+      - data:/var/lib/gitea
+      - config:/etc/gitea
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 3000:3000
       - 2222:2222
+
+volumes:
+  config:
+  data:

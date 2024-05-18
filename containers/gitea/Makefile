@@ -1,8 +1,5 @@
 #!/usr/bin/env make
 
-pre-flight:
-	@mkdir -pv 'config' 'data'
-
 firewalld-open: override service_name ?= gitea
 firewalld-open: override webui_port ?= 3000
 firewalld-open: override ssh_port ?= 2222
@@ -16,5 +13,5 @@ firewalld-open: ${shell which 'firewall-cmd'}
 	@sudo firewall-cmd --permanent --add-service '${service_name}'
 	@sudo firewall-cmd --reload
 
-composition-go-brrr: ${shell which 'docker-compose'} pre-flight
+composition-go-brrr: ${shell which 'docker-compose'}
 	@docker-compose up -d

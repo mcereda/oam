@@ -10,7 +10,10 @@ services:
       - PUID=1000
       - PGID=100
     volumes:
-      - ${PWD}/config:/var/syncthing/config
+      - config:/var/syncthing/config
       - ${PWD}/data:/var/syncthing/data
     network_mode: host
     restart: unless-stopped
+
+volumes:
+  config:
