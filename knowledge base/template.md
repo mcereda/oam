@@ -2,7 +2,7 @@
 
 Intro
 
-<!-- Remove this line to uncomment if needed
+<!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
@@ -11,19 +11,19 @@ Intro
 
 ## TL;DR
 
-<!-- Uncomment if needed
+<!-- Uncomment if used
 <details>
   <summary>Installation and configuration</summary>
 </details>
 -->
 
-<!-- Uncomment if needed
+<!-- Uncomment if used
 <details>
   <summary>Usage</summary>
 </details>
 -->
 
-<!-- Uncomment if needed
+<!-- Uncomment if used
 <details>
   <summary>Real world use cases</summary>
 </details>
