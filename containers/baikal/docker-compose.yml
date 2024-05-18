@@ -1,0 +1,20 @@
+---
+
+# sources:
+# - https://github.com/ckulka/baikal-docker/blob/master/examples/docker-compose.yaml
+
+version: '2'
+
+services:
+  baikal:
+    image: ckulka/baikal:nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - config:/var/www/baikal/config
+      - data:/var/www/baikal/Specific
+
+volumes:
+  config:
+  data:

@@ -131,6 +131,16 @@ docker network ls
 docker network inspect 'monitoring_default'
 
 
+# Create volumes.
+docker volume create 'volume-name'
+
+# List volumes.
+docker volume list
+
+# Inspect volumes.
+docker volume inspect 'volume-name'
+
+
 # Display a summary of the vulnerabilities in images.
 # If not given any input, it targets the most recently built image.
 docker scout qv
@@ -200,6 +210,10 @@ docker compose down
 ```sh
 # Get the SHAsum of images.
 docker inspect --format='{{index .RepoDigests 0}}' 'node:18-buster'
+
+# Act upon files in volumes.
+sudo ls "$(docker volume inspect --format '{{.Mountpoint}}' 'baikal_config')"
+sudo vim "$(docker volume inspect --format '{{.Mountpoint}}' 'gitea_config')/app.ini"
 ```
 
 </details>
@@ -371,6 +385,7 @@ docker load …
 - [Docker ARG, ENV and .env - a Complete Guide]
 - [Configuring HealthCheck in docker-compose]
 - [Docker Buildx Bake + Gitlab CI Matrix]
+- [How to list the content of a named volume in docker 1.9+?]
 
 <!--
   Reference
@@ -397,3 +412,4 @@ docker load …
 [docker buildx bake + gitlab ci matrix]: https://teymorian.medium.com/docker-buildx-bake-gitlab-ci-matrix-77edb6b9863f
 [getting around docker's host network limitation on mac]: https://medium.com/@lailadahi/getting-around-dockers-host-network-limitation-on-mac-9e4e6bfee44b
 [opencontainers image spec]: https://specs.opencontainers.org/image-spec/
+[how to list the content of a named volume in docker 1.9+?]: https://stackoverflow.com/questions/34803466/how-to-list-the-content-of-a-named-volume-in-docker-1-9
