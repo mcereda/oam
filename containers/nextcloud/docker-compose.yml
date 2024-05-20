@@ -1,36 +1,61 @@
+---
+
+# sources:
+# - https://hub.docker.com/_/nextcloud
+
 version: '3.2'
 
 services:
   db:
-    image: postgres
-    restart: always
+    image: postgres:16.3-alpine3.19
+    restart: unless-stopped
+    shm_size: 128mb
     volumes:
       - db:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB_FILE=/run/secrets/postgres_db
-      - POSTGRES_USER_FILE=/run/secrets/postgres_user
-      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+      POSTGRES_DB_FILE: /run/secrets/postgres_db
+      POSTGRES_USER_FILE: /run/secrets/postgres_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     secrets:
       - postgres_db
       - postgres_password
       - postgres_user
 
+  redis:
+    image: redis:7.2.4-alpine3.19
+    restart: unless-stopped
+    # environment:
+    #   REDIS_USERNAME: default
+    #   REDIS_PASSWORD: something
+    # command: >-
+    #   --user ${REDIS_USERNAME} on >${REDIS_PASSWORD} ${REDIS_PERMISSIONS}
+    #   --user default off
+
   app:
-    image: nextcloud
-    restart: always
+    depends_on:
+      - db
+      - redis
+    image: nextcloud:27.1.9-apache
+    restart: unless-stopped
     ports:
       - 8080:80
     volumes:
       - nextcloud:/var/www/html
+      - config:/var/www/html/config
+      - data:/var/www/html/data
+      - custom_apps:/var/www/html/custom_apps
+      # - theme:/var/www/html/themes/<YOUR_CUSTOM_THEME>
     environment:
-      - POSTGRES_HOST=db
-      - POSTGRES_DB_FILE=/run/secrets/postgres_db
-      - POSTGRES_USER_FILE=/run/secrets/postgres_user
-      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
-      - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/nextcloud_admin_password
-      - NEXTCLOUD_ADMIN_USER_FILE=/run/secrets/nextcloud_admin_user
-    depends_on:
-      - db
+      POSTGRES_HOST: db
+      POSTGRES_DB_FILE: /run/secrets/postgres_db
+      POSTGRES_USER_FILE: /run/secrets/postgres_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      REDIS_HOST: redis
+      NEXTCLOUD_ADMIN_PASSWORD_FILE: /run/secrets/nextcloud_admin_password
+      NEXTCLOUD_ADMIN_USER_FILE: /run/secrets/nextcloud_admin_user
+      NEXTCLOUD_INIT_HTACCESS: true
+      NEXTCLOUD_TRUSTED_DOMAINS: >-
+        ${HOSTNAME}
     secrets:
       - nextcloud_admin_password
       - nextcloud_admin_user
@@ -41,6 +66,10 @@ services:
 volumes:
   db:
   nextcloud:
+  config:
+  data:
+  custom_apps:
+  # theme:
 
 secrets:
   nextcloud_admin_password:

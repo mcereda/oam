@@ -1,0 +1,33 @@
+---
+
+# this method kinda sucks imho, but hey… ¯\_(ツ)_/¯
+
+# sources:
+# - https://github.com/nextcloud/all-in-one
+# - https://github.com/nextcloud/all-in-one/blob/main/compose.yaml
+# - https://hub.docker.com/r/nextcloud/all-in-one
+
+version: '3'
+
+services:
+  nextcloud-aio:
+    image: nextcloud/all-in-one:20240502_104630-latest
+    container_name:
+      # not allowed to be changed, since mastercontainer updates would fail
+      nextcloud-aio-mastercontainer
+    init: true
+    restart: unless-stopped
+    publish:
+      - # used for the AIO interface and uses a self-signed certificate by default
+        8080:8080
+      # - # used for getting valid certificates for the AIO interface if you want to use port 8443
+      #   80:80
+      # - 8443:8443
+    volumes:
+      - config:/mnt/docker-aio-config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+volumes:
+  config:
+    name:
+      # not allowed to be changed, since built-in backups would fail later on
+      nextcloud_aio_mastercontainer
