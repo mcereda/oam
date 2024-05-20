@@ -11,6 +11,7 @@ pre-flight:
 	@[[ -f 'postgres_user.txt' ]] || echo '${postgres_user}' > 'postgres_user.txt'
 	@[[ -f 'postgres_password.txt' ]] || echo '${postgres_password}' > 'postgres_password.txt'
 	@[[ -f 'postgres_db.txt' ]] || echo '${postgres_db}' > 'postgres_db.txt'
+	chmod 'go=' 'nextcloud_admin_password.txt' 'postgres_password.txt'
 
 firewalld-open: override service_name ?= nextcloud
 firewalld-open: override port ?= 8080
