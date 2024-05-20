@@ -4,6 +4,8 @@ version: '3.8'
 services:
 
   node_exporter:
+    profiles:
+      - exporter
     image: quay.io/prometheus/node-exporter:latest
     container_name: node_exporter
     command:
@@ -15,6 +17,8 @@ services:
       - '/:/host:ro,rslave'
 
   prometheus:
+    profiles:
+      - server
     depends_on:
       - node_exporter
     image: prom/prometheus
@@ -26,6 +30,8 @@ services:
       - ./prometheus:/etc/prometheus
 
   grafana:
+    profiles:
+      - server
     depends_on:
       - prometheus
     image: grafana/grafana-enterprise
