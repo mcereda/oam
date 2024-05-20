@@ -7,7 +7,7 @@ version: '3.8'
 services:
   node_exporter:
     container_name: node_exporter
-    image: quay.io/prometheus/node-exporter:v1.8.0
+    image: quay.io/prometheus/node-exporter:v1.8.0@sha256:8a57af80a4c77ffb97749b44895248563616fcfd405b5370d5db35fe6c15e4ec
     command:
       - '--path.rootfs=/host'
     network_mode: host
