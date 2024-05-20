@@ -1,0 +1,19 @@
+################################################################################
+## ~/.config/starship.toml
+##
+## Starship's user configuration file.
+##
+## Sources:
+## - https://starship.rs/config/
+################################################################################
+
+# Get editor completions based on the config schema.
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Allow longer-running commands to keep executing.
+command_timeout = 750
+
+# Replace the default '❯' symbol in the prompt with '$'.
+[character]
+success_symbol = '[\$](bold green)'
+error_symbol = '[\$](bold red)'

@@ -5,9 +5,11 @@ Fast and customizable prompt for most shells.
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
+
+<details>
+  <summary>Installation and configuration</summary>
 
 ```sh
 # Installation.
@@ -16,47 +18,71 @@ zypper in 'starship'
 
 # Start when the shell starts.
 eval "$(starship init bash)" | tee -a ~'/.bashrc'
-echo 'starship init fish | source' | tee -a ~'/.config/fish/config.fish'
 eval "$(starship init zsh)" | tee -a ~'/.zshrc'
+echo 'starship init fish | source' | tee -a ~'/.config/fish/config.fish'
 
 # Initialize starship configuration.
 mkdir -p ~'/.config' && touch ~'/.config/starship.toml'
 
+# Change configuration.
+starship config
+vim ~'/.config/starship.toml'
+
+# Print the whole configuration.
+starship print-config
+cat ~'/.config/starship.toml'
+```
+
+</details>
+<details>
+  <summary>Usage</summary>
+
+```sh
 # List available presets (prompt styles).
 starship preset -l
 ```
 
+</details>
+
 ## Configuration
 
 ```sh
+# Change configuration.
+starship config
+vim ~'/.config/starship.toml'
+
+# Print the whole configuration.
+starship print-config
+cat ~'/.config/starship.toml'
+```
+
+```toml
 # ~/.config/starship.toml
 
 # Get editor completions based on the config schema.
 "$schema" = 'https://starship.rs/config-schema.json'
+command_timeout = 750
 
 # Replace the default '❯' symbol in the prompt with '$'.
 # The '$' character needs to be escaped.
 [character]
 success_symbol = '[\$](bold green)'
+error_symbol = '[\$](bold red)'
 ```
 
 ## Further readings
 
 - [Website]
-- [Nerd fonts]
-
-## Sources
-
-All the references in the [further readings] section, plus the following:
-
 - [Github]
+- [Nerd fonts]
+- [Bash]
+- [Zsh]
+- [Fish]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Knowledge base -->
 [bash]: bash.md
@@ -68,5 +94,3 @@ All the references in the [further readings] section, plus the following:
 <!-- Upstream -->
 [github]: https://github.com/starship/starship
 [website]: https://starship.rs/
-
-<!-- Others -->
