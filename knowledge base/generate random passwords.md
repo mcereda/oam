@@ -1,7 +1,5 @@
 # Generate random passwords
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Sources](#sources)
 
@@ -12,12 +10,13 @@
 openssl rand -base64 32
 gpg --gen-random --armor 1 32
 
-# Print out 32 random alphanumerical characters.
+# Print out 32 random alphanumeric characters.
 date '+%s' | sha256sum | base64 | head -c '32'
 cat '/dev/urandom' | LC_ALL='C' tr -dc '[:alnum:]' | fold -w '32' | head -n '1'
 
 # XKCD-inspired passwords.
-pipx run 'xkcdpass'
+xkcdpass -d '-' -C 'random' -n 5
+gopass pwgen -x --xc --xl 'en' --xn --xs '.' 3
 ```
 
 ## Sources
@@ -26,7 +25,8 @@ pipx run 'xkcdpass'
 - [Generate a random password on Linux]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Others -->
