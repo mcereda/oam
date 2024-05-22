@@ -1,4 +1,4 @@
-#!fish
+#!/usr/bin/env fish
 
 function pulumi-all-of-type
 	pulumi stack export \
@@ -34,3 +34,6 @@ end
 # Get the URN (or other stuff) of resources that would be deleted
 pulumi preview --json | jq -r '.steps[]|select(.op=="delete").urn' -
 pulumi preview --json | jq -r '.steps[]|select(.op=="delete").oldState.id' -
+
+# Remove from the state all resources that would be deleted
+pulumi preview --json | jq -r '.steps[]|select(.op=="delete").urn' - | xargs -n1 pulumi state delete --force
