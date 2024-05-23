@@ -5,12 +5,73 @@ print-postgis-service-logs:
   variables:
     CI_DEBUG_SERVICES: "true"
   services:
-    - name: "postgis/postgis:15-3.3"
+    - name: postgis/postgis:15-3.4@sha256:6a6eb58d25a331da1d2532412641330b064ffec33f294aa5a7812fe26a6ed2f3
       alias: db
       variables:
         POSTGRES_DB: postgres
         POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: "postgres"
+        POSTGRES_PASSWORD: postgres
         POSTGRES_HOST_AUTH_METHOD: trust
   script:
     - echo 'hello!!'
+
+docker-build-image-dind:
+  rules:
+    - when: manual
+  variables:
+    BUILDER_NAME: tmp-$CI_JOB_ID
+    DOCKER_VERSION: '26.1.2'
+    GIT_DEPTH: '1'
+    IMAGE_NAME: $CI_PROJECT_NAME
+    IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+    PLATFORM: linux/amd64
+  services:
+    - docker:$DOCKER_VERSION-dind
+  image: library/docker:DOCKER_VERSION-cli-alpine3.19
+  before_script:
+    - docker info
+    - docker buildx create --driver 'docker-container' --name "$BUILDER_NAME" --use
+  script:
+    - docker buildx build --platform "$PLATFORM" --tag "$IMAGE_NAME/$IMAGE_TAG" '.'
+  after_script:
+    - docker buildx rm "$BUILDER_NAME"
+
+powerpipe-report:
+  # Strongly suggested to just create your own image for this.
+  # Initializing it from scratch alone takes me about 8 mins.
+  stage: test
+  rules:
+    - when: manual
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+    POWERPIPE_MOD_LOCATION: /home/piper/powerpipe
+    POWERPIPE_TELEMETRY: none
+    POWERPIPE_UPDATE_CHECK: 'false'
+    POWERPIPE_VERSION: v0.3.0
+    STEAMPIPE_MOD_LOCATION: /home/piper/steampipe
+    STEAMPIPE_TELEMETRY: none
+    STEAMPIPE_UPDATE_CHECK: 'false'
+    STEAMPIPE_VERSION: v0.23.2
+  image: library/debian:12.5-slim@sha256:804194b909ef23fb995d9412c9378fb3505fe2427b70f3cc425339e48a828fca
+  before_script:
+    - |-
+        : "${AWS_ACCESS_KEY_ID?required}"
+        : "${AWS_SECRET_ACCESS_KEY?required}"
+    - adduser --disabled-password --gecos '' --shell '/bin/sh' 'piper'
+    - apt update
+    - apt install --assume-yes --no-install-recommends 'curl' 'ca-certificates'
+    - curl -fsSL -O 'https://steampipe.io/install/steampipe.sh' -O 'https://powerpipe.io/install/powerpipe.sh'
+    - su piper -c "mkdir -pv '$STEAMPIPE_MOD_LOCATION' '$POWERPIPE_MOD_LOCATION'"
+    - /bin/sh steampipe.sh "$STEAMPIPE_VERSION"
+    - /bin/sh powerpipe.sh "$POWERPIPE_VERSION"
+    - su piper -c "steampipe service start --database-listen 'local'"
+  script:
+    - su piper -c "steampipe plugin install 'aws'"
+    - su piper -c "powerpipe mod install 'github.com/turbot/steampipe-mod-aws-compliance'"
+    - su piper -c "powerpipe benchmark run 'aws_compliance.benchmark.gdpr' --export 'nunit3'"
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      # not a junit, so useless, but hey…
+      junit: "*.nunit3.xml"
