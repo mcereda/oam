@@ -14,6 +14,8 @@
 
 ## TL;DR
 
+Non-interactive mode: `DEBIAN_FRONTEND='noninteractive' apt`.
+
 ```sh
 # Check for broken dependencies.
 sudo apt-get check
@@ -37,6 +39,7 @@ apt depends 'ufw'
 
 # Install packages.
 sudo apt install 'nano' 'python3-zstd/stable' 'gparted=0.16.1-1'
+sudo apt install --no-install-recommends --assume-yes 'curl'
 
 # Remove packages.
 sudo apt remove 'dhclient' 'sudo'

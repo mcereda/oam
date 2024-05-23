@@ -8,7 +8,7 @@ Dynamically query APIs, code and more with SQL.
 
 ## TL;DR
 
-Default config directory is `$HOME/.steampipe`.
+Default files directory (called _installation directory_ by Steampipe) is `$HOME/.steampipe`.
 
 <details>
   <summary>Installation and configuration</summary>
@@ -18,6 +18,18 @@ brew install 'turbot/tap/steampipe'
 
 steampipe completion fish | source
 steampipe completion fish > "$HOME/.config/fish/completions/steampipe.fish"
+
+# Disable telemetry.
+export STEAMPIPE_TELEMETRY='none'
+
+# Most used configuration settings.
+# Most can be set through switch.
+# These are set to their defaults.
+export \
+  STEAMPIPE_INSTALL_DIR="${HOME}/.steampipe" \
+  STEAMPIPE_MAX_PARALLEL=10 \
+  STEAMPIPE_MOD_LOCATION="$PWD" \
+  STEAMPIPE_UPDATE_CHECK=true
 ```
 
 </details>
@@ -27,8 +39,17 @@ steampipe completion fish > "$HOME/.config/fish/completions/steampipe.fish"
 
 ```sh
 # Install plugins.
-steampipe plugin install 'steampipe'
-steampipe plugin install 'aws'
+steampipe plugin install 'steampipe' 'aws@^0.130' 'theapsgroup/gitlab@v0.6.0'
+
+# List installed plugins.
+steampipe plugin list
+
+# Update plugins.
+steampipe plugin update --all
+steampipe plugin update 'steampipe' 'aws'
+
+# Uninstall plugins.
+steampipe plugin uninstall 'steampipe' 'theapsgroup/gitlab@0.6.0' 'hub.steampipe.io/plugins/turbot/aws@^0'
 
 # Start the service.
 steampipe service start
@@ -61,14 +82,14 @@ steampipe query 'query'
 steampipe query 'query' --output 'json'
 steampipe query 'query' --output 'csv' --separator '|'
 
-# Executes benchmarks and controls.
-steampipe check 'benchmark.cis_v130'
-steampipe check 'control.cis_v130_1_4' 'control.cis_v130_2_1_1'
-steampipe check 'all'
-steampipe check … --tag 'cis_level=1' --tag 'cis=true' --search-path-prefix 'aws_connection_2'
-steampipe check … --where "severity in ('critical', 'high')" --dry-run
-steampipe check … --theme 'light' --output 'brief' --export 'output.csv' --export 'output.json' --export 'md'
-steampipe check … --theme 'plain' --progress false
+# Execution of benchmarks and controls has been deprecated in favour of Powerpipe.
+#steampipe check 'benchmark.cis_v130'
+#steampipe check 'control.cis_v130_1_4' 'control.cis_v130_2_1_1'
+#steampipe check 'all'
+#steampipe check … --tag 'cis_level=1' --tag 'cis=true' --search-path-prefix 'aws_connection_2'
+#steampipe check … --where "severity in ('critical', 'high')" --dry-run
+#steampipe check … --theme 'light' --output 'brief' --export 'output.csv' --export 'output.json' --export 'md'
+#steampipe check … --theme 'plain' --progress false
 ```
 
 </details>
@@ -91,7 +112,7 @@ where
   and p.is_aws_managed;
 ```
 
-Dashboards have been deprecated from Steampipe. Use [Powerpipe] instead.
+Dashboards and Mods have been deprecated in favour of [Powerpipe]. Use it instead.
 
 </details>
 
