@@ -22,11 +22,12 @@ sudo zypper install 'podman'
 - [Docker]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
-
-<!-- Upstream -->
-[website]: https://podman.io/
 
 <!-- Knowledge base -->
 [docker]: docker.md
+
+<!-- Upstream -->
+[website]: https://podman.io/

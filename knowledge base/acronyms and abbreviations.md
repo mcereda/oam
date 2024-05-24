@@ -118,17 +118,18 @@
 - [Continuous delivery]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
 [acl]: acl.md
-[adr]: adr.placeholder
+[adr]: adr.md
 [bash]: bash.md
-[cni]: cni.placeholder
+[cni]: cni.md
 [fhs]: fhs.placeholder
 [fish]: fish.md
-[iac]: iac.placeholder
+[iac]: iac.md
 [kubernetes]: kubernetes/README.md
 [ssh]: ssh.md
 [sssd]: sssd.md
