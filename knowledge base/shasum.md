@@ -1,54 +1,38 @@
-# Title
-
-TODO
-
-Intro
-
-<!-- Remove this line to uncomment if used
-## Table of contents <!-- omit in toc -->
+# Shasum
 
 1. [TL;DR](#tldr)
-1. [Further readings](#further-readings)
-   1. [Sources](#sources)
 
 ## TL;DR
 
-<!-- Uncomment if used
 <details>
   <summary>Installation and configuration</summary>
 
 ```sh
+brew install 'coreutils'
 ```
 
 </details>
--->
 
-<!-- Uncomment if used
 <details>
   <summary>Usage</summary>
 
 ```sh
+# Print the checksum of given files.
+sha512sum 'path/to/file'
+sha1sum 'path/to/file.1' 'path/to/file.N'
+
+# Check files given their checksum and name in one or more files.
+sha256sum -c 'expected.sha256'
+sha512sum -cw 'expected.1.sha512' 'expected.N.sha512'
 ```
 
 </details>
--->
 
 <!-- Uncomment if used
 <details>
   <summary>Real world use cases</summary>
-
-```sh
-```
-
 </details>
 -->
-
-## Further readings
-
-- [Website]
-- [Github]
-
-### Sources
 
 <!--
   Reference
@@ -59,7 +43,4 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[github]: https://github.com/project/
-[website]: https://website/
-
 <!-- Others -->
