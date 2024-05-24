@@ -399,7 +399,7 @@ docker load …
 [containerd]: containerd.md
 [dive]: dive.placeholder
 [podman]: podman.md
-[testcontainers]: testcontainers.placeholder
+[testcontainers]: testcontainers.md
 
 <!-- Upstream -->
 [building multi-arch images for arm and x86 with docker desktop]: https://www.docker.com/blog/multi-arch-images/

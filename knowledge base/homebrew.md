@@ -187,6 +187,8 @@ See also [How to manually download brew package for installation?].
 
 - [manpage]
 - Homebrew [bundle]
+- [Mas]
+- [Whalebrew]
 
 ## Sources
 
@@ -195,9 +197,16 @@ See also [How to manually download brew package for installation?].
 - [How to manually download brew package for installation?]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
+<!-- In-article sections -->
+<!-- Knowledge base -->
+[mas]: mas.md
+[whalebrew]: whalebrew.md
+
+<!-- Files -->
 <!-- Upstream -->
 [bundle]: https://github.com/Homebrew/homebrew-bundle
 [manpage]: https://docs.brew.sh/Manpage
