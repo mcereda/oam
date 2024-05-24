@@ -235,7 +235,8 @@ sudo vim "$(docker volume inspect --format '{{.Mountpoint}}' 'gitea_config')/app
   8eaaae8c0c72   hello-world   "/hello"   21 seconds ago   Created           sleepy_brown
   ```
 
-- When referring to a container or image using their ID, you just need to use as many characters you need to uniquely specify a single one of them:
+- When referring to a container or image using their ID, you just need to use as many characters you need to uniquely
+  specify a single one of them:
 
   ```sh
   $ docker ps -a
@@ -252,8 +253,10 @@ sudo vim "$(docker volume inspect --format '{{.Mountpoint}}' 'gitea_config')/app
   8eaaae8c0c72   hello-world   "/hello"   45 seconds ago   Exited (0) 10 seconds ago           sleepy_brown
   ```
 
-- Docker's host networking feature is not supported on Mac, even though the `docker run` command doesn't complain about it.<br/>
-  This is due to the fact that the Docker daemon on Mac is running in a virtual machine, and not natively; hence, ports are exposed on the VM and not of the host running it.<br/>
+- Docker's host networking feature is not supported on Mac, even though the `docker run` command doesn't complain about
+  it.<br/>
+  This is due to the fact that the Docker daemon on Mac is running in a virtual machine, and not natively; hence, ports
+  are exposed on the VM and not of the host running it.<br/>
   One way around it is port forwarding to localhost (the `-p` or `-P` options).
 
 ## Daemon configuration
@@ -393,9 +396,9 @@ docker load …
   -->
 
 <!-- Knowledge base -->
-[containerd]: containerd.placeholder
+[containerd]: containerd.md
 [dive]: dive.placeholder
-[podman]: podman.placeholder
+[podman]: podman.md
 [testcontainers]: testcontainers.placeholder
 
 <!-- Upstream -->

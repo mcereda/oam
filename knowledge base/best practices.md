@@ -12,15 +12,22 @@ What really worked for me.
 ## Generic concepts
 
 - Always think critically and question all the things. Especially those that don't appear to make any sense.<br/>
-  Don't just follow trends or advice from others. They _might_ know better, but you will be the one dealing with the issues in the end.
+  Don't just follow trends or advice from others. They _might_ know better, but you will be the one dealing with the
+  issues in the end.
 - Try to understand how something really works, may it be a technology, a tool or what else.<br/>
-  Try at least once to do manually what an automation would do in your place. Look at the source code of tools. Read the _fabulous_ documentation.
+  Try at least once to do manually what an automation would do in your place. Look at the source code of tools. Read the
+  _fabulous_ documentation.
 - Stay curious. Experiment. Learn and break things (in a sane and safe way). Dive deeper into what interests you.
 - Make the **informed** decision that most satisfies your **current** necessities.<br/>
-  There is no _perfect_ nor _correct_ solution, just different sets of tradeoff. Besides, no one will ever have all the information at the start, as some of them only come with experience and looking back at decisions one has already made gives the distorted perspective that those decisions were clearer than they really were.
-- Review every decision after some time. Check they are still relevant, or if there is some improvement you can implement.<br/>
-  Things change constantly: new technologies are given birth often, and processes improve. Also, now you know better then before.
-- Keep things simple (KISS approach) **with respect of your ultimate goal** and not only for the sake of simplicity.<br/>
+  There is no _perfect_ nor _correct_ solution, just different sets of tradeoff. Besides, no one will ever have all the
+  information at the start, as some of them only come with experience and looking back at decisions one has already made
+  gives the distorted perspective that those decisions were clearer than they really were.
+- Review every decision after some time. Check they are still relevant, or if there is some improvement you can
+  implement.<br/>
+  Things change constantly: new technologies are given birth often, and processes improve. Also, now you know better
+  then before.
+- Keep things simple (KISS approach) **with respect of your ultimate goal** and not only for the sake of
+  simplicity.<br/>
   Always going for the simple solution makes things complicated on a higher level.<br/>
   Check out [KISS principle is not that simple].
 - Beware of complex things that _should be simple_.<br/>
@@ -31,23 +38,29 @@ What really worked for me.
   Check out the [5 whys] approach.
 - Put in place processes to avoid repeating mistakes.
 - Automate when and where you can, yet mind [the automation paradox].
-- Automation does **not** necessarily involve [abstracting away][we have used too many levels of abstractions and now the future looks bleak].
-- Keep different parts **de**coupled where possible, the same way [_interfaces_ are used in programming][what does it mean to program to interfaces?].<br/>
+- Automation does **not** necessarily involve
+  [abstracting away][we have used too many levels of abstractions and now the future looks bleak].
+- Keep different parts **de**coupled where possible, the same way
+  [_interfaces_ are used in programming][what does it mean to program to interfaces?].<br/>
   This allows for quick and (as much as possible) painless switch between technologies.
 - The _one-size-fits-all_ approach is a big fat lie.<br/>
-  You'll end up with stiff, hard to change results that satisfy nobody. This proved particularly true with regards to templates and pipelines.
+  You'll end up with stiff, hard to change results that satisfy nobody. This proved particularly true with regards to
+  templates and pipelines.
 - Choose tools based on **how helpful** they are to achieve your goals.<br/>
   Do **not** adapt your work to specific tools.
 - Backup your data, especially when you are about to update something.<br/>
   [Murphy's law] is lurking. Consider [the 3-2-1 backup strategy].
 - [Branch early, branch often].
+- [Keep a changelog].
 - [Keep changes short and sweet][the art of small pull requests].<br/>
-  Nobody likes to dive deep into a 1200 lines, 356 files pull request ([PR fatigue][how to tackle pull request fatigue], everybody?).
+  Nobody likes to dive deep into a 1200 lines, 356 files pull request ([PR fatigue][how to tackle pull request fatigue],
+  everybody?).
 - Consider keeping changes in _behaviour_ (logic) separated from changes to the structure.<br/>
   It allows for easier debugging by letting you deal with one great issue at a time.
 - Make changes easy, avoid making easy changes.<br/>
   Easy changes will build up long term and become a pain to deal with.
-- [Trunk-based development][trunk-based development: a comprehensive guide] and other branching strategies all work.<br/>
+- [Trunk-based development][trunk-based development: a comprehensive guide] and other branching strategies all
+  work.<br/>
   Consider the [different pros and cons of each][git branching strategies vs. trunk-based development].
 - Refactoring _can_ be an option.<br/>
   Just **don't default** to it nor use it mindlessly.
@@ -68,7 +81,8 @@ What really worked for me.
   Then try to make them better.
 - Don't just dismiss your teammates' customs.<br/>
   E.g., use [EditorConfig] instead of your editor's specific setting files only.
-- You, your teammates and other teams in your company _should be_ on the same boat and _should be_ shooting for the same goal.<br/>
+- You, your teammates and other teams in your company _should be_ on the same boat and _should be_ shooting for the same
+  goal.<br/>
   Act like it. You may as well collaborate instead of fighting.
 
 ## CI/CD specific
@@ -80,7 +94,8 @@ What really worked for me.
 ### Pipelining
 
 - Differentiate what the concept of pipelines really is from the idea of pipelines in approaches like DevOps.<br/>
-  Pipelines are sequences of actions. Pipelines in DevOps and alike end up being magic tools to take actions away from people.
+  Pipelines are sequences of actions. Pipelines in DevOps and alike end up being magic tools to take actions away from
+  people.
 - Keep in mind [the automation paradox].<br/>
   Pipelines tend to easily become complex systems just like Rube Goldberg machines.
 - Keep tasks as simple, consistent and reproducible as possible.<br/>
@@ -90,7 +105,8 @@ What really worked for me.
 - Consider using local automation to guarantee basic quality **before** the code reaches the shared repository.<br/>
   Tools like [`pre-commit`][pre-commit] or [`lefthook`][lefthook] are a doozy for this.
 - DevOps pipelines are meant to be used as **last mile** steps for specific goals.<br/>
-  There **cannot** be a single pipeline for everything, the same way as the _one-size-fits-all_ concept never really works.
+  There **cannot** be a single pipeline for everything, the same way as the _one-size-fits-all_ concept never really
+  works.
 
 ## Product engineering
 
@@ -101,9 +117,11 @@ Consider what follows for infrastructure and platform engineering as well.
 - Focus on small audiences first. Avoid trying appealing lots of users from the beginning.<br/>
   If you do not have a user base, the product has no reason to exist but your will to create it.
 - Consider and fix users' pain points **before** adding new features.<br/>
-  If users are not happy with your tool they'll try moving away from it, bringing the discussion back to the previous point in this list.
+  If users are not happy with your tool they'll try moving away from it, bringing the discussion back to the previous
+  point in this list.
 - Avoid creating mindless abstractions, like templates using variables for all their attributes.<br/>
-  Prefer providing one or at most a few simplified solutions that use different [adapters or interfaces][what does it mean to program to interfaces?] in the background instead.<br/>
+  Prefer providing one or at most a few simplified solutions that use different
+  [adapters or interfaces][what does it mean to program to interfaces?] in the background instead.<br/>
   E.g., check out how [Crossplane] works.
 
 ## Sources
@@ -143,6 +161,7 @@ Listed in order of addition:
 <!-- Knowledge base -->
 [crossplane]: https://www.crossplane.io/
 [editorconfig]: editorconfig.md
+[keep a changelog]: keep%20a%20changelog.md
 [lefthook]: lefthook.md
 [pre-commit]: pre-commit.md
 [safe]: safe.placeholder

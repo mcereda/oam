@@ -6,5 +6,5 @@ Hyperconverged infrastructure (HCI) solution by SUSE built for bare metal server
 
 [kubernetes]: kubernetes/README.md
 [kubevirt]: kubernetes/kubevirt.placeholder
-[kvm]: kvm.placeholder
+[kvm]: kvm.md
 [longhorn]: kubernetes/longhorn.placeholder

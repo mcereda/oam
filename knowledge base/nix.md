@@ -4,7 +4,7 @@
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -95,22 +95,18 @@ rm -rf '/nix'
 - [Website]
 - [NixOS]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Manual]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[nixos]: nixos.md
 
 <!-- Upstream -->
 [manual]: https://nix.dev/manual/nix/2.19/
 [website]: https://nix.dev
-
-<!-- In-article sections -->
-[further readings]: #further-readings
-
-<!-- Knowledge base -->
-[nixos]: nixos.placeholder
