@@ -78,6 +78,7 @@
 | RPM     | RPM Package Manager                                    | Package management system used by Linux distributions like Red Hat, (open)SuSE and Fedora           |
 | SAFE    | Scaled Agile FramEwork                                 |                                                                                                     |
 | SBOM    | Software Bill Of Materials                             | See [SBOM at a Glance]                                                                              |
+| SIEM    | [Security Information and Event Management)][siem]     |                                                                                                     |
 | SOPS    | Secrets OPerationS                                     |                                                                                                     |
 | SPIFFE  | Secure Production Identity Framework for Everyone      |                                                                                                     |
 | SQL     | Structured Query Language                              |                                                                                                     |
@@ -131,6 +132,7 @@
 [fish]: fish.md
 [iac]: iac.md
 [kubernetes]: kubernetes/README.md
+[siem]: siem.md
 [ssh]: ssh.md
 [sssd]: sssd.md
 [terraform enterprise]: terraform%20enterprise.md
