@@ -1,0 +1,6 @@
+/* Use this file to optionally override global css styles and use with caution. */
+/* See README.md for hints and examples: https://github.com/AOEpeople/aoe_technology_radar/ */
+
+[class^="Layout_content"] span {
+  font-size: small;
+}
