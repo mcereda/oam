@@ -60,6 +60,7 @@ Blips can (and in time, should) move between rings as one's recommendation chang
 ## Further readings
 
 - [Zalando's tech-radar tool]
+- [AOE's technology radar]
 
 ### Sources
 
@@ -75,5 +76,6 @@ Blips can (and in time, should) move between rings as one's recommendation chang
 <!-- Files -->
 <!-- Upstream -->
 <!-- Others -->
+[aoe's technology radar]: https://github.com/AOEpeople/aoe_technology_radar
 [thoughtworks' technology radar]: https://www.thoughtworks.com/radar
 [zalando's tech-radar tool]: https://github.com/zalando/tech-radar
