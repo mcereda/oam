@@ -1,0 +1,41 @@
+{
+    "date": "2024.04.25",
+    "entries": [
+        {
+            "quadrant": 2,
+            "ring": 0,
+            "label": "node.js",
+            "active": true,
+            "moved": 0
+        },
+        {
+            "quadrant": 3,
+            "ring": 0,
+            "label": "pulumi",
+            "link": "https://www.pulumi.com/",
+            "active": true,
+            "moved": 0
+        },
+        {
+            "quadrant": 2,
+            "ring": 1,
+            "label": "python",
+            "active": true,
+            "moved": 0
+        },
+        {
+            "quadrant": 2,
+            "ring": 2,
+            "label": "golang",
+            "active": true,
+            "moved": -1
+        },
+        {
+            "quadrant": 1,
+            "ring": 3,
+            "label": "gitea",
+            "active": false,
+            "moved": 1
+        }
+    ]
+}

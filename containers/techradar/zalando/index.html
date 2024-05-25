@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <meta name="description"
+    content="Tech Radar: a tool to visualize technology choices, inspire and support Engineering teams at Apollo Agriculture to pick the best technologies for new projects">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tech Radar</title>
+  <link rel="shortcut icon"
+    href="view-source:https://images.squarespace-cdn.com/content/v1/6414395791ffc20447907be9/94d4e41d-9d48-4068-89a1-52f0a7e36890/favicon.ico?format=100w">
+
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="radar.js"></script>
+
+  <link rel="stylesheet" href="radar.css">
+</head>
+
+<body>
+
+  <svg id="radar"></svg>
+
+  <script>
+    fetch('./radar.json').then(function (response) {
+      return response.json();
+    }).then(function (data) {
+      radar_visualization({
+        svg_id: "radar",
+        width: 1450,
+        height: 950,
+        colors: {
+          background: "#fff",
+          grid: '#dddde0',
+          inactive: "#ddd"
+        },
+        title: "Tech Radar",
+        date: data.date,
+        quadrants: [
+          { name: "Data Management" }, // BR, #0
+          { name: "Datastores" },      // BL, #1
+          { name: "Languages" },       // TR, #2
+          { name: "Infrastructure" },  // TL, #3
+        ],
+        rings: [
+          { name: "ADOPT", color: "#5ba300" },
+          { name: "TRIAL", color: "#009eb0" },
+          { name: "ASSESS", color: "#c7ba00" },
+          { name: "HOLD", color: "#e09b96" }
+        ],
+        print_layout: true,
+        links_in_new_tabs: true,
+        // zoomed_quadrant: 0,
+        entries: data.entries
+      });
+    }).catch(function (err) {
+      console.log('Error loading config.json', err);
+    });
+  </script>
+
+</body>
+
+</html>
