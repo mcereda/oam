@@ -14,7 +14,7 @@ the form of [vCard]s.
 Implementations:
 
 - [Radicale](https://radicale.org/)
-- [Baikal](https://github.com/sabre-io/Baikal)
+- [Baikal]
 
 <!--
   Reference
@@ -23,6 +23,7 @@ Implementations:
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[baikal]: baikal.md
 [caldav]: caldav.md
 [vcard]: vcard.md
 [webdav]: webdav.md

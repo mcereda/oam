@@ -2,9 +2,9 @@
 
 | Acronym | Expansion                                              | Description                                                                                         |
 | ------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| ACME    | [Automatic Certificate Management Environment]         | Protocol to automate the issuance and renewal of certificates without human interaction             |
 | ACK     | ACKnowledgement                                        |                                                                                                     |
 | ACL     | [Access Control List][acl]                             |                                                                                                     |
+| ACME    | [Automatic Certificate Management Environment]         | Protocol to automate the issuance and renewal of certificates without human interaction             |
 | AD      | Active Directory                                       |                                                                                                     |
 | ADR     | [Architectural Decision Record][adr]                   |                                                                                                     |
 | APK     | Alpine Package Keeper                                  | Package manager used by Alpine Linux                                                                |
@@ -76,6 +76,7 @@
 | ROM     | Read-Only Memory                                       |                                                                                                     |
 | RPM     | Revolutions Per Minute                                 |                                                                                                     |
 | RPM     | RPM Package Manager                                    | Package management system used by Linux distributions like Red Hat, (open)SuSE and Fedora           |
+| SaaSS   | [Service as a Software Substitute]                     | Using a service as a substitute for running a copy of a program.                                    |
 | SAFE    | Scaled Agile FramEwork                                 |                                                                                                     |
 | SBOM    | Software Bill Of Materials                             | See [SBOM at a Glance]                                                                              |
 | SIEM    | [Security Information and Event Management)][siem]     |                                                                                                     |
@@ -148,4 +149,5 @@
 [continuous delivery]: https://en.wikipedia.org/wiki/Continuous_delivery
 [kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
 [sbom at a glance]: https://www.ntia.gov/sites/default/files/publications/sbom_at_a_glance_apr2021_0.pdf
+[service as a software substitute]: https://www.gnu.org/philosophy/who-does-that-server-really-serve.html
 [what is openid connect]: https://openid.net/developers/how-connect-works/

@@ -1,9 +1,4 @@
-# Title
-
-Intro
-
-<!-- Remove this line to uncomment if used
-## Table of contents <!-- omit in toc -->
+# Baikal
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -35,6 +30,7 @@ docker run --rm -p '80:80' 'ckulka/baikal:nginx'
 
 - [Website]
 - [Github]
+- [Self-hosting]
 
 ### Sources
 
@@ -47,6 +43,8 @@ docker run --rm -p '80:80' 'ckulka/baikal:nginx'
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[self-hosting]: self-hosting.md
+
 <!-- Files -->
 <!-- Upstream -->
 [github]: https://github.com/sabre-io/Baikal
