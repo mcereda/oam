@@ -3,13 +3,53 @@
 Open source security platform.<br/>
 Provides unified XDR and SIEM protection for endpoints and cloud workloads.
 
+1. [TL;DR](#tldr)
 1. [Components](#components)
    1. [Indexer](#indexer)
    1. [Server](#server)
    1. [Dashboard](#dashboard)
    1. [Agent](#agent)
+1. [Requirements](#requirements)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
+
+## TL;DR
+
+<details>
+  <summary>Installation</summary>
+
+Refer the [installation guide](https://documentation.wazuh.com/current/installation-guide/index.html) and
+[installation alternatives](https://documentation.wazuh.com/current/deployment-options/index.html) pages.
+
+  <details style="margin: 1em 0 0 1em">
+    <summary>Installation assistant</summary>
+
+```sh
+# Start the assistant.
+curl -sO 'https://packages.wazuh.com/4.7/wazuh-install.sh' && sudo bash 'wazuh-install.sh' -a
+
+# Print out passwords for the indexer and all API users.
+sudo tar -O -xvf 'wazuh-install-files.tar' 'wazuh-install-files/wazuh-passwords.txt'
+
+# Uninstall.
+sudo bash 'wazuh-install.sh' -u
+sudo bash 'wazuh-install.sh' --uninstall
+```
+
+  </details>
+  <details style="margin: 1em 0 0 1em">
+    <summary>Docker compose</summary>
+
+```sh
+git clone 'https://github.com/wazuh/wazuh-docker'
+cd 'wazuh-docker/single-node'
+[[ uname -s == Linux ]] && sysctl -w vm.max_map_count=262144
+docker-compose -f 'generate-indexer-certs.yml' run --rm 'generator'
+docker-compose up -d
+```
+
+  </details>
+</details>
 
 ## Components
 
@@ -45,15 +85,58 @@ One can interact with the indexer cluster using its REST API.
 
 ### Server
 
-TODO
+Runs the analysis engine, the RESTful API, the agent enrollment and connection services, the cluster daemon, and
+Filebeat.
+
+Analyzes data received from the agents, triggers alerts when threats or anomalies are detected, and manages and monitors
+the agents' configuration and state remotely.
+
+![server architecture](server%20architecture.png)
+
+| Component                | Description                                                                                                                                                                                                                                                                                              |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Agent enrollment service | Used to enroll new agents.<br/>Provides and distributes unique authentication keys to each agent.                                                                                                                                                                                                        |
+| Agent connection service | Receives data from the agents.<br/>Uses the keys shared by the enrollment service to validate each agent's identity and encrypt the communications between the agents and the server.<br/>Provides centralized configuration management.                                                                 |
+| Analysis engine          | Performs the data analysis by using decoders to identify the type of information being processed and extracting relevant data elements from the log messages. Then, by using rules, identifies patterns in the decoded events that could trigger alerts and possibly call for automated countermeasures. |
+| RESTful API              | Provides an interface to interact with the Wazuh infrastructure.<br/>Manages configuration settings of agents and servers, monitors the infrastructure status and overall health, manages and edits decoders and rules, and queries monitored endpoints. Also used by the dashboard.                     |
+| Cluster daemon           | Scales servers horizontally by deploying them as a cluster to provide high availability and load balancing. Used by servers to communicate with each other and keep synchronized.                                                                                                                        |
+| Filebeat                 | Sends events and alerts to the indexer, reads the output of the analysis engine and ships events in real time, and provides load balancing when connected to a multi-node indexer cluster.                                                                                                               |
 
 ### Dashboard
 
-TODO
+User interface for mining, analyzing, and visualizing security events and alerts data.<br/>
+Used for the management and monitoring of the platform.<br/>
+Provides features for role-based access control (RBAC) and single sign-on (SSO).
+
+Wazuh provides out-of-the-box dashboards for regulatory compliance (e.g.: PCI DSS, GDPR, HIPAA, and NIST 800-53).<br/>
+It also provides an interface to navigate through the MITRE ATT&CK framework and related alerts.<br/>
+Includes a _Ruleset Test_ tool that can process log messages to check how it is decoded and if it matches a threat
+detection rule or not, and an API Console for users to interact with the API.
 
 ### Agent
 
-TODO
+Collects system and application data and forwards it to the server through an encrypted and authenticated channel.
+
+Has a modular architecture where each component is in charge of its own tasks (monitoring the file system, reading log
+messages, collecting inventory data, scanning the system configuration, looking for malware).
+
+| Module                                  | Description                                                                                                                                                                                                                                                                                                                                         |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Log collector                           | Reads log files and system events, collects operating system and application log messages.                                                                                                                                                                                                                                                          |
+| Command execution                       | Allows running authorized commands periodically to collect their output and report it back to the server for analysis.                                                                                                                                                                                                                              |
+| File integrity monitoring (FIM)         | Monitors the file system to report when files are created, deleted or modified.<br/>Keeps track of changes in file attributes, permissions, ownership, and content. Captures who, what, and when details in real time when events occur. Builds and maintains a database with the state of the monitored files to allow queries to be run remotely. |
+| Security configuration assessment (SCA) | Provides continuous configuration assessment.                                                                                                                                                                                                                                                                                                       |
+| System inventory                        | Periodically runs scans and collects inventory data.<br/>Scan results are stored in local SQLite databases that can be queried remotely.                                                                                                                                                                                                            |
+| Malware detection                       | Detects anomalies and the possible presence of rootkits.<br/>Looks for hidden processes, hidden files, and hidden ports while monitoring system calls.                                                                                                                                                                                              |
+| Active response                         | Runs automatic actions when threats are detected.                                                                                                                                                                                                                                                                                                   |
+| Container security monitoring           | Integrates with the Docker Engine API to monitor changes in containerized environments.<br/>Alerts about containers running in privileged mode and about users executing commands in a running container.                                                                                                                                           |
+| Cloud security monitoring               | Monitors cloud providers by communicating with their APIs. Detects changes to the cloud infrastructure and collecting cloud services log data.                                                                                                                                                                                                      |
+
+## Requirements
+
+Refer <https://documentation.wazuh.com/current/quickstart.html#requirements>.
+
+[Open ports](https://documentation.wazuh.com/current/getting-started/architecture.html#required-ports).
 
 ## Further readings
 
@@ -63,6 +146,7 @@ TODO
 ### Sources
 
 - [Documentation]
+- [Docker installation repository]
 
 <!--
   Reference
@@ -75,6 +159,7 @@ TODO
 <!-- Upstream -->
 [documentation]: https://documentation.wazuh.com/current/
 [github]: https://github.com/wazuh/wazuh
+[docker installation repository]: https://github.com/wazuh/wazuh-docker
 [website]: https://wazuh.com/
 
 <!-- Others -->
