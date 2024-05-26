@@ -135,6 +135,7 @@
         "fargate",
         "fastboot",
         "fdupes",
+        "filebeat",
         "fileglob",
         "firewalld",
         "flatpak",
