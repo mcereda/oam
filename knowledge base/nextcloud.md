@@ -90,6 +90,7 @@ To configure Nextcloud from `snap`:
 ## Further readings
 
 - [Website]
+- [Self-hosting]
 - The docker version's [README][docker readme]
 - The snap version's [README][snap readme]
 - [How to install and configure Nextcloud on Ubuntu 18.04]
@@ -108,6 +109,9 @@ Providers:
   Reference
   ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[self-hosting]: self-hosting.md
 
 <!-- Upstream -->
 [how to check if redis is used in nc]: https://help.nextcloud.com/t/how-to-check-if-redis-is-used-in-nc/22268/2

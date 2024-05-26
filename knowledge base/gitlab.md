@@ -660,6 +660,7 @@ Solution: set the correct ownership with
 
 ## Further readings
 
+- [Self-hosting]
 - Gitlab's helm [chart]
 - Gitlab's helm [chart]'s [global settings]
 - [Command-line options]
@@ -714,6 +715,7 @@ Solution: set the correct ownership with
 <!-- Knowledge base -->
 [buildah]: buildah.md
 [kaniko]: kubernetes/kaniko.placeholder
+[self-hosting]: self-hosting.md
 
 <!-- Files -->
 <!-- Upstream -->

@@ -102,6 +102,7 @@ When using Docker, make sure this port is published.
 
 ## Further readings
 
+- [Self-hosting]
 - [Website]
 - [Compose file]
 - [Git]
@@ -120,8 +121,8 @@ Alternatives:
   ═╬═Time══
   -->
 
-<!-- In-article sections -->
 <!-- Knowledge base -->
+[self-hosting]: self-hosting.md
 [git]: git.md
 [gitlab]: gitlab.md
 
@@ -132,5 +133,3 @@ Alternatives:
 [configuration cheat sheet]: https://docs.gitea.com/administration/config-cheat-sheet
 [https setup to encrypt connections to gitea]: https://docs.gitea.com/administration/https-setup
 [website]: https://about.gitea.com/
-
-<!-- Others -->
