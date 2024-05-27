@@ -25,6 +25,11 @@ brew install 'awscli'
 aws configure
 aws configure --profile 'work'
 
+# Setup credentials in environment variables.
+export \
+  AWS_ACCESS_KEY_ID='AKIA2…A0TC' \
+  AWS_SECRET_ACCESS_KEY='Lgb4…kko4'
+
 # Use specific profiles for the rest of the shell session.
 export AWS_PROFILE='work'
 
@@ -148,6 +153,9 @@ Subcommands not listed here are in their own service-specific article:
   <summary>Real world use cases</summary>
 
 ```sh
+# Check the credentials are fine.
+aws sts get-caller-identity
+
 # Get roles' ARN from their name.
 aws iam list-roles --query "Roles[?RoleName == 'EKSRole'].[RoleName, Arn]"
 
