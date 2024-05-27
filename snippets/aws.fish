@@ -1,5 +1,8 @@
 #!fish
 
+# Check the credentials are fine
+aws sts get-caller-identity
+
 alias aws-caller-info 'aws sts get-caller-identity'
 alias aws-ssm 'aws ssm start-session --target'
 

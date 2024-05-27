@@ -9,7 +9,15 @@ Provides unified XDR and SIEM protection for endpoints and cloud workloads.
    1. [Server](#server)
    1. [Dashboard](#dashboard)
    1. [Agent](#agent)
-1. [Requirements](#requirements)
+1. [Installation](#installation)
+   1. [Requirements](#requirements)
+   1. [Procedure](#procedure)
+1. [Configuration](#configuration)
+   1. [Local configuration](#local-configuration)
+   1. [Shared configuration](#shared-configuration)
+1. [AWS integration](#aws-integration)
+   1. [Instances](#instances)
+   1. [Services](#services)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -17,35 +25,52 @@ Provides unified XDR and SIEM protection for endpoints and cloud workloads.
 
 <details>
   <summary>Installation</summary>
-
-Refer the [installation guide](https://documentation.wazuh.com/current/installation-guide/index.html) and
-[installation alternatives](https://documentation.wazuh.com/current/deployment-options/index.html) pages.
-
-  <details style="margin: 1em 0 0 1em">
-    <summary>Installation assistant</summary>
-
-```sh
-# Start the assistant.
-curl -sO 'https://packages.wazuh.com/4.7/wazuh-install.sh' && sudo bash 'wazuh-install.sh' -a
-
-# Print out passwords for the indexer and all API users.
-sudo tar -O -xvf 'wazuh-install-files.tar' 'wazuh-install-files/wazuh-passwords.txt'
-
-# Uninstall.
-sudo bash 'wazuh-install.sh' -u
-sudo bash 'wazuh-install.sh' --uninstall
-```
-
-  </details>
-  <details style="margin: 1em 0 0 1em">
+  <details style="margin-left: 1em">
     <summary>Docker compose</summary>
 
 ```sh
-git clone 'https://github.com/wazuh/wazuh-docker'
+git clone 'https://github.com/wazuh/wazuh-docker.git' -b 'v4.7.4'
 cd 'wazuh-docker/single-node'
-[[ uname -s == Linux ]] && sysctl -w vm.max_map_count=262144
+[[ $(uname -s) == 'Linux' ]] && sudo sysctl -w vm.max_map_count=262144
 docker-compose -f 'generate-indexer-certs.yml' run --rm 'generator'
 docker-compose up -d
+```
+
+  </details>
+
+```sh
+open 'https://localhost'
+xdg-open 'https://localhost'
+```
+
+</details>
+
+<details>
+  <summary>Configuration</summary>
+
+| FIle         | Paths                                                                                     | Description                                                                                                                                                                                 |
+| ------------ | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ossec.conf` | `/var/ossec/etc/`<br/>`C:\Program Files (x86)\ossec-agent\`                               | Local configuration.<br/>Main configuration file for the manager.                                                                                                                           |
+| `agent.conf` | `/var/ossec/etc/shared/default/`<br/>`C:\Program Files (x86)\ossec-agent\shared\default\` | Shared configuration.<br/>Main configuration file for the agents.<br/>Validated by `/var/ossec/bin/verify-agent-conf`.<br/>Overrides settings from `ossec.conf` unless specified otherwise. |
+
+  <details style="margin-left: 1em">
+    <summary>Docker compose</summary>
+
+| File                                      | Description                  |
+| ----------------------------------------- | ---------------------------- |
+| `config/wazuh_cluster/wazuh_manager.conf` | Manager's configuration file |
+| `config/wazuh_indexer_ssl_certs/`         | Certificates                 |
+
+  </details>
+</details>
+<details>
+  <summary>Usage</summary>
+  <details style="margin-left: 1em">
+    <summary>Docker compose</summary>
+
+```sh
+# Run commands in the components.
+docker compose exec -it 'wazuh.manager' env
 ```
 
   </details>
@@ -132,11 +157,168 @@ messages, collecting inventory data, scanning the system configuration, looking 
 | Container security monitoring           | Integrates with the Docker Engine API to monitor changes in containerized environments.<br/>Alerts about containers running in privileged mode and about users executing commands in a running container.                                                                                                                                           |
 | Cloud security monitoring               | Monitors cloud providers by communicating with their APIs. Detects changes to the cloud infrastructure and collecting cloud services log data.                                                                                                                                                                                                      |
 
-## Requirements
+## Installation
+
+### Requirements
 
 Refer <https://documentation.wazuh.com/current/quickstart.html#requirements>.
 
 [Open ports](https://documentation.wazuh.com/current/getting-started/architecture.html#required-ports).
+
+### Procedure
+
+Refer the [installation guide](https://documentation.wazuh.com/current/installation-guide/index.html) and
+[installation alternatives](https://documentation.wazuh.com/current/deployment-options/index.html) pages.
+
+<details style="margin-bottom: 1em">
+  <summary>Docker compose</summary>
+
+1. Clone the repository containing the compose files.<br/>
+   Make sure to specify the branch:
+
+   ```sh
+   git clone 'https://github.com/wazuh/wazuh-docker.git' -b 'v4.7.4'
+   ```
+
+1. Enter the directory corresponding to the setup one wants:
+
+   ```sh
+   cd 'wazuh-docker/single-node'
+   cd 'wazuh-docker/multi-node'
+   ```
+
+1. \[On Linux hosts]
+
+   ```sh
+   sudo sysctl -w vm.max_map_count=262144
+   ```
+
+1. Generate the self-signed certificates:
+
+   ```sh
+   docker-compose -f 'generate-indexer-certs.yml' run --rm 'generator'
+   ```
+
+   Or put one's own in the `config/wazuh_indexer_ssl_certs` directory:
+
+   ```sh
+   $ ls 'config/wazuh_indexer_ssl_certs'
+   admin-key.pem            root-ca-manager.pem      wazuh.dashboard-key.pem      wazuh.indexer.pem
+   admin.pem                root-ca.key              wazuh.dashboard.pem          wazuh.manager-key.pem
+   root-ca-manager.key      root-ca.pem              wazuh.indexer-key.pem        wazuh.manager.pem
+   ```
+
+1. Run the composition:
+
+   ```sh
+   docker-compose up -d
+   ```
+
+   > Expect several `Failed to connect to Wazuh indexer port 9200` log messages and the _Wazuh dashboard server is not
+   > ready yet_ message in the web UI until the Wazuh indexer finishes starting up.<br/>
+   > It takes about 1 minute for the indexer to start up, then the dashboard setup process continues normally.<br/>
+   > This is due to the dashboard container using `curl` to ping the indexer's API to know when it is up.
+
+</details>
+
+Once the service started, open <https://localhost>.<br/>
+The default credentials are `admin`:`SecretPassword`.
+
+## Configuration
+
+### Local configuration
+
+Refer <https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/index.html>.
+
+The `ossec.conf` file is the main configuration file for the manager, and is used by the agents for defaults.<br/>
+Errors in this file **will** prevent the manager from starting.
+
+The file is in XML format. The outermost XML tag is `<ossec_config>`.<br/>
+There can be more than one `<ossec_config>` tag. Repeating sections may override previously defined ones.
+
+```xml
+<ossec_config>
+  <alerts>…</alerts>
+  <wodle name="aws-s3">…</wodle>
+</ossec_config>
+```
+
+### Shared configuration
+
+Refer <https://documentation.wazuh.com/current/user-manual/reference/centralized-configuration.html>.
+
+The `agent.conf` file is very similar to `ossec.conf` but is used to distribute configuration information to agents.
+
+```xml
+<agent_config>
+  …
+</agent_config>
+```
+
+When `agent.conf` is used, it is merged onto `ossec.conf`. Its settings will override or be added to the ones in the
+local configuration.
+
+Several configurations may be created based on the `name`, `OS` or `profile` of agents:
+
+```xml
+<agent_config name="agent_name">
+    <localfile>
+        <location>/var/log/my.log</location>
+        <log_format>syslog</log_format>
+    </localfile>
+</agent_config>
+
+<agent_config os="Linux">
+    <localfile>
+        <location>/var/log/linux.log</location>
+        <log_format>syslog</log_format>
+    </localfile>
+</agent_config>
+
+<agent_config profile="database">
+    <localfile>
+        <location>/var/log/database.log</location>
+        <log_format>syslog</log_format>
+    </localfile>
+</agent_config>
+```
+
+## AWS integration
+
+Refer <https://documentation.wazuh.com/current/cloud-security/amazon/index.html> and
+<https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/wodle-s3.html>.
+
+### Instances
+
+Install the agent on hosts that need to be monitored.
+
+### Services
+
+Service monitoring requires one S3 bucket to save the data flow generated by Wazuh, and then redirect this to the rest
+of the services from AWS.
+
+The AWS module requires credentials to be able to pull log data from services.<br/>
+`wazuh-modulesd` is executed by the `root` user, so the credentials file must be placed at `/root/.aws/credentials` if
+used. Environment variables work as effectively.
+
+Setup the module in the manager's configuration file.<br/>
+Requires one `bucket` attribute.<br/>
+Can be added in a separate `<ossec_config>` section.
+
+```xml
+…
+<ossec_config>
+  <wodle name="aws-s3">
+    <bucket type="cloudtrail">
+      <name>wazuh-bucket</name>
+      <path>cloudtrail<path>
+    </bucket>
+    <bucket type="wpcflow">
+      <name>wazuh-bucket-vpc</name>
+    </bucket>
+  </wodle>
+</ossec_config>
+```
 
 ## Further readings
 
