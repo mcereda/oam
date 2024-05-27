@@ -9,6 +9,11 @@ Protocol allowing for automation of issuance and renewal of certificates.
 
 - [Let's Encrypt]
 
+Providers:
+
+- [Nginx Proxy Manager]
+- [Traefik]
+
 ### Sources
 
 - [What is ACME protocol and how does it work?]
@@ -21,6 +26,8 @@ Protocol allowing for automation of issuance and renewal of certificates.
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [let's encrypt]: letsencrypt.md
+[nginx proxy manager]: nginx%20proxy%20manager.md
+[traefik]: traefik.md
 
 <!-- Files -->
 <!-- Upstream -->
