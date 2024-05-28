@@ -1,5 +1,9 @@
 # DNF
 
+A.K.A. _Dandified YUM_.
+
+Rewrite of [YUM] using [`libsolv`][libsolv].
+
 1. [TL;DR](#tldr)
 1. [Lock packages versions](#lock-packages-versions)
 1. [Further readings](#further-readings)
@@ -166,10 +170,13 @@ Not to mention,
 - [How to lock kernel (or another package) on Fedora]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
-<!-- In-article sections -->
+<!-- Knowledge base -->
+[yum]: yum.md
+
 <!-- Upstream -->
 [dnf command reference]: https://dnf.readthedocs.io/en/latest/command_ref.html
 [dnf configuration reference]: https://dnf.readthedocs.io/en/latest/conf_ref.html
@@ -180,4 +187,5 @@ Not to mention,
 [how to install only security and bugfixes updates with dnf]: https://fedoramagazine.org/how-to-install-only-security-and-bugfixes-updates-with-dnf/
 [how to lock kernel (or another package) on fedora]: https://robbinespu.gitlab.io/posts/locking-package-fedora/
 [how to use yum/dnf to downgrade or rollback some package updates?]: https://access.redhat.com/solutions/29617
+[libsolv]: https://github.com/openSUSE/libsolv
 [man page]: https://man7.org/linux/man-pages/man8/dnf.8.html
