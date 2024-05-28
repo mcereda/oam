@@ -7,6 +7,7 @@
    1. [Loops](#loops)
 1. [Roles](#roles)
    1. [Get roles](#get-roles)
+   1. [Assign roles](#assign-roles)
    1. [Role dependencies](#role-dependencies)
 1. [Output formatting](#output-formatting)
 1. [Create custom filter plugins](#create-custom-filter-plugins)
@@ -268,6 +269,23 @@ ansible-galaxy install --roles-path 'path/to/roles' 'namespace.role'
 ansible-galaxy install 'namespace.role,v1.0.0'
 ansible-galaxy install 'git+https://github.com/namespace/role.git,commit-hash'
 ansible-galaxy install -r 'requirements.yml'
+```
+
+### Assign roles
+
+In playbooks:
+
+```yaml
+---
+- hosts: all
+  roles:
+    - web_server
+    - geerlingguy.postgresql
+    - role: /custom/path/to/role
+      vars:
+        var1: value1
+      tags: example
+      message: some message
 ```
 
 ### Role dependencies
@@ -652,11 +670,13 @@ See [Integrate with AWS SSM].
 - [Merging two dictionaries by key in Ansible]
 - [Creating your own Ansible filter plugins]
 - [Why Ansible and Python fork break on macOS High Sierra+ and how to solve]
-- [Ansible: Set variable to file content]
+- [Ansible: set variable to file content]
 - [How can I hide skipped tasks output in Ansible]
+- [Ansible roles: basics, creating & using]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
@@ -681,6 +701,7 @@ See [Integrate with AWS SSM].
 [slurp]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/slurp_module.html
 
 <!-- Others -->
+[ansible roles: basics, creating & using]: https://spacelift.io/blog/ansible-roles
 [ansible: set variable to file content]: https://stackoverflow.com/questions/24003880/ansible-set-variable-to-file-content
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
 [creating your own ansible filter plugins]: https://www.dasblinkenlichten.com/creating-ansible-filter-plugins/

@@ -2,6 +2,8 @@
 
 1. [TL;DR](#tldr)
 1. [Pull through cache feature](#pull-through-cache-feature)
+1. [Troubleshooting](#troubleshooting)
+   1. [Docker pull errors with `no basic auth credentials`](#docker-pull-errors-with-no-basic-auth-credentials)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -70,6 +72,18 @@ aws ecr describe-repositories --repository-names 'docker-tools/image-builder' \
 > **Note:** when requesting an image for the first time using the pull through cache, the ECR creates a new repository for that image.<br>
 > This might™ introduce a small latency and be cause of pull failures. Pulling that (not-yet)cached image from an interactive shell session worked flawlessly.
 
+## Troubleshooting
+
+### Docker pull errors with `no basic auth credentials`
+
+Refer <https://github.com/awslabs/amazon-ecr-credential-helper/issues/207>.
+
+Context: trying to pull an image on an EC2 instance that is using the amazon-ecr-credential-helper to login.
+
+1. Check the user's `~/.ecr/log/ecr-login.log` file to get detailed information.
+1. Check the user's `~/.docker/config.json` file has a correct PAT.
+1. Check the instance's role has permissions to pull images.
+
 ## Further readings
 
 - [Amazon Web Services]
@@ -82,10 +96,10 @@ aws ecr describe-repositories --repository-names 'docker-tools/image-builder' \
 - [CLI subcommand reference]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
-<!-- In-article sections -->
 <!-- Knowledge base -->
 [amazon web services]: README.md
 [cli]: cli.md
@@ -95,5 +109,3 @@ aws ecr describe-repositories --repository-names 'docker-tools/image-builder' \
 [cli subcommand reference]: https://docs.aws.amazon.com/cli/latest/reference/ecr/
 [creating a lifecycle policy preview]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/lpp_creation.html
 [using pull through cache rules]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache.html
-
-<!-- Others -->
