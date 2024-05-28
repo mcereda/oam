@@ -1,7 +1,5 @@
 # Systemd
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [User services](#user-services)
    1. [Failed to connect to bus: No medium found](#failed-to-connect-to-bus-no-medium-found)
@@ -10,7 +8,8 @@
    1. [Disable systemd-resolved](#disable-systemd-resolved)
    1. [Ignore the DNS servers list given by the DHCP server](#ignore-the-dns-servers-list-given-by-the-dhcp-server)
    1. [Manually set DNS servers](#manually-set-dns-servers)
-1. [Sources](#sources)
+1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -295,7 +294,11 @@ FallbackDNS=1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001 # Cloudfla
 
 Restart the `systemd-resolved` service to apply the new settings.
 
-## Sources
+## Further readings
+
+- [Supervisor]
+
+### Sources
 
 - [How to disable systemd-resolved in Ubuntu]
 - [What are the systemctl options to list all failed units?]
@@ -306,8 +309,12 @@ Restart the `systemd-resolved` service to apply the new settings.
 - [Changing DNS with systemd-resolved]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[supervisor]: supervisor.md
 
 <!-- Others -->
 [changing dns with systemd-resolved]: https://notes.enovision.net/linux/changing-dns-with-resolve
