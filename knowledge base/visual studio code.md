@@ -22,25 +22,28 @@ See the [settings.json] example.
 The user configuration is loaded from the `settings.json` file in the user's configuration directory for the application.
 The workspace configuration is loaded from the `.vscode/settings.json` file in the workspace's root directory.
 
+Make sure to quote names containing spaces (e.g.: `'Courier New'`).
+
 ### Handy settings
 
 Built-in:
 
-| Setting                                  | Default value | Scopes          | Location in tree            | Description                                                                                                                    |
-| ---------------------------------------- | ------------- | --------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `editor.copyWithSyntaxHighlighting`      | `true`        | User, Workspace | Text Editor                 | Copy syntax highlighting too when copying something to the clipboard.                                                          |
-| `editor.guides.bracketPairs`             | `false`       | User, Workspace | Text Editor                 | Controls whether bracket pair guides are enabled or not.                                                                       |
-| `extensions.autoCheckUpdates`            | `true`        | User            | Features > Extensions       | Automatically check extensions for updates.                                                                                    |
-| `extensions.autoUpdates`                 | `true`        | User            | Features > Extensions       | Automatically update extensions.                                                                                               |
-| `files.insertFinalNewline`               | `false`       | User, Workspace | Text Editor > Files         | Insert a final newline at the end of the file when saving it.                                                                  |
-| `files.trimFinalNewlines`                | `false`       | User, Workspace | Text Editor > Files         | Trim all new lines after the final new line at the end of the file when saving it.                                             |
-| `settingsSync.ignoredExtensions`         | `[]`          | User            | Application > Settings Sync | List of extensions to ignore while synchronizing.                                                                              |
-| `telemetry.telemetryLevel`               | `"all"`       | User            | Application > Telemetry     | Controls Visual Studio Code telemetry, first-party extension telemetry, and **participating** third-party extension telemetry. |
-| `terminal.integrated.cursorBlinking`     | `false`       | User, Workspace | Features > Terminal         | Make the cursor blink in the integrated terminal.                                                                              |
-| `terminal.integrated.cursorStyle`        | `"block"`     | User, Workspace | Features > Terminal         | Show the cursor as a block in the integrated terminal.                                                                         |
-| `terminal.integrated.defaultProfile.osx` | `null`        | User, Workspace | Features > Terminal         | The default profile used on macOS.                                                                                             |
-| `terminal.integrated.scrollback`         | `1000`        | User, Workspace | Features > Terminal         | The maximum number of lines the terminal keeps in its buffer.                                                                  |
-| `update.mode`                            | `"default"`   | User            | Application > Update        | Automatically check for application updates.                                                                                   |
+| Setting                                  | Default value                               | Scopes          | Location in tree            | Description                                                                                                                    |
+| ---------------------------------------- | ------------------------------------------- | --------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `editor.copyWithSyntaxHighlighting`      | `true`                                      | User, Workspace | Text Editor                 | Copy syntax highlighting too when copying something to the clipboard.                                                          |
+| `editor.fontFamily`                      | `"Menlo, Monaco, 'Courier New', monospace"` | User, Workspace | Text Editor                 | Sets the font's family to use in the editor.                                                                                   |
+| `editor.guides.bracketPairs`             | `false`                                     | User, Workspace | Text Editor                 | Controls whether bracket pair guides are enabled or not.                                                                       |
+| `extensions.autoCheckUpdates`            | `true`                                      | User            | Features > Extensions       | Automatically check extensions for updates.                                                                                    |
+| `extensions.autoUpdates`                 | `true`                                      | User            | Features > Extensions       | Automatically update extensions.                                                                                               |
+| `files.insertFinalNewline`               | `false`                                     | User, Workspace | Text Editor > Files         | Insert a final newline at the end of the file when saving it.                                                                  |
+| `files.trimFinalNewlines`                | `false`                                     | User, Workspace | Text Editor > Files         | Trim all new lines after the final new line at the end of the file when saving it.                                             |
+| `settingsSync.ignoredExtensions`         | `[]`                                        | User            | Application > Settings Sync | List of extensions to ignore while synchronizing.                                                                              |
+| `telemetry.telemetryLevel`               | `"all"`                                     | User            | Application > Telemetry     | Controls Visual Studio Code telemetry, first-party extension telemetry, and **participating** third-party extension telemetry. |
+| `terminal.integrated.cursorBlinking`     | `false`                                     | User, Workspace | Features > Terminal         | Make the cursor blink in the integrated terminal.                                                                              |
+| `terminal.integrated.cursorStyle`        | `"block"`                                   | User, Workspace | Features > Terminal         | Show the cursor as a block in the integrated terminal.                                                                         |
+| `terminal.integrated.defaultProfile.osx` | `null`                                      | User, Workspace | Features > Terminal         | The default profile used on macOS.                                                                                             |
+| `terminal.integrated.scrollback`         | `1000`                                      | User, Workspace | Features > Terminal         | The maximum number of lines the terminal keeps in its buffer.                                                                  |
+| `update.mode`                            | `"default"`                                 | User            | Application > Update        | Automatically check for application updates.                                                                                   |
 
 Extensions:
 
@@ -55,6 +58,12 @@ Extensions:
 | yzhang.markdown-all-in-one | `markdown.extension.toc.orderedList`          | `false`       | User, Workspace | Extensions > Markdown All In One  | Use an ordered list in the ToC.                                                                                                                              |
 | redhat.ansible             | `redhat.telemetry.enabled`                    | `true`        | User, Workspace | Extensions > Ansible > Telemetry  | Send telemetry to Red Hat servers.                                                                                                                           |
 | redhat.ansible             | `ansible.validation.lint.enabled`             | `true`        | User, Workspace | Extensions > Ansible > Validation | USe ansible-lint if found to lint Ansible files. Kinda a nuisance when enabled.                                                                              |
+
+Example: change font to JetBrains Mono.
+
+```diff
++  "editor.fontFamily": "'JetBrainsMono Nerd Font', Menlo, Monaco, 'Courier New', monospace",
+```
 
 ## Handy keyboard shortcuts
 
@@ -151,9 +160,11 @@ sudo dscl . append '/Groups/_developer' GroupMembership "$USER"
 - [Electron applications all crash upon launch]
 - [Authorize a non-admin developer in Xcode / Mac OS]
 - [Deep dive on Ansible VScode extension]
+- [How do I change VS Code settings to use JetBrains Mono font]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Files -->
@@ -169,6 +180,7 @@ sudo dscl . append '/Groups/_developer' GroupMembership "$USER"
 [authorize a non-admin developer in xcode / mac os]: https://stackoverflow.com/questions/1837889/authorize-a-non-admin-developer-in-xcode-mac-os#1837935
 [deep dive on ansible vscode extension]: https://www.ansible.com/blog/deep-dive-on-ansible-vscode-extension/
 [electron applications all crash upon launch]: https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/1944468
+[how do i change vs code settings to use jetbrains mono font]: https://stackoverflow.com/questions/59776906/how-do-i-change-vs-code-settings-to-use-jetbrains-mono-font
 [recommending vscode extensions within your open source projects]: https://tattoocoder.com/recommending-vscode-extensions-within-your-open-source-projects/
 [using extensions in compiled vscode]: https://stackoverflow.com/questions/44057402/using-extensions-in-compiled-vscode#45291490
 [vscode (and some non-patched electron applications) doesn't run after tumbleweed update on nvidia]: https://www.reddit.com/r/openSUSE/comments/ptqlfu/psa_vscode_and_some_nonpatched_electron/
