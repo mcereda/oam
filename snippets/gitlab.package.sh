@@ -86,13 +86,15 @@ gitlab-rails runner '
 sudo yum check-update
 sudo yum info 'gitlab-ee'        # informational
 sudo rpm -qa | grep 'gitlab-ee'  # informational
+sudo yum --showduplicates list available 'gitlab-ee'
 sudo gitlab-backup create        # not strictly necessary: the upgrade will create a partial one
 tmux new-session -A -s 'gitlab-upgrade' "sudo yum update 'gitlab-ee'"
+tmux new-session -A -s 'gitlab-upgrade' "sudo yum update 'gitlab-ee-16.11.3'"
 sudo gitlab-rake 'gitlab:check'
 
 # Password reset
 sudo gitlab-rake 'gitlab:password:reset[root]'
-sudo gitlab-rails console \
+sudo gitlab-rails console
 	# --> user = User.find_by_username 'root'
 	# --> user.password = 'QwerTy184'
 	# --> user.password_confirmation = 'QwerTy184'

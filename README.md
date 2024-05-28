@@ -6,8 +6,6 @@ This commonly applies to telecommunication, computer networks, and computer hard
 
 In short, my private collection of notes and scripts. I use them to ease my tech life.
 
-## Table of contents <!-- omit in toc -->
-
 1. [License](#license)
 1. [Status](#status)
 1. [Support](#support)
@@ -37,7 +35,8 @@ I might accept suggestions, though. Use the repository's hosting platform's tool
 - [myshittycode.com]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
