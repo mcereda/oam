@@ -1,7 +1,19 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
-# sources:
-# - https://stevenmortimer.com/5-steps-to-change-github-default-branch-from-master-to-main/
+##
+# Remove files from the latest commit.
+# The easiest way is to use `git gui`: 'Commit' => 'Amend Last Commit' => uncheck the files => 'Commit'.
+##
+
+git reset --soft HEAD~1                     # or `git reset --soft HEAD^`
+git restore --staged '.lefthook-local.yml'  # or `git reset HEAD '.lefthook-local.yml'`
+git commit -c ORIG_HEAD
+
+
+##
+# Change the default branch from 'master' to 'main'.
+# Source: https://stevenmortimer.com/5-steps-to-change-github-default-branch-from-master-to-main/
+##
 
 # create main branch locally, taking the history from master
 git branch --move 'master' 'main'
