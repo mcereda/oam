@@ -168,6 +168,8 @@ Not to mention,
 - [How to install only security and bugfixes updates with DNF]
 - [How to use YUM/DNF to downgrade or rollback some package updates?]
 - [How to lock kernel (or another package) on Fedora]
+- [Appendix A. DNF commands list]
+- [A quick guide to DNF for yum users]
 
 <!--
   Reference
@@ -178,11 +180,13 @@ Not to mention,
 [yum]: yum.md
 
 <!-- Upstream -->
+[appendix a. dnf commands list]: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/managing_software_with_the_dnf_tool/assembly_yum-commands-list_managing-software-with-the-dnf-tool
 [dnf command reference]: https://dnf.readthedocs.io/en/latest/command_ref.html
 [dnf configuration reference]: https://dnf.readthedocs.io/en/latest/conf_ref.html
 [using the dnf software package manager]: https://docs.fedoraproject.org/en-US/quick-docs/dnf/
 
 <!-- Others -->
+[a quick guide to dnf for yum users]: https://opensource.com/article/18/8/guide-yum-dnf
 [cheat.sh]: https://cheat.sh/dnf
 [how to install only security and bugfixes updates with dnf]: https://fedoramagazine.org/how-to-install-only-security-and-bugfixes-updates-with-dnf/
 [how to lock kernel (or another package) on fedora]: https://robbinespu.gitlab.io/posts/locking-package-fedora/
