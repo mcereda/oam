@@ -1,7 +1,7 @@
-# Yellowdog Updater Modified
+# Yellowdog Updater, Modified
 
 Command-line utility for RPM used by Red Hat Linux and derivates.<br/>
-Replaced by [DNF] in Fedora.
+Replaced by [DNF] in Fedora 22+ and RHEL 8+.
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -18,26 +18,70 @@ YUM.
   <summary>Usage</summary>
 
 ```sh
-# Check for updates.
-sudo yum check-update
+# Get help.
+yum help
+yum help localinstall
 
-# List available packages.
-sudo yum --showduplicates list available 'gitlab-ee'
+# Refresh the repositories' metadata.
+yum makecache
+
+# Check for updates.
+yum check-update
+
+# List packages.
+yum --showduplicates list available 'gitlab-ee'
 
 # Display information about packages.
-sudo yum info 'gitlab-ee'
+yum info 'gitlab-ee'
 
 # Install packages.
-sudo yum install 'buildah' 'jq-0.5.6-1.fc24'
-sudo yum -y install 'Downloads/tito-0.6.2-1.fc22.noarch.rpm' --setopt='install_weak_deps=False'
-sudo yum install 'https://kojipkgs.fedoraproject.org/packages/tito/0.6.0/1.fc22/noarch/tito-0.6.0-1.fc22.noarch.rpm'
+yum install 'buildah' 'jq-0.5.6-1.fc24'
+yum -y install 'Downloads/tito-0.6.2-1.fc22.noarch.rpm' --setopt='install_weak_deps=False'
+yum install 'https://kojipkgs.fedoraproject.org/packages/tito/0.6.0/1.fc22/noarch/tito-0.6.0-1.fc22.noarch.rpm'
 
 # Upgrade packages.
-sudo yum update 'gitlab-ee-16.11.3'
+yum upgrade 'gitlab-ee-16.11.3'
+yum --obsoletes --best update
 
 # Clear the cache.
-sudo yum clean packages
-sudo yum clean all
+yum clean packages
+yum clean all
+
+# Show enabled repositories.
+yum repolist
+
+# Display information about enabled repositories.
+yum repoinfo
+yum repoinfo 'kernel-livepatch'
+
+# TODO
+yum alias
+yum autoremove
+yum check
+yum repoquery --deplist
+yum distro-sync
+yum downgrade
+yum group | yum group summary
+yum group info
+yum group install
+yum group list
+yum group mark
+yum group remove
+yum group upgrade
+yum localinstall
+yum history
+yum list
+yum mark
+yum module
+yum provides
+yum reinstall
+yum remove
+yum repository-packages
+yum search
+yum shell
+yum swap
+yum updateinfo
+yum upgrade-minimal
 ```
 
 </details>
