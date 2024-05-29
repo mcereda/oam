@@ -131,7 +131,7 @@ sudo gitlab-rails runner 'User.update_all(otp_required_for_login: false, encrypt
 
 sudo aws s3 cp 's3://backups/gitlab/gitlab-secrets.json' '/etc/gitlab/gitlab-secrets.json'
 sudo aws s3 cp 's3://backups/gitlab/gitlab.rb' '/etc/gitlab/gitlab.rb'
-sudo aws s3 cp \
+sudo aws s3 cp --region=eu-east-1 \
 	's3://backups/gitlab/11493107454_2018_04_25_10.6.4-ce_gitlab_backup.tar' \
 	'/var/opt/gitlab/backups/'
 sudo gitlab-ctl stop 'puma'

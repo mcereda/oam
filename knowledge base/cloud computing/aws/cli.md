@@ -6,13 +6,15 @@
 1. [Profiles](#profiles)
 1. [Configuration](#configuration)
 1. [Session Manager integration](#session-manager-integration)
+1. [Troubleshooting](#troubleshooting)
+   1. [Installation with `pip` on Mac OS X errors out with message about the version of `six`](#installation-with-pip-on-mac-os-x-errors-out-with-message-about-the-version-of-six)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
 ## TL;DR
 
-Do *not* use '--max-items' with '--query': the items limit is applied before the query filter, and could lead to no
-results.
+Do *not* use `--max-items` together with `--query`: the items limit is applied before the query filter, and could lead
+to show no results.
 
 <details>
   <summary>Installation and configuration</summary>
@@ -20,6 +22,7 @@ results.
 ```sh
 # Install the CLI.
 brew install 'awscli'
+pip install 'awscli'
 
 # Configure profiles.
 aws configure
@@ -234,6 +237,25 @@ Then use it to get a session on the instance:
 # Start sessions via Session Manager.
 aws ssm start-session --target 'i-0123456789abcdef0'
 ```
+
+## Troubleshooting
+
+### Installation with `pip` on Mac OS X errors out with message about the version of `six`
+
+Context: on Mac OS X, during installation using `pip`
+
+Error message example: FIXME error regarding the version of six that came with `distutils` in El Capitan.
+
+Root cause: FIXME
+
+Solutions:
+
+- Use a virtual environment.
+- Use the `--ignore-installed` option:
+
+  ```sh
+  sudo python -m 'pip' install 'awscli' --ignore-installed 'six'
+  ```
 
 ## Further readings
 
