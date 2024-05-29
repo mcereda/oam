@@ -26,10 +26,16 @@ What really worked for me.
   implement.<br/>
   Things change constantly: new technologies are given birth often, and processes improve. Also, now you know better
   then before.
+- Focus on the real problem at hand.<br/>
+  Beware the [the XY problem].
+- Do not make things more complicated than they **need** to be.
 - Keep things simple (KISS approach) **with respect of your ultimate goal** and not only for the sake of
   simplicity.<br/>
   Always going for the simple solution makes things complicated on a higher level.<br/>
   Check out [KISS principle is not that simple].
+- Stop modularizing stuff just to [avoid repetitions][don't repeat yourself(dry) in software development].
+- Stop [abstracting away][we have used too many levels of abstractions and now the future looks bleak] stuff that does
+  not need to be (`docker-cli`/`kubectl` wrappers mapping features 1-to-1, anyone?).
 - Beware of complex things that _should be simple_.<br/>
   E.g., google what the _[SAFe] delusion_ is.
 - Focus on what matters, but also set time aside to work on the rest.<br/>
@@ -37,15 +43,15 @@ What really worked for me.
 - Learn from your (and others') mistakes.<br/>
   Check out the [5 whys] approach.
 - Put in place processes to avoid repeating mistakes.
-- Automate when and where you can, yet mind [the automation paradox].
-- Automation does **not** necessarily involve
-  [abstracting away][we have used too many levels of abstractions and now the future looks bleak].
+- Automate when and where you can, yet mind [the automation paradox] and
+  [abstractions][we have used too many levels of abstractions and now the future looks bleak].
 - Keep different parts **de**coupled where possible, the same way
   [_interfaces_ are used in programming][what does it mean to program to interfaces?].<br/>
   This allows for quick and (as much as possible) painless switch between technologies.
 - The _one-size-fits-all_ approach is a big fat lie.<br/>
   You'll end up with stiff, hard to change results that satisfy nobody. This proved particularly true with regards to
-  templates and pipelines.
+  templates and pipelines.<br/>
+  Stop designing systems that _should work for everybody at all times_.
 - Choose tools based on **how helpful** they are to achieve your goals.<br/>
   Do **not** adapt your work to specific tools.
 - Backup your data, especially when you are about to update something.<br/>
@@ -70,7 +76,8 @@ What really worked for me.
   They are **not** to be taken literally.<br/>
   They **need** to be adapted to the workplace, not the other way around.
 - [Amazon's leadership principles] are double-edge swords.<br/>
-  Only Amazon was able to apply them as they are defined, and they still create a lot of discontent.
+  They are generally good practices, but only Amazon is able to apply them as they are defined **and** they still create
+  a lot of discontent when used against people.
 - Keep Goodhart's law in mind:
   > When a measure becomes a target, it ceases to be a good measure.
 
@@ -154,6 +161,8 @@ Listed in order of addition:
 - [Why your platform monolith is probably a bad idea] by David Leitner
 - [How to mind Goodhart's law and avoid unintended consequences]
 - [The XY problem]
+- [Don't repeat yourself(DRY) in Software Development]
+- [Wisdom From Linus - Prime Reacts]
 
 <!--
   Reference
@@ -177,6 +186,7 @@ Listed in order of addition:
 [branch early, branch often]: https://medium.com/@huydotnet/branch-early-branch-often-daadaad9468e
 [culture eats your structure for lunch]: https://thoughtmanagement.org/2013/07/10/culture-eats-your-structure-for-lunch/
 [devops is bullshit]: https://blog.massdriver.cloud/posts/devops-is-bullshit/
+[don't repeat yourself(dry) in software development]: https://www.geeksforgeeks.org/dont-repeat-yourselfdry-in-software-development/
 [from inboxing to thought showers: how business bullshit took over]: https://www.theguardian.com/news/2017/nov/23/from-inboxing-to-thought-showers-how-business-bullshit-took-over
 [git branching strategies vs. trunk-based development]: https://launchdarkly.com/blog/git-branching-strategies-vs-trunk-based-development/
 [hacking your manager - how to get platform engineering on their radar]: https://www.youtube.com/watch?v=8xprsTXKr0w
@@ -196,3 +206,4 @@ Listed in order of addition:
 [what does it mean to program to interfaces?]: https://www.baeldung.com/cs/program-to-interface
 [why the fuck are we templating yaml?]: https://leebriggs.co.uk/blog/2019/02/07/why-are-we-templating-yaml
 [why your platform monolith is probably a bad idea]: https://www.youtube.com/watch?v=3B0TbV-Ipmo
+[wisdom from linus - prime reacts]: https://www.youtube.com/watch?v=EvzB_Q1gSds
