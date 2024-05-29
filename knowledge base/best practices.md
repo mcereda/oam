@@ -7,6 +7,7 @@ What really worked for me.
 1. [CI/CD specific](#cicd-specific)
    1. [Pipelining](#pipelining)
 1. [Product engineering](#product-engineering)
+1. [Management](#management)
 1. [Sources](#sources)
 
 ## Generic concepts
@@ -131,6 +132,10 @@ Consider what follows for infrastructure and platform engineering as well.
   [adapters or interfaces][what does it mean to program to interfaces?] in the background instead.<br/>
   E.g., check out how [Crossplane] works.
 
+## Management
+
+- Beware the [action fallacy][the "action fallacy" tells us that the most effective leaders are unseen].
+
 ## Sources
 
 Listed in order of addition:
@@ -163,6 +168,8 @@ Listed in order of addition:
 - [The XY problem]
 - [Don't repeat yourself(DRY) in Software Development]
 - [Wisdom From Linus - Prime Reacts]
+- [Are We Celebrating the Wrong Leaders? - Martin Gutmann]
+- [The "action fallacy" tells us that the most effective leaders are unseen]
 
 <!--
   Reference
@@ -183,6 +190,7 @@ Listed in order of addition:
 [a case against "platform teams"]: https://kislayverma.com/organizations/a-case-against-platform-teams/
 [amazon's leadership principles]: https://www.amazon.jobs/content/en/our-workplace/leadership-principles
 [amazon's tenets: supercharging decision-making]: https://aws.amazon.com/blogs/enterprise-strategy/tenets-supercharging-decision-making/
+[are we celebrating the wrong leaders? - martin gutmann]: https://www.youtube.com/watch?v=b0Z9IpTVfUg
 [branch early, branch often]: https://medium.com/@huydotnet/branch-early-branch-often-daadaad9468e
 [culture eats your structure for lunch]: https://thoughtmanagement.org/2013/07/10/culture-eats-your-structure-for-lunch/
 [devops is bullshit]: https://blog.massdriver.cloud/posts/devops-is-bullshit/
@@ -196,6 +204,7 @@ Listed in order of addition:
 [murphy's law]: https://en.wikipedia.org/wiki/Murphy%27s_law
 [platform teams need a delightfully different approach, not one that sucks less]: https://www.chkk.io/blog/platform-teams-different-approach
 [simple sabotage for software]: https://erikbern.com/2023/12/13/simple-sabotage-for-software.html
+[the "action fallacy" tells us that the most effective leaders are unseen]: https://bigthink.com/business/action-fallacy-most-effective-leaders-unseen/
 [the 3-2-1 backup strategy]: https://www.backblaze.com/blog/the-3-2-1-backup-strategy/
 [the art of small pull requests]: https://essenceofcode.com/2019/10/29/the-art-of-small-pull-requests/
 [the xy problem]: https://xyproblem.info/
