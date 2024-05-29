@@ -47,6 +47,13 @@ lefthook uninstall -cv
 
 # Reset lefthook-managed git hooks and start from the beginning.
 lefthook uninstall && lefthook install
+
+# Disable lefthook for this commit.
+LEFTHOOK=0 git commit -am "Lefthook skipped"
+LEFTHOOK=false git commit -am "Lefthook skipped"
+
+# Avoid commands and scripts by name or tag for this commit.
+LEFTHOOK_EXCLUDE=ruby,security,lint git commit -am "Skip some tag checks"
 ```
 
 Uses the [glob library] for glob patterns.
@@ -54,11 +61,13 @@ Uses the [glob library] for glob patterns.
 ## Configuration
 
 Configuration files can be written in JSON, TOML or YAML.<br/>
-Only one of them will be used, even if there are more than one in the repository. The chosen one will be the first one found during initialization, hence it is suggested to use a **single** configuration file in any of the above formats.
+Only one of them will be used, even if there are more than one in the repository. The chosen one will be the first one
+found during initialization, hence it is suggested to use a **single** configuration file in any of the above formats.
 
 The _main_ configuration file must exist and go by the name `lefthook.<formatExtension>` or `.lefthook.<formatExtension>`.
 
-An _extra_ configuration file named `lefthook-local` is merged with the main file if found upon initialization. All supported formats can be applied to this `-local` file.<br/>
+An _extra_ configuration file named `lefthook-local` is merged with the main file if found upon initialization. All
+supported formats can be applied to this `-local` file.<br/>
 If the main configuration file starts with the leading dot, the `-local` file must also start with the leading dot.
 
 ```sh
@@ -146,7 +155,8 @@ All the references in the [further readings] section, plus the following:
 - [Lefthook: knock your team's code back into shape]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
