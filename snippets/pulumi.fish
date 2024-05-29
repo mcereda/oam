@@ -37,3 +37,7 @@ pulumi preview --json | jq -r '.steps[]|select(.op=="delete").oldState.id' -
 
 # Remove from the state all resources that would be deleted
 pulumi preview --json | jq -r '.steps[]|select(.op=="delete").urn' - | xargs -n1 pulumi state delete --force
+
+
+pulumi plugin ls --project
+pulumi plugin install
