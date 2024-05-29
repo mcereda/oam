@@ -221,6 +221,22 @@ pulumi stack rename 'org/new-project/dev'
 pulumi stack rename 'org/new-project/dev' -s 'dev'
 
 
+# List installed plugins.
+pulumi plugin ls
+pulumi plugin ls --project --json
+
+# Install plugins.
+pulumi plugin install
+pulumi plugin install 'resource' 'aws'
+pulumi plugin install 'resource' 'aws' '6.37.1' --reinstall
+
+# Remove installed plugins.
+pulumi plugin rm 'resource'
+pulumi plugin rm 'resource' 'aws' --yes
+pulumi plugin rm 'resource' 'aws' '6.37.0'
+pulumi plugin rm --all
+
+
 # Run in Docker.
 docker run … -it \
   -v "$(pwd):/pulumi/projects" \
