@@ -153,9 +153,11 @@ Listed in order of addition:
 - [Thinking about lockdowns] by CGP Grey
 - [Why your platform monolith is probably a bad idea] by David Leitner
 - [How to mind Goodhart's law and avoid unintended consequences]
+- [The XY problem]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
@@ -186,6 +188,7 @@ Listed in order of addition:
 [simple sabotage for software]: https://erikbern.com/2023/12/13/simple-sabotage-for-software.html
 [the 3-2-1 backup strategy]: https://www.backblaze.com/blog/the-3-2-1-backup-strategy/
 [the art of small pull requests]: https://essenceofcode.com/2019/10/29/the-art-of-small-pull-requests/
+[the xy problem]: https://xyproblem.info/
 [thinking about lockdowns]: https://www.youtube.com/watch?v=SVmEXdGqO-s
 [trunk-based development: a comprehensive guide]: https://launchdarkly.com/blog/introduction-to-trunk-based-development/
 [understanding the pareto principle (the 80/20 rule)]: https://betterexplained.com/articles/understanding-the-pareto-principle-the-8020-rule/
