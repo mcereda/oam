@@ -40,7 +40,7 @@ pip3 install --user 'ansible'
 brew install 'ansible' 'sshpass'         # darwin
 sudo pamac install 'ansible' 'sshpass'   # manjaro linux
 
-# Generate an example configuration file with all entries disabled.
+# Generate example configuration files with entries disabled.
 ansible-config init --disabled > 'ansible.cfg'
 ansible-config init --disabled -t 'all' > 'ansible.cfg'
 
@@ -49,6 +49,11 @@ ansible -i 'path/to/hosts/file' -m 'setup' all
 ansible -i 'host1,hostN,' -m 'setup' 'host1' -u 'remote-user'
 ansible -i 'localhost,' -c 'local' -km 'setup' 'localhost'
 
+# List hosts.
+ansible-inventory -i 'inventory' --list
+ansible-playbook -i 'inventory' 'playbook.yml' --list-hosts
+ansible -i 'inventory' all --list-hosts
+
 # Check the syntax of a playbook.
 # This will *not* execute the plays inside it.
 ansible-playbook 'path/to/playbook.yml' --syntax-check
@@ -56,7 +61,7 @@ ansible-playbook 'path/to/playbook.yml' --syntax-check
 # Execute playbooks.
 ansible-playbook 'path/to/playbook.yml' -i 'hosts.list'
 ansible-playbook … -i 'host1,host2,hostN,' -l 'hosts,list'
-ansible-playbook … -i 'host1,host2,other,' -l 'hosts-pattern'
+ansible-playbook … -i 'host1,host2,other,' -l 'hosts-pattern' --step
 
 # Show what changes (with details) a play would apply to the local machine.
 ansible-playbook 'path/to/playbook.yml' -i 'localhost,' -c 'local' -vvC
