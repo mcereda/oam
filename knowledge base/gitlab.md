@@ -12,6 +12,7 @@
       1. [Make a job in a pipeline run only when some specific files change](#make-a-job-in-a-pipeline-run-only-when-some-specific-files-change)
    1. [Get the version of the helper image to use for a runner](#get-the-version-of-the-helper-image-to-use-for-a-runner)
 1. [Manage kubernetes clusters](#manage-kubernetes-clusters)
+1. [Maintenance mode](#maintenance-mode)
 1. [Runners](#runners)
    1. [Autoscaling](#autoscaling)
       1. [Docker Machine](#docker-machine)
@@ -20,14 +21,21 @@
    1. [Pipeline fails with error `You are not allowed to download code from this project`](#pipeline-fails-with-error-you-are-not-allowed-to-download-code-from-this-project)
    1. [Gitlab keeps answering with code 502](#gitlab-keeps-answering-with-code-502)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
+Using `-H 'PRIVATE-TOKEN: glpat-m-…'` in API calls is the same as using `-H 'Authorization: bearer glpat-m-…'`.
+
 ```sh
 # List the current application settings of the GitLab instance.
-curl --header 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings'
-curl --header 'Authorization: bearer glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings'
+curl -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings'
+
+# Enable maintenance mode.
+curl -X 'PUT' -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings?maintenance_mode=true'
+
+# Disable maintenance mode.
+curl -X 'PUT' -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings?maintenance_mode=false'
 ```
 
 ## Package
@@ -136,6 +144,7 @@ sudo gitlab-ctl restart 'nginx'
 sudo gitlab-rake 'gitlab:check'
 
 # Create backups.
+sudo gitlab-backup create
 sudo gitlab-backup create BACKUP='prefix_override' STRATEGY='copy'
 
 # Create empty backup archives for testing purposes.
@@ -186,10 +195,21 @@ sudo gitlab-rails runner '
 sudo gitlab-rails runner 'User.where(username: "anUsernameHere").each(&:disable_two_factor!)'
 ```
 
+Migration procedure:
+
+1. Put the old instance in [maintenance mode]
+1. Take a full backup of the old instance
+1. Copy the configuration and secrets from the old instance to the new one
+1. Change the DNS to the new instance
+1. Reconfigure the new instance
+1. Restore the full backup on the new instance
+
 </details>
 
 <details>
   <summary>Removal</summary>
+
+Refer <https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/doc/installation/index.md#uninstall-the-linux-package-omnibus>.
 
 ```sh
 # Remove all users and groups created by the package.
@@ -590,6 +610,56 @@ See [adding and removing kubernetes clusters] for more information.
 
 For now the Gitlab instance can manage only kubernetes clusters external to the one it is running into.
 
+## Maintenance mode
+
+Refer [Gitlab maintenance mode].
+
+Allows administrators to reduce write operations to a minimum while maintenance tasks are performed.<br/>
+The main goal is to block all external actions that change the internal state, specially the PostgreSQL database, files,
+repositories, and the container registry.
+
+When enabled, new actions are forbidden to come in and internal state changes are minimal.<br/>
+This allows maintenance tasks to execute easier as services can be stopped completely or further degraded for a shorter
+period of time than might otherwise be needed.
+
+Most external actions that do **not** change the internal state are allowed. HTTP `POST`, `PUT`, `PATCH`, and `DELETE`
+requests are blocked.<br/>
+See <https://docs.gitlab.com/ee/administration/maintenance_mode/#rest-api> for a detailed overview of how special cases
+are handled.
+
+Through Web UI:
+
+- On the left sidebar, at the bottom, select _Admin Area_.
+- On the left sidebar, select _Settings_ > _General_.
+- Expand _Maintenance Mode_ and toggle _Enable Maintenance Mode_.<br/>
+  Optionally add a message for the banner.
+- Select _Save changes_.
+
+Through API calls:
+
+```sh
+# Enable maintenance mode.
+curl -X 'PUT' -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings?maintenance_mode=true'
+curl -X 'PUT' -H 'PRIVATE-TOKEN: glpat-m-…' \
+  'https://gitlab.fqdn/api/v4/application/settings?maintenance_mode_message=YaBlockedBro'
+```
+
+```sh
+# Disable maintenance mode.
+curl -X 'PUT' -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings?maintenance_mode=false'
+```
+
+Through Rails console:
+
+```ruby
+::Gitlab::CurrentSettings.update!(maintenance_mode: true)
+::Gitlab::CurrentSettings.update!(maintenance_mode_message: "New message")
+```
+
+```ruby
+::Gitlab::CurrentSettings.update!(maintenance_mode: false)
+```
+
 ## Runners
 
 ```sh
@@ -705,6 +775,7 @@ Solution: set the correct ownership with
 - [How to Upgrade Your Omnibus GitLab]
 - [The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership]
 - [GitLab HA Scaling Runner Vending Machine for AWS EC2 ASG]
+- [GitLab maintenance mode]
 
 <!--
   Reference
@@ -712,6 +783,8 @@ Solution: set the correct ownership with
   -->
 
 <!-- In-article sections -->
+[maintenance mode]: #maintenance-mode
+
 <!-- Knowledge base -->
 [buildah]: buildah.md
 [kaniko]: kubernetes/kaniko.placeholder
@@ -760,6 +833,7 @@ Solution: set the correct ownership with
 [use ci/cd configuration from other files]: https://docs.gitlab.com/ee/ci/yaml/includes.html
 [use extends to reuse configuration sections]: https://docs.gitlab.com/ee/ci/yaml/yaml_optimization.html#use-extends-to-reuse-configuration-sections
 [use kaniko to build docker images]: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
+[gitlab maintenance mode]: https://docs.gitlab.com/ee/administration/maintenance_mode/
 
 <!-- Others -->
 [authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb
