@@ -421,3 +421,5 @@ All the references in the [further readings] section, plus the following:
 [linuxize.com]: https://linuxize.com
 [opensource.com]: https://opensource.com
 [unix.stackexchange.com]: https://unix.stackexchange.com
+
+[bash prompt generator]: https://robotmoon.com/bash-prompt-generator/
