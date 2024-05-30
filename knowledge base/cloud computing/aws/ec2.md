@@ -37,13 +37,17 @@ aws ec2 describe-images --filters \
   'Name=architecture,Values=["arm64","x86_64"]' \
   'Name=block-device-mapping.volume-type,Values=["gp3"]'
 
-
 # Describe security groups.
 aws ec2 describe-security-groups --group-names 'pulumi-workshop'
 
 # Delete security groups.
 aws ec2 delete-security-group --group-name 'pulumi-workshop'
 aws ec2 delete-security-group --group-id 'sg-0773aa724d0c2dd51'
+
+# Query the onboard IMDSv1 metadata server.
+curl 'http://instance-data/latest/meta-data/instance-id'
+curl 'http://169.254.169.254/latest/meta-data/instance-type'
+curl 'http://[fd00:ec2::254]/latest/meta-data/local-ipv4'
 ```
 
 </details>
@@ -68,6 +72,7 @@ See [EBS].
 - [`describe-images`][describe-images] CLI subcommand
 - [Best practices for handling EC2 Spot Instance interruptions]
 - [IAM roles for Amazon EC2]
+- [Retrieve instance metadata]
 
 <!--
   Reference
@@ -86,6 +91,7 @@ See [EBS].
 [describe-images]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-images.html
 [describeimages]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
 [iam roles for amazon ec2]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
+[retrieve instance metadata]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
 [using instance profiles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
 
 <!-- Others -->
