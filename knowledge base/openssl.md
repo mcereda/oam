@@ -9,7 +9,7 @@
    1. [Code 20: unable to get local issuer certificate](#code-20-unable-to-get-local-issuer-certificate)
    1. [Code 21: unable to verify the first certificate](#code-21-unable-to-verify-the-first-certificate)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -118,11 +118,12 @@ openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
 
 To make it **not** ask for a password, add the `-nodes` option.
 
-To avoid answering the questions (for automation), add `-subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=www.example.com"`:
+To avoid answering the questions (for automation), add
+`-subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=www.example.com"`:
 
 ```sh
-$ openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/C=NL/ST=Nederlands/L=Amsterdam/O=Mek Net/OU=Org/CN=mek.info"
-openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/C=NL/ST=Nederlands/L=Amsterdam/O=Mek Net/OU=Org/CN=mek.info"
+$ openssl req -x509 -out 'cert.pem' \
+  -newkey 'rsa:4096' -keyout 'key.pem' -days '365' -nodes -subj "/C=NL/ST=Nederlands/L=Amsterdam/O=Mek Net/OU=Org/CN=mek.info"
 Generating a 4096 bit RSA private key
 ..............................................................................................................................................................................................................................++
 ...........................................................................................................................................................................++
@@ -181,17 +182,21 @@ closed
 
 See also [OpenSSL unable to verify the first certificate for Experian URL] and [Verify certificate chain with OpenSSL].
 
-One or more certificates in the certificate chain is not valid, self-signed or simply was not provided by either the server or the client (if a client certificate is needed).<br />
-This could also mean that the root certificate is not in the local database of trusted root certificates, which could have been not given to, or queried by, OpenSSL.
+One or more certificates in the certificate chain is not valid, self-signed or simply was not provided by either the
+server or the client (if a client certificate is needed).<br />
+This could also mean that the root certificate is not in the local database of trusted root certificates, which could
+have been not given to, or queried by, OpenSSL.
 
-A well configured server sends the entire certificate chain during the handshake, therefore providing all the necessary intermediate certificates; servers for which the connection fails might be providing only the end entity certificate.
+A well configured server sends the entire certificate chain during the handshake, therefore providing all the necessary
+intermediate certificates; servers for which the connection fails might be providing only the end entity certificate.
 
-OpenSSL is **not** capable of getting missing intermediate certificates on-the-fly, so a `s_client -connect` attempt could fail where a full-fledge browser, able to discover certificates, would succeed on the same URL.
+OpenSSL is **not** capable of getting missing intermediate certificates on-the-fly, so a `s_client -connect` attempt
+could fail where a full-fledge browser, able to discover certificates, would succeed on the same URL.
 
 You can:
 
-- either make the server send the entire certificate chain
-- or pass the missing certificates to OpenSSL as client-side parameters using the '-CApath' or '-CAfile' options.
+- Either make the server send the entire certificate chain, or
+- Pass the missing certificates to OpenSSL as client-side parameters using the '-CApath' or '-CAfile' options.
 
 ### Code 21: unable to verify the first certificate
 
@@ -208,21 +213,18 @@ See [code 20](#code-20-unable-to-get-local-issuer-certificate).
 - [Display the contents of a SSL certificate]
 - [Check SSL certificate chain with OpenSSL examples]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [How to generate a self-signed SSL certificate using OpenSSL]
 - [OpenSSL unable to verify the first certificate for Experian URL]
 - [Verify certificate chain with OpenSSL]
 - [How to put domain correctly in CSR?]
+- [OpenSSL command cheatsheet]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Others -->
 [check ssl certificate chain with openssl examples]: https://www.howtouselinux.com/post/certificate-chain
@@ -230,6 +232,7 @@ All the references in the [further readings] section, plus the following:
 [display the contents of a ssl certificate]: https://support.qacafe.com/knowledge-base/how-do-i-display-the-contents-of-a-ssl-certificate/
 [how to generate a self-signed ssl certificate using openssl]: https://stackoverflow.com/questions/10175812/how-to-generate-a-self-signed-ssl-certificate-using-openssl#10176685
 [how to put domain correctly in csr?]: https://www.namecheap.com/support/knowledgebase/article.aspx/9641/2290/how-to-put-domain-correctly-in-csr/
+[openssl command cheatsheet]: https://www.freecodecamp.org/news/openssl-command-cheatsheet-b441be1e8c4a
 [openssl commands to check and verify your ssl certificate, key and csr]: https://www.ibm.com/support/pages/openssl-commands-check-and-verify-your-ssl-certificate-key-and-csr
 [openssl unable to verify the first certificate for experian url]: https://stackoverflow.com/questions/7587851/openssl-unable-to-verify-the-first-certificate-for-experian-url
 [the most common openssl commands]: https://www.sslshopper.com/article-most-common-openssl-commands.html
