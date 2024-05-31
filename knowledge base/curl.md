@@ -5,20 +5,21 @@
 1. [TL;DR](#tldr)
 1. [Apply settings to all connections](#apply-settings-to-all-connections)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
 ```sh
-# Send a single GET request and show its output on stdout.
+# Send single GET requests and show their output on stdout.
 curl 'http://url.of/file'
+curl 'https://www.example.com'
 
 # Be quiet.
-curl 'https://www.example.com' … --silent
+curl … --silent
 curl … -s --show-error
 
 # Download files to specific paths.
-curl 'http://url.of/file' --output 'path/to/file'
+curl … --output 'path/to/file'
 curl … -o 'path/to/file'
 
 # Download files reusing their name for output.
@@ -26,44 +27,44 @@ curl … --remote-name 'http://url.of/file1' -O 'http://url.of/file2'
 curl … -O http://url.of/file[1-24]
 
 # Resume downloads.
-curl 'http://url.of/file' --continue-at -
+curl … --continue-at -
 curl … -o 'partial_file' -C -
 
 # Limit downloads bandwidth.
-curl 'http://url.of/file' --limit-rate '1000B'
+curl … --limit-rate '1000B'
 
 # Follow redirects.
-curl 'http://url.of/file' --location
+curl … --location
 curl … -L
 
 # Only fetch the response's HTTP headers.
 # Prevents downloading the response's body.
-curl 'http://example.com' --head
+curl … --head
 curl … -I
 
 # Write specific information in output.
-curl 'http://example.com' … --write-out '@template.file'
+curl … … --write-out '@template.file'
 curl … -w 'request returned %{http_code}\nDownloaded %{size_download} bytes\n'
 
 # Send different request types.
-curl 'http://example.com' --request 'PUT'
+curl … --request 'PUT'
 curl … -X 'GET'
 
 # Specify headers.
-curl 'http://example.com' -H 'Content-Type:application/json'
+curl … -H 'Content-Type:application/json'
 curl … --header 'Content-Type:application/json'
 
 # Fail fast with no output.
 # Returns the HTTP error code.
-curl 'http://example.com' --fail
+curl … --fail
 curl … -f
 
 # Skip certificate validation.
-curl 'https://example.com' --insecure
+curl … --insecure
 curl … -k
 
 # Pass certificates for a resource.
-curl 'https://example.com' --cert 'client.pem' --key 'key.pem'
+curl … --cert 'client.pem' --key 'key.pem'
 curl … --cacert 'ca.pem'
 
 # Authenticate.
@@ -72,25 +73,30 @@ curl 'ftp://url.of/file' -u 'username':'password' -O
 curl 'ftp://username:password@example.com'
 
 # Send data.
-curl 'http://example.com' -X 'POST' -H "Content-Type:application/json" --data '@file.json'
+curl … -X 'POST' -H "Content-Type:application/json" --data '@file.json'
 curl … -d '{"name": "bob"}'
 curl … -d 'name=bob'
 
-# POST to a form.
-curl 'http://example.com' --form 'name=user' -F 'password=test'
+# POST to forms.
+curl … --form 'name=user' -F 'password=test'
 curl … -d 'name=bob' -F 'password=@password.file'
 
-# Use a proxy.
-curl 'http://example.com' --proxy 'socks5://localhost:19999'
+# Use proxies.
+curl … --proxy 'socks5://localhost:19999'
 
-# Forcefully resolve a host to a given address.
-curl 'https://example.com' --resolve 'example.com:443:google.com'
+# Forcefully resolve hosts to given addresses.
+# The resolution *must* be an address, not an FQDN.
+curl … --resolve 'super.fake.domain:8443:127.0.0.1' 'https://super.fake.domain:8443'
 
-# Ask to use HTTP/2.
-curl 'https://example.com' --http2
+# Use different names.
+# Kinda like '--resolve' but to aliases and supports ports.
+curl … --connect-to 'super.fake.domain:443:localhost:8443' 'https://super.fake.domain'
+
+# Ask kindly to use HTTP/2.
+curl … --http2
 
 # Force the use of HTTP/2.
-curl 'https://example.com' --http2-prior-knowledge
+curl … --http2-prior-knowledge
 ```
 
 ## Apply settings to all connections
@@ -108,7 +114,8 @@ The default configuration file is looked for in the following places, in this or
 
 On Non-Windows hosts, `curl` uses `getpwuid` to find the user's home directory.
 
-On Windows, if curl finds no `.curlrc` file in the sequence described above, it will check for one in the same dir the curl executable is placed.
+On Windows, if curl finds no `.curlrc` file in the sequence described above, it will check for one in the same dir the
+`curl` executable is placed.
 
 ```txt
 # ~/.curlrc
@@ -129,17 +136,17 @@ config: "~/.config/curl"
 
 - [Book]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [cheat.sh]
 - [How to ignore invalid and self signed ssl connection errors with curl]
 - [Config file]
 - [HTTP2]
+- [Name resolve tricks]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Upstream -->
@@ -147,9 +154,7 @@ All the references in the [further readings] section, plus the following:
 [config file]: https://everything.curl.dev/cmdline/configfile
 [http2]: https://everything.curl.dev/http/versions/http2
 
-<!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Others -->
 [cheat.sh]: https://cheat.sh/curl
 [how to ignore invalid and self signed ssl connection errors with curl]: https://www.cyberciti.biz/faq/how-to-curl-ignore-ssl-certificate-warnings-command-option/
+[name resolve tricks]: https://everything.curl.dev/usingcurl/connections/name.html

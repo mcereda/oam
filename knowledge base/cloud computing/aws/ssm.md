@@ -253,7 +253,8 @@ $ sudo ssm-cli get-diagnostics --output 'table'
 - [Troubleshooting managed node availability using `ssm-cli`][troubleshooting managed node availability using ssm-cli]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->

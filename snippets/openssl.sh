@@ -148,26 +148,27 @@ openssl pkcs12 -in 'keystore.pfx' -out 'keystore.pem' -nodes
 ##
 
 # Tests connections to remote servers
-openssl s_client -connect 'www.google.com:443'
-openssl s_client -host 'www.google.com' -port '443'
+openssl s_client -connect 'www.google.com:443' < '/dev/null'
+openssl s_client -host 'www.google.com' -port '443' < '/dev/null'  # deprecated in favour of '-connect'
 
 # Show the full certificate chains
-openssl s_client … -showcerts < '/dev/null'
+openssl s_client … -showcerts
 
 # Extract certificates
-openssl s_client … 2>&1 < '/dev/null' | sed -n '/-----BEGIN/,/-----END/p' > 'certificate.pem'
+openssl s_client … 2>&1 | sed -n '/-----BEGIN/,/-----END/p' > 'certificate.pem'
 
 # Override SNI (Server Name Indication) extension with other server names
 # Allows testing multiple secure sites hosted by same IP address
 openssl s_client … -servername 'host.fqdn'
+openssl s_client -host 'localhost' -port '8443' -servername 'testcert.com' < '/dev/null'
 
 # Test TLS connections by forcibly using specific cipher suites
 # Checks if servers can properly talk via different configured cipher suites
-openssl s_client … -cipher 'ECDHE-RSA-AES128-GCM-SHA256' 2>&1 < '/dev/null'
+openssl s_client … -cipher 'ECDHE-RSA-AES128-GCM-SHA256' 2>&1
 
 # Measure SSL connection time without and with session reuse
-openssl s_time -connect 'example.com:443' -new
-openssl s_time -connect 'example.com:443' -reuse
+openssl s_time … -new
+openssl s_time … -reuse
 # Roughly examine TCP and SSL handshake times using `curl`
 curl -kso '/dev/null' -w "tcp:%{time_connect}, ssldone:%{time_appconnect}\n" 'https://example.com'
 
@@ -194,7 +195,9 @@ openssl dgst -sha512 < 'input.file'
 cat 'input.file' | openssl sha512
 
 # Base64 encoding and decoding
-cat /dev/urandom | head -c 50 | openssl base64 | openssl base64 -d
+echo 'plaintext' | openssl base64
+echo 'cGxhaW50ZXh0Cg==' | openssl base64 -d
+cat '/dev/urandom' | head -c 50 | openssl base64 | openssl base64 -d
 
 # Measure speed of security algorithms
 openssl speed 'rsa2048'

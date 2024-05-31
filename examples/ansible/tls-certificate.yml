@@ -1,10 +1,16 @@
 ---
 
-- name: Create and validate an HTTPS certificate
+- name: Create and validate a TLS certificate using LetsEncrypt with DNS-01 challenge type, and AWS Route53
   hosts: all
+  gather_facts: false
 
   vars:
+    account_email: someone@example.org
+    acme_directory: https://acme-v02.api.letsencrypt.org/directory
+    # acme_directory: https://acme-staging-v02.api.letsencrypt.org/directory
     common_name: service.example.org
+    remaining_days: 7
+    zone: example.org
 
   pre_tasks:
 
@@ -15,16 +21,17 @@
         size: 4096
       with_items:
         - /tmp/{{ common_name }}.key
-        - /tmp/letsencrypt.account.key.pem
+        - /tmp/acme.account.key.pem
 
-  # - name: Generate private keys for an account and the certificate - OpenSSH alternative
-  #   community.crypto.openssh_keypair:
-  #     path: "{{ item }}"
-  #     type: rsa
-  #     size: 4096
-  #   with_items:
-  #     - /tmp/{{ common_name }}.key
-  #     - /tmp/letsencrypt.account.key.pem
+    - name: Generate private keys for an account and the certificate - OpenSSH alternative
+      when: false
+      community.crypto.openssh_keypair:
+        path: "{{ item }}"
+        type: rsa
+        size: 4096
+      with_items:
+        - /tmp/{{ common_name }}.key
+        - /tmp/acme.account.key.pem
 
   tasks:
 
@@ -38,13 +45,15 @@
       community.crypto.acme_certificate:
         challenge: dns-01
         acme_version: 2
-        acme_directory: https://acme-v02.api.letsencrypt.org/directory
-        account_key_src: /tmp/letsencrypt.account.key.pem
-        account_email: someone@example.org
+        acme_directory: "{{ acme_directory }}"
+        account_key_src: /tmp/acme.account.key.pem
+        account_email: "{{ account_email }}"
         csr: /tmp/{{ common_name }}.crs
-        cert: /tmp/{{ common_name }}.crt
+        dest: /tmp/{{ common_name }}.endpointOnly.crt  # endpoint only certificate
+        fullchain_dest: /tmp/{{ common_name }}.crt     # full certificate chain
         terms_agreed: true
-        remaining_days: 21
+        remaining_days: "{{ remaining_days }}"
+        # force: true
       register: dns_challenge
       notify: Create TXT records for challenge validation
 
@@ -53,7 +62,7 @@
     - name: Create TXT records for challenge validation
       when: common_name in dns_challenge.challenge_data
       amazon.aws.route53:
-        zone: example.org
+        zone: "{{ zone }}"
         record: "{{ dns_challenge.challenge_data[common_name]['dns-01'].record }}"
         type: TXT
         ttl: 60
@@ -61,7 +70,7 @@
         overwrite: true
         wait: true
         value:
-          # Value should be enclosed in quotation marks
+          # shall be enclosed in quotation marks
           >-
           {{
             dns_challenge.challenge_data[common_name]['dns-01'].resource_value
@@ -73,14 +82,16 @@
       community.crypto.acme_certificate:
         challenge: dns-01
         acme_version: 2
-        acme_directory: https://acme-v02.api.letsencrypt.org/directory
-        account_key_src: /tmp/letsencrypt.account.key.pem
-        account_email: someone@example.org
+        acme_directory: "{{ acme_directory }}"
+        account_key_src: /tmp/acme.account.key.pem
+        account_email: "{{ account_email }}"
         csr: /tmp/{{ common_name }}.crs
-        cert: /tmp/{{ common_name }}.crt
-        remaining_days: 21
+        dest: /tmp/{{ common_name }}.endpointOnly.crt  # endpoint only certificate
+        fullchain_dest: /tmp/{{ common_name }}.crt     # full certificate chain
+        remaining_days: "{{ remaining_days }}"
         terms_agreed: true
         data: "{{ dns_challenge }}"
+        # force: true
 
   post_tasks:
     - name: Delete TXT records for challenge validation
@@ -88,7 +99,7 @@
         validation_record: "{{ ['_acme-challenge', common_name] | join('.') }}"
       when: query('community.dns.lookup', validation_record, type='TXT') != []
       amazon.aws.route53:
-        zone: example.org
+        zone: "{{ zone }}"
         record: "{{ validation_record }}"
         type: TXT
         state: absent
