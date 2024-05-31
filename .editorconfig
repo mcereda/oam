@@ -14,7 +14,7 @@ insert_final_newline = true
 [.vscode/*.json]
 insert_final_newline = false
 
-[*.{ba,,z}sh]
+[*.{,ba,fi,z}sh]
 indent_style = tab
 tab_width = 4
 
