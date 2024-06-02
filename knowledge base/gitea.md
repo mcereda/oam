@@ -124,7 +124,7 @@ Alternatives:
 <!-- Knowledge base -->
 [self-hosting]: self-hosting.md
 [git]: git.md
-[gitlab]: gitlab.md
+[gitlab]: gitlab/README.md
 
 <!-- Files -->
 [compose file]: /docker/gitea/docker-compose.yml
