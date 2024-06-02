@@ -1,7 +1,6 @@
 ---
 
-# Directories are created recursively.
-- name: Create a whole directory tree
+- name: Create directories recursively
   ansible.builtin.file:
     path: /tmp/path/to/final/dir
     state: directory
@@ -10,10 +9,10 @@
   block:
     - name: By using absolute paths and special variables (preferred)
       ansible.builtin.import_tasks:
-      file: "{{ role_path }}/tasks/install/{{ install_method }}.yml"
+        file: "{{ role_path }}/tasks/install/{{ install_method }}.yml"
     - name: By using paths relative to the including file
       ansible.builtin.import_tasks:
-      file: pre-flight.yml
+        file: pre-flight.yml
 
 - name: Conditionally include tasks
   block:
@@ -76,3 +75,34 @@
       - ./logs:/var/log/gitlab:Z
       - ./data:/var/opt/gitlab:Z
     auto_remove: true
+
+- name: Add elements to lists
+  set_fact:
+    programming_languages: "{{ programming_languages + ['Ruby'] }}"
+
+- name: "Use the users' home directory for something"
+  tags: pre-flight
+  block:
+    - name: "Get raw information from the system's entries"
+      ansible.builtin.getent:
+        database: passwd
+        key: "{{ item }}"
+        split: ":"
+      with_items:
+        - root
+        - ec2-user
+      register: users_entries
+    - name: Compute and register the results
+      ansible.builtin.set_fact:
+        users_info: >-
+          {{
+            users_entries
+            | community.general.json_query('results[].ansible_facts.getent_passwd[]')
+            | combine
+          }}
+    - name: Do your thing!
+      ansible.builtin.file:
+        path: "{{ item.value[4] }}/placeholder"
+        owner: "{{ item.key }}"
+        state: touch
+      with_dict: "{{ users_info }}"

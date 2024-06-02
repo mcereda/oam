@@ -678,6 +678,8 @@ See [Integrate with AWS SSM].
 - [Ansible: set variable to file content]
 - [How can I hide skipped tasks output in Ansible]
 - [Ansible roles: basics, creating & using]
+- [Developing and Testing Ansible Roles with Molecule and Podman - Part 1]
+- [How to get an arbitrary remote user's home directory in Ansible?]
 
 <!--
   Reference
@@ -696,14 +698,15 @@ See [Integrate with AWS SSM].
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
 [collections index]: https://docs.ansible.com/ansible/latest/collections/index.html
 [configuration]: https://docs.ansible.com/ansible/latest/reference_appendices/config.html
+[developing and testing ansible roles with molecule and podman - part 1]: https://www.ansible.com/blog/developing-and-testing-ansible-roles-with-molecule-and-podman-part-1/
 [galaxy  sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
 [galaxy]: https://galaxy.ansible.com/
 [roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
+[slurp]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/slurp_module.html
 [special tags: always and never]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html#special-tags-always-and-never
 [special variables]: https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
 [templating]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html
 [tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
-[slurp]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/slurp_module.html
 
 <!-- Others -->
 [ansible roles: basics, creating & using]: https://spacelift.io/blog/ansible-roles
@@ -713,6 +716,7 @@ See [Integrate with AWS SSM].
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
 [how can i hide skipped tasks output in ansible]: https://stackoverflow.com/questions/39189549/how-can-i-hide-skipped-tasks-output-in-ansible#76147924
 [how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
+[how to get an arbitrary remote user's home directory in ansible?]: https://stackoverflow.com/questions/33343215/how-to-get-an-arbitrary-remote-users-home-directory-in-ansible#45447488
 [how to install sshpass on mac]: https://stackoverflow.com/questions/32255660/how-to-install-sshpass-on-mac/62623099#62623099
 [how to recursively set directory and file permissions]: https://superuser.com/questions/1024677/ansible-how-to-recursively-set-directory-and-file-permissions#1317715
 [how to set up and use python virtual environments for ansible]: https://www.redhat.com/sysadmin/python-venv-ansible
