@@ -89,7 +89,8 @@
           become_user: "{{ item }}"
           become_flags: "-iH"
           check_mode: false
-          command: echo {"{{ item }}":"$HOME"}
+          command: >-
+            echo "{{ item }}: $HOME"
           with_items:
             - root
             - ec2-user
