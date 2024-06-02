@@ -83,7 +83,7 @@ curl -fsSLo "$HOME/.config/fish/completions/task.fish" 'https://raw.githubuserco
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [azure devops]: cloud%20computing/azure/devops.md
-[gitlab]: gitlab.md
+[gitlab]: gitlab/README.md
 [gnu make]: gnu%20userland/make.md
 
 <!-- Files -->

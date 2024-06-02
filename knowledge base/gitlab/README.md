@@ -9,13 +9,11 @@
    1. [Different owners for parts of the code base](#different-owners-for-parts-of-the-code-base)
 1. [CI/CD pipelines](#cicd-pipelines)
    1. [Specify when to run jobs](#specify-when-to-run-jobs)
-      1. [Make a job in a pipeline run only when some specific files change](#make-a-job-in-a-pipeline-run-only-when-some-specific-files-change)
+      1. [Only when some specific files change](#only-when-some-specific-files-change)
    1. [Get the version of the helper image to use for a runner](#get-the-version-of-the-helper-image-to-use-for-a-runner)
 1. [Manage kubernetes clusters](#manage-kubernetes-clusters)
 1. [Maintenance mode](#maintenance-mode)
 1. [Runners](#runners)
-   1. [Autoscaling](#autoscaling)
-      1. [Docker Machine](#docker-machine)
 1. [Troubleshooting](#troubleshooting)
    1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
    1. [Pipeline fails with error `You are not allowed to download code from this project`](#pipeline-fails-with-error-you-are-not-allowed-to-download-code-from-this-project)
@@ -555,7 +553,7 @@ Use the `rules` key and specify the conditions the job needs.
 Conditions are validated **in order** until one applies. The rest are ignored.<br/>
 If no condition applies, the job is skipped.
 
-#### Make a job in a pipeline run only when some specific files change
+#### Only when some specific files change
 
 ```yaml
 docker-build:
@@ -662,29 +660,7 @@ Through Rails console:
 
 ## Runners
 
-```sh
-brew install 'gitlab-runner'
-```
-
-```sh
-gitlab-runner exec docker 'job-name'
-gitlab-runner exec docker \
-  --env 'AWS_ACCESS_KEY_ID=AKIA…' --env 'AWS_SECRET_ACCESS_KEY=F…s' --env 'AWS_REGION=eu-east-1' \
-  --env 'DOCKER_AUTH_CONFIG={ "credsStore": "ecr-login" }' \
-  --docker-volumes "$HOME/.aws/credentials:/root/.aws/credentials:ro"
-  'job-requiring-ecr-access'
-```
-
-### Autoscaling
-
-#### Docker Machine
-
-[Supported cloud providers][docker machine's supported cloud providers].
-
-Pitfalls:
-
-- On AWS, the driver supports only one subnet.<br/>
-  See [AWS driver does not support multiple non default subnets] and [Docker Machine's AWS driver's options].
+See [runners](runner.md).
 
 ## Troubleshooting
 
@@ -751,9 +727,7 @@ Solution: set the correct ownership with
 - [Back up GitLab Using Amazon S3]
 - [Support object storage bucket prefixes]
 - [Back up GitLab excluding specific data from the backup]
-- [AWS driver does not support multiple non default subnets]
 - [Autoscaling GitLab Runner on AWS EC2]
-- [Authenticating your GitLab CI runner to an AWS ECR registry using Amazon ECR Docker Credential Helper]
 - [How to restart GitLab]
 - [Customize pipeline configuration]
 - [Code owners]
@@ -806,8 +780,6 @@ Solution: set the correct ownership with
 [command-line options]: https://docs.gitlab.com/charts/installation/command-line-options.html
 [customize pipeline configuration]: https://docs.gitlab.com/ee/ci/pipelines/settings.html
 [deployment]: https://docs.gitlab.com/charts/installation/deployment.html
-[docker machine's aws driver's options]: https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/blob/main/docs/drivers/aws.md#options
-[docker machine's supported cloud providers]: https://docs.gitlab.com/runner/configuration/autoscale.html#supported-cloud-providers
 [environment variables]: https://docs.gitlab.com/ee/administration/environment_variables.html
 [gitlab ha scaling runner vending machine for aws ec2 asg]: https://gitlab.com/guided-explorations/aws/gitlab-runner-autoscaling-aws-asg#gitlab-runners-on-aws-spot-best-practices
 [global settings]: https://docs.gitlab.com/charts/charts/globals.html
@@ -836,8 +808,6 @@ Solution: set the correct ownership with
 [gitlab maintenance mode]: https://docs.gitlab.com/ee/administration/maintenance_mode/
 
 <!-- Others -->
-[authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb
-[aws driver does not support multiple non default subnets]: https://github.com/docker/machine/issues/4700
 [chef infra]: https://www.chef.io/products/chef-infra
 [configuring private dns zones and upstream nameservers in kubernetes]: https://kubernetes.io/blog/2017/04/configuring-private-dns-zones-upstream-nameservers-kubernetes/
 [how to disable the two-factor authentication in gitlab?]: https://stackoverflow.com/questions/31024771/how-to-disable-the-two-factor-authentication-in-gitlab

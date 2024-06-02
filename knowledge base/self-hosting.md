@@ -34,7 +34,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 <!-- Knowledge base -->
 [baikal]: baikal.md
 [gitea]: gitea.md
-[gitlab]: gitlab.md
+[gitlab]: gitlab/README.md
 [nextcloud]: nextcloud.md
 [paperless-ngx]: paperless-ngx.md
 [photoprism]: photoprism.md

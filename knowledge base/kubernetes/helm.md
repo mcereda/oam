@@ -2,8 +2,6 @@
 
 Package manager for Kubernetes.
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Start managing existing resources with a specific helm chart](#start-managing-existing-resources-with-a-specific-helm-chart)
 1. [Plugins](#plugins)
