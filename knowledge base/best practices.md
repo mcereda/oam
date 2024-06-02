@@ -30,6 +30,7 @@ What really worked for me.
 - Focus on the real problem at hand.<br/>
   Beware the [the XY problem].
 - Do not make things more complicated than they **need** to be.
+  Also read [Death by a thousand microservices].
 - Keep things simple (KISS approach) **with respect of your ultimate goal** and not only for the sake of
   simplicity.<br/>
   Always going for the simple solution makes things complicated on a higher level.<br/>
@@ -170,6 +171,7 @@ Listed in order of addition:
 - [Wisdom From Linus - Prime Reacts]
 - [Are We Celebrating the Wrong Leaders? - Martin Gutmann]
 - [The "action fallacy" tells us that the most effective leaders are unseen]
+- [Death by a thousand microservices]
 
 <!--
   Reference
@@ -193,6 +195,7 @@ Listed in order of addition:
 [are we celebrating the wrong leaders? - martin gutmann]: https://www.youtube.com/watch?v=b0Z9IpTVfUg
 [branch early, branch often]: https://medium.com/@huydotnet/branch-early-branch-often-daadaad9468e
 [culture eats your structure for lunch]: https://thoughtmanagement.org/2013/07/10/culture-eats-your-structure-for-lunch/
+[death by a thousand microservices]: https://renegadeotter.com/2023/09/10/death-by-a-thousand-microservices.html
 [devops is bullshit]: https://blog.massdriver.cloud/posts/devops-is-bullshit/
 [don't repeat yourself(dry) in software development]: https://www.geeksforgeeks.org/dont-repeat-yourselfdry-in-software-development/
 [from inboxing to thought showers: how business bullshit took over]: https://www.theguardian.com/news/2017/nov/23/from-inboxing-to-thought-showers-how-business-bullshit-took-over
