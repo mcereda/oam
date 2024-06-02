@@ -81,28 +81,56 @@
     programming_languages: "{{ programming_languages + ['Ruby'] }}"
 
 - name: "Use the users' home directory for something"
-  tags: pre-flight
   block:
-    - name: "Get raw information from the system's entries"
-      ansible.builtin.getent:
-        database: passwd
-        key: "{{ item }}"
-        split: ":"
-      with_items:
-        - root
-        - ec2-user
-      register: users_entries
-    - name: Compute and register the results
-      ansible.builtin.set_fact:
-        users_info: >-
-          {{
-            users_entries
-            | community.general.json_query('results[].ansible_facts.getent_passwd[]')
-            | combine
-          }}
-    - name: Do your thing!
-      ansible.builtin.file:
-        path: "{{ item.value[4] }}/placeholder"
-        owner: "{{ item.key }}"
-        state: touch
-      with_dict: "{{ users_info }}"
+    - name: Executing commands from specified users
+      block:
+        - name: "Get users' homedir back"
+          become: true
+          become_user: "{{ item }}"
+          become_flags: "-iH"
+          check_mode: false
+          command: echo {"{{ item }}":"$HOME"}
+          with_items:
+            - root
+            - ec2-user
+          register: users_homedir_retrieve
+        - name: Compute and register the results
+          ansible.builtin.set_fact:
+            users_homedir: >-
+              {{
+                users_homedir_retrieve
+                | community.general.json_query('results[].stdout')
+                | map('from_yaml')
+                | combine
+              }}
+        - name: Do your thing!
+          ansible.builtin.file:
+            path: "{{ item.value }}/placeholder"
+            owner: "{{ item.key }}"
+            state: touch
+          with_dict: "{{ users_homedir }}"
+    - name: "From the system's entries"
+      block:
+        - name: "Get raw information from the system's entries"
+          ansible.builtin.getent:
+            database: passwd
+            key: "{{ item }}"
+            split: ":"
+          with_items:
+            - root
+            - ec2-user
+          register: users_entries
+        - name: Compute and register the results
+          ansible.builtin.set_fact:
+            users_info: >-
+              {{
+                users_entries
+                | community.general.json_query('results[].ansible_facts.getent_passwd[]')
+                | combine
+              }}
+        - name: Do your thing!
+          ansible.builtin.file:
+            path: "{{ item.value[4] }}/placeholder"
+            owner: "{{ item.key }}"
+            state: touch
+          with_dict: "{{ users_info }}"
