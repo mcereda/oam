@@ -91,6 +91,7 @@
           check_mode: false
           command: >-
             echo "{{ item }}: $HOME"
+          changed_when: false
           with_items:
             - root
             - ec2-user
