@@ -105,9 +105,10 @@
                 | combine
               }}
         - name: Do your thing!
+          become: true
+          become_user: "{{ item.key }}"
           ansible.builtin.file:
             path: "{{ item.value }}/placeholder"
-            owner: "{{ item.key }}"
             state: touch
           with_dict: "{{ users_homedir }}"
     - name: "From the system's entries"
