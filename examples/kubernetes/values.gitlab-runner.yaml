@@ -2,8 +2,7 @@
 
 ##
 # Source:
-# `helm template --namespace 'gitlab' --values "values.gitlab-runner.yaml" --set global.hosts.hostSuffix='test' \
-#   'gitlab-runner' 'gitlab/gitlab-runner'`
+# `helm template --namespace 'gitlab' 'gitlab-runner' 'gitlab/gitlab-runner'`
 ##
 
 useTini: false
