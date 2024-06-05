@@ -9,23 +9,12 @@
 
 ## Deployment
 
-<div class="warning" style="
-  background-color: rgba(255,255,0,0.0625);
-  border: solid yellow;  /* #FFFF00 */
-  margin: 1em 0;
-  padding: 1em 1em 0;
-">
-<header style="
-  font-weight: bold;
-  margin-bottom: 0.5em;
-">Incomplete ARM64 image collection</header>
-
-Consider using only AMD64 nodes to host the containers for AWX.
-
-As of 2024-04-11, AWX does **not** appear to provide ARM64 images for all its containers.<br/>
-One'll need to build their own missing ARM64 images and specify those during deployment. Good luck!
-
-</div>
+> ### Incomplete ARM64 image collection
+>
+> Consider using only AMD64 nodes to host the containers for AWX.
+>
+> As of 2024-04-11, AWX does **not** appear to provide ARM64 images for all its containers.<br/>
+> One'll need to build their own missing ARM64 images and specify those during deployment. Good luck with that!
 
 Starting from version 18.0, the [AWX Operator][operator's documentation] is the preferred way to install AWX.<br/>
 It is meant to provide a Kubernetes-native installation method for AWX via an AWX Custom Resource Definition (CRD).
@@ -224,8 +213,10 @@ kubectl delete ns 'awx'
 
 [Guide][basic install]
 
-  <details>
-    <summary>1. ARM, Mac OS X, <code>minikube</code>, <code>kustomize</code>: failed: ARM images for AWX not available</summary>
+  <details style="margin-left: 1em">
+    <summary>
+      1. ARM, Mac OS X, <code>minikube</code>, <code>kustomize</code>: failed: ARM images for AWX not available
+    </summary>
 
 ```sh
 $ minikube start --cpus=4 --memory=6g --addons=ingress
@@ -286,8 +277,7 @@ $ # (ノಠ益ಠ)ノ彡┻━┻
 ```
 
   </details>
-
-  <details>
+  <details style="margin-left: 1em">
     <summary>2. AMD64, OpenSUSE Leap 15.5, <code>minikube</code>, <code>kustomize</code></summary>
 
 ```sh
@@ -362,7 +352,7 @@ $ minikube kubectl -- delete -k '.'
 
 [Guide][helm install on existing cluster]
 
-  <details>
+  <details style="margin-left: 1em">
     <summary>1. AMD64, OpenSUSE Leap 15.5, <code>minikube</code>, <code>helm</code></summary>
 
 ```sh
@@ -431,7 +421,7 @@ $ minikube kubectl -- delete ns 'awx'
 <details>
   <summary>Run: kustomized helm chart</summary>
 
-  <details>
+  <details style="margin-left: 1em">
     <summary>1. AMD64, OpenSUSE Leap 15.5, <code>minikube</code></summary>
 
 <div class="warning" style="
@@ -544,17 +534,16 @@ $ minikube kubectl -- delete -f <(minikube kubectl -- kustomize --enable-helm)
 - [Installer role's defaults]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
-<!-- In-article sections -->
 <!-- Knowledge base -->
 [helm]: kubernetes/helm.md
 [kubernetes]: kubernetes/README.md
 [kustomize]: kubernetes/kustomize.md
 [minikube]: kubernetes/minikube.md
 
-<!-- Files -->
 <!-- Upstream -->
 [awx's documentation]: https://ansible.readthedocs.io/projects/awx/en/latest/
 [awx's repository]: https://github.com/ansible/awx/
