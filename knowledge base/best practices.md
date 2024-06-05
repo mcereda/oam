@@ -27,8 +27,12 @@ What really worked for me.
   implement.<br/>
   Things change constantly: new technologies are given birth often, and processes improve. Also, now you know better
   then before.
-- Focus on the real problem at hand.<br/>
+- Gain the hard skills required to solve complex problems, but only deploy complex solutions when they are actually,
+  _really_, needed.
+- Focus on the **real** problem at hand.<br/>
   Beware the [the XY problem].
+- When making a **business** decision, it's generally good to pick the simplest, fastest, and cheapest option.<br/>
+  When making a **career** decision, it pays to be an expert in hard things.
 - Do not make things more complicated than they **need** to be.
   Also read [Death by a thousand microservices].
 - Keep things simple (KISS approach) **with respect of your ultimate goal** and not only for the sake of
@@ -172,6 +176,7 @@ Listed in order of addition:
 - [Are We Celebrating the Wrong Leaders? - Martin Gutmann]
 - [The "action fallacy" tells us that the most effective leaders are unseen]
 - [Death by a thousand microservices]
+- [Maybe you do need Kubernetes]
 
 <!--
   Reference
@@ -204,6 +209,7 @@ Listed in order of addition:
 [how to mind goodhart's law and avoid unintended consequences]: https://builtin.com/data-science/goodharts-law
 [how to tackle pull request fatigue]: https://javascript.plainenglish.io/tackling-pr-fatigue-6865edc205ce
 [kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
+[maybe you do need kubernetes]: https://blog.boot.dev/education/maybe-you-do-need-kubernetes/
 [murphy's law]: https://en.wikipedia.org/wiki/Murphy%27s_law
 [platform teams need a delightfully different approach, not one that sucks less]: https://www.chkk.io/blog/platform-teams-different-approach
 [simple sabotage for software]: https://erikbern.com/2023/12/13/simple-sabotage-for-software.html
