@@ -1,0 +1,6 @@
+---
+
+##
+# Source:
+# `helm show values --repo 'https://prometheus-community.github.io/helm-charts' 'prometheus'`
+##

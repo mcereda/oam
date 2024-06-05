@@ -2,9 +2,8 @@
 
 Open-source platform for monitoring and observability.
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
+1. [Installation](#installation)
 1. [Provisioning](#provisioning)
    1. [Datasources](#datasources)
    1. [Dashboards](#dashboards)
@@ -28,18 +27,57 @@ curl -sS \
   "
 ```
 
+## Installation
+
+<details>
+  <summary>kubernetes</summary>
+
+```sh
+helm repo add 'grafana' 'https://grafana.github.io/helm-charts'
+helm -n 'monitoring' upgrade -i --create-namespace 'grafana' 'grafana/grafana'
+
+helm -n 'monitoring' upgrade -i --create-namespace --repo 'https://grafana.github.io/helm-charts' 'grafana' 'grafana'
+```
+
+Access components:
+
+| Component | From within the cluster                   |
+| --------- | ----------------------------------------- |
+| Server    | `grafana.monitoring.svc.cluster.local:80` |
+
+```sh
+# Access the server
+kubectl -n 'monitoring' get secret 'grafana' -o jsonpath='{.data.admin-password}' | base64 --decode
+kubectl -n 'monitoring' get pods -l 'app.kubernetes.io/name=grafana,app.kubernetes.io/instance=grafana' \
+  -o jsonpath='{.items[0].metadata.name}' \
+| xargs -I {} kubectl -n 'monitoring' port-forward {} 3000
+```
+
+Clean up:
+
+```sh
+helm -n 'monitoring' delete 'grafana'
+kubectl delete namespace --ignore-not-found 'monitoring'
+```
+
+Access Prometheus instances in the same namespace using `http://prometheus-server`
+
+<details>
+
 ## Provisioning
 
 See [provision dashboards and data sources] for details.
 
 ### Datasources
 
-Data sources can be managed automatically at provisioning by adding YAML configuration files in the `provisioning/datasources` directory.
+Data sources can be managed automatically at provisioning by adding YAML configuration files in the
+`provisioning/datasources` directory.
 
 Each configuration file can contain a list of `datasources` to add or update during startup.<br/>
 If the data source already exists, Grafana reconfigures it to match the provisioned configuration file.
 
-Grafana also deletes the data sources listed in `deleteDatasources` before adding or updating those in the `datasources` list.
+Grafana also deletes the data sources listed in `deleteDatasources` before adding or updating those in the `datasources`
+list.
 
 ```yml
 ---
@@ -68,9 +106,11 @@ The easiest way to write datasources definitions in the configuration file is to
 1. Login to Grafana as `admin`
 1. Manually setup the datasource
 1. Issue a `GET /api/datasources` request to Grafana's API to get the datasource configuration
+
    ```sh
    curl -sS 'http://grafana:3000/api/datasources' -H 'Authorization: Basic YWRtaW46YWRtaW4='
    ```
+
 1. Edit it as YAML
 1. Drop the YAML definition into the `provisioning/datasources` directory
 
@@ -100,11 +140,15 @@ datasources:
 
 ### Dashboards
 
-Dashboards can be automatically managed by adding one or more YAML config files in the `provisioning/dashboards` directory.<br/>
-Each config file can contain a list of dashboards `providers` that load dashboards into Grafana from the local filesystem.
+Dashboards can be automatically managed by adding one or more YAML config files in the `provisioning/dashboards`
+directory.<br/>
+Each config file can contain a list of dashboards `providers` that load dashboards into Grafana from the local
+filesystem.
 
-When Grafana starts, it will insert all dashboards available in the configured path, or update them if they are already present.<br/>
-Later on it will poll that path every `updateIntervalSeconds`, look for updated json files and update/insert those into the database.
+When Grafana starts, it will insert all dashboards available in the configured path, or update them if they are already
+present.<br/>
+Later on it will poll that path every `updateIntervalSeconds`, look for updated json files and update/insert those into
+the database.
 
 ```yml
 apiVersion: 1
@@ -137,10 +181,13 @@ $ curl -sS \
 
 ## Dashboards of interest
 
-| Name               | Grafana ID | URLs                                                                                                                                                                                           |
-| ------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Node exporter full | 1860       | [grafana](https://grafana.com/grafana/dashboards/1860-node-exporter-full/), [github raw](https://raw.githubusercontent.com/rfmoz/grafana-dashboards/master/prometheus/node-exporter-full.json) |
-| OpenWRT            | 11147      | [grafana](https://grafana.com/grafana/dashboards/11147-openwrt/)                                                                                                                               |
+| Name                            | Grafana ID | URLs                                                                                                                                                                                           |
+| ------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Node exporter full              | 1860       | [grafana](https://grafana.com/grafana/dashboards/1860-node-exporter-full/), [github raw](https://raw.githubusercontent.com/rfmoz/grafana-dashboards/master/prometheus/node-exporter-full.json) |
+| OpenWRT                         | 11147      | [grafana](https://grafana.com/grafana/dashboards/11147-openwrt/)                                                                                                                               |
+| prometheus 2.0 overview         | 3662       | FIXME                                                                                                                                                                                          |
+| kubernetes cluster (prometheus) | 6417       | FIXME                                                                                                                                                                                          |
+| Nextcloud                       | 9632       | FIXME                                                                                                                                                                                          |
 
 ## Further readings
 
@@ -148,7 +195,8 @@ $ curl -sS \
 - [Github]
 - [HTTP API reference]
 - [Prometheus]
-- [`docker/monitoring`][docker/monitoring]
+- [`containers/monitoring`][containers/monitoring]
+- Official [helm chart]
 
 ## Sources
 
@@ -157,18 +205,13 @@ All the references in the [further readings] section, plus the following:
 - [Provisioning]
 - [Provision dashboards and data sources]
 - [Data source on startup]
+- [Set up prometheus and ingress on kubernetes]
+- [How to integrate Prometheus and Grafana on Kubernetes using Helm]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
-
-<!-- Upstream -->
-[data source on startup]: https://community.grafana.com/t/data-source-on-startup/8618/2
-[github]: https://github.com/grafana/grafana
-[http api reference]: https://grafana.com/docs/grafana/latest/developers/http_api/
-[provision dashboards and data sources]: https://grafana.com/tutorials/provision-dashboards-and-data-sources/
-[provisioning]: https://grafana.com/docs/grafana/latest/administration/provisioning/
-[website]: https://grafana.com
 
 <!-- In-article sections -->
 [datasources provisioning]: #datasources
@@ -178,4 +221,17 @@ All the references in the [further readings] section, plus the following:
 [prometheus]: prometheus.md
 
 <!-- Files -->
-[docker/monitoring]: ../docker/monitoring/README.md
+[containers/monitoring]: ../containers/monitoring/README.md
+
+<!-- Upstream -->
+[data source on startup]: https://community.grafana.com/t/data-source-on-startup/8618/2
+[github]: https://github.com/grafana/grafana
+[http api reference]: https://grafana.com/docs/grafana/latest/developers/http_api/
+[provision dashboards and data sources]: https://grafana.com/tutorials/provision-dashboards-and-data-sources/
+[provisioning]: https://grafana.com/docs/grafana/latest/administration/provisioning/
+[website]: https://grafana.com
+[helm chart]: https://github.com/grafana/helm-charts/tree/main/charts/grafana
+
+<!-- Others -->
+[how to integrate prometheus and grafana on kubernetes using helm]: https://semaphoreci.com/blog/prometheus-grafana-kubernetes-helm
+[set up prometheus and ingress on kubernetes]: https://blog.gojekengineering.com/diy-how-to-set-up-prometheus-and-ingress-on-kubernetes-d395248e2ba
