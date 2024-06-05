@@ -19,7 +19,7 @@ brew install 'gitlab-runner'
 dnf install 'gitlab-runner'
 docker pull 'gitlab/gitlab-runner'
 helm --namespace 'gitlab' upgrade --install --create-namespace --version '0.64.1' --repo 'https://charts.gitlab.io' \
-  'gitlab-runner' -f 'values.gitlab-runner.yml' 'gitlab/gitlab-runner'
+  'gitlab-runner' -f 'values.gitlab-runner.yml' 'gitlab-runner'
 ```
 
 </details>
