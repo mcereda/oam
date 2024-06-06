@@ -69,6 +69,7 @@ sudo reboot
 ## Further readings
 
 - [ROCm documentation]
+- [Docker Hub]
 
 ### Sources
 
@@ -87,6 +88,7 @@ sudo reboot
 <!-- Files -->
 <!-- Upstream -->
 [components of rocm programming models]: https://rocm.docs.amd.com/projects/install-on-linux/en/latest/how-to/native-install/package-manager-integration.html#components-of-rocm-programming-models
+[docker hub]: https://hub.docker.com/u/rocm
 [native installation on sle]: https://rocm.docs.amd.com/projects/install-on-linux/en/latest/how-to/native-install/sles.html
 [rocm documentation]: https://rocm.docs.amd.com/en/latest/
 [running rocm docker containers]: https://rocm.docs.amd.com/projects/install-on-linux/en/latest/how-to/docker.html
