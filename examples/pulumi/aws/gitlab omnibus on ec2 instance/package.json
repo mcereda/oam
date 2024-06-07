@@ -1,0 +1,19 @@
+{
+    "name": "gitlab-omnibus-on-aws-ec2",
+    "main": "index.ts",
+    "devDependencies": {
+        "@types/node": "^18",
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@pulumi/aws": "^6.0.0",
+        "@pulumi/cloudinit": "^1.0.0",
+        "@pulumi/command": "^0.10.0",
+        "@pulumi/pulumi": "^3.0.0",
+        "@pulumi/tls": "^5.0.0",
+        "@pulumiverse/acme": "^0.0.1",
+        "@pulumiverse/time": "^0.0.17",
+        "typescript": "^5.0.0",
+        "yaml": "^2.0.0"
+    }
+}

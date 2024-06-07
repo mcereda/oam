@@ -15,14 +15,17 @@ import * as time from "@pulumiverse/time";
 
 const ami = aws.ec2.getAmiOutput({
     owners: [ "amazon" ],
-    nameRegex: "^al2023-ami-minimal-*",
-    filters: [{
-        name: "architecture",
-        values: [
-            "arm64",
-            "x86_64",
-        ],
-    }],
+    nameRegex: "^al2023-ami-2023.*",
+    filters: [
+        {
+            name: "architecture",
+            values: [ "arm64" ],
+        },
+        {
+            name: "state",
+            values: [ "available" ],
+        },
+    ],
     mostRecent: true,
 });
 
@@ -33,7 +36,7 @@ const role = aws.iam.getRoleOutput({
 const subnet = aws.ec2.getSubnetOutput({
     filters: [{
         name: "tag:Name",
-        values: [ "eu-east-2a-private" ]
+        values: [ "Private A" ]
     }],
 });
 
@@ -82,11 +85,6 @@ const userData = new cloudinit.Config(
         gzip: true,
         base64Encode: true,
         parts: [
-            {
-                contentType: "text/cloud-config",
-                content: fs.readFileSync("../../cloud-init/aws.ssm.yaml", "utf8"),
-                filename: "cloud-config.ssm.yml",
-            },
             {
                 contentType: "text/cloud-config",
                 content: pulumi.all([
