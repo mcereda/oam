@@ -1,8 +1,6 @@
 # Chezmoi
 
-A multi-machine dotfile manager, written in Go.
-
-## Table of contents <!-- omit in toc -->
+Multi-machine dotfiles manager written in Go.
 
 1. [TL;DR](#tldr)
 1. [Save the current state to a remote repository](#save-the-current-state-to-a-remote-repository)
@@ -14,11 +12,11 @@ A multi-machine dotfile manager, written in Go.
 ## TL;DR
 
 ```sh
-# Install Chezmoi.
+# Install.
 brew install 'chezmoi'
 sudo zypper install 'chezmoi'
 
-# Initialize chezmoi.
+# Initialize.
 chezmoi init
 chezmoi init 'https://github.com/username/dotfiles.git' --branch 'chezmoi'
 
@@ -82,7 +80,8 @@ $
 ## Gotchas
 
 - templating uses the [Go text/template] library
-- due to a feature of a library used by chezmoi, all custom variable names in the configuration file are converted to lowercase; see the [custom data fields appear as all lowercase strings] GitHub issue for more information.
+- ~~Due to a feature of a library used by chezmoi, all custom variable names in the configuration file are converted to
+  lowercase; see the [custom data fields appear as all lowercase strings] GitHub issue for more information.~~
 
   ```toml
   # configuration file
@@ -94,6 +93,8 @@ $
   ```txt
   map[awesomecustomfield:my Awesome custom Value chezmoi:… normallookingcustomfield:normalLookingValue]
   ```
+
+  > Solved in [2376](https://github.com/twpayne/chezmoi/pull/2376/files).
 
 ## Snippets
 
