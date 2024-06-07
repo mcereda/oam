@@ -13,5 +13,5 @@ firewalld-open: ${shell which 'firewall-cmd'}
 	@sudo firewall-cmd --permanent --add-service '${service_name}'
 	@sudo firewall-cmd --reload
 
-composition-go-brrr: ${shell which 'docker-compose'}
+composition-go-brrr: ${shell which 'docker-compose'} pre-flight
 	@docker-compose up -d

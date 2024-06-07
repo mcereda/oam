@@ -2,13 +2,12 @@
 
 TODO
 
-<!-- Remove this line to uncomment if used
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
 
 ## TL;DR
+
+Default credentials: `admin@example.com`:`changeme`.
 
 <!-- Uncomment if used
 <details>
