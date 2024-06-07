@@ -1,0 +1,8 @@
+encryptionsalt: v1:55yDA5Kuyzs=:v1:+kFXkziA9Bd7nNZQ:OSBtNRAVCGBXwzTtHOGA5Ti9Dz+FTQ==
+config:
+  aws:region: eu-west-1
+  aws:defaultTags:
+    tags:
+      ManagedByPulumi: true
+      Owner: "somebody@example.com"
+      PulumiProject: ec2-instance

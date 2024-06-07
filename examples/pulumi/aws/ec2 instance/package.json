@@ -1,0 +1,13 @@
+{
+    "name": "ec2-instance",
+    "main": "index.ts",
+    "devDependencies": {
+        "@types/node": "^18",
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@pulumi/aws": "^6.0.0",
+        "@pulumi/cloudinit": "^1.0.0",
+        "yaml": "^2.0.0"
+    }
+}

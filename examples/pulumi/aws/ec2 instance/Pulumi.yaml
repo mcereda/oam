@@ -1,0 +1,9 @@
+name: ec2-instance
+runtime: nodejs
+description: AWS EC2 instance example
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: aws-typescript
+backend:
+  url: file://.
