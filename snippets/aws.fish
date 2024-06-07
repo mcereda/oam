@@ -73,3 +73,26 @@ aws ec2 describe-images --output 'yaml' \
 aws iam list-instance-profiles | grep -i 'ssm'
 
 sudo ssm-cli get-diagnostics --output 'table'
+
+# Check instances are available
+aws ssm get-connection-status --target "i-0915612ff82914822" --query "Status=='connected'" --output 'text'
+
+# Connect to instances if they are available
+instance_id='i-08fc83ad07487d72f' \
+&& eval $(aws ssm get-connection-status --target "$instance_id" --query "Status=='connected'" --output 'text') \
+&& aws ssm start-session --target "$instance_id" \
+|| (echo "instance ${instance_id} not available" >&2 && false)
+
+# Send commands
+aws ssm send-command --instance-ids 'i-08fc83ad07487d72f' --document-name 'AWS-RunShellScript' --parameters "commands='echo hallo'"
+aws ssm wait command-executed --command-id 'e5f7ca0e-4d74-4316-84be-9ccaf3ae1f70' --instance-id 'i-08fc83ad07487d72f'
+aws ssm get-command-invocation --command-id 'e5f7ca0e-4d74-4316-84be-9ccaf3ae1f70' --instance-id 'i-08fc83ad07487d72f'
+
+# Run commands and get their output.
+set instance_id 'i-0915612f182914822' \
+&& set command_id (aws ssm send-command --instance-ids "$instance_id" \
+	--document-name 'AWS-RunShellScript' --parameters 'commands="echo hallo"' \
+	--query 'Command.CommandId' --output 'text') \
+&& aws ssm wait command-executed --command-id "$command_id" --instance-id "$instance_id" \
+&& aws ssm get-command-invocation --command-id "$command_id" --instance-id "$instance_id" \
+	--query '{"status": Status, "rc": ResponseCode, "stdout": StandardOutputContent, "stderr": StandardErrorContent}'

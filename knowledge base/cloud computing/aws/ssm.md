@@ -29,22 +29,39 @@ aws ssm start-session \
 aws ssm send-command \
   --instance-ids 'i-0123456789abcdef0' \
   --document-name 'AWS-RunShellScript' \
-  --parameters commands="echo 'hallo!'"
+  --parameters "commands="echo 'hallo'"
+
+# Wait for commands execution.
+aws ssm wait command-executed --instance-id 'i-0123456789abcdef0' --command-id 'abcdef01-2345-abcd-6789-abcdef012345'
+
+# Get commands results.
+aws ssm get-command-invocation --instance-id 'i-0123456789abcdef0' --command-id 'abcdef01-2345-abcd-6789-abcdef012345'
+aws ssm get-command-invocation \
+  --instance-id 'i-0123456789abcdef0' --command-id 'abcdef01-2345-abcd-6789-abcdef012345' \
+  --query '{"status": Status, "rc": ResponseCode, "stdout": StandardOutputContent, "stderr": StandardErrorContent}'
 ```
 
 </details>
 <details>
   <summary>Real world use cases</summary>
 
+Also check out the [snippets].
+
 ```sh
 # Connect to instances if they are available.
 instance_id='i-08fc83ad07487d72f' \
-&& eval $(aws ssm get-connection-status --target "$instance_id" --query "Status=='connected'" --output text) \
+&& eval $(aws ssm get-connection-status --target "$instance_id" --query "Status=='connected'" --output 'text') \
 && aws ssm start-session --target "$instance_id" \
 || (echo "instance ${instance_id} not available" >&2 && false)
 
-aws ssm send-command --instance-ids "i-08fc83ad07487d72f" \
-  --document-name "AWS-RunShellScript" --parameters commands="echo 'hallo!'"
+# Run commands and get their output.
+instance_id='i-0915612f182914822' \
+&& command_id=$(aws ssm send-command --instance-ids "$instance_id" \
+  --document-name 'AWS-RunShellScript' --parameters 'commands="echo hallo"' \
+  --query 'Command.CommandId' --output 'text') \
+&& aws ssm wait command-executed --command-id "$command_id" --instance-id "$instance_id" \
+&& aws ssm get-command-invocation --command-id "$command_id" --instance-id "$instance_id" \
+  --query '{"status": Status, "rc": ResponseCode, "stdout": StandardOutputContent, "stderr": StandardErrorContent}'
 ```
 
 </details>
@@ -267,6 +284,7 @@ $ sudo ssm-cli get-diagnostics --output 'table'
 [amazon web services]: README.md
 [cli]: cli.md
 [ec2]: ec2.md
+[snippets]: ../../../snippets/aws.fish
 
 <!-- Upstream -->
 [aws_ssm connection plugin notes]: https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html#notes

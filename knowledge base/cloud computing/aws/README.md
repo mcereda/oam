@@ -267,6 +267,7 @@ Examples:
 - [Automating DNS-challenge based LetsEncrypt certificates with AWS Route 53]
 - [Working with DB instance read replicas]
 - AWS' [CLI]
+- [Configuring EC2 Disk alert using Amazon CloudWatch]
 
 ### Sources
 
@@ -347,6 +348,7 @@ Examples:
 [automating dns-challenge based letsencrypt certificates with aws route 53]: https://johnrix.medium.com/automating-dns-challenge-based-letsencrypt-certificates-with-aws-route-53-8ba799dd207b
 [aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
 [aws icons]: https://aws-icons.com/
+[configuring ec2 disk alert using amazon cloudwatch]: https://medium.com/@chandinims001/configuring-ec2-disk-alert-using-amazon-cloudwatch-793807e40d72
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
 [introduction to aws iam assumerole]: https://aws.plainenglish.io/introduction-to-aws-iam-assumerole-fbef3ce8e90b
 [not authorized to perform: sts:assumerole]: https://repost.aws/questions/QUOY5XngCtRyOX4Desaygz8Q/not-authorized-to-perform-sts-assumerole
