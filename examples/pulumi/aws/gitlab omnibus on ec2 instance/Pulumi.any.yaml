@@ -3,5 +3,6 @@ config:
   acme:serverUrl: https://acme-v02.api.letsencrypt.org/directory
   aws:defaultTags:
     tags:
-      ManagedBy: Pulumi
+      ManagedByPulumi: true
+      Owner: "somebody@example.com"
       PulumiProject: gitlab-omnibus-on-aws-ec2
