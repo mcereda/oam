@@ -17,6 +17,7 @@ security policy.
    1. [Local storage](#local-storage)
    1. [External storage](#external-storage)
    1. [Backfilling](#backfilling)
+1. [Write to remote Prometheus servers](#write-to-remote-prometheus-servers)
 1. [Management API](#management-api)
    1. [Take snapshots of the data](#take-snapshots-of-the-data)
 1. [Further readings](#further-readings)
@@ -308,6 +309,27 @@ TODO
 
 TODO
 
+## Write to remote Prometheus servers
+
+Also see [How to set up and experiment with Prometheus remote-write].
+
+The remote server must accept incoming metrics.<br/>
+One way is to have it start with the `--web.enable-remote-write-receiver` option.
+
+Use the [`remote_write` setting][remote_write setting] to configure the sender to forward metrics to the receiver:
+
+```yaml
+remote_write:
+  - url: http://prometheus.receiver.fqdn:9090/api/v1/write
+  - url: https://aps-workspaces.eu-east-1.amazonaws.com/workspaces/ws-01234567-abcd-1234-abcd-01234567890a/api/v1/remote_write
+    queue_config:
+      max_samples_per_send: 1000
+      max_shards: 100
+      capacity: 1500
+    sigv4:
+      region: eu-east-1
+```
+
 ## Management API
 
 ### Take snapshots of the data
@@ -372,6 +394,7 @@ All the references in the [further readings] section, plus the following:
 - [Set up prometheus and ingress on kubernetes]
 - [How to integrate Prometheus and Grafana on Kubernetes using Helm]
 - [node-exporter's helm chart's values]
+- [How to set up and experiment with Prometheus remote-write]
 
 <!--
   Reference
@@ -400,6 +423,7 @@ All the references in the [further readings] section, plus the following:
 [prometheus/node_exporter]: https://github.com/prometheus/node_exporter
 [prometheus/snmp_exporter]: https://github.com/prometheus/snmp_exporter
 [promql]: https://prometheus.io/docs/prometheus/latest/querying/basics/
+[remote_write setting]: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write
 [storage]: https://prometheus.io/docs/prometheus/latest/storage/
 [website]: https://prometheus.io/
 
@@ -409,6 +433,7 @@ All the references in the [further readings] section, plus the following:
 [how i monitor my openwrt router with grafana cloud and prometheus]: https://grafana.com/blog/2021/02/09/how-i-monitor-my-openwrt-router-with-grafana-cloud-and-prometheus/
 [how relabeling in prometheus works]: https://grafana.com/blog/2022/03/21/how-relabeling-in-prometheus-works/
 [how to integrate prometheus and grafana on kubernetes using helm]: https://semaphoreci.com/blog/prometheus-grafana-kubernetes-helm
+[how to set up and experiment with prometheus remote-write]: https://developers.redhat.com/articles/2023/11/30/how-set-and-experiment-prometheus-remote-write
 [install prometheus and grafana with helm 3 on a local machine vm]: https://dev.to/ko_kamlesh/install-prometheus-grafana-with-helm-3-on-local-machine-vm-1kgj
 [ordaa/boinc_exporter]: https://gitlab.com/ordaa/boinc_exporter
 [scrape selective metrics in prometheus]: https://docs.last9.io/docs/how-to-scrape-only-selective-metrics-in-prometheus
