@@ -150,6 +150,10 @@ sudo gitlab-backup create BACKUP='prefix_override' STRATEGY='copy'
 sudo gitlab-backup create … \
   SKIP='db,repositories,uploads,builds,artifacts,pages,lfs,terraform_state,registry,packages,ci_secure_files'
 
+# Create backups of the configuration.
+sudo gitlab-ctl backup-etc
+sudo gitlab-ctl backup-etc && ls -t '/etc/gitlab/config_backup/' | head -n '1'
+
 # Restore backups.
 sudo aws s3 cp 's3://backups/gitlab/gitlab-secrets.json' '/etc/gitlab/gitlab-secrets.json' \
 && sudo aws s3 cp 's3://backups/gitlab/gitlab.rb' '/etc/gitlab/gitlab.rb' \

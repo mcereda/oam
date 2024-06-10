@@ -82,12 +82,30 @@ gitlab-rails runner '
 # --------------------------------------
 ##
 
+# Check services
+sudo gitlab-ctl status
+
+# Get logs
+sudo gitlab-ctl tail
+sudo gitlab-ctl tail 'prometheus'
+
+# Backup data
+sudo gitlab-backup create
+sudo gitlab-backup create STRATEGY=copy
+
+# Backup configuration
+sudo gitlab-ctl backup-etc \
+&& ls -t '/etc/gitlab/config_backup/' \
+	| head -n '1' \
+	| xargs -pI '{}' aws s3 cp '/etc/gitlab/config_backup/'{} 's3://backups/gitlab/'
+
 # Package upgrade
 sudo yum check-update
 sudo yum info 'gitlab-ee'                                              # informational
 sudo rpm -qa | grep 'gitlab-ee'                                        # informational
 sudo yum --showduplicates list available 'gitlab-ee'
 sudo gitlab-backup create                                              # not strictly necessary: the upgrade will create a partial one
+sudo gitlab-ctl backup-etc
 tmux new-session -A -s 'gitlab-upgrade' "sudo yum update 'gitlab-ee'"  # 'gitlab-ee-16.11.3' if version-specific
 sudo gitlab-rake 'gitlab:check'
 
