@@ -45,6 +45,9 @@ dnf list 'sponge' 'ca-certificates'
 dnf list --installed
 dnf list --obsoletes
 
+# List all available versions of packages.
+dnf list --available --showduplicates 'gitlab-runner'
+
 # Lists installed packages that are not available in any known repository.
 dnf list --extras
 
@@ -78,6 +81,8 @@ dnf upgrade
 dnf upgrade --bugfix --exclude 'sshpass'
 dnf upgrade --nobest --security
 dnf upgrade --advisories='FEDORA-2021-74ebf2f06f,FEDORA-2021-83fdddca0f'
+dnf upgrade --security --sec-severity 'Critical' --downloadonly
+dnf -y upgrade --security --sec-severity 'Important'
 
 # List summary information about occurred transactions.
 dnf history

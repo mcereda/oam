@@ -71,6 +71,7 @@
         "asciinema",
         "authelia",
         "authentik",
+        "autoremove",
         "autoscaler",
         "autoscalers",
         "awscli",
