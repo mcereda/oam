@@ -1,0 +1,25 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowAccessToTheBucket",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::backups-bucket"
+            ]
+        },
+        {
+            "Sid": "AllowOperationsInTheDesignatedFolder",
+            "Effect": "Allow",
+            "Action": [
+                "s3:*"
+            ],
+            "Resource": [
+                "arn:aws:s3:::backups-bucket/prometheus/*"
+            ]
+        }
+    ]
+}
