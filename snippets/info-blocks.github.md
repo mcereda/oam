@@ -2,7 +2,9 @@
 
 The idea here is to mimic Confluence's Info panel.
 
-Use Markdown's [Alert extension](https://github.blog/changelog/2023-12-14-new-markdown-extension-alerts-provide-distinctive-styling-for-significant-content/).<br/>
+> Only works in places using Github's Markdown.
+
+Use Github's [Alert extension](https://github.blog/changelog/2023-12-14-new-markdown-extension-alerts-provide-distinctive-styling-for-significant-content/).<br/>
 See <https://github.com/sinsukehlab/NOTE-test/blob/main/NOTE.md> for more examples.
 
 ---
