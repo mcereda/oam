@@ -153,6 +153,7 @@ lint:
 All the references in the [further readings] section, plus the following:
 
 - [Lefthook: knock your team's code back into shape]
+- [5 cool (and surprising) ways to configure Lefthook for automation joy]
 
 <!--
   Reference
@@ -169,6 +170,7 @@ All the references in the [further readings] section, plus the following:
 [configuration file example]: ../examples/dotfiles/.lefthook.yml
 
 <!-- Upstream -->
+[5 cool (and surprising) ways to configure Lefthook for automation joy]: https://evilmartians.com/chronicles/5-cool-and-surprising-ways-to-configure-lefthook-for-automation-joy
 [configuration]: https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
 [github]: https://github.com/evilmartians/lefthook
 [lefthook: knock your team's code back into shape]: https://evilmartians.com/chronicles/lefthook-knock-your-teams-code-back-into-shape
