@@ -101,22 +101,19 @@ pulumi about
 pulumi about -s 'dev'
 
 
-# Get the full program configuration.
-# Secrets are obscured.
-pulumi config get
-
 # Set configuration values.
 pulumi config set 'varName' 'value'
 pulumi config set 'namespace:varName' 'value'
 pulumi config set --secret 'secretName' 'secretValue'
 pulumi config set --secret 'namespace:secretName' 'secretValue'
 
+# Read configuration values.
+# Secrets get unencrypted.
+pulumi config get 'dbPassword'
+
 # Copy the configuration over to other stacks.
 pulumi config cp -d 'local'
 pulumi config cp -s 'prod' -d 'dev'
-
-# Read secrets.
-pulumi config get 'dbPassword'
 
 
 # Get a summary of what would be deployed.
