@@ -35,7 +35,7 @@
           - vim
       notify: "Start AWS' SSM agent"
   roles:
-    - role: ../../ansible/role.gitlab-omnibus-on-ec2
+    - role: ../../../ansible/role.gitlab-omnibus-on-ec2
       vars:
         external_url: 'https://gitlab.company.com'
         # initial_password: null

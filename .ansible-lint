@@ -1,0 +1,7 @@
+---
+# https://ansible.readthedocs.io/projects/lint/configuring/#ansible-lint-configuration
+
+offline: true
+warn_list:
+  - 'role-name[path]'
+  - package-latest
