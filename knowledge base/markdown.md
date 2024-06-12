@@ -2,8 +2,6 @@
 
 ReadMe's Markdown engine.
 
-## Table of contents <!-- omit in toc -->
-
 1. [Syntax highlighting](#syntax-highlighting)
 1. [TODO lists](#todo-lists)
 1. [Folded content](#folded-content)
@@ -16,11 +14,12 @@ ReadMe's Markdown engine.
    1. [Gantt diagram](#gantt-diagram)
    1. [Pie chart](#pie-chart)
 1. [Math](#math)
+1. [Alerts](#alerts)
 1. [Troubleshooting](#troubleshooting)
    1. [Escape the backtick character](#escape-the-backtick-character)
    1. [VS Code and mermaid graph in Markdown preview](#vs-code-and-mermaid-graph-in-markdown-preview)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## Syntax highlighting
 
@@ -271,6 +270,54 @@ $$\sum_{n=1}^{10} n^2$$
 $\sum_{n=1}^{10} n^2$
 $$\sum_{n=1}^{10} n^2$$
 
+## Alerts
+
+Uses the Alert extension.
+
+Refer [Github's alert formatting][github formatting  alerts].
+
+```md
+> [!NOTE]
+> Useful information that users should know, even when skimming content.
+
+> [!TIP]
+> Helpful advice for doing things better or more easily.
+
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
+
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+
+> [!CAUTION]
+> Advises about risks or negative outcomes of certain actions.
+```
+
+---
+
+> [!NOTE]
+> Useful information that users should know, even when skimming content.
+
+---
+
+> [!TIP]
+> Helpful advice for doing things better or more easily.
+
+---
+
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
+
+---
+
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+
+---
+
+> [!CAUTION]
+> Advises about risks or negative outcomes of certain actions.
+
 ## Troubleshooting
 
 ### Escape the backtick character
@@ -291,11 +338,12 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 - Official [documentation]
 - [Extended syntax]
 - [Linguist supported language syntax list]
+- [Github's alert formatting][github formatting  alerts]
 
-## Sources
+### Sources
 
-All the references in the [further readings] section, plus the following:
-
+- [Basic syntax]
+- [Code blocks]
 - [Escaping backticks]
 - [Escaping backtick in Markdown]
 - [The magical Markdown I bet you don't know]
@@ -303,20 +351,18 @@ All the references in the [further readings] section, plus the following:
 - [Syntax highlighting in Markdown]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[mermaid.js]: mermaid.js.md
 
 <!-- Upstream -->
 [basic syntax]: https://www.markdownguide.org/basic-syntax
 [code blocks]: https://docs.readme.com/rdmd/docs/code-blocks
 [documentation]: https://docs.readme.com/rdmd/docs
 [extended syntax]: https://www.markdownguide.org/extended-syntax/
-
-<!-- In-article sections -->
-[further readings]: #further-readings
-
-<!-- Knowledge base -->
-[mermaid.js]: mermaid.js.md
 
 <!-- Others -->
 [bierner.markdown-mermaid]: https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid
@@ -326,3 +372,4 @@ All the references in the [further readings] section, plus the following:
 [slaise/high-level-markdown]: https://github.com/slaise/High-level-Markdown
 [syntax highlighting in markdown]: https://support.codebasehq.com/articles/tips-tricks/syntax-highlighting-in-markdown
 [the magical markdown i bet you don't know]: https://medium.com/codex/the-magical-markdown-i-bet-you-dont-know-b51f8c049773
+[github formatting  alerts]: https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
