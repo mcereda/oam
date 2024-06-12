@@ -58,6 +58,7 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | [EventBridge]  | FIXME                                         |
 | [GuardDuty]    | Threat detection                              |
 | [Inspector]    | FIXME                                         |
+| [OpenSearch]   | ELK, logging                                  |
 | [RDS]          | Databases                                     |
 | [S3]           | Storage                                       |
 | [Sagemaker]    | Machine learning                              |
@@ -315,6 +316,7 @@ Examples:
 [ecr]: ecr.md
 [ecs]: ecs.md
 [eks]: eks.md
+[opensearch]: opensearch.md
 [s3]: s3.md
 [sagemaker]: sagemaker.md
 

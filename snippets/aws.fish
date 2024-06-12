@@ -75,7 +75,7 @@ aws iam list-instance-profiles | grep -i 'ssm'
 sudo ssm-cli get-diagnostics --output 'table'
 
 # Check instances are available
-aws ssm get-connection-status --target "i-0915612ff82914822" --query "Status=='connected'" --output 'text'
+aws ssm get-connection-status --query "Status=='connected'" --output 'text' --target "i-0915612ff82914822"
 
 # Connect to instances if they are available
 instance_id='i-08fc83ad07487d72f' \
@@ -96,3 +96,6 @@ set instance_id 'i-0915612f182914822' \
 && aws ssm wait command-executed --command-id "$command_id" --instance-id "$instance_id" \
 && aws ssm get-command-invocation --command-id "$command_id" --instance-id "$instance_id" \
 	--query '{"status": Status, "rc": ResponseCode, "stdout": StandardOutputContent, "stderr": StandardErrorContent}'
+
+aws imagebuilder list-image-recipes
+aws imagebuilder get-image-recipe --image-recipe-arn 'arn:aws:imagebuilder:eu-west-1:012345678901:image-recipe/my-custom-image/1.0.12'
