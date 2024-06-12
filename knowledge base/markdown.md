@@ -2,6 +2,8 @@
 
 ReadMe's Markdown engine.
 
+Compare Markdown implementations at [babelmark].
+
 1. [Syntax highlighting](#syntax-highlighting)
 1. [TODO lists](#todo-lists)
 1. [Folded content](#folded-content)
@@ -365,11 +367,12 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 [extended syntax]: https://www.markdownguide.org/extended-syntax/
 
 <!-- Others -->
+[babelmark]: https://babelmark.github.io/
 [bierner.markdown-mermaid]: https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid
 [escaping backtick in markdown]: https://www.growingwiththeweb.com/2015/06/escaping-backtick-in-markdown.html
 [escaping backticks]: https://www.markdownguide.org/basic-syntax/#escaping-backticks
+[github formatting  alerts]: https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
 [linguist supported language syntax list]: https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
 [slaise/high-level-markdown]: https://github.com/slaise/High-level-Markdown
 [syntax highlighting in markdown]: https://support.codebasehq.com/articles/tips-tricks/syntax-highlighting-in-markdown
 [the magical markdown i bet you don't know]: https://medium.com/codex/the-magical-markdown-i-bet-you-dont-know-b51f8c049773
-[github formatting  alerts]: https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
