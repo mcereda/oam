@@ -31,6 +31,10 @@ function pulumi-urnRegex2urn
 	| jq -r --arg regex "$argv[1]" '.deployment.resources[]|select(.urn|test($regex)).urn' -
 end
 
+
+pulumi pre
+pulumi pre --cwd 'observability' --diff
+
 # Get the URN (or other stuff) of resources that would be deleted
 pulumi preview --json | jq -r '.steps[]|select(.op=="delete").urn' -
 pulumi preview --json | jq -r '.steps[]|select(.op=="delete").oldState.id' -
@@ -41,3 +45,12 @@ pulumi preview --json | jq -r '.steps[]|select(.op=="delete").urn' - | xargs -n1
 
 pulumi plugin ls --project
 pulumi plugin install
+
+
+pulumi state unprotect 'urn:pulumi:dev::custom-images::aws:imagebuilder/infrastructureConfiguration:InfrastructureConfiguration::server-baseline'
+pulumi state delete 'urn:pulumi:dev::custom-images::aws:imagebuilder/infrastructureConfiguration:InfrastructureConfiguration::server-baseline'
+pulumi state rename -y 'urn:pulumi:dev::custom-images::aws:imagebuilder/imageRecipe:ImageRecipe::baselineServerImage-1.0.8' 'serverBaseline-1.0.8'
+
+
+find . -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi preview --parallel "$(nproc)" --cwd
+find . -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi refresh --parallel "$(nproc)" -s 'dev' --non-interactive -v '3' --cwd
