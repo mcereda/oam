@@ -24,7 +24,9 @@ ansible-galaxy init 'gitlab'
 ansible-galaxy role init --type 'container' --init-path 'gitlab' 'name'
 
 # Apply changes.
-ansible-playbook \
+ansible-playbook 'gitlab.yml' \
 	-i 'aws_ec2.yml' -e 'ansible_aws_ssm_plugin=/usr/local/sessionmanagerplugin/bin/session-manager-plugin' \
-	-D --step \
-	'gitlab.yml'
+	-D --step
+ansible-playbook 'prometheus.yml' \
+	-i 'aws_ec2.yml' -e 'ansible_aws_ssm_plugin=/usr/local/sessionmanagerplugin/bin/session-manager-plugin' \
+	-D -t 'cron' -l 'i-0123456789abcdef0 -C

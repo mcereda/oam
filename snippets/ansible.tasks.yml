@@ -137,3 +137,27 @@
             owner: "{{ item.key }}"
             state: touch
           with_dict: "{{ users_info }}"
+
+- name: Cronjobs
+  block:
+    - name: At specific times
+      become: true
+      ansible.builtin.cron:
+        name: Prometheus manual data backup
+        cron_file: prometheus-manual-data-backup
+
+        # Mind this is based on the hosts' time.
+        hour: 4
+        minute: 0
+
+        user: root
+        job:
+          # - Keep '%' characters escaped or they'll be treated as newlines.
+          # - Archive creation returns 1 if it detects changes to read files.
+          #   Using ';' instead of '&&' to ignore.
+          >
+            FILENAME="/tmp/prometheus-data-$(date +'\%s-\%F-\%H-\%m-\%S').tar.gz"
+            && tar -czf "$FILENAME" '/var/lib/prometheus/data'
+            ; tar -tf "$FILENAME" > '/dev/null'
+            && aws s3 cp "$FILENAME" 's3://backups/prometheus/'
+            && rm "$FILENAME"

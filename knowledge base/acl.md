@@ -10,10 +10,12 @@
 
 ## TL;DR
 
-When **setting** permissions, the _execute_ flag can be set to the **uppercase** `X` instead of the **lowercase** `x`.<br/>
-The uppercase `X` permission allows execution only if the target is a directory or if the execute permission has already been set for the user or group.
+When **setting** permissions, the _execute_ flag can be set to the **uppercase** `X` instead of the
+**lowercase** `x`.<br/>
+The uppercase `X` permission allows execution only if the target is a directory or if the execute permission has already
+been set for the user or group.
 
-BSD systems use NFSv4 ACLs by default in ZFS.
+BSD systems use NFSv4 ACLs by default in ZFS.<br/>
 List of **NFSv4** [permission tags][syntax descriptions for setting acls] and [inheritance options][acl inheritance].
 
 ```sh
@@ -79,7 +81,8 @@ setfacl -b 'path/to/file'
 
 ## Set default permissions for files and directories
 
-Suppose you want a folder to set the default permissions of newly created files and directories to `0664` (`-rw-rw-r--`) and `0775` (`drwxrwxr-x`) respectively.<br/>
+Suppose you want a folder to set the default permissions of newly created files and directories to `0664` (`-rw-rw-r--`)
+and `0775` (`drwxrwxr-x`) respectively.<br/>
 The best way to achieve this would be to set up it's ACLs accordingly.
 
 ### Posix
@@ -131,7 +134,8 @@ setfacl -a '5' 'everyone@:r-x---a-R-c---:-d-----:allow' 'path/to/dir'
 - [`chmod`][chmod] for how to force new files to be owned by specific users or groups
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
