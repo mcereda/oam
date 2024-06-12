@@ -40,6 +40,8 @@ curl -X 'PUT' -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/applic
 
 Previously known as 'Omnibus'.
 
+Default backup location: `/var/opt/gitlab/backups`.
+
 <details>
   <summary>Installation</summary>
 

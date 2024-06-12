@@ -1,28 +1,30 @@
 # Crontab
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
-1. [Sources](#sources)
+1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 ## TL;DR
 
 ```sh
 # List existing jobs.
 crontab -l
-sudo crontab -l -u other_user
+sudo crontab -l -u 'jane'
 
 # Edit crontab files.
 crontab -e
-sudo crontab -e -u other_user
+sudo crontab -e -u 'mark'
 
 # Replace the current crontab with the contents of a given file.
-crontab path/to/file
-sudo crontab -u other_user path/to/file
+crontab 'path/to/file'
+sudo crontab -u 'kelly' 'path/to/file'
+
+# Validate crontab files.
+crontab -T '/etc/cron.d/prometheus-backup'
 
 # Remove all cron jobs.
 crontab -r
-sudo crontab -r -u other_user
+sudo crontab -r -u 'nana'
 ```
 
 ```txt
@@ -36,13 +38,21 @@ sudo crontab -r -u other_user
 34 2 * * Fri /absolute/path/to/script.sh
 ```
 
-## Sources
+## Further readings
+
+- [Cron]
+
+### Sources
 
 - [cheat.sh]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[cron]: cron.md
 
 <!-- Others -->
 [cheat.sh]: https://cheat.sh/crontab
