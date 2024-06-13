@@ -9,6 +9,8 @@ Amazon offering for managed OpenSearch clusters.
    1. [Migrate indexes to UltraWarm storage](#migrate-indexes-to-ultrawarm-storage)
    1. [Return warm indexes to hot storage](#return-warm-indexes-to-hot-storage)
    1. [Migrate indexes to Cold storage](#migrate-indexes-to-cold-storage)
+1. [Best practices](#best-practices)
+   1. [Dedicated master nodes](#dedicated-master-nodes)
 1. [Cost-saving measures](#cost-saving-measures)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -149,9 +151,57 @@ GET _cold/migration/my-index/_status
 POST _cold/migration/my-index/_cancel
 ```
 
+## Best practices
+
+Refer [Operational best practices for Amazon OpenSearch Service] and
+[Best practices for configuring your Amazon OpenSearch Service domain].
+
+- Use [dedicated master nodes] in **production** clusters.
+- Use Multi-AZ deployments in **production** clusters.
+
+### Dedicated master nodes
+
+Refer [Dedicated master nodes in Amazon OpenSearch Service].
+
+They increase cluster stability by performing cluster management tasks.<br/>
+They do **not** hold data nor respond to data upload requests.
+
+Only **one** of the dedicated master nodes is active, while the others wait as backup in case the active dedicated
+master node fails.
+
+All data upload requests are served by the data nodes, while all cluster management tasks are offloaded to the active
+dedicated master node.
+Cluster management tasks are:
+
+- Tracking all nodes in the cluster.
+- Maintaining routing information for nodes in the cluster.
+- Tracking the number of indexes in the cluster.
+- Tracking the number of shards belonging to each index.
+- Updating the cluster state after state changes.<br/>
+  I.e., creating an index and adding or removing nodes in the cluster.
+- Replicating changes to the cluster state across all nodes in the cluster.
+- Monitoring the health of all cluster nodes by sending heartbeat signals.
+
+Use Multi-AZ with Standby **adds** three dedicated master nodes to each OpenSearch Service domain it is enabled
+for.
+
+Even deploying in Single-AZ mode, **three** dedicated master nodes are recommended for stability.<br/>
+In any case, **never** choose an even number of dedicated master nodes to avoid _split brain_ problems.
+
+If a cluster has an **even** number of master-eligible nodes, OpenSearch and Elasticsearch versions 7.x and later will
+ignore one node so that the voting configuration is always an odd number.<br/>
+As such, an even number of dedicated master nodes are essentially equivalent to that number - 1.
+
+> If a cluster doesn't have the necessary quorum to elect a new master node, write and read requests to the cluster will
+> both fail.<br/>
+> This behavior differs from the OpenSearch default.
+
+Master nodes size is highly correlated with the data instance size and the number of instances, indexes, and shards they
+can manage.
+
 ## Cost-saving measures
 
-- Choose good instance types and sizes.<br/>
+- Choose appropriate [instance types and sizes][supported instance types in amazon opensearch service].<br/>
   Leverage the ability to select them to tailor the service offering to one's needs.
 - Consider using reserved instances for long-term savings.
 - Enable index-level compression to save storage space and reduce I/O costs.
@@ -159,7 +209,8 @@ POST _cold/migration/my-index/_cancel
 - Consider using [S3] as data store for infrequently accessed or archived data.
 - Consider adjusting the frequency and retention period of snapshots.<br/>
   By default, AWS OpenSearch takes **daily** snapshots and retains them for **14 days**.
-- Enable autoscaling.
+- If using `gp2` EBS volumes, move to `gp3`.
+- Enable autoscaling (serverless only).
 - Optimize indexes' sharding and replication.
 - Optimize queries.
 - Optimize data ingestion.
@@ -176,6 +227,7 @@ POST _cold/migration/my-index/_cancel
 ## Further readings
 
 - [OpenSearch]
+- [Supported instance types in Amazon OpenSearch Service]
 
 ### Sources
 
@@ -187,6 +239,10 @@ POST _cold/migration/my-index/_cancel
 - [UltraWarm storage for Amazon OpenSearch Service]
 - [Index State Management in Amazon OpenSearch Service]
 - [Cold storage for Amazon OpenSearch Service]
+- [Lower your Amazon OpenSearch Service storage cost with gp3 Amazon EBS volumes]
+- [Dedicated master nodes in Amazon OpenSearch Service]
+- [Best practices for configuring your Amazon OpenSearch Service domain]
+- [Operational best practices for Amazon OpenSearch Service]
 
 <!--
   Reference
@@ -198,18 +254,24 @@ POST _cold/migration/my-index/_cancel
 [ultrawarm storage]: #ultrawarm-storage
 
 <!-- Knowledge base -->
+[dedicated master nodes]: #dedicated-master-nodes
 [opensearch]: ../../opensearch.md
 [s3]: s3.md
 
 <!-- Files -->
 <!-- Upstream -->
+[best practices for configuring your amazon opensearch service domain]: https://aws.amazon.com/blogs/big-data/best-practices-for-configuring-your-amazon-opensearch-service-domain/
 [cold storage for amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/cold-storage.html
+[dedicated master nodes in amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-dedicatedmasternodes.html
 [how do i reduce the cost of using opensearch service domains?]: https://repost.aws/knowledge-center/opensearch-domain-pricing
 [index state management in amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ism.html
+[lower your amazon opensearch service storage cost with gp3 amazon ebs volumes]: https://aws.amazon.com/blogs/big-data/lower-your-amazon-opensearch-service-storage-cost-with-gp3-amazon-ebs-volumes/
+[operational best practices for amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/bp.html
+[supported instance types in amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/supported-instance-types.html
 [ultrawarm storage for amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ultrawarm.html
 
 <!-- Others -->
 [cost-saving strategies for aws opensearch(finops): optimize performance without breaking the bank]: https://ramchandra-vadranam.medium.com/cost-saving-strategies-for-aws-opensearch-finops-optimize-performance-without-breaking-the-bank-f87f0bb2ce37
 [opensearch cost optimization: 12 expert tips]: https://opster.com/guides/opensearch/opensearch-capacity-planning/how-to-reduce-opensearch-costs/
-[right-size amazon opensearch instances to cut costs by 50% or more]: https://cloudfix.com/blog/right-size-amazon-opensearch-instances-cut-costs/
 [reducing amazon opensearch service costs: our journey to over 60% savings]: https://medium.com/kreuzwerker-gmbh/how-we-accelerate-financial-and-operational-efficiency-with-amazon-opensearch-6b86b41d50a0
+[right-size amazon opensearch instances to cut costs by 50% or more]: https://cloudfix.com/blog/right-size-amazon-opensearch-instances-cut-costs/

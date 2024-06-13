@@ -16,6 +16,8 @@ Use cases: application search, log analytics, data observability, data ingestion
 1. [Requirements](#requirements)
 1. [Quickstart](#quickstart)
 1. [Tuning](#tuning)
+1. [The split brain problem](#the-split-brain-problem)
+1. [APIs](#apis)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -199,6 +201,14 @@ Use docker compose.
 - Set the size of the Java heap.<br/>
   Recommend half of system RAM.
 
+## The split brain problem
+
+TODO
+
+## APIs
+
+TODO
+
 ## Further readings
 
 - [Website]
@@ -207,11 +217,16 @@ Use docker compose.
 - [Lucene]
 - [Okapi BM25]
 - [`fsync`][fsync]
+- [AWS' managed OpenSearch] offering
 
 ### Sources
 
 - [What is OpenSearch?]
 - [Creating a cluster]
+- [Elasticsearch split brain]
+- [Avoiding the Elasticsearch split brain problem, and how to recover]
+- [Index templates in OpenSearch - how to use composable templates]
+- [Index management]
 
 <!--
   Reference
@@ -223,15 +238,21 @@ Use docker compose.
 [translog]: #translog
 
 <!-- Knowledge base -->
+[AWS' managed OpenSearch]: cloud%20computing/aws/opensearch.md
+
 <!-- Files -->
 <!-- Upstream -->
+[creating a cluster]: https://opensearch.org/docs/latest/tuning-your-cluster/
 [documentation]: https://opensearch.org/docs/latest/
 [github]: https://github.com/opensearch-project
-[creating a cluster]: https://opensearch.org/docs/latest/tuning-your-cluster/
+[index management]: https://opensearch.org/docs/latest/dashboards/im-dashboards/index-management/
 [website]: https://opensearch.org/
 [what is opensearch?]: https://aws.amazon.com/what-is/opensearch/
 
 <!-- Others -->
+[avoiding the elasticsearch split brain problem, and how to recover]: https://bigdataboutique.com/blog/avoiding-the-elasticsearch-split-brain-problem-and-how-to-recover-f6451c
+[elasticsearch split brain]: https://opster.com/guides/elasticsearch/best-practices/elasticsearch-split-brain/
 [fsync]: https://man7.org/linux/man-pages/man2/fsync.2.html
+[index templates in opensearch - how to use composable templates]: https://opster.com/guides/opensearch/opensearch-data-architecture/index-templating-in-opensearch-how-to-use-composable-templates/
 [lucene]: https://lucene.apache.org/
 [okapi bm25]: https://en.wikipedia.org/wiki/Okapi_BM25
