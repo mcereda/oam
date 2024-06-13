@@ -42,15 +42,23 @@ pulumi preview --json | jq -r '.steps[]|select(.op=="delete").oldState.id' -
 # Remove from the state all resources that would be deleted
 pulumi preview --json | jq -r '.steps[]|select(.op=="delete").urn' - | xargs -n1 pulumi state delete --force
 
+
 pulumi config set 'boincAcctMgrUrl' 'https://bam.boincstats.com'
 pulumi config set --secret 'boincGuiRpcPasswd' 'something-something-darkside'
 pulumi config set --path 'outer.inner' 'value'
 pulumi config set --path 'list[1]' 'value'
 
+# Gitlab provider
+# 'baseUrl' requires the ending slash
+pulumi config set 'gitlab:baseUrl' 'https://private.gitlab.server/api/v4/'
+pulumi config set 'gitlab:token' 'glpat-m-Va…zy' --secret
+
+
 pulumi config get 'boincAcctMgrUrl'
 pulumi config get 'boincGuiRpcPasswd'
 pulumi config get --path outer.inner
 pulumi config get --path 'list[1]'
+
 
 pulumi plugin ls --project
 pulumi plugin install
