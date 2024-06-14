@@ -198,6 +198,8 @@ From [Using service-linked roles]:
 > Service-linked roles appear in your AWS account and are owned by the service. An IAM administrator can view, but not
 > edit the permissions for service-linked roles.
 
+Check [aws.permissions.cloud] for a community-driven source of truth for AWS identity.
+
 ### IAM policies
 
 IAM does not expose policies' `Sid` element in the IAM API, so it can't be used to retrieve statements.
@@ -269,6 +271,7 @@ Examples:
 - [Working with DB instance read replicas]
 - AWS' [CLI]
 - [Configuring EC2 Disk alert using Amazon CloudWatch]
+- [aws.permissions.cloud]
 
 ### Sources
 
@@ -350,6 +353,7 @@ Examples:
 [automating dns-challenge based letsencrypt certificates with aws route 53]: https://johnrix.medium.com/automating-dns-challenge-based-letsencrypt-certificates-with-aws-route-53-8ba799dd207b
 [aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
 [aws icons]: https://aws-icons.com/
+[aws.permissions.cloud]: https://aws.permissions.cloud/
 [configuring ec2 disk alert using amazon cloudwatch]: https://medium.com/@chandinims001/configuring-ec2-disk-alert-using-amazon-cloudwatch-793807e40d72
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
 [introduction to aws iam assumerole]: https://aws.plainenglish.io/introduction-to-aws-iam-assumerole-fbef3ce8e90b

@@ -18,6 +18,7 @@ Use cases: application search, log analytics, data observability, data ingestion
 1. [Tuning](#tuning)
 1. [The split brain problem](#the-split-brain-problem)
 1. [APIs](#apis)
+1. [Hot-warm architecture](#hot-warm-architecture)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -152,6 +153,9 @@ Enormous documents should still be indexed individually.
 
 When indexing documents, the document's `_id` must be 512 bytes or less in size.
 
+_Static_ index settings can only be updated on **closed** indexes.<br/>
+_Dynamic_ index settings can be updated at any time through the [APIs].
+
 ## Requirements
 
 | Port number | Component                                                                        |
@@ -193,13 +197,14 @@ Use docker compose.
 ## Tuning
 
 - Disable swapping.<br/>
-  Swapping can dramatically decrease performance and stability.
+  If kept enabled, it can dramatically **decrease** performance and stability.
 - Avoid using network file systems for node storage in a production workflow.<br/>
   Using those can cause performance issues due to network conditions (i.e.: latency, limited throughput) or read/write
   speeds.
 - Use solid-state drives (SSDs) on the hosts for node storage where possible.
 - Set the size of the Java heap.<br/>
-  Recommend half of system RAM.
+  Recommended to use **half** of the system's RAM.
+- Set up a [hot-warm architecture].
 
 ## The split brain problem
 
@@ -207,7 +212,40 @@ TODO
 
 ## APIs
 
-TODO
+FIXME: expand
+
+- Close indexes.<br/>
+  Disables read and write operations.
+
+  ```plaintext
+  POST /prometheus-logs-20231205/_close
+  ```
+
+- (Re)Open closed indexes.<br/>
+  Enables read and write operations.
+
+  ```plaintext
+  POST /prometheus-logs-20231205/_open
+  ```
+
+- Update indexes' settings.<br/>
+  _Static_ settings can only be updated on **closed** indexes.
+
+  ```plaintext
+  PUT /prometheus-logs-20231205/_settings
+  {
+    "index": {
+      "codec": "zstd_no_dict",
+      "codec.compression_level": 3,
+      "refresh_interval": "2s"
+    }
+  }
+  ```
+
+## Hot-warm architecture
+
+Refer
+[Set up a hot-warm architecture](https://opensearch.org/docs/latest/tuning-your-cluster/#advanced-step-7-set-up-a-hot-warm-architecture).
 
 ## Further readings
 
@@ -218,6 +256,7 @@ TODO
 - [Okapi BM25]
 - [`fsync`][fsync]
 - [AWS' managed OpenSearch] offering
+- [Setting up Hot-Warm architecture for ISM in OpenSearch]
 
 ### Sources
 
@@ -227,6 +266,7 @@ TODO
 - [Avoiding the Elasticsearch split brain problem, and how to recover]
 - [Index templates in OpenSearch - how to use composable templates]
 - [Index management]
+- [Index settings]
 
 <!--
   Reference
@@ -234,6 +274,8 @@ TODO
   -->
 
 <!-- In-article sections -->
+[apis]: #apis
+[hot-warm architecture]: #hot-warm-architecture
 [refresh operations]: #refresh-operations
 [translog]: #translog
 
@@ -246,6 +288,7 @@ TODO
 [documentation]: https://opensearch.org/docs/latest/
 [github]: https://github.com/opensearch-project
 [index management]: https://opensearch.org/docs/latest/dashboards/im-dashboards/index-management/
+[index settings]: https://opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index-settings/
 [website]: https://opensearch.org/
 [what is opensearch?]: https://aws.amazon.com/what-is/opensearch/
 
@@ -256,3 +299,4 @@ TODO
 [index templates in opensearch - how to use composable templates]: https://opster.com/guides/opensearch/opensearch-data-architecture/index-templating-in-opensearch-how-to-use-composable-templates/
 [lucene]: https://lucene.apache.org/
 [okapi bm25]: https://en.wikipedia.org/wiki/Okapi_BM25
+[setting up hot-warm architecture for ism in opensearch]: https://opster.com/guides/opensearch/opensearch-data-architecture/setting-up-hot-warm-architecture-for-ism/

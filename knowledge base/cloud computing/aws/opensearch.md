@@ -17,20 +17,28 @@ Amazon offering for managed OpenSearch clusters.
 
 ## Storage
 
-_Standard_ data nodes use _hot_ storage in the form of instance stores or EBS volumes attached to each node.<br/>
-Hot storage provides the fastest possible performance for indexing and searching new data.
+Clusters can be set up to use the [hot-warm architecture].
 
-_UltraWarm_ nodes use S3 and caching.<br/>
-Useful for indexes that are **not** actively written to, queried less frequently, or don't need the hot storage's
-performance.
+_Hot_ storage provides the fastest possible performance for indexing and searching **new** data.
 
-> Warm indexes are **read-only** unless returned to hot storage.<br/>
-> This makes UltraWarm storage best-suited for immutable data such as logs.
+_Data_ nodes use **hot** storage in the form of instance stores or EBS volumes attached to each node.
 
-Warm indexes behave like any other index.
+Indexes that are **not** actively written to (e.g., immutable data like logs), that are queried less frequently, or that
+don't need the hot storage's performance can be moved to _warm_ storage.
 
-_Cold_ storage uses s3 too. It is meant for data accessed only occasionally or no longer in active use.<br/>
-One **can't** read from nor write to cold indexes. When one needs it, one can selectively attach it to UltraWarm nodes.
+Warm indexes are **read-only** unless returned to hot storage.<br/>
+Aside that, they behave like any other hot index.
+
+_UltraWarm_ nodes use **warm** storage in the form of S3 and caching.
+
+AWS' managed OpenSearch service offers also _Cold_ storage.<br/>
+It is meant for data accessed only occasionally or no longer in active use.<br/>
+Cold indexes are normally detached from nodes and stored in S3, meaning one **can't** read from nor write to cold
+indexes by default.<br/>
+Should one need to query them, one needs to selectively attach them to UltraWarm nodes.
+
+Use [Index State Management][index state management in amazon opensearch service] to automate indexes migration to
+lower storage states after they meet specific conditions.
 
 ### UltraWarm storage
 
@@ -54,8 +62,7 @@ Considerations:
   to the amount of storage each instance type can address and the maximum number of warm nodes supported by Domains.
 - Amazon recommends a maximum shard size of 50 GiB.
 - Upon enablement, UltraWarm might not be available to use for several hours even if the domain state is _Active_.
-- Use [Index State Management][index state management in amazon opensearch service] to automate indexes migration to
-  UltraWarm after they meet specific conditions.
+- The minimum amount of UltraWarm instances allowed by AWS is 2.
 
 > Before disabling UltraWarm, one **must** either delete **all** warm indexes or migrate them back to hot storage.<br/>
 > After warm storage is empty, wait five minutes before attempting to disable UltraWarm.
@@ -68,6 +75,10 @@ Requirements:
 
 - OpenSearch/ElasticSearch >= v7.9.
 - [UltraWarm storage] enabled for the same domain.
+
+Considerations:
+
+- One **can't** read from nor write to cold indexes.
 
 ## Operations
 
@@ -203,6 +214,10 @@ can manage.
 
 - Choose appropriate [instance types and sizes][supported instance types in amazon opensearch service].<br/>
   Leverage the ability to select them to tailor the service offering to one's needs.
+
+  > [OR1 instances][or1 storage for amazon opensearch service] **cannot** (currently?) be selected as master nodes.<br/>
+  > They must also be selected **at domain creation**.
+
 - Consider using reserved instances for long-term savings.
 - Enable index-level compression to save storage space and reduce I/O costs.
 - Use Index Lifecycle Management policies to move old data in lower storage tiers.
@@ -216,17 +231,18 @@ can manage.
 - Optimize data ingestion.
 - Optimize indexes' mapping and settings.
 - Optimize the JVM heap size.
-- Summarize and compress historical data using Rollups.
+- Summarize and compress historical data using [index rollups].
 - Check out caches.
 - Reduce the number of requests using throttling and rate limiting.
-- Move to single-AZ deployments.
-- Leverage Spot Instances for data ingestion and processing.
-- Compress source data before sending it to OpenSearch to reduce the storage footprint and data transfer costs.
+- Move to Single-AZ deployments.
+- Filter out and compress source data before sending it to OpenSearch to reduce the storage footprint and data transfer
+  costs.
 - Share a single OpenSearch cluster with multiple accounts to reduce the overall number of instances and resources.
 
 ## Further readings
 
 - [OpenSearch]
+- [Hot-warm architecture]
 - [Supported instance types in Amazon OpenSearch Service]
 
 ### Sources
@@ -243,6 +259,7 @@ can manage.
 - [Dedicated master nodes in Amazon OpenSearch Service]
 - [Best practices for configuring your Amazon OpenSearch Service domain]
 - [Operational best practices for Amazon OpenSearch Service]
+- [OR1 storage for Amazon OpenSearch Service]
 
 <!--
   Reference
@@ -255,6 +272,7 @@ can manage.
 
 <!-- Knowledge base -->
 [dedicated master nodes]: #dedicated-master-nodes
+[hot-warm architecture]: ../../opensearch.md#hot-warm-architecture
 [opensearch]: ../../opensearch.md
 [s3]: s3.md
 
@@ -267,11 +285,13 @@ can manage.
 [index state management in amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ism.html
 [lower your amazon opensearch service storage cost with gp3 amazon ebs volumes]: https://aws.amazon.com/blogs/big-data/lower-your-amazon-opensearch-service-storage-cost-with-gp3-amazon-ebs-volumes/
 [operational best practices for amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/bp.html
+[or1 storage for amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/or1.html
 [supported instance types in amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/supported-instance-types.html
 [ultrawarm storage for amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ultrawarm.html
 
 <!-- Others -->
 [cost-saving strategies for aws opensearch(finops): optimize performance without breaking the bank]: https://ramchandra-vadranam.medium.com/cost-saving-strategies-for-aws-opensearch-finops-optimize-performance-without-breaking-the-bank-f87f0bb2ce37
+[index rollups]: https://opensearch.org/docs/latest/im-plugin/index-rollups/index/
 [opensearch cost optimization: 12 expert tips]: https://opster.com/guides/opensearch/opensearch-capacity-planning/how-to-reduce-opensearch-costs/
 [reducing amazon opensearch service costs: our journey to over 60% savings]: https://medium.com/kreuzwerker-gmbh/how-we-accelerate-financial-and-operational-efficiency-with-amazon-opensearch-6b86b41d50a0
 [right-size amazon opensearch instances to cut costs by 50% or more]: https://cloudfix.com/blog/right-size-amazon-opensearch-instances-cut-costs/
