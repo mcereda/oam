@@ -253,6 +253,7 @@
         "rego",
         "replicatedctl",
         "resolv",
+        "resolvables",
         "rfkill",
         "ripsecrets",
         "rmmod",

@@ -1,8 +1,7 @@
 # The Zypper package manager
 
-SUSE and openSUSE GNU/Linux's package management utility and command-line interface to the ZYpp system management library (`libzypp`).
-
-## Table of contents <!-- omit in toc -->
+SUSE and openSUSE GNU/Linux's package management utility and command-line interface to the ZYpp system management
+library (`libzypp`).
 
 1. [TL;DR](#tldr)
 1. [Concepts](#concepts)
@@ -10,7 +9,7 @@ SUSE and openSUSE GNU/Linux's package management utility and command-line interf
 1. [Configuration](#configuration)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -35,9 +34,15 @@ Default files:
 Command examples:
 
 ```sh
-# Update the package cache.
+# Update caches.
 zypper refresh
 zypper ref 'updates'
+
+# Clean caches.
+zypper clean --metadata
+zypper clean --all 'packman'
+
+# ---
 
 # Search for resolvables.
 zypper search 'nmap'
@@ -63,7 +68,7 @@ zypper in --no-recommends 'gv' 'virtualbox-ose=2.0.6' '/root/ansible.rpm'
 
 # Install from specific repositories.
 # Requires the repo to be already added.
-zypper in -r 'packman' 'libavdevice60'
+zypper in -r 'packman' --download-in-heaps 'libavdevice60'
 zypper in -r 'https://repo.vivaldi.com/archive/vivaldi-suse.repo' 'vivaldi'
 
 # Reinstall resolvables.
@@ -74,7 +79,7 @@ zypper in -f 'amdgpu-dkms'
 zypper source-install -d 'dbus-1'
 zypper si 'dolphin-plugins'
 
-# Check the dependencies of *installed* packages are satisfied.
+# Check the dependencies of *installed* resolvables are satisfied.
 zypper verify 'git-lfs'
 zypper ve 'virtualbox'
 
@@ -88,9 +93,9 @@ zypper in '!Firefox' '-htop'
 zypper list-updates
 zypper lu --all
 
-# Update installed packages.
+# Update installed resolvables.
 zypper update
-zypper up 'vivaldi-stable'
+zypper up --download-in-heaps 'vivaldi-stable'
 
 # List available patches.
 # By default, it shows only *applicable* ones.
@@ -104,23 +109,23 @@ zypper pchk --with-optional
 # Apply patches.
 zypper patch
 
-# Perform a distribution upgrade.
+# Perform distribution upgrades.
 zypper dist-upgrade
-zypper dup --details --from 'factory' --from 'packman'
+zypper dup --details --from 'factory' --from 'packman' --download-in-heaps
 
 # List unneded packages.
 # E.g. older dependencies not used anymore.
 zypper packages --unneeded
 zypper pa --unneeded
 
+# ---
 
-# List currently defined repositories.
+# List repositories.
 zypper repos
-zypper rl -d --sort-by-priority
+zypper lr -d --sort-by-priority
 
 # Add repositories.
-zypper addrepo --check --refresh --priority '90' \
-  'https://repo.vivaldi.com/archive/vivaldi-suse.repo' 'vivaldi'
+zypper addrepo --check --refresh --priority '90' 'https://repo.vivaldi.com/archive/vivaldi-suse.repo' 'vivaldi'
 zypper ar -cfp '89' …
 
 # Remove repositories.
@@ -136,10 +141,7 @@ zypper nr '5' 'packman'
 zypper modifyrepo -er 'updates'
 zypper mr -da
 
-
-# Clean caches.
-zypper clean --metadata
-zypper clean --all 'packman'
+# ---
 
 # Execute without user confirmation (non-interactively).
 zypper --non-interactive …
@@ -150,8 +152,16 @@ zypper purge-kernels --dry-run
 # Clean up unneded packages.
 # Always check what is being done.
 zypper packages --unneeded \
-| awk -F'|' 'NR>4{gsub(" ", "", $0);print $3"="$4}' \
-| sort -u | sudo xargs zypper rm -u
+| awk -F'|' 'NR>4{gsub(" ", "", $0);print $3"="$4}' | sort -u \
+| sudo xargs zypper rm -u
+
+# Upgrade distribution's releases.
+sudo zypper refresh \
+&& sudo zypper update \
+&& sed -i 's|/15.5/|/${releasever}/|g' '/etc/zypp/repos.d/'*'.repo' \
+&& sudo zypper --releasever '15.6' refresh \
+&& sudo zypper --releasever '15.6' dist-upgrade \
+&& sudo reboot
 ```
 
 ## Concepts
@@ -161,13 +171,17 @@ In contrast to normal repositories, @System provides packages that can only be d
 
 Installed packages which do not belong to any available repository are denoted as _unwanted_, _orphaned_ or _dropped_.
 
-One can specify the location of packages or repositories using any type of URI supported by `libzypp` (e.g. local paths, ftp/https/other URI).<br/>
-In addition, Zypper accepts openSUSE Build Service repositories in the `addrepo` command in the form of `obs://project/platform` URI.
+One can specify the location of packages or repositories using any type of URI supported by `libzypp` (e.g. local paths,
+ftp/https/other URI).<br/>
+In addition, Zypper accepts openSUSE Build Service repositories in the `addrepo` command in the form of
+`obs://project/platform` URI.
 
 Resource objects are called _resolvables_.<br/>
-They might be **packages**, **patches**, **patterns**, **products**, or basically any kind of object with dependencies to other objects managed by `libzypp`.
+They might be **packages**, **patches**, **patterns**, **products**, or basically any kind of object with dependencies
+to other objects managed by `libzypp`.
 
-If one does not request specific versions of resolvables during an action, Zypper's dependency solver will pick a _reasonable_ one automatically.
+If one does not request specific versions of resolvables during an action, Zypper's dependency solver will pick a
+_reasonable_ one automatically.
 
 ## Repositories
 
@@ -209,30 +223,28 @@ sudo rpm --query --list 'parallel'
 - [Managing software with command line tools]
 - [Zypp configuration options]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Package repositories]
 - [Additional package repositories]
 - [Command to clean out all unneeded autoinstalled dependencies]
+- [System upgrade]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[rpm]: rpm.md
 
 <!-- Upstream -->
 [additional package repositories]: https://en.opensuse.org/Additional_package_repositories
 [command to clean out all unneeded autoinstalled dependencies]: https://github.com/openSUSE/zypper/issues/116
 [managing software with command line tools]: https://documentation.suse.com/sles/15-SP5/html/SLES-all/cha-sw-cl.html
 [package repositories]: https://en.opensuse.org/Package_repositories
+[system upgrade]: https://en.opensuse.org/SDB:System_upgrade
 [zypp configuration options]: https://doc.opensuse.org/projects/libzypp/HEAD/group__ZyppConfig.html
-
-<!-- In-article sections -->
-[further readings]: #further-readings
-
-<!-- Knowledge base -->
-[rpm]: rpm.md
 
 <!-- Others -->
 [how can i list all files which have been installed by an zypp/zypper package?]: https://unix.stackexchange.com/questions/162092/how-can-i-list-all-files-which-have-been-installed-by-an-zypp-zypper-package#239944
