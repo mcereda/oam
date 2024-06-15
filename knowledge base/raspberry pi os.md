@@ -3,6 +3,8 @@
 ## Table of contents <!-- omit in toc -->
 
 1. [First boot](#first-boot)
+1. [Boot from USB](#boot-from-usb)
+   1. [Raspberry Pi 4B](#raspberry-pi-4b)
 1. [Repositories](#repositories)
 1. [Privilege escalation](#privilege-escalation)
 1. [Disable WiFi and Bluetooth](#disable-wifi-and-bluetooth)
@@ -30,11 +32,36 @@
     1. [LED warning flash codes](#led-warning-flash-codes)
     1. [Issues connecting to WiFi network using roaming features or WPA3](#issues-connecting-to-wifi-network-using-roaming-features-or-wpa3)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## First boot
 
 Unless manually set from the Imager, on first boot the system will ask to create a new initial user.
+
+## Boot from USB
+
+Available on Raspberry Pi 2B v1.2, 3A+, 3B, 3B+, 4B, 400, Compute Module 3, Compute Module 3+ and Compute Module 4 only.
+
+### Raspberry Pi 4B
+
+The bootloader EEPROM may need to be updated to enable booting from USB mass storage devices.
+
+To check this, power the Pi up with no SD card inserted and a display attached to one of the HDMI ports.<br/>
+It will display a diagnostic screen which includes the bootloader EEPROM version at the top.
+
+The bootloader must be dated **_Sep 3 2020_** or later to support USB mass storage boot.<br/>
+If the diagnostic screen reports a date earlier than _Sep 3 2020_, or there is no diagnostic screen shown, one will need
+to update the bootloader EEPROM first to enable USB mass storage boot.
+
+To update it:
+
+1. use the _Misc Utility Images_ option in Raspberry Pi Imager to create an SD card with the latest
+   _Raspberry Pi 4 EEPROM boot recovery_ image
+1. boot the Pi using this SD card
+1. the bootloader EEPROM will be updated to the latest factory version
+1. the Pi will flash its green ACT light rapidly and display green on the HDMI outputs to indicate success
+
+USB mass storage boot on the Pi 4B requires Raspberry Pi OS 2020-08-20 or later.
 
 ## Repositories
 
@@ -239,6 +266,11 @@ sudo nano '/etc/init.d/raspi-config'
 
 See [Timely tips for speeding up your Raspberry Pi].
 
+```sh
+# Run benchmarks.
+curl -L https://raw.githubusercontent.com/aikoncwd/rpi-benchmark/master/rpi-benchmark.sh | sudo bash
+```
+
 ## Headless boot
 
 Manual procedure:
@@ -296,7 +328,7 @@ network={
 
 Use `wpa_passphrase`:
 
-```
+```plaintext
 usage: wpa_passphrase <ssid> [passphrase]
 If passphrase is left out, it will be read from stdin
 ```
@@ -404,10 +436,9 @@ Long term solution: none currently known.
 - [Country code search]
 - [`k3s`][k3s]
 - [Configuration]
+- [os documentation]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Prepare SD card for WiFi on headless Pi]
 - [Run Kubernetes on a Raspberry Pi with k3s]
@@ -416,27 +447,43 @@ All the references in the [further readings] section, plus the following:
 - [Timely tips for speeding up your Raspberry Pi]
 - [Repositories]
 - [Mirrors]
+- [disabling bluetooth on raspberry pi]
+- [ghollingworth/overlayfs]
+- [how to disable onboard wifi and bluetooth on raspberry pi 3]
+- [how to disable wi-fi on raspberry pi]
+- [how to disable your raspberry pi's wi-fi]
+- [how to make your raspberry pi 4 faster with a 64 bit kernel]
+- [re: raspbian jessie linux 4.4.9 severe performance degradati]
+- [rp automatic updates]
+- [sd card power failure resilience ideas]
+- [alpine linux headless installation]
+- [alpine linux]
+- [benchmark]
+- [preventing filesystem corruption in embedded linux]
+- [usb mass storage boot]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Upstream -->
 [/boot/config.txt]: https://www.raspberrypi.org/documentation/configuration/config-txt/README.md
 [configuration]: https://www.raspberrypi.com/documentation/computers/configuration.html
 [mirrors]: https://www.raspbian.org/RaspbianMirrors
+[os documentation]: https://www.raspberrypi.org/documentation/computers/os.html
 [overclocking]: https://www.raspberrypi.org/documentation/configuration/config-txt/overclocking.md
 [repositories]: https://www.raspbian.org/RaspbianRepository
 [vcgencmd]: https://www.raspberrypi.com/documentation/computers/os.html#vcgencmd
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Knowledge base -->
 [k3s]: kubernetes/k3s.md
 [rfkill]: rfkill.md
 
 <!-- Others -->
+[alpine linux headless installation]: https://wiki.alpinelinux.org/wiki/Raspberry_Pi_-_Headless_Installation
+[alpine linux]: https://wiki.alpinelinux.org/wiki/Raspberry_Pi
+[benchmark]: https://github.com/aikoncwd/rpi-benchmark
 [country code search]: https://www.iso.org/obp/ui/#search/code/
 [disabling bluetooth on raspberry pi]: https://di-marco.net/blog/it/2020-04-18-tips-disabling_bluetooth_on_raspberry_pi/
 [ghollingworth/overlayfs]: https://github.com/ghollingworth/overlayfs
@@ -445,8 +492,8 @@ All the references in the [further readings] section, plus the following:
 [how to disable your raspberry pi's wi-fi]: https://pimylifeup.com/raspberry-pi-disable-wifi/
 [how to make your raspberry pi 4 faster with a 64 bit kernel]: https://medium.com/for-linux-users/how-to-make-your-raspberry-pi-4-faster-with-a-64-bit-kernel-77028c47d653
 [issue 2067]: https://github.com/k3s-io/k3s/issues/2067#issuecomment-664052806
-[os documentation]: https://www.raspberrypi.org/documentation/computers/os.html
 [prepare sd card for wifi on headless pi]: https://raspberrypi.stackexchange.com/questions/10251/prepare-sd-card-for-wifi-on-headless-pi
+[preventing filesystem corruption in embedded linux]: https://www.embeddedarm.com/assets/preventing-filesystem-corruption-in-embedded-linux
 [raspbian bug 1929746]: https://bugs.launchpad.net/raspbian/+bug/1929746
 [re: how to make sure the rpi cpu is not throttled down?]: https://www.raspberrypi.org/forums/viewtopic.php?t=152549#p999931
 [re: raspbian jessie linux 4.4.9 severe performance degradati]: https://www.raspberrypi.org/forums/viewtopic.php?f=63&t=147781&start=50#p972790
@@ -454,3 +501,4 @@ All the references in the [further readings] section, plus the following:
 [run kubernetes on a raspberry pi with k3s]: https://opensource.com/article/20/3/kubernetes-raspberry-pi-k3s
 [sd card power failure resilience ideas]: https://www.raspberrypi.org/forums/viewtopic.php?f=63&t=253104&p=1549229#p1549117
 [timely tips for speeding up your raspberry pi]: https://www.raspberry-pi-geek.com/Archive/2013/01/Timely-tips-for-speeding-up-your-Raspberry-Pi
+[usb mass storage boot]: https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/msd.md

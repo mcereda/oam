@@ -28,7 +28,15 @@ See usage for details.
   <summary>Installation and configuration</summary>
 
 ```sh
+# Install.
 brew install 'tmux'
+
+# Get the default settings.
+# Might need to run from inside a sessions.
+# Specify a null configuration file so that tmux ends up printing whatever is hard-coded in its source.
+tmux -f '/dev/null' show-options -s
+tmux -f '/dev/null' show-options -g
+tmux -f '/dev/null' list-keys
 ```
 
 The configuration file is `$HOME/.tmux.conf` or `$XDG_CONFIG_HOME/tmux/tmux.conf`.
@@ -120,6 +128,9 @@ tmux kill-session -t 'session-name'
 - [Tmux has forever changed the way I write code]
 - [Sending simulated keystrokes in Bash]
 - [Is it possible to send input to a tmux session without connecting to it?]
+- [devhints.io]
+- [hamvocke/dotfiles]
+- [Default Tmux config]
 
 <!--
   Reference
@@ -135,6 +146,9 @@ tmux kill-session -t 'session-name'
 [tmux plugin manager]: https://github.com/tmux-plugins/tpm
 
 <!-- Others -->
+[default tmux config]: https://unix.stackexchange.com/questions/175421/default-tmux-config#342975
+[devhints.io]: https://devhints.io/tmux
+[hamvocke/dotfiles]: https://github.com/hamvocke/dotfiles/blob/master/tmux/.tmux.conf
 [is it possible to send input to a tmux session without connecting to it?]: https://unix.stackexchange.com/questions/409861/is-it-possible-to-send-input-to-a-tmux-session-without-connecting-to-it#409863
 [sending simulated keystrokes in bash]: https://superuser.com/questions/585398/sending-simulated-keystrokes-in-bash#1606615
 [tmux cheat sheet & quick reference]: https://tmuxcheatsheet.com/
