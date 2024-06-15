@@ -59,9 +59,9 @@ sudo zypper addrepo --check --refresh --priority '90' 'https://repo.vivaldi.com/
 
 # Modify repositories
 # Use this to enable or disable them
-zypper modifyrepo -ef 'updates'
-zypper mr -gp '98' '1'
-zypper mr -da
+sudo zypper modifyrepo -ef 'updates'
+sudo zypper mr -gp '98' '1'
+sudo zypper mr -da
 
 # Remove repositories
 sudo zypper removerepo 'mozilla'
@@ -80,7 +80,7 @@ zypper packages --unneeded \
 sudo systemctl stop 'display-manager.service'
 sudo zypper refresh
 sudo zypper update
-sed -i 's|/15.5/|/${releasever}/|g' '/etc/zypp/repos.d/'*'.repo'
+sudo sed -i 's|/15.5/|/${releasever}/|g' '/etc/zypp/repos.d/'*'.repo'
 sudo zypper --releasever '15.6' refresh
 sudo zypper --releasever '15.6' dist-upgrade --allow-vendor-change
 sudo reboot
