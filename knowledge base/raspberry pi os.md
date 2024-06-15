@@ -288,7 +288,7 @@ Manual procedure:
    This will be used to overwrite the same file in `/etc` on the OS.
 
    1. Follow the template below.
-   1. [Optionally] fill the template with the password's hash for improved security
+   1. \[Optionally] fill the template with the password's hash for improved security
 
 ### The `wpa_supplicant` file
 
