@@ -1,7 +1,5 @@
 # SSH
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Server installation on Windows](#server-installation-on-windows)
 1. [Key Management](#key-management)
@@ -182,8 +180,21 @@ When connecting to a host, the SSH client will use settings:
 1. from the user's `~/.ssh/config` file,
 1. from the `/etc/ssh/ssh_config` file
 
-Settings are loaded in a **first-come-first-served** way. They should hence appear from the most specific to the most
-generic, both by file and by position in those files:
+Unless noted otherwise, for each parameter, only the **first** obtained value will be used
+(_first-come-first-served_).<br/>
+Values should hence appear from the most **specific** to the most **generic**, both by file and by position in those
+files.
+
+The configuration files contain sections separated by `Host` specifications<br/>
+Those sections are only applied to hosts that match one of the patterns given in each specification.
+
+The file contains keyword-argument pairs, one per line.<br/>
+Lines starting with `#` and empty lines are interpreted as comments.<br/>
+Arguments may optionally be enclosed in **double** quotes (`"`) in order to represent arguments containing spaces.<br/>
+Configuration options may be separated by whitespace, or optional whitespace and exactly one `=`. The latter format is
+useful to avoid the need to quote whitespace when specifying configuration options using the ssh, scp, and sftp `-o`
+option.<br/>
+Keywords are case-**in**sensitive and arguments are case-**sensitive**.
 
 ```ssh-config
 Host targaryen
@@ -253,8 +264,34 @@ IdentityAgent ~/.gnupg/S.gpg-agent.ssh
 
 ## Server configuration
 
-Config file defaults to `/etc/ssh/sshd_config`.<br/>
-Restart the server upon config file change.
+The daemon's default configuration file is `/etc/ssh/sshd_config`.<br/>
+Reload the server upon config file change. No need to restart it.
+
+The configuration file contains keyword-argument pairs, one per line.<br/>
+Unless noted otherwise, for each keyword, the **first** obtained value is used (_first-come-first-served_).<br/>
+Lines starting with `#` and empty lines are interpreted as comments.<br/>
+Arguments may optionally be enclosed in **double** quotes (`"`) in order to represent arguments containing spaces.<br/>
+Keywords are case-**in**sensitive and arguments are case-**sensitive**.
+
+**Some** Linux distributions (e.g., Debian, OpenSUSE) started including `.conf` files in `/etc/ssh/sshd_config.d/` and
+`/usr/etc/ssh/sshd_config.d/` as first thing in the base configuration file:
+
+```ssh-config
+# To modify the system-wide sshd configuration, create a "*.conf" file under
+# "/etc/ssh/sshd_config.d/" which will be automatically included below.
+# Don't edit this configuration file itself if possible to avoid update
+# problems.
+Include /etc/ssh/sshd_config.d/*.conf
+
+# The strategy used for options in the default sshd_config shipped with
+# OpenSSH is to specify options with their default value where
+# possible, but leave them commented.  Uncommented options override the
+# default value.
+Include /usr/etc/ssh/sshd_config.d/*.conf
+```
+
+This avoids issues from updates overwriting the default file and allows user configurations to override defaults in a
+cleaner way.
 
 ### Change port
 
@@ -333,21 +370,22 @@ PubkeyAcceptedAlgorithms +ssh-rsa
 to your `~/.ssh/config` like so:
 
 ```diff
-Host  azure-devops
-    IdentityFile              ~/.ssh/id_rsa
-    IdentitiesOnly            yes
-+   HostkeyAlgorithms         +ssh-rsa
-+   PubkeyAcceptedAlgorithms  +ssh-rsa
+ Host  azure-devops
+     IdentityFile              ~/.ssh/id_rsa
+     IdentitiesOnly            yes
++    HostkeyAlgorithms         +ssh-rsa
++    PubkeyAcceptedAlgorithms  +ssh-rsa
 ```
 
 Solution: update the SSH server.
 
 ## Further readings
 
-- [`SSH_CONFIG(5)`][ssh_config man page] man page
-- [`ssh_config`][ssh_config example] example
-- [`SSHD_CONFIG(5)`][sshd_config man page] man page
-- [`sshd_config`][sshd_config example] example
+- [`SSH_CONFIG(5)` man page][ssh_config man page]
+- [`ssh_config` example][ssh_config example]
+- [`SSHD_CONFIG(5)` man page][sshd_config man page]
+- [`sshd_config` defaults][sshd_config defaults]
+- [`sshd_config` example][sshd_config example]
 - [ssh-agent]
 - [Use GPG keys for SSH authentication]
 
@@ -366,15 +404,16 @@ Solution: update the SSH server.
 - [How to check if an RSA public / private key pair match]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
-<!-- In-article sections -->
 <!-- Knowledge base -->
 [use gpg keys for ssh authentication]: gnupg.md#use-gpg-keys-for-ssh-authentication
 
 <!-- Files -->
 [ssh_config example]: ../examples/ssh/ssh_config
+[sshd_config defaults]: ../examples/ssh/sshd_config.defaults
 [sshd_config example]: ../examples/ssh/sshd_config
 
 <!-- Upstream -->
