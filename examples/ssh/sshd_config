@@ -1,16 +1,29 @@
 ################################################################################
 ## /etc/ssh/sshd_config
 ##
-## SSHD server system-wide configuration file.
+## OpenSSH daemon system-wide configuration file.
+## Last updated: see file modification date.
 ##
-## This sshd was compiled with PATH='/usr/bin:/bin:/usr/sbin:/sbin'.
-## The strategy used for options in the default sshd_config shipped with OpenSSH
-## is to specify options with their default value where possible, but leave them
-## commented.  Uncommented options override the default value.
+## Uncommented options override the default value.
+## Unless noted otherwise, for each keyword, the *first* obtained value will be
+## used in a first-come-first-served fashion.
+## Keywords are case-*in*sensitive, and arguments are case-*sensitive*.
 ##
 ## Sources:
 ## - https://man.openbsd.org/sshd_config
 ################################################################################
+
+# To modify the system-wide sshd configuration, create a "*.conf" file under
+# "/etc/ssh/sshd_config.d/" which will be automatically included below.
+# Don't edit this configuration file itself if possible to avoid update
+# problems.
+Include /etc/ssh/sshd_config.d/*.conf
+
+# The strategy used for options in the default sshd_config shipped with
+# OpenSSH is to specify options with their default value where
+# possible, but leave them commented.  Uncommented options override the
+# default value.
+Include /usr/etc/ssh/sshd_config.d/*.conf
 
 #Port 22
 #AddressFamily any
@@ -40,7 +53,7 @@ PermitRootLogin yes
 
 # The default is to check both .ssh/authorized_keys and .ssh/authorized_keys2
 # but this is overridden so installations will only check .ssh/authorized_keys
-AuthorizedKeysFile	.ssh/authorized_keys
+AuthorizedKeysFile      .ssh/authorized_keys
 
 #AuthorizedPrincipalsFile none
 
@@ -60,7 +73,7 @@ AuthorizedKeysFile	.ssh/authorized_keys
 #PermitEmptyPasswords no
 
 # Change to no to disable s/key passwords
-#ChallengeResponseAuthentication yes
+#KbdInteractiveAuthentication yes
 
 # Kerberos options
 #KerberosAuthentication no
@@ -76,13 +89,13 @@ AuthorizedKeysFile	.ssh/authorized_keys
 
 # Set this to 'yes' to enable PAM authentication, account processing,
 # and session processing. If this is enabled, PAM authentication will
-# be allowed through the ChallengeResponseAuthentication and
+# be allowed through the KbdInteractiveAuthentication and
 # PasswordAuthentication.  Depending on your PAM configuration,
-# PAM authentication via ChallengeResponseAuthentication may bypass
-# the setting of "PermitRootLogin without-password".
+# PAM authentication via KbdInteractiveAuthentication may bypass
+# the setting of "PermitRootLogin prohibit-password".
 # If you just want the PAM account and session checks to run without
 # PAM authentication, then enable this but set PasswordAuthentication
-# and ChallengeResponseAuthentication to 'no'.
+# and KbdInteractiveAuthentication to 'no'.
 UsePAM yes
 
 #AllowAgentForwarding yes
@@ -92,8 +105,7 @@ X11Forwarding yes
 #X11DisplayOffset 10
 #X11UseLocalhost yes
 #PermitTTY yes
-#PrintMotd yes
-#PrintLastLog yes
+PrintMotd no
 #TCPKeepAlive yes
 #PermitUserEnvironment no
 #Compression delayed
@@ -110,7 +122,7 @@ X11Forwarding yes
 #Banner none
 
 # override default of no subsystems
-Subsystem	sftp	/usr/lib/ssh/sftp-server
+Subsystem       sftp    /usr/lib/ssh/sftp-server
 
 # This enables accepting locale enviroment variables LC_* LANG, see sshd_config(5).
 AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
@@ -119,7 +131,7 @@ AcceptEnv LC_IDENTIFICATION LC_ALL
 
 # Example of overriding settings on a per-user basis
 #Match User anoncvs
-#	X11Forwarding no
-#	AllowTcpForwarding no
-#	PermitTTY no
-#	ForceCommand cvs server
+#       X11Forwarding no
+#       AllowTcpForwarding no
+#       PermitTTY no
+#       ForceCommand cvs server
