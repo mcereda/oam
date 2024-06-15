@@ -21,7 +21,7 @@ sudo zypper install 'parallel'
 sudo zypper in --no-confirm --download 'in-advance' 'https://prerelease.keybase.io/keybase_amd64.rpm'
 sudo zypper in --no-recommends 'gv' 'virtualbox-ose=2.0.6' '/root/ansible.rpm'
 sudo zypper in -r 'https://repo.vivaldi.com/archive/vivaldi-suse.repo' 'vivaldi'
-sudo zypper in -f 'amdgpu-dkms'
+sudo zypper in -f 'amdgpu-dkms' 'bluez-auto-enable-devices'
 
 # Check the dependencies of *installed* resolvables are satisfied
 zypper verify 'git-lfs'

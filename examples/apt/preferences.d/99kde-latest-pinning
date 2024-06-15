@@ -1,0 +1,3 @@
+Package: kde-* plasma-*
+Pin: release n=unstable
+Pin-Priority: 600
