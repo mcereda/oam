@@ -34,6 +34,11 @@ Default files:
 Command examples:
 
 ```sh
+zypper help
+zypper help 'command'
+
+# ---
+
 # Update caches.
 zypper refresh
 zypper ref 'updates'
@@ -64,11 +69,12 @@ zypper if -t 'pattern' 'lamp_server'
 # Install resolvables.
 zypper install 'parallel'
 zypper in --no-confirm 'https://prerelease.keybase.io/keybase_amd64.rpm'
-zypper in --no-recommends 'gv' 'virtualbox-ose=2.0.6' '/root/ansible.rpm'
+zypper in --no-recommends 'yast*ftp*' 'virtualbox-ose=2.0.6' '/root/ansible.rpm'
 
 # Install from specific repositories.
 # Requires the repo to be already added.
-zypper in -r 'packman' --download-in-heaps 'libavdevice60'
+zypper in 'packman:libavdevice60'
+zypper in -r 'packman' --download 'in-advance' 'libavdevice60'
 zypper in -r 'https://repo.vivaldi.com/archive/vivaldi-suse.repo' 'vivaldi'
 
 # Reinstall resolvables.
@@ -95,7 +101,7 @@ zypper lu --all
 
 # Update installed resolvables.
 zypper update
-zypper up --download-in-heaps 'vivaldi-stable'
+zypper up --download 'in-heaps' 'vivaldi-stable'
 
 # List available patches.
 # By default, it shows only *applicable* ones.
@@ -111,7 +117,7 @@ zypper patch
 
 # Perform distribution upgrades.
 zypper dist-upgrade
-zypper dup --details --from 'factory' --from 'packman' --download-in-heaps
+zypper dup --details --from 'factory' --from 'packman' --download 'as-needed' --remove-orphaned
 
 # List unneded packages.
 # E.g. older dependencies not used anymore.
@@ -138,13 +144,19 @@ zypper nr '5' 'packman'
 
 # Modify repositories.
 # Disable with '-d'.
-zypper modifyrepo -er 'updates'
+zypper modifyrepo -ef 'updates'
+zypper mr -gp '98' '1' 'mozilla'
+zypper mr -d 'packman' '4' 'https://repo.vivaldi.com/archive/vivaldi-suse.repo'
 zypper mr -da
 
 # ---
 
 # Execute without user confirmation (non-interactively).
 zypper --non-interactive …
+zypper --non-interactive --auto-agree-with-licenses …
+
+# Mark transactions in log files.
+zypper --userdata 'comment-here' …
 
 # Clean up installed kernel packages.
 zypper purge-kernels --dry-run
@@ -156,12 +168,15 @@ zypper packages --unneeded \
 | sudo xargs zypper rm -u
 
 # Upgrade distribution's releases.
-sudo zypper refresh \
-&& sudo zypper update \
+# Suggested to do this after:
+# - all users logged off;
+# - disabling the GUI (`systemctl stop 'display-manager.service'`).
+zypper refresh \
+&& zypper update \
 && sed -i 's|/15.5/|/${releasever}/|g' '/etc/zypp/repos.d/'*'.repo' \
-&& sudo zypper --releasever '15.6' refresh \
-&& sudo zypper --releasever '15.6' dist-upgrade \
-&& sudo reboot
+&& zypper --releasever '15.6' refresh \
+&& zypper --releasever '15.6' dist-upgrade \
+&& reboot
 ```
 
 ## Concepts
@@ -229,6 +244,7 @@ sudo rpm --query --list 'parallel'
 - [Additional package repositories]
 - [Command to clean out all unneeded autoinstalled dependencies]
 - [System upgrade]
+- [Zypper cheat sheet]
 
 <!--
   Reference
@@ -245,6 +261,7 @@ sudo rpm --query --list 'parallel'
 [package repositories]: https://en.opensuse.org/Package_repositories
 [system upgrade]: https://en.opensuse.org/SDB:System_upgrade
 [zypp configuration options]: https://doc.opensuse.org/projects/libzypp/HEAD/group__ZyppConfig.html
+[zypper cheat sheet]: https://en.opensuse.org/images/1/17/Zypper-cheat-sheet-1.pdf
 
 <!-- Others -->
 [how can i list all files which have been installed by an zypp/zypper package?]: https://unix.stackexchange.com/questions/162092/how-can-i-list-all-files-which-have-been-installed-by-an-zypp-zypper-package#239944
