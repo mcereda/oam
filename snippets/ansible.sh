@@ -21,6 +21,7 @@ ansible-playbook 'gitlab.yml' --list-tasks --skip-tags 'system,user'
 
 # Create new roles.
 ansible-galaxy init 'gitlab'
+ansible-galaxy role init 'my_role'
 ansible-galaxy role init --type 'container' --init-path 'gitlab' 'name'
 
 # Apply changes.

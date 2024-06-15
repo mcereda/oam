@@ -34,7 +34,7 @@ curl -sS \
 
 ```sh
 helm repo add 'grafana' 'https://grafana.github.io/helm-charts'
-helm -n 'monitoring' upgrade -i --create-namespace 'grafana' 'grafana/grafana'
+helm -n 'monitoring' upgrade -i --create-namespace --set adminPassword='abc0123' 'grafana' 'grafana/grafana'
 
 helm -n 'monitoring' upgrade -i --create-namespace --repo 'https://grafana.github.io/helm-charts' 'grafana' 'grafana'
 ```
