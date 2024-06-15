@@ -25,9 +25,11 @@ ansible-galaxy role init 'my_role'
 ansible-galaxy role init --type 'container' --init-path 'gitlab' 'name'
 
 # Apply changes.
+ansible-playbook -DK 'ansible/playbooks/local-network.hosts.configure.yml' \
+	-i 'inventory/local-network.ini' -l 'workstation.lan' -c 'local' -C
 ansible-playbook 'gitlab.yml' \
 	-i 'aws_ec2.yml' -e 'ansible_aws_ssm_plugin=/usr/local/sessionmanagerplugin/bin/session-manager-plugin' \
 	-D --step
 ansible-playbook 'prometheus.yml' \
 	-i 'aws_ec2.yml' -e 'ansible_aws_ssm_plugin=/usr/local/sessionmanagerplugin/bin/session-manager-plugin' \
-	-D -t 'cron' -l 'i-0123456789abcdef0 -C
+	-D -t 'cron' -l 'i-0123456789abcdef0' -C
