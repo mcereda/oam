@@ -21,7 +21,7 @@ security policy.
 1. [Management API](#management-api)
    1. [Take snapshots of the data](#take-snapshots-of-the-data)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -201,6 +201,20 @@ calculates the **per-second rate of change** based on the last two data points o
 To calculate the overall CPU usage, the idle mode of the metric is used. Since idle percent of a processor is the
 opposite of a busy processor, the irate value is subtracted from 1. To make it a percentage, it is multiplied by 100.
 
+<details>
+  <summary>Examples</summary>
+
+```promql
+# Get all allocatable CPU cores where the 'node' attribute matches regex ".*-runners-.*" grouped by node
+sum(kube_node_status_allocatable_cpu_cores{node=~".*-runners-.*"}) BY (node)
+
+# FIXME
+sum(rate(container_cpu_usage_seconds_total{namespace="gitlab-runners",container="build",pod_name=~"runner.*"}[30s])) by (pod_name,container) /
+sum(container_spec_cpu_quota{namespace="gitlab-runners",pod_name=~"runner.*"}/container_spec_cpu_period{namespace="gitlab-runners",pod_name=~"runner.*"}) by (pod_name,container)
+```
+
+</details>
+
 ## Storage
 
 Refer [Storage].
@@ -377,9 +391,7 @@ The snapshot now exists at `<data-dir>/snapshots/20171210T211224Z-2be650b6d019eb
 - [`ordaa/boinc_exporter`][ordaa/boinc_exporter]
 - [Grafana]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Getting started with Prometheus]
 - [Node exporter guide]
@@ -395,14 +407,14 @@ All the references in the [further readings] section, plus the following:
 - [How to integrate Prometheus and Grafana on Kubernetes using Helm]
 - [node-exporter's helm chart's values]
 - [How to set up and experiment with Prometheus remote-write]
+- [Install Prometheus and Grafana by Helm]
+- [Prometheus and Grafana setup in Minikube]
+- [I need to know about the below kube_state_metrics description. Exactly looking is what the particular metrics doing]
 
 <!--
   Reference
   ═╬═Time══
   -->
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Knowledge base -->
 [grafana]: grafana.md
@@ -434,8 +446,11 @@ All the references in the [further readings] section, plus the following:
 [how relabeling in prometheus works]: https://grafana.com/blog/2022/03/21/how-relabeling-in-prometheus-works/
 [how to integrate prometheus and grafana on kubernetes using helm]: https://semaphoreci.com/blog/prometheus-grafana-kubernetes-helm
 [how to set up and experiment with prometheus remote-write]: https://developers.redhat.com/articles/2023/11/30/how-set-and-experiment-prometheus-remote-write
+[i need to know about the below kube_state_metrics description. exactly looking is what the particular metrics doing]: https://stackoverflow.com/questions/60440847/i-need-to-know-about-the-below-kube-state-metrics-description-exactly-looking-i#60449570
+[install prometheus and grafana by helm]: https://medium.com/@at_ishikawa/install-prometheus-and-grafana-by-helm-9784c73a3e97
 [install prometheus and grafana with helm 3 on a local machine vm]: https://dev.to/ko_kamlesh/install-prometheus-grafana-with-helm-3-on-local-machine-vm-1kgj
 [ordaa/boinc_exporter]: https://gitlab.com/ordaa/boinc_exporter
+[prometheus and grafana setup in minikube]: http://blog.marcnuri.com/prometheus-grafana-setup-minikube/
 [scrape selective metrics in prometheus]: https://docs.last9.io/docs/how-to-scrape-only-selective-metrics-in-prometheus
 [set up prometheus and ingress on kubernetes]: https://blog.gojekengineering.com/diy-how-to-set-up-prometheus-and-ingress-on-kubernetes-d395248e2ba
 [snmp monitoring and easing it with prometheus]: https://medium.com/@openmohan/snmp-monitoring-and-easing-it-with-prometheus-b157c0a42c0c

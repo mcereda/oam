@@ -3,23 +3,32 @@
 Open source container orchestration engine for containerized applications.<br />
 Hosted by the [Cloud Native Computing Foundation][cncf].
 
-1. [Basics](#basics)
-1. [Control plane](#control-plane)
-   1. [API server](#api-server)
-   1. [`kube-scheduler`](#kube-scheduler)
-   1. [`kube-controller-manager`](#kube-controller-manager)
-   1. [`cloud-controller-manager`](#cloud-controller-manager)
-1. [Worker nodes](#worker-nodes)
-   1. [`kubelet`](#kubelet)
-   1. [`kube-proxy`](#kube-proxy)
-   1. [Container runtime](#container-runtime)
-   1. [Addons](#addons)
-1. [Workloads](#workloads)
-   1. [Pods](#pods)
+1. [Concepts](#concepts)
+   1. [Control plane](#control-plane)
+      1. [API server](#api-server)
+      1. [`kube-scheduler`](#kube-scheduler)
+      1. [`kube-controller-manager`](#kube-controller-manager)
+      1. [`cloud-controller-manager`](#cloud-controller-manager)
+   1. [Worker nodes](#worker-nodes)
+      1. [`kubelet`](#kubelet)
+      1. [`kube-proxy`](#kube-proxy)
+      1. [Container runtime](#container-runtime)
+      1. [Addons](#addons)
+   1. [Workloads](#workloads)
+      1. [Pods](#pods)
+1. [Best practices](#best-practices)
+1. [Volumes](#volumes)
+   1. [hostPaths](#hostpaths)
+   1. [emptyDirs](#emptydirs)
+   1. [configMaps](#configmaps)
+   1. [secrets](#secrets)
+   1. [nfs](#nfs)
+   1. [downwardAPI](#downwardapi)
+   1. [PersistentVolumes](#persistentvolumes)
+      1. [Resize PersistentVolumes](#resize-persistentvolumes)
 1. [Autoscaling](#autoscaling)
    1. [Pod scaling](#pod-scaling)
    1. [Node scaling](#node-scaling)
-1. [Best practices](#best-practices)
 1. [Quality of service](#quality-of-service)
 1. [Containers with high privileges](#containers-with-high-privileges)
    1. [Capabilities](#capabilities)
@@ -27,7 +36,7 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 1. [Sysctl settings](#sysctl-settings)
 1. [Backup and restore](#backup-and-restore)
 1. [Managed Kubernetes Services](#managed-kubernetes-services)
-    1. [Best practices in cloud environments](#best-practices-in-cloud-environments)
+   1. [Best practices in cloud environments](#best-practices-in-cloud-environments)
 1. [Edge computing](#edge-computing)
 1. [Troubleshooting](#troubleshooting)
     1. [Dedicate Nodes to specific workloads](#dedicate-nodes-to-specific-workloads)
@@ -40,7 +49,7 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
-## Basics
+## Concepts
 
 When using Kubernetes, one is using a cluster.
 
@@ -56,7 +65,7 @@ fault-tolerance and high availability.
 
 ![Cluster components](components.svg)
 
-## Control plane
+### Control plane
 
 Makes global decisions about the cluster (like scheduling).<br/>
 Detects and responds to cluster events (like starting up a new pod when a deployment has less replicas then it requests).
@@ -74,7 +83,7 @@ Control plane components run on one or more cluster nodes.<br/>
 For ease of use, setup scripts typically start all control plane components on the **same** host and avoid **running**
 other workloads on it.
 
-### API server
+#### API server
 
 Exposes the Kubernetes API. It is the front end for, and the core of, the Kubernetes control plane.<br/>
 `kube-apiserver` is the main implementation of the Kubernetes API server, and is designed to scale horizontally (by
@@ -108,7 +117,7 @@ The Kubernetes API can be extended:
 - using _custom resources_ to declaratively define how the API server should provide your chosen resource API, or
 - extending the Kubernetes API by implementing an aggregation layer.
 
-### `kube-scheduler`
+#### `kube-scheduler`
 
 Detects newly created pods with no assigned node, and selects one for them to run on.
 
@@ -121,7 +130,7 @@ Scheduling decisions take into account:
 - inter-workload interference;
 - deadlines.
 
-### `kube-controller-manager`
+#### `kube-controller-manager`
 
 Runs _controller_ processes.<br />
 Each controller is a separate process logically speaking; they are all compiled into a single binary and run in a single
@@ -136,7 +145,7 @@ Examples of these controllers are:
 - the EndpointSlice controller, which populates _EndpointSlice_ objects providing a link between services and pods;
 - the ServiceAccount controller, which creates default ServiceAccounts for new namespaces.
 
-### `cloud-controller-manager`
+#### `cloud-controller-manager`
 
 Embeds cloud-specific control logic, linking clusters to one's cloud provider's API and separating the components that
 interact with that cloud platform from the components that only interact with clusters.
@@ -156,19 +165,19 @@ The following controllers can have cloud provider dependencies:
 - the route controller, which sets up routes in the underlying cloud infrastructure;
 - the service controller, which creates, updates and deletes cloud provider load balancers.
 
-## Worker nodes
+### Worker nodes
 
 Each and every node runs components providing a runtime environment for the cluster, and syncing with the control plane
 to maintain workloads running as requested.
 
-### `kubelet`
+#### `kubelet`
 
 A `kubelet` runs as an agent on each and every node in the cluster, making sure that containers are run in a pod.
 
 It takes a set of _PodSpecs_ and ensures that the containers described in them are running and healthy.<br/>
 It only manages containers created by Kubernetes.
 
-### `kube-proxy`
+#### `kube-proxy`
 
 Network proxy running on each node and implementing part of the Kubernetes Service concept.
 
@@ -178,21 +187,21 @@ or outside of one's cluster.
 It uses the operating system's packet filtering layer, if there is one and it's available; if not, it just forwards the
 traffic itself.
 
-### Container runtime
+#### Container runtime
 
 The software responsible for running containers.
 
 Kubernetes supports container runtimes like `containerd`, `CRI-O`, and any other implementation of the Kubernetes CRI
 (Container Runtime Interface).
 
-### Addons
+#### Addons
 
 Addons use Kubernetes resources (_DaemonSet_, _Deployment_, etc) to implement cluster features.<br/>
 As such, namespaced resources for addons belong within the `kube-system` namespace.
 
 See [addons] for an extended list of the available addons.
 
-## Workloads
+### Workloads
 
 Workloads consist of groups of containers ([_pods_][pods]) and a specification for how to run them (_manifest_).<br/>
 Configuration files are written in YAML (preferred) or JSON format and are composed of:
@@ -201,7 +210,7 @@ Configuration files are written in YAML (preferred) or JSON format and are compo
 - resource specifications, with attributes specific to the kind of resource they are describing, and
 - status, automatically generated and edited by the control plane.
 
-### Pods
+#### Pods
 
 The smallest deployable unit of computing that one can create and manage in Kubernetes.<br/>
 Pods contain one or more relatively tightly coupled application containers; they are always co-located (executed on the
@@ -217,38 +226,6 @@ Gotchas:
 
 - If a Container specifies a memory or CPU `limit` but does **not** specify a memory or CPU `request`, Kubernetes
   automatically assigns it a resource `request` spec equal to the given `limit`.
-
-## Autoscaling
-
-Controllers are available to scale Pods or Nodes automatically, both in number or size.
-
-Automatic scaling of Pods is done in number by the HorizontalPodAutoscaler, and in size by the VerticalPodAutoscaler.<br/>
-Automatic scaling of Nodes is done in number by the Cluster Autoscaler, and in size by add-ons like [Karpenter].
-
-> Be aware of mix-and-matching autoscalers for the same kind of resource.<br/>
-> One can easily defy the work done by the other and make that resource behave unexpectedly.
-
-K8S only comes with the HorizontalPodAutoscaler by default.<br/>
-Managed K8S usually also comes with the [Cluster Autoscaler] if autoscaling is enabled on the cluster resource.
-
-### Pod scaling
-
-Autoscaling of Pods by number requires the use of the Horizontal Pod Autoscaler.<br/>
-Autoscaling of Pods by size requires the use of the Vertical Pod Autoscaler.
-
-### Node scaling
-
-Autoscaling of Nodes by number requires the [Cluster Autoscaler].
-
-1. The Cluster Autoscaler routinely checks for pending Pods.
-1. Pods fill up the available Nodes.
-1. When Pods start to fail for lack of available resources, Nodes are added to the cluster.
-1. When Pods are not failing due to lack of available resources and one or more Nodes are underused, the Autoscaler
-   tries to fit the existing Pods in less Nodes.
-1. If one or more Nodes can result unused from the previous step (DaemonSets are usually not taken into consideration),
-   the Autoscaler will terminate them.
-
-Autoscaling of Nodes by size requires add-ons like [Karpenter].
 
 ## Best practices
 
@@ -297,6 +274,374 @@ Also see [configuration best practices] and the [production best practices check
   Specially valid when using [connection tracking].
 - Protect the cluster's ingress points.<br/>
   Firewalls, web application firewalls, application gateways.
+
+## Volumes
+
+Refer [volumes].
+
+Sources to mount directories from.
+
+They go by the `volumes` key in Pods' `spec`.<br/>
+E.g., in a Deployment they are declared in its `spec.template.spec.volumes`:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      volumes:
+        - <volume source 1>
+        - <volume source N>
+```
+
+Mount volumes in containers by using the `volumesMount`:
+
+```yaml
+apiVersion: apps/v1
+kind: Pod
+spec:
+  containers:
+    - name: some-container
+      volumeMounts:
+        - name: my-volume-source
+          mountPath: /path/to/mount
+          readOnly: false
+          subPath: dir/in/volume
+```
+
+### hostPaths
+
+Mount files or directories from the host node's filesystem into Pods.
+
+**Not** something most Pods will need, but powerful escape hatches for some applications.
+
+Use cases:
+
+- Containers needing access to node-level system components<br/>
+  E.g., containers transferring system logs to a central location and needing access to those logs using a read-only
+  mount of `/var/log`.
+- Making configuration files stored on the host system available read-only to _static_ Pods.
+  This because static Pods **cannot** access ConfigMaps.
+
+If mounted files or directories on the host are only accessible to `root`:
+
+- Either the process needs to run as `root` in a privileged container,
+- Or the files' permissions on the host need to be changed to allow the process to read from (or write to) the volume.
+
+```yaml
+apiVersion: apps/v1
+kind: Pod
+volumes:
+  - name: example-volume
+    # Mount '/data/foo' only if that directory already exists
+    hostPath:
+      path: /data/foo  # location on host
+      type: Directory  # optional
+```
+
+### emptyDirs
+
+Scrape disks for **temporary** Pod data.
+
+**Not** shared between Pods.<br/>
+All data is **destroyed** once the Pod is removed, but stays intact when Pods restart.
+
+Use cases:
+
+- Provide directories to create pid/lock or other special files for 3rd-party software when it's inconvenient or
+  impossible to disable them.<br/>
+  E.g., Java Hazelcast creates lockfiles in the user's home directory and there's no way to disable this behaviour.
+- Store intermediate calculations which can be lost<br/>
+  E.g., external sorting, buffering of big responses to save memory.
+- Improve startup time after application crashes if the application in question pre-computes something before or during
+  startup.</br>
+  E.g., compressed assets in the application's image, decompressing data into temporary directory.
+
+```yaml
+apiVersion: apps/v1
+kind: Pod
+volumes:
+  - name: my-emptydir
+    emptyDir:
+      # Omit the 'medium' field to use disk storage.
+      # The 'Memory' medium will create tmpfs to store data.
+      medium: Memory
+      sizeLimit: 1Gi
+```
+
+### configMaps
+
+Inject configuration data into Pods.
+
+When referencing a ConfigMap:
+
+- Provide the name of the ConfigMap in the volume.
+- Optionally customize the path to use for a specific entry in the ConfigMap.
+
+```yaml
+apiVersion: apps/v1
+kind: Pod
+spec:
+  containers:
+    - name: test
+      volumeMounts:
+        - name: config-vol
+          mountPath: /etc/config
+  volumes:
+    - name: config-vol
+      configMap:
+        name: log-config
+        items:
+          - key: log_level
+            path: log_level
+    - name: my-configmap-volume
+      configMap:
+        name: my-configmap
+        defaultMode: 0644  # posix access mode, set it to the most restricted value
+        optional: true     # allow pods to start with this configmap missing, resulting in an empty directory
+```
+
+ConfigMaps **must** be created before they can be mounted.
+
+One ConfigMap can be mounted into any number of Pods.
+
+ConfigMaps are always mounted `readOnly`.
+
+Containers using ConfigMaps as `subPath` volume mounts will **not** receive ConfigMap updates.
+
+Text data is exposed as files using the UTF-8 character encoding.<br/>
+Use `binaryData` For any other character encoding.
+
+### secrets
+
+Used to pass sensitive information to Pods.<br/>
+E.g., passwords.
+
+They behave like ConfigMaps but are backed by `tmpfs`, so they are never written to non-volatile storage.
+
+Secrets **must** be created before they can be mounted.
+
+Secrets are always mounted `readOnly`.
+
+Containers using Secrets as `subPath` volume mounts will **not** receive Secret updates.
+
+```yaml
+apiVersion: apps/v1
+kind: Pod
+spec:
+  volumes:
+    - name: my-secret-volume
+      secret:
+        secretName: my-secret
+        defaultMode: 0644
+        optional: false
+```
+
+### nfs
+
+mount **existing** NFS shares into Pods.
+
+The contents of NFS volumes are preserved after Pods are removed and the volume is merely unmounted.<br/>
+This means that NFS volumes can be pre-populated with data, and that data can be shared between Pods.
+
+NFS can be mounted by multiple writers simultaneously.
+
+One **cannot** specify NFS mount options in a Pod spec.<br/>
+Either set mount options server-side or use `/etc/nfsmount.conf`.<br/>
+Alternatively, mount NFS volumes via PersistentVolumes as they do allow to set mount options.
+
+```yaml
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - image: registry.k8s.io/test-webserver
+      name: test-container
+      volumeMounts:
+      - mountPath: /my-nfs-data
+        name: test-volume
+  volumes:
+    - name: test-volume
+      nfs:
+        server: my-nfs-server.example.com
+        path: /my-nfs-volume
+        readOnly: true
+```
+
+### downwardAPI
+
+Downward APIs expose Pods' and containers' resource declaration or status field values.<br/>
+Refer [Expose Pod information to Containers through files].
+
+Downward API volumes make downward API data available to applications as read-only files in plain text format.
+
+Containers using the downward API as `subPath` volume mounts will **not** receive updates when field values change.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    cluster: test-cluster1
+    rack: rack-22
+    zone: us-east-coast
+spec:
+  volumes:
+    - name: my-downwardapi-volume
+      downwardAPI:
+        defaultMode: 0644
+        items:
+        - path: labels
+          fieldRef:
+            fieldPath: metadata.labels
+
+# Mounting this volume results in a file with contents similar to the following:
+# ```plaintext
+# cluster="test-cluster1"
+# rack="rack-22"
+# zone="us-east-coast"
+# ```
+```
+
+### PersistentVolumes
+
+#### Resize PersistentVolumes
+
+1. Check the `StorageClass` is set with `allowVolumeExpansion: true`:
+
+   ```sh
+   kubectl get storageClass 'storage-class-name' -o jsonpath='{.allowVolumeExpansion}'
+   ```
+
+1. Edit the PersistentVolumeClaim's `spec.resources.requests.storage` field.<br/>
+   This will take care of the underlying PersistentVolume's size automagically.
+
+   ```sh
+   kubectl edit persistentVolumeClaim 'my-pvc'
+   ```
+
+1. Verify the change by checking the PVC's `status.capacity` field:
+
+   ```sh
+   kubectl get pvc 'my-pvc' -o jsonpath='{.status}'
+   ```
+
+   Should one see the message
+
+   > Waiting for user to (re-)start a pod to finish file system resize of volume on node
+
+   under the `status.conditions` field, just wait some time.<br/>
+   It should **not** be necessary to restart the Pods, and the capacity should change soon to the requested one.
+
+Gotchas:
+
+- It's possible to recreate StatefulSets **without** the need of killing the Pods it controls.<br/>
+  Reapply the STS' declaration with a new PersistentVolume size, and start new pods to resize the underlying filesystem.
+
+  <details>
+    <summary>If deploying the STS via Helm</summary>
+
+  1. Change the size of the PersistentVolumeClaims used by the STS:
+
+     ```sh
+     kubectl edit persistentVolumeClaims 'my-pvc'
+     ```
+
+  1. Delete the STS **without killing its pods**:
+
+     ```sh
+     kubectl delete statefulsets.apps 'my-sts' --cascade 'orphan'
+     ```
+
+  1. Redeploy the STS with the changed size.
+     It will retake ownership of existing Pods.
+
+  1. Delete the STS' pods one-by-one.<br/>
+     During Pod restart, the Kubelet will resize the filesystem to match new block device size.
+
+     ```sh
+     kubectl delete pod 'my-sts-pod'
+     ```
+
+  </details>
+  <details>
+    <summary>If managing the STS manually</summary>
+
+  1. Change the size of the PersistentVolumeClaims used by the STS:
+
+     ```sh
+     kubectl edit persistentVolumeClaims 'my-pvc'
+     ```
+
+  1. Note down the names of PVs for specific PVCs and their sizes:
+
+     ```sh
+     kubectl get persistentVolume 'my-pv'
+     ```
+
+  1. Dump the STS to disk:
+
+     ```sh
+     kubectl get sts 'my-sts' -o yaml > 'my-sts.yaml'
+     ```
+
+  1. Remove any extra field (like `metadata.{selfLink,resourceVersion,creationTimestamp,generation,uid}` and `status`)
+     and set the template's PVC size to the value you want.
+
+  1. Delete the STS **without killing its pods**:
+
+     ```sh
+     kubectl delete sts 'my-sts' --cascade 'orphan'
+     ```
+
+  1. Reapply the STS.<br/>
+     It will retake ownership of existing Pods.
+
+     ```sh
+     kubectl apply -f 'my-sts.yaml'
+     ```
+
+  1. Delete the STS' pods one-by-one.<br/>
+     During Pod restart, the Kubelet will resize the filesystem to match new block device size.
+
+     ```sh
+     kubectl delete pod 'my-sts-pod'
+     ```
+
+  </details>
+
+## Autoscaling
+
+Controllers are available to scale Pods or Nodes automatically, both in number or size.
+
+Automatic scaling of Pods is done in number by the HorizontalPodAutoscaler, and in size by the VerticalPodAutoscaler.<br/>
+Automatic scaling of Nodes is done in number by the Cluster Autoscaler, and in size by add-ons like [Karpenter].
+
+> Be aware of mix-and-matching autoscalers for the same kind of resource.<br/>
+> One can easily defy the work done by the other and make that resource behave unexpectedly.
+
+K8S only comes with the HorizontalPodAutoscaler by default.<br/>
+Managed K8S usually also comes with the [Cluster Autoscaler] if autoscaling is enabled on the cluster resource.
+
+### Pod scaling
+
+Autoscaling of Pods by number requires the use of the Horizontal Pod Autoscaler.<br/>
+Autoscaling of Pods by size requires the use of the Vertical Pod Autoscaler.
+
+### Node scaling
+
+Autoscaling of Nodes by number requires the [Cluster Autoscaler].
+
+1. The Cluster Autoscaler routinely checks for pending Pods.
+1. Pods fill up the available Nodes.
+1. When Pods start to fail for lack of available resources, Nodes are added to the cluster.
+1. When Pods are not failing due to lack of available resources and one or more Nodes are underused, the Autoscaler
+   tries to fit the existing Pods in less Nodes.
+1. If one or more Nodes can result unused from the previous step (DaemonSets are usually not taken into consideration),
+   the Autoscaler will terminate them.
+
+Autoscaling of Nodes by size requires add-ons like [Karpenter].
 
 ## Quality of service
 
@@ -694,6 +1039,7 @@ Others:
 - [Common labels]
 - [What is Kubernetes?]
 - [Using RBAC Authorization]
+- [Expose Pod information to Containers through files]
 
 <!--
   Reference
@@ -744,6 +1090,7 @@ Others:
 [container hooks]: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
 [distribute credentials securely using secrets]: https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/
 [documentation]: https://kubernetes.io/docs/home/
+[expose pod information to containers through files]: https://kubernetes.io/docs/tasks/inject-data-application/downward-api-volume-expose-pod-information/
 [labels and selectors]: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 [namespaces]: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 [no new privileges design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/no-new-privs.md
@@ -756,6 +1103,7 @@ Others:
 [using rbac authorization]: https://kubernetes.io/docs/reference/access-authn-authz/rbac/
 [using sysctls in a kubernetes cluster]: https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/
 [version skew policy]: https://kubernetes.io/releases/version-skew-policy/
+[volumes]: https://kubernetes.io/docs/concepts/storage/volumes/
 
 <!-- Others -->
 [best practices for pod security in azure kubernetes service (aks)]: https://learn.microsoft.com/en-us/azure/aks/developer-best-practices-pod-security
