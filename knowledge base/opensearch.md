@@ -267,6 +267,7 @@ Refer
 - [Index templates in OpenSearch - how to use composable templates]
 - [Index management]
 - [Index settings]
+- [Elasticsearch Index Lifecycle Management & Policy]
 
 <!--
   Reference
@@ -294,6 +295,7 @@ Refer
 
 <!-- Others -->
 [avoiding the elasticsearch split brain problem, and how to recover]: https://bigdataboutique.com/blog/avoiding-the-elasticsearch-split-brain-problem-and-how-to-recover-f6451c
+[elasticsearch index lifecycle management & policy]: https://opster.com/guides/elasticsearch/data-architecture/index-lifecycle-policy-management/
 [elasticsearch split brain]: https://opster.com/guides/elasticsearch/best-practices/elasticsearch-split-brain/
 [fsync]: https://man7.org/linux/man-pages/man2/fsync.2.html
 [index templates in opensearch - how to use composable templates]: https://opster.com/guides/opensearch/opensearch-data-architecture/index-templating-in-opensearch-how-to-use-composable-templates/
