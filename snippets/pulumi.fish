@@ -18,17 +18,29 @@ function pulumi-id2urn
 	| jq -r --arg id "$argv[1]" '.deployment.resources[]|select(.id==$id).urn' -
 end
 
+function pulumi-ids
+	pulumi stack export \
+	| jq -r '.deployment.resources[].id' - \
+	| sort
+end
+
 function pulumi-urn2id
 	pulumi stack export \
 	| jq -r --arg urn "$argv[1]" '.deployment.resources[]|select(.urn==$urn).id' -
 end
 
 # Examples:
-# - $ pulumi-urnRegex2urn 'gitlab_ee_main_instance$'
+# - $ pulumi-urnRegex2urn 'monitoring_instance$'
 #   urn:pulumi:dev::start::aws:ec2/instance:Instance::monitoring-instance
 function pulumi-urnRegex2urn
 	pulumi stack export \
 	| jq -r --arg regex "$argv[1]" '.deployment.resources[]|select(.urn|test($regex)).urn' -
+end
+
+function pulumi-urns
+	pulumi stack export \
+	| jq -r '.deployment.resources[].urn' - \
+	| sort
 end
 
 
