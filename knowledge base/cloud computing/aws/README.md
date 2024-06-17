@@ -3,6 +3,7 @@
 1. [Networking](#networking)
    1. [Elastic IP addresses](#elastic-ip-addresses)
 1. [Services](#services)
+   1. [Billing and Cost Management](#billing-and-cost-management)
    1. [CloudWatch](#cloudwatch)
    1. [Config](#config)
    1. [Detective](#detective)
@@ -46,25 +47,32 @@ One can can rapidly remapping addresses to other instances in one's account and 
 
 ## Services
 
-| Service        | Description                                   |
-| -------------- | --------------------------------------------- |
-| [CloudWatch]   | Observability (logging, monitoring, alerting) |
-| [Config]       | Compliance                                    |
-| [Detective]    | FIXME                                         |
-| [EC2]          | Virtual machines                              |
-| [ECR]          | Container registry                            |
-| [ECS]          | Containers as a service                       |
-| [EKS]          | Kubernetes clusters                           |
-| [EventBridge]  | FIXME                                         |
-| [GuardDuty]    | Threat detection                              |
-| [Inspector]    | FIXME                                         |
-| [OpenSearch]   | ELK, logging                                  |
-| [RDS]          | Databases                                     |
-| [S3]           | Storage                                       |
-| [Sagemaker]    | Machine learning                              |
-| [Security Hub] | Aggregator for security findings              |
+| Service                       | Description                                   |
+| ----------------------------- | --------------------------------------------- |
+| [Billing and Cost Management] | FIXME                                         |
+| [CloudWatch]                  | Observability (logging, monitoring, alerting) |
+| [Config]                      | Compliance                                    |
+| [Detective]                   | FIXME                                         |
+| [EC2]                         | Virtual machines                              |
+| [ECR]                         | Container registry                            |
+| [ECS]                         | Containers as a service                       |
+| [EKS]                         | Kubernetes clusters                           |
+| [EventBridge]                 | FIXME                                         |
+| [GuardDuty]                   | Threat detection                              |
+| [Inspector]                   | FIXME                                         |
+| [OpenSearch]                  | ELK, logging                                  |
+| [RDS]                         | Databases                                     |
+| [S3]                          | Storage                                       |
+| [Sagemaker]                   | Machine learning                              |
+| [Security Hub]                | Aggregator for security findings              |
 
 [Service icons][aws icons] are publicly available for diagrams and such.
+
+### Billing and Cost Management
+
+Costs can be grouped by Tags applied on resources.<br/>
+Tags to use for this kind of grouping need to be activated in the _Cost allocation tags_ section.<br/>
+New tags might take 24 or 48 hours to appear there.
 
 ### CloudWatch
 
@@ -141,6 +149,47 @@ FIXME
 
 Read replicas **can** be promoted to standalone DB instances.<br/>
 See [Working with DB instance read replicas].
+
+Disk free metrics are available in CloudWatch.
+
+Automatic backups are **enabled** by default.<br/>
+RDS will automatically create storage volume snapshots of the **entire** DB instances.<br/>
+Backups occur during a daily user-configurable 30 minute period backup window and are kept for a configurable number of
+up to 35 days (_backup retention period_). One can recover DB instances to any point in time during the backup retention
+period.
+
+DB instances must be in the `available` state for automated backups to occur.<br/>
+Automated backups don't occur while DB instances are in other states (i.e., `storage_full`).
+
+Automated backups don't occur while a DB snapshot copy is running in the same AWS Region for the same database.
+
+Back up DB instances manually by creating DB snapshots.<br/>
+The first snapshot contains the data for the full database. Subsequent snapshots of the same database are incremental.
+
+One can copy both automatic and manual DB snapshots, but only share manual DB snapshots.
+
+RDS backup storage for each Region is composed of both the automated backups and manual DB snapshots for that
+Region.<br/>
+Moving snapshots to other Regions increases the backup storage in the destination Regions.
+
+Backups are stored in [S3].
+
+Should one choose to retain automated backups when deleting DB instances, its automated backups are saved for the full
+retention period, otherwise all automated backups are deleted with the instance.<br/>
+After they are deleted, automated backups can't be recovered.
+
+Should one choose to have RDS create a final DB snapshot before deleting a DB instance, one can use that or previously
+created manual snapshots to recover it.
+
+Manual snapshots are **not** deleted.
+
+One can store up to 100 manual snapshots per Region.
+
+One can choose any of the following retention periods for instances' Performance Insights data:
+
+- 7 days (default, free tier).
+- _n_ months, where n is a number from 1 to 24.<br/>
+  In CLI and IaC, this number must be _n*31_.
 
 ### Security Hub
 
@@ -297,6 +346,9 @@ Examples:
 - [Use an IAM role in the AWS CLI]
 - [Creating a role to delegate permissions to an IAM user]
 - [How to use the PassRole permission with IAM roles]
+- [Introduction to backups][rds  introduction to backups] for RDS
+- [Pricing and data retention for Performance Insights][rds  pricing and data retention for performance insights] for
+  RDS
 
 <!--
   Reference
@@ -304,6 +356,7 @@ Examples:
   -->
 
 <!-- In-article sections -->
+[billing and cost management]: #billing-and-cost-management
 [cloudwatch]: #cloudwatch
 [config]: #config
 [detective]: #detective
@@ -336,6 +389,8 @@ Examples:
 [how to use the passrole permission with iam roles]: https://aws.amazon.com/blogs/security/how-to-use-the-passrole-permission-with-iam-roles/
 [iam json policy elements: sid]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_sid.html
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
+[rds  introduction to backups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
+[rds  pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
 [services that publish cloudwatch metrics]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
 [subnets for your vpc]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html
 [test your roles' access policies using the aws identity and access management policy simulator]: https://aws.amazon.com/blogs/security/test-your-roles-access-policies-using-the-aws-identity-and-access-management-policy-simulator/
