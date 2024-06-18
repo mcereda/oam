@@ -1,6 +1,6 @@
-# Title
+# OpenSearch
 
-Search and analytics suite forked from ElasticSearch by Amazon.<br/>
+Search and analytics suite [forked from ElasticSearch by Amazon][stepping up for a truly open source elasticsearch].<br/>
 Makes it easy to ingest, search, visualize, and analyze data.
 
 Use cases: application search, log analytics, data observability, data ingestion, others.
@@ -268,6 +268,8 @@ Refer
 - [Index management]
 - [Index settings]
 - [Elasticsearch Index Lifecycle Management & Policy]
+- [Top 14 ELK alternatives in 2024]
+- [Stepping up for a truly open source Elasticsearch]
 
 <!--
   Reference
@@ -302,3 +304,5 @@ Refer
 [lucene]: https://lucene.apache.org/
 [okapi bm25]: https://en.wikipedia.org/wiki/Okapi_BM25
 [setting up hot-warm architecture for ism in opensearch]: https://opster.com/guides/opensearch/opensearch-data-architecture/setting-up-hot-warm-architecture-for-ism/
+[stepping up for a truly open source elasticsearch]: https://aws.amazon.com/blogs/opensource/stepping-up-for-a-truly-open-source-elasticsearch/
+[top 14 elk alternatives in 2024]: https://signoz.io/blog/elk-alternatives/
