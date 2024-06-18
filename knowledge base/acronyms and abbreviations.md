@@ -43,6 +43,7 @@
 | ELI5    | Explain Like I'm 5                                     |                                                                                                     |
 | ESS     | Extended Service Set                                   | Group of WAPs working together to offer the same wireless network                                   |
 | ESSID   | Extended Service Set IDentifier                        | The wireless network name shared in an ESS                                                          |
+| ETL     | Extract, Transform and Load                            | The process of combining data from multiple sources into a large, central data warehouse            |
 | FHS     | [Filesystem Hierarchy Standard][fhs]                   |                                                                                                     |
 | FIFO    | First In First Out                                     |                                                                                                     |
 | FILO    | First In Last Out                                      |                                                                                                     |
