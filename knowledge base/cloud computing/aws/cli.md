@@ -108,11 +108,6 @@ aws iam detach-user-policy --user-name 'me-user' \
 aws iam delete-user-policy --user-name 'me-user' --policy-name 'user-ro-access-bucket'
 
 
-# Show RDS instances.
-aws rds describe-db-instances
-aws rds describe-db-instances --output 'json' --query "DBInstances[?(DBInstanceIdentifier=='master-prod')]"
-
-
 # List hosted zones.
 aws route53 list-hosted-zones
 
@@ -147,6 +142,7 @@ Subcommands not listed here are in their own service-specific article:
 [`ec2`][ec2 tldr] |
 [`ecr`][ecr tldr] |
 [`eks`][eks tldr] |
+[`rds`][rds tldr] |
 [`s3`][s3 tldr] |
 [`ssm`][ssm tldr]
 
@@ -280,6 +276,7 @@ Solutions:
 [ec2 tldr]: ec2.md#tldr
 [ecr tldr]: ecr.md#tldr
 [eks tldr]: eks.md#tldr
+[rds tldr]: rds.md#tldr
 [s3 tldr]: s3.md#tldr
 [ssm tldr]: ssm.md#tldr
 
