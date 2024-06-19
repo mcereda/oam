@@ -99,3 +99,16 @@ set instance_id 'i-0915612f182914822' \
 
 aws imagebuilder list-image-recipes
 aws imagebuilder get-image-recipe --image-recipe-arn 'arn:aws:imagebuilder:eu-west-1:012345678901:image-recipe/my-custom-image/1.0.12'
+
+
+aws rds start-export-task \
+	--export-task-identifier 'db-finalSnapshot-2024' \
+	--source-arn 'arn:aws:rds:eu-west-1:012345678901:snapshot:db-prod-final-2024' \
+	--s3-bucket-name 'backups' --s3-prefix 'rds' \
+	--iam-role-arn 'arn:aws:iam::012345678901:role/CustomRdsS3Exporter' \
+	--kms-key-id 'arn:aws:kms:eu-west-1:012345678901:key/abcdef01-2345-6789-abcd-ef0123456789'
+
+# Max 5 running at any given time, RDS cannot queue
+echo {1..5} | xargs -p -n '1' -I '{}' aws rds start-export-task …
+
+aws rds describe-export-tasks --query 'ExportTasks[].WarningMessage' --output 'json'
