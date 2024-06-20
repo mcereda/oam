@@ -9,6 +9,7 @@
    1. [Detective](#detective)
    1. [GuardDuty](#guardduty)
    1. [EventBridge](#eventbridge)
+   1. [ImageBuilder](#imagebuilder)
    1. [Inspector](#inspector)
    1. [KMS](#kms)
    1. [Security Hub](#security-hub)
@@ -59,6 +60,7 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | [EKS]                         | Kubernetes clusters                           |
 | [EventBridge]                 | FIXME                                         |
 | [GuardDuty]                   | Threat detection                              |
+| [ImageBuilder]                | Build custom AMIs                             |
 | [Inspector]                   | FIXME                                         |
 | [KMS]                         | Key management                                |
 | [OpenSearch]                  | ELK, logging                                  |
@@ -135,6 +137,10 @@ _Threat IP List_ is a blacklist of **public IPs and CIDRs** that will be used by
 ### EventBridge
 
 TODO
+
+### ImageBuilder
+
+Also refer [Image baking in AWS using Packer and Image builder].
 
 ### Inspector
 
@@ -343,6 +349,7 @@ Examples:
 - [Exporting DB snapshot data to Amazon S3]
 - [I'm trying to export a snapshot from Amazon RDS MySQL to Amazon S3, but I'm receiving an error. Why is this happening?]
 - [Rotating AWS KMS keys]
+- [Image baking in AWS using Packer and Image builder]
 
 <!--
   Reference
@@ -356,6 +363,7 @@ Examples:
 [detective]: #detective
 [eventbridge]: #eventbridge
 [guardduty]: #guardduty
+[imagebuilder]: #imagebuilder
 [inspector]: #inspector
 [kms]: #kms
 [security hub]: #security-hub
@@ -407,5 +415,6 @@ Examples:
 [aws.permissions.cloud]: https://aws.permissions.cloud/
 [configuring ec2 disk alert using amazon cloudwatch]: https://medium.com/@chandinims001/configuring-ec2-disk-alert-using-amazon-cloudwatch-793807e40d72
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
+[image baking in aws using packer and image builder]: https://dev.to/santhoshnimmala/image-baking-in-aws-using-packer-and-image-builder-1ed3
 [introduction to aws iam assumerole]: https://aws.plainenglish.io/introduction-to-aws-iam-assumerole-fbef3ce8e90b
 [you might be clueless as to why aws assume role isn't working, despite being correctly set up]: https://medium.com/@kamal.maiti/you-might-be-clueless-as-to-why-aws-assume-role-isnt-working-despite-being-correctly-set-up-1b3138519c07
