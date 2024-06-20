@@ -101,11 +101,12 @@ powerpipe server --listen 'network' --port '8080'
 
 </details>
 
-<!-- Uncomment if needed
-<details>
-  <summary>Real world use cases</summary>
-</details>
--->
+Mods of interest:
+
+| Mod                                                                   | Summary                              |
+| --------------------------------------------------------------------- | ------------------------------------ |
+| [AWS Compliance](https://hub.powerpipe.io/mods/turbot/aws_compliance) | AWS compliance and security controls |
+| [AWS Thrifty](https://hub.powerpipe.io/mods/turbot/aws_thrifty)       | AWS cost optimization                |
 
 ## Further readings
 
@@ -113,6 +114,7 @@ powerpipe server --listen 'network' --port '8080'
 - [Github]
 - [Flowpipe]
 - [Steampipe]
+- [Powerpipe Hub][hub]
 
 ### Sources
 
@@ -131,8 +133,9 @@ powerpipe server --listen 'network' --port '8080'
 
 <!-- Files -->
 <!-- Upstream -->
-[website]: https://powerpipe.io/
 [github]: https://github.com/turbot/powerpipe
+[hub]: https://hub.powerpipe.io/
 [selecting a database]: https://powerpipe.io/docs/run#selecting-a-database
+[website]: https://powerpipe.io/
 
 <!-- Others -->
