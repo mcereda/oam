@@ -7,16 +7,13 @@
    1. [Operator](#operator)
 1. [Repository management](#repository-management)
    1. [Different owners for parts of the code base](#different-owners-for-parts-of-the-code-base)
-1. [CI/CD pipelines](#cicd-pipelines)
-   1. [Specify when to run jobs](#specify-when-to-run-jobs)
-      1. [Only when some specific files change](#only-when-some-specific-files-change)
    1. [Get the version of the helper image to use for a runner](#get-the-version-of-the-helper-image-to-use-for-a-runner)
 1. [Manage kubernetes clusters](#manage-kubernetes-clusters)
 1. [Maintenance mode](#maintenance-mode)
 1. [Runners](#runners)
+1. [CI/CD pipelines](#cicd-pipelines)
 1. [Troubleshooting](#troubleshooting)
    1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
-   1. [Pipeline fails with error `You are not allowed to download code from this project`](#pipeline-fails-with-error-you-are-not-allowed-to-download-code-from-this-project)
    1. [Gitlab keeps answering with code 502](#gitlab-keeps-answering-with-code-502)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
@@ -542,41 +539,6 @@ Gotchas:
   This feature is being added, but it has been open for over 3y now. See
   [Ability to reference Maintainers or Developers from CODEOWNERS].
 
-## CI/CD pipelines
-
-Refer to [CI/CD pipelines] and [CI/CD pipeline templates].<br/>
-Also check [Use CI/CD configuration from other files] and [Use extends to reuse configuration sections].
-
-### Specify when to run jobs
-
-Refer [Specify when jobs run with `rules`][specify when jobs run with rules].
-
-Use the `rules` key and specify the conditions the job needs.
-
-> The `only`/`except` keywords have been deprecated by the `rules` keyword, and cannot be used together.<br/>
-> This means one might be forced to use `only`/`except` if one is including a pipeline that is already using them.
-
-Conditions are validated **in order** until one applies. The rest are ignored.<br/>
-If no condition applies, the job is skipped.
-
-#### Only when some specific files change
-
-```yaml
-docker-build:
-  only:
-    changes:
-      - cmd/*
-      - go.*
-      - Dockerfile
-```
-
-Multiple entries in the condition are validated in an `OR` fashion. In the example above, the condition will make the
-job run only when a change occurs:
-
-- to any file in the `cmd` directory
-- to any file in the repository's root directory which name starts with `go` (like `go.mod` or `go.sum`)
-- to the `Dockerfile` in the repository's root directory
-
 ### Get the version of the helper image to use for a runner
 
 The `gitlab/gitlab-runner-helper` images are tagged using the runner's **os**, **architecture**, and **git revision**.
@@ -668,6 +630,10 @@ Through Rails console:
 
 See [runners](runner.md).
 
+## CI/CD pipelines
+
+See [pipelines](pipeline.md).
+
 ## Troubleshooting
 
 ### Use access tokens to clone projects
@@ -675,22 +641,6 @@ See [runners](runner.md).
 ```sh
 git clone "https://oauth2:${ACCESS_TOKEN}@somegitlab.com/vendor/package.git"
 ```
-
-### Pipeline fails with error `You are not allowed to download code from this project`
-
-Error message example:
-
-```txt
-Getting source from Git repository 00:00
-Fetching changes with git depth set to 20...
-Reinitialized existing Git repository in /builds/myProj/myRepo/.git/
-remote: You are not allowed to download code from this project.
-fatal: unable to access 'https://gitlab.com/myProj/myRepo.git/': The requested URL returned error: 403
-```
-
-Root cause: the user starting the pipeline does not have enough privileges to the repository.
-
-Solution: give that user _developer_ access or have somebody else with enough privileges run it.
 
 ### Gitlab keeps answering with code 502
 
@@ -721,7 +671,6 @@ Solution: set the correct ownership with
 - [TLS] configuration
 - [Adding and removing Kubernetes clusters]
 - Gitlab's [operator code] and relative [guide][operator guide]
-- [CI/CD pipelines]
 - [Buildah]
 - [Kaniko]
 - [The GitLab Handbook]
@@ -735,15 +684,12 @@ Solution: set the correct ownership with
 - [Back up GitLab excluding specific data from the backup]
 - [Autoscaling GitLab Runner on AWS EC2]
 - [How to restart GitLab]
-- [Customize pipeline configuration]
 - [Code owners]
 - [Ability to reference Maintainers or Developers from CODEOWNERS]
 - [Merge request approval rules]
 - [Caching in CI/CD]
-- [Predefined CI/CD variables reference]
 - [Tutorial: Use Buildah in a rootless container with GitLab Runner Operator on OpenShift]
 - [Use kaniko to build Docker images]
-- [Specify when jobs run with `rules`][specify when jobs run with rules]
 - [Install self-managed GitLab]
 - [Package configuration file template]
 - [Install GitLab with the Linux package]
@@ -766,9 +712,9 @@ Solution: set the correct ownership with
 [maintenance mode]: #maintenance-mode
 
 <!-- Knowledge base -->
-[buildah]: buildah.md
-[kaniko]: kubernetes/kaniko.placeholder
-[self-hosting]: self-hosting.md
+[buildah]: ../buildah.md
+[kaniko]: ../kubernetes/kaniko.placeholder
+[self-hosting]: ../self-hosting.md
 
 <!-- Files -->
 <!-- Upstream -->
@@ -780,11 +726,8 @@ Solution: set the correct ownership with
 [caching in ci/cd]: https://docs.gitlab.com/ee/ci/caching/
 [chart cpu and ram resource requirements]: https://docs.gitlab.com/charts/installation/deployment.html#cpu-and-ram-resource-requirements
 [chart]: https://docs.gitlab.com/charts/
-[ci/cd pipeline templates]: https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates
-[ci/cd pipelines]: https://docs.gitlab.com/ee/ci/pipelines/
 [code owners]: https://docs.gitlab.com/ee/user/project/codeowners/
 [command-line options]: https://docs.gitlab.com/charts/installation/command-line-options.html
-[customize pipeline configuration]: https://docs.gitlab.com/ee/ci/pipelines/settings.html
 [deployment]: https://docs.gitlab.com/charts/installation/deployment.html
 [environment variables]: https://docs.gitlab.com/ee/administration/environment_variables.html
 [gitlab ha scaling runner vending machine for aws ec2 asg]: https://gitlab.com/guided-explorations/aws/gitlab-runner-autoscaling-aws-asg#gitlab-runners-on-aws-spot-best-practices
@@ -797,19 +740,15 @@ Solution: set the correct ownership with
 [operator code]: https://gitlab.com/gitlab-org/cloud-native/gitlab-operator
 [operator guide]: https://docs.gitlab.com/operator/
 [package configuration file template]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/raw/master/files/gitlab-config-template/gitlab.rb.template
-[predefined ci/cd variables reference]: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
 [reset a user's password]: https://docs.gitlab.com/ee/security/reset_user_password.html
 [restore gitlab]: https://docs.gitlab.com/ee/administration/backup_restore/restore_gitlab.html
 [runners on kubernetes]: https://docs.gitlab.com/runner/install/kubernetes.html
 [sign-up restrictions]: https://docs.gitlab.com/ee/administration/settings/sign_up_restrictions.html
-[specify when jobs run with rules]: https://docs.gitlab.com/ee/ci/jobs/job_rules.html
 [support object storage bucket prefixes]: https://gitlab.com/gitlab-org/charts/gitlab/-/issues/3376
 [the docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership]: https://gitlab.com/gitlab-org/gitlab/-/issues/349846#note_1516339762
 [the gitlab handbook]: https://handbook.gitlab.com/
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
 [tutorial: use buildah in a rootless container with gitlab runner operator on openshift]: https://docs.gitlab.com/ee/ci/docker/buildah_rootless_tutorial.html
-[use ci/cd configuration from other files]: https://docs.gitlab.com/ee/ci/yaml/includes.html
-[use extends to reuse configuration sections]: https://docs.gitlab.com/ee/ci/yaml/yaml_optimization.html#use-extends-to-reuse-configuration-sections
 [use kaniko to build docker images]: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
 [gitlab maintenance mode]: https://docs.gitlab.com/ee/administration/maintenance_mode/
 
