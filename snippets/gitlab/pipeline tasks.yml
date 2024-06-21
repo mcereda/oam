@@ -75,3 +75,40 @@ powerpipe-report:
     reports:
       # not a junit, so useless, but hey…
       junit: "*.nunit3.xml"
+
+pulumi update:
+  stage: deploy
+  rules:
+    # This job should only be created for changes to the main branch, and only if any program-related file changed.
+    - if: >-
+        $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+        && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        paths:
+          - infra/*.ts
+          - infra/packages.json
+    - when: never
+  interruptible: false
+  variables:
+    PULUMI_BACKEND_URL: file://.
+    PULUMI_PROJECT_DIR: infra
+    PULUMI_STACK: dev
+  image:
+    name: ${ECR_REPO_URL}/pulumi/pulumi-nodejs:3.120.0@sha256:b4806aaddda0b79e33fab4b7c12a4ecbf43657db2e392f35b5b4bcff3e7c7ba0
+    pull_policy: if-not-present
+  before_script:
+    # Run everything from the (sub)project's directory so all is confined there.
+    - cd "${CI_PROJECT_DIR}/${PULUMI_PROJECT_DIR}"
+
+    # Install dependencies anew.
+    # Make sure no packages-lock or yarn-lock files are in the folder.
+    # Make sure the dependencies reflect the needs of the pulumi project.
+    - pulumi install
+
+    # Pulumi's backend is set by the default ENV, no need to login here.
+    - pulumi stack select "${PULUMI_STACK:?required but not set}"
+    - pulumi about
+  script:
+    - >-
+        pulumi update --yes --non-interactive --verbose '3'
+        --parallel "${THREADS:-$(nproc)}"
