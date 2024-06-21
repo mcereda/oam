@@ -1,7 +1,6 @@
 # Homebrew
 
 1. [TL;DR](#tldr)
-1. [Configuration](#configuration)
 1. [Downgrade an application to a non-managed version](#downgrade-an-application-to-a-non-managed-version)
    1. [The easy way](#the-easy-way)
    1. [The hard way](#the-hard-way)
@@ -12,11 +11,54 @@
 
 ## TL;DR
 
+<details>
+  <summary>Installation</summary>
+
 ```sh
-# Install on OS X.
+# Install.
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
+# Uninstall.
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+```
 
+</details>
+<details>
+  <summary>Configuration</summary>
+
+```sh
+# Require SHA check for casks.
+# Change cask installation dir to the Application folder in the user's HOME.
+export HOMEBREW_CASK_OPTS="--require-sha --appdir $HOME/Applications"
+
+# Print install times for each formula at the end of the run.
+export HOMEBREW_DISPLAY_INSTALL_TIMES=1
+
+# Do not automatically update before running some commands.
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+# Do not print HOMEBREW_INSTALL_BADGE on a successful build.
+export HOMEBREW_NO_EMOJI=1
+
+# Do not use the GitHub API.
+# Avoid searches or fetching relevant issues after a failed install.
+export HOMEBREW_NO_GITHUB_API=1
+
+# Forbid redirects from secure HTTPS to insecure HTTP.
+export HOMEBREW_NO_INSECURE_REDIRECT=1
+
+# Only list updates to installed software.
+export HOMEBREW_UPDATE_REPORT_ONLY_INSTALLED=1
+
+# Pass the -A option when calling sudo.
+export SUDO_ASKPASS=1
+```
+
+</details>
+<details>
+  <summary>Usage</summary>
+
+```sh
 # Search for formulae.
 brew search 'parallel'
 brew search --cask 'gpg'
@@ -46,16 +88,16 @@ brew uninstall --zap 'keybase'
 # (Re)create links for applications.
 brew link 'kubernetes-cli'
 
+# Show outdated casks.
+brew outdated --cask --greedy
 
 # Add taps.
 # Only one at a time.
 brew tap 'homebrew/services'
 
-
 # Manage services.
 # Requires the 'homebrew/services' tap.
 brew services start 'openssl-osx-ca'
-
 
 # Bring an installation up to speed from a Brewfile.
 brew bundle
@@ -75,41 +117,9 @@ brew bundle … --cleanup --zap
 
 # Dump all installed casks/formulae/images/taps into a Brewfile.
 brew bundle dump
-
-
-# Uninstall from OS X.
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
 ```
 
-## Configuration
-
-```sh
-# Require SHA check for casks.
-# Change cask installation dir to the Application folder in the user's HOME.
-export HOMEBREW_CASK_OPTS="--require-sha --appdir $HOME/Applications"
-
-# Print install times for each formula at the end of the run.
-export HOMEBREW_DISPLAY_INSTALL_TIMES=1
-
-# Do not automatically update before running some commands.
-export HOMEBREW_NO_AUTO_UPDATE=1
-
-# Do not print HOMEBREW_INSTALL_BADGE on a successful build.
-export HOMEBREW_NO_EMOJI=1
-
-# Do not use the GitHub API.
-# Avoid searches or fetching relevant issues after a failed install.
-export HOMEBREW_NO_GITHUB_API=1
-
-# Forbid redirects from secure HTTPS to insecure HTTP.
-export HOMEBREW_NO_INSECURE_REDIRECT=1
-
-# Only list updates to installed software.
-export HOMEBREW_UPDATE_REPORT_ONLY_INSTALLED=1
-
-# Pass the -A option when calling sudo.
-export SUDO_ASKPASS=1
-```
+</details>
 
 ## Downgrade an application to a non-managed version
 
