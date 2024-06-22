@@ -63,6 +63,16 @@ sudo lsof -n -i 'TCP' -s 'TCP:LISTEN'
 # Get the PID of processes using specific ports.
 lsof -nt -i ':443'
 
+# List network interfaces.
+ifconfig
+networksetup -listallnetworkservices
+networksetup -listallhardwareports
+
+# Get information about network interfaces.
+networksetup -getinfo 'Wi-Fi'
+ipconfig getoption 'en0' 'domain_name_server'
+ipconfig getoption 'en0' 'subnet_mask'
+
 # Clear the DNS cache.
 sudo dscacheutil -flushcache; sudo killall -HUP 'mDNSResponder'
 
@@ -492,15 +502,13 @@ To use any of these key combinations, press and hold the keys immediately after 
 - [Tagging files from the macOS command line]
 - [macOS: Using Custom DNS Resolvers]
 - [macOS tools and tips]
+- [List all network hardware from command line in Mac OS]
+- [Network warrior: how to use macOS network utilities]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
-
-<!-- Upstream -->
-[compress a pdf in preview on mac]: https://support.apple.com/guide/preview/compress-a-pdf-prvw1509/mac
-[mac startup key combinations]: https://support.apple.com/en-us/HT201255
-[resize, rotate, or flip an image in preview on mac]: https://support.apple.com/guide/preview/resize-rotate-or-flip-an-image-prvw2015/11.0/mac/13.0
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
@@ -516,6 +524,11 @@ To use any of these key combinations, press and hold the keys immediately after 
 [time machine]: time%20machine.md
 [xattr]: xattr.md
 
+<!-- Upstream -->
+[compress a pdf in preview on mac]: https://support.apple.com/guide/preview/compress-a-pdf-prvw1509/mac
+[mac startup key combinations]: https://support.apple.com/en-us/HT201255
+[resize, rotate, or flip an image in preview on mac]: https://support.apple.com/guide/preview/resize-rotate-or-flip-an-image-prvw2015/11.0/mac/13.0
+
 <!-- Others -->
 [boot a mac from usb drive]: https://www.wikihow.com/Boot-a-Mac-from-USB-Drive
 [caffeinate your mac]: https://www.theapplegeek.co.uk/blog/caffeinate
@@ -525,12 +538,14 @@ To use any of these key combinations, press and hold the keys immediately after 
 [how to update xcode from command line]: https://stackoverflow.com/questions/34617452/how-to-update-xcode-from-command-line#34617930
 [installing .pkg with terminal?]: https://apple.stackexchange.com/questions/72226/installing-pkg-with-terminal#394976
 [launchctl man page]: https://www.unix.com/man-page/osx/1/launchctl
+[list all network hardware from command line in mac os]: https://osxdaily.com/2014/09/03/list-all-network-hardware-from-the-command-line-in-os-x/
 [list of xcode command line tools]: https://mac.install.guide/commandlinetools/8.html
 [macos default values command reference]: https://github.com/kevinSuttle/macOS-Defaults/blob/master/REFERENCE.md
 [macos network quality tool]: https://www.theapplegeek.co.uk/blog/networkquality
 [macos tools and tips]: https://handbook.gitlab.com/handbook/tools-and-tips/mac/
 [macos: using custom dns resolvers]: https://vninja.net/2020/02/06/macos-custom-dns-resolvers/
 [mdls]: https://ss64.com/osx/mdls.html
+[network warrior: how to use macos network utilities]: https://medium.com/macoclock/network-warrior-how-to-use-macos-network-utilities-63c88f490ba0
 [pam_reattach]: https://github.com/fabianishere/pam_reattach
 [tagging files from the macos command line]: https://brettterpstra.com/2017/08/22/tagging-files-from-the-command-line/
 [using terminal to find your mac's network name]: https://www.tech-otaku.com/networking/using-terminal-find-your-macs-network-name/

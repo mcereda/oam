@@ -1,0 +1,23 @@
+---
+# See https://github.com/syncthing/syncthing/blob/main/README-Docker.md
+version: "3"
+services:
+  syncthing:
+    image: syncthing/syncthing:1.27.8
+    container_name: syncthing
+    hostname: MacBook-Pro
+    environment:
+      - PUID=501
+      - PGID=20
+    volumes:
+      - ${PWD}/config:/var/syncthing/config
+      - ${PWD}/data:/var/syncthing/data
+    ports:
+      # No way to use 'host' mode  in OS X
+      - 127.0.0.1:8384:8384/tcp   # Web UI
+      - 22000:22000/tcp           # TCP file transfers
+      - 22000:22000/udp           # QUIC file transfers
+      - 21027:21027/udp           # Receive local discovery broadcasts
+    restart: unless-stopped
+volumes:
+  config:
