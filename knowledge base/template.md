@@ -15,7 +15,7 @@ Intro
 
 <!-- Uncomment if used
 <details>
-  <summary>Installation and configuration</summary>
+  <summary>Setup</summary>
 
 ```sh
 ```
