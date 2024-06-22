@@ -28,7 +28,7 @@ aws ecr list-images --registry-id '123456789012' --repository-name 'my-image'
 
 # Use ECRs as Docker registries.
 aws ecr get-login-password \
-| docker login --username 'AWS' --password-stdin 'aws_account_id.dkr.ecr.region.amazonaws.com' \
+| docker login --username 'AWS' --password-stdin 'aws_account_id.dkr.ecr.region.amazonaws.com'
 
 # Pull images from ECRs.
 docker pull 'aws_account_id.dkr.ecr.region.amazonaws.com/repository_name/image_name:tag'

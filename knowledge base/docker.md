@@ -15,16 +15,28 @@
 ## TL;DR
 
 <details>
-  <summary>Installation and configuration</summary>
+  <summary>Setup</summary>
+
+| OS       | Setup type       | Engine configuration file                                                  | Settings                                                          | Data directory          |
+| -------- | ---------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------- |
+| Linux    | Engine, regular  | `/etc/docker/daemon.json`                                                  |                                                                   | `/var/lib/docker`       |
+| Linux    | Engine, rootless | `${XDG_CONFIG_HOME}/docker/daemon.json`<br/>`~/.config/docker/daemon.json` |                                                                   |                         |
+| Linux    | Docker Desktop   | `${HOME}/.docker/daemon.json`                                              | `${HOME}/.docker/desktop/settings.json`                           |                         |
+| Mac OS X | Docker Desktop   | `${HOME}/.docker/daemon.json`                                              | `${HOME}/Library/Group Containers/group.com.docker/settings.json` |                         |
+| Windows  | Docker Desktop   | `C:\ProgramData\docker\config\daemon.json`                                 | `C:\Users\UserName\AppData\Roaming\Docker\settings.json`          | `C:\ProgramData\docker` |
 
 ```sh
-# Install
+# Install.
 brew install --cask 'docker'
 sudo zypper install 'docker'
+
+# Configure.
+vim '/etc/docker/daemon.json'
+jq -i '."log-level"="info"' '/etc/docker/daemon.json'
+jq -i '.dns=["8.8.8.8", "1.1.1.1"]' "${HOME}/.docker/daemon.json"
 ```
 
 </details>
-
 <details>
   <summary>Usage</summary>
 
@@ -35,26 +47,31 @@ docker images -a
 # Search for images.
 docker search 'boinc'
 
+# Login to registries.
+docker login
+docker login -u 'username' -p 'password'
+aws ecr get-login-password \
+| docker login --username 'AWS' --password-stdin 'aws_account_id.dkr.ecr.region.amazonaws.com' \
+
 # Pull images.
 docker pull 'alpine:3.14'
 docker pull 'boinc/client:latest'
 docker pull 'moby/buildkit@sha256:00d2…'
 docker pull 'pulumi/pulumi-nodejs:3.112.0@sha256:37a0…'
+docker pull 'quay.io/strimzi/kafka:latest-kafka-3.6.1'
+docker pull '012345678901.dkr.ecr.eu-west-1.amazonaws.com/example-com/syncthing:1.27.8'
 
 # Remove images.
 docker rmi 'node'
 docker rmi 'alpine:3.14'
 docker rmi 'f91a431c5276'
 
-# Login to registries.
-docker login
-docker login -u 'username' -p 'password'
-
 # Create containers.
-docker create -h 'alpine-test' --name 'alpine-test' 'alpine'
+docker create -h 'alpine-test-host' --name 'alpine-test-container' 'alpine:3.19'
+docker create … 'quay.io/strimzi/kafka:latest-kafka-3.6.1'
 
 # Start containers.
-docker start 'alpine-test'
+docker start 'alpine-test-container'
 docker start 'bdbe3f45'
 
 # Create and start containers.
@@ -123,13 +140,11 @@ docker rmi 'alpine'
 docker image prune -a
 docker system prune -a
 
-
 # List networks.
 docker network ls
 
 # Inspect networks.
 docker network inspect 'monitoring_default'
-
 
 # Create volumes.
 docker volume create 'volume-name'
@@ -139,7 +154,6 @@ docker volume list
 
 # Inspect volumes.
 docker volume inspect 'volume-name'
-
 
 # Display a summary of the vulnerabilities in images.
 # If not given any input, it targets the most recently built image.
@@ -158,7 +172,6 @@ docker scout cves --format 'only-packages' --only-package-type 'golang' --only-v
 docker scout recommendations
 docker scout recommendations 'golang:1.19.4' --only-refresh
 docker scout recommendations 'golang:1.19.4' --only-update
-
 
 # List builders.
 docker buildx ls
@@ -183,7 +196,6 @@ docker buildx build … --push \
 # Remove builders.
 docker buildx rm 'builder_name'
 
-
 # Pull images used in compositions.
 docker compose pull
 
@@ -203,8 +215,7 @@ docker compose down
 ```
 
 </details>
-
-<details>
+<details style="margin: 0 0 1em 0">
   <summary>Real world use cases</summary>
 
 ```sh
@@ -217,6 +228,13 @@ sudo vim "$(docker volume inspect --format '{{.Mountpoint}}' 'gitea_config')/app
 ```
 
 </details>
+
+The Docker engine leverages specific Linux capabilities.
+
+On Windows and Mac OS X the engine runs in Linux VMs.<br/>
+Docker's `host` network mode will use the VM's network, and **not** the host's one. Using that mode on those OSes will
+result in the containers being **silently unable** to receive traffic from outside the host.<br/>
+To solve this, use a different network mode and **explicitly publish** the ports used.
 
 ## Gotchas
 
@@ -280,11 +298,9 @@ Docker mounts specific system files in all containers to forward its settings:
 
 ```sh
 6a95fabde222$ mount
-…
 /dev/disk/by-uuid/1bb…eb5 on /etc/resolv.conf type btrfs (rw,…)
 /dev/disk/by-uuid/1bb…eb5 on /etc/hostname type btrfs (rw,…)
 /dev/disk/by-uuid/1bb…eb5 on /etc/hosts type btrfs (rw,…)
-…
 ```
 
 Those files come from the volume the docker container is using for its root, and are modified on the container's startup
@@ -389,6 +405,7 @@ docker load …
 - [Configuring HealthCheck in docker-compose]
 - [Docker Buildx Bake + Gitlab CI Matrix]
 - [How to list the content of a named volume in docker 1.9+?]
+- [Difference between Expose and Ports in Docker Compose]
 
 <!--
   Reference
@@ -411,8 +428,9 @@ docker load …
 [cheatsheet]: https://collabnix.com/docker-cheatsheet/
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html
 [configuring healthcheck in docker-compose]: https://medium.com/@saklani1408/configuring-healthcheck-in-docker-compose-3fa6439ee280
+[difference between expose and ports in docker compose]: https://www.baeldung.com/ops/docker-compose-expose-vs-ports
 [docker arg, env and .env - a complete guide]: https://vsupalov.com/docker-arg-env-variable-guide/
 [docker buildx bake + gitlab ci matrix]: https://teymorian.medium.com/docker-buildx-bake-gitlab-ci-matrix-77edb6b9863f
 [getting around docker's host network limitation on mac]: https://medium.com/@lailadahi/getting-around-dockers-host-network-limitation-on-mac-9e4e6bfee44b
-[opencontainers image spec]: https://specs.opencontainers.org/image-spec/
 [how to list the content of a named volume in docker 1.9+?]: https://stackoverflow.com/questions/34803466/how-to-list-the-content-of-a-named-volume-in-docker-1-9
+[opencontainers image spec]: https://specs.opencontainers.org/image-spec/
