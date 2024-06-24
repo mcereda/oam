@@ -88,6 +88,8 @@ the data into the new instance.<br/>
 Use one of the following methods:
 
 - Use the database engine's native dump and restore method.<br/>
+  Consider using [transportable DBs][migrating databases using rds postgresql transportable databases] when dealing with
+  PostgreSQL DBs.
   This **will** require downtime.
 - [Perform an homogeneous data migration][migrating databases to their amazon rds equivalents with aws dms] using AWS's
   [DMS][what is aws database migration service?] for minimal downtime.
@@ -275,12 +277,13 @@ $ aws rds cancel-export-task --export-task-identifier 'my_export'
 ## Restore
 
 DB instances **can** be restored from DB snapshots.<br/>
-Instances **cannot** be restored with less storage.
+Restoring instances from snapshots requires the new instances to have **equal or more** allocated storage than what the
+original instance had allocated at the time the snapshot was taken.
 
 ```sh
 aws rds restore-db-instance-from-db-snapshot \
-  --db-instance-identifier 'mynewdbinstance' \
-  --db-snapshot-identifier 'mydbsnapshot'
+  --db-instance-identifier 'myNewDbInstance' \
+  --db-snapshot-identifier 'myDbSnapshot'
 ```
 
 ## Encryption
@@ -311,6 +314,7 @@ latest available backup.
 - [How can I decrease the total provisioned storage size of my Amazon RDS DB instance?]
 - [What is AWS Database Migration Service?]
 - [Migrating databases to their Amazon RDS equivalents with AWS DMS]
+- [Migrating databases using RDS PostgreSQL Transportable Databases]
 
 <!--
   Reference
@@ -328,6 +332,7 @@ latest available backup.
 [how can i decrease the total provisioned storage size of my amazon rds db instance?]: https://repost.aws/knowledge-center/rds-db-storage-size
 [introduction to backups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
 [migrating databases to their amazon rds equivalents with aws dms]: https://docs.aws.amazon.com/dms/latest/userguide/data-migrations.html
+[migrating databases using rds postgresql transportable databases]: https://aws.amazon.com/blogs/database/migrating-databases-using-rds-postgresql-transportable-databases/
 [pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
 [restoring from a db snapshot]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html
 [what is aws database migration service?]: https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html
