@@ -1,6 +1,7 @@
 # Amazon Relational Database Service
 
 1. [TL;DR](#tldr)
+1. [Storage](#storage)
 1. [Backup](#backup)
    1. [Automatic backups](#automatic-backups)
    1. [Manual backups](#manual-backups)
@@ -53,6 +54,43 @@ One can choose any of the following retention periods for instances' Performance
 - 7 days (default, free tier).
 - _n_ months, where n is a number from 1 to 24.<br/>
   In CLI and IaC, this number must be _n*31_.
+
+## Storage
+
+Refer [Amazon RDS DB instance storage].
+
+When selecting General Purpose SSD or Provisioned IOPS SSD, RDS automatically stripes storage across multiple volumes to
+enhance performance depending on the engine selected and the amount of storage requested:
+
+| DB engine                        | Storage size      | Number of volumes provisioned |
+| -------------------------------- | ----------------- | ----------------------------- |
+| Db2                              | Less than 400 GiB | 1                             |
+| Db2                              | 400 to 65,536 GiB | 4                             |
+| MariaDB<br/>MySQL<br/>PostgreSQL | Less than 400 GiB | 1                             |
+| MariaDB<br/>MySQL<br/>PostgreSQL | 400 to 65,536 GiB | 4                             |
+| Oracle                           | Less than 200 GiB | 1                             |
+| Oracle                           | 200 to 65,536 GiB | 4                             |
+| SQL Server                       | Any               | 1                             |
+
+When modifying a General Purpose SSD or Provisioned IOPS SSD volume, it goes through a sequence of states.<br/>
+While the volume is in the `optimizing` state, volume performance is between the source and target configuration
+specifications.<br/>
+Transitional volume performance will be no less than the **lower** of the two specifications.
+
+When increasing allocated storage, increases must be by at least of 10%. Trying to increase the value by less than 10%
+will result in an error.<br/>
+The allocated storage **cannot** be increased when restoring RDS for SQL Server DB instances.
+
+> The allocated storage size of any DB instance **cannot be lowered** after creation.
+
+Decrease the storage size of DB instances by creating a new instance with lower provisioned storage size, then migrate
+the data into the new instance.<br/>
+Us one of the following methods:
+
+- Use the database engine's native dump and restore method.<br/>
+  This **will** require downtime.
+- [Perform an homogeneous data migration][migrating databases to their amazon rds equivalents with aws dms] using AWS's
+  [DMS][what is aws database migration service?] for minimal downtime.
 
 ## Backup
 
@@ -239,10 +277,6 @@ $ aws rds cancel-export-task --export-task-identifier 'my_export'
 DB instances **can** be restored from DB snapshots.<br/>
 Instances **cannot** be restored with less storage.
 
-When increasing allocated storage, increases must be by at least of 10%. Trying to increase the value by less than 10%
-will result in an error.<br/>
-The allocated storage **cannot** be increased when restoring RDS for SQL Server DB instances.
-
 ```sh
 aws rds restore-db-instance-from-db-snapshot \
   --db-instance-identifier 'mynewdbinstance' \
@@ -273,6 +307,10 @@ latest available backup.
 - [Introduction to backups]
 - [Restoring from a DB snapshot]
 - [AWS KMS key management]
+- [Amazon RDS DB instance storage]
+- [How can I decrease the total provisioned storage size of my Amazon RDS DB instance?]
+- [What is AWS Database Migration Service?]
+- [Migrating databases to their Amazon RDS equivalents with AWS DMS]
 
 <!--
   Reference
@@ -285,10 +323,14 @@ latest available backup.
 
 <!-- Files -->
 <!-- Upstream -->
+[amazon rds db instance storage]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
 [aws kms key management]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.Keys.html
+[how can i decrease the total provisioned storage size of my amazon rds db instance?]: https://repost.aws/knowledge-center/rds-db-storage-size
 [introduction to backups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
+[migrating databases to their amazon rds equivalents with aws dms]: https://docs.aws.amazon.com/dms/latest/userguide/data-migrations.html
 [pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
 [restoring from a db snapshot]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html
+[what is aws database migration service?]: https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html
 [working with db instance read replicas]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html
 
 <!-- Others -->
