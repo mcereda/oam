@@ -85,7 +85,7 @@ The allocated storage **cannot** be increased when restoring RDS for SQL Server 
 
 Decrease the storage size of DB instances by creating a new instance with lower provisioned storage size, then migrate
 the data into the new instance.<br/>
-Us one of the following methods:
+Use one of the following methods:
 
 - Use the database engine's native dump and restore method.<br/>
   This **will** require downtime.
