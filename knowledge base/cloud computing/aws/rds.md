@@ -2,12 +2,17 @@
 
 1. [TL;DR](#tldr)
 1. [Storage](#storage)
+1. [Parameter Groups](#parameter-groups)
+1. [Option Groups](#option-groups)
 1. [Backup](#backup)
    1. [Automatic backups](#automatic-backups)
    1. [Manual backups](#manual-backups)
    1. [Export snapshots to S3](#export-snapshots-to-s3)
 1. [Restore](#restore)
 1. [Encryption](#encryption)
+1. [Operations](#operations)
+   1. [PostgreSQL](#postgresql)
+      1. [Reduce allocated storage by migrating using transportable databases](#reduce-allocated-storage-by-migrating-using-transportable-databases)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -21,10 +26,26 @@
 aws rds describe-db-instances
 aws rds describe-db-instances --output 'json' --query "DBInstances[?(DBInstanceIdentifier=='master-prod')]"
 
+# Show Parameter Groups.
+aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15'
+
+# Create parameter Groups.
+aws rds create-db-parameter-group --db-parameter-group-name 'pg15-source-transport-group' \
+  --db-parameter-group-family 'postgres15' --description 'Parameter group with transport parameters enabled'
+
+# Modify Parameter Groups.
+aws rds modify-db-parameter-group --db-parameter-group-name 'pg15-source-transport-group' \
+  --parameters \
+    'ParameterName=pg_transport.num_workers,ParameterValue=4,ApplyMethod=pending-reboot' \
+    'ParameterName=pg_transport.timing,ParameterValue=1,ApplyMethod=pending-reboot' \
+    'ParameterName=pg_transport.work_mem,ParameterValue=131072,ApplyMethod=pending-reboot' \
+    'ParameterName=shared_preload_libraries,ParameterValue="pg_stat_statements,pg_transport",ApplyMethod=pending-reboot' \
+    'ParameterName=max_worker_processes,ParameterValue=24,ApplyMethod=pending-reboot'
+
 # Restore instances from snapshots.
 aws rds restore-db-instance-from-db-snapshot \
-  --db-instance-identifier 'mynewdbinstance' \
-  --db-snapshot-identifier 'mydbsnapshot'
+  --db-instance-identifier 'myNewBbInstance' \
+  --db-snapshot-identifier 'myOldDbSnapshot'
 
 # Start export tasks.
 aws rds start-export-task \
@@ -89,10 +110,30 @@ Use one of the following methods:
 
 - Use the database engine's native dump and restore method.<br/>
   Consider using [transportable DBs][migrating databases using rds postgresql transportable databases] when dealing with
-  PostgreSQL DBs.
+  PostgreSQL DBs should the requirements match.<br/>
   This **will** require downtime.
 - [Perform an homogeneous data migration][migrating databases to their amazon rds equivalents with aws dms] using AWS's
   [DMS][what is aws database migration service?] for minimal downtime.
+
+## Parameter Groups
+
+Refer [Working with parameter groups].
+
+Used to specify how a DB is configured.
+
+Learn about available parameters by describing the existing default ones:
+
+```sh
+aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15'
+aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
+  --query "Parameters[?ParameterName=='shared_preload_libraries']" --output 'table'
+aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
+  --query "Parameters[?ParameterName=='shared_preload_libraries'].ApplyMethod" --output 'text'
+```
+
+## Option Groups
+
+Used to enable and configure additional features and functionalities in a DB.
 
 ## Backup
 
@@ -300,9 +341,103 @@ In this terminal state, DB instances are no longer available and their databases
 restore DB instances, one must first re-enable access to the KMS key for RDS, and then restore the instances from their
 latest available backup.
 
+## Operations
+
+### PostgreSQL
+
+#### Reduce allocated storage by migrating using transportable databases
+
+Refer [Migrating databases using RDS PostgreSQL Transportable Databases],
+[Transporting PostgreSQL databases between DB instances] and
+[Transport PostgreSQL databases between two Amazon RDS DB instances using pg_transport].
+
+Requires a **source** DB and a **target** DB.<br/>
+Suggested the use of an EC2 instance in the middle to operate on both DBs.
+
+1. Enable the required configuration parameters and `pg_transport` extension on the source and target RDS instances.<br/>
+   Create a new RDS Parameter Group or modify the existing one used by the source.
+
+   Required parameters:
+
+   - `shared_preload_libraries` **must** include `pg_transport`.
+   - `pg_transport.num_workers` **must** be tuned.<br/>
+     Its value determines the number of `transport.send_file` workers that will be created in the source. Defaults to 3.
+   - `max_worker_processes` **must** be at least (3 * `pg_transport.num_workers`) + 9.<br/>
+     Required on the destination to handle various background worker processes involved in the transport.
+   - `pg_transport.work_mem` _can_ be tuned.<br/>
+     Specifies the maximum memory to allocate to each worker. Defaults to 131072 (128 MB) or 262144 (256 MB) depending
+     on the PostgreSQL version.
+   - `pg_transport.timing` _can_ be set to `1`.<br/>
+     Specifies whether to report timing information during the transport. Defaults to 1 (true), meaning that timing
+     information is reported.
+
+1. Reboot the instances equipped with the Parameter Group to apply changes.
+1. Create a new _target_ instance with the required allocated storage.
+1. Make sure the middleman can connect to both DBs.
+1. Make sure the _target_ DB instance can connect to the _source_.
+1. Prepare **both** source and target DBs:
+
+   1. Connect to the DB:
+
+      ```sh
+      psql -h 'source-instance.111122223333.eu-west-1.rds.amazonaws.com' -p '5432' -U 'admin' --password
+      ```
+
+   1. **Remove** all extensions but `pg_transport` from the public schema of the DB instance.<br/>
+      Only the `pg_transport` extension is allowed during the actual transport operation.
+
+      ```sql
+      SELECT * FROM pg_extension;
+      DROP EXTENSION 'pggeo', '…';
+      ```
+
+   1. Install the `pg_transport` extension if missing:
+
+      ```sql
+      CREATE EXTENSION pg_transport;
+      CREATE EXTENSION;
+      ```
+
+1. \[optional] Test the transport by running the `transport.import_from_server` function on the **target** DB instance:
+
+   ```sql
+   SELECT transport.import_from_server(
+     'source-instance.111122223333.eu-west-1.rds.amazonaws.com', 5432,
+     'admin', 'SourcePassword', 'mySourceDb',
+     'destination-user-password',
+     true
+   );
+
+1. Run the transport by running the `transport.import_from_server` function on the **target** DB instance:
+
+   ```sql
+   SELECT transport.import_from_server( …, …, …, …, …, …, false);
+   ```
+
+> When the transport begins, all current sessions on the **source** database are ended and the DB is put in ReadOnly
+> mode.<br/>
+> Only the specific source database that is being transported is affected.
+>
+> The in-transit database will be **inaccessible** on the **target** DB instance for the duration of the transport.<br/>
+> During transport, the target DB instance **cannot be restored** to a point in time: the transport is **not**
+> transactional and does **not** use the PostgreSQL write-ahead log to record changes.<br/>
+
+If the target DB instance has automatic backups enabled, a backup is automatically taken after transport completes.<br/>
+Point-in-time restores will be available for times after the backup finishes.
+
+Should the transport fail, the `pg_transport` extension will attempt to undo all changes to the source **and** target DB
+instances. This includes removing the destination's partially transported database.<br/>
+Depending on the type of failure, the source database might continue to reject write-enabled queries. Should this
+happen, allow write-enabled queries manually:
+
+```sql
+ALTER DATABASE db-name SET default_transaction_read_only = false;
+```
+
 ## Further readings
 
 - [Working with DB instance read replicas]
+- [Working with parameter groups]
 
 ### Sources
 
@@ -314,6 +449,7 @@ latest available backup.
 - [How can I decrease the total provisioned storage size of my Amazon RDS DB instance?]
 - [What is AWS Database Migration Service?]
 - [Migrating databases to their Amazon RDS equivalents with AWS DMS]
+- [Transporting PostgreSQL databases between DB instances]
 - [Migrating databases using RDS PostgreSQL Transportable Databases]
 
 <!--
@@ -335,7 +471,10 @@ latest available backup.
 [migrating databases using rds postgresql transportable databases]: https://aws.amazon.com/blogs/database/migrating-databases-using-rds-postgresql-transportable-databases/
 [pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
 [restoring from a db snapshot]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html
+[transport postgresql databases between two amazon rds db instances using pg_transport]: https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/transport-postgresql-databases-between-two-amazon-rds-db-instances-using-pg_transport.html
+[transporting postgresql databases between db instances]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.TransportableDB.html
 [what is aws database migration service?]: https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html
 [working with db instance read replicas]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html
+[working with parameter groups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html
 
 <!-- Others -->
