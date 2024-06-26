@@ -112,3 +112,15 @@ aws rds start-export-task \
 echo {1..5} | xargs -p -n '1' -I '{}' aws rds start-export-task …
 
 aws rds describe-export-tasks --query 'ExportTasks[].WarningMessage' --output 'json'
+
+aws s3api list-buckets --output 'text' --query 'Buckets[].Name' | xargs -pn '1' aws s3api list-multipart-uploads --bucket
+
+aws ec2 describe-volumes --output 'text' --filters 'Name=status,Values=available' \
+	--query "Volumes[?CreateTime<'2018-03-31'].VolumeId" \
+| xargs -pn '1' aws ec2 delete-volume --volume-id
+
+aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15'
+aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
+	--query "Parameters[?ParameterName=='shared_preload_libraries']" --output 'table'
+aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
+	--query "Parameters[?ParameterName=='shared_preload_libraries'].ApplyMethod" --output 'text'
