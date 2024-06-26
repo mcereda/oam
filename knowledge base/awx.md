@@ -4,6 +4,7 @@
 1. [Removal](#removal)
 1. [Testing](#testing)
    1. [Create a demo instance](#create-a-demo-instance)
+1. [API](#api)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -513,6 +514,10 @@ $ minikube kubectl -- delete -f <(minikube kubectl -- kustomize --enable-helm)
   </details>
 </details>
 
+## API
+
+Refer [AWX API Reference] and [How to use AWX REST API to execute jobs].
+
 ## Further readings
 
 - [Website]
@@ -532,6 +537,8 @@ $ minikube kubectl -- delete -f <(minikube kubectl -- kustomize --enable-helm)
 - [Helm install on existing cluster]
 - [Iterating on the installer without deploying the operator]
 - [Installer role's defaults]
+- [AWX API Reference]
+- [How to use AWX REST API to execute jobs]
 
 <!--
   Reference
@@ -545,6 +552,7 @@ $ minikube kubectl -- delete -f <(minikube kubectl -- kustomize --enable-helm)
 [minikube]: kubernetes/minikube.md
 
 <!-- Upstream -->
+[awx api reference]: https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/
 [awx's documentation]: https://ansible.readthedocs.io/projects/awx/en/latest/
 [awx's repository]: https://github.com/ansible/awx/
 [basic install]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/installation/basic-install.html
@@ -557,3 +565,4 @@ $ minikube kubectl -- delete -f <(minikube kubectl -- kustomize --enable-helm)
 
 <!-- Others -->
 [arm64 image pulled shows amd64 as its arch]: https://github.com/brancz/kube-rbac-proxy/issues/79#issuecomment-826557647
+[how to use awx rest api to execute jobs]: https://www.dbi-services.com/blog/how-to-use-awx-rest-api-to-execute-jobs/
