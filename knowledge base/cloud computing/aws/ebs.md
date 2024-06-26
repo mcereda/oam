@@ -3,6 +3,7 @@
 Persistent [block storage][what is block storage?] for [EC2 Instances][ec2].
 
 1. [TL;DR](#tldr)
+1. [Snapshots](#snapshots)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -13,18 +14,36 @@ Persistent [block storage][what is block storage?] for [EC2 Instances][ec2].
 
 ```sh
 # Clean up unused volumes.
-aws ec2 describe-volumes --output 'text' \
-  --filters 'Name=status,Values=available' --query 'Volumes[].VolumeId' \
+aws ec2 describe-volumes --output 'text' --filters 'Name=status,Values=available' \
+  --query "Volumes[?CreateTime<'2018-03-31'].VolumeId" \
 | xargs -pn '1' aws ec2 delete-volume --volume-id
 ```
 
 </details>
+
+## Snapshots
+
+When created, snapshots are **incremental**.<br/>
+Incremental snapshots are stored in EBS' standard tier.
+
+Snapshots can be [archived][archive amazon ebs snapshots] to save money should they **not** need frequent nor fast
+retrieval.<br/>
+When archived, incremental snapshots are converted to **full snapshots** and moved to EBS' archive tier.
+
+> The minimum archive period is 90 days.<br/>
+> If deleting or permanently restoring an archived snapshot before the minimum archive period, one is billed for all the
+> remaining days in the archive tier, rounded to the nearest hour.
+
+When access to archived snapshots is needed, they need to be restored to the standard tier before use. Restoring can
+take **up to 72h**.
 
 ## Further readings
 
 - [Amazon Web Services]
 - [What is block storage?]
 - AWS' [CLI]
+- [Archive Amazon EBS snapshots]
+- [Automate snapshot lifecycles]
 
 ### Sources
 
@@ -34,7 +53,8 @@ aws ec2 describe-volumes --output 'text' \
 - [`delete-volume`][delete-volume]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
@@ -43,6 +63,8 @@ aws ec2 describe-volumes --output 'text' \
 [ec2]: ec2.md
 
 <!-- Upstream -->
+[archive amazon ebs snapshots]: https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-archive.html
+[automate snapshot lifecycles]: https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-ami-policy.html
 [delete-volume]: https://docs.aws.amazon.com/cli/latest/reference/ec2/delete-volume.html
 [describe-volumes]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-volumes.html
 [documentation]: https://docs.aws.amazon.com/ebs/
