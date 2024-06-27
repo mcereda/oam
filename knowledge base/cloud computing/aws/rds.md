@@ -13,13 +13,15 @@
 1. [Operations](#operations)
    1. [PostgreSQL](#postgresql)
       1. [Reduce allocated storage by migrating using transportable databases](#reduce-allocated-storage-by-migrating-using-transportable-databases)
+1. [Troubleshooting](#troubleshooting)
+   1. [ERROR: extension must be loaded via shared\_preload\_libraries](#error-extension-must-be-loaded-via-shared_preload_libraries)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
 <details>
-  <summary>Usage</summary>
+  <summary>CLI usage</summary>
 
 ```sh
 # Show RDS instances.
@@ -64,6 +66,7 @@ aws rds cancel-export-task --export-task-identifier 'my_export'
 ```
 
 </details>
+<br/>
 
 Read replicas **can** be promoted to standalone DB instances.<br/>
 See [Working with DB instance read replicas].
@@ -108,12 +111,14 @@ Decrease the storage size of DB instances by creating a new instance with lower 
 the data into the new instance.<br/>
 Use one of the following methods:
 
-- Use the database engine's native dump and restore method.<br/>
-  Consider using [transportable DBs][migrating databases using rds postgresql transportable databases] when dealing with
+- Use the database engine's native dump and restore method.
+  This **will** require **long** downtime.
+- Consider using [transportable DBs][migrating databases using rds postgresql transportable databases] when dealing with
   PostgreSQL DBs should the requirements match.<br/>
-  This **will** require downtime.
+  This **will** require **_some_** downtime.
 - [Perform an homogeneous data migration][migrating databases to their amazon rds equivalents with aws dms] using AWS's
-  [DMS][what is aws database migration service?] for minimal downtime.
+  [DMS][what is aws database migration service?]<br/>
+  This **should** require **minimal** downtime.
 
 ## Parameter Groups
 
@@ -351,8 +356,41 @@ Refer [Migrating databases using RDS PostgreSQL Transportable Databases],
 [Transporting PostgreSQL databases between DB instances] and
 [Transport PostgreSQL databases between two Amazon RDS DB instances using pg_transport].
 
-Requires a **source** DB and a **target** DB.<br/>
-Suggested the use of an EC2 instance in the middle to operate on both DBs.
+> When the transport begins, all current sessions on the **source** database are ended and the DB is put in ReadOnly
+> mode.<br/>
+> Only the specific source database that is being transported is affected. Others are **not** affected.
+>
+> The in-transit database will be **inaccessible** on the **target** DB instance for the duration of the transport.<br/>
+> During transport, the target DB instance **cannot be restored** to a point in time, as the transport is **not**
+> transactional and does **not** use the PostgreSQL write-ahead log to record changes.
+
+A test transfer of a ~350 GB database between two `db.t4g.medium` instances using gp3 storage took FIXME minutes.
+
+<details>
+  <summary>Requirements</summary>
+
+- A **source** DB to copy from.
+- A **target** instance to copy the DB to.
+
+  > Since the transport will create the DB on the target, the target instance must **not** contain the database that
+  > needs to be transported.<br/>
+  > Should the target contain the DB already, it **will** need to be dropped beforehand.
+
+- The transported DB (but not _other_ DBs on the same source instance) to:
+
+  - Be put in **Read Only** mode.
+  - Have all installed extensions **removed**.
+
+To avoid locking the operator's machine for the time needed by the transport, it is suggested the use of an EC2 instance
+in the middle to operate on both DBs.
+
+> Try and keep the DBs identifiers under 22 characters.<br/>
+> PostgreSQL will try and truncate the identifier after 63 characters, and AWS will add something like
+> `.{{12-char-id}}.{{region}}.rds.amazonaws.com` to it.
+
+</details>
+<details>
+  <summary>Procedure</summary>
 
 1. Enable the required configuration parameters and `pg_transport` extension on the source and target RDS instances.<br/>
    Create a new RDS Parameter Group or modify the existing one used by the source.
@@ -380,33 +418,35 @@ Suggested the use of an EC2 instance in the middle to operate on both DBs.
    1. Connect to the DB:
 
       ```sh
-      psql -h 'source-instance.111122223333.eu-west-1.rds.amazonaws.com' -p '5432' -U 'admin' --password
+      psql -h 'source-instance.5f7mp3pt3n6e.eu-west-1.rds.amazonaws.com' -p '5432' -U 'admin' --password
+      psql -h 'target-instance.5f7mp3pt3n6e.eu-west-1.rds.amazonaws.com' -p '5432' -U 'admin' --password 'postgres'
       ```
 
    1. **Remove** all extensions but `pg_transport` from the public schema of the DB instance.<br/>
       Only the `pg_transport` extension is allowed during the actual transport operation.
 
       ```sql
-      SELECT * FROM pg_extension;
-      DROP EXTENSION 'pggeo', '…';
+      SELECT "extname" FROM "pg_extension";
+      DROP EXTENSION "plpgsql", "postgis", "…" CASCADE;
       ```
 
    1. Install the `pg_transport` extension if missing:
 
       ```sql
-      CREATE EXTENSION pg_transport;
-      CREATE EXTENSION;
+      CREATE EXTENSION "pg_transport";
       ```
 
 1. \[optional] Test the transport by running the `transport.import_from_server` function on the **target** DB instance:
 
    ```sql
+   -- Keep arguments in *single* quotes here
    SELECT transport.import_from_server(
-     'source-instance.111122223333.eu-west-1.rds.amazonaws.com', 5432,
-     'admin', 'SourcePassword', 'mySourceDb',
-     'destination-user-password',
+     'source-instance.5f7mp3pt3n6e.eu-west-1.rds.amazonaws.com', 5432,
+     'admin', 'source-user-password', 'mySourceDb',
+     'target-user-password',
      true
    );
+   ```
 
 1. Run the transport by running the `transport.import_from_server` function on the **target** DB instance:
 
@@ -414,13 +454,14 @@ Suggested the use of an EC2 instance in the middle to operate on both DBs.
    SELECT transport.import_from_server( …, …, …, …, …, …, false);
    ```
 
-> When the transport begins, all current sessions on the **source** database are ended and the DB is put in ReadOnly
-> mode.<br/>
-> Only the specific source database that is being transported is affected.
->
-> The in-transit database will be **inaccessible** on the **target** DB instance for the duration of the transport.<br/>
-> During transport, the target DB instance **cannot be restored** to a point in time: the transport is **not**
-> transactional and does **not** use the PostgreSQL write-ahead log to record changes.<br/>
+1. Validate the data in the target.
+1. Add all the needed roles and permissions to the target.
+1. Restore uninstalled extensions in the public schema of **both** DB instances.<br/>
+   `pg_transport` _can_ be uninstalled.
+1. Revert the value of the max_worker_processes parameter.
+
+</details>
+<br/>
 
 If the target DB instance has automatic backups enabled, a backup is automatically taken after transport completes.<br/>
 Point-in-time restores will be available for times after the backup finishes.
@@ -434,10 +475,17 @@ happen, allow write-enabled queries manually:
 ALTER DATABASE db-name SET default_transaction_read_only = false;
 ```
 
+## Troubleshooting
+
+### ERROR: extension must be loaded via shared_preload_libraries
+
+Refer [How can I resolve the "ERROR: <module/extension> must be loaded via shared_preload_libraries" error?]
+
 ## Further readings
 
 - [Working with DB instance read replicas]
 - [Working with parameter groups]
+- [How can I resolve the "ERROR: <module/extension> must be loaded via shared_preload_libraries" error?]
 
 ### Sources
 
@@ -466,6 +514,7 @@ ALTER DATABASE db-name SET default_transaction_read_only = false;
 [amazon rds db instance storage]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
 [aws kms key management]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.Keys.html
 [how can i decrease the total provisioned storage size of my amazon rds db instance?]: https://repost.aws/knowledge-center/rds-db-storage-size
+[how can i resolve the "error: <module/extension> must be loaded via shared_preload_libraries" error?]: https://repost.aws/knowledge-center/rds-postgresql-resolve-preload-error
 [introduction to backups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
 [migrating databases to their amazon rds equivalents with aws dms]: https://docs.aws.amazon.com/dms/latest/userguide/data-migrations.html
 [migrating databases using rds postgresql transportable databases]: https://aws.amazon.com/blogs/database/migrating-databases-using-rds-postgresql-transportable-databases/
