@@ -1,16 +1,96 @@
+-- Add '+' to psql commands to get more information
+
+
+-- Show help
+help
+
+-- Show available SQL commands
+\h
+
+-- Show available psql commands
+\?
+
+
+-- Show connection information
+\conninfo
+
+
+-- List databases
+\l
+\list+
+SELECT datname FROM pg_database;
+
+-- Create databases
+CREATE DATABASE world;
+
+-- Show database settings
+SELECT * FROM pg_settings;
+SELECT "name", "setting" FROM pg_settings WHERE NAME LIKE '%log%';
+SHOW "wal_keep_size";
+
+-- Change database settings for the current session
+SET pgaudit.log = 'none';
+
+-- Change database settings permanently
+ALTER DATABASE reviser SET pgaudit.log TO 'none';
+
+-- Switch between databases
+\c sales
+\connect vendor
+
+
+-- List schemas
+\dn
+SELECT schema_name FROM information_schema.schemata;
+SELECT nspname FROM pg_catalog.pg_namespace;
+
+-- Create schemas
+CREATE SCHEMA mundane;
+CREATE SCHEMA IF NOT EXISTS mundane AUTHORIZATION joe;
+
+-- Remove schemas
+DROP SCHEMA mundane;
+DROP SCHEMA IF EXISTS mundane CASCADE;
+
+
+-- List tables
+\d
+\dt+
+
+
+-- List users with respective roles
+\du
+\du+
+
+-- Check the current user has SuperUser permissions
+SHOW is_superuser
+
+-- Grant users SuperUser permissions
+-- Executing user must be already SuperUser
+ALTER USER joel WITH SUPERUSER;
+-- Revoke SuperUser permissions
+ALTER USER joel WITH NOSUPERUSER;
+-- Allow users to create databases
+ALTER USER mark CREATEDB;
+
+
 -- Close the connection to the current DB
 \q
+\quit
 
--- Show extensions.
-SELECT "*" FROM "pg_extension";
-SELECT "extname" FROM "pg_extension";
+
+-- Show extensions
+\dx
+SELECT * FROM pg_extension;
+SELECT extname FROM pg_extension;
 
 -- Add extensions
-CREATE EXTENSION "pg_transport";
-CREATE EXTENSION IF NOT EXISTS "pgaudit";
+CREATE EXTENSION pg_transport;
+CREATE EXTENSION IF NOT EXISTS pgaudit;
 
 -- Remove extensions
-DROP EXTENSION "plpgsql", "btree_gist", … CASCADE;
+DROP EXTENSION plpgsql;
+DROP EXTENSION IF EXISTS plpgsql, btree_gist, … CASCADE;
 
 
 -- Simulate DB transfers

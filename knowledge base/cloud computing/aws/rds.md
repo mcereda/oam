@@ -126,14 +126,27 @@ Refer [Working with parameter groups].
 
 Used to specify how a DB is configured.
 
+- _Static_ parameters **require** instances to be rebooted after a change for the new value to take effect.
+- _Dynamic_ parameters are applied at runtime and **do not** require instances to reboot after changing.
+
+  RDS instances using custom DB parameter groups allow for changes to values of _dynamic_ parameters while running.<br/>
+  Make changes by using the AWS Management Console, the AWS CLI, or the Amazon RDS API.
+
+  If one has enough privileges to do so, one can also change parameter values by using the `ALTER DATABASE`,
+  `ALTER ROLE`, and `SET` commands.
+
 Learn about available parameters by describing the existing default ones:
 
 ```sh
 aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15'
 aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
   --query "Parameters[?ParameterName=='shared_preload_libraries']" --output 'table'
+
 aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
-  --query "Parameters[?ParameterName=='shared_preload_libraries'].ApplyMethod" --output 'text'
+  --query "Parameters[?ParameterName=='shared_preload_libraries'].ApplyType" --output 'text'
+
+aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' --output 'table' \
+  --query "Parameters[?ApplyType!='dynamic']"
 ```
 
 ## Option Groups
@@ -356,6 +369,9 @@ Refer [Migrating databases using RDS PostgreSQL Transportable Databases],
 [Transporting PostgreSQL databases between DB instances] and
 [Transport PostgreSQL databases between two Amazon RDS DB instances using pg_transport].
 
+The `pg_transport` enables streaming the database files with minimal processing by making a target DB instance import
+a database from a source DB instance.
+
 > When the transport begins, all current sessions on the **source** database are ended and the DB is put in ReadOnly
 > mode.<br/>
 > Only the specific source database that is being transported is affected. Others are **not** affected.
@@ -364,29 +380,43 @@ Refer [Migrating databases using RDS PostgreSQL Transportable Databases],
 > During transport, the target DB instance **cannot be restored** to a point in time, as the transport is **not**
 > transactional and does **not** use the PostgreSQL write-ahead log to record changes.
 
-A test transfer of a ~350 GB database between two `db.t4g.medium` instances using gp3 storage took FIXME minutes.
-
 <details>
   <summary>Requirements</summary>
 
-- A **source** DB to copy from.
-- A **target** instance to copy the DB to.
+- A **source DB** to copy data from.
+- A **target instance** to copy the DB to.
 
   > Since the transport will create the DB on the target, the target instance must **not** contain the database that
   > needs to be transported.<br/>
   > Should the target contain the DB already, it **will** need to be dropped beforehand.
 
-- The transported DB (but not _other_ DBs on the same source instance) to:
+- Both DB instances **must** run the same major version of PostgreSQL.
+- Should the source DB have the `pgaudit` extension _loaded_, that extension will **need** to be _installed_ on the
+  target instance so that it can be ported.
+- The target instance **must** be able to connect to the source instance.
+- All source database objects **must** reside in the default `pg_default` tablespace.
+- The source DB (but not _other_ DBs on the same source instance) will need to:
 
-  - Be put in **Read Only** mode.
+  - Be put in **Read Only** mode (automatic, done during transport).
   - Have all installed extensions **removed**.
 
 To avoid locking the operator's machine for the time needed by the transport, it is suggested the use of an EC2 instance
-in the middle to operate on both DBs.
+as the middleman to operate on both DBs.
 
 > Try and keep the DBs identifiers under 22 characters.<br/>
 > PostgreSQL will try and truncate the identifier after 63 characters, and AWS will add something like
 > `.{{12-char-id}}.{{region}}.rds.amazonaws.com` to it.
+
+</details>
+<details>
+  <summary>Limitations</summary>
+
+- The access privileges and ownership from the source database are **not** transferred to the target database.
+- Databases **cannot** be transported onto read replicas or parent instances of read replicas.
+- `reg` data types **cannot** be used in any database table that are about to be transported with this method.
+- There can be **up to 32** total transports (including both imports and exports) active at the same time on any DB
+  instance.
+- All the DB data is migrated **as is**.
 
 </details>
 <details>
@@ -397,11 +427,13 @@ in the middle to operate on both DBs.
 
    Required parameters:
 
-   - `shared_preload_libraries` **must** include `pg_transport`.
+   - `shared_preload_libraries` **must** include `pg_transport`.<br/>
+     Static parameter, requires reboot.
    - `pg_transport.num_workers` **must** be tuned.<br/>
      Its value determines the number of `transport.send_file` workers that will be created in the source. Defaults to 3.
    - `max_worker_processes` **must** be at least (3 * `pg_transport.num_workers`) + 9.<br/>
-     Required on the destination to handle various background worker processes involved in the transport.
+     Required on the destination to handle various background worker processes involved in the transport.<br/>
+     Static parameter, requires reboot.
    - `pg_transport.work_mem` _can_ be tuned.<br/>
      Specifies the maximum memory to allocate to each worker. Defaults to 131072 (128 MB) or 262144 (256 MB) depending
      on the PostgreSQL version.
@@ -413,27 +445,48 @@ in the middle to operate on both DBs.
 1. Create a new _target_ instance with the required allocated storage.
 1. Make sure the middleman can connect to both DBs.
 1. Make sure the _target_ DB instance can connect to the _source_.
-1. Prepare **both** source and target DBs:
+1. Prepare the **source** DB for transport:
 
    1. Connect to the DB:
 
       ```sh
-      psql -h 'source-instance.5f7mp3pt3n6e.eu-west-1.rds.amazonaws.com' -p '5432' -U 'admin' --password
-      psql -h 'target-instance.5f7mp3pt3n6e.eu-west-1.rds.amazonaws.com' -p '5432' -U 'admin' --password 'postgres'
+      psql -h 'source-instance.5f7mp3pt3n6e.eu-west-1.rds.amazonaws.com' -p '5432' -d 'source-db' -U 'admin' --password
       ```
 
-   1. **Remove** all extensions but `pg_transport` from the public schema of the DB instance.<br/>
-      Only the `pg_transport` extension is allowed during the actual transport operation.
+   1. Only the `pg_transport` extension is allowed in the source DB during the actual transport operation.<br/>
+      **Remove** all extensions but `pg_transport` from the public schema of the DB instance:
 
       ```sql
       SELECT "extname" FROM "pg_extension";
-      DROP EXTENSION "plpgsql", "postgis", "…" CASCADE;
+      DROP EXTENSION IF EXISTS "btree_gist", "pgcrypto", …, "postgis" CASCADE;
       ```
 
-   1. Install the `pg_transport` extension if missing:
+   1. Load the `pg_transport` extension if missing:
 
       ```sql
-      CREATE EXTENSION "pg_transport";
+      CREATE EXTENSION IF NOT EXISTS "pg_transport";
+      ```
+
+1. Prepare the **target** DB for transport:
+
+   1. The instance must **not** contain a DB with the same name of the source, as the transport will create it on the
+      target.<br/>
+      Connect to a _different_ DB than the source:
+
+      ```sh
+      psql -h 'target-instance.5f7mp3pt3n6e.eu-west-1.rds.amazonaws.com' -p '5432' -d 'postgres' -U 'admin' --password
+      ```
+
+   1. Make sure no DB exists with the same name of the source DB:
+
+      ```sql
+      DROP DATABASE IF EXISTS "source-db";
+      ```
+
+   1. Load the `pg_transport` extension if missing:
+
+      ```sql
+      CREATE EXTENSION IF NOT EXISTS "pg_transport";
       ```
 
 1. \[optional] Test the transport by running the `transport.import_from_server` function on the **target** DB instance:
@@ -442,7 +495,7 @@ in the middle to operate on both DBs.
    -- Keep arguments in *single* quotes here
    SELECT transport.import_from_server(
      'source-instance.5f7mp3pt3n6e.eu-west-1.rds.amazonaws.com', 5432,
-     'admin', 'source-user-password', 'mySourceDb',
+     'admin', 'source-user-password', 'source-db',
      'target-user-password',
      true
    );
@@ -475,11 +528,37 @@ happen, allow write-enabled queries manually:
 ALTER DATABASE db-name SET default_transaction_read_only = false;
 ```
 
+<details>
+  <summary>Performance tests</summary>
+
+  <details style="margin: 0 0 0 1em">
+    <summary><code>db.t4g.medium</code> to <code>db.t4g.medium</code>, gp3 storage, ~ 350 GB database</summary>
+
+|                            | 1               | 2               | 3               | 4               | 5               |
+| -------------------------- | --------------- | --------------- | --------------- | --------------- | --------------- |
+| `pg_transport.num_workers` | 2               | 4               | 8               | 8               | 12              |
+| `max_worker_processes`     | 15              | 21              | 33              | 33              | 45              |
+| `pg_transport.work_mem`    | 131072 (128 MB) | 131072 (128 MB) | 131072 (128 MB) | 262144 (256 MB) | 131072 (128 MB) |
+| Minimum transfer rate      | ~ 19 MB/s       | ~ 19 MB/s       | ~ 50 MB/s       | ~ 4 MB/s        | ~ 25 MB/s       |
+| Maximum transfer rate      | ~ 58 MB/s       | ~ 95 MB/s       | ~ 255 MB/s      | ~ 255 MB/s      | ~ 165 MB/s      |
+| Average transfer rate      | ~ 31 MB/s       | ~ 66 MB/s       | ~ 138 MB/s      | ~ 101 MB/s      | ~ 85 MB/s       |
+| Time estimated             | ~ 3h 13m        | ~ 1h 36m        | ~ 48m           | ~ 1h            | ~ 1h 11m        |
+| Time taken                 | - (interrupted) | - (interrupted) | - (interrupted) | - (interrupted) | - (interrupted) |
+| Source CPU usage           | ~ 10%           | ~ 15%           | ~ 45%           | ~ 39%           | ~ 37%           |
+| Target CPU usage           | ~ 12%           | ~ 18%           | ~ 38%           | ~ 28%           | ~ 25%           |
+
+  </details>
+</details>
+
 ## Troubleshooting
 
 ### ERROR: extension must be loaded via shared_preload_libraries
 
 Refer [How can I resolve the "ERROR: <module/extension> must be loaded via shared_preload_libraries" error?]
+
+1. Include the module or extension in the `shared_preload_libraries` parameter in the Parameter Group.
+1. Reboot the instance to apply the change.
+1. Try reloading it again.
 
 ## Further readings
 
@@ -499,6 +578,8 @@ Refer [How can I resolve the "ERROR: <module/extension> must be loaded via share
 - [Migrating databases to their Amazon RDS equivalents with AWS DMS]
 - [Transporting PostgreSQL databases between DB instances]
 - [Migrating databases using RDS PostgreSQL Transportable Databases]
+- [Importing data into PostgreSQL on Amazon RDS]
+- [Working with parameters on your RDS for PostgreSQL DB instance]
 
 <!--
   Reference
@@ -515,6 +596,7 @@ Refer [How can I resolve the "ERROR: <module/extension> must be loaded via share
 [aws kms key management]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.Keys.html
 [how can i decrease the total provisioned storage size of my amazon rds db instance?]: https://repost.aws/knowledge-center/rds-db-storage-size
 [how can i resolve the "error: <module/extension> must be loaded via shared_preload_libraries" error?]: https://repost.aws/knowledge-center/rds-postgresql-resolve-preload-error
+[importing data into postgresql on amazon rds]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.Procedural.Importing.html
 [introduction to backups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
 [migrating databases to their amazon rds equivalents with aws dms]: https://docs.aws.amazon.com/dms/latest/userguide/data-migrations.html
 [migrating databases using rds postgresql transportable databases]: https://aws.amazon.com/blogs/database/migrating-databases-using-rds-postgresql-transportable-databases/
@@ -525,5 +607,6 @@ Refer [How can I resolve the "ERROR: <module/extension> must be loaded via share
 [what is aws database migration service?]: https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html
 [working with db instance read replicas]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html
 [working with parameter groups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html
+[working with parameters on your rds for postgresql db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html
 
 <!-- Others -->
