@@ -28,3 +28,7 @@ cat <<-EOF | sudo tee -a /etc/yum.repos.d/vscodium.repo
 	repo_gpgcheck=1
 	gpgkey=https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg
 EOF
+
+
+# List files in packages
+dnf repoquery -l 'nginx'

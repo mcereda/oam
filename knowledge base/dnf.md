@@ -139,6 +139,20 @@ dnf install 'python3-dnf-plugin-versionlock'
 ```
 
 ```sh
+# Get information about packages.
+dnf info 'xfsprogs'
+dnf repoquery -i 'openssh'
+dnf repoquery --info 'bash'
+
+# List available package versions.
+dnf list --available --showduplicates 'gitlab-runner'
+dnf repoquery 'httpd'
+
+# List installed packages.
+dnf list installed
+rpm --query -a
+rpmquery -a
+
 # List locked versions.
 dnf versionlock
 dnf versionlock list
@@ -150,6 +164,17 @@ dnf versionlock add 'docker-ce' 'docker-ce-cli' 'docker-ce-rootless-extras'
 # Unlock versions.
 dnf versionlock delete 'kernel' 'docker-ce-20.10.23-3.el8'
 dnf versionlock clear
+
+# List files in packages.
+dnf repoquery -l 'nginx'
+dnf repoquery --list 'postgresql15'
+
+# Get packages providing specific files.
+dnf whatprovides '/usr/bin/psql'
+dnf whatprovides '*/pgbench'
+
+# Check packages' changelog.
+dnf repoquery --changelog 'libvirt'
 ```
 
 The _versionlock_ plugin maintains the constraints in its configuration file and automatically checks the constraints on every run.
@@ -175,6 +200,7 @@ Not to mention,
 - [How to lock kernel (or another package) on Fedora]
 - [Appendix A. DNF commands list]
 - [A quick guide to DNF for yum users]
+- [How to list package files with dnf in Linux]
 
 <!--
   Reference
@@ -194,6 +220,7 @@ Not to mention,
 [a quick guide to dnf for yum users]: https://opensource.com/article/18/8/guide-yum-dnf
 [cheat.sh]: https://cheat.sh/dnf
 [how to install only security and bugfixes updates with dnf]: https://fedoramagazine.org/how-to-install-only-security-and-bugfixes-updates-with-dnf/
+[how to list package files with dnf in linux]: https://www.cyberciti.biz/faq/dnf-list-package-files-for-rhel-centosstream-feora-rocky-almalinux/
 [how to lock kernel (or another package) on fedora]: https://robbinespu.gitlab.io/posts/locking-package-fedora/
 [how to use yum/dnf to downgrade or rollback some package updates?]: https://access.redhat.com/solutions/29617
 [libsolv]: https://github.com/openSUSE/libsolv
