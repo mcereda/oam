@@ -124,3 +124,4 @@ aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
 	--query "Parameters[?ParameterName=='shared_preload_libraries']" --output 'table'
 aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
 	--query "Parameters[?ParameterName=='shared_preload_libraries'].ApplyMethod" --output 'text'
+aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' --output 'json' --query "Parameters[?ApplyType!='dynamic']"

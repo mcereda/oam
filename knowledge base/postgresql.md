@@ -1,7 +1,5 @@
 # PostgreSQL
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -24,7 +22,7 @@ sudo zypper install 'postgresql15' 'postgresql15-server'
 psql 'my-db'
 psql 'my-db' 'user'
 psql 'postgresql://host:5433/my-db?sslmode=require'
-psql -U 'username' -d 'my-db' -h 'hostname' -p 'port' -W 'password'
+psql -U 'username' -d 'my-db' -h 'hostname' -p 'port' --password
 
 # List available databases.
 psql … --list
@@ -33,25 +31,33 @@ psql … --list
 psql 'my-db' … -c 'select * from tableName;' -o 'out.file'
 psql 'my-db' … -c 'select * from tableName;' -H
 psql 'my-db' … -f 'commands.sql'
+
+# Initialize a test DB.
+pgbench -i 'test-db'
+pgbench -i 'test-db' -h 'hostname' -p '5555' -U 'user'
 ```
 
 ## Further readings
 
 - [Docker image]
+- [Bidirectional replication in PostgreSQL using pglogical]
 
 ### Sources
 
 - [psql]
+- [pg_settings]
 - [Connect to a PostgreSQL database]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
-<!-- In-article sections -->
 <!-- Upstream -->
 [docker image]: https://github.com/docker-library/docs/blob/master/postgres/README.md
 [psql]: https://www.postgresql.org/docs/current/app-psql.html
+[pg_settings]: https://www.postgresql.org/docs/current/view-pg-settings.html
 
 <!-- Others -->
 [connect to a postgresql database]: https://www.postgresqltutorial.com/connect-to-postgresql-database/
+[bidirectional replication in postgresql using pglogical]: https://www.jamesarmes.com/2023/03/bidirectional-replication-postgresql-pglogical.html
