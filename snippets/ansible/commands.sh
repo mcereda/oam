@@ -4,6 +4,9 @@
 ansible-config init --disabled > 'ansible.cfg'
 ansible-config init --disabled -t 'all' > 'ansible.cfg'
 
+# Show the current configuration.
+ansible-config dump
+
 # List hosts.
 ansible-inventory -i 'aws_ec2.yml' --list
 ansible-playbook -i 'self-hosting.yml' 'gitlab.yml' --list-hosts
