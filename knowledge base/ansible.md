@@ -11,6 +11,7 @@
    1. [Role dependencies](#role-dependencies)
 1. [Output formatting](#output-formatting)
 1. [Create custom filter plugins](#create-custom-filter-plugins)
+1. [Performance tuning](#performance-tuning)
 1. [Troubleshooting](#troubleshooting)
    1. [Print all known variables](#print-all-known-variables)
    1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
@@ -43,6 +44,9 @@ sudo pamac install 'ansible' 'sshpass'   # manjaro linux
 # Generate example configuration files with entries disabled.
 ansible-config init --disabled > 'ansible.cfg'
 ansible-config init --disabled -t 'all' > 'ansible.cfg'
+
+# Show the current configuration.
+ansible-config dump
 
 # Show hosts' ansible facts.
 ansible -i 'path/to/hosts/file' -m 'setup' all
@@ -383,6 +387,95 @@ $ ANSIBLE_STDOUT_CALLBACK='json' ansible-playbook --inventory='localhost,' 'loca
 
 See [Creating your own Ansible filter plugins].
 
+## Performance tuning
+
+Refer the following:
+
+- [8 ways to speed up your Ansible playbooks]
+- [6 ways to speed up Ansible playbook execution]
+- [How to speed up Ansible playbooks drastically?]
+- [Easy things you can do to speed up ansible]
+
+Suggestions:
+
+- Optimize fact gathering:
+
+  - Disable fact gathering when not used.
+  - Consider using smart fact gathering:
+
+    ```ini
+    [defaults]
+    gathering = smart
+    fact_caching = jsonfile
+    fact_caching_connection = /tmp/ansible/facts.json  ; /tmp/ansible to use the directory and have a file per host
+    fact_caching_timeout = 86400
+    ```
+
+  - Only gather subsets of facts:
+
+    ```yaml
+    - name: Play with selected facts
+      gather_facts: true
+      gather_subset:
+        - '!all'
+        - '!min'
+        - system
+    ```
+
+    Refer the [setup module] for more information, and the [setup module source code] for available keys.
+
+- Consider increasing the number of forks when dealing with lots of managed hosts:
+
+  ```ini
+  [defaults]
+  forks = 25
+  ```
+
+- Set **independent** tasks as async.
+- Optimize SSH connections:
+
+  - Prefer key-based authentication if used:
+
+    ```ini
+    [ssh_connection]
+    ssh_args = -o PreferredAuthentications=publickey
+    ```
+
+  - Use pipelining:
+
+    ```ini
+    [ssh_connection]
+    pipelining = True
+    ```
+
+  - Consider using multiplexing:
+
+    ```ini
+    [ssh_connection]
+    ssh_args = -o ControlMaster=auto -o ControlPersist=3600s
+    ```
+
+- Consider installing and using the [Mitogen plugin][mitogen for ansible] on the controller:
+
+  ```sh
+  curl -fsLO 'https://github.com/mitogen-hq/mitogen/releases/download/v0.3.7/mitogen-0.3.7.tar.gz'
+  tar -xaf 'mitogen-0.3.7.tar.gz'
+  ```
+
+  ```ini
+  [defaults]
+  strategy_plugins = mitogen-0.3.7/ansible_mitogen/plugins/strategy
+  strategy = mitogen_linear
+  ```
+
+  > Be advised that mitogen is not really supported by Ansible and has some issues with privilege escalation
+  > ([1](https://github.com/mitogen-hq/mitogen/issues/466)).
+
+- Improve the code:
+
+  - Bundle up package installations together.
+  - Beware of expensive calls.
+
 ## Troubleshooting
 
 ### Print all known variables
@@ -657,6 +750,7 @@ See [Integrate with AWS SSM].
 - [Windows playbook example]
 - [Special tags: `always` and `never`][special tags: always and never]
 - [Integrate with AWS SSM]
+- [Mitogen for Ansible]
 
 ### Sources
 
@@ -680,6 +774,12 @@ See [Integrate with AWS SSM].
 - [Ansible roles: basics, creating & using]
 - [Developing and Testing Ansible Roles with Molecule and Podman - Part 1]
 - [How to get an arbitrary remote user's home directory in Ansible?]
+- [6 ways to speed up Ansible playbook execution]
+- [How to speed up Ansible playbooks drastically?]
+- [Easy things you can do to speed up ansible]
+- [What is the exact list of Ansible setup min?]
+- [Setup module source code]
+- [8 ways to speed up your Ansible playbooks]
 
 <!--
   Reference
@@ -694,6 +794,7 @@ See [Integrate with AWS SSM].
 [examples  templating]: ../examples/ansible/templating.yml
 
 <!-- Upstream -->
+[8 ways to speed up your ansible playbooks]: https://www.redhat.com/sysadmin/faster-ansible-playbook-execution
 [ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
 [collections index]: https://docs.ansible.com/ansible/latest/collections/index.html
@@ -702,6 +803,8 @@ See [Integrate with AWS SSM].
 [galaxy  sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
 [galaxy]: https://galaxy.ansible.com/
 [roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
+[setup module source code]: https://github.com/ansible/ansible/blob/devel/lib/ansible/modules/setup.py
+[setup module]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/setup_module.html
 [slurp]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/slurp_module.html
 [special tags: always and never]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html#special-tags-always-and-never
 [special variables]: https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
@@ -709,10 +812,12 @@ See [Integrate with AWS SSM].
 [tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
 
 <!-- Others -->
+[6 ways to speed up ansible playbook execution]: https://wearenotch.com/speed-up-ansible-playbook-execution/
 [ansible roles: basics, creating & using]: https://spacelift.io/blog/ansible-roles
 [ansible: set variable to file content]: https://stackoverflow.com/questions/24003880/ansible-set-variable-to-file-content
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
 [creating your own ansible filter plugins]: https://www.dasblinkenlichten.com/creating-ansible-filter-plugins/
+[easy things you can do to speed up ansible]: https://mayeu.me/post/easy-things-you-can-do-to-speed-up-ansible/
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
 [how can i hide skipped tasks output in ansible]: https://stackoverflow.com/questions/39189549/how-can-i-hide-skipped-tasks-output-in-ansible#76147924
 [how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
@@ -720,14 +825,17 @@ See [Integrate with AWS SSM].
 [how to install sshpass on mac]: https://stackoverflow.com/questions/32255660/how-to-install-sshpass-on-mac/62623099#62623099
 [how to recursively set directory and file permissions]: https://superuser.com/questions/1024677/ansible-how-to-recursively-set-directory-and-file-permissions#1317715
 [how to set up and use python virtual environments for ansible]: https://www.redhat.com/sysadmin/python-venv-ansible
+[how to speed up ansible playbooks drastically?]: https://www.linkedin.com/pulse/how-speed-up-ansible-playbooks-drastically-lionel-gurret
 [human-readable output format]: https://www.shellhacks.com/ansible-human-readable-output-format/
 [include task only if file exists]: https://stackoverflow.com/questions/28119521/ansible-include-task-only-if-file-exists#comment118578470_62289639
 [is it possible to use inline templates?]: https://stackoverflow.com/questions/33768690/is-it-possible-to-use-inline-templates#33783423
 [jinja2 templating]: https://jinja.palletsprojects.com/en/3.1.x/templates/
 [merging two dictionaries by key in ansible]: https://serverfault.com/questions/1084157/merging-two-dictionaries-by-key-in-ansible#1084164
+[mitogen for ansible]: https://mitogen.networkgenomics.com/ansible_detailed.html
 [only do something if another action changed]: https://raymii.org/s/tutorials/Ansible_-_Only-do-something-if-another-action-changed.html
 [removing empty values from a list and assigning it to a new list]: https://stackoverflow.com/questions/60525961/ansible-removing-empty-values-from-a-list-and-assigning-it-to-a-new-list#60526774
 [unique filter of list in jinja2]: https://stackoverflow.com/questions/44329598/unique-filter-of-list-in-jinja2
+[what is the exact list of ansible setup min?]: https://stackoverflow.com/questions/71060833/what-is-the-exact-list-of-ansible-setup-min#71061125
 [why ansible and python fork break on macos high sierra+ and how to solve]: https://ansiblepilot.medium.com/why-ansible-and-python-fork-break-on-macos-high-sierra-and-how-to-solve-d11540cd2a1b
 [windows playbook example]: https://geekflare.com/ansible-playbook-windows-example/
 [working with versions]: https://docs.ansible.com/ansible/latest/collections/community/general/docsite/filter_guide_working_with_versions.html
