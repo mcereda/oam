@@ -35,12 +35,21 @@ psql 'my-db' … -f 'commands.sql'
 # Initialize a test DB.
 pgbench -i 'test-db'
 pgbench -i 'test-db' -h 'hostname' -p '5555' -U 'user'
+
+# Create full backups of databases.
+pg_dump -U 'postgres' -d 'sales' -F 'custom' -f 'sales.bak'
+pg_dump … -T 'customers,orders' -t 'salespeople,performances'
+pg_dump … -s
+
+# Restore backups.
+pg_restore -U 'postgres' -d 'sales' 'sales.bak'
 ```
 
 ## Further readings
 
 - [Docker image]
 - [Bidirectional replication in PostgreSQL using pglogical]
+- [What is the pg_dump command for backing up a PostgreSQL database?]
 
 ### Sources
 
@@ -61,3 +70,4 @@ pgbench -i 'test-db' -h 'hostname' -p '5555' -U 'user'
 <!-- Others -->
 [connect to a postgresql database]: https://www.postgresqltutorial.com/connect-to-postgresql-database/
 [bidirectional replication in postgresql using pglogical]: https://www.jamesarmes.com/2023/03/bidirectional-replication-postgresql-pglogical.html
+[what is the pg_dump command for backing up a postgresql database?]: https://www.linkedin.com/advice/3/what-pgdump-command-backing-up-postgresql-ke2ef
