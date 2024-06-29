@@ -13,15 +13,10 @@ Intro
 
 ## TL;DR
 
-<!-- Uncomment if used
-<details>
-  <summary>Installation and configuration</summary>
-
-```sh
-```
-
-</details>
--->
+> Do **not** install custom alternatives for `python3` on SUSE systems.<br/>
+> `/usr/bin/python3` does **not** have update alternatives there due to system tools dependencies and always points to
+> specific tested versions. Creating custom `python3` alternatives pointing to different versions — i.e., `python3.11`
+> — **will** break dependent system tools.
 
 <details>
   <summary>Usage</summary>
@@ -40,16 +35,6 @@ update-alternatives --config --all
 
 </details>
 
-<!-- Uncomment if used
-<details>
-  <summary>Real world use cases</summary>
-
-```sh
-```
-
-</details>
--->
-
 ## Further readings
 
 ### Sources
@@ -65,5 +50,6 @@ update-alternatives --config --all
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-<!-- Others -->
 [update-alternatives: managing multiple versions of commands and files]: https://documentation.suse.com/sles/15-SP5/html/SLES-all/cha-update-alternative.html
+
+<!-- Others -->
