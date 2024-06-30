@@ -33,8 +33,7 @@ Default files:
 | `/var/log/zypp/history`    | Installation history log file                               |
 
 Mark packages as **automatically** installed by adding them to `/var/lib/zypp/AutoInstalled`.<br/>
-Mark packages as **manually** installed by removing them from that file or forcefully reinstalling them
-(`zypper in -f 'tmux'`).
+Mark packages as **manually** installed by removing them from that file or forcefully reinstalling them.
 
 Command examples:
 
