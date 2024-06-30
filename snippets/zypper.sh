@@ -72,9 +72,10 @@ zypper purge-kernels --dry-run
 
 # Clean up unneded packages
 # Always check what is being done
-zypper packages --unneeded \
-| awk -F'|' 'NR>4{gsub(" ", "", $0);print $3"="$4}' | sort -u \
-| sudo xargs -p zypper rm -u
+# FIXME: flaky
+zypper -q pa --unneeded \
+| grep -E '^i\s+' | awk -F'|' '{gsub(" ", "", $0); print $3"="$4}' | sort -u \
+| xargs sudo zypper rm -uD
 
 # Upgrade distribution's releases
 sudo systemctl stop 'display-manager.service'
