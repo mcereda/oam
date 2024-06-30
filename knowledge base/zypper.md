@@ -32,6 +32,10 @@ Default files:
 | `/var/log/zypper.log`      | Zypper's log file                                           |
 | `/var/log/zypp/history`    | Installation history log file                               |
 
+Mark packages as **automatically** installed by adding them to `/var/lib/zypp/AutoInstalled`.<br/>
+Mark packages as **manually** installed by removing them from that file or forcefully reinstalling them
+(`zypper in -f 'tmux'`).
+
 Command examples:
 
 ```sh
@@ -42,7 +46,7 @@ zypper help 'command'
 
 # Update caches.
 zypper refresh
-zypper ref 'updates' 'mozilla'
+zypper ref --force 'updates' 'mozilla'
 
 # Clean caches.
 zypper clean --metadata
@@ -56,6 +60,11 @@ zypper cleanlocks
 # Search for resolvables.
 zypper search 'nmap'
 zypper se -r 'repository' 'mariadb'
+zypper se --type 'pattern' 'kde_plasma'
+
+# List all patterns.
+zypper se -t 'pattern'
+zypper se -n 'patterns-*'
 
 # Show all available versions of resolvables.
 zypper se -s 'kernel-default'
@@ -67,11 +76,11 @@ zypper se --provides '/usr/sbin/useradd'
 
 # Display detailed information about resolvables.
 zypper info 'workrave'
-zypper if -t 'patch' 'libzypp'
+zypper if --type 'patch' 'libzypp'
 zypper if -t 'pattern' 'lamp_server'
 
 # Install resolvables.
-zypper install 'parallel'
+zypper install -n 'parallel'
 zypper in --no-confirm 'https://prerelease.keybase.io/keybase_amd64.rpm'
 zypper in --no-recommends 'yast*ftp*' 'virtualbox-ose=2.0.6' '/root/ansible.rpm'
 
@@ -82,6 +91,7 @@ zypper in -r 'packman' --download 'in-advance' 'libavdevice60'
 zypper in -r 'https://repo.vivaldi.com/archive/vivaldi-suse.repo' 'vivaldi'
 
 # Reinstall resolvables.
+# This marks them as *manually* installed.
 zypper in -f 'amdgpu-dkms'
 
 # Install resolvables from source.
@@ -90,12 +100,13 @@ zypper source-install -d 'dbus-1'
 zypper si 'dolphin-plugins'
 
 # Check the dependencies of *installed* resolvables are satisfied.
-zypper verify 'git-lfs'
-zypper ve 'virtualbox'
+zypper verify
+zypper ve 'virtualbox' 'git-lfs'
 
 # Uninstall resolvables.
 zypper remove --clean-deps 'code'
-zypper rm -u 'zfs'
+zypper rm -u 'libreoffice' 'patterns-kde-kde_games'
+zypper rm -ut 'pattern' 'games'
 zypper in '!Firefox' '-htop'
 
 # List available updates.
@@ -128,14 +139,28 @@ zypper dup --details --from 'factory' --from 'packman' --download 'as-needed' --
 zypper packages --unneeded
 zypper pa --unneeded
 
-# List installed packages.
+# List installed resolvables.
 zypper search --installed-only
-zypper se -i
+zypper se -it 'pattern'
+
+# List installed packages
 zypper packages --installed-only
 zypper pa -i
 
 # List *manually* installed packages.
+zypper packages --userinstalled
 zypper pa -i | grep 'i+' | awk -F '|' '{print $3}' | sort -u
+
+# List *automatically* installed packages.
+zypper packages --autoinstalled
+
+# Mark resolvables as *manually* installed.
+zypper in -f 'zstd'
+zypper in -f -t 'pattern' 'kde_plasma'
+sed '/zstd/d' '/var/lib/zypp/AutoInstalled'
+
+# Mark resolvables as *automatically* installed.
+echo 'zstd' | tee -a '/var/lib/zypp/AutoInstalled'
 
 # ---
 
@@ -175,10 +200,11 @@ zypper --userdata 'comment-here' …
 zypper purge-kernels --dry-run
 
 # Clean up unneded packages.
-# Always check what is being done.
-zypper packages --unneeded \
-| awk -F'|' 'NR>4{gsub(" ", "", $0);print $3"="$4}' | sort -u \
-| sudo xargs zypper rm -u
+# *Always* check what is being done.
+# FIXME: flaky
+zypper -q pa --unneeded \
+| grep -E '^i\s+' | awk -F'|' '{gsub(" ", "", $0); print $3"="$4}' | sort -u \
+| xargs zypper rm -uD
 
 # Upgrade distribution's releases.
 # Suggested to do this after:
@@ -303,6 +329,8 @@ Procedure:
 - [System upgrade]
 - [Zypper cheat sheet]
 - [KDE repositories]
+- [Zypper manual]
+- [45 Zypper commands to manage 'Suse' Linux package management]
 
 <!--
   Reference
@@ -321,6 +349,8 @@ Procedure:
 [system upgrade]: https://en.opensuse.org/SDB:System_upgrade
 [zypp configuration options]: https://doc.opensuse.org/projects/libzypp/HEAD/group__ZyppConfig.html
 [zypper cheat sheet]: https://en.opensuse.org/images/1/17/Zypper-cheat-sheet-1.pdf
+[zypper manual]: https://en.opensuse.org/SDB:Zypper_manual
 
 <!-- Others -->
+[45 zypper commands to manage 'suse' linux package management]: https://www.tecmint.com/zypper-commands-to-manage-suse-linux-package-management/
 [how can i list all files which have been installed by an zypp/zypper package?]: https://unix.stackexchange.com/questions/162092/how-can-i-list-all-files-which-have-been-installed-by-an-zypp-zypper-package#239944
