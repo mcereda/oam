@@ -2,16 +2,17 @@
 
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
+   1. [Performance tuning](#performance-tuning)
+1. [Inventories](#inventories)
 1. [Templating](#templating)
    1. [Tests](#tests)
    1. [Loops](#loops)
+1. [Output formatting](#output-formatting)
 1. [Roles](#roles)
    1. [Get roles](#get-roles)
    1. [Assign roles](#assign-roles)
    1. [Role dependencies](#role-dependencies)
-1. [Output formatting](#output-formatting)
 1. [Create custom filter plugins](#create-custom-filter-plugins)
-1. [Performance tuning](#performance-tuning)
 1. [Troubleshooting](#troubleshooting)
    1. [Print all known variables](#print-all-known-variables)
    1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
@@ -135,6 +136,115 @@ ansible-config init --disabled > 'ansible.cfg'
 ansible-config init --disabled -t all > 'ansible.cfg'
 ```
 
+### Performance tuning
+
+Refer the following:
+
+- [8 ways to speed up your Ansible playbooks]
+- [6 ways to speed up Ansible playbook execution]
+- [How to speed up Ansible playbooks drastically?]
+- [Easy things you can do to speed up ansible]
+
+Suggestions:
+
+- Optimize fact gathering:
+
+  - Disable fact gathering when not used.
+  - Consider using smart fact gathering:
+
+    ```ini
+    [defaults]
+    gathering = smart
+    fact_caching = jsonfile
+    fact_caching_connection = /tmp/ansible/facts.json  ; /tmp/ansible to use the directory and have a file per host
+    fact_caching_timeout = 86400
+    ```
+
+  - Only gather subsets of facts:
+
+    ```yaml
+    - name: Play with selected facts
+      gather_facts: true
+      gather_subset:
+        - '!all'
+        - '!min'
+        - system
+    ```
+
+    Refer the [setup module] for more information, and the [setup module source code] for available keys.
+
+- Consider increasing the number of forks when dealing with lots of managed hosts:
+
+  ```ini
+  [defaults]
+  forks = 25
+  ```
+
+- Set **independent** tasks as async.
+- Optimize SSH connections:
+
+  - Prefer key-based authentication if used:
+
+    ```ini
+    [ssh_connection]
+    ssh_args = -o PreferredAuthentications=publickey
+    ```
+
+  - Use pipelining:
+
+    ```ini
+    [ssh_connection]
+    pipelining = True
+    ```
+
+  - Consider using multiplexing:
+
+    ```ini
+    [ssh_connection]
+    ssh_args = -o ControlMaster=auto -o ControlPersist=3600s
+    ```
+
+- Consider installing and using the [Mitogen plugin][mitogen for ansible] on the controller:
+
+  ```sh
+  curl -fsLO 'https://github.com/mitogen-hq/mitogen/releases/download/v0.3.7/mitogen-0.3.7.tar.gz'
+  tar -xaf 'mitogen-0.3.7.tar.gz'
+  ```
+
+  ```ini
+  [defaults]
+  strategy_plugins = mitogen-0.3.7/ansible_mitogen/plugins/strategy
+  strategy = mitogen_linear
+  ```
+
+  > Be advised that mitogen is not really supported by Ansible and has some issues with privilege escalation
+  > ([1](https://github.com/mitogen-hq/mitogen/issues/466)).
+
+- Improve the code:
+
+  - Bundle up package installations together.
+  - Beware of _expensive_ calls.
+
+## Inventories
+
+```ini
+saturn ansible_python_interpreter=/usr/bin/python3.12 ansible_connection=local
+jupiter.lan ansible_python_interpreter=/usr/bin/python3 ansible_port=4444
+
+[accessed_remotely]
+saturn
+jupiter.lan
+uranus.example.com ansible_port=5987
+
+[swap_resistent]
+jupiter.lan
+saturn
+
+[workstations]
+saturn
+; mars.lan ansible_port=4444
+```
+
 ## Templating
 
 Ansible leverages [Jinja2 templating], which can be used directly in tasks or through the `template` module.
@@ -253,6 +363,68 @@ Return a boolean result.
     - ['inner1', 'inner2']
 ```
 
+## Output formatting
+
+> Introduced in Ansible 2.5
+
+Change Ansible's output setting the stdout callback to `json` or `yaml`:
+
+```sh
+ANSIBLE_STDOUT_CALLBACK='yaml'
+```
+
+```ini
+# ansible.cfg
+[defaults]
+stdout_callback = json
+```
+
+`yaml` will set tasks output only to be in the defined format:
+
+```sh
+$ ANSIBLE_STDOUT_CALLBACK='yaml' ansible-playbook --inventory='localhost,' 'localhost.configure.yml' -vv --check
+PLAY [Configure localhost] *******************************************************************
+
+TASK [Upgrade system packages] ***************************************************************
+task path: /home/user/localhost.configure.yml:7
+ok: [localhost] => changed=false
+  cmd:
+  - /usr/bin/zypper
+  - --quiet
+  - --non-interactive
+  …
+  update_cache: false
+```
+
+The `json` output format will be a single, long JSON file:
+
+```sh
+$ ANSIBLE_STDOUT_CALLBACK='json' ansible-playbook --inventory='localhost,' 'localhost.configure.yml' -vv --check
+{
+    "custom_stats": {},
+    "global_custom_stats": {},
+    "plays": [
+        {
+            "play": {
+                …
+                "name": "Configure localhost"
+            },
+            "tasks": [
+                {
+                    "hosts": {
+                        "localhost": {
+                            …
+                            "action": "community.general.zypper",
+                            "changed": false,
+                            …
+                            "update_cache": false
+                        }
+                    }
+                    …
+…
+}
+```
+
 ## Roles
 
 ### Get roles
@@ -321,160 +493,9 @@ collections:
   - community.dns
 ```
 
-## Output formatting
-
-> Introduced in Ansible 2.5
-
-Change Ansible's output setting the stdout callback to `json` or `yaml`:
-
-```sh
-ANSIBLE_STDOUT_CALLBACK='yaml'
-```
-
-```ini
-# ansible.cfg
-[defaults]
-stdout_callback = json
-```
-
-`yaml` will set tasks output only to be in the defined format:
-
-```sh
-$ ANSIBLE_STDOUT_CALLBACK='yaml' ansible-playbook --inventory='localhost,' 'localhost.configure.yml' -vv --check
-PLAY [Configure localhost] *******************************************************************
-
-TASK [Upgrade system packages] ***************************************************************
-task path: /home/user/localhost.configure.yml:7
-ok: [localhost] => changed=false
-  cmd:
-  - /usr/bin/zypper
-  - --quiet
-  - --non-interactive
-  …
-  update_cache: false
-```
-
-The `json` output format will be a single, long JSON file:
-
-```sh
-$ ANSIBLE_STDOUT_CALLBACK='json' ansible-playbook --inventory='localhost,' 'localhost.configure.yml' -vv --check
-{
-    "custom_stats": {},
-    "global_custom_stats": {},
-    "plays": [
-        {
-            "play": {
-                …
-                "name": "Configure localhost"
-            },
-            "tasks": [
-                {
-                    "hosts": {
-                        "localhost": {
-                            …
-                            "action": "community.general.zypper",
-                            "changed": false,
-                            …
-                            "update_cache": false
-                        }
-                    }
-                    …
-…
-}
-```
-
 ## Create custom filter plugins
 
 See [Creating your own Ansible filter plugins].
-
-## Performance tuning
-
-Refer the following:
-
-- [8 ways to speed up your Ansible playbooks]
-- [6 ways to speed up Ansible playbook execution]
-- [How to speed up Ansible playbooks drastically?]
-- [Easy things you can do to speed up ansible]
-
-Suggestions:
-
-- Optimize fact gathering:
-
-  - Disable fact gathering when not used.
-  - Consider using smart fact gathering:
-
-    ```ini
-    [defaults]
-    gathering = smart
-    fact_caching = jsonfile
-    fact_caching_connection = /tmp/ansible/facts.json  ; /tmp/ansible to use the directory and have a file per host
-    fact_caching_timeout = 86400
-    ```
-
-  - Only gather subsets of facts:
-
-    ```yaml
-    - name: Play with selected facts
-      gather_facts: true
-      gather_subset:
-        - '!all'
-        - '!min'
-        - system
-    ```
-
-    Refer the [setup module] for more information, and the [setup module source code] for available keys.
-
-- Consider increasing the number of forks when dealing with lots of managed hosts:
-
-  ```ini
-  [defaults]
-  forks = 25
-  ```
-
-- Set **independent** tasks as async.
-- Optimize SSH connections:
-
-  - Prefer key-based authentication if used:
-
-    ```ini
-    [ssh_connection]
-    ssh_args = -o PreferredAuthentications=publickey
-    ```
-
-  - Use pipelining:
-
-    ```ini
-    [ssh_connection]
-    pipelining = True
-    ```
-
-  - Consider using multiplexing:
-
-    ```ini
-    [ssh_connection]
-    ssh_args = -o ControlMaster=auto -o ControlPersist=3600s
-    ```
-
-- Consider installing and using the [Mitogen plugin][mitogen for ansible] on the controller:
-
-  ```sh
-  curl -fsLO 'https://github.com/mitogen-hq/mitogen/releases/download/v0.3.7/mitogen-0.3.7.tar.gz'
-  tar -xaf 'mitogen-0.3.7.tar.gz'
-  ```
-
-  ```ini
-  [defaults]
-  strategy_plugins = mitogen-0.3.7/ansible_mitogen/plugins/strategy
-  strategy = mitogen_linear
-  ```
-
-  > Be advised that mitogen is not really supported by Ansible and has some issues with privilege escalation
-  > ([1](https://github.com/mitogen-hq/mitogen/issues/466)).
-
-- Improve the code:
-
-  - Bundle up package installations together.
-  - Beware of expensive calls.
 
 ## Troubleshooting
 
