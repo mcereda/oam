@@ -8,6 +8,7 @@ library (`libzypp`).
 1. [Repositories](#repositories)
 1. [Configuration](#configuration)
 1. [Gotchas](#gotchas)
+1. [Distribution's release upgrade](#distributions-release-upgrade)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -41,11 +42,14 @@ zypper help 'command'
 
 # Update caches.
 zypper refresh
-zypper ref 'updates'
+zypper ref 'updates' 'mozilla'
 
 # Clean caches.
 zypper clean --metadata
 zypper clean --all 'packman'
+
+# Clean up locks.
+zypper cleanlocks
 
 # ---
 
@@ -124,6 +128,15 @@ zypper dup --details --from 'factory' --from 'packman' --download 'as-needed' --
 zypper packages --unneeded
 zypper pa --unneeded
 
+# List installed packages.
+zypper search --installed-only
+zypper se -i
+zypper packages --installed-only
+zypper pa -i
+
+# List *manually* installed packages.
+zypper pa -i | grep 'i+' | awk -F '|' '{print $3}' | sort -u
+
 # ---
 
 # List repositories.
@@ -171,11 +184,11 @@ zypper packages --unneeded \
 # Suggested to do this after:
 # - all users logged off;
 # - disabling the GUI (`systemctl stop 'display-manager.service'`).
-zypper refresh \
-&& zypper update \
-&& sed -i 's|/15.5/|/${releasever}/|g' '/etc/zypp/repos.d/'*'.repo' \
-&& zypper --releasever '15.6' refresh \
-&& zypper --releasever '15.6' dist-upgrade \
+sed -i 's|/15.5/|/$releasever/|g' '/etc/zypp/repos.d/'*'.repo' \
+&& zypper ref \
+&& zypper up \
+&& zypper --releasever '15.6' ref \
+&& zypper --releasever '15.6' dup \
 && reboot
 ```
 
@@ -207,11 +220,12 @@ This means that a repository with priority 90 will have precedence on repositori
 
 Repositories of interest:
 
-| Name          | URL                                                                                                                                                    | Description                                                           |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| Packman (all) | <https://ftp.fau.de/packman/suse/opeSUSE_Tumbleweed/><br/><https://ftp.fau.de/packman/suse/openSUSE_Leap_15.5/>                                        | The largest external repository of openSUSE packages                  |
-| Mozilla       | <https://download.opensuse.org/repositories/mozilla/openSUSE_Tumbleweed/><br/><https://download.opensuse.org/repositories/mozilla/openSUSE_Leap_15.5/> | Bleeding edge versions of Firefox, Thunderbird and all things Mozilla |
-| Vivaldi       | <https://repo.vivaldi.com/archive/vivaldi-suse.repo>                                                                                                   | A browser adapting to you, not the other way around.                  |
+| Name          | Repos' URL keys                                                                                                                                                                                                                                                                                                                                            | Repo files' URLs                                                                                  | Description                                                                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Mozilla       | `https://download.opensuse.org/repositories/mozilla/openSUSE_Tumbleweed/`<br/>`https://download.opensuse.org/repositories/mozilla/openSUSE_Leap_$releasever/`                                                                                                                                                                                              | [Tumbleweed](https://download.opensuse.org/repositories/mozilla/openSUSE_Tumbleweed/mozilla.repo) | Bleeding edge versions of Firefox, Thunderbird and all things Mozilla        |
+| Packman (all) | `https://ftp.fau.de/packman/suse/openSUSE_Tumbleweed/`<br/>`https://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Leap_$releasever/`                                                                                                                                                                                                                    | [Tumbleweed](https://ftp.fau.de/packman/suse/openSUSE_Tumbleweed/packman.repo)                    | The largest external repository of openSUSE packages                         |
+| Vivaldi       |                                                                                                                                                                                                                                                                                                                                                            | [All](https://repo.vivaldi.com/archive/vivaldi-suse.repo)                                         | A browser adapting to you, not the other way around.                         |
+| KDE           | `https://download.opensuse.org/repositories/KDE:/Extra/openSUSE_Tumbleweed/`<br/>`https://download.opensuse.org/repositories/KDE:/Frameworks/openSUSE_Tumbleweed/`<br/>`https://download.opensuse.org/repositories/KDE:/Applications/KDE_Frameworks5_openSUSE_Tumbleweed/`<br/>`https://download.opensuse.org/repositories/KDE:/Extra/openSUSE_Leap_15.6/` |                                                                                                   | Bleeding edge versions of framework, Plasma, applications and all things KDE |
 
 ## Configuration
 
@@ -231,6 +245,49 @@ Zypper does not have for now a way to list **the content** of an **installed** p
 sudo rpm --query --list 'parallel'
 ```
 
+## Distribution's release upgrade
+
+> Tested on openSUSE Leap (15.5. to 15.6).
+
+Suggested to do this **after**:
+
+- All users logged off;
+- Disabling the GUI (`systemctl stop 'display-manager.service'`).
+
+Procedure:
+
+1. Make sure no repository has the release version hardcoded:
+
+   ```sh
+   sudo sed -i 's|/15.5/|/$releasever/|g' '/etc/zypp/repos.d/'*'.repo'
+   ```
+
+1. Refresh the cache:
+
+   ```sh
+   sudo zypper refresh
+   ```
+
+1. Update the **current** release's packages:
+
+   ```sh
+   sudo zypper update
+   ```
+
+1. Refresh the cache again forcing the **new** release version:
+
+   ```sh
+   sudo zypper --releasever '15.6' refresh
+   ```
+
+1. Upgrade the whole distribution to the **new** release:
+
+   ```sh
+   sudo zypper --releasever '15.6' dist-upgrade
+   ```
+
+1. Reboot.
+
 ## Further readings
 
 - [rpm]
@@ -245,6 +302,7 @@ sudo rpm --query --list 'parallel'
 - [Command to clean out all unneeded autoinstalled dependencies]
 - [System upgrade]
 - [Zypper cheat sheet]
+- [KDE repositories]
 
 <!--
   Reference
@@ -257,6 +315,7 @@ sudo rpm --query --list 'parallel'
 <!-- Upstream -->
 [additional package repositories]: https://en.opensuse.org/Additional_package_repositories
 [command to clean out all unneeded autoinstalled dependencies]: https://github.com/openSUSE/zypper/issues/116
+[kde repositories]: https://en.opensuse.org/SDB:KDE_repositories
 [managing software with command line tools]: https://documentation.suse.com/sles/15-SP5/html/SLES-all/cha-sw-cl.html
 [package repositories]: https://en.opensuse.org/Package_repositories
 [system upgrade]: https://en.opensuse.org/SDB:System_upgrade
