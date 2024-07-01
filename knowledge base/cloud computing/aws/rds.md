@@ -386,6 +386,18 @@ putting the source DB in RO mode.
 > transactional and does **not** use the PostgreSQL write-ahead log to record changes.
 
 <details>
+  <summary>Limitations</summary>
+
+- The access privileges and ownership from the source database are **not** transferred to the target database.<br/>
+  Dump them from the source or recreate them in other ways.
+- Databases **cannot** be transported onto read replicas or parent instances of read replicas.
+- `reg` data types **cannot** be used in any source database's table that are about to be transported.
+- There can be **up to 32** total transports (including both imports and exports) active at the same time on any DB
+  instance.
+- All the DB's data is migrated **as is**.
+
+</details>
+<details>
   <summary>Requirements</summary>
 
 - A **source DB** to copy data from.
@@ -398,7 +410,7 @@ putting the source DB in RO mode.
 - Both DB instances **must** run the same **major** version of PostgreSQL.<br/>
   Differences in **minor** versions seem to be fine.
 - Should the source DB have the `pgaudit` extension _loaded_, that extension will **need** to be _installed_ on the
-  target instance so that it can be ported.
+  target instance.
 - The target instance **must** be able to connect to the source instance.
 - All source database objects **must** reside in the default `pg_default` tablespace.
 - The source DB (but not _other_ DBs on the same source instance) will need to:
@@ -412,17 +424,6 @@ as the middleman to operate on both DBs.
 > Try and keep the DBs identifiers under 22 characters.<br/>
 > PostgreSQL will try and truncate the identifier after 63 characters, and AWS will add something like
 > `.{{12-char-id}}.{{region}}.rds.amazonaws.com` to it.
-
-</details>
-<details>
-  <summary>Limitations</summary>
-
-- The access privileges and ownership from the source database are **not** transferred to the target database.
-- Databases **cannot** be transported onto read replicas or parent instances of read replicas.
-- `reg` data types **cannot** be used in any database table that are about to be transported with this method.
-- There can be **up to 32** total transports (including both imports and exports) active at the same time on any DB
-  instance.
-- All the DB data is migrated **as is**.
 
 </details>
 <details>
@@ -447,11 +448,15 @@ as the middleman to operate on both DBs.
      Specifies whether to report timing information during the transport. Defaults to 1 (true), meaning that timing
      information is reported.
 
-1. Reboot the instances equipped with the Parameter Group to apply changes.
-1. Create a new _target_ instance with the required allocated storage.
+1. Reboot the instances equipped with the Parameter Group to apply static changes.
+1. Create a new _target_ instance with the required allocated storage.<br/>
+   Check the requirements again.
 1. Make sure the middleman can connect to both DBs.
 1. Make sure the _target_ DB instance can connect to the _source_.
-1. RDS does **not** grant _full_ SuperUser permissions even to instances' master users. This makes impossible to use
+1. make sure one has a way to reinstate existing roles and permissions onto the target.<br/>
+   Dump existing roles and permissions from the source if required on the target.
+
+   RDS does **not** grant _full_ SuperUser permissions even to instances' master users. This makes impossible to use
    `pg_dumpall -r` to _fully_ dump rules and permissions from the source.<br/>
    One **_can_** export them by **excluding the passwords** from the dump:
 
@@ -475,7 +480,6 @@ as the middleman to operate on both DBs.
      'roles.sql'
    ```
 
-   Just make sure one has a way to reinstate existing roles and permissions onto the target.
 1. Prepare the **source** DB for transport:
 
    1. Connect to the DB:
@@ -502,7 +506,7 @@ as the middleman to operate on both DBs.
 
    1. The instance must **not** contain a DB with the same name of the source, as the transport will create it on the
       target.<br/>
-      Connect to a _different_ DB than the source:
+      Connect to a _different_ DB than the source's:
 
       ```sh
       psql -h 'target-instance.5f7mp3pt3n6e.eu-west-1.rds.amazonaws.com' -p '5432' -d 'postgres' -U 'admin' --password
@@ -540,7 +544,7 @@ as the middleman to operate on both DBs.
 
 1. Validate the data in the target.
 1. Restore uninstalled extensions in the public schema of **both** DB instances.<br/>
-   `pg_transport` _can_ be dropped now.
+   `pg_transport` _can_ be now dropped if not necessary anymore.
 1. Restore all the needed roles and permissions onto the target:
 
    ```sh
