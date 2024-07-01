@@ -15,6 +15,7 @@
       1. [Reduce allocated storage by migrating using transportable databases](#reduce-allocated-storage-by-migrating-using-transportable-databases)
 1. [Troubleshooting](#troubleshooting)
    1. [ERROR: extension must be loaded via shared\_preload\_libraries](#error-extension-must-be-loaded-via-shared_preload_libraries)
+   1. [ERROR: must be superuser to alter superuser roles or change superuser attribute](#error-must-be-superuser-to-alter-superuser-roles-or-change-superuser-attribute)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -375,7 +376,11 @@ a database from a source DB instance.
 > When the transport begins, all current sessions on the **source** database are ended and the DB is put in ReadOnly
 > mode.<br/>
 > Only the specific source database that is being transported is affected. Others are **not** affected.
->
+
+Primary instances with replicas **can** be used as source instances.<br/>
+TODO: test using a RO replica **as** the source instance. I expect this will **not** work due to the transport extension
+putting the source DB in RO mode.
+
 > The in-transit database will be **inaccessible** on the **target** DB instance for the duration of the transport.<br/>
 > During transport, the target DB instance **cannot be restored** to a point in time, as the transport is **not**
 > transactional and does **not** use the PostgreSQL write-ahead log to record changes.
@@ -390,7 +395,8 @@ a database from a source DB instance.
   > needs to be transported.<br/>
   > Should the target contain the DB already, it **will** need to be dropped beforehand.
 
-- Both DB instances **must** run the same major version of PostgreSQL.
+- Both DB instances **must** run the same **major** version of PostgreSQL.<br/>
+  Differences in **minor** versions seem to be fine.
 - Should the source DB have the `pgaudit` extension _loaded_, that extension will **need** to be _installed_ on the
   target instance so that it can be ported.
 - The target instance **must** be able to connect to the source instance.
@@ -445,6 +451,31 @@ as the middleman to operate on both DBs.
 1. Create a new _target_ instance with the required allocated storage.
 1. Make sure the middleman can connect to both DBs.
 1. Make sure the _target_ DB instance can connect to the _source_.
+1. RDS does **not** grant _full_ SuperUser permissions even to instances' master users. This makes impossible to use
+   `pg_dumpall -r` to _fully_ dump rules and permissions from the source.<br/>
+   One **_can_** export them by **excluding the passwords** from the dump:
+
+   ```sh
+   pg_dumpall -h 'source-instance.5f7mp3pt3n6e.eu-west-1.rds.amazonaws.com' -U 'admin' -l 'postgres' -W \
+     -rf 'roles.sql' --no-role-passwords
+   ```
+
+   but statements involving protected roles (like `rdsadmin` and any other matching `rds_*`) and change in 'superuser'
+   or 'replication' attributes will fail on restore.<br/>
+   Clean them up from the dump:
+
+   ```sh
+   # Ignore *everything* that has to do with 'rdsadmin'
+   # Ignore the creation or alteration of AWS-managed RDS roles
+   # Ignore changes involving protected attributes
+   sed -Ei'.backup' \
+     -e '/rdsadmin/d' \
+     -e '/(CREATE|ALTER) ROLE rds_/d' \
+     -e 's/(NO)(SUPERUSER|REPLICATION)\s?//g' \
+     'roles.sql'
+   ```
+
+   Just make sure one has a way to reinstate existing roles and permissions onto the target.
 1. Prepare the **source** DB for transport:
 
    1. Connect to the DB:
@@ -504,14 +535,24 @@ as the middleman to operate on both DBs.
 1. Run the transport by running the `transport.import_from_server` function on the **target** DB instance:
 
    ```sql
-   SELECT transport.import_from_server( …, …, …, …, …, …, false);
+   SELECT transport.import_from_server( …, …, …, …, …, …, false );
    ```
 
 1. Validate the data in the target.
-1. Add all the needed roles and permissions to the target.
 1. Restore uninstalled extensions in the public schema of **both** DB instances.<br/>
-   `pg_transport` _can_ be uninstalled.
-1. Revert the value of the max_worker_processes parameter.
+   `pg_transport` _can_ be dropped now.
+1. Restore all the needed roles and permissions onto the target:
+
+   ```sh
+   psql -h 'target-instance.5f7mp3pt3n6e.eu-west-1.rds.amazonaws.com' -p '5432' -U 'admin' -d 'postgres' --password \
+     -f 'roles.sql'
+   ```
+
+   > Restoring roles from raw dumps **will** throw a lot of errors about altering superuser attributes or protected
+   > roles. Check the list item about dumping data above.
+
+1. Revert the value of the `max_worker_processes` parameter if necessary.<br/>
+   This will require a restart of the instance.
 
 </details>
 <br/>
@@ -534,18 +575,42 @@ ALTER DATABASE db-name SET default_transaction_read_only = false;
   <details style="margin: 0 0 0 1em">
     <summary><code>db.t4g.medium</code> to <code>db.t4g.medium</code>, gp3 storage, ~ 350 GB database</summary>
 
-|                            | 1               | 2               | 3               | 4               | 5               |
-| -------------------------- | --------------- | --------------- | --------------- | --------------- | --------------- |
-| `pg_transport.num_workers` | 2               | 4               | 8               | 8               | 12              |
-| `max_worker_processes`     | 15              | 21              | 33              | 33              | 45              |
-| `pg_transport.work_mem`    | 131072 (128 MB) | 131072 (128 MB) | 131072 (128 MB) | 262144 (256 MB) | 131072 (128 MB) |
-| Minimum transfer rate      | ~ 19 MB/s       | ~ 19 MB/s       | ~ 50 MB/s       | ~ 4 MB/s        | ~ 25 MB/s       |
-| Maximum transfer rate      | ~ 58 MB/s       | ~ 95 MB/s       | ~ 255 MB/s      | ~ 255 MB/s      | ~ 165 MB/s      |
-| Average transfer rate      | ~ 31 MB/s       | ~ 66 MB/s       | ~ 138 MB/s      | ~ 101 MB/s      | ~ 85 MB/s       |
-| Time estimated             | ~ 3h 13m        | ~ 1h 36m        | ~ 48m           | ~ 1h            | ~ 1h 11m        |
-| Time taken                 | - (interrupted) | - (interrupted) | - (interrupted) | - (interrupted) | - (interrupted) |
-| Source CPU usage           | ~ 10%           | ~ 15%           | ~ 45%           | ~ 39%           | ~ 37%           |
-| Target CPU usage           | ~ 12%           | ~ 18%           | ~ 38%           | ~ 28%           | ~ 25%           |
+Interruptions are due to the exhaustion of I/O burst credits, which tainted the benchmark.
+
+|                            | 1st run             | 2nd run             | 3rd and 6th run   | 4                   | 5                   |
+| -------------------------- | ------------------- | ------------------- | ----------------- | ------------------- | ------------------- |
+| `pg_transport.num_workers` | 2                   | 4                   | 8                 | 8                   | 12                  |
+| `max_worker_processes`     | 15                  | 21                  | 33                | 33                  | 45                  |
+| `pg_transport.work_mem`    | 131072 (128 MB)     | 131072 (128 MB)     | 131072 (128 MB)   | 262144 (256 MB)     | 131072 (128 MB)     |
+| Minimum transfer rate      | ~ 19 MB/s           | ~ 19 MB/s           | ~ 50 MB/s         | ~ 4 MB/s            | ~ 25 MB/s           |
+| Maximum transfer rate      | ~ 58 MB/s           | ~ 95 MB/s           | ~ 255 MB/s        | ~ 255 MB/s          | ~ 165 MB/s          |
+| Average transfer rate      | ~ 31 MB/s           | ~ 66 MB/s           | ~ 138 MB/s        | ~ 101 MB/s          | ~ 85 MB/s           |
+| Time estimated after 10m   | ~ 3h 13m            | ~ 1h 36m            | ~ 52m             | ~ 1h                | ~ 1h 11m            |
+| Time taken                 | N/A (interrupted)   | N/A (interrupted)   | N/A (interrupted) | N/A (interrupted)   | N/A (interrupted)   |
+| Source CPU usage           | ~ 10%               | ~ 15%               | ~ 40%             | ~ 39%               | ~ 37%               |
+| Source RAM usage delta     | N/A (did not check) | N/A (did not check) | + ~ 1.5 GB        | N/A (did not check) | N/A (did not check) |
+| Target CPU usage           | ~ 12%               | ~ 18%               | ~ 34%             | ~ 28%               | ~ 25%               |
+| Target RAM usage delta     | N/A (did not check) | N/A (did not check) | + ~ 1.5 GB        | N/A (did not check) | N/A (did not check) |
+
+  </details>
+
+  <details style="margin: 0 0 0 1em">
+    <summary><code>db.m6i.xlarge</code> to <code>db.m6i.xlarge</code>, gp3 storage, ~ 390 GB database</summary>
+
+|                            | 1st run         | 2nd to 5th run  |
+| -------------------------- | --------------- | --------------- |
+| `pg_transport.num_workers` | 8               | 16              |
+| `max_worker_processes`     | 33              | 57              |
+| `pg_transport.work_mem`    | 131072 (128 MB) | 131072 (128 MB) |
+| Minimum transfer rate      | ~ 97 MB/s       | ~ 248 MB/s      |
+| Maximum transfer rate      | ~ 155 MB/s      | ~ 545 MB/s      |
+| Average transfer rate      | ~ 135 MB/s      | ~ 490 MB/s      |
+| Time estimated after 10m   | ~ 46m           | ~ 14m           |
+| Time taken                 | ~ 48m           | ~ 14m           |
+| Source CPU usage           | ~ 12%           | ~ 42%           |
+| Source RAM usage delta     | + ~ 940 MB      | + ~ 1.5 GB      |
+| Target CPU usage           | ~ 17%           | ~ 65%           |
+| Target RAM usage delta     | + ~ 1.3 GB      | + ~ 3.3 GB      |
 
   </details>
 </details>
@@ -559,6 +624,16 @@ Refer [How can I resolve the "ERROR: <module/extension> must be loaded via share
 1. Include the module or extension in the `shared_preload_libraries` parameter in the Parameter Group.
 1. Reboot the instance to apply the change.
 1. Try reloading it again.
+
+### ERROR: must be superuser to alter superuser roles or change superuser attribute
+
+Error message examples:
+
+> ERROR: must be superuser to alter superuser roles or change superuser attribute<br/>
+> ERROR: must be superuser to alter replication roles or change replication attribute
+
+RDS does **not** grant _full_ SuperUser permissions even to instances' master users.<br/>
+Actions involving altering protected roles or changing protected attributes are practically blocked on RDS.
 
 ## Further readings
 
@@ -580,6 +655,7 @@ Refer [How can I resolve the "ERROR: <module/extension> must be loaded via share
 - [Migrating databases using RDS PostgreSQL Transportable Databases]
 - [Importing data into PostgreSQL on Amazon RDS]
 - [Working with parameters on your RDS for PostgreSQL DB instance]
+- [Backing up login roles aka users and group roles]
 
 <!--
   Reference
@@ -610,3 +686,4 @@ Refer [How can I resolve the "ERROR: <module/extension> must be loaded via share
 [working with parameters on your rds for postgresql db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html
 
 <!-- Others -->
+[backing up login roles aka users and group roles]: https://www.postgresonline.com/article_pfriendly/81.html

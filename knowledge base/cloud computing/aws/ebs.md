@@ -44,6 +44,7 @@ take **up to 72h**.
 - AWS' [CLI]
 - [Archive Amazon EBS snapshots]
 - [Automate snapshot lifecycles]
+- [Choose the best Amazon EBS volume type for your self-managed database deployment]
 
 ### Sources
 
@@ -65,6 +66,7 @@ take **up to 72h**.
 <!-- Upstream -->
 [archive amazon ebs snapshots]: https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-archive.html
 [automate snapshot lifecycles]: https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-ami-policy.html
+[choose the best amazon ebs volume type for your self-managed database deployment]: https://aws.amazon.com/blogs/storage/how-to-choose-the-best-amazon-ebs-volume-type-for-your-self-managed-database-deployment/
 [delete-volume]: https://docs.aws.amazon.com/cli/latest/reference/ec2/delete-volume.html
 [describe-volumes]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-volumes.html
 [documentation]: https://docs.aws.amazon.com/ebs/
