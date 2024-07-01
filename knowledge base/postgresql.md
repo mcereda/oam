@@ -22,7 +22,8 @@ sudo zypper install 'postgresql15' 'postgresql15-server'
 psql 'my-db'
 psql 'my-db' 'user'
 psql 'postgresql://host:5433/my-db?sslmode=require'
-psql -U 'username' -d 'my-db' -h 'hostname' -p 'port' --password
+psql -U 'username' -d 'my-db' -h 'hostname' -p 'port' -W
+psql --host 'host.fqnd' --port '5432' --username 'postgres' --database 'postgres' --password
 
 # List available databases.
 psql … --list
@@ -38,11 +39,20 @@ pgbench -i 'test-db' -h 'hostname' -p '5555' -U 'user'
 
 # Create full backups of databases.
 pg_dump -U 'postgres' -d 'sales' -F 'custom' -f 'sales.bak'
+pg_dump --host 'host.fqnd' --port '5432' --username 'postgres' --dbname 'postgres' --password --schema-only
 pg_dump … -T 'customers,orders' -t 'salespeople,performances'
-pg_dump … -s
+pg_dump … -s --format 'custom'
+
+# Dump users and groups to file
+pg_dumpall -h 'host.fqnd' -p '5432' -U 'postgres' -l 'postgres' -W --roles-only --file 'roles.sql'
+pg_dumpall -h 'host.fqnd' -p '5432' -U 'postgres' -l 'postgres' -Wrf 'roles.sql' --no-role-passwords
 
 # Restore backups.
 pg_restore -U 'postgres' -d 'sales' 'sales.bak'
+
+# Execute commands from file
+# E.g., restore from dump
+psql -h 'host.fqnd' -U 'postgres' -d 'postgres' -W -f 'dump.sql' -e
 ```
 
 ## Further readings
