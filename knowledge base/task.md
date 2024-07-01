@@ -25,7 +25,7 @@ This allows to write sh/bash commands and have them work even where `sh` or `bas
 Windows) as long as any called executable is available in `PATH`.
 
 <details>
-  <summary>Installation and configuration</summary>
+  <summary>Setup</summary>
 
 ```sh
 # Install the executable.
@@ -35,7 +35,8 @@ sudo dnf install 'go-task'
 sudo snap install 'task' --classic
 
 # Setup the shell's completion.
-curl -fsSLo "$HOME/.config/fish/completions/task.fish" 'https://raw.githubusercontent.com/go-task/task/main/completion/fish/task.fish'
+curl -fsSL 'https://raw.githubusercontent.com/go-task/task/main/completion/fish/task.fish' \
+  -o "$HOME/.config/fish/completions/task.fish"
 ```
 
 </details>
@@ -63,7 +64,7 @@ curl -fsSLo "$HOME/.config/fish/completions/task.fish" 'https://raw.githubuserco
 1. Run tasks by their name:
 
    ```sh
-   task assets build
+   task 'assets' 'build'
    ```
 
    If task names are omitted, a task named `default` will be assumed.

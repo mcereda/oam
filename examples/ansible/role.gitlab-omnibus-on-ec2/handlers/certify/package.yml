@@ -7,7 +7,7 @@
     - route53
   become: true
   amazon.aws.route53:
-    zone: apolloagriculture.com  # FIXME
+    zone: exaample.com  # FIXME
     record: "{{ dns_challenge.challenge_data[external_url_hostname]['dns-01'].record }}"
     type: TXT
     ttl: 60
@@ -53,7 +53,7 @@
     - route53
   become: true
   amazon.aws.route53:
-    zone: apolloagriculture.com  # FIXME
+    zone: example.com  # FIXME
     record: "{{ validation_record }}"
     type: TXT
     state: absent
