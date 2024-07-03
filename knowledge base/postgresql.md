@@ -62,6 +62,14 @@ pg_restore -U 'postgres' -d 'sales' 'sales.bak'
 # Execute commands from file
 # E.g., restore from dump
 psql -h 'host.fqnd' -U 'postgres' -d 'postgres' -W -f 'dump.sql' -e
+
+# Generate scram-sha-256 hashes using only tools from PostgreSQL.
+# Requires to actually create and delete users.
+createuser 'dummyuser' -e --pwprompt && dropuser 'dummyuser'
+
+# Generate scram-sha-256 hashes.
+# Leverage https://github.com/supercaracal/scram-sha-256
+scram-sha-256 'mySecretPassword'
 ```
 
 ## Further readings
@@ -77,6 +85,7 @@ psql -h 'host.fqnd' -U 'postgres' -d 'postgres' -W -f 'dump.sql' -e
 - [pg_settings]
 - [Connect to a PostgreSQL database]
 - [The password file]
+- [How to Generate SCRAM-SHA-256 to Create Postgres 13 User]
 
 <!--
   Reference
@@ -92,5 +101,6 @@ psql -h 'host.fqnd' -U 'postgres' -d 'postgres' -W -f 'dump.sql' -e
 <!-- Others -->
 [bidirectional replication in postgresql using pglogical]: https://www.jamesarmes.com/2023/03/bidirectional-replication-postgresql-pglogical.html
 [connect to a postgresql database]: https://www.postgresqltutorial.com/connect-to-postgresql-database/
+[how to generate scram-sha-256 to create postgres 13 user]: https://stackoverflow.com/questions/68400120/how-to-generate-scram-sha-256-to-create-postgres-13-user
 [how to scram in postgres with pgbouncer]: https://www.crunchydata.com/blog/pgbouncer-scram-authentication-postgresql
 [what is the pg_dump command for backing up a postgresql database?]: https://www.linkedin.com/advice/3/what-pgdump-command-backing-up-postgresql-ke2ef
