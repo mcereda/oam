@@ -7,10 +7,14 @@ psql --host 'prod.db.lan' --port '5432' --username 'postgres' --database 'postgr
 psql -h 'host.fqnd' -p '5432' -U 'admin' -d 'postgres' -W
 psql 'postgresql://localhost:5433/games?sslmode=require'
 
-# List available databases.
+# List available databases
 psql … --list
 
-# Execute commands.
+# Change passwords
+psql … -U 'jonathan' -c '\password'
+psql … -U 'admin' -c '\password jonathan'
+
+# Execute SQL commands
 psql … -c 'select * from tableName;' -o 'out.file'
 psql … -c 'select * from tableName;' -H
 psql … -f 'commands.sql'
@@ -31,9 +35,9 @@ pg_dump -h 'host.fqnd' -p '5432' -U 'admin' -d 'postgres' -Ws
 pg_dumpall -h 'host.fqnd' -p '5432' -U 'postgres' -l 'postgres' -W --roles-only --file 'roles.sql'
 pg_dumpall -h 'host.fqnd' -p '5432' -U 'postgres' -l 'postgres' -Wrf 'roles.sql' --no-role-passwords
 
-# Restore backups.
+# Restore backups
 pg_restore -U 'postgres' -d 'sales' 'sales.bak'
 
-# Initialize a test DB.
+# Initialize a test DB
 pgbench -i 'test-db'
 pgbench -i 'test-db' -h 'hostname' -p '5555' -U 'user'

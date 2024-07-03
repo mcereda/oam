@@ -27,9 +27,11 @@ CREATE DATABASE world;
 SELECT * FROM pg_settings;
 SELECT "name", "setting" FROM pg_settings WHERE NAME LIKE '%log%';
 SHOW "wal_keep_size";
+SHOW "password_encryption";
 
 -- Change database settings for the current session
 SET pgaudit.log = 'none';
+SET password_encryption  = 'scram-sha-256';
 
 -- Change database settings permanently
 ALTER DATABASE reviser SET pgaudit.log TO 'none';
@@ -61,6 +63,8 @@ DROP SCHEMA IF EXISTS mundane CASCADE;
 -- List users with respective roles
 \du
 \du+
+-- List users only
+select usename FROM pg_catalog.pg_user;
 
 -- Check the current user has SuperUser permissions
 SHOW is_superuser
@@ -72,11 +76,17 @@ ALTER USER joel WITH SUPERUSER;
 ALTER USER joel WITH NOSUPERUSER;
 -- Allow users to create databases
 ALTER USER mark CREATEDB;
+-- Change passwords
+ALTER USER jonathan WITH PASSWORD 'seagull5-pantomime-Resting';
 
 
 -- Close the connection to the current DB
 \q
 \quit
+
+
+-- Get passwords
+SELECT rolpassword from pg_authid where rolname = 'admin';
 
 
 -- Show extensions

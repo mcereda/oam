@@ -6,6 +6,15 @@
 
 ## TL;DR
 
+One can store one's credentials in `~/.pgpass`:
+
+```plaintext
+# line format => hostname:port:database:username:password`
+# can use wildcards
+postgres.lan:5643:postgres:postgres:BananaORama
+*:*:sales:elaine:modestPassword
+```
+
 ```sh
 # Installation.
 brew install 'postgresql@14'
@@ -60,12 +69,14 @@ psql -h 'host.fqnd' -U 'postgres' -d 'postgres' -W -f 'dump.sql' -e
 - [Docker image]
 - [Bidirectional replication in PostgreSQL using pglogical]
 - [What is the pg_dump command for backing up a PostgreSQL database?]
+- [How to SCRAM in Postgres with pgBouncer]
 
 ### Sources
 
 - [psql]
 - [pg_settings]
 - [Connect to a PostgreSQL database]
+- [The password file]
 
 <!--
   Reference
@@ -76,8 +87,10 @@ psql -h 'host.fqnd' -U 'postgres' -d 'postgres' -W -f 'dump.sql' -e
 [docker image]: https://github.com/docker-library/docs/blob/master/postgres/README.md
 [psql]: https://www.postgresql.org/docs/current/app-psql.html
 [pg_settings]: https://www.postgresql.org/docs/current/view-pg-settings.html
+[the password file]: https://www.postgresql.org/docs/current/libpq-pgpass.html
 
 <!-- Others -->
-[connect to a postgresql database]: https://www.postgresqltutorial.com/connect-to-postgresql-database/
 [bidirectional replication in postgresql using pglogical]: https://www.jamesarmes.com/2023/03/bidirectional-replication-postgresql-pglogical.html
+[connect to a postgresql database]: https://www.postgresqltutorial.com/connect-to-postgresql-database/
+[how to scram in postgres with pgbouncer]: https://www.crunchydata.com/blog/pgbouncer-scram-authentication-postgresql
 [what is the pg_dump command for backing up a postgresql database?]: https://www.linkedin.com/advice/3/what-pgdump-command-backing-up-postgresql-ke2ef
