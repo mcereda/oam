@@ -76,9 +76,46 @@
       - ./data:/var/opt/gitlab:Z
     auto_remove: true
 
-- name: Add elements to lists
-  set_fact:
-    programming_languages: "{{ programming_languages + ['Ruby'] }}"
+- name: Manipulate lists
+  block:
+    - name: Add elements to lists
+      set_fact:
+        programming_languages: "{{ programming_languages + ['Ruby'] }}"
+    - name: Sort dict elements in list by attribute
+      vars:
+        snapshots:
+          - name: sales
+            create_time: '2024-06-25T00:52:55.127000+00:00'
+          - name: test
+            create_time: '2024-05-17T01:53:12.103220+00:00'
+      set_fact:
+        snapshot_latest: "{{ snapshots | sort(attribute='create_time') | last }}"
+    - name: Give back the first not null value (coalesce-like)
+      vars:
+        list_with_null_values:
+          - null
+          - null
+          - something
+          - something else
+      set_fact:
+        first_non_null_value: "{{ list_with_null_values | select | first }}"
+
+- name: Manipulate dictionaries
+  block:
+    - name: Merge dictionaries
+      vars:
+        dict_1:
+          a: 43
+          b: some string
+        dict_2:
+          y: true
+          z:
+            - 4
+            - test
+      set_fact:
+        merged_dict: "{{ dict1 | ansible.builtin.combine(dict_2, {'z':'new_value','w':[44]}) }}"
+        recursively_merged_dict: >-
+          {{ {'rest':'test'} | ansible.builtin.combine({'z':'new_value','w':[44]}, dict_1, dict_2, recursive=true) }}
 
 - name: "Use the users' home directory for something"
   block:
@@ -161,3 +198,22 @@
             ; tar -tf "$FILENAME" > '/dev/null'
             && aws s3 cp "$FILENAME" 's3://backups/prometheus/'
             && rm "$FILENAME"
+
+- name: Error handling in blocks
+  block:
+    - name: This executes normally
+      ansible.builtin.debug:
+        msg: I execute normally
+    - name: This errors out
+      ansible.builtin.command: "/bin/false"
+    - name: This never executes
+      ansible.builtin.debug:
+        msg: I never execute due to the above task failing
+  rescue:
+    - name: This executes if any errors arose in the block
+      ansible.builtin.debug:
+        msg: I caught an error and can do stuff here to fix it
+  always:
+    - name: This always executes
+      ansible.builtin.debug:
+        msg: I always execute

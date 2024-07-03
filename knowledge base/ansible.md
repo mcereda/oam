@@ -7,6 +7,10 @@
 1. [Templating](#templating)
    1. [Tests](#tests)
    1. [Loops](#loops)
+1. [Validation](#validation)
+   1. [Assertions](#assertions)
+1. [Error handling](#error-handling)
+   1. [Using blocks](#using-blocks)
 1. [Output formatting](#output-formatting)
 1. [Roles](#roles)
    1. [Get roles](#get-roles)
@@ -14,25 +18,25 @@
    1. [Role dependencies](#role-dependencies)
 1. [Create custom filter plugins](#create-custom-filter-plugins)
 1. [Troubleshooting](#troubleshooting)
-   1. [Print all known variables](#print-all-known-variables)
-   1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
-   1. [Run specific tasks even in check mode](#run-specific-tasks-even-in-check-mode)
-   1. [Dry-run only specific tasks](#dry-run-only-specific-tasks)
-   1. [Set up recursive permissions on a directory so that directories are set to 755 and files to 644](#set-up-recursive-permissions-on-a-directory-so-that-directories-are-set-to-755-and-files-to-644)
-   1. [Only run a task when another has a specific result](#only-run-a-task-when-another-has-a-specific-result)
-   1. [Define when a task changed or failed](#define-when-a-task-changed-or-failed)
-   1. [Set environment variables for a play, role or task](#set-environment-variables-for-a-play-role-or-task)
-   1. [Set variables to the value of environment variables](#set-variables-to-the-value-of-environment-variables)
-   1. [Check if a list contains an item and fail otherwise](#check-if-a-list-contains-an-item-and-fail-otherwise)
-   1. [Define different values for `true`/`false`/`null`](#define-different-values-for-truefalsenull)
-   1. [Force a task or play to use a specific Python interpreter](#force-a-task-or-play-to-use-a-specific-python-interpreter)
-   1. [Provide a template file content inline](#provide-a-template-file-content-inline)
-   1. [Python breaks in OS X](#python-breaks-in-os-x)
-   1. [Load files' content into variables](#load-files-content-into-variables)
-   1. [Only run a task when explicitly requested](#only-run-a-task-when-explicitly-requested)
-   1. [Using AWS' SSM with Ansible fails with error _Failed to create temporary directory_](#using-aws-ssm-with-ansible-fails-with-error-failed-to-create-temporary-directory)
+    1. [Print all known variables](#print-all-known-variables)
+    1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
+    1. [Run specific tasks even in check mode](#run-specific-tasks-even-in-check-mode)
+    1. [Dry-run only specific tasks](#dry-run-only-specific-tasks)
+    1. [Set up recursive permissions on a directory so that directories are set to 755 and files to 644](#set-up-recursive-permissions-on-a-directory-so-that-directories-are-set-to-755-and-files-to-644)
+    1. [Only run a task when another has a specific result](#only-run-a-task-when-another-has-a-specific-result)
+    1. [Define when a task changed or failed](#define-when-a-task-changed-or-failed)
+    1. [Set environment variables for a play, role or task](#set-environment-variables-for-a-play-role-or-task)
+    1. [Set variables to the value of environment variables](#set-variables-to-the-value-of-environment-variables)
+    1. [Check if a list contains an item and fail otherwise](#check-if-a-list-contains-an-item-and-fail-otherwise)
+    1. [Define different values for `true`/`false`/`null`](#define-different-values-for-truefalsenull)
+    1. [Force a task or play to use a specific Python interpreter](#force-a-task-or-play-to-use-a-specific-python-interpreter)
+    1. [Provide a template file content inline](#provide-a-template-file-content-inline)
+    1. [Python breaks in OS X](#python-breaks-in-os-x)
+    1. [Load files' content into variables](#load-files-content-into-variables)
+    1. [Only run a task when explicitly requested](#only-run-a-task-when-explicitly-requested)
+    1. [Using AWS' SSM with Ansible fails with error _Failed to create temporary directory_](#using-aws-ssm-with-ansible-fails-with-error-failed-to-create-temporary-directory)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -363,6 +367,46 @@ Return a boolean result.
     - ['inner1', 'inner2']
 ```
 
+## Validation
+
+### Assertions
+
+```yaml
+- ansible.builtin.assert:
+    that:
+      - install_method in supported_install_methods
+      - external_url is ansible.builtin.url
+    fail_msg: What to say if any of the above conditions fail
+    success_msg: What to say if all of the above conditions succeed
+```
+
+## Error handling
+
+### Using blocks
+
+Refer [Blocks].
+
+```yaml
+- name: Error handling in blocks
+  block:
+    - name: This executes normally
+      ansible.builtin.debug:
+        msg: I execute normally
+    - name: This errors out
+      ansible.builtin.command: "/bin/false"
+    - name: This never executes
+      ansible.builtin.debug:
+        msg: I never execute due to the above task failing
+  rescue:
+    - name: This executes if any errors arose in the block
+      ansible.builtin.debug:
+        msg: I caught an error and can do stuff here to fix it
+  always:
+    - name: This always executes
+      ansible.builtin.debug:
+        msg: I always execute
+```
+
 ## Output formatting
 
 > Introduced in Ansible 2.5
@@ -401,27 +445,28 @@ The `json` output format will be a single, long JSON file:
 ```sh
 $ ANSIBLE_STDOUT_CALLBACK='json' ansible-playbook --inventory='localhost,' 'localhost.configure.yml' -vv --check
 {
-    "custom_stats": {},
-    "global_custom_stats": {},
-    "plays": [
+  "custom_stats": {},
+  "global_custom_stats": {},
+  "plays": [
+    {
+      "play": {
+        …
+        "name": "Configure localhost"
+      },
+      "tasks": [
         {
-            "play": {
-                …
-                "name": "Configure localhost"
-            },
-            "tasks": [
-                {
-                    "hosts": {
-                        "localhost": {
-                            …
-                            "action": "community.general.zypper",
-                            "changed": false,
-                            …
-                            "update_cache": false
-                        }
-                    }
-                    …
-…
+          "hosts": {
+            "localhost": {
+              "action": "community.general.zypper",
+              "changed": false,
+              …
+              "update_cache": false
+            }
+          }
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -648,7 +693,7 @@ Create a test and define two values: the first will be returned when the test re
 returned when the test returns `false` (Ansible 1.9+):
 
 ```yaml
-{{ (ansible_pkg_mgr == 'zypper') | ternary('gnu_parallel', 'parallel')) }}
+{{ (ansible_pkg_mgr == 'zypper') | ternary('gnu_parallel', 'parallel') }}
 ```
 
 Since Ansible 2.8 you can define a third value to be returned when the test returns `null`:
@@ -801,6 +846,7 @@ See [Integrate with AWS SSM].
 - [What is the exact list of Ansible setup min?]
 - [Setup module source code]
 - [8 ways to speed up your Ansible playbooks]
+- [Blocks]
 
 <!--
   Reference
@@ -818,6 +864,7 @@ See [Integrate with AWS SSM].
 [8 ways to speed up your ansible playbooks]: https://www.redhat.com/sysadmin/faster-ansible-playbook-execution
 [ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
+[blocks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_blocks.html
 [collections index]: https://docs.ansible.com/ansible/latest/collections/index.html
 [configuration]: https://docs.ansible.com/ansible/latest/reference_appendices/config.html
 [developing and testing ansible roles with molecule and podman - part 1]: https://www.ansible.com/blog/developing-and-testing-ansible-roles-with-molecule-and-podman-part-1/
