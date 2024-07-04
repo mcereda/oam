@@ -847,6 +847,8 @@ See [Integrate with AWS SSM].
 - [Setup module source code]
 - [8 ways to speed up your Ansible playbooks]
 - [Blocks]
+- [How to work with lists and dictionaries in Ansible]
+- [Handling secrets in your Ansible playbooks]
 
 <!--
   Reference
@@ -887,6 +889,7 @@ See [Integrate with AWS SSM].
 [creating your own ansible filter plugins]: https://www.dasblinkenlichten.com/creating-ansible-filter-plugins/
 [easy things you can do to speed up ansible]: https://mayeu.me/post/easy-things-you-can-do-to-speed-up-ansible/
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
+[handling secrets in your ansible playbooks]: https://www.redhat.com/sysadmin/ansible-playbooks-secrets
 [how can i hide skipped tasks output in ansible]: https://stackoverflow.com/questions/39189549/how-can-i-hide-skipped-tasks-output-in-ansible#76147924
 [how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
 [how to get an arbitrary remote user's home directory in ansible?]: https://stackoverflow.com/questions/33343215/how-to-get-an-arbitrary-remote-users-home-directory-in-ansible#45447488
@@ -894,6 +897,7 @@ See [Integrate with AWS SSM].
 [how to recursively set directory and file permissions]: https://superuser.com/questions/1024677/ansible-how-to-recursively-set-directory-and-file-permissions#1317715
 [how to set up and use python virtual environments for ansible]: https://www.redhat.com/sysadmin/python-venv-ansible
 [how to speed up ansible playbooks drastically?]: https://www.linkedin.com/pulse/how-speed-up-ansible-playbooks-drastically-lionel-gurret
+[how to work with lists and dictionaries in ansible]: https://www.redhat.com/sysadmin/ansible-lists-dictionaries-yaml
 [human-readable output format]: https://www.shellhacks.com/ansible-human-readable-output-format/
 [include task only if file exists]: https://stackoverflow.com/questions/28119521/ansible-include-task-only-if-file-exists#comment118578470_62289639
 [is it possible to use inline templates?]: https://stackoverflow.com/questions/33768690/is-it-possible-to-use-inline-templates#33783423

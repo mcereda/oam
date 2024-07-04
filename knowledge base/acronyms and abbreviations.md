@@ -74,6 +74,7 @@
 | PDF     | Portable Document Format                               |                                                                                                     |
 | PEBCAK  | Problem Exists Between Chair And Keyboard              |                                                                                                     |
 | PGP     | Pretty Good Privacy                                    |                                                                                                     |
+| RBAC    | Role-Based Access Control                              |                                                                                                     |
 | ROM     | Read-Only Memory                                       |                                                                                                     |
 | RPM     | Revolutions Per Minute                                 |                                                                                                     |
 | RPM     | RPM Package Manager                                    | Package management system used by Linux distributions like Red Hat, (open)SuSE and Fedora           |
@@ -119,6 +120,7 @@
 - [SBOM at a Glance]
 - [What is OpenID Connect]
 - [Continuous delivery]
+- [URL, URI, URN: what's the difference?]
 
 <!--
   Reference
@@ -152,3 +154,4 @@
 [sbom at a glance]: https://www.ntia.gov/sites/default/files/publications/sbom_at_a_glance_apr2021_0.pdf
 [service as a software substitute]: https://www.gnu.org/philosophy/who-does-that-server-really-serve.html
 [what is openid connect]: https://openid.net/developers/how-connect-works/
+[url, uri, urn: what's the difference?]: https://auth0.com/blog/url-uri-urn-differences/
