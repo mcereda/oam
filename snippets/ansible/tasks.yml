@@ -99,6 +99,10 @@
           - something else
       set_fact:
         first_non_null_value: "{{ list_with_null_values | select | first }}"
+    - name: Get values for a specific attribute in a list of dictionaries
+      set_fact:
+        vpc_security_group_ids: >-
+          {{ instance_information.vpc_security_groups | map(attribute='vpc_security_group_id') }}
 
 - name: Manipulate dictionaries
   block:
