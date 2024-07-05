@@ -69,6 +69,9 @@ aws rds cancel-export-task --export-task-identifier 'my_export'
 </details>
 <br/>
 
+Instances [**can** be renamed][renaming a db instance].<br/>
+Renaming them has some effects and requirements. Check the reference.
+
 Read replicas **can** be promoted to standalone DB instances.<br/>
 See [Working with DB instance read replicas].
 
@@ -660,6 +663,7 @@ Actions involving altering protected roles or changing protected attributes are 
 - [Importing data into PostgreSQL on Amazon RDS]
 - [Working with parameters on your RDS for PostgreSQL DB instance]
 - [Backing up login roles aka users and group roles]
+- [Renaming a DB instance]
 
 <!--
   Reference
@@ -681,6 +685,7 @@ Actions involving altering protected roles or changing protected attributes are 
 [migrating databases to their amazon rds equivalents with aws dms]: https://docs.aws.amazon.com/dms/latest/userguide/data-migrations.html
 [migrating databases using rds postgresql transportable databases]: https://aws.amazon.com/blogs/database/migrating-databases-using-rds-postgresql-transportable-databases/
 [pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
+[renaming a db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RenameInstance.html
 [restoring from a db snapshot]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html
 [transport postgresql databases between two amazon rds db instances using pg_transport]: https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/transport-postgresql-databases-between-two-amazon-rds-db-instances-using-pg_transport.html
 [transporting postgresql databases between db instances]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.TransportableDB.html
