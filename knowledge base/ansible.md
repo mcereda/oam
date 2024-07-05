@@ -20,6 +20,7 @@
 1. [Troubleshooting](#troubleshooting)
     1. [Print all known variables](#print-all-known-variables)
     1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
+    1. [Time tasks execution](#time-tasks-execution)
     1. [Run specific tasks even in check mode](#run-specific-tasks-even-in-check-mode)
     1. [Dry-run only specific tasks](#dry-run-only-specific-tasks)
     1. [Set up recursive permissions on a directory so that directories are set to 755 and files to 644](#set-up-recursive-permissions-on-a-directory-so-that-directories-are-set-to-755-and-files-to-644)
@@ -562,6 +563,25 @@ Use the `meta` plugin with the `flush_handlers` option:
   ansible.builtin.meta: flush_handlers
 ```
 
+### Time tasks execution
+
+Add `profile_tasks` the list of enable callbacks.
+
+Choose one or more options:
+
+- Add it to `callbacks_enabled` in the `[defaults]` section of Ansible's configuration file:
+
+  ```ini
+  [defaults]
+  callbacks_enabled = profile_tasks  # or ansible.posix.profile_tasks
+  ```
+
+- Set the `ANSIBLE_CALLBACKS_ENABLED` environment variable:
+
+  ```sh
+  export ANSIBLE_CALLBACKS_ENABLED='profile_tasks'
+  ```
+
 ### Run specific tasks even in check mode
 
 Add the `check_mode: false` pair to the task:
@@ -758,6 +778,8 @@ For **remote** files, use the [`slurp` module][slurp]:
 - ansible.builtin.set_fact:
     user_data: "{{ slurped_user_data.content | ansible.builtin.b64decode }}"
 ```
+
+The contents are presented as base64 string. The decode is needed.
 
 ### Only run a task when explicitly requested
 
