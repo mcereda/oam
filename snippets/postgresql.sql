@@ -69,6 +69,15 @@ select usename FROM pg_catalog.pg_user;
 -- Check the current user has SuperUser permissions
 SHOW is_superuser
 
+-- Create roles
+-- Does *not* support IF NOT EXISTS
+CREATE ROLE miriam;
+CREATE ROLE miriam WITH LOGIN PASSWORD 'jw8s0F4' VALID UNTIL '2005-01-01';
+
+-- Create users
+-- Does *not* support IF NOT EXISTS
+CREATE USER mike;
+
 -- Grant users SuperUser permissions
 -- Executing user must be already SuperUser
 ALTER USER joel WITH SUPERUSER;

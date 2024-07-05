@@ -110,7 +110,6 @@
       # remove anything involving 'rdsadmin'
       # remove changes to protected RDS users
       # remove protected 'superuser' and 'replication' assignments
-      # add 'IF NOT EXISTS' to creation statements
       vars:
         # **Hack notice**: Ansible has issues with splitting on new lines if this template is quoted differently
         permissions_dump_content_as_lines: "{{ dump_file.content | ansible.builtin.b64decode | split('\n') }}"
@@ -125,7 +124,6 @@
             | reject('match', '.*rdsadmin.*')
             | reject('match', '^(CREATE|ALTER) ROLE rds_')
             | map('regex_replace', '(NO)(SUPERUSER|REPLICATION)\s?', '')
-            | map('regex_replace', '(CREATE \w+ \w+)(.*)', '\1 IF NOT EXISTS\2')
           }}
 
 - name: Manipulate dictionaries
