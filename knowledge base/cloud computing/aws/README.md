@@ -350,6 +350,7 @@ Examples:
 - [I'm trying to export a snapshot from Amazon RDS MySQL to Amazon S3, but I'm receiving an error. Why is this happening?]
 - [Rotating AWS KMS keys]
 - [Image baking in AWS using Packer and Image builder]
+- [Avoid the 60 minutes timeout when using the AWS CLI with IAM roles]
 
 <!--
   Reference
@@ -411,6 +412,7 @@ Examples:
 
 <!-- Others -->
 [automating dns-challenge based letsencrypt certificates with aws route 53]: https://johnrix.medium.com/automating-dns-challenge-based-letsencrypt-certificates-with-aws-route-53-8ba799dd207b
+[avoid the 60 minutes timeout when using the aws cli with iam roles]: https://cloudonaut.io/avoid-the-60-minutes-timeout-when-using-the-aws-cli-with-iam-roles/
 [aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
 [aws.permissions.cloud]: https://aws.permissions.cloud/
 [configuring ec2 disk alert using amazon cloudwatch]: https://medium.com/@chandinims001/configuring-ec2-disk-alert-using-amazon-cloudwatch-793807e40d72
