@@ -15,11 +15,23 @@ postgres.lan:5643:postgres:postgres:BananaORama
 *:*:sales:elaine:modestPassword
 ```
 
+The credential file's permissions must be `0600`, or it will be ignored.
+
 ```sh
 # Installation.
 brew install 'postgresql@14'
 sudo dnf install 'postgresql' 'postgresql-server'
 sudo zypper install 'postgresql15' 'postgresql15-server'
+
+# Set the password in environment variables.
+export PGPASSWORD='securePassword'
+
+# Set up the credentials file.
+cat <<EOF > ~/'.pgpass'
+postgres.lan:5643:postgres:postgres:BananaORama
+*:*:sales:elaine:modestPassword
+EOF
+chmod '600' ~/'.pgpass'
 ```
 
 ```sh
