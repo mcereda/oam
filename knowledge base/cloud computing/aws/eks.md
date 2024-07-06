@@ -9,6 +9,8 @@
 1. [Access management](#access-management)
 1. [Secrets encryption through KMS](#secrets-encryption-through-kms)
 1. [Storage](#storage)
+   1. [Use EBS as volumes](#use-ebs-as-volumes)
+      1. [EBS CSI driver IAM role](#ebs-csi-driver-iam-role)
 1. [Troubleshooting](#troubleshooting)
    1. [Identify common issues](#identify-common-issues)
    1. [The worker nodes fail to join the cluster](#the-worker-nodes-fail-to-join-the-cluster)
@@ -643,8 +645,45 @@ TL;DR:
 
 ## Storage
 
-Refer [How do I use persistent storage in Amazon EKS?], [Fargate storage] and
+Refer [How do I use persistent storage in Amazon EKS?], [Fargate storage], and
 [Running stateful workloads with Amazon EKS on AWS Fargate using Amazon EFS] for this.
+
+Leverage Container Storage Interface (CSI) drivers.
+
+### Use EBS as volumes
+
+Refer [Use Amazon EBS storage] and [Amazon Elastic Block Store (EBS) CSI driver].
+
+Kubernetes clusters can use [EBS] volumes as storage for generic ephemeral volumes and persistent volumes through the
+EBS CSI driver.
+
+Considerations:
+
+- The EBS CSI driver needs make calls to AWS' APIs on your behalf.<br/>
+  The worker nodes' IAM permissions need to be [set accordingly][ebs csi driver iam role].
+- The EBS CSI DaemonSet is **required** to mount EBS volumes.<br/>
+  Fargate _can_ run the EBS _controller_ Pods, but it **cannot** run DaemonSets (including the CSI DaemonSet).<br/>
+  This means that Fargate **won't be able** to mount EBS volumes, and that only EC2 nodes running the DaemonSet will be
+  able to do that.
+- The EBS CSI driver is not installed on clusters by default.<br/>
+  Add it as an addon.
+- The _managed_ and _self-managed_ add-ons **cannot** be installed at the same time.
+- EKS does **not** automatically update the CSI Driver add-on when new versions are released, nor it does after clusters
+  are updated to new Kubernetes minor versions.
+
+#### EBS CSI driver IAM role
+
+Refer [Manage the Amazon EBS CSI driver as an Amazon EKS add-on].
+
+Requirements:
+
+- [external-snapshotter], if planning to use the snapshot functionality of the driver.<br/>
+  Its components **must** to be installed **before** the driver add-on is installed on the cluster.<br/>
+  The components' installation **must** be performed in this order:
+
+  1. CustomResourceDefinitions (CRDs) for `volumeSnapshotClasses`, `volumeSnapshots` and `volumeSnapshotContents`.
+  1. ClusterRole, ClusterRoleBinding, and other RBAC components.
+  1. Snapshot controller's Deployment.
 
 ## Troubleshooting
 
@@ -691,6 +730,7 @@ Debug: see [Identify common issues].
 - [Identity and Access Management]
 - [How do I use persistent storage in Amazon EKS?]
 - [Running stateful workloads with Amazon EKS on AWS Fargate using Amazon EFS]
+- [Use Amazon EBS storage]
 
 ### Sources
 
@@ -712,6 +752,8 @@ Debug: see [Identify common issues].
 - [Simplified Amazon EKS Access - NEW Cluster Access Management Controls]
 - [Visualizing AWS EKS Kubernetes Clusters with Relationship Graphs]
 - [How to Add IAM User and IAM Role to AWS EKS Cluster?]
+- [Amazon Elastic Block Store (EBS) CSI driver]
+- [Manage the Amazon EBS CSI driver as an Amazon EKS add-on]
 
 <!--
   Reference
@@ -721,6 +763,7 @@ Debug: see [Identify common issues].
 <!-- In-article sections -->
 [access management]: #access-management
 [create worker nodes]: #create-worker-nodes
+[ebs csi driver iam role]: #ebs-csi-driver-iam-role
 [identify common issues]: #identify-common-issues
 [requirements]: #requirements
 [secrets encryption through kms]: #secrets-encryption-through-kms
@@ -728,6 +771,7 @@ Debug: see [Identify common issues].
 <!-- Knowledge base -->
 [amazon web services]: README.md
 [cli]: cli.md
+[ebs]: ebs.md
 [kubernetes]: ../../kubernetes/README.md
 [pulumi]: ../../pulumi.md
 [terraform]: ../../pulumi.md
@@ -758,6 +802,7 @@ Debug: see [Identify common issues].
 [how do i resolve the error "you must be logged in to the server (unauthorized)" when i connect to the amazon eks api server?]: https://repost.aws/knowledge-center/eks-api-server-unauthorized-error
 [how do i use persistent storage in amazon eks?]: https://repost.aws/knowledge-center/eks-persistent-storage
 [identity and access management]: https://aws.github.io/aws-eks-best-practices/security/docs/iam/
+[manage the amazon ebs csi driver as an amazon eks add-on]: https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html
 [managed node groups]: https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html
 [private cluster requirements]: https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html
 [required permissions to view eks resources]: https://docs.aws.amazon.com/eks/latest/userguide/view-kubernetes-resources.html#view-kubernetes-resources-permissions
@@ -765,9 +810,12 @@ Debug: see [Identify common issues].
 [self-managed nodes]: https://docs.aws.amazon.com/eks/latest/userguide/worker.html
 [service-linked role permissions for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles-eks.html#service-linked-role-permissions-eks
 [simplified amazon eks access - new cluster access management controls]: https://www.youtube.com/watch?v=ae25cbV5Lxo
+[use amazon ebs storage]: https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html
 [using iam groups to manage kubernetes cluster access]: https://archive.eksworkshop.com/beginner/091_iam-groups/
 [using service-linked roles for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles.html
 
 <!-- Others -->
+[amazon elastic block store (ebs) csi driver]: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/README.md
+[external-snapshotter]: https://github.com/kubernetes-csi/external-snapshotter
 [how to add iam user and iam role to aws eks cluster?]: https://antonputra.com/kubernetes/add-iam-user-and-iam-role-to-eks/
 [visualizing aws eks kubernetes clusters with relationship graphs]: https://dev.to/aws-builders/visualizing-aws-eks-kubernetes-clusters-with-relationship-graphs-46a4
