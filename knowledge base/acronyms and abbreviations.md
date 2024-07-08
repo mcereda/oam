@@ -57,6 +57,7 @@
 | HA      | High Availability                                      | Characteristic of a system which aims to ensure better or longer availability for its services      |
 | HPC     | High Performance Computing                             | Collections of systems and tools used to achieve a greater processing capacity than the single unit |
 | IaC     | [Infrastructure as Code][iac]                          |                                                                                                     |
+| IC      | Integrated Circuit                                     |                                                                                                     |
 | IP      | Internet Protocol                                      |                                                                                                     |
 | IPvX    | Internet Protocol version X                            |                                                                                                     |
 | ISP     | Internet Service Provider                              |                                                                                                     |
@@ -70,6 +71,8 @@
 | LED     | Light Emitting Diode                                   |                                                                                                     |
 | LIFO    | Last In First Out                                      |                                                                                                     |
 | M2COTS  | Mass Market COTS                                       | Widely available COTS products                                                                      |
+| OAM     | [Open Application Model]                               |                                                                                                     |
+| OAM     | Operations, Administration and Management              |                                                                                                     |
 | OIDC    | OpenID Connect                                         |                                                                                                     |
 | PDF     | Portable Document Format                               |                                                                                                     |
 | PEBCAK  | Problem Exists Between Chair And Keyboard              |                                                                                                     |
@@ -92,6 +95,7 @@
 | TFE     | [TerraForm Enterprise]                                 |                                                                                                     |
 | TIL     | Today I Learned                                        |                                                                                                     |
 | TL;DR   | Too Long; Didn't Read                                  |                                                                                                     |
+| UART    | Universal Asynchronous Receiver and Transmitter        |                                                                                                     |
 | UDP     | User Datagram Protocol                                 |                                                                                                     |
 | UFW     | Uncomplicated FireWall                                 |                                                                                                     |
 | URI     | Uniform Resource Identifier                            |                                                                                                     |
@@ -155,3 +159,4 @@
 [service as a software substitute]: https://www.gnu.org/philosophy/who-does-that-server-really-serve.html
 [what is openid connect]: https://openid.net/developers/how-connect-works/
 [url, uri, urn: what's the difference?]: https://auth0.com/blog/url-uri-urn-differences/
+[open application model]: https://oam.dev/
