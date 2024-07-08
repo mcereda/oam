@@ -1,3 +1,25 @@
 // For a full list of overridable settings, and general information on folder-specific settings,
 // see the documentation: https://docs.zed.dev/configuration/configuring-zed#folder-specific-settings
 https://zed.dev/
+https://github.com/zed-industries/zed
+
+https://zed.dev/docs/
+
+```sh
+brew install --cask 'zed'
+sudo zypper ar 'https://download.opensuse.org/repositories/editors/openSUSE_Tumbleweed/editors.repo' && sudo zypper in 'zed'
+```
+
+https://zed.dev/docs/configuring-zed
+
+global settings at `~/.config/zed/settings.json`
+folder-specific settings at `.zed/settings.json`
+
+Disable telemetry:
+
+```json
+"telemetry": {
+    "diagnostics": false,
+    "metrics": false
+},
+```
