@@ -12,14 +12,15 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 | Name             | Description                | Alternatives                    |
 | ---------------- | -------------------------- | ------------------------------- |
 | [Baikal]         | CalDAV and CardDAV server  | [Radicale]                      |
-| [Gitea]          | Git server                 | [Gitlab]                        |
-| [Gitlab]         | Git server                 | [Gitea]                         |
+| [Gitea]          | Git server                 | [Gitlab], [Gogs]                |
+| [Gitlab]         | Git server                 | [Gitea], [Gogs]                 |
+| [Gogs]           | Git server                 | [Gitea], [Gitlab]               |
 | [Home Assistant] | Home automation platform   |                                 |
 | [NextCloud]      | File sharing platform      | [OwnCloud]                      |
+| [OpenMediaVault] | NAS solution               | [TrueNAS]                       |
 | [Paperless-ngx]  | Document management system |                                 |
 | [PhotoPrism]     | Google Photos replacement  |                                 |
 | [Uptime Kuma]    | Status page                | [Gatus], [Statping-ng], [Vigil] |
-| [OpenMediaVault] | NAS solution               | [TrueNAS]                       |
 
 ## Further readings
 
@@ -46,6 +47,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 <!-- Others -->
 [awesome-selfhosted]: https://awesome-selfhosted.net/
 [gatus]: https://github.com/TwiN/gatus
+[gogs]: https://github.com/gogs/gogs
 [home assistant]: https://www.home-assistant.io/
 [owncloud]: https://owncloud.com/
 [radicale]: https://radicale.org/
