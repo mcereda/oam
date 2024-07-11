@@ -81,6 +81,9 @@
     - name: Add elements to lists
       set_fact:
         programming_languages: "{{ programming_languages + ['Ruby'] }}"
+    - name: Remove elements from lists
+      set_fact:
+        list_without_items: "{{ dbs_list | difference(['template0','template1','postgres','rdsadmin']) }}"
     - name: Sort dict elements in list by attribute
       vars:
         snapshots:
@@ -142,6 +145,37 @@
         merged_dict: "{{ dict1 | ansible.builtin.combine(dict_2, {'z':'new_value','w':[44]}) }}"
         recursively_merged_dict: >-
           {{ {'rest':'test'} | ansible.builtin.combine({'z':'new_value','w':[44]}, dict_1, dict_2, recursive=true) }}
+    - name: Register the list of extensions per DB
+      vars:
+        db_extensions: {}
+      ansible.builtin.set_fact:
+        db_extensions: >-
+          {{
+            db_extensions
+            | combine({
+                item.item: item.query_result | map(attribute='extname')
+            })
+          }}
+      with_items: "{{ db_extensions_query.results }}"
+    - name:
+      vars:
+        db_extensions:
+          sales:
+            - pgaudit
+            - plpgsql
+          countries:
+            - pgcrypto
+            - postgis
+            - pg_stat_statements
+      ansible.builtin.set_fact:
+        db_extension_pairs: >-
+          {%- set output = [] -%}
+          {%- for db in db_extensions.keys() -%}
+            {%- for extension in db_extensions[db] -%}
+              {{- output.append({'db':db, 'extension': extension}) -}}
+            {%- endfor -%}
+          {%- endfor -%}
+          {{- output -}}
 
 - name: "Use the users' home directory for something"
   block:
@@ -224,6 +258,14 @@
             ; tar -tf "$FILENAME" > '/dev/null'
             && aws s3 cp "$FILENAME" 's3://backups/prometheus/'
             && rm "$FILENAME"
+
+- name: Debug tasks
+  debugger: on_failed
+  ansible.builtin.fail:
+    msg: Manual, enforced failure
+    # print all variables at this point => p task_vars
+    # continue => c
+    # abort and quit => q
 
 - name: Error handling in blocks
   block:
