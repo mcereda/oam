@@ -20,7 +20,7 @@
 1. [Troubleshooting](#troubleshooting)
     1. [Print all known variables](#print-all-known-variables)
     1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
-    1. [p tasks execution](#p-tasks-execution)
+    1. [Time tasks execution](#time-tasks-execution)
     1. [Run specific tasks even in check mode](#run-specific-tasks-even-in-check-mode)
     1. [Dry-run only specific tasks](#dry-run-only-specific-tasks)
     1. [Set up recursive permissions on a directory so that directories are set to 755 and files to 644](#set-up-recursive-permissions-on-a-directory-so-that-directories-are-set-to-755-and-files-to-644)
@@ -162,7 +162,7 @@ Suggestions:
     gathering = smart
     fact_caching = jsonfile
     fact_caching_connection = /tmp/ansible/facts.json  ; /tmp/ansible to use the directory and have a file per host
-    fact_caching_pout = 86400
+    fact_caching_timeout = 86400
     ```
 
   - Only gather subsets of facts:
@@ -563,7 +563,7 @@ Use the `meta` plugin with the `flush_handlers` option:
   ansible.builtin.meta: flush_handlers
 ```
 
-### p tasks execution
+### Time tasks execution
 
 Add `profile_tasks` the list of enable callbacks.
 
@@ -877,7 +877,7 @@ See [Integrate with AWS SSM].
 
 <!--
   Reference
-  ═╬═p══
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
