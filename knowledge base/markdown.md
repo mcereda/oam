@@ -9,7 +9,7 @@ Compare Markdown implementations at [babelmark].
 1. [Folded content](#folded-content)
 1. [Images](#images)
 1. [Diagrams](#diagrams)
-   1. [Flow chart A.K.A. graph](#flow-chart-aka-graph)
+   1. [Flowchart A.K.A. graph](#flowchart-aka-graph)
    1. [Sequence diagram](#sequence-diagram)
    1. [Class diagram](#class-diagram)
    1. [State diagram](#state-diagram)
@@ -90,34 +90,34 @@ Code blocks for diagrams can either:
 - start with ` ```mermaid ` and finish with ` ``` `, or
 - start with `:::mermaid` and finish with `:::`.
 
-### Flow chart A.K.A. graph
+### Flowchart A.K.A. graph
 
 ```md
 :::mermaid
 graph LR
-    A[Christmas] -->|Get money| B(Go shopping)
-    B --> C{Let me think}
-    subgraph work
+  A[Christmas] -->|Get money| B(Go shopping)
+  B --> C{Let me think}
+  subgraph work
     C -->|One| D[Laptop]
     C --x|Two| E[iPhone]
     C -.->|Three| F[fa:fa-car Car]
     C ==> G((Bike))
     C --> J>TV]
-    end
+  end
 :::
 ```
 
 ```mermaid
 graph LR
-    A[Christmas] -->|Get money| B(Go shopping)
-    B --> C{Let me think}
-    subgraph work
+  A[Christmas] -->|Get money| B(Go shopping)
+  B --> C{Let me think}
+  subgraph work
     C -->|One| D[Laptop]
     C --x|Two| E[iPhone]
     C -.->|Three| F[fa:fa-car Car]
     C ==> G((Bike))
     C --> J>TV]
-    end
+  end
 ```
 
 ### Sequence diagram
@@ -341,6 +341,7 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 - [Extended syntax]
 - [Linguist supported language syntax list]
 - [Github's alert formatting][github formatting  alerts]
+- [Live editor]
 
 ### Sources
 
@@ -373,6 +374,7 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 [escaping backticks]: https://www.markdownguide.org/basic-syntax/#escaping-backticks
 [github formatting  alerts]: https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
 [linguist supported language syntax list]: https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
+[live editor]: https://mermaid.live/edit
 [slaise/high-level-markdown]: https://github.com/slaise/High-level-Markdown
 [syntax highlighting in markdown]: https://support.codebasehq.com/articles/tips-tricks/syntax-highlighting-in-markdown
 [the magical markdown i bet you don't know]: https://medium.com/codex/the-magical-markdown-i-bet-you-dont-know-b51f8c049773
