@@ -20,7 +20,7 @@
 1. [Troubleshooting](#troubleshooting)
     1. [Print all known variables](#print-all-known-variables)
     1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
-    1. [Time tasks execution](#time-tasks-execution)
+    1. [p tasks execution](#p-tasks-execution)
     1. [Run specific tasks even in check mode](#run-specific-tasks-even-in-check-mode)
     1. [Dry-run only specific tasks](#dry-run-only-specific-tasks)
     1. [Set up recursive permissions on a directory so that directories are set to 755 and files to 644](#set-up-recursive-permissions-on-a-directory-so-that-directories-are-set-to-755-and-files-to-644)
@@ -162,7 +162,7 @@ Suggestions:
     gathering = smart
     fact_caching = jsonfile
     fact_caching_connection = /tmp/ansible/facts.json  ; /tmp/ansible to use the directory and have a file per host
-    fact_caching_timeout = 86400
+    fact_caching_pout = 86400
     ```
 
   - Only gather subsets of facts:
@@ -563,7 +563,7 @@ Use the `meta` plugin with the `flush_handlers` option:
   ansible.builtin.meta: flush_handlers
 ```
 
-### Time tasks execution
+### p tasks execution
 
 Add `profile_tasks` the list of enable callbacks.
 
@@ -839,6 +839,7 @@ See [Integrate with AWS SSM].
 - [Special tags: `always` and `never`][special tags: always and never]
 - [Integrate with AWS SSM]
 - [Mitogen for Ansible]
+- [Debugging tasks]
 
 ### Sources
 
@@ -871,10 +872,12 @@ See [Integrate with AWS SSM].
 - [Blocks]
 - [How to work with lists and dictionaries in Ansible]
 - [Handling secrets in your Ansible playbooks]
+- [Ansible - how to remove an item from a list?]
+- [Looping over lists inside of a dict]
 
 <!--
   Reference
-  ═╬═Time══
+  ═╬═p══
   -->
 
 <!-- Knowledge base -->
@@ -891,6 +894,7 @@ See [Integrate with AWS SSM].
 [blocks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_blocks.html
 [collections index]: https://docs.ansible.com/ansible/latest/collections/index.html
 [configuration]: https://docs.ansible.com/ansible/latest/reference_appendices/config.html
+[debugging tasks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_debugger.html
 [developing and testing ansible roles with molecule and podman - part 1]: https://www.ansible.com/blog/developing-and-testing-ansible-roles-with-molecule-and-podman-part-1/
 [galaxy  sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
 [galaxy]: https://galaxy.ansible.com/
@@ -905,6 +909,7 @@ See [Integrate with AWS SSM].
 
 <!-- Others -->
 [6 ways to speed up ansible playbook execution]: https://wearenotch.com/speed-up-ansible-playbook-execution/
+[ansible - how to remove an item from a list?]: https://stackoverflow.com/questions/40927792/ansible-how-to-remove-an-item-from-a-list#40927834
 [ansible roles: basics, creating & using]: https://spacelift.io/blog/ansible-roles
 [ansible: set variable to file content]: https://stackoverflow.com/questions/24003880/ansible-set-variable-to-file-content
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
@@ -924,6 +929,7 @@ See [Integrate with AWS SSM].
 [include task only if file exists]: https://stackoverflow.com/questions/28119521/ansible-include-task-only-if-file-exists#comment118578470_62289639
 [is it possible to use inline templates?]: https://stackoverflow.com/questions/33768690/is-it-possible-to-use-inline-templates#33783423
 [jinja2 templating]: https://jinja.palletsprojects.com/en/3.1.x/templates/
+[looping over lists inside of a dict]: https://www.reddit.com/r/ansible/comments/1b28dtm/looping_over_lists_inside_of_a_dict/
 [merging two dictionaries by key in ansible]: https://serverfault.com/questions/1084157/merging-two-dictionaries-by-key-in-ansible#1084164
 [mitogen for ansible]: https://mitogen.networkgenomics.com/ansible_detailed.html
 [only do something if another action changed]: https://raymii.org/s/tutorials/Ansible_-_Only-do-something-if-another-action-changed.html
