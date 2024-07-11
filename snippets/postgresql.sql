@@ -60,6 +60,11 @@ DROP SCHEMA IF EXISTS mundane CASCADE;
 \dt+
 
 
+-- Revoke *default* privileges
+ALTER DEFAULT PRIVILEGES IN SCHEMA cache REVOKE select ON TABLES FROM sales;
+ALTER DEFAULT PRIVILEGES FOR ROLE juan IN SCHEMA cache REVOKE all ON TABLES FROM sales;
+
+
 -- List users with respective roles
 \du
 \du+
@@ -83,10 +88,14 @@ CREATE USER mike;
 ALTER USER joel WITH SUPERUSER;
 -- Revoke SuperUser permissions
 ALTER USER joel WITH NOSUPERUSER;
--- Allow users to create databases
+-- Grant privileges to users
 ALTER USER mark CREATEDB;
+ALTER ROLE miriam CREATEROLE CREATEDB;
 -- Change passwords
 ALTER USER jonathan WITH PASSWORD 'seagull5-pantomime-Resting';
+ALTER ROLE samantha WITH PASSWORD 'Wing5+Trunks3+Relic2' VALID UNTIL 'August 4 12:00:00 2024 +1';
+-- Change password's validity
+ALTER ROLE fred VALID UNTIL 'infinity';
 
 
 -- Close the connection to the current DB
