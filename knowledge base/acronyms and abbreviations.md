@@ -67,6 +67,8 @@
 | JRE     | Java Runtime Engine                                    |                                                                                                     |
 | K8S     | [Kubernetes]                                           |                                                                                                     |
 | KISS    | Keep It Simple Stupid                                  | Also see [KISS principle is not that simple]                                                        |
+| KMS     | Key Management Service                                 |                                                                                                     |
+| KMS     | Knowledge Management System                            |                                                                                                     |
 | LAN     | Local Area Network                                     |                                                                                                     |
 | LED     | Light Emitting Diode                                   |                                                                                                     |
 | LIFO    | Last In First Out                                      |                                                                                                     |
