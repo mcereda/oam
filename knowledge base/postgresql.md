@@ -17,6 +17,12 @@ postgres.lan:5643:postgres:postgres:BananaORama
 
 The credential file's permissions must be `0600`, or it will be ignored.
 
+Database roles represent both users and groups.<br/>
+Roles are **distinct** from the OS' users and groups, and are global across the whole installation (there are **no**
+DB-specific roles).
+
+Extensions in PostgreSQL are managed per database.
+
 ```sh
 # Installation.
 brew install 'postgresql@14'

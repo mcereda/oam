@@ -1,6 +1,8 @@
 # Amazon Relational Database Service
 
 1. [TL;DR](#tldr)
+1. [Engine](#engine)
+   1. [PostgreSQL](#postgresql)
 1. [Storage](#storage)
 1. [Parameter Groups](#parameter-groups)
 1. [Option Groups](#option-groups)
@@ -11,11 +13,10 @@
 1. [Restore](#restore)
 1. [Encryption](#encryption)
 1. [Operations](#operations)
-   1. [PostgreSQL](#postgresql)
-      1. [Reduce allocated storage by migrating using transportable databases](#reduce-allocated-storage-by-migrating-using-transportable-databases)
+   1. [PostgreSQL: reduce allocated storage by migrating using transportable databases](#postgresql-reduce-allocated-storage-by-migrating-using-transportable-databases)
 1. [Troubleshooting](#troubleshooting)
-   1. [ERROR: extension must be loaded via shared\_preload\_libraries](#error-extension-must-be-loaded-via-shared_preload_libraries)
-   1. [ERROR: must be superuser to alter superuser roles or change superuser attribute](#error-must-be-superuser-to-alter-superuser-roles-or-change-superuser-attribute)
+    1. [ERROR: extension must be loaded via shared\_preload\_libraries](#error-extension-must-be-loaded-via-shared_preload_libraries)
+    1. [ERROR: must be superuser to alter _X_ roles or change _X_ attribute](#error-must-be-superuser-to-alter-x-roles-or-change-x-attribute)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -82,6 +83,12 @@ One can choose any of the following retention periods for instances' Performance
 - 7 days (default, free tier).
 - _n_ months, where n is a number from 1 to 24.<br/>
   In CLI and IaC, this number must be _n*31_.
+
+## Engine
+
+### PostgreSQL
+
+Refer [Understanding PostgreSQL roles and permissions].
 
 ## Storage
 
@@ -365,9 +372,7 @@ latest available backup.
 
 ## Operations
 
-### PostgreSQL
-
-#### Reduce allocated storage by migrating using transportable databases
+### PostgreSQL: reduce allocated storage by migrating using transportable databases
 
 Refer [Migrating databases using RDS PostgreSQL Transportable Databases],
 [Transporting PostgreSQL databases between DB instances] and
@@ -632,7 +637,7 @@ Refer [How can I resolve the "ERROR: <module/extension> must be loaded via share
 1. Reboot the instance to apply the change.
 1. Try reloading it again.
 
-### ERROR: must be superuser to alter superuser roles or change superuser attribute
+### ERROR: must be superuser to alter _X_ roles or change _X_ attribute
 
 Error message examples:
 
@@ -647,6 +652,7 @@ Actions involving altering protected roles or changing protected attributes are 
 - [Working with DB instance read replicas]
 - [Working with parameter groups]
 - [How can I resolve the "ERROR: <module/extension> must be loaded via shared_preload_libraries" error?]
+- [Understanding PostgreSQL roles and permissions]
 
 ### Sources
 
@@ -689,6 +695,7 @@ Actions involving altering protected roles or changing protected attributes are 
 [restoring from a db snapshot]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html
 [transport postgresql databases between two amazon rds db instances using pg_transport]: https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/transport-postgresql-databases-between-two-amazon-rds-db-instances-using-pg_transport.html
 [transporting postgresql databases between db instances]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.TransportableDB.html
+[understanding postgresql roles and permissions]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Roles.html
 [what is aws database migration service?]: https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html
 [working with db instance read replicas]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html
 [working with parameter groups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html
