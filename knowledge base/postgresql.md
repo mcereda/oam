@@ -104,6 +104,7 @@ scram-sha-256 'mySecretPassword'
 - [Connect to a PostgreSQL database]
 - [The password file]
 - [How to Generate SCRAM-SHA-256 to Create Postgres 13 User]
+- [PostgreSQL: Get member roles and permissions]
 
 <!--
   Reference
@@ -121,4 +122,5 @@ scram-sha-256 'mySecretPassword'
 [connect to a postgresql database]: https://www.postgresqltutorial.com/connect-to-postgresql-database/
 [how to generate scram-sha-256 to create postgres 13 user]: https://stackoverflow.com/questions/68400120/how-to-generate-scram-sha-256-to-create-postgres-13-user
 [how to scram in postgres with pgbouncer]: https://www.crunchydata.com/blog/pgbouncer-scram-authentication-postgresql
+[postgresql: get member roles and permissions]: https://www.cybertec-postgresql.com/en/postgresql-get-member-roles-and-permissions/
 [what is the pg_dump command for backing up a postgresql database?]: https://www.linkedin.com/advice/3/what-pgdump-command-backing-up-postgresql-ke2ef
