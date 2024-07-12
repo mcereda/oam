@@ -90,6 +90,11 @@ Code blocks for diagrams can either:
 - start with ` ```mermaid ` and finish with ` ``` `, or
 - start with `:::mermaid` and finish with `:::`.
 
+| Code delimiter | Gitea | Github | Gitlab |
+| -------------- | ----- | ------ | ------ |
+| ` ```mermaid ` | ✓     | ✓      | ✓      |
+| ` :::mermaid ` | ✓     | ✗      | ✓      |
+
 ### Flowchart A.K.A. graph
 
 ```md
