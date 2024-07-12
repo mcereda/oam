@@ -28,13 +28,15 @@ SELECT * FROM pg_settings;
 SELECT "name", "setting" FROM pg_settings WHERE NAME LIKE '%log%';
 SHOW "wal_keep_size";
 SHOW "password_encryption";
+SHOW "pgaudit.log";
 
--- Change database settings for the current session
-SET pgaudit.log = 'none';
-SET password_encryption  = 'scram-sha-256';
+-- Change database settings *for the current session* only
+SET pgaudit.log = none;
+SET password_encryption = scram-sha-256;
 
 -- Change database settings permanently
-ALTER DATABASE reviser SET pgaudit.log TO 'none';
+-- Will *not* be active for the current session, logout and login again to see the change
+ALTER DATABASE reviser SET pgaudit.log TO none;
 
 -- Switch between databases
 \c sales
@@ -71,22 +73,20 @@ ALTER DEFAULT PRIVILEGES FOR ROLE juan IN SCHEMA cache REVOKE all ON TABLES FROM
 -- List users only
 select usename FROM pg_catalog.pg_user;
 
--- Check the current user has SuperUser permissions
+-- Check the current user has SuperUser privileges
 SHOW is_superuser
 
 -- Create roles
+-- Roles *are* users and groups since PostgreSQL vFIXME
 -- Does *not* support IF NOT EXISTS
 CREATE ROLE miriam;
 CREATE ROLE miriam WITH LOGIN PASSWORD 'jw8s0F4' VALID UNTIL '2005-01-01';
-
--- Create users
--- Does *not* support IF NOT EXISTS
 CREATE USER mike;
 
--- Grant users SuperUser permissions
--- Executing user must be already SuperUser
+-- Grant roles SuperUser privileges
+-- The role granting privileges must be already SuperUser
 ALTER USER joel WITH SUPERUSER;
--- Revoke SuperUser permissions
+-- Revoke SuperUser privileges
 ALTER USER joel WITH NOSUPERUSER;
 -- Grant privileges to users
 ALTER USER mark CREATEDB;
@@ -96,6 +96,11 @@ ALTER USER jonathan WITH PASSWORD 'seagull5-pantomime-Resting';
 ALTER ROLE samantha WITH PASSWORD 'Wing5+Trunks3+Relic2' VALID UNTIL 'August 4 12:00:00 2024 +1';
 -- Change password's validity
 ALTER ROLE fred VALID UNTIL 'infinity';
+-- Rename
+ALTER ROLE manager RENAME TO boss
+
+-- Assign roles to users
+GRANT rds_superuser TO mike;
 
 
 -- Close the connection to the current DB
