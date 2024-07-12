@@ -1,5 +1,12 @@
 ---
 
+- name: Retry tasks
+  ansible.builtin.command: /usr/bin/false
+  retries: 3
+  delay: 3
+  register: command_result
+  until: command_result is not failed
+
 - name: Create directories recursively
   ansible.builtin.file:
     path: /tmp/path/to/final/dir
@@ -76,6 +83,10 @@
       - ./data:/var/opt/gitlab:Z
     auto_remove: true
 
+- name: Manipulate strings
+  ansible.builtin.set_fact:
+    string_with_first_letter_to_uppercase: "{{ 'all_lowercase' | capitalize }}"
+
 - name: Manipulate lists
   block:
     - name: Add elements to lists
@@ -106,6 +117,14 @@
       set_fact:
         vpc_security_group_ids: >-
           {{ instance_information.vpc_security_groups | map(attribute='vpc_security_group_id') }}
+    - name: Return only elements with specific attributes matching a filter
+      set_fact:
+        available_rds_snapshots: snapshots_list | selectattr("status", "equalto", "available")
+        mounts_with_path: ansible_facts.mounts | selectattr('mount', 'in', path)
+    - name: Return all elements *but* the ones with specific attributes matching a filter
+      set_fact:
+        available_rds_snapshots: snapshots_list | rejectattr("status", "equalto", "creating")
+        mounts_without_path: ansible_facts.mounts | rejectattr('mount', 'in', path)
     - name: Remove lines about RDS protected users and permissions from a dump file
       # remove empty lines
       # remove comments
@@ -286,20 +305,41 @@
       ansible.builtin.debug:
         msg: I always execute
 
-- name: Commands
+- name: AWS
   block:
-    - name: Dump permissions from an RDS instance to file
-      environment:
-        PGPASSWORD: "someRandomString"
-      ansible.builtin.command: >-
-        pg_dumpall -h 'instance-id.c4v563ptr321.eu-west-1.rds.amazonaws.com' -p '5432' -U 'postgres' -l 'postgres'
-        -rf '/tmp/instance-id_roles.sql' --no-role-passwords
-      changed_when: false
-    - name: Dump permissions from an RDS instance and register the output for later use through 'execution.stdout_lines'
-      environment:
-        PGPASSWORD: "someRandomString"
-      ansible.builtin.command: >-
-        pg_dumpall -h 'instance-id.c4v563ptr321.eu-west-1.rds.amazonaws.com' -p '5432' -U 'postgres' -l 'postgres'
-        -r --no-role-passwords
-      changed_when: false
-      register: execution
+    - name: RDS
+      block:
+        - name: Create an instance's snapshot
+          block:
+            - name: Create the snapshot
+              amazon.aws.rds_instance_snapshot:
+                db_instance_identifier: "db-identifier"
+                db_snapshot_identifier: "db-identifier-snapshot"
+              register: snapshot_creation
+            - name: Wait for the snapshot to be in the 'available state'
+              when: snapshot_creation.snapshot_create_time is defined
+              amazon.aws.rds_snapshot_info:
+                db_snapshot_identifier: "{{ snapshot_creation.db_snapshot_identifier }}"
+              register: snapshot_check
+              retries: 3
+              delay: 120
+              until: snapshot_check.snapshots | selectattr("status", "equalto", "available") | length > 0
+        - name: "Dump roles' privileges"
+          block:
+            - name: Dump to file
+              environment:
+                PGPASSWORD: "someRandomString"
+              vars:
+                out_file: /tmp/instance-id_roles.sql
+              ansible.builtin.command: >-
+                pg_dumpall -h 'instance-id.c4v563ptr321.eu-west-1.rds.amazonaws.com' -p '5432' -U 'postgres' -l 'postgres'
+                -r --no-role-passwords -f '{{ out_file }}'
+              changed_when: false
+            - name: Dump to variable for later use through 'dump_execution.stdout_lines'
+              environment:
+                PGPASSWORD: "someRandomString"
+              ansible.builtin.command: >-
+                pg_dumpall -h 'instance-id.c4v563ptr321.eu-west-1.rds.amazonaws.com' -p '5432' -U 'postgres' -l 'postgres'
+                -r --no-role-passwords
+              changed_when: false
+              register: dump_execution
