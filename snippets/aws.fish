@@ -100,7 +100,6 @@ set instance_id 'i-0915612f182914822' \
 aws imagebuilder list-image-recipes
 aws imagebuilder get-image-recipe --image-recipe-arn 'arn:aws:imagebuilder:eu-west-1:012345678901:image-recipe/my-custom-image/1.0.12'
 
-
 aws rds start-export-task \
 	--export-task-identifier 'db-finalSnapshot-2024' \
 	--source-arn 'arn:aws:rds:eu-west-1:012345678901:snapshot:db-prod-final-2024' \
