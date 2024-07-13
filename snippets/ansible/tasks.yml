@@ -332,14 +332,19 @@
               vars:
                 out_file: /tmp/instance-id_roles.sql
               ansible.builtin.command: >-
-                pg_dumpall -h 'instance-id.c4v563ptr321.eu-west-1.rds.amazonaws.com' -p '5432' -U 'postgres' -l 'postgres'
-                -r --no-role-passwords -f '{{ out_file }}'
+                pg_dumpall
+                --host 'instance-id.c4v563ptr321.eu-west-1.rds.amazonaws.com' --port '5432'
+                --user 'postgres' --database 'postgres' --no-password
+                --roles-only --no-role-passwords
+                --file '{{ out_file }}'
               changed_when: false
             - name: Dump to variable for later use through 'dump_execution.stdout_lines'
               environment:
                 PGPASSWORD: "someRandomString"
               ansible.builtin.command: >-
-                pg_dumpall -h 'instance-id.c4v563ptr321.eu-west-1.rds.amazonaws.com' -p '5432' -U 'postgres' -l 'postgres'
+                pg_dumpall
+                -h 'instance-id.c4v563ptr321.eu-west-1.rds.amazonaws.com' -p '5432'
+                -U 'postgres' -l 'postgres' -w
                 -r --no-role-passwords
               changed_when: false
               register: dump_execution
