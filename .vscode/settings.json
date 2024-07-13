@@ -58,7 +58,7 @@
     "[yaml]": {
         "editor.rulers": [
             120
-        ],
+        ]
     },
 
     "cSpell.language": "en,en-GB",

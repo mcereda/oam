@@ -6,20 +6,20 @@ skip_output:
   - skips
 
 
+bootstrap:
+  parallel: true
+  commands:
+    commitlint:
+      run: npm install --save-dev '@commitlint/cli' '@commitlint/config-conventional'
+    venv:
+      run: make create-venv
+
 debug:
   parallel: true
   commands:
     commitlint-config:
       glob: '.commitlintrc.js'
       run: node_modules/.bin/commitlint --print-config
-
-pre-flight:
-  parallel: true
-  commands:
-    commitlint:
-      run: npm install --save-dev '@commitlint/cli' '@commitlint/config-conventional'
-    venv:
-      run: make recreate-venv
 
 
 lint:
@@ -69,7 +69,7 @@ validate:
       glob: '*.{yaml,yml}'
       run: >-
         echo '{all_files}'
-        | xargs -t yq '.'
+        | xargs -t .venv/bin/yq '.'
 
 
 pre-commit:
@@ -81,7 +81,7 @@ pre-commit:
     validate-yaml:
       <<: *yq
       run: >-
-        yq '.' {staged_files} > /dev/null
+        .venv/bin/yq '.' {staged_files} > /dev/null
         && echo 'All YAML files are readable'
     validate-ansible-playbooks:
       <<: *ansible-playbook-syntax-check
