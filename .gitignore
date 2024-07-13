@@ -4,6 +4,7 @@
 !/.vscode/extensions.json
 !/.vscode/settings.json
 
+/.lefthook/
 /.lefthook-local.yml
 
 /node_modules/
