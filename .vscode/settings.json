@@ -55,6 +55,11 @@
         ],
         "editor.wordWrap": "off"
     },
+    "[yaml]": {
+        "editor.rulers": [
+            120
+        ],
+    },
 
     "cSpell.language": "en,en-GB",
     "cSpell.words": [
