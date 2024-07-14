@@ -9,18 +9,23 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 
 ## Software
 
-| Name             | Description                | Alternatives                    |
-| ---------------- | -------------------------- | ------------------------------- |
-| [Baikal]         | CalDAV and CardDAV server  | [Radicale]                      |
-| [Gitea]          | Git server                 | [Gitlab], [Gogs]                |
-| [Gitlab]         | Git server                 | [Gitea], [Gogs]                 |
-| [Gogs]           | Git server                 | [Gitea], [Gitlab]               |
-| [Home Assistant] | Home automation platform   |                                 |
-| [NextCloud]      | File sharing platform      | [OwnCloud]                      |
-| [OpenMediaVault] | NAS solution               | [TrueNAS]                       |
-| [Paperless-ngx]  | Document management system |                                 |
-| [PhotoPrism]     | Google Photos replacement  |                                 |
-| [Uptime Kuma]    | Status page                | [Gatus], [Statping-ng], [Vigil] |
+| Name             | Description                | Alternatives                              |
+| ---------------- | -------------------------- | ----------------------------------------- |
+| [AWX]            | Task runner                | [CTFreak], [Rundeck], [Semaphore], [Zuul] |
+| [Baikal]         | CalDAV and CardDAV server  | [Radicale]                                |
+| [CTFreak]        | Task runner                | [AWX], [Rundeck], [Semaphore], [Zuul]     |
+| [Gitea]          | Git server                 | [Gitlab], [Gogs]                          |
+| [Gitlab]         | Git server                 | [Gitea], [Gogs]                           |
+| [Gogs]           | Git server                 | [Gitea], [Gitlab]                         |
+| [Home Assistant] | Home automation platform   |                                           |
+| [NextCloud]      | File sharing platform      | [OwnCloud]                                |
+| [OpenMediaVault] | NAS solution               | [TrueNAS]                                 |
+| [Paperless-ngx]  | Document management system |                                           |
+| [PhotoPrism]     | Google Photos replacement  |                                           |
+| [Rundeck]        | Task runner                | [AWX], [CTFreak], [Semaphore], [Zuul]     |
+| [Semaphore]      | Task runner                | [AWX], [CTFreak], [Rundeck], [Zuul]       |
+| [Uptime Kuma]    | Status page                | [Gatus], [Statping-ng], [Vigil]           |
+| [Zuul]           | Task runner                | [AWX], [CTFreak], [Rundeck], [Semaphore]  |
 
 ## Further readings
 
@@ -35,6 +40,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
   -->
 
 <!-- Knowledge base -->
+[awx]: awx.md
 [baikal]: baikal.md
 [gitea]: gitea.md
 [gitlab]: gitlab/README.md
@@ -42,16 +48,20 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 [openmediavault]: openmediavault.md
 [paperless-ngx]: paperless-ngx.md
 [photoprism]: photoprism.md
+[rundeck]: rundeck.md
 [uptime kuma]: uptime%20kuma.md
 
 <!-- Others -->
 [awesome-selfhosted]: https://awesome-selfhosted.net/
+[ctfreak]: https://ctfreak.com/
 [gatus]: https://github.com/TwiN/gatus
 [gogs]: https://github.com/gogs/gogs
 [home assistant]: https://www.home-assistant.io/
 [owncloud]: https://owncloud.com/
 [radicale]: https://radicale.org/
+[semaphore]: https://semaphoreui.com/
 [service as a software substitute]: https://www.gnu.org/philosophy/who-does-that-server-really-serve.html
 [statping-ng]: https://statping-ng.github.io/
 [truenas]: https://www.truenas.com/
 [vigil]: https://github.com/valeriansaliou/vigil
+[zuul]: https://zuul-ci.org/
