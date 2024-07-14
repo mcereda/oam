@@ -1,0 +1,23 @@
+---
+
+# Sources:
+# - https://docs.rundeck.com/docs/administration/install/docker.html#open-source-rundeck
+# - https://github.com/rundeck/docker-zoo/blob/master/basic/docker-compose.yml
+
+# Default user and password: admin:admin
+# On localhost, it requires RUNDECK_GRAILS_URL=http://localhost:4440 or login will appear to not work
+# See https://github.com/rundeck/docs/issues/217 for details
+
+services:
+  rundeck:
+    image: rundeck/rundeck:5.4.0
+    tty: true
+    volumes:
+      - data:/home/rundeck/server/data
+      - ${RUNDECK_LICENSE_FILE:-/dev/null}:/home/rundeck/etc/rundeckpro-license.key
+    ports:
+      - 4440:4440
+    environment:
+      RUNDECK_GRAILS_URL: http://localhost:4440
+volumes:
+  data:

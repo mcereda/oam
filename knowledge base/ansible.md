@@ -108,14 +108,20 @@ ansible-galaxy role init --type 'container' --init-path 'path/to/role' 'name'
 ansible-galaxy remove 'namespace.role'
 ```
 
-<details>
-  <summary>Galaxy collections and roles worth a check</summary>
+Galaxy collections and roles worth a check:
 
 | ID                                             | Type       | Description           |
 | ---------------------------------------------- | ---------- | --------------------- |
 | [sivel.toiletwater][galaxy  sivel.toiletwater] | collection | Extra filters, mostly |
 
-</details>
+UIs:
+
+| UI          | Static inventories | Dynamic inventories |
+| ----------- | ------------------ | ------------------- |
+| [AWX]       | ✓                  | ✓                   |
+| [Rundeck]   | ✓                  | ?                   |
+| [Semaphore] | ✓                  | ✗                   |
+| [Zuul]      | ?                  | ?                   |
 
 ## Configuration
 
@@ -840,6 +846,7 @@ See [Integrate with AWS SSM].
 - [Integrate with AWS SSM]
 - [Mitogen for Ansible]
 - [Debugging tasks]
+- [AWX]
 
 ### Sources
 
@@ -881,7 +888,9 @@ See [Integrate with AWS SSM].
   -->
 
 <!-- Knowledge base -->
+[awx]: awx.md
 [integrate with aws ssm]: cloud%20computing/aws/ssm.md#integrate-with-ansible
+[rundeck]: rundeck.md
 
 <!-- Files -->
 [examples]: ../examples/ansible/
@@ -934,9 +943,11 @@ See [Integrate with AWS SSM].
 [mitogen for ansible]: https://mitogen.networkgenomics.com/ansible_detailed.html
 [only do something if another action changed]: https://raymii.org/s/tutorials/Ansible_-_Only-do-something-if-another-action-changed.html
 [removing empty values from a list and assigning it to a new list]: https://stackoverflow.com/questions/60525961/ansible-removing-empty-values-from-a-list-and-assigning-it-to-a-new-list#60526774
+[semaphore]: https://semaphoreui.com/
 [unique filter of list in jinja2]: https://stackoverflow.com/questions/44329598/unique-filter-of-list-in-jinja2
 [what is the exact list of ansible setup min?]: https://stackoverflow.com/questions/71060833/what-is-the-exact-list-of-ansible-setup-min#71061125
 [why ansible and python fork break on macos high sierra+ and how to solve]: https://ansiblepilot.medium.com/why-ansible-and-python-fork-break-on-macos-high-sierra-and-how-to-solve-d11540cd2a1b
 [windows playbook example]: https://geekflare.com/ansible-playbook-windows-example/
 [working with versions]: https://docs.ansible.com/ansible/latest/collections/community/general/docsite/filter_guide_working_with_versions.html
 [yes and no, true and false]: https://chronicler.tech/red-hat-ansible-yes-no-and/
+[zuul]: https://zuul-ci.org/
