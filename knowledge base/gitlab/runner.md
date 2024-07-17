@@ -1,7 +1,5 @@
 # Gitlab runner
 
-TODO
-
 1. [TL;DR](#tldr)
 1. [Pull images from private AWS ECR registries](#pull-images-from-private-aws-ecr-registries)
 1. [Autoscaling](#autoscaling)
@@ -41,6 +39,8 @@ gitlab-runner exec docker \
 ```
 
 </details>
+
+1 runner is assigned 1 task at a time.
 
 ## Pull images from private AWS ECR registries
 
@@ -104,10 +104,133 @@ Runner like any others, just configured to use the `docker+machine` executor.
 
 [Supported cloud providers][docker machine's supported cloud providers].
 
+Using this executor opens up specific [configuration settings][docker machine executor autoscale configuration].
+
 Pitfalls:
 
-- On AWS, the driver supports only one subnet.<br/>
+- On AWS, the driver supports only one subnet (and hence 1 AZ) per runner.<br/>
   See [AWS driver does not support multiple non default subnets] and [Docker Machine's AWS driver's options].
+
+<details>
+  <summary>Example configuration</summary>
+
+```toml
+# Number of jobs *in total* that can be run concurrently by *all* configured runners
+# Does *not* affect the *total* upper limit of VMs created by *all* providers
+concurrent = 40
+
+[[runners]]
+  name = "static-scaler"
+
+  url = "https://gitlab.example.com"
+  token = "abcdefghijklmnopqrst"
+
+  executor = "docker+machine"
+  environment = [ "AWS_REGION=eu-west-1" ]
+
+  # Number of jobs that can be run concurrently by the VMs created by *this* runner
+  # Defines the *upper limit* of how many VMs can be created by *this* runner, since it is 1 task per VM at a time
+  limit = 10
+
+  [runners.machine]
+    # Static number of VMs that need to be idle at all times
+    IdleCount = 0
+
+    # Remove VMs after 5m in the idle state
+    IdleTime = 300
+
+    # Maximum number of VMs that can be added to this runner in parallel
+    # Defaults to 0 (no limit)
+    MaxGrowthRate = 1
+
+    # Template for the VMs' names
+    # Must contain '%s'
+    MachineName = "static-ondemand-%s"
+
+    MachineDriver = "amazonec2"
+    MachineOptions = [
+      # Refer the correct driver at 'https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/tree/main/docs/drivers'
+      "amazonec2-region=eu-west-1",
+      "amazonec2-vpc-id=vpc-1234abcd",
+      "amazonec2-zone=a",                              # driver limitation, only 1 allowed
+      "amazonec2-subnet-id=subnet-0123456789abcdef0",  # subnet-id in the specified az
+      "amazonec2-use-private-address=true",
+      "amazonec2-private-address-only=true",
+      "amazonec2-security-group=GitlabRunners",
+
+      "amazonec2-instance-type=m6i.large",
+      "amazonec2-root-size=50",
+      "amazonec2-iam-instance-profile=GitlabRunnerEc2",
+      "amazonec2-tags=Team,Infrastructure,Application,Gitlab Runner,SpotInstance,False",
+    ]
+
+[[runners]]
+  name = "dynamic-scaler"
+  executor = "docker+machine"
+  limit = 40  # will still respect the global concurrency value
+
+  [runners.machine]
+    # With 'IdleScaleFactor' defined, this becomes the upper limit of VMs that can be idle at all times
+    IdleCount = 10
+
+    # *Minimum* number of VMs that need to be idle at all times when 'IdleScaleFactor' is defined
+    # Defaults to 1; will be set automatically to 1 if set lower than that
+    IdleCountMin = 1
+
+    # Number of VMs that need to be idle at all times, as a factor of the number of machines in use
+    # In this case: idle VMs = 1.0 * machines in use, min 1, max 10
+    # Must be a floating point number
+    # Defaults to 0.0
+    IdleScaleFactor = 1.0
+
+    IdleTime = 600
+
+    # Remove VMs after 250 jobs
+    # Keeps them fresh
+    MaxBuilds = 250
+
+    MachineName = "dynamic-spot-%s"
+    MachineDriver = "amazonec2"
+    MachineOptions = [
+      # Refer the correct driver at 'https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/tree/main/docs/drivers'
+      "amazonec2-region=eu-west-1",
+      "amazonec2-vpc-id=vpc-1234abcd",
+      "amazonec2-zone=b",                              # driver limitation, only 1 allowed
+      "amazonec2-subnet-id=subnet-abcdef0123456789a",  # subnet-id in the specified az
+      "amazonec2-use-private-address=true",
+      "amazonec2-private-address-only=true",
+      "amazonec2-security-group=GitlabRunners",
+
+      "amazonec2-instance-type=r7a.large",
+      "amazonec2-root-size=25",
+      "amazonec2-iam-instance-profile=GitlabRunnerEc2",
+      "amazonec2-tags=Team,Infrastructure,Application,Gitlab Runner,SpotInstance,True",
+
+      "amazonec2-request-spot-instance=true",
+      "amazonec2-spot-price=0.3",
+    ]
+
+    # Pump up the volume of available VMs during working hours
+    [[runners.machine.autoscaling]]
+      Periods = ["* * 9-17 * * mon-fri *"] # Every work day between 9 and 18 Amsterdam time
+      Timezone = "Europe/Amsterdam"
+
+      IdleCount = 20
+      IdleCountMin = 5
+      IdleTime = 3600
+
+      # In this case: idle VMs = 1.5 * machines in use, min 5, max 20
+      IdleScaleFactor = 1.5
+
+    # Reduce even more the number of available VMs during the weekends
+    [[runners.machine.autoscaling]]
+      Periods = ["* * * * * sat,sun *"]
+      IdleCount = 0
+      IdleTime = 120
+      Timezone = "UTC"
+```
+
+</details>
 
 ## Further readings
 
@@ -115,6 +238,7 @@ Pitfalls:
 - [Amazon ECR Docker Credential Helper]
 - Gitlab's [docker machine] fork
 - Gitlab's [gitlab-runner-operator] for OpenShift and Kubernetes
+- [Docker Machine Executor autoscale configuration]
 
 ### Sources
 
@@ -144,6 +268,7 @@ Pitfalls:
 [install and register gitlab runner for autoscaling with docker machine]: https://docs.gitlab.com/17.0/runner/executors/docker_machine.html
 [gitlab-runner-operator]: https://gitlab.com/gitlab-org/gl-openshift/gitlab-runner-operator
 [gitlab runner helm chart]: https://docs.gitlab.com/runner/install/kubernetes.html
+[docker machine executor autoscale configuration]: https://docs.gitlab.com/runner/configuration/autoscale.html
 
 <!-- Others -->
 [authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb
