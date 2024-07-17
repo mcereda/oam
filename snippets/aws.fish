@@ -1,4 +1,4 @@
-#!fish
+#!/usr/bin/env fish
 
 # Check the credentials are fine
 aws sts get-caller-identity
@@ -126,3 +126,21 @@ aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
 aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' --output 'json' --query "Parameters[?ApplyType!='dynamic']"
 
 aws kms get-key-policy --output 'text' --key-id '01234567-89ab-cdef-0123-456789abcdef'
+
+aws ec2 describe-images --image-ids 'ami-01234567890abcdef'
+aws ec2 describe-images --image-ids 'ami-01234567890abcdef' --query 'Images[].Description'
+
+aws autoscaling start-instance-refresh --auto-scaling-group-name 'ProductionServers'
+aws autoscaling describe-instance-refreshes \
+	--auto-scaling-group-name 'ProductionServers' --instance-refresh-ids '01234567-89ab-cdef-0123-456789abcdef'
+aws autoscaling cancel-instance-refresh --auto-scaling-group-name 'ProductionServers'
+aws autoscaling rollback-instance-refresh --auto-scaling-group-name 'ProductionServers'
+
+aws kms create-key
+aws kms encrypt --key-id '01234567-89ab-cdef-0123-456789abcdef' --plaintext 'My Test String'
+aws kms encrypt --key-id '01234567-89ab-cdef-0123-456789abcdef' --plaintext 'My Test String' \
+	--query 'CiphertextBlob' --output 'text' \
+| base64 --decode > 'ciphertext.dat'
+aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat'
+aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat' --query 'Plaintext' --output 'text' \
+| base64 --decode

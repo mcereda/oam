@@ -351,6 +351,7 @@ Examples:
 - [Rotating AWS KMS keys]
 - [Image baking in AWS using Packer and Image builder]
 - [Avoid the 60 minutes timeout when using the AWS CLI with IAM roles]
+- [Using AWS KMS via the CLI with a Symmetric Key]
 
 <!--
   Reference
@@ -419,4 +420,5 @@ Examples:
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
 [image baking in aws using packer and image builder]: https://dev.to/santhoshnimmala/image-baking-in-aws-using-packer-and-image-builder-1ed3
 [introduction to aws iam assumerole]: https://aws.plainenglish.io/introduction-to-aws-iam-assumerole-fbef3ce8e90b
+[using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
 [you might be clueless as to why aws assume role isn't working, despite being correctly set up]: https://medium.com/@kamal.maiti/you-might-be-clueless-as-to-why-aws-assume-role-isnt-working-despite-being-correctly-set-up-1b3138519c07
