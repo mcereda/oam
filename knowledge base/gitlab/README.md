@@ -674,6 +674,7 @@ Solution: set the correct ownership with
 - [Buildah]
 - [Kaniko]
 - [The GitLab Handbook]
+- [Icons]
 
 ### Sources
 
@@ -731,8 +732,10 @@ Solution: set the correct ownership with
 [deployment]: https://docs.gitlab.com/charts/installation/deployment.html
 [environment variables]: https://docs.gitlab.com/ee/administration/environment_variables.html
 [gitlab ha scaling runner vending machine for aws ec2 asg]: https://gitlab.com/guided-explorations/aws/gitlab-runner-autoscaling-aws-asg#gitlab-runners-on-aws-spot-best-practices
+[gitlab maintenance mode]: https://docs.gitlab.com/ee/administration/maintenance_mode/
 [global settings]: https://docs.gitlab.com/charts/charts/globals.html
 [how to restart gitlab]: https://docs.gitlab.com/ee/administration/restart_gitlab.html
+[icons]: https://gitlab-org.gitlab.io/gitlab-svgs/
 [install gitlab with the linux package]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/doc/installation/index.md
 [install self-managed gitlab]: https://about.gitlab.com/install
 [merge request approval rules]: https://docs.gitlab.com/ee/user/project/merge_requests/approvals/rules.html
@@ -750,7 +753,6 @@ Solution: set the correct ownership with
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
 [tutorial: use buildah in a rootless container with gitlab runner operator on openshift]: https://docs.gitlab.com/ee/ci/docker/buildah_rootless_tutorial.html
 [use kaniko to build docker images]: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
-[gitlab maintenance mode]: https://docs.gitlab.com/ee/administration/maintenance_mode/
 
 <!-- Others -->
 [chef infra]: https://www.chef.io/products/chef-infra
