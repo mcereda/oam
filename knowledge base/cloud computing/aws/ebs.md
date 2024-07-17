@@ -21,6 +21,11 @@ aws ec2 describe-volumes --output 'text' --filters 'Name=status,Values=available
 
 </details>
 
+Volumes can have their size **increased**, but **not** reduced.<br/>
+After increase, the filesystem **must** be [extended][Extend the file system after resizing an EBS volume] to take
+advantage of the change in size.<br/>
+Apparently, Linux machines are able to do that automatically with a reboot.
+
 ## Snapshots
 
 When created, snapshots are **incremental**.<br/>
@@ -45,6 +50,7 @@ take **up to 72h**.
 - [Archive Amazon EBS snapshots]
 - [Automate snapshot lifecycles]
 - [Choose the best Amazon EBS volume type for your self-managed database deployment]
+- [Extend the file system after resizing an EBS volume]
 
 ### Sources
 
@@ -52,6 +58,7 @@ take **up to 72h**.
 - [Delete Unused AWS EBS Volumes]
 - [`describe-volumes`][describe-volumes]
 - [`delete-volume`][delete-volume]
+- [How do I increase or decrease the size of my EBS volume?]
 
 <!--
   Reference
@@ -70,6 +77,8 @@ take **up to 72h**.
 [delete-volume]: https://docs.aws.amazon.com/cli/latest/reference/ec2/delete-volume.html
 [describe-volumes]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-volumes.html
 [documentation]: https://docs.aws.amazon.com/ebs/
+[extend the file system after resizing an ebs volume]: https://docs.aws.amazon.com/ebs/latest/userguide/recognize-expanded-volume-linux.html
+[how do i increase or decrease the size of my ebs volume?]: https://repost.aws/knowledge-center/ebs-increase-decrease-volume-size
 [what is block storage?]: https://aws.amazon.com/what-is/block-storage/
 
 <!-- Others -->

@@ -108,6 +108,21 @@ aws iam detach-user-policy --user-name 'me-user' \
 aws iam delete-user-policy --user-name 'me-user' --policy-name 'user-ro-access-bucket'
 
 
+# Create new symmetric keys.
+aws kms create-key
+
+# Encrypt text.
+aws kms encrypt --key-id '01234567-89ab-cdef-0123-456789abcdef' --plaintext 'My Test String'
+aws kms encrypt --key-id '01234567-89ab-cdef-0123-456789abcdef' --plaintext 'My Test String' \
+  --query 'CiphertextBlob' --output 'text' \
+| base64 --decode > 'ciphertext.dat'
+
+# Decrypt files.
+aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat'
+aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat' --query 'Plaintext' --output 'text' \
+| base64 --decode
+
+
 # List hosted zones.
 aws route53 list-hosted-zones
 
@@ -265,9 +280,11 @@ Solutions:
 - [Improved CLI auto-prompt mode]
 - [Install the Session Manager plugin for the AWS CLI]
 - [Use an IAM role in the AWS CLI]
+- [Using AWS KMS via the CLI with a Symmetric Key]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
@@ -290,3 +307,4 @@ Solutions:
 [install the session manager plugin for the aws cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-macos-overview.html#install-plugin-macos-signed
 [quickstart]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html
 [use an iam role in the aws cli]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html
+[using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
