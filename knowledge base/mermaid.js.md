@@ -187,9 +187,16 @@ classDiagram
 
 ### State diagram
 
+Refer [State diagrams].
+
 ```md
 :::mermaid
   stateDiagram-v2
+    direction LR
+
+    state "Still state with description" as Still
+    Moving: Moving state with description
+
     [*] --> Still
     Still --> [*]
     Still --> Moving
@@ -201,6 +208,11 @@ classDiagram
 
 ```mermaid
 stateDiagram-v2
+  direction LR
+
+  state "Still state with description" as Still
+  Moving: Moving state<br/>with description
+
   [*] --> Still
   Still --> [*]
   Still --> Moving
@@ -304,12 +316,11 @@ gitGraph:
   -->
 
 <!-- Upstream -->
-
 [documentation]: https://mermaid.js.org/intro/
 [examples]: https://mermaid.js.org/syntax/examples.html
 [live editor]: https://mermaid.live
+[state diagrams]: https://mermaid.js.org/syntax/stateDiagram.html
 
 <!-- Knowledge base -->
-
 [markdown]: markdown.md
 [mermaid-cli]: mermaid-cli.md
