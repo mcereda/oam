@@ -11,6 +11,9 @@ help
 \?
 
 
+-- Show PostgreSQL version
+SELECT version();
+
 -- Show connection information
 \conninfo
 
@@ -116,6 +119,9 @@ SELECT rolpassword from pg_authid where rolname = 'admin';
 \dx
 SELECT * FROM pg_extension;
 SELECT extname FROM pg_extension;
+
+-- Show extensions versions
+SELECT postgis_version(), postgis_full_version(), postgis_lib_version();
 
 -- Add extensions
 CREATE EXTENSION pg_transport;
