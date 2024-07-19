@@ -66,3 +66,12 @@ git symbolic-ref 'refs/remotes/origin/HEAD' 'refs/remotes/origin/main'
 
 # delete the master branch on the remote
 git push origin --delete 'master'
+
+
+# create patches from the last commit
+git format-patch -n HEAD^
+git format-patch HEAD^ -o './patchfile.patch'
+git format-patch HEAD~1 --stdout
+
+# create patches from specific commits
+git format-patch -1 '3918a1d036e74d47a5c830e4bbabba6f507162b1'
