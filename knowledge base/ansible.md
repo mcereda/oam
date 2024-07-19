@@ -36,6 +36,7 @@
     1. [Load files' content into variables](#load-files-content-into-variables)
     1. [Only run a task when explicitly requested](#only-run-a-task-when-explicitly-requested)
     1. [Using AWS' SSM with Ansible fails with error _Failed to create temporary directory_](#using-aws-ssm-with-ansible-fails-with-error-failed-to-create-temporary-directory)
+    1. [Future feature annotations is not defined](#future-feature-annotations-is-not-defined)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -826,6 +827,18 @@ Solution:
 Explicitly set Ansible's temporary directory to a folder the remote user can write to.<br/>
 See [Integrate with AWS SSM].
 
+### Future feature annotations is not defined
+
+Refer [Newer versions of Ansible don't work with RHEL 8].
+
+Error message example:
+
+> ```plaintext
+> SyntaxError: future feature annotations is not defined
+> ```
+
+Solution: use a version of `ansible-core` lower than 2.17.
+
 ## Further readings
 
 - [Configuration]
@@ -881,6 +894,7 @@ See [Integrate with AWS SSM].
 - [Handling secrets in your Ansible playbooks]
 - [Ansible - how to remove an item from a list?]
 - [Looping over lists inside of a dict]
+- [Newer versions of Ansible don't work with RHEL 8]
 
 <!--
   Reference
@@ -941,6 +955,7 @@ See [Integrate with AWS SSM].
 [looping over lists inside of a dict]: https://www.reddit.com/r/ansible/comments/1b28dtm/looping_over_lists_inside_of_a_dict/
 [merging two dictionaries by key in ansible]: https://serverfault.com/questions/1084157/merging-two-dictionaries-by-key-in-ansible#1084164
 [mitogen for ansible]: https://mitogen.networkgenomics.com/ansible_detailed.html
+[newer versions of ansible don't work with rhel 8]: https://www.jeffgeerling.com/blog/2024/newer-versions-ansible-dont-work-rhel-8
 [only do something if another action changed]: https://raymii.org/s/tutorials/Ansible_-_Only-do-something-if-another-action-changed.html
 [removing empty values from a list and assigning it to a new list]: https://stackoverflow.com/questions/60525961/ansible-removing-empty-values-from-a-list-and-assigning-it-to-a-new-list#60526774
 [semaphore]: https://semaphoreui.com/
