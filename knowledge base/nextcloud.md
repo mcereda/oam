@@ -4,18 +4,58 @@ Redis is recommended to prevent file locking problems.
 
 ## Table of contents <!-- omit in toc -->
 
+1. [TL;DR](#tldr)
 1. [Containerized](#containerized)
    1. [Official helm chart](#official-helm-chart)
 1. [Snappy](#snappy)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
+## TL;DR
+
+<details>
+  <summary>Setup</summary>
+
+  <details style="margin: 0 0 0 1em">
+    <summary>Helm</summary>
+
+  ```sh
+  helm repo add 'nextcloud' 'https://nextcloud.github.io/helm/'
+  helm repo update
+  helm inspect values 'nextcloud/nextcloud' > 'values.yaml'
+  helm upgrade -in 'nextcloud' --create-namespace --atomic 'nextcloud' 'nextcloud/nextcloud' -f 'values.yaml'
+  ```
+
+  </details>
+
+</details>
+
+<!-- Uncomment if used
+<details>
+  <summary>Usage</summary>
+
+```sh
+```
+
+</details>
+-->
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
+docker compose exec -ti -u 33 app /var/www/html/occ db:add-missing-indices
+docker compose exec -ti -u 33 app /var/www/html/occ maintenance:repair --include-expensive
+```
+
+</details>
+
 ## Containerized
 
 Use environment variables to inform Nextcloud about internal configuration:
 
 | Name                        | Default   | Description                                               |
-|-----------------------------|-----------|-----------------------------------------------------------|
+| --------------------------- | --------- | --------------------------------------------------------- |
 | `NEXTCLOUD_ADMIN_USER`      | (not set) | Name of the Nextcloud admin user                          |
 | `NEXTCLOUD_ADMIN_PASSWORD`  | (not set) | Password for the Nextcloud admin user                     |
 | `NEXTCLOUD_TRUSTED_DOMAINS` | (not set) | Optional space-separated list of domains                  |
