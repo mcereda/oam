@@ -112,3 +112,8 @@ pulumi update:
     - >-
         pulumi update --yes --non-interactive --verbose '3'
         --parallel "${THREADS:-$(nproc)}"
+
+do-it-again:
+  retry:
+    max: 2
+    when: runner_system_failure
