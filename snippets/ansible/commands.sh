@@ -36,6 +36,11 @@ ansible-playbook 'gitlab.yml' \
 ansible-playbook 'prometheus.yml' \
 	-i 'aws_ec2.yml' -e 'ansible_aws_ssm_plugin=/usr/local/sessionmanagerplugin/bin/session-manager-plugin' \
 	-D -t 'cron' -l 'i-0123456789abcdef0' -C
+ansible-playbook 'playbook.yaml' \
+	-e 'ansible_aws_ssm_plugin=/usr/local/sessionmanagerplugin/bin/session-manager-plugin' \
+	-e 'ansible_connection=aws_ssm' -e 'ansible_aws_ssm_bucket_name=ssm-bucket' -e 'ansible_aws_ssm_region=eu-west-1' \
+	-e 'ansible_remote_tmp=/tmp/.ansible-\${USER}/tmp' \
+	-i 'i-0123456789abcdef0,' -D
 
 ANSIBLE_ENABLE_TASK_DEBUGGER=True ansible-playbook …
 ANSIBLE_CALLBACKS_ENABLED='profile_tasks' ansible-playbook …
