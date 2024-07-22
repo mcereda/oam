@@ -1,8 +1,7 @@
 import * as acme from '@pulumiverse/acme';
 import * as aws from "@pulumi/aws";
 import * as cloudinit from "@pulumi/cloudinit";
-import * as command from "@pulumi/command"
-import * as fs from 'fs';
+import * as command from "@pulumi/command";
 import * as pulumi from "@pulumi/pulumi";
 import * as tls from "@pulumi/tls";
 import * as yaml from "yaml";
