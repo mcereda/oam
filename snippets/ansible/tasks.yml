@@ -12,6 +12,13 @@
     path: /tmp/path/to/final/dir
     state: directory
 
+- name: Write files from tasks
+  ansible.builtin.copy:
+    dest: "{{ ansible_user_dir }}/.tmux.conf"
+    mode: u=rw,go=r
+    content: |
+      …
+
 - name: Import tasks
   block:
     - name: By using absolute paths and special variables (preferred)
@@ -64,24 +71,53 @@
       ansible.builtin.debug:
         msg: "{{ lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname) }}"
 
+- name: Add repositories
+  block:
+    - name: DNF/YUM
+      ansible.builtin.yum_repository:
+        name: epel
+        description: EPEL YUM repo
+        baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+
+- name: Install packages
+  block:
+    - name: Generic module
+      ansible.builtin.package:
+        name:
+          - tmux
+          - screen
+    - name: Via PIP
+      ansible.builtin.pip:
+        name:
+          - bottle
+          - django>1.11.0,<1.12.0
+          - svn+http://myrepo/svn/MyApp#egg=MyApp
+          - git+http://myrepo/app/MyApp
+          - file:///path/to/MyApp.tar.gz
+
 - name: Run containers
-  community.docker.docker_container:
-    name: gitlab
-    image: gitlab/gitlab-ce:16.11.2-ce.0
-    hostname: gitlab.lan
-    published_ports:
-      - "8022:22"
-      - "8080:80"
-      - "8443:443"
-    env:
-      GITLAB_OMNIBUS_CONFIG: >-
-        external_url 'http://gitlab.lan';
-    shm_size: 256m
-    volumes:
-      - ./config:/etc/gitlab:Z
-      - ./logs:/var/log/gitlab:Z
-      - ./data:/var/opt/gitlab:Z
-    auto_remove: true
+  block:
+    - name: Directly
+      community.docker.docker_container:
+        name: gitlab
+        image: gitlab/gitlab-ce:16.11.2-ce.0
+        hostname: gitlab.lan
+        published_ports:
+          - "8022:22"
+          - "8080:80"
+          - "8443:443"
+        env:
+          GITLAB_OMNIBUS_CONFIG: >-
+            external_url 'http://gitlab.lan';
+        shm_size: 256m
+        volumes:
+          - ./config:/etc/gitlab:Z
+          - ./logs:/var/log/gitlab:Z
+          - ./data:/var/opt/gitlab:Z
+        auto_remove: true
+    - name: With Compose
+      community.docker.docker_compose_v2:
+        project_src: /home/user/flask
 
 - name: Manipulate strings
   ansible.builtin.set_fact:
