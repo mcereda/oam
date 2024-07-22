@@ -1,7 +1,5 @@
 # Cloud init
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Merge 2 or more files or parts](#merge-2-or-more-files-or-parts)
 1. [Further readings](#further-readings)

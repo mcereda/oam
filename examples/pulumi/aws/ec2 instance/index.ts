@@ -66,6 +66,7 @@ const userData = new cloudinit.Config(
         base64Encode: true,
         parts: [
             {
+                // only useful on minimal al2023 base images or other images with no aws-ssm
                 contentType: "text/cloud-config",
                 content: yaml.stringify({
                     package_upgrade: false,
@@ -98,7 +99,7 @@ new aws.ec2.Instance(
         keyName: keyPair.apply(keyPair => keyPair.keyName!),
         rootBlockDevice: {
             volumeType: "gp3",
-            volumeSize: 10,
+            volumeSize: 20,
             tags: {
                 Description: "Instance root disk",
                 Name: "EC2 Instance Example",
