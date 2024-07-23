@@ -15,9 +15,7 @@ sudo dnf --assumeyes install \
 sudo dnf upgrade --security --sec-severity 'Critical' --downloadonly
 sudo dnf -y upgrade --security --sec-severity 'Important'
 
-
 sudo rpmkeys --import 'https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg'
-
 
 cat <<-EOF | sudo tee -a /etc/yum.repos.d/vscodium.repo
 	[gitlab.com_paulcarroty_vscodium_repo]
@@ -29,6 +27,8 @@ cat <<-EOF | sudo tee -a /etc/yum.repos.d/vscodium.repo
 	gpgkey=https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg
 EOF
 
-
 # List files in packages
 dnf repoquery -l 'nginx'
+
+sudo dnf check-release-update
+sudo dnf upgrade --releasever='2023.5.20240722'
