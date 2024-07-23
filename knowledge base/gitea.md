@@ -1,5 +1,6 @@
 # Gitea
 
+1. [TL;DR](#tldr)
 1. [Installation](#installation)
 1. [Configuration](#configuration)
    1. [LFS](#lfs)
@@ -7,6 +8,13 @@
    1. [Set up HTTP redirection](#set-up-http-redirection)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
+
+## TL;DR
+
+```sh
+helm repo add 'gitea-charts' 'https://dl.gitea.com/charts/'
+helm upgrade --install 'gitea' 'gitea-charts/gitea'
+```
 
 ## Installation
 
@@ -115,6 +123,9 @@ Alternatives:
 
 - [Configuration cheat sheet]
 - [HTTPS setup to encrypt connections to Gitea]
+- [Installation with Docker]
+- [Installation with Helm]
+- [Helm Chart]
 
 <!--
   Reference
@@ -127,9 +138,12 @@ Alternatives:
 [gitlab]: gitlab/README.md
 
 <!-- Files -->
-[compose file]: /docker/gitea/docker-compose.yml
+[compose file]: /containers/gitea/docker-compose.yml
 
 <!-- Upstream -->
 [configuration cheat sheet]: https://docs.gitea.com/administration/config-cheat-sheet
+[helm chart]: https://gitea.com/gitea/helm-chart/
 [https setup to encrypt connections to gitea]: https://docs.gitea.com/administration/https-setup
+[installation with docker]: https://docs.gitea.com/installation/install-with-docker-rootless
+[installation with helm]: https://docs.gitea.com/installation/install-on-kubernetes
 [website]: https://about.gitea.com/
