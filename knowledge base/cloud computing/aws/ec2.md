@@ -12,6 +12,9 @@ Use an instance profile to pass an IAM role to an EC2 instance.
 
 `T` instances launch as `unlimited` by default. Launch them in `standard` mode to avoid paying for surplus credits.
 
+The instance type [_can_ be changed][change the instance type]. The procedure depends on the root volume, but does
+require downtime.
+
 <details>
   <summary>Real world use cases</summary>
 
@@ -117,6 +120,7 @@ See [EBS].
 - [IAM roles for Amazon EC2]
 - [Retrieve instance metadata]
 - [Burstable performance instances]
+- [Change the instance type]
 
 <!--
   Reference
@@ -141,6 +145,7 @@ See [EBS].
 [standard mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-standard-mode.html
 [unlimited mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-unlimited-mode.html
 [using instance profiles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
+[change the instance type]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html
 
 <!-- Others -->
 [aws ec2 instance pricing comparison]: https://ec2instances.github.io/
