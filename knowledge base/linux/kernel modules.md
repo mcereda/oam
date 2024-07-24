@@ -1,8 +1,10 @@
 # Linux kernel modules
 
 1. [TL;DR](#tldr)
+1. [Load modules on boot](#load-modules-on-boot)
 1. [Permanent modules configuration](#permanent-modules-configuration)
 1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -43,6 +45,15 @@ modprobe -r 'module_name'
 rmmod 'module_name'
 ```
 
+## Load modules on boot
+
+If using Systemd, put lists of modules in `.conf` files in the `/etc/modules-load.d/` directory:
+
+```sh
+$ cat '/etc/modules-load.d/ddcutil.conf'
+i2c-dev
+```
+
 ## Permanent modules configuration
 
 Write the options in a `.conf` file in `/etc/modprobe.d/`:
@@ -57,6 +68,10 @@ options brcmfmac roamoff=1 feature_disable=0x82000
 - The [Kernel module][arch wiki kernel module] page in the [Arch wiki]
 - The [Kernel modules][gentoo wiki kernel modules] page in the [Gentoo wiki]
 
+### Sources
+
+- [How to load a kernel module automatically at boot time]
+
 <!--
   Reference
   ═╬═Time══
@@ -67,3 +82,4 @@ options brcmfmac roamoff=1 feature_disable=0x82000
 [arch wiki kernel module]: https://wiki.archlinux.org/title/Kernel_module
 [gentoo wiki]: https://wiki.gentoo.org/wiki/Main_Page
 [gentoo wiki kernel modules]: https://wiki.gentoo.org/wiki/Kernel_Modules
+[how to load a kernel module automatically at boot time]: https://www.cyberciti.biz/faq/linux-how-to-load-a-kernel-module-automatically-at-boot-time/
