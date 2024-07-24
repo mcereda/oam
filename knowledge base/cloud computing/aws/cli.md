@@ -1,7 +1,5 @@
 # AWS CLI
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Profiles](#profiles)
 1. [Configuration](#configuration)
@@ -17,11 +15,12 @@ Do *not* use `--max-items` together with `--query`: the items limit is applied b
 to show no results.
 
 <details>
-  <summary>Installation and configuration</summary>
+  <summary>Setup</summary>
 
 ```sh
 # Install the CLI.
 brew install 'awscli'
+docker pull 'amazon/aws-cli'
 pip install 'awscli'
 
 # Configure profiles.
@@ -53,6 +52,9 @@ rm -r ~'/.aws/cli/cache'
   <summary>Usage</summary>
 
 ```sh
+# Use the docker version.
+docker run --rm -ti -v "$HOME/.aws:/root/.aws:ro" 'amazon/aws-cli:2.17.16' autoscaling describe-auto-scaling-groups
+
 # List applications in CodeDeploy.
 aws deploy list-applications
 

@@ -405,6 +405,13 @@ kubectl top node 'my-node'
 # Forward local connections to cluster resources.
 kubectl port-forward 'my-pod' '5000:6000'
 kubectl -n 'default' port-forward 'service/my-service' '8443:https'
+
+# Start pods and attach to them.
+kubectl run --rm -it --image 'alpine' 'alpine' --command -- sh
+kubectl run --rm -it --image 'amazon/aws-cli:2.17.16' 'awscli' -- autoscaling describe-auto-scaling-groups
+
+# Attach to running pods.
+kubectl attach 'alpine' -c 'alpine' -it
 ```
 
 </details>
@@ -421,6 +428,12 @@ kubectl -n 'awx' port-forward 'service/awx-service' '8080:http'
 
 # Delete leftovers CRDs from helm charts by release name.
 kubectl delete crds -l "helm.sh/chart=awx-operator"
+
+# Run pods with specific specs.
+kubectl -n 'kube-system' run --rm -it 'awscli' --overrides '{"spec":{"serviceAccountName":"cluster-autoscaler-aws"}}' \
+  --image '012345678901.dkr.ecr.eu-west-1.amazonaws.com/cache/amazon/aws-cli:2.17.16' \
+  -- \
+  autoscaling describe-auto-scaling-groups
 
 # Show Containers' status, properties and capabilities from the inside.
 # Run the command from *inside* the container.
