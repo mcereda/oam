@@ -187,6 +187,7 @@ pulumi stack graph -s 'dev' 'dev.dot' --short-node-name
 # Rename stacks.
 pulumi stack rename 'new-name'
 pulumi stack rename 'new-dev' -s 'dev'
+pulumi stack rename -s 'dev' 'organization/internal-services/dev'
 
 # Change secrets providers.
 pulumi stack change-secrets-provider 'awskms://1234abcd-12ab-34cd-56ef-1234567890ab?region=us-east-1'
@@ -216,6 +217,7 @@ pulumi state unprotect 'resourceUrn'
 # new name.
 pulumi stack rename 'org/new-project/dev'
 pulumi stack rename 'org/new-project/dev' -s 'dev'
+pulumi stack rename -s 'pulumicomuser/testproj/dev' 'organization/internal-services/dev'
 
 
 # List installed plugins.
