@@ -133,6 +133,8 @@ aws kms get-key-policy --output 'text' --key-id '01234567-89ab-cdef-0123-456789a
 aws ec2 describe-images --image-ids 'ami-01234567890abcdef'
 aws ec2 describe-images --image-ids 'ami-01234567890abcdef' --query 'Images[].Description'
 
+aws autoscaling describe-auto-scaling-groups
+aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names 'ProductionServers'
 aws autoscaling start-instance-refresh --auto-scaling-group-name 'ProductionServers'
 aws autoscaling describe-instance-refreshes \
 	--auto-scaling-group-name 'ProductionServers' --instance-refresh-ids '01234567-89ab-cdef-0123-456789abcdef'
@@ -147,3 +149,9 @@ aws kms encrypt --key-id '01234567-89ab-cdef-0123-456789abcdef' --plaintext 'My 
 aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat'
 aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat' --query 'Plaintext' --output 'text' \
 | base64 --decode
+
+aws eks --region 'eu-west-1' update-kubeconfig --name 'oneForAll' --profile 'dev-user'
+
+aws eks describe-addon-versions --query 'sort(addons[].addonName)'
+
+docker run --rm -ti -v "$HOME/.aws:/root/.aws:ro" 'amazon/aws-cli:2.17.16' autoscaling describe-auto-scaling-groups

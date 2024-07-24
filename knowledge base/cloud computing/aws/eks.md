@@ -11,11 +11,14 @@
 1. [Storage](#storage)
    1. [Use EBS as volumes](#use-ebs-as-volumes)
       1. [EBS CSI driver IAM role](#ebs-csi-driver-iam-role)
+1. [Pod identity](#pod-identity)
+1. [Autoscaling](#autoscaling)
+   1. [Cluster autoscaler](#cluster-autoscaler)
 1. [Troubleshooting](#troubleshooting)
-   1. [Identify common issues](#identify-common-issues)
-   1. [The worker nodes fail to join the cluster](#the-worker-nodes-fail-to-join-the-cluster)
+    1. [Identify common issues](#identify-common-issues)
+    1. [The worker nodes fail to join the cluster](#the-worker-nodes-fail-to-join-the-cluster)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -34,9 +37,9 @@ both the control plane and nodes.<br/>
 Such security group cannot be avoided nor customized in the cluster's definition (e.g. using IaC tools like [Pulumi] or
 [Terraform]):
 
-> ```txt
-> error: aws:eks/cluster:Cluster resource 'cluster' has a problem: Value for unconfigurable attribute. Can't configure a value for "vpc_config.0.cluster_security_group_id": its value will be decided automatically based on the result of applying this configuration.
-> ```
+> error: aws:eks/cluster:Cluster resource 'cluster' has a problem: Value for unconfigurable attribute. Can't configure a
+> value for "vpc_config.0.cluster_security_group_id": its value will be decided automatically based on the result of
+> applying this configuration.
 
 For some reason, giving resources a tag like `aks:eks:cluster-name=value` succeeds, but has no effect (it is not really
 applied).
@@ -83,6 +86,7 @@ aws eks associate-access-policy --cluster-name 'DeepThought' \
 
 # Connect to clusters.
 aws eks update-kubeconfig --name 'DeepThought' && kubectl cluster-info
+aws eks --region 'eu-west-1' update-kubeconfig --name 'oneForAll' --profile 'dev-user' && kubectl cluster-info
 
 
 # Create EC2 node groups.
@@ -100,6 +104,10 @@ aws eks create-fargate-profile \
   --pod-execution-role-arn 'arn:aws:iam::000011112222:role/DeepThinkerFargate' \
   --subnets 'subnet-11112222333344445' 'subnet-66667777888899990' \
   --selectors 'namespace=string'
+
+
+# Get addon names.
+aws eks describe-addon-versions --query 'addons[].addonName'
 ```
 
 </details>
@@ -685,17 +693,137 @@ Requirements:
   1. ClusterRole, ClusterRoleBinding, and other RBAC components.
   1. Snapshot controller's Deployment.
 
+## Pod identity
+
+Refer [Learn how EKS Pod Identity grants pods access to AWS services].
+
+Provides pods the ability to manage AWS credentials in a similar way to how EC2 instance profiles provide credentials to
+instances.
+
+Limitations:
+
+- Pod Identity Agents are DaemonSets.<br/>
+  This means they **cannot** run on Fargate hosts and **will** require EC2 nodes.
+- Does **not** work with **Amazon-provided EKS add-ons** that need IAM credentials.<br/>
+  These controllers, drivers and plugins support EKS Pod Identities should they be installed as **self-managed** add-ons
+  instead.
+
+Procedure:
+
+1. Set up the Pod Identity Agent on clusters.
+
+   <details>
+     <summary>Requirements</summary>
+
+   - The **nodes**' service role **must** have permissions for the agent to execute `AssumeRoleForPodIdentity` actions in
+     the EKS Auth API.
+
+     Use the AWS-managed `AmazonEKSWorkerNodePolicy` policy.<br/>
+     Alternatively, add a custom policy with the following:
+
+     ```json
+     {
+       "Version": "2012-10-17",
+       "Statement": [{
+         "Effect": "Allow",
+         "Action": [ "eks-auth:AssumeRoleForPodIdentity" ],
+         "Resource": "*"
+       }]
+     }
+     ```
+
+     Limit this action using tags to restrict which roles can be assumed by pods that use the agent.
+
+   - Nodes to **be able** to reach and download images from ECRs.<br/>
+     Required since the container image for the add-on is available there.
+   - Nodes to **be able** to reach the EKS Auth API.<br/>
+     Private clusters **will** require the `eks-auth` endpoint in PrivateLink.
+
+   </details>
+   <details>
+     <summary>CLI</summary>
+
+   ```sh
+   aws eks create-addon --cluster-name 'cluster' --addon-name 'eks-pod-identity-agent'
+   aws eks create-addon --cluster-name 'cluster' --addon-name 'eks-pod-identity-agent' --resolve-conflicts 'OVERWRITE'
+   ```
+
+   </details>
+   <details style="margin-bottom: 1em">
+     <summary>Pulumi</summary>
+
+   ```ts
+   new aws.eks.Addon("pod-identity", {
+     clusterName: cluster.name,
+     addonName: "eks-pod-identity-agent",
+     resolveConflictsOnCreate: "OVERWRITE",
+     resolveConflictsOnUpdate: "OVERWRITE",
+   });
+   ```
+
+   </details>
+
+1. Associate IAM roles with Kubernetes service accounts:
+
+   <details>
+     <summary>CLI</summary>
+
+   ```sh
+   aws eks create-pod-identity-association \
+     --cluster-name 'cluster' --namespace 'default' \
+     --service-account 'default' --role-arn 'arn:aws:iam::012345678901:role/CustomRole'
+   ```
+
+   </details>
+   <details style="margin-bottom: 1em">
+     <summary>Pulumi</summary>
+
+   ```ts
+   new aws.eks.PodIdentityAssociation("customRole-to-defaultServiceAccount", {
+     clusterName: cluster.name,
+     roleArn: customRole.arn,
+     serviceAccount: "default",
+     namespace: "default",
+   });
+   ```
+
+   </details>
+
+   There is no need for the service account to exists before association.<br/>
+   The moment it will be created in the defined namespace, it will also be able to assume the role.
+
+1. Configure pods to use those service accounts.
+
+## Autoscaling
+
+Autoscaling of EKS clusters can happen:
+
+- _Horizontally_ (as in **number** of nodes) through the use of [Cluster Autoscaler].
+- _Vertically_ (as in **size** of nodes) through the use of [Karpenter].
+
+The pods running the autoscaling components **will need** the necessary permissions to operate on the cluster's
+resources.<br/>
+This means giving them pods access keys, or enabling [Pod Identity].
+
+### Cluster autoscaler
+
+Nothing more than the [Kubernetes' cluster autoscaler component].
+
+After any operation, the cluster autoscaler will wait for the ASG cooldown time to end.<br/>
+Only then, it will start counting down its own timers.
+
 ## Troubleshooting
 
 See [Amazon EKS troubleshooting].
 
 ### Identify common issues
 
-Use the [AWSSupport-TroubleshootEKSWorkerNode](https://docs.aws.amazon.com/systems-manager-automation-runbooks/latest/userguide/automation-awssupport-troubleshooteksworkernode.html) runbook.
+Use the [AWSSupport-TroubleshootEKSWorkerNode runbook].
 
 > For the automation to work, worker nodes **must** have permission to access Systems Manager and have Systems Manager
 > running.<br/>
-> Grant this permission by attaching the [`AmazonSSMManagedInstanceCore`](https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-policies-overview) policy to the node role.
+> Grant this permission by attaching the `AmazonSSMManagedInstanceCore` policy to the node role.<br/>
+> See [Configure instance permissions required for Systems Manager].
 
 Procedure:
 
@@ -754,6 +882,9 @@ Debug: see [Identify common issues].
 - [How to Add IAM User and IAM Role to AWS EKS Cluster?]
 - [Amazon Elastic Block Store (EBS) CSI driver]
 - [Manage the Amazon EBS CSI driver as an Amazon EKS add-on]
+- [How do you get kubectl to log in to an AWS EKS cluster?]
+- [Learn how EKS Pod Identity grants pods access to AWS services]
+- [Configure instance permissions required for Systems Manager]
 
 <!--
   Reference
@@ -762,16 +893,20 @@ Debug: see [Identify common issues].
 
 <!-- In-article sections -->
 [access management]: #access-management
+[cluster autoscaler]: #cluster-autoscaler
 [create worker nodes]: #create-worker-nodes
 [ebs csi driver iam role]: #ebs-csi-driver-iam-role
 [identify common issues]: #identify-common-issues
+[pod identity]: #pod-identity
 [requirements]: #requirements
 [secrets encryption through kms]: #secrets-encryption-through-kms
 
 <!-- Knowledge base -->
 [amazon web services]: README.md
 [cli]: cli.md
+[kubernetes' cluster autoscaler component]: ../../kubernetes/cluster%20autoscaler.md
 [ebs]: ebs.md
+[karpenter]: ../../kubernetes/karpenter.placeholder
 [kubernetes]: ../../kubernetes/README.md
 [pulumi]: ../../pulumi.md
 [terraform]: ../../pulumi.md
@@ -790,7 +925,9 @@ Debug: see [Identify common issues].
 [aws eks create-cluster]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-cluster.html
 [aws eks create-fargate-profile]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-fargate-profile.html
 [aws eks create-nodegroup]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-nodegroup.html
+[AWSSupport-TroubleshootEKSWorkerNode runbook]: https://docs.aws.amazon.com/systems-manager-automation-runbooks/latest/userguide/automation-awssupport-troubleshooteksworkernode.html
 [choosing an amazon ec2 instance type]: https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html
+[configure instance permissions required for systems manager]: https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-policies-overview
 [de-mystifying cluster networking for amazon eks worker nodes]: https://aws.amazon.com/blogs/containers/de-mystifying-cluster-networking-for-amazon-eks-worker-nodes/
 [eks workshop]: https://www.eksworkshop.com/
 [enabling iam principal access to your cluster]: https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html
@@ -802,6 +939,7 @@ Debug: see [Identify common issues].
 [how do i resolve the error "you must be logged in to the server (unauthorized)" when i connect to the amazon eks api server?]: https://repost.aws/knowledge-center/eks-api-server-unauthorized-error
 [how do i use persistent storage in amazon eks?]: https://repost.aws/knowledge-center/eks-persistent-storage
 [identity and access management]: https://aws.github.io/aws-eks-best-practices/security/docs/iam/
+[learn how eks pod identity grants pods access to aws services]: https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html
 [manage the amazon ebs csi driver as an amazon eks add-on]: https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html
 [managed node groups]: https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html
 [private cluster requirements]: https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html
@@ -817,5 +955,6 @@ Debug: see [Identify common issues].
 <!-- Others -->
 [amazon elastic block store (ebs) csi driver]: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/README.md
 [external-snapshotter]: https://github.com/kubernetes-csi/external-snapshotter
+[how do you get kubectl to log in to an aws eks cluster?]: https://stackoverflow.com/questions/53266960/how-do-you-get-kubectl-to-log-in-to-an-aws-eks-cluster
 [how to add iam user and iam role to aws eks cluster?]: https://antonputra.com/kubernetes/add-iam-user-and-iam-role-to-eks/
 [visualizing aws eks kubernetes clusters with relationship graphs]: https://dev.to/aws-builders/visualizing-aws-eks-kubernetes-clusters-with-relationship-graphs-46a4
