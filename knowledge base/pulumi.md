@@ -51,7 +51,7 @@ choco install 'pulumi'
 
 # Create completions for the shell.
 source <(pulumi gen-completion 'zsh')
-pulumi completion 'fish' > "$HOME/.config/fish/completions/pulumi.fish"
+pulumi gen-completion 'fish' > "$HOME/.config/fish/completions/pulumi.fish"
 ```
 
 </details>
