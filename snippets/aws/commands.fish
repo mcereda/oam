@@ -3,42 +3,6 @@
 # Check the credentials are fine
 aws sts get-caller-identity
 
-alias aws-caller-info 'aws sts get-caller-identity'
-alias aws-ssm 'aws ssm start-session --target'
-
-function aws-assume-role-by-name
-	set current_caller (aws-caller-info --output json | jq -r '.UserId' -)
-	aws-iam-role-arn-from-name "$argv[1]" \
-	| xargs -I {} \
-		aws sts assume-role \
-			--role-arn "{}" \
-			--role-session-name "$current_caller-as-$argv[1]-stsSession" \
-	&& echo "Assumed role $argv[1]; Session name: '$current_caller-as-$argv[1]-stsSession'"
-end
-
-function aws-ec2-instanceId-from-nameTag
-	aws ec2 describe-instances --output text \
-	--filters "Name=tag:Name,Values=$argv[1]" \
-	--query 'Reservations[].Instances[0].InstanceId'
-end
-
-function aws-iam-role-arn-from-name
-	aws iam list-roles --output 'text' \
-		--query "Roles[?RoleName == '$argv[1]'].Arn"
-end
-
-alias aws-ec2-running-instanceIds "aws ec2 describe-instances --output 'text' \
-	--filters 'Name=instance-state-name,Values=running' \
-	--query 'Reservations[].Instances[0].InstanceId' \
-| sed -E 's/\t+/\n/g'"
-alias aws-ssm-gitlabAutoscalingManager-ita-b "aws ec2 describe-instances --output text \
-	--filters \
-		'Name=availability-zone,Values=eu-south-1b' \
-		'Name=instance-state-name,Values=running' \
-		'Name=tag:Name,Values=Gitlab Autoscaling Manager' \
-	--query 'Reservations[].Instances[0].InstanceId' \
-| xargs -ot aws ssm start-session --target"
-
 aws s3 rm 's3://bucket-name/prefix' --recursive --dry-run
 aws s3 cp 's3://my-first-bucket/test.txt' 's3://my-other-bucket/'
 
@@ -155,3 +119,15 @@ aws eks --region 'eu-west-1' update-kubeconfig --name 'oneForAll' --profile 'dev
 aws eks describe-addon-versions --query 'sort(addons[].addonName)'
 
 docker run --rm -ti -v "$HOME/.aws:/root/.aws:ro" 'amazon/aws-cli:2.17.16' autoscaling describe-auto-scaling-groups
+
+# Get all users' access keys
+aws iam list-users --no-cli-pager --query 'Users[].UserName' --output 'text' \
+| xargs -n1 aws iam list-access-keys --output 'json' --user
+
+# Get the user owning a specific access key
+aws iam list-users --no-cli-pager --query 'Users[].UserName' --output 'text' \
+| xargs -n1 -P (nproc) aws iam list-access-keys \
+	--query "AccessKeyMetadata[?AccessKeyId=='AKIA2HKHF74L5H5PMM5W'].UserName" --output 'json' --user \
+| jq -rs 'flatten|first'
+
+AKIA01234567890ABCDE
