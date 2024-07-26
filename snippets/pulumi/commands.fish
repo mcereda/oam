@@ -1,5 +1,11 @@
 #!/usr/bin/env fish
 
+source <(pulumi gen-completion 'zsh')
+pulumi gen-completion 'fish' > "$HOME/.config/fish/completions/pulumi.fish"
+
+pulumi install
+pulumi install --reinstall
+
 pulumi pre
 pulumi pre --cwd 'observability' --diff
 
@@ -26,14 +32,14 @@ pulumi config get --path outer.inner
 pulumi config get --path 'list[1]'
 
 pulumi plugin ls --project
-pulumi plugin install
+pulumi plugin install --exact --reinstall
 
 pulumi state unprotect 'urn:pulumi:dev::custom-images::aws:imagebuilder/infrastructureConfiguration:InfrastructureConfiguration::server-baseline'
 pulumi state delete 'urn:pulumi:dev::custom-images::aws:imagebuilder/infrastructureConfiguration:InfrastructureConfiguration::server-baseline'
 pulumi state rename -y 'urn:pulumi:dev::custom-images::aws:imagebuilder/imageRecipe:ImageRecipe::baselineServerImage-1.0.8' 'serverBaseline-1.0.8'
 
-find . -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi preview --parallel "$(nproc)" --cwd
-find . -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi refresh --parallel "$(nproc)" -s 'dev' --non-interactive -v '3' --cwd
+find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi preview --parallel "$(nproc)" --cwd
+find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi refresh --parallel "$(nproc)" -s 'dev' --non-interactive -v '3' --cwd
 
 pulumi import --generate-code='false' 'aws:iam/user:User' 'jimmy' 'jimmy'
 
