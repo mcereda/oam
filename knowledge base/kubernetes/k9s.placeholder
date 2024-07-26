@@ -21,3 +21,9 @@ k9s --context 'context-name'
 # Disables all modification commands.
 k9s --readonly
 ```
+
+? --> Show help
+: --> Filter by resource Kind
+
+r --> Toggle automatic refresh in detailed views
+Shift+l --> Sort by LastSeen in events view
