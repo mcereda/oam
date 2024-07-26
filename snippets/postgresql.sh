@@ -36,7 +36,8 @@ pg_dumpall -h 'host.fqnd' -p '5432' -U 'postgres' -l 'postgres' -W --roles-only 
 pg_dumpall -h 'host.fqnd' -p '5432' -U 'postgres' -l 'postgres' -Wrf 'roles.sql' --no-role-passwords
 
 # Restore backups
-pg_restore -U 'postgres' -d 'sales' 'sales.bak'
+pg_restore -U 'postgres' -d 'sales' 'sales.dump'
+pg_restore -h 'host.fqdn' -U 'master' -d 'sales' -Oxj 8 'sales.dump'
 
 # Initialize a test DB
 pgbench -i 'test-db'
