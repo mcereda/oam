@@ -811,7 +811,7 @@ Procedure:
 
 ## Autoscaling
 
-Autoscaling of EKS clusters can happen:
+Clusters can automatically scale:
 
 - _Horizontally_ (as in **number** of nodes) through the use of [Cluster Autoscaler].
 - _Vertically_ (as in **size** of nodes) through the use of [Karpenter].
