@@ -825,9 +825,10 @@ This means giving them pods access keys, or enabling [Pod Identity].
 Just use the [Kubernetes' cluster autoscaler component].
 
 Suggested the use of a custom IAM role.<br/>
-Refer https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md.
+Refer the autoscaler's
+[AWS-specific README](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md).
 
-<details>
+<details style="margin-bottom: 1em">
   <summary>Pulumi</summary>
 
 ```ts
@@ -892,10 +893,12 @@ new aws.eks.PodIdentityAssociation("clusterAutoscalingRole-to-clusterAutoscalerS
 
 </details>
 
+Install the cluster autoscaler component with the proper configuration:
+
 ```sh
 # Use a service account with podIdentityAssociation
 aws eks --region 'eu-west-1' update-kubeconfig --name 'DeepThought'
-helm --namespace 'kube-system' upgrade --install 'https://kubernetes.github.io/autoscaler' \
+helm --namespace 'kube-system' upgrade --install --repo 'https://kubernetes.github.io/autoscaler' \
   'cluster-autoscaler' 'cluster-autoscaler' \
   --set 'cloudProvider'='aws' \
   --set 'awsRegion'='eu-west-1' \
