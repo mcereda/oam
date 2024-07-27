@@ -196,10 +196,10 @@ podLabels:
 
 Gotchas:
 
-- The _executor_, _helper_ and _service_ containers will all reside in a single pod.<br/>
+- The _build_, _helper_ and multiple _service_ containers will all reside in a single pod.<br/>
   If **the sum** of the resources request by **all** of them is too high, it will **not** be scheduled and the pipeline
   will hang and fail.
-- If a pod is killed due to OOM, the pipeline that spawned it will hang until it times out.
+- If any pod is killed due to OOM, the pipeline that spawned it will hang until it times out.
 
 Improvements:
 
@@ -211,6 +211,12 @@ Improvements:
   ```toml
   [[runners]]
     [runners.kubernetes]
+
+    [runners.kubernetes.node_selector]
+      gitlab = "true"
+      "kubernetes.io/arch" = "amd64"
+      "eks.amazonaws.com/capacityType" = "ON_DEMAND"
+
       [runners.kubernetes.affinity]
         [runners.kubernetes.affinity.node_affinity]
           [runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution]
@@ -222,6 +228,10 @@ Improvements:
 
       [runners.kubernetes.node_tolerations]
         "app=gitlab-runner" = "NoSchedule"
+        "node-role.kubernetes.io/master" = "NoSchedule"
+        "custom.toleration=value" = "NoSchedule"
+        "empty.value=" = "PreferNoSchedule"
+        onlyKey = ""
   ```
 
   </details>
