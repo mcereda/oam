@@ -2,6 +2,7 @@
 
 1. [TL;DR](#tldr)
 1. [Pull images from private AWS ECR registries](#pull-images-from-private-aws-ecr-registries)
+1. [Runners on Kubernetes](#runners-on-kubernetes)
 1. [Autoscaling](#autoscaling)
    1. [Docker Machine](#docker-machine)
 1. [Further readings](#further-readings)
@@ -40,7 +41,7 @@ gitlab-runner exec docker \
 
 </details>
 
-1 runner is assigned 1 task at a time.
+Each runner executor is assigned 1 task at a time.
 
 ## Pull images from private AWS ECR registries
 
@@ -95,6 +96,190 @@ gitlab-runner exec docker \
    ```
 
 Now your GitLab runner should automatically authenticate to one's private ECR registry.
+
+## Runners on Kubernetes
+
+[Store tokens in secrets][store registration tokens or runner tokens in secrets] instead of putting the token in the
+chart's values.
+
+Requirements:
+
+- A running and configured Gitlab instance.
+- A Kubernetes cluster.
+
+Procedure:
+
+1. \[best practice] Create a dedicated namespace:
+
+   ```sh
+   kubectl create namespace 'gitlab'
+   ```
+
+1. Create a runner in gitlab:
+
+   1. Go to one's Gitlab instance's `/admin/runners` page.
+   1. Click on the _New instance runner_ button.
+   1. Keep _Linux_ as runner type.
+   1. Click on the _Create runner_ button.
+   1. Copy the runner's token.
+
+1. (Re-)Create the runners' Kubernetes secret with the runners' token from the previous step:
+
+   ```sh
+   kubectl delete --namespace 'gitlab' secret 'gitlab-runner-token' --ignore-not-found
+   kubectl create --namespace 'gitlab' secret generic 'gitlab-runner-token' \
+     --from-literal='runner-registration-token=""' --from-literal='runner-token=glrt-…'
+   ```
+
+   The secret's name **must** be matched in the helm chart's values file.
+
+1. Install the helm chart:
+
+   ```sh
+   helm --namespace 'gitlab' upgrade --install --repo 'https://charts.gitlab.io' \
+     --values 'values.yaml' \
+     'gitlab-runner' 'gitlab-runner'
+   ```
+
+   \[best practice] Be sure to match the runner version with the Gitlab server's:
+
+   ```sh
+   helm search repo --versions 'gitlab/gitlab-runner'
+   ```
+
+<details style="margin-bottom: 1em;">
+  <summary>Example helm chart values</summary>
+
+```yaml
+gitlabUrl: https://gitlab.example.com/
+unregisterRunners: true
+concurrent: 20
+checkInterval: 3
+rbac:
+  create: true
+metrics:
+  enabled: true
+runners:
+  config: |
+    [[runners]]
+
+      [runners.cache]
+        Shared = true
+
+      [runners.kubernetes]
+        image = "alpine"
+        pull_policy = [
+          "if-not-present",
+          "always"
+        ]
+        allowed_pull_policies = [
+          "if-not-present",
+          "always",
+          "never"
+        ]
+
+        namespace = "{{.Release.Namespace}}"
+  name: "runner-on-k8s"
+  secret: gitlab-runner-token
+tolerations:
+  - key: app
+    operator: Equal
+    value: gitlab
+  - key: component
+    operator: Equal
+    value: runner
+podLabels:
+  team: engineering
+```
+
+</details>
+
+Gotchas:
+
+- The _executor_, _helper_ and _service_ containers will all reside in a single pod.<br/>
+  If **the sum** of the resources request by **all** of them is too high, it will **not** be scheduled and the pipeline
+  will hang and fail.
+- If a pod is killed due to OOM, the pipeline that spawned it will hang until it times out.
+
+Improvements:
+
+- Dedicate specific nodes to runner executors.<br/>
+  Taint dedicated nodes and add tolerations and affinities to the runner's configuration.
+
+  <details style="margin-bottom: 1em;">
+
+  ```toml
+  [[runners]]
+    [runners.kubernetes]
+      [runners.kubernetes.affinity]
+        [runners.kubernetes.affinity.node_affinity]
+          [runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution]
+            [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms]]
+              [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
+                key = "app"
+                operator = "In"
+                values = [ "gitlab-runner" ]
+
+      [runners.kubernetes.node_tolerations]
+        "app=gitlab-runner" = "NoSchedule"
+  ```
+
+  </details>
+
+- Avoid massive resource consumption by defaulting to (very?) strict resource requests and limits.
+
+  <details style="margin-bottom: 1em;">
+
+  ```toml
+  [[runners]]
+    [runners.kubernetes]
+      cpu_request = "0.1"
+      cpu_limit = "2"
+      memory_request = "1Gi"
+      memory_limit = "2Gi"
+      ephemeral_storage_limit = "512Mi"
+
+      helper_cpu_limit = "0.5"
+      helper_memory_limit = "128Mi"
+      helper_ephemeral_storage_limit = "64Mi"
+
+      service_cpu_limit = "1"
+      service_memory_limit = "0.5Gi"
+  ```
+
+  </details>
+
+- Play nice and make sure to leave some space for the host's other workloads by allowing for resource request and limit
+  override only up to a point.
+
+  <details style="margin-bottom: 1em;">
+
+  ```toml
+  [[runners]]
+    [runners.kubernetes]
+      cpu_limit_overwrite_max_allowed = "15"
+      cpu_request_overwrite_max_allowed = "15"
+      memory_limit_overwrite_max_allowed = "62Gi"
+      memory_request_overwrite_max_allowed = "62Gi"
+      ephemeral_storage_limit_overwrite_max_allowed = "49Gi"
+      ephemeral_storage_request_overwrite_max_allowed = "49Gi"
+
+      helper_cpu_limit_overwrite_max_allowed = "0.9"
+      helper_cpu_request_overwrite_max_allowed = "0.9"
+      helper_memory_limit_overwrite_max_allowed = "1Gi"
+      helper_memory_request_overwrite_max_allowed = "1Gi"
+      helper_ephemeral_storage_limit_overwrite_max_allowed = "1Gi"
+      helper_ephemeral_storage_request_overwrite_max_allowed = "1Gi"
+
+      service_cpu_limit_overwrite_max_allowed = "3.9"
+      service_cpu_request_overwrite_max_allowed = "3.9"
+      service_memory_limit_overwrite_max_allowed = "15.5Gi"
+      service_memory_request_overwrite_max_allowed = "15.5Gi"
+      service_ephemeral_storage_limit_overwrite_max_allowed = "15Gi"
+      service_ephemeral_storage_request_overwrite_max_allowed = "15Gi"
+  ```
+
+  </details>
 
 ## Autoscaling
 
@@ -261,14 +446,15 @@ concurrent = 40
 <!-- Files -->
 <!-- Upstream -->
 [docker executor]: https://docs.gitlab.com/17.0/runner/executors/docker.html
-[docker machine]: https://gitlab.com/gitlab-org/ci-cd/docker-machine
+[docker machine executor autoscale configuration]: https://docs.gitlab.com/runner/configuration/autoscale.html
 [docker machine's aws driver's options]: https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/blob/main/docs/drivers/aws.md#options
 [docker machine's supported cloud providers]: https://docs.gitlab.com/runner/configuration/autoscale.html#supported-cloud-providers
-[install gitlab runner]: https://docs.gitlab.com/runner/install/
-[install and register gitlab runner for autoscaling with docker machine]: https://docs.gitlab.com/17.0/runner/executors/docker_machine.html
-[gitlab-runner-operator]: https://gitlab.com/gitlab-org/gl-openshift/gitlab-runner-operator
+[docker machine]: https://gitlab.com/gitlab-org/ci-cd/docker-machine
 [gitlab runner helm chart]: https://docs.gitlab.com/runner/install/kubernetes.html
-[docker machine executor autoscale configuration]: https://docs.gitlab.com/runner/configuration/autoscale.html
+[gitlab-runner-operator]: https://gitlab.com/gitlab-org/gl-openshift/gitlab-runner-operator
+[install and register gitlab runner for autoscaling with docker machine]: https://docs.gitlab.com/17.0/runner/executors/docker_machine.html
+[install gitlab runner]: https://docs.gitlab.com/runner/install/
+[store registration tokens or runner tokens in secrets]: https://docs.gitlab.com/runner/install/kubernetes.html#store-registration-tokens-or-runner-tokens-in-secrets
 
 <!-- Others -->
 [authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb
