@@ -2,11 +2,11 @@
 
 1. [TL;DR](#tldr)
 1. [Requirements](#requirements)
-1. [Creation procedure](#creation-procedure)
+1. [Cluster creation procedure](#cluster-creation-procedure)
+1. [Access management](#access-management)
 1. [Create worker nodes](#create-worker-nodes)
    1. [Create managed node groups](#create-managed-node-groups)
    1. [Schedule pods on Fargate](#schedule-pods-on-fargate)
-1. [Access management](#access-management)
 1. [Secrets encryption through KMS](#secrets-encryption-through-kms)
 1. [Storage](#storage)
    1. [Use EBS as volumes](#use-ebs-as-volumes)
@@ -22,30 +22,33 @@
 
 ## TL;DR
 
-When one creates a [_cluster_][amazon eks clusters], one really only creates the cluster's control plane and the
-dedicated nodes underneath it.<br/>
-Worker nodes can consist of any combination of [self-managed nodes], [managed node groups] and [Fargate], and depend on
-the control plane.
+When one creates a [_cluster_][amazon eks clusters], one really only creates the cluster's _[control plane]_ with the
+AWS managed, dedicated nodes that keep it running.
+
+_Worker nodes_ depend upon the control plane, and **must** be created **after** the control plane.<br/>
+Worker nodes can consist of any combination of [self-managed nodes], [managed node groups] and [Fargate], but only
+support specific instance types.
 
 EKS automatically installs some [self-managed add-ons][amazon eks add-ons] like the AWS VPC CNI plugin, `kube-proxy` and
-CoreDNS.<br/>
-Disable them in the cluster's definition.
+CoreDNS to allow the cluster to work correctly in AWS.<br/>
+They _can_ be disabled after creation or in the clusters' IaC.
 
 Upon cluster creation, EKS
 [automatically creates a security group][amazon eks security group requirements and considerations] and applies it to
 both the control plane and nodes.<br/>
-Such security group cannot be avoided nor customized in the cluster's definition (e.g. using IaC tools like [Pulumi] or
-[Terraform]):
+The creation of this security group **cannot** be avoided, nor the security group can be customized in the cluster's
+definition (e.g. using IaC tools like [Pulumi] or [Terraform]):
 
 > error: aws:eks/cluster:Cluster resource 'cluster' has a problem: Value for unconfigurable attribute. Can't configure a
 > value for "vpc_config.0.cluster_security_group_id": its value will be decided automatically based on the result of
 > applying this configuration.
 
-For some reason, giving resources a tag like `aks:eks:cluster-name=value` succeeds, but has no effect (it is not really
-applied).
+For some reason, giving resources a tag like `aks:eks:cluster-name=value` succeeds, but has no effect (the tag is just
+**not** applied).
 
-By default, the IAM principal creating the cluster is the only one able to make calls to the cluster's API server.<br/>
-To let other IAM principals have access to the cluster, one needs to add them to it. See [access management].
+By default, the IAM principal creating the cluster is the **only** one allowed to make calls to the cluster's API
+server.<br/>
+Other IAM principals _can_ have access to the cluster's API once [they are added to it][access management].
 
 <details>
   <summary>Usage</summary>
@@ -94,14 +97,14 @@ aws eks create-nodegroup \
   --cluster-name 'DeepThought' \
   --nodegroup-name 'alpha' \
   --scaling-config 'minSize=1,maxSize=3,desiredSize=1' \
-  --node-role-arn 'arn:aws:iam::000011112222:role/DeepThinkerNodeRole' \
+  --node-role-arn 'arn:aws:iam::000011112222:role/DeepThoughtNodeGroupsServiceRole' \
   --subnets 'subnet-11112222333344445' 'subnet-66667777888899990'
 
 # Create Fargate profiles.
 aws eks create-fargate-profile \
   --cluster-name 'DeepThought' \
   --fargate-profile-name 'alpha' \
-  --pod-execution-role-arn 'arn:aws:iam::000011112222:role/DeepThinkerFargate' \
+  --pod-execution-role-arn 'arn:aws:iam::000011112222:role/DeepThoughtFargateServiceRole' \
   --subnets 'subnet-11112222333344445' 'subnet-66667777888899990' \
   --selectors 'namespace=string'
 
@@ -120,14 +123,15 @@ aws eks describe-addon-versions --query 'addons[].addonName'
 
 ## Requirements
 
-- \[suggestion] 1 (one) custom _Cluster Service Role_ with the `AmazonEKSClusterPolicy` IAM policy attached or similar
-  custom permissions.
+- \[suggested] 1 (one) custom _Cluster Service Role_.<br/>
+  One **must** attach this role the `AmazonEKSClusterPolicy` IAM policy, give it similar custom permissions.
 
   <details style="margin-bottom: 1em;">
+    <summary>But why?!</summary>
 
-  Kubernetes clusters managed by EKS make calls to other AWS services on the user's behalf to manage the resources that
+  Kubernetes clusters managed by EKS make calls to other AWS services on the users' behalf to manage the resources that
   the cluster uses.<br/>
-  For a cluster to be allowed to make those calls, it **requires** to have the aforementioned permissions.
+  For any cluster to be allowed to make such calls, its role **requires** to have the aforementioned permissions.
 
   To create clusters which would **not** require access to any other AWS resource, one can assign the cluster the
   `AWSServiceRoleForAmazonEKS` service-linked role directly <sup>[1][service-linked role permissions for amazon eks],
@@ -145,55 +149,48 @@ aws eks describe-addon-versions --query 'addons[].addonName'
   > With the `AWSServiceRoleForAmazonEKS` service-linked role, that policy is no longer required for clusters created on
   > or after April 16, 2020.
 
-  <div class="tip" style="
-    background-color: rgba(0,255,0,0.0625);
-    border: solid lightGreen;  /* #90EE90 */
-    margin: 1em 0;
-    padding: 1em 1em 0;
-  ">
-  <header style="font-weight: bold; margin-bottom: 0.5em">Pro tip</header>
-
-  Should one want to use more advanced features like [encryption with managed keys][secrets encryption through kms], the
-  role will need access to the referenced resources.<br/>
-  In this case it would probably be better to create a custom role instead of assigning permissions to the built-in one.
-
-  </div>
-
   </details>
 
-- \[suggestion] 1+ (one or more) custom service role(s) for the pod executors, with the required policies attached or
-  similar permissions.
+  Pro tip:<br/>
+  Should one want to use more advanced features like [encryption with managed keys][secrets encryption through kms], the
+  role **will** need access to the referenced resources.<br/>
+  In such a case, it's generally better to create a custom role instead of assigning permissions to the built-in one.
 
-  The reasons and required permissions vary depending on the type of executor.<br/>
-  It would probably be better to create a custom role instead of assigning permissions to the built-in one.
+- \[suggested] 1+ (one or more) custom service role(s) for the worker nodes.<br/>
+  Best practice would dictate to create **one role per worker node type**, and to attach each of them only the policies
+  they require (or giving them similar custom permissions).
 
+  The reasons and required permissions vary depending on the type of worker node.<br/>
+  It's generally better to create a custom role instead of assigning permissions to the built-in one.<br/>
   See the corresponding section under [Create worker nodes].
 
-- 1+ (one or more) executor(s) for pods.<br/>
+- 1+ (one or more) worker node type.<br/>
   See the [Create worker nodes] section.
 
 - \[if using APIs for authentication] 1+ (one or more) access entry (/entries) with an EKS access policy assigned.
 
 - _Private_ clusters have [more special requirements][private cluster requirements] of their own.
 
-## Creation procedure
+## Cluster creation procedure
 
 The Internet is full of guides and abstractions which do not work, are confusing, or rely on other code.<br/>
-Some create Cloudformation stacks in the process. Follow the
-[Getting started guide][getting started with amazon eks - aws management console and aws cli] to avoid issues.
+Some even create Cloudformation stacks in the process. _WHY?! (╯°Д°)╯︵ ┻━┻_.
 
-This is what worked:
+Follow the [Getting started guide][getting started with amazon eks - aws management console and aws cli] to avoid
+issues.
+
+This is what worked for me:
 
 1. Create a VPC, if one does not have them already, with public and private subnets that meet
    [EKS' requirements][amazon eks vpc and subnet requirements and considerations].
 
-   [Example in Cloudformation](https://s3.us-west-2.amazonaws.com/amazon-eks/cloudformation/2020-10-29/amazon-eks-vpc-private-subnets.yaml)
+   [Cloudformation](https://s3.us-west-2.amazonaws.com/amazon-eks/cloudformation/2020-10-29/amazon-eks-vpc-private-subnets.yaml)
 
-1. Create a custom IAM role for the cluster if needed (see [Requirements]).<br/>
-1. Attach the required policies to the role used in the cluster.
+1. Create a custom IAM (service) role for the cluster if needed (see [Requirements]).
+1. Attach the required policies to the cluster's service role.
 
    <details>
-     <summary>Example in CLI</summary>
+     <summary>CLI</summary>
 
    ```json
    {
@@ -210,17 +207,17 @@ This is what worked:
 
    ```sh
    aws iam create-role \
-     --role-name 'DeepThinker' \
+     --role-name 'DeepThoughtClusterServiceRole' \
      --assume-role-policy-document 'file://eks-cluster-role-trust-policy.json'
    aws iam attach-role-policy \
-     --role-name 'DeepThinker' \
+     --role-name 'DeepThoughtClusterServiceRole' \
      --policy-arn 'arn:aws:iam::aws:policy/AmazonEKSClusterPolicy'
    ```
 
    </details>
 
    <details style="margin-bottom: 1em;">
-     <summary>Example in Pulumi</summary>
+     <summary>Pulumi</summary>
 
    ```ts
    const cluster_assumeRole_policy = JSON.stringify({
@@ -240,22 +237,21 @@ This is what worked:
            // alternatively, use RolePolicyAttachments
            "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
        ],
-       name: "DeepThinker",
+       name: "DeepThoughtClusterServiceRole",
        …
    });
    ```
 
    </details>
 
-1. Create the cluster.<br/>
+1. Create the cluster('s control plane).<br/>
    Make sure you give it the correct cluster service role.
 
    <details>
-     <summary>Example in CLI</summary>
+     <summary>CLI</summary>
 
    ```sh
-   aws eks create-cluster \
-     --name 'DeepThought' \
+   aws eks create-cluster --name 'DeepThought' \
      --role-arn 'arn:aws:iam::000011112222:role/aws-service-role/eks.amazonaws.com/AWSServiceRoleForAmazonEKS' \
      --resources-vpc-config 'subnetIds=subnet-11112222333344445,subnet-66667777888899990'
    ```
@@ -263,7 +259,7 @@ This is what worked:
    </details>
 
    <details style="margin-bottom: 1em;">
-     <summary>Example in Pulumi</summary>
+     <summary>Pulumi</summary>
 
    ```ts
    const cluster = new aws.eks.Cluster("cluster", {
@@ -296,45 +292,110 @@ This is what worked:
 1. [Create some worker nodes][create worker nodes].
 1. Profit!
 
+## Access management
+
+The current default authentication method for EKS clusters created using AWS' APIs is through the `aws-auth` configMap
+stored in the `kube-system` namespace.
+
+By default, **only** the IAM principal creating the cluster is added to that configMap.<br/>
+As such, **only that principal** is allowed to make calls to that cluster's API server.
+
+To allow other IAM principals to call the cluster's API, the cluster's creator needs to add them to the `aws-auth`
+configMap.<br/>
+Refer the following to allow others this way:
+
+- [Required permissions to view EKS resources].
+- [Enabling IAM principal access to your cluster].
+- [Allowing IAM roles or users access to Kubernetes objects on your Amazon EKS cluster].
+- [How do I resolve the error "You must be logged in to the server (Unauthorized)" when I connect to the Amazon EKS API server?]
+- [Identity and Access Management]
+- [Using IAM Groups to manage Kubernetes cluster access]
+- [Simplified Amazon EKS Access - NEW Cluster Access Management Controls]
+
+When a cluster's authentication mode includes the APIs:
+
+```sh
+# Check cluster's authentication mode.
+$ aws eks describe-cluster --name 'DeepThought' --query 'cluster.accessConfig.authenticationMode' --output 'text'
+API_AND_CONFIG_MAP
+```
+
+one can create _access entries_ to allow IAM users and roles to connect to it:
+
+```sh
+# Create access entries to use IAM for authentication.
+aws eks create-access-entry --cluster-name 'DeepThought' \
+  --principal-arn 'arn:aws:iam::000011112222:role/Admin'
+aws eks create-access-entry … --principal-arn 'arn:aws:iam::000011112222:user/bob'
+```
+
+> In the case the configmap is also used, APIs take precedence over the configmap.
+
+Mind that, to allow operations **inside** the cluster, every access entry **requires** to be also assigned an EKS access
+policy:
+
+```sh
+# List available access policies.
+aws eks list-access-policies
+
+# Associate policies to access entries.
+aws eks associate-access-policy --cluster-name 'DeepThought' \
+  --principal-arn 'arn:aws:iam::000011112222:role/Admin' \
+  --policy-arn 'arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy' \
+  --access-scope '[ "type": "cluster" ]'
+aws eks associate-access-policy --cluster-name 'DeepThought' \
+  --principal-arn 'arn:aws:iam::000011112222:user/bob' \
+  --policy-arn 'arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy' \
+  --access-scope '[ "type": "namespace", "namespaces": [ "bob" ] ]'
+```
+
 ## Create worker nodes
 
-See [step 3](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-console.html#eks-launch-workers) of the
+Refer [step 3](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-console.html#eks-launch-workers) of the
 [getting started guide][getting started with amazon eks - aws management console and aws cli].
 
 ### Create managed node groups
 
-See [Choosing an Amazon EC2 instance type] and [Managed node groups] for more information.
+Refer [Choosing an Amazon EC2 instance type] and [Managed node groups] for more information and what instance types are
+supported.
 
 Additional requirements:
 
-- \[suggestion] 1 (one) custom _Node Service Role_ with the `AmazonEKSWorkerNodePolicy`,
-  `AmazonEC2ContainerRegistryReadOnly` and `AmazonEKS_CNI_Policy` policies attached or similar permissions.
+- \[suggested] 1 (one) custom _Node Group Service Role_.<br/>
+  Attach to it the `AmazonEKSWorkerNodePolicy`, `AmazonEC2ContainerRegistryReadOnly` and `AmazonEKS_CNI_Policy`
+  policies, or give it similar custom permissions.
 
-  The EKS nodes' `kubelet` makes calls to the AWS APIs on one's behalf.<br/>
+  <details style="margin-bottom: 1em;">
+    <summary>But why?!</summary>
+
+  The EKS nodes' `kubelet`s make calls to the AWS APIs on one's behalf.<br/>
   Nodes receive permissions for these API calls through an IAM instance profile and associated policies.
 
-  For a node to be allowed to make those calls, it **requires** to have the aforementioned permissions.
+  For any node to be allowed to make those calls, it **requires** to have the aforementioned permissions.
 
-- When deploying a managed node group in **private** subnets, one must ensure that it can access Amazon ECR for pulling
+  </details>
+
+- When deploying managed node groups in **private** subnets, they **will** need access to Amazon ECRs for pulling
   container images.<br/>
-  Do this by connecting a NAT gateway to the route table of the subnet, or by adding the following AWS PrivateLink VPC
-  endpoints:
+  Do this by connecting a NAT gateway to the route table of the private subnets, or by creating the following AWS
+  PrivateLink VPC endpoints:
 
   - Amazon ECR API endpoint interface: `com.amazonaws.{region}.ecr.api`.
   - Amazon ECR Docker registry API endpoint interface: `com.amazonaws.{region}.ecr.dkr`.
   - Amazon S3 gateway endpoint: `com.amazonaws.{region}.s3`.
 
-- If the nodes are to be created in private subnets, the cluster
+- When deploying managed node groups in **private** subnets, the cluster
   [**must** provide its private API server endpoint][private cluster requirements].<br/>
   Set the cluster's `vpc_config.0.endpoint_private_access` attribute to `true`.
 
 Procedure:
 
-1. Create a custom IAM role for the nodes if needed (see [Requirements]).
-1. Attach the required policies to the role used by the nodes.
+1. Create a custom IAM (service) role for the node groups if needed (see [Requirements] and the additional requirements
+   above).
+1. Attach the required policies to the node groups' service role.
 
    <details>
-     <summary>Example in CLI</summary>
+     <summary>CLI</summary>
 
    ```json
    {
@@ -353,26 +414,26 @@ Procedure:
 
    ```sh
    aws iam create-role \
-     --role-name 'DeepThinkerNode' \
-     --assume-role-policy-document 'file://eks-node-role-trust-policy.json'
+     --role-name 'DeepThoughtNodeGroupsServiceRole' \
+     --assume-role-policy-document 'file://eks-node-group-role-trust-policy.json'
    aws iam attach-role-policy \
      --policy-arn 'arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy' \
-     --role-name 'DeepThinkerNode'
+     --role-name 'DeepThoughtNodeGroupsServiceRole'
    aws iam attach-role-policy \
      --policy-arn 'arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly' \
-     --role-name 'DeepThinkerNode'
+     --role-name 'DeepThoughtNodeGroupsServiceRole'
    aws iam attach-role-policy \
      --policy-arn 'arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy' \
-     --role-name 'DeepThinkerNode'
+     --role-name 'DeepThoughtNodeGroupsServiceRole'
    ```
 
    </details>
 
    <details style="margin-bottom: 1em;">
-     <summary>Example in Pulumi</summary>
+     <summary>Pulumi</summary>
 
    ```ts
-   const nodes_assumeRole_policy = JSON.stringify({
+   const nodeGroups_assumeRole_policy = JSON.stringify({
        Version: "2012-10-17",
        Statement: [{
            Effect: "Allow",
@@ -383,15 +444,15 @@ Procedure:
        }],
    });
 
-   const node_service_role = new aws.iam.Role("node-service-role", {
-       assumeRolePolicy: nodes_assumeRole_policy,
+   const nodeGroups_service_role = new aws.iam.Role("nodeGroups-service-role", {
+       assumeRolePolicy: nodeGroups_assumeRole_policy,
        managedPolicyArns: [
            // alternatively, use RolePolicyAttachments
            "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
            "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
            "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
        ],
-       name: "DeepThinkerNode",
+       name: "DeepThoughtNodeGroupsServiceRole",
        …
    });
    ```
@@ -401,27 +462,27 @@ Procedure:
 1. Create the desired node groups.
 
    <details>
-     <summary>Example in CLI</summary>
+     <summary>CLI</summary>
 
    ```sh
    aws eks create-nodegroup \
      --cluster-name 'DeepThought' \
      --nodegroup-name 'alpha' \
      --scaling-config 'minSize=1,maxSize=3,desiredSize=1' \
-     --node-role-arn 'arn:aws:iam::000011112222:role/DeepThinkerNode' \
+     --node-role-arn 'arn:aws:iam::000011112222:role/DeepThoughtNodeGroupsServiceRole' \
      --subnets 'subnet-11112222333344445' 'subnet-66667777888899990'
    ```
 
    </details>
 
    <details>
-     <summary>Example in Pulumi</summary>
+     <summary>Pulumi</summary>
 
    ```ts
    const nodeGroup_alpha = new aws.eks.NodeGroup("nodeGroup-alpha", {
        nodeGroupName: "nodeGroup-alpha",
        clusterName: cluster.name,
-       nodeRoleArn: node_service_role.arn,
+       nodeRoleArn: nodeGroups_service_role.arn,
        scalingConfig: {
            minSize: 1,
            maxSize: 3,
@@ -438,27 +499,30 @@ Procedure:
 
 Additional requirements:
 
-- \[suggestion] 1 (one) custom _Fargate Service Role_ with the `AmazonEKSFargatePodExecutionRolePolicy` policy attached
-  or similar permissions.
+- \[suggestion] 1 (one) custom _Fargate Service Role_.<br/>
+  Attach to it the `AmazonEKSFargatePodExecutionRolePolicy` policy, or give it similar custom permissions.
+
+  <details style="margin-bottom: 1em;">
+    <summary>But why?!</summary>
 
   To create pods on Fargate, the components running on Fargate must make calls to the AWS APIs on one's behalf.<br/>
   This is so that it can take actions such as pull container images from ECR or route logs to other AWS services.
 
   For a cluster to be allowed to make those calls, it **requires** to have a Fargate profile assigned, and this profile
-  must use a role with:
+  must use a role with the aforementioned permissions.
 
-  - The `AmazonEKSFargatePodExecutionRolePolicy` policy attached to it, or
-  - Comparable permissions.
+  </details>
 
 - 1+ (one or more) Fargate profile(s).
 
 Procedure:
 
-1. Create a custom IAM role for the Fargate profile if needed (see [Requirements]).
-1. Attach the required policies to the role used by the profile.
+1. Create a custom IAM (service) role for the Fargate profile if needed (see [Requirements] and the additional
+   requirements above).
+1. Attach the required policies to the Fargate service profile.
 
    <details>
-     <summary>Example in CLI</summary>
+     <summary>CLI</summary>
 
    ```json
    {
@@ -472,7 +536,7 @@ Procedure:
                },
                "Condition": {
                     "ArnLike": {
-                         "aws:SourceArn": "arn:aws:eks:region-code:111122223333:fargateprofile/my-cluster/*"
+                         "aws:SourceArn": "arn:aws:eks:region-code:111122223333:fargateprofile/DeepThought/*"
                     }
                }
            }
@@ -482,20 +546,24 @@ Procedure:
 
    ```sh
    aws iam create-role \
-     --role-name 'DeepThinkerFargate' \
-     --assume-role-policy-document 'file://eks-cluster-role-trust-policy.json'
+     --role-name 'DeepThoughtFargateServiceRole' \
+     --assume-role-policy-document 'file://eks-fargate-role-trust-policy.json'
    aws iam attach-role-policy \
-     --role-name 'DeepThinkerFargate' \
+     --role-name 'DeepThoughtFargateServiceRole' \
      --policy-arn 'arn:aws:iam::aws:policy/AmazonEKSClusterPolicy'
    ```
 
    </details>
 
    <details style="margin-bottom: 1em;">
-     <summary>Example in Pulumi</summary>
+     <summary>Pulumi</summary>
 
    ```ts
-   const fargate_assumeRole_policy = JSON.stringify({
+   const fargate_assumeRole_policy = pulumi.all([
+     aws.getRegionOutput().apply(region => region.id),
+     aws.getCallerIdentityOutput().apply(callerIdentity => callerIdentity.accountId),
+     cluster.name,
+   ]).apply(([regionId, awsAccountId, clusterName]) => JSON.stringify({
        Version: "2012-10-17",
        Statement: [{
            Effect: "Allow",
@@ -505,11 +573,11 @@ Procedure:
            },
            Condition: {
                ArnLike: {
-                   "aws:SourceArn": `arn:aws:eks:${region}:${account}:fargateprofile/${cluster.name}/*`
+                   "aws:SourceArn": `arn:aws:eks:${regionId}:${awsAccountId}:fargateprofile/${clusterName}/*`
                }
            },
        }],
-   });
+   }));
 
    const fargate_service_role = new aws.iam.Role("fargate-service-role", {
        assumeRolePolicy: fargate_assumeRole_policy,
@@ -517,7 +585,7 @@ Procedure:
            // alternatively, use RolePolicyAttachments
            "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy",
        ],
-       name: "DeepThinkerFargate",
+       name: "DeepThoughtFargateServiceRole",
        …
    });
    ```
@@ -527,21 +595,21 @@ Procedure:
 1. Create the desired Fargate profiles.
 
    <details>
-     <summary>Example in CLI</summary>
+     <summary>CLI</summary>
 
    ```sh
    aws eks create-fargate-profile \
      --cluster-name 'DeepThought' \
      --fargate-profile-name 'alpha' \
-     --pod-execution-role-arn 'arn:aws:iam::000011112222:role/DeepThinkerFargate' \
+     --pod-execution-role-arn 'arn:aws:iam::000011112222:role/DeepThoughtFargateServiceRole' \
      --subnets 'subnet-11112222333344445' 'subnet-66667777888899990' \
-     --selectors 'namespace=string'
+     --selectors 'namespace=monitoring' 'namespace=default'
    ```
 
    </details>
 
    <details>
-     <summary>Example in Pulumi</summary>
+     <summary>Pulumi</summary>
 
    ```ts
    const fargateProfile_alpha = new aws.eks.FargateProfile("fargateProfile-alpha", {
@@ -559,59 +627,6 @@ Procedure:
 
    </details>
 
-## Access management
-
-The current default authentication method is through the `aws-auth` configmap in the `kube-system` namespace.
-
-By default, the IAM principal creating the cluster is the only one able to make calls to the cluster's API server.<br/>
-To let other IAM principals have access to the cluster, one needs to add them to it.
-
-See the following to allow others:
-
-- [Required permissions to view EKS resources].
-- [Enabling IAM principal access to your cluster].
-- [Allowing IAM roles or users access to Kubernetes objects on your Amazon EKS cluster].
-- [How do I resolve the error "You must be logged in to the server (Unauthorized)" when I connect to the Amazon EKS API server?]
-- [Identity and Access Management]
-- [Using IAM Groups to manage Kubernetes cluster access]
-- [Simplified Amazon EKS Access - NEW Cluster Access Management Controls]
-
-When a cluster's authentication mode includes the APIs:
-
-```sh
-# Check cluster's authentication mode.
-$ aws eks describe-cluster --name 'thisIsBananas' --query 'cluster.accessConfig.authenticationMode' --output 'text'
-API_AND_CONFIG_MAP
-```
-
-One can use access entries to allow IAM users and roles to connect to it:
-
-```sh
-# Create access entries to use IAM for authentication.
-aws eks create-access-entry --cluster-name 'DeepThought' \
-  --principal-arn 'arn:aws:iam::000011112222:role/Admin'
-aws eks create-access-entry … --principal-arn 'arn:aws:iam::000011112222:user/bob'
-```
-
-> In the case the configmap is also used, APIs take precedence over the configmap.
-
-Mind that, to allow operations inside the cluster, every access entry requires to be assigned an EKS access policy:
-
-```sh
-# List available access policies.
-aws eks list-access-policies
-
-# Associate policies to access entries.
-aws eks associate-access-policy --cluster-name 'DeepThought' \
-  --principal-arn 'arn:aws:iam::000011112222:role/Admin' \
-  --policy-arn 'arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy' \
-  --access-scope '[ "type": "cluster" ]'
-aws eks associate-access-policy --cluster-name 'DeepThought' \
-  --principal-arn 'arn:aws:iam::000011112222:user/bob' \
-  --policy-arn 'arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy' \
-  --access-scope '[ "type": "namespace", "namespaces": [ "bob" ] ]'
-```
-
 ## Secrets encryption through KMS
 
 See [Enabling secret encryption on an existing cluster].
@@ -620,10 +635,10 @@ TL;DR:
 
 1. Make sure the role used in the cluster has access to the used key with `kms:DescribeKey` and `kms:CreateGrant`
    permissions.
-1. Configure the cluster:
+1. Configure the cluster to use the aforementioned key.
 
    <details>
-     <summary>Example in CLI</summary>
+     <summary>CLI</summary>
 
    ```sh
    aws eks associate-encryption-config \
@@ -637,7 +652,7 @@ TL;DR:
    </details>
 
    <details>
-     <summary>Example in Pulumi</summary>
+     <summary>Pulumi</summary>
 
    ```ts
    const cluster = new aws.eks.Cluster("cluster", {
@@ -708,47 +723,46 @@ Limitations:
   These controllers, drivers and plugins support EKS Pod Identities should they be installed as **self-managed** add-ons
   instead.
 
+Requirements:
+
+- The **nodes**' service role **must** have permissions for the agent to execute `AssumeRoleForPodIdentity` actions in
+  the EKS Auth API.
+
+  Use the AWS-managed `AmazonEKSWorkerNodePolicy` policy.<br/>
+  Alternatively, add a custom policy with the following:
+
+  ```json
+  {
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Action": [ "eks-auth:AssumeRoleForPodIdentity" ],
+      "Resource": "*"
+    }]
+  }
+  ```
+
+  Limit this action using tags to restrict which roles can be assumed by pods that use the agent.
+
+- Nodes **must** be able to reach and download images from ECRs.<br/>
+  Required since the container image for the add-on is available there.
+- Nodes **must** be able to reach the EKS Auth API.<br/>
+  Private clusters **will** require the `eks-auth` endpoint in PrivateLink.
+
 Procedure:
 
 1. Set up the Pod Identity Agent on clusters.
 
    <details>
-     <summary>Requirements</summary>
-
-   - The **nodes**' service role **must** have permissions for the agent to execute `AssumeRoleForPodIdentity` actions in
-     the EKS Auth API.
-
-     Use the AWS-managed `AmazonEKSWorkerNodePolicy` policy.<br/>
-     Alternatively, add a custom policy with the following:
-
-     ```json
-     {
-       "Version": "2012-10-17",
-       "Statement": [{
-         "Effect": "Allow",
-         "Action": [ "eks-auth:AssumeRoleForPodIdentity" ],
-         "Resource": "*"
-       }]
-     }
-     ```
-
-     Limit this action using tags to restrict which roles can be assumed by pods that use the agent.
-
-   - Nodes to **be able** to reach and download images from ECRs.<br/>
-     Required since the container image for the add-on is available there.
-   - Nodes to **be able** to reach the EKS Auth API.<br/>
-     Private clusters **will** require the `eks-auth` endpoint in PrivateLink.
-
-   </details>
-   <details>
      <summary>CLI</summary>
 
    ```sh
-   aws eks create-addon --cluster-name 'cluster' --addon-name 'eks-pod-identity-agent'
-   aws eks create-addon --cluster-name 'cluster' --addon-name 'eks-pod-identity-agent' --resolve-conflicts 'OVERWRITE'
+   aws eks create-addon --cluster-name 'DeepThought' --addon-name 'eks-pod-identity-agent'
+   aws eks create-addon … --resolve-conflicts 'OVERWRITE'
    ```
 
    </details>
+
    <details style="margin-bottom: 1em">
      <summary>Pulumi</summary>
 
@@ -763,18 +777,22 @@ Procedure:
 
    </details>
 
-1. Associate IAM roles with Kubernetes service accounts:
+1. Associate IAM roles with Kubernetes service accounts.
+
+   There is **no need** for the service account to exists before association.<br/>
+   The moment it will be created in the defined namespace, it will also be able to assume the role.
 
    <details>
      <summary>CLI</summary>
 
    ```sh
    aws eks create-pod-identity-association \
-     --cluster-name 'cluster' --namespace 'default' \
-     --service-account 'default' --role-arn 'arn:aws:iam::012345678901:role/CustomRole'
+     --cluster-name 'DeepThought' --namespace 'default' \
+     --service-account 'cluster-autoscaler-aws' --role-arn 'arn:aws:iam::012345678901:role/EKSScaleNodeGroupsPolicy'
    ```
 
    </details>
+
    <details style="margin-bottom: 1em">
      <summary>Pulumi</summary>
 
@@ -788,9 +806,6 @@ Procedure:
    ```
 
    </details>
-
-   There is no need for the service account to exists before association.<br/>
-   The moment it will be created in the defined namespace, it will also be able to assume the role.
 
 1. Configure pods to use those service accounts.
 
@@ -807,7 +822,86 @@ This means giving them pods access keys, or enabling [Pod Identity].
 
 ### Cluster autoscaler
 
-Nothing more than the [Kubernetes' cluster autoscaler component].
+Just use the [Kubernetes' cluster autoscaler component].
+
+Suggested the use of a custom IAM role.<br/>
+Refer https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md.
+
+<details>
+  <summary>Pulumi</summary>
+
+```ts
+const clusterAutoscaling_role = new aws.iam.Role("clusterAutoscaling", {
+  description: "Allows Pods to scale EKS cluster node groups on behalf of the user.",
+  assumeRolePolicy: JSON.stringify({
+    Version: "2012-10-17",
+    Statement: [{
+      Effect: "Allow",
+      Principal: {
+        Service: "pods.eks.amazonaws.com",
+      },
+      Action: [
+        "sts:AssumeRole",
+        "sts:TagSession",
+      ],
+    }],
+  }),
+});
+const clusterAutoscaling_policy_scaleNodeGroups = new aws.iam.Policy("scaleNodeGroups", {
+  description: "Allows bearers to scale EKS node groups up and down.",
+  policy: JSON.stringify({
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Effect: "Allow",
+        Action: [
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:DescribeAutoScalingInstances",
+          "autoscaling:DescribeLaunchConfigurations",
+          "autoscaling:DescribeScalingActivities",
+          "ec2:DescribeImages",
+          "ec2:DescribeInstanceTypes",
+          "ec2:DescribeLaunchTemplateVersions",
+          "ec2:GetInstanceTypesFromInstanceRequirements",
+          "eks:DescribeNodegroup",
+        ],
+        Resource: [ "*" ],
+      },
+      {
+        Effect: "Allow",
+        Action: [
+          "autoscaling:SetDesiredCapacity",
+          "autoscaling:TerminateInstanceInAutoScalingGroup",
+        ],
+        Resource: [ "*" ],
+      },
+    ],
+  }),
+});
+new aws.iam.RolePolicyAttachment("scaleNodeGroupsPolicy-to-clusterAutoscalingRole", {
+  policyArn: clusterAutoscaling_policy_scaleNodeGroups.arn,
+  role: clusterAutoscaling_role.name,
+});
+new aws.eks.PodIdentityAssociation("clusterAutoscalingRole-to-clusterAutoscalerServiceAccount", {
+  clusterName: cluster.name,
+  roleArn: clusterAutoscaling_role.arn,
+  serviceAccount: "cluster-autoscaler-aws",
+  namespace: "kube-system",
+});
+```
+
+</details>
+
+```sh
+# Use a service account with podIdentityAssociation
+aws eks --region 'eu-west-1' update-kubeconfig --name 'DeepThought'
+helm --namespace 'kube-system' upgrade --install 'https://kubernetes.github.io/autoscaler' \
+  'cluster-autoscaler' 'cluster-autoscaler' \
+  --set 'cloudProvider'='aws' \
+  --set 'awsRegion'='eu-west-1' \
+  --set 'autoDiscovery.clusterName'='DeepThought' \
+  --set 'rbac.serviceAccount.name'='cluster-autoscaler-aws'
+```
 
 After any operation, the cluster autoscaler will wait for the ASG cooldown time to end.<br/>
 Only then, it will start counting down its own timers.
@@ -827,7 +921,7 @@ Use the [AWSSupport-TroubleshootEKSWorkerNode runbook].
 
 Procedure:
 
-1. Open the [runbook](https://console.aws.amazon.com/systems-manager/automation/execute/AWSSupport-TroubleshootEKSWorkerNode).
+1. Open the [AWSSupport-TroubleshootEKSWorkerNode runbook].
 1. Check that the AWS Region in the Management Console is set to the same Region as your cluster.
 1. In the Input parameters section, specify the name of the cluster and the EC2 instance ID.
 1. \[optional] In the `AutomationAssumeRole` field, specify a role to allow Systems Manager to perform actions.<br/>
@@ -904,6 +998,7 @@ Debug: see [Identify common issues].
 <!-- Knowledge base -->
 [amazon web services]: README.md
 [cli]: cli.md
+[control plane]: ../../kubernetes/README.md#control-plane
 [kubernetes' cluster autoscaler component]: ../../kubernetes/cluster%20autoscaler.md
 [ebs]: ebs.md
 [karpenter]: ../../kubernetes/karpenter.placeholder
