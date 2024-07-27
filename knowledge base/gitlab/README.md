@@ -5,6 +5,7 @@
 1. [Kubernetes](#kubernetes)
    1. [Helm chart](#helm-chart)
    1. [Operator](#operator)
+1. [Creating resources in Pulumi](#creating-resources-in-pulumi)
 1. [Repository management](#repository-management)
    1. [Different owners for parts of the code base](#different-owners-for-parts-of-the-code-base)
    1. [Get the version of the helper image to use for a runner](#get-the-version-of-the-helper-image-to-use-for-a-runner)
@@ -13,8 +14,8 @@
 1. [Runners](#runners)
 1. [CI/CD pipelines](#cicd-pipelines)
 1. [Troubleshooting](#troubleshooting)
-   1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
-   1. [Gitlab keeps answering with code 502](#gitlab-keeps-answering-with-code-502)
+    1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
+    1. [Gitlab keeps answering with code 502](#gitlab-keeps-answering-with-code-502)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -515,6 +516,29 @@ or consider using the [minimal Minikube example values file] as reference, as st
 
 See the [operator guide] and the [operator code] for details.
 
+## Creating resources in Pulumi
+
+Refer Pulumi's [GitLab provider installation & configuration] and [GitLab provider's README].
+
+**Before** it can be used to create resources, Pulumi's GitLab provider **requires**:
+
+- The GitLab instance to be reachable.
+- To be [configured][gitlab provider's readme] with the `baseUrl` of the correct GitLab instance:
+
+  ```sh
+  # The `baseUrl` configuration value *must* end with a slash.
+  pulumi config set 'gitlab:baseUrl' 'https://gitlab.example.com/api/v4/'
+  ```
+
+- To be [configured][gitlab provider's readme] with GitLab _administrative_ credentials.
+
+  A token can be set in the stack's configuration.<br/>
+  Alternatively, the `GITLAB_TOKEN` environment variable can be exported before updating the project:
+
+  ```sh
+  export GITLAB_TOKEN='glpat-m-Va…zy'
+  ```
+
 ## Repository management
 
 ### Different owners for parts of the code base
@@ -757,6 +781,8 @@ Solution: set the correct ownership with
 <!-- Others -->
 [chef infra]: https://www.chef.io/products/chef-infra
 [configuring private dns zones and upstream nameservers in kubernetes]: https://kubernetes.io/blog/2017/04/configuring-private-dns-zones-upstream-nameservers-kubernetes/
+[gitlab provider installation & configuration]: https://www.pulumi.com/registry/packages/gitlab/installation-configuration/
+[gitlab provider's readme]: https://github.com/pulumi/pulumi-gitlab/blob/master/README.md
 [how to disable the two-factor authentication in gitlab?]: https://stackoverflow.com/questions/31024771/how-to-disable-the-two-factor-authentication-in-gitlab
 [how to upgrade your omnibus gitlab]: https://medium.com/kocsistem/how-to-upgrade-your-omnibus-gitlab-9179bb710ca
 [using gitlab token to clone without authentication]: https://stackoverflow.com/questions/25409700/using-gitlab-token-to-clone-without-authentication#29570677
