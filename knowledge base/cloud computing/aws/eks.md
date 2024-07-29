@@ -10,10 +10,12 @@
 1. [Secrets encryption through KMS](#secrets-encryption-through-kms)
 1. [Storage](#storage)
    1. [Use EBS as volumes](#use-ebs-as-volumes)
-      1. [EBS CSI driver IAM role](#ebs-csi-driver-iam-role)
+      1. [EBS CSI driver IAM role as aws-managed add-on](#ebs-csi-driver-iam-role-as-aws-managed-add-on)
+      1. [EBS CSI driver IAM role as self-managed add-on](#ebs-csi-driver-iam-role-as-self-managed-add-on)
+1. [Metrics server](#metrics-server)
 1. [Pod identity](#pod-identity)
 1. [Autoscaling](#autoscaling)
-   1. [Cluster autoscaler](#cluster-autoscaler)
+    1. [Cluster autoscaler](#cluster-autoscaler)
 1. [Troubleshooting](#troubleshooting)
     1. [Identify common issues](#identify-common-issues)
     1. [The worker nodes fail to join the cluster](#the-worker-nodes-fail-to-join-the-cluster)
@@ -55,8 +57,7 @@ Other IAM principals _can_ have access to the cluster's API once [they are added
 
 ```sh
 # Create clusters.
-aws eks create-cluster \
-  --name 'DeepThought' \
+aws eks create-cluster --name 'DeepThought' \
   --role-arn 'arn:aws:iam::000011112222:role/aws-service-role/eks.amazonaws.com/AWSServiceRoleForAmazonEKS' \
   --resources-vpc-config 'subnetIds=subnet-11112222333344445,subnet-66667777888899990'
 aws eks create-cluster … --access-config 'authenticationMode=API'
@@ -65,8 +66,7 @@ aws eks create-cluster … --access-config 'authenticationMode=API'
 aws eks describe-cluster --name 'DeepThought' --query 'cluster.accessConfig.authenticationMode' --output 'text'
 
 # Change encryption configuration.
-aws eks associate-encryption-config \
-  --cluster-name 'DeepThought' \
+aws eks associate-encryption-config --cluster-name 'DeepThought' \
   --encryption-config '[{
     "provider": { "keyArn": "arn:aws:kms:eu-west-1:000011112222:key/33334444-5555-6666-7777-88889999aaaa" },
     "resources": [ "secrets" ]
@@ -89,20 +89,18 @@ aws eks associate-access-policy --cluster-name 'DeepThought' \
 
 # Connect to clusters.
 aws eks update-kubeconfig --name 'DeepThought' && kubectl cluster-info
-aws eks --region 'eu-west-1' update-kubeconfig --name 'oneForAll' --profile 'dev-user' && kubectl cluster-info
+aws eks --region 'eu-west-1' update-kubeconfig --name 'DeepThought' --profile 'dev-user' && kubectl cluster-info
 
 
 # Create EC2 node groups.
-aws eks create-nodegroup \
-  --cluster-name 'DeepThought' \
+aws eks create-nodegroup --cluster-name 'DeepThought' \
   --nodegroup-name 'alpha' \
   --scaling-config 'minSize=1,maxSize=3,desiredSize=1' \
   --node-role-arn 'arn:aws:iam::000011112222:role/DeepThoughtNodeGroupsServiceRole' \
   --subnets 'subnet-11112222333344445' 'subnet-66667777888899990'
 
 # Create Fargate profiles.
-aws eks create-fargate-profile \
-  --cluster-name 'DeepThought' \
+aws eks create-fargate-profile --cluster-name 'DeepThought' \
   --fargate-profile-name 'alpha' \
   --pod-execution-role-arn 'arn:aws:iam::000011112222:role/DeepThoughtFargateServiceRole' \
   --subnets 'subnet-11112222333344445' 'subnet-66667777888899990' \
@@ -111,6 +109,12 @@ aws eks create-fargate-profile \
 
 # Get addon names.
 aws eks describe-addon-versions --query 'addons[].addonName'
+
+# Get addon versions.
+aws eks describe-addon-versions --addon-name 'eks-pod-identity-agent' --query 'addons[].addonVersions[]'
+
+# Get addon configuration options.
+aws eks describe-addon-configuration --addon-name 'aws-ebs-csi-driver' --addon-version 'v1.32.0-eksbuild.1'
 ```
 
 </details>
@@ -231,15 +235,17 @@ This is what worked for me:
        }],
    });
 
-   const cluster_service_role = new aws.iam.Role("cluster-service-role", {
-       assumeRolePolicy: cluster_assumeRole_policy,
-       managedPolicyArns: [
-           // alternatively, use RolePolicyAttachments
-           "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-       ],
-       name: "DeepThoughtClusterServiceRole",
-       …
-   });
+   const cluster_service_role = new aws.iam.Role(
+       "cluster-service-role",
+       {
+           assumeRolePolicy: cluster_assumeRole_policy,
+           managedPolicyArns: [
+               // alternatively, use RolePolicyAttachments
+               "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+           ],
+           name: "DeepThoughtClusterServiceRole",
+       },
+   );
    ```
 
    </details>
@@ -262,17 +268,19 @@ This is what worked for me:
      <summary>Pulumi</summary>
 
    ```ts
-   const cluster = new aws.eks.Cluster("cluster", {
-       name: "DeepThought",
-       roleArn: cluster_service_role.arn,
-       vpcConfig: {
-           subnetIds: [
-               "subnet-11112222333344445",
-               "subnet-66667777888899990",
-           ],
+   const cluster = new aws.eks.Cluster(
+       "cluster",
+       {
+           name: "DeepThought",
+           roleArn: cluster_service_role.arn,
+           vpcConfig: {
+               subnetIds: [
+                   "subnet-11112222333344445",
+                   "subnet-66667777888899990",
+               ],
+           },
        },
-       …
-   });
+   );
    ```
 
    </details>
@@ -444,17 +452,19 @@ Procedure:
        }],
    });
 
-   const nodeGroups_service_role = new aws.iam.Role("nodeGroups-service-role", {
-       assumeRolePolicy: nodeGroups_assumeRole_policy,
-       managedPolicyArns: [
-           // alternatively, use RolePolicyAttachments
-           "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-           "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-           "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-       ],
-       name: "DeepThoughtNodeGroupsServiceRole",
-       …
-   });
+   const nodeGroups_service_role = new aws.iam.Role(
+       "nodeGroups-service-role",
+       {
+           assumeRolePolicy: nodeGroups_assumeRole_policy,
+           managedPolicyArns: [
+               // alternatively, use RolePolicyAttachments
+               "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+               "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+               "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+           ],
+           name: "DeepThoughtNodeGroupsServiceRole",
+       },
+   );
    ```
 
    </details>
@@ -465,8 +475,7 @@ Procedure:
      <summary>CLI</summary>
 
    ```sh
-   aws eks create-nodegroup \
-     --cluster-name 'DeepThought' \
+   aws eks create-nodegroup --cluster-name 'DeepThought' \
      --nodegroup-name 'alpha' \
      --scaling-config 'minSize=1,maxSize=3,desiredSize=1' \
      --node-role-arn 'arn:aws:iam::000011112222:role/DeepThoughtNodeGroupsServiceRole' \
@@ -479,18 +488,20 @@ Procedure:
      <summary>Pulumi</summary>
 
    ```ts
-   const nodeGroup_alpha = new aws.eks.NodeGroup("nodeGroup-alpha", {
-       nodeGroupName: "nodeGroup-alpha",
-       clusterName: cluster.name,
-       nodeRoleArn: nodeGroups_service_role.arn,
-       scalingConfig: {
-           minSize: 1,
-           maxSize: 3,
-           desiredSize: 1,
+   const nodeGroup_alpha = new aws.eks.NodeGroup(
+       "nodeGroup-alpha",
+       {
+           nodeGroupName: "nodeGroup-alpha",
+           clusterName: cluster.name,
+           nodeRoleArn: nodeGroups_service_role.arn,
+           scalingConfig: {
+               minSize: 1,
+               maxSize: 3,
+               desiredSize: 1,
+           },
+           subnetIds: cluster.vpcConfig.subnetIds,
        },
-       subnetIds: cluster.vpcConfig.subnetIds,
-       …
-   });
+   );
    ```
 
    </details>
@@ -560,34 +571,38 @@ Procedure:
 
    ```ts
    const fargate_assumeRole_policy = pulumi.all([
-     aws.getRegionOutput().apply(region => region.id),
-     aws.getCallerIdentityOutput().apply(callerIdentity => callerIdentity.accountId),
-     cluster.name,
-   ]).apply(([regionId, awsAccountId, clusterName]) => JSON.stringify({
-       Version: "2012-10-17",
-       Statement: [{
-           Effect: "Allow",
-           Action: "sts:AssumeRole",
-           Principal: {
-               Service:  "eks-fargate-pods.amazonaws.com",
-           },
-           Condition: {
-               ArnLike: {
-                   "aws:SourceArn": `arn:aws:eks:${regionId}:${awsAccountId}:fargateprofile/${clusterName}/*`
-               }
-           },
-       }],
-   }));
+       aws.getRegionOutput().apply(region => region.id),
+       aws.getCallerIdentityOutput().apply(callerIdentity => callerIdentity.accountId),
+       cluster.name,
+   ]).apply(
+       ([regionId, awsAccountId, clusterName]) => JSON.stringify({
+           Version: "2012-10-17",
+           Statement: [{
+               Effect: "Allow",
+               Action: "sts:AssumeRole",
+               Principal: {
+                   Service:  "eks-fargate-pods.amazonaws.com",
+               },
+               Condition: {
+                   ArnLike: {
+                       "aws:SourceArn": `arn:aws:eks:${regionId}:${awsAccountId}:fargateprofile/${clusterName}/*`,
+                   },
+               },
+           }],
+       }),
+   );
 
-   const fargate_service_role = new aws.iam.Role("fargate-service-role", {
-       assumeRolePolicy: fargate_assumeRole_policy,
-       managedPolicyArns: [
-           // alternatively, use RolePolicyAttachments
-           "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy",
-       ],
-       name: "DeepThoughtFargateServiceRole",
-       …
-   });
+   const fargate_service_role = new aws.iam.Role(
+       "fargate-service-role",
+       {
+           assumeRolePolicy: fargate_assumeRole_policy,
+           managedPolicyArns: [
+               // alternatively, use RolePolicyAttachments
+               "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy",
+           ],
+           name: "DeepThoughtFargateServiceRole",
+       },
+   );
    ```
 
    </details>
@@ -598,8 +613,7 @@ Procedure:
      <summary>CLI</summary>
 
    ```sh
-   aws eks create-fargate-profile \
-     --cluster-name 'DeepThought' \
+   aws eks create-fargate-profile --cluster-name 'DeepThought' \
      --fargate-profile-name 'alpha' \
      --pod-execution-role-arn 'arn:aws:iam::000011112222:role/DeepThoughtFargateServiceRole' \
      --subnets 'subnet-11112222333344445' 'subnet-66667777888899990' \
@@ -612,17 +626,19 @@ Procedure:
      <summary>Pulumi</summary>
 
    ```ts
-   const fargateProfile_alpha = new aws.eks.FargateProfile("fargateProfile-alpha", {
-       fargateProfileName: "fargateProfile-alpha",
-       clusterName: cluster.name,
-       podExecutionRoleArn: fargate_service_role.arn,
-       selectors: [
-           { namespace: "monitoring" },
-           { namespace: "default" },
-       ],
-       subnetIds: cluster.vpcConfig.subnetIds,
-       …
-   });
+   const fargateProfile_alpha = new aws.eks.FargateProfile(
+       "fargateProfile-alpha",
+       {
+           fargateProfileName: "fargateProfile-alpha",
+           clusterName: cluster.name,
+           podExecutionRoleArn: fargate_service_role.arn,
+           selectors: [
+               { namespace: "monitoring" },
+               { namespace: "default" },
+           ],
+           subnetIds: cluster.vpcConfig.subnetIds,
+       },
+   );
    ```
 
    </details>
@@ -641,8 +657,7 @@ TL;DR:
      <summary>CLI</summary>
 
    ```sh
-   aws eks associate-encryption-config \
-     --cluster-name 'DeepThought' \
+   aws eks associate-encryption-config --cluster-name 'DeepThought' \
      --encryption-config '[{
        "provider": { "keyArn": "arn:aws:kms:eu-west-1:000011112222:key/33334444-5555-6666-7777-88889999aaaa" },
        "resources": [ "secrets" ]
@@ -655,13 +670,15 @@ TL;DR:
      <summary>Pulumi</summary>
 
    ```ts
-   const cluster = new aws.eks.Cluster("cluster", {
-       encryptionConfig: {
-           provider: { keyArn: `arn:aws:kms:${region}:${account}:key/${key_id}` },
-           resources: [ "secrets" ],
+   new aws.eks.Cluster(
+       "cluster",
+       {
+           encryptionConfig: {
+               provider: { keyArn: `arn:aws:kms:${region}:${account}:key/${key_id}` },
+               resources: [ "secrets" ],
+           },
        },
-       …
-   });
+   );
    ```
 
    </details>
@@ -682,31 +699,135 @@ EBS CSI driver.
 
 Considerations:
 
-- The EBS CSI driver needs make calls to AWS' APIs on your behalf.<br/>
-  The worker nodes' IAM permissions need to be [set accordingly][ebs csi driver iam role].
+- The EBS CSI driver needs to make calls to AWS' APIs on one's behalf.<br/>
+  The driver's IAM role's permissions need to be [set accordingly][ebs csi driver iam role as aws-managed add-on].
 - The EBS CSI DaemonSet is **required** to mount EBS volumes.<br/>
   Fargate _can_ run the EBS _controller_ Pods, but it **cannot** run DaemonSets (including the CSI DaemonSet).<br/>
   This means that Fargate **won't be able** to mount EBS volumes, and that only EC2 nodes running the DaemonSet will be
   able to do that.
-- The EBS CSI driver is not installed on clusters by default.<br/>
+- The EBS CSI driver is **not** installed on clusters by default.<br/>
   Add it as an addon.
 - The _managed_ and _self-managed_ add-ons **cannot** be installed at the same time.
-- EKS does **not** automatically update the CSI Driver add-on when new versions are released, nor it does after clusters
-  are updated to new Kubernetes minor versions.
+- EKS does **not** automatically update the CSI Driver add-on when new versions are released, **nor** it does after
+  clusters are updated to new Kubernetes minor versions.
 
-#### EBS CSI driver IAM role
+Test the driver's installation:
+
+```sh
+# Refer https://docs.aws.amazon.com/eks/latest/userguide/ebs-sample-app.html
+git clone 'https://github.com/kubernetes-sigs/aws-ebs-csi-driver.git'
+cd 'aws-ebs-csi-driver/examples/kubernetes/dynamic-provisioning'
+echo -e "parameters:\n  type: gp3" >> 'manifests/storageclass.yaml'
+kubectl apply -f 'manifests/'
+kubectl describe storageClass 'ebs-sc'
+kubectl get pvc
+kubectl get pv
+kubectl exec -it 'app' -- cat '/data/out.txt'
+kubectl delete -f 'manifests/'
+```
+
+#### EBS CSI driver IAM role as aws-managed add-on
 
 Refer [Manage the Amazon EBS CSI driver as an Amazon EKS add-on].
 
 Requirements:
 
+- An existing EKS cluster (_duh!_).
+- An existing IAM OIDC provider for the cluster.
+
+  ```sh
+  # 1. Get the OIDC issuer ID for existing EKS clusters
+  OIDC_ISSUER="$(aws eks describe-cluster --name 'DeepThought' --query 'cluster.identity.oidc.issuer' --output 'text')"
+  OIDC_ID="$(echo "$OIDC_ISSUER" | awk -F '/id/' '{print $2}')"
+  # 2. Check they are present in the list of providers for the account
+  aws iam list-open-id-connect-providers --query 'OpenIDConnectProviderList' --output 'text' | grep "$OIDC_ID"
+  # 3. If the providers do not exist, create them
+  aws create create-open-id-connect-provider --url "$OIDC_ISSUER" --client-id-list 'sts.amazonaws.com'
+  ```
+
+- An IAM role for the EBS CSI driver.<br/>
+  Refer [Create an Amazon EBS CSI driver IAM role].
+
+  If missing, the add-on **will** be installed but `kubectl describe pvc` will show the following errors:
+
+  > ```plaintext
+  > failed to provision volume with StorageClass
+  > ```
+  >
+  > ```plaintext
+  > could not create volume in EC2: UnauthorizedOperation error
+  > ```
+
 - [external-snapshotter], if planning to use the snapshot functionality of the driver.<br/>
-  Its components **must** to be installed **before** the driver add-on is installed on the cluster.<br/>
   The components' installation **must** be performed in this order:
 
   1. CustomResourceDefinitions (CRDs) for `volumeSnapshotClasses`, `volumeSnapshots` and `volumeSnapshotContents`.
   1. ClusterRole, ClusterRoleBinding, and other RBAC components.
   1. Snapshot controller's Deployment.
+
+  ```sh
+  git clone 'https://github.com/kubernetes-csi/external-snapshotter.git'
+  kubectl kustomize 'external-snapshotter/client/config/crd' | kubectl apply -f -
+  kubectl -n 'kube-system' kustomize 'external-snapshotter/deploy/kubernetes/snapshot-controller' | kubectl apply -f -
+  ```
+
+Procedure:
+
+- Install the add-on.<br/>
+  Make sure to specify the IAM role for the EBS CSI driver from the requirements.
+
+  <details>
+    <summary>CLI</summary>
+
+  ```sh
+  aws eks create-addon --cluster-name 'DeepThought' \
+    --addon-name 'aws-ebs-csi-driver' \
+    --service-account-role-arn 'arn:aws:iam::012345678901:role/customEksEbsCsiDriverRole
+  ```
+
+  </details>
+
+  <details>
+    <summary>Pulumi</summary>
+
+  ```ts
+  new aws.eks.Addon(
+      "ebsCsiDriver",
+      {
+          clusterName: cluster.name,
+          addonName: "aws-ebs-csi-driver",
+          addonVersion: "v1.32.0-eksbuild.1",
+          resolveConflictsOnCreate: "OVERWRITE",
+          resolveConflictsOnUpdate: "OVERWRITE",
+          serviceAccountRoleArn: ebsCsiDriver_role.arn,
+      },
+  );
+  ```
+
+  </details>
+
+#### EBS CSI driver IAM role as self-managed add-on
+
+```sh
+helm upgrade -i --repo 'https://kubernetes-sigs.github.io/aws-ebs-csi-driver' \
+  'aws-ebs-csi-driver' 'aws-ebs-csi-driver' \
+  --namespace 'kube-system'
+```
+
+## Metrics server
+
+Refer [View resource usage with the KubernetesMetrics Server].
+
+Required by the Horizontal Pod Autoscaler and Dashboard components.
+
+Make sure to use a container port different from 10250 if using Fargate, as that port is reserved on Fargate:
+
+```sh
+helm upgrade -i --repo 'https://kubernetes-sigs.github.io/metrics-server' \
+  'metrics-server' 'metrics-server' \
+  --namespace 'kube-system' \
+  --set 'containerPort'='10251'
+```
 
 ## Pod identity
 
@@ -733,12 +854,12 @@ Requirements:
 
   ```json
   {
-    "Version": "2012-10-17",
-    "Statement": [{
-      "Effect": "Allow",
-      "Action": [ "eks-auth:AssumeRoleForPodIdentity" ],
-      "Resource": "*"
-    }]
+      "Version": "2012-10-17",
+      "Statement": [{
+          "Effect": "Allow",
+          "Action": [ "eks-auth:AssumeRoleForPodIdentity" ],
+          "Resource": "*"
+      }]
   }
   ```
 
@@ -767,12 +888,15 @@ Procedure:
      <summary>Pulumi</summary>
 
    ```ts
-   new aws.eks.Addon("pod-identity", {
-     clusterName: cluster.name,
-     addonName: "eks-pod-identity-agent",
-     resolveConflictsOnCreate: "OVERWRITE",
-     resolveConflictsOnUpdate: "OVERWRITE",
-   });
+   new aws.eks.Addon(
+       "pod-identity",
+       {
+           clusterName: cluster.name,
+           addonName: "eks-pod-identity-agent",
+           resolveConflictsOnCreate: "OVERWRITE",
+           resolveConflictsOnUpdate: "OVERWRITE",
+       },
+   );
    ```
 
    </details>
@@ -797,12 +921,15 @@ Procedure:
      <summary>Pulumi</summary>
 
    ```ts
-   new aws.eks.PodIdentityAssociation("customRole-to-defaultServiceAccount", {
-     clusterName: cluster.name,
-     roleArn: customRole.arn,
-     serviceAccount: "default",
-     namespace: "default",
-   });
+   new aws.eks.PodIdentityAssociation(
+       "customRole-to-defaultServiceAccount",
+       {
+           clusterName: cluster.name,
+           roleArn: customRole.arn,
+           serviceAccount: "default",
+           namespace: "default",
+       },
+   );
    ```
 
    </details>
@@ -832,63 +959,75 @@ Refer the autoscaler's
   <summary>Pulumi</summary>
 
 ```ts
-const clusterAutoscaling_role = new aws.iam.Role("clusterAutoscaling", {
-  description: "Allows Pods to scale EKS cluster node groups on behalf of the user.",
-  assumeRolePolicy: JSON.stringify({
-    Version: "2012-10-17",
-    Statement: [{
-      Effect: "Allow",
-      Principal: {
-        Service: "pods.eks.amazonaws.com",
-      },
-      Action: [
-        "sts:AssumeRole",
-        "sts:TagSession",
-      ],
-    }],
-  }),
-});
-const clusterAutoscaling_policy_scaleNodeGroups = new aws.iam.Policy("scaleNodeGroups", {
-  description: "Allows bearers to scale EKS node groups up and down.",
-  policy: JSON.stringify({
-    Version: "2012-10-17",
-    Statement: [
-      {
-        Effect: "Allow",
-        Action: [
-          "autoscaling:DescribeAutoScalingGroups",
-          "autoscaling:DescribeAutoScalingInstances",
-          "autoscaling:DescribeLaunchConfigurations",
-          "autoscaling:DescribeScalingActivities",
-          "ec2:DescribeImages",
-          "ec2:DescribeInstanceTypes",
-          "ec2:DescribeLaunchTemplateVersions",
-          "ec2:GetInstanceTypesFromInstanceRequirements",
-          "eks:DescribeNodegroup",
-        ],
-        Resource: [ "*" ],
-      },
-      {
-        Effect: "Allow",
-        Action: [
-          "autoscaling:SetDesiredCapacity",
-          "autoscaling:TerminateInstanceInAutoScalingGroup",
-        ],
-        Resource: [ "*" ],
-      },
-    ],
-  }),
-});
-new aws.iam.RolePolicyAttachment("scaleNodeGroupsPolicy-to-clusterAutoscalingRole", {
-  policyArn: clusterAutoscaling_policy_scaleNodeGroups.arn,
-  role: clusterAutoscaling_role.name,
-});
-new aws.eks.PodIdentityAssociation("clusterAutoscalingRole-to-clusterAutoscalerServiceAccount", {
-  clusterName: cluster.name,
-  roleArn: clusterAutoscaling_role.arn,
-  serviceAccount: "cluster-autoscaler-aws",
-  namespace: "kube-system",
-});
+const clusterAutoscaling_role = new aws.iam.Role(
+    "clusterAutoscaling",
+    {
+        description: "Allows Pods to scale EKS cluster node groups on behalf of the user.",
+        assumeRolePolicy: JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [{
+                Effect: "Allow",
+                Principal: {
+                    Service: "pods.eks.amazonaws.com",
+                },
+                Action: [
+                    "sts:AssumeRole",
+                    "sts:TagSession",
+                ],
+            }],
+        }),
+    },
+);
+const clusterAutoscaling_policy_eksScaleNodeGroups = new aws.iam.Policy(
+    "eksScaleNodeGroups",
+    {
+        description: "Allows bearers to scale EKS node groups up and down.",
+        policy: JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [
+                {
+                    Effect: "Allow",
+                    Action: [
+                        "autoscaling:DescribeAutoScalingGroups",
+                        "autoscaling:DescribeAutoScalingInstances",
+                        "autoscaling:DescribeLaunchConfigurations",
+                        "autoscaling:DescribeScalingActivities",
+                        "ec2:DescribeImages",
+                        "ec2:DescribeInstanceTypes",
+                        "ec2:DescribeLaunchTemplateVersions",
+                        "ec2:GetInstanceTypesFromInstanceRequirements",
+                        "eks:DescribeNodegroup",
+                    ],
+                    Resource: [ "*" ],
+                },
+                {
+                    Effect: "Allow",
+                    Action: [
+                        "autoscaling:SetDesiredCapacity",
+                        "autoscaling:TerminateInstanceInAutoScalingGroup",
+                    ],
+                    Resource: [ "*" ],
+                },
+            ],
+        }),
+    },
+);
+new aws.iam.RolePolicyAttachment(
+    "scaleNodeGroupsPolicy-to-clusterAutoscalingRole",
+    {
+        policyArn: clusterAutoscaling_policy_scaleNodeGroups.arn,
+        role: clusterAutoscaling_role.name,
+    },
+);
+new aws.eks.PodIdentityAssociation(
+    "clusterAutoscalingRole-to-clusterAutoscalerServiceAccount",
+    {
+        clusterName: cluster.name,
+        roleArn: clusterAutoscaling_role.arn,
+        serviceAccount: "cluster-autoscaler-aws",
+        namespace: "kube-system",
+    },
+);
 ```
 
 </details>
@@ -898,8 +1037,9 @@ Install the cluster autoscaler component with the proper configuration:
 ```sh
 # Use a service account with podIdentityAssociation
 aws eks --region 'eu-west-1' update-kubeconfig --name 'DeepThought'
-helm --namespace 'kube-system' upgrade --install --repo 'https://kubernetes.github.io/autoscaler' \
+helm upgrade -i --repo 'https://kubernetes.github.io/autoscaler' \
   'cluster-autoscaler' 'cluster-autoscaler' \
+  --namespace 'kube-system' \
   --set 'cloudProvider'='aws' \
   --set 'awsRegion'='eu-west-1' \
   --set 'autoDiscovery.clusterName'='DeepThought' \
@@ -982,6 +1122,8 @@ Debug: see [Identify common issues].
 - [How do you get kubectl to log in to an AWS EKS cluster?]
 - [Learn how EKS Pod Identity grants pods access to AWS services]
 - [Configure instance permissions required for Systems Manager]
+- [View resource usage with the KubernetesMetrics Server]
+- [Create an Amazon EBS CSI driver IAM role]
 
 <!--
   Reference
@@ -992,7 +1134,7 @@ Debug: see [Identify common issues].
 [access management]: #access-management
 [cluster autoscaler]: #cluster-autoscaler
 [create worker nodes]: #create-worker-nodes
-[ebs csi driver iam role]: #ebs-csi-driver-iam-role
+[ebs csi driver iam role as aws-managed add-on]: #ebs-csi-driver-iam-role-as-aws-managed-add-on
 [identify common issues]: #identify-common-issues
 [pod identity]: #pod-identity
 [requirements]: #requirements
@@ -1026,6 +1168,7 @@ Debug: see [Identify common issues].
 [AWSSupport-TroubleshootEKSWorkerNode runbook]: https://docs.aws.amazon.com/systems-manager-automation-runbooks/latest/userguide/automation-awssupport-troubleshooteksworkernode.html
 [choosing an amazon ec2 instance type]: https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html
 [configure instance permissions required for systems manager]: https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-policies-overview
+[create an amazon ebs csi driver iam role]: https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html
 [de-mystifying cluster networking for amazon eks worker nodes]: https://aws.amazon.com/blogs/containers/de-mystifying-cluster-networking-for-amazon-eks-worker-nodes/
 [eks workshop]: https://www.eksworkshop.com/
 [enabling iam principal access to your cluster]: https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html
@@ -1049,6 +1192,7 @@ Debug: see [Identify common issues].
 [use amazon ebs storage]: https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html
 [using iam groups to manage kubernetes cluster access]: https://archive.eksworkshop.com/beginner/091_iam-groups/
 [using service-linked roles for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles.html
+[view resource usage with the kubernetesmetrics server]: https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html
 
 <!-- Others -->
 [amazon elastic block store (ebs) csi driver]: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/README.md
