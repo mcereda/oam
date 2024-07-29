@@ -116,7 +116,22 @@ aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat' --query 'Plaintext' -
 
 aws eks --region 'eu-west-1' update-kubeconfig --name 'oneForAll' --profile 'dev-user'
 
+# Create OIDC providers for EKS clusters
+# 1. Get the OIDC issuer ID for existing EKS clusters
+set 'OIDC_ISSUER' (aws eks describe-cluster --name 'oneForAll' --query 'cluster.identity.oidc.issuer' --output 'text')
+set 'OIDC_ID' (echo "$OIDC_ISSUER" | awk -F '/id/' '{print $2}')
+# 2. Check they are present in the list of providers for the account
+aws iam list-open-id-connect-providers --query 'OpenIDConnectProviderList' --output 'text' | grep "$OIDC_ID"
+# 3. If the providers do not exist, create them
+aws create create-open-id-connect-provider --url "$OIDC_ISSUER" --client-id-list 'sts.amazonaws.com'
+
+aws iam list-roles --query "Roles[?RoleName=='EksEbsCsiDriverRole'].Arn"
+aws iam list-attached-role-policies --role-name 'EksEbsCsiDriverRole' --query 'AttachedPolicies[].PolicyArn'
+aws iam get-policy --policy-arn 'arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy' --query 'Policy'
+
 aws eks describe-addon-versions --query 'sort(addons[].addonName)'
+aws eks describe-addon-versions --addon-name 'eks-pod-identity-agent' --query 'addons[].addonVersions[]'
+aws eks describe-addon-configuration --addon-name 'aws-ebs-csi-driver' --addon-version 'v1.32.0-eksbuild.1'
 
 docker run --rm -ti -v "$HOME/.aws:/root/.aws:ro" 'amazon/aws-cli:2.17.16' autoscaling describe-auto-scaling-groups
 
@@ -127,7 +142,5 @@ aws iam list-users --no-cli-pager --query 'Users[].UserName' --output 'text' \
 # Get the user owning a specific access key
 aws iam list-users --no-cli-pager --query 'Users[].UserName' --output 'text' \
 | xargs -n1 -P (nproc) aws iam list-access-keys \
-	--query "AccessKeyMetadata[?AccessKeyId=='AKIA2HKHF74L5H5PMM5W'].UserName" --output 'json' --user \
+	--query "AccessKeyMetadata[?AccessKeyId=='AKIA01234567890ABCDE'].UserName" --output 'json' --user \
 | jq -rs 'flatten|first'
-
-AKIA01234567890ABCDE

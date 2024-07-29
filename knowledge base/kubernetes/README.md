@@ -45,7 +45,6 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
     1. [Run a command just before a Pod stops](#run-a-command-just-before-a-pod-stops)
 1. [Examples](#examples)
     1. [Create an admission webhook](#create-an-admission-webhook)
-    1. [Prometheus on Kubernetes using Helm](#prometheus-on-kubernetes-using-helm)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -362,7 +361,7 @@ Use cases:
 apiVersion: apps/v1
 kind: Pod
 volumes:
-  - name: my-emptydir
+  - name: my-empty-dir
     emptyDir:
       # Omit the 'medium' field to use disk storage.
       # The 'Memory' medium will create tmpfs to store data.
@@ -456,7 +455,7 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-    - image: registry.k8s.io/test-webserver
+    - image: registry.k8s.io/test-web-server
       name: test-container
       volumeMounts:
       - mountPath: /my-nfs-data
@@ -488,7 +487,7 @@ metadata:
     zone: us-east-coast
 spec:
   volumes:
-    - name: my-downwardapi-volume
+    - name: my-downward-api-volume
       downwardAPI:
         defaultMode: 0644
         items:
@@ -551,7 +550,7 @@ Gotchas:
   1. Delete the STS **without killing its pods**:
 
      ```sh
-     kubectl delete statefulsets.apps 'my-sts' --cascade 'orphan'
+     kubectl delete statefulSets.apps 'my-sts' --cascade 'orphan'
      ```
 
   1. Redeploy the STS with the changed size.
@@ -615,14 +614,18 @@ Gotchas:
 
 Controllers are available to scale Pods or Nodes automatically, both in number or size.
 
-Automatic scaling of Pods is done in number by the HorizontalPodAutoscaler, and in size by the VerticalPodAutoscaler.<br/>
+Automatic scaling of Pods is done in number by the Horizontal Pod Autoscaler, and in size by the
+Vertical Pod Autoscaler.<br/>
 Automatic scaling of Nodes is done in number by the Cluster Autoscaler, and in size by add-ons like [Karpenter].
 
 > Be aware of mix-and-matching autoscalers for the same kind of resource.<br/>
 > One can easily defy the work done by the other and make that resource behave unexpectedly.
 
-K8S only comes with the HorizontalPodAutoscaler by default.<br/>
+K8S only comes with the Horizontal Pod Autoscaler by default.<br/>
 Managed K8S usually also comes with the [Cluster Autoscaler] if autoscaling is enabled on the cluster resource.
+
+The Horizontal and Vertical Pod Autoscalers require to access metrics.<br/>
+This requires the [metrics server] addon to be installed and accessible.
 
 ### Pod scaling
 
@@ -954,10 +957,6 @@ you need:
 
 See the example's [README][create an admission webhook].
 
-### Prometheus on Kubernetes using Helm
-
-See the example's [README][prometheus on kubernetes using helm].
-
 ## Further readings
 
 Usage:
@@ -1053,6 +1052,7 @@ Others:
 <!-- Knowledge base -->
 [azure kubernetes service]: ../cloud%20computing/azure/aks.md
 [cert-manager]: cert-manager.md
+[cluster autoscaler]: cluster%20autoscaler.md
 [connection tracking]: ../connection%20tracking.placeholder
 [create an admission webhook]: ../../examples/kubernetes/create%20an%20admission%20webhook/README.md
 [etcd]: ../etcd.placeholder
@@ -1069,9 +1069,9 @@ Others:
 [kubescape]: kubescape.md
 [kubeval]: kubeval.md
 [kustomize]: kustomize.md
+[metrics server]: metrics%20server.md
 [minikube]: minikube.md
 [network policies]: network%20policies.md
-[prometheus on kubernetes using helm]: ../../examples/kubernetes/prometheus%20on%20k8s%20using%20helm.md
 [rke2]: rke2.md
 [terraform]: ../terraform.md
 [velero]: velero.md
@@ -1079,7 +1079,6 @@ Others:
 <!-- Upstream -->
 [addons]: https://kubernetes.io/docs/concepts/cluster-administration/addons/
 [api deprecation policy]: https://kubernetes.io/docs/reference/using-api/deprecation-policy/
-[cluster autoscaler]: https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler
 [common labels]: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
 [concepts]: https://kubernetes.io/docs/concepts/
 [configuration best practices]: https://kubernetes.io/docs/concepts/configuration/overview/
