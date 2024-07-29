@@ -10,8 +10,8 @@
 1. [Secrets encryption through KMS](#secrets-encryption-through-kms)
 1. [Storage](#storage)
    1. [Use EBS as volumes](#use-ebs-as-volumes)
-      1. [EBS CSI driver IAM role as aws-managed add-on](#ebs-csi-driver-iam-role-as-aws-managed-add-on)
-      1. [EBS CSI driver IAM role as self-managed add-on](#ebs-csi-driver-iam-role-as-self-managed-add-on)
+      1. [EBS CSI driver as aws-managed add-on](#ebs-csi-driver-as-aws-managed-add-on)
+      1. [EBS CSI driver as self-managed add-on](#ebs-csi-driver-as-self-managed-add-on)
 1. [Metrics server](#metrics-server)
 1. [Pod identity](#pod-identity)
 1. [Autoscaling](#autoscaling)
@@ -700,7 +700,7 @@ EBS CSI driver.
 Considerations:
 
 - The EBS CSI driver needs to make calls to AWS' APIs on one's behalf.<br/>
-  The driver's IAM role's permissions need to be [set accordingly][ebs csi driver iam role as aws-managed add-on].
+  The driver's IAM role's permissions need to be [set accordingly][ebs csi driver as aws-managed add-on].
 - The EBS CSI DaemonSet is **required** to mount EBS volumes.<br/>
   Fargate _can_ run the EBS _controller_ Pods, but it **cannot** run DaemonSets (including the CSI DaemonSet).<br/>
   This means that Fargate **won't be able** to mount EBS volumes, and that only EC2 nodes running the DaemonSet will be
@@ -726,7 +726,7 @@ kubectl exec -it 'app' -- cat '/data/out.txt'
 kubectl delete -f 'manifests/'
 ```
 
-#### EBS CSI driver IAM role as aws-managed add-on
+#### EBS CSI driver as aws-managed add-on
 
 Refer [Manage the Amazon EBS CSI driver as an Amazon EKS add-on].
 
@@ -734,6 +734,9 @@ Requirements:
 
 - An existing EKS cluster (_duh!_).
 - An existing IAM OIDC provider for the cluster.
+
+  <details>
+    <summary>CLI</summary>
 
   ```sh
   # 1. Get the OIDC issuer ID for existing EKS clusters
@@ -744,6 +747,24 @@ Requirements:
   # 3. If the providers do not exist, create them
   aws create create-open-id-connect-provider --url "$OIDC_ISSUER" --client-id-list 'sts.amazonaws.com'
   ```
+
+  </details>
+
+  <details style="margin-bottom: 1em;">
+    <summary>Pulumi</summary>
+
+  ```ts
+  const oidcProvider = new aws.iam.OpenIdConnectProvider(
+      "cluster",
+      {
+          clientIdLists: [ "sts.amazonaws.com" ],
+          thumbprintLists: [ "0123456789abcdef0123456789abcdef01234567" ],  // FIXME: use reference
+          url: cluster.identities[0].oidcs[0].issuer,
+      },
+  );
+  ```
+
+  </details>
 
 - An IAM role for the EBS CSI driver.<br/>
   Refer [Create an Amazon EBS CSI driver IAM role].
@@ -758,6 +779,53 @@ Requirements:
   > could not create volume in EC2: UnauthorizedOperation error
   > ```
 
+  <details>
+    <summary>CLI</summary>
+
+  ```sh
+  ```
+
+  </details>
+
+  <details style="margin-bottom: 1em;">
+    <summary>Pulumi</summary>
+
+  ```ts
+  const eksEbsCsiDriver_role = oidcProvider.arn.apply(oidcProviderArn => new aws.iam.Role(
+      "eksEbsCsiDriver",
+      {
+          name: "EksEbsCsiDriverRole",
+          description: "Allows Pods to act upon EBS volumes on behalf of the user.",
+          assumeRolePolicy: JSON.stringify({
+              Version: "2012-10-17",
+              Statement: [{
+                  Effect: "Allow",
+                  Principal: {
+                      Federated: oidcProviderArn,
+                  },
+                  Action: "sts:AssumeRoleWithWebIdentity",
+                  Condition: {
+                      StringEquals: {
+                          // FIXME: use references
+                          "oidc.eks.eu-west-1.amazonaws.com/id/0123456789ABCDEF0123456789ABCDEF:aud": "sts.amazonaws.com",
+                          "oidc.eks.eu-west-1.amazonaws.com/id/0123456789ABCDEF0123456789ABCDEF:sub": "system:serviceaccount:kube-system:ebs-csi-controller-sa",
+                      },
+                  },
+              }],
+          }),
+      },
+  ));
+  new aws.iam.RolePolicyAttachment(
+      "AmazonEBSCSIDriverPolicy-to-eksEbsCsiDriverRole",
+      {
+          policyArn: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
+          role: eksEbsCsiDriver_role.name,
+      },
+  );
+  ```
+
+  </details>
+
 - [external-snapshotter], if planning to use the snapshot functionality of the driver.<br/>
   The components' installation **must** be performed in this order:
 
@@ -765,11 +833,15 @@ Requirements:
   1. ClusterRole, ClusterRoleBinding, and other RBAC components.
   1. Snapshot controller's Deployment.
 
+  <details style="margin-bottom: 1em;">
+    <summary>CLI</summary>
   ```sh
   git clone 'https://github.com/kubernetes-csi/external-snapshotter.git'
   kubectl kustomize 'external-snapshotter/client/config/crd' | kubectl apply -f -
   kubectl -n 'kube-system' kustomize 'external-snapshotter/deploy/kubernetes/snapshot-controller' | kubectl apply -f -
   ```
+
+  </details>
 
 Procedure:
 
@@ -787,7 +859,7 @@ Procedure:
 
   </details>
 
-  <details>
+  <details style="margin-bottom: 1em;">
     <summary>Pulumi</summary>
 
   ```ts
@@ -806,13 +878,18 @@ Procedure:
 
   </details>
 
-#### EBS CSI driver IAM role as self-managed add-on
+#### EBS CSI driver as self-managed add-on
+
+<details style="margin-bottom: 1em;">
+  <summary>CLI</summary>
 
 ```sh
 helm upgrade -i --repo 'https://kubernetes-sigs.github.io/aws-ebs-csi-driver' \
   'aws-ebs-csi-driver' 'aws-ebs-csi-driver' \
   --namespace 'kube-system'
 ```
+
+</details>
 
 ## Metrics server
 
@@ -1134,7 +1211,7 @@ Debug: see [Identify common issues].
 [access management]: #access-management
 [cluster autoscaler]: #cluster-autoscaler
 [create worker nodes]: #create-worker-nodes
-[ebs csi driver iam role as aws-managed add-on]: #ebs-csi-driver-iam-role-as-aws-managed-add-on
+[ebs csi driver as aws-managed add-on]: #ebs-csi-driver-as-aws-managed-add-on
 [identify common issues]: #identify-common-issues
 [pod identity]: #pod-identity
 [requirements]: #requirements
