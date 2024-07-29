@@ -151,7 +151,7 @@ Procedure:
   <summary>Example helm chart values</summary>
 
 ```yaml
-gitlabUrl: https://gitlab.example.com/
+gitlabUrl: https://gitlab.example.org/
 unregisterRunners: true
 concurrent: 20
 checkInterval: 3
@@ -181,6 +181,16 @@ runners:
         namespace = "{{.Release.Namespace}}"
   name: "runner-on-k8s"
   secret: gitlab-runner-token
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+            - key: eks.amazonaws.com/capacityType
+              operator: In
+              values:
+                - ON_DEMAND
 tolerations:
   - key: app
     operator: Equal
@@ -203,6 +213,25 @@ Gotchas:
 
 Improvements:
 
+- Keep the manager pod on stable nodes.
+
+  <details style="margin-bottom: 1em;">
+
+  ```yaml
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: eks.amazonaws.com/capacityType
+                operator: In
+                values:
+                  - ON_DEMAND
+  ```
+
+  </details>
+
 - Dedicate specific nodes to runner executors.<br/>
   Taint dedicated nodes and add tolerations and affinities to the runner's configuration.
 
@@ -215,7 +244,6 @@ Improvements:
     [runners.kubernetes.node_selector]
       gitlab = "true"
       "kubernetes.io/arch" = "amd64"
-      "eks.amazonaws.com/capacityType" = "ON_DEMAND"
 
       [runners.kubernetes.affinity]
         [runners.kubernetes.affinity.node_affinity]
@@ -225,6 +253,19 @@ Improvements:
                 key = "app"
                 operator = "In"
                 values = [ "gitlab-runner" ]
+              [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
+                key = "customLabel"
+                operator = "In"
+                values = [ "customValue" ]
+
+            [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution]]
+              weight = 1
+
+              [runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference]
+                [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference.match_expressions]]
+                  key = "eks.amazonaws.com/capacityType"
+                  operator = "In"
+                  values = [ "ON_DEMAND" ]
 
       [runners.kubernetes.node_tolerations]
         "app=gitlab-runner" = "NoSchedule"
@@ -236,24 +277,30 @@ Improvements:
 
   </details>
 
-- Avoid massive resource consumption by defaulting to (very?) strict resource requests and limits.
+- Avoid massive resource consumption by defaulting to (very?) strict resource limits and `0` request.
 
   <details style="margin-bottom: 1em;">
 
   ```toml
   [[runners]]
     [runners.kubernetes]
-      cpu_request = "0.1"
+      cpu_request = "0"
       cpu_limit = "2"
-      memory_request = "1Gi"
+      memory_request = "0"
       memory_limit = "2Gi"
+      ephemeral_storage_request = "0"
       ephemeral_storage_limit = "512Mi"
 
+      helper_cpu_request = "0"
       helper_cpu_limit = "0.5"
+      helper_memory_request = "0"
       helper_memory_limit = "128Mi"
+      helper_ephemeral_storage_request = "0"
       helper_ephemeral_storage_limit = "64Mi"
 
+      service_cpu_request = "0"
       service_cpu_limit = "1"
+      service_memory_request = "0"
       service_memory_limit = "0.5Gi"
   ```
 
@@ -317,7 +364,7 @@ concurrent = 40
 [[runners]]
   name = "static-scaler"
 
-  url = "https://gitlab.example.com"
+  url = "https://gitlab.example.org"
   token = "abcdefghijklmnopqrst"
 
   executor = "docker+machine"

@@ -12,15 +12,15 @@ image:
   image: gitlab-org/gitlab-runner
 imagePullPolicy: IfNotPresent
 
-gitlabUrl: https://gitlab.company.com/
+gitlabUrl: https://gitlab.example.org/
 
 unregisterRunners: true
 
 terminationGracePeriodSeconds: 3600
 
-concurrent: 10
+concurrent: 50
 shutdown_timeout: 0
-checkInterval: 30
+checkInterval: 15
 
 sessionServer:
   enabled: false
@@ -51,6 +51,7 @@ runners:
     [[runners]]
 
       [runners.cache]
+
         Type = "s3"
         Path = "runner/"
         Shared = true
@@ -58,11 +59,11 @@ runners:
 
         [runners.cache.s3]
           ServerAddress = "s3.amazonaws.com"
-          BucketName = "company-ci"
+          BucketName = "example-ci"
           BucketLocation = "eu-west-1"
 
       [runners.kubernetes]
-        namespace = "{{.Release.Namespace}}"
+
         image = "alpine"
         pull_policy = [
           "if-not-present",
@@ -73,6 +74,67 @@ runners:
           "always",
           "never"
         ]
+
+        namespace = "{{.Release.Namespace}}"
+
+        cpu_limit = "2"
+        cpu_limit_overwrite_max_allowed = "15"
+        cpu_request = "0"
+        cpu_request_overwrite_max_allowed = "15"
+        ephemeral_storage_limit = "512Mi"
+        ephemeral_storage_limit_overwrite_max_allowed = "49Gi"
+        ephemeral_storage_request = "0"
+        ephemeral_storage_request_overwrite_max_allowed = "49Gi"
+        helper_cpu_limit = "0.5"
+        helper_cpu_limit_overwrite_max_allowed = "0.9"
+        helper_cpu_request = "0"
+        helper_cpu_request_overwrite_max_allowed = "0.9"
+        helper_ephemeral_storage_limit = "64Mi"
+        helper_ephemeral_storage_limit_overwrite_max_allowed = "1Gi"
+        helper_ephemeral_storage_request = "0"
+        helper_ephemeral_storage_request_overwrite_max_allowed = "1Gi"
+        helper_memory_limit = "128Mi"
+        helper_memory_limit_overwrite_max_allowed = "1Gi"
+        helper_memory_request = "0"
+        helper_memory_request_overwrite_max_allowed = "1Gi"
+        memory_limit = "2Gi"
+        memory_limit_overwrite_max_allowed = "62Gi"
+        memory_request = "0"
+        memory_request_overwrite_max_allowed = "62Gi"
+        service_cpu_limit = "1"
+        service_cpu_limit_overwrite_max_allowed = "3.9"
+        service_cpu_request = "0"
+        service_cpu_request_overwrite_max_allowed = "3.9"
+        service_ephemeral_storage_limit_overwrite_max_allowed = "15Gi"
+        service_ephemeral_storage_request_overwrite_max_allowed = "15Gi"
+        service_memory_limit = "0.5Gi"
+        service_memory_limit_overwrite_max_allowed = "15.5Gi"
+        service_memory_request = "0"
+        service_memory_request_overwrite_max_allowed = "15.5Gi"
+
+        [runners.kubernetes.affinity]
+          [runners.kubernetes.affinity.node_affinity]
+
+            [runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution]
+              [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms]]
+                [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
+                  key = "app.example.org"
+                  operator = "In"
+                  values = [ "gitlab-runner" ]
+
+            [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution]]
+              weight = 1
+
+              [runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference]
+                [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference.match_expressions]]
+                  key = "eks.amazonaws.com/capacityType"
+                  operator = "In"
+                  values = [ "ON_DEMAND" ]
+
+        [runners.kubernetes.node_tolerations]
+          "app.example.org=gitlab-runner" = "NoSchedule"
+          "node-role.kubernetes.io/master" = "NoSchedule"
+
 
   configPath: ""
   name: "test-runner-on-k8s"
