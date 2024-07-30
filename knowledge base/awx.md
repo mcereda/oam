@@ -3,7 +3,7 @@
 1. [Deployment](#deployment)
 1. [Removal](#removal)
 1. [Testing](#testing)
-   1. [Create a demo instance](#create-a-demo-instance)
+   1. [Create demo instances](#create-demo-instances)
 1. [API](#api)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -22,6 +22,12 @@ It is meant to provide a Kubernetes-native installation method for AWX via an AW
 
 The operator will use an Ansible role to create all the AWX resources under its hood.<br/>
 See [Iterating on the installer without deploying the operator].
+
+Requirements:
+
+- An existing K8S cluster.
+- The ability to create PersistentVolumeClaims and PersistentVolumes in said K8S cluster.
+- The ability for the cluster to create load balancers if setting the service type to load balancer.
 
 <details>
   <summary>Using <code>kustomize</code></summary>
@@ -207,7 +213,7 @@ kubectl delete ns 'awx'
 
 ## Testing
 
-### Create a demo instance
+### Create demo instances
 
 <details>
   <summary>Run: follow the basic installation guide</summary>
@@ -422,23 +428,12 @@ $ minikube kubectl -- delete ns 'awx'
 <details>
   <summary>Run: kustomized helm chart</summary>
 
+> #### Warning
+>
+> Remember to include the CRDs from the helm chart.
+
   <details style="margin-left: 1em">
     <summary>1. AMD64, OpenSUSE Leap 15.5, <code>minikube</code></summary>
-
-<div class="warning" style="
-  background-color: rgba(255,255,0,0.0625);
-  border: solid yellow;  /* #FFFF00 */
-  margin: 1em 0;
-  padding: 1em 1em 0;
-">
-<header style="
-  font-weight: bold;
-  margin-bottom: 0.5em;
-">Warning</header>
-
-Mind including the CRDs from the helm chart.
-
-</div>
 
 ```sh
 $ minikube start --cpus=4 --memory=6g --addons=ingress
@@ -509,6 +504,87 @@ DgHIaA9onZj106osEmvECigzsBqutHqI
 $ xdg-open $(minikube service -n 'awx' 'awx-demo-service' --url)
 
 $ minikube kubectl -- delete -f <(minikube kubectl -- kustomize --enable-helm)
+```
+
+  </details>
+
+  <details style="margin-left: 1em">
+    <summary>1. AMD64, Mac OS X, EKS</summary>
+
+```sh
+$ mkdir -p '/tmp/awx'
+$ cd '/tmp/awx'
+
+$ cat <<EOF > 'namespace.yaml'
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: awx
+EOF
+$ cat <<EOF > 'kustomization.yaml'
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: awx
+resources:
+  - namespace.yaml
+helmCharts:
+  - name: awx-operator
+    repo: https://ansible.github.io/awx-operator/
+    version: 2.19.1
+    releaseName: awx-operator
+    includeCRDs: true
+EOF
+$ kubectl kustomize --enable-helm | kubectl apply -f -
+namespace/awx created
+…
+deployment.apps/awx-operator-controller-manager created
+$ kubectl get pods -n 'awx'
+NAME                                               READY   STATUS    RESTARTS   AGE
+awx-operator-controller-manager-3361cfab38-tdgt3   2/2     Running   0          13s
+
+$ cat <<EOF > 'awx-demo.yaml'
+---
+apiVersion: awx.ansible.com/v1beta1
+kind: AWX
+metadata:
+  name: awx-demo
+spec:
+  admin_email: me@example.org
+  no_log: false
+  node_selector: |
+    kubernetes.io/arch: amd64
+  service_type: LoadBalancer
+  ingress_type: ingress
+  ingress_annotations: |
+    kubernetes.io/ingress.class: alb
+EOF
+$ yq -iy '.resources+=["awx-demo.yaml"]' 'kustomization.yaml'
+$ kubectl kustomize --enable-helm | kubectl apply -f -
+namespace/awx unchanged
+…
+deployment.apps/awx-operator-controller-manager unchanged
+awx.awx.ansible.com/awx-demo created
+$ kubectl -n 'awx' get pods
+NAME                                               READY   STATUS      RESTARTS   AGE
+awx-demo-migration-24.1.0-zwv8w                    0/1     Completed   0          115s
+awx-demo-postgres-15-0                             1/1     Running     0          10m
+awx-demo-task-8e34efc56-w5rc5                      4/4     Running     0          8m3s
+awx-demo-web-545gbdgg7b-q2q4m                      3/3     Running     0          8m4s
+awx-operator-controller-manager-3361cfab38-tdgt3   2/2     Running     0          14m
+
+$ # Default user is 'admin'.
+$ kubectl -n 'awx' get secret 'awx-demo-admin-password' -o jsonpath="{.data.password}" | base64 --decode
+IDwYOgL9k2ckaXmqMm6PT4d6TXdJcocd
+$ kubectl -n 'awx' get ingress 'awx-demo-ingress' -o jsonpath='{.status.loadBalancer.ingress[*].hostname}' \
+  | xargs -I{} open http://{}
+
+$ kubectl kustomize --enable-helm | kubectl delete -f -
+namespace "awx" deleted
+…
+awx.awx.ansible.com "awx-demo" deleted
+deployment.apps "awx-operator-controller-manager" deleted
 ```
 
   </details>
