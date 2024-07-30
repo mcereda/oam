@@ -442,6 +442,23 @@ cat '/proc/1/status'
 # Check Containers' capabilities.
 # Run the command from *inside* the container.
 grep 'Cap' '/proc/1/status'
+
+# Create the 'gp3' storage class and set it as the default.
+kubectl annotate sc 'gp2' 'storageclass.kubernetes.io/is-default-class'='false'
+cat <<EOF | kubectl apply -f -
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+  name: gp3
+parameters:
+  type: gp3
+provisioner: kubernetes.io/aws-ebs
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+EOF
 ```
 
 </details>

@@ -132,6 +132,8 @@ aws iam get-policy --policy-arn 'arn:aws:iam::aws:policy/service-role/AmazonEBSC
 aws eks describe-addon-versions --query 'sort(addons[].addonName)'
 aws eks describe-addon-versions --addon-name 'eks-pod-identity-agent' --query 'addons[].addonVersions[]'
 aws eks describe-addon-configuration --addon-name 'aws-ebs-csi-driver' --addon-version 'v1.32.0-eksbuild.1'
+aws eks describe-addon-configuration --addon-name 'aws-ebs-csi-driver' --addon-version 'v1.32.0-eksbuild.1' \
+	--query 'configurationSchema' --output 'text' | jq -sr
 
 docker run --rm -ti -v "$HOME/.aws:/root/.aws:ro" 'amazon/aws-cli:2.17.16' autoscaling describe-auto-scaling-groups
 
