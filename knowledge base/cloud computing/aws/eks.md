@@ -4,21 +4,26 @@
 1. [Requirements](#requirements)
 1. [Cluster creation procedure](#cluster-creation-procedure)
 1. [Access management](#access-management)
+   1. [OIDC providers](#oidc-providers)
 1. [Create worker nodes](#create-worker-nodes)
    1. [Create managed node groups](#create-managed-node-groups)
    1. [Schedule pods on Fargate](#schedule-pods-on-fargate)
 1. [Secrets encryption through KMS](#secrets-encryption-through-kms)
 1. [Storage](#storage)
    1. [Use EBS as volumes](#use-ebs-as-volumes)
+1. [Autoscaling](#autoscaling)
+1. [Add-ons](#add-ons)
+   1. [Metrics server](#metrics-server)
+   1. [Pod identity](#pod-identity)
+   1. [Cluster autoscaler](#cluster-autoscaler)
+   1. [AWS Load Balancer Controller](#aws-load-balancer-controller)
+   1. [EBS CSI driver](#ebs-csi-driver)
       1. [EBS CSI driver as aws-managed add-on](#ebs-csi-driver-as-aws-managed-add-on)
       1. [EBS CSI driver as self-managed add-on](#ebs-csi-driver-as-self-managed-add-on)
-1. [Metrics server](#metrics-server)
-1. [Pod identity](#pod-identity)
-1. [Autoscaling](#autoscaling)
-    1. [Cluster autoscaler](#cluster-autoscaler)
 1. [Troubleshooting](#troubleshooting)
     1. [Identify common issues](#identify-common-issues)
     1. [The worker nodes fail to join the cluster](#the-worker-nodes-fail-to-join-the-cluster)
+    1. [AWS ELB controller fails to get the region from the host's metadata](#aws-elb-controller-fails-to-get-the-region-from-the-hosts-metadata)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -33,13 +38,13 @@ support specific instance types.
 
 EKS automatically installs some [self-managed add-ons][amazon eks add-ons] like the AWS VPC CNI plugin, `kube-proxy` and
 CoreDNS to allow the cluster to work correctly in AWS.<br/>
-They _can_ be disabled after creation or in the clusters' IaC.
+Add-ons _can_ be disabled **after** creation or in the clusters' IaC.
 
 Upon cluster creation, EKS
 [automatically creates a security group][amazon eks security group requirements and considerations] and applies it to
 both the control plane and nodes.<br/>
-The creation of this security group **cannot** be avoided, nor the security group can be customized in the cluster's
-definition (e.g. using IaC tools like [Pulumi] or [Terraform]):
+It appears the creation of this security group **cannot** be avoided, nor the security group can be customized in the
+cluster's definition (e.g. using IaC tools like [Pulumi] or [Terraform]):
 
 > error: aws:eks/cluster:Cluster resource 'cluster' has a problem: Value for unconfigurable attribute. Can't configure a
 > value for "vpc_config.0.cluster_security_group_id": its value will be decided automatically based on the result of
@@ -52,6 +57,12 @@ By default, the IAM principal creating the cluster is the **only** one allowed t
 server.<br/>
 Other IAM principals _can_ have access to the cluster's API once [they are added to it][access management].
 
+Pods can assume IAM roles through Kubernetes service accounts, provided the service accounts have been associated the
+roles by leveraging:
+
+- [OIDC providers], and/or
+- [Pod Identity].
+
 <details>
   <summary>Usage</summary>
 
@@ -62,7 +73,7 @@ aws eks create-cluster --name 'DeepThought' \
   --resources-vpc-config 'subnetIds=subnet-11112222333344445,subnet-66667777888899990'
 aws eks create-cluster … --access-config 'authenticationMode=API'
 
-# Check cluster's authentication mode.
+# Check clusters' authentication mode.
 aws eks describe-cluster --name 'DeepThought' --query 'cluster.accessConfig.authenticationMode' --output 'text'
 
 # Change encryption configuration.
@@ -130,7 +141,7 @@ aws eks describe-addon-configuration --addon-name 'aws-ebs-csi-driver' --addon-v
 - \[suggested] 1 (one) custom _Cluster Service Role_.<br/>
   One **must** attach this role the `AmazonEKSClusterPolicy` IAM policy, give it similar custom permissions.
 
-  <details style="margin-bottom: 1em;">
+  <details style="margin-bottom: 1em">
     <summary>But why?!</summary>
 
   Kubernetes clusters managed by EKS make calls to other AWS services on the users' behalf to manage the resources that
@@ -194,7 +205,7 @@ This is what worked for me:
 1. Attach the required policies to the cluster's service role.
 
    <details>
-     <summary>CLI</summary>
+     <summary>Assume role policy definition</summary>
 
    ```json
    {
@@ -209,6 +220,11 @@ This is what worked for me:
    }
    ```
 
+   </details>
+
+   <details>
+     <summary>CLI</summary>
+
    ```sh
    aws iam create-role \
      --role-name 'DeepThoughtClusterServiceRole' \
@@ -220,27 +236,15 @@ This is what worked for me:
 
    </details>
 
-   <details style="margin-bottom: 1em;">
+   <details style="margin-bottom: 1em">
      <summary>Pulumi</summary>
 
    ```ts
-   const cluster_assumeRole_policy = JSON.stringify({
-       Version: "2012-10-17",
-       Statement: [{
-           Effect: "Allow",
-           Action: "sts:AssumeRole",
-           Principal: {
-               Service: "eks.amazonaws.com",
-           },
-       }],
-   });
-
    const cluster_service_role = new aws.iam.Role(
        "cluster-service-role",
        {
            assumeRolePolicy: cluster_assumeRole_policy,
            managedPolicyArns: [
-               // alternatively, use RolePolicyAttachments
                "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
            ],
            name: "DeepThoughtClusterServiceRole",
@@ -264,7 +268,7 @@ This is what worked for me:
 
    </details>
 
-   <details style="margin-bottom: 1em;">
+   <details style="margin-bottom: 1em">
      <summary>Pulumi</summary>
 
    ```ts
@@ -293,8 +297,8 @@ This is what worked for me:
    Added new context arn:aws:eks:eu-east-1:000011112222:cluster/DeepThought to /home/itsAme/.kube/config
 
    $ kubectl cluster-info
-   Kubernetes control plane is running at https://FB32A9C4A3D6BBC82695B1936BF4AAA3.gr7.eu-east-1.eks.amazonaws.com
-   CoreDNS is running at https://FB32A9C4A3D6BBC82695B1936BF4AAA3.gr7.eu-east-1.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+   Kubernetes control plane is running at https://0123456789ABCDEF0123456789ABCDEF.gr7.eu-east-1.eks.amazonaws.com
+   CoreDNS is running at https://0123456789ABCDEF0123456789ABCDEF.gr7.eu-east-1.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
    ```
 
 1. [Create some worker nodes][create worker nodes].
@@ -320,33 +324,22 @@ Refer the following to allow others this way:
 - [Using IAM Groups to manage Kubernetes cluster access]
 - [Simplified Amazon EKS Access - NEW Cluster Access Management Controls]
 
-When a cluster's authentication mode includes the APIs:
+When a cluster's authentication mode includes the APIs, one can allow IAM users and roles to connect to and operate on
+it by creating _access entries_:
 
 ```sh
-# Check cluster's authentication mode.
 $ aws eks describe-cluster --name 'DeepThought' --query 'cluster.accessConfig.authenticationMode' --output 'text'
 API_AND_CONFIG_MAP
+$ aws eks describe-cluster --name 'Marvin' --query 'cluster.accessConfig.authenticationMode' --output 'text'
+API
+
+$ aws eks create-access-entry --cluster-name 'DeepThought' --principal-arn 'arn:aws:iam::000011112222:role/Admin'
+$ aws eks create-access-entry … --principal-arn 'arn:aws:iam::000011112222:user/bob'
 ```
 
-one can create _access entries_ to allow IAM users and roles to connect to it:
+To allow operations **inside** the cluster, every access entry **requires** to be also assigned an EKS access policy:
 
 ```sh
-# Create access entries to use IAM for authentication.
-aws eks create-access-entry --cluster-name 'DeepThought' \
-  --principal-arn 'arn:aws:iam::000011112222:role/Admin'
-aws eks create-access-entry … --principal-arn 'arn:aws:iam::000011112222:user/bob'
-```
-
-> In the case the configmap is also used, APIs take precedence over the configmap.
-
-Mind that, to allow operations **inside** the cluster, every access entry **requires** to be also assigned an EKS access
-policy:
-
-```sh
-# List available access policies.
-aws eks list-access-policies
-
-# Associate policies to access entries.
 aws eks associate-access-policy --cluster-name 'DeepThought' \
   --principal-arn 'arn:aws:iam::000011112222:role/Admin' \
   --policy-arn 'arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy' \
@@ -355,6 +348,66 @@ aws eks associate-access-policy --cluster-name 'DeepThought' \
   --principal-arn 'arn:aws:iam::000011112222:user/bob' \
   --policy-arn 'arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy' \
   --access-scope '[ "type": "namespace", "namespaces": [ "bob" ] ]'
+```
+
+Should both configmap and APIs being used, the APIs **take precedence** over the configmap.
+
+### OIDC providers
+
+Clusters are associated an OpenID Connect (OIDC) issuer URL upon creation.<br/>
+IAM OIDC providers can be created for one's cluster's OIDC issuer URL to use IAM roles for service accounts.<br/>
+Providers can be used as alternative to [Pod Identity] associations.
+
+<details>
+  <summary>CLI</summary>
+
+```sh
+# 1. Get the OIDC issuer ID for existing EKS clusters
+OIDC_ISSUER="$(aws eks describe-cluster --name 'DeepThought' --query 'cluster.identity.oidc.issuer' --output 'text')"
+OIDC_ID="$(echo "$OIDC_ISSUER" | awk -F '/id/' '{print $2}')"
+# 2. Check they are present in the list of providers for the account
+aws iam list-open-id-connect-providers --query 'OpenIDConnectProviderList' --output 'text' | grep "$OIDC_ID"
+# 3. If the providers do not exist, create them
+aws create create-open-id-connect-provider --url "$OIDC_ISSUER" --client-id-list 'sts.amazonaws.com'
+```
+
+</details>
+
+<details style="margin-bottom: 1em">
+  <summary>Pulumi</summary>
+
+```ts
+const oidcProvider = new aws.iam.OpenIdConnectProvider(
+    "cluster",
+    {
+        clientIdLists: [ "sts.amazonaws.com" ],
+        thumbprintLists: [ "0123456789abcdef0123456789abcdef01234567" ],  // FIXME: use reference
+        url: cluster.identities[0].oidcs[0].issuer,
+    },
+);
+```
+
+</details>
+
+To use the OIDC provider, roles need to be configured with an assume policy like the following:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [{
+        "Effect": "Allow",
+        "Principal": {
+            "Federated": "arn:aws:iam::012345678901:oidc-provider/oidc.eks.eu-west-1.amazonaws.com/id/0123456789ABCDEF0123456789ABCDEF"
+        },
+        "Action": "sts:AssumeRoleWithWebIdentity",
+        "Condition": {
+            "StringEquals": {
+                "oidc.eks.eu-west-1.amazonaws.com/id/0123456789ABCDEF0123456789ABCDEF:aud": "sts.amazonaws.com",
+                "oidc.eks.eu-west-1.amazonaws.com/id/0123456789ABCDEF0123456789ABCDEF:sub": "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+            }
+        }
+    }]
+}
 ```
 
 ## Create worker nodes
@@ -373,7 +426,7 @@ Additional requirements:
   Attach to it the `AmazonEKSWorkerNodePolicy`, `AmazonEC2ContainerRegistryReadOnly` and `AmazonEKS_CNI_Policy`
   policies, or give it similar custom permissions.
 
-  <details style="margin-bottom: 1em;">
+  <details style="margin-bottom: 1em">
     <summary>But why?!</summary>
 
   The EKS nodes' `kubelet`s make calls to the AWS APIs on one's behalf.<br/>
@@ -403,7 +456,7 @@ Procedure:
 1. Attach the required policies to the node groups' service role.
 
    <details>
-     <summary>CLI</summary>
+     <summary>Assume role policy definition</summary>
 
    ```json
    {
@@ -419,6 +472,11 @@ Procedure:
        ]
    }
    ```
+
+   </details>
+
+   <details>
+     <summary>CLI</summary>
 
    ```sh
    aws iam create-role \
@@ -437,27 +495,15 @@ Procedure:
 
    </details>
 
-   <details style="margin-bottom: 1em;">
+   <details style="margin-bottom: 1em">
      <summary>Pulumi</summary>
 
    ```ts
-   const nodeGroups_assumeRole_policy = JSON.stringify({
-       Version: "2012-10-17",
-       Statement: [{
-           Effect: "Allow",
-           Action: "sts:AssumeRole",
-           Principal: {
-               Service: "ec2.amazonaws.com",
-           },
-       }],
-   });
-
    const nodeGroups_service_role = new aws.iam.Role(
        "nodeGroups-service-role",
        {
            assumeRolePolicy: nodeGroups_assumeRole_policy,
            managedPolicyArns: [
-               // alternatively, use RolePolicyAttachments
                "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
                "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
                "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
@@ -513,7 +559,7 @@ Additional requirements:
 - \[suggestion] 1 (one) custom _Fargate Service Role_.<br/>
   Attach to it the `AmazonEKSFargatePodExecutionRolePolicy` policy, or give it similar custom permissions.
 
-  <details style="margin-bottom: 1em;">
+  <details style="margin-bottom: 1em">
     <summary>But why?!</summary>
 
   To create pods on Fargate, the components running on Fargate must make calls to the AWS APIs on one's behalf.<br/>
@@ -533,7 +579,7 @@ Procedure:
 1. Attach the required policies to the Fargate service profile.
 
    <details>
-     <summary>CLI</summary>
+     <summary>Assume role policy definition</summary>
 
    ```json
    {
@@ -555,6 +601,11 @@ Procedure:
    }
    ```
 
+   </details>
+
+   <details>
+     <summary>CLI</summary>
+
    ```sh
    aws iam create-role \
      --role-name 'DeepThoughtFargateServiceRole' \
@@ -566,38 +617,15 @@ Procedure:
 
    </details>
 
-   <details style="margin-bottom: 1em;">
+   <details style="margin-bottom: 1em">
      <summary>Pulumi</summary>
 
    ```ts
-   const fargate_assumeRole_policy = pulumi.all([
-       aws.getRegionOutput().apply(region => region.id),
-       aws.getCallerIdentityOutput().apply(callerIdentity => callerIdentity.accountId),
-       cluster.name,
-   ]).apply(
-       ([regionId, awsAccountId, clusterName]) => JSON.stringify({
-           Version: "2012-10-17",
-           Statement: [{
-               Effect: "Allow",
-               Action: "sts:AssumeRole",
-               Principal: {
-                   Service:  "eks-fargate-pods.amazonaws.com",
-               },
-               Condition: {
-                   ArnLike: {
-                       "aws:SourceArn": `arn:aws:eks:${regionId}:${awsAccountId}:fargateprofile/${clusterName}/*`,
-                   },
-               },
-           }],
-       }),
-   );
-
    const fargate_service_role = new aws.iam.Role(
        "fargate-service-role",
        {
            assumeRolePolicy: fargate_assumeRole_policy,
            managedPolicyArns: [
-               // alternatively, use RolePolicyAttachments
                "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy",
            ],
            name: "DeepThoughtFargateServiceRole",
@@ -645,9 +673,9 @@ Procedure:
 
 ## Secrets encryption through KMS
 
-See [Enabling secret encryption on an existing cluster].
+Refer [Enabling secret encryption on an existing cluster].
 
-TL;DR:
+Procedure:
 
 1. Make sure the role used in the cluster has access to the used key with `kms:DescribeKey` and `kms:CreateGrant`
    permissions.
@@ -726,178 +754,57 @@ kubectl exec -it 'app' -- cat '/data/out.txt'
 kubectl delete -f 'manifests/'
 ```
 
-#### EBS CSI driver as aws-managed add-on
+'gp2' seem to still be the default EBS type at the time of writing.<br/>
+Though it seems to be possible to add storage custom storage classes to the values file for the EBS CSI driver's helm
+chart, this is not configurable from the AWS-managed add-on.
 
-Refer [Manage the Amazon EBS CSI driver as an Amazon EKS add-on].
-
-Requirements:
-
-- An existing EKS cluster (_duh!_).
-- An existing IAM OIDC provider for the cluster.
-
-  <details>
-    <summary>CLI</summary>
-
-  ```sh
-  # 1. Get the OIDC issuer ID for existing EKS clusters
-  OIDC_ISSUER="$(aws eks describe-cluster --name 'DeepThought' --query 'cluster.identity.oidc.issuer' --output 'text')"
-  OIDC_ID="$(echo "$OIDC_ISSUER" | awk -F '/id/' '{print $2}')"
-  # 2. Check they are present in the list of providers for the account
-  aws iam list-open-id-connect-providers --query 'OpenIDConnectProviderList' --output 'text' | grep "$OIDC_ID"
-  # 3. If the providers do not exist, create them
-  aws create create-open-id-connect-provider --url "$OIDC_ISSUER" --client-id-list 'sts.amazonaws.com'
-  ```
-
-  </details>
-
-  <details style="margin-bottom: 1em;">
-    <summary>Pulumi</summary>
-
-  ```ts
-  const oidcProvider = new aws.iam.OpenIdConnectProvider(
-      "cluster",
-      {
-          clientIdLists: [ "sts.amazonaws.com" ],
-          thumbprintLists: [ "0123456789abcdef0123456789abcdef01234567" ],  // FIXME: use reference
-          url: cluster.identities[0].oidcs[0].issuer,
-      },
-  );
-  ```
-
-  </details>
-
-- An IAM role for the EBS CSI driver.<br/>
-  Refer [Create an Amazon EBS CSI driver IAM role].
-
-  If missing, the add-on **will** be installed but `kubectl describe pvc` will show the following errors:
-
-  > ```plaintext
-  > failed to provision volume with StorageClass
-  > ```
-  >
-  > ```plaintext
-  > could not create volume in EC2: UnauthorizedOperation error
-  > ```
-
-  <details>
-    <summary>CLI</summary>
-
-  ```sh
-  ```
-
-  </details>
-
-  <details style="margin-bottom: 1em;">
-    <summary>Pulumi</summary>
-
-  ```ts
-  const eksEbsCsiDriver_role = oidcProvider.arn.apply(oidcProviderArn => new aws.iam.Role(
-      "eksEbsCsiDriver",
-      {
-          name: "EksEbsCsiDriverRole",
-          description: "Allows Pods to act upon EBS volumes on behalf of the user.",
-          assumeRolePolicy: JSON.stringify({
-              Version: "2012-10-17",
-              Statement: [{
-                  Effect: "Allow",
-                  Principal: {
-                      Federated: oidcProviderArn,
-                  },
-                  Action: "sts:AssumeRoleWithWebIdentity",
-                  Condition: {
-                      StringEquals: {
-                          // FIXME: use references
-                          "oidc.eks.eu-west-1.amazonaws.com/id/0123456789ABCDEF0123456789ABCDEF:aud": "sts.amazonaws.com",
-                          "oidc.eks.eu-west-1.amazonaws.com/id/0123456789ABCDEF0123456789ABCDEF:sub": "system:serviceaccount:kube-system:ebs-csi-controller-sa",
-                      },
-                  },
-              }],
-          }),
-      },
-  ));
-  new aws.iam.RolePolicyAttachment(
-      "AmazonEBSCSIDriverPolicy-to-eksEbsCsiDriverRole",
-      {
-          policyArn: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
-          role: eksEbsCsiDriver_role.name,
-      },
-  );
-  ```
-
-  </details>
-
-- [external-snapshotter], if planning to use the snapshot functionality of the driver.<br/>
-  The components' installation **must** be performed in this order:
-
-  1. CustomResourceDefinitions (CRDs) for `volumeSnapshotClasses`, `volumeSnapshots` and `volumeSnapshotContents`.
-  1. ClusterRole, ClusterRoleBinding, and other RBAC components.
-  1. Snapshot controller's Deployment.
-
-  <details style="margin-bottom: 1em;">
-    <summary>CLI</summary>
-  ```sh
-  git clone 'https://github.com/kubernetes-csi/external-snapshotter.git'
-  kubectl kustomize 'external-snapshotter/client/config/crd' | kubectl apply -f -
-  kubectl -n 'kube-system' kustomize 'external-snapshotter/deploy/kubernetes/snapshot-controller' | kubectl apply -f -
-  ```
-
-  </details>
-
-Procedure:
-
-- Install the add-on.<br/>
-  Make sure to specify the IAM role for the EBS CSI driver from the requirements.
-
-  <details>
-    <summary>CLI</summary>
-
-  ```sh
-  aws eks create-addon --cluster-name 'DeepThought' \
-    --addon-name 'aws-ebs-csi-driver' \
-    --service-account-role-arn 'arn:aws:iam::012345678901:role/customEksEbsCsiDriverRole
-  ```
-
-  </details>
-
-  <details style="margin-bottom: 1em;">
-    <summary>Pulumi</summary>
-
-  ```ts
-  new aws.eks.Addon(
-      "ebsCsiDriver",
-      {
-          clusterName: cluster.name,
-          addonName: "aws-ebs-csi-driver",
-          addonVersion: "v1.32.0-eksbuild.1",
-          resolveConflictsOnCreate: "OVERWRITE",
-          resolveConflictsOnUpdate: "OVERWRITE",
-          serviceAccountRoleArn: ebsCsiDriver_role.arn,
-      },
-  );
-  ```
-
-  </details>
-
-#### EBS CSI driver as self-managed add-on
-
-<details style="margin-bottom: 1em;">
-  <summary>CLI</summary>
+<details style="margin-bottom: 1em">
+  <summary>Generic procedure to create the 'gp3' type and set that as the default</summary>
 
 ```sh
-helm upgrade -i --repo 'https://kubernetes-sigs.github.io/aws-ebs-csi-driver' \
-  'aws-ebs-csi-driver' 'aws-ebs-csi-driver' \
-  --namespace 'kube-system'
+kubectl annotate sc 'gp2' 'storageclass.kubernetes.io/is-default-class'='false'
+cat <<EOF | kubectl apply -f -
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+  name: gp3
+parameters:
+  type: gp3
+provisioner: kubernetes.io/aws-ebs
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+EOF
 ```
 
 </details>
 
-## Metrics server
+## Autoscaling
+
+Clusters can automatically scale:
+
+- _Horizontally_ (as in **number** of nodes) through the use of [Cluster Autoscaler].
+- _Vertically_ (as in **size** of nodes) through the use of [Karpenter].
+
+The pods running the autoscaling components **will need** the necessary permissions to operate on the cluster's
+resources.<br/>
+This means giving them pods access keys, or enabling [Pod Identity].
+
+## Add-ons
+
+EKS automatically installs some [self-managed add-ons][amazon eks add-ons] like the AWS VPC CNI plugin, `kube-proxy` and
+CoreDNS to allow the cluster to work correctly in AWS.<br/>
+Add-ons _can_ be disabled **after** creation or in the clusters' IaC.
+
+### Metrics server
 
 Refer [View resource usage with the KubernetesMetrics Server].
 
 Required by the Horizontal Pod Autoscaler and Dashboard components.
 
-Make sure to use a container port different from 10250 if using Fargate, as that port is reserved on Fargate:
+Make sure to use a container port different from 10250 if using Fargate, as that port is reserved on it:
 
 ```sh
 helm upgrade -i --repo 'https://kubernetes-sigs.github.io/metrics-server' \
@@ -906,12 +813,13 @@ helm upgrade -i --repo 'https://kubernetes-sigs.github.io/metrics-server' \
   --set 'containerPort'='10251'
 ```
 
-## Pod identity
+### Pod identity
 
 Refer [Learn how EKS Pod Identity grants pods access to AWS services].
 
 Provides pods the ability to manage AWS credentials in a similar way to how EC2 instance profiles provide credentials to
-instances.
+instances.<br/>
+It can be used as alternative to [OIDC providers].
 
 Limitations:
 
@@ -1013,24 +921,34 @@ Procedure:
 
 1. Configure pods to use those service accounts.
 
-## Autoscaling
-
-Clusters can automatically scale:
-
-- _Horizontally_ (as in **number** of nodes) through the use of [Cluster Autoscaler].
-- _Vertically_ (as in **size** of nodes) through the use of [Karpenter].
-
-The pods running the autoscaling components **will need** the necessary permissions to operate on the cluster's
-resources.<br/>
-This means giving them pods access keys, or enabling [Pod Identity].
-
 ### Cluster autoscaler
 
 Just use the [Kubernetes' cluster autoscaler component].
 
-Suggested the use of a custom IAM role.<br/>
+Suggested the use of a custom IAM role and [Pod Identity].<br/>
 Refer the autoscaler's
 [AWS-specific README](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md).
+
+<details>
+  <summary>Assume role policy definition</summary>
+
+  ```json
+  {
+      "Version": "2012-10-17",
+      "Statement": [{
+          "Effect": "Allow",
+          "Principal": {
+              "Service": "pods.eks.amazonaws.com"
+          },
+          "Action": [
+              "sts:AssumeRole",
+              "sts:TagSession"
+          ]
+      }]
+  }
+  ```
+
+</details>
 
 <details style="margin-bottom: 1em">
   <summary>Pulumi</summary>
@@ -1040,19 +958,7 @@ const clusterAutoscaling_role = new aws.iam.Role(
     "clusterAutoscaling",
     {
         description: "Allows Pods to scale EKS cluster node groups on behalf of the user.",
-        assumeRolePolicy: JSON.stringify({
-            Version: "2012-10-17",
-            Statement: [{
-                Effect: "Allow",
-                Principal: {
-                    Service: "pods.eks.amazonaws.com",
-                },
-                Action: [
-                    "sts:AssumeRole",
-                    "sts:TagSession",
-                ],
-            }],
-        }),
+        assumeRolePolicy: clusterAutoscaler_assumeRole_policy,
     },
 );
 const clusterAutoscaling_policy_eksScaleNodeGroups = new aws.iam.Policy(
@@ -1126,6 +1032,229 @@ helm upgrade -i --repo 'https://kubernetes.github.io/autoscaler' \
 After any operation, the cluster autoscaler will wait for the ASG cooldown time to end.<br/>
 Only then, it will start counting down its own timers.
 
+### AWS Load Balancer Controller
+
+Refer [Install the AWS Load Balancer Controller using Helm].
+
+Requirements:
+
+- An existing EKS cluster (_duh!_).
+- An existing IAM [OIDC provider][oidc providers] for the cluster.<br/>
+  Alternatively, [Pod Identity] must be installed in the cluster and the role in the next step must be configured to
+  use it.
+- A dedicated IAM role for the load balancer controller.
+
+  <details style="margin-bottom: 1em">
+    <summary>Pulumi (OIDC)</summary>
+
+  ```ts
+  const eksElbController_role = oidcProvider.arn.apply(oidcProviderArn => new aws.iam.Role(
+      "eksElbController",
+      {
+          name: "EksElbControllerRole",
+          description: "Allows EKS' load balancer controller component to control ELBs on behalf of the user.",
+          assumeRolePolicy: JSON.stringify({
+              Version: "2012-10-17",
+              Statement: [{
+                  Effect: "Allow",
+                  Principal: {
+                      Federated: oidcProviderArn,
+                  },
+                  Action: "sts:AssumeRoleWithWebIdentity",
+                  Condition: {
+                      StringEquals: {
+                          // FIXME: use references
+                          "oidc.eks.eu-west-1.amazonaws.com/id/0123456789ABCDEF0123456789ABCDEF:aud": "sts.amazonaws.com",
+                          "oidc.eks.eu-west-1.amazonaws.com/id/0123456789ABCDEF0123456789ABCDEF:sub": "system:serviceaccount:kube-system:aws-load-balancer-controller",
+                      },
+                  },
+              }],
+          }),
+      },
+  ));
+  new aws.iam.RolePolicyAttachment(
+      "eksElbControllerPolicy-to-eksElbControllerRole",
+      {
+          policyArn: "arn:aws:iam::012345678901:policy/EksElbControllerPolicy",
+          role: eksElbController_role.name,
+      },
+  );
+  ```
+
+   </details>
+
+- Subnets **must** be configured _properly_.<br/>
+  Refer [Route application and HTTP traffic with Application Load Balancers].
+
+  Specifically, subnets must have the specific, appropriate tags.<br/>
+  Those are actively looked for by the controller, and will miserably fail if they are not present.
+
+Procedure:
+
+1. Create a IAM policy using the `/docs/install/iam_policy.json` file in the
+   [controller's repository][aws load balancer controller repository].
+
+   <details style="margin-bottom: 1em">
+     <summary>CLI</summary>
+
+   ```sh
+   curl -O 'https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.8.1/docs/install/iam_policy.json'
+   aws iam create-policy \
+     --policy-name 'EksElbControllerPolicy' \
+     --policy-document 'file://iam_policy.json'
+   ```
+
+   </details>
+
+1. Assign the policy from the previous step to the role.
+1. Install the load balancer controller with the proper configuration.
+
+   <details style="margin-bottom: 1em">
+     <summary>Helm</summary>
+
+   ```sh
+   helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
+     'aws-load-balancer-controller' 'aws-load-balancer-controller' \
+     --namespace 'kube-system' \
+     --set 'clusterName'='DeepThought' \
+     --set 'serviceAccount.create'='true' \
+     --set 'serviceAccount.name'='aws-load-balancer-controller' \
+     --set 'region'='eu-west-1' \
+     --set 'vpcId'='vpc-01234567'
+   ```
+
+   </details>
+
+### EBS CSI driver
+
+#### EBS CSI driver as aws-managed add-on
+
+Refer [Manage the Amazon EBS CSI driver as an Amazon EKS add-on].
+
+Requirements:
+
+- An existing EKS cluster (_duh!_).
+- An existing IAM [OIDC provider][oidc providers] for the cluster.<br/>
+  Alternatively, [Pod Identity] must be installed in the cluster and the role in the next step must be configured to
+  use it.
+- An IAM role for the EBS CSI driver.<br/>
+  Refer [Create an Amazon EBS CSI driver IAM role].
+
+  If missing, the add-on **will** be installed but `kubectl describe pvc` will show the following errors:
+
+  > ```plaintext
+  > failed to provision volume with StorageClass
+  > ```
+  >
+  > ```plaintext
+  > could not create volume in EC2: UnauthorizedOperation error
+  > ```
+
+  <details style="margin-bottom: 1em">
+    <summary>Pulumi</summary>
+
+  ```ts
+  const eksEbsCsiDriver_role = oidcProvider.arn.apply(oidcProviderArn => new aws.iam.Role(
+      "eksEbsCsiDriver",
+      {
+          name: "EksEbsCsiDriverRole",
+          description: "Allows Pods to act upon EBS volumes on behalf of the user.",
+          assumeRolePolicy: JSON.stringify({
+              Version: "2012-10-17",
+              Statement: [{
+                  Effect: "Allow",
+                  Principal: {
+                      Federated: oidcProviderArn,
+                  },
+                  Action: "sts:AssumeRoleWithWebIdentity",
+                  Condition: {
+                      StringEquals: {
+                          // FIXME: use references
+                          "oidc.eks.eu-west-1.amazonaws.com/id/0123456789ABCDEF0123456789ABCDEF:aud": "sts.amazonaws.com",
+                          "oidc.eks.eu-west-1.amazonaws.com/id/0123456789ABCDEF0123456789ABCDEF:sub": "system:serviceaccount:kube-system:ebs-csi-controller-sa",
+                      },
+                  },
+              }],
+          }),
+      },
+  ));
+  new aws.iam.RolePolicyAttachment(
+      "AmazonEBSCSIDriverPolicy-to-eksEbsCsiDriverRole",
+      {
+          policyArn: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
+          role: eksEbsCsiDriver_role.name,
+      },
+  );
+  ```
+
+  </details>
+
+- [external-snapshotter], if planning to use the snapshot functionality of the driver.<br/>
+  The components' installation **must** be performed in this order:
+
+  1. CustomResourceDefinitions (CRDs) for `volumeSnapshotClasses`, `volumeSnapshots` and `volumeSnapshotContents`.
+  1. ClusterRole, ClusterRoleBinding, and other RBAC components.
+  1. Snapshot controller's Deployment.
+
+  <details style="margin-bottom: 1em">
+    <summary>CLI</summary>
+
+  ```sh
+  git clone 'https://github.com/kubernetes-csi/external-snapshotter.git'
+  kubectl kustomize 'external-snapshotter/client/config/crd' | kubectl apply -f -
+  kubectl -n 'kube-system' kustomize 'external-snapshotter/deploy/kubernetes/snapshot-controller' | kubectl apply -f -
+  ```
+
+  </details>
+
+Procedure:
+
+- Install the add-on.<br/>
+  Make sure to specify the IAM role for the EBS CSI driver from the requirements.
+
+  <details>
+    <summary>CLI</summary>
+
+  ```sh
+  aws eks create-addon --cluster-name 'DeepThought' \
+    --addon-name 'aws-ebs-csi-driver' \
+    --service-account-role-arn 'arn:aws:iam::012345678901:role/customEksEbsCsiDriverRole
+  ```
+
+  </details>
+
+  <details style="margin-bottom: 1em">
+    <summary>Pulumi</summary>
+
+  ```ts
+  new aws.eks.Addon(
+      "ebsCsiDriver",
+      {
+          clusterName: cluster.name,
+          addonName: "aws-ebs-csi-driver",
+          addonVersion: "v1.32.0-eksbuild.1",
+          resolveConflictsOnCreate: "OVERWRITE",
+          resolveConflictsOnUpdate: "OVERWRITE",
+          serviceAccountRoleArn: ebsCsiDriver_role.arn,
+      },
+  );
+  ```
+
+  </details>
+
+#### EBS CSI driver as self-managed add-on
+
+<details style="margin-bottom: 1em">
+  <summary>CLI</summary>
+
+```sh
+helm upgrade -i --repo 'https://kubernetes-sigs.github.io/aws-ebs-csi-driver' \
+  'aws-ebs-csi-driver' 'aws-ebs-csi-driver' \
+  --namespace 'kube-system'
+```
+
+</details>
+
 ## Troubleshooting
 
 See [Amazon EKS troubleshooting].
@@ -1156,6 +1285,26 @@ Error message example:
 > NodeCreationFailure: Instances failed to join the kubernetes cluster.
 
 Debug: see [Identify common issues].
+
+### AWS ELB controller fails to get the region from the host's metadata
+
+Error message example:
+
+> failed to introspect region from EC2Metadata, specify --aws-region instead if EC2Metadata is unavailable:
+> EC2MetadataRequestError: failed to get EC2 instance identity document
+
+Root cause: there is something wrong with the role and its permissions.
+
+Workaround:<br/>
+Provide the helm chart values for vpcId and region:
+
+```sh
+helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
+  'aws-load-balancer-controller' 'aws-load-balancer-controller' \
+  […] \
+  --set 'region'='us-west-1' \
+  --set 'vpcId'='vpc-01234567'
+```
 
 ## Further readings
 
@@ -1201,6 +1350,12 @@ Debug: see [Identify common issues].
 - [Configure instance permissions required for Systems Manager]
 - [View resource usage with the KubernetesMetrics Server]
 - [Create an Amazon EBS CSI driver IAM role]
+- [Migrating Amazon EKS clusters from gp2 to gp3 EBS volumes]
+- [Upgrade default storage class for EKS]
+- [Enable EBS GP3 for eks by default]
+- [Install the AWS Load Balancer Controller using Helm]
+- [Reaching failed to introspect region from EC2Metadata... on container start-up - vanilla EKS/Fargate]
+- [Route application and HTTP traffic with Application Load Balancers]
 
 <!--
   Reference
@@ -1213,6 +1368,7 @@ Debug: see [Identify common issues].
 [create worker nodes]: #create-worker-nodes
 [ebs csi driver as aws-managed add-on]: #ebs-csi-driver-as-aws-managed-add-on
 [identify common issues]: #identify-common-issues
+[oidc providers]: #oidc-providers
 [pod identity]: #pod-identity
 [requirements]: #requirements
 [secrets encryption through kms]: #secrets-encryption-through-kms
@@ -1242,7 +1398,7 @@ Debug: see [Identify common issues].
 [aws eks create-cluster]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-cluster.html
 [aws eks create-fargate-profile]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-fargate-profile.html
 [aws eks create-nodegroup]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-nodegroup.html
-[AWSSupport-TroubleshootEKSWorkerNode runbook]: https://docs.aws.amazon.com/systems-manager-automation-runbooks/latest/userguide/automation-awssupport-troubleshooteksworkernode.html
+[awssupport-troubleshooteksworkernode runbook]: https://docs.aws.amazon.com/systems-manager-automation-runbooks/latest/userguide/automation-awssupport-troubleshooteksworkernode.html
 [choosing an amazon ec2 instance type]: https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html
 [configure instance permissions required for systems manager]: https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-policies-overview
 [create an amazon ebs csi driver iam role]: https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html
@@ -1257,11 +1413,14 @@ Debug: see [Identify common issues].
 [how do i resolve the error "you must be logged in to the server (unauthorized)" when i connect to the amazon eks api server?]: https://repost.aws/knowledge-center/eks-api-server-unauthorized-error
 [how do i use persistent storage in amazon eks?]: https://repost.aws/knowledge-center/eks-persistent-storage
 [identity and access management]: https://aws.github.io/aws-eks-best-practices/security/docs/iam/
+[install the aws load balancer controller using helm]: https://docs.aws.amazon.com/eks/latest/userguide/lbc-helm.html
 [learn how eks pod identity grants pods access to aws services]: https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html
 [manage the amazon ebs csi driver as an amazon eks add-on]: https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html
 [managed node groups]: https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html
+[migrating amazon eks clusters from gp2 to gp3 ebs volumes]: https://aws.amazon.com/blogs/containers/migrating-amazon-eks-clusters-from-gp2-to-gp3-ebs-volumes/
 [private cluster requirements]: https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html
 [required permissions to view eks resources]: https://docs.aws.amazon.com/eks/latest/userguide/view-kubernetes-resources.html#view-kubernetes-resources-permissions
+[route application and http traffic with application load balancers]: https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html
 [running stateful workloads with amazon eks on aws fargate using amazon efs]: https://aws.amazon.com/blogs/containers/running-stateful-workloads-with-amazon-eks-on-aws-fargate-using-amazon-efs/
 [self-managed nodes]: https://docs.aws.amazon.com/eks/latest/userguide/worker.html
 [service-linked role permissions for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles-eks.html#service-linked-role-permissions-eks
@@ -1273,7 +1432,11 @@ Debug: see [Identify common issues].
 
 <!-- Others -->
 [amazon elastic block store (ebs) csi driver]: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/README.md
+[aws load balancer controller repository]: https://github.com/kubernetes-sigs/aws-load-balancer-controller
+[enable ebs gp3 for eks by default]: https://geko.cloud/en/aws-enable-ebs-gp3-for-eks-by-default/
 [external-snapshotter]: https://github.com/kubernetes-csi/external-snapshotter
 [how do you get kubectl to log in to an aws eks cluster?]: https://stackoverflow.com/questions/53266960/how-do-you-get-kubectl-to-log-in-to-an-aws-eks-cluster
 [how to add iam user and iam role to aws eks cluster?]: https://antonputra.com/kubernetes/add-iam-user-and-iam-role-to-eks/
+[reaching failed to introspect region from ec2metadata... on container start-up - vanilla eks/fargate]: https://github.com/kubernetes-sigs/aws-load-balancer-controller/issues/1561
+[upgrade default storage class for eks]: https://www.argonaut.dev/docs/guides/migrate-eks-to-gp3
 [visualizing aws eks kubernetes clusters with relationship graphs]: https://dev.to/aws-builders/visualizing-aws-eks-kubernetes-clusters-with-relationship-graphs-46a4

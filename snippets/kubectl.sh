@@ -25,3 +25,20 @@ kubectl -n 'kube-system' run --rm -it 'awscli' --overrides '{"spec":{"serviceAcc
 
 
 kubectl scale deployment -n 'kube-system' 'cluster-autoscaler-aws-cluster-autoscaler' --replicas '0'
+
+
+kubectl annotate sc 'gp2' 'storageclass.kubernetes.io/is-default-class'='false'
+cat <<EOF | kubectl apply -f -
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+    annotations:
+        storageclass.kubernetes.io/is-default-class: "true"
+    name: gp3
+parameters:
+    type: gp3
+provisioner: kubernetes.io/aws-ebs
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+EOF
