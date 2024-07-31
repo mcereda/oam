@@ -79,6 +79,17 @@ echo {1..5} | xargs -p -n '1' -I '{}' aws rds start-export-task …
 
 aws rds describe-export-tasks --query 'ExportTasks[].WarningMessage' --output 'json'
 
+aws rds restore-db-instance-to-point-in-time \
+	--source-db-instance-identifier 'awx' --target-db-instance-identifier 'awx-pitred' \
+	--restore-time '2024-07-31T09:29:40+00:00' \
+	--allocated-storage '20'
+
+aws rds restore-db-instance-from-db-snapshot \
+	--db-instance-identifier 'awx-pitr-snapshot' \
+	--db-snapshot-identifier 'rds:awx-2024-07-30-14-15'
+
+aws rds delete-db-instance --skip-final-snapshot --db-instance-identifier 'awx'
+
 aws s3api list-buckets --output 'text' --query 'Buckets[].Name' | xargs -pn '1' aws s3api list-multipart-uploads --bucket
 
 aws ec2 describe-volumes --output 'text' --filters 'Name=status,Values=available' \
