@@ -38,6 +38,14 @@ postgres.lan:5643:postgres:postgres:BananaORama
 *:*:sales:elaine:modestPassword
 EOF
 chmod '600' ~/'.pgpass'
+
+# Set up the per-user services file.
+cat <<EOF > ~/'.pg_service.conf'
+[prod]
+host = prod.0123456789ab.eu-west-1.rds.amazonaws.com
+port = 5433
+user = master
+EOF
 ```
 
 ```sh
@@ -51,6 +59,7 @@ psql 'my-db' 'user'
 psql 'postgresql://host:5433/my-db?sslmode=require'
 psql -U 'username' -d 'my-db' -h 'hostname' -p 'port' -W
 psql --host 'host.fqnd' --port '5432' --username 'postgres' --database 'postgres' --password
+psql "service=prod sslmode=require"
 
 # List available databases.
 psql … --list
