@@ -209,7 +209,7 @@ Automatic backups occur **daily** during the instances' backup window, configure
 require more time than allotted to the backup window, they will continue after the window ends and until they finish.
 
 Backups are retained for up to 35 days (_backup retention period_).<br/>
-One can recover DB instances to any point in time from the backup retention period.
+One can recover DB instances to **any** point in time that sits inside the backup retention period.
 
 The backup window can't overlap with the weekly maintenance window for DB instance or Multi-AZ DB cluster.<br/>
 During automatic backup windows storage I/O might be suspended briefly while the backup process initializes.
@@ -223,11 +223,11 @@ are supposed to start.
 DB instances must be in the `available` state for automated backups to occur.<br/>
 Automated backups don't occur while DB instances are in other states (i.e., `storage_full`).
 
-Automated backups aren't created while a DB instance or cluster is stopped.<br/>
-RDS doesn't include time spent in the stopped state when the backup retention window is calculated. This means backups
-can be retained longer than the backup retention period if a DB instance has been stopped.
+Automated backups are **not** created while a DB instance or cluster is stopped.<br/>
+RDS does **not** include time spent in the stopped state when the backup retention window is calculated. This means that
+backups can be retained longer than the backup retention period if a DB instance has been stopped.
 
-Automated backups don't occur while a DB snapshot copy is running in the same AWS Region for the same database.
+Automated backups will **not** occur while a DB snapshot copy is running in the same AWS Region for the same database.
 
 ### Manual backups
 
@@ -376,7 +376,7 @@ aws rds restore-db-instance-from-db-snapshot \
 
 RDS automatically integrates with AWS KMS for key management.
 
-By default, RDS uses the RDS AWS managed key (`aws/rds`) for encryption.<br/>
+By default, RDS uses the _RDS AWS managed key_ (`aws/rds`) from KMS for encryption.<br/>
 This key can't be managed, rotated, nor deleted by users.
 
 RDS will automatically put databases into a terminal state when access to the KMS key is required but the key has been
@@ -674,15 +674,17 @@ Actions involving altering protected roles or changing protected attributes are 
 
 Error message example:
 
+> ```plaintext
 > Cannot execute SQL 'SELECT transport.import_from_server(
 >   'source.ab0123456789.eu-west-1.rds.amazonaws.com',
 >   5432,
->   'masta',
+>   'mastarr',
 >   '********',
 >   'sales',
 >   '********',
 >   true
 > );' None: remote user must have superuser (or rds_superuser if on RDS)
+> ```
 
 _Speculative_ root cause: RDS did not finish to properly apply the settings.
 
