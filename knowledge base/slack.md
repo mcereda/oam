@@ -60,6 +60,7 @@ Check out [slackmojis] for some common reactions.
 ## Further readings
 
 - [Website]
+- [Posting messages using curl]
 
 ### Sources
 
@@ -74,6 +75,7 @@ Check out [slackmojis] for some common reactions.
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
+[posting messages using curl]: https://api.slack.com/tutorials/tracks/posting-messages-with-curl
 [website]: https://slack.com/
 
 <!-- Others -->
