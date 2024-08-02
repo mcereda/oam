@@ -895,6 +895,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 - [Ansible - how to remove an item from a list?]
 - [Looping over lists inside of a dict]
 - [Newer versions of Ansible don't work with RHEL 8]
+- [Running your Ansible playbooks in parallel and other strategies]
 
 <!--
   Reference
@@ -958,6 +959,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 [newer versions of ansible don't work with rhel 8]: https://www.jeffgeerling.com/blog/2024/newer-versions-ansible-dont-work-rhel-8
 [only do something if another action changed]: https://raymii.org/s/tutorials/Ansible_-_Only-do-something-if-another-action-changed.html
 [removing empty values from a list and assigning it to a new list]: https://stackoverflow.com/questions/60525961/ansible-removing-empty-values-from-a-list-and-assigning-it-to-a-new-list#60526774
+[running your ansible playbooks in parallel and other strategies]: https://toptechtips.github.io/2023-06-26-ansible-parallel/
 [semaphore]: https://semaphoreui.com/
 [unique filter of list in jinja2]: https://stackoverflow.com/questions/44329598/unique-filter-of-list-in-jinja2
 [what is the exact list of ansible setup min?]: https://stackoverflow.com/questions/71060833/what-is-the-exact-list-of-ansible-setup-min#71061125
