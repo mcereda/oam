@@ -131,6 +131,9 @@
     - name: Remove elements from lists
       set_fact:
         list_without_items: "{{ dbs_list | difference(['template0','template1','postgres','rdsadmin']) }}"
+    - name: Get a random element
+      set_fact:
+        random_item: "{{ ['a','b','c'] | random }}"
     - name: Sort dict elements in list by attribute
       vars:
         snapshots:
@@ -391,3 +394,27 @@
           retries: 12
           delay: 15
           until: instance_check.instances[0].pending_modified_values.keys() | length > 0
+
+- name: Send messages to Slack channels
+  vars:
+    slack_notification_hook_url: https://hooks.slack.com/services/AB01CD23EF4/ABCD0123E/aBcDefGh0123456789iJKLmn
+  block:
+    - name: Send plain messages
+      ansible.builtin.uri:
+        url: "{{ slack_notification_hook_url }}"
+        method: POST
+        body_format: json
+        body:
+          text: (╥╯ᗝ╰╥) task XYZ failed
+    - name: Send mrkdwn (Slack-specific markdown) text
+      # FIXME: still to be tested
+      ansible.builtin.uri:
+        url: "{{ slack_notification_hook_url }}"
+        method: POST
+        body_format: json
+        body:
+          blocks:
+            - type: section
+              text:
+                type: mrkdwn
+                text: This is a *_fancy_* message
