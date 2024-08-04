@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 
+##
 # Easy, quick & dirty solution to act upon multiple git repositories at once.
-
-# TODO:
-#   - use 'gitpython' instead of calling `git`?
+#
+# Implementation:
+# - Wrap around the existing `git` command instead of using the 'gitpython' library to allow for aliases.
+# - Use the 'click' libraries for CLI arguments for ease of use.
+#
+# Improvements:
+# - Use multiprocessing instead of multithreading?
+##
 
 import click
 import logging
@@ -47,16 +53,23 @@ def pre_flight(git_subcommand):
 @click.command()
 @click.option('--debug', '-d', is_flag=True, default=False, help='Enable debug mode.')
 @click.option('--dry-run', '-n', is_flag=True, default=False, help='Simulate actions.')
-@click.option('--recursive/--no-recursive', ' /--no-r', is_flag=True, default=True, help='Recurse from the given directories.', show_default=True)
+@click.option(
+    '--recursive/--no-recursive', ' /--no-r',
+    is_flag=True, default=True,
+    help='Recurse from the given directories.', show_default=True
+)
 @click.option('--threads', '-t', default=cpu_count(), help='Number of threads to use.', show_default=True)
 @click.option('--verbose', '-v', is_flag=True, default=False, help='Enable verbose mode.')
 @click.argument('git_subcommand')
-@click.argument('directories', type=click.Path(exists=True, file_okay=False, resolve_path=True), nargs=-1, metavar='DIRECTORY...')
+@click.argument(
+    'directories', type=click.Path(exists=True, file_okay=False, resolve_path=True),
+    nargs=-1, metavar='DIRECTORY...'
+)
 
 def main(debug, directories, dry_run, git_subcommand, recursive, threads, verbose):
     """
-    Executes the GIT_SUBCOMMAND in the given DIRECTORIES. With -r, executes it
-    on all repositories found in the given DIRECTORIES.
+    Execute the given GIT_SUBCOMMAND in the given DIRECTORIES.
+    With -r, execute it on all repositories found in the given DIRECTORIES.
 
     GIT_SUBCOMMAND  The git subcommand to execute, quoted if with arguments.
     DIRECTORY       The directories to walk while looking for repositories.
@@ -85,7 +98,9 @@ def main(debug, directories, dry_run, git_subcommand, recursive, threads, verbos
         for directory in directories:
             logging.info(f"starting from '{directory}'")
 
-            repositories_in_dir = set(dirname(dirpath) for dirpath, _, _ in walk(directory) if basename(dirpath) == '.git')
+            repositories_in_dir = set(
+                dirname(dirpath) for dirpath, _, _ in walk(directory) if basename(dirpath) == '.git'
+            )
             logging.debug(f"{directory} has repositories {', '.join(repositories_in_dir)}")
 
             repositories.extend(repositories_in_dir)
