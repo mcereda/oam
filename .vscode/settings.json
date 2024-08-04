@@ -55,6 +55,11 @@
         ],
         "editor.wordWrap": "off"
     },
+    "[python]": {
+        "editor.rulers": [
+            120
+        ]
+    },
     "[yaml]": {
         "editor.rulers": [
             120
