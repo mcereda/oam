@@ -67,7 +67,8 @@ fault-tolerance and high availability.
 ### Control plane
 
 Makes global decisions about the cluster (like scheduling).<br/>
-Detects and responds to cluster events (like starting up a new pod when a deployment has less replicas then it requests).
+Detects and responds to cluster events (like starting up a new pod when a deployment has less replicas then it
+requests).
 
 The control plane is composed by:
 
@@ -753,7 +754,8 @@ Check:
 - [Linux capabilities], to see what capabilities can be assigned to a process **in a Linux system**;
 - [Runtime privilege and Linux capabilities in Docker containers] for the capabilities available **inside Kubernetes**,
   and
-- [Container capabilities in Kubernetes] for a handy table associating capabilities in Kubernetes to their Linux variant.
+- [Container capabilities in Kubernetes] for a handy table associating capabilities in Kubernetes to their Linux
+  variant.
 
 ### Privileged container vs privilege escalation
 
@@ -1017,6 +1019,7 @@ Others:
 - The [Build your very own self-hosting platform with Raspberry Pi and Kubernetes] series of articles
 - [Why separate your Kubernetes workload with nodepool segregation and affinity options]
 - [RBAC.dev]
+- [Scaling Kubernetes to 7,500 nodes]
 
 ### Sources
 
@@ -1064,6 +1067,7 @@ Others:
 [istio]: istio.md
 [k0s]: k0s.placeholder
 [k3s]: k3s.md
+[karpenter]: karpenter.placeholder
 [keda]: keda.md
 [kubectl]: kubectl.md
 [kubescape]: kubescape.md
@@ -1072,6 +1076,7 @@ Others:
 [metrics server]: metrics%20server.md
 [minikube]: minikube.md
 [network policies]: network%20policies.md
+[pulumi]: ../pulumi.md
 [rke2]: rke2.md
 [terraform]: ../terraform.md
 [velero]: velero.md
@@ -1112,9 +1117,13 @@ Others:
 [container capabilities in kubernetes]: https://unofficial-kubernetes.readthedocs.io/en/latest/concepts/policy/container-capabilities/
 [elasticsearch]: https://github.com/elastic/helm-charts/issues/689
 [how to run a command in a pod after initialization]: https://stackoverflow.com/questions/44140593/how-to-run-command-after-initialization/44146351#44146351
+[kube-ps1]: https://github.com/jonmosco/kube-ps1
+[kubectx+kubens]: https://github.com/ahmetb/kubectx
 [kubernetes cluster autoscaler]: https://www.kubecost.com/kubernetes-autoscaling/kubernetes-cluster-autoscaler/
 [kubernetes securitycontext capabilities explained]: https://www.golinuxcloud.com/kubernetes-securitycontext-capabilities/
 [kubernetes troubleshooting - the complete guide]: https://komodor.com/learn/kubernetes-troubleshooting-the-complete-guide/
+[kubeswitch]: https://github.com/danielfoehrKn/kubeswitch
+[kubie]: https://github.com/sbstp/kubie
 [linux capabilities]: https://man7.org/linux/man-pages/man7/capabilities.7.html
 [making sense of taints and tolerations]: https://medium.com/kubernetes-tutorials/making-sense-of-taints-and-tolerations-in-kubernetes-446e75010f4e
 [no_new_privs linux kernel documentation]: https://www.kernel.org/doc/Documentation/prctl/no_new_privs.txt
@@ -1122,14 +1131,7 @@ Others:
 [rbac.dev]: https://rbac.dev/
 [read-only filesystem error]: https://stackoverflow.com/questions/49614034/kubernetes-deployment-read-only-filesystem-error/51478536#51478536
 [runtime privilege and linux capabilities in docker containers]: https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities
-[why separate your kubernetes workload with nodepool segregation and affinity options]: https://medium.com/contino-engineering/why-separate-your-kubernetes-workload-with-nodepool-segregation-and-affinity-rules-cb5225953788
-
-[karpenter]: https://karpenter.sh/
-[kube-ps1]: https://github.com/jonmosco/kube-ps1
-[kubectx+kubens]: https://github.com/ahmetb/kubectx
-[kubeswitch]: https://github.com/danielfoehrKn/kubeswitch
-[kubie]: https://github.com/sbstp/kubie
-[pulumi]: https://www.pulumi.com
-
 [scaling k8s nodes without breaking the bank or your sanity - brandon wagner & nick tran, amazon]: https://www.youtube.com/watch?v=UBb8wbfSc34
+[scaling kubernetes to 7,500 nodes]: https://openai.com/index/scaling-kubernetes-to-7500-nodes/
 [what is kubernetes?]: https://www.youtube.com/watch?v=a2gfpZE8vXY
+[why separate your kubernetes workload with nodepool segregation and affinity options]: https://medium.com/contino-engineering/why-separate-your-kubernetes-workload-with-nodepool-segregation-and-affinity-rules-cb5225953788
