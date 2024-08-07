@@ -65,6 +65,7 @@ Check out [slackmojis] for some common reactions.
 ### Sources
 
 - [Slackmojis]
+- [Slack Notifications for Ansible Tower (AWX)]
 
 <!--
   Reference
@@ -79,4 +80,5 @@ Check out [slackmojis] for some common reactions.
 [website]: https://slack.com/
 
 <!-- Others -->
+[slack notifications for ansible tower (awx)]: https://mpolinowski.github.io/docs/DevOps/Ansible/2021-04-30-ansible-tower-slack-notifications/2021-04-30/
 [slackmojis]: https://slackmojis.com/

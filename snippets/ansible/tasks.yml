@@ -189,6 +189,15 @@
 
 - name: Manipulate dictionaries
   block:
+    - name: Add keys to dictionaries
+      set_fact:
+        organization: "{{ organization | combine({ 'name': 'ExampleOrg' }) }}"
+    - name: Sort keys in dictionaries
+      set_fact:
+        organization: "{{ organization | dictsort }}"
+    - name: Pretty print dictionaries
+      set_fact:
+        organization: "{{ organization | to_nice_json }}"
     - name: Merge dictionaries
       vars:
         dict_1:
@@ -215,7 +224,7 @@
             })
           }}
       with_items: "{{ db_extensions_query.results }}"
-    - name:
+    - name: FIXME
       vars:
         db_extensions:
           sales:
@@ -418,3 +427,17 @@
               text:
                 type: mrkdwn
                 text: This is a *_fancy_* message
+
+- name: AWX
+  environment:
+    CONTROLLER_HOST: https://awx.example.org/
+    CONTROLLER_VERIFY_SSL: false
+    CONTROLLER_USERNAME: admin
+    CONTROLLER_PASSWORD: somethingSecret
+  block:
+    - name: Export all data from existing instances
+      # At the time of writing: applications, credential_types, credentials, execution_environments, inventory,
+      # inventory_sources, job_templates, notification_templates, organizations, projects, schedules, teams, and users.
+      awx.awx.export:
+        all: true
+      register: awx_export_output

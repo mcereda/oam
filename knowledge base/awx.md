@@ -633,7 +633,7 @@ Refer [AWX API Reference] and [How to use AWX REST API to execute jobs].
 [awx's repository]: https://github.com/ansible/awx/
 [basic install]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/installation/basic-install.html
 [helm install on existing cluster]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/installation/helm-install-on-existing-cluster.html
-[installer role's defaults]: https://github.com/ansible/awx-operator/blob/ffba1b4712a0b03f1faedfa70e3a9ef0d443e4a6/roles/installer/defaults/main.yml
+[installer role's defaults]: https://github.com/ansible/awx-operator/blob/devel/roles/installer/defaults/main.yml
 [iterating on the installer without deploying the operator]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/troubleshooting/debugging.html#iterating-on-the-installer-without-deploying-the-operator
 [operator's documentation]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/
 [operator's repository]: https://github.com/ansible/awx-operator/
