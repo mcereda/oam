@@ -12,6 +12,7 @@ git config --local 'commit.gpgsign' true
 git config --local 'pull.rebase' false
 
 git clone --recurse-submodules 'git@github.com:example/ansible-role-keychron-capable.git'
+git clone 'https://gitlab-ci-token:glpat-01234567ABCDEFGHijkl@gitlab.example.org/testProj/myRepo.git'
 
 git branch --list --remote 'origin/*' | cut -d/ -f2
 
@@ -45,7 +46,6 @@ git reset --soft HEAD~1                     # or `git reset --soft HEAD^`
 git restore --staged '.lefthook-local.yml'  # or `git reset HEAD '.lefthook-local.yml'`
 git commit -c ORIG_HEAD
 
-
 ##
 # Change the default branch from 'master' to 'main'.
 # --------------------------------------
@@ -67,7 +67,6 @@ git symbolic-ref 'refs/remotes/origin/HEAD' 'refs/remotes/origin/main'
 # delete the master branch on the remote
 git push origin --delete 'master'
 
-
 # create patches from the last commit
 git format-patch -n HEAD^
 git format-patch HEAD^ -o './patchfile.patch'
@@ -75,3 +74,30 @@ git format-patch HEAD~1 --stdout
 
 # create patches from specific commits
 git format-patch -1 '3918a1d036e74d47a5c830e4bbabba6f507162b1'
+
+git-all () {
+	[[ -n $DEBUG ]] && set -o xtrace
+
+	local COMMAND
+	local FOLDERS=()
+	for (( I = $# ; I >= 0 ; I-- )); do
+		if [[ -d ${@[$I]} ]]; then
+			FOLDERS+=${@[$I]}
+		else
+			COMMAND="${@[1,-$((${#FOLDERS}+1))]}"
+			break
+		fi
+	done
+	if [[ -z "$COMMAND" ]]; then
+		echo "error: no command given" >&2
+		return
+	fi
+	local REPOSITORIES=( $(find ${FOLDERS[@]:-'.'} -type d -name .git -exec dirname '{}' \;) )
+
+	parallel --color-failed --tagstring "{/}" "git -C {} $COMMAND" ::: ${REPOSITORIES[@]}
+	# echo -n ${REPOSITORIES[@]} | xargs -d ' ' -tP 0 -I git -C "{}" $(echo ${COMMAND[@]})  # xargs, linux
+	# echo -n ${REPOSITORIES[@]} | xargs -n 1 -P 0 -I {} git -C "{}" $(echo ${COMMAND[@]})  # xargs, osx
+	# for REPOSITORY in ${REPOSITORIES[@]}; do echo -e "\n\n---\n${REPOSITORY}"; git -C "$REPOSITORY" "$COMMAND"; done
+
+	[[ -n $DEBUG ]] && set +o xtrace
+}

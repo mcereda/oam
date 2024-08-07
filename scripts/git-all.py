@@ -93,7 +93,7 @@ def main(debug, directories, dry_run, git_subcommand, recursive, threads, verbos
 
     pre_flight(git_subcommand=git_subcommand_parts[0])
 
-    repositories = list(directories)
+    repositories = []
     if recursive:
         for directory in directories:
             logging.info(f"starting from '{directory}'")
@@ -104,7 +104,10 @@ def main(debug, directories, dry_run, git_subcommand, recursive, threads, verbos
             logging.debug(f"{directory} has repositories {', '.join(repositories_in_dir)}")
 
             repositories.extend(repositories_in_dir)
-        repositories = set(repositories)
+    else:
+        # Just trust the user gave repositories in input
+        repositories.extend(directories)
+    repositories = set(repositories)
     logging.debug(f"repositories: {', '.join(repositories)}")
 
     logging.debug(f"creating threads")
