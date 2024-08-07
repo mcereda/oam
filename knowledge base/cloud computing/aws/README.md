@@ -16,6 +16,8 @@
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
    1. [IAM policies](#iam-policies)
+   1. [Assume Roles](#assume-roles)
+      1. [Require MFA for assuming Roles](#require-mfa-for-assuming-roles)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -310,6 +312,94 @@ Examples:
    ```
 
 </details>
+
+### Assume Roles
+
+Refer [Introduction to AWS IAM AssumeRole].
+
+Users, Roles and Services can assume Roles as long as:
+
+1. The User, Role or Service that is trying to assume the end Role has assigned policies that would allow them to.
+
+   ```json
+   {
+       "Version": "2012-10-17",
+       "Statement": [
+           {
+               "Sid": "AllowMeToAssumeThoseRoles",
+               "Effect": "Allow",
+               "Action": "sts:AssumeRole",
+               "Resource": [
+                   "arn:aws:iam::012345678901:role/EksAdminRole",
+                   "arn:aws:iam::987654321098:role/EcsAuditorRole"
+               ]
+           }
+       ]
+   }
+   ```
+
+1. The **end** Role's Trust Relationships allow the entity in the point above to assume it.
+
+   ```json
+   {
+       "Version": "2012-10-17",
+       "Statement": [
+           …,
+           {
+               "Effect": "Allow",
+               "Principal": {
+                   "AWS": "arn:aws:iam::012345678901:user/halJordan"
+               },
+               "Action": "sts:AssumeRole"
+           }
+       ]
+   }
+   ```
+
+Allowed entities can assume Roles using the [STS AssumeRole API][assumerole api reference]:
+
+```sh
+aws sts assume-role --output 'yaml' \
+  --role-arn "arn:aws:iam::012345678901:role/EksAdminRole" \
+  --role-session-name "lookAt-halJordan-sheIsThe-EksAdminRole-now"
+```
+
+```yaml
+AssumedRoleUser:
+  Arn: arn:aws:sts::012345678901:assumed-role/EksAdminRole/AIDA0123456789ABCDEFG-as-EksAdminRole-stsSession
+  AssumedRoleId: AROA2HKHF0123456789OA:AIDA0123456789ABCDEFG-as-EksAdminRole-stsSession
+Credentials:
+  AccessKeyId: ASIA2HKHF012345ABCDE
+  Expiration: '2024-08-06T10:29:15+00:00'
+  SecretAccessKey: C2SGbkwmfHWzf44DX6IQQirg5XCGwpLX0Ai++Qkq
+  SessionToken: IQoJb3jPZ2luX2VjEAIaCWV1LXdlc3QtMSJHMEUCIQCGEihh9rBi1cL8ebhQVdcKl8Svzm5VCIC/ebCdxpORiA…
+```
+
+#### Require MFA for assuming Roles
+
+Add the `"Bool": {"aws:MultiFactorAuthPresent": true}` condition to the Role's trust relationships:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [{
+        "Effect": "Allow",
+        "Principal": {
+            "AWS": "arn:aws:iam::012345678901:user/halJordan"
+        },
+        "Action": "sts:AssumeRole",
+        "Condition": {
+            "Bool": {
+                "aws:MultiFactorAuthPresent": true
+            }
+        }
+    }]
+}
+```
+
+When requiring MFA with AssumeRole, identities need to pass values for the SerialNumber and TokenCode parameters.<br/>
+SerialNumbers identify the users' hardware or virtual MFA devices, TokenCodes are the time-based one-time password
+(TOTP) value that devices produce.
 
 ## Further readings
 

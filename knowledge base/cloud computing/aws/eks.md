@@ -101,6 +101,9 @@ aws eks associate-access-policy --cluster-name 'DeepThought' \
 # Connect to clusters.
 aws eks update-kubeconfig --name 'DeepThought' && kubectl cluster-info
 aws eks --region 'eu-west-1' update-kubeconfig --name 'DeepThought' --profile 'dev-user' && kubectl cluster-info
+aws eks update-kubeconfig \
+  --region 'eu-west-1' --name 'DeepThought' --role-arn 'arn:aws:iam::012345678901:role/AssumedRole' \
+&& kubectl cluster-info
 
 
 # Create EC2 node groups.
@@ -130,11 +133,17 @@ aws eks describe-addon-configuration --addon-name 'aws-ebs-csi-driver' --addon-v
 
 </details>
 
-<!-- Uncomment if needed
 <details>
   <summary>Real world use cases</summary>
+
+```sh
+# Connect to clusters.
+aws eks --region 'eu-west-1' update-kubeconfig --name 'DeepThought'
+aws eks … update-kubeconfig --name 'DeepThought' --profile 'dev-user'
+aws eks … update-kubeconfig --name 'DeepThought' --role-arn 'arn:aws:iam::012345678901:role/EksAdminRole'
+```
+
 </details>
--->
 
 ## Requirements
 
@@ -1089,7 +1098,7 @@ Requirements:
   Specifically, subnets must have the specific, appropriate tags.<br/>
   Those are actively looked for by the controller, and will miserably fail if they are not present.
 
-Procedure:
+Installation:
 
 1. Create a IAM policy using the `/docs/install/iam_policy.json` file in the
    [controller's repository][aws load balancer controller repository].
@@ -1124,6 +1133,9 @@ Procedure:
    ```
 
    </details>
+
+Ingresses annotations will configure the load balancers they create.<br/>
+Refer [Ingress annotations][aws load balancer controller ingress annotations] for the full list.
 
 ### EBS CSI driver
 
@@ -1432,6 +1444,7 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 
 <!-- Others -->
 [amazon elastic block store (ebs) csi driver]: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/README.md
+[aws load balancer controller ingress annotations]: https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/guide/ingress/annotations.md
 [aws load balancer controller repository]: https://github.com/kubernetes-sigs/aws-load-balancer-controller
 [enable ebs gp3 for eks by default]: https://geko.cloud/en/aws-enable-ebs-gp3-for-eks-by-default/
 [external-snapshotter]: https://github.com/kubernetes-csi/external-snapshotter

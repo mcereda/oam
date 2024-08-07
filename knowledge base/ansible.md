@@ -18,6 +18,7 @@
    1. [Assign roles](#assign-roles)
    1. [Role dependencies](#role-dependencies)
 1. [Create custom filter plugins](#create-custom-filter-plugins)
+1. [Execution environments](#execution-environments)
 1. [Troubleshooting](#troubleshooting)
     1. [Print all known variables](#print-all-known-variables)
     1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
@@ -555,6 +556,107 @@ collections:
 
 See [Creating your own Ansible filter plugins].
 
+## Execution environments
+
+Container images that can be used as Ansible control nodes.
+
+Ansible Builder aids in the creation of Ansible Execution Environments.<br/>
+Refer [Introduction to Ansible Builder] for how to build one.
+
+Builders' `build` command defaults to using:
+
+- `execution-environment.yml` or `execution-environment.yaml` as the definition file.
+- `$PWD/context` as the directory to use for the build context.
+
+<details>
+  <summary><code>execution-environment.yml</code> example</summary>
+
+Refer [Execution environment definition].
+
+```yaml
+---
+version: 3
+
+build_arg_defaults:
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: '--pre'
+
+dependencies:
+  ansible_core:
+    package_pip: ansible-core==2.14.4
+  ansible_runner:
+    package_pip: ansible-runner
+  galaxy: requirements.yml
+  python:
+    - six
+    - psutil
+  system: bindep.txt
+  exclude:
+    python:
+      - docker
+    system:
+      - python3-Cython
+
+images:
+  base_image:
+    name: docker.io/redhat/ubi9:latest
+    # Other available base images:
+    #   - quay.io/rockylinux/rockylinux:9
+    #   - quay.io/centos/centos:stream9
+    #   - registry.fedoraproject.org/fedora:38
+    #   - registry.redhat.io/ansible-automation-platform-23/ee-minimal-rhel8:latest
+    #     (needs an account)
+
+# Custom package manager path for the RHEL based images
+# options:
+#   package_manager_path: /usr/bin/microdnf
+
+additional_build_files:
+  - src: files/ansible.cfg
+    dest: configs
+
+additional_build_steps:
+  prepend_base:
+    - RUN echo This is a prepend base command!
+    # Enable Non-default stream before packages provided by it can be installed. (optional)
+    # - RUN $PKGMGR module enable postgresql:15 -y
+    # - RUN $PKGMGR install -y postgresql
+  prepend_galaxy:
+    - COPY _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+
+  prepend_final: |
+    RUN whoami
+    RUN cat /etc/os-release
+  append_final:
+    - RUN echo This is a post-install command!
+    - RUN ls -la /etc
+```
+
+</details>
+
+<details>
+  <summary><code>requirements.yml</code> example</summary>
+
+```yaml
+---
+collections:
+  - redhat.openshift
+```
+
+</details>
+
+<details>
+  <summary>Commands example</summary>
+
+```sh
+pip install 'ansible-builder'
+ansible-builder build --container-runtime 'docker' -t 'example-ee:latest' -f 'definition.yml'
+ansible-runner -p 'test_play.yml' --container-image 'example-ee:latest'
+ansible-navigator run 'test_play.yml' -i 'localhost,' --execution-environment-image 'example-ee:latest' \
+  --mode 'stdout' --pull-policy 'missing' --container-options='--user=0'
+```
+
+</details>
+
 ## Troubleshooting
 
 ### Print all known variables
@@ -865,6 +967,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 - [Mitogen for Ansible]
 - [Debugging tasks]
 - [AWX]
+- [Introduction to Ansible Builder]
 
 ### Sources
 
@@ -901,6 +1004,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 - [Looping over lists inside of a dict]
 - [Newer versions of Ansible don't work with RHEL 8]
 - [Running your Ansible playbooks in parallel and other strategies]
+- [Execution environment definition]
 
 <!--
   Reference
@@ -925,8 +1029,10 @@ Solution: use a version of `ansible-core` lower than 2.17.
 [configuration]: https://docs.ansible.com/ansible/latest/reference_appendices/config.html
 [debugging tasks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_debugger.html
 [developing and testing ansible roles with molecule and podman - part 1]: https://www.ansible.com/blog/developing-and-testing-ansible-roles-with-molecule-and-podman-part-1/
+[execution environment definition]: https://ansible.readthedocs.io/projects/builder/en/stable/definition/
 [galaxy  sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
 [galaxy]: https://galaxy.ansible.com/
+[introduction to ansible builder]: https://www.ansible.com/blog/introduction-to-ansible-builder/
 [roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
 [setup module source code]: https://github.com/ansible/ansible/blob/devel/lib/ansible/modules/setup.py
 [setup module]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/setup_module.html

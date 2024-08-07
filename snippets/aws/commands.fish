@@ -125,7 +125,9 @@ aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat'
 aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat' --query 'Plaintext' --output 'text' \
 | base64 --decode
 
+aws eks --region 'eu-west-1' update-kubeconfig --name 'oneForAll'
 aws eks --region 'eu-west-1' update-kubeconfig --name 'oneForAll' --profile 'dev-user'
+aws eks --region 'eu-west-1' update-kubeconfig --name 'oneForAll' --role-arn 'arn:aws:iam::012345678901:role/AssumedRole'
 
 # Create OIDC providers for EKS clusters
 # 1. Get the OIDC issuer ID for existing EKS clusters
