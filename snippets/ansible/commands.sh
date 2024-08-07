@@ -46,3 +46,8 @@ ANSIBLE_ENABLE_TASK_DEBUGGER=True ansible-playbook …
 ANSIBLE_CALLBACKS_ENABLED='profile_tasks' ansible-playbook …
 
 ansible-playbook 'path/to/playbook.yml' --syntax-check
+
+# Ad-hoc commands.
+ansible -m 'ping' 'all'
+ansible 'hostRegex' -m 'ansible.builtin.shell' -a 'echo $TERM'
+ansible -i 'localhost,' -c 'local' -m 'ansible.builtin.copy' -a 'src=/tmp/src' -a 'dest=/tmp/dest' 'localhost'
