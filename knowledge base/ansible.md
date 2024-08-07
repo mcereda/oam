@@ -4,6 +4,7 @@
 1. [Configuration](#configuration)
    1. [Performance tuning](#performance-tuning)
 1. [Inventories](#inventories)
+   1. [AWS](#aws)
 1. [Templating](#templating)
    1. [Tests](#tests)
    1. [Loops](#loops)
@@ -256,6 +257,10 @@ saturn
 saturn
 ; mars.lan ansible_port=4444
 ```
+
+### AWS
+
+Refer [Integrate with AWS SSM].
 
 ## Templating
 

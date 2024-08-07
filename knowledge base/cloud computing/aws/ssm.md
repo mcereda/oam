@@ -145,7 +145,7 @@ aws ssm describe-instance-associations-status --instance-id 'instance-id'
 
 ## Integrate with Ansible
 
-Create a dynamic inventory named `aws_ec2.yml`.<br/>
+Create a dynamic inventory which name ends with `aws_ec2.yml` (e.g. `test.aws_ec2.yml` or simply `aws_ec2.yml`).<br/>
 It needs to be named like that to be found by the
 ['community.aws.aws_ssm' connection plugin][community.aws.aws_ssm connection].
 
@@ -167,6 +167,7 @@ hostnames:
   - instance-id
     # acts as keyword to use the instances' 'InstanceId' attribute
     # use 'private-ip-address' to use the instances' 'PrivateIpAddress' attribute instead
+    # or any option in <https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html#options> really
 ```
 
 Pitfalls:
@@ -175,7 +176,7 @@ Pitfalls:
   From the [plugin notes][aws_ssm connection plugin notes]:
 
   > The `community.aws.aws_ssm` connection plugin does not support using the `remote_user` and `ansible_user` variables
-  > to configure the remote user.  The ``become_user`` parameter should be used to configure which user to run commands
+  > to configure the remote user.  The `become_user` parameter should be used to configure which user to run commands
   > as. Remote commands will often default to running as the `ssm-agent` user, however this will also depend on how SSM
   > has been configured.
 
@@ -284,7 +285,7 @@ $ sudo ssm-cli get-diagnostics --output 'table'
 [amazon web services]: README.md
 [cli]: cli.md
 [ec2]: ec2.md
-[snippets]: ../../../snippets/aws.fish
+[snippets]: ../../../snippets/aws/commands.fish
 
 <!-- Upstream -->
 [aws_ssm connection plugin notes]: https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html#notes
