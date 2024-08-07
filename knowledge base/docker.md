@@ -51,7 +51,7 @@ docker search 'boinc'
 docker login
 docker login -u 'username' -p 'password'
 aws ecr get-login-password \
-| docker login --username 'AWS' --password-stdin 'aws_account_id.dkr.ecr.region.amazonaws.com' \
+| docker login --username 'AWS' --password-stdin '012345678901.dkr.ecr.eu-east-2.amazonaws.com'
 
 # Pull images.
 docker pull 'alpine:3.14'
