@@ -10,3 +10,7 @@ sudo vim '/var/lib/docker/volumes/website/_data/index.html'
 docker run -d --name 'some-nginx' -v '/some/content:/usr/share/nginx/html:ro' 'nginx'
 
 docker logs --since '5m' -f 'dblab_server'
+
+docker login
+docker login -u 'whatever' -p 'glpat-ABC012def345GhI678jKl' 'gitlab.example.org:5050'
+aws ecr get-login-password | docker login --username 'AWS' --password-stdin '012345678901.dkr.ecr.eu-west-1.amazonaws.com'
