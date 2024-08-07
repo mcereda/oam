@@ -23,8 +23,9 @@ parallel -qt -j 1 \
 
 # Get the exit status of all subjobs ('--joblog $outfile').
 # Use all the threads you can (--jobs 0), hammering the CPU.
+# Highlight in red jobs that failed.
 find . -type d -name .git -exec dirname "{}" + \
-| parallel --jobs 0 --tagstring {/} --joblog - \
+| parallel --jobs 0 --color-failed --tagstring {/} --joblog - \
     'git -C {} pull --recurse-submodules'
 
 # Inject Istio's sidecar to all Deployments in a Namespace.

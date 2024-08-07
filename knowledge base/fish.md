@@ -44,6 +44,35 @@ diff -y -W 200 \
 # Math.
 math 2 '+' 6
 time pulumi pre --parallel (math 2 '*' (nproc))
+
+# Array manipulation.
+echo (seq 10)[-1..1]  # -> 10 9 8 7 6 5 4 3 2 1
+set array "$array appended_element"
+
+# Define CLI options.
+# Use all lines.
+set -l opts
+set opts $opts (fish_opt -s 'c' -l 'command' --required-val)
+set opts $opts (fish_opt -s 'p' -l 'path' --multiple-vals)
+argparse $opts -- $argv
+or return
+echo $_flag_command
+echo $_flag_path
+echo $argv
+
+# Switch.
+switch $animal
+  case cat
+    echo evil
+  case wolf dog human moose dolphin whale
+    echo mammal
+  case duck goose albatross
+    echo bird
+  case shark trout stingray
+    echo fish
+  case '*'
+    echo I have no idea what a $animal is
+end
 ```
 
 For functions defined in files in `~/.config/fish/functions/` to be automatically available, the files need to:
