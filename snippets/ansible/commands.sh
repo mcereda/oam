@@ -41,6 +41,7 @@ ansible-playbook 'playbook.yaml' \
 	-e 'ansible_connection=aws_ssm' -e 'ansible_aws_ssm_bucket_name=ssm-bucket' -e 'ansible_aws_ssm_region=eu-west-1' \
 	-e 'ansible_remote_tmp=/tmp/.ansible-\${USER}/tmp' \
 	-i 'i-0123456789abcdef0,' -D
+ansible-playbook -i 'localhost,' -c 'local' -Dvvv 'playbook.yml' -t 'container_registry' --ask-vault-pass
 
 ANSIBLE_ENABLE_TASK_DEBUGGER=True ansible-playbook …
 ANSIBLE_CALLBACKS_ENABLED='profile_tasks' ansible-playbook …
@@ -51,3 +52,11 @@ ansible-playbook 'path/to/playbook.yml' --syntax-check
 ansible -m 'ping' 'all'
 ansible 'hostRegex' -m 'ansible.builtin.shell' -a 'echo $TERM'
 ansible -i 'localhost,' -c 'local' -m 'ansible.builtin.copy' -a 'src=/tmp/src' -a 'dest=/tmp/dest' 'localhost'
+
+ansible-vault encrypt_string --name 'command_output' 'somethingNobodyShouldKnow'
+ansible-vault encrypt --output 'ssh.key' '.ssh/id_rsa'
+ansible-vault view 'ssh.key.pub' --vault-password-file 'password_file.txt'
+ansible-vault edit 'ssh.key.pub'
+ansible-vault decrypt --output '.ssh/id_rsa' --vault-password-file 'password_file.txt' 'ssh.key'
+
+diff 'some_role/files/ssh.key.plain' <(ansible-vault view --vault-password-file 'password_file' 'some_role/files/ssh.key.enc')

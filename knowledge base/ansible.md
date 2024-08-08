@@ -19,6 +19,8 @@
    1. [Role dependencies](#role-dependencies)
 1. [Create custom filter plugins](#create-custom-filter-plugins)
 1. [Execution environments](#execution-environments)
+1. [Secrets management](#secrets-management)
+    1. [Ansible Vault](#ansible-vault)
 1. [Troubleshooting](#troubleshooting)
     1. [Print all known variables](#print-all-known-variables)
     1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
@@ -81,6 +83,7 @@ ansible-playbook 'path/to/playbook.yml' -i 'localhost,' -c 'local' -vvC
 
 # Only execute tasks with specific tags.
 ansible-playbook 'path/to/playbook.yml' --tags 'configuration,packages'
+ansible-playbook -i 'localhost,' -c 'local' -Dvvv 'playbook.yml' -t 'container_registry' --ask-vault-pass
 
 # Avoid executing tasks with specific tags.
 ansible-playbook 'path/to/playbook.yml' --skip-tags 'system,user'
@@ -92,6 +95,23 @@ ansible-playbook … --list-tasks --skip-tags 'system,user'
 
 # Debug playbooks.
 ANSIBLE_ENABLE_TASK_DEBUGGER=True ansible-playbook …
+
+# Encrypt data using Vault.
+ansible-vault encrypt_string --name 'command_output' 'somethingNobodyShouldKnow'
+ansible-vault encrypt '.ssh/id_rsa' --vault-password-file 'password_file.txt'
+ansible-vault encrypt --output 'ssh.key' '.ssh/id_rsa'
+
+# Print out decoded contents of files encrypted with Vault.
+ansible-vault view 'ssh.key.pub'
+ansible-vault view 'ssh.key.pub' --vault-password-file 'password_file.txt'
+
+# Edit decoded contents of files encrypted with Vault.
+ansible-vault edit 'ssh.key.pub'
+ansible-vault edit 'ssh.key.pub' --vault-password-file 'password_file.txt'
+
+# Decrypt files encrypted with Vault.
+ansible-vault decrypt 'ssh.key'
+ansible-vault decrypt --output '.ssh/id_rsa' --vault-password-file 'password_file.txt' 'ssh.key'
 
 # List roles installed from Galaxy.
 ansible-galaxy list
@@ -657,6 +677,209 @@ ansible-navigator run 'test_play.yml' -i 'localhost,' --execution-environment-im
 
 </details>
 
+## Secrets management
+
+Refer [handling secrets in your Ansible playbooks].
+
+Use **interactive prompts** to ask for values at runtime.
+
+```yaml
+---
+- hosts: all
+  gather_facts: false
+  vars_prompt:
+    - name: api_key
+      prompt: Enter the API key
+  tasks:
+    - name: Ensure API key is present in config file
+      ansible.builtin.lineinfile:
+        path: /etc/app/configuration.ini
+        line: "API_KEY={{ api_key }}"
+```
+
+Use [Ansible Vault] for automated execution when one does **not** require
+to use specific secrets or password managers.
+
+### Ansible Vault
+
+Refer [Protecting sensitive data with Ansible Vault] and [Ansible Vault tutorial].
+
+Vault encrypts variables and files **at rest** and allows for their use in playbooks and roles.<br/>
+It does **not** prevent tasks to print out data **in use**. See the
+[`no_log`](https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#keep-secret-data) attribute for hiding
+sensible values.
+
+Protected data **will** require one or more passwords to encrypt and decrypt.<br/>
+If storing vault passwords in third-party tools, one will need them need to allow for non-interactive access.
+
+Create and view protected data by using the `ansible-vault` command.<br/>
+Use the `ansible.cfg` file to specify the location of a password file or to always prompt for the password.
+
+Vault passwords can be any string, and there is currently no special command to create one.<br/>
+One must provide the/a Vault password **every time one encrypts and/or decrypts data** with Vault.<br/>
+If using multiple Vault passwords, one can differentiate between them by means of vault IDs.
+
+> By default, Vault IDs only label protected content to remind one which password one used to encrypt it. Ansible will
+> **not** check that the vault ID in the header of any encrypted content matches the vault ID one provides when using
+> that content, and will try and decrypt the data with the password one provides.<br/>
+> Force this check by setting the `DEFAULT_VAULT_ID_MATCH` config option.
+
+Vault can only encrypt variables and files.<br/>
+Encrypted content is marked in playbook and roles with the `!vault` tag. This tells Ansible and YAML that the content
+needs to be decrypted. Content created with `--vault-id` also contains the vault ID's label in the mark.
+
+Encrypted **variables** allow for mixed plaintext and encrypted content, even inline, in plays or roles.<br/>
+One **cannot** _rekey_ encrypted variables.<br/>
+To encrypt tasks or other content, one must encrypt the entire file.
+
+Input files are encrypted in-place unless one specifies the output files in the command.
+
+<details style="margin-left: 1em">
+  <summary>Encrypt and use variables</summary>
+
+1. Encrypt the variable's value:
+
+   ```sh
+   $ ansible-vault encrypt_string --name 'command_output' 'somethingNobodyShouldKnow'
+   New Vault password:
+   Confirm New Vault password:
+   Encryption successful
+   command_output: !vault |
+             $ANSIBLE_VAULT;1.1;AES256
+             34306534613939316131303430653733633961623931363032633933393039373764356464623461
+             3463353332623466623661363831303836396165323238660a353137363562393161396566386565
+             35616662336536613365386164353439616232643131306534353264346635373566313630613261
+             3531373034333830640a353138306463653533366432623438343266623930396238313763643836
+             66646237336338353866306361316233326535333236363136613263346631633836
+
+   $ ansible-vault encrypt_string --name 'command_output' 'somethingNobodyShouldKnow' \
+       --vault-password-file 'password_file.txt'
+   Encryption successful
+   command_output: !vault |
+             $ANSIBLE_VAULT;1.1;AES256
+             31373465393164316666663963643163313032623233356634313038333662653061623936383838
+             6166636433313438613338373438343130633766656535390a353338373261393931316533303837
+             64363736383163643238336565363936303434393931386131383463336539306466636231633131
+             6432396337366333350a356338623630626161333666373831313966633038343133316532383562
+             61303538333031333861313733383363656531613333356364363432343361393636
+   ```
+
+1. Use the output as the value:
+
+   ```yaml
+   - name: Configure credential 'Gitlab container registry PAT'
+     tags:
+       - container_registry
+       - gitlab
+     awx.awx.credential:
+       organization: Private
+       name: Gitlab container registry PAT
+       credential_type: Container Registry
+       inputs:
+         host: gitlab.example.org:5050
+         username: awx  # or anything, really
+         password: !vault |
+           $ANSIBLE_VAULT;1.1;AES256
+           34306534613939316131303430653733633961623931363032633933393039373764356464623461
+           3463353332623466623661363831303836396165323238660a353137363562393161396566386565
+           35616662336536613365386164353439616232643131306534353264346635373566313630613261
+           3531373034333830640a353138306463653533366432623438343266623930396238313763643836
+           66646237336338353866306361316233326535333236363136613263346631633836
+         verify_ssl: false
+       update_secrets: false
+   ```
+
+1. Require the play execution to ask for the password used during encryption:
+
+   ```sh
+   ansible-playbook -i 'localhost,' -c 'local' -Dvvv 'playbook.yml' -t 'container_registry' --ask-vault-pass
+   ansible-playbook … --vault-password-file 'password_file.txt'
+   ```
+
+</details>
+
+<details style="margin: 0 0 1em 1em">
+  <summary>Encrypt and use existing files</summary>
+
+1. Encrypt the file:
+
+   ```sh
+   # Input files are encrypted in place unless output files are specified
+   $ ansible-vault encrypt 'ssh.key'
+   New Vault password:
+   Confirm New Vault password:
+   Encryption successful
+
+   $ ansible-vault encrypt --output 'ssh_key.enc' '.ssh/id_rsa' --vault-password-file 'password_file.txt'
+   Encryption successful
+   ```
+
+1. Use the file normally:
+
+   ```yaml
+   - name: Test value is read correctly
+     tags: debug
+     ansible.builtin.debug:
+       msg: "{{ lookup('file', 'ssh_key.enc') }}"
+   ```
+
+1. Require the play execution to ask for the password used during encryption:
+
+   ```sh
+   ansible-playbook -i 'localhost,' -c 'local' -Dvvv 'playbook.yml' -t 'container_registry' --ask-vault-pass
+   ansible-playbook … --vault-password-file 'password_file.txt'
+   ```
+
+</details>
+
+Decrypt files with `ansible-vault decrypt 'path/to/file'`.<br/>
+Input files are decrypted in place unless one specifies the output files in the command.
+
+<details style="margin: 0 0 1em 1em">
+  <summary>Decrypt files</summary>
+
+```sh
+$ ansible-vault decrypt 'ssh.key'
+New Vault password:
+Confirm New Vault password:
+Decryption successful
+
+$ ansible-vault decrypt --output '.ssh/id_rsa' --vault-password-file 'password_file.txt' 'ssh.key'
+Decryption successful
+```
+
+</details>
+
+One can quickly view the content of encrypted files with `ansible-vault view 'path/to/file'`:
+
+<details style="margin: 0 0 1em 1em">
+  <summary>View encrypted files' content</summary>
+
+```sh
+$ cat 'ssh.key.pub'
+$ANSIBLE_VAULT;1.1;AES256
+38623265623763366431646435646634363136373831323464356130383432356266616461323730
+6436396161613934356339323731336130383064386464610a373664326235376336333736306563
+62366635646565633833336638616434353935313632323733326634356366666439316336353030
+6635353335653034340a613330323565366365346638343464623036396134626537643064653437
+36653734373839306135306165326464633231383236663735646465643332383332626564643038
+64363531383430393834373764633564383537326430303038383661656134383631306336633539
+33343166386135663537656262343734383339383363343736633965393262666133623932653732
+63613034393964333865626532636332393964396463613131356534623433353065313661383461
+37646635336433376132393766333761306162366666346634323166353630633036
+
+$ ansible-vault view 'ssh.key.pub'
+Vault password:
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFIw4vv6LYg3P7bfgrR5I4k/0123456789abcdefghIL me@example.org
+
+$ ansible-vault view 'ssh.key.pub' --vault-password-file 'password_file.txt'
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFIw4vv6LYg3P7bfgrR5I4k/0123456789abcdefghIL me@example.org
+```
+
+</details>
+
+Or even edit their content with `ansible-vault edit 'path/to/file'`.
+
 ## Troubleshooting
 
 ### Print all known variables
@@ -1005,11 +1228,16 @@ Solution: use a version of `ansible-core` lower than 2.17.
 - [Newer versions of Ansible don't work with RHEL 8]
 - [Running your Ansible playbooks in parallel and other strategies]
 - [Execution environment definition]
+- [Protecting sensitive data with Ansible vault]
+- [Ansible Vault tutorial]
 
 <!--
   Reference
   ═╬═Time══
   -->
+
+<!-- In-article sections -->
+[ansible vault]: #ansible-vault
 
 <!-- Knowledge base -->
 [awx]: awx.md
@@ -1033,6 +1261,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 [galaxy  sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
 [galaxy]: https://galaxy.ansible.com/
 [introduction to ansible builder]: https://www.ansible.com/blog/introduction-to-ansible-builder/
+[protecting sensitive data with ansible vault]: https://docs.ansible.com/ansible/latest/vault_guide/index.html
 [roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
 [setup module source code]: https://github.com/ansible/ansible/blob/devel/lib/ansible/modules/setup.py
 [setup module]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/setup_module.html
@@ -1046,6 +1275,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 [6 ways to speed up ansible playbook execution]: https://wearenotch.com/speed-up-ansible-playbook-execution/
 [ansible - how to remove an item from a list?]: https://stackoverflow.com/questions/40927792/ansible-how-to-remove-an-item-from-a-list#40927834
 [ansible roles: basics, creating & using]: https://spacelift.io/blog/ansible-roles
+[ansible vault tutorial]: https://piyops.com/ansible-vault-tutorial
 [ansible: set variable to file content]: https://stackoverflow.com/questions/24003880/ansible-set-variable-to-file-content
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
 [creating your own ansible filter plugins]: https://www.dasblinkenlichten.com/creating-ansible-filter-plugins/
