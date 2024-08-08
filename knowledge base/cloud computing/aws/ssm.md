@@ -146,6 +146,7 @@ aws ssm describe-instance-associations-status --instance-id 'instance-id'
 ## Integrate with Ansible
 
 Create a dynamic inventory which name ends with `aws_ec2.yml` (e.g. `test.aws_ec2.yml` or simply `aws_ec2.yml`).<br/>
+Refer the [amazon.aws.aws_ec2 inventory] for more information about the file specifications.<br/>
 It needs to be named like that to be found by the
 ['community.aws.aws_ssm' connection plugin][community.aws.aws_ssm connection].
 
@@ -154,6 +155,11 @@ It needs to be named like that to be found by the
 plugin: aws_ec2
 regions:
   - eu-east-2
+exclude_filters:
+  - tag-key:
+      - aws:eks:cluster-name  # EKS nodes do not use SSM-capable images
+include_filters:
+  - instance-state-name: running
 keyed_groups:
   - key: tags.Name
     # add hosts to 'tag_Name_<tag_value>' groups for each aws_ec2 host's 'Tags.Name' attribute
@@ -288,6 +294,7 @@ $ sudo ssm-cli get-diagnostics --output 'table'
 [snippets]: ../../../snippets/aws/commands.fish
 
 <!-- Upstream -->
+[amazon.aws.aws_ec2 inventory]: https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html
 [aws_ssm connection plugin notes]: https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html#notes
 [community.aws.aws_ssm connection]: https://docs.ansible.com/ansible/latest/collections/community/aws/aws_ssm_connection.html
 [session manager preferences]: https://console.aws.amazon.com/systems-manager/session-manager/preferences
