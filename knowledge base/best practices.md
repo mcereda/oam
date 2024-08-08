@@ -58,8 +58,10 @@ What really worked for me.
   You'll end up with stiff, hard to change results that satisfy nobody. This proved particularly true with regards to
   templates and pipelines.<br/>
   Stop designing systems that _should work for everybody at all times_.
-- Choose tools based on **how helpful** they are to achieve your goals.<br/>
+- Choose tools based on **how helpful** they are **to you** to achieve your goals.<br/>
   Do **not** adapt your work to specific tools.
+- Keep track of tools' EOL and keep them updated accordingly.
+  Trackers like [endoflife.date] could help in this.
 - Backup your data, especially when you are about to update something.<br/>
   [Murphy's law] is lurking. Consider [the 3-2-1 backup strategy].
 - [Branch early, branch often].
@@ -203,6 +205,7 @@ Listed in order of addition:
 [death by a thousand microservices]: https://renegadeotter.com/2023/09/10/death-by-a-thousand-microservices.html
 [devops is bullshit]: https://blog.massdriver.cloud/posts/devops-is-bullshit/
 [don't repeat yourself(dry) in software development]: https://www.geeksforgeeks.org/dont-repeat-yourselfdry-in-software-development/
+[endoflife.date]: https://endoflife.date/
 [from inboxing to thought showers: how business bullshit took over]: https://www.theguardian.com/news/2017/nov/23/from-inboxing-to-thought-showers-how-business-bullshit-took-over
 [git branching strategies vs. trunk-based development]: https://launchdarkly.com/blog/git-branching-strategies-vs-trunk-based-development/
 [hacking your manager - how to get platform engineering on their radar]: https://www.youtube.com/watch?v=8xprsTXKr0w
