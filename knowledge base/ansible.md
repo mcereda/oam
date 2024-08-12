@@ -13,6 +13,7 @@
 1. [Error handling](#error-handling)
    1. [Using blocks](#using-blocks)
 1. [Output formatting](#output-formatting)
+1. [Handlers](#handlers)
 1. [Roles](#roles)
    1. [Get roles](#get-roles)
    1. [Assign roles](#assign-roles)
@@ -502,6 +503,46 @@ $ ANSIBLE_STDOUT_CALLBACK='json' ansible-playbook --inventory='localhost,' 'loca
     }
   ]
 }
+```
+
+## Handlers
+
+Blocks and `import_tasks` tend to make the handlers unreachable.
+
+Instead of using blocks, give the same listen string to all involved handlers:
+
+```diff
+- - name: Block name
+-   block:
+-     - name: First task
+-       …
+-     - name: N-th task
+-       …
++ - name: First task
++   listen: Block name
++   …
++ - name: N-th task
++   listen: Block name
++   …
+```
+
+Instead of using `ìmport_tasks`, use `include_tasks`:
+
+```diff
+  - name: First task
+-   import_tasks: tasks.yml
++   include_tasks: tasks.yml
+```
+
+Handlers **can** notify other handlers:
+
+```yaml
+- name: Configure Nginx
+  ansible.builtin.copy: …
+  notify: Restart Nginx
+
+- name: Restart Nginx
+  ansible.builtin.copy: …
 ```
 
 ## Roles
