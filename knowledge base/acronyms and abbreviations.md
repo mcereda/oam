@@ -22,6 +22,7 @@
 | BYOD    | Bring Your Own Device                                  |                                                                                                     |
 | CD      | Continuous Delivery                                    | Continuous creation and testing of artifacts, ready to be deployed at the end of the process        |
 | CD      | Continuous Deployment                                  |                                                                                                     |
+| CDN     | Content Delivery Network                               |                                                                                                     |
 | CI      | Continuous Integration                                 |                                                                                                     |
 | CLI     | Command Line Interface                                 |                                                                                                     |
 | CMS     | Content Management System                              |                                                                                                     |
