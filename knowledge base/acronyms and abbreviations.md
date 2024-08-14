@@ -7,6 +7,7 @@
 | ACME    | [Automatic Certificate Management Environment]         | Protocol to automate the issuance and renewal of certificates without human interaction             |
 | AD      | Active Directory                                       |                                                                                                     |
 | ADR     | [Architectural Decision Record][adr]                   |                                                                                                     |
+| API     | Application Programming Interface                      | A way for two or more computer programs or components to communicate with each other                |
 | APK     | Alpine Package Keeper                                  | Package manager used by Alpine Linux                                                                |
 | APT     | Advanced Package Tool                                  | Package manager used by Debian Linux                                                                |
 | ASCII   | American Standard Code for Information Interchange     |                                                                                                     |
@@ -45,6 +46,7 @@
 | ESS     | Extended Service Set                                   | Group of WAPs working together to offer the same wireless network                                   |
 | ESSID   | Extended Service Set IDentifier                        | The wireless network name shared in an ESS                                                          |
 | ETL     | Extract, Transform and Load                            | The process of combining data from multiple sources into a large, central data warehouse            |
+| FDW     | Foreign Data Wrapper                                   | Standardized way of handling access to remote objects from SQL databases                            |
 | FHS     | [Filesystem Hierarchy Standard][fhs]                   |                                                                                                     |
 | FIFO    | First In First Out                                     |                                                                                                     |
 | FILO    | First In Last Out                                      |                                                                                                     |
