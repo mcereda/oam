@@ -8,6 +8,7 @@ pulumi install --reinstall
 
 pulumi pre
 pulumi pre --cwd 'observability' --diff
+pulumi up --suppress-outputs
 
 # Get the URN (or other stuff) of resources that would be deleted
 pulumi preview --json | jq -r '.steps[]|select(.op=="delete").urn' -
