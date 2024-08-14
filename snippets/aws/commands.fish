@@ -1,7 +1,15 @@
 #!/usr/bin/env fish
 
+aws configure list-profiles
+aws configure --profile 'engineer'
+
+# Assume roles
+aws sts assume-role --role-arn 'arn:aws:iam::012345678901:role/ServiceRole' --role-session-name 'me-as-serviceRole'
+aws --profile 'eng' sts assume-role --role-arn 'arn:aws:iam::012345678901:role/ServiceRole' --role-session-name 'eng-as-serviceRole'
+
 # Check the credentials are fine
 aws sts get-caller-identity
+AWS_PROFILE='engineer' aws sts get-caller-identity
 
 aws s3 rm 's3://bucket-name/prefix' --recursive --dry-run
 aws s3 cp 's3://my-first-bucket/test.txt' 's3://my-other-bucket/'

@@ -355,6 +355,25 @@
 
 - name: AWS
   block:
+    - name: Assume roles
+      block:
+        - name: Get session tokens
+          amazon.aws.sts_assume_role:
+            access_key: AKIA1EXAMPLE1EXAMPLE                      # optional if defined as environment variable
+            secret_key: 123456789abcdefghijklmnopqrstuvwxyzABCDE  # optional if defined as environment variable
+            profile: someProfile                                  # optional if defined as environment variable
+            role_arn: "arn:aws:iam::123456789012:role/someRole"
+            role_session_name: "someRoleSession"
+          register: assumed_role
+        - name: Use the assumed role to take action
+          amazon.aws.ec2_tag:
+            access_key: "{{ assumed_role.sts_creds.access_key }}"
+            secret_key: "{{ assumed_role.sts_creds.secret_key }}"
+            profile: null  # required to use the assumed role's token, if profile is specified via environment variable
+            session_token: "{{ assumed_role.sts_creds.session_token }}"
+            resource: i-xyzxyz01
+            tags:
+              MyNewTag: value
     - name: RDS
       block:
         - name: Create an instance's snapshot

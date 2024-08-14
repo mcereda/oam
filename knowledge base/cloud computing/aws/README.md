@@ -15,9 +15,6 @@
    1. [Security Hub](#security-hub)
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
-   1. [IAM policies](#iam-policies)
-   1. [Assume Roles](#assume-roles)
-      1. [Require MFA for assuming Roles](#require-mfa-for-assuming-roles)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -62,6 +59,7 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | [EKS]                         | Kubernetes clusters                           |
 | [EventBridge]                 | FIXME                                         |
 | [GuardDuty]                   | Threat detection                              |
+| [IAM]                         | Access control                                |
 | [ImageBuilder]                | Build custom AMIs                             |
 | [Inspector]                   | FIXME                                         |
 | [KMS]                         | Key management                                |
@@ -230,187 +228,15 @@ Member accounts can administer Security Hub by delegation if given the permissio
 
 ## Access control
 
-| Entity | Description                                                                                                                     | Notes                                                  |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| User   | Represents a human or a workload.<br/>Defined by its name and credentials.                                                      | No permissions by default, need to be assigned to it   |
-| Role   | Defines a set of permissions for making requests to AWS services.<br/>Defines what actions can be performed on which resources. | Can be assumed by AWS services, applications and users |
-
-To be able to assume roles:
-
-- Users, roles or services **must** have the permissions to assume the role they want to assume.
-- The role's trust relationship **should** allow the users, roles or services to assume it.
-
-From [Using service-linked roles]:
-
-> A _service role_ is an IAM role that a service assumes to perform actions on your behalf.<br/>
-> An IAM administrator can create, modify, and delete a service role from within IAM.
->
-> A _service-linked role_ is a type of service role that is linked to an AWS service.<br/>
-> The service can assume the role to perform an action on your behalf.<br/>
-> Service-linked roles appear in your AWS account and are owned by the service. An IAM administrator can view, but not
-> edit the permissions for service-linked roles.
-
-Check [aws.permissions.cloud] for a community-driven source of truth for AWS identity.
-
-### IAM policies
-
-IAM does not expose policies' `Sid` element in the IAM API, so it can't be used to retrieve statements.
-
-Examples:
-
-<details>
-  <summary>Give a user temporary RO access to a bucket</summary>
-
-1. Create the policy:
-
-   ```json
-   {
-     "Version": "2012-10-17",
-     "Statement": [{
-       "Sid": "AllowAttachedPrincipalsTemporaryROAccessToBucket",
-       "Effect": "Allow",
-       "Action": [
-         "s3:GetObject",
-         "s3:GetObjectAttributes",
-         "s3:ListBucket",
-         "s3:ListBucketVersions"
-       ],
-       "Resource": [
-         "arn:aws:s3:::my-bucket",
-         "arn:aws:s3:::my-bucket/*"
-       ],
-       "Condition": {
-         "DateLessThan": {
-           "aws:CurrentTime": "2024-03-01T00:00:00Z"
-         }
-       }
-     }]
-   }
-   ```
-
-   ```sh
-   $ aws iam create-policy --output 'yaml' \
-     --policy-name 'temp-ro-access-my-bucket' --policy-document 'file://policy.json'
-   - Policy:
-       Arn: arn:aws:iam::012345678901:policy/temp-ro-access-my-bucket
-       AttachmentCount: 0
-       CreateDate: '2024-02-25T09:34:12+00:00'
-       DefaultVersionId: v1
-       IsAttachable: true
-       Path: /
-       PermissionsBoundaryUsageCount: 0
-       PolicyId: ANPA2HKHE74L11PTJGB3V
-       PolicyName: temp-ro-access-my-bucket
-       UpdateDate: '2024-02-25T09:34:12+00:00'
-   ```
-
-1. Attach the newly created policy to the user:
-
-   ```sh
-   aws iam attach-user-policy \
-     --user-name 'my-user' --policy-arn 'arn:aws:iam::012345678901:policy/temp-ro-access-my-bucket'
-   ```
-
-</details>
-
-### Assume Roles
-
-Refer [Introduction to AWS IAM AssumeRole].
-
-Users, Roles and Services can assume Roles as long as:
-
-1. The User, Role or Service that is trying to assume the end Role has assigned policies that would allow them to.
-
-   ```json
-   {
-       "Version": "2012-10-17",
-       "Statement": [
-           {
-               "Sid": "AllowMeToAssumeThoseRoles",
-               "Effect": "Allow",
-               "Action": "sts:AssumeRole",
-               "Resource": [
-                   "arn:aws:iam::012345678901:role/EksAdminRole",
-                   "arn:aws:iam::987654321098:role/EcsAuditorRole"
-               ]
-           }
-       ]
-   }
-   ```
-
-1. The **end** Role's Trust Relationships allow the entity in the point above to assume it.
-
-   ```json
-   {
-       "Version": "2012-10-17",
-       "Statement": [
-           …,
-           {
-               "Effect": "Allow",
-               "Principal": {
-                   "AWS": "arn:aws:iam::012345678901:user/halJordan"
-               },
-               "Action": "sts:AssumeRole"
-           }
-       ]
-   }
-   ```
-
-Allowed entities can assume Roles using the [STS AssumeRole API][assumerole api reference]:
-
-```sh
-aws sts assume-role --output 'yaml' \
-  --role-arn "arn:aws:iam::012345678901:role/EksAdminRole" \
-  --role-session-name "lookAt-halJordan-sheIsThe-EksAdminRole-now"
-```
-
-```yaml
-AssumedRoleUser:
-  Arn: arn:aws:sts::012345678901:assumed-role/EksAdminRole/AIDA0123456789ABCDEFG-as-EksAdminRole-stsSession
-  AssumedRoleId: AROA2HKHF0123456789OA:AIDA0123456789ABCDEFG-as-EksAdminRole-stsSession
-Credentials:
-  AccessKeyId: ASIA2HKHF012345ABCDE
-  Expiration: '2024-08-06T10:29:15+00:00'
-  SecretAccessKey: C2SGbkwmfHWzf44DX6IQQirg5XCGwpLX0Ai++Qkq
-  SessionToken: IQoJb3jPZ2luX2VjEAIaCWV1LXdlc3QtMSJHMEUCIQCGEihh9rBi1cL8ebhQVdcKl8Svzm5VCIC/ebCdxpORiA…
-```
-
-#### Require MFA for assuming Roles
-
-Add the `"Bool": {"aws:MultiFactorAuthPresent": true}` condition to the Role's trust relationships:
-
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [{
-        "Effect": "Allow",
-        "Principal": {
-            "AWS": "arn:aws:iam::012345678901:user/halJordan"
-        },
-        "Action": "sts:AssumeRole",
-        "Condition": {
-            "Bool": {
-                "aws:MultiFactorAuthPresent": true
-            }
-        }
-    }]
-}
-```
-
-When requiring MFA with AssumeRole, identities need to pass values for the SerialNumber and TokenCode parameters.<br/>
-SerialNumbers identify the users' hardware or virtual MFA devices, TokenCodes are the time-based one-time password
-(TOTP) value that devices produce.
+Refer [IAM].
 
 ## Further readings
 
 - [EC2]
 - [Services that publish CloudWatch metrics]
-- [Using service-linked roles]
 - [Best Practices for Tagging AWS Resources]
 - [Automating DNS-challenge based LetsEncrypt certificates with AWS Route 53]
 - AWS' [CLI]
-- [Configuring EC2 Disk alert using Amazon CloudWatch]
-- [aws.permissions.cloud]
 
 ### Sources
 
@@ -418,29 +244,15 @@ SerialNumbers identify the users' hardware or virtual MFA devices, TokenCodes ar
 - [What is CloudWatch]
 - [What is Amazon VPC?]
 - [Subnets for your VPC]
-- [Introduction to AWS IAM AssumeRole]
-- [AWS JSON policy elements: Principal]
 - [What is AWS Config?]
 - [AWS Config tutorial by Stephane Maarek]
 - [Date & time policy conditions at AWS - 1-minute IAM lesson]
-- [IAM JSON policy elements: Sid]
 - [Elastic IP addresses]
-- [Using IAM policy conditions for fine-grained access control to manage resource record sets]
-- [Not authorized to perform: sts:AssumeRole]
 - [Test Your Roles' Access Policies Using the AWS Identity and Access Management Policy Simulator]
-- [Troubleshooting IAM roles]
-- [How can I monitor the account activity of specific IAM users, roles, and AWS access keys?]
-- [Using IAM roles]
-- [AssumeRole api reference]
-- [You might be clueless as to why AWS assume role isn't working, despite being correctly set up]
-- [Use an IAM role in the AWS CLI]
-- [Creating a role to delegate permissions to an IAM user]
-- [How to use the PassRole permission with IAM roles]
 - [Exporting DB snapshot data to Amazon S3]
 - [I'm trying to export a snapshot from Amazon RDS MySQL to Amazon S3, but I'm receiving an error. Why is this happening?]
 - [Rotating AWS KMS keys]
 - [Image baking in AWS using Packer and Image builder]
-- [Avoid the 60 minutes timeout when using the AWS CLI with IAM roles]
 - [Using AWS KMS via the CLI with a Symmetric Key]
 
 <!--
@@ -466,6 +278,7 @@ SerialNumbers identify the users' hardware or virtual MFA devices, TokenCodes ar
 [ecr]: ecr.md
 [ecs]: ecs.md
 [eks]: eks.md
+[iam]: iam.md
 [opensearch]: opensearch.md
 [rds]: rds.md
 [s3]: s3.md
@@ -473,42 +286,25 @@ SerialNumbers identify the users' hardware or virtual MFA devices, TokenCodes ar
 
 <!-- Upstream -->
 [access aws services through aws privatelink]: https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-access-aws-services.html
-[assumerole api reference]: https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html
 [aws icons]: https://aws-icons.com/
-[aws json policy elements: principal]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html
 [best practices for tagging aws resources]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html
 [connect to the internet using an internet gateway]: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
-[creating a role to delegate permissions to an iam user]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user.html
 [elastic ip addresses]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html
 [exporting db snapshot data to amazon s3]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ExportSnapshot.html
-[how can i monitor the account activity of specific iam users, roles, and aws access keys?]: https://repost.aws/knowledge-center/view-iam-history
-[how to use the passrole permission with iam roles]: https://aws.amazon.com/blogs/security/how-to-use-the-passrole-permission-with-iam-roles/
 [i'm trying to export a snapshot from amazon rds mysql to amazon s3, but i'm receiving an error. why is this happening?]: https://repost.aws/knowledge-center/rds-mysql-export-snapshot
-[iam json policy elements: sid]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_sid.html
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
-[not authorized to perform: sts:assumerole]: https://repost.aws/questions/QUOY5XngCtRyOX4Desaygz8Q/not-authorized-to-perform-sts-assumerole
 [rotating aws kms keys]: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
 [services that publish cloudwatch metrics]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
 [subnets for your vpc]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html
 [test your roles' access policies using the aws identity and access management policy simulator]: https://aws.amazon.com/blogs/security/test-your-roles-access-policies-using-the-aws-identity-and-access-management-policy-simulator/
-[troubleshooting iam roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_roles.html
-[use an iam role in the aws cli]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html
-[using iam policy conditions for fine-grained access control to manage resource record sets]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/specifying-rrset-conditions.html
-[using iam roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use.html
-[using service-linked roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/using-service-linked-roles.html
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
 [what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
 
 <!-- Others -->
 [automating dns-challenge based letsencrypt certificates with aws route 53]: https://johnrix.medium.com/automating-dns-challenge-based-letsencrypt-certificates-with-aws-route-53-8ba799dd207b
-[avoid the 60 minutes timeout when using the aws cli with iam roles]: https://cloudonaut.io/avoid-the-60-minutes-timeout-when-using-the-aws-cli-with-iam-roles/
 [aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
-[aws.permissions.cloud]: https://aws.permissions.cloud/
-[configuring ec2 disk alert using amazon cloudwatch]: https://medium.com/@chandinims001/configuring-ec2-disk-alert-using-amazon-cloudwatch-793807e40d72
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
 [image baking in aws using packer and image builder]: https://dev.to/santhoshnimmala/image-baking-in-aws-using-packer-and-image-builder-1ed3
-[introduction to aws iam assumerole]: https://aws.plainenglish.io/introduction-to-aws-iam-assumerole-fbef3ce8e90b
 [using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
-[you might be clueless as to why aws assume role isn't working, despite being correctly set up]: https://medium.com/@kamal.maiti/you-might-be-clueless-as-to-why-aws-assume-role-isnt-working-despite-being-correctly-set-up-1b3138519c07
