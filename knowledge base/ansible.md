@@ -743,7 +743,7 @@ to use specific secrets or password managers.
 
 ### Ansible Vault
 
-Refer [Protecting sensitive data with Ansible Vault] and [Ansible Vault tutorial].
+Refer [Protecting sensitive data with Ansible Vault], [Ansible Vault tutorial] and [Ansible Vault with AWX].
 
 Vault encrypts variables and files **at rest** and allows for their use in playbooks and roles.<br/>
 It does **not** prevent tasks to print out data **in use**. See the
@@ -753,8 +753,21 @@ sensible values.
 Protected data **will** require one or more passwords to encrypt and decrypt.<br/>
 If storing vault passwords in third-party tools, one will need them need to allow for non-interactive access.
 
-Create and view protected data by using the `ansible-vault` command.<br/>
-Use the `ansible.cfg` file to specify the location of a password file or to always prompt for the password.
+Create and view protected data by using the `ansible-vault` command.
+
+Provide the Vault's password:
+
+- By using command line options.<br/>
+  Make ansible ask for it using `‑‑ask‑vault‑pass`, or provide a file containing it with `--vault-password-file`.
+- By using the `ansible.cfg` file to either always prompt for the password, or to specify the default location of the
+  password file:
+
+  ```ini
+  [defaults]
+  vault_password_file = password_file.txt
+  ```
+
+- By exporting the `ANSIBLE_VAULT_PASSWORD_FILE` environment variable to specify the location of the password file.
 
 Vault passwords can be any string, and there is currently no special command to create one.<br/>
 One must provide the/a Vault password **every time one encrypts and/or decrypts data** with Vault.<br/>
@@ -775,7 +788,7 @@ To encrypt tasks or other content, one must encrypt the entire file.
 
 Input files are encrypted in-place unless one specifies the output files in the command.
 
-<details style="margin-left: 1em">
+<details style="padding-left: 1em">
   <summary>Encrypt and use variables</summary>
 
 1. Encrypt the variable's value:
@@ -839,7 +852,7 @@ Input files are encrypted in-place unless one specifies the output files in the 
 
 </details>
 
-<details style="margin: 0 0 1em 1em">
+<details style="padding: 0 0 1em 1em">
   <summary>Encrypt and use existing files</summary>
 
 1. Encrypt the file:
@@ -876,7 +889,7 @@ Input files are encrypted in-place unless one specifies the output files in the 
 Decrypt files with `ansible-vault decrypt 'path/to/file'`.<br/>
 Input files are decrypted in place unless one specifies the output files in the command.
 
-<details style="margin: 0 0 1em 1em">
+<details style="padding: 0 0 1em 1em">
   <summary>Decrypt files</summary>
 
 ```sh
@@ -893,7 +906,7 @@ Decryption successful
 
 One can quickly view the content of encrypted files with `ansible-vault view 'path/to/file'`:
 
-<details style="margin: 0 0 1em 1em">
+<details style="padding: 0 0 1em 1em">
   <summary>View encrypted files' content</summary>
 
 ```sh
@@ -1271,6 +1284,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 - [Execution environment definition]
 - [Protecting sensitive data with Ansible vault]
 - [Ansible Vault tutorial]
+- [Ansible Vault with AWX]
 
 <!--
   Reference
@@ -1317,6 +1331,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 [ansible - how to remove an item from a list?]: https://stackoverflow.com/questions/40927792/ansible-how-to-remove-an-item-from-a-list#40927834
 [ansible roles: basics, creating & using]: https://spacelift.io/blog/ansible-roles
 [ansible vault tutorial]: https://piyops.com/ansible-vault-tutorial
+[ansible vault with awx]: https://medium.com/t%C3%BCrk-telekom-bulut-teknolojileri/ansible-vault-with-awx-80b603617798
 [ansible: set variable to file content]: https://stackoverflow.com/questions/24003880/ansible-set-variable-to-file-content
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
 [creating your own ansible filter plugins]: https://www.dasblinkenlichten.com/creating-ansible-filter-plugins/
