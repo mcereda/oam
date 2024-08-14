@@ -32,6 +32,9 @@ steampipe check 'benchmark.cis_v130'
 
 steampipe query list
 
+# Start interactive sessions
+steampipe query
+
 # List AWS IAM users and their group
 steampipe query 'select name from aws_iam_role'
 steampipe query "SELECT iam_user ->> 'UserName' as User, name as Group FROM aws_iam_group CROSS JOIN jsonb_array_elements(users) as iam_user"
