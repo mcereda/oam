@@ -110,6 +110,7 @@ See [EBS].
 - [Connect to your instances without requiring a public IPv4 address using EC2 Instance Connect Endpoint]
 - [Unlimited mode for burstable performance instances]
 - [Standard mode for burstable performance instances]
+- [Configuring EC2 Disk alert using Amazon CloudWatch]
 
 ### Sources
 
@@ -150,3 +151,4 @@ See [EBS].
 <!-- Others -->
 [aws ec2 instance pricing comparison]: https://ec2instances.github.io/
 [ec2instances.info on vantage.sh]: https://instances.vantage.sh/
+[configuring ec2 disk alert using amazon cloudwatch]: https://medium.com/@chandinims001/configuring-ec2-disk-alert-using-amazon-cloudwatch-793807e40d72
