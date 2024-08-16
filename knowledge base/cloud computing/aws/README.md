@@ -70,6 +70,8 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | [Security Hub]                | Aggregator for security findings              |
 
 [Service icons][aws icons] are publicly available for diagrams and such.
+Public service IP address ranges are [available in JSON form][aws public ip address ranges now available in json form]
+at <https://ip-ranges.amazonaws.com/ip-ranges.json>.
 
 ### Billing and Cost Management
 
@@ -254,6 +256,7 @@ Refer [IAM].
 - [Rotating AWS KMS keys]
 - [Image baking in AWS using Packer and Image builder]
 - [Using AWS KMS via the CLI with a Symmetric Key]
+- [AWS Public IP Address Ranges Now Available in JSON Form]
 
 <!--
   Reference
@@ -301,6 +304,7 @@ Refer [IAM].
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
 [what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
+[aws public ip address ranges now available in json form]: https://aws.amazon.com/blogs/aws/aws-ip-ranges-json/
 
 <!-- Others -->
 [automating dns-challenge based letsencrypt certificates with aws route 53]: https://johnrix.medium.com/automating-dns-challenge-based-letsencrypt-certificates-with-aws-route-53-8ba799dd207b

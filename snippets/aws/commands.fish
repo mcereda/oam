@@ -49,7 +49,7 @@ aws iam list-instance-profiles | grep -i 'ssm'
 
 sudo ssm-cli get-diagnostics --output 'table'
 
-# Check instances are available
+# Check instances are available for use with SSM
 aws ssm get-connection-status --query "Status=='connected'" --output 'text' --target "i-0915612ff82914822"
 
 # Connect to instances if they are available

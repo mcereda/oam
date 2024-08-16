@@ -1,0 +1,130 @@
+---
+- name: Properly clone a running EC2 instance
+  hosts: localhost
+  gather_facts: false
+  vars:
+    original_instance_name_tag: "Use ME!!"
+  pre_tasks:
+    - name: Get information from the original instance
+      tags:
+        - gather_information
+        - pre_task
+      amazon.aws.ec2_instance_info:
+        filters:
+          "tag:Name": "{{ original_instance_name_tag }}"
+          "instance-state-name": [ "running" ]
+      register: original_instance_information
+    - name: Check a running instance with Name tag '{{ original_instance_name_tag }}' has been found
+      tags:
+        - gather_information
+        - pre_task
+      ansible.builtin.assert:
+        that: original_instance_information.instances | length > 0
+        fail_msg: No running instances found with Name tag '{{ original_instance_name_tag }}'
+        success_msg: At least one running instance has been found with Name tag '{{ original_instance_name_tag }}'
+  tasks:
+    - name: Create a Security Group with only the connections required for testing
+      tags: security_group
+      amazon.aws.ec2_security_group:
+        name: Clone EC2 Instance SG
+        description: Temporary SG for cloning EC2 Instances
+        rules_egress:
+          - cidr_ip: 0.0.0.0/0
+            ports: 443
+            rule_desc: Required by SSM, but could be stricter
+      register: clone_instance_security_group_information
+    - name: Create snapshots of the instance's volumes
+      # Allows for more control over the snapshot, namely to avoid recreating snapshot of massive volumes and lose hours
+      tags: snapshot
+      amazon.aws.ec2_snapshot:
+        volume_id: "{{ item }}"
+        description: Temporary snapshot for cloning EC2 Instances
+        last_snapshot_min_age: 1440  # 1d
+        wait_timeout: 7200  # 2h might still be not enough for big boi volumes
+      loop: "{{ original_instance_information.instances[0].block_device_mappings | map(attribute='ebs.volume_id') }}"
+      register: original_instance_snapshots
+    - name: Create an AMI from the snapshot
+      tags: ami
+      amazon.aws.ec2_ami:
+        # no_reboot: false  # set to true if one does *not* want to have the original instance shut down
+        wait: true
+        name: temp-{{ original_instance_name_tag | regex_replace(' ', '-') | lower }}-ami
+        description: Temporary AMI for cloning EC2 Instances
+        tags:
+          Name: Clone EC2 Instance AMI
+        root_device_name: "{{ original_instance_information.instances[0].root_device_name }}"
+        device_mapping: >-
+          {%- set devices_list = [] -%}
+          {%- for result in original_instance_snapshots.results -%}
+          {%-   for device in original_instance_information.instances[0].block_device_mappings
+                | selectattr('ebs.volume_id', 'equalto', result.volume_id) -%}
+          {{-
+                  devices_list.append({
+                    'device_name': device.device_name,
+                    'snapshot_id': result.snapshots | sort(attribute='start_time') | last | json_query('snapshot_id'),
+                    'volume_type': 'gp3',
+                    'delete_on_termination': true,
+                  })
+          -}}
+          {%-   endfor -%}
+          {%- endfor -%}
+          {{  devices_list }}
+      register: original_instance_ami
+    - name: Use the AMI to launch a clone
+      tags:
+        - clone
+        - instance
+      when: original_instance_ami.image_id is defined
+      amazon.aws.ec2_instance:
+        name: Clone EC2 Instance
+        vpc_subnet_id: "{{ original_instance_information.instances[0].subnet_id }}"
+        instance_type: "{{ original_instance_information.instances[0].instance_type }}"
+        image:
+          id: "{{ original_instance_ami.image_id }}"
+        security_group: "{{ clone_instance_security_group_information.group_id }}"
+        iam_instance_profile: "{{ original_instance_information.instances[0].iam_instance_profile.arn }}"
+      register: clone_instance_information
+    - name: Wait for the instance to be ready
+      tags:
+        - clone
+        - instance
+        - check
+      when: clone_instance_information.instance_ids is defined
+      block:
+        - name: Just pause enough for the instance to initialize
+          # Because of course there seems to be no effing way to distinguish between just running and ready, and of
+          # course the SSM connection plugin crashes badly instead of just erroring the task out (ノಠ益ಠ)ノ彡┻━┻
+          ansible.builtin.pause:
+            minutes: 3
+        - name: Try connecting with SSM
+          delegate_to: "{{ clone_instance_information.instances[0].instance_id }}"
+          vars:
+            ansible_connection: community.aws.aws_ssm
+            ansible_aws_ssm_bucket_name: some-bucket
+            ansible_aws_ssm_region: eu-west-1
+            ansible_aws_ssm_timeout: 300
+          ansible.builtin.ping:
+    - name: Ready!
+      ansible.builtin.debug:
+        msg: The clone instance is ready!
+  post_tasks:
+    - name: Remove the clone
+      tags:
+        - clone
+        - instance
+        - cleanup
+        - post_task
+      when: clone_instance_information.instance_ids is defined
+      amazon.aws.ec2_instance:
+        instance_ids: "{{ clone_instance_information.instance_ids }}"
+        state: absent
+    - name: Remove the AMI
+      tags:
+        - always  # stupid ami module fails if already existing
+        - ami
+        - cleanup
+        - post_task
+      when: original_instance_ami.image_id is defined
+      amazon.aws.ec2_ami:
+        image_id: "{{ original_instance_ami.image_id }}"
+        state: absent
