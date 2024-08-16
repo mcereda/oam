@@ -43,6 +43,8 @@ gitlab-runner exec docker \
 
 Each runner executor is assigned 1 task at a time.
 
+Runners seem to require the main instance to give the full certificate chain upon connection.
+
 ## Pull images from private AWS ECR registries
 
 1. Create an IAM Role in one's AWS account and attach it the

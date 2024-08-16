@@ -46,7 +46,7 @@ Default backup location: `/var/opt/gitlab/backups`.
 Refer [Install self-managed GitLab].
 
 ```sh
-sudo dnf install 'gitlab-ee'
+sudo dnf install 'gitlab-ee-16.11.6'
 sudo EXTERNAL_URL='http://gitlab.example.com' GITLAB_ROOT_PASSWORD='smthng_Strong_0r_it_llfail' apt install 'gitlab-ee'
 
 sudo gitlab-rake 'gitlab:env:info'
@@ -96,8 +96,8 @@ Backup settings for AWS buckets.</br>
 See [Back up Gitlab using Amazon S3]:
 
 ```rb
-# If using an IAM Profile, don't configure 'aws_access_key_id' and
-# 'aws_secret_access_key' but set "'use_iam_profile' => true" instead.
+# If using an IAM Profile, don't configure 'aws_access_key_id' and 'aws_secret_access_key'.
+# Set "'use_iam_profile' => true" instead.
 gitlab_rails['backup_upload_connection'] = {
   'provider' => 'AWS',
   'region' => 'eu-west-1',
@@ -120,6 +120,9 @@ The package's included nginx generates keys and a **self-signed** certificate fo
 given URL's schema is HTTPS.<br/>
 The Let's Encrypt account key is in OpenSSL format, while the certificate's key is in OpenSSH format. Both are **not**
 password protected.
+
+The certificate used by Gitlab's nginx should include the full chain.<br/>
+The leaf-only certificate works normally, but runners seem to require the full chain to connect properly.
 
 </details>
 
@@ -177,7 +180,7 @@ tmux new-session -As 'gitlab-upgrade' "sudo yum update 'gitlab-ee'"
 
 # Reset the root user's password.
 sudo gitlab-rake 'gitlab:password:reset[root]'
-sudo gitlab-rails console  \
+sudo gitlab-rails console
   # --> user = User.find_by_username 'root'
   # --> user.password = 'QwerTy184'
   # --> user.password_confirmation = 'QwerTy184'
@@ -206,12 +209,20 @@ Migration procedure:
 1. Reconfigure the new instance
 1. Restore the full backup on the new instance
 
+Check the [Upgrade Path tool] before upgrading.
+
+Upgrade procedure:
+
+1. Upgrade to the latest **patch** version of the current minor first.
+1. Upgrade to the **latest** patch version of **every** mandatory step.
+1. Upgrade runners to the nearest minor version of the main instance.
+
 </details>
 
 <details>
   <summary>Removal</summary>
 
-Refer <https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/doc/installation/index.md#uninstall-the-linux-package-omnibus>.
+Refer [Uninstall the Linux Package (Omnibus)].
 
 ```sh
 # Remove all users and groups created by the package.
@@ -221,7 +232,7 @@ sudo gitlab-ctl stop && sudo gitlab-ctl remove-accounts
 sudo gitlab-ctl cleanse && sudo rm -r '/opt/gitlab'
 
 # Uninstall the package.
-sudo apt remove 'gitlab-ee'
+sudo apt remove 'gitlab-ce'
 sudo dnf remove 'gitlab-ee'
 ```
 
@@ -699,6 +710,7 @@ Solution: set the correct ownership with
 - [Kaniko]
 - [The GitLab Handbook]
 - [Icons]
+- [Upgrade Path tool]
 
 ### Sources
 
@@ -776,6 +788,8 @@ Solution: set the correct ownership with
 [the gitlab handbook]: https://handbook.gitlab.com/
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
 [tutorial: use buildah in a rootless container with gitlab runner operator on openshift]: https://docs.gitlab.com/ee/ci/docker/buildah_rootless_tutorial.html
+[uninstall the linux package (omnibus)]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/doc/installation/index.md#uninstall-the-linux-package-omnibus
+[upgrade path tool]: https://gitlab-com.gitlab.io/support/toolbox/upgrade-path/
 [use kaniko to build docker images]: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
 
 <!-- Others -->

@@ -167,3 +167,10 @@ aws iam list-users --no-cli-pager --query 'Users[].UserName' --output 'text' \
 | xargs -n1 -P (nproc) aws iam list-access-keys \
 	--query "AccessKeyMetadata[?AccessKeyId=='AKIA01234567890ABCDE'].UserName" --output 'json' --user \
 | jq -rs 'flatten|first'
+
+# Get details for access keys
+# When no user is specified, it displays only keys for the current one
+aws iam --no-cli-pager list-access-keys
+aws iam --no-cli-pager list-access-keys --user-name 'mark'
+
+watch -n '1' aws ec2 describe-instances --instance-ids 'i-0123456789abcdef0' --query 'Reservations[].Instances[].[State,StateTransitionReason]'
