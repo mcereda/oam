@@ -28,8 +28,12 @@ Apparently, Linux machines are able to do that automatically with a reboot.
 
 ## Snapshots
 
-When created, snapshots are **incremental**.<br/>
+The first snapshot is **complete**, with all the volume's blocks being copied. All successive snapshots of the same
+volume are **incremental**, with only the changes being copied.<br/>
 Incremental snapshots are stored in EBS' standard tier.
+
+Snapshots can be unbearably slow depending on the amount of data needing to be copied.<br/>
+For comparison, the first snapshot of a 200 GiB volume took about 2h to complete.
 
 Snapshots can be [archived][archive amazon ebs snapshots] to save money should they **not** need frequent nor fast
 retrieval.<br/>

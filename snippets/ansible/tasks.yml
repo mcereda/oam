@@ -19,6 +19,14 @@
     content: |
       …
 
+- name: Show input data type
+  set_fact:
+    should_be_string: "{{ 'this' | type_debug }}"
+
+- name: Run locally
+  delegate_to: 127.0.0.1  # 'localhost' works too
+  command: hostname
+
 - name: Import tasks
   block:
     - name: By using absolute paths and special variables (preferred)
@@ -135,6 +143,7 @@
       set_fact:
         random_item: "{{ ['a','b','c'] | random }}"
     - name: Sort dict elements in list by attribute
+      tags: order_by
       vars:
         snapshots:
           - name: sales
@@ -156,6 +165,7 @@
       set_fact:
         vpc_security_group_ids: >-
           {{ instance_information.vpc_security_groups | map(attribute='vpc_security_group_id') }}
+        volume_ids: "{{ instances_information.instances[0].block_device_mappings | map(attribute='ebs.volume_id') }}"
     - name: Return only elements with specific attributes matching a filter
       set_fact:
         available_rds_snapshots: snapshots_list | selectattr("status", "equalto", "available")
@@ -243,6 +253,28 @@
             {%- endfor -%}
           {%- endfor -%}
           {{- output -}}
+    - name: Get the device name and last snapshot id for all block devices in an EC2 instance
+      # Useful to create AMIs from instance snapshots
+      tags:
+        - aws
+        - ec2
+        - snapshot
+        - ami
+      ansible.builtin.set_fact:
+        last_snap_for_device: >-
+          {%- set devices_list = [] -%}
+          {%- for result in current_instance_snapshots.results -%}
+          {%-   for device in current_instance_information.instances[0].block_device_mappings
+                | selectattr('ebs.volume_id', 'equalto', result.volume_id) -%}
+          {{-
+                  devices_list.append({
+                    'device_name': device.device_name,
+                    'snapshot_id': result.snapshots | sort(attribute='start_time') | last | json_query('snapshot_id'),
+                  })
+          -}}
+          {%-   endfor -%}
+          {%- endfor -%}
+          {{  devices_list }}
 
 - name: "Use the users' home directory for something"
   block:
@@ -261,6 +293,7 @@
             - ec2-user
           register: users_homedir_retrieve
         - name: Compute and register the results
+          tags: AnsibleUnsafeText_to_Dict
           ansible.builtin.set_fact:
             users_homedir: >-
               {{
@@ -354,7 +387,18 @@
         msg: I always execute
 
 - name: AWS
+  tags: aws
   block:
+    - name: Get current IP ranges
+      # too many to be put into security group rules
+      set_fact:
+        ip_ranges: >-
+          lookup('url', 'https://ip-ranges.amazonaws.com/ip-ranges.json', split_lines=False)
+          | from_json
+          | json_query('prefixes')
+          | selectattr('region', 'equalto', 'eu-west-1')
+          | selectattr('service', 'equalto', 'AMAZON')
+          | map(attribute='ip_prefix')
     - name: Assume roles
       block:
         - name: Get session tokens
@@ -374,6 +418,38 @@
             resource: i-xyzxyz01
             tags:
               MyNewTag: value
+    - name: EC2
+      block:
+        - name: Get running instances with 'K8S' as the 'Application' tag
+          amazon.aws.ec2_instance_info:
+            filters:
+              "tag:Application": K8S
+              "instance-state-name": [ "running" ]
+        - name: Clone EC2 instances
+          vars:
+            source_instance_id: i-0123456789abcdef0
+          block:
+            - name: Get instance information from the original instance
+              amazon.aws.ec2_instance_info:
+                instance_ids:
+                  - "{{ source_instance_id }}"
+              register: source_instance_info
+            - name: Create an AMI of the original instance
+              amazon.aws.ec2_ami:
+                instance_id: "{{ source_instance_id }}"
+                no_reboot: true     # remove if the instance rebooting upon AMI creation is no biggie
+                wait: true
+                wait_timeout: 3600  # big volumes call for bit wait times (a 200GiB volume took )
+                name: ami-source
+              register: source_ami
+            - name: Use the AMI to launch clones identical to the original
+              when: source_ami.image_id is defined
+              amazon.aws.ec2_instance:
+                name: clone
+                vpc_subnet_id: "{{ source_instance_info.instances[0].subnet_id }}"
+                instance_type: "{{ source_instance_info.instances[0].instance_type }}"
+                image:
+                  id: "{{ source_ami.image_id }}"
     - name: RDS
       block:
         - name: Create an instance's snapshot

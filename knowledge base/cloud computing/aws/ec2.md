@@ -15,6 +15,13 @@ Use an instance profile to pass an IAM role to an EC2 instance.
 The instance type [_can_ be changed][change the instance type]. The procedure depends on the root volume, but does
 require downtime.
 
+Clone EC2 instances by:
+
+1. Creating an AMI from the original instance.
+   Mind the default behaviour of the AMI creator is to **shutdown** the instance, take a snapshot, and boot it again
+   [to guarantee the image's filesystem integrity][create an ami from an amazon ec2 instance].
+1. Using that AMI to launch clones identical to the original.
+
 <details>
   <summary>Real world use cases</summary>
 
@@ -122,6 +129,8 @@ See [EBS].
 - [Retrieve instance metadata]
 - [Burstable performance instances]
 - [Change the instance type]
+- [How to Clone instance EC2]
+- [Create an AMI from an Amazon EC2 Instance]
 
 <!--
   Reference
@@ -137,16 +146,18 @@ See [EBS].
 <!-- Upstream -->
 [best practices for handling ec2 spot instance interruptions]: https://aws.amazon.com/blogs/compute/best-practices-for-handling-ec2-spot-instance-interruptions/
 [burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html
+[change the instance type]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html
 [connect to your instances without requiring a public ipv4 address using ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-with-ec2-instance-connect-endpoint.html
+[create an ami from an amazon ec2 instance]: https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide//tkv-create-ami-from-instance.html
 [describe-images]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-images.html
 [describeimages]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
+[how to clone instance ec2]: https://repost.aws/questions/QUOrWudF3vRL2Vqtrv0M9lfQ/how-to-clone-instance-ec2
 [iam roles for amazon ec2]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
 [key concepts and definitions for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-credits-baseline-concepts.html
 [retrieve instance metadata]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
 [standard mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-standard-mode.html
 [unlimited mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-unlimited-mode.html
 [using instance profiles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
-[change the instance type]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html
 
 <!-- Others -->
 [aws ec2 instance pricing comparison]: https://ec2instances.github.io/
