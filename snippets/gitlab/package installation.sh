@@ -85,6 +85,10 @@ gitlab-rails runner '
 # Check services
 sudo gitlab-ctl status
 
+# Restart services
+sudo gitlab-ctl restart
+sudo gitlab-ctl restart nginx
+
 # Get logs
 sudo gitlab-ctl tail
 sudo gitlab-ctl tail 'prometheus'
@@ -175,3 +179,10 @@ sudo rm -rf '/etc/gitlab' '/opt/gitlab'
 sudo dnf -y remove --noautoremove 'gitlab-ee'
 
 ## Removal - end --------------------- #
+
+# Check the included PostgreSQL version
+sudo gitlab-psql -c 'SELECT version();'
+
+# Check the status of batched background migrations
+# Should the query return zero rows, all batched background migrations are complete
+sudo gitlab-psql -c "SELECT job_class_name, table_name, column_name, job_arguments FROM batched_background_migrations WHERE status NOT IN(3, 6);"

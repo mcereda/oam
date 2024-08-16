@@ -35,7 +35,7 @@
     account_key_src: "{{ letsencrypt_privatekey_path }}"
     account_email: "{{ acme_account_email }}"
     csr: "{{ certificate_csr_path }}"
-    cert: "{{ certificate_path }}"
+    fullchain: "{{ certificate_path }}"
     remaining_days: 29
     terms_agreed: true
     data: "{{ dns_challenge }}"

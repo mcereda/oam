@@ -297,6 +297,7 @@
         "sdkman",
         "setfacl",
         "setfattr",
+        "sidekiq",
         "siem",
         "slurm",
         "snmp",
