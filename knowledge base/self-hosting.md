@@ -9,24 +9,25 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 
 ## Software
 
-| Name             | Description                | Alternatives                              |
-| ---------------- | -------------------------- | ----------------------------------------- |
-| [AWX]            | Task runner                | [CTFreak], [Rundeck], [Semaphore], [Zuul] |
-| [Baikal]         | CalDAV and CardDAV server  | [Radicale]                                |
-| [CTFreak]        | Task runner                | [AWX], [Rundeck], [Semaphore], [Zuul]     |
-| [Gitea]          | Git server                 | [Gitlab], [Gogs]                          |
-| [Gitlab]         | Git server                 | [Gitea], [Gogs]                           |
-| [Gogs]           | Git server                 | [Gitea], [Gitlab]                         |
-| [Home Assistant] | Home automation platform   |                                           |
-| [NextCloud]      | File sharing platform      | [OwnCloud]                                |
-| [OpenMediaVault] | NAS solution               | [TrueNAS]                                 |
-| [Paperless-ngx]  | Document management system |                                           |
-| [PhotoPrism]     | Google Photos replacement  |                                           |
-| [Rundeck]        | Task runner                | [AWX], [CTFreak], [Semaphore], [Zuul]     |
-| [Semaphore]      | Task runner                | [AWX], [CTFreak], [Rundeck], [Zuul]       |
-| [Uptime Kuma]    | Status page                | [Gatus], [Statping-ng], [Vigil]           |
-| [Zuul]           | Task runner                | [AWX], [CTFreak], [Rundeck], [Semaphore]  |
-| [Wallabag]       | Web page saver             | Pocket                                    |
+| Name             | Description                         | Alternatives                              |
+| ---------------- | ----------------------------------- | ----------------------------------------- |
+| [AWX]            | Task runner                         | [CTFreak], [Rundeck], [Semaphore], [Zuul] |
+| [Baikal]         | CalDAV and CardDAV server           | [Radicale]                                |
+| [CTFreak]        | Task runner                         | [AWX], [Rundeck], [Semaphore], [Zuul]     |
+| [Gitea]          | Git server                          | [Gitlab], [Gogs]                          |
+| [Gitlab]         | Git server                          | [Gitea], [Gogs]                           |
+| [Gogs]           | Git server                          | [Gitea], [Gitlab]                         |
+| [Home Assistant] | Home automation platform            |                                           |
+| [Immich]         | Photo and video management solution | Google Photo                              |
+| [NextCloud]      | File sharing platform               | [OwnCloud]                                |
+| [OpenMediaVault] | NAS solution                        | [TrueNAS]                                 |
+| [Paperless-ngx]  | Document management system          |                                           |
+| [PhotoPrism]     | Google Photos replacement           |                                           |
+| [Rundeck]        | Task runner                         | [AWX], [CTFreak], [Semaphore], [Zuul]     |
+| [Semaphore]      | Task runner                         | [AWX], [CTFreak], [Rundeck], [Zuul]       |
+| [Uptime Kuma]    | Status page                         | [Gatus], [Statping-ng], [Vigil]           |
+| [Wallabag]       | Web page saver                      | Pocket                                    |
+| [Zuul]           | Task runner                         | [AWX], [CTFreak], [Rundeck], [Semaphore]  |
 
 ## Further readings
 
@@ -45,6 +46,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 [baikal]: baikal.md
 [gitea]: gitea.md
 [gitlab]: gitlab/README.md
+[immich]: immich.md
 [nextcloud]: nextcloud.md
 [openmediavault]: openmediavault.md
 [paperless-ngx]: paperless-ngx.md
