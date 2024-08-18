@@ -18,11 +18,11 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 | [Gitlab]         | Git server                          | [Gitea], [Gogs]                           |
 | [Gogs]           | Git server                          | [Gitea], [Gitlab]                         |
 | [Home Assistant] | Home automation platform            |                                           |
-| [Immich]         | Photo and video management solution | Google Photo                              |
+| [Immich]         | Photo and video management solution | Google Photo, [PhotoPrism]                |
 | [NextCloud]      | File sharing platform               | [OwnCloud]                                |
 | [OpenMediaVault] | NAS solution                        | [TrueNAS]                                 |
 | [Paperless-ngx]  | Document management system          |                                           |
-| [PhotoPrism]     | Google Photos replacement           |                                           |
+| [PhotoPrism]     | Photo and video management solution | Google Photo, [Immich]                    |
 | [Rundeck]        | Task runner                         | [AWX], [CTFreak], [Semaphore], [Zuul]     |
 | [Semaphore]      | Task runner                         | [AWX], [CTFreak], [Rundeck], [Zuul]       |
 | [Uptime Kuma]    | Status page                         | [Gatus], [Statping-ng], [Vigil]           |
