@@ -179,6 +179,7 @@ Listed in order of addition:
 - [The "action fallacy" tells us that the most effective leaders are unseen]
 - [Death by a thousand microservices]
 - [Maybe you do need Kubernetes]
+- [The 10 Commandments of Navigating Code Reviews]
 
 <!--
   Reference
@@ -217,6 +218,7 @@ Listed in order of addition:
 [platform teams need a delightfully different approach, not one that sucks less]: https://www.chkk.io/blog/platform-teams-different-approach
 [simple sabotage for software]: https://erikbern.com/2023/12/13/simple-sabotage-for-software.html
 [the "action fallacy" tells us that the most effective leaders are unseen]: https://bigthink.com/business/action-fallacy-most-effective-leaders-unseen/
+[the 10 commandments of navigating code reviews]: https://angiejones.tech/ten-commandments-code-reviews/
 [the 3-2-1 backup strategy]: https://www.backblaze.com/blog/the-3-2-1-backup-strategy/
 [the art of small pull requests]: https://essenceofcode.com/2019/10/29/the-art-of-small-pull-requests/
 [the xy problem]: https://xyproblem.info/
