@@ -3,5 +3,6 @@
 
 offline: true
 warn_list:
-  - 'role-name[path]'
+  - 'name[template]'   # Jinja templates should only be at the end of 'name' -- oh come on!
+  - 'role-name[path]'  # Avoid using paths when importing roles -- yeah, need for testing
   - package-latest
