@@ -758,16 +758,32 @@ Create and view protected data by using the `ansible-vault` command.
 Provide the Vault's password:
 
 - By using command line options.<br/>
-  Make ansible ask for it using `‑‑ask‑vault‑pass`, or provide a file containing it with `--vault-password-file`.
-- By using the `ansible.cfg` file to either always prompt for the password, or to specify the default location of the
-  password file:
+  Make ansible ask for it using `‑‑ask‑vault‑pass`, or provide a file containing it with `--vault-password-file`:
+
+  ```sh
+  ansible … --ask-vault-pass
+  ansible-playbook … --vault-password-file 'password_file.txt'
+  ```
+
+- By exporting the `ANSIBLE_VAULT_PASSWORD` or `ANSIBLE_VAULT_PASSWORD_FILE` environment variables to specify the
+  password itself or the location of the password file, respectively:
+
+  ```sh
+  ANSIBLE_VAULT_PASSWORD_FILE='password_file.txt' ansible …
+  export ANSIBLE_VAULT_PASSWORD='abraKadabra' ; ansible-playbook …
+  ```
+
+- By using the `ansible.cfg` config file to either always prompt for the password, or to specify the default location of
+  the password file:
 
   ```ini
   [defaults]
   vault_password_file = password_file.txt
+  ; ask_vault_pass = True
   ```
 
-- By exporting the `ANSIBLE_VAULT_PASSWORD_FILE` environment variable to specify the location of the password file.
+  Should the password file be executable, Ansible will execute it and use its output as the password for Vault.<br/>
+  This works well to integrate with CLI-capable password managers.
 
 Vault passwords can be any string, and there is currently no special command to create one.<br/>
 One must provide the/a Vault password **every time one encrypts and/or decrypts data** with Vault.<br/>
