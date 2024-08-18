@@ -424,7 +424,7 @@
           amazon.aws.ec2_instance_info:
             filters:
               "tag:Application": K8S
-              "instance-state-name": [ "running" ]
+              "instance-state-name": ["running"]
         - name: Clone EC2 instances
           vars:
             source_instance_id: i-0123456789abcdef0

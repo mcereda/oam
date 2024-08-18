@@ -1,2 +1,3 @@
-ansible/playbooks/keybase.register-device.yml                   no-changed-when
-examples/ansible/aws_ec2.yml                                    yaml[comments-indentation]
+ansible/playbooks/keybase.register-device.yml  no-changed-when
+examples/ansible/aws_ec2.yml                   yaml[comments-indentation]
+examples/ansible/ec2.clone-instance.yml        args[module]

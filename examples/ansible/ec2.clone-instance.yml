@@ -12,7 +12,7 @@
       amazon.aws.ec2_instance_info:
         filters:
           "tag:Name": "{{ original_instance_name_tag }}"
-          "instance-state-name": [ "running" ]
+          "instance-state-name": ["running"]
       register: original_instance_information
     - name: Check a running instance with Name tag '{{ original_instance_name_tag }}' has been found
       tags:
