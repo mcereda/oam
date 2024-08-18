@@ -47,6 +47,9 @@
 
 ## TL;DR
 
+<details>
+  <summary>Setup</summary>
+
 ```sh
 # Install.
 pip3 install --user 'ansible'
@@ -55,16 +58,18 @@ sudo pamac install 'ansible' 'sshpass'   # manjaro linux
 
 # Generate example configuration files with entries disabled.
 ansible-config init --disabled > 'ansible.cfg'
-ansible-config init --disabled -t 'all' > 'ansible.cfg'
+ansible-config init --disabled -t 'all' > ~/'.ansible.cfg'
 
 # Show the current configuration.
 ansible-config dump
+```
 
-# Show hosts' ansible facts.
-ansible -i 'path/to/hosts/file' -m 'setup' all
-ansible -i 'host1,hostN,' -m 'setup' 'host1' -u 'remote-user'
-ansible -i 'localhost,' -c 'local' -km 'setup' 'localhost'
+</details>
 
+<details>
+  <summary>Usage</summary>
+
+```sh
 # List hosts.
 ansible-inventory -i 'inventory' --list
 ansible-playbook -i 'inventory' 'playbook.yml' --list-hosts
@@ -97,17 +102,20 @@ ansible-playbook … --list-tasks --skip-tags 'system,user'
 # Debug playbooks.
 ANSIBLE_ENABLE_TASK_DEBUGGER=True ansible-playbook …
 
+# Record how much time tasks take.
+ANSIBLE_CALLBACKS_ENABLED='profile_tasks' ansible-playbook …
+
 # Encrypt data using Vault.
 ansible-vault encrypt_string --name 'command_output' 'somethingNobodyShouldKnow'
 ansible-vault encrypt '.ssh/id_rsa' --vault-password-file 'password_file.txt'
-ansible-vault encrypt --output 'ssh.key' '.ssh/id_rsa'
+ANSIBLE_VAULT_PASSWORD_FILE='password_file.txt' ansible-vault encrypt --output 'ssh.key' '.ssh/id_rsa'
 
 # Print out decoded contents of files encrypted with Vault.
 ansible-vault view 'ssh.key.pub'
 ansible-vault view 'ssh.key.pub' --vault-password-file 'password_file.txt'
 
 # Edit decoded contents of files encrypted with Vault.
-ansible-vault edit 'ssh.key.pub'
+ANSIBLE_VAULT_PASSWORD='abracadabra' ansible-vault edit 'ssh.key.pub'
 ansible-vault edit 'ssh.key.pub' --vault-password-file 'password_file.txt'
 
 # Decrypt files encrypted with Vault.
@@ -131,6 +139,33 @@ ansible-galaxy role init --type 'container' --init-path 'path/to/role' 'name'
 # Remove roles installed from Galaxy.
 ansible-galaxy remove 'namespace.role'
 ```
+
+</details>
+
+<details style="padding-bottom: 1em">
+  <summary>Real world use cases</summary>
+
+```sh
+# Show hosts' ansible facts.
+ansible -i 'path/to/hosts/file' -m 'setup' all
+ansible -i 'host1,hostN,' -m 'setup' 'host1' -u 'remote-user'
+ansible -i 'localhost,' -c 'local' -km 'setup' 'localhost'
+
+# Execute locally using Ansible from the virtual environment in the current directory.
+ansible -i 'localhost ansible_python_interpreter=venv/bin/python3,' -c 'local' -m 'ansible.builtin.copy' -a 'src=/tmp/src' -a 'dest=/tmp/dest' 'localhost'
+
+# Check the Vault password file is correct.
+diff 'some_role/files/ssh.key.plain' <(ansible-vault view --vault-password-file 'password_file.txt' 'some_role/files/ssh.key.enc')
+
+# Use AWS SSM for connections.
+ansible-playbook 'playbook.yaml' -DCvvv \
+  -e 'ansible_aws_ssm_plugin=/usr/local/sessionmanagerplugin/bin/session-manager-plugin' \
+  -e 'ansible_connection=aws_ssm' -e 'ansible_aws_ssm_bucket_name=ssm-bucket' -e 'ansible_aws_ssm_region=eu-west-1' \
+  -e 'ansible_remote_tmp=/tmp/.ansible-\${USER}/tmp' \
+  -i 'i-0123456789abcdef0,'
+```
+
+</details>
 
 Galaxy collections and roles worth a check:
 
@@ -770,7 +805,7 @@ Provide the Vault's password:
 
   ```sh
   ANSIBLE_VAULT_PASSWORD_FILE='password_file.txt' ansible …
-  export ANSIBLE_VAULT_PASSWORD='abraKadabra' ; ansible-playbook …
+  export ANSIBLE_VAULT_PASSWORD='abracadabra' ; ansible-playbook …
   ```
 
 - By using the `ansible.cfg` config file to either always prompt for the password, or to specify the default location of
@@ -783,7 +818,17 @@ Provide the Vault's password:
   ```
 
   Should the password file be executable, Ansible will execute it and use its output as the password for Vault.<br/>
-  This works well to integrate with CLI-capable password managers.
+  This works well to integrate with CLI-capable password managers:
+
+  ```sh
+  # File 'password_file.sh'
+
+  # Gopass
+  gopass show -o 'ansible/vault'
+
+  # Bitwarden CLI
+  # bw login --check >/dev/null && bw get password 'ansible vault'
+  ```
 
 Vault passwords can be any string, and there is currently no special command to create one.<br/>
 One must provide the/a Vault password **every time one encrypts and/or decrypts data** with Vault.<br/>
