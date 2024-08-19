@@ -53,22 +53,24 @@
         tags:
           Name: Clone EC2 Instance AMI
         root_device_name: "{{ original_instance_information.instances[0].root_device_name }}"
-        device_mapping: >-
-          {%- set devices_list = [] -%}
-          {%- for result in original_instance_snapshots.results -%}
-          {%-   for device in original_instance_information.instances[0].block_device_mappings
-                | selectattr('ebs.volume_id', 'equalto', result.volume_id) -%}
-          {{-
-                  devices_list.append({
-                    'device_name': device.device_name,
-                    'snapshot_id': result.snapshots | sort(attribute='start_time') | last | json_query('snapshot_id'),
-                    'volume_type': 'gp3',
-                    'delete_on_termination': true,
-                  })
-          -}}
-          {%-   endfor -%}
-          {%- endfor -%}
-          {{  devices_list }}
+        device_mapping:
+          # Refer https://jinja.palletsprojects.com/en/3.0.x/templates/#assignments for the namespace object's reason
+          >-
+            {%- set ns = namespace(devices_list = []) -%}
+            {%- for result in original_instance_snapshots.results -%}
+            {%-   for device in original_instance_information.instances[0].block_device_mappings
+                  | selectattr('ebs.volume_id', 'equalto', result.volume_id) -%}
+            {{-
+                    ns.devices_list.append({
+                      'device_name': device.device_name,
+                      'snapshot_id': result.snapshots | sort(attribute='start_time') | last | json_query('snapshot_id'),
+                      'volume_type': 'gp3',
+                      'delete_on_termination': true,
+                    })
+            -}}
+            {%-   endfor -%}
+            {%- endfor -%}
+            {{  ns.devices_list }}
       register: original_instance_ami
     - name: Use the AMI to launch a clone
       tags:

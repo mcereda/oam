@@ -245,14 +245,16 @@
             - postgis
             - pg_stat_statements
       ansible.builtin.set_fact:
-        db_extension_pairs: >-
-          {%- set output = [] -%}
-          {%- for db in db_extensions.keys() -%}
-            {%- for extension in db_extensions[db] -%}
-              {{- output.append({'db':db, 'extension': extension}) -}}
+        db_extension_pairs:
+          # Refer https://jinja.palletsprojects.com/en/3.0.x/templates/#assignments for the namespace object's reason
+          >-
+            {%- set ns = namespace(output = []) -%}
+            {%- for db in db_extensions.keys() -%}
+              {%- for extension in db_extensions[db] -%}
+                {{- ns.output.append({'db':db, 'extension': extension}) -}}
+              {%- endfor -%}
             {%- endfor -%}
-          {%- endfor -%}
-          {{- output -}}
+            {{- ns.output -}}
     - name: Get the device name and last snapshot id for all block devices in an EC2 instance
       # Useful to create AMIs from instance snapshots
       tags:
@@ -261,20 +263,22 @@
         - snapshot
         - ami
       ansible.builtin.set_fact:
-        last_snap_for_device: >-
-          {%- set devices_list = [] -%}
-          {%- for result in current_instance_snapshots.results -%}
-          {%-   for device in current_instance_information.instances[0].block_device_mappings
-                | selectattr('ebs.volume_id', 'equalto', result.volume_id) -%}
-          {{-
-                  devices_list.append({
-                    'device_name': device.device_name,
-                    'snapshot_id': result.snapshots | sort(attribute='start_time') | last | json_query('snapshot_id'),
-                  })
-          -}}
-          {%-   endfor -%}
-          {%- endfor -%}
-          {{  devices_list }}
+        last_snap_for_device:
+          # Refer https://jinja.palletsprojects.com/en/3.0.x/templates/#assignments for the namespace object's reason
+          >-
+            {%- set ns = namespace(devices_list = []) -%}
+            {%- for result in current_instance_snapshots.results -%}
+            {%-   for device in current_instance_information.instances[0].block_device_mappings
+                  | selectattr('ebs.volume_id', 'equalto', result.volume_id) -%}
+            {{-
+                    ns.devices_list.append({
+                      'device_name': device.device_name,
+                      'snapshot_id': result.snapshots | sort(attribute='start_time') | last | json_query('snapshot_id'),
+                    })
+            -}}
+            {%-   endfor -%}
+            {%- endfor -%}
+            {{  ns.devices_list }}
 
 - name: "Use the users' home directory for something"
   block:
