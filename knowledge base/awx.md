@@ -594,6 +594,53 @@ deployment.apps "awx-operator-controller-manager" deleted
 
 Refer [AWX API Reference] and [How to use AWX REST API to execute jobs].
 
+AWX offers the `awx` client CLI tool:
+
+```sh
+# Install the 'awx' client
+pipx install 'awxkit'
+pip3 install --user 'awxkit'
+
+# Normally `awx` would require setting the configuration every command like so:
+#   awx --conf.host https://awx.example.org --conf.username 'admin' --conf.password 'password' config
+#   awx --conf.host https://awx.example.org --conf.username 'admin' --conf.password 'password' export --schedules
+
+# Export settings to environment variables to avoid having to set them on the command line all the time
+export TOWER_HOST='https://awx.example.org' TOWER_USERNAME='admin' TOWER_PASSWORD='password'
+
+# Show the client configuration
+awx … config
+
+# List all available endpoints
+curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/' | jq '.' -
+
+# List jobs
+awx jobs list
+awx jobs list -f 'yaml'
+awx jobs list -f 'human' --filter 'name,created,status'
+awx jobs list -f 'jq' --filter '.results[] | .name + " is " + .status'
+
+# Show job templates
+awx job_templates list
+curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/job_templates/' | jq '.' -
+
+# Show notification templates
+awx … notification_templates list
+curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/notification_templates/' | jq '.' -
+
+# Show schedules
+awx … schedules list
+awx … schedules --schedules 'schedule-1' 'schedule-n'
+curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/schedules/' | jq '.' -
+
+# Export data
+awx … export
+awx … export --job_templates 'job-template-1' 'job-template-n' --schedules
+curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/export/' | jq '.' -
+```
+
+Refer [AWX Command Line Interface] for more information.
+
 ## Further readings
 
 - [Website]
@@ -601,6 +648,7 @@ Refer [AWX API Reference] and [How to use AWX REST API to execute jobs].
 - [Minikube]
 - [Kustomize]
 - [Helm]
+- [AWX Command Line Interface]
 
 ### Sources
 
@@ -629,6 +677,7 @@ Refer [AWX API Reference] and [How to use AWX REST API to execute jobs].
 
 <!-- Upstream -->
 [awx api reference]: https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/
+[awx command line interface]: https://docs.ansible.com/ansible-tower/latest/html/towercli/
 [awx's documentation]: https://ansible.readthedocs.io/projects/awx/en/latest/
 [awx's repository]: https://github.com/ansible/awx/
 [basic install]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/installation/basic-install.html
