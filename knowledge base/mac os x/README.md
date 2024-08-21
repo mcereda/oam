@@ -13,6 +13,7 @@
 1. [Use TouchID to authenticate in the terminal](#use-touchid-to-authenticate-in-the-terminal)
     1. [Fix iTerm2](#fix-iterm2)
 1. [Create custom DNS resolvers](#create-custom-dns-resolvers)
+1. [Remap the Home and End keys](#remap-the-home-and-end-keys)
 1. [Xcode CLI tools](#xcode-cli-tools)
     1. [Headless installation](#headless-installation)
     1. [Removal](#removal)
@@ -386,6 +387,27 @@ Instead:
    dscacheutil -q 'host' -a 'name' 'gitlab.lan'
    ```
 
+## Remap the Home and End keys
+
+Refer [Remap Home and End Keys?] and [trusktr's default keybindings].
+
+```sh
+mkdir -p "$HOME/Library/KeyBindings"
+cat <<-EOF | tee "$HOME/Library/KeyBindings/DefaultKeyBinding.dict"
+{
+  /* Remap Home and End keys to act primarily on lines */
+  "\UF729" = "moveToBeginningOfLine:"; /* Home */
+  "\UF72B" = "moveToEndOfLine:"; /* End */
+  "$\UF729" = "moveToBeginningOfLineAndModifySelection:"; /* Shift + Home */
+  "$\UF72B" = "moveToEndOfLineAndModifySelection:"; /* Shift + End */
+  "^\UF729" = "moveToBeginningOfDocument:"; /* Ctrl + Home */
+  "^\UF72B" = "moveToEndOfDocument:"; /* Ctrl + End */
+  "$^\UF729" = "moveToBeginningOfDocumentAndModifySelection:"; /* Shift + Ctrl + Home */
+  "$^\UF72B" = "moveToEndOfDocumentAndModifySelection:"; /* Shift + Ctrl + End */
+}
+EOF
+```
+
 ## Xcode CLI tools
 
 ```sh
@@ -401,12 +423,14 @@ The tools will be installed into `/Library/Developer/CommandLineTools` by defaul
 touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
 
 # Get their label.
-CLI_TOOLS_LABEL="$(/usr/sbin/softwareupdate -l \
- | grep -B 1 -E 'Command Line Tools' \
- | awk -F'*' '/^ *\\*/ {print $2}' \
- | sed -e 's/^ *Label: //' -e 's/^ *//' \
- | sort -V \
- | tail -n1)"
+CLI_TOOLS_LABEL="$(\
+  /usr/sbin/softwareupdate -l \
+  | grep -B 1 -E 'Command Line Tools' \
+  | awk -F'*' '/^ *\\*/ {print $2}' \
+  | sed -e 's/^ *Label: //' -e 's/^ *//' \
+  | sort -V \
+  | tail -n1 \
+)"
 
 # Install them.
 /usr/sbin/softwareupdate -i --agree-to-license "$CLI_TOOLS_LABEL"
@@ -504,6 +528,8 @@ To use any of these key combinations, press and hold the keys immediately after 
 - [macOS tools and tips]
 - [List all network hardware from command line in Mac OS]
 - [Network warrior: how to use macOS network utilities]
+- [Remap Home and End Keys?]
+- [trusktr's default keybindings]
 
 <!--
   Reference
@@ -547,7 +573,9 @@ To use any of these key combinations, press and hold the keys immediately after 
 [mdls]: https://ss64.com/osx/mdls.html
 [network warrior: how to use macos network utilities]: https://medium.com/macoclock/network-warrior-how-to-use-macos-network-utilities-63c88f490ba0
 [pam_reattach]: https://github.com/fabianishere/pam_reattach
+[remap home and end keys?]: https://discussions.apple.com/thread/251108215
 [tagging files from the macos command line]: https://brettterpstra.com/2017/08/22/tagging-files-from-the-command-line/
+[trusktr's default keybindings]: https://gist.github.com/trusktr/1e5e516df4e8032cbc3d
 [using terminal to find your mac's network name]: https://www.tech-otaku.com/networking/using-terminal-find-your-macs-network-name/
 [who is listening on a given tcp port on mac os x?]: https://stackoverflow.com/questions/4421633/who-is-listening-on-a-given-tcp-port-on-mac-os-x
 [xcode command line tools installation faq]: https://www.godo.dev/tutorials/xcode-command-line-tools-installation-faq
