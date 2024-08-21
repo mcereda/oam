@@ -157,6 +157,8 @@ Credentials:
 
 ### Require MFA for assuming Roles
 
+Refer [Using AWS CLI Securely with IAM Roles and MFA].
+
 Add the `"Bool": {"aws:MultiFactorAuthPresent": true}` condition to the Role's trust relationships:
 
 ```json
@@ -181,6 +183,26 @@ When requiring MFA with AssumeRole, identities need to pass values for the Seria
 SerialNumbers identify the users' hardware or virtual MFA devices, TokenCodes are the time-based one-time password
 (TOTP) value that devices produce.
 
+For CLI access, the user will need to add the `mfa_serial` setting to their profile:
+
+```ini
+[default]
+…
+
+[role-with-mfa]
+source_profile = default
+role_arn = arn:aws:iam::012345678901:role/EksAdminRole
+mfa_serial = arn:aws:iam::012345678901:mfa/gopass
+```
+
+```sh
+$ AWS_PROFILE='role-with-mfa' aws sts get-caller-identity --output 'yaml'
+Enter MFA code for arn:aws:iam::012345678901:mfa/gopass:
+Account: '012345678901'
+Arn: arn:aws:sts::012345678901:assumed-role/EksAdminRole/botocore-session-1234567890
+UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
+```
+
 ## Further readings
 
 - [Amazon Web Services]
@@ -204,6 +226,7 @@ SerialNumbers identify the users' hardware or virtual MFA devices, TokenCodes ar
 - [How to use the PassRole permission with IAM roles]
 - [Avoid the 60 minutes timeout when using the AWS CLI with IAM roles]
 - [AWS IAM Roles - Everything You Need to Know & Examples]
+- [Using AWS CLI Securely with IAM Roles and MFA]
 
 <!--
   References
@@ -234,3 +257,4 @@ SerialNumbers identify the users' hardware or virtual MFA devices, TokenCodes ar
 [aws.permissions.cloud]: https://aws.permissions.cloud/
 [introduction to aws iam assumerole]: https://aws.plainenglish.io/introduction-to-aws-iam-assumerole-fbef3ce8e90b
 [you might be clueless as to why aws assume role isn't working, despite being correctly set up]: https://medium.com/@kamal.maiti/you-might-be-clueless-as-to-why-aws-assume-role-isnt-working-despite-being-correctly-set-up-1b3138519c07
+[using aws cli securely with iam roles and mfa]: https://dev.to/albac/using-aws-cli-securely-with-iam-roles-and-mfa-56c3
