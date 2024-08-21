@@ -148,10 +148,17 @@ sudo gitlab-rake 'gitlab:check'
 sudo gitlab-backup create
 sudo gitlab-backup create BACKUP='prefix_override' STRATEGY='copy'
 
+# Skip creating tar files during a backup.
+# It is *not* possible to skip the tar creation when using object storage for backups.
+sudo gitlab-backup create … SKIP='tar'
+
 # Create empty backup archives for testing purposes.
 # See https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html#excluding-specific-data-from-the-backup
 sudo gitlab-backup create … \
   SKIP='db,repositories,uploads,builds,artifacts,pages,lfs,terraform_state,registry,packages,ci_secure_files'
+
+# Skip backups during upgrades.
+sudo touch '/etc/gitlab/skip-auto-backup'
 
 # Create backups of the configuration.
 sudo gitlab-ctl backup-etc
