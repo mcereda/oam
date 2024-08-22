@@ -8,6 +8,9 @@
 ## TL;DR
 
 ```sh
+# Search for packages.
+npm search 'typescript'
+
 # Install packages.
 # Use existing cache.
 npm install '@pnp/cli-microsoft365'
@@ -37,11 +40,12 @@ npm config set 'cafile'='path/to/ca/cert.pem'
 - [node.js]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
-
-<!-- Upstream -->
-[documentation]: https://docs.npmjs.com/cli/
 
 <!-- Knowledge base -->
 [node.js]: node.js.md
+
+<!-- Upstream -->
+[documentation]: https://docs.npmjs.com/cli/
