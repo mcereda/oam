@@ -1,0 +1,27 @@
+---
+
+
+bootstrap:
+  commands:
+    markdownlint:
+      run: docker pull 'ghcr.io/igorshubovych/markdownlint-cli:latest'
+
+lint:
+  commands:
+    md: &markdownlint
+      files: >-
+        find . -type 'f'
+        \( -name '*.md' -or -name '*.markdown' \)
+        -not \( -path '*/node_modules/*' -or -path '*/*venv/*' \)
+      run: >-
+        docker run --rm -v "$PWD:/workdir:ro" 'ghcr.io/igorshubovych/markdownlint-cli:latest'
+        {files}
+
+
+pre-commit:
+  commands:
+    lint-md:
+      glob: '*.{markdown,md}'
+      run: >-
+        docker run --rm -v "$PWD:/workdir:ro" 'ghcr.io/igorshubovych/markdownlint-cli:latest'
+        {staged_files}

@@ -1,0 +1,22 @@
+---
+# Hadolint's official docker image is based on 'scratch', and takes only one input file at a time.
+# I have no clue how to fix that at the time of writing so let's just use the local command.
+
+
+bootstrap:
+  commands:
+    hadolint:
+      run: brew install 'hadolint'
+
+lint:
+  commands:
+    docker: &hadolint
+      glob: "*[Dd]ockerfile*"
+      run: hadolint {all_files}
+
+
+pre-commit:
+  commands:
+    lint-docker:
+      <<: *hadolint
+      run: hadolint {staged_files}

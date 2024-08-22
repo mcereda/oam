@@ -1,0 +1,20 @@
+---
+
+
+bootstrap:
+  commands:
+    kics:
+      run: docker pull 'checkmarx/kics'
+
+check-compliance:
+  commands:
+    kics: &kics
+      run: >-
+        docker run --rm --name 'kics' -v "$PWD:/app/bin/repository" 'checkmarx/kics'
+        scan -p 'repository'
+
+
+pre-commit:
+  commands:
+    check-compliance:
+      <<: *kics

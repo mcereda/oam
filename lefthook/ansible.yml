@@ -1,0 +1,32 @@
+---
+# No official docker images are available at the time of writing, falling back to the local command.
+
+
+bootstrap:
+  commands:
+    ansible-lint:
+      run: >-
+        python3 -m 'venv' '.venv'
+        && .venv/bin/pip install --require-virtualenv 'ansible-lint'
+
+lint:
+  commands:
+    ansible: &ansible-lint
+      files: find . -type f -path "*ansible*" -not -path "*venv*"
+      glob: '*.{yaml,yml}'
+      run: .venv/bin/ansible-lint {files}
+
+validate:
+  commands:
+    ansible-playbook: &ansible-playbook-syntax-check
+      glob: "*.{yaml,yml}"
+      run: .venv/bin/ansible-playbook -i 'localhost,' --syntax-check {all_files}
+
+
+pre-commit:
+  commands:
+    lint-ansible:
+      <<: *ansible-lint
+    validate-ansible:
+      <<: *ansible-playbook-syntax-check
+      run: .venv/bin/ansible-playbook -i 'localhost,' --syntax-check {staged_files}
