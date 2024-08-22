@@ -1,0 +1,28 @@
+---
+# No official docker images are available at the time of writing, falling back to the local command.
+
+
+bootstrap:
+  commands:
+    commitlint:
+      run: |-
+        npm install --save-dev '@commitlint/cli' '@commitlint/config-conventional'
+        cat <<EOF > '.commitlintrc.js'
+        module.exports = {
+          extends: [
+            '@commitlint/config-conventional'
+          ]
+        }
+        EOF
+
+debug:
+  commands:
+    commitlint-config:
+      glob: '.commitlintrc.js'
+      run: node_modules/.bin/commitlint --print-config
+
+
+commit-msg:
+  commands:
+    lint: &commitlint
+      run: node_modules/.bin/commitlint --edit

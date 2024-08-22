@@ -1,0 +1,43 @@
+---
+# Using the 'yq' flavour available from Python's Pipy, not mikefarah's.
+# No official docker images are available for 'yq' at the time of writing, falling back to the local command.
+
+
+bootstrap:
+  commands:
+    yamllint:
+      run: docker pull 'registry.gitlab.com/pipeline-components/yamllint:latest'
+    yq:
+      run: >-
+        python3 -m 'venv' '.venv'
+        && .venv/bin/pip install --require-virtualenv 'yq'
+
+lint:
+  commands:
+    yaml: &yamllint
+      glob: '*.{yaml,yml}'
+      run: >-
+        docker run --rm -v "$PWD:/code:ro" 'registry.gitlab.com/pipeline-components/yamllint:latest'
+        yamllint {all_files}
+
+validate:
+  commands:
+    yaml: &yq
+      glob: '*.{yaml,yml}'
+      run: >-
+        echo '{all_files}'
+        | xargs -t .venv/bin/yq '.'
+
+
+pre-commit:
+  commands:
+    validate-yaml:
+      <<: *yq
+      run: >-
+        .venv/bin/yq '.' {staged_files} > /dev/null
+        && echo 'All YAML files are readable'
+    lint-yaml:
+      <<: *yamllint
+      run: >-
+        docker run --rm -v "$PWD:/code:ro" 'registry.gitlab.com/pipeline-components/yamllint:latest'
+        yamllint {staged_files}

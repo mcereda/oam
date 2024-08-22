@@ -3,7 +3,11 @@
 override venv ?= ${shell git rev-parse --show-toplevel}/.venv
 
 create-venv: override python_version ?= 3.11
-create-venv: override python_executable ?= ${shell which --tty-only --show-dot --show-tilde 'python${python_version}'}
+ifeq "${shell uname}" "Darwin"
+create-venv: python_executable = ${shell which 'python${python_version}'}
+else
+create-venv: python_executable = ${shell which --tty-only --show-dot --show-tilde 'python${python_version}'}
+endif
 create-venv: ${python_executable}
 	@${python_executable} -m 'venv' '${venv}'
 	@${venv}/bin/pip --require-virtualenv install -r 'requirements.txt'

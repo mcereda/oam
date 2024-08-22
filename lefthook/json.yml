@@ -1,0 +1,24 @@
+---
+
+
+bootstrap:
+  commands:
+    jq:
+      run: docker pull 'ghcr.io/jqlang/jq'
+
+validate:
+  commands:
+    json: &jq
+      glob: '*.json'
+      run: >-
+        docker run -i --rm -v "${PWD}:/workdir:ro" --workdir '/workdir' 'ghcr.io/jqlang/jq'
+        -r 'input_filename' {all_files}
+
+
+pre-commit:
+  commands:
+    validate-json:
+      <<: *jq
+      run: >-
+        docker run -i --rm -v "${PWD}:/workdir:ro" --workdir '/workdir' 'ghcr.io/jqlang/jq'
+        -r 'input_filename' {staged_files}
