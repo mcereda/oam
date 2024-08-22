@@ -103,6 +103,14 @@ sudo gitlab-ctl backup-etc \
 	| head -n '1' \
 	| xargs -pI '{}' aws s3 cp '/etc/gitlab/config_backup/'{} 's3://backups/gitlab/'
 
+# Put the instance in maintenance mode
+sudo gitlab-rails runner '
+	::Gitlab::CurrentSettings.update!(maintenance_mode: true);
+	::Gitlab::CurrentSettings.update!(maintenance_mode_message: "New message");
+'
+# Take the instance out of maintenance mode
+sudo gitlab-rails runner '::Gitlab::CurrentSettings.update!(maintenance_mode: false);'
+
 # Package upgrade
 sudo yum check-update
 sudo yum info 'gitlab-ee'                                              # informational

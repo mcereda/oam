@@ -33,3 +33,5 @@ gitlab-runner list -c '/etc/gitlab-runner/config.toml'
 gitlab-runner verify -c '/etc/gitlab-runner/config.toml'
 # Also delete runners that have been removed from the main instance
 gitlab-runner verify … --delete
+
+diff -y <(helm show values 'gitlab/gitlab-runner' --version '0.64.2') <(helm show values 'gitlab/gitlab-runner' --version '0.68.1')
