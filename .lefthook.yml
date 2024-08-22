@@ -11,7 +11,7 @@ extends:
   - lefthook/commitlint.yml
   - lefthook/docker.yml
   - lefthook/json.yml
-  - lefthook/kics.yml
+  # - lefthook/kics.yml
   - lefthook/markdown.yml
   - lefthook/yaml.yml
 

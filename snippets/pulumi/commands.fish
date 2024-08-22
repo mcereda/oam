@@ -3,6 +3,9 @@
 source <(pulumi gen-completion 'zsh')
 pulumi gen-completion 'fish' > "$HOME/.config/fish/completions/pulumi.fish"
 
+docker run --rm --name 'pulumi-nodejs-3.127.0' -ti 'pulumi/pulumi-nodejs:3.127.0' --version
+docker run --rm --name 'pulumi-nodejs-3.128.0' -ti --entrypoint 'bash' 'pulumi/pulumi-nodejs:3.128.0'
+
 pulumi install
 pulumi install --reinstall
 
@@ -39,12 +42,21 @@ pulumi state unprotect 'urn:pulumi:dev::custom-images::aws:imagebuilder/infrastr
 pulumi state delete 'urn:pulumi:dev::custom-images::aws:imagebuilder/infrastructureConfiguration:InfrastructureConfiguration::server-baseline'
 pulumi state rename -y 'urn:pulumi:dev::custom-images::aws:imagebuilder/imageRecipe:ImageRecipe::baselineServerImage-1.0.8' 'serverBaseline-1.0.8'
 
+find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -print -exec yq '.backend.url' {} '+'
+
+find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi install --cwd
 find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi preview --parallel "$(nproc)" --cwd
 find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi refresh --parallel "$(nproc)" -s 'dev' --non-interactive -v '3' --cwd
 
 pulumi import --generate-code='false' 'aws:iam/user:User' 'jimmy' 'jimmy'
 
 # Rename stacks
-pulumi stack rename -s 'dev' 'stag'
+pulumi stack rename -s 'dev' 'staging'
 # When the project name (and backend) changed
 pulumi stack rename -s 'pulumicomuser/testproj/dev' 'organization/internal-services/dev'
+
+# Get providers for resources
+pulumi stack export | jq -r '.deployment.resources[]|{"urn":.urn,"provider":.provider}'
+
+# Check providers are all of a specific version
+pulumi stack export | jq -r '.deployment.resources[].provider' | grep -v 'aws::default_6_50_0'
