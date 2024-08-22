@@ -51,7 +51,8 @@ ansible-playbook 'path/to/playbook.yml' --syntax-check
 # Ad-hoc commands.
 ansible -i 'hosts.yml' -m 'ping' 'all'
 ansible -i 'host-1,host-n,' 'hostRegex' -m 'ansible.builtin.shell' -a 'echo $TERM'
-ansible -i 'localhost ansible_python_interpreter=venv/bin/python3,' -c 'local' -m 'ansible.builtin.copy' -a 'src=/tmp/src' -a 'dest=/tmp/dest' 'localhost'
+ansible -i 'localhost ansible_python_interpreter=venv/bin/python3,' -c 'local' 'localhost' \
+	-m 'ansible.builtin.copy' -a 'src=/tmp/src' -a 'dest=/tmp/dest'
 
 ansible-vault encrypt_string --name 'command_output' 'somethingNobodyShouldKnow'
 ANSIBLE_VAULT_PASSWORD='ohSuchASecurePassword' ansible-vault encrypt --output 'ssh.key' '.ssh/id_rsa'

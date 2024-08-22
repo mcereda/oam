@@ -17,6 +17,13 @@ Persistent [block storage][what is block storage?] for [EC2 Instances][ec2].
 aws ec2 describe-volumes --output 'text' --filters 'Name=status,Values=available' \
   --query "Volumes[?CreateTime<'2018-03-31'].VolumeId" \
 | xargs -pn '1' aws ec2 delete-volume --volume-id
+
+# Check state of snapshots.
+aws ec2 describe-snapshots --snapshot-ids 'snap-0123456789abcdef0' \
+  --query 'Snapshots[].{"State": State,"Progress": Progress}' --output 'yaml'
+
+# Wait for snapshots to finish.
+aws ec2 wait snapshot-completed --snapshot-ids 'snap-0123456789abcdef0'
 ```
 
 </details>

@@ -116,6 +116,13 @@ aws kms get-key-policy --output 'text' --key-id '01234567-89ab-cdef-0123-456789a
 aws ec2 describe-images --image-ids 'ami-01234567890abcdef'
 aws ec2 describe-images --image-ids 'ami-01234567890abcdef' --query 'Images[].Description'
 
+# Check state of snapshots.
+aws ec2 describe-snapshots --snapshot-ids 'snap-0123456789abcdef0' \
+	--query 'Snapshots[].{"State": State,"Progress": Progress}' --output 'yaml'
+
+# Wait for snapshots to finish.
+aws ec2 wait snapshot-completed --snapshot-ids 'snap-0123456789abcdef0'
+
 aws autoscaling describe-auto-scaling-groups
 aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names 'ProductionServers'
 aws autoscaling start-instance-refresh --auto-scaling-group-name 'ProductionServers'
