@@ -15,6 +15,7 @@
    1. [Security Hub](#security-hub)
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
+1. [Savings plans](#savings-plans)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -232,6 +233,60 @@ Member accounts can administer Security Hub by delegation if given the permissio
 
 Refer [IAM].
 
+## Savings plans
+
+Refer [Savings Plans user guide].
+
+Pricing models offering lower prices compared to On-Demand prices. They require specific usage commitments ($/hour) for
+1-**year** or 3-**years** terms.
+
+Dedicated Instances, Spot Instances and Reserved Instances are **not** discounted by Savings Plans.
+
+| Savings Plan     | Included resources                                                                                                                                                                                                                                                                     | Up to |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| Compute          | EC2 instances regardless of family, size, AZ, region, OS or tenancy<br/>Lambda<br/>Fargate                                                                                                                                                                                             | 66%   |
+| EC2 Instance     | **Individual** EC2 instance families in a specific region (e.g. M5 usage in N. Virginia) regardless of AZ, size, OS or tenancy                                                                                                                                                         | 72%   |
+| Amazon SageMaker | **Eligible** SageMaker ML instances, including SageMaker Studio Notebook, SageMaker On-Demand Notebook, SageMaker Processing, SageMaker Data Wrangler, SageMaker Training, SageMaker Real-Time Inference, and SageMaker Batch Transform regardless of instance family, size, or region | 64%   |
+
+Both Compute and EC2 Instance plan types apply to EC2 instances that are a part of Amazon EMR, Amazon EKS, and
+Amazon ECS clusters. They do **not** apply to RDS instances.<br/>
+Charges for the EKS service itself will not be covered by Savings Plans, but the underlying EC2 instances will be.
+
+Savings Plans are available in the following payment options:
+
+- _No Upfront_: no upfront payments, commitment charged purely on a monthly basis.
+- _Partial Upfront_: lower prices, at least half of one's commitment upfront, remainder charged on a monthly basis.
+- _All Upfront_: lowest prices, entire commitment charged in one payment at the start.
+
+Savings Plans can be purchased in any account within an AWS Organization/Consolidated Billing family.<br/>
+By default, the benefits of the Plans are applicable to usage across **all** accounts. One can **choose** to restrict
+the benefit of the Plans to only the account that purchased them.
+
+One account **can** have multiple Savings Plans active at the same time.
+
+Plans **cannot** be cancelled during their term.<br/>
+Plans **can** be _returned_ only if:
+
+- They consist in an hourly commitment of $100 or less.
+- They have been purchased in the past 7 days **and** in the same calendar month.
+
+Once returned, one will receive a 100% refund for any upfront charges for the Savings Plan.<br/>
+Refunds will be reflected in one's bill within 24 hours of return.
+
+Any usage covered by the plan **will be charged at On-Demand rates**, or get covered by a different Savings Plans _if
+applicable_.
+
+Plans do **not** provide capacity reservations.<br/>
+One **can** however reserve capacity with On Demand Capacity Reservations and pay lower prices on them with Savings
+Plans.
+
+EC2 Instance Savings Plans are applied **before** Compute Savings Plans.
+
+Savings Plans are applied to the highest savings percentage first. If there are multiple usages with equal savings
+percentages, Savings Plans are applied to the first usage with the lowest Savings Plans rate.<br/>
+Savings Plans continue to apply until there are no more remaining usages, or one's commitment is exhausted. Any
+remaining usage is then charged at the On-Demand rates.
+
 ## Further readings
 
 - [EC2]
@@ -257,6 +312,8 @@ Refer [IAM].
 - [Image baking in AWS using Packer and Image builder]
 - [Using AWS KMS via the CLI with a Symmetric Key]
 - [AWS Public IP Address Ranges Now Available in JSON Form]
+- [Savings Plans user guide]
+- [AWS Savings Plans Vs. Reserved Instances: When To Use Each]
 
 <!--
   Reference
@@ -290,6 +347,7 @@ Refer [IAM].
 <!-- Upstream -->
 [access aws services through aws privatelink]: https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-access-aws-services.html
 [aws icons]: https://aws-icons.com/
+[aws public ip address ranges now available in json form]: https://aws.amazon.com/blogs/aws/aws-ip-ranges-json/
 [best practices for tagging aws resources]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html
 [connect to the internet using an internet gateway]: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
@@ -298,17 +356,18 @@ Refer [IAM].
 [i'm trying to export a snapshot from amazon rds mysql to amazon s3, but i'm receiving an error. why is this happening?]: https://repost.aws/knowledge-center/rds-mysql-export-snapshot
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [rotating aws kms keys]: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
+[savings plans user guide]: https://docs.aws.amazon.com/savingsplans/latest/userguide/
 [services that publish cloudwatch metrics]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
 [subnets for your vpc]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html
 [test your roles' access policies using the aws identity and access management policy simulator]: https://aws.amazon.com/blogs/security/test-your-roles-access-policies-using-the-aws-identity-and-access-management-policy-simulator/
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
 [what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
-[aws public ip address ranges now available in json form]: https://aws.amazon.com/blogs/aws/aws-ip-ranges-json/
 
 <!-- Others -->
 [automating dns-challenge based letsencrypt certificates with aws route 53]: https://johnrix.medium.com/automating-dns-challenge-based-letsencrypt-certificates-with-aws-route-53-8ba799dd207b
 [aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
+[aws savings plans vs. reserved instances: when to use each]: https://www.cloudzero.com/blog/savings-plans-vs-reserved-instances/
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
 [image baking in aws using packer and image builder]: https://dev.to/santhoshnimmala/image-baking-in-aws-using-packer-and-image-builder-1ed3
 [using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
