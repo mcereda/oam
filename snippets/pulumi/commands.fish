@@ -37,6 +37,8 @@ pulumi config get --path 'list[1]'
 
 pulumi plugin ls --project
 pulumi plugin install --exact --reinstall
+pulumi plugin rm --all --yes
+pulumi plugin rm 'resource' 'aws' '6.20.1'
 
 pulumi state unprotect 'urn:pulumi:dev::custom-images::aws:imagebuilder/infrastructureConfiguration:InfrastructureConfiguration::server-baseline'
 pulumi state delete 'urn:pulumi:dev::custom-images::aws:imagebuilder/infrastructureConfiguration:InfrastructureConfiguration::server-baseline'
