@@ -3,5 +3,13 @@
 
 default: true
 
-MD013: false
-MD033: false
+MD013:  # line-length
+  line_length: 120
+  tables: false
+  code_blocks: false
+MD033:  # no-inline-html
+  allowed_elements:
+    - br
+    - code
+    - details
+    - summary
