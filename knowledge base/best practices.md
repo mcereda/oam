@@ -180,6 +180,7 @@ Listed in order of addition:
 - [Death by a thousand microservices]
 - [Maybe you do need Kubernetes]
 - [The 10 Commandments of Navigating Code Reviews]
+- [Less Is More: The Minimum Effective Dose]
 
 <!--
   Reference
@@ -213,6 +214,7 @@ Listed in order of addition:
 [how to mind goodhart's law and avoid unintended consequences]: https://builtin.com/data-science/goodharts-law
 [how to tackle pull request fatigue]: https://javascript.plainenglish.io/tackling-pr-fatigue-6865edc205ce
 [kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
+[less is more: the minimum effective dose]: https://medium.com/the-mission/less-is-more-the-minimum-effective-dose-e6d56625931e
 [maybe you do need kubernetes]: https://blog.boot.dev/education/maybe-you-do-need-kubernetes/
 [murphy's law]: https://en.wikipedia.org/wiki/Murphy%27s_law
 [platform teams need a delightfully different approach, not one that sucks less]: https://www.chkk.io/blog/platform-teams-different-approach
