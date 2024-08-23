@@ -176,6 +176,13 @@ sudo trimforce enable
 
 # Get information about users.
 dscl '.' -read "/Users/$USER" 'UserShell'
+
+
+# Bypass Gatekeeper for currently installed versions.
+xattr -c '/Applications/Zen Browser.app/'
+
+# Bypass Gatekeeper for all versions of apps.
+xattr -d 'com.apple.quarantine' '/Applications/LibreWolf.app/'
 ```
 
 ## Taking screenshots
@@ -320,16 +327,19 @@ auth       sufficient     pam_smartcard.so
 auth       required       pam_opendirectory.so
 ```
 
-> This file is normally read-only, so saving your changes may require you to force the save (e.g. vim will require the use of `wq!` when saving).
+> This file is normally read-only, so saving your changes may require you to force the save (e.g. vim will require the
+> use of `wq!` when saving).
 
 ### Fix iTerm2
 
-iTerm2 from version 3.2.8 comes with a _reattach_ advanced feature which is incompatible with the addition of the `pam_tid.so` module alone.
+iTerm2 from version 3.2.8 comes with a _reattach_ advanced feature which is incompatible with the addition of the
+`pam_tid.so` module alone.
 
-You can either:
+One can either:
 
-- disable the feature: iTerm2 > Preferences > Advanced > (Goto the Session heading) > _Allow sessions to survive logging out and back in_
-- install and enable the `pam_reattach.so` module as _optional_ to `/etc/pam.d/sudo`:
+- Disable the feature.<br/>
+  iTerm2 > Preferences > Advanced > (Goto the Session heading) > _Allow sessions to survive logging out and back in_.
+- Install and enable the `pam_reattach.so` module as _optional_ to `/etc/pam.d/sudo`:
 
   ```sh
   # pick one
@@ -345,7 +355,8 @@ You can either:
   auth       required       pam_opendirectory.so
   ```
 
-  > Note that when the module is not installed in `/usr/lib/pam` or `/usr/local/lib/pam` (e.g. on M1 Macs where Homebrew is installed in `/opt/homebrew`), you must specify the full path to the module in the PAM service file.
+  > When the module is not installed in `/usr/lib/pam` or `/usr/local/lib/pam` (e.g. on M1 Macs where Homebrew is
+  > installed in `/opt/homebrew`), one must specify the **full** path to the module in the PAM service file.
 
 ## Create custom DNS resolvers
 
@@ -414,7 +425,8 @@ EOF
 xcode-select --install
 ```
 
-The tools will be installed into `/Library/Developer/CommandLineTools` by default, with the binaries being available at `$(xcode-select -p)/usr/bin/`.
+The tools will be installed into `/Library/Developer/CommandLineTools` by default, with the binaries being available at
+`$(xcode-select -p)/usr/bin/`.
 
 ### Headless installation
 
@@ -473,7 +485,8 @@ xcode-select --install
 
 > Only available on Intel based Macs.
 
-To use any of these key combinations, press and hold the keys immediately after pressing the power button to turn on your Mac, or after your Mac begins to restart. Keep holding until the described behavior occurs.
+To use any of these key combinations, press and hold the keys immediately after pressing the power button to turn on
+your Mac, or after your Mac begins to restart. Keep holding until the described behavior occurs.
 
 | Combination                                                                  | Behaviour                                                                                                                                                                                                                     |
 | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
