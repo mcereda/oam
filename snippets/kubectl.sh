@@ -5,6 +5,8 @@ kubectl create namespace 'gitlab'
 kubectl create --namespace 'gitlab' secret generic 'gitlab-runner-token' --dry-run='client' --output 'yaml' \
 	--from-literal='runner-registration-token=""' --from-literal='runner-token=glrt-…'
 kubectl apply --namespace 'gitlab' --values 'secrets.yaml'
+kubectl --namespace 'gitea' create secret generic 'gitea-admin-secret' \
+	--from-literal 'username=gitea_admin' --from-literal "password=$(pulumi config get 'giteaAdminPassword')"
 
 
 kubectl get nodes 'fargate-ip-172-31-83-147.eu-west-1.compute.internal' -o 'yaml' | yq -y '.metadata.labels'
