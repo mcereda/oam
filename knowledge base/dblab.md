@@ -9,9 +9,12 @@ Database Lab Engine client CLI.
 ## TL;DR
 
 <details>
-  <summary>Installation and configuration</summary>
+  <summary>Setup</summary>
 
 ```sh
+# Install.
+curl -sSL 'dblab.sh' | bash
+
 # Initialize CLI configuration.
 # Assumes that 'localhost:2345' forwards to the Database Lab Engine machine's at port 2345'.
 dblab init --environment-id 'tutorial' --url 'http://localhost:2345' --token 'secret_token' --insecure
@@ -45,10 +48,11 @@ dblab clone create --username 'dblab_user_1' --password 'secret_password' --id '
 ## Further readings
 
 - [Database Lab]
-- [Website]
-- [Main repository]
+- [Database Lab Client CLI reference (dblab)]
 
 ### Sources
+
+- [How to install and initialize Database Lab CLI]
 
 <!--
   Reference
@@ -61,7 +65,7 @@ dblab clone create --username 'dblab_user_1' --password 'secret_password' --id '
 
 <!-- Files -->
 <!-- Upstream -->
-[main repository]: https://github.com/project/
-[website]: https://website/
+[how to install and initialize database lab cli]: https://postgres.ai/docs/how-to-guides/cli/cli-install-init
+[database lab client cli reference (dblab)]: https://postgres.ai/docs/reference-guides/dblab-client-cli-reference
 
 <!-- Others -->
