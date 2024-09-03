@@ -1,0 +1,6 @@
+{
+  "wrap_guides": [80, 120],
+  "buffer_font_features": {
+    "calt": false
+  }
+}
