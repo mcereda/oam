@@ -1,11 +1,15 @@
 #!/usr/bin/env sh
 
-# Ignore permission errors.
-# -------------------------
-
+# Ignore permission errors
 find '/' -type 'f' -name 'git-remote-keybase' 2>/dev/null
+find '/' -type 'f' -name 'git-remote-keybase' -readable    # GNU find only
 
-# GNU find.
-find '/' -type 'f' -name 'git-remote-keybase' -readable
+# Find files modified in the last 24h
+find '.' -newermt '24 hours ago'
+find '.' -mtime '-24h'
 
-find '.' -type 'd' -name '.git' -exec dirname {} ';' | xargs -I {} -n 1 -t git -C {} remote --verbose
+# Find files changed in the last 24h
+find '.' -newerct '24 hours ago'
+find '.' -ctime '-24h'
+
+find '.' -type 'd' -name '.git' -exec dirname {} ';' | xargs -t -I {} git -C {} remote --verbose

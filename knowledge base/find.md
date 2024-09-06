@@ -1,13 +1,14 @@
 # Find
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Time specifications](#time-specifications)
 1. [Gotchas](#gotchas)
 1. [Sources](#sources)
 
 ## TL;DR
+
+<details>
+  <summary>Usage</summary>
 
 ```sh
 # Change the permissions of all files and directories in the current directory,
@@ -94,12 +95,17 @@ find … 2>/dev/null
 find … 2> >(grep -v 'Permission denied' >&2)   # BASH and ZSH only
 ```
 
+</details>
+
 ## Time specifications
 
-Primaries used to check the difference between the file last access, creation or modification time and the time `find` was started.
+Primaries used to check the difference between the file last access, creation or modification time and the time `find`
+was started.
 
-All time specification primaries take a numeric argument, and allow the number to be preceded by a plus sign (`+`) or a minus sign (`-`).<br/>
-A preceding plus sign means **more than `n`**, a preceding minus sign means **less than `n`** and neither means **exactly `n`**.
+All time specification primaries take a numeric argument, and allow the number to be preceded by a plus sign (`+`) or a
+minus sign (`-`).<br/>
+A preceding plus sign means **more than `n`**, a preceding minus sign means **less than `n`** and neither means
+**exactly `n`**.
 
 Accepted time information:
 
@@ -110,7 +116,8 @@ Accepted time information:
 
 With the `-Xmin` form, times are rounded up to the next full **minute**. This is the same as using `-Xtime Nm`.
 
-With the `-Xtime` form, times depend on the given unit; if no unit is given, it defaults to full 24 hours periods (days).<br/>
+With the `-Xtime` form, times depend on the given unit; if no unit is given, it defaults to full 24 hours periods
+(days).<br/>
 Accepted units:
 
 - `s` for seconds
@@ -121,8 +128,11 @@ Accepted units:
 
 Any number of units may be combined in one `-Xtime` argument.
 
-with the `-newerXY file` form, `find` checks if `file` has a more recent last access time (X=a), inode creation time (X=B), change time (X=c), or modification time (X=m) than the last access time (Y=a), inode creation time (Y=B), change time (Y=c), or modification time (Y=m).<br/>
-If Y=t, `file` is interpreted as a direct date specification of the form understood by `cvs`. Also, `-newermm` is the same as `-newer`.
+with the `-newerXY file` form, `find` checks if `file` has a more recent last access time (X=a), inode creation time
+(X=B), change time (X=c), or modification time (X=m) than the last access time (Y=a), inode creation time (Y=B), change
+time (Y=c), or modification time (Y=m).<br/>
+If Y=t, `file` is interpreted as a direct date specification of the form understood by `cvs`. Also, `-newermm` is the
+same as `-newer`.
 
 ```sh
 # Find files last accessed exactly 5 minutes ago.
@@ -187,7 +197,8 @@ find / -newer file.txt -user wnj -print
 - [How can I exclude all "permission denied" messages from "find"?]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Others -->
