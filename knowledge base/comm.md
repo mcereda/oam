@@ -10,13 +10,14 @@ With no options, produces 3 columns in output:
 
 Comparisons honor the rules specified by 'LC_COLLATE'.
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
 ## TL;DR
+
+<details>
+  <summary>Usage</summary>
 
 ```sh
 # Print only lines present in both file1 and file2.
@@ -31,6 +32,23 @@ test $(comm -23 'path/to/pre-sorted/file1' <(sort -u 'path/to/file2') | wc -l) -
 [[ $(comm -23 <(sort -u 'path/to/file1') 'path/to/pre-sorted/file2' | wc -l) -eq 0 ]]
 ```
 
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
+# List security groups not used by EC2 instances in AWS.
+comm -23 \
+  <( aws ec2 describe-security-groups --query 'SecurityGroups[*].GroupId' --output 'text' | tr '\t' '\n' | sort ) \
+  <( \
+    aws ec2 describe-instances --query 'Reservations[*].Instances[*].SecurityGroups[*].GroupId' --output 'text' \
+    | tr '\t' '\n' | sort | uniq \
+  )
+```
+
+</details>
+
 ## Further readings
 
 - [`cmp`][cmp]
@@ -44,7 +62,8 @@ All the references in the [further readings] section, plus the following:
 - [6 more terminal commands you should know]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
