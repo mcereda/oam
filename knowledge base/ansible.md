@@ -10,14 +10,16 @@
    1. [Loops](#loops)
 1. [Validation](#validation)
    1. [Assertions](#assertions)
+1. [Asynchronous actions](#asynchronous-actions)
+   1. [Run tasks in parallel](#run-tasks-in-parallel)
 1. [Error handling](#error-handling)
    1. [Using blocks](#using-blocks)
 1. [Output formatting](#output-formatting)
 1. [Handlers](#handlers)
 1. [Roles](#roles)
-   1. [Get roles](#get-roles)
-   1. [Assign roles](#assign-roles)
-   1. [Role dependencies](#role-dependencies)
+    1. [Get roles](#get-roles)
+    1. [Assign roles](#assign-roles)
+    1. [Role dependencies](#role-dependencies)
 1. [Create custom filter plugins](#create-custom-filter-plugins)
 1. [Execution environments](#execution-environments)
 1. [Secrets management](#secrets-management)
@@ -450,6 +452,86 @@ Return a boolean result.
     success_msg: What to say if all of the above conditions succeed
 ```
 
+## Asynchronous actions
+
+Refer [Asynchronous actions and polling].
+
+Executing tasks in the background will return a Job ID that can be polled for information about that task.<br/>
+Polling keeps the connection to the remote node open between polls.
+
+Use the `async` keyword in playbook tasks.<br/>
+Leaving it off makes tasks run synchronously, which is Ansible's default.
+
+> As of Ansible 2.3, `async` does **not** support check mode and tasks using it **will fail** when run in check mode.
+
+Asynchronous tasks will create temporary async job cache file (in `~/.ansible_async/` by default).<br/>
+When asynchronous tasks complete **with** polling enabled, the related temporary async job cache file is automatically
+removed. This does **not** happen for tasks that do **not** use polling.
+
+```sh
+# Execute long running operations asynchronously in the background.
+ansible 'all' -B '3600' -P '0' -a '/usr/bin/long_running_operation --do-stuff'   # no polling
+ansible 'all' -B '1800' -P '60' -a '/usr/bin/long_running_operation --do-stuff'  # with polling
+
+# Check on background jobs' status.
+ansible 'web1.example.com' -m 'async_status' -a 'jid=488359678239.2844'
+```
+
+```yaml
+---
+- tasks:
+    - name: Simulate long running op (15 sec), wait for up to 45 sec, poll every 5 sec
+      ansible.builtin.command: /bin/sleep 15
+      async: 45
+      poll: 5
+```
+
+The default poll value is set by the `DEFAULT_POLL_INTERVAL` setting.<br/>
+There is **no** default for `async`'s time limit.
+
+Asynchronous playbook tasks **always** return changed.
+
+### Run tasks in parallel
+
+Use `async` with `poll` set to _0_.<br/>
+When `poll` is _0_, Ansible starts the task and immediately moves on to the next one with**out** waiting for a result
+from the first.<br/>
+Each asynchronous task runs until it either completes, fails or times out (running longer than the value set for its
+`async`). Playbook runs end with**out** checking back on asynchronous tasks.
+
+```yaml
+---
+- tasks:
+    - name: Simulate long running op (15 sec), allow to run for 45 sec, fire and forget
+      ansible.builtin.command: /bin/sleep 15
+      async: 45
+      poll: 0
+```
+
+Operations requiring exclusive locks, such as YUM transactions, will make successive operations that require those files
+wait or fail.
+
+Synchronize asynchronous tasks by registering them to obtain their job ID and using it with the `async_status` module in
+later tasks:
+
+```yaml
+- tasks:
+    - name: Run an async task
+      ansible.builtin.yum:
+        name: docker-io
+        state: present
+      async: 1000
+      poll: 0
+      register: yum_sleeper
+    - name: Check on an async task
+      async_status:
+        jid: "{{ yum_sleeper.ansible_job_id }}"
+      register: job_result
+      until: job_result.finished
+      retries: 100
+      delay: 10
+```
+
 ## Error handling
 
 ### Using blocks
@@ -623,6 +705,8 @@ In playbooks:
       tags: example
       message: some message
 ```
+
+Role assignments can**not** be parallelized at the time of writing.
 
 ### Role dependencies
 
@@ -1346,6 +1430,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 - [Protecting sensitive data with Ansible vault]
 - [Ansible Vault tutorial]
 - [Ansible Vault with AWX]
+- [Asynchronous actions and polling]
 
 <!--
   Reference
@@ -1367,6 +1452,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 <!-- Upstream -->
 [8 ways to speed up your ansible playbooks]: https://www.redhat.com/sysadmin/faster-ansible-playbook-execution
 [ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
+[asynchronous actions and polling]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_async.html
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
 [blocks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_blocks.html
 [collections index]: https://docs.ansible.com/ansible/latest/collections/index.html
