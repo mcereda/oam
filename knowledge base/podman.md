@@ -20,6 +20,8 @@ sudo zypper install 'podman'
 
 - [Website]
 - [Docker]
+- [Containerd]
+- [Kaniko]
 
 <!--
   Reference
@@ -27,7 +29,9 @@ sudo zypper install 'podman'
   -->
 
 <!-- Knowledge base -->
+[containerd]: containerd.md
 [docker]: docker.md
+[kaniko]: kaniko.md
 
 <!-- Upstream -->
 [website]: https://podman.io/
