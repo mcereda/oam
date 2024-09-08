@@ -101,6 +101,10 @@ pkgin ug
 pkgin list
 pkgin ls
 
+# List files in packages.
+pkgin pkg-contents
+pkgin pc
+
 # *Gently* reboot the system.
 shutdown -r now
 shutdown -r +30 "System will reboot"
