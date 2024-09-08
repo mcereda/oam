@@ -24,6 +24,7 @@
 1. [Execution environments](#execution-environments)
 1. [Secrets management](#secrets-management)
     1. [Ansible Vault](#ansible-vault)
+1. [Best practices](#best-practices)
 1. [Troubleshooting](#troubleshooting)
     1. [Print all known variables](#print-all-known-variables)
     1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
@@ -1078,6 +1079,26 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFIw4vv6LYg3P7bfgrR5I4k/0123456789abcdefghIL
 </details>
 
 Or even edit their content with `ansible-vault edit 'path/to/file'`.
+
+## Best practices
+
+- Tag all tasks.
+- Define tasks so that playbook runs will not fail just because a task depends on another.
+- Provide ways to manually feed values to dependent tasks so a run can start from there or only use tagged tasks, e.g.
+  by using variables that can be overridden in the command line.
+- If using other systems to maintain a canonical list of systems in one's infrastructure, consider using dynamic
+  inventories.
+- Consider using `blocks` to group tasks logically.
+- Keep debugging messages but set them to run only at higher verbosity:
+
+  ```yaml
+  tasks:
+    - debug:
+        msg: "I always display!"
+    - debug:
+        msg: "I only display with ansible-playbook -vvv+"
+        verbosity: 3
+  ```
 
 ## Troubleshooting
 
