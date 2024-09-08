@@ -391,6 +391,7 @@ docker load …
 - [Dive]
 - [Testcontainers]
 - [Containerd]
+- [Kaniko]
 
 ### Sources
 
@@ -416,6 +417,7 @@ docker load …
 <!-- Knowledge base -->
 [containerd]: containerd.md
 [dive]: dive.placeholder
+[kaniko]: kaniko.md
 [podman]: podman.md
 [testcontainers]: testcontainers.md
 
