@@ -72,13 +72,16 @@
 | KISS    | Keep It Simple Stupid                                  | Also see [KISS principle is not that simple]                                                        |
 | KMS     | Key Management Service                                 |                                                                                                     |
 | KMS     | Knowledge Management System                            |                                                                                                     |
+| KPI     | Key performance indicator                              | Quantitative success metrics that track business goals or projects                                  |
 | LAN     | Local Area Network                                     |                                                                                                     |
 | LED     | Light Emitting Diode                                   |                                                                                                     |
 | LIFO    | Last In First Out                                      |                                                                                                     |
 | M2COTS  | Mass Market COTS                                       | Widely available COTS products                                                                      |
+| NACL    | Network ACL                                            |                                                                                                     |
 | OAM     | [Open Application Model]                               |                                                                                                     |
 | OAM     | Operations, Administration and Management              |                                                                                                     |
 | OIDC    | OpenID Connect                                         |                                                                                                     |
+| OKR     | Objectives and Key Results                             | Framework helping teams set and track measurable goals                                              |
 | PDF     | Portable Document Format                               |                                                                                                     |
 | PEBCAK  | Problem Exists Between Chair And Keyboard              |                                                                                                     |
 | PGP     | Pretty Good Privacy                                    |                                                                                                     |
@@ -130,6 +133,7 @@
 - [What is OpenID Connect]
 - [Continuous delivery]
 - [URL, URI, URN: what's the difference?]
+- [What are OKRs? A guide to objectives and key results]
 
 <!--
   Reference
@@ -160,8 +164,9 @@
 [cn (canonicalName vs commonName) in active directory explained]: https://www.itechguides.com/what-is-cn-in-active-directory/
 [continuous delivery]: https://en.wikipedia.org/wiki/Continuous_delivery
 [kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
+[open application model]: https://oam.dev/
 [sbom at a glance]: https://www.ntia.gov/sites/default/files/publications/sbom_at_a_glance_apr2021_0.pdf
 [service as a software substitute]: https://www.gnu.org/philosophy/who-does-that-server-really-serve.html
-[what is openid connect]: https://openid.net/developers/how-connect-works/
 [url, uri, urn: what's the difference?]: https://auth0.com/blog/url-uri-urn-differences/
-[open application model]: https://oam.dev/
+[what are okrs? a guide to objectives and key results]: https://asana.com/resources/okr-meaning
+[what is openid connect]: https://openid.net/developers/how-connect-works/
