@@ -1,7 +1,5 @@
 # Network Manager
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Sources](#sources)
 
@@ -17,6 +15,10 @@ nmcli connection modify 'it hurts when ip' connection.autoconnect-priority 1
 
 # Start the TUI.
 nmtui
+
+# Show networks' channel, transfer rate, signal strength and security.
+nmcli device wifi list
+nmcli dev wifi
 ```
 
 ## Sources
@@ -25,7 +27,8 @@ nmtui
 - [NM-settings]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Upstream -->
