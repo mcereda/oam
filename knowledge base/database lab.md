@@ -29,6 +29,10 @@ docker logs --since '2024-05-01' -f 'dblab_server'
 docker logs --since '2024-08-01T23:11:35' -f 'dblab_server'
 ```
 
+Images for the _Standard_ and _Enterprise_ editions are available at
+<https://gitlab.com/postgres-ai/se-images/container_registry/>.<br/>
+Images for the _Community_ edition are available at <https://gitlab.com/postgres-ai/custom-images>.
+
 ## Clones
 
 Database clones comes in two flavours:
