@@ -104,7 +104,10 @@ docker exec 'app_web_1' tail 'logs/development.log'
 docker exec -ti 'alpine-test' 'sh'
 
 # Show containers' output.
-docker log 'alpine-test'
+docker logs -f 'alpine-test'
+docker logs --since '1m' 'dblab_server' --details
+docker logs --since '2024-05-01' -n '100' 'mariadb'
+docker logs --since '2024-08-01T23:11:35' --until '2024-08-05T20:43:35' 'gitlab'
 
 # List processes running inside containers.
 docker top 'alpine-test'

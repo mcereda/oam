@@ -10,6 +10,8 @@ sudo vim '/var/lib/docker/volumes/website/_data/index.html'
 docker run -d --name 'some-nginx' -v '/some/content:/usr/share/nginx/html:ro' 'nginx'
 
 docker logs --since '5m' -f 'dblab_server'
+docker logs --since '2024-09-07' 'dblab_server'
+docker logs --since '2024-09-09T09:05:00' --until '2024-09-09T10:05:00' 'dblab_server'
 
 docker login
 docker login -u 'whatever' -p 'glpat-ABC012def345GhI678jKl' 'gitlab.example.org:5050'

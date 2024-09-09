@@ -6,9 +6,28 @@ Use cases of the clones are to test database migrations, optimize SQL, or deploy
 
 The website <https://Postgres.ai/> hosts the SaaS version of the Database Lab Engine.
 
+Configuration file examples are available at <https://gitlab.com/postgres-ai/database-lab/-/tree/v3.0.0/configs>.
+
+1. [Engine](#engine)
 1. [Clones](#clones)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
+
+## Engine
+
+Config file in YAML format, at `~/.dblab/engine/configs/server.yml` by default.
+
+Metadata files at `~/.dblab/engine/meta` by default. The metadata folder **must be writable**.
+
+```sh
+# Reload the configuration without downtime.
+docker exec -it 'dblab_server' kill -SIGHUP 1
+
+# Follow logs.
+docker logs --since '1m' -f 'dblab_server'
+docker logs --since '2024-05-01' -f 'dblab_server'
+docker logs --since '2024-08-01T23:11:35' -f 'dblab_server'
+```
 
 ## Clones
 
@@ -45,6 +64,8 @@ Database clones comes in two flavours:
 
 ### Sources
 
+- [Database Lab Engine configuration reference]
+
 <!--
   Reference
   ═╬═Time══
@@ -56,6 +77,7 @@ Database clones comes in two flavours:
 
 <!-- Files -->
 <!-- Upstream -->
+[database lab engine configuration reference]: https://postgres.ai/docs/reference-guides/database-lab-engine-configuration-reference
 [documentation]: https://postgres.ai/docs/
 [main repository]: https://gitlab.com/postgres-ai/database-lab
 [website]: https://postgres.ai/
