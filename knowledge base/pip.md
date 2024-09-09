@@ -6,18 +6,13 @@ Package installer for Python.
 1. [Configuration](#configuration)
 1. [Further readings](#further-readings)
 
-## Table of contents <!-- omit in toc -->
-
-1. [TL;DR](#tldr)
-1. [Configuration](#configuration)
-1. [Further readings](#further-readings)
-
 ## TL;DR
 
 ```sh
 # Install packages.
 pip install 'yamllint'
-pip install --user 'ansible'
+pip install --user 'ansible==10.1.0'
+pip install -U --require-virtualenv -r 'requirements.txt' --no-cache-dir
 
 # Upgrade packages.
 pip install -U 'pip'
@@ -54,7 +49,8 @@ When multiple configuration exist, pip **merges** them in the following order:
 1. user
 1. site
 
-Latter files override values from previous files, i.e. the global timeout specified in the global file will be superseded by the one defined in the user file.
+Latter files override values from previous files, i.e. the global timeout specified in the global file will be
+superseded by the one defined in the user file.
 
 ## Further readings
 
@@ -62,7 +58,8 @@ Latter files override values from previous files, i.e. the global timeout specif
 - [`pipx`][pipx]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Upstream -->
