@@ -20,6 +20,9 @@ systemctl list-unit-files
 # List failed units only.
 systemctl list-units --state='failed'
 
+# Reload service definitions.
+systemctl daemon-reload
+
 # Start services.
 sudo systemctl start 'adb.service'
 systemctl --user start 'keybase.service'
@@ -27,6 +30,15 @@ systemctl --user start 'keybase.service'
 # Restart services.
 sudo systemctl restart 'bluetooth.service'
 systemctl --user restart 'davmail.service'
+
+# Reload services.
+sudo systemctl reload 'prometheus.service'
+systemctl --user reload 'davmail.service'
+
+# Reload or restart services.
+# For when one is unsure what would work.
+sudo systemctl reload-or-restart 'apache2.service'
+systemctl --user reload-or-restart 'davmail.service'
 
 # Stop services.
 sudo systemctl stop 'cups.service'
@@ -267,7 +279,9 @@ Storage=persistent
 
 ### Ignore the DNS servers list given by the DHCP server
 
-Set the following lines in any network-specific file for which you want to ignore DNS servers from DHCP (like `/etc/systemd/network/eth0.network`), or in the global settings (`/etc/systemd/resolved.conf` or any file in `/etc/systemd/resolved.conf.d/`):
+Set the following lines in any network-specific file for which you want to ignore DNS servers from DHCP (like
+`/etc/systemd/network/eth0.network`), or in the global settings (`/etc/systemd/resolved.conf` or any file in
+`/etc/systemd/resolved.conf.d/`):
 
 ```ini
 [DHCP]
@@ -284,7 +298,9 @@ Use the handy command:
 sudo systemd-resolve -i 'wlp2s0' --set-dns '192.168.1.1' --set-domain 'lan'
 ```
 
-or set the following lines in the global settings (`/etc/systemd/resolved.conf` or any file in `/etc/systemd/resolved.conf.d/`), or in any network-specific file you want to set DNS servers for (like `/etc/systemd/network/eth0.network`):
+or set the following lines in the global settings (`/etc/systemd/resolved.conf` or any file in
+`/etc/systemd/resolved.conf.d/`), or in any network-specific file you want to set DNS servers for (like
+`/etc/systemd/network/eth0.network`):
 
 ```ini
 [Resolve]
@@ -307,6 +323,7 @@ Restart the `systemd-resolved` service to apply the new settings.
 - [How to Set Hostname Using Hostnamectl Command?]
 - [Suspend and hibernate]
 - [Changing DNS with systemd-resolved]
+- [systemctl Commands: Restart, Reload, and Stop Service]
 
 <!--
   Reference
@@ -323,4 +340,5 @@ Restart the `systemd-resolved` service to apply the new settings.
 [how to set time, timezone and synchronize system clock using timedatectl command]: https://www.tecmint.com/set-time-timezone-and-synchronize-time-using-timedatectl-command/
 [how to use journalctl to view and manipulate systemd logs]: https://www.digitalocean.com/community/tutorials/how-to-use-journalctl-to-view-and-manipulate-systemd-logs
 [suspend and hibernate]: https://wiki.archlinux.org/title/Power_management#Suspend_and_hibernate
+[systemctl commands: restart, reload, and stop service]: https://www.linode.com/docs/guides/introduction-to-systemctl/
 [what are the systemctl options to list all failed units?]: https://unix.stackexchange.com/questions/341060/what-are-the-systemctl-options-to-list-all-failed-units/341061#341061

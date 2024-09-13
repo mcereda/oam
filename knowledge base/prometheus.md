@@ -30,9 +30,10 @@ security policy.
 prometheus
 prometheus --web.enable-admin-api
 
-# Reload the configuration file without restarting the process.
+# Reload the configuration file *without* restarting the process.
 kill -s 'SIGHUP' '3969'
 pkill --signal 'HUP' 'prometheus'
+curl -i -X 'POST' 'localhost:9090/-/reload'  # if admin APIs are enabled
 
 # Shut down the process *gracefully*.
 kill -s 'SIGTERM' '3969'
@@ -363,7 +364,7 @@ PUT /api/v1/admin/tsdb/snapshot
 
 URL query parameters:
 
-- `skip_head`=<bool>: skip data present in the head block. Optional.
+- `skip_head`=\<bool>: skip data present in the head block. Optional.
 
 Examples:
 
