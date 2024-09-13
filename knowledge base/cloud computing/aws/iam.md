@@ -32,6 +32,10 @@ Check [aws.permissions.cloud] for a community-driven source of truth for AWS ide
 
 IAM does not expose policies' `Sid` element in the IAM API, so it can't be used to retrieve statements.
 
+Watch out for explicit `Deny` statements, as they could prevent users from do seemingly completely unrelated things -
+like accessing a Pulumi state file in a S3 bucket when an explicit `Deny` statement blocks IAM users from listing IAM
+Groups when they are not logged in with MFA.
+
 Examples:
 
 <details>
@@ -229,7 +233,8 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 - [Using AWS CLI Securely with IAM Roles and MFA]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
