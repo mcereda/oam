@@ -889,6 +889,8 @@ Solution:
 
 ### `Attempting to deploy or update resources with X pending operations from previous deployment`
 
+Also see [Enable pulumi refresh to solve pending creates].
+
 Context: one gets this kind of warning during an `update` action.
 
 Warning message example:
@@ -919,6 +921,7 @@ Solution: follow the suggestion in the warning message:
 - [Code examples]
 - [Resources reference]
 - [Things I wish I knew earlier about Pulumi]
+- [Enable pulumi refresh to solve pending creates]
 
 ### Sources
 
@@ -939,7 +942,8 @@ Solution: follow the suggestion in the warning message:
 - [`pulumi config set-all`][pulumi config set-all]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
@@ -962,6 +966,7 @@ Solution: follow the suggestion in the warning message:
 [code examples]: https://github.com/pulumi/examples
 [deletebeforereplace]: https://www.pulumi.com/docs/concepts/options/deletebeforereplace/
 [documentation]: https://www.pulumi.com/docs/
+[enable pulumi refresh to solve pending creates]: https://github.com/pulumi/pulumi/pull/10394
 [get started with pulumi policy as code]: https://www.pulumi.com/docs/using-pulumi/crossguard/get-started/
 [iac recommended practices: developer stacks and git branches]: https://www.pulumi.com/blog/iac-recommended-practices-developer-stacks-git-branches/
 [ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
