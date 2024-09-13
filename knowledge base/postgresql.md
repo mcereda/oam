@@ -1,6 +1,9 @@
 # PostgreSQL
 
 1. [TL;DR](#tldr)
+1. [Extensions of interest](#extensions-of-interest)
+   1. [PostGIS](#postgis)
+   1. [`postgresql_anonymizer`](#postgresql_anonymizer)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -23,9 +26,12 @@ DB-specific roles).
 
 Extensions in PostgreSQL are managed per database.
 
+<details>
+  <summary>Setup</summary>
+
 ```sh
 # Installation.
-brew install 'postgresql@14'
+brew install 'postgresql@16'
 sudo dnf install 'postgresql' 'postgresql-server'
 sudo zypper install 'postgresql15' 'postgresql15-server'
 
@@ -47,6 +53,11 @@ port = 5433
 user = master
 EOF
 ```
+
+</details>
+
+<details>
+  <summary>Usage</summary>
 
 ```sh
 # Connect to servers via CLI client.
@@ -99,12 +110,73 @@ createuser 'dummyuser' -e --pwprompt && dropuser 'dummyuser'
 scram-sha-256 'mySecretPassword'
 ```
 
+```sql
+-- Load extensions from the underlying operating system
+-- They must be already installed on the instance
+ALTER SYSTEM SET shared_preload_libraries = 'anon';
+ALTER DATABASE postgres SET session_preload_libraries = 'anon';
+```
+
+</details>
+
+## Extensions of interest
+
+### PostGIS
+
+TODO
+
+### `postgresql_anonymizer`
+
+Extension to mask or replace personally identifiable information or other sensitive data in a DB.
+
+Refer [`postgresql_anonymizer`][postgresql_anonymizer] and [An In-Depth Guide to Postgres Data Masking with Anonymizer].
+
+Admins declare masking rules using the PostgreSQL Data Definition Language (DDL) and specify the anonymization strategy
+inside each tables' definition.
+
+<details>
+  <summary>Example</summary>
+
+```sh
+docker run --rm -d -e 'POSTGRES_PASSWORD=postgres' -p '6543:5432' 'registry.gitlab.com/dalibo/postgresql_anonymizer'
+psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
+```
+
+```sql
+=# SELECT * FROM people LIMIT 1;
+ id | firstname | lastname |   phone
+----+-----------+----------+------------
+ T1 | Sarah     | Conor    | 0609110911
+
+-- 1. Activate the dynamic masking engine
+=# CREATE EXTENSION IF NOT EXISTS anon CASCADE;
+=# SELECT anon.start_dynamic_masking();
+
+-- 2. Declare a masked user
+=# CREATE ROLE skynet LOGIN PASSWORD 'skynet';
+=# SECURITY LABEL FOR anon ON ROLE skynet IS 'MASKED';
+
+-- 3. Declare masking rules
+=# SECURITY LABEL FOR anon ON COLUMN people.lastname IS 'MASKED WITH FUNCTION anon.fake_last_name()';
+=# SECURITY LABEL FOR anon ON COLUMN people.phone IS 'MASKED WITH FUNCTION anon.partial(phone,2,$$******$$,2)';
+
+-- 4. Connect with the masked user and test masking
+=# \connect - skynet
+=# SELECT * FROM people LIMIT 1;
+ id | firstname | lastname |   phone
+----+-----------+----------+------------
+ T1 | Sarah     | Morris   | 06******11
+```
+
+</details>
+
 ## Further readings
 
 - [Docker image]
 - [Bidirectional replication in PostgreSQL using pglogical]
 - [What is the pg_dump command for backing up a PostgreSQL database?]
 - [How to SCRAM in Postgres with pgBouncer]
+- [`postgresql_anonymizer`][postgresql_anonymizer]
 
 ### Sources
 
@@ -114,6 +186,7 @@ scram-sha-256 'mySecretPassword'
 - [The password file]
 - [How to Generate SCRAM-SHA-256 to Create Postgres 13 User]
 - [PostgreSQL: Get member roles and permissions]
+- [An In-Depth Guide to Postgres Data Masking with Anonymizer]
 
 <!--
   Reference
@@ -127,9 +200,11 @@ scram-sha-256 'mySecretPassword'
 [the password file]: https://www.postgresql.org/docs/current/libpq-pgpass.html
 
 <!-- Others -->
+[an in-depth guide to postgres data masking with anonymizer]: https://thelinuxcode.com/postgresql-anonymizer-data-masking/
 [bidirectional replication in postgresql using pglogical]: https://www.jamesarmes.com/2023/03/bidirectional-replication-postgresql-pglogical.html
 [connect to a postgresql database]: https://www.postgresqltutorial.com/connect-to-postgresql-database/
 [how to generate scram-sha-256 to create postgres 13 user]: https://stackoverflow.com/questions/68400120/how-to-generate-scram-sha-256-to-create-postgres-13-user
 [how to scram in postgres with pgbouncer]: https://www.crunchydata.com/blog/pgbouncer-scram-authentication-postgresql
+[postgresql_anonymizer]: https://postgresql-anonymizer.readthedocs.io/en/stable/
 [postgresql: get member roles and permissions]: https://www.cybertec-postgresql.com/en/postgresql-get-member-roles-and-permissions/
 [what is the pg_dump command for backing up a postgresql database?]: https://www.linkedin.com/advice/3/what-pgdump-command-backing-up-postgresql-ke2ef

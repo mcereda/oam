@@ -18,6 +18,12 @@ SELECT version();
 \conninfo
 
 
+-- Load extensions globally in the instance
+-- If supported (no RDS)
+ALTER SYSTEM SET shared_preload_libraries = 'anon';
+ALTER DATABASE postgres SET session_preload_libraries = 'anon';
+
+
 -- List databases
 \l
 \list+
@@ -62,7 +68,24 @@ DROP SCHEMA IF EXISTS mundane CASCADE;
 
 -- List tables
 \d
+\dt
 \dt+
+
+-- Create tables
+CREATE TABLE people (
+  id         char(2)     PRIMARY KEY,
+  firstname  varchar(40) NOT NULL,
+  lastname   varchar(40) NOT NULL,
+  phone      varchar(20) NOT NULL
+);
+
+-- Show table structure
+\d sales
+\d+ clients
+
+
+-- Insert data
+INSERT INTO people(id,firstname,lastname,phone) VALUES ('T1','Sarah','Conor','0609110911');
 
 
 -- Revoke *default* privileges
@@ -75,6 +98,8 @@ ALTER DEFAULT PRIVILEGES FOR ROLE juan IN SCHEMA cache REVOKE all ON TABLES FROM
 \du+
 -- List users only
 SELECT usename FROM pg_catalog.pg_user;
+-- List roles only
+SELECT rolname FROM pg_catalog.pg_roles;
 
 -- Check the current user has SuperUser privileges
 SHOW is_superuser;
@@ -85,7 +110,7 @@ SHOW is_superuser;
 -- Does *not* support IF NOT EXISTS
 CREATE ROLE miriam;
 CREATE ROLE miriam WITH LOGIN PASSWORD 'jw8s0F4' VALID UNTIL '2005-01-01';
-CREATE USER mike;
+CREATE USER mike IN ROLE engineers;
 
 -- Grant roles SuperUser privileges
 -- The role granting privileges must be already SuperUser
@@ -99,17 +124,21 @@ ALTER USER mark CREATEDB REPLICATION;
 ALTER ROLE miriam CREATEROLE CREATEDB;
 
 -- Change passwords
+ALTER USER mike WITH PASSWORD NULL;
 ALTER USER jonathan WITH PASSWORD 'seagull5-pantomime-Resting';
 ALTER ROLE samantha WITH PASSWORD 'Wing5+Trunks3+Relic2' VALID UNTIL 'August 4 12:00:00 2024 +1';
 
 -- Change password's validity
 ALTER ROLE fred VALID UNTIL 'infinity';
 
--- Rename
+-- Rename roles
 ALTER ROLE manager RENAME TO boss;
 
 -- Assign roles to users
 GRANT rds_superuser TO mike;
+
+-- Remove role memberships from users
+REVOKE engineers FROM mike;
 
 
 -- Close the connection to the current DB
@@ -121,10 +150,13 @@ GRANT rds_superuser TO mike;
 SELECT rolpassword from pg_authid where rolname = 'admin';
 
 
--- Show extensions
+-- Show available extensions
+SELECT name FROM pg_available_extensions ORDER BY name;
+
+-- Show installed extensions
 \dx
 SELECT * FROM pg_extension;
-SELECT extname FROM pg_extension;
+SELECT extname FROM pg_extension ORDER BY extname;
 
 -- Show extensions versions
 SELECT postgis_version(), postgis_full_version(), postgis_lib_version();
