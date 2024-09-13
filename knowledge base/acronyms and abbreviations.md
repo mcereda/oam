@@ -39,7 +39,9 @@
 | CVE     | Common Vulnerabilities and Exposures                   |                                                                                                     |
 | CVS     | Concurrent Versioning System                           |                                                                                                     |
 | DBMS    | Data Base Management System                            |                                                                                                     |
+| DDL     | Data Definition Language                               |                                                                                                     |
 | DKIM    | DomainKeys Identified Mail                             |                                                                                                     |
+| DML     | Data Manipulation Language                             |                                                                                                     |
 | EA      | Extended Attributes                                    |                                                                                                     |
 | EEPROM  | Electronically Erasable Programmable Read-Only Memory  |                                                                                                     |
 | ELI5    | Explain Like I'm 5                                     |                                                                                                     |
@@ -85,6 +87,7 @@
 | PDF     | Portable Document Format                               |                                                                                                     |
 | PEBCAK  | Problem Exists Between Chair And Keyboard              |                                                                                                     |
 | PGP     | Pretty Good Privacy                                    |                                                                                                     |
+| PII     | Personally Identifiable Information                    |                                                                                                     |
 | RBAC    | Role-Based Access Control                              |                                                                                                     |
 | ROM     | Read-Only Memory                                       |                                                                                                     |
 | RPM     | Revolutions Per Minute                                 |                                                                                                     |
@@ -93,9 +96,13 @@
 | SAFE    | Scaled Agile FramEwork                                 |                                                                                                     |
 | SBOM    | Software Bill Of Materials                             | See [SBOM at a Glance]                                                                              |
 | SIEM    | [Security Information and Event Management)][siem]     |                                                                                                     |
+| SLA     | Service-Level Agreement                                |                                                                                                     |
+| SLI     | Service-Level Indicator                                |                                                                                                     |
+| SLO     | Service-Level Objective                                |                                                                                                     |
 | SOPS    | Secrets OPerationS                                     |                                                                                                     |
 | SPIFFE  | Secure Production Identity Framework for Everyone      |                                                                                                     |
 | SQL     | Structured Query Language                              |                                                                                                     |
+| SRE     | Site Reliability Engineer                              |                                                                                                     |
 | SSH     | [Secure SHell][ssh]                                    |                                                                                                     |
 | SSID    | Service Set IDentifier                                 | A wireless network name                                                                             |
 | SSSD    | [System Security Services Daemon][sssd]                |                                                                                                     |
@@ -134,6 +141,7 @@
 - [Continuous delivery]
 - [URL, URI, URN: what's the difference?]
 - [What are OKRs? A guide to objectives and key results]
+- [SRE fundamentals: SLIs, SLAs and SLOs]
 
 <!--
   Reference
@@ -167,6 +175,7 @@
 [open application model]: https://oam.dev/
 [sbom at a glance]: https://www.ntia.gov/sites/default/files/publications/sbom_at_a_glance_apr2021_0.pdf
 [service as a software substitute]: https://www.gnu.org/philosophy/who-does-that-server-really-serve.html
+[sre fundamentals: slis, slas and slos]: https://cloud.google.com/blog/products/devops-sre/sre-fundamentals-slis-slas-and-slos
 [url, uri, urn: what's the difference?]: https://auth0.com/blog/url-uri-urn-differences/
 [what are okrs? a guide to objectives and key results]: https://asana.com/resources/okr-meaning
 [what is openid connect]: https://openid.net/developers/how-connect-works/
