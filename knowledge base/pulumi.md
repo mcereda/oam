@@ -21,6 +21,7 @@
    1. [Stack init fails due to missing scheme](#stack-init-fails-due-to-missing-scheme)
    1. [Stack init fails due to invalid key identifier](#stack-init-fails-due-to-invalid-key-identifier)
    1. [Change your program back to the original providers](#change-your-program-back-to-the-original-providers)
+   1. [`Attempting to deploy or update resources with X pending operations from previous deployment`](#attempting-to-deploy-or-update-resources-with-x-pending-operations-from-previous-deployment)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -885,6 +886,31 @@ Solution:
 1. Fix the provider's version to the one wanted by the resource.
 1. Run `pulumi install` to gather the required version.
 1. Try the action again now.
+
+### `Attempting to deploy or update resources with X pending operations from previous deployment`
+
+Context: one gets this kind of warning during an `update` action.
+
+Warning message example:
+
+> ```plaintext
+> Diagnostics:
+>   pulumi:pulumi:Stack (iam-internal-dev):
+>     warning: Attempting to deploy or update resources with 19 pending operations from previous deployment.
+>       * urn:pulumi:dev::iam-internal::aws:iam/userPolicyAttachment:UserPolicyAttachment::apolloAllowUserSetupMfa-to-jonathan, interrupted while creating
+>       * …
+>       * urn:pulumi:dev::iam-internal::aws:iam/groupPolicyAttachment:GroupPolicyAttachment::amazonReadOnlyAccess-to-engineers, interrupted while creating
+>     These resources are in an unknown state because the Pulumi CLI was interrupted while waiting for changes to these resources to complete. You should confirm whether or not the operations listed completed successfully by checking the state of the appropriate provider. For example, if you are using AWS, you can confirm using the AWS Console.
+>
+>     Once you have confirmed the status of the interrupted operations, you can repair your stack using `pulumi refresh` which will refresh the state from the provider you are using and clear the pending operations if there are any.
+>
+>     Note that `pulumi refresh` will need to be run interactively to clear pending CREATE operations.
+> ```
+
+Solution: follow the suggestion in the warning message:
+
+1. Run `pulumi refresh` interactively.
+1. Choose to clear the pending operations if the resource is created, or other options depending on the outcome.
 
 ## Further readings
 
