@@ -1,6 +1,8 @@
 https://k9scli.io/
 https://k9scli.io/topics/commands/
 
+Requires access to the KUBECONFIG.
+
 ```sh
 # List all available CLI options.
 k9s help
