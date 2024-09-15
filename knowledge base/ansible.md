@@ -1082,12 +1082,10 @@ Or even edit their content with `ansible-vault edit 'path/to/file'`.
 
 ## Best practices
 
-- Tag all tasks.
-- Define tasks so that playbook runs will not fail just because a task depends on another.
-- Provide ways to manually feed values to dependent tasks so a run can start from there or only use tagged tasks, e.g.
-  by using variables that can be overridden in the command line.
-- If using other systems to maintain a canonical list of systems in one's infrastructure, consider using dynamic
-  inventories.
+- Tag **all** tasks somehow.
+- Define tasks so that playbook runs will **not** fail just because one task depends on another.
+- Provide ways to **manually** feed values to dependent tasks so that runs can start from there or only use tagged
+  tasks, e.g. by using variables that can be overridden in the command line.
 - Consider using `blocks` to group tasks logically.
 - Keep debugging messages but set them to run only at higher verbosity:
 
@@ -1099,6 +1097,11 @@ Or even edit their content with `ansible-vault edit 'path/to/file'`.
         msg: "I only display with ansible-playbook -vvv+"
         verbosity: 3
   ```
+
+- When **replacing** resources, if possible, make sure the replacement is set correctly **before** deleting the
+  original.
+- If using other systems to maintain a canonical list of systems in one's infrastructure, consider using dynamic
+  inventories.
 
 ## Troubleshooting
 
