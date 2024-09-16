@@ -1126,10 +1126,8 @@ Installation:
      'aws-load-balancer-controller' 'aws-load-balancer-controller' \
      --namespace 'kube-system' \
      --set 'clusterName'='DeepThought' \
-     --set 'serviceAccount.create'='true' \
-     --set 'serviceAccount.name'='aws-load-balancer-controller' \
-     --set 'region'='eu-west-1' \
-     --set 'vpcId'='vpc-01234567'
+     --set 'serviceAccount.create'='true' --set 'serviceAccount.name'='aws-load-balancer-controller' \
+     --set 'region'='eu-west-1' --set 'vpcId'='vpc-01234567'
    ```
 
    </details>

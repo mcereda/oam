@@ -13,3 +13,4 @@ MD033:  # no-inline-html
     - code
     - details
     - summary
+    - sup

@@ -23,9 +23,24 @@ helm --namespace 'gitlab' upgrade --install --create-namespace --version '0.64.1
 helm upgrade --install 'keda' 'keda' --repo 'https://kedacore.github.io/charts' --namespace 'keda' --create-namespace
 
 helm get manifest 'wordpress'
+helm --namespace 'kube-system' get values 'metrics-server'
 
 helm -n 'monitoring' delete 'grafana'
 
 helm plugin list
 helm plugin install 'https://github.com/databus23/helm-diff'
 helm -n 'pocs' diff upgrade --repo 'https://dl.gitea.com/charts/' 'gitea' 'gitea' -f 'values.yaml'
+
+aws eks --region 'eu-west-1' update-kubeconfig --name 'custom-eks-cluster' \
+&& helm --namespace 'kube-system' upgrade --install --repo 'https://kubernetes.github.io/autoscaler'
+	'cluster-autoscaler' 'cluster-autoscaler' \
+	--set 'cloudProvider'='aws' --set 'awsRegion'='eu-west-1' --set 'autoDiscovery.clusterName'='custom-eks-cluster' \
+	--set 'rbac.serviceAccount.name'='cluster-autoscaler-aws' \
+	--set 'replicaCount'='2' \
+	--set 'resources.requests.cpu'='40m' --set 'resources.requests.memory'='50Mi' \
+	--set 'resources.limits.cpu'='100m' --set 'resources.limits.memory'='300Mi' \
+	--set 'affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].weight'='100' \
+	--set 'affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.topologyKey'='kubernetes.io/hostname' \
+	--set 'affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].key'='app.kubernetes.io/name' \
+	--set 'affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].operator'='In' \
+	--set 'affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].values[0]'='aws-cluster-autoscaler'
