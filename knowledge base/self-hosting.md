@@ -24,6 +24,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 | [Paperless-ngx]  | Document management system          |                                           |
 | [PhotoPrism]     | Photo and video management solution | Google Photo, [Immich]                    |
 | [Rundeck]        | Task runner                         | [AWX], [CTFreak], [Semaphore], [Zuul]     |
+| [SafeLine]       | Web Application Firewall            |                                           |
 | [Semaphore]      | Task runner                         | [AWX], [CTFreak], [Rundeck], [Zuul]       |
 | [Uptime Kuma]    | Status page                         | [Gatus], [Statping-ng], [Vigil]           |
 | [Wallabag]       | Web page saver                      | Pocket                                    |
@@ -52,6 +53,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 [paperless-ngx]: paperless-ngx.md
 [photoprism]: photoprism.md
 [rundeck]: rundeck.md
+[safeline]: safeline.md
 [uptime kuma]: uptime%20kuma.md
 [wallabag]: wallabag.md
 
