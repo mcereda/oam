@@ -29,7 +29,14 @@ Depending on the metrics-server version it uses:
 ```sh
 kubectl apply -f 'https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml'
 helm -n 'kube-system' upgrade --install --repo 'https://kubernetes-sigs.github.io/metrics-server' \
-  'metrics-server' 'metrics-server' --set 'containerPort'='10251'
+  'metrics-server' 'metrics-server' \
+  --set 'replicas'='2' --set 'addonResizer.enabled'='true' \
+  --set 'containerPort'='10251' \
+  --set 'affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].weight'='100' \
+  --set 'affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.topologyKey'='kubernetes.io/hostname' \
+  --set 'affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].key'='app.kubernetes.io/name' \
+  --set 'affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].operator'='In' \
+  --set 'affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].values[0]'='metrics-server'
 ```
 
 </details>
