@@ -116,12 +116,31 @@ aws kms get-key-policy --output 'text' --key-id '01234567-89ab-cdef-0123-456789a
 aws ec2 describe-images --image-ids 'ami-01234567890abcdef'
 aws ec2 describe-images --image-ids 'ami-01234567890abcdef' --query 'Images[].Description'
 
-# Check state of snapshots.
+# Get volume IDs of EC2 instances
+aws ec2 describe-instances --output 'text' \
+	--filters 'Name=tag:Name,Values=Prometheus' 'Name=instance-state-name,Values=running' \
+	--query 'Reservations[].Instances[0].BlockDeviceMappings[*].Ebs.VolumeId'
+
+# Create snapshots of EBS volumes
+aws ec2 create-snapshot --volume-id 'vol-0123456789abcdef0' --description 'Manual snapshot Pre-Update' \
+	--tag-specifications 'ResourceType=snapshot,Tags=[{Key=Name,Value=Prometheus},{Key=Team,Value=Infra}]' \
+
+# Check state of snapshots
 aws ec2 describe-snapshots --snapshot-ids 'snap-0123456789abcdef0' \
 	--query 'Snapshots[].{"State": State,"Progress": Progress}' --output 'yaml'
 
 # Wait for snapshots to finish.
 aws ec2 wait snapshot-completed --snapshot-ids 'snap-0123456789abcdef0'
+
+# Take snapshots of EC2 volumes and wait for them to finish
+aws ec2 describe-instances --output 'text' \
+	--filters 'Name=tag:Name,Values=Prometheus' 'Name=instance-state-name,Values=running' \
+	--query 'Reservations[].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId' \
+| xargs -tn '1' aws ec2 create-snapshot --output 'text' --query 'SnapshotId' \
+	--description 'Manual snapshot Pre-Update' \
+	--tag-specifications 'ResourceType=snapshot,Tags=[{Key=Name,Value=Prometheus},{Key=Team,Value=Infra}]' \
+	--volume-id \
+| xargs -t aws ec2 wait snapshot-completed --snapshot-ids
 
 aws autoscaling describe-auto-scaling-groups
 aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names 'ProductionServers'
