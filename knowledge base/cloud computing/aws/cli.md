@@ -276,6 +276,7 @@ Solutions:
 - CLI [quickstart]
 - [Configure profiles] in the CLI
 - [How do I assume an IAM role using the AWS CLI?]
+- [Yubikey authentication for AWS CLI (and boto) made easy]
 
 ### Sources
 
@@ -310,3 +311,4 @@ Solutions:
 [quickstart]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html
 [use an iam role in the aws cli]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html
 [using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
+[yubikey authentication for aws cli (and boto) made easy]: https://github.com/tommie-lie/awscli-plugin-yubikeytotp
