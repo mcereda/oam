@@ -1,7 +1,5 @@
 # OpenSSL
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Create a self signed certificate](#create-a-self-signed-certificate)
 1. [Display the contents of a SSL certificate](#display-the-contents-of-a-ssl-certificate)
@@ -47,6 +45,7 @@ openssl req -text -noout -verify -in 'request.csr'
 
 # Check existing keys and verify their consistency.
 openssl rsa -check -in 'file.key'
+openssl rsa -check -in 'file.key' -noout
 
 # Check certificates or keys and return information about them.
 openssl x509 -text -noout -in 'certificate.crt'
@@ -123,7 +122,8 @@ To avoid answering the questions (for automation), add
 
 ```sh
 $ openssl req -x509 -out 'cert.pem' \
-  -newkey 'rsa:4096' -keyout 'key.pem' -days '365' -nodes -subj "/C=NL/ST=Nederlands/L=Amsterdam/O=Mek Net/OU=Org/CN=mek.info"
+  -newkey 'rsa:4096' -keyout 'key.pem' -days '365' -nodes \
+  -subj "/C=NL/ST=Nederlands/L=Amsterdam/O=Mek Net/OU=Org/CN=mek.info"
 Generating a 4096 bit RSA private key
 ..............................................................................................................................................................................................................................++
 ...........................................................................................................................................................................++
