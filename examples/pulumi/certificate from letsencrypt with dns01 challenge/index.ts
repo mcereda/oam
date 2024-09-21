@@ -7,8 +7,32 @@ import * as yaml from "yaml";
 
 /**
  * NOT WORKING
- * Fails during certificate creation with errors "not found" and "response from server: EOF"
- * It seems to find the DNS zone. It is like it does not find the DNS entry even if I create it manually?
+ * Fails during certificate creation with the following trace:
+ *   pulumi:pulumi:Stack (certificates-with-letsencrypt-dev):
+ *     2024/09/17 23:50:18 [INFO] acme: Trying to resolve account by key
+ *     2024-09-17T23:50:18.789+0200 [INFO]  plugin: configuring client automatic mTLS
+ *     2024-09-17T23:50:18.802+0200 [DEBUG] plugin: starting plugin: path=/Users/user/.pulumi/plugins/resource-acme-v0.3.0/pulumi-resource-acme args=["/Users/user/.pulumi/plugins/resource-acme-v0.3.0/pulumi-resource-acme", "-dnsplugin"]
+ *     2024-09-17T23:50:18.805+0200 [DEBUG] plugin: plugin started: path=/Users/user/.pulumi/plugins/resource-acme-v0.3.0/pulumi-resource-acme pid=27352
+ *     2024-09-17T23:50:18.807+0200 [DEBUG] plugin: waiting for RPC address: plugin=/Users/user/.pulumi/plugins/resource-acme-v0.3.0/pulumi-resource-acme
+ *     2024-09-17T23:50:18.842+0200 [INFO]  plugin.pulumi-resource-acme: configuring server automatic mTLS: timestamp="2024-09-17T23:50:18.842+0200"
+ *     2024-09-17T23:50:18.847+0200 [DEBUG] plugin.pulumi-resource-acme: plugin address: network=unix address=/var/folders/sw/nd9600w52nn6hp4_yxmykn8h0000gn/T/plugin4288581984 timestamp="2024-09-17T23:50:18.847+0200"
+ *     2024-09-17T23:50:18.847+0200 [DEBUG] plugin: using plugin: version=1
+ *     2024-09-17T23:50:18.853+0200 [TRACE] plugin.stdio: waiting for stdio data
+ *     2024/09/17 23:50:18 [INFO] [gitlab.company.com] acme: Obtaining bundled SAN certificate given a CSR
+ *     2024/09/17 23:50:19 [INFO] [gitlab.company.com] AuthURL: https://acme-staging-v02.api.letsencrypt.org/acme/authz-v3/12345678901
+ *     2024/09/17 23:50:19 [INFO] [gitlab.company.com] acme: Could not find solver for: tls-alpn-01
+ *     2024/09/17 23:50:19 [INFO] [gitlab.company.com] acme: Could not find solver for: http-01
+ *     2024/09/17 23:50:19 [INFO] [gitlab.company.com] acme: use dns-01 solver
+ *     2024/09/17 23:50:19 [INFO] [gitlab.company.com] acme: Preparing to solve DNS-01
+ *     2024/09/17 23:50:19 [INFO] [gitlab.company.com] acme: Cleaning DNS-01 challenge
+ *     2024/09/17 23:50:19 [WARN] [gitlab.company.com] acme: cleaning up failed: 2 errors occurred:
+ *         * rpc error: code = Unknown desc = route53: not found, ResolveEndpointV2
+ *         * error encountered while cleaning token for DNS challenge: rpc error: code = Unknown desc = route53: not found, ResolveEndpointV2
+ *     2024/09/17 23:50:19 [INFO] Deactivating auth: https://acme-staging-v02.api.letsencrypt.org/acme/authz-v3/12345678901
+ *     2024-09-17T23:50:19.743+0200 [DEBUG] plugin.stdio: received EOF, stopping recv loop: err="rpc error: code = Unavailable desc = error reading from server: EOF"
+ *     2024-09-17T23:50:19.744+0200 [INFO]  plugin: plugin process exited: plugin=/Users/user/.pulumi/plugins/resource-acme-v0.3.0/pulumi-resource-acme id=27352
+ * It seems to find the DNS zone. It is like it does not find the TXT DNS entry (_acme-challenge.gitlab.company.com) even if I create it manually?
+ * Permissions are no issue
  **/
 
 
