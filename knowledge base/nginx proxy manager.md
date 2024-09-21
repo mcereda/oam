@@ -4,6 +4,7 @@ TODO
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -44,6 +45,11 @@ Default credentials: `admin@example.com`:`changeme`.
 - [Proxy]
 - [Nginx]
 - [Website]
+- [Main repository]
+
+### Sources
+
+- [Export letsencrypt certificates]
 
 <!--
   Reference
@@ -57,6 +63,8 @@ Default credentials: `admin@example.com`:`changeme`.
 
 <!-- Files -->
 <!-- Upstream -->
+[export letsencrypt certificates]: https://github.com/NginxProxyManager/nginx-proxy-manager/issues/683
+[main repository]: https://github.com/NginxProxyManager/nginx-proxy-manager
 [website]: https://nginxproxymanager.com/
 
 <!-- Others -->
