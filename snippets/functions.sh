@@ -1,4 +1,4 @@
-#!sh
+#!/usr/bin/env sh
 
 is_strictly_false () {
 	if [[ "$1" =~ '0|^[Ff][Aa][Ll][Ss][Ee]$|^[Nn][Oo]?$|^$' ]]

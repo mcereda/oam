@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # sources:
 # - https://wiki.archlinux.org/?title=BOINC#Laptop_overheating_and_battery_duration_reduction
