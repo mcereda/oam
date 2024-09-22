@@ -2,11 +2,9 @@
 
 Command line utility for OpenWrt's UCI system.
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -57,17 +55,19 @@ reload_config
 
 - [The UCI system]
 
-## Sources
+### Sources
 
-- [The UCI system]
+- [DHCP and DNS examples]
 - [Turris Omnia]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
-
-<!-- Upstream -->
-[the uci system]: https://openwrt.org/docs/guide-user/base-system/uci
 
 <!-- Knowledge base -->
 [Turris Omnia]: turris%20os.md
+
+<!-- Upstream -->
+[the uci system]: https://openwrt.org/docs/guide-user/base-system/uci
+[dhcp and dns examples]: https://openwrt.org/docs/guide-user/base-system/dhcp_configuration

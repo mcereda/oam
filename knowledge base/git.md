@@ -1,7 +1,5 @@
 # Git
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Authentication](#authentication)
 1. [Configuration](#configuration)
@@ -78,7 +76,7 @@ git --list-cmds='main,alias'
 git clone 'https://github.com:user/repo.git'
 git clone --bare 'git@github.com:user/repo.git' 'path/to/clone'
 git clone --recurse-submodules 'ssh@git.server:user/repo.git'
-git clone --depth 1 'ssh@git.server:user/repo.git'
+git clone --depth '1' 'ssh@git.server:user/repo.git' --branch 'release/v1.2'
 git clone 'https://token@github.com/user/repo'
 git \
   -c http.extraHeader="Authorization: Basic $(echo -n "user:pat" | base64)" \
@@ -418,7 +416,8 @@ git config --list --show-scope
 git config --list --global --show-origin
 ```
 
-The configuration is shown in full for the requested scope (or all if not specified), but it might include the same setting multiple times if it shows up in multiple scopes.<br/>
+The configuration is shown in full for the requested scope (or all if not specified), but it might include the same
+setting multiple times if it shows up in multiple scopes.<br/>
 Render the current value of a setting using the `--get` option:
 
 ```sh
@@ -440,7 +439,7 @@ Paths can be relative or absolute, and one can use `~` as shortcut for the user'
 [include]
   path = /path/to/file.inc
   path = path/to/inc.file
-  path = ~/path/to/incfile
+  path = ~/path/to/included/file
 ```
 
 #### Conditional inclusions
@@ -476,7 +475,8 @@ git remote set-url 'origin' 'git@github.com:user/new-repo-name.git'
 
 #### Push to multiple git remotes with the one command
 
-To always push to `repo1`, `repo2`, and `repo3`, but always pull only from `repo1`, set up the remote 'origin' as follows:
+To always push to `repo1`, `repo2`, and `repo3`, but always pull only from `repo1`, set up the remote 'origin' as
+follows:
 
 ```sh
 git remote add origin https://exampleuser@example.com/path/to/repo1
@@ -621,7 +621,8 @@ git diff > 'file.patch'
 git diff --output 'file.patch' --cached
 ```
 
-The output from `git diff` just shows changes to **text** files by default, no metadata or other information about commits or branches.<br/>
+The output from `git diff` just shows changes to **text** files by default, no metadata or other information about
+commits or branches.<br/>
 To get a whole commit with all its metadata and binary changes, use `git format-patch`:
 
 ```sh
@@ -659,7 +660,8 @@ The commits are applied one after the other and registered in the repository's l
 ## The stash stack
 
 The _stash_ is a changelist separated from the one in the current working directory.<br/>
-`git stash` will save the current changes there and cleans the working directory. You can (re-)apply changes from the stash at any time:
+`git stash` will save the current changes there and cleans the working directory. You can (re-)apply changes from the
+stash at any time:
 
 ```sh
 # Stash changes locally.
@@ -739,7 +741,8 @@ git pull 'origin' 'master'
 ### Rebase a branch on top of another
 
 `git rebase` takes the commits in a branch and appends them on top of the commits in a different branch.
-The commits to rebase are previously saved into a temporary area and then reapplied to the new branch, one by one, in order.
+The commits to rebase are previously saved into a temporary area and then reapplied to the new branch, one by one, in
+order.
 
 ```sh
 # Rebase main on top of the current branch.
@@ -964,7 +967,8 @@ export GIT_TRACE=1
 > fatal: failed to write commit object
 > ```
 
-If `gnupg2` and `gpg-agent` 2.x are used, be sure to set the environment variable `GPG_TTY`, specially `zsh` users using `Powerlevel10k` with Instant Prompt enabled.
+If `gnupg2` and `gpg-agent` 2.x are used, be sure to set the environment variable `GPG_TTY`, specially `zsh` users using
+`Powerlevel10k` with Instant Prompt enabled.
 
 ```sh
 export GPG_TTY=$(tty)
@@ -1026,7 +1030,8 @@ git -c http.sslVerify=false …
 - [cheat.sh]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Files -->

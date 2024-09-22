@@ -74,7 +74,7 @@
 | KISS    | Keep It Simple Stupid                                  | Also see [KISS principle is not that simple]                                                        |
 | KMS     | Key Management Service                                 |                                                                                                     |
 | KMS     | Knowledge Management System                            |                                                                                                     |
-| KPI     | Key performance indicator                              | Quantitative success metrics that track business goals or projects                                  |
+| KPI     | Key Performance Indicator                              | Quantitative success metrics that track business goals or projects                                  |
 | LAN     | Local Area Network                                     |                                                                                                     |
 | LED     | Light Emitting Diode                                   |                                                                                                     |
 | LIFO    | Last In First Out                                      |                                                                                                     |
@@ -84,6 +84,7 @@
 | OAM     | Operations, Administration and Management              |                                                                                                     |
 | OIDC    | OpenID Connect                                         |                                                                                                     |
 | OKR     | Objectives and Key Results                             | Framework helping teams set and track measurable goals                                              |
+| OOM     | Out Of Memory                                          |                                                                                                     |
 | PDF     | Portable Document Format                               |                                                                                                     |
 | PEBCAK  | Problem Exists Between Chair And Keyboard              |                                                                                                     |
 | PGP     | Pretty Good Privacy                                    |                                                                                                     |

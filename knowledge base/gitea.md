@@ -11,12 +11,42 @@
 
 ## TL;DR
 
+<details>
+  <summary>Setup</summary>
+
 ```sh
+# Install from source.
+git clone 'https://github.com/go-gitea/gitea' -b 'release/v1.22' && cd 'gitea' \
+&& TAGS='bindata sqlite sqlite_unlock_notify' make build
+
+# Install as package.
+apk add 'gitea'
+brew install 'gitea'
+emerge -aqv 'gitea'
+pacman -S 'gitea'
+pkg install 'gitea'
+
+# Kubernetes
 helm repo add 'gitea-charts' 'https://dl.gitea.com/charts/'
 helm upgrade --install 'gitea' 'gitea-charts/gitea'
 ```
 
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
+# Start after installation from source.
+./gitea web
+```
+
+</details>
+
 ## Installation
+
+<details>
+  <summary>Container</summary>
 
 Docker [compose file].
 
@@ -25,6 +55,8 @@ Change those in the compose file or whatever.
 
 One can optionally define the administrative user during the initial setup.<br/>
 If no administrative user is defined in that moment, the first registered user becomes the administrator.
+
+</details>
 
 ## Configuration
 
@@ -138,7 +170,7 @@ Alternatives:
 [gitlab]: gitlab/README.md
 
 <!-- Files -->
-[compose file]: /containers/gitea/docker-compose.yml
+[compose file]: /docker%20compositions/gitea/docker-compose.yml
 
 <!-- Upstream -->
 [configuration cheat sheet]: https://docs.gitea.com/administration/config-cheat-sheet

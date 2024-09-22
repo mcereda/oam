@@ -23,6 +23,10 @@ gpg --list-keys --keyid-format 'short' 'key.identifier@email.com' \
 gpg --armor --export 'E455…50AB' | pbcopy
 gpg --export-ssh-key 'E455…50AB' | pbcopy
 
+# Sign a string
+# Used by Gitea to prove one had the private key associated to a GPG public key
+echo '1d64…9920' | gpg -a --default-key 'E455…50AB' --detach-sig
+
 # Load identities in SSH
 gpgconf --launch gpg-agent
 
