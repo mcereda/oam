@@ -1,4 +1,4 @@
-#!sh
+#!/usr/bin/env sh
 
 # Sources:
 # - https://superuser.com/questions/621870/test-if-a-port-on-a-remote-system-is-reachable-without-telnet

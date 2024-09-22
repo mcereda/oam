@@ -1,4 +1,4 @@
-#!sh
+#!/usr/bin/env sh
 
 # Just `vim` but read-only.
 view 'file'

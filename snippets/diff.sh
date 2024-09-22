@@ -1,4 +1,4 @@
-#!sh
+#!/usr/bin/env sh
 
 # Sources:
 # - https://stackoverflow.com/questions/8800578/how-to-colorize-diff-on-the-command-line
