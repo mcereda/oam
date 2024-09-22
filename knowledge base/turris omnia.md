@@ -1,18 +1,23 @@
 # Turris Omnia
 
-## Table of contents <!-- omit in toc -->
-
 1. [Factory reset](#factory-reset)
 1. [Hardware upgrades](#hardware-upgrades)
 1. [Further readings](#further-readings)
 
 ## Factory reset
 
-Keep pressed the reset button on the back panel and wait for LEDs to indicate the number of the desired mode, then release the reset button.
+Keep pressed the reset button on the back panel and wait for LEDs to indicate the number of the desired mode, then
+release the reset button.
 
-The LEDs are used as a counter, with the number of lid LEDs (regardless of the color) indicating the reset mode the router will reboot into. The LEDs will transition from green to red, and when the last LED turns red the next LED will light up and the counter is incremented. When the counter reaches 12 (the total number of LEDs), it will start again from 1.
+The LEDs are used as a counter, with the number of lid LEDs (regardless of the color) indicating the reset mode the
+router will reboot into.<br/>
+The LEDs will transition from green to red, and when the last LED turns red the next LED will light up and the counter
+is incremented.<br/>
+When the counter reaches 12 (the total number of LEDs), it will start again from 1.
 
-When the reset button is released, the LED counter will blink three times to confirm the selected reset mode. If the selected mode is different from the required one, just press the reset button again and start the mode selection process again.
+When the reset button is released, the LED counter will blink three times to confirm the selected reset mode.<br/>
+If the selected mode is different from the required one, just press the reset button again and start the mode selection
+process again.
 
 Available reset modes are:
 
@@ -24,11 +29,20 @@ Available reset modes are:
 - 6 LEDs: re-flash from the Internet (Omnia 2019 and newer)
 - 7 LEDs: start a rescue shell
 
-> **Tip:** release the reset button immediately after the required number of LEDs starts shining (regardless of the color). Do not unnecessarily prolong holding the reset button when the last LED is lit. By doing this you decrease a chance of accidentally transitioning to the next mode at the same moment when the button is released.
+> **Tip:** release the reset button immediately after the required number of LEDs starts shining (regardless of the
+> color).
+>
+> Do not unnecessarily prolong holding the reset button when the last LED is lit.<br/>
+> By doing this you decrease a chance of accidentally transitioning to the next mode at the same moment when the button
+> is released.
 
-After the selected mode indication is performed, all LEDs will turn blue for a moment and then a light wave indicates the start the first stage boot during which LEDs turn green.
+After the selected mode indication is performed, all LEDs will turn blue for a moment and then a light wave indicates
+the start the first stage boot during which LEDs turn green.
 
-> **Warning:** when LEDs turn red, it means that some highly sensitive operation is in process and data may be corrupted if it is interrupted. Try not to reset router during the process or you might end up with corrupted filesystem. That one can be fixed using mode 4 but with complete data loss.
+> **Warning:** when LEDs turn red, it means that some highly sensitive operation is in process and data may be corrupted
+> if it is interrupted.<br/>
+> Try not to reset router during the process or you might end up with corrupted filesystem. That one can be fixed using
+> mode 4 but with complete data loss.
 
 ## Hardware upgrades
 
@@ -47,7 +61,8 @@ Most compatible upgrades are available on [Discomp].
 - [Turris OS]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Upstream -->

@@ -13,6 +13,7 @@ git config --local 'pull.rebase' false
 
 git clone --recurse-submodules 'git@github.com:example/ansible-role-keychron-capable.git'
 git clone 'https://gitlab-ci-token:glpat-01234567ABCDEFGHijkl@gitlab.example.org/testProj/myRepo.git'
+git clone 'https://github.com/go-gitea/gitea' -b 'release/v1.22'
 
 git branch --list --remote 'origin/*' | cut -d/ -f2
 

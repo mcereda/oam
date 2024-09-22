@@ -2,8 +2,6 @@
 
 Linux distribution based on top of OpenWrt. Check the [website] for more information.
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [LED diodes settings](#led-diodes-settings)
    1. [Automatic overnight dimming](#automatic-overnight-dimming)
@@ -16,7 +14,8 @@ Linux distribution based on top of OpenWrt. Check the [website] for more informa
    1. [Execute a shell into containers](#execute-a-shell-into-containers)
    1. [Start containers at boot](#start-containers-at-boot)
    1. [Example: cfengine hub](#example-cfengine-hub)
-   1. [Example: git server](#example-git-server)
+   1. [Example: basic, stripped git server](#example-basic-stripped-git-server)
+   1. [Example: gitea](#example-gitea)
    1. [Example: monitoring](#example-monitoring)
    1. [Example: pi-hole](#example-pi-hole)
 1. [Hardening](#hardening)
@@ -113,13 +112,16 @@ schnapps delete -t 'post'
 Permanent changes can be set in `/etc/config/rainbow`, the UCI configuration file.
 
 The `rainbow` utility allows to change the color and set the status of each diode individually.<br/>
-The setting are `disable` (off), `enable` (on) or `auto`; `auto` leaves the control of the diodes to the hardware, like blinking during data transfer and so on.
+The setting are `disable` (off), `enable` (on) or `auto`; `auto` leaves the control of the diodes to the hardware, like
+blinking during data transfer and so on.
 
-`rainbow`'s `brightness` subcommand uses numbers from 0 to 8, or from 0 to 255 if using the `-p` switch for higher precision.
+`rainbow`'s `brightness` subcommand uses numbers from 0 to 8, or from 0 to 255 if using the `-p` switch for higher
+precision.
 
 ### Automatic overnight dimming
 
-Automatically adjust the intensity of LEDs using a cronjob to be able to see the state of individual devices during the day, but not to be dazzled by the diodes in the night.
+Automatically adjust the intensity of LEDs using a cronjob to be able to see the state of individual devices during the
+day, but not to be dazzled by the diodes in the night.
 
 Create the cron file in the `/etc/cron.d` directory:
 
@@ -145,8 +147,10 @@ When assigning static DHCP leases LuCI **only requires** the IP and MAC addresse
 - **require** a unique hostname for each entry
 - set the lease time to _infinite_
 
-Setting a hostname in an entry will make Turris OS resolve the IP address **only** with that given hostname (and **not** the name the host presents itself with).<br/>
-Not setting a hostname in an entry will make Turris OS resolve the IP address with the name the host presents itself with.
+Setting a hostname in an entry will make Turris OS resolve the IP address **only** with that given hostname (and **not**
+the name the host presents itself with).<br/>
+Not setting a hostname in an entry will make Turris OS resolve the IP address with the name the host presents itself
+with.
 
 CLI procedure:
 
@@ -165,10 +169,12 @@ luci-reload
 Some packages are not available in `opkg`'s repository, but containers can replace them.<br/>
 This is particularly useful to run services off the system which are not officially supported (like [Pi-hole]).
 
-At the time of writing [LXC] is the only container runtime supported in Turris OS, and this guide will assume one is using it.<br/>
+At the time of writing [LXC] is the only container runtime supported in Turris OS, and this guide will assume one is
+using it.<br/>
 This requires the `lxc` package to be installed.
 
-> It is highly suggested to use an [expansion disk](#hardware-upgrades) to store any container, but specially any one I/O heavy.
+> It is highly suggested to use an [expansion disk](turris%20omnia.md#hardware-upgrades) to store any container, but
+> specially any one I/O heavy.
 
 The procedure to have a working container is as follows:
 
@@ -177,7 +183,7 @@ The procedure to have a working container is as follows:
    This is particularly suggested in case of services.
 1. [Start the container](#start-containers).
 1. [Execute a shell](#execute-a-shell-into-containers) to enter it and set it all up.<br/>
-   See the configuration [examples](#examples) below.
+   See the configuration examples below.
 1. Check all is working as expected.
 1. If you changed the container's hostname from inside if, restart it for good measure.
 1. Set the container to [start at boot](#start-containers-at-boot) if required.
@@ -300,7 +306,7 @@ config container
 
 </details>
 
-### Example: git server
+### Example: basic, stripped git server
 
 > This procedure assumes you are using an LXC container based on the Debian Bullseye image.
 
@@ -336,6 +342,31 @@ chsh 'git' -s "$(which 'git-shell')"
 
 # All done!
 exit
+```
+
+### Example: gitea
+
+> This procedure assumes you are using an LXC container based on LinuxContainers' Alpine 3.20 image:
+>
+> ```sh
+> lxc-create --name 'gitea' --template 'download' -- \
+>   --server 'images.linuxcontainers.org' --dist 'alpine' --release '3.20' --arch 'armhf'
+> ```
+
+```sh
+# Set the correct hostname.
+# Should be already set correctly.
+echo 'gitea' > '/etc/hostname'
+hostname -F '/etc/hostname'
+
+# Install Gitea.
+apk add 'gitea' 'gitea-openrc'
+
+# Start Gitea.
+rc-update add 'gitea'
+rc-service 'gitea' start
+
+# Connect to 'gitea:3000' to start the first-time installation wizard.
 ```
 
 ### Example: monitoring
@@ -436,15 +467,17 @@ uci commit 'dhcp' && reload_config && luci-reload
 Suggestions:
 
 - [SSH]:
-   - Change the SSH port from the default `22` value.
-   - Restrict login to specific IP addresses.
-   - Restrict authentication options to keys.
+  - Change the SSH port from the default `22` value.
+  - Restrict login to specific IP addresses.
+  - Restrict authentication options to keys.
 
 ## The SFP+ caged module
 
 List of [supported SFP modules].
 
-> The physical WAN port and the SFP module cage are wired to a single controller; when a SFP module is inserted, the physical WAN **port** **will be disabled**, and the virtual WAN interface will automatically be switched to the SFP module.
+> The physical WAN port and the SFP module cage are wired to a single controller; when a SFP module is inserted, the
+> physical WAN **port** **will be disabled**, and the virtual WAN interface will automatically be switched to the SFP
+> module.
 
 When the OS is installed, it will probably miss the SFP kernel modules.<br/>
 Check the module is recognized by the system like so:
@@ -477,7 +510,8 @@ Check the module is recognized by the system like so:
 
 ### Use the SFP module as a LAN port
 
-To use the SFP module as a LAN port, assign any other physical switch port to the virtual WAN interface to use that as the WAN connection and the SFP module in the LAN.
+To use the SFP module as a LAN port, assign any other physical switch port to the virtual WAN interface to use that as
+the WAN connection and the SFP module in the LAN.
 
 In the Foris web interface:
 
@@ -492,7 +526,8 @@ In the LuCI web interface:
 
 1. Go to _Network_ > _Interfaces_.
 1. In the _Interfaces_ tab, edit the WAN interface and assign the _lan4_ port to it.
-1. In the _Devices_ tab, edit the _br-lan_ bridge device to include the port used by the SFP module (on mine, it was `eth2`).
+1. In the _Devices_ tab, edit the _br-lan_ bridge device to include the port used by the SFP module (on mine, it was
+   `eth2`).
 1. Hit _Save & Apply_.
 
 Using the CLI (yet to be tested):
@@ -530,18 +565,9 @@ All the references in the [further readings] section, plus the following:
 - [Operating temperature]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
-
-<!-- Upstream -->
-[docs]: https://docs.turris.cz
-[factory reset on turris omnia]: https://docs.turris.cz/hw/omnia/rescue-modes/
-[home nas]: https://wiki.turris.cz/doc/en/howto/nas
-[how to control led diodes]: https://wiki.turris.cz/doc/en/howto/led_settings
-[operating temperature]: https://forum.turris.cz/t/operating-temperature/998
-[supported sfp modules]: https://wiki.turris.cz/doc/en/public/sfp
-[turris wiki]: https://wiki.turris.cz/doc/en/start
-[website]: https://www.turris.com/turris-os/
 
 <!-- In-article sections -->
 [further readings]: #further-readings
@@ -554,9 +580,17 @@ All the references in the [further readings] section, plus the following:
 [ssh]: ssh.md
 [uci]: uci.md
 
+<!-- Upstream -->
+[docs]: https://docs.turris.cz
+[factory reset on turris omnia]: https://docs.turris.cz/hw/omnia/rescue-modes/
+[home nas]: https://wiki.turris.cz/doc/en/howto/nas
+[how to control led diodes]: https://wiki.turris.cz/doc/en/howto/led_settings
+[operating temperature]: https://forum.turris.cz/t/operating-temperature/998
+[supported sfp modules]: https://wiki.turris.cz/doc/en/public/sfp
+[turris wiki]: https://wiki.turris.cz/doc/en/start
+[website]: https://www.turris.com/turris-os/
+
 <!-- Others -->
 [install pi-hole]: https://github.com/nminten/turris-omnia_documentation/blob/master/howtos/pihole.md
 [installing pi-hole on turris omnia]: https://blog.weinreich.org/posts/2020/2020-05-02-turris-omnia-pihole/
-[openwrt uci]: https://openwrt.org/docs/guide-user/base-system/uci
 [pi-hole on turris omnia]: http://polster.github.io/2017/08/04/Pi-Hole-on-Turris.html
-[pi-hole supported operating systems]: https://docs.pi-hole.net/main/prerequisites/#supported-operating-systems
