@@ -7,7 +7,7 @@ version: '2'
 
 services:
   server:
-    image: gitea/gitea:1.21.11-rootless
+    image: gitea/gitea:1.22.2-rootless
     restart: unless-stopped
     volumes:
       - data:/var/lib/gitea
