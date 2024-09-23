@@ -899,7 +899,7 @@ Warning message example:
 > Diagnostics:
 >   pulumi:pulumi:Stack (iam-internal-dev):
 >     warning: Attempting to deploy or update resources with 19 pending operations from previous deployment.
->       * urn:pulumi:dev::iam-internal::aws:iam/userPolicyAttachment:UserPolicyAttachment::apolloAllowUserSetupMfa-to-jonathan, interrupted while creating
+>       * urn:pulumi:dev::iam-internal::aws:iam/userPolicyAttachment:UserPolicyAttachment::AllowUserSetupMfa-to-jonathan, interrupted while creating
 >       * …
 >       * urn:pulumi:dev::iam-internal::aws:iam/groupPolicyAttachment:GroupPolicyAttachment::amazonReadOnlyAccess-to-engineers, interrupted while creating
 >     These resources are in an unknown state because the Pulumi CLI was interrupted while waiting for changes to these resources to complete. You should confirm whether or not the operations listed completed successfully by checking the state of the appropriate provider. For example, if you are using AWS, you can confirm using the AWS Console.
