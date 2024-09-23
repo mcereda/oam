@@ -12,7 +12,7 @@ image:
   image: gitlab-org/gitlab-runner
 imagePullPolicy: IfNotPresent
 
-gitlabUrl: https://gitlab.example.org/
+gitlabUrl: https://gitlab.company.com/
 
 unregisterRunners: true
 
