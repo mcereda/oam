@@ -99,6 +99,13 @@ One can choose any of the following retention periods for instances' Performance
 - _n_ months, where n is a number from 1 to 24.<br/>
   In CLI and IaC, this number must be _n*31_.
 
+Each and every DB instance has a 30-minutes weekly maintenance window defining when modifications and software patching
+occur. Should it not be defined during creation, one will be assigned automatically at random from the default time
+block for the region.<br/>
+If any maintenance event is scheduled before the window, it's **initiated** in that time frame. Most maintenance events
+complete during the 30-minute maintenance window, while larger events may take more.<br/>
+Maintenance windows are paused when their DB instances are stopped.
+
 ## Engine
 
 ### PostgreSQL
@@ -114,10 +121,10 @@ enhance performance depending on the engine selected and the amount of storage r
 
 | DB engine                        | Storage size      | Number of volumes provisioned |
 | -------------------------------- | ----------------- | ----------------------------- |
-| Db2                              | Less than 400 GiB | 1                             |
-| Db2                              | 400 to 65,536 GiB | 4                             |
 | MariaDB<br/>MySQL<br/>PostgreSQL | Less than 400 GiB | 1                             |
 | MariaDB<br/>MySQL<br/>PostgreSQL | 400 to 65,536 GiB | 4                             |
+| Db2                              | Less than 400 GiB | 1                             |
+| Db2                              | 400 to 65,536 GiB | 4                             |
 | Oracle                           | Less than 200 GiB | 1                             |
 | Oracle                           | 200 to 65,536 GiB | 4                             |
 | SQL Server                       | Any               | 1                             |
@@ -211,7 +218,7 @@ require more time than allotted to the backup window, they will continue after t
 Backups are retained for up to 35 days (_backup retention period_).<br/>
 One can recover DB instances to **any** point in time that sits inside the backup retention period.
 
-The backup window can't overlap with the weekly maintenance window for DB instance or Multi-AZ DB cluster.<br/>
+The backup window **must not overlap** with the weekly maintenance window for DB instance or Multi-AZ DB cluster.<br/>
 During automatic backup windows storage I/O might be suspended briefly while the backup process initializes.
 Initialization typically takes up to a few seconds. One might also experience elevated latencies for a few minutes
 during backups for Multi-AZ deployments.<br/>
@@ -714,6 +721,7 @@ Solution: reboot the source and target instance and retry.
 - [Backing up login roles aka users and group roles]
 - [Renaming a DB instance]
 - [Amazon RDS DB instances]
+- [Maintaining a DB instance]
 
 <!--
   Reference
@@ -733,6 +741,7 @@ Solution: reboot the source and target instance and retry.
 [how can i resolve the "error: <module/extension> must be loaded via shared_preload_libraries" error?]: https://repost.aws/knowledge-center/rds-postgresql-resolve-preload-error
 [importing data into postgresql on amazon rds]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.Procedural.Importing.html
 [introduction to backups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
+[maintaining a db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html
 [migrating databases to their amazon rds equivalents with aws dms]: https://docs.aws.amazon.com/dms/latest/userguide/data-migrations.html
 [migrating databases using rds postgresql transportable databases]: https://aws.amazon.com/blogs/database/migrating-databases-using-rds-postgresql-transportable-databases/
 [pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
