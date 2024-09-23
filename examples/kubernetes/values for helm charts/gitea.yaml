@@ -1,0 +1,95 @@
+---
+
+###
+# Gitea
+# --------------------------------------
+# Single-pod, expendable instance for RO view only.
+# No need for HA or pod spreading affinity settings.
+#
+# Default values: `helm show values --repo 'https://dl.gitea.com/charts/' 'gitea'`
+###
+
+image:
+  registry: 012345678901.dkr.ecr.eu-west-1.amazonaws.com
+  repository: docker-hub-cache/gitea/gitea
+  tag: 1.22.2
+  rootless: true
+postgresql-ha:
+  # single-pod, expendable instance for RO view only, no need for HA
+  enabled: false
+redis-cluster:
+  # single-pod, expendable instance for RO view only, no need for HA
+  enabled: false
+persistence:
+  enabled: true
+  create: true
+  mount: true
+  claimName: gitea-shared-storage
+  size: 10Gi
+  accessModes:
+    - ReadWriteOnce
+strategy:
+  type: Recreate  # FIXME: RollingUpdate seem to have issues with persistence and locks the new pod in pending
+resources:
+  # seems to usually use 4m CPUs and 125Mi RAM
+  requests:
+    cpu: 10m
+    memory: 128Mi
+  limits:
+    cpu: 100m
+    memory: 196Mi
+ingress:
+  enabled: true
+  className: alb
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/load-balancer-name: gitea
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/certificate-arn: 'arn:aws:acm:eu-west-1:012345678901:certificate/01234567-abcd-0123-abcd-0123456789ab'
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-2016-08
+    alb.ingress.kubernetes.io/ssl-redirect: 443
+  hosts:
+    - host: gitea.company.com
+      paths:
+        - path: /
+          pathType: Prefix
+gitea:
+  admin:
+    existingSecret: gitea-admin-secret
+    email: admin@company.com
+    passwordMode: keepUpdated
+  config:
+    server:
+      ROOT_URL: https://gitea.company.com  # needed due to tls termination on the ingress
+      LANDING_PAGE: login
+    database:
+      DB_TYPE: sqlite3
+    queue:
+      TYPE: level
+    admin:
+      DISABLE_REGULAR_ORG_CREATION: true
+    oauth2_client:
+      ENABLE_AUTO_REGISTRATION: true
+      REGISTER_EMAIL_CONFIRM: true
+      USERNAME: email
+      UPDATE_AVATAR: true
+    service:
+      DISABLE_REGISTRATION: true
+      DEFAULT_KEEP_EMAIL_PRIVATE: true
+      DEFAULT_ALLOW_CREATE_ORGANIZATION: false
+      DEFAULT_USER_VISIBILITY: limited  # visible to authenticated users only
+      DEFAULT_ORG_VISIBILITY: limited  # visible to authenticated users only
+    mailer:
+      ENABLED: true
+      PROTOCOL: smtp+starttls
+      SMTP_ADDR: email-smtp.eu-west-1.amazonaws.com
+      SMTP_PORT: 587
+      USER: AKIA2HKHF0123456ABCD
+      PASSWD: ABCD…ABCD
+      FROM: noreply@gitea.company.com
+    cache:
+      ADAPTER: memory
+    session:
+      PROVIDER: memory
+    migrations:
+      ALLOWED_DOMAINS: gitlab.company.com
