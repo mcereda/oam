@@ -1,7 +1,5 @@
 # Python
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Dictionaries](#dictionaries)
 1. [F-strings](#f-strings)
@@ -235,7 +233,8 @@ All the references in the [further readings] section, plus the following:
 - [Click]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Upstream -->

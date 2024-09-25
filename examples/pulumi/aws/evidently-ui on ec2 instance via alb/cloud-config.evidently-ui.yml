@@ -1,0 +1,85 @@
+#cloud-config
+
+# Tested on:
+# - Amazon Linux 2023
+
+bootcmd:
+  # `cloud-init` has issues with `firewall-cmd`, using the offline version.
+  - firewall-offline-cmd --add-port='8000/tcp' --zone='public'
+
+users:
+  - default
+  - evidently
+
+packages:
+  - make
+
+write_files:
+  - path: /home/evidently/requirements.txt
+    owner: evidently:evidently
+    defer: true
+    content: |
+      evidently[llm]==0.4.37
+      tracely==0.1.0
+      s3fs==2024.9.0
+  - path: /home/evidently/Makefile
+    owner: evidently:evidently
+    defer: true
+    content:
+      # make sure to keep the tab characters in the targets' definitions
+      |
+        #!/usr/bin/env make
+
+        # '/tmp' is on tmpfs (uses and is limited by the instance's RAM)
+        # Use a local 'tmp' directory for PIP to avoid exhausting the space during installation
+
+        override tmpdir ?= ${HOME}/tmp
+        override venv ?= ${HOME}/venv
+
+        create-venv: override python_version ?= 3
+        create-venv: python_executable = ${shell which --tty-only --show-dot --show-tilde 'python${python_version}'}
+        create-venv: ${python_executable}
+        	@mkdir -p ${tmpdir}
+        	@${python_executable} -m 'venv' '${venv}'
+        	@TMPDIR=${tmpdir} ${venv}/bin/pip --require-virtualenv install -r 'requirements.txt'
+
+        recreate-venv:
+        	@rm -rf '${venv}'
+        	@${MAKE} create-venv
+
+        update-venv: ${venv}/bin/pip
+        	@${venv}/bin/pip freeze -l --require-virtualenv | sed 's/==/>=/' \
+        	| xargs ${venv}/bin/pip --require-virtualenv install -U
+
+        start-evidently-ui: override host ?= 0.0.0.0
+        start-evidently-ui: override port ?= 8000
+        start-evidently-ui: override workspace ?= s3://evidentlyUi/workspace
+        start-evidently-ui: create-venv ${venv}/bin/evidently
+        	@${venv}/bin/evidently ui --host='${host}' --port='${port}' --workspace='${workspace}'
+  - path: /etc/systemd/system/evidently-ui.service
+    owner: root:root
+    permissions: 0755
+    defer: true
+    content: |
+      [Unit]
+      Description=Evidently UI
+      Documentation=https://docs.evidentlyai.com/
+      Wants=network-online.target
+      After=network-online.target
+
+      [Service]
+      Type=simple
+      User=evidently
+      Group=evidently
+      WorkingDirectory=/home/evidently
+      ExecStart=/usr/bin/env make start-evidently-ui
+      SyslogIdentifier=evidently-ui
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+
+runcmd:
+  - systemctl reload 'firewalld.service'
+  - systemctl daemon-reload
+  - systemctl enable --now 'evidently-ui.service'

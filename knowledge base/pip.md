@@ -8,6 +8,25 @@ Package installer for Python.
 
 ## TL;DR
 
+Stores the cache in:
+
+- `$XDG_CACHE_HOME` (default: `~/.cache/pip`) on Linux.
+- `~/Library/Caches/pip` on Mac OS X.
+- `%LocalAppData%\pip\Cache` on Windows.
+
+pip will also respect XDG_CACHE_HOME.
+
+Creates **temporary** files to unpack/build/doOtherStuff to packages, then deletes them after installation.<br/>
+It checks, in order, if any of the directories used by `tempfile.gettempdir()` **exists**, and is **readable** and
+**writable**; the first one matching all the requirements is used.<br/>
+The directory priority at the time of writing is as follows:
+
+1. `$TMPDIR`
+1. `$TEMP`
+1. `$TMP`
+1. `C:\TEMP`, `C:\TMP`, `\TEMP`, and `\TMP` on Windows; `/tmp`, `/var/tmp`, and `/usr/tmp` on any other platform.
+1. The current working directory
+
 ```sh
 # Install packages.
 pip install 'yamllint'
@@ -25,6 +44,23 @@ pip install --requirement <(pip freeze | sed 's/==/>=/') --upgrade
 
 # Generate a list of the outdated packages.
 pip list --outdated
+
+# Get the currently configured cache directory.
+pip cache dir
+
+# Provide an overview of the contents of the cache.
+pip cache info
+
+# List files from the 'wheel' cache.
+pip cache list
+pip cache list 'ansible'
+
+# Removes files from the 'wheel' cache.
+# Files from the 'HTTP' cache are left untouched at this time.
+pip cache remove 'setuptools'
+
+# Clear all files from the 'wheel' and 'HTTP' caches.
+pip cache purge
 
 # Remove orphaned dependencies.
 # Requires `pip-autoremove`.

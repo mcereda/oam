@@ -122,6 +122,13 @@ aws ec2 describe-instances --output 'text' \
 
 watch -n '1' aws ec2 describe-instances --instance-ids 'i-0123456789abcdef0' --query 'Reservations[].Instances[].[State,StateTransitionReason]'
 
+# Retrieve the security credentials for an IAM role named 's3access'
+# IMDSv2
+TOKEN=$(curl -X PUT 'http://169.254.169.254/latest/api/token' -H 'X-aws-ec2-metadata-token-ttl-seconds: 21600') \
+&& curl -H "X-aws-ec2-metadata-token: ${TOKEN}" 'http://169.254.169.254/latest/meta-data/iam/security-credentials/s3access'
+# IMDSv1
+curl 'http://169.254.169.254/latest/meta-data/iam/security-credentials/s3access'
+
 
 ###
 # ECR
