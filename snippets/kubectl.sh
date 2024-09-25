@@ -50,3 +50,7 @@ reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
 EOF
+
+# Check persistent volumes' usage
+# Need to connect to the pod mounting it
+kubectl -n 'gitea' exec 'gitea-766fd5fb64-2qlqb' -c 'gitea' -- df -h '/data'
