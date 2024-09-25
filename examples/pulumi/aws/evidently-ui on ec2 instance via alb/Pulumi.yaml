@@ -1,0 +1,11 @@
+---
+name: evidently-ui-on-ec2-via-alb
+runtime:
+  name: nodejs
+  options:
+    packagemanager: npm
+description: 'AWS example: Evidently-UI on EC2 instance via ALB'
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: aws-typescript
