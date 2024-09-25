@@ -314,6 +314,7 @@ remaining usage is then charged at the On-Demand rates.
 - [AWS Public IP Address Ranges Now Available in JSON Form]
 - [Savings Plans user guide]
 - [AWS Savings Plans Vs. Reserved Instances: When To Use Each]
+- [How can I use AWS KMS asymmetric keys to encrypt a file using OpenSSL?]
 
 <!--
   Reference
@@ -353,6 +354,7 @@ remaining usage is then charged at the On-Demand rates.
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
 [elastic ip addresses]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html
 [exporting db snapshot data to amazon s3]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ExportSnapshot.html
+[how can i use aws kms asymmetric keys to encrypt a file using openssl?]: https://repost.aws/knowledge-center/kms-openssl-encrypt-key
 [i'm trying to export a snapshot from amazon rds mysql to amazon s3, but i'm receiving an error. why is this happening?]: https://repost.aws/knowledge-center/rds-mysql-export-snapshot
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [rotating aws kms keys]: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
