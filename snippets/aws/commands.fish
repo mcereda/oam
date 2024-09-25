@@ -213,7 +213,8 @@ aws iam --no-cli-pager list-access-keys --user-name 'mark'
 ###
 
 aws imagebuilder list-image-recipes
-aws imagebuilder get-image-recipe --image-recipe-arn 'arn:aws:imagebuilder:eu-west-1:012345678901:image-recipe/my-custom-image/1.0.12'
+aws imagebuilder get-image-recipe \
+	--image-recipe-arn 'arn:aws:imagebuilder:eu-west-1:012345678901:image-recipe/my-custom-image/1.0.12'
 
 
 ###
@@ -224,13 +225,23 @@ aws imagebuilder get-image-recipe --image-recipe-arn 'arn:aws:imagebuilder:eu-we
 aws kms get-key-policy --output 'text' --key-id '01234567-89ab-cdef-0123-456789abcdef'
 
 aws kms create-key
+
+aws kms get-public-key --key-id 'arn:aws:kms:eu-west-1:123456789012:key/d74f5077-811b-4447-af65-71f5f64f37d3' \
+	--output text --query 'PublicKey' > 'RSAPublic.b64' \
+&& base64 -d 'RSAPublic.b64' > 'RSAPublic.bin'
+
 aws kms encrypt --key-id '01234567-89ab-cdef-0123-456789abcdef' --plaintext 'My Test String'
 aws kms encrypt --key-id '01234567-89ab-cdef-0123-456789abcdef' --plaintext 'My Test String' \
 	--query 'CiphertextBlob' --output 'text' \
 | base64 --decode > 'ciphertext.dat'
+
 aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat'
 aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat' --query 'Plaintext' --output 'text' \
 | base64 --decode
+aws kms decrypt --key-id 'arn:aws:kms:eu-west-1:123456789012:key/d74f5077-811b-4447-af65-71f5f64f37d3' \
+	--ciphertext-blob 'fileb://enc.key.bin' --encryption-algorithm 'RSAES_OAEP_SHA_256' \
+	--output 'text' --query 'Plaintext' \
+| base64 --decode > 'decryptedKey.bin'
 
 
 ###

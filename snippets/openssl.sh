@@ -7,7 +7,7 @@
 
 # Generate pseudo-random passwords
 openssl rand '32'
-openssl rand -base64 '18'
+openssl rand -base64 '18' > 'key.bin'
 
 
 ##
@@ -207,9 +207,17 @@ openssl speed 'ecdsap256'
 openssl ciphers -v
 
 # Enumerate individual cipher suites
-# Described by a short-hand OpenSSL cipher list string.
-# Useful to test 'ssl_ciphers' string.
+# Described by a short-hand OpenSSL cipher list string
+# Useful to test 'ssl_ciphers' string
 openssl ciphers -v 'EECDH+ECDSA+AESGCM:EECDH+aRSA+SHA256:EECDH:DHE+AESGCM:DHE:!RSA!aNULL:!eNULL:!LOW:!RC4'
+
+# Encrypt files
+openssl enc -aes-256-cbc -salt -pbkdf2 -in 'FILE_TO_ENCRYPT' -out 'FILE_TO_ENCRYPT.enc' -pass 'file:./key.bin'
+openssl pkeyutl -pubin -encrypt -in 'key.bin' -out 'enc.key.bin' \
+	-inkey 'RSAPublic.bin' -keyform 'DER' -pkeyopt 'rsa_padding_mode:oaep' -pkeyopt 'rsa_oaep_md:sha256'
+
+# Decrypt files
+openssl enc -d -aes-256-cbc -pbkdf2 -in 'FILE_TO_DECRYPT.enc' -out 'DECRYPTED_FILE' -pass 'file:./decryptedKey.bin'
 
 
 ##
