@@ -1,0 +1,73 @@
+---
+
+# See the installer role's defaults at
+# <https://github.com/ansible/awx-operator/blob/2.19.1/roles/installer/defaults/main.yml> and any page under the
+# 'Advanced configuration' section in the operator's documentation at
+# <https://ansible.readthedocs.io/projects/awx-operator/en/latest/index.html> for details.
+
+apiVersion: awx.ansible.com/v1beta1
+kind: AWX
+metadata:
+  name: awx
+spec:
+  admin_email: admin@company.com
+  postgres_configuration_secret: awx-postgres-configuration
+  node_selector:
+    # force amd64 - arm images seem to be not ready
+    |
+      kubernetes.io/arch: amd64
+  service_type: NodePort
+  ingress_type: ingress
+  task_tolerations: |
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "awx"
+      effect: "NoSchedule"
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "awx-task"
+      effect: "NoSchedule"
+  task_affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: dedicatedTo
+                operator: In
+                values:
+                  - awx
+                  - awx-task
+  task_resource_requirements:
+    # Averages at about 17-45m vCPU and 850Mi RAM when chilling unused
+    # Averages at about 503m vCPU and 1094Mi RAM with one task starting
+    # Went as up as 1778m and 1037Mi RAM during initialization
+    requests:
+      cpu: 30m
+      memory: 800Mi
+  web_tolerations: |
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "awx"
+      effect: "NoSchedule"
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "awx-web"
+      effect: "NoSchedule"
+  web_affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: dedicatedTo
+                operator: In
+                values:
+                  - awx
+                  - awx-web
+  web_resource_requirements:
+    # Averages at about 18-150m vCPU and 1250Mi RAM when chilling unused
+    # Averages at about 750m vCPU and 1280Mi RAM with one user browsing
+    # Went as up as 1883m and 1328Mi RAM during initialization
+    requests:
+      cpu: 50m
+      memory: 1.25Gi
+  no_log: true

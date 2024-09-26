@@ -1,0 +1,23 @@
+---
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: awx
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/managed-by: kustomize
+      app.kubernetes.io/part-of: awx
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+secretGenerator:
+  - name: awx-postgres-configuration
+    envs:
+      - db.env
+      - db.secret.env
+
+resources:
+  - awx.yaml
