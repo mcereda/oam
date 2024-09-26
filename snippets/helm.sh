@@ -28,6 +28,7 @@ helm --namespace 'kube-system' get values 'metrics-server'
 helm -n 'monitoring' delete 'grafana'
 
 helm plugin list
+
 helm plugin install 'https://github.com/databus23/helm-diff'
 helm -n 'pocs' diff upgrade --repo 'https://dl.gitea.com/charts/' 'gitea' 'gitea' -f 'values.yaml'
 
