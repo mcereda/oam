@@ -6,6 +6,12 @@
 # Single-pod, expendable instance for RO view only.
 # No need for HA or pod spreading affinity settings.
 #
+# Gotchas:
+# - When persistence is enabled the pod requires a volume, but the volume is stored only in one availability zone.
+#   Need to force pod and volume in the same zone. Or find a better solution.
+# - The 'RollingUpdate' strategy has issues with persistence.
+#   Lock files on disk need to be exclusive and leave new pods crashing.
+#
 # Default values: `helm show values --repo 'https://dl.gitea.com/charts/' 'gitea'`
 ###
 
@@ -28,14 +34,26 @@ persistence:
   size: 10Gi
   accessModes:
     - ReadWriteOnce
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - # required due to persistence, see Gotchas in the top comment
+              key: topology.kubernetes.io/zone
+              operator: In
+              values:
+                - eu-west-1a
 strategy:
-  type: Recreate  # FIXME: RollingUpdate seem to have issues with persistence and locks the new pod in pending
+  type: Recreate  # 'RollingUpdate' has issues with persistence, see Gotchas in the top comment
 resources:
-  # seems to usually use 4m CPUs and 125Mi RAM
   requests:
+    # usually runs on 4m CPUs and 80Mi RAM when chilling unused
     cpu: 10m
     memory: 128Mi
   limits:
+    # bump resources up a lot when needing fast migrations
+    # not usually necessary for normal use
     cpu: 100m
     memory: 196Mi
 ingress:
@@ -45,7 +63,8 @@ ingress:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/load-balancer-name: gitea
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/certificate-arn: 'arn:aws:acm:eu-west-1:012345678901:certificate/01234567-abcd-0123-abcd-0123456789ab'
+    alb.ingress.kubernetes.io/certificate-arn: >-
+      arn:aws:acm:eu-west-1:012345678901:certificate/01234567-abcd-0123-abcd-0123456789ab
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-2016-08
     alb.ingress.kubernetes.io/ssl-redirect: 443
   hosts:
@@ -70,7 +89,7 @@ gitea:
       DISABLE_REGULAR_ORG_CREATION: true
     oauth2_client:
       ENABLE_AUTO_REGISTRATION: true
-      REGISTER_EMAIL_CONFIRM: true
+      REGISTER_EMAIL_CONFIRM: true  # only use if mailer settings are working
       USERNAME: email
       UPDATE_AVATAR: true
     service:
