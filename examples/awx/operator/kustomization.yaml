@@ -1,0 +1,21 @@
+---
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: awx
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/managed-by: kustomize
+      app.kubernetes.io/part-of: awx
+
+resources:
+  - namespace.yaml
+helmCharts:
+  - name: awx-operator
+    repo: https://ansible.github.io/awx-operator/
+    version: 2.19.1
+    releaseName: awx-operator
+    includeCRDs: true  # Important that it is true; *not* namespaced, watch out upon removal
+    # FIXME: set resources -> requires 10m+32Mi, leave limitless (peaked at 1880m+799Mi during init)
