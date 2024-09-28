@@ -35,6 +35,19 @@ export const userData = new cloudinit.Config(
                 filename: "cloud-config.security-updates.yml",
                 mergeType: "dict(recurse_array,no_replace)+list(append)",
             },
+            {
+                contentType: "text/cloud-config",
+                content: yaml.stringify({
+                    package_upgrade: false,
+                    packages: [ "postgresql" ],
+                    runcmd: [
+                        "systemctl daemon-reload",
+                        "systemctl enable --now 'postgres'",
+                    ]
+                }),
+                filename: "cloud-config.postgres.yml",
+                mergeType: "dict(allow_delete,no_replace)+list(append)",
+            },
         ],
     },
 );

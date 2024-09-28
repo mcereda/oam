@@ -43,7 +43,7 @@ Projects (and hence stacks) [can be nested][monolith vs micro-stack].
 Target single resources with `-t`, `--target`. Target also those that depend on them with `--target-dependents`.
 
 <details>
-  <summary>Installation</summary>
+  <summary>Setup</summary>
 
 ```sh
 # Install.
@@ -237,6 +237,11 @@ pulumi plugin rm 'resource' 'aws' '6.37.0'
 pulumi plugin rm --all
 
 
+# Use terraform providers.
+# Follow the instructions that come after the provider installation.
+pulumi package add terraform-provider 'planetscale/planetscale'
+
+
 # Run in Docker.
 docker run … -it \
   -v "$(pwd):/pulumi/projects" \
@@ -245,7 +250,7 @@ docker run … -it \
   bash -c "npm ci && pulumi login 's3://bucket/prefix' && pulumi pre --parallel $(nproc) -s 'dev'"
 
 
-# Plans
+# Use Plans.
 # *Experimental* feature at the time of writing.
 # Has issues with apply operations?
 pulumi pre … --save-plan 'plan.json'
@@ -270,21 +275,26 @@ const cluster = new aws.eks.Cluster("cluster", {
 const encryptionKey = aws.kms.getKeyOutput({
   keyId: "00001111-2222-3333-4444-555566667777",
 });
-const clusterServiceRole = new aws.iam.Role("clusterServiceRole", {
-  inlinePolicies: [{
-    policy: encryptionKey.arn.apply(arn => JSON.stringify({
-      Version: "2012-10-17",
-      Statement: [{
-        Effect: "Allow",
-        Action: [
-          "kms:CreateGrant",
-          "kms:DescribeKey",
-        ],
-        Resource: arn,
-      }],
-    })),
-  }]
-});
+new aws.iam.Role(
+  "clusterServiceRole",
+  {
+    inlinePolicies: [{
+      policy: encryptionKey.arn.apply(
+        keyArn => JSON.stringify({
+          Version: "2012-10-17",
+          Statement: [{
+            Effect: "Allow",
+            Action: [
+              "kms:CreateGrant",
+              "kms:DescribeKey",
+            ],
+            Resource: keyArn,
+          }],
+        }),
+      ),
+    }],
+  },
+);
 ```
 
 </details>
