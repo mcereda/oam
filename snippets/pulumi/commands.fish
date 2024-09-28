@@ -62,3 +62,6 @@ pulumi stack export | jq -r '.deployment.resources[]|{"urn":.urn,"provider":.pro
 
 # Check providers are all of a specific version
 pulumi stack export | jq -r '.deployment.resources[].provider' | grep -v 'aws::default_6_50_0'
+
+# Avoid permission errors when deleting clusters with charts and stuff.
+PULUMI_K8S_DELETE_UNREACHABLE='true' pulumi destroy
