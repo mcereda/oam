@@ -54,3 +54,9 @@ EOF
 # Check persistent volumes' usage
 # Need to connect to the pod mounting it
 kubectl -n 'gitea' exec 'gitea-766fd5fb64-2qlqb' -c 'gitea' -- df -h '/data'
+
+# Create a fictious job large enough to trigger a scale up in clusters with cluster-autoscaler
+kubectl run --rm -i --restart 'Never' 'resource-grabber' --image='alpine' \
+	--overrides '{"spec":{"containers":[{"name":"alpine","image":"alpine","resources":{"requests":{"cpu":"1700m"}}}]}}' \
+	-- \
+	sleep '3s'
