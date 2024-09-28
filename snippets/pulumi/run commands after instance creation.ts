@@ -19,12 +19,12 @@ command.local.Command(
     { create: "say 'instance created'" }
 );
 
-instance.privateDns.apply(host => new command.local.Command(
+instance.privateDns.apply(hostIpAddress => new command.local.Command(
     "ansiblePlaybook-ssh",
-    { create: `ansible-playbook -i '${host},' -D 'playbook.yaml'` },
+    { create: `ansible-playbook -i '${hostIpAddress},' -D 'playbook.yaml'` },
 ));
 
-instance.id.apply(id => new command.local.Command(
+instance.id.apply(instanceId => new command.local.Command(
     "ansiblePlaybook-awsSsm",
     {
         create: `
@@ -34,7 +34,7 @@ instance.id.apply(id => new command.local.Command(
                 -e 'ansible_aws_ssm_bucket_name=ssm-bucket'
                 -e 'ansible_aws_ssm_region=eu-west-1'
                 -e 'ansible_remote_tmp=/tmp/.ansible-\${USER}/tmp'
-                -i '${id},'
+                -i '${instanceId},'
                 -D 'playbook.yaml'
         `,
     },
