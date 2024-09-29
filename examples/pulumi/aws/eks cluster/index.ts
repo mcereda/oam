@@ -10,16 +10,17 @@
  *
  * Features:
  *   - Private cluster.
+ *     Provided the subnets are correctly configured.
  *   - Log everything to CloudWatch.
  *   - Use KMS to encrypt secrets.
  *   - Use Roles for administration and viewing.
- *   - Use EC2 instances as nodes.
- *   - Use Fargate as node.
+ *   - Use EC2 instances as worker nodes.
+ *   - Use Fargate for workloads in the 'kube-system' namespace.
  *   - Use addons:
  *       - Pod Identity.
  *         Requires EC2 instances, not supported by Fargate at the time of writing.
  *       - ClusterAutoscaler.
- *         Requires Pod Identity.
+ *         Requires Pod Identity or an OIDC provider.
  *       - Metrics Server.
  *
  * Minimum resource requirements:
@@ -246,6 +247,7 @@ const cluster = pulumi.all([privateSubnets_output.ids, clusterServiceRole_iamRol
             vpcConfig: {
                 subnetIds: privateSubnetIds,
                 endpointPrivateAccess: true,
+                endpointPublicAccess: false,
             },
             version: "1.30",
             roleArn: clusterServiceRoleArn,
@@ -683,11 +685,12 @@ pulumi
             "awsClusterAutoscaler",
             {
                 namespace: "kube-system",
-                name: "aws-cluster-autoscaler",
-                chart: "cluster-autoscaler",
+                name: "aws-cluster-autoscaler",  // release name
                 repositoryOpts: {
                     repo: "https://kubernetes.github.io/autoscaler",
                 },
+                chart: "cluster-autoscaler",  // chart name in its repository
+                version: "9.40.0",            // -> app version 1.31.0
                 valueYamlFiles: [
                     new pulumi.asset.FileAsset("./chart-values/cluster-autoscaler.yml"),
                 ],
@@ -734,11 +737,12 @@ k8sProvider_output.apply(
         "metricsServer",
         {
             namespace: "kube-system",
-            name: "metrics-server",
-            chart: "metrics-server",
+            name: "metrics-server",  // release name
             repositoryOpts: {
                 repo: "https://kubernetes-sigs.github.io/metrics-server",
             },
+            chart: "metrics-server",  // chart name in its repository
+            version: "3.12.1",        // -> app version 0.7.1
             valueYamlFiles: [
                 new pulumi.asset.FileAsset("./chart-values/metrics-server.yml"),
             ],
