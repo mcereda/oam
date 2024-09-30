@@ -60,3 +60,8 @@ kubectl run --rm -i --restart 'Never' 'resource-grabber' --image='alpine' \
 	--overrides '{"spec":{"containers":[{"name":"alpine","image":"alpine","resources":{"requests":{"cpu":"1700m"}}}]}}' \
 	-- \
 	sleep '3s'
+
+# Remove nodes safely
+kubectl cordon 'kworker-rj2' \
+&& kubectl drain 'kworker-rj2' --grace-period=300 --ignore-daemonsets=true \
+&& kubectl delete node 'kworker-rj2'
