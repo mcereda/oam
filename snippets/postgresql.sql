@@ -210,3 +210,43 @@ SELECT pg_drop_replication_slot('airbyte_slot');
 -- Create publications
 CREATE PUBLICATION peerflow_prod FOR ALL TABLES;
 CREATE PUBLICATION airbyte FOR TABLE call_log, queue_log;
+
+
+-- Wildcards
+-- '%' = zero or more characters
+-- '_' = exactly 1 character
+SELECT * FROM users WHERE name LIKE '% Banda';  -- ends with ' Banda'
+SELECT name FROM customers WHERE name LIKE '%banda%';  -- contains 'banda'
+SELECT id FROM customers WHERE City LIKE 'L___on';  -- starts with 'L', followed by any 3 characters, followed by 'on'
+
+
+-- Shuffle data
+-- source: https://stackoverflow.com/questions/33555524/postgresql-shuffle-column-values#33555639
+WITH
+  ids AS (
+    SELECT
+      row_number() OVER (ORDER BY random()) row_num,
+      vendor_id AS new_vendor_id
+    FROM vendors
+  ),
+  names AS (
+    SELECT
+      row_number() OVER (ORDER BY random()) row_num,
+      vendor_name AS new_vendor_name
+    FROM vendors
+  )
+UPDATE vendors
+  SET
+    vendor_id = new_vendor_id,
+    vendor_name = new_vendor_name
+  FROM ids JOIN names ON ids.row_num = names.row_num
+  WHERE vendor_id = new_vendor_id;
+
+
+-- Deterministic random values
+select setseed(0.25), round(random()::decimal, 15) as random_number;  -- seed must be in [-1:1]
+
+
+-- Search values in all tables
+-- source: https://stackoverflow.com/questions/5350088/how-to-search-a-specific-value-in-all-tables-postgresql/23036421#23036421
+--         └── https://github.com/dverite/postgresql-functions/tree/master/global_search
