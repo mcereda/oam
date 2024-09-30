@@ -8,10 +8,9 @@
    1. [Optimize connection handling](#optimize-connection-handling)
    1. [Integrate with GnuPG](#integrate-with-gnupg)
 1. [Server configuration](#server-configuration)
-   1. [Change port](#change-port)
-   1. [Disable password authentication](#disable-password-authentication)
-   1. [Permit root login](#permit-root-login)
+   1. [Change listening port](#change-listening-port)
    1. [Conditional blocks](#conditional-blocks)
+   1. [Hardening](#hardening)
 1. [SSHFS](#sshfs)
    1. [Installation](#installation)
 1. [Troubleshooting](#troubleshooting)
@@ -293,34 +292,107 @@ Include /usr/etc/ssh/sshd_config.d/*.conf
 This avoids issues from updates overwriting the default file and allows user configurations to override defaults in a
 cleaner way.
 
-### Change port
+### Change listening port
 
 ```ssh-config
 Port 2222
 ```
 
-### Disable password authentication
-
-```ssh-config
-PasswordAuthentication no
-ChallengeResponseAuthentication no
-```
-
-### Permit root login
-
-```ssh-config
-PermitRootLogin yes
-```
-
 ### Conditional blocks
 
-> Only a subset of keywords may be used in a _Match_ block. Check the [`SSHD_CONFIG(5)`][sshd_config man page] man page.
+> Only a subset of keywords may be used in a _Match_ block.<br/>
+> Check the [`SSHD_CONFIG(5)`][sshd_config man page] man page for more information.
 
 ```ssh-config
 Match Address 192.168.111.0/24
     PasswordAuthentication no
     PermitRootLogin no
+Match User ashley
+    AllowUsers ashley@203.0.113.1
 ```
+
+### Hardening
+
+Don't bother changing the SSH port from the default `22` value unless you require it for other purposes.<br/>
+Security through obscurity is utterly ineffective and can create issues with tools expecting standard usage
+<sup>
+[1][Why I don't change SSH from port 22],
+[2][Security Through Obscurity (STO): History, Criticism & Risks]
+</sup>.
+
+Suggestions:
+
+- Disable `root` login:
+
+  ```ssh-config
+  PermitRootLogin no
+  ```
+
+  Or limit it to keys:
+
+  ```ssh-config
+  PermitRootLogin prohibit-password
+  ```
+
+- Limit the maximum number of authentication attempts for any login session:
+
+  ```ssh-config
+  MaxAuthTries 3
+  ```
+
+- Limit the amount of time user have to complete authentication after the initial connection:
+
+  ```ssh-config
+  LoginGraceTime 20
+  ```
+
+- Disable authentication with empty passwords:
+
+  ```sh
+  PermitEmptyPasswords no
+  ```
+
+- Disable password authentication altogether:
+
+  ```ssh-config
+  PasswordAuthentication no
+  ```
+
+- Restrict authentication options to keys:
+
+  ```ssh-config
+  ChallengeResponseAuthentication no
+  ```
+
+- Disable other authentication methods if not used:
+
+  ```ssh-config
+  ChallengeResponseAuthentication no
+  KerberosAuthentication no
+  GSSAPIAuthentication no
+  ```
+
+- Disable other features if not used:
+
+  ```ssh-config
+  AllowAgentForwarding no
+  AllowTcpForwarding no
+  PermitTunnel no
+  X11Forwarding no
+  ```
+
+- Restrict login to specific IP addresses:
+
+  ```ssh-config
+  AllowUsers*@203.0.113.1 *@203.0.113.2 *@192.0.2.0/24 *@172.16.*.1 sammy@203.0.113.1 alex@203.0.113.2
+  Match User ashley
+      AllowUsers ashley@203.0.113.1
+  ```
+
+- Temporarily block IPs after repeated authentication failures.<br/>
+  See [fail2ban].
+
+- [Set up port knocking].
 
 ## SSHFS
 
@@ -388,6 +460,7 @@ Solution: update the SSH server.
 - [`sshd_config` example][sshd_config example]
 - [ssh-agent]
 - [Use GPG keys for SSH authentication]
+- [Security Through Obscurity (STO): History, Criticism & Risks]
 
 ### Sources
 
@@ -402,6 +475,8 @@ Solution: update the SSH server.
 - [Restrict SSH login to a specific IP or host]
 - [Stick with security: YubiKey, SSH, GnuPG, macOS]
 - [How to check if an RSA public / private key pair match]
+- [Why I don't change SSH from port 22]
+- [How To Harden OpenSSH on Ubuntu 20.04]
 
 <!--
   Reference
@@ -410,6 +485,7 @@ Solution: update the SSH server.
 
 <!-- Knowledge base -->
 [use gpg keys for ssh authentication]: gnupg.md#use-gpg-keys-for-ssh-authentication
+[set up port knocking]: set%20up%20port%20knocking.md
 
 <!-- Files -->
 [ssh_config example]: ../examples/ssh/ssh_config
@@ -422,14 +498,18 @@ Solution: update the SSH server.
 [sshd_config man page]: https://man.openbsd.org/sshd_config
 
 <!-- Others -->
+[fail2ban]: https://github.com/fail2ban/fail2ban
 [get started with openssh for windows]: https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=gui
 [how to check if an rsa public / private key pair match]: https://serverfault.com/questions/426394/how-to-check-if-an-rsa-public-private-key-pair-match#426429
 [how to enable ssh access using a gpg key for authentication]: https://opensource.com/article/19/4/gpg-subkeys-ssh
+[how to harden openssh on ubuntu 20.04]: https://www.digitalocean.com/community/tutorials/how-to-harden-openssh-on-ubuntu-20-04
 [how to list keys added to ssh-agent with ssh-add?]: https://unix.stackexchange.com/questions/58969/how-to-list-keys-added-to-ssh-agent-with-ssh-add
 [how to perform hostname canonicalization]: https://sleeplessbeastie.eu/2020/08/24/how-to-perform-hostname-canonicalization/
 [how to reuse ssh connection to speed up remote login process using multiplexing]: https://www.cyberciti.biz/faq/linux-unix-reuse-openssh-connection/
 [multiple similar entries in ssh config]: https://unix.stackexchange.com/questions/61655/multiple-similar-entries-in-ssh-config
 [restrict ssh login to a specific ip or host]: https://docs.rackspace.com/support/how-to/restrict-ssh-login-to-a-specific-ip-or-host/
+[security through obscurity (sto): history, criticism & risks]: https://www.okta.com/uk/identity-101/security-through-obscurity/
 [stick with security: yubikey, ssh, gnupg, macos]: https://evilmartians.com/chronicles/stick-with-security-yubikey-ssh-gnupg-macos
 [use sshfs to mount a remote directory as a volume on osx]: https://benohead.com/mac-os-x-use-sshfs-to-mount-a-remote-directory-as-a-volume/
 [using the ssh config file]: https://linuxize.com/post/using-the-ssh-config-file/
+[why i don't change ssh from port 22]: https://www.youtube.com/watch?v=Fzt5dqaIMYc
