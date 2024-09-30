@@ -6,6 +6,7 @@ psql 'postgres' 'admin'
 psql --host 'prod.db.lan' --port '5432' --username 'postgres' --database 'postgres' --password
 psql -h 'host.fqnd' -p '5432' -U 'admin' -d 'postgres' -W
 psql 'postgresql://localhost:5433/games?sslmode=require'
+psql 'host=host.fqdn port=5467 user=admin dbname=postgres'
 
 # List available databases
 psql … --list
