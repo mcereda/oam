@@ -464,12 +464,9 @@ uci commit 'dhcp' && reload_config && luci-reload
 
 ## Hardening
 
-Suggestions:
+See:
 
-- [SSH]:
-  - Change the SSH port from the default `22` value.
-  - Restrict login to specific IP addresses.
-  - Restrict authentication options to keys.
+- [SSH hardening].
 
 ## The SFP+ caged module
 
@@ -577,7 +574,7 @@ All the references in the [further readings] section, plus the following:
 [openwrt]: openwrt.md
 [opkg]: opkg.md
 [pi-hole]: pi-hole.md
-[ssh]: ssh.md
+[ssh hardening]: ssh.md#hardening
 [uci]: uci.md
 
 <!-- Upstream -->
