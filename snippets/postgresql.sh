@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 
+# Start DBs
+docker run --rm --name 'postgres' -d -p '5432:5432' -e POSTGRES_PASSWORD='password' 'postgres:14.12'
+
 # Connect to DBs
 psql 'postgres'
 psql 'postgres' 'admin'
