@@ -73,19 +73,23 @@ DROP SCHEMA IF EXISTS mundane CASCADE;
 
 -- Create tables
 CREATE TABLE people (
-  id         char(2)     PRIMARY KEY,
-  firstname  varchar(40) NOT NULL,
-  lastname   varchar(40) NOT NULL,
-  phone      varchar(20) NOT NULL
+  id          char(2)      PRIMARY KEY,
+  first_name  varchar(40)  NOT NULL,
+  last_name   text(40)     NOT NULL,
+  phone       varchar(20)
 );
 
 -- Show table structure
 \d sales
 \d+ clients
+SELECT column_name, data_type, character_maximum_length FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'vendors';
 
 
 -- Insert data
-INSERT INTO people(id,firstname,lastname,phone) VALUES ('T1','Sarah','Conor','0609110911');
+INSERT INTO people(id, first_name, last_name, phone)
+VALUES
+  ('T1', 'Sarah', 'Conor', '0609110911'),
+  ('wa', 'Wally', 'Polly', null);
 
 
 -- Revoke *default* privileges
@@ -139,6 +143,31 @@ GRANT rds_superuser TO mike;
 
 -- Remove role memberships from users
 REVOKE engineers FROM mike;
+
+-- List permissions
+-- on tables
+SELECT *
+FROM information_schema.role_table_grants
+WHERE grantee = 'darwin';
+-- about ownership
+SELECT *
+FROM pg_tables
+WHERE tableowner = 'darwin';
+-- on schemas
+SELECT
+  r.usename AS grantor,
+  e.usename AS grantee,
+  nspname,
+  privilege_type,
+  is_grantable
+FROM pg_namespace
+JOIN LATERAL (
+  SELECT *
+  FROM aclexplode(nspacl) AS x
+) a ON true
+JOIN pg_user e ON a.grantee = e.usesysid
+JOIN pg_user r ON a.grantor = r.usesysid
+WHERE e.usename = 'darwin';
 
 
 -- Close the connection to the current DB
@@ -244,9 +273,16 @@ UPDATE vendors
 
 
 -- Deterministic random values
-select setseed(0.25), round(random()::decimal, 15) as random_number;  -- seed must be in [-1:1]
+SELECT setseed(0.25), round(random()::DECIMAL, 15) AS random_number;  -- seed must be in [-1:1]
 
 
 -- Search values in all tables
 -- source: https://stackoverflow.com/questions/5350088/how-to-search-a-specific-value-in-all-tables-postgresql/23036421#23036421
 --         └── https://github.com/dverite/postgresql-functions/tree/master/global_search
+
+
+-- Functions
+-- Refer <https://www.postgresql.org/docs/current/sql-createfunction.html>
+CREATE OR REPLACE FUNCTION return_1() RETURNS integer
+LANGUAGE SQL
+RETURN 1;

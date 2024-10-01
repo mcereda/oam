@@ -1,6 +1,7 @@
 # PostgreSQL
 
 1. [TL;DR](#tldr)
+1. [Functions](#functions)
 1. [Extensions of interest](#extensions-of-interest)
    1. [PostGIS](#postgis)
    1. [`postgresql_anonymizer`](#postgresql_anonymizer)
@@ -119,6 +120,44 @@ ALTER DATABASE postgres SET session_preload_libraries = 'anon';
 
 </details>
 
+## Functions
+
+Refer [CREATE FUNCTION].
+
+```sql
+CREATE OR REPLACE FUNCTION just_return_1() RETURNS integer
+LANGUAGE SQL
+RETURN 1;
+
+SELECT just_return_1();
+```
+
+```sql
+CREATE OR REPLACE FUNCTION increment(i integer) RETURNS integer
+AS $$
+  BEGIN
+    RETURN i + 1;
+  END
+$$
+LANGUAGE plpgsql;
+```
+
+```sql
+CREATE OR REPLACE FUNCTION entries_in_column(
+  table_name TEXT,
+  column_name TEXT
+) RETURNS INTEGER
+LANGUAGE plpgsql
+AS $func$
+  DECLARE result INTEGER;
+  BEGIN
+    EXECUTE format('SELECT count(%s) FROM %s LIMIT 2', column_name, table_name) INTO result;
+    RETURN result;
+  END
+$func$;
+SELECT * FROM entries_in_column('vendors','vendor_id');
+```
+
 ## Extensions of interest
 
 ### PostGIS
@@ -177,6 +216,8 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 - [What is the pg_dump command for backing up a PostgreSQL database?]
 - [How to SCRAM in Postgres with pgBouncer]
 - [`postgresql_anonymizer`][postgresql_anonymizer]
+- [pgxn-manager]
+- [dverite/postgresql-functions]
 
 ### Sources
 
@@ -187,6 +228,10 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 - [How to Generate SCRAM-SHA-256 to Create Postgres 13 User]
 - [PostgreSQL: Get member roles and permissions]
 - [An In-Depth Guide to Postgres Data Masking with Anonymizer]
+- [Get count of records affected by INSERT or UPDATE in PostgreSQL]
+- [How to write update function (stored procedure) in Postgresql?]
+- [How to search a specific value in all tables (PostgreSQL)?]
+- [PostgreSQL: Show all the privileges for a concrete user]
 
 <!--
   Reference
@@ -198,13 +243,20 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 [psql]: https://www.postgresql.org/docs/current/app-psql.html
 [pg_settings]: https://www.postgresql.org/docs/current/view-pg-settings.html
 [the password file]: https://www.postgresql.org/docs/current/libpq-pgpass.html
+[create function]: https://www.postgresql.org/docs/current/sql-createfunction.html
 
 <!-- Others -->
 [an in-depth guide to postgres data masking with anonymizer]: https://thelinuxcode.com/postgresql-anonymizer-data-masking/
 [bidirectional replication in postgresql using pglogical]: https://www.jamesarmes.com/2023/03/bidirectional-replication-postgresql-pglogical.html
 [connect to a postgresql database]: https://www.postgresqltutorial.com/connect-to-postgresql-database/
+[dverite/postgresql-functions]: https://github.com/dverite/postgresql-functions
+[get count of records affected by insert or update in postgresql]: https://stackoverflow.com/questions/4038616/get-count-of-records-affected-by-insert-or-update-in-postgresql#78459743
 [how to generate scram-sha-256 to create postgres 13 user]: https://stackoverflow.com/questions/68400120/how-to-generate-scram-sha-256-to-create-postgres-13-user
 [how to scram in postgres with pgbouncer]: https://www.crunchydata.com/blog/pgbouncer-scram-authentication-postgresql
+[how to search a specific value in all tables (postgresql)?]: https://stackoverflow.com/questions/5350088/how-to-search-a-specific-value-in-all-tables-postgresql/23036421#23036421
+[how to write update function (stored procedure) in postgresql?]: https://stackoverflow.com/questions/21087710/how-to-write-update-function-stored-procedure-in-postgresql
+[pgxn-manager]: https://github.com/pgxn/pgxn-manager
 [postgresql_anonymizer]: https://postgresql-anonymizer.readthedocs.io/en/stable/
 [postgresql: get member roles and permissions]: https://www.cybertec-postgresql.com/en/postgresql-get-member-roles-and-permissions/
+[postgresql: show all the privileges for a concrete user]: https://stackoverflow.com/questions/40759177/postgresql-show-all-the-privileges-for-a-concrete-user
 [what is the pg_dump command for backing up a postgresql database?]: https://www.linkedin.com/advice/3/what-pgdump-command-backing-up-postgresql-ke2ef
