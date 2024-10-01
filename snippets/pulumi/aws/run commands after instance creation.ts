@@ -9,22 +9,24 @@
 import * as aws from "@pulumi/aws";
 import * as command from "@pulumi/command";
 
-const instance = new aws.ec2.Instance(
-    "instance",
-    { … }
-);
+const instance_output = new aws.ec2.getInstanceOutput({
+    filters: [{
+        name: "tag:Name",
+        values: [ "instance-name-tag" ],
+    }],
+});
 
 command.local.Command(
     "notify",
     { create: "say 'instance created'" }
 );
 
-instance.privateDns.apply(hostIpAddress => new command.local.Command(
+instance_output.privateDns.apply(hostIpAddress => new command.local.Command(
     "ansiblePlaybook-ssh",
     { create: `ansible-playbook -i '${hostIpAddress},' -D 'playbook.yaml'` },
 ));
 
-instance.id.apply(instanceId => new command.local.Command(
+instance_output.id.apply(instanceId => new command.local.Command(
     "ansiblePlaybook-awsSsm",
     {
         create: `
