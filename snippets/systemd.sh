@@ -7,3 +7,5 @@ sudo hostnamectl
 sudo hostnamectl status --static
 
 sudo hostnamectl set-hostname --pretty 'prometheus'
+
+sudo systemctl list-units --state='failed'

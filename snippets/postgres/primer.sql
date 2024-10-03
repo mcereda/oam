@@ -1,3 +1,8 @@
+-- Single line comment
+/*
+ * multi-line comment
+ */
+
 -- Add '+' to psql commands to get more information
 
 
@@ -249,6 +254,11 @@ SELECT name FROM customers WHERE name LIKE '%banda%';  -- contains 'banda'
 SELECT id FROM customers WHERE City LIKE 'L___on';  -- starts with 'L', followed by any 3 characters, followed by 'on'
 
 
+-- Comparison with lists
+SELECT * FROM users WHERE username IN ('matthew', 'lucas', 'todd', 'roxy', 'kyle', 'ken', 'gideon');
+SELECT * FROM users WHERE username NOT IN ('knives', 'wallace');
+
+
 -- Shuffle data
 -- source: https://stackoverflow.com/questions/33555524/postgresql-shuffle-column-values#33555639
 WITH
@@ -283,6 +293,24 @@ SELECT setseed(0.25), round(random()::DECIMAL, 15) AS random_number;  -- seed mu
 
 -- Functions
 -- Refer <https://www.postgresql.org/docs/current/sql-createfunction.html>
-CREATE OR REPLACE FUNCTION return_1() RETURNS integer
-LANGUAGE SQL
-RETURN 1;
+\df
+\df+ to_char
+SELECT routine_name FROM information_schema.routines WHERE routine_type = 'FUNCTION';
+SELECT p.proname FROM pg_catalog.pg_namespace n JOIN pg_catalog.pg_proc p ON p.pronamespace = n.oid WHERE p.prokind = 'f';
+
+CREATE OR REPLACE FUNCTION return_1() RETURNS INTEGER LANGUAGE SQL RETURN 1;
+
+
+-- Type casting
+SELECT
+  CAST ('21' AS INTEGER), 420.69::INTEGER,
+  CAST('100' AS DOUBLE PRECISION), '100.93'::FLOAT,
+  CAST ('true' AS BOOLEAN),
+  CAST('2024-02-01 12:34:56' AS DATE), '01-OCT-2015' ::DATE,
+  CAST('2016-11-11' AS TIMESTAMP), '2016-11-11'::TIMESTAMP,
+  CAST ('15 minute' AS INTERVAL), '3 month' :: INTERVAL,
+  CAST ('20 days' AS TEXT), '24 hour':: TEXT,
+  CAST (ARRAY[1,3,5] AS TEXT),
+  '{1,2,3}'::INTEGER[] AS result_array;
+SELECT to_char(42, '0000');  -- '0042'
+SELECT to_number('12,454.9', '99G999D9S');
