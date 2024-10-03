@@ -38,7 +38,8 @@
 | CSS     | Cascading Style Sheets                                 |                                                                                                     |
 | CVE     | Common Vulnerabilities and Exposures                   |                                                                                                     |
 | CVS     | Concurrent Versioning System                           |                                                                                                     |
-| DBMS    | Data Base Management System                            |                                                                                                     |
+| DB      | Data Base                                              |                                                                                                     |
+| DBMS    | DB Management System                                   |                                                                                                     |
 | DDL     | Data Definition Language                               |                                                                                                     |
 | DKIM    | DomainKeys Identified Mail                             |                                                                                                     |
 | DML     | Data Manipulation Language                             |                                                                                                     |
@@ -79,6 +80,7 @@
 | LED     | Light Emitting Diode                                   |                                                                                                     |
 | LIFO    | Last In First Out                                      |                                                                                                     |
 | M2COTS  | Mass Market COTS                                       | Widely available COTS products                                                                      |
+| MR      | Merge Request                                          | Prevalently used in GitLab                                                                          |
 | NACL    | Network ACL                                            |                                                                                                     |
 | OAM     | [Open Application Model]                               |                                                                                                     |
 | OAM     | Operations, Administration and Management              |                                                                                                     |
@@ -89,6 +91,7 @@
 | PEBCAK  | Problem Exists Between Chair And Keyboard              |                                                                                                     |
 | PGP     | Pretty Good Privacy                                    |                                                                                                     |
 | PII     | Personally Identifiable Information                    |                                                                                                     |
+| PR      | Pull Request                                           | Prevalently used in GitHub                                                                          |
 | RBAC    | Role-Based Access Control                              |                                                                                                     |
 | ROM     | Read-Only Memory                                       |                                                                                                     |
 | RPM     | Revolutions Per Minute                                 |                                                                                                     |
