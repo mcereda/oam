@@ -3,6 +3,7 @@
 Tool to build container images from a Dockerfile with**out** the need of the Docker engine.
 
 1. [TL;DR](#tldr)
+1. [Usage in GitLab pipelines](#usage-in-gitlab-pipelines)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -59,7 +60,7 @@ docker run … \
     --destination 'gcr.io/gcp-project-id/custom-image:1.2.3' \
     --destination 'mycr.azurecr.io/azure-repository:1.2.3'
 docker run … -v "$PWD/config.json:/kaniko/.docker/config.json:ro" 'gcr.io/kaniko-project/executor:latest'
-docker run … 'gcr.io/kaniko-project/executor' … --cache true --custom-platform 'linux/amd64'
+docker run … 'gcr.io/kaniko-project/executor' … --cache true --custom-platform 'linux/amd64' --build-arg VERSION='1.2'
 ```
 
 </details>
@@ -74,6 +75,21 @@ docker run --rm -ti -v "$PWD:/workspace" --entrypoint '' 'gcr.io/kaniko-project/
 ```
 
 </details>
+
+## Usage in GitLab pipelines
+
+```yaml
+build-container:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - >-
+        /kaniko/executor
+        --context "${CI_PROJECT_DIR}"
+        --destination "${CI_REGISTRY_IMAGE}:latest"
+```
 
 ## Further readings
 
