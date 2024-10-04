@@ -3,6 +3,16 @@
 # Start DBs
 docker run --rm --name 'postgres' -d -p '5432:5432' -e POSTGRES_PASSWORD='password' 'postgres:14.12'
 
+# Start PgAdmin
+# Retain data in a volume between sessions
+docker run -d --name 'pgadmin' \
+	--rm -v 'pgadmin-overrides:/pgadmin4' \
+	--rm -v 'pgadmin-data:/var/lib/pgadmin' \
+	-p 8080:80 \
+	-e 'PGADMIN_DEFAULT_EMAIL=me@company.com' \
+	-e 'PGADMIN_DEFAULT_PASSWORD=password' \
+	'dpage/pgadmin4'
+
 # Connect to DBs
 psql 'postgres'
 psql 'postgres' 'admin'
