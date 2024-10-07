@@ -2,6 +2,7 @@
 
 # Start DBs
 docker run --rm --name 'postgres' -d -p '5432:5432' -e POSTGRES_PASSWORD='password' 'postgres:14.12'
+docker run --rm --name 'postgis'  -d -p '5432:5432' -e POSTGRES_PASSWORD='password' 'postgis/postgis:14-3.4'
 
 # Start PgAdmin
 # Retain data in a volume between sessions

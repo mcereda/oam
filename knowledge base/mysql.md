@@ -1,9 +1,8 @@
 # MySQL
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -37,13 +36,23 @@ grant ALL on db.* to 'username'@'127.0.0.1';
 
 ## Further readings
 
+- [SQL]
+- [PostgreSQL]
+
+### Sources
+
 - How to [list tables] in MySQL
 - How to [show databases] in MySQL
 - [phpimap issue 1549]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[postgresql]: postgresql.md
+[sql]: sql.md
 
 <!-- Others -->
 [list tables]: https://alvinalexander.com/blog/post/mysql/list-tables-in-mysql-database/
