@@ -259,28 +259,23 @@ SELECT * FROM users WHERE username IN ('matthew', 'lucas', 'todd', 'roxy', 'kyle
 SELECT * FROM users WHERE username NOT IN ('knives', 'wallace');
 
 
--- Shuffle data
+-- Shuffle columns
+-- needs some identifier for the join and where clauses - either use primary key or ctid
 -- source: https://stackoverflow.com/questions/33555524/postgresql-shuffle-column-values#33555639
 WITH
-  ids AS (
-    SELECT
-      row_number() OVER (ORDER BY random()) row_num,
-      vendor_id AS new_vendor_id
-    FROM vendors
-  ),
-  names AS (
-    SELECT
-      row_number() OVER (ORDER BY random()) row_num,
-      vendor_name AS new_vendor_name
-    FROM vendors
-  )
+  ids AS (   SELECT row_number() OVER (ORDER BY random()) row_num, vendor_id   AS new_vendor_id   FROM vendors ),
+  names AS ( SELECT row_number() OVER (ORDER BY random()) row_num, vendor_name AS new_vendor_name FROM vendors )
 UPDATE vendors
-  SET
-    vendor_id = new_vendor_id,
-    vendor_name = new_vendor_name
-  FROM ids JOIN names ON ids.row_num = names.row_num
+  SET vendor_id = new_vendor_id, vendor_name = new_vendor_name FROM ids JOIN names ON ids.row_num = names.row_num
   WHERE vendor_id = new_vendor_id;
-
+--
+WITH
+  __ctids_in_order AS ( SELECT ROW_NUMBER() OVER (),                  ctid                           FROM vendors ),
+  __shuffled_names AS ( SELECT ROW_NUMBER() OVER (ORDER BY RANDOM()), vendor_name AS new_vendor_name FROM vendors )
+UPDATE vendors
+  SET vendor_name = __shuffled_names.new_vendor_name
+  FROM __shuffled_names JOIN __ctids_in_order ON __shuffled_names.row_number = __ctids_in_order.row_number
+  WHERE vendors.ctid = __ctids_in_order.ctid
 
 -- Deterministic random values
 SELECT setseed(0.25), round(random()::DECIMAL, 15) AS random_number;  -- seed must be in [-1:1]
@@ -312,6 +307,92 @@ SELECT
   CAST ('15 minute' AS INTERVAL), '3 month' :: INTERVAL,
   CAST ('20 days' AS TEXT), '24 hour':: TEXT,
   CAST (ARRAY[1,3,5] AS TEXT),
+  CAST (B'1001' AS INTEGER), x'123abc'::int,
   '{1,2,3}'::INTEGER[] AS result_array;
 SELECT to_char(42, '0000');  -- '0042'
 SELECT to_number('12,454.9', '99G999D9S');
+
+
+-- Atomic actions
+BEGIN;
+  -- add ON UPDATE CASCADE to the 'signups_customer_id_fkey' constraint
+  -- ALTER TABLE 'x' ALTER CONSTRAINT does not support this action at the time of writing
+  ALTER TABLE signups RENAME CONSTRAINT signups_customer_id_fkey TO delete_me;
+  ALTER TABLE signups ADD CONSTRAINT signups_customer_id_fkey FOREIGN KEY (customer_id) REFERENCES customers(id) ON UPDATE CASCADE;
+  ALTER TABLE signups DROP CONSTRAINT delete_me;
+COMMIT;
+BEGIN;
+  ALTER TABLE customers RENAME COLUMN phone TO phone_old;
+  ALTER TABLE customers ADD COLUMN phone text UNIQUE;
+COMMIT;
+
+
+-- Timezones
+SELECT * FROM pg_timezone_names;
+-- Time functions
+SELECT
+  NOW(), CURRENT_TIME, CURRENT_TIMESTAMP,       -- current date and time *with* the time zone of the server
+  NOW()::timestamp, LOCALTIME, LOCALTIMESTAMP,  -- current date and time *without* time zone
+  TIMEOFDAY();
+
+
+-- Search
+SELECT table_schema, table_name, column_name
+FROM information_schema.columns
+WHERE column_name LIKE '%national_id%';
+
+
+-- Loops
+DO $$
+  DECLARE hashed_i TEXT;
+  BEGIN
+    FOR i IN 1..150000
+    LOOP
+      hashed_i = LPAD(ABS(SUBSTRING(DIGEST(i::TEXT, 'sha1')::TEXT, 2, 8)::BIT(32)::INT/2.147483647)::INT::TEXT, 8, '0');
+      IF hashed_i LIKE '00%' THEN
+        RAISE NOTICE '%: %', i, hashed_i;
+      END IF;
+    END LOOP;
+  END;
+$$;
+DO $$
+  DECLARE column_info RECORD;  -- required to use select in for definition
+  BEGIN
+    FOR column_info IN
+      SELECT table_schema AS schema, table_name AS table, column_name AS column
+      FROM information_schema.columns
+      WHERE column_name LIKE '%sensitive%'
+    LOOP
+      RAISE NOTICE 'target: %.%.%', column_info.schema, column_info.table, column_info.column;
+      PERFORM hash_data(column_info.table, column_info.column, column_info.schema);
+    END LOOP;
+  END;
+$$;
+
+
+-- Strings
+-- escape single quotes by doubling them (' -> '')
+query = 'SELECT table_schema AS schema, table_name AS table, column_name AS column FROM information_schema.columns WHERE column_name LIKE ''%national_id%''';
+SELECT ENCODE('something'::BYTEA, 'base64');
+SELECT CONVERT_FROM(DECODE('c29tZXRoaW5n', 'base64'), 'UTF-8');
+
+
+ALTER TABLE customers RENAME COLUMN phone TO phone_numbers;
+ALTER TABLE signups RENAME CONSTRAINT signups_customer_id_fkey TO something_blue;
+ALTER TABLE vendors SET CONSTRAINT vendors_value_uindex DEFERRED;
+
+
+-- Show all constraints
+SELECT
+  ns.nspname AS schema,
+  class.relname AS "table",
+  con.conname AS "constraint",
+  con.condeferrable AS "deferrable",
+  con.condeferred AS "deferred"
+FROM pg_constraint con
+  INNER JOIN pg_class class ON class.oid = con.conrelid
+  INNER JOIN pg_namespace ns ON ns.oid = class.relnamespace
+WHERE
+  con.contype IN ('p', 'u') AND
+  ns.nspname != 'pg_catalog'
+ORDER BY 1, 2, 3;

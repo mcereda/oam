@@ -211,6 +211,7 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 
 ## Further readings
 
+- [SQL]
 - [Docker image]
 - [Bidirectional replication in PostgreSQL using pglogical]
 - [What is the pg_dump command for backing up a PostgreSQL database?]
@@ -218,6 +219,7 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 - [`postgresql_anonymizer`][postgresql_anonymizer]
 - [pgxn-manager]
 - [dverite/postgresql-functions]
+- [MySQL]
 
 ### Sources
 
@@ -237,6 +239,10 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
   Reference
   ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[mysql]: mysql.md
+[sql]: sql.md
 
 <!-- Upstream -->
 [docker image]: https://github.com/docker-library/docs/blob/master/postgres/README.md
