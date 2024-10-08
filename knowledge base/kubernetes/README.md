@@ -1013,6 +1013,7 @@ Applications:
 - [Flux]
 - [Istio]
 - [KEDA]
+- [k8s-ephemeral-storage-metrics]
 
 Others:
 
@@ -1117,6 +1118,7 @@ Others:
 [container capabilities in kubernetes]: https://unofficial-kubernetes.readthedocs.io/en/latest/concepts/policy/container-capabilities/
 [elasticsearch]: https://github.com/elastic/helm-charts/issues/689
 [how to run a command in a pod after initialization]: https://stackoverflow.com/questions/44140593/how-to-run-command-after-initialization/44146351#44146351
+[k8s-ephemeral-storage-metrics]: https://github.com/jmcgrath207/k8s-ephemeral-storage-metrics
 [kube-ps1]: https://github.com/jonmosco/kube-ps1
 [kubectx+kubens]: https://github.com/ahmetb/kubectx
 [kubernetes cluster autoscaler]: https://www.kubecost.com/kubernetes-autoscaling/kubernetes-cluster-autoscaler/
