@@ -70,3 +70,7 @@ kubectl cordon 'kworker-rj2' \
 kubectl get --raw "/api/v1/nodes/ip-172-31-69-42.eu-west-1.compute.internal/proxy/stats/summary"
 # Get raw information as Prometheus metrics
 kubectl get --raw "/api/v1/nodes/ip-172-31-69-42.eu-west-1.compute.internal/proxy/metrics/cadvisor"
+
+# Get ephemeral storage usage for pods
+kubectl get --raw "/api/v1/nodes/ip-172-31-69-42.eu-west-1.compute.internal/proxy/stats/summary" \
+| jq '.pods[] | select(.podRef.name == "gitlab-runner-59dd68c5cb-9vcp4")."ephemeral-storage"'

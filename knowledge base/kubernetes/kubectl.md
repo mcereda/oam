@@ -32,7 +32,7 @@ One possible output format is [JSONpath].
 1. [Verbosity and debugging](#verbosity-and-debugging)
 1. [Plugins](#plugins)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -463,9 +463,13 @@ volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
 EOF
 
-# Check persistent volumes' usage
-# Need to connect to the pod mounting it
+# Check persistent volumes' usage.
+# Need to connect to the pod mounting it.
 kubectl -n 'gitea' exec 'gitea-766fd5fb64-2qlqb' -c 'gitea' -- df -h '/data'
+
+# Get ephemeral storage usage for pods.
+kubectl get --raw "/api/v1/nodes/ip-172-31-69-42.eu-west-1.compute.internal/proxy/stats/summary" \
+| jq '.pods[] | select(.podRef.name == "gitlab-runner-59dd68c5cb-9vcp4")."ephemeral-storage"'
 ```
 
 </details>
@@ -676,19 +680,24 @@ TODO
 - [Enforce Pod Security Standards with Namespace Labels]
 - [Krew]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Cheatsheet]
 - [Run a single-instance stateful application]
 - [Run a replicated stateful application]
 - [Accessing an application on Kubernetes in Docker]
 - [Plugins]
+- [How can I determine the current ephemeral-storage usage of a running Kubernetes pod?]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[jsonpath]: ../jsonpath.md
+[krew]: krew.placeholder
+[kubernetes]: README.md
 
 <!-- Upstream -->
 [assigning pods to nodes]: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
@@ -700,15 +709,8 @@ All the references in the [further readings] section, plus the following:
 [plugins]: https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
 [taints and tolerations]: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
 
-<!-- In-article sections -->
-[further readings]: #further-readings
-
-<!-- Knowledge base -->
-[jsonpath]: ../jsonpath.md
-[krew]: krew.placeholder
-[kubernetes]: README.md
-
 <!-- Others -->
 [accessing an application on kubernetes in docker]: https://medium.com/@lizrice/accessing-an-application-on-kubernetes-in-docker-1054d46b64b1
+[how can i determine the current ephemeral-storage usage of a running kubernetes pod?]: https://stackoverflow.com/questions/53217227/how-can-i-determine-the-current-ephemeral-storage-usage-of-a-running-kubernetes#72891131
 [run a replicated stateful application]: https://kubernetes.io/docs/tasks/run-application/run-replicated-stateful-application/
 [run a single-instance stateful application]: https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/
