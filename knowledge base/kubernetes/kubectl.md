@@ -13,7 +13,8 @@ kubectl get deploy,rs,po -A
 Use `kubectl api-resources` to check out the available resources and their abbreviations.
 
 Multiple resource types can be specified together, but **only one resource name** is accepted at a time.<br/>
-Resource names are case **sensitive** and will filter the requested resources; use the `-l` (`--selector`) option to play around filtering:
+Resource names are case **sensitive** and will filter the requested resources; use the `-l` (`--selector`) option to
+play around filtering:
 
 ```sh
 kubectl get deployments,replicaSets -A
@@ -22,8 +23,6 @@ kubectl get pods -l 'app=nginx,tier=frontend'
 ```
 
 One possible output format is [JSONpath].
-
-## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
@@ -412,6 +411,11 @@ kubectl run --rm -it --image 'amazon/aws-cli:2.17.16' 'awscli' -- autoscaling de
 
 # Attach to running pods.
 kubectl attach 'alpine' -c 'alpine' -it
+
+# Get raw information as JSON
+kubectl get --raw "/api/v1/nodes/node-name/proxy/stats/summary"
+# Get raw information as Prometheus metrics
+kubectl get --raw "/api/v1/nodes/node-name/proxy/metrics/cadvisor"
 ```
 
 </details>
@@ -432,8 +436,7 @@ kubectl delete crds -l "helm.sh/chart=awx-operator"
 # Run pods with specific specs.
 kubectl -n 'kube-system' run --rm -it 'awscli' --overrides '{"spec":{"serviceAccountName":"cluster-autoscaler-aws"}}' \
   --image '012345678901.dkr.ecr.eu-west-1.amazonaws.com/cache/amazon/aws-cli:2.17.16' \
-  -- \
-  autoscaling describe-auto-scaling-groups
+  -- autoscaling describe-auto-scaling-groups
 
 # Show Containers' status, properties and capabilities from the inside.
 # Run the command from *inside* the container.
@@ -459,6 +462,10 @@ reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
 EOF
+
+# Check persistent volumes' usage
+# Need to connect to the pod mounting it
+kubectl -n 'gitea' exec 'gitea-766fd5fb64-2qlqb' -c 'gitea' -- df -h '/data'
 ```
 
 </details>
@@ -467,19 +474,23 @@ EOF
 
 The configuration files are loaded as follows:
 
-1. If the `--kubeconfig` flag is set, then only that file is loaded; the flag may only be set **once**, and no merging takes place:
+1. If the `--kubeconfig` flag is set, then only that file is loaded; the flag may only be set **once**, and no merging
+   takes place:
 
    ```sh
    kubectl config --kubeconfig 'config.local' view
    ```
 
-1. If the `$KUBECONFIG` environment variable is set, then it is used as a list of paths following the normal path delimiting rules for your system; the files are merged:
+1. If the `$KUBECONFIG` environment variable is set, then it is used as a list of paths following the normal path
+   delimiting rules for your system; the files are merged:
 
    ```sh
    export KUBECONFIG="/tmp/config.local:.kube/config.prod"
    ```
 
-   When a value is modified, it is modified in the file that defines the stanza; when a value is created, it is created in the first existing file; if no file in the chain exist, then the last file in the list is created with the configuration.
+   When a value is modified, it is modified in the file that defines the stanza; when a value is created, it is created
+   in the first existing file; if no file in the chain exist, then the last file in the list is created with the
+   configuration.
 
 1. If none of the above happens, `~/.kube/config` is used, and no merging takes place.
 
@@ -578,7 +589,8 @@ data:
 EOF
 ```
 
-When subsequentially (re-)applying manifests, one can compare the current state of the cluster against the state it would be in if the manifest was applied:
+When subsequentially (re-)applying manifests, one can compare the current state of the cluster against the state it
+would be in if the manifest was applied:
 
 ```sh
 kubectl diff -f 'manifest.yaml'
@@ -606,16 +618,16 @@ kubectl create job 'backup-before-upgrade-13.6.2-to-13.9.2' \
 
 Add the `-o`, `--output` option to a command:
 
-Format                              | Description
------------------------------------ | -----------
-`-o=custom-columns=<spec>`          | Print a table using a comma separated list of custom columns
-`-o=custom-columns-file=<filename>` | Print a table using the custom columns template in the \<filename> file
-`-o=json`                           | Output a JSON formatted API object
-`-o=jsonpath=<template>`            | Print the fields defined in a jsonpath expression
-`-o=jsonpath-file=<filename>`       | Print the fields defined by the jsonpath expression in the \<filename> file
-`-o=name`                           | Print only the resource name and nothing else
-`-o=wide`                           | Output in the plain-text format with any additional information, and for pods, the node name is included
-`-o=yaml`                           | Output a YAML formatted API object
+| Format                              | Description                                                                                              |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `-o=custom-columns=<spec>`          | Print a table using a comma separated list of custom columns                                             |
+| `-o=custom-columns-file=<filename>` | Print a table using the custom columns template in the \<filename> file                                  |
+| `-o=json`                           | Output a JSON formatted API object                                                                       |
+| `-o=jsonpath=<template>`            | Print the fields defined in a jsonpath expression                                                        |
+| `-o=jsonpath-file=<filename>`       | Print the fields defined by the jsonpath expression in the \<filename> file                              |
+| `-o=name`                           | Print only the resource name and nothing else                                                            |
+| `-o=wide`                           | Output in the plain-text format with any additional information, and for pods, the node name is included |
+| `-o=yaml`                           | Output a YAML formatted API object                                                                       |
 
 Examples using `-o=custom-columns`:
 
@@ -637,17 +649,17 @@ Verbosity is controlled through the `-v` flag, or `--v` followed by an integer r
 
 General Kubernetes logging conventions and the associated log levels are described in the following table:
 
-Verbosity | Description
---------- | -----------
-`--v=0`   | Generally useful for this to always be visible to a cluster operator.
-`--v=1`   | A reasonable default log level if you don't want verbosity.
-`--v=2`   | Useful steady state information about the service and important log messages that may correlate to significant changes in the system. This is the recommended default log level for most systems.
-`--v=3`   | Extended information about changes.
-`--v=4`   | Debug level verbosity.
-`--v=6`   | Display requested resources.
-`--v=7`   | Display HTTP request headers.
-`--v=8`   | Display HTTP request contents.
-`--v=9`   | Display HTTP request contents without truncation of contents.
+| Verbosity | Description                                                                                                                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--v=0`   | Generally useful for this to always be visible to a cluster operator.                                                                                                                             |
+| `--v=1`   | A reasonable default log level if you don't want verbosity.                                                                                                                                       |
+| `--v=2`   | Useful steady state information about the service and important log messages that may correlate to significant changes in the system. This is the recommended default log level for most systems. |
+| `--v=3`   | Extended information about changes.                                                                                                                                                               |
+| `--v=4`   | Debug level verbosity.                                                                                                                                                                            |
+| `--v=6`   | Display requested resources.                                                                                                                                                                      |
+| `--v=7`   | Display HTTP request headers.                                                                                                                                                                     |
+| `--v=8`   | Display HTTP request contents.                                                                                                                                                                    |
+| `--v=9`   | Display HTTP request contents without truncation of contents.                                                                                                                                     |
 
 ## Plugins
 

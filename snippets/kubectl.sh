@@ -65,3 +65,8 @@ kubectl run --rm -i --restart 'Never' 'resource-grabber' --image='alpine' \
 kubectl cordon 'kworker-rj2' \
 && kubectl drain 'kworker-rj2' --grace-period=300 --ignore-daemonsets=true \
 && kubectl delete node 'kworker-rj2'
+
+# Get raw information as JSON
+kubectl get --raw "/api/v1/nodes/ip-172-31-69-42.eu-west-1.compute.internal/proxy/stats/summary"
+# Get raw information as Prometheus metrics
+kubectl get --raw "/api/v1/nodes/ip-172-31-69-42.eu-west-1.compute.internal/proxy/metrics/cadvisor"
