@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 
+find "$HOME/bin" -type 'l' \( -name "pg*" -or -name "psql" \) -exec basename {} ';' \
+| xargs -pI{} ln -sf /opt/homebrew/Cellar/postgresql@15/15.8_1/bin/{} $HOME/bin/{}
+
 # Start DBs
 docker run --rm --name 'postgres' -d -p '5432:5432' -e POSTGRES_PASSWORD='password' 'postgres:14.12'
 docker run --rm --name 'postgis'  -d -p '5432:5432' -e POSTGRES_PASSWORD='password' 'postgis/postgis:14-3.4'
