@@ -5,7 +5,8 @@
 1. [Kubernetes](#kubernetes)
    1. [Helm chart](#helm-chart)
    1. [Operator](#operator)
-1. [Creating resources in Pulumi](#creating-resources-in-pulumi)
+1. [Create resources in GitLab using Pulumi](#create-resources-in-gitlab-using-pulumi)
+1. [Forking](#forking)
 1. [Repository management](#repository-management)
    1. [Different owners for parts of the code base](#different-owners-for-parts-of-the-code-base)
    1. [Get the version of the helper image to use for a runner](#get-the-version-of-the-helper-image-to-use-for-a-runner)
@@ -534,7 +535,7 @@ or consider using the [minimal Minikube example values file] as reference, as st
 
 See the [operator guide] and the [operator code] for details.
 
-## Creating resources in Pulumi
+## Create resources in GitLab using Pulumi
 
 Refer Pulumi's [GitLab provider installation & configuration] and [GitLab provider's README].
 
@@ -556,6 +557,10 @@ Refer Pulumi's [GitLab provider installation & configuration] and [GitLab provid
   ```sh
   export GITLAB_TOKEN='glpat-m-Va…zy'
   ```
+
+## Forking
+
+Refer [Forks].
 
 ## Repository management
 
@@ -746,6 +751,7 @@ Solution: set the correct ownership with
 - [The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership]
 - [GitLab HA Scaling Runner Vending Machine for AWS EC2 ASG]
 - [GitLab maintenance mode]
+- [Forks]
 
 <!--
   Reference
@@ -774,6 +780,7 @@ Solution: set the correct ownership with
 [command-line options]: https://docs.gitlab.com/charts/installation/command-line-options.html
 [deployment]: https://docs.gitlab.com/charts/installation/deployment.html
 [environment variables]: https://docs.gitlab.com/ee/administration/environment_variables.html
+[forks]: https://docs.gitlab.com/ee/user/project/repository/forking_workflow.html
 [gitlab ha scaling runner vending machine for aws ec2 asg]: https://gitlab.com/guided-explorations/aws/gitlab-runner-autoscaling-aws-asg#gitlab-runners-on-aws-spot-best-practices
 [gitlab maintenance mode]: https://docs.gitlab.com/ee/administration/maintenance_mode/
 [global settings]: https://docs.gitlab.com/charts/charts/globals.html
