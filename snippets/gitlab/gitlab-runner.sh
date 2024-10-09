@@ -5,6 +5,8 @@ helm --namespace 'gitlab' upgrade --install --create-namespace --version '0.64.1
 
 # register with token
 gitlab-runner register --url 'https://gitlab.com/' --non-interactive --executor 'shell' --token 'glrt-…'
+curl -X 'POST' https://gitlab.com/api/v4/user/runners -H 'PRIVATE-TOKEN: glpat-m-…' \
+	-d 'runner_type=instance_type' -d "tag_list=small,instance" -d 'run_untagged=false'
 # register with registration token: deprecated
 gitlab-runner register --url 'https://gitlab.example.com' --registration-token 'abc…' -n \
 	--name 'gitlab-aws-autoscaler' --executor 'docker+machine' --docker-image 'alpine'
