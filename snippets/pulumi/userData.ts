@@ -6,34 +6,39 @@ import * as yaml from 'yaml';
 const gitlabUrl = "https://gitlab.example.org";
 const runnerToken = "glrt-…";
 
+const securityUpdates_part = {
+    filename: "cloud-config.security-updates.yml",
+    contentType: "text/cloud-config",
+    content: yaml.stringify({
+        write_files: [{
+            path: "/etc/cron.daily/security-updates",
+            permissions: "0755",
+            content: [
+                "#!/bin/bash",
+                "dnf -y upgrade --security --nobest",
+            ].join("\n"),
+            defer: true,
+        }],
+    }),
+};
+
+
 const userData = new cloudinit.Config(
     "userData",
     {
         gzip: false,
         base64Encode: false,
         parts: [
-            {
-                filename: "cloud-config.security-updates.yml",
-                contentType: "text/cloud-config",
-                content: yaml.stringify({
-                    write_files: [{
-                        path: "/etc/cron.daily/security-updates",
-                        permissions: "0755",
-                        content: [
-                            "#!/bin/bash",
-                            "dnf -y upgrade --security --nobest",
-                        ].join("\n"),
-                        defer: true,
-                    }],
-                }),
-            },
+            securityUpdates_part,
             {
                 filename: "cloud-config.docker.yml",
+                mergeType: "dict(recurse_array,no_replace)+list(append)",
                 contentType: "text/cloud-config",
                 content: fs.readFileSync("./docker.yum.yaml", "utf8"),
             },
             {
                 filename: "cloud-config.gitlab-runner.yml",
+                mergeType: "dict(recurse_array,no_replace)+list(append)",
                 contentType: "text/cloud-config",
                 content: pulumi.all([ gitlabUrl, runnerToken ]).apply(
                     ([ gitlabUrl, runnerToken ]) => yaml.stringify({
@@ -79,6 +84,7 @@ const userData = new cloudinit.Config(
             },
             {
                 filename: "cloud-config.postgres.yml",
+                mergeType: "dict(recurse_array,no_replace)+list(append)",
                 contentType: "text/cloud-config",
                 content: yaml.stringify({
                     package_upgrade: false,
