@@ -26,17 +26,14 @@ const userData = new cloudinit.Config(
                         defer: true,
                     }],
                 }),
-                mergeType: "dict(recurse_array,no_replace)+list(append)",
             },
             {
                 filename: "cloud-config.docker.yml",
                 contentType: "text/cloud-config",
                 content: fs.readFileSync("./docker.yum.yaml", "utf8"),
-                mergeType: "dict(recurse_array,no_replace)+list(append)",
             },
             {
                 filename: "cloud-config.gitlab-runner.yml",
-                mergeType: "dict(allow_delete,no_replace)+list(append)",
                 contentType: "text/cloud-config",
                 content: pulumi.all([ gitlabUrl, runnerToken ]).apply(
                     ([ gitlabUrl, runnerToken ]) => yaml.stringify({
@@ -68,7 +65,7 @@ const userData = new cloudinit.Config(
                                 `[[runners]]`,
                                 `  name = "runner autoscaler"`,
                                 `  url = "${gitlabUrl}"`,
-                                `  token = ${runnerToken}`,
+                                `  token = "${runnerToken}"`,
                                 `  executor = "sh"`,
                             ].join("\n"),
                         }],
@@ -81,6 +78,7 @@ const userData = new cloudinit.Config(
                 ),
             },
             {
+                filename: "cloud-config.postgres.yml",
                 contentType: "text/cloud-config",
                 content: yaml.stringify({
                     package_upgrade: false,
@@ -90,8 +88,6 @@ const userData = new cloudinit.Config(
                         "systemctl enable --now 'postgres'",
                     ]
                 }),
-                filename: "cloud-config.postgres.yml",
-                mergeType: "dict(allow_delete,no_replace)+list(append)",
             },
         ],
     },
