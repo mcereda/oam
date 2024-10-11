@@ -3,6 +3,7 @@
 1. [TL;DR](#tldr)
 1. [Gotchas](#gotchas)
 1. [Daemon configuration](#daemon-configuration)
+   1. [Credentials](#credentials)
 1. [Images configuration](#images-configuration)
 1. [Containers configuration](#containers-configuration)
 1. [Health checks](#health-checks)
@@ -287,8 +288,32 @@ The docker daemon is configured using the `/etc/docker/daemon.json` file:
 ```json
 {
     "default-runtime": "runc",
-    "dns": ["8.8.8.8", "1.1.1.1"]
+    "dns": ["8.8.8.8", "1.1.1.1"],
+
 }
+```
+
+### Credentials
+
+Configured in the `${HOME}/.docker/config.json` file of the user executing docker commands:
+
+```json
+{
+  "credsStore": "ecr-login",
+  "auths": {
+    "https://index.docker.io/v1/": {
+      "auth": "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ101234"
+    }
+  }
+}
+```
+
+The `ecr-login` credentials store requires the [`amazon-ecr-credential-helper`][amazon-ecr-credential-helper] to be
+present on the system.
+
+```sh
+brew install 'docker-credential-helper-ecr'
+dnf install 'amazon-ecr-credential-helper'
 ```
 
 ## Images configuration
@@ -395,6 +420,7 @@ docker load …
 - [Testcontainers]
 - [Containerd]
 - [Kaniko]
+- [`amazon-ecr-credential-helper`][amazon-ecr-credential-helper]
 
 ### Sources
 
@@ -430,6 +456,7 @@ docker load …
 [github]: https://github.com/docker
 
 <!-- Others -->
+[amazon-ecr-credential-helper]: https://github.com/awslabs/amazon-ecr-credential-helper
 [arch linux wiki]: https://wiki.archlinux.org/index.php/Docker
 [cheatsheet]: https://collabnix.com/docker-cheatsheet/
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html

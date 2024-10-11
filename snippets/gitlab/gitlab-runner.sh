@@ -37,3 +37,12 @@ gitlab-runner verify -c '/etc/gitlab-runner/config.toml'
 gitlab-runner verify … --delete
 
 diff -y <(helm show values 'gitlab/gitlab-runner' --version '0.64.2') <(helm show values 'gitlab/gitlab-runner' --version '0.68.1')
+
+# Install plugins from the OCI registry distribution
+gitlab-runner fleeting install
+
+# List plugins with version
+gitlab-runner fleeting list
+
+# Sign in to private registries
+gitlab-runner fleeting login
