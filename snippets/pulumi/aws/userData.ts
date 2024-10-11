@@ -1,5 +1,4 @@
 import * as cloudinit from "@pulumi/cloudinit";
-import * as pulumi from "@pulumi/pulumi";
 import * as yaml from 'yaml';
 
 const userData = new cloudinit.Config(
@@ -11,7 +10,6 @@ const userData = new cloudinit.Config(
             {
                 // docker on AmazonLinux 2023
                 filename: "cloud-config.docker-engine.yml",
-                mergeType: "dict(allow_delete,no_replace)+list(append)",
                 contentType: "text/cloud-config",
                 content: yaml.stringify({
                     package_upgrade: false,
