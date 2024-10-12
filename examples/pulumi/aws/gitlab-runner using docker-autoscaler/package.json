@@ -1,0 +1,14 @@
+{
+    "name": "aws_gitlab-runner-autoscaler_docker-autoscaler",
+    "main": "index.ts",
+    "devDependencies": {
+        "@types/node": "^18",
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@pulumi/aws": "^6.55.0",
+        "@pulumi/cloudinit": "^1.4.7",
+        "@pulumi/pulumi": "^3.136.1",
+        "yaml": "^2.5.1"
+    }
+}

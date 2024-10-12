@@ -1,10 +1,10 @@
----
-name: evidently-ui-on-ec2-via-alb
+name: aws_gitlab-runner-autoscaler_docker-autoscaler
+description: >-
+  AWS example: Gitlab runner autoscaler using docker-autoscaler
 runtime:
   name: nodejs
   options:
     packagemanager: npm
-description: 'AWS example: Evidently-UI on EC2 instance via ALB'
 config:
   pulumi:tags:
     value:
