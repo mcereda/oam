@@ -1,0 +1,10 @@
+encryptionsalt: v1:p/R9FMstlOM=:v1:0Co3Kfu2CitxpVg6:UdYMMz8ZcasE7GPn1WjcTwK3R6+mmg==
+config:
+  aws:region: eu-west-1
+  aws:defaultTags:
+    tags:
+      ManagedByPulumi: "true"  # or it will not visualize
+      Owner: "somebody@example.com"
+  aws_gitlab-runner-autoscaler_docker-autoscaler:gitlab-url: https://gitlab.example.org
+  aws_gitlab-runner-autoscaler_docker-autoscaler:gitlab-runner-token:
+    secure: v1:osMr46blYbAd9dpP:IV7ld3oAnGiG51AbPS/pu/0/75NWxB9rb3/PvLPmu6JqhrCfd46+/uM=

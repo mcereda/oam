@@ -1,0 +1,2 @@
+set -x PULUMI_BACKEND_URL 'file://.'
+set -x PULUMI_CONFIG_PASSPHRASE 'test123'

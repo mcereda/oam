@@ -1,0 +1,259 @@
+###
+# Gitlab runner configuration file
+# --------------------------------------
+# Default locations:
+# - /etc/gitlab-runner/config.toml
+# - $HOME/.gitlab-runner/config.toml
+#
+# Refer 'https://docs.gitlab.com/runner/configuration/advanced-configuration.html'
+###
+
+concurrent = 32  # global through *all* runners
+listen_address = "0.0.0.0:9100"
+
+
+###
+# Docker autoscaler executor
+# ------------------
+###
+
+[[runners]]
+  name = "docker autoscaler on AWS"
+
+  # instances using docker-autoscaler executor
+  # ----------------
+  # up to 10 instances at a time, min 1 idle during working hours
+  # use each instance for up to 250 jobs
+  # 1 job per instance at a time
+
+  url = "https://gitlab.example.org"
+  token = "glrt-abc…"
+
+  environment = [ "AWS_REGION=eu-west-1" ]
+  executor = "docker-autoscaler"
+
+  [runners.docker]
+    privileged = false
+
+    image = "busybox:latest"
+    pull_policy = [
+      "if-not-present",
+      "always"
+    ]
+    allowed_pull_policies = [
+      "if-not-present",
+      "always",
+      "never"
+    ]
+
+  [runners.autoscaler]
+    plugin = "aws"
+    max_instances = 10
+    max_use_count = 250
+    capacity_per_instance = 1
+
+    [runners.autoscaler.plugin_config]
+      name = "GitlabRunners"  # autoscaling group name
+
+    [[runners.autoscaler.policy]]
+      periods = [ "* 7-19 * * mon-fri" ]
+      timezone = "Europe/Amsterdam"
+      idle_count = 1
+      idle_time = "20m0s"
+
+### Docker autoscaler executor - end
+
+
+###
+# Docker machine executor
+# ------------------
+# DEPRECATED - use 'docker-autoscaler' or 'instance' executors instead
+###
+
+[[runners]]
+  name = "docker machine ondemand on AWS"
+
+  # ondemand instance using docker+machine executor
+  # ----------------
+  # Up to 1, min 1 during working hours
+
+  url = "https://gitlab.example.org"
+  token = "glrt-abc…"
+
+  environment = [ "AWS_REGION=eu-west-1" ]
+  executor = "docker+machine"
+
+  # Number of jobs that can be run concurrently by the VMs created by *this* runner
+  # Defines the *upper limit* of how many VMs can be created by *this* runner, since it is 1 task per VM at a time
+  limit = 1
+
+  [runners.cache]
+    Type = "s3"
+    Path = "cache/"
+    Shared = true
+    MaxUploadedArchiveSize = 0
+
+    [runners.cache.s3]
+      ServerAddress = "s3.amazonaws.com"
+      BucketName = "exampleorg-gitlab-cache"
+      BucketLocation = "eu-west-1"
+
+  [runners.docker]
+    tls_verify = false
+    image = "busybox:latest"
+    privileged = false
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = [
+      "/cache",
+
+      # docker-in-docker
+      "/var/run/docker.sock:/var/run/docker.sock"
+    ]
+    shm_size = 0
+    network_mtu = 0
+    pull_policy = [
+      "if-not-present",
+      "always"
+    ]
+    allowed_pull_policies = [
+      "if-not-present",
+      "always",
+      "never"
+    ]
+
+    [runners.docker.services_tmpfs]
+      # speed up i/o for 'postgresql' services
+      "/var/lib/postgresql/data" = "rw,noexec"
+
+  [runners.machine]
+    # Static number of VMs that need to be idle at all times
+    IdleCount = 0
+
+    # Remove VMs after 250 jobs
+    # Keeps instances "fresh"
+    MaxBuilds = 250
+
+    # Maximum number of VMs that can be added to this runner in parallel
+    # Defaults to 0 (no limit)
+    MaxGrowthRate = 1
+
+    MachineDriver = "amazonec2"
+    MachineName = "autoscaled-b-ondemand-%s"
+    MachineOptions = [
+      "amazonec2-region=eu-west-1",
+      "amazonec2-vpc-id=vpc-01234567",
+      "amazonec2-zone=b",
+      "amazonec2-subnet-id=subnet-0123456789abcdef0",
+      "amazonec2-use-private-address=true",
+      "amazonec2-private-address-only=true",
+      "amazonec2-security-group=GitlabRunners",
+      "amazonec2-instance-type=m7i.xlarge",
+      "amazonec2-root-size=50",
+      "amazonec2-volume-type=gp3",
+      "amazonec2-iam-instance-profile=GitlabRunner",
+      "amazonec2-tags=Team,Infra,Application,GitlabRunner,SpotInstance,False",
+    ]
+
+    [[runners.machine.autoscaling]]
+      Periods = [ "* * 9-5 * * mon-fri *" ]
+      Timezone = "Europe/Amsterdam"
+      IdleCount = 1
+
+
+[[runners]]
+  name = "docker machine spot on AWS"
+
+  # spot instances using docker+machine executor
+  # ----------------
+  # Up to 10, min 2 during working hours
+
+  url = "https://gitlab.example.org"
+  token = "glrt-abc…"
+
+  environment = [ "AWS_REGION=eu-west-1" ]
+  executor = "docker+machine"
+  limit = 10
+  request_concurrency = 4
+
+  [runners.cache]
+    Type = "s3"
+    Path = "cache/"
+    Shared = true
+    MaxUploadedArchiveSize = 0
+
+    [runners.cache.s3]
+      ServerAddress = "s3.amazonaws.com"
+      BucketName = "exampleorg-gitlab-cache"
+      BucketLocation = "eu-west-1"
+
+  [runners.docker]
+    tls_verify = false
+    image = "busybox:latest"
+    privileged = false
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = [
+      "/cache",
+
+      # docker-in-docker
+      "/var/run/docker.sock:/var/run/docker.sock"
+    ]
+    shm_size = 0
+    network_mtu = 0
+    services_limit = -1
+    pull_policy = [
+      "if-not-present",
+      "always"
+    ]
+    allowed_pull_policies = [
+      "if-not-present",
+      "always",
+      "never"
+    ]
+
+    [runners.docker.services_tmpfs]
+      # speed up i/o for 'postgresql' services
+      "/var/lib/postgresql/data" = "rw,noexec"
+
+  [runners.machine]
+    IdleCount = 0
+
+    # Remove VMs after 5m in the idle state
+    IdleTime = 300
+
+    MaxBuilds = 50
+    MaxGrowthRate = 4
+
+    MachineDriver = "amazonec2"
+    MachineName = "autoscaled-a-spot-%s"
+    MachineOptions = [
+      "amazonec2-region=eu-west-1",
+      "amazonec2-vpc-id=vpc-01234567",
+      "amazonec2-zone=a",
+      "amazonec2-subnet-id=subnet-0123456789abcdef0",
+      "amazonec2-use-private-address=true",
+      "amazonec2-private-address-only=true",
+      "amazonec2-security-group=GitlabRunners",
+
+      "amazonec2-instance-type=m7i.xlarge",
+      "amazonec2-root-size=50",
+      "amazonec2-volume-type=gp3",
+      "amazonec2-iam-instance-profile=GitlabRunner",
+      "amazonec2-tags=Team,Infra,Application,GitlabRunner,SpotInstance,True",
+
+      "amazonec2-request-spot-instance=true",
+      "amazonec2-spot-price=0.3",
+    ]
+
+    [[runners.machine.autoscaling]]
+      Periods = ["* 7-19 * * mon-fri *"]
+      Timezone = "Europe/Amsterdam"
+      IdleCount = 10
+      IdleCountMin = 2
+      IdleScaleFactor = 1.5
+      IdleTime = 900
+
+### Docker machine executor - end
