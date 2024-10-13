@@ -1,12 +1,13 @@
 # Fwupd
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
 ## TL;DR
+
+<details>
+  <summary>Setup</summary>
 
 ```sh
 # Installation.
@@ -16,6 +17,14 @@ pacman -Sy 'fwupd'
 pamac install 'fwupd'
 yum install 'fwupd'
 zypper install 'fwupd'
+```
+
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
 
 # Display detected devices.
 fwupdmgr get-devices
@@ -39,6 +48,8 @@ fwupdmgr report-history
 fwupdmgr clear-history
 ```
 
+</details>
+
 ## Further readings
 
 - [Website]
@@ -50,7 +61,8 @@ fwupdmgr clear-history
 - [Arch wiki]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Upstream -->
