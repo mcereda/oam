@@ -49,17 +49,19 @@ end
 
 if set -q '_flag_debug'
 	echo "DEBUG: repositories: $repositories"
+	set _parallel_flag_debug '-t'
+	set _xargs_flag_debug '-t'
 end
 
 switch $_flag_executor
 	case 'parallel'
-		if ! which -s parallel
+		if ! which parallel > /dev/null
 			echo "Error: GNU parallel not found" >&2
 			return
 		end
-		parallel --color-failed -j "$_flag_threads" --tagstring "{/}" "git -C {} $_flag_command" ::: $repositories
+		parallel --color-failed $_parallel_flag_debug -j "$_flag_threads" --tagstring "{/}" "git -C {} $_flag_command" ::: $repositories
 	case 'xargs'
-		echo  $repositories | xargs -tP "$_flag_threads" -I{} git -C "{}" $_flag_command
+		echo  $repositories | xargs $_xargs_flag_debug -P "$_flag_threads" -I{} git -C "{}" $_flag_command
 	case '*'
 		echo "Error: $runner not supported" >&2
 		return
