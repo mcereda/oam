@@ -1,10 +1,8 @@
 # `getfattr`
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -12,6 +10,9 @@
 # Install the tool.
 apt install 'attr'
 dnf install 'attr'
+
+# Get values for all attributes.
+getfattr -d 'path/to/file.1' … 'path/to/file.N'
 
 # Get values for specific extended attributes.
 getfattr -n 'name' 'path/to/file.1' … 'path/to/file.N'
@@ -21,19 +22,15 @@ getfattr -n 'name' 'path/to/file.1' … 'path/to/file.N'
 
 - [`setfattr`][setfattr]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [`man` page][man page]
 - [Tag files in GNU/Linux]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Knowledge base -->
 [setfattr]: setfattr.md
