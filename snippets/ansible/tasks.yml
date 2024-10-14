@@ -29,11 +29,15 @@
   ansible.builtin.command: hostname
 
 - name: Assertions
+  vars:
+    installation_method: package
+    url: https://www.google.com/
   ansible.builtin.assert:
     that:
-      - "'package' in ['container', 'package']"
+      - installation_method in ['container', 'package']
       - "'https://www.google.com/' is ansible.builtin.url"
       - "'domain.example.com' is community.general.fqdn_valid(min_labels=2)"
+      - url is regex('\w\.com/')
     fail_msg: What to say if any of the above conditions fail
     success_msg: What to say if all of the above conditions succeed
 
