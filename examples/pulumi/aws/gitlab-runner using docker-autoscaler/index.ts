@@ -171,9 +171,29 @@ const gitlab_runners_launchTemplate = new aws.ec2.LaunchTemplate(
     "gitlab-runners",
     {
         name: "GitlabRunners",
+        description: "Gitlab Runner instances managed using the docker-autoscaler executor",
+        updateDefaultVersion: true,
         imageId: ami_amazonLinux_x86_64_latest.apply(amis => amis.id),
         vpcSecurityGroupIds: [ gitlab_runners_securityGroup.id ],
         userData: gitlab_runners_userData.rendered,
+        tagSpecifications: [
+            {
+                resourceType: "instance",
+                tags: {
+                    Name: "Gitlab Runner",
+                    Owner: "infra@example.org",
+                    Team: "Infra",
+                },
+            },
+            {
+                resourceType: "volume",
+                tags: {
+                    Name: "Gitlab Runner",
+                    Owner: "infra@example.org",
+                    Team: "Infra",
+                },
+            },
+        ],
     },
 );
 const gitlab_runners_autoScalingGroup = new aws.autoscaling.Group(
@@ -182,8 +202,13 @@ const gitlab_runners_autoScalingGroup = new aws.autoscaling.Group(
         name: "GitlabRunners",
         tags: [
             {
-                key: "Owner",
-                value: "infra@example.org",
+                key: "AutoScalingGroup",
+                value: "GitlabRunners",
+                propagateAtLaunch: true,
+            },
+            {
+                key: "Executor",
+                value: "docker-autoscaler",
                 propagateAtLaunch: true,
             },
         ],
@@ -213,6 +238,11 @@ const gitlab_runners_autoScalingGroup = new aws.autoscaling.Group(
                 ],
             },
         },
+    },
+    {
+        ignoreChanges: [
+            "desiredCapacity",  // managed by autoscaling manager
+        ],
     },
 );
 // runners - end

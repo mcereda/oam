@@ -16,6 +16,7 @@
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
 1. [Savings plans](#savings-plans)
+1. [Resource tagging](#resource-tagging)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -287,6 +288,23 @@ percentages, Savings Plans are applied to the first usage with the lowest Saving
 Savings Plans continue to apply until there are no more remaining usages, or one's commitment is exhausted. Any
 remaining usage is then charged at the On-Demand rates.
 
+## Resource tagging
+
+Suggested:
+
+| Tag                     | Purpose | Example                                                         | Notes |
+| ----------------------- | ------- | --------------------------------------------------------------- | ----- |
+| `Name`                  | AWS UI  | `GitlabRunner`                                                  |       |
+| `Owner`                 |         | `SecurityLead`, `SecOps`, `Workload-1-Development-team`         |       |
+| `BusinessUnitId`        |         | `Finance`, `Retail`, `API-1`, `DevOps`                          |       |
+| `Environment`           |         | `Sandbox`, `Dev`, `PreProd`, `QA`, `Prod`, `Testing`            |       |
+| `CostCenter`            |         | `FIN123`, `Retail-123`, `Sales-248`, `HR-333`                   |       |
+| `FinancialOwner`        |         | `HR`, `SecurityLead`, `DevOps-3`, `Workload-1-Development-team` |       |
+| `ComplianceRequirement` |         | `NIST`, `HIPAA`, `GDPR`                                         |       |
+
+[Create tag policies][creating organization policies with aws organizations] to enforce values, and to prevent the
+creation of non-compliant resources.
+
 ## Further readings
 
 - [EC2]
@@ -315,6 +333,9 @@ remaining usage is then charged at the On-Demand rates.
 - [Savings Plans user guide]
 - [AWS Savings Plans Vs. Reserved Instances: When To Use Each]
 - [How can I use AWS KMS asymmetric keys to encrypt a file using OpenSSL?]
+- [A guide to tagging resources in AWS]
+- [Guidance for Tagging on AWS]
+- [Creating organization policies with AWS Organizations]
 
 <!--
   Reference
@@ -352,8 +373,10 @@ remaining usage is then charged at the On-Demand rates.
 [best practices for tagging aws resources]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html
 [connect to the internet using an internet gateway]: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
+[creating organization policies with aws organizations]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_policies_create.html
 [elastic ip addresses]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html
 [exporting db snapshot data to amazon s3]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ExportSnapshot.html
+[guidance for tagging on aws]: https://aws.amazon.com/solutions/guidance/tagging-on-aws/
 [how can i use aws kms asymmetric keys to encrypt a file using openssl?]: https://repost.aws/knowledge-center/kms-openssl-encrypt-key
 [i'm trying to export a snapshot from amazon rds mysql to amazon s3, but i'm receiving an error. why is this happening?]: https://repost.aws/knowledge-center/rds-mysql-export-snapshot
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
@@ -367,6 +390,7 @@ remaining usage is then charged at the On-Demand rates.
 [what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
 
 <!-- Others -->
+[a guide to tagging resources in aws]: https://medium.com/@staxmarketing/a-guide-to-tagging-resources-in-aws-8f4311afeb46
 [automating dns-challenge based letsencrypt certificates with aws route 53]: https://johnrix.medium.com/automating-dns-challenge-based-letsencrypt-certificates-with-aws-route-53-8ba799dd207b
 [aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
 [aws savings plans vs. reserved instances: when to use each]: https://www.cloudzero.com/blog/savings-plans-vs-reserved-instances/
