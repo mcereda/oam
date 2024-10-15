@@ -357,6 +357,13 @@ git show :/cool
 # Skip commit hooks.
 # Most useful with a broken `pre-commit` or `lefthook` executable or config.
 git commit --no-verify …
+
+# Reset fork to upstream's state
+git remote add 'upstream' '/url/to/original/repo'
+git fetch 'upstream'
+git checkout 'master'
+git reset --hard 'upstream/master'
+git push 'origin' 'master' --force
 ```
 
 ## Authentication
@@ -1028,6 +1035,7 @@ git -c http.sslVerify=false …
 - [Dress up your git diffs with word-level highlights]
 - [Git global config for specific repositories?]
 - [cheat.sh]
+- [Clean up a fork and restart it from the upstream]
 
 <!--
   Reference
@@ -1052,6 +1060,7 @@ git -c http.sslVerify=false …
 [able to push to all git remotes with the one command?]: https://stackoverflow.com/questions/5785549/able-to-push-to-all-git-remotes-with-the-one-command
 [cannot clone git from azure devops using pat]: https://stackoverflow.com/questions/53106546/cannot-clone-git-from-azure-devops-using-pat#53182981
 [cheat.sh]: https://cheat.sh/git
+[clean up a fork and restart it from the upstream]: https://stackoverflow.com/questions/9646167/clean-up-a-fork-and-restart-it-from-the-upstream#9646323
 [coloring white space in git-diff's output]: https://stackoverflow.com/questions/5257553/coloring-white-space-in-git-diffs-output#5259137
 [create a git patch from the uncommitted changes in the current working directory]: https://stackoverflow.com/questions/5159185/create-a-git-patch-from-the-uncommitted-changes-in-the-current-working-directory
 [dress up your git diffs with word-level highlights]: https://www.viget.com/articles/dress-up-your-git-diffs-with-word-level-highlights/

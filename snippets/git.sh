@@ -102,3 +102,10 @@ git-all () {
 
 	[[ -n $DEBUG ]] && set +o xtrace
 }
+
+# Reset fork to upstream's state
+git remote add 'upstream' '/url/to/original/repo'
+git fetch 'upstream'
+git checkout 'master'
+git reset --hard 'upstream/master'
+git push 'origin' 'master' --force
