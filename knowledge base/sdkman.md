@@ -7,7 +7,7 @@
 ## TL;DR
 
 <details>
-  <summary>Management</summary>
+  <summary>Setup</summary>
 
 Configuration file: `${HOME}/.sdkman/etc/config`
 
@@ -19,6 +19,7 @@ curl -s "https://get.sdkman.io?rcupdate=false" | bash
 
 # Initialize.
 source "$HOME/.sdkman/bin/sdkman-init.sh"
+set SDKMAN_PLATFORM "$(cat "$HOME/.sdkman/var/platform")"
 
 # Get help.
 sdk help
@@ -118,7 +119,8 @@ sdk uninstall 'scala' '3.4.1'
 - [Usage]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
