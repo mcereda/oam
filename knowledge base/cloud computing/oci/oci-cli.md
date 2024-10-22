@@ -2,27 +2,40 @@
 
 Oracle Cloud Infrastructure CLI.
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
 1. [Further readings](#further-readings)
 
 ## TL;DR
 
+<details>
+  <summary>Setup</summary>
+
 ```sh
 # Install the CLI.
+pip install 'oci-cli'
 brew install 'oci-cli'
+dnf install 'oci-cli'
+zypper install 'oci-cli'
 
 # Start the interactive setup.
+# The key pair must be registered for the user in the cloud console.
 oci setup config
 
 # Generate a key pair to include in the config file.
+# The key pair must be registered for the user in the cloud console.
 oci setup keys
 
 # Show the current configuration.
 cat ~/'.oci/config'
+```
 
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
 # List available compartments.
 oci iam compartment list
 oci iam compartment list -c 'tenancy_id'
@@ -52,6 +65,8 @@ oci instance-agent available-plugins get -c 'tenancy_id' \
 oci compute instance list -c 'tenancy_id'
 ```
 
+</details>
+
 ## Configuration
 
 | Unix location            | Description                                                                            |
@@ -67,7 +82,8 @@ oci compute instance list -c 'tenancy_id'
 - [Required keys and OCIDs]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
