@@ -1,7 +1,5 @@
 # Oracle Cloud Infrastructure
 
-## Table of contents <!-- omit in toc -->
-
 1. [Concepts](#concepts)
    1. [Compartments](#compartments)
    1. [Networking](#networking)
@@ -38,13 +36,15 @@ This includes **any policies** attached to the compartment itself.
 - [`oci-cli`][oci-cli]
 - [Compute images]
 - [Connect to private compute instances using OCI Bastion Service]
+- [Running Commands on an Instance]
 
 ### Sources
 
 - [Required keys and OCIDs]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
@@ -56,3 +56,4 @@ This includes **any policies** attached to the compartment itself.
 
 <!-- Others -->
 [connect to private compute instances using oci bastion service]: https://medium.com/@harjulthakkar/connect-to-private-compute-instance-using-oci-bastion-service-ca96a3ceea49
+[running commands on an instance]: https://docs.public.oneportal.content.oci.oraclecloud.com/en-us/iaas/Content/Compute/Tasks/runningcommands.htm
