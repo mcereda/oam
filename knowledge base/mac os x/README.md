@@ -179,10 +179,10 @@ dscl '.' -read "/Users/$USER" 'UserShell'
 
 
 # Bypass Gatekeeper for currently installed versions.
-xattr -c '/Applications/Zen Browser.app/'
+xattr -c '/path/to/app.app'
 
 # Bypass Gatekeeper for all versions of apps.
-xattr -d 'com.apple.quarantine' '/Applications/LibreWolf.app/'
+xattr -d 'com.apple.quarantine' '/path/to/app.app'
 ```
 
 ## Taking screenshots
