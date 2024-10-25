@@ -66,6 +66,32 @@ aws deploy get-deployment-group --application-name 'batman' \
   --deployment-group-name 'production'
 
 
+# Show ELB details.
+aws elbv2 describe-load-balancers --names 'load-balancer-name'
+
+# Get the private IP addresses of load balancers.
+aws ec2 describe-network-interfaces --output 'text' \
+  --filters Name=description,Values='ELB app/application-load-balancer-name/application-load-balancer-id' \
+  --query 'NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress'
+aws ec2 describe-network-interfaces --output 'text' \
+  --filters Name=description,Values='ELB net/network-load-balancer-name/network-load-balancer-id' \
+  --query 'NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress'
+aws ec2 describe-network-interfaces --output 'text' \
+  --filters Name=description,Values='ELB classic-load-balancer-name' \
+  --query 'NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress'
+
+# Get the public IP addresses of load balancers.
+aws ec2 describe-network-interfaces --output 'text' \
+  --filters Name=description,Values='ELB app/application-load-balancer-name/application-load-balancer-id' \
+  --query 'NetworkInterfaces[*].Association.PublicIp'
+aws ec2 describe-network-interfaces --output 'text' \
+  --filters Name=description,Values='ELB net/network-load-balancer-name/network-load-balancer-id' \
+  --query 'NetworkInterfaces[*].Association.PublicIp'
+aws ec2 describe-network-interfaces --output 'text' \
+  --filters Name=description,Values='ELB classic-load-balancer-name' \
+  --query 'NetworkInterfaces[*].Association.PublicIp'
+
+
 # Get information about the current user.
 aws sts get-caller-identity
 
@@ -284,6 +310,7 @@ Solutions:
 - [Install the Session Manager plugin for the AWS CLI]
 - [Use an IAM role in the AWS CLI]
 - [Using AWS KMS via the CLI with a Symmetric Key]
+- [What's the source IP address of the traffic that Elastic Load Balancing sends to my web servers?]
 
 <!--
   Reference
@@ -311,4 +338,5 @@ Solutions:
 [quickstart]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html
 [use an iam role in the aws cli]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html
 [using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
+[what's the source ip address of the traffic that elastic load balancing sends to my web servers?]: https://repost.aws/knowledge-center/elb-find-load-balancer-ip
 [yubikey authentication for aws cli (and boto) made easy]: https://github.com/tommie-lie/awscli-plugin-yubikeytotp

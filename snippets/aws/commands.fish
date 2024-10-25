@@ -205,6 +205,37 @@ aws eks describe-addon-configuration --addon-name 'aws-ebs-csi-driver' --addon-v
 
 
 ###
+# ELB - Load Balancers
+# ------------------
+###
+
+# Get load balancers IDs
+aws elbv2 describe-load-balancers --names 'load-balancer-name' --query 'LoadBalancers[].LoadBalancerArn' --output 'text' \
+| grep -o '[^/]*$'
+
+# Get the private IP addresses of load balancers
+aws ec2 describe-network-interfaces --output 'text' \
+	--filters Name=description,Values='ELB app/application-load-balancer-name/application-load-balancer-id' \
+	--query 'NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress'
+aws ec2 describe-network-interfaces --output 'text' \
+	--filters Name=description,Values='ELB net/network-load-balancer-name/network-load-balancer-id' \
+	--query 'NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress'
+aws ec2 describe-network-interfaces --output 'text' \
+	--filters Name=description,Values='ELB classic-load-balancer-name' \
+	--query 'NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress'
+
+# Get the public IP addresses of load balancers
+aws ec2 describe-network-interfaces --output 'text' \
+	--filters Name=description,Values='ELB app/application-load-balancer-name/application-load-balancer-id' \
+	--query 'NetworkInterfaces[*].Association.PublicIp'
+aws ec2 describe-network-interfaces --output 'text' \
+	--filters Name=description,Values='ELB net/network-load-balancer-name/network-load-balancer-id' \
+	--query 'NetworkInterfaces[*].Association.PublicIp'
+aws ec2 describe-network-interfaces --output 'text' \
+	--filters Name=description,Values='ELB classic-load-balancer-name' \
+	--query 'NetworkInterfaces[*].Association.PublicIp'
+
+###
 # IAM
 # ------------------
 ###
