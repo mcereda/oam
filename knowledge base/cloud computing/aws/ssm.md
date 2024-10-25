@@ -143,6 +143,24 @@ aws ssm describe-instance-associations-status --instance-id 'instance-id'
   > **Other shell profile configuration options**<br/>
   > By default, Session Manager starts in the "/usr/bin" directory.
 
+- **Avoid** executing SSM through commands like `xargs` or `parallel` like in the following:
+
+  ```sh
+  aws ec2 describe-instances --output text --query 'Reservations[].Instances[0].InstanceId' --filters … \
+  | xargs -ot aws ssm start-session --target
+  ```
+
+  The middle commands start the session correctly, but will intercept traps like `CTRL-C` and stop their own execution
+  terminating the SSM session.
+
+  Prefer using the `describe-instance` command's output as input for the `start-session` command instead:
+
+  ```sh
+  aws ssm start-session --target "$( \
+    aws ec2 describe-instances --output text --query 'Reservations[].Instances[0].InstanceId' --filters … \
+  )"
+  ```
+
 ## Integrate with Ansible
 
 Create a dynamic inventory which name ends with `aws_ec2.yml` (e.g. `test.aws_ec2.yml` or simply `aws_ec2.yml`).<br/>
