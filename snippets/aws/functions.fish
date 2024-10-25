@@ -45,10 +45,11 @@ alias aws-ec2-running-instanceIds "aws ec2 describe-instances --output 'text' \
 	--filters 'Name=instance-state-name,Values=running' \
 	--query 'Reservations[].Instances[0].InstanceId' \
 | sed -E 's/\t+/\n/g'"
-alias aws-ssm-gitlabAutoscalingManager-ita-b "aws ec2 describe-instances --output text \
+alias aws-ssm-gitlabAutoscalingManager-ita-b "aws ssm start-session --target ( \
+	aws ec2 describe-instances --output text \
+	--query 'Reservations[].Instances[0].InstanceId' \
 	--filters \
 		'Name=availability-zone,Values=eu-south-1b' \
 		'Name=instance-state-name,Values=running' \
 		'Name=tag:Name,Values=Gitlab Autoscaling Manager' \
-	--query 'Reservations[].Instances[0].InstanceId' \
-| xargs -ot aws ssm start-session --target"
+)"
