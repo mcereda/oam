@@ -28,7 +28,7 @@ helm --namespace 'gitlab' upgrade --install --create-namespace --version '0.64.1
 
 </details>
 
-<details>
+<details style="padding-bottom: 1em;">
   <summary>Usage</summary>
 
 ```sh
@@ -49,6 +49,34 @@ gitlab-runner exec docker \
 Each runner executor is assigned 1 task at a time.
 
 Runners seem to require the main instance to give the full certificate chain upon connection.
+
+The `runners.autoscaler.policy.periods` setting appears to be a full blown cron job, not just a time frame.
+
+<details style="margin-top: -1em; padding: 0 0 1em 1em;">
+
+Given the following policies:
+
+```toml
+[[runners]]
+  [runners.autoscaler]
+    [[runners.autoscaler.policy]]
+      periods = [ "* 7-19 * * mon-fri" ]
+      …
+    [[runners.autoscaler.policy]]
+      periods = [ "30 8-18 * * mon-fri" ]
+      …
+```
+
+It will **not** work as _apply policy 1 between 07:00 and 19:00 but override it with policy 2 between 08:30 and
+18:30_.<br/>
+Instead, the runner will:
+
+- Apply policy 1 every minute of every hour between 07:00 and 19:00, **and**
+- Override policy 1 by applying policy 2 only on the 30th minute of every hour between 08:00 and 18:00.
+
+Meaning it will reapply policy 1 at the 31st minute of every hour in the period defined by policy 2.
+
+</details>
 
 ## Pull images from private AWS ECR registries
 
@@ -424,9 +452,10 @@ concurrent = 40
     # Reduce even more the number of available VMs during the weekends
     [[runners.machine.autoscaling]]
       Periods = ["* * * * * sat,sun *"]
+      Timezone = "UTC"
+
       IdleCount = 0
       IdleTime = 120
-      Timezone = "UTC"
 ```
 
 </details>
