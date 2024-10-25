@@ -3,7 +3,7 @@ import * as postgresql from "@pulumi/postgresql";
 import * as pulumi from "@pulumi/pulumi";
 
 const config = new pulumi.Config();
-const rdsInstance_output = aws.rds.getInstanceOutput({dbInstanceIdentifier: "pikachu-zambia-staging"});
+const rdsInstance_output = aws.rds.getInstanceOutput({dbInstanceIdentifier: "some-db"});
 
 const rdsInstance_postgresqlProvider = new postgresql.Provider(
     "rdsInstance", {
