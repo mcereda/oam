@@ -13,7 +13,7 @@ sudo dnf --assumeyes install \
 	"https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
 
 sudo dnf upgrade --security --sec-severity 'Critical' --downloadonly
-sudo dnf -y upgrade --security --sec-severity 'Important'
+sudo dnf -y upgrade --security --nobest --sec-severity 'Important'
 
 sudo rpmkeys --import 'https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg'
 
@@ -31,4 +31,4 @@ EOF
 dnf repoquery -l 'nginx'
 
 sudo dnf check-release-update
-sudo dnf upgrade --releasever='2023.5.20240722'
+sudo dnf upgrade --releasever='2023.6.20241010' --excludepkgs 'gitlab-runner'
