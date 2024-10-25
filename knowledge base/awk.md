@@ -1,7 +1,5 @@
 # `awk`
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
 
@@ -24,6 +22,10 @@ awk 'length($0) > 20' sales.txt
 
 # Print only lines where the value of the second column is greater than 100.
 awk '$2 > 100' sales.txt
+
+# Print only the last column.
+echo 'maps.google.com' | awk -F. '{print $NF}'
+awk -F '/' '{print $NF}' <<< 'test/with/slashes'
 ```
 
 ## Further readings
@@ -33,7 +35,8 @@ awk '$2 > 100' sales.txt
 - [The essential Bash cheat sheet]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Others -->
