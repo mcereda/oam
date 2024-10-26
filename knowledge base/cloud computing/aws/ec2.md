@@ -3,6 +3,9 @@
 1. [TL;DR](#tldr)
 1. [Burstable instances](#burstable-instances)
 1. [Disks](#disks)
+1. [Auto scaling](#auto-scaling)
+   1. [Lifecycle hooks](#lifecycle-hooks)
+1. [Image builder](#image-builder)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -98,14 +101,67 @@ In Unlimited mode, burstable instances:
 - Use CPU credits they earn to pay down the surplus credits they spent earlier when CPU utilization falls below the
   baseline again.
 
-The ability to earn CPU credits to pay down surplus credits is what enables EC2 to average the CPU utilization of
-instances over a 24-hour period.<br/>
-If the average CPU usage over a 24-hour period **exceeds** the baseline, instances are billed for the additional usage
-at a [flat additional rate per vCPU-hour](https://aws.amazon.com/ec2/pricing/on-demand/#T2.2FT3.2FT4g_Unlimited_Mode_Pricing).
+Earning CPU credits to pay down surplus credits enables EC2 to average the CPU utilization of instances over a 24-hour
+period.<br/>
+If the average CPU usage over a 24-hour period **exceeds** the baseline, instances are
+[billed for the additional usage](https://aws.amazon.com/ec2/pricing/on-demand/#T2.2FT3.2FT4g_Unlimited_Mode_Pricing).
 
 ## Disks
 
-See [EBS].
+Refer [EBS].
+
+## Auto scaling
+
+Refer [Amazon EC2 Auto Scaling].
+
+### Lifecycle hooks
+
+Refer [Amazon EC2 Auto Scaling lifecycle hooks].
+
+Also see [CompleteLifecycleAction].
+
+## Image builder
+
+Refer [EC2 Image Builder].
+
+AWS service automating the creation, management, and deployment of customized AMIs or Docker images.
+
+AMIs created by Image Builder in one's account are owned by that account.
+
+Image Builder supports the following at the time of writing:
+
+| Operating system/distribution      | Supported versions                             |
+| ---------------------------------- | ---------------------------------------------- |
+| Amazon Linux                       | 2, 2023                                        |
+| CentOS                             | 7, 8                                           |
+| CentOS Stream                      | 8                                              |
+| Mac OS X                           | 12.x (Monterey), 13.x (Ventura), 14.x (Sonoma) |
+| Red Hat Enterprise Linux (RHEL)    | 7, 8, 9                                        |
+| SUSE Linux Enterprise Server (SLE) | 12, 15                                         |
+| Ubuntu                             | 18.04 LTS, 20.04 LTS, 22.04 LTS, 24.04 LTS     |
+| Windows Server                     | 2012 R2, 2016, 2019, 2022                      |
+
+Image Builder costs **nothing** to create custom AMI or container images.<br/>
+However, standard pricing applies for other services that are used in the process.
+
+Steps:
+
+<details>
+  <summary>AMI creation</summary>
+
+1. \[optional] Create new components as needed.
+1. \[optional] Create a new image recipe.
+1. \[optional] Create a new infrastructure configuration.
+1. \[optional] Create a new distribution configuration.
+1. Create a new pipeline.
+
+</details>
+<details>
+  <summary>Container creation</summary>
+
+TODO
+
+</details>
 
 ## Further readings
 
@@ -131,6 +187,10 @@ See [EBS].
 - [Change the instance type]
 - [How to Clone instance EC2]
 - [Create an AMI from an Amazon EC2 Instance]
+- [Amazon EC2 Auto Scaling]
+- [Amazon EC2 Auto Scaling lifecycle hooks]
+- [EC2 Image Builder]
+- [CompleteLifecycleAction]
 
 <!--
   Reference
@@ -144,13 +204,17 @@ See [EBS].
 [ssm]: ssm.md
 
 <!-- Upstream -->
+[amazon ec2 auto scaling lifecycle hooks]: https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html
+[amazon ec2 auto scaling]: https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html
 [best practices for handling ec2 spot instance interruptions]: https://aws.amazon.com/blogs/compute/best-practices-for-handling-ec2-spot-instance-interruptions/
 [burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html
 [change the instance type]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html
+[completelifecycleaction]: https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_CompleteLifecycleAction.html
 [connect to your instances without requiring a public ipv4 address using ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-with-ec2-instance-connect-endpoint.html
 [create an ami from an amazon ec2 instance]: https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide//tkv-create-ami-from-instance.html
 [describe-images]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-images.html
 [describeimages]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
+[ec2 image builder]: https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html
 [how to clone instance ec2]: https://repost.aws/questions/QUOrWudF3vRL2Vqtrv0M9lfQ/how-to-clone-instance-ec2
 [iam roles for amazon ec2]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
 [key concepts and definitions for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-credits-baseline-concepts.html
