@@ -46,7 +46,7 @@ gitlab-runner exec docker \
 
 </details>
 
-Each runner executor is assigned 1 task at a time.
+Each runner executor is assigned 1 task at a time by default.
 
 Runners seem to require the main instance to give the full certificate chain upon connection.
 
@@ -138,11 +138,19 @@ Now your GitLab runner should automatically authenticate to one's private ECR re
 
 Refer [Docker Autoscaler executor].
 
-Autoscale-enabled wrap for the Docker executor that creates instances on-demand to accommodate jobs processed by the
-runner manager.
+Autoscale-enabled wrap for the `docker` executor. Supports all `docker` executor's options and features.<br/>
+Creates instances on-demand to accommodate jobs processed by the runner leveraging it, which acts as manager.<br/>
+The runner itself will **not** execute jobs, just delegate them.
 
 Leverages [fleeting] plugins to scale automatically.<br/>
 Fleeting is an abstraction for a group of autoscaled instances, and uses plugins supporting cloud providers.
+
+Both the manager and the instances executing jobs require the Docker Engine to be installed.<br/>
+The manager will connect to the instances via SSH and execute Docker commands. The user it connects with **must** be
+able to execute those commands commands (most likely by being part of the `docker` group on the instances).
+
+Container images are pulled by the manager and sent to the instances it creates.<br/>
+The instances do not require container registry access themselves this way.
 
 Add the following settings in the `config.toml` file:
 
@@ -179,11 +187,9 @@ Requirements:
 - A Launch Template referencing an AMI equipped with Docker Engine for the runners to use.
 
   Alternatively, any AMI that can run Docker Engine can be used as long as an appropriate cloud-init configuration is
-  provided in the template's `userData`.<br/>
-  Specifically, the user executing Docker (by default, the instance's default user) must be part of the `docker` group
-  in order to be able to access Docker's socket.
+  provided in the template's `userData`.
 
-  <details style="padding-bottom: 1em;">
+  <details style="margin-top: -1em; padding-bottom: 1em;">
 
   ```yaml
   packages: [ "docker" ]
@@ -195,6 +201,11 @@ Requirements:
 
   </details>
 
+  In this case, and specially if the cloud-init process takes long, instances might be considered ready by the ASG but
+  jobs might fail if the Docker Engine is not installed and configured properly before they are assigned to the
+  instances.<br/>
+  Consider creating a new AMI with everything ready for the LT to use, or set up a lifecycle hook in the ASG to give
+  instances time to finish preparations before being considered ready by the ASG.
 - An AutoScaling Group with the following setting:
 
   - Minimum capacity = 0.
@@ -204,7 +215,7 @@ Requirements:
 - An IAM Policy granting the **manager** instance the permissions needed to scale the ASG.<br/>
   Refer the [Recommended IAM Policy](https://gitlab.com/gitlab-org/fleeting/plugins/aws#recommended-iam-policy).
 
-  <details style="padding-bottom: 1em;">
+  <details style="margin-top: -1em; padding-bottom: 1em;">
 
   ```json
   {
@@ -248,7 +259,7 @@ Requirements:
 - \[if needed] The [amazon ecr docker credential helper] installed on the **manager** instance.
 - \[if needed] An IAM Policy granting the **manager** instance the permissions needed to pull images from ECRs.
 
-  <details style="padding-bottom: 1em;">
+  <details style="margin-top: -1em; padding-bottom: 1em;">
 
   ```json
   {
@@ -279,15 +290,31 @@ Procedure:
 
 1. Configure the default AWS Region for the AWS SDK to use.
 
+   <details style="margin-top: -1em; padding-bottom: 1em;">
+
    ```ini
    [default]
    region = eu-west-1
    ```
 
+   </details>
+
+   This could probably just be configured in the executor's setting, but I still need to confirm it.
+
+   <details style="margin-top: -1em; padding-bottom: 1em;">
+
+   ```toml
+   [[runners]]
+     executor = "docker-autoscaler"
+     environment = [ "AWS_REGION=eu-west-1" ]
+   ```
+
+   </details>
+
 1. Install the gitlab runner on the **manager** instance.<br/>
    Configure it to use the `docker-autoscaler` executor.
 
-   <details style="padding-bottom: 1em;">
+   <details style="margin-top: -1em; padding-bottom: 1em;">
 
    ```toml
    concurrent = 10
@@ -317,9 +344,13 @@ Procedure:
 
 1. Install the [fleeting] plugin.
 
+   <details style="margin-top: -1em; padding-bottom: 1em;">
+
    ```sh
    gitlab-runner fleeting install
    ```
+
+   </details>
 
 </details>
 
