@@ -184,10 +184,12 @@ Idle instances stay available for at least 20 minutes.
 Requirements:
 
 - An EC2 instance with Docker Engine to act as manager.
-- A Launch Template referencing an AMI equipped with Docker Engine for the runners to use.
+- A Launch Template referencing an AMI equipped with Docker Engine for the runners to use.<br/>
+  Suggested to use [AL2023 based Amazon ECS AMIs][using al2023 based amazon ecs amis to host containerized workloads] or
+  custom ones.
 
-  Alternatively, any AMI that can run Docker Engine can be used as long as an appropriate cloud-init configuration is
-  provided in the template's `userData`.
+  Any AMI that can run Docker Engine can be used as-is, as long as an _appropriate_ cloud-init configuration is provided
+  in the LT's `userData` field.
 
   <details style="margin-top: -1em; padding-bottom: 1em;">
 
@@ -201,11 +203,11 @@ Requirements:
 
   </details>
 
-  In this case, and specially if the cloud-init process takes long, instances might be considered ready by the ASG but
-  jobs might fail if the Docker Engine is not installed and configured properly before they are assigned to the
+  In this last case, and specially if the cloud-init process takes long, instances might be considered ready by the ASG,
+  but jobs might fail if the Docker Engine is not installed and configured properly before they are assigned to the
   instances.<br/>
   Consider creating a new AMI with everything ready for the LT to use, or set up a lifecycle hook in the ASG to give
-  instances time to finish preparations before being considered ready by the ASG.
+  instances time to finish preparations before being considered ready.
 - An AutoScaling Group with the following setting:
 
   - Minimum capacity = 0.
@@ -833,6 +835,7 @@ Improvements:
 - Gitlab's [gitlab-runner-operator] for OpenShift and Kubernetes
 - [Docker Machine Executor autoscale configuration]
 - [Fleeting]
+- [Using AL2023 based Amazon ECS AMIs to host containerized workloads]
 
 ### Sources
 
@@ -879,3 +882,4 @@ Improvements:
 [authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb
 [aws driver does not support multiple non default subnets]: https://github.com/docker/machine/issues/4700
 [amazon ecr docker credential helper]: https://github.com/awslabs/amazon-ecr-credential-helper
+[using al2023 based amazon ecs amis to host containerized workloads]: https://docs.aws.amazon.com/linux/al2023/ug/ecs.html

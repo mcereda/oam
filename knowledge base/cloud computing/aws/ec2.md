@@ -25,6 +25,9 @@ Clone EC2 instances by:
    [to guarantee the image's filesystem integrity][create an ami from an amazon ec2 instance].
 1. Using that AMI to launch clones identical to the original.
 
+Consider using specialized AMIs for specialized purposes.<br/>
+E.g., [using AL2023 based Amazon ECS AMIs to host containerized workloads].
+
 <details>
   <summary>Real world use cases</summary>
 
@@ -174,6 +177,7 @@ TODO
 - [Unlimited mode for burstable performance instances]
 - [Standard mode for burstable performance instances]
 - [Configuring EC2 Disk alert using Amazon CloudWatch]
+- [Using AL2023 based Amazon ECS AMIs to host containerized workloads]
 
 ### Sources
 
@@ -221,6 +225,7 @@ TODO
 [retrieve instance metadata]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
 [standard mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-standard-mode.html
 [unlimited mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-unlimited-mode.html
+[using al2023 based amazon ecs amis to host containerized workloads]: https://docs.aws.amazon.com/linux/al2023/ug/ecs.html
 [using instance profiles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
 
 <!-- Others -->
