@@ -229,6 +229,9 @@ docker inspect --format='{{index .RepoDigests 0}}' 'node:18-buster'
 # Act upon files in volumes.
 sudo ls "$(docker volume inspect --format '{{.Mountpoint}}' 'baikal_config')"
 sudo vim "$(docker volume inspect --format '{{.Mountpoint}}' 'gitea_config')/app.ini"
+
+# Send images to other nodes with Docker.
+docker save 'local/image:latest' | ssh -C 'user@remote.host' docker load
 ```
 
 </details>
@@ -288,8 +291,7 @@ The docker daemon is configured using the `/etc/docker/daemon.json` file:
 ```json
 {
     "default-runtime": "runc",
-    "dns": ["8.8.8.8", "1.1.1.1"],
-
+    "dns": ["8.8.8.8", "1.1.1.1"]
 }
 ```
 
