@@ -42,13 +42,17 @@ gitlab-runner exec docker \
   --env 'DOCKER_AUTH_CONFIG={ "credsStore": "ecr-login" }' \
   --docker-volumes "$HOME/.aws/credentials:/root/.aws/credentials:ro"
   'job-requiring-ecr-access'
+
+# Force a configuration file reload.
+sudo kill -HUP $(pidof 'gitlab-runner')
+sudo kill -s 'SIGHUP' $(pidof 'gitlab-runner')
 ```
 
 </details>
 
 Each runner executor is assigned 1 task at a time by default.
 
-Runners seem to require the main instance to give the full certificate chain upon connection.
+Runners require the main instance to give the full certificate chain upon connection.
 
 The `runners.autoscaler.policy.periods` setting appears to be a full blown cron job, not just a time frame.
 
@@ -75,6 +79,23 @@ Instead, the runner will:
 - Override policy 1 by applying policy 2 only on the 30th minute of every hour between 08:00 and 18:00.
 
 Meaning it will reapply policy 1 at the 31st minute of every hour in the period defined by policy 2.
+
+</details>
+
+One can use system signals to interact with runners.
+
+<details style="margin-top: -1em; padding: 0 0 1em 1em;">
+
+| Signal                 | Command it operates on | Effect                                                                                                        | Example                                |
+| ---------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `SIGINT`               | `register`             | Cancel ongoing runner registrations.<br/>Delete runners if already registered.                                |                                        |
+| `SIGINT`<br/>`SIGTERM` | `run`<br/>`run-single` | Abort all running builds and exit as soon as possible.<br/>Use twice to exit immediately (forceful shutdown). |                                        |
+| `SIGQUIT`              | `run`<br/>`run-single` | Stop accepting new builds and exit as soon as currently running builds finish (graceful shutdown).            | `sudo kill -SIGQUIT <main_runner_pid>` |
+| `SIGHUP`               | run                    | Force reloading the configuration file.                                                                       | `sudo kill -SIGHUP <main_runner_pid>`  |
+
+> Do **not** use `killall` or `pkill` for graceful shutdowns if one is using the `shell` or `docker` executors.<br/>
+> This causes improper handling of the signals due to subprocesses being killed as well. Only use it on the main process
+> handling the jobs.
 
 </details>
 
@@ -313,8 +334,8 @@ Procedure:
 
    </details>
 
-1. Install the gitlab runner on the **manager** instance.<br/>
-   Configure it to use the `docker-autoscaler` executor.
+1. Install the gitlab runner on the **manager** instance.
+1. Configure the runner to use the `docker-autoscaler` executor.
 
    <details style="margin-top: -1em; padding-bottom: 1em;">
 
@@ -849,6 +870,7 @@ Improvements:
 - [Autoscaling GitLab Runner on AWS EC2]
 - [Instance executor]
 - [Docker Autoscaler executor]
+- [Signals]
 
 <!--
   Reference
@@ -876,6 +898,7 @@ Improvements:
 [install and register gitlab runner for autoscaling with docker machine]: https://docs.gitlab.com/runner/executors/docker_machine.html
 [install gitlab runner]: https://docs.gitlab.com/runner/install/
 [instance executor]: https://docs.gitlab.com/runner/executors/instance.html
+[signals]: https://docs.gitlab.com/runner/commands/#signals
 [store registration tokens or runner tokens in secrets]: https://docs.gitlab.com/runner/install/kubernetes.html#store-registration-tokens-or-runner-tokens-in-secrets
 
 <!-- Others -->

@@ -121,6 +121,14 @@ sudo gitlab-ctl backup-etc
 tmux new-session -A -s 'gitlab-upgrade' "sudo yum update 'gitlab-ee'"  # 'gitlab-ee-16.11.3' if version-specific
 sudo gitlab-rake 'gitlab:check'
 
+# DB version upgrade
+sudo gitlab-ctl pg-upgrade
+sudo gitlab-ctl pg-upgrade -V '16'
+# Check there is enough disk space for two copies of the database
+test $(( $(sudo du -s '/var/opt/gitlab/postgresql/data' | awk '{print $1}') * 2 )) -lt \
+	$(sudo df --output='avail' --direct '/var/opt/gitlab/postgresql/data' | tail -n 1) \
+&& sudo gitlab-ctl pg-upgrade -V '16'
+
 # Password reset
 sudo gitlab-rake 'gitlab:password:reset[root]'
 sudo gitlab-rails console
