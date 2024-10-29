@@ -11,7 +11,10 @@
 
 ## TL;DR
 
-Use an instance profile to pass an IAM role to an EC2 instance.
+EC2 instances are billed by the second, with a minimum of 60s,
+[since 2017-10-02][announcing amazon ec2 per second billing].
+
+Use an instance profile to allow an EC2 instance to use an IAM role.
 
 `T` instances launch as `unlimited` by default. Launch them in `standard` mode to avoid paying for surplus credits.
 
@@ -178,6 +181,7 @@ TODO
 - [Standard mode for burstable performance instances]
 - [Configuring EC2 Disk alert using Amazon CloudWatch]
 - [Using AL2023 based Amazon ECS AMIs to host containerized workloads]
+- [Announcing Amazon EC2 per second billing]
 
 ### Sources
 
@@ -210,6 +214,7 @@ TODO
 <!-- Upstream -->
 [amazon ec2 auto scaling lifecycle hooks]: https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html
 [amazon ec2 auto scaling]: https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html
+[announcing amazon ec2 per second billing]: https://aws.amazon.com/about-aws/whats-new/2017/10/announcing-amazon-ec2-per-second-billing/
 [best practices for handling ec2 spot instance interruptions]: https://aws.amazon.com/blogs/compute/best-practices-for-handling-ec2-spot-instance-interruptions/
 [burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html
 [change the instance type]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html
