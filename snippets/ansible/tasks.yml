@@ -668,3 +668,13 @@
         acme_version: 2
         account_key_src: path/to/acme_account.key.pem
         certificate: path/to/certificate.crt.pem
+
+- name: GitLab
+  block:
+    - name: Install configured fleeting plugins
+      when: runner_executor in [ "docker-autoscaler", "instance" ]
+      become: true
+      ansible.builtin.command:
+        chdir: /root
+        cmd: gitlab-runner fleeting install
+        creates: /root/.config/fleeting/plugins

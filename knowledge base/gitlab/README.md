@@ -186,6 +186,14 @@ sudo yum check-update
 sudo gitlab-backup create
 tmux new-session -As 'gitlab-upgrade' "sudo yum update 'gitlab-ee'"
 
+# DB version upgrade
+sudo gitlab-ctl pg-upgrade
+sudo gitlab-ctl pg-upgrade -V '16'
+# Check there is enough disk space for two copies of the database
+test $(( $(sudo du -s '/var/opt/gitlab/postgresql/data' | awk '{print $1}') * 2 )) -lt \
+  $(sudo df --output='avail' --direct '/var/opt/gitlab/postgresql/data' | tail -n 1) \
+&& sudo gitlab-ctl pg-upgrade -V '16'
+
 # Reset the root user's password.
 sudo gitlab-rake 'gitlab:password:reset[root]'
 sudo gitlab-rails console
@@ -752,6 +760,7 @@ Solution: set the correct ownership with
 - [GitLab HA Scaling Runner Vending Machine for AWS EC2 ASG]
 - [GitLab maintenance mode]
 - [Forks]
+- [Upgrade packaged PostgreSQL server]
 
 <!--
   Reference
@@ -803,6 +812,7 @@ Solution: set the correct ownership with
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
 [tutorial: use buildah in a rootless container with gitlab runner operator on openshift]: https://docs.gitlab.com/ee/ci/docker/buildah_rootless_tutorial.html
 [uninstall the linux package (omnibus)]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/doc/installation/index.md#uninstall-the-linux-package-omnibus
+[upgrade packaged postgresql server]: https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server
 [upgrade path tool]: https://gitlab-com.gitlab.io/support/toolbox/upgrade-path/
 [use kaniko to build docker images]: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
 

@@ -25,6 +25,7 @@ gitlab-runner register --url 'https://gitlab.example.com' --registration-token '
 
 # Just list configured runners
 gitlab-runner list -c '/etc/gitlab-runner/config.toml'
+curl -fs 'https://gitlab.com/api/v4/runners/all?per_page=100' -H 'PRIVATE-TOKEN: glpat-m-…'
 
 # Check configured runners can connect to the main instance
 gitlab-runner verify -c '/etc/gitlab-runner/config.toml'
@@ -35,6 +36,20 @@ gitlab-runner verify … --delete
 curl -fs 'https://gitlab.com/api/v4/runners/all?status=offline&per_page=100' -H 'PRIVATE-TOKEN: glpat-m-…' \
 | jq '.[].id' \
 | xargs -I 'runner_id' curl -fsX 'DELETE' "https://gitlab.com/api/v4/runners/runner_id" 'PRIVATE-TOKEN: glpat-m-…'
+
+# Force reloading the configuration file
+sudo kill -HUP $(pidof 'gitlab-runner')
+sudo kill -s 'SIGHUP' $(pgrep 'gitlab-runner')
+
+# Stop accepting new builds and exit as soon as currently running builds finish
+# A.K.A. graceful shutdown
+sudo kill -QUIT $(pgrep 'gitlab-runner')
+sudo kill -s 'SIGQUIT' $(pidof 'gitlab-runner')
+
+# Pause active runners
+curl -fs 'https://gitlab.com/api/v4/runners/all?per_page=100&paused=false' -H 'PRIVATE-TOKEN: glpat-m-…' \
+| jq '.[].id' - \
+| xargs -I '{}' curl -fsX 'PUT' 'https://gitlab.com/api/v4/runners/{}' -H 'PRIVATE-TOKEN: glpat-m-…' -F 'paused=true'
 
 
 ###
