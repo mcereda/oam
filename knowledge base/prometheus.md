@@ -423,7 +423,7 @@ The snapshot now exists at `<data-dir>/snapshots/20171210T211224Z-2be650b6d019eb
 [snmp exporter]: snmp%20exporter.md
 
 <!-- Files -->
-[docker/monitoring]: ../containers/monitoring/README.md
+[docker/monitoring]: ../docker%20compositions/monitoring/README.md
 
 <!-- Upstream -->
 [documentation]: https://prometheus.io/docs/

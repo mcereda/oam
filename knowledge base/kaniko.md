@@ -100,6 +100,7 @@ build-container:
 - [Use kaniko to build Docker images]
 - [An Introduction to Kaniko]
 - [Introducing kaniko: Build container images in Kubernetes and Google Container Builder without privileges]
+- [Kaniko: Kubernetes native daemonless Docker image builder]
 
 <!--
   Reference
@@ -116,3 +117,4 @@ build-container:
 <!-- Others -->
 [an introduction to kaniko]: https://www.baeldung.com/ops/kaniko
 [use kaniko to build docker images]: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
+[kaniko: kubernetes native daemonless docker image builder]: https://8grams.medium.com/kaniko-kubernetes-native-daemonless-docker-image-builder-8eec88979f9e
