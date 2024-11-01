@@ -171,27 +171,43 @@ The manager will connect to the instances via SSH and execute Docker commands. T
 able to execute those commands commands (most likely by being part of the `docker` group on the instances).
 
 Container images are pulled by the manager and sent to the instances it creates.<br/>
-The instances do not require container registry access themselves this way.
+The instances do **not** require container registry access themselves this way.
 
-Add the following settings in the `config.toml` file:
+<details>
+  <summary>Setup</summary>
 
-```toml
-[[runners]]
-  executor = "docker-autoscaler"
+1. Configure the default region for the SDK to use in the runner executor user's related file.<br/>
+   Adding it as environment variable in the runner's configuration file does **not** work.
 
-  [runners.docker]
-    image = "busybox:latest"  # or whatever
+   <details style="padding-bottom: 1em;">
+     <summary>AWS</summary>
 
-  [runners.autoscaler]
-    plugin = "aws:latest"  # or 'googlecloud' or 'azure' or whatever
+   `$HOME/.aws/config`
 
-    [runners.autoscaler.plugin_config]
-      name = "…"  # see plugin docs
+   ```ini
+   [default]
+   region = eu-west-1
+   ```
 
-    [[runners.autoscaler.policy]]
-      idle_count = 5
-      idle_time = "20m0s"
-```
+   </details>
+
+1. Add at least the following in the runner's `config.toml` file:
+
+   ```toml
+   [[runners]]
+     executor = "docker-autoscaler"
+
+     [runners.docker]
+       image = "busybox:latest"  # or whatever
+
+     [runners.autoscaler]
+       plugin = "aws:latest"  # or 'googlecloud' or 'azure' or whatever
+
+       [runners.autoscaler.plugin_config]
+         name = "…"  # see plugin docs
+   ```
+
+</details>
 
 <details>
   <summary>Example: AWS, 1 instance per job, 5 idle instances for 20min.</summary>
@@ -318,18 +334,6 @@ Procedure:
    ```ini
    [default]
    region = eu-west-1
-   ```
-
-   </details>
-
-   This could probably just be configured in the executor's setting, but I still need to confirm it.
-
-   <details style="margin-top: -1em; padding-bottom: 1em;">
-
-   ```toml
-   [[runners]]
-     executor = "docker-autoscaler"
-     environment = [ "AWS_REGION=eu-west-1" ]
    ```
 
    </details>
