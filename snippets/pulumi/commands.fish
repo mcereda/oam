@@ -1,5 +1,13 @@
 #!/usr/bin/env fish
 
+brew install 'pulumi/tap/pulumi'
+
+pulumi login
+pulumi login 's3://some-bucket/with-prefix'
+pulumi whoami -v
+
+rm -r "$HOME/.pulumi"
+
 source <(pulumi gen-completion 'zsh')
 pulumi gen-completion 'fish' > "$HOME/.config/fish/completions/pulumi.fish"
 
