@@ -2,6 +2,7 @@
 
 alias aws-caller-info 'aws sts get-caller-identity'
 alias aws-ssm 'aws ssm start-session --target'
+alias aws-whoami 'aws-caller-info'
 
 function aws-assume-role-by-name
 	set current_caller (aws-caller-info --output json | jq -r '.UserId' -)

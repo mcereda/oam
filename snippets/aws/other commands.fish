@@ -1,31 +1,5 @@
 #!/usr/bin/env fish
 
-###
-# CLI config
-# ------------------
-###
-
-aws configure list-profiles
-aws configure --profile 'engineer'
-
-# Assume roles
-aws sts assume-role --role-arn 'arn:aws:iam::012345678901:role/ServiceRole' --role-session-name 'me-as-serviceRole'
-aws --profile 'eng' sts assume-role --role-arn 'arn:aws:iam::012345678901:role/ServiceRole' --role-session-name 'eng-as-serviceRole'
-
-# Check the credentials are fine
-aws sts get-caller-identity
-AWS_PROFILE='engineer' aws sts get-caller-identity
-
-docker run --rm -ti -v "$HOME/.aws:/root/.aws:ro" 'amazon/aws-cli:2.17.16' autoscaling describe-auto-scaling-groups
-
-
-###
-# ACM
-# ------------------
-###
-
-aws acm get-certificate --certificate-arn 'arn:aws:acm:eu-west-1:012345678901:certificate/abcdef01-2345-6789-abcd-ef0123456789'
-
 
 ###
 # Autoscaling Groups
@@ -39,24 +13,6 @@ aws autoscaling describe-instance-refreshes \
 	--auto-scaling-group-name 'ProductionServers' --instance-refresh-ids '01234567-89ab-cdef-0123-456789abcdef'
 aws autoscaling cancel-instance-refresh --auto-scaling-group-name 'ProductionServers'
 aws autoscaling rollback-instance-refresh --auto-scaling-group-name 'ProductionServers'
-
-
-###
-# CodeDeploy
-# ------------------
-###
-
-aws deploy list-applications
-aws deploy list-deployment-groups --application-name 'Evidently'
-aws deploy get-deployment-group --application-name 'Evidently' --deployment-group-name 'production' --output 'json' | pbcopy
-
-diff -y -W 200 \
-(aws deploy get-deployment-group --application-name 'Evidently' --deployment-group-name 'staging' --output json | psub) \
-(aws deploy get-deployment-group --application-name 'Evidently' --deployment-group-name 'production' --output 'json' | psub)
-
-aws deploy create-deployment --application-name 'Evidently' --deployment-group-name 'staging' \
-	--description 'This is Evidently a deployment (☞ﾟ∀ﾟ)☞' \
-	--s3-location 'bundleType=zip,bucket=deployments-bucket,key=evidently-master-staging.zip'
 
 
 ###
@@ -80,7 +36,8 @@ aws ec2 describe-images --output 'yaml' \
 aws iam list-instance-profiles | grep -i 'ssm'
 
 # Check instances are available for use with SSM
-aws ssm get-connection-status --query "Status=='connected'" --output 'text' --target "i-0915612ff82914822"
+aws ssm get-connection-status --query "Status=='connected'" --output 'text' --target 'i-0915612ff82914822'
+aws ssm describe-instance-associations-status --instance-id 'i-0f8b61c78622caed2'
 # From the instance
 sudo ssm-cli get-diagnostics --output 'table'
 
@@ -89,6 +46,8 @@ instance_id='i-08fc83ad07487d72f' \
 && eval $(aws ssm get-connection-status --target "$instance_id" --query "Status=='connected'" --output 'text') \
 && aws ssm start-session --target "$instance_id" \
 || (echo "instance ${instance_id} not available" >&2 && false)
+
+aws ssm describe-instance-associations-status --instance-id 'i-08fc83ad07487d72f'
 
 # Send commands
 aws ssm send-command --instance-ids 'i-08fc83ad07487d72f' --document-name 'AWS-RunShellScript' --parameters "commands='echo hallo'"
