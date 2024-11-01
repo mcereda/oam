@@ -47,11 +47,12 @@ EOF
 chmod '600' ~/'.pgpass'
 
 # Set up the per-user services file.
+# do *not* use spaces around the '=' sign.
 cat <<EOF > ~/'.pg_service.conf'
 [prod]
-host = prod.0123456789ab.eu-west-1.rds.amazonaws.com
-port = 5433
-user = master
+host=prod.0123456789ab.eu-west-1.rds.amazonaws.com
+port=5433
+user=master
 EOF
 ```
 
@@ -137,7 +138,7 @@ CREATE OR REPLACE FUNCTION increment(i integer) RETURNS integer
 AS $$
   BEGIN
     RETURN i + 1;
-  END
+  END;
 $$
 LANGUAGE plpgsql;
 ```
@@ -153,7 +154,7 @@ AS $func$
   BEGIN
     EXECUTE format('SELECT count(%s) FROM %s LIMIT 2', column_name, table_name) INTO result;
     RETURN result;
-  END
+  END;
 $func$;
 SELECT * FROM entries_in_column('vendors','vendor_id');
 ```
@@ -234,6 +235,8 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 - [How to write update function (stored procedure) in Postgresql?]
 - [How to search a specific value in all tables (PostgreSQL)?]
 - [PostgreSQL: Show all the privileges for a concrete user]
+- [PostgreSQL - disabling constraints]
+- [Hashing a String to a Numeric Value in PostgreSQL]
 
 <!--
   Reference
@@ -257,11 +260,13 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 [connect to a postgresql database]: https://www.postgresqltutorial.com/connect-to-postgresql-database/
 [dverite/postgresql-functions]: https://github.com/dverite/postgresql-functions
 [get count of records affected by insert or update in postgresql]: https://stackoverflow.com/questions/4038616/get-count-of-records-affected-by-insert-or-update-in-postgresql#78459743
+[hashing a string to a numeric value in postgresql]: https://stackoverflow.com/questions/9809381/hashing-a-string-to-a-numeric-value-in-postgresql#69650940
 [how to generate scram-sha-256 to create postgres 13 user]: https://stackoverflow.com/questions/68400120/how-to-generate-scram-sha-256-to-create-postgres-13-user
 [how to scram in postgres with pgbouncer]: https://www.crunchydata.com/blog/pgbouncer-scram-authentication-postgresql
 [how to search a specific value in all tables (postgresql)?]: https://stackoverflow.com/questions/5350088/how-to-search-a-specific-value-in-all-tables-postgresql/23036421#23036421
 [how to write update function (stored procedure) in postgresql?]: https://stackoverflow.com/questions/21087710/how-to-write-update-function-stored-procedure-in-postgresql
 [pgxn-manager]: https://github.com/pgxn/pgxn-manager
+[postgresql - disabling constraints]: https://stackoverflow.com/questions/2679854/postgresql-disabling-constraints#2681413
 [postgresql_anonymizer]: https://postgresql-anonymizer.readthedocs.io/en/stable/
 [postgresql: get member roles and permissions]: https://www.cybertec-postgresql.com/en/postgresql-get-member-roles-and-permissions/
 [postgresql: show all the privileges for a concrete user]: https://stackoverflow.com/questions/40759177/postgresql-show-all-the-privileges-for-a-concrete-user

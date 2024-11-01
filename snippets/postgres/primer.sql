@@ -85,6 +85,7 @@ CREATE TABLE people (
 );
 
 -- Show table structure
+-- Includes constraints
 \d sales
 \d+ clients
 SELECT column_name, data_type, character_maximum_length FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'vendors';
@@ -290,10 +291,19 @@ SELECT setseed(0.25), round(random()::DECIMAL, 15) AS random_number;  -- seed mu
 -- Refer <https://www.postgresql.org/docs/current/sql-createfunction.html>
 \df
 \df+ to_char
+\df+ hash*
 SELECT routine_name FROM information_schema.routines WHERE routine_type = 'FUNCTION';
 SELECT p.proname FROM pg_catalog.pg_namespace n JOIN pg_catalog.pg_proc p ON p.pronamespace = n.oid WHERE p.prokind = 'f';
 
 CREATE OR REPLACE FUNCTION return_1() RETURNS INTEGER LANGUAGE SQL RETURN 1;
+
+-- Show functions definition
+\sf hash_numeric
+\sf+ hashfloat8
+
+-- Given hash_national_ids(country TEXT, table_name TEXT, column_name DEFAULT 'national_id')
+SELECT hash_national_ids('estonia', 'clients');
+SELECT hash_national_ids(country => 'estonia', table_name => 'clients', column_name => 'national_id');
 
 
 -- Type casting
@@ -382,7 +392,20 @@ ALTER TABLE signups RENAME CONSTRAINT signups_customer_id_fkey TO something_blue
 ALTER TABLE vendors SET CONSTRAINT vendors_value_uindex DEFERRED;
 
 
--- Show all constraints
+-- Show all constraints in the current DB
+SELECT
+  ns.nspname AS schema,
+  class.relname AS "table",
+  con.conname AS "constraint",
+  con.contype AS "type",
+  con.condeferrable AS "deferrable",
+  con.condeferred AS "deferred"
+FROM pg_constraint con
+  INNER JOIN pg_class class ON class.oid = con.conrelid
+  INNER JOIN pg_namespace ns ON ns.oid = class.relnamespace
+WHERE ns.nspname != 'pg_catalog'
+ORDER BY 1, 2, 3;
+-- Show all uniqueness constraints in the current DB
 SELECT
   ns.nspname AS schema,
   class.relname AS "table",
@@ -393,6 +416,25 @@ FROM pg_constraint con
   INNER JOIN pg_class class ON class.oid = con.conrelid
   INNER JOIN pg_namespace ns ON ns.oid = class.relnamespace
 WHERE
-  con.contype IN ('p', 'u') AND
+  con.contype IN ('u') AND
   ns.nspname != 'pg_catalog'
 ORDER BY 1, 2, 3;
+
+
+-- List all uniqueness constraints in a schema
+SELECT
+  class.relname AS "table",
+  con.conname AS "constraint",
+  con.condeferrable AS "deferrable",
+  con.condeferred AS "deferred"
+FROM pg_constraint con
+  INNER JOIN pg_class class ON class.oid = con.conrelid
+  INNER JOIN pg_namespace ns ON ns.oid = class.relnamespace
+WHERE
+  con.contype IN ('u') AND
+  ns.nspname = 'public'
+ORDER BY 1, 2, 3;
+
+
+-- Empty tables of their data
+TRUNCATE TABLE sales;
