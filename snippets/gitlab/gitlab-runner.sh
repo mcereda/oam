@@ -32,6 +32,12 @@ gitlab-runner verify -c '/etc/gitlab-runner/config.toml'
 # Also delete runners that have been removed from the main instance
 gitlab-runner verify … --delete
 
+# Unregister runners
+gitlab-runner unregister --name 'some-runner'
+gitlab-runner unregister --token 'abcdefghij0123456789'
+gitlab-runner unregister --all-runners
+curl -fsX 'DELETE' 'https://gitlab.com/api/v4/runners/2207' -H 'PRIVATE-TOKEN: glpat-m-…'
+
 # Unregister offline runners
 curl -fs 'https://gitlab.com/api/v4/runners/all?status=offline&per_page=100' -H 'PRIVATE-TOKEN: glpat-m-…' \
 | jq '.[].id' \
