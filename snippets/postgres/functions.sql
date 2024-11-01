@@ -23,25 +23,34 @@ LANGUAGE plpgsql
 AS $$
   DECLARE affected_rows INTEGER;
   BEGIN
-    EXECUTE format('
-      WITH
-        ctids AS (
-          SELECT
-            ROW_NUMBER() OVER (),
-            ctid
-          FROM %I
-        ),
-        shuffled_values AS (
-          SELECT
-            ROW_NUMBER() OVER (ORDER BY RANDOM()),
-            %I AS new_value
-          FROM %I
-        )
-      UPDATE %I
-        SET %I = shuffled_values.new_value
-        FROM shuffled_values JOIN ctids ON shuffled_values.row_number = ctids.row_number
-        WHERE %I.ctid = ctids.ctid
-    ', table_name, column_name, table_name, table_name, column_name, table_name);
+    SET CONSTRAINTS ALL DEFERRED;
+    EXECUTE format(
+      '
+        WITH
+          ctids AS (
+            SELECT
+              ROW_NUMBER() OVER (),
+              ctid
+            FROM %I
+          ),
+          shuffled_values AS (
+            SELECT
+              ROW_NUMBER() OVER (ORDER BY RANDOM()),
+              %I AS new_value
+            FROM %I
+          )
+        UPDATE %I
+          SET %I = shuffled_values.new_value
+          FROM shuffled_values JOIN ctids ON shuffled_values.row_number = ctids.row_number
+          WHERE %I.ctid = ctids.ctid
+      ',
+      table_name,
+      column_name,
+      table_name,
+      table_name,
+      column_name,
+      table_name
+    );
     GET DIAGNOSTICS affected_rows = ROW_COUNT;
     RETURN affected_rows;
   END;

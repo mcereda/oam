@@ -17,6 +17,25 @@ docker run -d --name 'pgadmin' \
 	-e 'PGADMIN_DEFAULT_PASSWORD=password' \
 	'dpage/pgadmin4'
 
+
+# Set up the credentials file
+# Format => hostname:port:database:username:password
+# Supports wildcards
+cat <<EOF > ~/'.pgpass'
+postgres.lan:5643:postgres:postgres:BananaORama
+*:*:sales:elaine:modestPassword
+EOF
+chmod '600' ~/'.pgpass'
+
+# Set up the per-user services file.
+# do *not* use spaces around the '=' sign.
+cat <<EOF > ~/'.pg_service.conf'
+[prod]
+host=prod.0123456789ab.eu-west-1.rds.amazonaws.com
+port=5433
+user=master
+EOF
+
 # Connect to DBs
 psql 'postgres'
 psql 'postgres' 'admin'
@@ -24,6 +43,7 @@ psql --host 'prod.db.lan' --port '5432' --username 'postgres' --database 'postgr
 psql -h 'host.fqnd' -p '5432' -U 'admin' -d 'postgres' -W
 psql 'postgresql://localhost:5433/games?sslmode=require'
 psql 'host=host.fqdn port=5467 user=admin dbname=postgres'
+psql "service=prod sslmode=require"
 
 # List available databases
 psql … --list
