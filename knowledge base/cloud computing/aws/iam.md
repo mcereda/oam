@@ -159,6 +159,11 @@ Credentials:
   SessionToken: IQoJb3jPZ2luX2VjEAIaCWV1LXdlc3QtMSJHMEUCIQCGEihh9rBi1cL8ebhQVdcKl8Svzm5VCIC/ebCdxpORiA…
 ```
 
+One _can_ assume Roles in a chain fashion, assuming one just to assume the other.
+
+> Role chaining limits one's CLI or API role session duration to a maximum of **1 hour** at the time of writing.<br/>
+> This duration **cannot** be increased. Refer [Can I increase the duration of the IAM role chaining session?].
+
 ### Require MFA for assuming Roles
 
 Refer [Using AWS CLI Securely with IAM Roles and MFA].
@@ -231,6 +236,7 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 - [Avoid the 60 minutes timeout when using the AWS CLI with IAM roles]
 - [AWS IAM Roles - Everything You Need to Know & Examples]
 - [Using AWS CLI Securely with IAM Roles and MFA]
+- [Can I increase the duration of the IAM role chaining session?]
 
 <!--
   Reference
@@ -244,6 +250,7 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 <!-- Files -->
 <!-- Upstream -->
 [assumerole api reference]: https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html
+[can i increase the duration of the iam role chaining session?]: https://repost.aws/knowledge-center/iam-role-chaining-limit
 [creating a role to delegate permissions to an iam user]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user.html
 [how can i monitor the account activity of specific iam users, roles, and aws access keys?]: https://repost.aws/knowledge-center/view-iam-history
 [how to use the passrole permission with iam roles]: https://aws.amazon.com/blogs/security/how-to-use-the-passrole-permission-with-iam-roles/
