@@ -26,6 +26,7 @@
 - [Postman], an alternative to Insomnia
 - [Hoppscotch], an alternative to Insomnia
 - [Bruno], an alternative to Insomnia
+- [httpie], an alternative to Insomnia
 
 ## Sources
 
@@ -34,13 +35,9 @@ All the references in the [further readings] section, plus the following:
 - [NPM install module in current directory]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
-
-<!-- Upstream -->
-[documentation]: https://docs.insomnia.rest/
-[inso cli]: https://docs.insomnia.rest/inso-cli
-[website]: https://insomnia.rest/
 
 <!-- In-article sections -->
 [further readings]: #further-readings
@@ -48,7 +45,13 @@ All the references in the [further readings] section, plus the following:
 <!-- Knowledge base -->
 [bruno]: bruno.md
 [hoppscotch]: hoppscotch.md
+[httpie]: httpie.md
 [postman]: postman.md
+
+<!-- Upstream -->
+[documentation]: https://docs.insomnia.rest/
+[inso cli]: https://docs.insomnia.rest/inso-cli
+[website]: https://insomnia.rest/
 
 <!-- Others -->
 [npm install module in current directory]: https://stackoverflow.com/questions/14032160/npm-install-module-in-current-directory#45660836

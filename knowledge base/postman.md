@@ -7,7 +7,7 @@ API platform for building and using APIs.
 1. [TL;DR](#tldr)
 1. [Scripting](#scripting)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -67,29 +67,33 @@ More examples [here][scripting in postman].
 - [Website]
 - [Documentation]
 - [Newman], CLI Collection runner for Postman
-- [Insomnia], an alternative to Postman
-- [Hoppscotch], an alternative to Postman
-- [Bruno], an alternative to Postman
 
-## Sources
+Alternatives:
 
-All the references in the [further readings] section, plus the following:
+- [Insomnia]
+- [Hoppscotch]
+- [Bruno]
+- [httpie]
+
+### Sources
 
 - [Scripting in Postman]
 - [Exporting data from Postman]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[bruno]: bruno.md
+[hoppscotch]: hoppscotch.md
+[httpie]: httpie.md
+[insomnia]: insomnia.md
+[newman]: newman.md
 
 <!-- Upstream -->
 [documentation]: https://learning.postman.com/docs
 [exporting data from postman]: https://learning.postman.com/docs/getting-started/importing-and-exporting/exporting-data/
 [scripting in postman]: https://learning.postman.com/docs/writing-scripts/intro-to-scripts/
 [website]: https://www.postman.com/
-
-<!-- Knowledge base -->
-[bruno]: bruno.md
-[hoppscotch]: hoppscotch.md
-[insomnia]: insomnia.md
-[newman]: newman.md
