@@ -1,6 +1,7 @@
 {
     "devDependencies": {
-        "@commitlint/cli": "^19.4.0",
-        "@commitlint/config-conventional": "^19.2.2"
+        "@commitlint/cli": "^19.5.0",
+        "@commitlint/config-conventional": "^19.5.0",
+        "@evilmartians/lefthook": "^1.8.2"
     }
 }

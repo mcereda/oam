@@ -1,11 +1,25 @@
 # Node Package Manager CLI
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
 
 ## TL;DR
+
+<details>
+  <summary>Setup</summary>
+
+```sh
+# Disable SSL verification.
+npm config set 'strict-ssl'='false'
+
+# Use custom CA certificates.
+npm config set 'cafile'='path/to/ca/cert.pem'
+```
+
+</details>
+
+<details>
+  <summary>Usage</summary>
 
 ```sh
 # Search for packages.
@@ -22,17 +36,15 @@ npm i -g '@pnp/cli-microsoft365@latest'
 npm clean-install '@pnp/cli-microsoft365'
 npm ci -g '@pnp/cli-microsoft365@latest'
 
+# Update packages.
+npm update
+npm up --save
+
 # Remove packages.
 npm uninstall '@pnp/cli-microsoft365'
 ```
 
-```sh
-# Disable SSL verification.
-npm config set 'strict-ssl'='false'
-
-# Use a custom CA certificate.
-npm config set 'cafile'='path/to/ca/cert.pem'
-```
+</details>
 
 ## Further readings
 
