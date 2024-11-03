@@ -1,5 +1,5 @@
-ansible==10.3.0
-ansible-lint==24.7.0
+ansible==10.5.0
+ansible-lint==24.9.2
 click==8.1.7
 pyinilint==0.17
 yq==3.4.3
