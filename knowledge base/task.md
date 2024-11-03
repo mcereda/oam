@@ -4,25 +4,31 @@ Task runner aiming to be simpler and easier to use than [GNU Make].
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 ## TL;DR
+
+Taskfiles are Task's Makefile counterpart.<br/>
+Taskfiles are written in YAML.
+
+Task leverages `mvdan.cc/sh` to run commands, which is a native Go shell interpreter.<br/>
+This allows to write `sh`/`bash` commands and have them work even where `sh` or `bash` are usually not available (e.g.:
+Windows) as long as any called executable is available in `PATH`.
 
 Pros:
 
 - Taskfiles are more readable than Makefiles.
+  Specifically:
+
+  - No need to use tabs.
+  - No need for special symbols.
+  - Easier environment variables management.
 
 Cons:
 
 - Taskfiles are written in YAML. ≈(・ཀ・≈)<br/>
   That makes them very much similar to \[[Gitlab] / [Azure Devops]]'s pipelines, and if one has any experience with them
   one knows what a pain that can be.
-
-Taskfiles are Task's Makefile counterpart.<br/>
-Taskfiles are written in YAML.
-
-Task uses `mvdan.cc/sh`, a native Go sh interpreter, to run commands.<br/>
-This allows to write sh/bash commands and have them work even where `sh` or `bash` are usually not available (e.g.:
-Windows) as long as any called executable is available in `PATH`.
 
 <details>
   <summary>Setup</summary>
@@ -35,8 +41,9 @@ sudo dnf install 'go-task'
 sudo snap install 'task' --classic
 
 # Setup the shell's completion.
-curl -fsSL 'https://raw.githubusercontent.com/go-task/task/main/completion/fish/task.fish' \
-  -o "$HOME/.config/fish/completions/task.fish"
+task --completion 'fish' > ~/'.config/fish/completions/task.fish'
+task --completion 'zsh'  > '/usr/local/share/zsh/site-functions/_task'
+task --completion 'bash' > '/etc/bash_completion.d/task'
 ```
 
 </details>
@@ -76,6 +83,11 @@ curl -fsSL 'https://raw.githubusercontent.com/go-task/task/main/completion/fish/
 - [Website]
 - [Github]
 
+### Sources
+
+- [Usage]
+- [Stop Using Makefile (Use Taskfile Instead)]
+
 <!--
   Reference
   ═╬═Time══
@@ -90,6 +102,8 @@ curl -fsSL 'https://raw.githubusercontent.com/go-task/task/main/completion/fish/
 <!-- Files -->
 <!-- Upstream -->
 [github]: https://github.com/go-task/task
+[usage]: https://taskfile.dev/usage/
 [website]: https://taskfile.dev/
 
 <!-- Others -->
+[stop using makefile (use taskfile instead)]: https://dev.to/calvinmclean/stop-using-makefile-use-taskfile-instead-4hm9
