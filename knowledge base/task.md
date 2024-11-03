@@ -38,6 +38,7 @@ Cons:
 brew install 'go-task'
 choco install 'go-task'
 dnf install 'go-task'
+go install 'github.com/go-task/task/v3/cmd/task@latest'
 snap install 'task' --classic
 zypper install 'https://github.com/go-task/task/releases/download/v3.39.2/task_linux_amd64.rpm'
 
