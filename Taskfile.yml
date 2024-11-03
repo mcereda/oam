@@ -7,18 +7,29 @@ vars:
 
 tasks:
 
-  create-venv:
+  dev-tools:bootstrap:
     cmds:
-      - python3.12 -m 'venv' '{{.VENV_DIR}}'
-      - >-
-          {{.VENV_DIR}}/bin/pip --require-virtualenv install -r '{{.REQUIREMENTS_FILE}}'
+      - task: python:create-venv
+      - npm install
 
-  recreate-venv:
+  dev-tools:update:
     cmds:
-      - rm -rf '{{.VENV_DIR}}'
-      - task: create-venv
+      - task: python:update-venv
+      - npm update --save
 
-  update-venv:
+  python:create-venv:
+    vars:
+      PYTHON_VERSION: 3.12
+    cmds:
+      - "python{{.PYTHON_VERSION}} -m 'venv' '{{.VENV_DIR}}'"
+      - "{{.VENV_DIR}}/bin/pip --require-virtualenv install -r '{{.REQUIREMENTS_FILE}}'"
+
+  python:recreate-venv:
+    cmds:
+      - "rm -rf '{{.VENV_DIR}}'"
+      - task: python:create-venv
+
+  python:update-venv:
     cmd: >-
       {{.VENV_DIR}}/bin/pip freeze -l --require-virtualenv | sed 's/==/>=/'
       | xargs {{.VENV_DIR}}/bin/pip --require-virtualenv install -U

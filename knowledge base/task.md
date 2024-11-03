@@ -37,8 +37,9 @@ Cons:
 # Install the executable.
 brew install 'go-task'
 choco install 'go-task'
-sudo dnf install 'go-task'
-sudo snap install 'task' --classic
+dnf install 'go-task'
+snap install 'task' --classic
+zypper install 'https://github.com/go-task/task/releases/download/v3.39.2/task_linux_amd64.rpm'
 
 # Setup the shell's completion.
 task --completion 'fish' > ~/'.config/fish/completions/task.fish'
@@ -72,6 +73,7 @@ task --completion 'bash' > '/etc/bash_completion.d/task'
 
    ```sh
    task 'assets' 'build'
+   task --dry 'bootstrap'
    ```
 
    If task names are omitted, a task named `default` will be assumed.
