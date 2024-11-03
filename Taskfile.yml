@@ -1,0 +1,24 @@
+---
+version: '3'
+
+vars:
+  REQUIREMENTS_FILE: requirements.txt
+  VENV_DIR: .venv
+
+tasks:
+
+  create-venv:
+    cmds:
+      - python3.12 -m 'venv' '{{.VENV_DIR}}'
+      - >-
+          {{.VENV_DIR}}/bin/pip --require-virtualenv install -r '{{.REQUIREMENTS_FILE}}'
+
+  recreate-venv:
+    cmds:
+      - rm -rf '{{.VENV_DIR}}'
+      - task: create-venv
+
+  update-venv:
+    cmd: >-
+      {{.VENV_DIR}}/bin/pip freeze -l --require-virtualenv | sed 's/==/>=/'
+      | xargs {{.VENV_DIR}}/bin/pip --require-virtualenv install -U
