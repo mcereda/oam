@@ -7,7 +7,7 @@
 ## TL;DR
 
 <details>
-  <summary>Installation</summary>
+  <summary>Setup</summary>
 
 ```sh
 brew install 'jq'
@@ -15,6 +15,7 @@ docker pull 'ghcr.io/jqlang/jq'
 ```
 
 </details>
+
 <details>
   <summary>Usage</summary>
 
@@ -52,8 +53,7 @@ jq 'del(recurse(.[]?;true)|select(. == null))' …
 # Print objects as 'key [space] "value"' pairs.
 jq -r 'to_entries[] | "\(.key) \"\(.value)\""' 'file.json'
 
-# Change single values.
-# A.K.A. update values.
+# Change the value of single keys.
 jq '.extensionsGallery | .serviceUrl |= "https://marketplace.visualstudio.com/_apis/public/gallery"' \
   '/usr/lib/code/product.json'
 jq --arg 'NAMESPACE' "$NAMESPACE" \
@@ -63,22 +63,22 @@ jq --arg 'NAMESPACE' "$NAMESPACE" \
   }' \
   '/tmp/service.kube.json'
 
-# Change multiple values at once.
+# Change the value of multiple keys at once.
 jq '.extensionsGallery
     | .serviceUrl = "https://marketplace.visualstudio.com/_apis/public/gallery"
     | .cacheUrl = "https://vscode.blob.core.windows.net/gallery/index"
     | .itemUrl = "https://marketplace.visualstudio.com/items"' \
-  /usr/lib/code/product.json
+  '/usr/lib/code/product.json'
 jq '.extensionsGallery + {
       serviceUrl: "https://marketplace.visualstudio.com/_apis/public/gallery",
       cacheUrl: "https://vscode.blob.core.windows.net/gallery/index",
       itemUrl: "https://marketplace.visualstudio.com/items"
-    }' /usr/lib/code/product.json
+    }' '/usr/lib/code/product.json'
 
 # Merge objects from 2 files
 jq '.[0] * .[1]' '1.json' '2.json'
 
-# Only show ('select') elements which specific attribute's value is in a list.
+# Only show ('select'ed) elements which specific attribute's value is in a list.
 jq '.[]|select(.PrivateIpAddress|IN("172.31.6.209","172.31.6.229"))|.PrivateDnsName' '-'
 
 # Add elements from arrays with the same name from other files.
@@ -87,7 +87,14 @@ jq '.rules=([inputs.rules]|flatten)' 'starting-rule-set.json' 'parts'/*'.json'
 
 # Put specific keys on top.
 jq '.objects = [(.objects[] as $in | {type,name,id} + $in)]' 'prod/dataPipeline_deviceLocationConversion_prod.json'
+```
 
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
 # Convert Enpass' JSON export to a YAML file
 jq '.items[] | {title, fields} | .title + ":", (.fields[] | select(.value != "") | "  " + .label + ": " + .value)' \
   'test.json' -cr
