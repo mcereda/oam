@@ -3,6 +3,10 @@
 # Sources:
 # - https://everything.curl.dev/usingcurl/connections/name.html
 
+# Get one's own public IP
+curl 'ipconfig.io'
+curl -fs 'https://ipconfig.io/json' | jq -r '.ip' -
+
 
 # Use different names.
 # Kinda like '--resolve' but to aliases and supports ports.
