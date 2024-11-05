@@ -1,5 +1,9 @@
 #!/usr/bin/env fish
 
+# List the current configuration
+aws configure list
+
+
 # List configured profiles
 aws configure list-profiles
 
@@ -9,7 +13,10 @@ aws configure --profile 'engineer'
 
 # Assume roles
 aws sts assume-role --role-arn 'arn:aws:iam::012345678901:role/ServiceRole' --role-session-name 'me-as-serviceRole'
-aws --profile 'eng' sts assume-role --role-arn 'arn:aws:iam::012345678901:role/ServiceRole' --role-session-name 'eng-as-serviceRole'
+aws --profile 'engineer' sts assume-role \
+	--role-arn 'arn:aws:iam::012345678901:role/ServiceRole' \
+	--role-session-name 'engineer-as-serviceRole' \
+	--duration-seconds '10800'
 
 
 # Check the credentials are fine
