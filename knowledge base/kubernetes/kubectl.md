@@ -363,6 +363,7 @@ kubectl logs -f -l 'name=myLabel' --all-containers
 
 # Get Logs for a previous instantiation of a Container.
 kubectl logs 'nginx' --previous
+kubectl logs 'nginx' -p -c 'init'
 
 # Get the Logs of the first Pod matching 'ID'.
 kubectl logs $(kubectl get pods --no-headers | grep $ID | awk '{print $2}')
