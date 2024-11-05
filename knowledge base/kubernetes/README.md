@@ -243,6 +243,7 @@ Also see [configuration best practices] and the [production best practices check
   Leverage [Namespaces].
 - Consider **organizing** cluster and workload resources.<br/>
   Leverage [Labels][labels and selectors]; see [recommended Labels].
+- Consider forwarding logs to a central log management system for better storage and easier access.
 - Avoid sending traffic to pods which are not ready to manage it.<br/>
   [Readiness probes][Configure Liveness, Readiness and Startup Probes] signal services to not forward requests until the
   probe verifies its own pod is up.<br/>
@@ -254,7 +255,7 @@ Also see [configuration best practices] and the [production best practices check
 - Prefer smaller container images.
 - Prioritize critical workloads.<br/>
   Leverage [quality of service](#quality-of-service).
-- Instrument applications to detect and respond to the SIGTERM signal.
+- Instrument workloads to detect and respond to the `SIGTERM` signal to allow them to safely and cleanly shutdown.
 - Avoid using bare pods.<br/>
   Prefer defining them as part of a replica-based resource, like Deployments, StatefulSets, ReplicaSets or DaemonSets.
 - Leverage [autoscalers](#autoscaling).
