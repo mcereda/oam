@@ -45,14 +45,14 @@ gitlab-runner exec docker \
 
 # Force a configuration file reload.
 sudo kill -HUP $(pidof 'gitlab-runner')
-sudo kill -s 'SIGHUP' $(pidof 'gitlab-runner')
+sudo pkill --signal 'SIGHUP' 'gitlab-runner'
 ```
 
 </details>
 
-Each runner executor is assigned 1 task at a time by default.
+Each _Worker_ is assigned a single task at a time by default.
 
-Runners require the main instance to give the full certificate chain upon connection.
+Runners require the Server to provide the full certificate chain upon connection.
 
 The `runners.autoscaler.policy.periods` setting appears to be a full blown cron job, not just a time frame.
 
@@ -63,17 +63,17 @@ Given the following policies:
 ```toml
 [[runners]]
   [runners.autoscaler]
-    [[runners.autoscaler.policy]]
+    [[runners.autoscaler.policy]]  # policy 1
       periods = [ "* 7-19 * * mon-fri" ]
       …
-    [[runners.autoscaler.policy]]
+    [[runners.autoscaler.policy]]  # policy 2
       periods = [ "30 8-18 * * mon-fri" ]
       …
 ```
 
 It will **not** work as _apply policy 1 between 07:00 and 19:00 but override it with policy 2 between 08:30 and
 18:30_.<br/>
-Instead, the runner will:
+Instead, the Runner will:
 
 - Apply policy 1 every minute of every hour between 07:00 and 19:00, **and**
 - Override policy 1 by applying policy 2 only on the 30th minute of every hour between 08:00 and 18:00.
@@ -82,15 +82,15 @@ Meaning it will reapply policy 1 at the 31st minute of every hour in the period 
 
 </details>
 
-One can use system signals to interact with runners.
+One can use system signals to interact with Runners.
 
 <details style="margin-top: -1em; padding: 0 0 1em 1em;">
 
 | Signal                 | Command it operates on | Effect                                                                                                        | Example                                |
 | ---------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `SIGINT`               | `register`             | Cancel ongoing runner registrations.<br/>Delete runners if already registered.                                |                                        |
+| `SIGINT`               | `register`             | Cancel ongoing Runner registrations.<br/>Delete Runners if already registered.                                |                                        |
 | `SIGINT`<br/>`SIGTERM` | `run`<br/>`run-single` | Abort all running builds and exit as soon as possible.<br/>Use twice to exit immediately (forceful shutdown). |                                        |
-| `SIGQUIT`              | `run`<br/>`run-single` | Stop accepting new builds and exit as soon as currently running builds finish (graceful shutdown).            | `sudo kill -SIGQUIT <main_runner_pid>` |
+| `SIGQUIT`              | `run`<br/>`run-single` | Stop accepting new builds and exit as soon as the currently running builds finish (graceful shutdown).        | `sudo kill -SIGQUIT <main_runner_pid>` |
 | `SIGHUP`               | run                    | Force reloading the configuration file.                                                                       | `sudo kill -SIGHUP <main_runner_pid>`  |
 
 > Do **not** use `killall` or `pkill` for graceful shutdowns if one is using the `shell` or `docker` executors.<br/>
@@ -100,6 +100,8 @@ One can use system signals to interact with runners.
 </details>
 
 ## Pull images from private AWS ECR registries
+
+FIXME
 
 1. Create an IAM Role in one's AWS account and attach it the
    `arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly` IAM policy.
@@ -163,15 +165,22 @@ Autoscale-enabled wrap for the `docker` executor. Supports all `docker` executor
 Creates instances on-demand to accommodate jobs processed by the runner leveraging it, which acts as manager.<br/>
 The runner itself will **not** execute jobs, just delegate them.
 
+A Runner registers to the Server and acts as Runner Autoscaler.<br/>
+The Autoscaler shall be configured to use `docker-autoscaler` as the executor, and shall be granted permissions to
+discover and scale the resources it uses to scale automatically.
+
 Leverages [fleeting] plugins to scale automatically.<br/>
-Fleeting is an abstraction for a group of autoscaled instances, and uses plugins supporting cloud providers.
+This is an abstraction for a group of automatically scaled instances, and uses plugins supporting cloud providers.
 
-Both the manager and the instances executing jobs require the Docker Engine to be installed.<br/>
-The manager will connect to the instances via SSH and execute Docker commands. The user it connects with **must** be
-able to execute those commands commands (most likely by being part of the `docker` group on the instances).
+The Autoscaler connects to the Workers through SSH (if Linux-based) and executes Docker commands.<br/>
+The user it connects with **must** be able to execute Docker commands with**out** a password (most likely by being part
+of the `docker` group on the Worker).
 
-Container images are pulled by the manager and sent to the instances it creates.<br/>
-The instances do **not** require container registry access themselves this way.
+Jobs are executed in containers.<br/>
+The container images are pulled by the Autoscaler, which then feeds them to the Workers. As such:
+
+- Workers do **not** need direct image access.
+- **Both** the Autoscaler **and** the Workers require the Docker Engine to be installed.
 
 <details>
   <summary>Setup</summary>
@@ -251,7 +260,7 @@ Requirements:
   - Desired capacity = 0.
 
   The runner will take care of scaling up and down.
-- An IAM Policy granting the **manager** instance the permissions needed to scale the ASG.<br/>
+- An IAM Policy granting the **Autoscaler** instance the permissions needed to scale the ASG.<br/>
   Refer the [Recommended IAM Policy](https://gitlab.com/gitlab-org/fleeting/plugins/aws#recommended-iam-policy).
 
   <details style="margin-top: -1em; padding-bottom: 1em;">
@@ -295,8 +304,8 @@ Requirements:
 
   </details>
 
-- \[if needed] The [amazon ecr docker credential helper] installed on the **manager** instance.
-- \[if needed] An IAM Policy granting the **manager** instance the permissions needed to pull images from ECRs.
+- \[if needed] The [amazon ecr docker credential helper] installed on the **Autoscaler** instance.
+- \[if needed] An IAM Policy granting the **Autoscaler** instance the permissions needed to pull images from ECRs.
 
   <details style="margin-top: -1em; padding-bottom: 1em;">
 
@@ -338,8 +347,8 @@ Procedure:
 
    </details>
 
-1. Install the gitlab runner on the **manager** instance.
-1. Configure the runner to use the `docker-autoscaler` executor.
+1. Install GitLab Runner on the **Autoscaling** instance.
+1. Configure the Runner to use the `docker-autoscaler` executor.
 
    <details style="margin-top: -1em; padding-bottom: 1em;">
 
@@ -347,7 +356,7 @@ Procedure:
    concurrent = 10
 
    [[runners]]
-     name = "docker autoscaler"
+     name = "runner autoscaler using docker autoscaler"
      url = "https://gitlab.example.org"
      token = "<token>"
      executor = "docker-autoscaler"
@@ -386,6 +395,8 @@ Procedure:
 > **Deprecated** in GitLab 17.5.<br/>
 > If using this executor with EC2 instances, Azure Compute, or GCE, migrate to the
 > [GitLab Runner Autoscaler](#gitlab-runner-autoscaler).
+
+<details style="padding: 0 0 0 1em">
 
 [Supported cloud providers][docker machine's supported cloud providers].
 
@@ -515,6 +526,8 @@ concurrent = 40
       IdleCount = 0
       IdleTime = 120
 ```
+
+</details>
 
 </details>
 
