@@ -8,15 +8,30 @@ Fast, simple, and cost effective Postgres replication.
 
 ## TL;DR
 
-<!-- Uncomment if used
 <details>
   <summary>Setup</summary>
 
-```sh
+  <details style="padding: 0 0 0 1em">
+    <summary>Check requirements</summary>
+
+```sql
+sourceDb=> SELECT name,setting FROM pg_settings WHERE name IN ('wal_level','rds.logical_replication');
+          name           | setting
+-------------------------+---------
+ rds.logical_replication | on
+ wal_level               | logical
+(2 rows)
 ```
 
+```sql
+ALTER SYSTEM SET wal_level = logical;
+ALTER SYSTEM SET max_wal_senders = 10;
+ALTER SYSTEM SET max_replication_slots = 10;
+```
+
+  </details>
+
 </details>
--->
 
 <!-- Uncomment if used
 <details>
