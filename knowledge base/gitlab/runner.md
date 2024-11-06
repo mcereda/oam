@@ -182,6 +182,9 @@ The container images are pulled by the Autoscaler, which then feeds them to the 
 - Workers do **not** need direct image access.
 - **Both** the Autoscaler **and** the Workers require the Docker Engine to be installed.
 
+Multiple Autoscaler do **not** play well managing the same resources.<br/>
+They end up competing for resources, and will try to delete each other's Workers.
+
 <details>
   <summary>Setup</summary>
 
