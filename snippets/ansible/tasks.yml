@@ -28,6 +28,31 @@
   delegate_to: 127.0.0.1  # 'localhost' works too
   ansible.builtin.command: hostname
 
+- name: Apply roles remotely
+  block:
+    - name: Gather facts about the EC2 instance
+      when: instance_information.instance_ids | length > 0
+      delegate_to: "{{ instance_information.instance_ids | first }}"
+      vars:
+        ansible_connection: aws_ssm
+        ansible_python_interpreter: /usr/bin/python3
+      ansible.builtin.gather_facts: {}
+      register: fact_gathering
+    - name: Apply the role to the EC2 instance
+      when:
+        - fact_gathering is not skipped
+        - fact_gathering is not failed
+      delegate_to: "{{ instance_information.instance_ids | first }}"
+      delegate_facts: true
+      vars:
+        ansible_connection: aws_ssm
+        ansible_aws_ssm_timeout: 900
+        ansible_python_interpreter: /usr/bin/python3
+        some_role_var: some value
+        some_other_role_var: some value
+      ansible.builtin.import_role:
+        name: role name
+
 - name: Assertions
   vars:
     installation_method: package
