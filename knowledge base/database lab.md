@@ -59,12 +59,15 @@ Database clones comes in two flavours:
   With ZFS, the Engine periodically creates a new snapshot of the data directory and maintains a set of snapshots. When
   requesting a new clone, users choose which snapshot to use as base.
 
+Clone DBs configuration starting point is at `~/.dblab/postgres_conf/postgresql.conf`.
+
 ## Further readings
 
 - [Website]
 - [Main repository]
 - [Documentation]
 - [`dblab`][dblab]
+- [Installation guide for DBLab Community Edition][how to install dblab manually]
 
 ### Sources
 
@@ -83,6 +86,7 @@ Database clones comes in two flavours:
 <!-- Upstream -->
 [database lab engine configuration reference]: https://postgres.ai/docs/reference-guides/database-lab-engine-configuration-reference
 [documentation]: https://postgres.ai/docs/
+[how to install dblab manually]: https://postgres.ai/docs/how-to-guides/administration/install-dle-manually
 [main repository]: https://gitlab.com/postgres-ai/database-lab
 [website]: https://postgres.ai/
 
