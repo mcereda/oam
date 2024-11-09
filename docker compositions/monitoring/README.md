@@ -34,6 +34,7 @@ Will be requested to change them upon first login.
 
 - [Grafana]
 - [Prometheus]
+- [ERROR - Deploy - Error response from daemon: linux mounts: path / is mounted on / but it is not a shared or slave mount]
 
 <!--
   Reference
@@ -47,3 +48,6 @@ Will be requested to change them upon first login.
 
 <!-- Files -->
 [prometheus' configuration file]: prometheus/prometheus.yml
+
+<!-- Others -->
+[error - deploy - error response from daemon: linux mounts: path / is mounted on / but it is not a shared or slave mount]: https://github.com/prometheus/node_exporter/issues/2002#issuecomment-802753422
