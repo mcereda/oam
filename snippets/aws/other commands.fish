@@ -54,7 +54,7 @@ aws ssm send-command --instance-ids 'i-08fc83ad07487d72f' --document-name 'AWS-R
 aws ssm wait command-executed --command-id 'e5f7ca0e-4d74-4316-84be-9ccaf3ae1f70' --instance-id 'i-08fc83ad07487d72f'
 aws ssm get-command-invocation --command-id 'e5f7ca0e-4d74-4316-84be-9ccaf3ae1f70' --instance-id 'i-08fc83ad07487d72f'
 
-# Run commands and get their output.
+# Run commands and get their output
 set instance_id 'i-0915612f182914822' \
 && set command_id (aws ssm send-command --instance-ids "$instance_id" \
 	--document-name 'AWS-RunShellScript' --parameters 'commands="echo hallo"' \
@@ -65,6 +65,12 @@ set instance_id 'i-0915612f182914822' \
 
 aws ec2 describe-images --image-ids 'ami-01234567890abcdef'
 aws ec2 describe-images --image-ids 'ami-01234567890abcdef' --query 'Images[].Description'
+
+# Configure the CloudWatch agent
+amazon-cloudwatch-agent-ctl -a 'status'
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a 'set-log-level' -l 'INFO'
+amazon-cloudwatch-agent-ctl -a 'fetch-config' -m 'ec2' -s -c 'file:/opt/aws/amazon-cloudwatch-agent/bin/config.json'
+tail -f '/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log'
 
 # Delete unused volumes older than some date
 aws ec2 describe-volumes --output 'text' --filters 'Name=status,Values=available' \

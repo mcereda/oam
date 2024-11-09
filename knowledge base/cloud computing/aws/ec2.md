@@ -3,6 +3,7 @@
 1. [TL;DR](#tldr)
 1. [Burstable instances](#burstable-instances)
 1. [Disks](#disks)
+1. [Metrics](#metrics)
 1. [Auto scaling](#auto-scaling)
    1. [Lifecycle hooks](#lifecycle-hooks)
 1. [Image builder](#image-builder)
@@ -70,6 +71,12 @@ aws ec2 delete-security-group --group-id 'sg-0773aa724d0c2dd51'
 curl 'http://instance-data/latest/meta-data/instance-id'
 curl 'http://169.254.169.254/latest/meta-data/instance-type'
 curl 'http://[fd00:ec2::254]/latest/meta-data/local-ipv4'
+
+# Configure the CloudWatch agent
+amazon-cloudwatch-agent-ctl -a 'status'
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a 'set-log-level' -l 'INFO'
+amazon-cloudwatch-agent-ctl -a 'fetch-config' -m 'ec2' -s -c 'file:/opt/custom/aws/cloudwatch/agent-config.json'
+tail -f '/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log'
 ```
 
 </details>
@@ -115,6 +122,25 @@ If the average CPU usage over a 24-hour period **exceeds** the baseline, instanc
 ## Disks
 
 Refer [EBS].
+
+## Metrics
+
+Instances publish a default set of metrics to CloudWatch with no charge.<br/>
+One can change this set by configuring the CloudWatch agent.
+
+Refer [How can I send memory and disk metrics from my EC2 instances to CloudWatch?].
+
+> Make sure the instance the permissions it needs to publish extra metrics.<br/>
+> Consider assigning it the AWS-managed `CloudWatchAgentServerPolicy` IAM policy or similar permissions.
+
+CloudWatch agent's logs are saved by default to `/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log`.
+
+```sh
+amazon-cloudwatch-agent-ctl -a 'status'
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a 'set-log-level' -l 'INFO'
+amazon-cloudwatch-agent-ctl -a 'fetch-config' -m 'ec2' -s -c 'file:/opt/aws/amazon-cloudwatch-agent/bin/config.json'
+tail -f '/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log'
+```
 
 ## Auto scaling
 
@@ -182,6 +208,7 @@ TODO
 - [Configuring EC2 Disk alert using Amazon CloudWatch]
 - [Using AL2023 based Amazon ECS AMIs to host containerized workloads]
 - [Announcing Amazon EC2 per second billing]
+- [How can I send memory and disk metrics from my EC2 instances to CloudWatch?]
 
 ### Sources
 
@@ -224,6 +251,7 @@ TODO
 [describe-images]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-images.html
 [describeimages]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
 [ec2 image builder]: https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html
+[how can i send memory and disk metrics from my ec2 instances to cloudwatch?]: https://repost.aws/knowledge-center/cloudwatch-memory-metrics-ec2
 [how to clone instance ec2]: https://repost.aws/questions/QUOrWudF3vRL2Vqtrv0M9lfQ/how-to-clone-instance-ec2
 [iam roles for amazon ec2]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
 [key concepts and definitions for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-credits-baseline-concepts.html
