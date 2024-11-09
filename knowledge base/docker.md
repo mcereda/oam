@@ -195,6 +195,8 @@ docker buildx create --node 'builder_name'
 docker buildx build -t 'image:tag' --load '.'
 docker buildx build … -t 'image:tag' --load --platform 'linux/amd64' '.'
 docker buildx build … --push \
+  --cache-to 'mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=012345678901.dkr.ecr.eu-west-2.amazonaws.com/buildkit-test:cache \
+  --cache-from type=registry,ref=012345678901.dkr.ecr.eu-west-2.amazonaws.com/buildkit-test:cache \
   --platform 'linux/amd64,linux/arm64,linux/arm/v7' '.'
 
 # Remove builders.
@@ -423,6 +425,7 @@ docker load …
 - [Containerd]
 - [Kaniko]
 - [`amazon-ecr-credential-helper`][amazon-ecr-credential-helper]
+- [Announcing remote cache support in Amazon ECR for BuildKit clients]
 
 ### Sources
 
@@ -459,6 +462,7 @@ docker load …
 
 <!-- Others -->
 [amazon-ecr-credential-helper]: https://github.com/awslabs/amazon-ecr-credential-helper
+[announcing remote cache support in amazon ecr for buildkit clients]: https://aws.amazon.com/blogs/containers/announcing-remote-cache-support-in-amazon-ecr-for-buildkit-clients/
 [arch linux wiki]: https://wiki.archlinux.org/index.php/Docker
 [cheatsheet]: https://collabnix.com/docker-cheatsheet/
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html

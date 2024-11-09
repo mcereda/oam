@@ -60,7 +60,7 @@ docker run … \
     --destination 'gcr.io/gcp-project-id/custom-image:1.2.3' \
     --destination 'mycr.azurecr.io/azure-repository:1.2.3'
 docker run … -v "$PWD/config.json:/kaniko/.docker/config.json:ro" 'gcr.io/kaniko-project/executor:latest'
-docker run … 'gcr.io/kaniko-project/executor' … --cache true --custom-platform 'linux/amd64' --build-arg VERSION='1.2'
+docker run … 'gcr.io/kaniko-project/executor' … --cache --custom-platform 'linux/amd64' --build-arg VERSION='1.2'
 ```
 
 </details>
