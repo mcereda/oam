@@ -231,6 +231,7 @@
         "mountpoint",
         "mpiexec",
         "multiarch",
+        "nats",
         "netcat",
         "nfsmount",
         "nindent",
