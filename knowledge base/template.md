@@ -46,7 +46,7 @@ Intro
 ## Further readings
 
 - [Website]
-- [Main repository]
+- [Codebase]
 
 ### Sources
 
@@ -59,7 +59,7 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[main repository]: https://github.com/project/
+[codebase]: https://github.com/project/
 [website]: https://website/
 
 <!-- Others -->
