@@ -112,7 +112,31 @@ curl 'http://169.254.169.254/latest/meta-data/iam/security-credentials/s3access'
 # ------------------
 ###
 
+aws ecr describe-repositories
+aws ecr create-repository --repository-name 'bananaslug' --registry-id '012345678901'
 aws ecr delete-repository --repository-name 'bananaslug'
+
+aws ecr get-login-password \
+| docker login --username AWS --password-stdin '012345678901.dkr.ecr.eu-west-1.amazonaws.com'
+
+aws ecr describe-pull-through-cache-rules --registry-id '012345678901'
+aws ecr validate-pull-through-cache-rule --ecr-repository-prefix 'ecr-public'
+
+docker pull '012345678901.dkr.ecr.eu-west-1.amazonaws.com/ecr-public/repository_name/image_name:tag'
+docker pull '012345678901.dkr.ecr.eu-west-1.amazonaws.com/quay/repository_name/image_name:tag'
+
+docker pull 'quay.io/argoproj/argocd:v2.10.0'
+docker pull '012345678901.dkr.ecr.eu-west-1.amazonaws.com/me/argoproj/argocd:v2.10.0'
+
+aws ecr create-pull-through-cache-rule --registry-id '012345678901' \
+	--ecr-repository-prefix 'cache/docker-hub' \
+	--upstream-registry 'docker-hub' --upstream-registry-url 'registry-1.docker.io' \
+	--credential-arn "$(\
+		aws secretsmanager describe-secret --secret-id 'ecr-pullthroughcache/docker-hub' --query 'ARN' --output 'text' \
+	)"
+aws ecr describe-pull-through-cache-rules --registry-id '012345678901' --ecr-repository-prefixes 'cache/docker-hub'
+
+aws ecr list-images --registry-id '012345678901' --repository-name 'cache/docker-hub'
 
 
 ###

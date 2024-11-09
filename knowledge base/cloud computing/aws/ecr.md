@@ -69,8 +69,10 @@ aws ecr describe-repositories --repository-names 'docker-tools/image-builder' \
 
 ## Pull through cache feature
 
-> **Note:** when requesting an image for the first time using the pull through cache, the ECR creates a new repository for that image.<br>
-> This might™ introduce a small latency and be cause of pull failures. Pulling that (not-yet)cached image from an interactive shell session worked flawlessly.
+> **Note:** when requesting an image for the first time using the pull through cache, the ECR creates a new repository
+> for that image.<br>
+> This might™ introduce a small latency and be cause of pull failures. Pulling that (not-yet)cached image from an
+> interactive shell session worked flawlessly.
 
 ## Troubleshooting
 
@@ -88,6 +90,7 @@ Context: trying to pull an image on an EC2 instance that is using the amazon-ecr
 
 - [Amazon Web Services]
 - AWS' [CLI]
+- [Use ECR as cache for BuildKit][announcing remote cache support in amazon ecr for buildkit clients]
 
 ### Sources
 
@@ -106,6 +109,7 @@ Context: trying to pull an image on an EC2 instance that is using the amazon-ecr
 
 <!-- Files -->
 <!-- Upstream -->
+[announcing remote cache support in amazon ecr for buildkit clients]: https://aws.amazon.com/blogs/containers/announcing-remote-cache-support-in-amazon-ecr-for-buildkit-clients/
 [cli subcommand reference]: https://docs.aws.amazon.com/cli/latest/reference/ecr/
 [creating a lifecycle policy preview]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/lpp_creation.html
 [using pull through cache rules]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache.html
