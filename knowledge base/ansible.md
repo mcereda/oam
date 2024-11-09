@@ -5,6 +5,7 @@
    1. [Performance tuning](#performance-tuning)
 1. [Inventories](#inventories)
    1. [AWS](#aws)
+   1. [Patterns](#patterns)
 1. [Templating](#templating)
    1. [Tests](#tests)
    1. [Loops](#loops)
@@ -321,6 +322,31 @@ saturn
 ### AWS
 
 Refer [Integrate with AWS SSM].
+
+### Patterns
+
+Refer [Patterns: targeting hosts and groups].
+
+They allow to specify hosts and/or groups from the inventory. Ansible will execute on all hosts included in the pattern.
+
+They can refer to a single host, an IP address, an inventory group, a set of groups, or all hosts.<br/>
+One can exclude or require subsets of hosts, use wildcards or regular expressions, and more.
+
+Use either a `,` or a `:` to separate lists of hosts.<br/>
+The `,` is preferred when dealing with ranges and IPv6 addresses.
+
+| What                   | Patterns                               | Targets                                                                         |
+| ---------------------- | -------------------------------------- | ------------------------------------------------------------------------------- |
+| Everything             | `all`,  `*`                            | All hosts                                                                       |
+| Single host            | `fqdn`, `192.168.1.1`, `localhost`     | The single host directly identified by the pattern                              |
+| Multiple hosts         | `host1:host2`, `host1,host2`           | All hosts directly identified by the pattern                                    |
+| Single group           | `webservers`, `tag_Application_Gitlab` | All hosts in the group identified by the pattern                                |
+| Multiple groups        | `webservers:dbservers`                 | All hosts in all groups identified by the pattern                               |
+| Exclude groups         | `webservers:!atlanta`                  | All hosts in the specified groups **not** identified by the **negated** pattern |
+| Intersection of groups | `webservers:&staging`                  | All hosts present in **all** the groups identified by the pattern               |
+
+One can use **wildcard** patterns with FQDNs or IP addresses, as long as the hosts are named in your inventory by FQDN
+or IP address.
 
 ## Templating
 
@@ -1455,6 +1481,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 - [Ansible Vault tutorial]
 - [Ansible Vault with AWX]
 - [Asynchronous actions and polling]
+- [Patterns: targeting hosts and groups]
 
 <!--
   Reference
@@ -1487,6 +1514,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 [galaxy  sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
 [galaxy]: https://galaxy.ansible.com/
 [introduction to ansible builder]: https://www.ansible.com/blog/introduction-to-ansible-builder/
+[patterns: targeting hosts and groups]: https://docs.ansible.com/ansible/latest/inventory_guide/intro_patterns.html
 [protecting sensitive data with ansible vault]: https://docs.ansible.com/ansible/latest/vault_guide/index.html
 [roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
 [setup module source code]: https://github.com/ansible/ansible/blob/devel/lib/ansible/modules/setup.py
