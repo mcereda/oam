@@ -219,6 +219,7 @@
         "libexec",
         "lighttpd",
         "localdomain",
+        "localstack",
         "lockfiles",
         "lucene",
         "luci",
