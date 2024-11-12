@@ -112,6 +112,17 @@ TOKEN=$(curl -X PUT 'http://169.254.169.254/latest/api/token' -H 'X-aws-ec2-meta
 # IMDSv1
 curl 'http://169.254.169.254/latest/meta-data/iam/security-credentials/s3access'
 
+# Start stopped instances
+# Requires the 'ec2:StartInstances' permission for the instances
+# Also requires the 'kms:GenerateDataKeyWithoutPlaintext' and 'kms:CreateGrant' permissions for the keys used by the
+#   instances, if any.
+#   See https://docs.aws.amazon.com/ebs/latest/userguide/how-ebs-encryption-works.html#how-ebs-encryption-works-encrypted-snapshot
+aws ec2 start-instances --instance-ids 'i-0123456789abcdef0'
+
+# Stop started instances
+# Requires the 'ec2:StopInstances' permission for the instances
+aws ec2 stop-instances --instance-ids 'i-0123456789abcdef0'
+
 
 ###
 # ECR

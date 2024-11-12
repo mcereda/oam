@@ -121,7 +121,7 @@ If the average CPU usage over a 24-hour period **exceeds** the baseline, instanc
 
 ## Disks
 
-Refer [EBS].
+Refer [EBS] and [Device names for volumes on Amazon EC2 instances].
 
 ## Metrics
 
@@ -209,6 +209,7 @@ TODO
 - [Using AL2023 based Amazon ECS AMIs to host containerized workloads]
 - [Announcing Amazon EC2 per second billing]
 - [How can I send memory and disk metrics from my EC2 instances to CloudWatch?]
+- [Device names for volumes on Amazon EC2 instances]
 
 ### Sources
 
@@ -250,6 +251,7 @@ TODO
 [create an ami from an amazon ec2 instance]: https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide//tkv-create-ami-from-instance.html
 [describe-images]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-images.html
 [describeimages]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
+[device names for volumes on amazon ec2 instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html
 [ec2 image builder]: https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html
 [how can i send memory and disk metrics from my ec2 instances to cloudwatch?]: https://repost.aws/knowledge-center/cloudwatch-memory-metrics-ec2
 [how to clone instance ec2]: https://repost.aws/questions/QUOrWudF3vRL2Vqtrv0M9lfQ/how-to-clone-instance-ec2
