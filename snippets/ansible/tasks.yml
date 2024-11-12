@@ -88,6 +88,9 @@
       - True is boolean
       - false is boolean
       - False is boolean
+      # null
+      - "'aa' != None"
+      - "'aa' not in [ None, '' ]"
 
 - name: Type conversion
   ansible.builtin.assert:
@@ -144,6 +147,27 @@
   tags: filter
   ansible.builtin.set_fact:
     path_list_of_all_txt_files_in_dir: "{{ lookup('ansible.builtin.fileglob', '/my/path/*.txt') }}"
+
+- name: Prompt for vars
+  tags:
+    - prompt
+    - variables
+  # at playbook level
+  vars_prompt:
+    - name: target_db
+      prompt: Target DB
+      private: false
+    - name: db_password
+      prompt: DB password
+
+- name: Import playbooks
+  tags:
+    - import
+    - playbook
+  # at playbook level
+  vars:
+    var_for_playbook_1: value1
+  ansible.builtin.import_playbook: path/to/playbook.yml
 
 - name: Import tasks
   block:
@@ -593,6 +617,41 @@
                 instance_type: "{{ source_instance_info.instances[0].instance_type }}"
                 image:
                   id: "{{ source_ami.image_id }}"
+        - name: Start stopped instances and add the first of them to the inventory for the next play
+          # at playbook level
+          hosts: localhost
+          check_mode: false
+          handlers:
+            - name: Add the first started host
+              ansible.builtin.add_host:
+                groups:
+                  - tag_Application_Postgres
+                  - tag_Component_Dumper
+                name: "{{ started_instances.instance_ids[0] }}"
+            - name: Add all started hosts with host variables
+              loop: "{{ started_instances.instance_ids }}"
+              ansible.builtin.add_host:
+                groups:
+                  - tag_Application_Postgres
+                  - tag_Component_Dumper
+                name: "{{ item }}"
+                ansible_connection: aws_ssm
+                ansible_aws_ssm_bucket_name: company-ssm-logs
+                ansible_aws_ssm_region: eu-west-1
+                ansible_aws_ssm_timeout: 900
+          tasks:
+            - name: Start the PG dumper instance
+              tags: dumper
+              amazon.aws.ec2_instance:
+                filters:
+                  tag:Application: Postgres
+                  tag:Component: Dumper
+                state: started
+              register: started_instances
+              notify:
+                - Add the first started host
+                - Add all started hosts with host variables
+          # follow up with play using hosts 'tag_Application_Postgres,&tag_Component_Dumper'
     - name: RDS
       block:
         - name: Create an instance's snapshot
