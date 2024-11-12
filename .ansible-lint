@@ -3,6 +3,7 @@
 
 offline: true
 warn_list:
-  - 'name[template]'   # Jinja templates should only be at the end of 'name' -- oh come on!
-  - 'role-name[path]'  # Avoid using paths when importing roles -- yeah, need for testing
+  - name[template]   # Jinja templates should only be at the end of 'name' -- oh come on!
+  - role-name[path]  # Avoid using paths when importing roles -- yeah, need for testing
+  - yaml[comments-indentation]
   - package-latest
