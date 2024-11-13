@@ -208,23 +208,42 @@ Pitfalls:
   a folder the remote user can write to ([source][ansible temp dir change]):
 
   ```sh
-  ANSIBLE_REMOTE_TMP='/tmp' ansible…
+  ANSIBLE_REMOTE_TMP="/tmp/.ansible-${USER}/tmp" ansible…
   ```
 
   ```ini
   # file: ansible.cfg
-  remote_tmp=/tmp
+  remote_tmp=/tmp/.ansible-${USER}/tmp
   ```
 
   ```diff
    - hosts: all
   +  vars:
-  +    ansible_remote_tmp: /tmp
+  +    ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp
      tasks: …
   ```
 
   This, or use the shell profiles in [SSM's preferences][session manager preferences] to change the directory when
   logged in.
+
+- In similar fashion to the point above, SSM might mess up the directory used by `async` tasks.<br/>
+  To avoid this, set it to a folder the remote user can write to:
+
+  ```sh
+  ANSIBLE_ASYNC_DIR="/tmp/.ansible-${USER}/async" ansible…
+  ```
+
+  ```ini
+  # file: ansible.cfg
+  async_dir=/tmp/.ansible-${USER}/async
+  ```
+
+  ```diff
+   - hosts: all
+  +  vars:
+  +    ansible_async_dir: /tmp/.ansible-ssm-user/async
+     tasks: …
+  ```
 
 ## Troubleshooting
 

@@ -70,12 +70,26 @@
           }}
     - name: Manipulate strings
       tags: string_manipulation
+      vars:
+        module_output: >-
+          u001b]0;@smth:/u0007{
+          "failed": 0, "started": 1, "finished": 0, "ansible_job_id": "j968817333249.114504",
+          "results_file": "/home/ssm-user/.ansible_async/j968817333249.114504", "_ansible_suppress_tmpdir_delete": true
+          }\r\r
+        pattern: >-
+          {{ '"failed": 0, "started": 1, "finished": 0' | regex_escape() }}
       ansible.builtin.set_fact:
         first_letter_to_uppercase: "{{ 'all_lowercase' | capitalize }}"
         something_replaced: "{{ 'dots.to.dashes' | replace('.','-') }}"
         split_string: "{{ 'testMe@example.com' | split('@') | first }}"
         pattern_replaced: >-
           {{ '*.domain.com...' | regex_replace('*' | regex_escape, 'star') | regex_replace('\.+$', '') }}
+        pattern_is_anywhere_in_module_output: "{{ module_output is search(pattern) }}"
+        pattern_is_at_the_beginning_of_string: "{{ 'sator arepo tenet opera rotas' is match('sator arepo') }}"
+        regex_is_anywhere_in_string: "{{ 'sator arepo tenet opera rotas' is regex('\\stenet\\s') }}"
+        first_substr_matching_regex: "{{ 'sator arepo tenet opera rotas' | regex_search('\\stenet\\s') }}"
+        value_from_json_string_in_module_output: >-
+          {{ 'ansible_job_id' | extract(module_output | regex_search('{.*}') | from_json) }}
     - name: Manipulate lists
       tags: list_manipulation
       block:
@@ -307,6 +321,33 @@
         - name: This always executes
           ansible.builtin.debug:
             msg: I always execute
+    - name: Long-running tasks
+      tags: long-running
+      vars:
+        ansible_async_dir: /tmp/.ansible/async  # defaults to '~/.ansible_async'
+      block:
+        - name: Long-running task with integrated poll
+          tags: async_with_self_poll
+          ansible.builtin.command: /bin/sleep 15
+          changed_when: false
+          async: 45  # run max 45s
+          poll: 5  # check once every 5s
+        - name: Long-running task with external poll
+          tags: async_with_external_poll
+          block:
+            - name: Long-running task with external poll
+              ansible.builtin.command: /bin/sleep 15
+              changed_when: false
+              async: 45  # run max 45s
+              poll: 0  # fire and forget
+              register: long_running_task_with_external_poll
+            - name: Check on long_running_task_with_external_poll
+              ansible.builtin.async_status:
+                jid: "{{ long_running_task_with_external_poll.ansible_job_id }}"
+              register: job_result
+              until: job_result.finished
+              retries: 9
+              delay: 5
 
 - name: Debugging
   tags:
@@ -489,12 +530,36 @@
     - '!all'
     - min
   check_mode: true
-  tasks:
+  tasks:  # ordered alphabetically by name
+    - name: Add authorized keys
+      become: true
+      ansible.posix.authorized_key:
+        user: ansible
+        key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI0123456789abcdefghijkl/ABCDEFGHIJKL01234567 ansible@example.org
+    - name: Add repositories
+      block:
+        - name: To DNF/YUM
+          when: ansible_pkg_mgr | lower in [ 'dnf', 'yum' ]
+          ansible.builtin.yum_repository:
+            name: epel
+            description: EPEL YUM repo
+            baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+    - name: Add users to the sudoers
+      become: true
+      community.general.sudoers:
+        name: ansible
+        user: ansible
+        nopassword: true
+        commands: ALL
     - name: Create directories recursively
       ansible.builtin.file:
         path: /tmp/path/to/final/dir
         state: directory
         mode: '0775'
+    - name: Create users
+      become: true
+      ansible.builtin.user:
+        name: ansible
     - name: Define files content in tasks
       ansible.builtin.copy:
         dest: "{{ ansible_user_dir }}/.tmux.conf"
@@ -511,14 +576,6 @@
     - name: Look for files
       ansible.builtin.set_fact:
         path_list_of_all_txt_files_in_dir: "{{ lookup('ansible.builtin.fileglob', '/my/path/*.txt') }}"
-    - name: Add repositories
-      block:
-        - name: To DNF/YUM
-          when: ansible_pkg_mgr | lower in [ 'dnf', 'yum' ]
-          ansible.builtin.yum_repository:
-            name: epel
-            description: EPEL YUM repo
-            baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
     - name: Install packages
       block:
         - name: Via package manager on any supported system
@@ -580,6 +637,27 @@
                   text:
                     type: mrkdwn
                     text: This is a *_fancy_* message
+    - name: Setup cronjobs
+      block:
+        - name: At specific times
+          # Mind this is based on the *hosts'* time.
+          become: true
+          ansible.builtin.cron:
+            name: Prometheus manual data backup
+            cron_file: prometheus-manual-data-backup
+            hour: 4
+            minute: 0
+            user: root
+            job:
+              # - Keep '%' characters escaped or they'll be treated as newlines.
+              # - Archive creation returns 1 if it detects changes to read files.
+              #   Using ';' instead of '&&' to ignore.
+              >
+                FILENAME="/tmp/prometheus-data-$(date +'\%s-\%F-\%H-\%m-\%S').tar.gz"
+                && tar -czf "$FILENAME" '/var/lib/prometheus/data'
+                ; tar -tf "$FILENAME" > '/dev/null'
+                && aws s3 cp "$FILENAME" 's3://backups/prometheus/'
+                && rm "$FILENAME"
     - name: Use the users' home directory for something
       block:
         - name: Executing commands from specified users
@@ -640,27 +718,6 @@
                 state: touch
                 mode: '0755'
               with_dict: "{{ users_info }}"
-    - name: Cronjobs
-      block:
-        - name: At specific times
-          become: true
-          ansible.builtin.cron:
-            name: Prometheus manual data backup
-            cron_file: prometheus-manual-data-backup
-            # Mind this is based on the hosts' time.
-            hour: 4
-            minute: 0
-            user: root
-            job:
-              # - Keep '%' characters escaped or they'll be treated as newlines.
-              # - Archive creation returns 1 if it detects changes to read files.
-              #   Using ';' instead of '&&' to ignore.
-              >
-                FILENAME="/tmp/prometheus-data-$(date +'\%s-\%F-\%H-\%m-\%S').tar.gz"
-                && tar -czf "$FILENAME" '/var/lib/prometheus/data'
-                ; tar -tf "$FILENAME" > '/dev/null'
-                && aws s3 cp "$FILENAME" 's3://backups/prometheus/'
-                && rm "$FILENAME"
 
 - name: AWS-specific operations
   tags: never
@@ -671,12 +728,13 @@
   tasks:
     - name: Apply roles on different targets than the current one
       block: []
-        # - name: Gather facts about the EC2 instance
+        # - name: Gather facts about the target EC2 instance
         #   when: instance_information.instance_ids | length > 0
         #   delegate_to: "{{ instance_information.instance_ids | first }}"
         #   vars:
         #     ansible_connection: aws_ssm
         #     ansible_python_interpreter: /usr/bin/python3
+        #     ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp
         #   ansible.builtin.gather_facts: {}
         #   register: fact_gathering
         # - name: Apply the role to the EC2 instance
@@ -689,6 +747,8 @@
         #     ansible_connection: aws_ssm
         #     ansible_aws_ssm_timeout: 900
         #     ansible_python_interpreter: /usr/bin/python3
+        #     ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp
+        #     ansible_async_dir: /tmp/.ansible-ssm-user/async
         #     some_role_var: some value
         #     some_other_role_var: some value
         #   ansible.builtin.import_role:
@@ -722,7 +782,7 @@
             resource: i-xyzxyz01
             tags:
               MyNewTag: value
-    - name: EC2
+    - name: EC2-specific operations
       block:
         - name: Get running instances with 'K8S' as the 'Application' tag
           amazon.aws.ec2_instance_info:
@@ -754,7 +814,49 @@
                 instance_type: "{{ source_instance_info.instances[0].instance_type }}"
                 image:
                   id: "{{ source_ami.image_id }}"
-    - name: RDS
+        - name: Long-running tasks via SSM
+          block:
+            - name: Dump a DB from an RDS instance to a temporary file
+              when: rds_instance.endpoint is defined
+              vars:
+                ansible_connection: community.aws.aws_ssm
+                ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp
+                ansible_async_dir: /tmp/.ansible-ssm-user/async
+                wanted_pattern_in_module_output: >-
+                  {{ '"failed": 0, "started": 1, "finished": 0' | regex_escape() }}
+              community.postgresql.postgresql_db:
+                login_host: "{{ rds_instance.endpoint.address }}"
+                login_port: "{{ rds_instance.endpoint.port }}"
+                login_user: "{{ rds_instance.master_username }}"
+                login_password: "{{ db_password }}"
+                name: sales
+                state: dump
+                target: "{{ temp_file_for_dump.path }}"
+                target_opts: >-
+                  --exclude-table …
+                  --exclude-schema archived
+                  --no-publications
+                  --format c
+              async: "{{ 60 * 60 * 2 }}"  # wait up to 2 hours
+              poll: 0  # fire and forget, since it would not check anyways
+              register: dump
+              changed_when:
+                - dump.rc == 0
+                - dump.module_stderr == ''
+                - "'started' | extract(dump.module_stdout | regex_search('{.*}') | from_json) == 1"
+                - "'failed'  | extract(dump.module_stdout | regex_search('{.*}') | from_json) == 0"
+              failed_when: dump.rc != 0
+            - name: Check on the dump task
+              vars:
+                dump_stdout_as_obj: "{{ dump.module_stdout | regex_search('{.*}') | from_json }}"
+                ansible_job_id: "{{ dump_stdout_as_obj.ansible_job_id }}"
+              ansible.builtin.async_status:
+                jid: "{{ ansible_job_id }}"
+              register: dump_result
+              until: dump_result.finished
+              retries: "{{ 60 * 2 }}"
+              delay: 60
+    - name: RDS-specific operations
       block:
         - name: Create an instance's snapshot
           block:
@@ -830,6 +932,8 @@
         ansible_aws_ssm_bucket_name: company-ssm-logs
         ansible_aws_ssm_region: eu-west-1
         ansible_aws_ssm_timeout: 900
+        ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp
+        ansible_async_dir: /tmp/.ansible-ssm-user/async
   tasks:
     - name: Start the PG dumper instance
       tags: dumper
