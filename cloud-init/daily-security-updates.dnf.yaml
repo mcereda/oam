@@ -2,7 +2,8 @@
 
 ##
 # Tested on:
-# - RHEL 8.6
+#   - Amazon Linux 2023.4.20240416
+#   - RHEL 8.6
 ##
 
 write_files:
