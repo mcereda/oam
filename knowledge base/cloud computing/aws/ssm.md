@@ -375,7 +375,7 @@ $ sudo ssm-cli get-diagnostics --output 'table'
 [amazon web services]: README.md
 [cli]: cli.md
 [ec2]: ec2.md
-[snippets]: ../../../snippets/aws/commands.fish
+[snippets]: ../../../snippets/aws/
 
 <!-- Upstream -->
 [amazon.aws.aws_ec2 inventory]: https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html
