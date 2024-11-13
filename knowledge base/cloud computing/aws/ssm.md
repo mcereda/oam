@@ -205,7 +205,9 @@ Pitfalls:
   > has been configured.
 
 - Since [SSM starts shell sessions under `/usr/bin`][gotchas], one must explicitly set Ansible's temporary directory to
-  a folder the remote user can write to ([source][ansible temp dir change]):
+  a folder the remote user can write to ([source][ansible temp dir change]).
+
+  <details style="padding-bottom: 1em">
 
   ```sh
   ANSIBLE_REMOTE_TMP="/tmp/.ansible-${USER}/tmp" ansible…
@@ -223,11 +225,15 @@ Pitfalls:
      tasks: …
   ```
 
+  </details>
+
   This, or use the shell profiles in [SSM's preferences][session manager preferences] to change the directory when
   logged in.
 
 - In similar fashion to the point above, SSM might mess up the directory used by `async` tasks.<br/>
-  To avoid this, set it to a folder the remote user can write to:
+  To avoid this, set it to a folder the remote user can write to.
+
+  <details style="padding-bottom: 1em">
 
   ```sh
   ANSIBLE_ASYNC_DIR="/tmp/.ansible-${USER}/async" ansible…
@@ -244,6 +250,47 @@ Pitfalls:
   +    ansible_async_dir: /tmp/.ansible-ssm-user/async
      tasks: …
   ```
+
+  </details>
+
+- When using `async` tasks, SSM will fire the task and disconnect; this makes the task **fail**, but the module will
+  still run on the target host.<br/>
+  Fire these tasks with `poll` set to `0` and forcing a specific failure test, then use a different task to check up on
+  them.
+
+  <details>
+
+  ```yaml
+  - name: Dump a DB from an RDS instance
+    vars:
+      ansible_connection: community.aws.aws_ssm
+      ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp   #-\
+      ansible_async_dir: /tmp/.ansible-ssm-user/async  #-- see previous gotchas
+      wanted_pattern_in_module_output: >-
+        {{ '"failed": 0, "started": 1, "finished": 0' | regex_escape() }}
+    community.postgresql.postgresql_db: { … }
+    async: "{{ 60 * 60 * 2 }}"      #-- wait up to 2 hours
+    poll: 0                         #-- fire and forget; ssm would not check anyways
+    register: dump
+    changed_when:
+      - dump.rc == 0
+      - dump.module_stderr == ''
+      - "'started' | extract(dump.module_stdout | regex_search('{.*}') | from_json) == 1"
+      - "'failed'  | extract(dump.module_stdout | regex_search('{.*}') | from_json) == 0"
+    failed_when: dump.rc != 0       #-- specify the failure yourself
+  - name: Check on the dump task
+    vars:
+      dump_stdout_as_obj: "{{ dump.module_stdout | regex_search('{.*}') | from_json }}"
+      ansible_job_id: "{{ dump_stdout_as_obj.ansible_job_id }}"
+    ansible.builtin.async_status:
+      jid: "{{ ansible_job_id }}"
+    register: dump_result
+    until: dump_result.finished
+    retries: "{{ 60 * 2 }}"         #-- wait up to 2 hours like the task before
+    delay: 60                       #-/
+  ```
+
+  </details>
 
 ## Troubleshooting
 
