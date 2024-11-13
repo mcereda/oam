@@ -59,13 +59,16 @@ Host  legacy-hosts azure-vm-* oci-bastion-*
 
 # Avoid nuisances with ephemeral hosts and localhost
 # E.g. preemptible or testing virtual machines which are often recreated
-Host  localhost *-vm-*
+Host  localhost *-vm-* *.compute.internal
 	StrictHostKeyChecking  no
 	UserKnownHostsFile     /dev/null
 
 # User-specific settings
 # E.g. programmatic accesses
-Match  user  robots
+Match  Host *.compute.internal  User ansible
+	IdentitiesOnly  yes
+	IdentityFile    ~/.ssh/ansible.key
+Match  User robots
 	AddKeysToAgent       no
 	BatchMode            yes
 	ForwardAgent         no
