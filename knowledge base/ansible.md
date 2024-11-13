@@ -483,6 +483,8 @@ Return a boolean result.
 
 Refer [Asynchronous actions and polling].
 
+Used to avoid connection timeouts and to run tasks concurrently.
+
 Executing tasks in the background will return a Job ID that can be polled for information about that task.<br/>
 Polling keeps the connection to the remote node open between polls.
 
@@ -506,8 +508,9 @@ ansible 'web1.example.com' -m 'async_status' -a 'jid=488359678239.2844'
 
 ```yaml
 ---
-- tasks:
-    - name: Simulate long running op (15 sec), wait for up to 45 sec, poll every 5 sec
+- …
+  tasks:
+    - name: Simulate long running operation (15 sec), wait for up to 45 sec, poll every 5 sec
       ansible.builtin.command: /bin/sleep 15
       async: 45
       poll: 5
