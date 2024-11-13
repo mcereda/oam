@@ -111,8 +111,9 @@ openssl x509 -in 'certificate.crt' -fingerprint -md5 -noout     # fingerprint as
 # Verify certificate chains
 # If a certificate is its own issuer, it is assumed to be the root CA (needs to be self signed)
 openssl verify 'certificate.crt'  # root and *all* intemediate certificates need to be trusted by the local machine
-openssl verify -untrusted 'intermediate-ca-chain.pem' 'certificate.crt'  # the root certificate need to be trusted by the local machine
-openssl verify -CAFile 'root.crt' -untrusted 'intermediate-ca-chain.pem' 'child.crt'
+openssl verify -untrusted 'intermediate-ca-chain.pem' 'certificate.crt'  # the root certificate needs to be trusted by the local machine
+openssl verify -purpose 'sslserver' -untrusted 'chain.pem' 'fullchain.pem'
+openssl verify -CAfile 'root.crt' -untrusted 'intermediate-ca-chain.pem' 'child.crt'
 
 # Verify certificates served by remote servers cover the given hostnames
 # Checks mutlidomain certificates properly cover all the hostnames
