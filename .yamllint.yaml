@@ -5,6 +5,9 @@
 extends: default
 
 rules:
+  brackets: disable
+  comments-indentation:
+    level: warning
   comments:
     ignore:
       - 'cloud-init/*'
