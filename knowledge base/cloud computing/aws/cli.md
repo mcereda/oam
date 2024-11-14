@@ -151,10 +151,6 @@ aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat' --query 'Plaintext' -
 | base64 --decode
 
 
-# List hosted zones.
-aws route53 list-hosted-zones
-
-
 # List all SageMaker EndpointConfigurations' names.
 aws sagemaker list-endpoint-configs --output 'yaml-stream' | yq -r '.[].EndpointConfigs[].EndpointConfigName' -
 aws sagemaker list-endpoint-configs --output 'yaml-stream' --query 'EndpointConfigs[].EndpointConfigName' | yq -r '.[].[]' -

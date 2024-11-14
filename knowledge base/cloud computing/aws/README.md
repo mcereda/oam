@@ -67,6 +67,7 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | [KMS]                         | Key management                                |
 | [OpenSearch]                  | ELK, logging                                  |
 | [RDS]                         | Databases                                     |
+| [Route53]                     | DNS                                           |
 | [S3]                          | Storage                                       |
 | [Sagemaker]                   | Machine learning                              |
 | [Security Hub]                | Aggregator for security findings              |
@@ -363,6 +364,7 @@ creation of non-compliant resources.
 [iam]: iam.md
 [opensearch]: opensearch.md
 [rds]: rds.md
+[route53]: route53.md
 [s3]: s3.md
 [sagemaker]: sagemaker.md
 
