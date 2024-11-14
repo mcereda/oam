@@ -815,13 +815,14 @@
                 image:
                   id: "{{ source_ami.image_id }}"
         - name: Long-running tasks via SSM
+          vars:
+            ansible_connection: community.aws.aws_ssm
+            ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp
+            ansible_async_dir: /tmp/.ansible-ssm-user/async
           block:
             - name: Dump a DB from an RDS instance to a temporary file
               when: rds_instance.endpoint is defined
               vars:
-                ansible_connection: community.aws.aws_ssm
-                ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp
-                ansible_async_dir: /tmp/.ansible-ssm-user/async
                 wanted_pattern_in_module_output: >-
                   {{ '"failed": 0, "started": 1, "finished": 0' | regex_escape() }}
               community.postgresql.postgresql_db:
@@ -831,14 +832,18 @@
                 login_password: "{{ db_password }}"
                 name: sales
                 state: dump
-                target: "{{ temp_file_for_dump.path }}"
+                target: >-
+                  [
+                    {{ ansible_user_dir }},
+                    dump.{{ db_instance_identifier }}.{{ ansible_date_time.iso8601_basic_short }}.dir
+                  ] | path_join
                 target_opts: >-
                   --exclude-table …
                   --exclude-schema archived
                   --no-publications
-                  --format c
-              async: "{{ 60 * 60 * 2 }}"  # wait up to 2 hours
-              poll: 0  # fire and forget, since it would not check anyways
+                  --format d --jobs $(nproc)
+              async: "{{ 60 * 60 * 2 }}"  # wait up to 12 hours -- 60 secs * 60 mins * 12 hours
+              poll: 0                     # fire and forget, since ssm would not allow self-checking anyways
               register: dump
               changed_when:
                 - dump.rc == 0
@@ -848,14 +853,16 @@
               failed_when: dump.rc != 0
             - name: Check on the dump task
               vars:
+                max_wait: "{{ (60 / 5 * 12) | int }}"      # wait up to 12 hours -- 60 mins / (delay/60) * 12 hours
+                ansible_aws_ssm_timeout: "{{ max_wait }}"  # ssm uses a single connection, keep active until the end
                 dump_stdout_as_obj: "{{ dump.module_stdout | regex_search('{.*}') | from_json }}"
                 ansible_job_id: "{{ dump_stdout_as_obj.ansible_job_id }}"
               ansible.builtin.async_status:
                 jid: "{{ ansible_job_id }}"
               register: dump_result
               until: dump_result.finished
-              retries: "{{ 60 * 2 }}"
-              delay: 60
+              retries: "{{ max_wait }}"
+              delay: 300  # check once every 5 minutes to avoid overloading the ssm agent
     - name: RDS-specific operations
       block:
         - name: Create an instance's snapshot
