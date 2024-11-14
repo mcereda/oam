@@ -204,6 +204,18 @@ Pitfalls:
   > as. Remote commands will often default to running as the `ssm-agent` user, however this will also depend on how SSM
   > has been configured.
 
+- SSM sessions' duration is limited by SSM's settings.<br/>
+  That might impact tasks that need to run for more than said duration.
+
+  <details style="padding-bottom: 1em">
+
+  Some modules (e.g.: `community.postgresql.postgresql_db`) got their session terminated and SSM retried the task,
+  killing and restarting the running process.<br/>
+  Since the process lasted more than the sessions' duration, it kept having its sessions terminated. The task failed
+  when the SSM reached the set retries for the connection.
+
+  </details>
+
 - Since [SSM starts shell sessions under `/usr/bin`][gotchas], one must explicitly set Ansible's temporary directory to
   a folder the remote user can write to ([source][ansible temp dir change]).
 
@@ -253,10 +265,28 @@ Pitfalls:
 
   </details>
 
-- When using `async` tasks, SSM will fire the task and disconnect; this makes the task **fail**, but the module will
-  still run on the target host.<br/>
-  Fire these tasks with `poll` set to `0` and forcing a specific failure test, then use a different task to check up on
-  them.
+- When using `async` tasks, SSM will fire the task and disconnect<br/>
+  This makes the task **fail**, but the process will still run on the target host.
+
+  <details style="margin-top: -1em; padding: 0 0 1em 0;">
+
+  ```json
+  {
+    "changed": false,
+    "module_stderr": "",
+    "module_stdout": "\u001b]0;@ip-172-31-42-42:/usr/bin\u0007{\"failed\": 0, \"started\": 1, \"finished\": 0, \"ansible_job_id\": \"j604343782826.4885\", \"results_file\": \"/tmp/.ansible-ssm-user/async/j604343782826.4885\", \"_ansible_suppress_tmpdir_delete\": true}\r\r",
+    "msg": "MODULE FAILURE\nSee stdout/stderr for the exact error",
+    "rc": 0
+  }
+  ```
+
+  </details>
+
+  Fire these tasks with `poll` set to `0` and forcing a specific failure test.<br/>
+  Then, use a different task to check up on them.
+
+  > When checking up tasks with `ansible.builtin.async_status`, SSM will use a single connection.<br/>
+  > Said connection must be kept alive until the end of the task.
 
   <details>
 
@@ -264,30 +294,34 @@ Pitfalls:
   - name: Dump a DB from an RDS instance
     vars:
       ansible_connection: community.aws.aws_ssm
-      ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp   #-\
+      ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp   #-- see previous gotchas
       ansible_async_dir: /tmp/.ansible-ssm-user/async  #-- see previous gotchas
       wanted_pattern_in_module_output: >-
         {{ '"failed": 0, "started": 1, "finished": 0' | regex_escape() }}
     community.postgresql.postgresql_db: { … }
-    async: "{{ 60 * 60 * 2 }}"      #-- wait up to 2 hours
-    poll: 0                         #-- fire and forget; ssm would not check anyways
+    async: "{{ 60 * 60 * 2 }}"                         #-- wait up to 2 hours ( 60s * 60m * 2h )
+    poll: 0                                            #-- fire and forget; ssm would not check anyways
     register: dump
     changed_when:
       - dump.rc == 0
       - dump.module_stderr == ''
       - "'started' | extract(dump.module_stdout | regex_search('{.*}') | from_json) == 1"
       - "'failed'  | extract(dump.module_stdout | regex_search('{.*}') | from_json) == 0"
-    failed_when: dump.rc != 0       #-- specify the failure yourself
+    failed_when: dump.rc != 0                          #-- specify the failure yourself
   - name: Check on the dump task
     vars:
+      max_wait: "{{ 60 * 60 * 2 }}"                    #-- wait for the async task to end
+      ansible_aws_ssm_timeout: "{{ max_wait }}"        #-- keep active the ssm connection the whole time
+      ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp   #-- see previous gotchas
+      ansible_async_dir: /tmp/.ansible-ssm-user/async  #-- see previous gotchas
       dump_stdout_as_obj: "{{ dump.module_stdout | regex_search('{.*}') | from_json }}"
       ansible_job_id: "{{ dump_stdout_as_obj.ansible_job_id }}"
     ansible.builtin.async_status:
       jid: "{{ ansible_job_id }}"
     register: dump_result
     until: dump_result.finished
-    retries: "{{ 60 * 2 }}"         #-- wait up to 2 hours like the task before
-    delay: 60                       #-/
+    retries: "{{ (max_wait/60) | int }}"               #-- ( ( ( max_wait/60s ) * 1/( delay/60s ) ) | int )
+    delay: 60                                          #-- set high to avoid overloading the ssm agent with sessions
   ```
 
   </details>

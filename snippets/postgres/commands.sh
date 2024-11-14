@@ -64,6 +64,7 @@ pg_dump -h 'host.fqnd' -p '5432' -U 'admin' -d 'postgres' -W
 pg_dump -U 'postgres' -d 'sales' -F 'custom' -f 'sales.bak' --schema-only
 pg_dump … -T 'customers,orders' -t 'salespeople,performances'
 pg_dump … -s --format 'custom'
+pg_dump … -F'd' --jobs '3'
 
 # Dump DBs' schema only
 pg_dump --host 'host.fqnd' --port '5432' --username 'postgres' --dbname 'postgres' --password --schema-only
@@ -75,7 +76,7 @@ pg_dumpall -h 'host.fqnd' -p '5432' -U 'postgres' -l 'postgres' -Wrf 'roles.sql'
 
 # Restore backups
 pg_restore -U 'postgres' -d 'sales' 'sales.dump'
-pg_restore -h 'host.fqdn' -U 'master' -d 'sales' -Oxj 8 'sales.dump'
+pg_restore -h 'host.fqdn' -U 'master' -d 'sales' -Oxj '8' 'sales.dump'
 
 # Initialize a test DB
 pgbench -i 'test-db'
