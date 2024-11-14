@@ -52,6 +52,14 @@
         integer_to_string_is_string: "{{ 43 | string is string }}"
         float_to_string_is_string: "{{ 74.93 | string is string }}"
         integer_to_bool_is_boolean: "{{ 4 | bool is boolean }}"
+    - name: Test truthfulness
+      tags: truthfulness
+      ansible.builtin.set_fact:
+        this_is_true: true
+        this_is_false: false
+        this_is_true_again: "{{ not false }}"
+        true_is_truthy: "{{ true is truthy }}"
+        false_is_falsy: "{{ false is falsy }}"
     - name: Elvis operator
       tags:
         - elvis_operator
@@ -271,6 +279,11 @@
         - sleep
       ansible.builtin.pause:
         seconds: 1
+    - name: Only run in check mode
+      tags: check_mode_only
+      when: ansible_check_mode is truthy
+      ansible.builtin.set_fact:
+        check_mode_active: ansible_check_mode
     - name: Enforce failures
       tags: failure
       ansible.builtin.fail:
@@ -328,6 +341,7 @@
       block:
         - name: Long-running task with integrated poll
           tags: async_with_self_poll
+          when: ansible_check_mode is falsy  # check mode and async cannot be used on same task
           ansible.builtin.command: /bin/sleep 15
           changed_when: false
           async: 45  # run max 45s
@@ -336,12 +350,14 @@
           tags: async_with_external_poll
           block:
             - name: Long-running task with external poll
+              when: ansible_check_mode is falsy  # check mode and async cannot be used on same task
               ansible.builtin.command: /bin/sleep 15
               changed_when: false
               async: 45  # run max 45s
               poll: 0  # fire and forget
               register: long_running_task_with_external_poll
             - name: Check on long_running_task_with_external_poll
+              when: long_running_task_with_external_poll is not skipped
               ansible.builtin.async_status:
                 jid: "{{ long_running_task_with_external_poll.ansible_job_id }}"
               register: job_result
@@ -738,9 +754,7 @@
         #   ansible.builtin.gather_facts: {}
         #   register: fact_gathering
         # - name: Apply the role to the EC2 instance
-        #   when:
-        #     - fact_gathering is not skipped
-        #     - fact_gathering is not failed
+        #   when: fact_gathering is not skipped
         #   delegate_to: "{{ instance_information.instance_ids | first }}"
         #   delegate_facts: true
         #   vars:
@@ -821,7 +835,9 @@
             ansible_async_dir: /tmp/.ansible-ssm-user/async
           block:
             - name: Dump a DB from an RDS instance to a temporary file
-              when: rds_instance.endpoint is defined
+              when:
+                - ansible_check_mode is falsy  # check mode and async cannot be used on same task
+                - rds_instance.endpoint is defined
               vars:
                 wanted_pattern_in_module_output: >-
                   {{ '"failed": 0, "started": 1, "finished": 0' | regex_escape() }}
