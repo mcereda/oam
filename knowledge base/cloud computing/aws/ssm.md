@@ -204,7 +204,7 @@ Pitfalls:
   > as. Remote commands will often default to running as the `ssm-agent` user, however this will also depend on how SSM
   > has been configured.
 
-- SSM sessions' duration is limited by SSM's settings.<br/>
+- SSM sessions' duration is limited by SSM's _idle session timeout_ setting.<br/>
   That might impact tasks that need to run for more than said duration.
 
   <details style="padding-bottom: 1em">
@@ -215,6 +215,9 @@ Pitfalls:
   when the SSM reached the set retries for the connection.
 
   </details>
+
+  Consider extending the SSM idle session timeout setting, or using `async` tasks (which come with their own SSM
+  caveats) to circumvent this issue.
 
 - Since [SSM starts shell sessions under `/usr/bin`][gotchas], one must explicitly set Ansible's temporary directory to
   a folder the remote user can write to ([source][ansible temp dir change]).
@@ -300,7 +303,7 @@ Pitfalls:
         {{ '"failed": 0, "started": 1, "finished": 0' | regex_escape() }}
     community.postgresql.postgresql_db: { … }
     async: "{{ 60 * 60 * 2 }}"                         #-- wait up to 2 hours ( 60s * 60m * 2h )
-    poll: 0                                            #-- fire and forget; ssm would not check anyways
+    poll: 0                                            #-- fire and forget; ssm would not allow self-checking anyways
     register: dump
     changed_when:
       - dump.rc == 0

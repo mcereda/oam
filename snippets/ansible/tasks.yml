@@ -842,8 +842,8 @@
                   --exclude-schema archived
                   --no-publications
                   --format d --jobs $(nproc)
-              async: "{{ 60 * 60 * 2 }}"  # wait up to 12 hours -- 60 secs * 60 mins * 12 hours
-              poll: 0                     # fire and forget, since ssm would not allow self-checking anyways
+              async: "{{ 60 * 60 * 2 }}"                   # wait up to 2 hours -- 60s * 60m * 2h
+              poll: 0                                      # fire and forget; ssm would not allow self-checking anyways
               register: dump
               changed_when:
                 - dump.rc == 0
@@ -853,7 +853,7 @@
               failed_when: dump.rc != 0
             - name: Check on the dump task
               vars:
-                max_wait: "{{ (60 / 5 * 12) | int }}"      # wait up to 12 hours -- 60 mins / (delay/60) * 12 hours
+                max_wait: "{{ (60 * 60 * 12) }}"           # wait for the async task to end
                 ansible_aws_ssm_timeout: "{{ max_wait }}"  # ssm uses a single connection, keep active until the end
                 dump_stdout_as_obj: "{{ dump.module_stdout | regex_search('{.*}') | from_json }}"
                 ansible_job_id: "{{ dump_stdout_as_obj.ansible_job_id }}"
@@ -861,8 +861,8 @@
                 jid: "{{ ansible_job_id }}"
               register: dump_result
               until: dump_result.finished
-              retries: "{{ max_wait }}"
-              delay: 300  # check once every 5 minutes to avoid overloading the ssm agent
+              retries: "{{ max_wait | int }}"
+              delay: 300                                   # check once every 5m to avoid overloading the ssm agent
     - name: RDS-specific operations
       block:
         - name: Create an instance's snapshot
