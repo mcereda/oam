@@ -3,6 +3,7 @@
 Persistent [block storage][what is block storage?] for [EC2 Instances][ec2].
 
 1. [TL;DR](#tldr)
+1. [Volume types](#volume-types)
 1. [Snapshots](#snapshots)
 1. [Encryption](#encryption)
 1. [Further readings](#further-readings)
@@ -10,7 +11,7 @@ Persistent [block storage][what is block storage?] for [EC2 Instances][ec2].
 
 ## TL;DR
 
-<details>
+<details style="padding-bottom: 1em;">
   <summary>Real world use cases</summary>
 
 ```sh
@@ -29,27 +30,51 @@ aws ec2 wait snapshot-completed --snapshot-ids 'snap-0123456789abcdef0'
 
 </details>
 
+Every EBS volume is local to, and available in, a single Availability Zone.
+
+Multiple EBS volumes can be attached to a single instance as long as both the volumes and the instance are in the same
+Availability Zone.
+
+Depending on the volume and instance types, multiple instances can mount a single volume at the same time.
+
 Volumes can have their size **increased**, but **not** reduced.<br/>
-After increase, the filesystem **must** be [extended][Extend the file system after resizing an EBS volume] to take
-advantage of the change in size.<br/>
-Apparently, Linux machines are able to do that automatically with a reboot.
+The volumes' filesystem is **not** automatically extended during the change in size, and **must** be
+[extended manually][Extend the file system after resizing an EBS volume] to take advantage of the change in size.<br/>
+Linux-based instances should™ be able to take care of that automatically after reboot.
+
+[Pricing][amazon ebs pricing]
+
+## Volume types
+
+Refer [Amazon EBS volume types].
+
+|                     | `gp3`          | `gp2`          | `io2`          | `io1`          | `st1`            | `sc1`            |
+| ------------------- | -------------- | -------------- | -------------- | -------------- | ---------------- | ---------------- |
+| Class               | SSD            | SSD            | SSD            | SSD            | HDD              | HDD              |
+| Annual failure rate | 0.1% - 0.2%    | 0.1% - 0.2%    | 0.001%         | 0.1% - 0.2%    | 0.1% - 0.2%      | 0.1% - 0.2%      |
+| Size                | 1 GiB - 16 TiB | 1 GiB - 16 TiB | 4 GiB - 64 TiB | 4 GiB - 16 TiB | 125 GiB - 16 TiB | 125 GiB - 16 TiB |
+| Max IOPS            | 16,000         | 16,000         | 256,000        | 64,000         | 500              | 250              |
+| Max throughput      | 1,000 MiB/s    | 250 MiB/s      | 4,000 MiB/s    | 1,000 MiB/s    | 500 MiB/s        | 250 MiB/s        |
+| Multi-attach        | No             | No             | Yes            | Yes            | No               | No               |
+| NVMe reservations   | No             | No             | Yes            | No             | No               | No               |
+| Bootable            | Yes            | Yes            | Yes            | Yes            | No               | No               |
 
 ## Snapshots
 
-The first snapshot is **complete**, with all the volume's blocks being copied. All successive snapshots of the same
-volume are **incremental**, with only the changes being copied.<br/>
+A volume's first snapshot is a **complete** snapshot of it, with _all the volume's blocks_ being copied over.<br/>
+All successive snapshots of the same volume are **incremental**, with _only the changes_ being copied over.<br/>
 Incremental snapshots are stored in EBS' standard tier.
 
 Snapshots can be unbearably slow depending on the amount of data needing to be copied.<br/>
-For comparison, the first snapshot of a 200 GiB volume took about 2h to complete.
+For comparison, the first snapshot of a standard 200 GiB `gp3` volume took about 2h to complete.
 
 Snapshots can be [archived][archive amazon ebs snapshots] to save money should they **not** need frequent nor fast
 retrieval.<br/>
 When archived, incremental snapshots are converted to **full snapshots** and moved to EBS' archive tier.
 
-> The minimum archive period is 90 days.<br/>
-> If deleting or permanently restoring an archived snapshot before the minimum archive period, one is billed for all the
-> remaining days in the archive tier, rounded to the nearest hour.
+> The **minimum** archival period is **90 days**.<br/>
+> Archived snapshots deleted or permanently restored before the end of the minimum archival period are billed for the
+> whole period.
 
 When access to archived snapshots is needed, they need to be restored to the standard tier before use. Restoring can
 take **up to 72h**.
@@ -99,7 +124,7 @@ snapshot for encrypted volumes is itself encrypted or unencrypted.
 
 </details>
 
-<details>
+<details style="padding-bottom: 1em;">
   <summary>The original snapshot is <b>not</b> encrypted</summary>
 
 1. EC2 sends a `CreateGrant` request to KMS to be allowed to encrypt the volume that is being created from the snapshot.
@@ -117,17 +142,20 @@ snapshot for encrypted volumes is itself encrypted or unencrypted.
 1. EC2 uses the plaintext data key in the Nitro hardware to encrypt disk I/O to the volume.<br/>
    The plaintext data key persists in memory as long as the volume is attached to the instance.
 
+</details>
+
 When KMS keys become unusable, the effect is **almost immediately** subject to **eventual** consistency.<br/>
 The key state of the impacted KMS keys change to reflect their new condition, and all requests to use those keys in
 cryptographic operations fail.
 
-EC2 uses the **data** key, not the KMS key itself, to encrypt all disk I/O while a volume is attached to
-the instance. As such, there is **no** immediate effect on the EC2 instance or its attached EBS volumes when performing
-an action that makes a key unusable.<br/>
-When the encrypted EBS volume is detached from the instance, however, EBS removes the data key from the Nitro hardware.
-As such, the next time the encrypted EBS volume is attached to an EC2 instance the attachment will fail due EBS being
-unable to use the KMS key to decrypt the volume's encrypted data key. To use the EBS volume again, one must make the KMS
-key usable again.
+EC2 encrypts all I/O to and from attached volumes using the **data** key, not the KMS key itself.<br/>
+There is **no** immediate effect on the EC2 instance or its attached EBS volumes when performing actions that make KMS
+keys unusable.
+
+EBS removes data keys from the hardware when encrypted EBS volumes are detached from instances.<br/>
+Attaching EBS volumes which data keys are encrypted with unusable KMS keys to EC2 instances will fail, because EBS will
+not be able to use the KMS keys to decrypt the data key used for the volume.<br/>
+Make the KMS key usable again to be able to attach such EBS volumes.
 
 ## Further readings
 
@@ -138,6 +166,7 @@ key usable again.
 - [Automate snapshot lifecycles]
 - [Choose the best Amazon EBS volume type for your self-managed database deployment]
 - [Extend the file system after resizing an EBS volume]
+- [Pricing][amazon ebs pricing]
 
 ### Sources
 
@@ -159,6 +188,8 @@ key usable again.
 [ec2]: ec2.md
 
 <!-- Upstream -->
+[amazon ebs pricing]: https://aws.amazon.com/ebs/pricing/
+[amazon ebs volume types]: https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html
 [archive amazon ebs snapshots]: https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-archive.html
 [automate snapshot lifecycles]: https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-ami-policy.html
 [choose the best amazon ebs volume type for your self-managed database deployment]: https://aws.amazon.com/blogs/storage/how-to-choose-the-best-amazon-ebs-volume-type-for-your-self-managed-database-deployment/
