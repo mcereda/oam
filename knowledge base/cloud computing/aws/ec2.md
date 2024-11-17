@@ -3,6 +3,7 @@
 1. [TL;DR](#tldr)
 1. [Burstable instances](#burstable-instances)
 1. [Disks](#disks)
+   1. [Ephemeral storage](#ephemeral-storage)
 1. [Metrics](#metrics)
 1. [Auto scaling](#auto-scaling)
    1. [Lifecycle hooks](#lifecycle-hooks)
@@ -121,7 +122,38 @@ If the average CPU usage over a 24-hour period **exceeds** the baseline, instanc
 
 ## Disks
 
-Refer [EBS] and [Device names for volumes on Amazon EC2 instances].
+Refer [EBS].
+
+Volumes being attached to an EC2 instance require a device name for the instance to refer to. The block device driver in
+the OS then assigns the volume an internal device name when mounting it, which _can_ be different from the name given in
+the volume's definition.
+Refer [Device names for volumes on Amazon EC2 instances].
+
+One or more Provisioned IOPS SSD (`io1` or `io2`) volumes can be attached to **up to 16 instances** as long as those
+instances reside **in the same Availability Zone**.<br/>
+Refer [Attach an EBS volume to multiple EC2 instances using Multi-Attach].
+
+The maximum number of EBS volumes that instances can have attached depends on the instance's type and size.<br/>
+Refer instance volume limits.
+
+Each instance a volume is attached to has **full read and write permission** to the shared volume.<br/>
+This allows to achieve higher application availability in applications that can manage concurrent write operations
+effectively.
+
+### Ephemeral storage
+
+Refer [Instance store temporary block storage for EC2 instances] for temporary storage of information that changes
+frequently (e.g. buffers, caches, scratch data, temporary content).
+
+_Instance stores_ consist of one or more virtual volumes exposed as block devices.
+
+The size of an instance store and the number of devices available, varies by instance type and size.<br/>
+Not every instance type provides instance store volumes.
+
+Virtual devices for instance store volumes are given device names in order from `ephemeral0` to `ephemeral23`.
+
+There is no additional charge for using the instance store volumes provided with instances.<br/>
+Instance store volumes are **included** as part of the usage cost of an instance.
 
 ## Metrics
 
@@ -210,6 +242,7 @@ TODO
 - [Announcing Amazon EC2 per second billing]
 - [How can I send memory and disk metrics from my EC2 instances to CloudWatch?]
 - [Device names for volumes on Amazon EC2 instances]
+- [Amazon EBS volume limits for Amazon EC2 instances]
 
 ### Sources
 
@@ -227,6 +260,8 @@ TODO
 - [Amazon EC2 Auto Scaling lifecycle hooks]
 - [EC2 Image Builder]
 - [CompleteLifecycleAction]
+- [Instance store temporary block storage for EC2 instances]
+- [Attach an EBS volume to multiple EC2 instances using Multi-Attach]
 
 <!--
   Reference
@@ -240,9 +275,11 @@ TODO
 [ssm]: ssm.md
 
 <!-- Upstream -->
+[amazon ebs volume limits for amazon ec2 instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/volume_limits.html
 [amazon ec2 auto scaling lifecycle hooks]: https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html
 [amazon ec2 auto scaling]: https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html
 [announcing amazon ec2 per second billing]: https://aws.amazon.com/about-aws/whats-new/2017/10/announcing-amazon-ec2-per-second-billing/
+[attach an ebs volume to multiple ec2 instances using multi-attach]: https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volumes-multi.html
 [best practices for handling ec2 spot instance interruptions]: https://aws.amazon.com/blogs/compute/best-practices-for-handling-ec2-spot-instance-interruptions/
 [burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html
 [change the instance type]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html
@@ -256,6 +293,7 @@ TODO
 [how can i send memory and disk metrics from my ec2 instances to cloudwatch?]: https://repost.aws/knowledge-center/cloudwatch-memory-metrics-ec2
 [how to clone instance ec2]: https://repost.aws/questions/QUOrWudF3vRL2Vqtrv0M9lfQ/how-to-clone-instance-ec2
 [iam roles for amazon ec2]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
+[instance store temporary block storage for ec2 instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html
 [key concepts and definitions for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-credits-baseline-concepts.html
 [retrieve instance metadata]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
 [standard mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-standard-mode.html
