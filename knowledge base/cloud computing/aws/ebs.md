@@ -69,18 +69,20 @@ Pricing examples:
 <details style="padding: 0 0 1em 1em; ">
   <summary><code>gp3</code>, 200 GB, 3000 IOPS, 512 MiB/s, for 69h 54m 34s in a 30d month in Ireland</summary>
 
-Regional price (storage): $\$0.088/GB/month$<br/>
-Regional price (IOPS): $\$0.0055/IOPS/month$ over 3000<br/>
-Regional price (throughput): $\$0.044/MB/s/month$ over 125
+```plaintext
+Regional price (storage): $0.088/GB/month
+Regional price (IOPS): $0.0055/IOPS/month over 3000
+Regional price (throughput): $0.044/MB/s/month over 125
 
-Seconds in a 30d month: $60s * 60m * 24h * 30d = 2592000s$<br/>
-Seconds of actual usage: $34s + (60s * 54m) + (60s * 60m * 69h) = 34 + 3240 + 248400 = 251674s$
+Seconds in a 30d month: 60s * 60m * 24h * 30d = 2592000s
+Seconds of actual usage: 34s + ( 60s * 54m ) + ( 60s * 60m * 69h ) = 34s + 3240s + 248400s = 251674s
 
-Storage costs: $200GB*\$0.088/GB*(251674s/2592000s) = 200*\$0.088*0.09709645062 = \$1.71$<br/>
-IOPS costs: $(3000-3000)IOPS*\$0.0055/IOPS*(251674s/2592000s) = 0*\$0.0055*0.09709645062 = \$0.00$<br/>
-Throughput costs: $(512-125)MB/s*\$0.044/MB/s*(251674s/2592000s) = 387*\$0.044*0.09709645062 = \$1.66$
+Storage costs: 200GB * $0.088/GB * ( 251674s / 2592000s ) = 200 * $0.088 * 0.09709645062 = $1.71
+IOPS costs: ( 3000 - 3000 )IOPS * $0.0055/IOPS * ( 251674s / 2592000s ) = 0 * $0.0055 * 0.09709645062 = $0.00
+Throughput costs: ( 512 - 125 )MB/s * $0.044/MB/s * ( 251674s / 2592000s ) = 387 * $0.044 * 0.09709645062 = $1.66
 
-Total: $\$1.71+\$0.00+\$1.66 = \$3.37$
+Total: $1.71 + $0.00 + $1.66 = $3.37
+```
 
 </details>
 
