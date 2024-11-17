@@ -35,7 +35,8 @@ private void index(){
 
 ## TODO lists
 
-Use `[ ]` after the bullet point or numbered list character to switch them for an empty ballot box, and `[x]` for a checked one.
+Use `[ ]` after the bullet point or numbered list character to switch them for an empty ballot box, and `[x]` for a
+checked one.
 
 1. [ ] 1
 1. [ ] 2
@@ -83,12 +84,20 @@ See also [The magical Markdown I bet you don't know] and [slaise/High-level-Mark
 
 ## Math
 
+Inline expressions: surround the expression with `$`.
+
 ```md
 $\sum_{n=1}^{10} n^2$
-$$\sum_{n=1}^{10} n^2$$
 ```
 
 $\sum_{n=1}^{10} n^2$
+
+Block expressions: surround the expression with `$$`.
+
+```md
+$$\sum_{n=1}^{10} n^2$$
+```
+
 $$\sum_{n=1}^{10} n^2$$
 
 ## Alerts
