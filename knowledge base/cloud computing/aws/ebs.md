@@ -42,22 +42,47 @@ The volumes' filesystem is **not** automatically extended during the change in s
 [extended manually][Extend the file system after resizing an EBS volume] to take advantage of the change in size.<br/>
 Linux-based instances should™ be able to take care of that automatically after reboot.
 
-[Pricing][amazon ebs pricing]
+Volume costs depend on its type, provisioned size, IOPS and throughput.<br/>
+Volumes are billed per-second increments, with a 60-seconds minimum period.<br/>
+Refer [Amazon EBS pricing]
 
 ## Volume types
 
 Refer [Amazon EBS volume types].
 
-|                     | `gp3`          | `gp2`          | `io2`          | `io1`          | `st1`            | `sc1`            |
-| ------------------- | -------------- | -------------- | -------------- | -------------- | ---------------- | ---------------- |
-| Class               | SSD            | SSD            | SSD            | SSD            | HDD              | HDD              |
-| Annual failure rate | 0.1% - 0.2%    | 0.1% - 0.2%    | 0.001%         | 0.1% - 0.2%    | 0.1% - 0.2%      | 0.1% - 0.2%      |
-| Size                | 1 GiB - 16 TiB | 1 GiB - 16 TiB | 4 GiB - 64 TiB | 4 GiB - 16 TiB | 125 GiB - 16 TiB | 125 GiB - 16 TiB |
-| Max IOPS            | 16,000         | 16,000         | 256,000        | 64,000         | 500              | 250              |
-| Max throughput      | 1,000 MiB/s    | 250 MiB/s      | 4,000 MiB/s    | 1,000 MiB/s    | 500 MiB/s        | 250 MiB/s        |
-| Multi-attach        | No             | No             | Yes            | Yes            | No               | No               |
-| NVMe reservations   | No             | No             | Yes            | No             | No               | No               |
-| Bootable            | Yes            | Yes            | Yes            | Yes            | No               | No               |
+|                     | `gp3`                                            | `gp2`          | `io2`             | `io1`             | `st1`            | `sc1`            |
+| ------------------- | ------------------------------------------------ | -------------- | ----------------- | ----------------- | ---------------- | ---------------- |
+| Class               | SSD                                              | SSD            | SSD               | SSD               | HDD              | HDD              |
+| Annual failure rate | 0.1% - 0.2%                                      | 0.1% - 0.2%    | 0.001%            | 0.1% - 0.2%       | 0.1% - 0.2%      | 0.1% - 0.2%      |
+| Size                | 1 GiB - 16 TiB                                   | 1 GiB - 16 TiB | 4 GiB - 64 TiB    | 4 GiB - 16 TiB    | 125 GiB - 16 TiB | 125 GiB - 16 TiB |
+| Max IOPS            | 16,000                                           | 16,000         | 256,000           | 64,000            | 500              | 250              |
+| Max throughput      | 1,000 MiB/s                                      | 250 MiB/s      | 4,000 MiB/s       | 1,000 MiB/s       | 500 MiB/s        | 250 MiB/s        |
+| Multi-attach        | No                                               | No             | Yes               | Yes               | No               | No               |
+| NVMe reservations   | No                                               | No             | Yes               | No                | No               | No               |
+| Bootable            | Yes                                              | Yes            | Yes               | Yes               | No               | No               |
+| Pricing             | Per-GB + Per-IOPS over 3,000 + Per-MB/s over 125 | Per-GB         | Per-GB + Per-IOPS | Per-GB + Per-IOPS | Per-GB           | Per-GB           |
+
+Billing is per-second increments, with a 60-seconds minimum period.
+
+Pricing examples:
+
+<details style="padding: 0 0 1em 1em; ">
+  <summary><code>gp3</code>, 200 GB, 3000 IOPS, 512 MiB/s, for 69h 54m 34s in a 30d month in Ireland</summary>
+
+Regional price (storage): $\$0.088/GB/month$<br/>
+Regional price (IOPS): $\$0.0055/IOPS/month$ over 3000<br/>
+Regional price (throughput): $\$0.044/MB/s/month$ over 125
+
+Seconds in a 30d month: $60s * 60m * 24h * 30d = 2592000s$<br/>
+Seconds of actual usage: $34s + (60s * 54m) + (60s * 60m * 69h) = 34 + 3240 + 248400 = 251674s$
+
+Storage costs: $200GB*\$0.088/GB*(251674s/2592000s) = 200*\$0.088*0.09709645062 = \$1.71$<br/>
+IOPS costs: $(3000-3000)IOPS*\$0.0055/IOPS*(251674s/2592000s) = 0*\$0.0055*0.09709645062 = \$0.00$<br/>
+Throughput costs: $(512-125)MB/s*\$0.044/MB/s*(251674s/2592000s) = 387*\$0.044*0.09709645062 = \$1.66$
+
+Total: $\$1.71+\$0.00+\$1.66 = \$3.37$
+
+</details>
 
 ## Snapshots
 
