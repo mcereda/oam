@@ -337,6 +337,7 @@ creation of non-compliant resources.
 - [A guide to tagging resources in AWS]
 - [Guidance for Tagging on AWS]
 - [Creating organization policies with AWS Organizations]
+- [AWS re:Invent 2022 - Advanced VPC design and new Amazon VPC capabilities (NET302)]
 
 <!--
   Reference
@@ -372,6 +373,7 @@ creation of non-compliant resources.
 [access aws services through aws privatelink]: https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-access-aws-services.html
 [aws icons]: https://aws-icons.com/
 [aws public ip address ranges now available in json form]: https://aws.amazon.com/blogs/aws/aws-ip-ranges-json/
+[aws re:invent 2022 - advanced vpc design and new amazon vpc capabilities (net302)]: https://www.youtube.com/watch?v=cbUNbK8ZdA0&pp=ygUWYW1hem9uIGludmVudCAyMDIyIHZwYw%3D%3D
 [best practices for tagging aws resources]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html
 [connect to the internet using an internet gateway]: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
