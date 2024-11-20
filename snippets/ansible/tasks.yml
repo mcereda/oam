@@ -796,6 +796,24 @@
             resource: i-xyzxyz01
             tags:
               MyNewTag: value
+    - name: Check S3 object exists
+      amazon.aws.s3_object_info:
+        bucket_name: my-bucket
+        object_name: prefix/object.tar
+    - name: Download objects from S3
+      # The 'amazon.aws.s3_object' module might be *not* suitable here as at the time of writing it stores downloaded
+      # data in memory before flushing it to disk, filling the host's memory up when downloading big files
+      amazon.aws.s3_object:
+        bucket: my-bucket
+        object: prefix/object.tar
+        dest: /tmp/object.tar
+        mode: get
+    - name: Upload objects to S3
+      amazon.aws.s3_object:
+        bucket: my-bucket
+        object: prefix/object.tar
+        src: /tmp/object.tar
+        mode: put
     - name: EC2-specific operations
       block:
         - name: Get running instances with 'K8S' as the 'Application' tag
