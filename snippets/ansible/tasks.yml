@@ -304,6 +304,9 @@
     - name: Execute notified handlers now
       tags: handler
       ansible.builtin.meta: flush_handlers
+    - name: Do nothing
+      tags: noop
+      ansible.builtin.meta: noop
     - name: Retry failing tasks
       tags:
         - failure
@@ -607,6 +610,11 @@
               - svn+http://myrepo/svn/MyApp#egg=MyApp
               - git+http://myrepo/app/MyApp
               - file:///path/to/MyApp.tar.gz
+    - name: Gather facts about the PG restorer instance
+      delegate_to: host_previously_not_in_inventory
+      ansible.builtin.setup:
+        filter:
+          - '!all'
     - name: Run containers
       block:
         - name: Directly
@@ -796,24 +804,36 @@
             resource: i-xyzxyz01
             tags:
               MyNewTag: value
-    - name: Check S3 object exists
-      amazon.aws.s3_object_info:
-        bucket_name: my-bucket
-        object_name: prefix/object.tar
-    - name: Download objects from S3
-      # The 'amazon.aws.s3_object' module might be *not* suitable here as at the time of writing it stores downloaded
-      # data in memory before flushing it to disk, filling the host's memory up when downloading big files
-      amazon.aws.s3_object:
-        bucket: my-bucket
-        object: prefix/object.tar
-        dest: /tmp/object.tar
-        mode: get
-    - name: Upload objects to S3
-      amazon.aws.s3_object:
-        bucket: my-bucket
-        object: prefix/object.tar
-        src: /tmp/object.tar
-        mode: put
+    - name: Update the play's inventory with a newly started instance
+      tags:
+        - update_inventory
+        - new_instance
+      when: new_instance.instance_id is defined
+      block:
+        - name: Add the new instance to the play's inventory
+          tags: add_instance_to_inventory
+          ansible.builtin.add_host:
+            name: "{{ new_instance.instance_id }}"
+            ansible_python_interpreter: /usr/bin/python3
+            ansible_connection: community.aws.aws_ssm
+            ansible_aws_ssm_bucket_name: company-ssm-logs
+            ansible_aws_ssm_region: eu-west-1
+            ansible_remote_tmp: /home/ssm-user/.cache/ansible/tmp
+            ansible_async_dir: /home/ssm-user/.cache/ansible/async
+        - name: Gather facts from the instance
+          tags: gather_facts
+          delegate_to: "{{ new_instance.instance_id }}"
+          delegate_facts: true
+          ansible.builtin.gather_facts:
+            # alternatively, use 'ansible.builtin.setup' to allow for subsets gathering
+        - name: DEBUG  Print the new instance's host variables
+          delegate_to: "{{ new_instance.instance_id }}"
+          ansible.builtin.debug:
+            verbosity: 3
+            var: hostvars[new_instance.instance_id]
+    - name: Wait for AWS to realize some requests have been made
+      ansible.builtin.pause:
+        seconds: 60
     - name: EC2-specific operations
       block:
         - name: Get running instances with 'K8S' as the 'Application' tag
@@ -945,9 +965,27 @@
           retries: 12
           delay: 15
           until: instance_check.instances[0].pending_modified_values.keys() | length == 0
-    - name: Wait for AWS to realize some requests have been made
-      ansible.builtin.pause:
-        seconds: 60
+    - name: S3-specific operations
+      block:
+        - name: Check S3 object exists
+          amazon.aws.s3_object_info:
+            bucket_name: my-bucket
+            object_name: prefix/object.tar
+        - name: Download objects from S3
+          # The 'amazon.aws.s3_object' module might be *not* suitable here as at the time of writing it stores
+          # downloaded data in memory before flushing it to disk, filling the host's memory up when downloading big
+          # files
+          amazon.aws.s3_object:
+            bucket: my-bucket
+            object: prefix/object.tar
+            dest: /tmp/object.tar
+            mode: get
+        - name: Upload objects to S3
+          amazon.aws.s3_object:
+            bucket: my-bucket
+            object: prefix/object.tar
+            src: /tmp/object.tar
+            mode: put
 - name: "AWS: Start stopped instances and add the first of them to the inventory for the next play"
   # works at playbook level
   tags:
