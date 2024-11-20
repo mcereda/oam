@@ -1485,6 +1485,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 - [Ansible Vault with AWX]
 - [Asynchronous actions and polling]
 - [Patterns: targeting hosts and groups]
+- [How to use ansible with S3 - Ansible aws_s3 examples]
 
 <!--
   Reference
@@ -1547,6 +1548,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 [how to recursively set directory and file permissions]: https://superuser.com/questions/1024677/ansible-how-to-recursively-set-directory-and-file-permissions#1317715
 [how to set up and use python virtual environments for ansible]: https://www.redhat.com/sysadmin/python-venv-ansible
 [how to speed up ansible playbooks drastically?]: https://www.linkedin.com/pulse/how-speed-up-ansible-playbooks-drastically-lionel-gurret
+[how to use ansible with s3 - ansible aws_s3 examples]: https://www.middlewareinventory.com/blog/ansible-aws_s3-example/
 [how to work with lists and dictionaries in ansible]: https://www.redhat.com/sysadmin/ansible-lists-dictionaries-yaml
 [human-readable output format]: https://www.shellhacks.com/ansible-human-readable-output-format/
 [include task only if file exists]: https://stackoverflow.com/questions/28119521/ansible-include-task-only-if-file-exists#comment118578470_62289639
