@@ -731,6 +731,7 @@ Solution: set the correct ownership with
 - [The GitLab Handbook]
 - [Icons]
 - [Upgrade Path tool]
+- [Elasticsearch]
 
 ### Sources
 
@@ -788,6 +789,7 @@ Solution: set the correct ownership with
 [code owners]: https://docs.gitlab.com/ee/user/project/codeowners/
 [command-line options]: https://docs.gitlab.com/charts/installation/command-line-options.html
 [deployment]: https://docs.gitlab.com/charts/installation/deployment.html
+[elasticsearch]: https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html
 [environment variables]: https://docs.gitlab.com/ee/administration/environment_variables.html
 [forks]: https://docs.gitlab.com/ee/user/project/repository/forking_workflow.html
 [gitlab ha scaling runner vending machine for aws ec2 asg]: https://gitlab.com/guided-explorations/aws/gitlab-runner-autoscaling-aws-asg#gitlab-runners-on-aws-spot-best-practices

@@ -196,21 +196,51 @@ sudo dnf -y remove --noautoremove 'gitlab-ee'
 
 ## Removal - end --------------------- #
 
+##
+# Opensearch integration - start
+##
+
+# Estimate the required cluster size based on the total size of the repositories
+sudo gitlab-rake 'gitlab:elastic:estimate_cluster_size'
+
+# Estimate the required shard sizes for each index based on approximate database counts
+# Does *not* include repository data (code, commits, and wikis)
+sudo gitlab-rake 'gitlab:elastic:estimate_shard_sizes'
+
+# Enable advanced search with Elasticsearch
+sudo gitlab-rake 'gitlab:elastic:enable_search_with_elasticsearch'
+
+# Disable advanced search with Elasticsearch
+sudo gitlab-rake 'gitlab:elastic:disable_search_with_elasticsearch'
+
+# Get information
+sudo gitlab-rake 'gitlab:elastic:info'
+
+# Index the entire instance
+# Deletes all existing indices
+sudo gitlab-rake 'gitlab:elastic:index'
+
+# Index specific data
+sudo gitlab-rake 'gitlab:elastic:index_epics'
+sudo gitlab-rake 'gitlab:elastic:index_work_items'
+sudo gitlab-rake 'gitlab:elastic:index_group_wikis'
+sudo gitlab-rake 'gitlab:elastic:index_namespaces'
+sudo gitlab-rake 'gitlab:elastic:index_projects'
+sudo gitlab-rake 'gitlab:elastic:index_snippets'
+sudo gitlab-rake 'gitlab:elastic:index_users'
+
+# Delete indexes
+sudo gitlab-rake gitlab:elastic:delete_index
+
+# Get logs
+tail -f '/var/log/gitlab/gitlab-rails/elasticsearch.log'
+
+## Opensearch integration - end --------------------- #
+
+
 # Check the included PostgreSQL version
 sudo gitlab-psql -c 'SELECT version();'
 
 # Check the status of batched background migrations
 # Should the query return zero rows, all batched background migrations are complete
 sudo gitlab-psql -c "SELECT job_class_name, table_name, column_name, job_arguments FROM batched_background_migrations WHERE status NOT IN(3, 6);"
-
-
-# Opensearch integration
-# Estimate the required cluster size based on the total size of the repositories
-sudo gitlab-rake 'gitlab:elastic:estimate_cluster_size'
-# Estimate the required shard sizes for each index based on approximate database counts
-# Does *not* include repository data (code, commits, and wikis)
-sudo gitlab-rake 'gitlab:elastic:estimate_shard_sizes'
-# Enable advanced search with Elasticsearch.
-sudo gitlab-rake 'gitlab:elastic:enable_search_with_elasticsearch'
-# Disable advanced search with Elasticsearch.
-sudo gitlab-rake 'gitlab:elastic:disable_search_with_elasticsearch'
