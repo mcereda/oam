@@ -105,7 +105,7 @@ ALTER DEFAULT PRIVILEGES FOR ROLE juan IN SCHEMA cache REVOKE all ON TABLES FROM
 
 -- List users with respective roles
 \du
-\du+
+\du+ mark
 -- List users only
 SELECT usename FROM pg_catalog.pg_user;
 -- List roles only
@@ -144,11 +144,15 @@ ALTER ROLE fred VALID UNTIL 'infinity';
 -- Rename roles
 ALTER ROLE manager RENAME TO boss;
 
--- Assign roles to users
+-- Assign roles to users or other roles
 GRANT rds_superuser TO mike;
+
+-- Assume roles for the current session
+SET ROLE admin;
 
 -- Remove role memberships from users
 REVOKE engineers FROM mike;
+
 
 -- List permissions
 -- on tables
@@ -173,7 +177,14 @@ JOIN LATERAL (
 ) a ON true
 JOIN pg_user e ON a.grantee = e.usesysid
 JOIN pg_user r ON a.grantor = r.usesysid
-WHERE e.usename = 'darwin';
+WHERE e.usename IN ('darwin', 'salesmen');
+-- detailed
+SELECT grantor, grantee, table_schema, table_name, privilege_type
+FROM information_schema.table_privileges
+WHERE grantee = 'engineers';
+
+-- Assign permissions
+GRANT USAGE ON SCHEMA bar_schema TO donald;
 
 
 -- Close the connection to the current DB
