@@ -184,6 +184,7 @@ Listed in order of addition:
 - [Maybe you do need Kubernetes]
 - [The 10 Commandments of Navigating Code Reviews]
 - [Less Is More: The Minimum Effective Dose]
+- [AWS re:Invent 2023 - Platform engineering with Amazon EKS (CON311)]
 
 <!--
   Reference
@@ -205,6 +206,7 @@ Listed in order of addition:
 [amazon's leadership principles]: https://www.amazon.jobs/content/en/our-workplace/leadership-principles
 [amazon's tenets: supercharging decision-making]: https://aws.amazon.com/blogs/enterprise-strategy/tenets-supercharging-decision-making/
 [are we celebrating the wrong leaders? - martin gutmann]: https://www.youtube.com/watch?v=b0Z9IpTVfUg
+[aws re:invent 2023 - platform engineering with amazon eks (con311)]: https://www.youtube.com/watch?v=eLxBnGoBltc
 [branch early, branch often]: https://medium.com/@huydotnet/branch-early-branch-often-daadaad9468e
 [culture eats your structure for lunch]: https://thoughtmanagement.org/2013/07/10/culture-eats-your-structure-for-lunch/
 [death by a thousand microservices]: https://renegadeotter.com/2023/09/10/death-by-a-thousand-microservices.html
