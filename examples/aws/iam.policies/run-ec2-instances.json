@@ -1,0 +1,102 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowListingEC2Resources",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeImages",
+                "ec2:DescribeInstances",
+                "ec2:DescribeTags",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeInstanceStatus"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "AllowCreatingEC2Instances",
+            "Effect": "Allow",
+            "Action": [
+                "iam:GetInstanceProfile",
+
+                "iam:PassRole",
+
+                "ec2:DescribeInstanceAttribute",
+                "ec2:RunInstances"
+            ],
+            "Resource": [
+                "arn:aws:iam::*:instance-profile/*",
+
+                "arn:aws:iam::*:role/*",
+
+                "arn:aws:ec2:*:*:instance/*",
+                "arn:aws:ec2:*:*:key-pair/*",
+                "arn:aws:ec2:*:*:network-interface/*",
+                "arn:aws:ec2:*:*:security-group/*",
+                "arn:aws:ec2:*:*:subnet/*",
+                "arn:aws:ec2:*:*:volume/*",
+                "arn:aws:ec2:*:*:image/*"
+            ]
+        },
+        {
+            "Sid": "AllowEncryptingEBSVolumes",
+            "Effect": "Allow",
+            "Action": [
+                "kms:GenerateDataKeyWithoutPlaintext",
+                "kms:CreateGrant",
+                "kms:Decrypt"
+            ],
+            "Resource": "arn:aws:kms:*:*:key/*"
+        },
+        {
+            "Sid": "AllowManagingEC2InstancesState",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+                "ec2:TerminateInstances"
+            ],
+            "Resource": [
+                "arn:aws:ec2:*:*:instance/*"
+            ]
+        },
+        {
+            "Sid": "AllowChangingEC2InstancesForRestoringDumpFiles",
+            "Effect": "Allow",
+            "Action": "ec2:CreateTags",
+            "Resource": [
+                "arn:aws:ec2:*:*:instance/*",
+                "arn:aws:ec2:*:*:volume/*"
+            ]
+        },
+        {
+            "Sid": "AllowConnectingToEC2InstancesViaSsm",
+            "Effect": "Allow",
+            "Action": [
+                "s3:DeleteObject",
+                "s3:GetBucketLocation",
+                "s3:GetObject",
+                "s3:PutObject",
+                "ssm:StartSession",
+                "ssm:TerminateSession"
+            ],
+            "Resource": [
+                "arn:aws:ec2:*:*:instance/*",
+                "arn:aws:s3:::ssm-logs",
+                "arn:aws:s3:::ssm-logs/*",
+                "arn:aws:ssm:*:*:document/SSM-SessionManagerRunShell",
+                "arn:aws:ssm:*:*:session/Executor-*"
+            ],
+            "Condition": {
+                "StringEqualsIgnoreCase": {
+                    "ec2:ResourceTag/Application": "DB",
+                    "ec2:ResourceTag/Component": [
+                        "Operator",
+                        "InstanceManager"
+                    ]
+                }
+            }
+        }
+    ]
+}
