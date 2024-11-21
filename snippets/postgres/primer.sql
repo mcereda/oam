@@ -140,6 +140,18 @@ ALTER ROLE samantha WITH PASSWORD 'Wing5+Trunks3+Relic2' VALID UNTIL 'August 4 1
 
 -- Change password's validity
 ALTER ROLE fred VALID UNTIL 'infinity';
+ALTER ROLE samantha VALID UNTIL 'August 4 12:00:00 2024 +1';
+
+-- Reset password expiration date to NULL
+UPDATE pg_authid SET rolvaliduntil = NULL WHERE rolname == 'lucas';
+-- For everybody
+UPDATE pg_authid
+SET rolvaliduntil = NULL
+WHERE rolname IN (
+  SELECT rolname
+  FROM pg_authid
+  WHERE rolvaliduntil IS NOT NULL
+);
 
 -- Rename roles
 ALTER ROLE manager RENAME TO boss;
