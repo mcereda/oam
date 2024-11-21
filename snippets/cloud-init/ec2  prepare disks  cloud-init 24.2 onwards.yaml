@@ -1,0 +1,22 @@
+---
+#cloud-config
+
+###
+# Sources:
+#   - https://cloudinit.readthedocs.io/en/latest/reference/modules.html#mounts
+#   - https://stackoverflow.com/questions/49980714/how-to-use-cloud-init-to-mount-an-unformatted-ebs-volume#78737805
+###
+
+device_aliases:
+  data: /dev/nvme1n1
+disk_setup:
+  data:
+    layout: true
+    overwrite: false
+    table_type: gpt
+fs_setup:
+  - device: "data.1"
+    filesystem: "xfs"
+    label: "data"
+mounts:
+  - [ "data.1", "/mnt/data" ]
