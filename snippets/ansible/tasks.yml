@@ -972,9 +972,10 @@
             bucket_name: my-bucket
             object_name: prefix/object.tar
         - name: Download objects from S3
-          # The 'amazon.aws.s3_object' module might be *not* suitable here as at the time of writing it stores
-          # downloaded data in memory before flushing it to disk, filling the host's memory up when downloading big
-          # files
+          # The 'amazon.aws.s3_object' module might be *not* suitable for files bigger than the executor's currently
+          # available memory. See <https://github.com/ansible-collections/amazon.aws/issues/2395>.
+          # TL:DR: at the time of writing, the module keeps downloaded data in memory before flushing it to disk,
+          # filling up the host's memory when downloading big files and causing it to stall or crash.
           amazon.aws.s3_object:
             bucket: my-bucket
             object: prefix/object.tar
