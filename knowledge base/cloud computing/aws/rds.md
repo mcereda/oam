@@ -49,8 +49,12 @@ aws rds modify-db-parameter-group --db-parameter-group-name 'pg15-source-transpo
 
 # Restore instances from snapshots.
 aws rds restore-db-instance-from-db-snapshot \
-  --db-instance-identifier 'myNewBbInstance' \
-  --db-snapshot-identifier 'myOldDbSnapshot'
+  --db-instance-identifier 'myNewDbInstance' --db-snapshot-identifier 'myDbSnapshot'
+
+# Restore instances to point in time.
+aws rds restore-db-instance-to-point-in-time \
+  --target-db-instance-identifier 'myNewDbInstance' --source-db-instance-identifier 'oldDbInstance' \
+  --use-latest-restorable-time
 
 # Start export tasks.
 aws rds start-export-task \
@@ -200,6 +204,9 @@ After automated backups are deleted, they **cannot** be recovered.
 
 Should one choose to have RDS create a final DB snapshot before deleting a DB instance, one can use that or previously
 created manual snapshots to recover it.
+
+Taking backups can be unbearably slow depending on the amount of data needing to be copied.<br/>
+For comparison, the first snapshot of a DB instance with standard 100 GiB `gp3` storage took about 3h to complete.
 
 ### Automatic backups
 
@@ -375,9 +382,25 @@ original instance had allocated at the time the snapshot was taken.
 
 ```sh
 aws rds restore-db-instance-from-db-snapshot \
-  --db-instance-identifier 'myNewDbInstance' \
-  --db-snapshot-identifier 'myDbSnapshot'
+  --db-instance-identifier 'myNewDbInstance' --db-snapshot-identifier 'myDbSnapshot'
+
+aws rds restore-db-instance-to-point-in-time \
+  --target-db-instance-identifier 'myNewDbInstance' --source-db-instance-identifier 'oldDbInstance' \
+  --use-latest-restorable-time
 ```
+
+Should source snapshots be from an instance with automatic backups enabled, the restored DB instance will backup itself
+right after creation.<br/>
+Refer the [Backup] section for what this means.
+
+> There is currently **no** way to prevent the backup being generated at instance creation time.<br/>
+> That process is triggered automatically and the feature can only be toggled on and off for existing instances.
+>
+> The `BackupRetentionPeriod` flag is part of both instances and snapshot definitions, but can only be set on
+> instances.<br/>
+> To create instances with this flag set to `0` and thus have **no** backup automatically taken, the source snapshot
+> _must_ have this flag already set to `0`. This can only happen if the source instance had the flag set to `0` when the
+> snapshot was taken in the first place.
 
 ## Encryption
 
@@ -722,6 +745,7 @@ Solution: reboot the source and target instance and retry.
 - [Renaming a DB instance]
 - [Amazon RDS DB instances]
 - [Maintaining a DB instance]
+- [Disabling AWS RDS backups when creating/updating instances?]
 
 <!--
   Reference
@@ -729,6 +753,8 @@ Solution: reboot the source and target instance and retry.
   -->
 
 <!-- In-article sections -->
+[backup]: #backup
+
 <!-- Knowledge base -->
 [s3]: s3.md
 
@@ -757,3 +783,4 @@ Solution: reboot the source and target instance and retry.
 
 <!-- Others -->
 [backing up login roles aka users and group roles]: https://www.postgresonline.com/article_pfriendly/81.html
+[disabling aws rds backups when creating/updating instances?]: https://stackoverflow.com/questions/35709153/disabling-aws-rds-backups-when-creating-updating-instances
