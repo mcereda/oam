@@ -968,7 +968,7 @@
               until: snapshot_check.snapshots | selectattr('status', 'equalto', 'available') | length > 0
         - name: Restore instance with automatic backup enabled to point in time
           block:
-            - name: Restore instance
+            - name: Restore DB instance
               amazon.aws.rds_instance:
                 db_instance_identifier: restored-to-pitr
                 creation_source: instance
@@ -980,16 +980,22 @@
                   # instance right after creation since db instances' first backup takes unbearably long (3h for 100GB)
                   false
               register: pitr_restored_instance
-            - name: Wait for the restored instance to be created
+            - name: Wait for the restored DB instance to be created
               when:
                 - clone_db_instance.backup_retention_period is defined
                 - clone_db_instance.backup_retention_period != 0
-              amazon.aws.rds_instance_info:
-                db_instance_identifier: "{{ pitr_restored_instance.db_instance_identifier }}"
-              register: pitr_restored_instance_status_check
-              retries: 15
-              delay: 60
-              until: pitr_restored_instance_status_check.instances[0].db_instance_status != 'creating'
+              block:
+                - name: Wait for the restored DB instance to be created
+                  amazon.aws.rds_instance_info:
+                    db_instance_identifier: "{{ pitr_restored_instance.db_instance_identifier }}"
+                  register: pitr_restored_instance_status_check
+                  retries: 15
+                  delay: 60
+                  until: pitr_restored_instance_status_check.instances[0].db_instance_status != 'creating'
+                - name: Update restored DB instance information
+                  # 'amazon.aws.rds_instance' will *not* have the 'endpoint' key defined if not waiting
+                  ansible.builtin.set_fact:
+                    pitr_restored_instance: "{{ pitr_restored_instance_status_check.instances[0] }}"
         - name: Dump roles' privileges
           block:
             - name: Dump to file
