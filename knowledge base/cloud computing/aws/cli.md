@@ -6,6 +6,7 @@
 1. [Session Manager integration](#session-manager-integration)
 1. [Troubleshooting](#troubleshooting)
    1. [Installation with `pip` on Mac OS X errors out with message about the version of `six`](#installation-with-pip-on-mac-os-x-errors-out-with-message-about-the-version-of-six)
+   1. [YubiKeys can only be used as hardware TOTP devices to assume Roles in the CLI, and not as UF2 passkeys](#yubikeys-can-only-be-used-as-hardware-totp-devices-to-assume-roles-in-the-cli-and-not-as-uf2-passkeys)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -292,13 +293,33 @@ Solutions:
   sudo python -m 'pip' install 'awscli' --ignore-installed 'six'
   ```
 
+### YubiKeys can only be used as hardware TOTP devices to assume Roles in the CLI, and not as UF2 passkeys
+
+Refer [Why Your YubiKey Won't Work With AWS CLI].
+
+Possible solutions:
+
+Leverage [tommie-lie/awscli-plugin-yubikeytotp].
+
+<details>
+
+Install the plugin, then add the following to `~/.aws/config`:
+
+```ini
+[plugins]
+cli_legacy_plugin_path = /path/to/python/site-packages/
+yubikeytotp = awscli_plugin_yubikeytotp
+```
+
+</details>
+
 ## Further readings
 
 - [Amazon Web Services]
 - CLI [quickstart]
 - [Configure profiles] in the CLI
 - [How do I assume an IAM role using the AWS CLI?]
-- [Yubikey authentication for AWS CLI (and boto) made easy]
+- [tommie-lie/awscli-plugin-yubikeytotp]
 
 ### Sources
 
@@ -307,6 +328,7 @@ Solutions:
 - [Use an IAM role in the AWS CLI]
 - [Using AWS KMS via the CLI with a Symmetric Key]
 - [What's the source IP address of the traffic that Elastic Load Balancing sends to my web servers?]
+- [Why Your YubiKey Won't Work With AWS CLI]
 
 <!--
   Reference
@@ -333,6 +355,9 @@ Solutions:
 [install the session manager plugin for the aws cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-macos-overview.html#install-plugin-macos-signed
 [quickstart]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html
 [use an iam role in the aws cli]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html
-[using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
 [what's the source ip address of the traffic that elastic load balancing sends to my web servers?]: https://repost.aws/knowledge-center/elb-find-load-balancer-ip
-[yubikey authentication for aws cli (and boto) made easy]: https://github.com/tommie-lie/awscli-plugin-yubikeytotp
+
+<!-- others -->
+[tommie-lie/awscli-plugin-yubikeytotp]: https://github.com/tommie-lie/awscli-plugin-yubikeytotp
+[using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
+[why your yubikey won't work with aws cli]: https://scalesec.com/blog/why-your-yubikey-wont-work-with-aws-cli/
