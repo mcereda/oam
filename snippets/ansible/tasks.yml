@@ -641,11 +641,35 @@
               - svn+http://myrepo/svn/MyApp#egg=MyApp
               - git+http://myrepo/app/MyApp
               - file:///path/to/MyApp.tar.gz
-    - name: Gather facts about the PG restorer instance
+    - name: Gather facts about hosts previously not in inventory
       delegate_to: host_previously_not_in_inventory
       ansible.builtin.setup:
         filter:
           - '!all'
+          - min
+    - name: Unarchive files
+      tags: unarchive
+      when:
+        - archive_file.stat.mimetype in ["application/x-tar"]
+        - archive_file.stat.path is regex('\\.tar')
+      block:
+        - name: Unarchive file '{{ archive_file.stat.path | basename }}'
+          ansible.builtin.unarchive:
+            remote_src: true
+            src: "{{ archive_file.stat.path }}"
+            dest: "{{ archive_file.stat.path | dirname }}"
+        - name: Get the name of extracted directories ending in '.dir'
+          tags: find
+          ansible.builtin.find:
+            paths: "{{ archive_file.stat.path | dirname }}"
+            recurse: false
+            file_type: directory
+            patterns: '*.dir'
+          register: extracted_dirs
+        - name: Save the first extracted directory found
+          ansible.builtin.stat:
+            path: "{{ extracted_dirs.files[0].path }}"
+          register: first_extracted_dir
     - name: Run containers
       block:
         - name: Directly
