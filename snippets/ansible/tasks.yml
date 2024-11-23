@@ -367,6 +367,26 @@
               until: job_result.finished
               retries: 9
               delay: 5
+- name: Run this play on up to 3 hosts at a time
+  hosts: large_group_of_hosts
+  serial: 3
+  tasks: []
+- name: Run this play on a batch of 4 hosts, then a batch of 8, then the rest
+  hosts: large_group_of_hosts
+  serial:
+    - 4
+    - 8
+    - 100%
+  strategy: linear
+  tasks:
+    - name: Limit this task to 3 workers (or up to the current batch if lower)
+      throttle: 3
+      ansible.builtin.set_fact:
+        greetings: hi from {{ ansible_hostname }}
+    # - name: Run this task only on one single host
+    #   run_once: true
+    #   ansible.builtin.set_fact:
+    #     confirm: only run on {{ ansible_hostname }}
 
 - name: Debugging
   tags:
@@ -383,7 +403,7 @@
     - name: Pretty print messages
       vars:
         install_method: package
-        supported_install_methods: [ 'package' ]
+        supported_install_methods: ['package']
       ansible.builtin.debug:
         msg: >-
           {{
@@ -589,7 +609,7 @@
     - name: Add repositories
       block:
         - name: To DNF/YUM
-          when: ansible_pkg_mgr | lower in [ 'dnf', 'yum' ]
+          when: ansible_pkg_mgr | lower in ['dnf', 'yum']
           ansible.builtin.yum_repository:
             name: epel
             description: EPEL YUM repo
@@ -880,8 +900,7 @@
           tags: gather_facts
           delegate_to: "{{ new_instance.instance_id }}"
           delegate_facts: true
-          ansible.builtin.gather_facts:
-            # alternatively, use 'ansible.builtin.setup' to allow for subsets gathering
+          ansible.builtin.gather_facts:  # alternatively, use 'ansible.builtin.setup' to allow for subsets gathering
         - name: DEBUG  Print the new instance's host variables
           delegate_to: "{{ new_instance.instance_id }}"
           ansible.builtin.debug:
@@ -1141,7 +1160,7 @@
   check_mode: true
   tasks:
     - name: Install configured fleeting plugins
-      when: runner_executor in [ "docker-autoscaler", "instance" ]
+      when: runner_executor in ["docker-autoscaler", "instance"]
       become: true
       ansible.builtin.command:
         chdir: /root

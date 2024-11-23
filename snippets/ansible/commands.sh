@@ -64,8 +64,10 @@ ansible-vault edit 'ssh.key.pub'
 ANSIBLE_VAULT_PASSWORD_FILE='password_file.txt' ansible-vault decrypt --output '.ssh/id_rsa' 'ssh.key'
 diff 'some_role/files/ssh.key.plain' <(ansible-vault view --vault-password-file 'password_file.txt' 'some_role/files/ssh.key.enc')
 
-# List available 'lookup' plugins.
+# List available plugins.
 ansible-doc -t 'lookup' -l
+ansible-doc -t 'strategy' -l
 
 # Show plugin-specific docs and examples.
 ansible-doc -t 'lookup' 'fileglob'
+ansible-doc -t 'strategy' 'linear'
