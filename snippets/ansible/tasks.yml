@@ -541,6 +541,37 @@
         content: "{{ 'some string' | ansible.builtin.vault(ansible_vault_password, vault_id='') }}"
         mode: '0644'
 
+- name: Use YAML anchors
+  hosts: localhost
+  connection: local
+  vars:
+    some_reusable_task: &some_reusable_task
+      name: Some reusable task
+      tags: some_reusable_task
+      check_mode: false
+      ansible.builtin.set_fact:
+        some_fact: "{{ some_var | default('some value') }}"
+    some_reusable_tasks_block: &some_reusable_tasks_block
+      name: Some reusable tasks block
+      tags: some_reusable_tasks_block
+      block:
+        - name: Some first reusable task in block
+          tags: some_first_reusable_task_in_block
+          check_mode: false
+          ansible.builtin.set_fact:
+            some_first_fact: "{{ some_first_var | default('some first value') }}"
+        - name: Some nth reusable task in block
+          tags: some_nth_reusable_task_in_block
+          check_mode: false
+          ansible.builtin.set_fact:
+            some_nth_fact: "{{ some_nth_var | default('some nth value') }}"
+  tasks:
+    - *some_reusable_task
+    - <<: *some_reusable_task
+      vars:
+        some_var: some overridden value
+    - *some_reusable_tasks_block
+
 - name: Common operations
   tags: never
   hosts: localhost
