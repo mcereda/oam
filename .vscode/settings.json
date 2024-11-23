@@ -338,6 +338,7 @@
         "tmpfs",
         "todomd",
         "tolerations",
+        "totp",
         "tput",
         "traefik",
         "translog",
