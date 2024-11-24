@@ -51,8 +51,10 @@ ansible-playbook 'path/to/playbook.yml' --syntax-check
 # Ad-hoc commands.
 ansible -i 'hosts.yml' -m 'ping' 'all'
 ansible -i 'host-1,host-n,' 'hostRegex' -m 'ansible.builtin.shell' -a 'echo $TERM'
-ansible -i 'localhost ansible_python_interpreter=venv/bin/python3,' -c 'local' 'localhost' \
-	-m 'ansible.builtin.copy' -a 'src=/tmp/src dest=/tmp/dest'
+ansible -i 'localhost' -c 'local' 'localhost' -m 'ansible.builtin.copy' -a 'src=/tmp/src dest=/tmp/dest'
+venv/bin/ansible -i 'localhost ansible_python_interpreter=venv/bin/python,' -c 'local' 'localhost' \
+	-m 'community.postgresql.postgresql_query' \
+	-a 'login_host=host.fqdn login_user=postgres login_password=password login_db=postgres query="SELECT 1;"'
 ansible -i 'localhost,' -c 'local' -Cvvv 'localhost' \
 	-m 'ansible.builtin.template' -a 'src=anonymizer/templates/anonymize_data.sql.j2 dest=/tmp/anonymize_data.sql' \
 	-e 'country=ireland' -e '{"phone_codes":{"ireland":"+353"}}'
