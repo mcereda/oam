@@ -1,15 +1,45 @@
 # Identity and Access Management
 
-| Entity | Description                                                                                                                     | Notes                                                  |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| User   | Represents a human or a workload.<br/>Defined by its name and credentials.                                                      | No permissions by default, need to be assigned to it   |
-| Role   | Defines a set of permissions for making requests to AWS services.<br/>Defines what actions can be performed on which resources. | Can be assumed by AWS services, applications and users |
+Controls who is authenticated (signed in) and authorized (has permissions) to use resources.
 
-To be able to assume roles:
+Authentication is provided by matching the sign-in credentials to a _principal_ trusted by the AWS account.<br/>
+Principals are IAM users, federated users, IAM roles, and applications.
 
-- Users, roles or services **must** have the permissions to assume the role they want to assume.
-- The role's trust relationship **should** allow the users, roles or services to assume it.
+Authorization is provided by sending requests to grant the principal access to _resources_.<br/>
+Such access is given in response to the authorization request **only** if _policies_ exist that grant the principal
+permission to the _actions_ **and** the _resources_ defined in the request.
 
+<details/>
+  <summary>Example</summary>
+
+When first signing in to the console, one lands on the console's homepage. At this point, one isn't accessing any
+specific service.
+
+When selecting a service, a request for authorization is sent to that service. It checks if one's principal is on the
+list of authorized users, what policies are being enforced to control the level of access granted, and any other
+policy that might be in effect.
+
+The service returns all the requested data for which the principal passes the checks, and errors for the rest.
+
+</details>
+
+Authorization requests can be made by principals within the same AWS account, or from other AWS accounts trusted by the
+first.
+
+Once authorized, the principal can take action or perform operations on resources in the AWS account.
+
+| Principal | Description                                                                                                                     | Notes                                               |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| User      | Represents a human or a workload.<br/>Defined by its name and credentials.                                                      | No permissions by default                           |
+| Role      | Defines a set of permissions for making requests to AWS services.<br/>Defines what actions can be performed on which resources. | Can be assumed by AWS services and other principals |
+
+Principals and AWS Services can assume Roles.<br/>
+Trust is needed both ways, meaning Roles can be assumed if and only if **both**:
+
+- The Principal or Service assum**ing** the Role is granted the `sts:AssumeRole` permissions to that Role.
+- The assum**ed** Role's trust relationship does allow the Principal or Service to assume it.
+
+_Service Roles_ are different from _Service-linked Roles_.<br/>
 From [Using service-linked roles]:
 
 > A _service role_ is an IAM role that a service assumes to perform actions on your behalf.<br/>
@@ -20,23 +50,97 @@ From [Using service-linked roles]:
 > Service-linked roles appear in your AWS account and are owned by the service. An IAM administrator can view, but not
 > edit the permissions for service-linked roles.
 
-Check [aws.permissions.cloud] for a community-driven source of truth for AWS identity.
+Refer [aws.permissions.cloud] for a community-driven source of truth for AWS IAM.
 
-1. [IAM policies](#iam-policies)
-1. [Assume Roles](#assume-roles)
-   1. [Require MFA for assuming Roles](#require-mfa-for-assuming-roles)
+1. [Users](#users)
+1. [Groups](#groups)
+1. [Policies](#policies)
+   1. [Trust Policies](#trust-policies)
+   1. [Trust Relationships](#trust-relationships)
+1. [Roles](#roles)
+   1. [Assume Roles](#assume-roles)
+      1. [Require MFA for assuming Roles](#require-mfa-for-assuming-roles)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
-## IAM policies
+## Users
 
-IAM does not expose policies' `Sid` element in the IAM API, so it can't be used to retrieve statements.
+Refer [IAM users].
 
-Watch out for explicit `Deny` statements, as they could prevent users from do seemingly completely unrelated things -
-like accessing a Pulumi state file in a S3 bucket when an explicit `Deny` statement blocks IAM users from listing IAM
-Groups when they are not logged in with MFA.
+Represent a human user or workload needing to interact with AWS resources.<br/>
+Consist of a name and credentials.<br/>
+Applications using their credentials to make requests are typically referred to as _service accounts_.
 
-Examples:
+IAM Users with administrator permissions are **not** the same thing as the AWS account's root user.
+
+IAM identifies IAM Users via:
+
+- A friendly name that IAM will use to display Users in the AWS Management Console.
+- A unique identifier returned only when using the API, and **not** visible in the console.
+- An ARN usable to uniquely identify a IAM User across all of AWS.
+
+Users can access AWS in different ways depending on their credentials:
+
+- Console password: nothing more than passwords used to sign in to interactive sessions.<br/>
+  Disabling a password (_console access_) for a User prevents them from signing in to the Console using their sign-in
+  credentials, but it does not change their permissions nor prevent them from accessing the Console using assumed roles.
+- Access keys: allow programmatic requests to AWS' APIs.
+- SSH keys: SSH public keys in the OpenSSH format used to authenticate with CodeCommit.
+- Server certificates: SSL/TLS certificates usable to authenticate with some services.
+
+When using the Management Console to create IAM Users, one must include a console password or an access key.<br/>
+By default, brand new IAM Users created using the APIs have no credentials of any kind.
+
+By default, Users have no permissions and can do nothing.
+
+Users can be assigned _permissions boundaries_.<br/>
+Those allow the use of managed policies to limit the maximum permissions that an identity-based policy can grant to an
+IAM User or Role.
+
+Each IAM User is associated with one and only one AWS account.<br/>
+Any activity performed by IAM Users in one's account is billed to the account.
+
+The number and size of IAM resources in an AWS account are limited.<br/>
+Refer [IAM and AWS STS quotas].
+
+## Groups
+
+Refer [IAM user groups].
+
+Collections of IAM users.<br/>
+They allow to specify permissions for multiple users.
+
+Groups can be assigned Policies. Any User in a Group inherits the Group's permissions.
+
+Groups **cannot** be used as Principals in a Policy.<br/>
+Groups relate to permissions, not authentication, and Principals are authenticated IAM entities.
+
+One Group can contain many Users, and one User can belong to multiple Groups.
+
+Groups can contain only Users, not Roles nor other Groups.
+
+There is no default Group that automatically includes all users in the AWS account.
+
+The number and size of IAM resources in an AWS account are limited.<br/>
+Refer [IAM and AWS STS quotas].
+
+## Policies
+
+Refer [Policies](https://blog.awsfundamentals.com/aws-iam-roles-terms-concepts-and-examples#heading-policies).
+
+Define which _actions_ are available for _principals_ on which _resources_ under which _conditions_.<br/>
+Their _effect_ can be to `allow` or `deny` such actions. A `deny` statement **always overwrites** `allow` statements.
+
+> Watch out for explicit `Deny` statements, as they could prevent users from do seemingly completely unrelated things -
+> like accessing a Pulumi state file in a S3 bucket when an explicit `Deny` statement blocks IAM users from listing IAM
+> Groups when they are not logged in with MFA.
+
+Mostly stored as structured JSON documents.<br/>
+Each Policy comes with one or several _statements_. Each statement defines an effect.
+
+IAM does not expose Policies' `Sid` element in the IAM API, so it can't be used to retrieve statements.
+
+Policy examples:
 
 <details>
   <summary>Give a user temporary RO access to a bucket</summary>
@@ -93,13 +197,44 @@ Examples:
 
 </details>
 
-## Assume Roles
+### Trust Policies
+
+Specific type of resource-based policy for IAM roles.<br/>
+Used to allow Principals ans AWS Services to assume Roles.
+
+### Trust Relationships
+
+[Trust Policies] used by AWS services to assume Roles in one's account to be able to manage resources on behalf of
+Users.
+
+## Roles
+
+Refer [IAM roles].
+
+IAM identities that have specific permissions but **cannot** have standard long-term credentials such as passwords or
+access keys associated with it.<br/>
+Roles are meant to be used to delegate access to AWS Services or other Principals that cannot normally act on those
+resources.
+
+Principals and AWS Services can _assume_ Roles to gain such delegated permissions.<br/>
+Trust is needed **both** ways, meaning Roles can be assumed if and only if **both**:
+
+- The Principal or Service assum**ing** the Role is granted the `sts:AssumeRole` permissions to that Role.
+- The assum**ed** Role's trust relationship does allow the Principal or Service to assume it.
+
+Roles are assumed in _sessions_.<br/>
+When assuming Roles, they provide the assuming identity with **temporary** security credentials that are only valid for
+that session.
+
+### Assume Roles
 
 Refer [Introduction to AWS IAM AssumeRole].
 
-Users, Roles and Services can assume Roles as long as:
+Principals and AWS Services can assume Roles as long as:
 
-1. The User, Role or Service that is trying to assume the end Role has assigned policies that would allow them to.
+1. The Principal or Service **trying to assume** the end Role has assigned Policies that would allow it to.
+
+   <details style="margin-top: -1em; padding-bottom: 1em;">
 
    ```json
    {
@@ -118,7 +253,11 @@ Users, Roles and Services can assume Roles as long as:
    }
    ```
 
-1. The **end** Role's Trust Relationships allow the entity in the point above to assume it.
+   </details>
+
+1. The **assumed** Role's Trust Relationships allows the Principal in the point above to assume it.
+
+   <details style="margin-top: -1em; padding-bottom: 1em;">
 
    ```json
    {
@@ -140,35 +279,40 @@ Users, Roles and Services can assume Roles as long as:
    }
    ```
 
-Allowed entities can assume Roles using the [STS AssumeRole API][assumerole api reference]:
+   </details>
+
+Allowed entities can assume Roles using the [STS AssumeRole API][assumerole api reference].
+
+<details style="margin-top: -1em; padding-bottom: 1em;">
 
 ```sh
-aws sts assume-role --output 'yaml' \
-  --role-arn "arn:aws:iam::012345678901:role/EksAdminRole" \
-  --role-session-name "lookAt-halJordan-sheIsThe-EksAdminRole-now"
-```
+$ aws sts assume-role --role-arn "arn:aws:iam::012345678901:role/EksAdminRole" \
+  --role-session-name "lookAt-halJordan-heIsThe-EksAdminRole-now" --duration-seconds '900' --output 'yaml'
 
-```yaml
 AssumedRoleUser:
-  Arn: arn:aws:sts::012345678901:assumed-role/EksAdminRole/AIDA0123456789ABCDEFG-as-EksAdminRole-stsSession
-  AssumedRoleId: AROA2HKHF0123456789OA:AIDA0123456789ABCDEFG-as-EksAdminRole-stsSession
+  Arn: arn:aws:sts::012345678901:assumed-role/EksAdminRole/lookAt-halJordan-heIsThe-EksAdminRole-now
+  AssumedRoleId: AROA2HKHF0123456789OA:lookAt-halJordan-heIsThe-EksAdminRole-now
 Credentials:
   AccessKeyId: ASIA2HKHF012345ABCDE
   Expiration: '2024-08-06T10:29:15+00:00'
   SecretAccessKey: C2SGbkwmfHWzf44DX6IQQirg5XCGwpLX0Ai++Qkq
-  SessionToken: IQoJb3jPZ2luX2VjEAIaCWV1LXdlc3QtMSJHMEUCIQCGEihh9rBi1cL8ebhQVdcKl8Svzm5VCIC/ebCdxpORiA…
+  SessionToken: IQoJb3jPZ2luX2VjEAIaCWV1LXdlc3QtMSJHMEUCIQCGEihh9rBi1cL8ebhQVdcKl8Svzm5VCIC/ebCdxpORiA…4A==
 ```
 
-One _can_ assume Roles in a chain fashion, assuming one just to assume the other.
+</details>
+
+One _can_ assume Roles in a chain fashion, assuming one Role to then assume another Role.
 
 > Role chaining limits one's CLI or API role session duration to a maximum of **1 hour** at the time of writing.<br/>
 > This duration **cannot** be increased. Refer [Can I increase the duration of the IAM role chaining session?].
 
-### Require MFA for assuming Roles
+#### Require MFA for assuming Roles
 
 Refer [Using AWS CLI Securely with IAM Roles and MFA].
 
-Add the `"Bool": {"aws:MultiFactorAuthPresent": true}` condition to the Role's trust relationships:
+Add the `"Bool": {"aws:MultiFactorAuthPresent": true}` condition to the Role's Trust Relationships.
+
+<details style="margin-top: -1em; padding-bottom: 1em;">
 
 ```json
 {
@@ -188,11 +332,15 @@ Add the `"Bool": {"aws:MultiFactorAuthPresent": true}` condition to the Role's t
 }
 ```
 
+</details>
+
 When requiring MFA with AssumeRole, identities need to pass values for the SerialNumber and TokenCode parameters.<br/>
 SerialNumbers identify the users' hardware or virtual MFA devices, TokenCodes are the time-based one-time password
 (TOTP) value that devices produce.
 
-For CLI access, the user will need to add the `mfa_serial` setting to their profile:
+For CLI access, the user will need to add the `mfa_serial` setting to their profile.
+
+<details style="margin-top: -1em; padding-bottom: 1em;">
 
 ```ini
 [default]
@@ -212,11 +360,14 @@ Arn: arn:aws:sts::012345678901:assumed-role/EksAdminRole/botocore-session-123456
 UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 ```
 
+</details>
+
 ## Further readings
 
 - [Amazon Web Services]
 - [aws.permissions.cloud]
 - [Using service-linked roles]
+- [IAM and AWS STS quotas]
 
 ### Sources
 
@@ -237,6 +388,10 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 - [AWS IAM Roles - Everything You Need to Know & Examples]
 - [Using AWS CLI Securely with IAM Roles and MFA]
 - [Can I increase the duration of the IAM role chaining session?]
+- [IAM users]
+- [IAM user groups]
+- [IAM roles]
+- [Get to Grips with AWS IAM Roles: Terms, Concepts, and Examples]
 
 <!--
   Reference
@@ -244,6 +399,8 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
   -->
 
 <!-- In-article sections -->
+[trust policies]: #trust-policies
+
 <!-- Knowledge base -->
 [amazon web services]: README.md
 
@@ -254,8 +411,12 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 [creating a role to delegate permissions to an iam user]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user.html
 [how can i monitor the account activity of specific iam users, roles, and aws access keys?]: https://repost.aws/knowledge-center/view-iam-history
 [how to use the passrole permission with iam roles]: https://aws.amazon.com/blogs/security/how-to-use-the-passrole-permission-with-iam-roles/
+[iam and aws sts quotas]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-quotas.html
 [iam json policy elements: principal]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html
 [iam json policy elements: sid]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_sid.html
+[iam roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html
+[iam user groups]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_groups.html
+[iam users]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users.html
 [not authorized to perform: sts:assumerole]: https://repost.aws/questions/QUOY5XngCtRyOX4Desaygz8Q/not-authorized-to-perform-sts-assumerole
 [troubleshooting iam roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_roles.html
 [use an iam role in the aws cli]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html
@@ -267,6 +428,7 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 [avoid the 60 minutes timeout when using the aws cli with iam roles]: https://cloudonaut.io/avoid-the-60-minutes-timeout-when-using-the-aws-cli-with-iam-roles/
 [aws iam roles - everything you need to know & examples]: https://spacelift.io/blog/aws-iam-roles
 [aws.permissions.cloud]: https://aws.permissions.cloud/
+[get to grips with aws iam roles: terms, concepts, and examples]: https://blog.awsfundamentals.com/aws-iam-roles-terms-concepts-and-examples#heading-assuming-roles
 [introduction to aws iam assumerole]: https://aws.plainenglish.io/introduction-to-aws-iam-assumerole-fbef3ce8e90b
-[you might be clueless as to why aws assume role isn't working, despite being correctly set up]: https://medium.com/@kamal.maiti/you-might-be-clueless-as-to-why-aws-assume-role-isnt-working-despite-being-correctly-set-up-1b3138519c07
 [using aws cli securely with iam roles and mfa]: https://dev.to/albac/using-aws-cli-securely-with-iam-roles-and-mfa-56c3
+[you might be clueless as to why aws assume role isn't working, despite being correctly set up]: https://medium.com/@kamal.maiti/you-might-be-clueless-as-to-why-aws-assume-role-isnt-working-despite-being-correctly-set-up-1b3138519c07
