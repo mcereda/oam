@@ -1,15 +1,31 @@
 # Macports
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
-1. [Installation](#installation)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
 Default ports install location is `/opt/local`.
+
+<details>
+  <summary>Setup</summary>
+
+```sh
+# Install.
+curl -o '/tmp/macports.pkg' \
+  'https://github.com/macports/macports-base/releases/download/v2.10.5/MacPorts-2.10.5-15-Sequoia.pkg' \
+&& sudo installer -pkg '/tmp/macports.pkg' -target '/'
+
+# Uninstall.
+# Refer <https://guide.macports.org/#installing.macports.uninstalling>.
+sudo port -fp uninstall installed
+```
+
+</details>
+
+<details>
+  <summary>Usage</summary>
 
 ```sh
 # Get help on commands.
@@ -131,37 +147,37 @@ port file 'openssl11'
 port work 'popt'
 ```
 
-## Installation
-
-See the [website] for the installation instructions.
+</details>
 
 ## Further readings
 
 - [Website]
+- [Codebase]
 - Official user [guide]
 - Public [ports] database
 - [Mac OS X]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [cheat.sh]
+- [Install MacPorts]
+- [Uninstall MacPorts]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
-
-<!-- Upstream -->
-[guide]: https://guide.macports.org/
-[ports]: https://ports.macports.org/
-[website]: https://www.macports.org/
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Knowledge base -->
 [mac os x]: README.md
+
+<!-- Upstream -->
+[codebase]: https://github.com/macports/macports-base
+[guide]: https://guide.macports.org/
+[install macports]: https://guide.macports.org/#installing.macports
+[ports]: https://ports.macports.org/
+[uninstall macports]: https://guide.macports.org/#installing.macports.uninstalling
+[website]: https://www.macports.org/
 
 <!-- Others -->
 [cheat.sh]: https://cheat.sh/port
