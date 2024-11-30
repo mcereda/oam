@@ -5,6 +5,7 @@ The friendly interactive shell.
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
 1. [Prompt](#prompt)
+1. [Key bindings](#key-bindings)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -99,6 +100,21 @@ end
 ## Prompt
 
 See [Starship] or [Tide].
+
+## Key bindings
+
+```sh
+# Show all active key bindings.
+bind
+```
+
+| Key combination | Binding name                   | Effect                                                            |
+| --------------- | ------------------------------ | ----------------------------------------------------------------- |
+| `CTRL` + `k`    | `kill-line`                    | Delete text from the cursor position to the end of the line       |
+| `CTRL` + `e`    | `end-of-line`                  | Move the cursor to the end of the line                            |
+| `CTRL` + `w`    | `backward-kill-path-component` | Delete previous word                                              |
+| `CTRL` + `u`    | `backward-kill-line`           | Delete text from the beginning of the line to the cursor position |
+| `CTRL` + `l`    | `clear-screen`                 | Clear screen                                                      |
 
 ## Further readings
 
