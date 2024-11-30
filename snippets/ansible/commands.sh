@@ -27,7 +27,7 @@ ansible-galaxy init 'gitlab'
 ansible-galaxy role init 'my_role'
 ansible-galaxy role init --type 'container' --init-path 'gitlab' 'name'
 
-# Apply changes.
+# Run playbooks.
 ansible-playbook -DK 'ansible/playbooks/local-network.hosts.configure.yml' \
 	-i 'inventory/local-network.ini' -l 'workstation.lan' -c 'local' -C
 ansible-playbook 'gitlab.yml' \
@@ -42,10 +42,34 @@ ansible-playbook 'playbook.yaml' \
 	-e 'ansible_remote_tmp=/tmp/.ansible-\${USER}/tmp' \
 	-i 'i-0123456789abcdef0,' -D
 ansible-playbook -i 'localhost,' -c 'local' -Dvvv 'playbook.yml' -t 'container_registry' --ask-vault-pass
+ansible-runner -p 'test_play.yml' --container-image 'example-ee:latest'
 
+# Run playbooks within Execution Environments.
+# Use the '=' between options and their arguments.
+ansible-runner run \
+    --container-volume-mount "$HOME/.aws:/runner/.aws:ro" \
+	--container-image '012345678901.dkr.ecr.eu-west-1.amazonaws.com/ansible-ee:1.2'
+    --process-isolation --process-isolation-executable 'docker' \
+    '.' --playbook 'playbook.yml' -i 'inventory.ini'
+ansible-navigator run 'playbook.yml' --execution-environment-image='ee/image'
+ansible-navigator \
+	--container-options='--platform=linux/amd64' --pull-policy='missing' \
+	--mode='stdout' \
+	--set-environment-variable='AWS_DEFAULT_REGION=eu-west-1' \
+	--pass-environment-variable='AWS_PROFILE' \
+	--execution-environment-volume-mounts="$HOME/.aws:/runner/.aws:ro" \
+	run \
+		--enable-prompts -i 'localhost,' \
+		'playbook.yml' \
+			-DC -c 'local'
+
+# Debug runs
 ANSIBLE_ENABLE_TASK_DEBUGGER=True ansible-playbook …
+
+# Time task execution
 ANSIBLE_CALLBACKS_ENABLED='profile_tasks' ansible-playbook …
 
+# Validate playbooks
 ansible-playbook 'path/to/playbook.yml' --syntax-check
 
 # Ad-hoc commands.
@@ -58,7 +82,18 @@ venv/bin/ansible -i 'localhost ansible_python_interpreter=venv/bin/python,' -c '
 ansible -i 'localhost,' -c 'local' -Cvvv 'localhost' \
 	-m 'ansible.builtin.template' -a 'src=anonymizer/templates/anonymize_data.sql.j2 dest=/tmp/anonymize_data.sql' \
 	-e 'country=ireland' -e '{"phone_codes":{"ireland":"+353"}}'
+ansible-runner run '.' -m 'debug' -a 'msg=hello' --hosts 'localhost'
+ansible-runner run '.' -m 'setup' --hosts 'localhost' \
+	--process-isolation --process-isolation-executable 'docker' --container-image 'me/ansible-ee:1.2'
 
+# Run roles
+# FIXME: check and test
+ansible-runner run 'path/to/dir' --role 'role-name' --role-var 'key1=value1 … keyN=valueN'
+
+# Clean up artifact directories
+ansible-runner run --rotate-artifacts
+
+# Encrypt/decrypt sensitive data with Vault
 ansible-vault encrypt_string --name 'command_output' 'somethingNobodyShouldKnow'
 ANSIBLE_VAULT_PASSWORD='ohSuchASecurePassword' ansible-vault encrypt --output 'ssh.key' '.ssh/id_rsa'
 ansible-vault view 'ssh.key.pub' --vault-password-file 'password_file.txt'
@@ -73,3 +108,12 @@ ansible-doc -t 'strategy' -l
 # Show plugin-specific docs and examples.
 ansible-doc -t 'lookup' 'fileglob'
 ansible-doc -t 'strategy' 'linear'
+
+# Run commands within Execution Environments.
+ansible-navigator exec
+AWS_PROFILE='AnsibleTaskExecutor' venv/bin/ansible-navigator \
+	--execution-environment-image='012345678901.dkr.ecr.eu-west-1.amazonaws.com/infra/ansible-ee' \
+	--execution-environment-volume-mounts="$HOME/.aws:/runner/.aws:ro" \
+	--pass-environment-variable='AWS_PROFILE' \
+	--set-environment-variable='AWS_DEFAULT_REGION=eu-west-1' \
+	exec -- aws sts get-caller-identity --no-cli-pager

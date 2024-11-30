@@ -23,6 +23,7 @@
     1. [Role dependencies](#role-dependencies)
 1. [Create custom filter plugins](#create-custom-filter-plugins)
 1. [Execution environments](#execution-environments)
+    1. [Build execution environments](#build-execution-environments)
 1. [Secrets management](#secrets-management)
     1. [Ansible Vault](#ansible-vault)
 1. [Best practices](#best-practices)
@@ -770,6 +771,23 @@ See [Creating your own Ansible filter plugins].
 
 Container images that can be used as Ansible control nodes.
 
+Prefer using `ansible-navigator` to `ansible-runner` for local runs as the latter is a pain in the ass to use directly.
+
+<details>
+  <summary>Commands example</summary>
+
+```sh
+pip install 'ansible-builder' 'ansible-runner' 'ansible-navigator'
+ansible-builder build --container-runtime 'docker' -t 'example-ee:latest' -f 'definition.yml'
+ansible-runner -p 'test_play.yml' --process-isolation --container-image 'example-ee:latest'
+ansible-navigator run 'test_play.yml' -i 'localhost,' --execution-environment-image 'example-ee:latest' \
+  --mode 'stdout' --pull-policy 'missing' --container-options='--user=0'
+```
+
+</details>
+
+### Build execution environments
+
 Ansible Builder aids in the creation of Ansible Execution Environments.<br/>
 Refer [Introduction to Ansible Builder] for how to build one.
 
@@ -850,19 +868,6 @@ additional_build_steps:
 ---
 collections:
   - redhat.openshift
-```
-
-</details>
-
-<details>
-  <summary>Commands example</summary>
-
-```sh
-pip install 'ansible-builder'
-ansible-builder build --container-runtime 'docker' -t 'example-ee:latest' -f 'definition.yml'
-ansible-runner -p 'test_play.yml' --container-image 'example-ee:latest'
-ansible-navigator run 'test_play.yml' -i 'localhost,' --execution-environment-image 'example-ee:latest' \
-  --mode 'stdout' --pull-policy 'missing' --container-options='--user=0'
 ```
 
 </details>
@@ -1443,6 +1448,8 @@ Solution: use a version of `ansible-core` lower than 2.17.
 - [Debugging tasks]
 - [AWX]
 - [Introduction to Ansible Builder]
+- [Ansible Navigator]
+- [Ansible Runner]
 
 ### Sources
 
@@ -1507,6 +1514,8 @@ Solution: use a version of `ansible-core` lower than 2.17.
 <!-- Upstream -->
 [8 ways to speed up your ansible playbooks]: https://www.redhat.com/sysadmin/faster-ansible-playbook-execution
 [ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
+[ansible navigator]: https://ansible.readthedocs.io/projects/navigator/en/stable/
+[ansible runner]: https://ansible.readthedocs.io/projects/runner/en/stable/
 [asynchronous actions and polling]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_async.html
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
 [blocks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_blocks.html
