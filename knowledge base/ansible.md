@@ -809,12 +809,12 @@ build_arg_defaults:
   ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: '--pre'
 
 dependencies:
-  ansible_core:
+  ansible_core:  # dedicated single-key dictionary
     package_pip: ansible-core==2.14.4
-  ansible_runner:
+  ansible_runner:  # dedicated single-key dictionary
     package_pip: ansible-runner
   galaxy: requirements.yml
-  python:
+  python:  # pip packages
     - six
     - psutil
   system: bindep.txt
