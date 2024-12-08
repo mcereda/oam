@@ -15,6 +15,7 @@ curl -X 'POST' 'https://dblab.company.com:1234/api/clone' -H "Verification-Token
 
 # Get clones' information
 curl 'https://dblab.company.com:1234/api/clone/smth' -H "Verification-Token: $(gopass show -o 'dblab')"
+dblab --url 'http://dblab.company.com:1234/' --token "$(gopass show -o 'dblab')" clone status 'smth'
 
 # Reset clones
 curl -X 'POST' 'https://dblab.company.com:1234/api/clone/smth/reset' -H "Verification-Token: $(gopass show -o 'dblab')" \
