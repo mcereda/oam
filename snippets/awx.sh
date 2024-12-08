@@ -28,6 +28,7 @@ awx jobs list -f 'jq' --filter '.results[] | .name + " is " + .status'
 
 # Show job templates
 awx job_templates list
+awx job_templates list --name 'Dump DBs' | jq '.results[]' -
 curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/job_templates/' | jq '.' -
 
 # Modify job templates
