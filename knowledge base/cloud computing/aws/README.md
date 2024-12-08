@@ -1,5 +1,6 @@
 # Amazon Web Services
 
+1. [TL;DR](#tldr)
 1. [Networking](#networking)
    1. [Elastic IP addresses](#elastic-ip-addresses)
 1. [Services](#services)
@@ -19,6 +20,36 @@
 1. [Resource tagging](#resource-tagging)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
+
+## TL;DR
+
+_Regions_ are physical world locations where multiple Availability Zones exist.<br/>
+They are physically isolated and independent from one another.<br/>
+Regions come at **no** charge.
+
+_Availability Zones_ are sets of one or more data centers, each with their own resources, housed in separate facilities.
+
+Resources created in one Region do **not** exist in any other Region, unless explicitly using replication features
+offered by AWS services.<br/>
+Some services like IAM do **not** have Regional resources.
+
+Recommended using regional STS endpoints instead of [the global one](https://sts.amazonaws.com) to reduce latency.<br/>
+Session tokens from regional STS endpoints are valid in **all** AWS Regions. However, tokens from the global endpoint
+are only valid in enabled Regions.
+
+Session tokens valid in all Regions are larger. If storing session tokens, these might affect one's systems.
+
+Regions introduced before 2019-03-20 are enabled by default. Newer regions are now disabled by default.<br/>
+Regions enabled by default **cannot be enabled or disabled**.
+
+Disabling Regions disables IAM access to resources in those Region. It will **not** delete resources in the disabled
+region, and they **will** continue to be charged at the standard rate.
+
+Disabling a Region can takes a few minutes to several hours to take effect. Services and Console will be visible until
+the region is completely disabled.
+
+Enabling Regions takes a few minutes to several hours. They **cannot** be used until the preparation process is
+complete.
 
 ## Networking
 
@@ -338,6 +369,7 @@ creation of non-compliant resources.
 - [Guidance for Tagging on AWS]
 - [Creating organization policies with AWS Organizations]
 - [AWS re:Invent 2022 - Advanced VPC design and new Amazon VPC capabilities (NET302)]
+- [Enable or disable AWS Regions in your account]
 
 <!--
   Reference
@@ -379,6 +411,7 @@ creation of non-compliant resources.
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
 [creating organization policies with aws organizations]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_policies_create.html
 [elastic ip addresses]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html
+[enable or disable aws regions in your account]: https://docs.aws.amazon.com/accounts/latest/reference/manage-acct-regions.html
 [exporting db snapshot data to amazon s3]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ExportSnapshot.html
 [guidance for tagging on aws]: https://aws.amazon.com/solutions/guidance/tagging-on-aws/
 [how can i use aws kms asymmetric keys to encrypt a file using openssl?]: https://repost.aws/knowledge-center/kms-openssl-encrypt-key
