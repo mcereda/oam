@@ -25,6 +25,19 @@ aws autoscaling rollback-instance-refresh --auto-scaling-group-name 'ProductionS
 
 
 ###
+# Cognito
+# ------------------
+###
+
+# List user pools
+# '--max-results' is required (ノಠ益ಠ)ノ彡┻━━┻
+aws cognito-idp list-user-pools --max-results '10' --query 'UserPools'
+
+# List users in pools
+aws cognito-idp list-users --user-pool-id 'eu-west-1_lrDF9T78a' --query "Users[?Username=='john']"
+
+
+###
 # ECR
 # ------------------
 ###
@@ -61,11 +74,13 @@ aws ecr list-images --registry-id '012345678901' --repository-name 'cache/docker
 # ------------------
 ###
 
-aws ecs list-tasks --cluster 'testCluster' --family 'testService' --output 'text' --query 'taskArns' \
-| xargs -p aws ecs wait tasks-running --cluster 'testCluster' --tasks
+aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --service-name 'testService'
+
+aws ecs list-tasks --output 'text' --query 'taskArns' --cluster 'testCluster' --family 'testService' \
+| xargs -t aws ecs wait tasks-running --cluster 'testCluster' --tasks
 while [[ $$(aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --service-name 'testService') == "" ]]; do sleep 1; done
 
-@aws ecs list-task-definitions --family-prefix 'testService' --output 'text' --query 'taskDefinitionArns' \
+aws ecs list-task-definitions --family-prefix 'testService' --output 'text' --query 'taskDefinitionArns' \
 | xargs -pn '1' aws ecs deregister-task-definition --task-definition
 
 aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --service-name 'testService' \
@@ -73,6 +88,16 @@ aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --
 | xargs -t aws ecs describe-tasks --query "tasks[].attachments[].details[?(name=='privateIPv4Address')].value" --output 'text' --cluster 'testCluster' --tasks \
 | tee \
 | xargs -I{} curl -fs "http://{}:8080"
+
+# Show information about services
+aws ecs describe-services --cluster 'stg' --services 'grafana'
+
+# Wait for services to be up and running
+# Shortcut with polling for `aws ecs describe-services …
+#   --query 'length(services[?!(length(deployments) == "1" && runningCount == desiredCount)]) == 0'`.
+# Polls every 15 seconds until a successful state has been reached, or 40 checks failed.
+# Exits with return code 255 after 40 failed checks.
+aws ecs wait services-stable --cluster 'stg' --services 'grafana'
 
 
 ###
@@ -139,6 +164,12 @@ aws ec2 describe-network-interfaces --output 'text' \
 # IAM
 # ------------------
 ###
+
+# Get users' information
+aws iam get-user --user-name 'michele'
+
+# Get information about user's console login capabilities
+aws iam get-login-profile --user-name 'john' --query 'LoginProfile'
 
 # Get all users' access keys
 aws iam list-users --no-cli-pager --query 'Users[].UserName' --output 'text' \
