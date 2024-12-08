@@ -667,6 +667,24 @@
         filter:
           - '!all'
           - min
+    - name: Apply migrations from folder
+      # take files in in alphabetical order so they can have a priority set
+      tags: apply_migrations_from_folder
+      community.postgresql.postgresql_query:
+        login_host: "{{ login_host }}"
+        login_port: "{{ login_port }}"
+        login_user: "{{ login_user }}"
+        login_password: "{{ login_password }}"
+        login_db: "{{ login_db }}"
+        query: "{{ lookup('ansible.builtin.file', item) }}"
+      loop: >-
+        {{
+          query(
+            'fileglob',
+            [ role_path, 'files', '*.sql' ] | path_join,
+            [ role_path, 'files', country|lower, '*.sql' ] | path_join,
+          ) | sort
+        }}
     - name: Unarchive files
       tags: unarchive
       when:
