@@ -1,17 +1,26 @@
 # Dig
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
-1. [Sources](#sources)
+1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 ## TL;DR
+
+<details>
+  <summary>Setup</summary>
 
 ```sh
 # Installation.
 apt-get install 'dnsutils'
 yum install 'bind-utils'
+```
 
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
 # Perform a DNS lookup.
 dig 'google.com'
 dig 'google.com' 'A'
@@ -45,13 +54,27 @@ dig '@8.8.8.8' 'google.com'
 dig 'google.com' 'ANY'
 ```
 
-## Sources
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
+dig +trace '@1.1.1.1' 'google.com'
+```
+
+</details>
+
+## Further readings
+
+### Sources
 
 - [How to Use Linux dig Command (DNS Lookup)]
 - [Using dig +trace to Understand DNS Resolution from Start to Finish]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Others -->
