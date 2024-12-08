@@ -1,5 +1,14 @@
 #!/usr/bin/env fish
 
+###
+# Account
+# ------------------
+###
+
+aws account enable-region --account-id '012345678901' --region-name 'af-south-1'
+aws account get-region-opt-status --region-name 'af-south-1'
+aws account disable-region --region-name 'af-south-1'
+
 
 ###
 # Autoscaling Groups
