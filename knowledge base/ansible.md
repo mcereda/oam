@@ -1493,6 +1493,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 - [Asynchronous actions and polling]
 - [Patterns: targeting hosts and groups]
 - [How to use ansible with S3 - Ansible aws_s3 examples]
+- [How to run Ansible with_fileglob in alphabetical order?]
 
 <!--
   Reference
@@ -1555,6 +1556,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 [how to get an arbitrary remote user's home directory in ansible?]: https://stackoverflow.com/questions/33343215/how-to-get-an-arbitrary-remote-users-home-directory-in-ansible#45447488
 [how to install sshpass on mac]: https://stackoverflow.com/questions/32255660/how-to-install-sshpass-on-mac/62623099#62623099
 [how to recursively set directory and file permissions]: https://superuser.com/questions/1024677/ansible-how-to-recursively-set-directory-and-file-permissions#1317715
+[how to run ansible with_fileglob in alphabetical order?]: https://stackoverflow.com/questions/59162054/how-to-run-ansible-with-fileglob-in-alpabetical-order#59162339
 [how to set up and use python virtual environments for ansible]: https://www.redhat.com/sysadmin/python-venv-ansible
 [how to speed up ansible playbooks drastically?]: https://www.linkedin.com/pulse/how-speed-up-ansible-playbooks-drastically-lionel-gurret
 [how to use ansible with s3 - ansible aws_s3 examples]: https://www.middlewareinventory.com/blog/ansible-aws_s3-example/
