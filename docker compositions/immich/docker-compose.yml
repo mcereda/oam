@@ -4,10 +4,8 @@
 # Edit variables via .env file
 ###
 
-name: immich
 services:
   immich-server:
-    container_name: immich_server
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
     extends:
       file: hwaccel.transcoding.yml
@@ -18,7 +16,7 @@ services:
     env_file:
       - .env
     ports:
-      - 2283:3001
+      - '2283:2283'
     depends_on:
       - redis
       - database
@@ -27,7 +25,6 @@ services:
       disable: false
 
   immich-machine-learning:
-    container_name: immich_machine_learning-openvino
     image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
     extends:
       file: hwaccel.ml.yml
@@ -41,14 +38,12 @@ services:
       disable: false
 
   redis:
-    container_name: immich_redis
-    image: docker.io/redis:6.2-alpine@sha256:e3b17ba9479deec4b7d1eeec1548a253acc5374d68d3b27937fcfe4df8d18c7e
+    image: docker.io/redis:6.2-alpine@sha256:eaba718fecd1196d88533de7ba49bf903ad33664a92debb24660a922ecd9cac8
     healthcheck:
       test: redis-cli ping || exit 1
     restart: unless-stopped
 
   database:
-    container_name: immich_postgres
     image: docker.io/tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:90724186f0a3517cf6914295b5ab410db9ce23190a2d9d0b9dd6463e3fa298f0
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
