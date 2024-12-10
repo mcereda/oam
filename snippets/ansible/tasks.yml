@@ -835,6 +835,10 @@
                 state: touch
                 mode: '0755'
               with_dict: "{{ users_info }}"
+    - name: Compare time
+      # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/to_datetime_filter.html
+      # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
+      block: []
 
 - name: AWS-specific operations
   tags: never
@@ -898,6 +902,31 @@
             resource: i-xyzxyz01
             tags:
               MyNewTag: value
+        - name: Test the remaining time for role assumption is > 5m
+          # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/to_datetime_filter.html
+          # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
+          ansible.builtin.debug:
+            msg: >-
+              {{
+                dict([
+                  [
+                    'assumed_role.sts_creds.expiration',
+                    assumed_role.sts_creds.expiration | to_datetime('%Y-%m-%dT%H:%M:%S+00:00')
+                  ],
+                  [ 'now()', now() ],
+                  [
+                    'assumed_role.sts_creds.expiration - now()',
+                    assumed_role.sts_creds.expiration | to_datetime('%Y-%m-%dT%H:%M:%S+00:00') - now()
+                  ],
+                  [
+                    'condition',
+                    (
+                      assumed_role.sts_creds.expiration
+                      | to_datetime('%Y-%m-%dT%H:%M:%S+00:00') - now()
+                    ).total_seconds() > 300
+                  ],
+                ])
+              }}
     - name: Update the play's inventory with a newly started instance
       tags:
         - update_inventory
