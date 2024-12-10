@@ -1,15 +1,19 @@
 ---
 services:
   photoprism:
-    container_name: photoprism
     image: photoprism/photoprism:latest
     # restart: unless-stopped                            # configure first, then enable
     stop_grace_period: 10s
+    devices:
+      - '/dev/dri:/dev/dri'
+      - '/dev/kfd:/dev/kfd'
+    group_add:
+      - video
     security_opt:
-      - seccomp:unconfined
-      - apparmor:unconfined
+      - 'seccomp:unconfined'
+      - 'apparmor:unconfined'
     ports:
-      - "2342:2342"
+      - '2342:2342'
     environment:
       PHOTOPRISM_ADMIN_USER: "admin"                     # FIXME?
       PHOTOPRISM_ADMIN_PASSWORD: "insecure"              # FIXME
