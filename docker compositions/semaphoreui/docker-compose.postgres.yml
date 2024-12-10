@@ -20,7 +20,7 @@ services:
       - postgres
     restart: unless-stopped
     ports:
-      - 3000:3000
+      - '3000:3000'
     image: semaphoreui/semaphore:latest
     environment:
       TZ: Europe/Berlin
