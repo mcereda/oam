@@ -636,6 +636,10 @@
         mode: u=rw,go=r
         content: |
           …
+    - name: Generate random strings
+      ansible.builtin.set_fact:
+        random_alphanumerical_lowercase_string_of_12_chars: >-
+          query('community.general.random_string', upper=false, special=false, length=12)
     - name: Generate passwords
       ansible.builtin.set_fact:
         random_password: "{{ lookup('ansible.builtin.password', '/dev/null') }}"
@@ -643,6 +647,9 @@
           {{ lookup('ansible.builtin.password', '/dev/null length=32 chars=ascii_letters,digits,punctuation') }}
         random_but_idempotent_password: >-
           {{ lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname, length=16) }}
+    - name: Get the PID of the current play
+      ansible.builtin.set_fact:
+        current_play_pid: lookup('pipe', 'echo $PPID')
     - name: Look for files
       ansible.builtin.set_fact:
         path_list_of_all_txt_files_in_dir: "{{ lookup('ansible.builtin.fileglob', '/my/path/*.txt') }}"
@@ -1064,28 +1071,28 @@
                 creation_source: instance
                 source_db_instance_identifier: source-instance
                 use_latest_restorable_time: true
-                # tags:  # avoid setting up, it errors out when restoring to pitr
+                tags: "{{ omit }}"  # avoid setting tags, it errors out when restoring to pitr
                 wait:
                   # avoid waiting for db instances with automatic backup enabled to finish backing up the restored
-                  # instance right after creation since db instances' first backup takes unbearably long (3h for 100GB)
+                  # instance right after creation - db instances' first backup can take unbearably long (3h for 100GB)
                   false
               register: pitr_restored_instance
-            - name: Wait for the restored DB instance to be created
-              when:
-                - clone_db_instance.backup_retention_period is defined
-                - clone_db_instance.backup_retention_period != 0
+            - name: Wait for the restored DB instance to be ready
+              when: pitr_restored_instance.db_instance_identifier is defined
               block:
-                - name: Wait for the restored DB instance to be created
+                - name: Wait for the restored DB instance to be ready
                   amazon.aws.rds_instance_info:
                     db_instance_identifier: "{{ pitr_restored_instance.db_instance_identifier }}"
-                  register: pitr_restored_instance_status_check
+                  register: pitr_restored_instance_ready_check
                   retries: 15
                   delay: 60
-                  until: pitr_restored_instance_status_check.instances[0].db_instance_status != 'creating'
+                  until:
+                    - pitr_restored_instance_ready_check.instances[0].db_instance_status in ['available', 'backing-up']
+                    - pitr_restored_instance_ready_check.instances[0].pending_modified_values.keys() | length == 0
                 - name: Update restored DB instance information
                   # 'amazon.aws.rds_instance' will *not* have the 'endpoint' key defined if not waiting
                   ansible.builtin.set_fact:
-                    pitr_restored_instance: "{{ pitr_restored_instance_status_check.instances[0] }}"
+                    pitr_restored_instance: "{{ pitr_restored_instance_ready_check.instances[0] }}"
         - name: Dump roles' privileges
           block:
             - name: Dump to file
