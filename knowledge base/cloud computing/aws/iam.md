@@ -9,7 +9,7 @@ Authorization is provided by sending requests to grant the principal access to _
 Such access is given in response to the authorization request **only** if _policies_ exist that grant the principal
 permission to the _actions_ **and** the _resources_ defined in the request.
 
-<details/>
+<details>
   <summary>Example</summary>
 
 When first signing in to the console, one lands on the console's homepage. At this point, one isn't accessing any

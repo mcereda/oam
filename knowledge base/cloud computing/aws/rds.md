@@ -110,6 +110,29 @@ If any maintenance event is scheduled before the window, it's **initiated** in t
 complete during the 30-minute maintenance window, while larger events may take more.<br/>
 Maintenance windows are paused when their DB instances are stopped.
 
+> Watch out for changes application order and timing.
+>
+> <details>
+> <summary>Example: creating a DB instance from snapshot with defined Parameter Group</summary>
+>
+> 1. The request of creation from snapshot is received by the AWS APIs.<br/>
+>    The Parameter Group's name is defined here.
+>
+> 1. The DB instance is created with a **default** Parameter Group.
+>
+>    The Parameter group **is** due for change, but this does **NOT** come up as a pending modified value.<br/>
+>    Checks for pending changes **will** miss it.
+>
+> 1. The DB instance's state goes from `creating` to `backing-up`.<br/>
+>    This backup usually takes very little for some unknown reason.
+>
+> 1. The change in Parameter Group is applied now, requiring the DB instance to be rebooted.<br/>
+>    The instance's state goes to `modifying`, then `rebooting`.
+>
+> 1. **NOW** the instance is ready for use.
+>
+> </details>
+
 ## Engine
 
 ### PostgreSQL
@@ -746,6 +769,7 @@ Solution: reboot the source and target instance and retry.
 - [Amazon RDS DB instances]
 - [Maintaining a DB instance]
 - [Disabling AWS RDS backups when creating/updating instances?]
+- [Viewing instance status]
 
 <!--
   Reference
@@ -776,6 +800,7 @@ Solution: reboot the source and target instance and retry.
 [transport postgresql databases between two amazon rds db instances using pg_transport]: https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/transport-postgresql-databases-between-two-amazon-rds-db-instances-using-pg_transport.html
 [transporting postgresql databases between db instances]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.TransportableDB.html
 [understanding postgresql roles and permissions]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Roles.html
+[viewing instance status]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/accessing-monitoring.html
 [what is aws database migration service?]: https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html
 [working with db instance read replicas]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html
 [working with parameter groups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html

@@ -1,33 +1,33 @@
 #!/usr/bin/env sh
 
-# Generate example configuration files with entries disabled.
+# Generate example configuration files with entries disabled
 ansible-config init --disabled > 'ansible.cfg'
 ansible-config init --disabled -t 'all' > 'ansible.cfg'
 
-# Show the current configuration.
+# Show the current configuration
 ansible-config dump
 
-# List hosts.
+# List hosts
 ansible-inventory -i 'aws_ec2.yml' --list
 ansible-playbook -i 'self-hosting.yml' 'gitlab.yml' --list-hosts
 ansible -i 'webservers.yml' all --list-hosts
 
-# Show hosts' ansible facts.
+# Show hosts' ansible facts
 ansible -i 'inventory.yml' -m 'setup' all
 ansible -i '192.168.1.34,gitlab.lan,' -m 'setup' 'gitlab.lan' -u 'admin'
 ansible -i 'localhost,' -c 'local' -km 'setup' 'localhost'
 
-# List tasks what would be executed.
+# List tasks what would be executed
 ansible-playbook 'gitlab.yml' --list-tasks
 ansible-playbook 'gitlab.yml' --list-tasks --tags 'configuration,packages'
 ansible-playbook 'gitlab.yml' --list-tasks --skip-tags 'system,user'
 
-# Create new roles.
+# Create new roles
 ansible-galaxy init 'gitlab'
 ansible-galaxy role init 'my_role'
 ansible-galaxy role init --type 'container' --init-path 'gitlab' 'name'
 
-# Run playbooks.
+# Run playbooks
 ansible-playbook -DK 'ansible/playbooks/local-network.hosts.configure.yml' \
 	-i 'inventory/local-network.ini' -l 'workstation.lan' -c 'local' -C
 ansible-playbook 'gitlab.yml' \
@@ -45,7 +45,7 @@ ansible-playbook -i 'localhost,' -c 'local' -Dvvv 'playbook.yml' -t 'container_r
 ansible-runner -p 'test_play.yml' --container-image 'example-ee:latest'
 
 # Run playbooks within Execution Environments.
-# Use the '=' between options and their arguments.
+# Use the '=' between options and their arguments
 ansible-runner run \
     --container-volume-mount "$HOME/.aws:/runner/.aws:ro" \
 	--container-image '012345678901.dkr.ecr.eu-west-1.amazonaws.com/ansible-ee:1.2'
@@ -72,7 +72,7 @@ ANSIBLE_CALLBACKS_ENABLED='profile_tasks' ansible-playbook …
 # Validate playbooks
 ansible-playbook 'path/to/playbook.yml' --syntax-check
 
-# Ad-hoc commands.
+# Ad-hoc commands
 ansible -i 'hosts.yml' -m 'ping' 'all'
 ansible -i 'host-1,host-n,' 'hostRegex' -m 'ansible.builtin.shell' -a 'echo $TERM'
 ansible -i 'localhost' -c 'local' 'localhost' -m 'ansible.builtin.copy' -a 'src=/tmp/src dest=/tmp/dest'
@@ -101,15 +101,18 @@ ansible-vault edit 'ssh.key.pub'
 ANSIBLE_VAULT_PASSWORD_FILE='password_file.txt' ansible-vault decrypt --output '.ssh/id_rsa' 'ssh.key'
 diff 'some_role/files/ssh.key.plain' <(ansible-vault view --vault-password-file 'password_file.txt' 'some_role/files/ssh.key.enc')
 
-# List available plugins.
+# List available plugins
 ansible-doc -t 'lookup' -l
 ansible-doc -t 'strategy' -l
 
-# Show plugin-specific docs and examples.
+# List installed collections
+ansible-galaxy collection list
+
+# Show plugin-specific docs and examples
 ansible-doc -t 'lookup' 'fileglob'
 ansible-doc -t 'strategy' 'linear'
 
-# Run commands within Execution Environments.
+# Run commands within Execution Environments
 ansible-navigator exec
 AWS_PROFILE='AnsibleTaskExecutor' venv/bin/ansible-navigator \
 	--execution-environment-image='012345678901.dkr.ecr.eu-west-1.amazonaws.com/infra/ansible-ee' \
