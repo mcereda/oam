@@ -75,7 +75,8 @@ ansible-playbook 'path/to/playbook.yml' --syntax-check
 # Ad-hoc commands
 ansible -i 'hosts.yml' -m 'ping' 'all'
 ansible -i 'host-1,host-n,' 'hostRegex' -m 'ansible.builtin.shell' -a 'echo $TERM'
-ansible -i 'localhost' -c 'local' 'localhost' -m 'ansible.builtin.copy' -a 'src=/tmp/src dest=/tmp/dest'
+ansible -i 'localhost,' -c 'local' 'localhost' -m 'ansible.builtin.copy' -a 'src=/tmp/src dest=/tmp/dest'
+ansible -i 'localhost,' -c 'local' -m 'debug' -a 'msg="{{ (60 / 2) | int }}"' 'localhost'
 venv/bin/ansible -i 'localhost ansible_python_interpreter=venv/bin/python,' -c 'local' 'localhost' \
 	-m 'community.postgresql.postgresql_query' \
 	-a 'login_host=host.fqdn login_user=postgres login_password=password login_db=postgres query="SELECT 1;"'
