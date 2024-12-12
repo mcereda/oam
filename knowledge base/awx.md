@@ -1,21 +1,83 @@
 # Ansible AWX
 
-1. [Deployment](#deployment)
-1. [Removal](#removal)
-1. [Testing](#testing)
-   1. [Create demo instances](#create-demo-instances)
+1. [Gotchas](#gotchas)
+1. [Instance setup](#instance-setup)
+   1. [Deployment](#deployment)
+   1. [Removal](#removal)
+   1. [Testing](#testing)
 1. [API](#api)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
-## Deployment
+## Gotchas
 
-> ### Incomplete ARM64 image collection
->
-> Consider using only AMD64 nodes to host the containers for AWX.
->
-> As of 2024-04-11, AWX does **not** appear to provide ARM64 images for all its containers.<br/>
-> One'll need to build their own missing ARM64 images and specify those during deployment. Good luck with that!
+- Consider using only AMD64 nodes to host the containers for AWX instances.
+
+  As of 2024-04-11, AWX does **not** appear to provide ARM64 images for all its containers.<br/>
+  One'll need to build their own missing ARM64 images and specify those during deployment. Good luck with that!
+
+- K8S tolerations set in AWX custom resources only affect K8S-based AWX instances' deployments.<br/>
+  They are **not** applied to other resources like automation Jobs.
+
+  <details>
+
+  Jobs' specific K8S settings need to be configured in the `pod_spec_override` attribute of Instance Groups of type
+  Container Group.
+
+  ```yaml
+  ---
+  # awx instance_groups get 'default' -f 'yaml'
+  …
+  pod_spec_override: |
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      namespace: awx
+      spec:
+        …
+        containers:
+          - …
+            image: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/custom/awx-ee:latest
+            resources:
+              requests:
+                cpu: 250m
+                memory: 100Mi
+              limits:
+                cpu: 1930m
+                memory: 3297Mi
+        tolerations:
+          - key: org.example.k8s/reservation/app
+            operator: Equal
+            value: awx
+            effect: NoSchedule
+          - key: org.example.k8s/awx/component
+            operator: Equal
+            value: job
+            effect: NoSchedule
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                  - key: org.example.k8s/reservation/app
+                    operator: In
+                    values:
+                      - awx
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 10
+                preference:
+                  matchExpressions:
+                    - key: org.example.k8s/awx/component
+                      operator: In
+                      values:
+                        - job
+  ```
+
+  </details>
+
+## Instance setup
+
+### Deployment
 
 Starting from version 18.0, the [AWX Operator][operator's documentation] is the preferred way to install AWX.<br/>
 It is meant to provide a Kubernetes-native installation method for AWX via an AWX Custom Resource Definition (CRD).
@@ -29,8 +91,8 @@ Requirements:
 - The ability to create PersistentVolumeClaims and PersistentVolumes in said K8S cluster.
 - The ability for the cluster to create load balancers if setting the service type to load balancer.
 
-<details>
-  <summary>Using <code>kustomize</code></summary>
+<details style="padding-top: 1em;">
+<summary>Deploy the operator with <code>kustomize</code></summary>
 
 ```sh
 $ mkdir -p '/tmp/awx'
@@ -59,8 +121,8 @@ awx-operator-controller-manager-8b7dfcb58-k7jt8   2/2     Running   0          1
 
 </details>
 
-<details style="margin-bottom: 1em;">
-  <summary>Using <code>helm</code></summary>
+<details style="padding-bottom: 1em;">
+<summary>Deploy the operator with <code>helm</code></summary>
 
 ```sh
 # Add the operator's repository.
@@ -122,8 +184,8 @@ Useful specs:
 | `no_log: false`    | See resource creation tasks' output in the operators'logs | Debug                                                  |
 | `node_selector: …` | Select nodes to run on                                    | Use only specific nodes (see warning at the beginning) |
 
-<details>
-  <summary>Using <code>kubectl</code></summary>
+<details style="padding-top: 1em;">
+<summary>Deploy AWX instances with <code>kubectl</code></summary>
 
 ```sh
 $ cd '/tmp/awx'
@@ -133,7 +195,7 @@ $ cd '/tmp/awx'
 </details>
 
 <details>
-  <summary>Using <code>kustomize</code></summary>
+  <summary>Deploy AWX instances with <code>kustomize</code></summary>
 
 ```sh
 $ cd '/tmp/awx'
@@ -144,8 +206,8 @@ $ cd '/tmp/awx'
 
 </details>
 
-<details>
-  <summary>Using the helm chart's integrated definition</summary>
+<details style="padding-bottom: 1em;">
+  <summary>Deploy AWX instances using the operator's helm chart's integrated definition</summary>
 
 ```sh
 # Update the operator by telling it to also deploy the AWX instance.
@@ -169,7 +231,7 @@ awx-demo-web-69d6d5d6c-wdxlv                       3/3     Running     0        
 awx-operator-controller-manager-75b667b745-g9g9c   2/2     Running     0          17m
 ```
 
-</details><br/>
+</details>
 
 The default user is `admin`.<br/>
 Get the password from the `{instance}-admin-password` secret:
@@ -179,14 +241,14 @@ $ kubectl -n 'awx' get secret 'awx-demo-admin-password' -o jsonpath="{.data.pass
 L2ZUgNTwtswVW3gtficG1Hd443l3Kicq
 ```
 
-Connection:
+Connect to the instance once it is up:
 
 ```sh
 kubectl -n 'awx' port-forward 'service/awx-service' '8080:http'
 open 'http://localhost:8080'
 ```
 
-## Removal
+### Removal
 
 Remove the `AWX` resource associated to the instance to delete it:
 
@@ -211,19 +273,17 @@ Eventually, remove the namespace too to clean all things up:
 kubectl delete ns 'awx'
 ```
 
-## Testing
-
-### Create demo instances
+### Testing
 
 <details>
-  <summary>Run: follow the basic installation guide</summary>
+<summary>Run: follow the basic installation guide</summary>
 
 [Guide][basic install]
 
-  <details style="margin-left: 1em">
-    <summary>
-      1. ARM, Mac OS X, <code>minikube</code>, <code>kustomize</code>: failed: ARM images for AWX not available
-    </summary>
+  <details style="margin-left: 1em;">
+  <summary>
+    1. ARM, Mac OS X, <code>minikube</code>, <code>kustomize</code>: failed: ARM images for AWX not available
+  </summary>
 
 ```sh
 $ minikube start --cpus=4 --memory=6g --addons=ingress
@@ -284,8 +344,8 @@ $ # (ノಠ益ಠ)ノ彡┻━┻
 ```
 
   </details>
-  <details style="margin-left: 1em">
-    <summary>2. AMD64, OpenSUSE Leap 15.5, <code>minikube</code>, <code>kustomize</code></summary>
+  <details style="margin-left: 1em;">
+  <summary>2. AMD64, OpenSUSE Leap 15.5, <code>minikube</code>, <code>kustomize</code></summary>
 
 ```sh
 $ minikube start --cpus=4 --memory=6g --addons=ingress
@@ -355,12 +415,12 @@ $ minikube kubectl -- delete -k '.'
 </details>
 
 <details>
-  <summary>Run: follow the helm installation guide</summary>
+<summary>Run: follow the helm installation guide</summary>
 
 [Guide][helm install on existing cluster]
 
-  <details style="margin-left: 1em">
-    <summary>1. AMD64, OpenSUSE Leap 15.5, <code>minikube</code>, <code>helm</code></summary>
+  <details style="margin-left: 1em;">
+  <summary>1. AMD64, OpenSUSE Leap 15.5, <code>minikube</code>, <code>helm</code></summary>
 
 ```sh
 $ minikube start --cpus=4 --memory=6g --addons=ingress
@@ -426,14 +486,14 @@ $ minikube kubectl -- delete ns 'awx'
 </details>
 
 <details>
-  <summary>Run: kustomized helm chart</summary>
+<summary>Run: kustomized helm chart</summary>
 
 > #### Warning
 >
 > Remember to include the CRDs from the helm chart.
 
   <details style="margin-left: 1em">
-    <summary>1. AMD64, OpenSUSE Leap 15.5, <code>minikube</code></summary>
+  <summary>1. AMD64, OpenSUSE Leap 15.5, <code>minikube</code></summary>
 
 ```sh
 $ minikube start --cpus=4 --memory=6g --addons=ingress
@@ -509,7 +569,7 @@ $ minikube kubectl -- delete -f <(minikube kubectl -- kustomize --enable-helm)
   </details>
 
   <details style="margin-left: 1em">
-    <summary>1. AMD64, Mac OS X, EKS</summary>
+  <summary>1. AMD64, Mac OS X, EKS</summary>
 
 ```sh
 $ mkdir -p '/tmp/awx'
@@ -614,6 +674,12 @@ awx … config
 # List all available endpoints
 curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/' | jq '.' -
 
+# List instance groups
+awx instance_groups list
+
+# Show instance groups
+awx instance_groups get 'default'
+
 # List jobs
 awx jobs list
 awx jobs list -f 'yaml'
@@ -623,6 +689,7 @@ awx jobs list -f 'jq' --filter '.results[] | .name + " is " + .status'
 # Show job templates
 awx job_templates list
 curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/job_templates/' | jq '.' -
+awx job_templates get 'Some Job'
 
 # Show notification templates
 awx … notification_templates list
@@ -631,6 +698,7 @@ curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/notification_te
 # Show schedules
 awx … schedules list
 awx … schedules --schedules 'schedule-1' 'schedule-n'
+awx schedules get 'Some Schedule'
 curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/schedules/' | jq '.' -
 
 # Export data
@@ -663,6 +731,7 @@ Refer [AWX Command Line Interface] for more information.
 - [Installer role's defaults]
 - [AWX API Reference]
 - [How to use AWX REST API to execute jobs]
+- [Automation Job isn't created with tolerations from AWX manifest]
 
 <!--
   Reference
@@ -690,4 +759,5 @@ Refer [AWX Command Line Interface] for more information.
 
 <!-- Others -->
 [arm64 image pulled shows amd64 as its arch]: https://github.com/brancz/kube-rbac-proxy/issues/79#issuecomment-826557647
+[automation job isn't created with tolerations from awx manifest]: https://github.com/ansible/awx-operator/issues/1099#issuecomment-1298706083
 [how to use awx rest api to execute jobs]: https://www.dbi-services.com/blog/how-to-use-awx-rest-api-to-execute-jobs/
