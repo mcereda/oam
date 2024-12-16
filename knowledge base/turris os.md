@@ -13,11 +13,7 @@ Linux distribution based on top of OpenWrt. Check the [website] for more informa
    1. [Start containers](#start-containers)
    1. [Execute a shell into containers](#execute-a-shell-into-containers)
    1. [Start containers at boot](#start-containers-at-boot)
-   1. [Example: cfengine hub](#example-cfengine-hub)
-   1. [Example: basic, stripped git server](#example-basic-stripped-git-server)
-   1. [Example: gitea](#example-gitea)
-   1. [Example: monitoring](#example-monitoring)
-   1. [Example: pi-hole](#example-pi-hole)
+   1. [Examples](#examples)
 1. [Hardening](#hardening)
 1. [The SFP+ caged module](#the-sfp-caged-module)
    1. [Use the SFP module as a LAN port](#use-the-sfp-module-as-a-lan-port)
@@ -203,12 +199,13 @@ In shell:
 # List available LXC container images.
 # Default source is 'repo.turris.cz/lxc'.
 lxc-create -n 'test' -t 'download'; lxc-destroy -n 'test'
-lxc-create … -t 'download' -- --server 'images.linuxcontainers.org'
+lxc-create … -t 'download' -- --server 'images.linuxcontainers.org'; lxc-destroy -n 'test'
 
 # Create LXC containers.
 # Default source is 'repo.turris.cz/lxc'.
 # Values are case sensitive and depend from what is on the server.
 lxc-create -n 'pi-hole' -t 'download' -- -d 'Debian' -r 'Bullseye' -a 'armv7l'
+lxc-create -n 'baikal' -t 'download' -- -d 'Alpine' -r '3.20' -a 'armv7l'
 lxc-create --name 'pi-hole' --template 'download' -- \
   --server 'repo.turris.cz/lxc' \
   --dist 'Ubuntu' --release 'Focal' --arch 'armv7l'
@@ -281,38 +278,81 @@ config container
   option timeout 60
 ```
 
-### Example: cfengine hub
-
-> CFEngine does not seem to support 32bits ARM processors anymore (but it does support arm64).<br/>
-> Still, since I am using a 32bit processor this is not doable for me.
+### Examples
 
 <details>
-  <summary>Old installation test</summary>
+  <summary>baikal</summary>
 
-  > This procedure assumes you are using an LXC container based on the Debian Bullseye image.
+> This procedure assumes one is using an LXC container based on the Debian Bullseye image.
+>
+> ```sh
+> lxc-create -n 'baikal' -t 'download' -- -d 'Debian' -r 'Bookworm' -a 'armv7l'
+> ```
 
-  ```sh
-  # Set the correct hostname.
-  hostnamectl set-hostname 'cfengine'
+Refer <https://sabre.io/baikal/install/>.
 
-  # Install CFEngine and the SSH server.
-  # Also install `unattended-upgrades` to ease updates management.
-  DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'cfengine3' 'openssh-server' 'unattended-upgrades'
+```sh
+# Set the correct hostname.
+hostnamectl set-hostname 'baikal'
+sed -i 's/LXC_NAME/baikal/' '/etc/hosts'
 
-  # Set up passwordless authentication.
-  mkdir "${HOME}/.ssh" && chmod '700' "${HOME}/.ssh"
-  echo 'ssh-…' >> "${HOME}/.ssh/authorized_keys" && chmod '600' "${HOME}/.ssh/authorized_keys"
-  ```
+# Install baikal.
+# Also install `unattended-upgrades` to ease updates management.
+DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes --no-install-recommends \
+  'apache2' 'ca-certificates' 'curl' 'php' 'php-sqlite3' 'unattended-upgrades' 'unzip'
+a2dismod 'mpm_event'
+a2enmod 'rewrite' 'php*'
+systemctl restart 'apache2'
+curl -fsL -o '/var/www/baikal.zip' 'https://github.com/sabre-io/Baikal/releases/download/0.10.1/baikal-0.10.1.zip'
+unzip -ud '/var/www/' '/var/www/baikal.zip' && rm '/var/www/baikal.zip'
+chown -R 'www-data:www-data' '/var/www/baikal/Specific' '/var/www/baikal/config'
+cat <<EOF > '/etc/apache2/sites-enabled/010-baikal.conf'
+<VirtualHost *:80>
+
+    DocumentRoot /var/www/baikal/html
+    ServerName baikal.lan
+
+    RewriteEngine on
+    # Generally already set by global Apache configuration
+    # RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    RewriteRule /.well-known/carddav /dav.php [R=308,L]
+    RewriteRule /.well-known/caldav  /dav.php [R=308,L]
+
+    <Directory "/var/www/baikal/html">
+        Options None
+        # If you install cloning git repository, you may need the following
+        # Options +FollowSymlinks
+        AllowOverride None
+        # Configuration for apache-2.4:
+        Require all granted
+        # Configuration for apache-2.2:
+        # Order allow,deny
+        # Allow from all
+    </Directory>
+
+    <IfModule mod_expires.c>
+        ExpiresActive Off
+    </IfModule>
+
+</VirtualHost>
+EOF
+```
 
 </details>
 
-### Example: basic, stripped git server
+<details>
+  <summary>basic, stripped git server</summary>
 
-> This procedure assumes you are using an LXC container based on the Debian Bullseye image.
+> This procedure assumes one is using an LXC container based on the Debian Bullseye image.
+>
+> ```sh
+> lxc-create -n 'git' -t 'download' -- -d 'Debian' -r 'Bullseye' -a 'armv7l'
+> ```
 
 ```sh
 # Set the correct hostname.
 hostnamectl set-hostname 'git'
+sed -i 's/LXC_NAME/git/' '/etc/hosts'
 
 # Install Git and the SSH server.
 # Also install `unattended-upgrades` to ease updates management.
@@ -344,9 +384,44 @@ chsh 'git' -s "$(which 'git-shell')"
 exit
 ```
 
-### Example: gitea
+</details>
 
-> This procedure assumes you are using an LXC container based on LinuxContainers' Alpine 3.20 image:
+<details>
+  <summary>cfengine hub</summary>
+
+> CFEngine does not seem to support 32bits ARM processors anymore (but it does support arm64).<br/>
+> Still, I am using a 32bit processor so this is not doable for me.
+
+  <details style="padding-left: 1em;">
+    <summary>Old installation test</summary>
+
+  > This procedure assumes one is using an LXC container based on the Debian Bullseye image.
+  >
+  > ```sh
+  > lxc-create -n 'baikal' -t 'download' -- -d 'Debian' -r 'Bullseye' -a 'armv7l'
+  > ```
+
+  ```sh
+  # Set the correct hostname.
+  hostnamectl set-hostname 'cfengine'
+
+  # Install CFEngine and the SSH server.
+  # Also install `unattended-upgrades` to ease updates management.
+  DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'cfengine3' 'openssh-server' 'unattended-upgrades'
+
+  # Set up passwordless authentication.
+  mkdir "${HOME}/.ssh" && chmod '700' "${HOME}/.ssh"
+  echo 'ssh-…' >> "${HOME}/.ssh/authorized_keys" && chmod '600' "${HOME}/.ssh/authorized_keys"
+  ```
+
+  </details>
+
+</details>
+
+<details>
+  <summary>gitea</summary>
+
+> This procedure assumes one is using an LXC container based on LinuxContainers' Alpine 3.20 image:
 >
 > ```sh
 > lxc-create --name 'gitea' --template 'download' -- \
@@ -369,9 +444,16 @@ rc-service 'gitea' start
 # Connect to 'gitea:3000' to start the first-time installation wizard.
 ```
 
-### Example: monitoring
+</details>
+
+<details>
+  <summary>monitoring</summary>
 
 > This procedure assumes you are using an LXC container based on the Debian Bullseye image.
+>
+> ```sh
+> lxc-create -n 'baikal' -t 'download' -- -d 'Debian' -r 'Bullseye' -a 'armv7l'
+> ```
 
 ```sh
 # Set the correct hostname.
@@ -405,9 +487,16 @@ systemctl enable 'prometheus.service'
 exit
 ```
 
-### Example: pi-hole
+</details>
+
+<details>
+  <summary>pi-hole</summary>
 
 > This procedure assumes you are using an LXC container based on the Debian Bullseye image.
+>
+> ```sh
+> lxc-create -n 'baikal' -t 'download' -- -d 'Debian' -r 'Bullseye' -a 'armv7l'
+> ```
 
 See [Installing pi-hole on Turris Omnia], [Install Pi-hole] and [Pi-Hole on Turris Omnia] for details.
 
@@ -461,6 +550,8 @@ uci commit 'dhcp' && reload_config && luci-reload
 /etc/init.d/odhcpd restart
 /etc/init.d/dnsmasq restart
 ```
+
+</details>
 
 ## Hardening
 
