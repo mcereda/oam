@@ -94,7 +94,7 @@ openssl req -in 'request.csr' -verify -text -noout  # prints the data given in i
 # Create self-signed certificates with their new private key from scratch
 openssl req -nodes -newkey 'rsa:2048' -keyout 'private.key' -out 'certificate.crt' -x509 -days '365'
 openssl req -newkey 'rsa:4096' -keyout 'private.key' -out 'certificate.pem' -x509 -days '365' -sha256 \
-	-subj '/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=www.company.com'
+	-subj '/C=US/ST=Oregon/L=Portland/O=Example Org/OU=R&D/CN=www.example.org'
 
 # Create self-signed certificates using existing CSRs and private keys
 openssl x509 -req -in 'request.csr' -signkey 'private.key' -out 'certificate.crt' -days '365'

@@ -289,7 +289,7 @@ config container
 > lxc-create -n 'baikal' -t 'download' -- -d 'Debian' -r 'Bookworm' -a 'armv7l'
 > ```
 
-Refer <https://sabre.io/baikal/install/>.
+Refer [baikal] and <https://sabre.io/baikal/install/>.
 
 ```sh
 # Set the correct hostname.
@@ -299,15 +299,18 @@ sed -i 's/LXC_NAME/baikal/' '/etc/hosts'
 # Install baikal.
 # Also install `unattended-upgrades` to ease updates management.
 DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes --no-install-recommends \
-  'apache2' 'ca-certificates' 'curl' 'php' 'php-sqlite3' 'unattended-upgrades' 'unzip'
+  'apache2' 'ca-certificates' 'curl' 'php' 'php-sqlite3' 'php-sabre-dav' 'unattended-upgrades' 'unzip'
 a2dismod 'mpm_event'
-a2enmod 'rewrite' 'php*'
+a2enmod 'rewrite' 'php*' 'ssl'
 systemctl restart 'apache2'
+openssl req -nodes \
+  -newkey 'rsa:4096' -keyout '/etc/ssl/private/baikal.key' -out '/etc/ssl/private/baikal.crt' -x509 -days '365' \
+  -subj '/C=NL/ST=North Holland/L=Amsterdam/O=Example Org/OU=Infra/CN=baikal.lan'
 curl -fsL -o '/var/www/baikal.zip' 'https://github.com/sabre-io/Baikal/releases/download/0.10.1/baikal-0.10.1.zip'
 unzip -ud '/var/www/' '/var/www/baikal.zip' && rm '/var/www/baikal.zip'
 chown -R 'www-data:www-data' '/var/www/baikal/Specific' '/var/www/baikal/config'
 cat <<EOF > '/etc/apache2/sites-enabled/010-baikal.conf'
-<VirtualHost *:80>
+<VirtualHost *:443>
 
     DocumentRoot /var/www/baikal/html
     ServerName baikal.lan
@@ -334,8 +337,18 @@ cat <<EOF > '/etc/apache2/sites-enabled/010-baikal.conf'
         ExpiresActive Off
     </IfModule>
 
+    SSLEngine on
+    SSLCertificateFile    /etc/ssl/private/baikal.crt
+    SSLCertificateKeyFile /etc/ssl/private/baikal.key
+
 </VirtualHost>
 EOF
+```
+
+Testing (after installing and creating a user):
+
+```sh
+curl -svvvko - --digest --user 'mark@baikal.lan:123p' https://baikal.lan/dav.php/calendars/mark@baikal.lan/default/
 ```
 
 </details>
@@ -661,6 +674,7 @@ All the references in the [further readings] section, plus the following:
 [further readings]: #further-readings
 
 <!-- Knowledge base -->
+[baikal]: baikal.md
 [lxc]: lxc.md
 [openwrt]: openwrt.md
 [opkg]: opkg.md
