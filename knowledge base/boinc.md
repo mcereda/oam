@@ -1,7 +1,5 @@
 # BOINC
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Client management](#client-management)
    1. [Remote management](#remote-management)
@@ -17,9 +15,14 @@
 ## TL;DR
 
 Files are located in `/var/lib/boinc` by default.<br/>
-Some distribution (debian and derivate) use `/etc/boinc-client` for configuration files instead, and create links to them in the default location.
+Some distribution (debian and derivate) use `/etc/boinc-client` for configuration files instead, and create links to
+them in the default location.
 
-The resource share property can be set anywhere from 0 to 1000 for each project, with 0 meaning it will not get any work from that project unless every other project you run is out of work.
+The resource share property can be set anywhere from 0 to 1000 for each project, with 0 meaning it will not get any work
+from that project unless every other project you run is out of work.
+
+<details>
+  <summary>Setup</summary>
 
 ```sh
 # Install.
@@ -28,10 +31,31 @@ sudo apt install 'boinc-client' 'boinc-manager'     # or 'boinc-client-nvidia-cu
 sudo pacman -S 'boinc'                              # or 'boinc-nox'
 sudo zypper install 'boinc-client' 'boinc-manager'
 
+# Enable the service.
+sudo systemctl start 'boinc-client.service'
+
+# Allow GPU usage.
+sudo gpasswd -a 'boinc' 'video'
+```
+
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
 # Set the GUI RPC communications port.
 # Default is '31416'.
 boinc --gui_rpc_port '30000'
+
+# Open `boinc-manager` with*out* also starting the client (`-nd`).
+# Connect to the instance started by the current system (`-a`).
+# Allow for multiple instances of the manager (`-m`).
+# Provide the connection password in the command (`-p`).
+boinc-manager -nd -amp '123'
 ```
+
+</details>
 
 <details>
   <summary>Laptop-like platforms energy management</summary>
@@ -47,7 +71,7 @@ echo 1 | sudo tee '/sys/devices/system/cpu/intel_pstate/no_turbo'
 # Suspend computing when the computer is in use by giving the `boinc` user
 # access to the X session (so that mouse and keyboard input can be communicated
 # to the client).
-xhost +SI:localuser:boinc
+xhost '+SI:localUser:boinc'
 ```
 
 </details>
@@ -60,31 +84,40 @@ xhost +SI:localuser:boinc
 | [boinccmd]      | Command line |
 | [boinctui]      | Text         |
 
-Local control RPCs are authenticated using the GUI RPC password. This password is located in the `gui_rpc_auth.cfg` configuration file, as the single first line, with a max length of 255 characters.
+Local control RPCs are authenticated using the GUI RPC password. This password is located in the `gui_rpc_auth.cfg`
+configuration file, as the single first line, with a max length of 255 characters.
 
 A password is **required** from version FIXME, and is automatically generated if the file is not found or it is empty.
 
-Resource share is used to help BOINC determine which projects to prioritize; the larger the number, the more it will prioritize work from that project over the other projects.<br/>
-This value does **not** determine anything about how much of your CPU, GPU, etc. are used. If you want to do that, change the relative settings.<br/>
-The number for resource share can be set anywhere from `0` to `1000` for each project. Setting a project's resource share to zero means it will **not** get any work from that project **unless** every other project you run is out of work.
+Resource share is used to help BOINC determine which projects to prioritize; the larger the number, the more it will
+prioritize work from that project over the other projects.<br/>
+This value does **not** determine anything about how much of your CPU, GPU, etc. are used. If you want to do that,
+change the relative settings.<br/>
+The number for resource share can be set anywhere from `0` to `1000` for each project. Setting a project's resource
+share to zero means it will **not** get any work from that project **unless** every other project you run is out of
+work.
 
 ### Remote management
 
 All remote RPCs (both status and control) are authenticated using the GUI RPC password.
 
 Quick, dirty solution: use the `--allow_remote_gui_rpc` option when starting the client.<br/>
-This will make the BOINC client accept connections from **any** host (subject to password authentication) even if the client's configuration files are set otherwise.
+This will make the BOINC client accept connections from **any** host (subject to password authentication) even if the
+client's configuration files are set otherwise.
 
 Better solution:
 
-1. add the `<allow_remote_gui_rpc>1</allow_remote_gui_rpc>` **option** to the `cc_config.xml` file in the BOINC data directory
-1. restart the service to make the above change effective
-1. check port 31416 (or the one configured for use) is reachable from other hosts
-1. specify a set of allowed hosts creating the `remote_hosts.cfg` file in the BOINC data directory; its entries must be DNS host names or IP addresses, and must be one per line
+1. Add the `<allow_remote_gui_rpc>1</allow_remote_gui_rpc>` **option** to the `cc_config.xml` file in the BOINC data
+   directory;
+1. Restart the service to make the above change effective;
+1. Check port `31416` (or the one configured for use) is reachable from other hosts.
+1. Specify a set of allowed hosts creating the `remote_hosts.cfg` file in the BOINC data directory; its entries must be
+   DNS host names or IP addresses, and must be one per line.
 
-   > the _Read config file_ action in BOINC Manager's _Advanced_ menu will also read the `remote_hosts.cfg` file, so a restart of the client is not required to enable changes to the remote host list.
+   > the _Read config file_ action in BOINC Manager's _Advanced_ menu will also read the `remote_hosts.cfg` file, so a
+   > restart of the client is not required to enable changes to the remote host list.
 
-1. check the `gui_rpc_auth.cfg` file in the BOINC data directory to get the password for authentication
+1. Check the `gui_rpc_auth.cfg` file in the BOINC data directory to get the password for authentication.
 
 ## Use the GPU for computations
 
@@ -101,12 +134,13 @@ Number of platforms     1
 
 If the resulting number of platform is `0`, you need to install the proprietary drivers for your card.
 
+<details style="padding-bottom: 1em;">
+  <summary>On OpenSUSE</summary>
+
 ### AMD drivers
 
 See [AMD Linux drivers] and [Radeon™ Software for Linux® Installation] for the AMD drivers.<br/>
 If you want to install also the ROCm component, see also the [AMD ROCm™ documentation].
-
-<details><summary>On OpenSUSE</summary>
 
 Install the `amdgpu-install` package from [AMD's Linux drivers][amd linux drivers] page, then execute it.
 
@@ -132,11 +166,11 @@ sudo pacman -Sy 'intel-compute-runtime' 'ocl-icd'
 sudo zypper install 'intel-opencl' 'ocl-icd-devel'
 ```
 
-</details><br/>
+</details>
 
 At the next restart of the BOINC client, something similar to this line should appear in the event logs:
 
-```txt
+```plaintext
 Oct 09 23:09:40 hostnameHere boinc[1709]: 09-Oct-2022 23:09:40 [---] OpenCL: AMD/ATI GPU 0: gfx90c:xnack- (driver version 3452.0 (HSA1.1,LC), device ve>
 ```
 
@@ -169,10 +203,11 @@ In `cc_config.xml`:
 ## Gotchas
 
 - It seems to work much better on debian-based distribution than on others.
-- In order to suspend computing when the computer is in use, the `boinc` user should have access to your X session so that mouse and keyboard input can be communicated to the client:
+- In order to suspend computing when the computer is in use, the `boinc` user should have access to your X session so
+  that mouse and keyboard input can be communicated to the client:
 
   ```sh
-  xhost +SI:localuser:boinc
+  xhost '+SI:localUser:boinc'
   ```
 
 ## Further readings
@@ -195,7 +230,8 @@ In `cc_config.xml`:
 - [Linux suspend when computer is in use bug]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
