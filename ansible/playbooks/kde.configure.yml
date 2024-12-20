@@ -45,10 +45,10 @@
             value: nl_NL.UTF-8
           - group: Formats
             key: LC_TIME
-            value: C
+            value: C.UTF-8
           - group: Translations
             key: LANGUAGE
-            value: C:en_IE
+            value: en_IE.UTF-8:C.UTF-8
     - name: Configure the timezone
       tags: timezone
       community.general.kdeconfig:
