@@ -19,6 +19,9 @@
           become: true
           ansible.builtin.copy:
             dest: /etc/zypp/repos.d/amdgpu.repo
+            owner: root
+            group: root
+            mode: u=rw,g=r,o=r
             content: |
               [amdgpu]
               name=amdgpu
@@ -31,6 +34,9 @@
           become: true
           ansible.builtin.copy:
             dest: /etc/zypp/repos.d/rocm.repo
+            owner: root
+            group: root
+            mode: u=rw,g=r,o=r
             content: |
               [ROCm-{{ drivers_version }}]
               name=ROCm{{ drivers_version }}
