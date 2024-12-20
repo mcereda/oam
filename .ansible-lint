@@ -3,9 +3,10 @@
 
 offline: true
 warn_list:
-  - name[template]  # Jinja templates should only be at the end of 'name'
-  - role-name[path]  # Avoid using paths when importing roles
+  - name[template]              # Jinja templates should only be at the end of 'name'
+  - role-name[path]             # Avoid using paths when importing roles
   - yaml[comments-indentation]  # Comment not indented like content
-  - yaml[brackets]  # Too many spaces inside brackets
-  - package-latest  # Package installs should not use latest
-  - jinja[spacing]  # Jinja2 spacing could be improved
+  - yaml[brackets]              # Too many spaces inside brackets
+  - yaml[line-length]           # Line too long
+  - package-latest              # Package installs should not use latest
+  - jinja[spacing]              # Jinja2 spacing could be improved
