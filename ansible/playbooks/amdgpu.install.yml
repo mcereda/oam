@@ -1,0 +1,49 @@
+---
+
+- name: Install AMDGPU drivers and applications
+  hosts: all
+  vars:
+    drivers_version: 6.3
+    distribution_version: "{{ ansible_distribution_version }}"
+    architecture: "{{ ansible_architecture }}"
+  tasks:
+    - name: Install AMDGPU drivers and applications on SLES
+      # refer https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/native-install/sles.html
+      tags: sles
+      when:
+        - ansible_pkg_mgr | lower in ['zypper']
+        - ansible_distribution_file_variety | lower in ['suse']
+      block:
+        - name: Add the AMDGPU kernel-mode driver repository on SLES
+          tags: repository
+          become: true
+          ansible.builtin.copy:
+            dest: /etc/zypp/repos.d/amdgpu.repo
+            content: |
+              [amdgpu]
+              name=amdgpu
+              baseurl=https://repo.radeon.com/amdgpu/{{ drivers_version }}/sle/{{ distribution_version }}/main/{{ architecture }}/
+              enabled=1
+              gpgcheck=1
+              gpgkey=https://repo.radeon.com/rocm/rocm.gpg.key
+        - name: Add the AMDGPU ROCm packages repository on SLES
+          tags: repository
+          become: true
+          ansible.builtin.copy:
+            dest: /etc/zypp/repos.d/rocm.repo
+            content: |
+              [ROCm-{{ drivers_version }}]
+              name=ROCm{{ drivers_version }}
+              baseurl=https://repo.radeon.com/rocm/zyp/{{ drivers_version }}/main
+              enabled=1
+              gpgcheck=1
+              gpgkey=https://repo.radeon.com/rocm/rocm.gpg.key
+        - name: Install AMDGPU packages on SLES
+          tags: package
+          become: true
+          community.general.zypper:
+            name:
+              - amdgpu-dkms
+              - rocm
+            disable_recommends: false
+            update_cache: true

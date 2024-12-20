@@ -75,6 +75,7 @@
         "airgap",
         "airgapped",
         "alertmanager",
+        "amdgpu",
         "apiserver",
         "asciicast",
         "asciinema",
@@ -294,6 +295,7 @@
         "ripsecrets",
         "rmmod",
         "roboto",
+        "rocm",
         "roff",
         "rootlv",
         "rootvg",
@@ -312,6 +314,7 @@
         "setfattr",
         "sidekiq",
         "siem",
+        "sles",
         "slurm",
         "snmp",
         "spiffe",
@@ -373,6 +376,7 @@
         "yellowdog",
         "ykman",
         "yubikey",
-        "zstd"
+        "zstd",
+        "zypp"
     ]
 }

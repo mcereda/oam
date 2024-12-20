@@ -28,6 +28,7 @@
     1. [Ansible Vault](#ansible-vault)
 1. [Best practices](#best-practices)
 1. [Troubleshooting](#troubleshooting)
+    1. [ERROR: Ansible could not initialize the preferred locale: unsupported locale setting](#error-ansible-could-not-initialize-the-preferred-locale-unsupported-locale-setting)
     1. [Print all known variables](#print-all-known-variables)
     1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
     1. [Time tasks execution](#time-tasks-execution)
@@ -1139,6 +1140,17 @@ Or even edit their content with `ansible-vault edit 'path/to/file'`.
 
 ## Troubleshooting
 
+### ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
+
+`ansible-core` requires the locale to have `UTF-8` encoding [since 2.14.0][ansible v2.14 CHANGELOG]:
+
+> ansible - At startup the filesystem encoding and locale are checked to verify they are UTF-8. If not, the process
+> exits with an error reporting the errant encoding.
+
+```sh
+LANG='C.UTF-8' ansible …
+```
+
 ### Print all known variables
 
 Print the special variable `vars` as a task:
@@ -1494,6 +1506,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 - [Patterns: targeting hosts and groups]
 - [How to use ansible with S3 - Ansible aws_s3 examples]
 - [How to run Ansible with_fileglob in alphabetical order?]
+- [Ansible v2.14 CHANGELOG]
 
 <!--
   Reference
@@ -1517,6 +1530,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 [ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
 [ansible navigator]: https://ansible.readthedocs.io/projects/navigator/en/stable/
 [ansible runner]: https://ansible.readthedocs.io/projects/runner/en/stable/
+[ansible v2.14 changelog]: https://github.com/ansible/ansible/blob/7bb078bd740fba8ad43cc69e18fc8aeb4719180a/changelogs/CHANGELOG-v2.14.rst#id11
 [asynchronous actions and polling]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_async.html
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
 [blocks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_blocks.html
