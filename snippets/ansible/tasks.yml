@@ -842,13 +842,40 @@
                 state: touch
                 mode: '0755'
               with_dict: "{{ users_info }}"
-    - name: Compare time
+    - name: Work with time
       # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/to_datetime_filter.html
-      # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
-      block: []
+      # https://docs.python.org/3/library/datetime.html
+      # The datetime format defaults to '%Y-%m-%d %H:%M:%S'.
+      tags: datetime
+      block:
+        - name: Compare date and times
+          ansible.builtin.set_fact:
+            total_seconds_between_dates: >-
+              {{ ( ('2016-08-14 20:00:12' | to_datetime) - ('2015-12-25' | to_datetime('%Y-%m-%d')) ).total_seconds() }}
+            remaining_seconds_after_delta:
+              # Does NOT convert years and days to seconds.
+              # Use total_seconds() for that.
+              "{{ ( ('2016-08-14 20:00:12' | to_datetime) - ('2016-08-14 18:00:00' | to_datetime) ).seconds }}"
+              # This returns "7212", delta is 2 hours and 12 seconds
+            days_between_dates:
+              # Discards remaining hours, minutes, and seconds
+              "{{ ( ('2016-08-14 20:00:12' | to_datetime) - ('2015-12-25' | to_datetime('%Y-%m-%d')) ).days }}"
+        - name: Take difference between dotnet (100ns precision) and iso8601 microsecond timestamps
+          vars:
+            date1: '2022-11-15T03:23:13.6869568Z'
+            date2: '2021-12-15T16:06:24.400087Z'
+            date1_short:
+              # Shorten to microseconds
+              # Works for any timestamp that has higher than microsecond precision by cutting off anything more precise than that
+              '{{ date1|regex_replace("([^.]+)(\.\d{6})(\d*)(.+)", "\1\2\4") }}'
+            iso8601format: '%Y-%m-%dT%H:%M:%S.%fZ'
+          ansible.builtin.set_fact:
+            date_diff_isoed: '{{ (date1_short|to_datetime(iso8601format) - date2|to_datetime(iso8601format)).total_seconds() }}'
 
 - name: AWS-specific operations
-  tags: never
+  tags:
+    - aws
+    - never
   hosts: localhost
   connection: local
   gather_facts: false
@@ -889,7 +916,13 @@
           | selectattr('region', 'equalto', 'eu-west-1')
           | selectattr('service', 'equalto', 'AMAZON')
           | map(attribute='ip_prefix')
+    - name: Work with time
+      tags: datetime
+      # AWS' datetime format is '%Y-%m-%dT%H:%M:%S'.
+      # https://stackoverflow.com/questions/48101921/ansible-compare-difference-between-two-dates-for-the-last-hour
+      block: []
     - name: Assume roles
+      tags: assume_role
       block:
         - name: Get session tokens
           amazon.aws.sts_assume_role:
