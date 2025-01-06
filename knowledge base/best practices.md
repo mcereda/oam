@@ -140,7 +140,7 @@ Consider what follows for _infrastructure_ and _platform engineering_ as well.
 - Avoid creating mindless abstractions, like templates using variables for _all_ their attributes.<br/>
   Prefer providing one or at most a few simplified solutions that use different
   [adapters or interfaces][what does it mean to program to interfaces?] in the background instead.<br/>
-  E.g., check out how [Crossplane] works.
+  E.g., check out how [Crossplane], [Radius] and [KRO] work.
 
 ## Management
 
@@ -195,9 +195,11 @@ Listed in order of addition:
 [crossplane]: https://www.crossplane.io/
 [editorconfig]: editorconfig.md
 [keep a changelog]: keep%20a%20changelog.md
+[kro]: kubernetes/kro.md
 [lefthook]: lefthook.md
 [pre-commit]: pre-commit.md
-[safe]: safe.placeholder
+[radius]: cloud%20computing/radius.md
+[safe]: safe.md
 [the automation paradox]: the%20automation%20paradox.md
 
 <!-- Others -->
