@@ -1,8 +1,6 @@
-# Title
+# ZED
 
-> TODO
-
-Intro
+Next-generation code editor.
 
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
@@ -13,15 +11,27 @@ Intro
 
 ## TL;DR
 
-<!-- Uncomment if used
 <details>
   <summary>Setup</summary>
 
 ```sh
+brew install --cask 'zed'
+sudo zypper ar 'https://download.opensuse.org/repositories/editors/openSUSE_Tumbleweed/editors.repo' && sudo zypper in 'zed'
+```
+
+Global settings at `~/.config/zed/settings.json`.
+Folder-specific settings at `.zed/settings.json`.
+
+Disable telemetry:
+
+```json
+"telemetry": {
+    "diagnostics": false,
+    "metrics": false
+}
 ```
 
 </details>
--->
 
 <!-- Uncomment if used
 <details>
@@ -61,8 +71,8 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
+[codebase]: https://github.com/zed-industries/zed
+[documentation]: https://zed.dev/docs/
+[website]: https://zed.dev/
 
 <!-- Others -->

@@ -1,4 +1,4 @@
-# Title
+# Radius
 
 > TODO
 
@@ -51,6 +51,8 @@ Intro
 ### Sources
 
 - [Documentation]
+- [The Microsoft Azure Incubations Team launches Radius, a new open application platform for the cloud]
+- [Radius a new open-source application platform for the cloud | BRK402]
 
 <!--
   Reference
@@ -61,8 +63,10 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
+[codebase]: https://github.com/radius-project/radius
+[documentation]: https://docs.radapp.io/
+[website]: https://radapp.io/
 
 <!-- Others -->
+[radius a new open-source application platform for the cloud | brk402]: https://www.youtube.com/watch?v=gaG77PiYv5w
+[the microsoft azure incubations team launches radius, a new open application platform for the cloud]: https://azure.microsoft.com/en-us/blog/the-microsoft-azure-incubations-team-launches-radius-a-new-open-application-platform-for-the-cloud/

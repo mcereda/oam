@@ -1,8 +1,8 @@
-# Title
+# Dagger
 
 > TODO
 
-Intro
+Programmable tool aiming to replace scripts with a modern API and cross-language scripting engine.
 
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
@@ -61,8 +61,8 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
+[codebase]: https://github.com/dagger/dagger
+[documentation]: https://docs.dagger.io/
+[website]: https://dagger.io/
 
 <!-- Others -->

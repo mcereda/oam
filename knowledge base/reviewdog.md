@@ -1,8 +1,8 @@
-# Title
+# ReviewDog
 
 > TODO
 
-Intro
+Automated code review tool working with any lint tools and supporting local runs.
 
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
@@ -45,12 +45,9 @@ Intro
 
 ## Further readings
 
-- [Website]
 - [Codebase]
 
 ### Sources
-
-- [Documentation]
 
 <!--
   Reference
@@ -61,8 +58,6 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
+[codebase]: https://github.com/reviewdog/reviewdog
 
 <!-- Others -->

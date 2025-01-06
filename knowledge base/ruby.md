@@ -1,4 +1,4 @@
-# Title
+# Ruby
 
 > TODO
 
@@ -13,15 +13,16 @@ Intro
 
 ## TL;DR
 
-<!-- Uncomment if used
 <details>
   <summary>Setup</summary>
 
 ```sh
+brew install 'ruby'
+
+SSL_CERT_FILE='path/to/ssl.cert'
 ```
 
 </details>
--->
 
 <!-- Uncomment if used
 <details>
@@ -46,7 +47,6 @@ Intro
 ## Further readings
 
 - [Website]
-- [Codebase]
 
 ### Sources
 
@@ -61,8 +61,7 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
+[documentation]: https://docs.ruby-lang.org/en/master/
+[website]: https://www.ruby-lang.org/en/
 
 <!-- Others -->

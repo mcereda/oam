@@ -1,8 +1,8 @@
-# Title
+# Gen3
 
 > TODO
 
-Intro
+Data platform for building data commons and data meshes.
 
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
@@ -46,11 +46,8 @@ Intro
 ## Further readings
 
 - [Website]
-- [Codebase]
 
 ### Sources
-
-- [Documentation]
 
 <!--
   Reference
@@ -61,8 +58,6 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
+[website]: https://gen3.org/
 
 <!-- Others -->

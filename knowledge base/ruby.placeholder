@@ -1,7 +1,0 @@
-# Ruby
-
-```sh
-brew install 'ruby'
-
-SSL_CERT_FILE='path/to/ssl.cert'
-```

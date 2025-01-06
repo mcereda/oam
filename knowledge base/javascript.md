@@ -1,4 +1,4 @@
-# Title
+# JavaScript
 
 > TODO
 
@@ -43,10 +43,19 @@ Intro
 </details>
 -->
 
+```js
+let now = new Date()
+
+let oneYearFromNow = new Date()
+oneYearFromNow.setDate(oneYearFromNow.getDate() + 365)
+
+console.log(now.toISOString())
+console.log(oneYearFromNow.toISOString())
+```
+
 ## Further readings
 
-- [Website]
-- [Codebase]
+- [Playcode]
 
 ### Sources
 
@@ -61,8 +70,7 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
+[documentation]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
 
 <!-- Others -->
+[playcode]: https://playcode.io/empty_javascript

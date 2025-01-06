@@ -1,8 +1,8 @@
-# Title
+# Spegel
 
 > TODO
 
-Intro
+Stateless, peer-to-peer OCI registry mirror for efficient image distribution inside a cluster.
 
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
@@ -61,8 +61,8 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
+[codebase]: https://github.com/XenitAB/spegel
+[documentation]: https://spegel.dev/docs/
+[website]: https://spegel.dev/
 
 <!-- Others -->
