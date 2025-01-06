@@ -1,8 +1,11 @@
-# Fluentd
+# Logging
 
-TODO
+> TODO
 
-Open-Source log collector.
+Intro
+
+<!-- Remove this line to uncomment if used
+## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -12,7 +15,7 @@ Open-Source log collector.
 
 <!-- Uncomment if used
 <details>
-  <summary>Installation and configuration</summary>
+  <summary>Setup</summary>
 
 ```sh
 ```
@@ -42,13 +45,13 @@ Open-Source log collector.
 
 ## Further readings
 
-- [Website]
-- [Main repository]
-- [Fluent Bit]
+- Grafana's [Loki]
+- [Fluentd] / [Fluent Bit]
+- [LogStash]
 
 ### Sources
 
-- [Fluentd vs. Fluent Bit: side by side comparison]
+- [Distributed logging for Microservices]
 
 <!--
   Reference
@@ -58,11 +61,11 @@ Open-Source log collector.
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [fluent bit]: fluent%20bit.md
+[fluentd]: fluentd.md
+[logstash]: logstash.md
+[loki]: loki.md
 
 <!-- Files -->
 <!-- Upstream -->
-[main repository]: https://github.com/fluent/fluentd
-[website]: https://www.fluentd.org/
-
 <!-- Others -->
-[fluentd vs. fluent bit: side by side comparison]: https://logz.io/blog/fluentd-vs-fluent-bit/
+[distributed logging for microservices]: https://www.geeksforgeeks.org/distributed-logging-for-microservices/
