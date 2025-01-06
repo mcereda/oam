@@ -1,4 +1,4 @@
-# Title
+# Scaled Agile FramEwork
 
 > TODO
 
@@ -45,12 +45,10 @@ Intro
 
 ## Further readings
 
-- [Website]
-- [Codebase]
-
 ### Sources
 
-- [Documentation]
+- [The SAFe Delusion]
+- [The Illusion of SAFe: Unmasking the Flaws of Scaled Agile]
 
 <!--
   Reference
@@ -61,8 +59,6 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
-
 <!-- Others -->
+[The Illusion of SAFe: Unmasking the Flaws of Scaled Agile]: https://medium.com/agileinsider/the-illusion-of-safe-unmasking-the-flaws-of-scaled-agile-5b0df6ef77e3
+[The SAFe Delusion]: https://safedelusion.com/

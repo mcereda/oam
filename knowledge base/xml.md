@@ -1,6 +1,6 @@
-# Title
+# XML
 
-> TODO
+TODO
 
 Intro
 
@@ -23,15 +23,15 @@ Intro
 </details>
 -->
 
-<!-- Uncomment if used
 <details>
   <summary>Usage</summary>
 
 ```sh
+xml sel -t -v 'configuration/gui/password' 'Library/Application Support/Syncthing/config.xml'
+xml ed -L -d 'configuration/gui/password' 'Library/Application Support/Syncthing/config.xml'
 ```
 
 </details>
--->
 
 <!-- Uncomment if used
 <details>
@@ -50,7 +50,9 @@ Intro
 
 ### Sources
 
-- [Documentation]
+- [5 simple ways to parse an XML file on Linux]
+- [`xmllint` cheatsheet][xmllint command cheatsheet]
+- [`xml` cheatsheet][xml command cheatsheet]
 
 <!--
   Reference
@@ -61,8 +63,7 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
-
 <!-- Others -->
+[5 simple ways to parse an xml file on linux]: https://www.fosslinux.com/114195/ways-to-parse-an-xml-file-on-linux.htm
+[xmllint command cheatsheet]: https://cheat.sh/xmllint
+[xml command cheatsheet]: https://cheat.sh/xml

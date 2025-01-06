@@ -1,6 +1,6 @@
-# Title
+# HTML
 
-> TODO
+TODO
 
 Intro
 
@@ -45,12 +45,9 @@ Intro
 
 ## Further readings
 
-- [Website]
-- [Codebase]
+- [Color names chart]
 
 ### Sources
-
-- [Documentation]
 
 <!--
   Reference
@@ -61,8 +58,5 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
-
 <!-- Others -->
+[color names chart]: https://htmlcolorcodes.com/color-names/

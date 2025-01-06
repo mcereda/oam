@@ -1,8 +1,11 @@
-# Title
+# etcd
 
 > TODO
 
-Intro
+Strongly consistent, distributed key-value store.
+
+Aims to provide a reliable way to store data that needs to be accessed by a distributed system or cluster of machines.
+Gracefully handles leader elections during network partitions and can tolerate machine failure, including the leader node.
 
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
@@ -61,8 +64,8 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
+[codebase]: https://github.com/etcd-io/etcd
+[documentation]: https://etcd.io/docs/
+[website]: https://etcd.io/
 
 <!-- Others -->

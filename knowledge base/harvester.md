@@ -1,8 +1,9 @@
-# Title
+# Harvester
 
 > TODO
 
-Intro
+Hyperconverged infrastructure solution by SUSE built for bare metal servers.<br/>
+Leverages [Kubernetes], [KubeVirt], [KVM] and [Longhorn].
 
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
@@ -59,10 +60,15 @@ Intro
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[kubernetes]: kubernetes/README.md
+[kubevirt]: kubernetes/kubevirt.placeholder
+[kvm]: kvm.md
+[longhorn]: kubernetes/longhorn.placeholder
+
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
+[codebase]: https://github.com/harvester/harvester
+[documentation]: https://docs.harvesterhci.io/
+[website]: https://harvesterhci.io/
 
 <!-- Others -->

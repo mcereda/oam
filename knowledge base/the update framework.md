@@ -1,8 +1,6 @@
-# Title
+# The Update Framework
 
-> TODO
-
-Intro
+Framework for securing software update systems.
 
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
@@ -46,11 +44,8 @@ Intro
 ## Further readings
 
 - [Website]
-- [Codebase]
 
 ### Sources
-
-- [Documentation]
 
 <!--
   Reference
@@ -61,8 +56,6 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
+[website]: https://theupdateframework.io/
 
 <!-- Others -->

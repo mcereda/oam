@@ -1,6 +1,6 @@
-# Title
+# XDoTool
 
-> TODO
+TODO
 
 Intro
 
@@ -45,12 +45,11 @@ Intro
 
 ## Further readings
 
-- [Website]
 - [Codebase]
 
 ### Sources
 
-- [Documentation]
+- [Automating X11 with `xdotool` (with examples)][automating X11 with xdotool (with examples)]
 
 <!--
   Reference
@@ -61,8 +60,7 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
-[website]: https://website/
+[codebase]: https://github.com/jordansissel/xdotool
 
 <!-- Others -->
+[automating X11 with xdotool (with examples)]: https://commandmasters.com/commands/xdotool-linux/

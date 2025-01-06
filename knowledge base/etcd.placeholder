@@ -1,8 +1,0 @@
-# etcd
-
-Strongly consistent, distributed key-value store.
-
-Aims to provide a reliable way to store data that needs to be accessed by a distributed system or cluster of machines.
-Gracefully handles leader elections during network partitions and can tolerate machine failure, including the leader node.
-
-[website]: https://etcd.io/

@@ -1,8 +1,6 @@
-# Title
+# Notary
 
-> TODO
-
-Intro
+Project allowing anyone to have trust over arbitrary collections of data.
 
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
@@ -50,7 +48,7 @@ Intro
 
 ### Sources
 
-- [Documentation]
+- [Ensure content trust on Kubernetes using Notary and Open Policy Agent]
 
 <!--
   Reference
@@ -61,8 +59,8 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/project/
-[documentation]: https://website/docs/
+[codebase]: https://github.com/notaryproject/notary
 [website]: https://website/
 
 <!-- Others -->
+[ensure content trust on kubernetes using notary and open policy agent]: https://siegert-maximilian.medium.com/ensure-content-trust-on-kubernetes-using-notary-and-open-policy-agent-485ab3a9423c
