@@ -114,6 +114,7 @@
 | TFE     | [TerraForm Enterprise]                                 |                                                                                                     |
 | TIL     | Today I Learned                                        |                                                                                                     |
 | TL;DR   | Too Long; Didn't Read                                  |                                                                                                     |
+| TLD     | Top Level Domain                                       |                                                                                                     |
 | UART    | Universal Asynchronous Receiver and Transmitter        |                                                                                                     |
 | UDP     | User Datagram Protocol                                 |                                                                                                     |
 | UFW     | Uncomplicated FireWall                                 |                                                                                                     |

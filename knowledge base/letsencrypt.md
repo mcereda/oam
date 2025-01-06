@@ -3,6 +3,7 @@
 1. [Challenges](#challenges)
    1. [DNS-01 challenge](#dns-01-challenge)
 1. [Limits](#limits)
+   1. [TLDs must be public](#tlds-must-be-public)
    1. [Duplicate certificates](#duplicate-certificates)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -37,6 +38,14 @@ the DNS gets too big.
 
 ## Limits
 
+### TLDs must be public
+
+Domain names must end in a public TLD to be certified by Let's Encrypt.
+
+As long as the domain to certify is listed in the [Public Suffix][public suffix tld list] or [IANA][iana tld list]
+lists, Let's Encrypt should be able to create certificates for it.<br/>
+One can check the domain on <https://letsdebug.net/> to confirm it.
+
 ### Duplicate certificates
 
 Refer [Duplicate certificate limit].
@@ -67,6 +76,9 @@ certificates for the `[example.com]` and `[login.example.com]` sets will succeed
 
 - [Challenge types]
 - [Duplicate certificate limit]
+- [Is LetsEncrypt compatible with all TLDs?]
+- [Public Suffix TLD list]
+- [IANA TLD list]
 
 <!--
   Reference
@@ -84,3 +96,6 @@ certificates for the `[example.com]` and `[login.example.com]` sets will succeed
 [website]: https://letsencrypt.org/
 
 <!-- Others -->
+[iana tld list]: https://www.iana.org/domains/root/db
+[is letsencrypt compatible with all tlds?]: https://community.letsencrypt.org/t/is-letsencrypt-compatible-with-all-tlds/142277/3
+[public suffix tld list]: https://publicsuffix.org/list/public_suffix_list.dat
