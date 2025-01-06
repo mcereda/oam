@@ -4,6 +4,8 @@ Automatically adjusts the number of nodes in Kubernetes clusters to meet their c
 
 1. [TL;DR](#tldr)
 1. [Best practices](#best-practices)
+1. [Troubleshooting](#troubleshooting)
+   1. [Unschedulable pods do not trigger scale-up](#unschedulable-pods-do-not-trigger-scale-up)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -62,11 +64,31 @@ aws eks --region 'eu-west-1' update-kubeconfig --name 'custom-eks-cluster' \
 ## Best practices
 
 - Do **not** modify nodes belonging to autoscaled node groups directly.
+  Changes will be soon lost as the modified nodes might be deleted at any time.
 - All nodes within the same autoscaled node group should have the same capacity, labels and system pods running on them.
-- Specify requests for all the pods one can.
+- Specify resource requests for all the pods one can, so that nodes can be scaled more reliably.
 - Should one need to prevent pods from being deleted too abruptly, consider using PodDisruptionBudgets.
-- Check one's cloud provider's quota is big enough **before** specifying min/max settings for clusters' node pools.
-- Do **not** run **any** additional node group autoscaler (**especially** those from one's own cloud provider).
+- Check one's cloud provider's VM quota is big enough **before** specifying min/max settings for clusters' node pools.
+- Ensure **any** additional node group autoscaler (**especially** those from one's own cloud provider) are **not**
+  competing for resources.<br/>
+- Prefer **avoiding** running multiple node autoscalers if possible.
+
+## Troubleshooting
+
+### Unschedulable pods do not trigger scale-up
+
+#### Context  <!-- omit in toc -->
+
+As of 2025-01-06, at least with EKS, it easily happens that unschedulable pods that would normally trigger a scale-up
+stay unschedulable and cause the _pod didn't trigger scale-up_ event instead.
+
+This primarily happens when the cluster's node groups are updated for any reason.
+
+#### Solution  <!-- omit in toc -->
+
+Restarting the Cluster Autoscaler's pods worked most of the time.
+
+It seems to be some sort of issue with cache.
 
 ## Further readings
 
