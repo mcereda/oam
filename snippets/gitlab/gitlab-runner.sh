@@ -89,3 +89,62 @@ gitlab-runner fleeting list
 
 # Sign in to private registries
 gitlab-runner fleeting login
+
+
+###
+# kubernetes executor
+# --------------------------------------
+###
+
+kubectl -n 'gitlab-runners' run --rm -i --restart 'Never' 'gitlab-scale-up-enforcer' --image='alpine' \
+	--pod-running-timeout='5m0s' --overrides '{\
+		"apiVersion": "v1",\
+		"spec": {\
+			"affinity": {\
+				"nodeAffinity": {\
+					"requiredDuringSchedulingIgnoredDuringExecution": {\
+						"nodeSelectorTerms": [{\
+							"matchExpressions": [\
+								{\
+									"key": "com.company.reservation/app",\
+									"operator":"In",\
+									"values": [ "gitlab" ]\
+								},\
+								{\
+									"key": "com.company.reservation/component",\
+									"operator": "In",\
+									"values": [ "runner" ]\
+								}\
+							]}\
+						]\
+					}\
+				}\
+			},\
+			"tolerations": [\
+				{\
+					"key": "com.company.reservation/app",\
+					"operator": "Equal",\
+					"value": "gitlab",\
+					"effect": "NoSchedule"\
+				},\
+				{\
+					"key": "com.company.reservation/component",\
+					"operator": "Equal",\
+					"value": "runner",\
+					"effect": "NoSchedule"\
+				}\
+			],\
+			"containers": [{\
+				"name": "resource-grabber",\
+				"image": "alpine",\
+				"resources": {\
+					"requests": {\
+						"cpu": "1800m",\
+						"memory": "14Gi"\
+					}\
+				}\
+			}]\
+		}\
+	}' \
+	-- \
+	sleep '3s'
