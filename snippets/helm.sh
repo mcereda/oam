@@ -22,6 +22,9 @@ helm --namespace 'gitlab' upgrade --install --create-namespace --version '0.64.1
 	--values 'values.gitlab-runner.yml' 'gitlab/gitlab-runner'
 helm upgrade --install 'keda' 'keda' --repo 'https://kedacore.github.io/charts' --namespace 'keda' --create-namespace
 
+helm list -n 'default'
+helm list -A
+
 helm get manifest 'wordpress'
 helm --namespace 'kube-system' get values 'metrics-server'
 
