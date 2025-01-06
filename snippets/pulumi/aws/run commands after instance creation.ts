@@ -1,7 +1,7 @@
 /**
- * Run commands after creation
+ * Run commands after instance creation
  * -----------------------------------------------------------------------------
- *
+ * No need for dependency when using values from the instance in the command with apply().
  * Replace the 'command.local.Command' resource to run it again:
  * `pulumi up --replace "urn:pulumi:any::stackName::command:local:Command::ansiblePlaybook-ssh"`
  **/
@@ -41,3 +41,12 @@ instance_output.id.apply(instanceId => new command.local.Command(
         `,
     },
 ));
+
+new command.local.Command(
+    "make",
+    {
+        dir: "someDir",
+        create: `make thisTarget`,
+    },
+    { dependsOn: [ instance_output ] },
+);

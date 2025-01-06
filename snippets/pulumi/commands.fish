@@ -78,3 +78,7 @@ PULUMI_K8S_DELETE_UNREACHABLE='true' pulumi destroy
 pulumi state move --source 'organization/utils/dev' --dest 'organization/iam/dev' \
 	'urn:pulumi:dev::utils::aws:iam/role:Role::rdsToS3Exporter' \
 	'urn:pulumi:dev::utils::aws:iam/rolePolicy:RolePolicy::rdsToS3Exporter-allowExportingSnapshotsToS3'
+
+# Upgrade providers' versions
+jq '.dependencies."@pulumi/aws" |= "6.66.2"' 'package.json' | sponge 'package.json' \
+&& pulumi install && pulumi update --suppress-outputs
