@@ -58,6 +58,7 @@ EOF
 sudo apt update
 
 sudo apt install './keybase_amd64.deb'
+sudo apt install --no-install-recommends 'psutils'
 sudo apt install --assume-yes 'plasma-desktop' 'plasma-nm' 'dolphin-plugins' 'konsole' 'sddm-theme-debian-breeze' 'kate'
 DEBIAN_FRONTEND='noninteractive' apt-get --assume-yes --target-release 'unstable' install 'kde-plasma-desktop'
 
