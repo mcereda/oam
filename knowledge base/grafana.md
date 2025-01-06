@@ -13,6 +13,9 @@ Open-source platform for monitoring and observability.
 
 ## TL;DR
 
+<details>
+  <summary>Usage</summary>
+
 ```sh
 # Export all existing dashboards by ID.
 curl -sS \
@@ -26,6 +29,8 @@ curl -sS \
     > '{}.json' \
   "
 ```
+
+</details>
 
 ## Installation
 
@@ -195,8 +200,9 @@ $ curl -sS \
 - [Github]
 - [HTTP API reference]
 - [Prometheus]
-- [`containers/monitoring`][containers/monitoring]
+- [docker compositions/monitoring]
 - Official [helm chart]
+- [Loki]
 
 ## Sources
 
@@ -218,10 +224,11 @@ All the references in the [further readings] section, plus the following:
 [further readings]: #further-readings
 
 <!-- Knowledge base -->
+[loki]: loki.md
 [prometheus]: prometheus.md
 
 <!-- Files -->
-[containers/monitoring]: ../containers/monitoring/README.md
+[docker compositions/monitoring]: ../docker%20compositions/monitoring/README.md
 
 <!-- Upstream -->
 [data source on startup]: https://community.grafana.com/t/data-source-on-startup/8618/2

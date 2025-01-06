@@ -2,7 +2,8 @@
 
 TODO
 
-Lightweight and highly scalable logging and metrics processor and forwarder.
+Lightweight and highly scalable logging and metrics processor and forwarder.<br/>
+Technically a stripped-down version of [Fluentd].
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -48,6 +49,8 @@ Lightweight and highly scalable logging and metrics processor and forwarder.
 
 ### Sources
 
+- [Fluentd vs. Fluent Bit: side by side comparison]
+
 <!--
   Reference
   ═╬═Time══
@@ -63,3 +66,4 @@ Lightweight and highly scalable logging and metrics processor and forwarder.
 [website]: https://www.fluentbit.io/
 
 <!-- Others -->
+[fluentd vs. fluent bit: side by side comparison]: https://logz.io/blog/fluentd-vs-fluent-bit/
