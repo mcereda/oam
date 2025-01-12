@@ -81,3 +81,5 @@ pg_restore -h 'host.fqdn' -U 'master' -d 'sales' -Oxj '8' 'sales.dump'
 # Initialize a test DB
 pgbench -i 'test-db'
 pgbench -i 'test-db' -h 'hostname' -p '5555' -U 'user'
+
+pg_isready -U 'denis' -d 'sales'
