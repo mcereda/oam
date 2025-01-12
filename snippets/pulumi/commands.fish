@@ -58,8 +58,6 @@ find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname
 find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi preview --parallel "$(nproc)" --cwd
 find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi refresh --parallel "$(nproc)" -s 'dev' --non-interactive -v '3' --cwd
 
-pulumi import --generate-code='false' 'aws:iam/user:User' 'jimmy' 'jimmy'
-
 # Rename stacks
 pulumi stack rename -s 'dev' 'staging'
 # When the project name (and backend) changed
@@ -82,3 +80,9 @@ pulumi state move --source 'organization/utils/dev' --dest 'organization/iam/dev
 # Upgrade providers' versions
 jq '.dependencies."@pulumi/aws" |= "6.66.2"' 'package.json' | sponge 'package.json' \
 && pulumi install && pulumi update --suppress-outputs
+
+# Import resources
+pulumi import 'aws:ec2/instance:Instance' 'logstash' 'i-abcdef0123456789a'
+pulumi import 'aws:ec2/securityGroup:SecurityGroup' 'internalOps' 'sg-0123456789abcdef0'
+pulumi import --generate-code='false' 'aws:iam/user:User' 'jimmy' 'jimmy'
+pulumi import 'aws:route53/record:Record' 'hoppscotch' 'ZGG4442BC3E8M_hoppscotch.example.org_A'
