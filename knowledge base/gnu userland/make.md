@@ -2,6 +2,7 @@
 
 1. [TL;DR](#tldr)
 1. [Load .env files in the Makefile](#load-env-files-in-the-makefile)
+1. [Load targets from other Makefiles](#load-targets-from-other-makefiles)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -115,6 +116,13 @@ endif
 If prefixed with '-' (`-include`), it does not error nor warning should any of the included files not exist.
 
 `export` without parameters exports all variables set until now.
+
+## Load targets from other Makefiles
+
+```makefile
+include ../Makefile
+-include something.make
+```
 
 ## Further readings
 
