@@ -30,6 +30,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 | [Semaphore]           | Task runner                         | [AWX], [CTFreak], [Rundeck], [Zuul]       |
 | [Uptime Kuma]         | Status page                         | [Gatus], [Statping-ng], [Vigil]           |
 | [Wallabag]            | Web page saver                      | Pocket                                    |
+| [Yaade]               | API development environment         | [Hoppscotch]                              |
 | [Zuul]                | Task runner                         | [AWX], [CTFreak], [Rundeck], [Semaphore]  |
 
 ## Further readings
@@ -60,6 +61,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 [safeline]: safeline.md
 [uptime kuma]: uptime%20kuma.md
 [wallabag]: wallabag.md
+[yaade]: yaade.md
 
 <!-- Others -->
 [awesome-selfhosted]: https://awesome-selfhosted.net/
