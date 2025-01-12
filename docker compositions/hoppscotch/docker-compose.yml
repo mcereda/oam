@@ -1,0 +1,98 @@
+---
+name: hoppscotch
+networks:
+  hoppscotch:
+volumes:
+  db:
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: dbPassword
+      POSTGRES_DB: hoppscotch
+    healthcheck:
+      test: pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - '5432:5432'
+    networks:
+      - hoppscotch
+    volumes:
+      - 'db:/var/lib/postgresql/data'
+  db_initializer:
+    depends_on:
+      db:
+        condition: service_healthy
+    image: hoppscotch/hoppscotch-backend
+    env_file:
+      - .env
+    command: pnpx prisma migrate deploy
+    networks:
+      - hoppscotch
+  backend:
+    depends_on:
+      db:
+        condition: service_healthy
+      db_initializer:
+        condition: service_completed_successfully
+    build:
+      dockerfile: prod.Dockerfile
+      context: .
+      target: backend
+    env_file:
+      - .env
+    healthcheck:
+      test: wget -q -O '/dev/null' 'localhost:3170'
+      interval: 5s
+      timeout: 4s
+      retries: 10
+      start_period: 5s
+    ports:
+      - '3170:3170'
+      - '3180:80'
+    networks:
+      - hoppscotch
+    restart: unless-stopped
+  # mailer:
+  #   image: dockage/mailcatcher
+  #   ports:
+  #     - '1080:1080'
+  #     - '1025:1025'
+  #   networks:
+  #     - hoppscotch
+  #   restart: unless-stopped
+  frontend:
+    depends_on:
+      backend:
+        condition: service_healthy
+    build:
+      dockerfile: prod.Dockerfile
+      context: .
+      target: app
+    env_file:
+      - .env
+    ports:
+      - '3000:3000'
+      - '3080:80'
+    networks:
+      - hoppscotch
+    restart: unless-stopped
+  admin:
+    depends_on:
+      backend:
+        condition: service_healthy
+    build:
+      dockerfile: prod.Dockerfile
+      context: .
+      target: sh_admin
+    env_file:
+      - .env
+    ports:
+      - '80:80'
+      - '3100:3100'
+    networks:
+      - hoppscotch
+    restart: unless-stopped

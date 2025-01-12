@@ -1,6 +1,7 @@
 # Hoppscotch
 
 1. [TL;DR](#tldr)
+1. [Self-hosting](#self-hosting)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -45,12 +46,16 @@ pw.env.set("idToken", jsonData.id_token);         // Set "idToken" to the value 
 
 Access the variables in the request section by referencing the variable in the format `<<variable_name>>`.
 
-post-request scripts == tests.
+Post-request scripts == tests.
+
+## Self-hosting
+
+TODO
 
 ## Further readings
 
 - [Website]
-- [Main repository]
+- [Codebase]
 - [Documentation]
 
 Alternatives:
@@ -74,8 +79,8 @@ Alternatives:
 
 <!-- Files -->
 <!-- Upstream -->
+[codebase]: https://github.com/hoppscotch/hoppscotch
 [documentation]: https://docs.hoppscotch.io/
-[main repository]: https://github.com/hoppscotch/hoppscotch
 [website]: https://hoppscotch.com/
 
 <!-- Others -->

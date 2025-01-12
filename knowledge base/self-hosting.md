@@ -18,6 +18,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 | [Gitlab]              | Git server                          | [Gitea], [Gogs]                           |
 | [Gogs]                | Git server                          | [Gitea], [Gitlab]                         |
 | [Home Assistant]      | Home automation platform            |                                           |
+| [Hoppscotch]          | API development environment         | [Yaade]                                   |
 | [Immich]              | Photo and video management solution | Google Photo, [PhotoPrism]                |
 | [NextCloud]           | File sharing platform               | [OwnCloud]                                |
 | [Nginx Proxy Manager] | Reverse Proxy                       |                                           |
@@ -48,6 +49,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 [baikal]: baikal.md
 [gitea]: gitea.md
 [gitlab]: gitlab/README.md
+[hoppscotch]: hoppscotch.md
 [immich]: immich.md
 [nextcloud]: nextcloud.md
 [nginx proxy manager]: nginx%20proxy%20manager.md
