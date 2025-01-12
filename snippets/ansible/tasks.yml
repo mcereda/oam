@@ -848,6 +848,10 @@
       # The datetime format defaults to '%Y-%m-%d %H:%M:%S'.
       tags: datetime
       block:
+        - name: Add or remove time
+          ansible.builtin.set_fact:
+            one_year_from_now: "{{ '%Y-%m-%dT%H:%M:%S' | strftime( (ansible_date_time.epoch_int) + (60*60*24*365) ) }}"
+            one_year_from_now_date_only: "{{ '%Y-%m-%d' | strftime( now(fmt='%s')|int + (60*60*24*365) ) }}"
         - name: Compare date and times
           ansible.builtin.set_fact:
             total_seconds_between_dates: >-
@@ -867,7 +871,7 @@
             date1_short:
               # Shorten to microseconds
               # Works for any timestamp that has higher than microsecond precision by cutting off anything more precise than that
-              '{{ date1|regex_replace("([^.]+)(\.\d{6})(\d*)(.+)", "\1\2\4") }}'
+              '{{ date1 | regex_replace("([^.]+)(\.\d{6})(\d*)(.+)", "\1\2\4") }}'
             iso8601format: '%Y-%m-%dT%H:%M:%S.%fZ'
           ansible.builtin.set_fact:
             date_diff_isoed: '{{ (date1_short|to_datetime(iso8601format) - date2|to_datetime(iso8601format)).total_seconds() }}'
@@ -1239,8 +1243,46 @@
         all: true
       register: awx_export_output
 
+- name: Gitea-specific operations
+  tags:
+    - gitea
+    - never
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  check_mode: true
+  tasks:
+    - name: Create a GitLab mirror repository in Gitea
+      tags: create_gitea_mirror_gitlab
+      ansible.builtin.uri:
+        url: https://gitea.example.org/api/v1/repos/migrate
+        method: POST
+        headers:
+          Authorization: token abcdef0123456789abcdef0123456789abcdef01
+        body_format: json
+        body:
+          auth_username: ro-access
+          auth_token: glpat-projAccesToken012345
+          clone_addr: https://gitlab.example.org/jimmy/secret-project
+          issues: false
+          labels: false
+          lfs: false
+          milestones: false
+          mirror: true
+          mirror_interval: 8h0m0s
+          private: true
+          pull_requests: false
+          releases: false
+          repo_name: secret-project
+          repo_owner: jimmy
+          service: gitlab
+          wiki: false
+        status_code: 201
+
 - name: GitLab-specific operations
-  tags: never
+  tags:
+    - gitlab
+    - never
   hosts: localhost
   connection: local
   gather_facts: false
@@ -1253,6 +1295,24 @@
         chdir: /root
         cmd: gitlab-runner fleeting install
         creates: /root/.config/fleeting/plugins
+    - name: Create a Project Access Token for Gitea in GitLab
+      tags: create_gitlab_project_access_token
+      block:
+        - name: Create the access token
+          community.general.gitlab_project_access_token:
+            api_url: https://gitlab.example.org
+            api_token: glpat-m-PLACEHOLDER0123456
+            project: jimmy/secret-project
+            name: ro-access
+            expires_at: "{{ '%Y-%m-%d' | strftime( now(fmt='%s')|int + (60*60*24*365) ) }}"  # 1y from now
+            access_level: guest
+            scopes:
+              - read_api
+              - read_repository
+          register: gitlab_project_access_token_creation
+        - name: Save the access token for later use
+          ansible.builtin.set_fact:
+            gitlab_project_access_token: "{{ gitlab_project_access_token_creation.access_token.token }}"
 
 - name: Let's Encrypt-specific operations
   tags: never

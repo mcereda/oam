@@ -22,6 +22,14 @@ ansible-playbook 'gitlab.yml' --list-tasks
 ansible-playbook 'gitlab.yml' --list-tasks --tags 'configuration,packages'
 ansible-playbook 'gitlab.yml' --list-tasks --skip-tags 'system,user'
 
+# List installed collections
+ansible-galaxy collection list
+
+# Install collections
+ansible-galaxy collection install 'community.general'
+ansible-galaxy collection install 'amazon.aws:9.1.0' '/path/to/collection' 'git+file:///path/to/collection.git'
+ansible-galaxy collection install -r 'requirements.yml'
+
 # Create new roles
 ansible-galaxy init 'gitlab'
 ansible-galaxy role init 'my_role'
@@ -106,15 +114,15 @@ diff 'some_role/files/ssh.key.plain' <(ansible-vault view --vault-password-file 
 ansible-doc -t 'lookup' -l
 ansible-doc -t 'strategy' -l
 
-# List installed collections
-ansible-galaxy collection list
-
 # Show plugin-specific docs and examples
 ansible-doc -t 'lookup' 'fileglob'
 ansible-doc -t 'strategy' 'linear'
 
 # Run commands within Execution Environments
 ansible-navigator exec
+venv/bin/ansible-navigator --mode='stdout' --container-options='--platform=linux/amd64' \
+	--execution-environment-image='012345678901.dkr.ecr.eu-west-1.amazonaws.com/infra/ansible-ee' \
+	exec -- ansible-galaxy collection list
 AWS_PROFILE='AnsibleTaskExecutor' venv/bin/ansible-navigator \
 	--execution-environment-image='012345678901.dkr.ecr.eu-west-1.amazonaws.com/infra/ansible-ee' \
 	--execution-environment-volume-mounts="$HOME/.aws:/runner/.aws:ro" \
