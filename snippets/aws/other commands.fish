@@ -89,6 +89,10 @@ aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --
 | tee \
 | xargs -I{} curl -fs "http://{}:8080"
 
+# Describe tasks given a service name
+aws ecs list-tasks --cluster 'testCluster' --output 'text' --query 'taskArns' \
+| xargs aws ecs describe-tasks --cluster 'testCluster' --query "tasks[?group.contains(@, 'serviceName')]" --output 'yaml' --tasks
+
 # Show information about services
 aws ecs describe-services --cluster 'stg' --services 'grafana'
 
@@ -186,6 +190,15 @@ aws iam list-users --no-cli-pager --query 'Users[].UserName' --output 'text' \
 aws iam --no-cli-pager list-access-keys
 aws iam --no-cli-pager list-access-keys --user-name 'mark'
 
+# Change users' console password
+# FIXME: check
+aws iam update-login-profile --user-name 'logan'
+aws iam update-login-profile --user-name 'mike' --password 'newPassword' --password-reset-require
+
+# Change one's own console password
+# FIXME: check
+basename (aws sts get-caller-identity --query 'Arn' --output 'text') \
+| xargs aws iam update-login-profile --user-name
 
 ###
 # Image Builder

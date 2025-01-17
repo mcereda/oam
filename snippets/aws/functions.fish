@@ -4,6 +4,20 @@ alias aws-caller-info 'aws sts get-caller-identity'
 alias aws-ssm 'aws ssm start-session --target'
 alias aws-whoami 'aws-caller-info'
 
+
+function aws-alb-privateDnsName-from-name
+	aws ec2 describe-network-interfaces --output 'text' \
+		--query 'NetworkInterfaces[*].PrivateIpAddresses[*].PrivateDnsName' \
+		--filters Name='description',Values="ELB app/$argv[1]/*"
+end
+
+function aws-alb-privateIps-from-name
+	aws ec2 describe-network-interfaces --output 'text' \
+		--query 'NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress' \
+		--filters Name='description',Values="ELB app/$argv[1]/*"
+end
+
+
 function aws-assume-role-by-name
 	set current_caller (aws-caller-info --output json | jq -r '.UserId' -)
 	aws-iam-role-arn-from-name "$argv[1]" \
@@ -20,7 +34,31 @@ function aws-ec2-instanceId-from-nameTag
 	--query 'Reservations[].Instances[0].InstanceId'
 end
 
-function aws-iam-role-arn-from-name
+function aws-ec2-nameTag-from-instanceId
+	aws ec2 describe-instances --output 'text' \
+	--filters "Name=instance-id,Values=$argv[1]" \
+	--query "Reservations[].Instances[0].Tags[?(@.Key=='Name')].Value"
+end
+
+function aws-ec2-tag-from-instanceId
+	aws ec2 describe-instances --output 'text' \
+	--filters "Name=instance-id,Values=$argv[1]" \
+	--query "Reservations[].Instances[0].Tags[?(@.Key=='$argv[2]')].Value"
+end
+
+function aws-ec2-tags-from-instanceId
+	aws ec2 describe-instances --output 'table' \
+	--filters "Name=instance-id,Values=$argv[1]" \
+	--query 'Reservations[].Instances[0].Tags[]'
+end
+
+function aws-ecs-tasks-from-clusterName-and-serviceName
+	aws ecs list-tasks --cluster "$argv[1]" --output 'text' --query 'taskArns' \
+	| xargs aws ecs describe-tasks --cluster "$argv[1]" \
+		--query "tasks[?group.contains(@, '$argv[2]')]" --tasks
+end
+
+function aws-iam-roleArn-from-name
 	aws iam list-roles --output 'text' \
 		--query "Roles[?RoleName == '$argv[1]'].Arn"
 end
@@ -32,12 +70,6 @@ function aws-iam-user-owning-accessKey
 	| xargs -n1 -P (nproc) aws iam list-access-keys \
 		--query "AccessKeyMetadata[?AccessKeyId=='$argv[1]'].UserName" \
 		--output 'json' --user \
-	| jq -rs 'flatten|first'
-end
-
-	aws iam list-users --no-cli-pager --query 'Users[].UserName' --output 'text' | xargs -n '1' | shuf \
-	| xargs -n 1 -P (nproc) aws iam list-access-keys --output 'json' \
-		--query "AccessKeyMetadata[?AccessKeyId=='$argv[1]'].UserName" --user \
 	| jq -rs 'flatten|first'
 end
 

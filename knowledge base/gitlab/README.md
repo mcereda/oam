@@ -24,6 +24,8 @@
 
 Using `-H 'PRIVATE-TOKEN: glpat-m-…'` in API calls is the same as using `-H 'Authorization: bearer glpat-m-…'`.
 
+Use _deploy tokens_ instead of personal access tokens to access repositories in pipelines as they do not expire.
+
 ```sh
 # List the current application settings of the GitLab instance.
 curl -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings'
