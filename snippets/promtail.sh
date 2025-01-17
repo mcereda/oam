@@ -24,3 +24,8 @@ curl 'http://promtail.fqdn:9080/metrics'
 
 # Connect to the web server
 open 'http://promtail.fqdn:9080/'
+open 'http://promtail.fqdn:9080/targets'
+open 'http://promtail.fqdn:9080/service-discovery'
+
+# Inspect pipeline's stages
+cat 'file.log' | promtail --stdin --dry-run --inspect --client.url 'http://loki.fqdn:3100/loki/api/v1/push'

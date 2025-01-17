@@ -24,3 +24,6 @@ docker save 'local/image:latest' | ssh -C 'user@remote.host' docker load
 docker inspect 'ghcr.io/jqlang/jq:latest'  # image
 docker inspect 'host'  # network
 docker inspect 'prometheus-1'  # container
+
+# Install compose directly from package
+dnf install 'https://download.docker.com/linux/fedora/41/aarch64/stable/Packages/docker-compose-plugin-2.32.1-1.fc41.aarch64.rpm'

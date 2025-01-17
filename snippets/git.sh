@@ -47,6 +47,7 @@ git reset --soft HEAD~1                     # or `git reset --soft HEAD^`
 git restore --staged '.lefthook-local.yml'  # or `git reset HEAD '.lefthook-local.yml'`
 git commit -c ORIG_HEAD
 
+
 ##
 # Change the default branch from 'master' to 'main'.
 # --------------------------------------
@@ -76,6 +77,12 @@ git format-patch HEAD~1 --stdout
 # create patches from specific commits
 git format-patch -1 '3918a1d036e74d47a5c830e4bbabba6f507162b1'
 
+
+###
+# Take actions on multiple repositories
+# --------------------------------------
+###
+
 git-all () {
 	[[ -n $DEBUG ]] && set -o xtrace
 
@@ -103,7 +110,12 @@ git-all () {
 	[[ -n $DEBUG ]] && set +o xtrace
 }
 
-# Reset fork to upstream's state
+
+###
+# Reset forks to their upstream's state
+# --------------------------------------
+###
+
 git remote add 'upstream' '/url/to/original/repo'
 git fetch 'upstream'
 git checkout 'master'

@@ -25,4 +25,5 @@ AWS_PROFILE='engineer' aws sts get-caller-identity
 
 
 # Run as Docker container
+docker run --rm -ti 'amazon/aws-cli' --version
 docker run --rm -ti -v "$HOME/.aws:/root/.aws:ro" 'amazon/aws-cli:2.17.16' autoscaling describe-auto-scaling-groups

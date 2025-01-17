@@ -2,8 +2,11 @@
 
 1. [TL;DR](#tldr)
 1. [Resource constraints](#resource-constraints)
-1. [Volumes](#volumes)
-   1. [EBS](#ebs)
+1. [Storage](#storage)
+   1. [EBS volumes](#ebs-volumes)
+   1. [EFS volumes](#efs-volumes)
+   1. [Docker volumes](#docker-volumes)
+   1. [Bind mounts](#bind-mounts)
 1. [Troubleshooting](#troubleshooting)
    1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
 1. [Further readings](#further-readings)
@@ -17,7 +20,7 @@ Tasks are a logical construct that model and run one or more containers. Contain
 ECS runs tasks as two different launch types:
 
 - On EC2 instances that one owns, manages, and pays for.
-- Using Fargate, technically a serverless environment for containers.
+- Using Fargate, technically a serverless environment for containers
 
 Unless otherwise restricted and capped, containers get access to all the CPU and memory capacity available on the host
 running it.
@@ -158,9 +161,18 @@ the `memoryReservation` value.<br/>
 If specifying `memoryReservation`, that value is guaranteed to the container and subtracted from the available memory
 resources for the container instance that the container is placed on. Otherwise, the value of `memory` is used.
 
-## Volumes
+## Storage
 
-### EBS
+Refer [Storage options for Amazon ECS tasks].
+
+| Volume type      | Launch type support | OS support     | Persistence                                                                                                    | Use cases                                                                   |
+| ---------------- | ------------------- | -------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [EBS volumes]    | EC2<br/>Fargate     | Linux          | _Can_ be persisted when used by a standalone task<br/>Ephemeral when attached to tasks maintained by a service | Transactional workloads                                                     |
+| [EFS volumes]    | EC2<br/>Fargate     | Linux          | Persistent                                                                                                     | Data analytics<br/>Media processing<br/>Content management<br/>Web serving  |
+| [Docker volumes] | EC2                 | Linux, Windows | Persistent                                                                                                     | Provide a location for data persistence<br/>Sharing data between containers |
+| [Bind mounts]    | EC2<br/>Fargate     | Linux, Windows | Ephemeral                                                                                                      | Data analytics<br/>Media processing<br/>Content management<br/>Web serving  |
+
+### EBS volumes
 
 Refer [Use Amazon EBS volumes with Amazon ECS].
 
@@ -183,9 +195,73 @@ termination.
 
 One **cannot** configure EBS volumes for attachment to ECS tasks running on AWS Outposts.
 
+### EFS volumes
+
+Refer [Use Amazon EFS volumes with Amazon ECS].
+
+Allows tasks with access to the same EFS volumes to share persistent storage.
+
+Tasks **must**:
+
+- Reference the EFS volumes in the `volumes` attribute of their definition.
+- Reference the defined volumes in the `mountPoints` attribute in the containers' specifications.
+
+<details style="padding: 0 0 1em 1em;">
+
+```json
+{
+  "volumes": [{
+    "name": "myEfsVolume",
+    "efsVolumeConfiguration": {
+      "fileSystemId": "fs-1234",
+      "rootDirectory": "/path/to/my/data",
+      "transitEncryption": "ENABLED",
+      "transitEncryptionPort": integer,
+      "authorizationConfig": {
+        "accessPointId": "fsap-1234",
+        "iam": "ENABLED"
+      }
+    }
+  }],
+  "containerDefinitions": [{
+    "name": "container-using-efs",
+    "image": "amazonlinux:2",
+    "entryPoint": [
+      "sh",
+      "-c"
+    ],
+    "command": [ "ls -la /mount/efs" ],
+    "mountPoints": [{
+      "sourceVolume": "myEfsVolume",
+      "containerPath": "/mount/efs",
+      "readOnly": true
+    }]
+  }]
+}
+```
+
+</details>
+
+EFS file systems are supported on
+
+- EC2 nodes using ECS-optimized AMI version 20200319 with container agent version 1.38.0.
+- Fargate since platform version 1.4.0 or later (Linux).
+
+**Not** supported on external instances.
+
+### Docker volumes
+
+TODO
+
+### Bind mounts
+
+TODO
+
 ## Troubleshooting
 
 ### Invalid 'cpu' setting for task
+
+Refer [Troubleshoot Amazon ECS task definition invalid CPU or memory errors] and [Resource constraints].
 
 <details>
   <summary>Cause</summary>
@@ -205,14 +281,15 @@ Specify a supported value for the task CPU and memory in your task definition.
 
 </details>
 
-Refer [Troubleshoot Amazon ECS task definition invalid CPU or memory errors] and [Resource constraints].
-
 ## Further readings
 
 - [Amazon Web Services]
 - [Amazon ECS task lifecycle]
 - AWS' [CLI]
 - [Troubleshoot Amazon ECS deployment issues]
+- [Storage options for Amazon ECS tasks]
+- [EBS]
+- [EFS]
 
 ### Sources
 
@@ -223,7 +300,10 @@ Refer [Troubleshoot Amazon ECS task definition invalid CPU or memory errors] and
 - [Use Amazon EBS volumes with Amazon ECS]
 - [Attach EBS volume to AWS ECS Fargate]
 - [Guide to Using Amazon EBS with Amazon ECS and AWS Fargate]
+- [Amazon ECS task definition differences for the Fargate launch type]
 - [How Amazon ECS manages CPU and memory resources]
+- [Exposing multiple ports for an AWS ECS service]
+- [Use Amazon EFS volumes with Amazon ECS]
 
 <!--
   Reference
@@ -231,22 +311,32 @@ Refer [Troubleshoot Amazon ECS task definition invalid CPU or memory errors] and
   -->
 
 <!-- In-article sections -->
+[bind mounts]: #bind-mounts
+[docker volumes]: #docker-volumes
+[ebs volumes]: #ebs-volumes
+[efs volumes]: #efs-volumes
 [resource constraints]: #resource-constraints
 
 <!-- Knowledge base -->
 [amazon web services]: README.md
 [cli]: cli.md
+[ebs]: ebs.md
+[efs]: efs.md
 
 <!-- Upstream -->
+[amazon ecs task definition differences for the fargate launch type]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html
 [amazon ecs task lifecycle]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html
 [amazon ecs task role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
 [how amazon ecs manages cpu and memory resources]: https://aws.amazon.com/blogs/containers/how-amazon-ecs-manages-cpu-and-memory-resources/
 [how amazon elastic container service works with iam]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security_iam_service-with-iam.html
 [identity and access management for amazon elastic container service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security-iam.html
+[storage options for amazon ecs tasks]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html
 [troubleshoot amazon ecs deployment issues]: https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ecs.html
 [troubleshoot amazon ecs task definition invalid cpu or memory errors]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 [use amazon ebs volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html
+[use amazon efs volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html
 
 <!-- Others -->
 [attach ebs volume to aws ecs fargate]: https://medium.com/@shujaatsscripts/attach-ebs-volume-to-aws-ecs-fargate-e23fea7bb1a7
+[exposing multiple ports for an aws ecs service]: https://medium.com/@faisalsuhail1/exposing-multiple-ports-for-an-aws-ecs-service-64b9821c09e8
 [guide to using amazon ebs with amazon ecs and aws fargate]: https://stackpioneers.com/2024/01/12/guide-to-using-amazon-ebs-with-amazon-ecs-and-aws-fargate/
