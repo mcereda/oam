@@ -167,14 +167,17 @@ REVOKE engineers FROM mike;
 
 
 -- List permissions
+
 -- on tables
 SELECT *
 FROM information_schema.role_table_grants
 WHERE grantee = 'darwin';
+
 -- about ownership
 SELECT *
 FROM pg_tables
 WHERE tableowner = 'darwin';
+
 -- on schemas
 SELECT
   r.usename AS grantor,
@@ -190,13 +193,17 @@ JOIN LATERAL (
 JOIN pg_user e ON a.grantee = e.usesysid
 JOIN pg_user r ON a.grantor = r.usesysid
 WHERE e.usename IN ('darwin', 'salesmen');
+
 -- detailed
 SELECT grantor, grantee, table_schema, table_name, privilege_type
 FROM information_schema.table_privileges
 WHERE grantee = 'engineers';
 
+
 -- Assign permissions
 GRANT USAGE ON SCHEMA bar_schema TO donald;
+GRANT ALL PRIVILEGES ON foo_table TO jonathan;
+GRANT admins TO joe;
 
 
 -- Close the connection to the current DB
