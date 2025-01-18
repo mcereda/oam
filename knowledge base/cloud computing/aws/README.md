@@ -86,10 +86,11 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | [CloudWatch]                  | Observability (logging, monitoring, alerting) |
 | [Config]                      | Compliance                                    |
 | [Detective]                   | FIXME                                         |
-| [EC2]                         | Virtual machines                              |
+| [EC2]                         | Managed virtual machines                      |
 | [ECR]                         | Container registry                            |
-| [ECS]                         | Containers as a service                       |
-| [EKS]                         | Kubernetes clusters                           |
+| [ECS]                         | Run containers as a service                   |
+| [EFS]                         | Serverless file storage                       |
+| [EKS]                         | Managed Kubernetes clusters                   |
 | [EventBridge]                 | FIXME                                         |
 | [GuardDuty]                   | Threat detection                              |
 | [IAM]                         | Access control                                |
@@ -393,6 +394,7 @@ creation of non-compliant resources.
 [ec2]: ec2.md
 [ecr]: ecr.md
 [ecs]: ecs.md
+[efs]: ecs.md
 [eks]: eks.md
 [iam]: iam.md
 [opensearch]: opensearch.md
