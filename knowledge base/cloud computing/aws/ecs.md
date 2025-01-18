@@ -1,6 +1,11 @@
 # Elastic Container Service
 
 1. [TL;DR](#tldr)
+1. [How it works](#how-it-works)
+   1. [EC2 launch type](#ec2-launch-type)
+   1. [Fargate launch type](#fargate-launch-type)
+   1. [Standalone tasks](#standalone-tasks)
+   1. [Services](#services)
 1. [Resource constraints](#resource-constraints)
 1. [Storage](#storage)
    1. [EBS volumes](#ebs-volumes)
@@ -14,21 +19,27 @@
 
 ## TL;DR
 
-The basic unit of a deployment is a _task_.<br/>
-Tasks are a logical construct that model and run one or more containers. Containers **cannot** run by themselves on ECS.
+_Tasks_ are the basic unit of deployment.<br/>
+Their details are specified in _task definitions_.
 
-ECS runs tasks as two different launch types:
+_Standalone tasks_ are meant to perform some work, then stop much like batch processes.<br/>
+_Services_ run and maintain a defined number of instances of the same task simultaneously, and are meant to stay active
+much like web servers.
+
+Tasks model and run one or more containers, much like Pods in Kubernetes.<br/>
+Containers **cannot** run on ECS unless encapsulated in a task.
+
+Tasks are executed depending on their _launch type_ and _capacity providers_:
 
 - On EC2 instances that one owns, manages, and pays for.
-- Using Fargate, technically a serverless environment for containers
+- On Fargate (an AWS-managed serverless environment for containers execution).
 
-Unless otherwise restricted and capped, containers get access to all the CPU and memory capacity available on the host
-running it.
+Unless explicitly restricted or capped, containers in tasks get access to all the CPU and memory capacity available on
+the host running it.
 
-Unless otherwise protected and guaranteed, all containers running on a given host share CPU, memory, and other resources
-in the same way other processes running on that host share those resources.
-
-By default, containers behave like other Linux processes with respect to access to resources like CPU and memory.
+By default, containers behave like other Linux processes with respect to access to resources like CPU and memory.<br/>
+Unless explicitly protected and guaranteed, all containers running on the same host share CPU, memory, and other
+resources much like normal processes running on that host share those very same resources.
 
 <details>
   <summary>Usage</summary>
@@ -110,6 +121,101 @@ while [[ $(aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'test
 ```
 
 </details>
+
+## How it works
+
+Tasks must be registered in _task definitions_ **before** they can be launched.
+
+Tasks can be executed as [Standalone tasks] or [services].<br/>
+Whatever the _launch type_:
+
+1. On launch, a task is created and moved to the `PROVISIONING` state.<br/>
+   While in this state, ECS needs to find compute capacity for the task and neither the task nor its containers exist.
+1. ECS selects the appropriate compute capacity for the task based on its launch type or capacity provider
+   configuration.
+
+   Tasks will fail immediately should there be not enough compute capacity for the task in the launch type or capacity
+   provider.
+
+   When using a capacity provider with managed scaling enabled, tasks that can't be started due to a lack of compute
+   capacity are kept in the `PROVISIONING` state while ECS provisions the necessary attachments.
+1. ECS uses the container agent to pull the task's container images.
+1. ECS starts the task's containers.
+1. ECS moves the task into the `RUNNING` state.
+
+### EC2 launch type
+
+Starts tasks onto _registered_ EC2 instances.
+
+Instances can be registered:
+
+- Manually.
+- Automatically, by using the _cluster auto scaling_ feature to dynamically scale the cluster's compute capacity.
+
+### Fargate launch type
+
+Starts tasks on dedicated, managed EC2 instances that are **not** reachable by the users.
+
+Instances are automatically provisioned, configured, and registered to scale one's cluster capacity.<br/>
+The service takes care itself of all the infrastructure management for the tasks.
+
+### Standalone tasks
+
+Refer [Amazon ECS standalone tasks].
+
+Meant to perform some work, then stop similarly to batch processes.
+
+Can be executed on schedules using the EventBridge Scheduler.
+
+### Services
+
+Refer [Amazon ECS services].
+
+Execute and maintain a defined number of instances of the same task simultaneously in a cluster.
+
+Tasks executed in services are meant to stay active until decommissioned, much like web services.<br/>
+Should any of such tasks fail or stops, the service scheduler will launch another instance of the same task to replace
+the one that failed.
+
+One can optionally expose services behind a load balancer to distribute traffic across the tasks that the service
+manages.
+
+The service scheduler will replace unhealthy tasks should a container health check or a load balancer target group
+health check fail.<br/>
+This depends on the `maximumPercent` and `desiredCount` parameters in the service's definition.
+
+If a task is marked unhealthy, the service scheduler will first start a replacement task. Then:
+
+- If the replacement task is `HEALTHY`, the service scheduler stops the unhealthy task.
+- If the replacement task is also `UNHEALTHY`, the scheduler will stop either the unhealthy replacement task or the
+  existing unhealthy task to get the total task count equal to the `desiredCount` value.
+
+Should the `maximumPercent` parameter limit the scheduler from starting a replacement task first, the scheduler will:
+
+- Stop unhealthy tasks one at a time at random in order to free up capacity.
+- Start a replacement task.
+
+The start and stop process continues until all unhealthy tasks are replaced with healthy tasks.<br/>
+Should the total task count still exceed `desiredCount` once all unhealthy tasks have been replaced and only healthy
+tasks are running, healthy tasks are stopped at random until the total task count equals `desiredCount`.
+
+The service scheduler includes logic that throttles how often tasks are restarted if they repeatedly fail to start.<br/>
+If a task is stopped without having entered the `RUNNING` state, the service scheduler starts to slow down the launch
+attempts and sends out a service event message.<br/>
+This prevents unnecessary resources from being used for failed tasks before one can resolve the issue.<br/>
+On service update, the service scheduler resumes normal scheduling behavior.
+
+Available service scheduler strategies:
+
+- `REPLICA`: places and maintains the desired number of tasks across one's cluster.<br/>
+  By default, tasks are spread across Availability Zones. Use task placement strategies and constraints to customize
+  task placement decisions.
+- `DAEMON`: deploys **exactly** one task on **each** active container instance meeting all of the task placement
+  constraints for the task.<br/>
+  There is no need to specify a desired number of tasks, a task placement strategy, or use Service Auto Scaling policies
+  when using this strategy.
+
+  Fargate does **not** support the `DAEMON` scheduling strategy.
 
 ## Resource constraints
 
@@ -304,6 +410,8 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [How Amazon ECS manages CPU and memory resources]
 - [Exposing multiple ports for an AWS ECS service]
 - [Use Amazon EFS volumes with Amazon ECS]
+- [Amazon ECS services]
+- [Amazon ECS standalone tasks]
 
 <!--
   Reference
@@ -316,6 +424,8 @@ Specify a supported value for the task CPU and memory in your task definition.
 [ebs volumes]: #ebs-volumes
 [efs volumes]: #efs-volumes
 [resource constraints]: #resource-constraints
+[services]: #services
+[standalone tasks]: #standalone-tasks
 
 <!-- Knowledge base -->
 [amazon web services]: README.md
@@ -324,6 +434,8 @@ Specify a supported value for the task CPU and memory in your task definition.
 [efs]: efs.md
 
 <!-- Upstream -->
+[amazon ecs services]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html
+[amazon ecs standalone tasks]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/standalone-tasks.html
 [amazon ecs task definition differences for the fargate launch type]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html
 [amazon ecs task lifecycle]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html
 [amazon ecs task role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
