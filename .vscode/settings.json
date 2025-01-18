@@ -134,6 +134,7 @@
         "cryptsetup",
         "csma",
         "daemonless",
+        "dapr",
         "datagram",
         "datasource",
         "datasources",
