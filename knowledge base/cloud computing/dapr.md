@@ -27,11 +27,16 @@ Dapr can be executed:
 - [Self-hosted][self-hosted mode] on a Windows/Linux/macOS machine, e.g. for local development.
 - [Clustered][clustered mode] on Kubernetes or clusters of physical or virtual machines, e.g. for production.
 
+The `dapr run` command looks for the default components directory.<br/>
+This directory holds yaml files providing the default definition for the components Dapr will be using at runtime.<br/>
+It is `$HOME/.dapr/components` for Linux or MacOS, and `%USERPROFILE%\.dapr\components` for Windows.
+
 <details>
   <summary>Setup</summary>
 
 ```sh
 brew install 'dapr/tap/dapr-cli'
+dapr init
 ```
 
 </details>
@@ -43,6 +48,25 @@ brew install 'dapr/tap/dapr-cli'
 # Launch a sidecar for a blank application named 'myApp' that will listen on port '3500'.
 dapr run --app-id 'myApp' --dapr-http-port '3500'
 
+# Run applications.
+dapr run --app-id 'myJavaApp' -- java -jar 'myJavaApp.jar'
+dapr run --app-id 'myPythonApp' --dapr-http-port '8080' --app-health-probe-interval '5' -- python 'myPythonApp.py'
+dapr run --app-id 'myGoApp' --app-port '3000' --app-protocol 'grpc' -- go run 'main.go'
+
+# Start the dashboard.
+dapr dashboard
+dapr dashboard --kubernetes --port '9999'
+
+# Send requests.
+# Defaults to 'POST' for the method.
+dapr invoke --app-id 'nodeApp' --method 'order' --verb 'GET'
+# └── curl 'http://localhost:3500/v1.0/invoke/nodeApp/method/order'
+dapr invoke --app-id 'nodeApp' --method 'neworder' --data-file 'sample.json'
+# └── curl -X 'POST' -H 'Content-Type: application/json' -d '@sample.json' \
+#       'http://localhost:3500/v1.0/invoke/nodeApp/method/neworder'
+
+# Stop applications.
+dapr stop --app-id 'myApp'
 ```
 
 </details>
