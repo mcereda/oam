@@ -20,14 +20,15 @@
 ## TL;DR
 
 _Tasks_ are the basic unit of deployment.<br/>
-Their details are specified in _task definitions_.
-
-_Standalone tasks_ are meant to perform some work, then stop much like batch processes.<br/>
-_Services_ run and maintain a defined number of instances of the same task simultaneously, and are meant to stay active
-much like web servers.
+They are instances of the set of containers specified in their own _task definition_.
 
 Tasks model and run one or more containers, much like Pods in Kubernetes.<br/>
 Containers **cannot** run on ECS unless encapsulated in a task.
+
+_Standalone tasks_ start a single task, which is meant to perform some work to completion and then stop (much like batch
+processes would).<br/>
+_Services_ run and maintain a defined number of instances of the same task simultaneously, which are meant to stay
+active and act as replicas of some service (much like web servers would).
 
 Tasks are executed depending on their _launch type_ and _capacity providers_:
 
