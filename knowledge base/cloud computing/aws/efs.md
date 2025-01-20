@@ -77,6 +77,17 @@ to be One Zone file systems.
   <summary>Usage</summary>
 
 ```sh
+# Get filesystems' information.
+aws efs describe-file-systems --query 'FileSystems[]' --creation-token 'fs-name'
+
+# Get filesystems's ids.
+aws efs describe-file-systems --query 'FileSystems[].FileSystemId' --output 'text' --creation-token 'fs-name'
+
+# Print filesystems's DNS.
+# No DNS nor region are returned from the get fs command, but ARN is and the DNS does follow a naming convention, so…
+aws efs describe-file-systems --query 'FileSystems[].FileSystemId' --output 'text' --creation-token 'fs-name' \
+| sed -E 's|arn:[a-z-]+:elasticfilesystem:([a-z0-9-]+):[0-9]+:file-system/(fs-[a-f0-9]+)|\2.efs.\1.amazonaws.com|'
+
 # Get mount targets' information.
 aws efs describe-mount-targets --query 'MountTargets[]' --file-system-id 'fs-0123456789abcdef0'
 
@@ -84,9 +95,15 @@ aws efs describe-mount-targets --query 'MountTargets[]' --file-system-id 'fs-012
 aws efs describe-mount-targets --query 'MountTargets[].IpAddress' --file-system-id 'fs-0123456789abcdef0'
 aws efs describe-mount-targets --query 'MountTargets[].IpAddress' --mount-target-id 'fsmt-0123456789abcdef0'
 
+# Get mount targets' IP address from the filesystem's name.
+aws efs describe-mount-targets --query 'MountTargets[].IpAddress' --output 'json' --file-system-id \
+"$(aws efs describe-file-systems --query 'FileSystems[].FileSystemId' --output 'text' --creation-token 'fs-name')"
+
 # Mount volumes.
 mount -t 'nfs' -o 'nfsvers=4.0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport' \
   'fs-0123456789abcdef0.efs.eu-west-1.amazonaws.com:/' "$HOME/efs"
+mount -t 'nfs' -o 'nfsvers=4,tcp,rwsize=1048576,hard,timeo=600,retrans=2,noresvport' \
+  '10.20.30.42:/export-name' "$HOME/efs/export"
 ```
 
 </details>
