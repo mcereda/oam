@@ -105,6 +105,22 @@ aws ecs wait services-stable --cluster 'stg' --services 'grafana'
 
 
 ###
+# EFS
+# ------------------
+###
+
+# Get mount targets' information.
+aws efs describe-mount-targets --query 'MountTargets[]' --file-system-id 'fs-0123456789abcdef0'
+
+# Get mount targets' IP address.
+aws efs describe-mount-targets --query 'MountTargets[].IpAddress' --output 'text' --file-system-id 'fs-0123456789abcdef0'
+aws efs describe-mount-targets --query 'MountTargets[].IpAddress' --output 'text' --mount-target-id 'fsmt-0123456789abcdef0'
+
+# Mount volumes.
+mount -t 'nfs' -o 'nfsvers=4.0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport' \
+	'fs-0123456789abcdef0.efs.eu-west-1.amazonaws.com:/' "$HOME/efs"
+
+###
 # EKS
 # ------------------
 ###

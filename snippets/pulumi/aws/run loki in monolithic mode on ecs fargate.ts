@@ -1,15 +1,27 @@
 import * as aws from "@pulumi/aws";
 
+
+// requirements - start
+
 const vpc_output = aws.ec2.getVpcOutput({
     filters: [{
         name: "tag:Name",
         values: "Default",
     }],
 });
-
+const privateSubnets_output = aws.ec2.getSubnetOutput({
+    filters: [{
+        name: "tag:Type",
+        values: [ "Private" ],
+    }],
+});
+const ecsCluster_output = aws.ecs.getClusterOutput({ clusterName: "someCluster" });
 const dnsZone_output = aws.route53.getZoneOutput({ name: "example.org." });
 
-const ecsCluster_output = aws.ecs.getClusterOutput({ clusterName: "someCluster" });
+// requirements - end
+
+
+// resources - start
 
 const securityGroup = new aws.ec2.SecurityGroup(
     "loki",
@@ -67,9 +79,9 @@ const taskDefinition = new aws.ecs.TaskDefinition(
             image: "grafana/loki:3.3.2",
             essential: true,
             environment: [],     // specified to avoid showing changes on every run
+            systemControls: [],  // specified to avoid showing changes on every run
             volumesFrom: [],     // specified to avoid showing changes on every run
             mountPoints: [],     // specified to avoid showing changes on every run
-            systemControls: [],  // specified to avoid showing changes on every run
             healthCheck: {
                 command: [
                     "CMD-SHELL",
@@ -102,12 +114,6 @@ const taskDefinition = new aws.ecs.TaskDefinition(
     },
 );
 
-const privateSubnets_output = aws.ec2.getSubnetOutput({
-    filters: [{
-        name: "tag:Type",
-        values: [ "Private" ],
-    }],
-});
 const targetGroup_http = new aws.alb.TargetGroup(
     "loki-http",
     {
@@ -119,9 +125,7 @@ const targetGroup_http = new aws.alb.TargetGroup(
         ipAddressType: "ipv4",
         protocol: "HTTP",
         port: 3100,
-        healthCheck: {
-            path: "/ready",
-        },
+        healthCheck: { path: "/ready" },
     },
 );
 const targetGroup_grpc = new aws.alb.TargetGroup(
@@ -148,9 +152,7 @@ const loadBalancer = new aws.alb.LoadBalancer(
         ipAddressType: "ipv4",
         subnets: privateSubnets_output.apply((subnets: aws.ec2.Subnet[]) => subnets.map(subnet => subnet.id)),
         securityGroups: [ securityGroup.id ],
-        accessLogs: {
-            bucket: "",
-        },
+        accessLogs: { bucket: "" },
     },
 );
 new aws.route53.Record(
@@ -181,7 +183,7 @@ new aws.alb.Listener(
     },
 );
 // new aws.alb.Listener(
-//     FIXME: Listener protocol 'HTTP' is not supported with a target group with the protocol-version 'GRPC'
+//     // FIXME: Listener protocol 'HTTP' is not supported with a target group with the protocol-version 'GRPC'
 //     "loki-grpc",
 //     {
 //         tags: { Application: "Loki" },
@@ -223,3 +225,5 @@ new aws.ecs.Service(
         ],
     },
 );
+
+// resources - end
