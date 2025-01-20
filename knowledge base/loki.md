@@ -403,6 +403,9 @@ Only recommended for very large Loki clusters, or when needing more precise cont
 - [Grafana]
 - [Promtail]
 - [Send log data to Loki]
+- [Grafana Loki store log data on S3 bucket on AWS Fargate]
+- [How to install Loki on (AWS) EKS using Terraform with S3]
+- [Deploy the Loki Helm chart on AWS]
 
 ### Sources
 
@@ -437,7 +440,10 @@ Only recommended for very large Loki clusters, or when needing more precise cont
 <!-- Files -->
 <!-- Upstream -->
 [codebase]: https://github.com/grafana/loki
+[deploy the loki helm chart on aws]: https://grafana.com/docs/loki/latest/setup/install/helm/deployment-guides/aws/
 [documentation]: https://grafana.com/docs/loki/latest/
+[grafana loki store log data on s3 bucket on aws fargate]: https://community.grafana.com/t/grafana-loki-store-log-data-on-s3-bucket-on-aws-fargate/112861
+[how to install loki on (aws) eks using terraform with s3]: https://community.grafana.com/t/how-to-install-loki-on-aws-eks-using-terraform-with-s3/136489
 [http api reference]: https://grafana.com/docs/loki/latest/reference/loki-http-api/
 [loki-distributed]: https://github.com/grafana/helm-charts/tree/main/charts/loki-distributed
 [send log data to loki]: https://grafana.com/docs/loki/latest/send-data/
