@@ -13,7 +13,10 @@ aws ec2 describe-images --output 'yaml' \
 	' \
 | yq '.[]|select(.Name|test("^al2023-ami-"))' -
 
-aws iam list-instance-profiles | grep -i 'ssm'
+# Show information about AMIs
+aws ec2 describe-images --image-ids 'ami-01234567890abcdef'
+aws ec2 describe-images --image-ids 'ami-01234567890abcdef' --query 'Images[].Description'
+
 
 # Check instances are available for use with SSM
 aws ssm get-connection-status --query "Status=='connected'" --output 'text' --target 'i-0915612ff82914822'
@@ -26,8 +29,6 @@ instance_id='i-08fc83ad07487d72f' \
 && eval $(aws ssm get-connection-status --target "$instance_id" --query "Status=='connected'" --output 'text') \
 && aws ssm start-session --target "$instance_id" \
 || (echo "instance ${instance_id} not available" >&2 && false)
-
-aws ssm describe-instance-associations-status --instance-id 'i-08fc83ad07487d72f'
 
 # Send commands
 aws ssm send-command --instance-ids 'i-08fc83ad07487d72f' --document-name 'AWS-RunShellScript' --parameters "commands='echo hallo'"
@@ -43,14 +44,13 @@ set instance_id 'i-0915612f182914822' \
 && aws ssm get-command-invocation --command-id "$command_id" --instance-id "$instance_id" \
 	--query '{"status": Status, "rc": ResponseCode, "stdout": StandardOutputContent, "stderr": StandardErrorContent}'
 
-aws ec2 describe-images --image-ids 'ami-01234567890abcdef'
-aws ec2 describe-images --image-ids 'ami-01234567890abcdef' --query 'Images[].Description'
 
 # Configure the CloudWatch agent
 amazon-cloudwatch-agent-ctl -a 'status'
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a 'set-log-level' -l 'INFO'
 amazon-cloudwatch-agent-ctl -a 'fetch-config' -m 'ec2' -s -c 'file:/opt/aws/amazon-cloudwatch-agent/bin/config.json'
 tail -f '/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log'
+
 
 # Delete unused volumes older than some date
 aws ec2 describe-volumes --output 'text' --filters 'Name=status,Values=available' \
@@ -83,12 +83,17 @@ aws ec2 describe-instances --output 'text' \
 	--volume-id \
 | xargs -t aws ec2 wait snapshot-completed --snapshot-ids
 
-# Retrieve the security credentials for an IAM role named 's3access'
+
+# Retrieve the security credentials for an IAM role named 's3access' from instances
 # IMDSv2
 TOKEN=$(curl -X PUT 'http://169.254.169.254/latest/api/token' -H 'X-aws-ec2-metadata-token-ttl-seconds: 21600') \
 && curl -H "X-aws-ec2-metadata-token: ${TOKEN}" 'http://169.254.169.254/latest/meta-data/iam/security-credentials/s3access'
 # IMDSv1
 curl 'http://169.254.169.254/latest/meta-data/iam/security-credentials/s3access'
+
+# Find instance profiles
+aws iam list-instance-profiles | grep -i 'ssm'
+
 
 # Create instances
 aws ec2 run-instances --instance-type 'c6a.xlarge' --image-id 'ami-0fcc0bef51bad3cb2' \
