@@ -109,16 +109,34 @@ aws ecs wait services-stable --cluster 'stg' --services 'grafana'
 # ------------------
 ###
 
+# Get filesystems' information.
+aws efs describe-file-systems --query 'FileSystems' --creation-token 'fs-name'
+
+# Get filesystems's ids.
+aws efs describe-file-systems --query 'FileSystems[].FileSystemId' --output 'text' --creation-token 'fs-name'
+
+# Print filesystems's DNS.
+# No DNS nor region are returned from the get fs command, but ARN is and the DNS does follow a naming convention, so…
+aws efs describe-file-systems --query 'FileSystems[].FileSystemArn' --output 'text' --creation-token 'fs-name' \
+| sed -E 's|arn:[a-z-]+:elasticfilesystem:([a-z0-9-]+):[0-9]+:file-system/(fs-[a-f0-9]+)|\2.efs.\1.amazonaws.com|'
+
 # Get mount targets' information.
-aws efs describe-mount-targets --query 'MountTargets[]' --file-system-id 'fs-0123456789abcdef0'
+aws efs describe-mount-targets --query 'MountTargets' --file-system-id 'fs-0123456789abcdef0'
 
 # Get mount targets' IP address.
 aws efs describe-mount-targets --query 'MountTargets[].IpAddress' --output 'text' --file-system-id 'fs-0123456789abcdef0'
 aws efs describe-mount-targets --query 'MountTargets[].IpAddress' --output 'text' --mount-target-id 'fsmt-0123456789abcdef0'
 
+# Get mount targets' IP address from the filesystem's name.
+aws efs describe-mount-targets --query 'MountTargets[].IpAddress' --output 'json' \
+	--file-system-id (aws efs describe-file-systems --query 'FileSystems[].FileSystemId' --output 'text' --creation-token 'fs-name')
+
 # Mount volumes.
 mount -t 'nfs' -o 'nfsvers=4.0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport' \
 	'fs-0123456789abcdef0.efs.eu-west-1.amazonaws.com:/' "$HOME/efs"
+mount -t 'nfs' -o 'nfsvers=4,tcp,rwsize=1048576,hard,timeo=600,retrans=2,noresvport' \
+	'10.20.30.42:/export-name' "$HOME/efs/export"
+
 
 ###
 # EKS
@@ -180,6 +198,7 @@ aws ec2 describe-network-interfaces --output 'text' \
 	--filters Name=description,Values='ELB classic-load-balancer-name' \
 	--query 'NetworkInterfaces[*].Association.PublicIp'
 
+
 ###
 # IAM
 # ------------------
@@ -215,6 +234,7 @@ aws iam update-login-profile --user-name 'mike' --password 'newPassword' --passw
 # FIXME: check
 basename (aws sts get-caller-identity --query 'Arn' --output 'text') \
 | xargs aws iam update-login-profile --user-name
+
 
 ###
 # Image Builder
