@@ -12,6 +12,7 @@ xattr -c '/Applications/Spotify.app'
 # Bypass Gatekeeper for all versions of apps
 xattr -d 'com.apple.quarantine' '/Applications/LibreWolf.app'
 xattr -d 'com.apple.quarantine' '/Applications/Zen Browser.app'
+xattr -dr 'com.apple.quarantine' '/path/to/directory'
 
 
 # Clear the DNS cache

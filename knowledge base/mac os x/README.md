@@ -183,6 +183,7 @@ xattr -c '/path/to/app.app'
 
 # Bypass Gatekeeper for all versions of apps.
 xattr -d 'com.apple.quarantine' '/path/to/app.app'
+xattr -dr 'com.apple.quarantine' '/path/to/directory'
 ```
 
 ## Taking screenshots
