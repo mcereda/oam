@@ -14,12 +14,16 @@ very cost-effective and easy to operate.
    1. [Compactor](#compactor)
    1. [Ruler](#ruler)
 1. [Clients](#clients)
+   1. [Logstash](#logstash)
+   1. [OpenTelemetry](#opentelemetry)
 1. [Labels](#labels)
    1. [Labelling best practices](#labelling-best-practices)
 1. [Deployment](#deployment)
    1. [Monolithic mode](#monolithic-mode)
    1. [Simple scalable mode](#simple-scalable-mode)
    1. [Microservices mode](#microservices-mode)
+1. [Object storage](#object-storage)
+1. [Analytics](#analytics)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -247,6 +251,28 @@ Multiple rulers will use a consistent hash ring to distribute rule groups amongs
 
 Refer [Send log data to Loki].
 
+### Logstash
+
+Loki provides the `logstash-output-loki` Logstash output plugin to enable shipping logs to a Loki or Grafana Cloud
+instance.<br/>
+Refer [Logstash plugin].
+
+```sh
+logstash-plugin install 'logstash-output-loki'
+```
+
+```rb
+output {
+  loki {
+    url => "http://loki.example.org:3100/loki/api/v1/push"
+  }
+}
+```
+
+### OpenTelemetry
+
+See also [OpenTelemetry / OTLP].
+
 ## Labels
 
 The content of each log line is **not** indexed. Instead, log entries are grouped into streams.<br/>
@@ -262,7 +288,8 @@ namespace = grafana-server
 
 Sets of log messages that share all the labels above would be called a _log stream_.
 
-Loki has a default limit of 15 index labels.
+Loki has a default limit of 15 index labels.<br/>
+I can't seem to find ways to set this up as of 2025-01-21.
 
 When Loki performs searches, it:
 
@@ -396,6 +423,79 @@ Designed for Kubernetes deployments and available as the [loki-distributed] comm
 
 Only recommended for very large Loki clusters, or when needing more precise control over them.
 
+## Object storage
+
+Refer [Storage] and [Loki S3 Storage: A Guide for Efficient Log Management].
+
+<details>
+  <summary>AWS example</summary>
+
+Refer also [AWS deployment (S3 Single Store)].
+
+  <details style="padding-left: 1em;">
+    <summary>Permissions</summary>
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::<chunks-bucket-name>",
+        "arn:aws:s3:::<chunks-bucket-name>/*",
+        "arn:aws:s3:::<ruler-bucket-name>",
+        "arn:aws:s3:::<ruler-bucket-name>/*"
+      ]
+    }
+  ]
+}
+```
+
+  </details>
+  <details style="padding-left: 1em;">
+    <summary>Loki settings</summary>
+
+```yaml
+storage_config:
+  aws:
+    region: <aws-region>
+    bucketnames:  # comma-separated list
+      <chunks-bucket-name>
+schema_config:
+  configs:
+    - store: tsdb
+      object_store: aws
+compactor:
+  delete_request_store: aws
+ruler:
+  storage:
+    type: s3
+    s3:
+      region: <aws-region>
+      bucketnames:  # comma-separated list
+        <ruler-bucket-name>
+```
+
+  </details>
+</details>
+
+## Analytics
+
+By default, Loki will send anonymous but uniquely-identifiable usage and configuration analytics to Grafana Labs.<br/>
+Explicitly disable reporting if wanted:
+
+```yaml
+analytics:
+  reporting_enabled: false
+```
+
 ## Further readings
 
 - [Website]
@@ -406,6 +506,10 @@ Only recommended for very large Loki clusters, or when needing more precise cont
 - [Grafana Loki store log data on S3 bucket on AWS Fargate]
 - [How to install Loki on (AWS) EKS using Terraform with S3]
 - [Deploy the Loki Helm chart on AWS]
+- [Loki S3 Storage: A Guide for Efficient Log Management]
+- [Grafana Loki Configuration Nuances]
+- [OpenTelemetry / OTLP]
+- [Loki-Operator]
 
 ### Sources
 
@@ -413,7 +517,7 @@ Only recommended for very large Loki clusters, or when needing more precise cont
 - [HTTP API reference]
 - [How to Set Up Grafana, Loki, and Prometheus Locally with Docker Compose: Part 1 of 3]
 - [Deploying Grafana, Loki, and Prometheus on AWS ECS with EFS and Cloud Formation (Part 3 of 3)]
-- [Storage - AWS deployment (S3 Single Store)]
+- [AWS deployment (S3 Single Store)]
 
 <!--
   Reference
@@ -439,6 +543,7 @@ Only recommended for very large Loki clusters, or when needing more precise cont
 
 <!-- Files -->
 <!-- Upstream -->
+[aws deployment (s3 single store)]: https://grafana.com/docs/loki/latest/configure/storage/#aws-deployment-s3-single-store
 [codebase]: https://github.com/grafana/loki
 [deploy the loki helm chart on aws]: https://grafana.com/docs/loki/latest/setup/install/helm/deployment-guides/aws/
 [documentation]: https://grafana.com/docs/loki/latest/
@@ -447,9 +552,14 @@ Only recommended for very large Loki clusters, or when needing more precise cont
 [http api reference]: https://grafana.com/docs/loki/latest/reference/loki-http-api/
 [loki-distributed]: https://github.com/grafana/helm-charts/tree/main/charts/loki-distributed
 [send log data to loki]: https://grafana.com/docs/loki/latest/send-data/
-[storage - aws deployment (s3 single store)]: https://grafana.com/docs/loki/latest/configure/storage/#aws-deployment-s3-single-store
+[storage]: https://grafana.com/docs/loki/latest/configure/storage/
 [website]: https://grafana.com/oss/loki/
+[logstash plugin]: https://grafana.com/docs/loki/latest/send-data/logstash/
 
 <!-- Others -->
 [deploying grafana, loki, and prometheus on aws ecs with efs and cloud formation (part 3 of 3)]: https://medium.com/@ahmadbilalch891/deploying-grafana-loki-and-prometheus-on-aws-ecs-with-efs-and-cloud-formation-part-3-of-3-24140ea8ccfb
+[grafana loki configuration nuances]: https://medium.com/lonto-digital-services-integrator/grafana-loki-configuration-nuances-2e9b94da4ac1
 [how to set up grafana, loki, and prometheus locally with docker compose: part 1 of 3]: https://medium.com/@ahmadbilalch891/how-to-set-up-grafana-loki-and-prometheus-locally-with-docker-compose-part-1-of-3-62fb25e51d92
+[loki s3 storage: a guide for efficient log management]: https://last9.io/blog/loki-s3-storage-guide/
+[loki-operator]: https://loki-operator.dev/
+[opentelemetry / otlp]: https://loki-operator.dev/docs/open-telemetry.md/
