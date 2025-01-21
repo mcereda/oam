@@ -249,7 +249,7 @@ Such tasks support CPU values between 0.25 and 10 vCPUs. these fields are option
 Task definitions specifying `FARGATE` as value for the `requiresCompatibilities` attribute, **even if they also specify
 the `EC2` value**, **are required** to set both settings **and** to set them to one of the couples specified in the
 table.<br/>
-Fargate task definitions support **only** those specific values for tasks' CPU and memory.
+Fargate task definitions support **only** those [specific values for tasks' CPU and memory][fargate tasks sizes].
 
 | CPU units | vCPUs | Memory values                               | Supported OSes | Notes                            |
 | --------- | ----- | ------------------------------------------- | -------------- | -------------------------------- |
@@ -440,6 +440,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [amazon ecs task definition differences for the fargate launch type]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html
 [amazon ecs task lifecycle]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html
 [amazon ecs task role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
+[fargate tasks sizes]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html#fargate-tasks-size
 [how amazon ecs manages cpu and memory resources]: https://aws.amazon.com/blogs/containers/how-amazon-ecs-manages-cpu-and-memory-resources/
 [how amazon elastic container service works with iam]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security_iam_service-with-iam.html
 [identity and access management for amazon elastic container service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security-iam.html

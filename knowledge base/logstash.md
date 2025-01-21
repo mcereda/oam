@@ -1,6 +1,4 @@
-# Title
-
-TODO
+# Logstash
 
 Server-side data processing pipeline that ingests data, transforms it, and then sends the results to any collector.
 
@@ -14,7 +12,7 @@ Part of the Elastic Stack along with Beats, [ElasticSearch] and [Kibana].
 
 <!-- Uncomment if used
 <details>
-  <summary>Installation and configuration</summary>
+  <summary>Setup</summary>
 
 ```sh
 ```
@@ -22,15 +20,47 @@ Part of the Elastic Stack along with Beats, [ElasticSearch] and [Kibana].
 </details>
 -->
 
-<!-- Uncomment if used
 <details>
   <summary>Usage</summary>
 
 ```sh
+# Validate configuration files.
+logstash -tf 'config.conf'
+logstash --config.test_and_exit --path.config 'config.conf'
+
+
+# Install plugins.
+logstash-plugin install 'logstash-output-loki'
+
+# List installed plugins.
+logstash-plugin list
+logstash-plugin list --verbose
+logstash-plugin list '*namefragment*'
+logstash-plugin list --group 'output'
+```
+
+```rb
+input { … }
+
+filter {
+  mutate {
+    add_field => {
+      "cluster" => "us-central-1"
+      "job" => "logstash"
+    }
+    replace => { "type" => "stream"}
+    remove_field => [ "src" ]
+  }
+}
+
+output {
+  loki {
+    url => "http://loki.example.org:3100/loki/api/v1/push"
+  }
+}
 ```
 
 </details>
--->
 
 <!-- Uncomment if used
 <details>
@@ -45,10 +75,12 @@ Part of the Elastic Stack along with Beats, [ElasticSearch] and [Kibana].
 ## Further readings
 
 - [Website]
-- [Main repository]
+- [Codebase]
 - [Beats], [ElasticSearch] and [Kibana]: the rest of the Elastic stack
 
 ### Sources
+
+- [How to debug your Logstash configuration file]
 
 <!--
   Reference
@@ -63,7 +95,8 @@ Part of the Elastic Stack along with Beats, [ElasticSearch] and [Kibana].
 
 <!-- Files -->
 <!-- Upstream -->
-[main repository]: https://github.com/elastic/logstash
+[codebase]: https://github.com/elastic/logstash
 [website]: https://website/
 
 <!-- Others -->
+[how to debug your logstash configuration file]: https://logz.io/blog/debug-logstash/

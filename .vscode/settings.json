@@ -189,6 +189,7 @@
         "helmfile",
         "hoppscotch",
         "imager",
+        "ingester",
         "istio",
         "istioctl",
         "jdupes",
