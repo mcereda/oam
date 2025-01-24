@@ -88,7 +88,7 @@
         - name: Start the composition
           tags:
             - docker-compose
-          community.docker.docker_compose:
+          community.docker.docker_compose_v2:
             project_src: "{{ pihole_root_dir }}"
         - name: Create the cron job to update Graviton's DB
           tags:
