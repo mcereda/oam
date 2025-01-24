@@ -1,13 +1,14 @@
 # ClamAV
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
+
+<details>
+  <summary>Usage</summary>
 
 ```sh
 # Manually update the virus definitions.
@@ -17,37 +18,42 @@ sudo systemctl stop 'clamav-freshclam' \
 && sudo 'freshclam' \
 && sudo systemctl enable --now 'clamav-freshclam'
 
-# scan a file or directory.
+# Scan specific files or directories.
 clamscan 'path/to/file'
 clamscan --recursive 'path/to/dir'
 
-# only return specific files.
+# Only scan files in a list.
+clamscan -i -f '/tmp/scan.list'
+
+# Only return specific results.
 clamscan --infected '/home/'
 clamscan --suppress-ok-results 'Downloads/'
 
-# save results to file.
+# Save results to files.
 clamscan --bell -i -r '/home' -l 'output.txt'
 
-# scan files in a list.
-clamscan -i -f '/tmp/scan.list'
-
-# remove infected files.
+# Delete infected files.
 clamscan -r --remove '/home/user'
 clamscan -r -i --move='/home/user/infected' '/home/'
 
-# limit cpu usage.
+# Limit CPU usage.
 nice -n 15 clamscan \
 && clamscan --bell -i -r '/home'
 
-# use multiple threads.
+# Use multiple threads.
 find . -type f -printf "'%p' " | xargs -P "$(nproc)" -n 1 clamscan
 find . -type f | parallel --group --jobs 0 -d '\n' clamscan {}
 ```
 
+</details>
+
 ## Gotchas
 
-- The `--fdpass` option of `clamdscan` (notice the _d_ in the command) sends a file descriptor to clamd rather than a path name, avoiding the need for the `clamav` user to be able to read everyone's files
-- `clamscan` is designed to be single-threaded, so when scanning a file or directory from the command line only a single CPU thread is used; use `xargs` or another executor to run a scan in parallel:
+- The `--fdpass` option of `clamdscan` (**with** the _d_ in the command name) sends a file descriptor to `clamd` rather
+  than a path name, avoiding the need for the `clamav` user to be able to read everyone's files.
+- `clamscan` is designed to be **single**-threaded, so it willfully uses a **single** CPU thread when scanning files or
+  directories from the command line.<br/>
+  Use `xargs` or another executor to run scans in parallel:
 
   ```sh
   find . -type f -printf "'%p' " | xargs -P $(nproc) -n 1 clamscan
@@ -56,20 +62,27 @@ find . -type f | parallel --group --jobs 0 -d '\n' clamscan {}
 
 ## Further readings
 
+- [Website]
+- [Codebase]
+- [Documentation]
 - [Gentoo Wiki]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Install ClamAV on Fedora Linux 35]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
-[further readings]: #further-readings
+<!-- Knowledge base -->
+<!-- Files -->
+<!-- Upstream -->
+[codebase]: https://github.com/Cisco-Talos/clamav
+[documentation]: https://docs.clamav.net/
+[website]: https://www.clamav.net/
 
 <!-- Others -->
 [gentoo wiki]: https://wiki.gentoo.org/wiki/ClamAV
