@@ -221,6 +221,8 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 - [pgxn-manager]
 - [dverite/postgresql-functions]
 - [MySQL]
+- [pg_flo]
+- [pgAdmin]
 
 ### Sources
 
@@ -245,6 +247,8 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 
 <!-- Knowledge base -->
 [mysql]: mysql.md
+[pg_flo]: pg_flo.md
+[pgadmin]: pgadmin.md
 [sql]: sql.md
 
 <!-- Upstream -->
