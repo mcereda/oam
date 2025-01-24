@@ -138,9 +138,11 @@ All the references in the [further readings] section, plus the following:
 
 - [Documentation]
 - [Github]
+- [Brace expansion with range in fish shell]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
@@ -159,5 +161,6 @@ All the references in the [further readings] section, plus the following:
 [website]: https://fishshell.com/
 
 <!-- Others -->
+[brace expansion with range in fish shell]: https://stackoverflow.com/questions/20770836/brace-expansion-with-range-in-fish-shell
 [fish shell cheatsheet]: https://devhints.io/fish-shell
 [tide]: https://github.com/IlanCosman/tide
