@@ -3,11 +3,12 @@
 Open-source platform for monitoring and observability.
 
 1. [TL;DR](#tldr)
-1. [Installation](#installation)
+1. [Setup](#setup)
 1. [Provisioning](#provisioning)
    1. [Datasources](#datasources)
    1. [Dashboards](#dashboards)
 1. [Dashboards of interest](#dashboards-of-interest)
+1. [Alerting](#alerting)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -32,7 +33,7 @@ curl -sS \
 
 </details>
 
-## Installation
+## Setup
 
 <details>
   <summary>kubernetes</summary>
@@ -194,15 +195,24 @@ $ curl -sS \
 | kubernetes cluster (prometheus) | 6417       | FIXME                                                                                                                                                                                          |
 | Nextcloud                       | 9632       | FIXME                                                                                                                                                                                          |
 
+## Alerting
+
+Refer [alerting] and [Get started with Grafana Alerting].
+
+1. Create a contact point if not existing already.
+1. Create an alert rule.
+
 ## Further readings
 
 - [Website]
 - [Github]
+- [Documentation]
 - [HTTP API reference]
 - [Prometheus]
 - [docker compositions/monitoring]
 - Official [helm chart]
 - [Loki]
+- [Get started with Grafana Alerting]
 
 ## Sources
 
@@ -213,6 +223,7 @@ All the references in the [further readings] section, plus the following:
 - [Data source on startup]
 - [Set up prometheus and ingress on kubernetes]
 - [How to integrate Prometheus and Grafana on Kubernetes using Helm]
+- [Alerting]
 
 <!--
   Reference
@@ -231,13 +242,16 @@ All the references in the [further readings] section, plus the following:
 [docker compositions/monitoring]: ../docker%20compositions/monitoring/README.md
 
 <!-- Upstream -->
+[alerting]: https://grafana.com/docs/grafana/latest/alerting/
 [data source on startup]: https://community.grafana.com/t/data-source-on-startup/8618/2
+[documentation]: https://grafana.com/docs/grafana/latest/
+[get started with grafana alerting]: https://grafana.com/tutorials/alerting-get-started/
 [github]: https://github.com/grafana/grafana
+[helm chart]: https://github.com/grafana/helm-charts/tree/main/charts/grafana
 [http api reference]: https://grafana.com/docs/grafana/latest/developers/http_api/
 [provision dashboards and data sources]: https://grafana.com/tutorials/provision-dashboards-and-data-sources/
 [provisioning]: https://grafana.com/docs/grafana/latest/administration/provisioning/
 [website]: https://grafana.com
-[helm chart]: https://github.com/grafana/helm-charts/tree/main/charts/grafana
 
 <!-- Others -->
 [how to integrate prometheus and grafana on kubernetes using helm]: https://semaphoreci.com/blog/prometheus-grafana-kubernetes-helm
