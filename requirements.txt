@@ -1,7 +1,7 @@
-ansible==10.5.0
-ansible-lint==24.9.2
-click==8.1.7
-pyinilint==0.17
-yq==3.4.3
+ansible-lint==25.1.0
+ansible==11.1.0
+click==8.1.8
 fqdn==1.5.1
 jmespath==1.0.1
+pyinilint==0.17
+yq==3.4.3
