@@ -84,5 +84,6 @@ jq '.dependencies."@pulumi/aws" |= "6.66.2"' 'package.json' | sponge 'package.js
 # Import resources
 pulumi import 'aws:ec2/instance:Instance' 'logstash' 'i-abcdef0123456789a'
 pulumi import 'aws:ec2/securityGroup:SecurityGroup' 'internalOps' 'sg-0123456789abcdef0'
-pulumi import --generate-code='false' 'aws:iam/user:User' 'jimmy' 'jimmy'
+pulumi import 'aws:iam/user:User' 'jimmy' 'jimmy' --generate-code='false'
 pulumi import 'aws:route53/record:Record' 'hoppscotch' 'ZGG4442BC3E8M_hoppscotch.example.org_A'
+pulumi import 'aws:cloudwatch/metricAlarm:MetricAlarm' 'prometheus-ec2-CPUUtilization' 'prometheus-ec2-CPUUtilization-drc5644'
