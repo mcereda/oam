@@ -1,4 +1,4 @@
-# Gitlab
+# GitLab
 
 1. [TL;DR](#tldr)
 1. [Package](#package)
@@ -16,7 +16,7 @@
 1. [CI/CD pipelines](#cicd-pipelines)
 1. [Troubleshooting](#troubleshooting)
     1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
-    1. [Gitlab keeps answering with code 502](#gitlab-keeps-answering-with-code-502)
+    1. [GitLab keeps answering with code 502](#gitlab-keeps-answering-with-code-502)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -81,7 +81,7 @@ sudo gitlab-rails runner '::Gitlab::CurrentSettings.update!(signup_enabled: fals
 ```sh
 # Validate.
 # Just makes sure the file is readable from a ruby app.
-# Gitlab's internal checks do not really do anything.
+# GitLab's internal checks do not really do anything.
 sudo vim '/etc/gitlab/gitlab.rb'
 sudo ruby -c '/etc/gitlab/gitlab.rb'
 sudo gitlab-ctl show-config
@@ -91,12 +91,12 @@ sudo gitlab-ctl show-config
 sudo gitlab-ctl check-config
 sudo gitlab-ctl check-config -v '16.11.0'
 
-# Make Gitlab aware of the changes.
+# Make GitLab aware of the changes.
 sudo gitlab-ctl reconfigure
 ```
 
 Backup settings for AWS buckets.</br>
-See [Back up Gitlab using Amazon S3]:
+See [Back up GitLab using Amazon S3]:
 
 ```rb
 # If using an IAM Profile, don't configure 'aws_access_key_id' and 'aws_secret_access_key'.
@@ -124,7 +124,7 @@ given URL's schema is HTTPS.<br/>
 The Let's Encrypt account key is in OpenSSL format, while the certificate's key is in OpenSSH format. Both are **not**
 password protected.
 
-The certificate used by Gitlab's nginx should include the full chain.<br/>
+The certificate used by GitLab's nginx should include the full chain.<br/>
 The leaf-only certificate works normally, but runners seem to require the full chain to connect properly.
 
 </details>
@@ -260,7 +260,7 @@ sudo dnf remove 'gitlab-ee'
 
 ### Helm chart
 
-Gitlab offers an official helm chart to to allow for deployments on kubernetes clusters.
+GitLab offers an official helm chart to to allow for deployments on kubernetes clusters.
 
 Follow the [deployment] guide for details and updated information.
 
@@ -350,7 +350,7 @@ kubectl delete --ignore-not-found namespace "${NAMESPACE}"
 <details>
   <summary>Maintenance</summary>
 
-- Add and update Gitlab's helm repository:
+- Add and update GitLab's helm repository:
 
   ```sh
   helm repo add 'gitlab' 'https://charts.gitlab.io/'
@@ -576,32 +576,61 @@ Refer [Forks].
 
 ### Different owners for parts of the code base
 
-Refer to [code owners] for more and updated information.
+Refer to [Code Owners] and [`CODEOWNERS` syntax][codeowners syntax] for more and updated information.
 
-Leverage _code owners_.
+Leverage _Code Owners_.
 
-By adding code owners to the repository, they become eligible approvers in the project for MRs that contain those files.
-<br/>
+Add the `CODEOWNERS` specifying paths and their relative owner.<br/>
+Use `@` to specify groups and users. Use `@@` for roles since GitLab 17.8.
+
+<details style="padding-bottom: 1em;">
+
+```plaintext
+## Default owners
+* @@maintainer
+
+## Default owners + users in the 'customer-support' group
+/customerSupport/ @@maintainer @customer-support
+
+## Default owners + users in the 'datascience' group
+# @lucas is taking care of it for now too
+/ds/ @@maintainer @datascience @lucas
+```
+
+</details>
+
+Repositories can use **a single** `CODEOWNERS` file.<br/>
+GitLab checks for `CODEOWNERS` files in each repository in these locations **in order**; the **first** one found is the
+one that is used, all others are ignored:
+
+- `/CODEOWNERS` (in the repository's root).
+- `/docs/CODEOWNERS`.
+- `/.gitlab/CODEOWNERS`.
+
+Code Owners specified in the file become eligible approvers in the project for MRs that change files in the specified
+file paths.<br/>
 Enable the _eligible approvers_ merge request approval rule in the project's _Settings_ > _Merge requests_.
 
-> Require code owner approval for protected branches in the project's _Settings_ > _Repository_ > _Protected branches_.
+> Require Code Owner approval for protected branches in the project's _Settings_ > _Repository_ > _Protected branches_.
 
 Gotchas:
 
 - Specifying owners for paths **overwrites** the previous owners list.<br/>
   There seems to be no way to **inherit and add** (and not just overwrite) owners that would not require the list being
   repeated.
-- There is as of 2024-04-10 no way to assign ownership by using aliases for roles (like maintainers or developers); only
-  groups or users are allowed.<br/>
-  This feature is being added, but it has been open for over 3y now. See
-  [Ability to reference Maintainers or Developers from CODEOWNERS].
+- ~~There is as of 2024-04-10 no way to assign ownership by using aliases for roles (like maintainers or developers); only
+  groups or users are allowed.~~<br/>
+  ~~This feature is being added, but it has been open for over 3y now. See
+  [Ability to reference Maintainers or Developers from CODEOWNERS].~~<br/>
+  Solved in GitLab 17.8, see
+  [GitLab 17.8 Release][gitlab 17.8 release - use roles to define project members as code owners].
 
 ### Get the version of the helper image to use for a runner
 
 The `gitlab/gitlab-runner-helper` images are tagged using the runner's **os**, **architecture**, and **git revision**.
 
-One needs to know the version of Gitlab and of the runner one wants to use.<br/>
-Usually, the runner's version is the one most similar to Gitlab's version (e.g. Gitlab: 13.6.2 → gitlab-runner: 13.6.0).
+One needs to know the version of GitLab and of the runner one wants to use.<br/>
+Usually, the runner's version is the one most similar to GitLab's version (e.g. GitLab: 13.6.2 → gitlab-runner: 13.6.0).
 
 To get the tag to use for the helper, check the runner's version:
 
@@ -631,11 +660,11 @@ docker.io/gitlab/gitlab-runner-helper:x86_64-8fa89735
 
 See [adding and removing kubernetes clusters] for more information.
 
-For now the Gitlab instance can manage only kubernetes clusters external to the one it is running into.
+For now the GitLab instance can manage only kubernetes clusters external to the one it is running into.
 
 ## Maintenance mode
 
-Refer [Gitlab maintenance mode].
+Refer [GitLab maintenance mode].
 
 Allows administrators to reduce write operations to a minimum while maintenance tasks are performed.<br/>
 The main goal is to block all external actions that change the internal state, specially the PostgreSQL database, files,
@@ -699,7 +728,7 @@ See [pipelines](pipeline.md).
 git clone "https://oauth2:${ACCESS_TOKEN}@somegitlab.com/vendor/package.git"
 ```
 
-### Gitlab keeps answering with code 502
+### GitLab keeps answering with code 502
 
 Refer [The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership].
 
@@ -710,7 +739,7 @@ Error message example:
 > Permission denied) while connecting to upstream, client: 172.21.0.1, server: gitlab.lan, request: "GET / HTTP/2.0",
 > upstream: "http\://unix:/var/opt/gitlab/gitlab-workhorse/sockets/socket:/", host: "gitlab.lan:8443"
 
-Context: Gitlab 16.11.2 CE running from Docker image.
+Context: GitLab 16.11.2 CE running from Docker image.
 
 Root cause: the socket's permissions are mapped incorrectly.
 
@@ -720,20 +749,21 @@ Solution: set the correct ownership with
 ## Further readings
 
 - [Self-hosting]
-- Gitlab's helm [chart]
-- Gitlab's helm [chart]'s [global settings]
+- GitLab's helm [chart]
+- GitLab's helm [chart]'s [global settings]
 - [Command-line options]
 - [Deployment] guide
 - Install [runners on kubernetes]
 - [TLS] configuration
 - [Adding and removing Kubernetes clusters]
-- Gitlab's [operator code] and relative [guide][operator guide]
+- GitLab's [operator code] and relative [guide][operator guide]
 - [Buildah]
 - [Kaniko]
 - [The GitLab Handbook]
 - [Icons]
 - [Upgrade Path tool]
 - [Elasticsearch]
+- [CODEOWNERS syntax]
 
 ### Sources
 
@@ -775,7 +805,7 @@ Solution: set the correct ownership with
 
 <!-- Knowledge base -->
 [buildah]: ../buildah.md
-[kaniko]: ../kubernetes/kaniko.placeholder
+[kaniko]: ../kaniko.md
 [self-hosting]: ../self-hosting.md
 
 <!-- Files -->
@@ -789,11 +819,13 @@ Solution: set the correct ownership with
 [chart cpu and ram resource requirements]: https://docs.gitlab.com/charts/installation/deployment.html#cpu-and-ram-resource-requirements
 [chart]: https://docs.gitlab.com/charts/
 [code owners]: https://docs.gitlab.com/ee/user/project/codeowners/
+[codeowners syntax]: https://docs.gitlab.com/ee/user/project/codeowners/reference.html
 [command-line options]: https://docs.gitlab.com/charts/installation/command-line-options.html
 [deployment]: https://docs.gitlab.com/charts/installation/deployment.html
 [elasticsearch]: https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html
 [environment variables]: https://docs.gitlab.com/ee/administration/environment_variables.html
 [forks]: https://docs.gitlab.com/ee/user/project/repository/forking_workflow.html
+[gitlab 17.8 release - use roles to define project members as code owners]: https://about.gitlab.com/releases/2025/01/16/gitlab-17-8-released/#use-roles-to-define-project-members-as-code-owners
 [gitlab ha scaling runner vending machine for aws ec2 asg]: https://gitlab.com/guided-explorations/aws/gitlab-runner-autoscaling-aws-asg#gitlab-runners-on-aws-spot-best-practices
 [gitlab maintenance mode]: https://docs.gitlab.com/ee/administration/maintenance_mode/
 [global settings]: https://docs.gitlab.com/charts/charts/globals.html
