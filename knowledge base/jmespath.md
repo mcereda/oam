@@ -20,6 +20,13 @@ az devops user list --org 'https://dev.azure.com/organizationName' \
 aws … --query "locations[?name.contains(@, `le`)]"
 aws … --query "locations[?name.contains(@, `ue`) || name.contains(@, `ia`)]"
 
+#
+aws ecs describe-tasks --cluster 'staging' --tasks 'ef6260ed8aab49cf926667ab0c52c313' --output 'yaml' \
+  --query 'tasks[0] | {
+      "managedAgents": containers[].managedAgents[?@.name==`ExecuteCommandAgent`][],
+      "enableExecuteCommand": enableExecuteCommand
+    }'
+
 # Print an object with specific keys and values from the input.
 az disk-encryption-set show --ids 'id' \
   --query "{
