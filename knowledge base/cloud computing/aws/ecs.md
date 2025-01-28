@@ -12,6 +12,7 @@
    1. [EFS volumes](#efs-volumes)
    1. [Docker volumes](#docker-volumes)
    1. [Bind mounts](#bind-mounts)
+1. [Execute commands in tasks' containers](#execute-commands-in-tasks-containers)
 1. [Troubleshooting](#troubleshooting)
    1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
 1. [Further readings](#further-readings)
@@ -317,33 +318,33 @@ Tasks **must**:
 
 ```json
 {
-  "volumes": [{
-    "name": "myEfsVolume",
-    "efsVolumeConfiguration": {
-      "fileSystemId": "fs-1234",
-      "rootDirectory": "/path/to/my/data",
-      "transitEncryption": "ENABLED",
-      "transitEncryptionPort": integer,
-      "authorizationConfig": {
-        "accessPointId": "fsap-1234",
-        "iam": "ENABLED"
-      }
-    }
-  }],
-  "containerDefinitions": [{
-    "name": "container-using-efs",
-    "image": "amazonlinux:2",
-    "entryPoint": [
-      "sh",
-      "-c"
-    ],
-    "command": [ "ls -la /mount/efs" ],
-    "mountPoints": [{
-      "sourceVolume": "myEfsVolume",
-      "containerPath": "/mount/efs",
-      "readOnly": true
+    "volumes": [{
+        "name": "myEfsVolume",
+        "efsVolumeConfiguration": {
+            "fileSystemId": "fs-1234",
+            "rootDirectory": "/path/to/my/data",
+            "transitEncryption": "ENABLED",
+            "transitEncryptionPort": integer,
+            "authorizationConfig": {
+                "accessPointId": "fsap-1234",
+                "iam": "ENABLED"
+            }
+        }
+    }],
+    "containerDefinitions": [{
+        "name": "container-using-efs",
+        "image": "amazonlinux:2",
+        "entryPoint": [
+            "sh",
+            "-c"
+        ],
+        "command": [ "ls -la /mount/efs" ],
+        "mountPoints": [{
+            "sourceVolume": "myEfsVolume",
+            "containerPath": "/mount/efs",
+            "readOnly": true
+        }]
     }]
-  }]
 }
 ```
 
@@ -363,6 +364,201 @@ TODO
 ### Bind mounts
 
 TODO
+
+## Execute commands in tasks' containers
+
+Refer [Using Amazon ECS Exec to access your containers on AWS Fargate and Amazon EC2],
+[A Step-by-Step Guide to Enabling Amazon ECS Exec],
+[`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]
+and [Amazon ECS Exec Checker].
+
+Leverage ECS Exec, which in turn leverages SSM to create a secure channel between one's device and the target container.
+It does so by bind-mounting the necessary SSM agent binaries into the container while the ECS (or Fargate) agent starts
+the SSM core agent inside the container.<br/>
+The agent, when invoked, calls SSM to create the secure channel. In order to do so, the container's ECS task must have
+the proper IAM privileges for the SSM core agent to call the SSM service.
+
+The SSM agent does **not** run as a separate container sidecar, but as an additional process **inside** the application
+container.<br/>
+Refer [ECS Execute-Command proposal] for details.
+
+Whe whole procedure is transparent and does **not** compel requirements changes in the container's content.
+
+Requirements:
+
+- The required SSM components must be available on the EC2 instances hosting the container.
+  Amazon's ECS optimized AMI and Fargate 1.4 include their latest version already.
+- The container's image must have `script` and `cat` installed.<br/>
+  Required in order to have command logs uploaded correctly to S3 and/or CloudWatch.
+- The task's role (**not** the Task's _execution_ role) must have specific permissions assigned.
+
+  <details style="padding-bottom: 1em;">
+    <summary>Policy example</summary>
+
+  ```json
+  {
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Sid": "RequiredSSMPermissions",
+              "Effect": "Allow",
+              "Action": [
+                  "ssmmessages:CreateControlChannel",
+                  "ssmmessages:CreateDataChannel",
+                  "ssmmessages:OpenControlChannel",
+                  "ssmmessages:OpenDataChannel"
+              ],
+              "Resource": "*"
+          },
+          {
+              "Sid": "RequiredGlobalCloudWatchPermissions",
+              "Effect": "Allow",
+              "Action": "logs:DescribeLogGroups",
+              "Resource": "*"
+          },
+          {
+              "Sid": "RequiredSpecificCloudWatchPermissions",
+              "Effect": "Allow",
+              "Action": [
+                  "logs:CreateLogStream",
+                  "logs:DescribeLogStreams",
+                  "logs:PutLogEvents"
+              ],
+              "Resource": "arn:aws:logs:eu-west-1:012345678901:log-group:/ecs/log-group-name:*"
+          },
+          {
+              "Sid": "OptionalGlobalS3Permissions",
+              "Effect": "Allow",
+              "Action": "s3:GetEncryptionConfiguration",
+              "Resource": "arn:aws:s3:::ecs-exec-bucket"
+          },
+          {
+              "Sid": "OptionalSpecificS3Permissions",
+              "Effect": "Allow",
+              "Action": "s3:PutObject",
+              "Resource": "arn:aws:s3:::ecs-exec-bucket/*"
+          },
+          {
+              "Sid": "OptionalKMSPermissions",
+              "Effect": "Allow",
+              "Action": "kms:Decrypt",
+              "Resource": "arn:aws:kms:eu-west-1:012345678901:key/abcdef01-2345-6789-abcd-ef0123456789"
+          }
+      ]
+  }
+  ```
+
+  </details>
+
+- The service or the `run-task` command that start the task **must have the `enable-execute-command` set to `true`**.
+
+  <details style="padding-bottom: 1em;">
+    <summary>Examples</summary>
+
+  ```sh
+  aws ecs run-task … --enable-execute-command
+  aws ecs update-service --cluster 'stg' --service 'grafana' --enable-execute-command --force-new-deployment
+  ```
+
+  </details>
+
+- **Users** initiating the execution:
+
+  - Must [install the Session Manager plugin for the AWS CLI].
+  - Must be allowed the `ecs:ExecuteCommand` action on the ECS cluster.
+
+    <details style="padding-bottom: 1em;">
+      <summary>Policy example</summary>
+
+    ```json
+    {
+        "Version": "2012-10-17",
+        "Statement": [{
+            "Effect": "Allow",
+            "Action": "ecs:ExecuteCommand",
+            "Resource": "arn:aws:ecs:eu-west-1:012345678901:cluster/staging",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/application": "appName",
+                    "StringEquals": {
+                        "ecs:container-name": "nginx"
+                    }
+                }
+            },
+        }]
+    }
+    ```
+
+    </details>
+
+Procedure:
+
+1. Confirm that the task's `ExecuteCommandAgent` status is `RUNNING` and the `enableExecuteCommand` attribute is set to
+   `true`.
+
+   <details style="padding-bottom: 1em;">
+    <summary>Example</summary>
+
+   ```sh
+   aws ecs describe-tasks --cluster 'staging' --tasks 'ef6260ed8aab49cf926667ab0c52c313' --output 'yaml' \
+   --query 'tasks[0] | {
+       "managedAgents": containers[].managedAgents[?@.name==`ExecuteCommandAgent`][],
+       "enableExecuteCommand": enableExecuteCommand
+     }'
+   ```
+
+   ```yaml
+   enableExecuteCommand: true
+   managedAgents:
+   - lastStartedAt: '2025-01-28T22:16:59.370000+01:00'
+     lastStatus: RUNNING
+     name: ExecuteCommandAgent
+   ```
+
+   </details>
+
+1. Execute the command.
+
+   <details style="padding-bottom: 1em;">
+    <summary>Example</summary>
+
+   ```sh
+   aws ecs execute-command --interactive --command 'df -h' \
+     --cluster 'staging' --task 'ef6260ed8aab49cf926667ab0c52c313' --container 'nginx'
+   ```
+
+   ```plaintext
+   The Session Manager plugin was installed successfully. Use the AWS CLI to start a session.
+
+
+   Starting session with SessionId: ecs-execute-command-zobkrf3qrif9j962h9pecgnae8
+   Filesystem      Size  Used Avail Use% Mounted on
+   overlay          31G   12G   18G  40% /
+   tmpfs            64M     0   64M   0% /dev
+   shm             464M     0  464M   0% /dev/shm
+   tmpfs           464M     0  464M   0% /sys/fs/cgroup
+   /dev/nvme1n1     31G   12G   18G  40% /etc/hosts
+   /dev/nvme0n1p1  4.9G  2.1G  2.8G  43% /managed-agents/execute-command
+   tmpfs           464M     0  464M   0% /proc/acpi
+   tmpfs           464M     0  464M   0% /sys/firmware
+
+
+   Exiting session with sessionId: ecs-execute-command-zobkrf3qrif9j962h9pecgnae8.
+   ```
+
+   </details>
+
+Should one's command invoke a shell, one will gain interactive access to the container.<br/>
+In this case, **all commands and their outputs** inside the shell session **will** be logged to S3 and/or CloudWatch.
+The shell invocation command and the user that invoked it will be logged in CloudTrail for auditing purposes as part of
+the ECS ExecuteCommand API call.
+
+Should one's command invoke a single command, **only the output** of the command will be logged to S3 and/or CloudWatch.
+The command itself will still be logged in CloudTrail as part of the ECS ExecuteCommand API call.
+
+Logging options are configured at the ECS cluster level.<br/>
+The task's role **will** need to have IAM permissions to log the output to S3 and/or CloudWatch should the cluster be
+configured for the above options. If the options are **not** configured, then the permissions are **not** required.
 
 ## Troubleshooting
 
@@ -397,6 +593,8 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [Storage options for Amazon ECS tasks]
 - [EBS]
 - [EFS]
+- [Amazon ECS Exec Checker]
+- [ECS Execute-Command proposal]
 
 ### Sources
 
@@ -413,6 +611,9 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [Use Amazon EFS volumes with Amazon ECS]
 - [Amazon ECS services]
 - [Amazon ECS standalone tasks]
+- [Using Amazon ECS Exec to access your containers on AWS Fargate and Amazon EC2]
+- [A Step-by-Step Guide to Enabling Amazon ECS Exec]
+- [`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]
 
 <!--
   Reference
@@ -435,22 +636,28 @@ Specify a supported value for the task CPU and memory in your task definition.
 [efs]: efs.md
 
 <!-- Upstream -->
+[amazon ecs exec checker]: https://github.com/aws-containers/amazon-ecs-exec-checker
 [amazon ecs services]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html
 [amazon ecs standalone tasks]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/standalone-tasks.html
 [amazon ecs task definition differences for the fargate launch type]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html
 [amazon ecs task lifecycle]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html
 [amazon ecs task role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
+[ecs execute-command proposal]: https://github.com/aws/containers-roadmap/issues/1050
 [fargate tasks sizes]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html#fargate-tasks-size
 [how amazon ecs manages cpu and memory resources]: https://aws.amazon.com/blogs/containers/how-amazon-ecs-manages-cpu-and-memory-resources/
 [how amazon elastic container service works with iam]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security_iam_service-with-iam.html
 [identity and access management for amazon elastic container service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security-iam.html
+[install the session manager plugin for the aws cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
 [storage options for amazon ecs tasks]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html
 [troubleshoot amazon ecs deployment issues]: https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ecs.html
 [troubleshoot amazon ecs task definition invalid cpu or memory errors]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 [use amazon ebs volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html
 [use amazon efs volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html
+[using amazon ecs exec to access your containers on aws fargate and amazon ec2]: https://aws.amazon.com/blogs/containers/new-using-amazon-ecs-exec-access-your-containers-fargate-ec2/
 
 <!-- Others -->
+[`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]: https://stackoverflow.com/questions/69261159/aws-ecs-execute-command-results-in-targetnotconnectedexception-the-execute
+[a step-by-step guide to enabling amazon ecs exec]: https://medium.com/@mariotolic/a-step-by-step-guide-to-enabling-amazon-ecs-exec-a88b05858709
 [attach ebs volume to aws ecs fargate]: https://medium.com/@shujaatsscripts/attach-ebs-volume-to-aws-ecs-fargate-e23fea7bb1a7
 [exposing multiple ports for an aws ecs service]: https://medium.com/@faisalsuhail1/exposing-multiple-ports-for-an-aws-ecs-service-64b9821c09e8
 [guide to using amazon ebs with amazon ecs and aws fargate]: https://stackpioneers.com/2024/01/12/guide-to-using-amazon-ebs-with-amazon-ecs-and-aws-fargate/

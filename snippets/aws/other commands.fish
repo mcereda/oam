@@ -103,6 +103,20 @@ aws ecs describe-services --cluster 'stg' --services 'grafana'
 # Exits with return code 255 after 40 failed checks.
 aws ecs wait services-stable --cluster 'stg' --services 'grafana'
 
+# Update services' attributes
+aws ecs update-service --cluster 'stg' --service 'grafana' --enable-execute-command --force-new-deployment
+
+# Check tasks' attributes
+aws ecs describe-tasks --cluster 'staging' --tasks 'ef6260ed8aab49cf926667ab0c52c313' --output 'yaml' \
+--query 'tasks[0] | {
+	"managedAgents": containers[].managedAgents[?@.name==`ExecuteCommandAgent`][],
+	"enableExecuteCommand": enableExecuteCommand
+	}'
+
+# Execute commands in tasks
+aws ecs execute-command --cluster 'staging' --task 'e242654518cf42a7be13a8551e0b3c27' --container 'echo-server' \
+	--interactive --command 'nc -vz 127.0.0.1 28080'
+
 
 ###
 # EFS
@@ -234,6 +248,9 @@ aws iam update-login-profile --user-name 'mike' --password 'newPassword' --passw
 # FIXME: check
 basename (aws sts get-caller-identity --query 'Arn' --output 'text') \
 | xargs aws iam update-login-profile --user-name
+
+# Add users to user groups
+aws iam add-user-to-group --group-name 'infra' --user-name 'matt'
 
 
 ###
