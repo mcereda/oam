@@ -113,9 +113,12 @@
             dbs_list: ['primary', 'sales']
           ansible.builtin.set_fact:
             list_without_items: "{{ dbs_list | difference(['template0','template1','postgres','rdsadmin']) }}"
-        - name: Get a random element
+        - name: Get elements
           ansible.builtin.set_fact:
             random_item: "{{ ['a','b','c'] | random }}"
+            last_item_array_mode: "{{ ['a','b','c'][-1] }}"
+            last_item_filter: "{{ ['a','b','c'] | last }}"
+            first_item_filter: "{{ ['a','b','c'] | first }}"
         - name: Sort dict elements in lists by attribute
           tags: order_by
           vars:
