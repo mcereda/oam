@@ -54,3 +54,22 @@ then
 	curl -C- -o '/tmp/macports.pkg https://github.com/macports/macports-base/releases/download/v2.7.2/MacPorts-2.7.2-12-Monterey.pkg'
 	sudo installer -pkg '/tmp/macports.pkg' -target '/'
 fi
+
+# Get available system information data types
+system_profiler -listDataTypes
+
+# Show current sysinfo
+system_profiler --json -detailLevel 'mini'
+system_profiler 'SPSoftwareDataType' 'SPHardwareDataType' 'SPNVMeDataType'
+
+# Create a 2GB RAM disk
+hdiutil attach -nomount 'ram://4194304'
+
+# Eject disks
+hdiutil attach '/dev/disk5'
+diskutil unmount '/dev/disk7'
+diskutil unmountDisk '/dev/disk6'
+
+# Initialize and mount volumes
+diskutil erasevolume HFS+ 'ramdisk' '/dev/disk4'
+hdiutil attach -nomount 'ram://4194304' | xargs diskutil erasevolume HFS+ 'ramdisk'
