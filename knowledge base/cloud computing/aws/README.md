@@ -18,6 +18,8 @@
 1. [Access control](#access-control)
 1. [Savings plans](#savings-plans)
 1. [Resource tagging](#resource-tagging)
+1. [API](#api)
+   1. [Python](#python)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -338,6 +340,105 @@ Suggested:
 [Create tag policies][creating organization policies with aws organizations] to enforce values, and to prevent the
 creation of non-compliant resources.
 
+## API
+
+Refer [Tools to Build on AWS].
+
+### Python
+
+Refer [Boto3 documentation].<br/>
+Also see [Difference in Boto3 between resource, client, and session?].
+
+_Clients_ and _Resources_ are different abstractions for service requests within the Boto3 SDK.<br/>
+When making API calls to an AWS service with Boto3, one does so via a _Client_ or a _Resource_.
+
+_Sessions_ are fundamental to both Clients and Resources and how both get access to AWS credentials.
+
+<details style="padding: 0 0 0 1em;">
+  <summary>Client</summary>
+
+Provides low-level access to AWS services by exposing the `botocore` client to the developer.
+
+Typically maps 1:1 with the related service's API and supports all operations for the called service.<br/>
+Exposes Python-fashioned method names (e.g. ListBuckets API => list_buckets method).
+
+Typically yields primitive, non-marshalled AWS data.<br/>
+E.g. DynamoDB attributes are dictionaries representing primitive DynamoDB values.
+
+Limited to listing at most 1000 objects, requiring the developer to deal with result pagination in code.<br/>
+Use a [paginator][boto3 paginators] or implement one's own loop.
+
+  <details style="padding: 0 0 1em 1em;">
+    <summary>Example</summary>
+
+```py
+import boto3
+
+client = boto3.client('s3')
+response = client.list_objects_v2(Bucket='mybucket')
+for content in response['Contents']:
+    obj_dict = client.get_object(Bucket='mybucket', Key=content['Key'])
+    print(content['Key'], obj_dict['LastModified'])
+```
+
+  </details>
+</details>
+
+<details style="padding: 0 0 0 1em;">
+  <summary>Resource</summary>
+
+Refer [Boto3 resources].
+
+Provides high-level, object-oriented code.
+
+Does **not** provide 100% API coverage of AWS services.
+
+Uses identifiers and attributes, has actions (operations on resources), and exposes sub-resources and collections of
+AWS resources.
+
+Typically yields marshalled data, **not** primitive AWS data.<br/>
+E.g. DynamoDB attributes are native Python values representing primitive DynamoDB values.
+
+Takes care of result pagination.<br/>
+The resulting collections of sub-resources are lazily-loaded.
+
+Resources are **not** thread safe and should **not** be shared across threads or processes.<br/>
+Create a new Resource for each thread or process instead.
+
+Since January 2023 the AWS Python SDK team stopped adding new features to the resources interface in Boto3.<br/>
+Newer service features can be accessed through the Client interface.<br/>
+Refer [More info about resource deprecation?] for more information.
+
+  <details style="padding: 0 0 1em 1em;">
+    <summary>Example</summary>
+
+```py
+import boto3
+
+s3 = boto3.resource('s3')
+bucket = s3.Bucket('mybucket')
+for obj in bucket.objects.all():
+    print(obj.key, obj.last_modified)
+```
+
+  </details>
+</details>
+
+<details style="padding: 0 0 1em 1em;">
+  <summary>Session</summary>
+
+Refer [Boto3 sessions].
+
+Stores configuration information (primarily credentials and selected AWS Region).<br/>
+Initiates the connectivity to AWS services.
+
+Leveraged by service Clients and Resources.<br/>
+boto3 creates a default session automatically when needed, using the default credential profile.<br/>
+The default credentials profile uses the `~/.aws/credentials` file if found, or tries assuming the role of the executing
+machine if not.
+
+</details>
+
 ## Further readings
 
 - [EC2]
@@ -345,6 +446,9 @@ creation of non-compliant resources.
 - [Best Practices for Tagging AWS Resources]
 - [Automating DNS-challenge based LetsEncrypt certificates with AWS Route 53]
 - AWS' [CLI]
+- [Tools to Build on AWS]
+- [Boto3 documentation]
+- [More info about resource deprecation?]
 
 ### Sources
 
@@ -371,6 +475,10 @@ creation of non-compliant resources.
 - [Creating organization policies with AWS Organizations]
 - [AWS re:Invent 2022 - Advanced VPC design and new Amazon VPC capabilities (NET302)]
 - [Enable or disable AWS Regions in your account]
+- [Difference in Boto3 between resource, client, and session?]
+- [Boto3 resources]
+- [Boto3 sessions]
+- [Boto3 paginators]
 
 <!--
   Reference
@@ -409,6 +517,10 @@ creation of non-compliant resources.
 [aws public ip address ranges now available in json form]: https://aws.amazon.com/blogs/aws/aws-ip-ranges-json/
 [aws re:invent 2022 - advanced vpc design and new amazon vpc capabilities (net302)]: https://www.youtube.com/watch?v=cbUNbK8ZdA0&pp=ygUWYW1hem9uIGludmVudCAyMDIyIHZwYw%3D%3D
 [best practices for tagging aws resources]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html
+[boto3 documentation]: https://boto3.amazonaws.com/v1/documentation/api/latest/index.html
+[boto3 paginators]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/paginators.html
+[boto3 resources]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/resources.html
+[boto3 sessions]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/session.html
 [connect to the internet using an internet gateway]: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
 [creating organization policies with aws organizations]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_policies_create.html
@@ -418,12 +530,14 @@ creation of non-compliant resources.
 [guidance for tagging on aws]: https://aws.amazon.com/solutions/guidance/tagging-on-aws/
 [how can i use aws kms asymmetric keys to encrypt a file using openssl?]: https://repost.aws/knowledge-center/kms-openssl-encrypt-key
 [i'm trying to export a snapshot from amazon rds mysql to amazon s3, but i'm receiving an error. why is this happening?]: https://repost.aws/knowledge-center/rds-mysql-export-snapshot
+[more info about resource deprecation?]: https://github.com/boto/boto3/discussions/3563
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [rotating aws kms keys]: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
 [savings plans user guide]: https://docs.aws.amazon.com/savingsplans/latest/userguide/
 [services that publish cloudwatch metrics]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
 [subnets for your vpc]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html
 [test your roles' access policies using the aws identity and access management policy simulator]: https://aws.amazon.com/blogs/security/test-your-roles-access-policies-using-the-aws-identity-and-access-management-policy-simulator/
+[tools to build on aws]: https://aws.amazon.com/developer/tools/
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
 [what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
@@ -434,5 +548,6 @@ creation of non-compliant resources.
 [aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
 [aws savings plans vs. reserved instances: when to use each]: https://www.cloudzero.com/blog/savings-plans-vs-reserved-instances/
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
+[difference in boto3 between resource, client, and session?]: https://stackoverflow.com/questions/42809096/difference-in-boto3-between-resource-client-and-session
 [image baking in aws using packer and image builder]: https://dev.to/santhoshnimmala/image-baking-in-aws-using-packer-and-image-builder-1ed3
 [using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
