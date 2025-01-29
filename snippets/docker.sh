@@ -1,5 +1,9 @@
 #!/usr/bin/env sh
 
+docker info
+docker info -f 'json'
+docker system info --format '{{range .Plugins.Volume}}{{println .}}{{end}}'
+
 docker images -a
 docker images --digests
 
@@ -27,3 +31,14 @@ docker inspect 'prometheus-1'  # container
 
 # Install compose directly from package
 dnf install 'https://download.docker.com/linux/fedora/41/aarch64/stable/Packages/docker-compose-plugin-2.32.1-1.fc41.aarch64.rpm'
+
+# Create non-standard volumes
+docker volume create --driver 'flocker' -o 'size=20GB' 'my-named-volume'
+docker volume create --driver 'local' --opt 'type=tmpfs' --opt 'device=tmpfs' --opt 'o=size=100m,uid=1000' 'foo'
+docker volume create --driver 'local' --opt 'type=btrfs' --opt 'device=/dev/sda2'
+docker volume create --driver 'convoy' --opt 'size=100m' 'test'
+
+# Use temporary, size-limited volumes in Mac OS X
+# The example uses a 2GB RAM disk
+hdiutil attach -nomount 'ram://4194304' | xargs diskutil erasevolume HFS+ 'ramdisk' \
+&& docker run --rm --name 'alpine' -v "/Volumes/ramdisk/:/ramdisk" -it 'alpine' sh
