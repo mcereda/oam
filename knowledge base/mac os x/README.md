@@ -4,6 +4,7 @@
 1. [Taking screenshots](#taking-screenshots)
 1. [Record the screen](#record-the-screen)
 1. [Hidden settings](#hidden-settings)
+   1. [Prevent Apple silicon laptops from turning on when opening their lid or connecting to power](#prevent-apple-silicon-laptops-from-turning-on-when-opening-their-lid-or-connecting-to-power)
 1. [Image manipulation](#image-manipulation)
 1. [Resize PDF files](#resize-pdf-files)
 1. [Manage tags](#manage-tags)
@@ -207,6 +208,44 @@ Use Quicktime Player to capture an area or the full screen by opening the applic
 ## Hidden settings
 
 See the [`defaults`][defaults] command.
+
+### Prevent Apple silicon laptops from turning on when opening their lid or connecting to power
+
+Mac laptops with Apple silicon automatically turn on and start up when one opens their lid or connects them to power.
+
+From macOS Sequoia 15, one can change this behavior.<br/>
+This will **not** affect one's ability to use the keyboard or trackpad to turn on the Mac.
+
+<details style="padding: 0 0 0 1em">
+  <summary>Prevent startup when opening the lid or connecting to power</summary>
+
+```sh
+sudo nvram BootPreference=%00
+```
+
+</details>
+<details style="padding: 0 0 0 1em">
+  <summary>Prevent startup only when opening the lid</summary>
+
+```sh
+sudo nvram BootPreference=%01
+```
+
+</details>
+<details style="padding: 0 0 1em 1em">
+  <summary>Prevent startup only when connecting to power</summary>
+
+```sh
+sudo nvram BootPreference=%02
+```
+
+</details>
+
+Undo any of the previous commands and reenable automatic startup when opening the lid or connecting to power:
+
+```sh
+sudo nvram -d BootPreference
+```
 
 ## Image manipulation
 
@@ -545,6 +584,7 @@ your Mac, or after your Mac begins to restart. Keep holding until the described 
 - [Remap Home and End Keys?]
 - [trusktr's default keybindings]
 - [Improve docker volume performance on MacOS with a RAM disk]
+- [Prevent a Mac laptop from turning on when opening its lid or connecting to power]
 
 <!--
   Reference
@@ -568,6 +608,7 @@ your Mac, or after your Mac begins to restart. Keep holding until the described 
 <!-- Upstream -->
 [compress a pdf in preview on mac]: https://support.apple.com/guide/preview/compress-a-pdf-prvw1509/mac
 [mac startup key combinations]: https://support.apple.com/en-us/HT201255
+[prevent a mac laptop from turning on when opening its lid or connecting to power]: https://support.apple.com/en-us/120622
 [resize, rotate, or flip an image in preview on mac]: https://support.apple.com/guide/preview/resize-rotate-or-flip-an-image-prvw2015/11.0/mac/13.0
 
 <!-- Others -->
