@@ -149,12 +149,22 @@
         fz:options="{&quot;version&quot;:2,&quot;updates&quot;:{&quot;enabled&quot;:true,&quot;updateMinutes&quot;:100,&quot;updateUnits&quot;:&quot;min&quot;,&quot;lastUpdateTime&quot;:1707679659137,&quot;lastDownloadTime&quot;:1706143484349,&quot;updatePeriod&quot;:&quot;&quot;,&quot;updateFrequency&quot;:&quot;&quot;,&quot;updateBase&quot;:&quot;&quot;},&quot;category&quot;:{&quot;enabled&quot;:false,&quot;prefixEnabled&quot;:false,&quot;prefix&quot;:&quot;&quot;}}"
       />
     </outline>
-    <outline title="Azure service updates">
+    <outline title="Azure">
       <outline
         title="Azure service updates"
         text="Azure service updates"
-        htmlUrl="https://azure.microsoft.com/en-us/updates/"
-        xmlUrl="https://azurecomcdn.azureedge.net/en-us/updates/feed/"
+        htmlUrl="https://azure.microsoft.com/en-us/updates"
+        xmlUrl="https://www.microsoft.com/releasecommunications/api/v2/Azure/rss"
+        type="rss"
+        version="RSS"
+        fz:quickMode="false"
+        fz:options="{&quot;version&quot;:2,&quot;updates&quot;:{&quot;enabled&quot;:true,&quot;updateMinutes&quot;:100,&quot;updateUnits&quot;:&quot;min&quot;,&quot;lastUpdateTime&quot;:1707679667396,&quot;lastDownloadTime&quot;:1707647512527,&quot;updatePeriod&quot;:&quot;&quot;,&quot;updateFrequency&quot;:&quot;&quot;,&quot;updateBase&quot;:&quot;&quot;},&quot;category&quot;:{&quot;enabled&quot;:false,&quot;prefixEnabled&quot;:false,&quot;prefix&quot;:&quot;&quot;}}"
+      />
+      <outline
+        title="Azure feeds"
+        text="Azure feeds"
+        htmlUrl="https://azurefeeds.com/"
+        xmlUrl="https://azurefeeds.com/feed/"
         type="rss"
         version="RSS"
         fz:quickMode="false"
@@ -212,32 +222,12 @@
       <outline
         title="Gitlab Inc. News Releases"
         text="Gitlab Inc. News Releases"
-        htmlUrl="https://ir.gitlab.com/"
-        xmlUrl="https://ir.gitlab.com/rss/news-releases.xml"
+        htmlUrl="https://about.gitlab.com/blog/"
+        xmlUrl="https://about.gitlab.com/atom.xml"
         type="rss"
         version="RSS"
         fz:quickMode="false"
         fz:options="{&quot;version&quot;:2,&quot;updates&quot;:{&quot;enabled&quot;:true,&quot;updateMinutes&quot;:100,&quot;updateUnits&quot;:&quot;min&quot;,&quot;lastUpdateTime&quot;:1707679656962,&quot;lastDownloadTime&quot;:null,&quot;updatePeriod&quot;:&quot;&quot;,&quot;updateFrequency&quot;:&quot;&quot;,&quot;updateBase&quot;:&quot;&quot;},&quot;category&quot;:{&quot;enabled&quot;:false,&quot;prefixEnabled&quot;:false,&quot;prefix&quot;:&quot;&quot;}}"
-      />
-      <outline
-        title="Gitlab Inc. Events"
-        text="Gitlab Inc. Events"
-        htmlUrl="https://ir.gitlab.com/"
-        xmlUrl="https://ir.gitlab.com/rss/events.xml"
-        type="rss"
-        version="RSS"
-        fz:quickMode="false"
-        fz:options="{&quot;version&quot;:2,&quot;updates&quot;:{&quot;enabled&quot;:true,&quot;updateMinutes&quot;:100,&quot;updateUnits&quot;:&quot;min&quot;,&quot;lastUpdateTime&quot;:1707679656754,&quot;lastDownloadTime&quot;:null,&quot;updatePeriod&quot;:&quot;&quot;,&quot;updateFrequency&quot;:&quot;&quot;,&quot;updateBase&quot;:&quot;&quot;},&quot;category&quot;:{&quot;enabled&quot;:false,&quot;prefixEnabled&quot;:false,&quot;prefix&quot;:&quot;&quot;}}"
-      />
-      <outline
-        title="Gitlab Inc. SEC Filings"
-        text="Gitlab Inc. SEC Filings"
-        htmlUrl="https://ir.gitlab.com/"
-        xmlUrl="https://ir.gitlab.com/rss/sec-filings.xml"
-        type="rss"
-        version="RSS"
-        fz:quickMode="false"
-        fz:options="{&quot;version&quot;:2,&quot;updates&quot;:{&quot;enabled&quot;:true,&quot;updateMinutes&quot;:100,&quot;updateUnits&quot;:&quot;min&quot;,&quot;lastUpdateTime&quot;:1707679656812,&quot;lastDownloadTime&quot;:null,&quot;updatePeriod&quot;:&quot;&quot;,&quot;updateFrequency&quot;:&quot;&quot;,&quot;updateBase&quot;:&quot;&quot;},&quot;category&quot;:{&quot;enabled&quot;:false,&quot;prefixEnabled&quot;:false,&quot;prefix&quot;:&quot;&quot;}}"
       />
     </outline>
 
