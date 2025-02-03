@@ -25,6 +25,34 @@ aws autoscaling rollback-instance-refresh --auto-scaling-group-name 'ProductionS
 
 
 ###
+# Chatbot
+# ------------------
+###
+
+# List Slack workspaces
+aws chatbot describe-slack-workspaces
+aws chatbot describe-slack-workspaces --query 'SlackWorkspaces'
+
+# Show Slack channel configurations
+aws chatbot describe-slack-channel-configurations
+aws chatbot describe-slack-channel-configurations --query 'SlackChannelConfigurations'
+
+
+###
+# CloudWatch
+# ------------------
+###
+
+# List available metrics
+aws cloudwatch list-metrics --namespace 'AWS/EC2'
+aws cloudwatch list-metrics --namespace 'AWS/EC2' --metric-name 'CPUUtilization'
+aws cloudwatch list-metrics --namespace 'AWS/EC2' --dimensions 'Name=InstanceId,Value=i-1234567890abcdef0' --query 'Metrics[].MetricName'
+
+# Show alarms information
+aws cloudwatch describe-alarms-for-metric --metric-name 'CPUUtilization' --namespace 'AWS/EC2' --dimensions 'Name=InstanceId,Value=i-1234567890abcdef0'
+
+
+###
 # Cognito
 # ------------------
 ###
@@ -347,3 +375,23 @@ aws s3api list-objects-v2 --bucket 'backup'
 aws s3api list-objects-v2 --bucket 'backup' --query "Contents[?LastModified>='2022-01-05T08:05:37+00:00'].Key"
 
 aws s3api list-buckets --output 'text' --query 'Buckets[].Name' | xargs -pn '1' aws s3api list-multipart-uploads --bucket
+
+
+###
+# SNS
+# ------------------
+###
+
+# List topics
+aws sns list-topics
+
+# Get information about topics
+aws sns get-topic-attributes --topic-arn 'arn:aws:sns:eu-west-1:012345678901:aSucculentTopic'
+
+# List subscriptions
+aws sns list-subscriptions
+aws sns list-subscriptions --query 'Subscriptions'
+aws sns list-subscriptions-by-topic --topic-arn 'arn:aws:sns:eu-west-1:012345678901:aSucculentTopic'
+
+# Get information about subscriptions
+aws sns get-subscription-attributes --subscription-arn 'arn:aws:sns:eu-west-1:012345678901:aSucculentTopic:abcdef01-2345-6789-abcd-ef0123456789'

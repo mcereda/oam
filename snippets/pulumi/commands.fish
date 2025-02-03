@@ -87,3 +87,4 @@ pulumi import 'aws:ec2/securityGroup:SecurityGroup' 'internalOps' 'sg-0123456789
 pulumi import 'aws:iam/user:User' 'jimmy' 'jimmy' --generate-code='false'
 pulumi import 'aws:route53/record:Record' 'hoppscotch' 'ZGG4442BC3E8M_hoppscotch.example.org_A'
 pulumi import 'aws:cloudwatch/metricAlarm:MetricAlarm' 'prometheus-ec2-CPUUtilization' 'prometheus-ec2-CPUUtilization-drc5644'
+pulumi import 'aws:chatbot/slackChannelConfiguration:SlackChannelConfiguration' 'alarms' 'arn:aws:chatbot::012345678901:chat-configuration/slack-channel/alarms'
