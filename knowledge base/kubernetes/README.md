@@ -40,6 +40,7 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 1. [Edge computing](#edge-computing)
 1. [Troubleshooting](#troubleshooting)
     1. [Dedicate Nodes to specific workloads](#dedicate-nodes-to-specific-workloads)
+    1. [Golang applications have trouble performing as expected](#golang-applications-have-trouble-performing-as-expected)
     1. [Recreate Pods upon ConfigMap's or Secret's content change](#recreate-pods-upon-configmaps-or-secrets-content-change)
     1. [Run a command in a Pod right after its initialization](#run-a-command-in-a-pod-right-after-its-initialization)
     1. [Run a command just before a Pod stops](#run-a-command-just-before-a-pod-stops)
@@ -883,6 +884,17 @@ Leverage taints and node affinity:
        value: "devs"
        effect: "NoSchedule"
    ```
+
+### Golang applications have trouble performing as expected
+
+By default, Golang sets the `GOMAXPROCS` environment variable (the number of OS threads for Go code execution) **to the
+number of available CPUs on the node running the Pod**.<br/>
+This is **different** from the amount of resources the Pod is allocated when a CPU limit is set in the Pod's
+specification, and the Go scheduler might try to run more or less threads than the application has CPU time for.
+
+Properly set the `GOMAXPROCS` environment variable in the Pod's specification to match the limits imposed to the
+Pod.<br/>
+If the CPU limit is less than `1000m` (1 CPU core), set `GOMAXPROCS=1`.
 
 ### Recreate Pods upon ConfigMap's or Secret's content change
 
