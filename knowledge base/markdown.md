@@ -171,6 +171,7 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 - [Github's alert formatting][github formatting  alerts]
 - [Live editor]
 - [Mermaid.js]
+- [MyST] extension for technical, scientific communication and publication
 
 ### Sources
 
@@ -207,3 +208,4 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 [slaise/high-level-markdown]: https://github.com/slaise/High-level-Markdown
 [syntax highlighting in markdown]: https://support.codebasehq.com/articles/tips-tricks/syntax-highlighting-in-markdown
 [the magical markdown i bet you don't know]: https://medium.com/codex/the-magical-markdown-i-bet-you-dont-know-b51f8c049773
+[myst]: https://mystmd.org/
