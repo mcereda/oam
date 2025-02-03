@@ -105,6 +105,8 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | [S3]                          | Storage                                       |
 | [Sagemaker]                   | Machine learning                              |
 | [Security Hub]                | Aggregator for security findings              |
+| [SNS]                         | Pub/sub message delivery                      |
+| [SQS]                         | Queues                                        |
 
 [Service icons][aws icons] are publicly available for diagrams and such.
 Public service IP address ranges are [available in JSON form][aws public ip address ranges now available in json form]
@@ -510,6 +512,8 @@ machine if not.
 [route53]: route53.md
 [s3]: s3.md
 [sagemaker]: sagemaker.md
+[sns]: sns.md
+[sqs]: sqs.md
 
 <!-- Upstream -->
 [access aws services through aws privatelink]: https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-access-aws-services.html
