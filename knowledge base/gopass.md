@@ -142,6 +142,9 @@ gopass templates new …
 # Use templates to create new secrets.
 gopass edit -c 'path/to/folder/with/template'/'secret'
 
+# Move templates.
+mv 'path/to/gopass/repo/path/to/folder/with/template/.pass-template' 'path/to/gopass/repo/path/to/destination'
+
 # Remove templates.
 gopass templates remove 'path/to/folder'
 gopass templates rm …
