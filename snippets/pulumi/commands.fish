@@ -82,9 +82,11 @@ jq '.dependencies."@pulumi/aws" |= "6.66.2"' 'package.json' | sponge 'package.js
 && pulumi install && pulumi update --suppress-outputs
 
 # Import resources
+# Could use `--suppress-outputs --generate-code='false' --protect=false` for some
+pulumi import 'aws:chatbot/slackChannelConfiguration:SlackChannelConfiguration' 'alarms' 'arn:aws:chatbot::012345678901:chat-configuration/slack-channel/alarms'
+pulumi import 'aws:cloudwatch/metricAlarm:MetricAlarm' 'prometheus-ec2-CPUUtilization' 'prometheus-ec2-CPUUtilization-drc5644'
 pulumi import 'aws:ec2/instance:Instance' 'logstash' 'i-abcdef0123456789a'
 pulumi import 'aws:ec2/securityGroup:SecurityGroup' 'internalOps' 'sg-0123456789abcdef0'
-pulumi import 'aws:iam/user:User' 'jimmy' 'jimmy' --generate-code='false'
+pulumi import 'aws:iam/user:User' 'jimmy' 'jimmy'
+pulumi import 'aws:rds/instance:Instance' 'staging' 'odoo-staging-replica'
 pulumi import 'aws:route53/record:Record' 'hoppscotch' 'ZGG4442BC3E8M_hoppscotch.example.org_A'
-pulumi import 'aws:cloudwatch/metricAlarm:MetricAlarm' 'prometheus-ec2-CPUUtilization' 'prometheus-ec2-CPUUtilization-drc5644'
-pulumi import 'aws:chatbot/slackChannelConfiguration:SlackChannelConfiguration' 'alarms' 'arn:aws:chatbot::012345678901:chat-configuration/slack-channel/alarms'
