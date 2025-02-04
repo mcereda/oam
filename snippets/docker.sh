@@ -21,6 +21,10 @@ docker login
 docker login -u 'whatever' -p 'glpat-ABC012def345GhI678jKl' 'gitlab.example.org:5050'
 aws ecr get-login-password | docker login --username 'AWS' --password-stdin '012345678901.dkr.ecr.eu-west-1.amazonaws.com'
 
+# Get image digests with*out* pulling them
+docker buildx imagetools inspect 'pulumi/pulumi-nodejs' --format '{{ json .Manifest.Digest }}'
+docker buildx imagetools inspect 'pulumi/pulumi-nodejs' --format '{{ json .Manifest }}' | jq -r '.digest' -
+
 # Send images to remote nodes with Docker
 docker save 'local/image:latest' | ssh -C 'user@remote.host' docker load
 
