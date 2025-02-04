@@ -160,7 +160,10 @@ Instance store volumes are **included** as part of the usage cost of an instance
 Instances publish a default set of metrics to CloudWatch with no charge.<br/>
 One can change this set by configuring the CloudWatch agent.
 
-Refer [How can I send memory and disk metrics from my EC2 instances to CloudWatch?].
+[Recommended alarms].
+
+Refer [How can I send memory and disk metrics from my EC2 instances to CloudWatch?] and
+[Monitor AWS EC2 memory utilization and set CloudWatch Alarm].
 
 > Make sure the instance the permissions it needs to publish extra metrics.<br/>
 > Consider assigning it the AWS-managed `CloudWatchAgentServerPolicy` IAM policy or similar permissions.
@@ -243,6 +246,7 @@ TODO
 - [How can I send memory and disk metrics from my EC2 instances to CloudWatch?]
 - [Device names for volumes on Amazon EC2 instances]
 - [Amazon EBS volume limits for Amazon EC2 instances]
+- [Recommended alarms]
 
 ### Sources
 
@@ -262,6 +266,7 @@ TODO
 - [CompleteLifecycleAction]
 - [Instance store temporary block storage for EC2 instances]
 - [Attach an EBS volume to multiple EC2 instances using Multi-Attach]
+- [Monitor AWS EC2 memory utilization and set CloudWatch Alarm]
 
 <!--
   Reference
@@ -295,6 +300,7 @@ TODO
 [iam roles for amazon ec2]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
 [instance store temporary block storage for ec2 instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html
 [key concepts and definitions for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-credits-baseline-concepts.html
+[recommended alarms]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Best_Practice_Recommended_Alarms_AWS_Services.html#EC2
 [retrieve instance metadata]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
 [standard mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-standard-mode.html
 [unlimited mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-unlimited-mode.html
@@ -305,3 +311,4 @@ TODO
 [aws ec2 instance pricing comparison]: https://ec2instances.github.io/
 [ec2instances.info on vantage.sh]: https://instances.vantage.sh/
 [configuring ec2 disk alert using amazon cloudwatch]: https://medium.com/@chandinims001/configuring-ec2-disk-alert-using-amazon-cloudwatch-793807e40d72
+[monitor aws ec2 memory utilization and set cloudwatch alarm]: https://medium.com/@VaibhaviDeshmukh07/monitor-aws-ec2-memory-utilization-and-set-cloudwatch-alarm-a53d0e0b1eeb
