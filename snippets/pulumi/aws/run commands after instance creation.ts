@@ -9,7 +9,7 @@
 import * as aws from "@pulumi/aws";
 import * as command from "@pulumi/command";
 
-const instance_output = new aws.ec2.getInstanceOutput({
+const instance_output = aws.ec2.getInstanceOutput({
     filters: [{
         name: "tag:Name",
         values: [ "instance-name-tag" ],

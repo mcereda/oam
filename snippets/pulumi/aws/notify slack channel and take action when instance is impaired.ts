@@ -1,6 +1,6 @@
 import * as aws from "@pulumi/aws";
 
-const instance_output = new aws.ec2.getInstanceOutput({
+const instance_output = aws.ec2.getInstanceOutput({
     filters: [{
         name: "tag:Name",
         values: [ "instance-name-tag" ],
@@ -68,49 +68,83 @@ new aws.chatbot.SlackChannelConfiguration(
     },
 );
 
-new aws.cloudwatch.MetricAlarm(
-    "prometheusServer_systemStatus",
-    {
-        name: "PrometheusServer_SystemStatus",
-        alarmDescription: "Notify and recover when the System status check fails 5 consecutive times over 5 minutes.",
+instance_output.id.apply( ( instanceId: string ) => {
+    // refer https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Best_Practice_Recommended_Alarms_AWS_Services.html#EC2
 
-        namespace: "AWS/EC2",
-        dimensions: {
-            InstanceId: instance_output.id,
-        },
-        metricName: "StatusCheckFailed_System",
-        statistic: "Maximum",
-        unit: "Count",
-        comparisonOperator: "GreaterThanOrEqualToThreshold",
-        threshold: 1,
-        evaluationPeriods: 5,
-        period: 60,
-        alarmActions: [
-            notifications_snsTopic.arn,
-            "arn:aws:automate:eu-west-1:ec2:recover",
-        ],
-    },
-);
-new aws.cloudwatch.MetricAlarm(
-    "prometheusServer_instanceStatus",
-    {
-        name: "PrometheusServer_instanceStatus",
-        alarmDescription: "Notify and reboot when the Instance status check fails 5 consecutive times over 5 minutes.",
+    new aws.cloudwatch.MetricAlarm(
+        `${instanceId}_systemStatus`,
+        {
+            name: `${instanceId}_SystemStatus`,
+            alarmDescription: "Notify on Slack and recover the instance when the System status check fails 2 consecutive times over 10 minutes.",
 
-        namespace: "AWS/EC2",
-        dimensions: {
-            InstanceId: instance_output.id,
+            namespace: "AWS/EC2",
+            dimensions: {
+                InstanceId: instanceId,
+            },
+            metricName: "StatusCheckFailed_System",
+            statistic: "Maximum",
+            unit: "Count",
+            comparisonOperator: "GreaterThanOrEqualToThreshold",
+            threshold: 1,
+            period: 300,
+            evaluationPeriods: 2,
+            datapointsToAlarm: 2,
+            alarmActions: [
+                notifications_snsTopic.arn,
+                "arn:aws:automate:eu-west-1:ec2:recover",
+            ],
         },
-        metricName: "StatusCheckFailed_Instance",
-        statistic: "Maximum",
-        unit: "Count",
-        comparisonOperator: "GreaterThanOrEqualToThreshold",
-        threshold: 1,
-        evaluationPeriods: 5,
-        period: 60,
-        alarmActions: [
-            notifications_snsTopic.arn,
-            "arn:aws:swf:eu-west-1:012345678901:action/actions/AWS_EC2.InstanceId.Reboot/1.0",
-        ],
-    },
-);
+    );
+
+    new aws.cloudwatch.MetricAlarm(
+        `${instanceId}_instanceStatus`,
+        {
+            name: `${instanceId}_InstanceStatus`,
+            alarmDescription: "Notify on Slack and restart the instance when the Instance status check fails 2 consecutive times over 10 minutes.",
+
+            namespace: "AWS/EC2",
+            dimensions: {
+                InstanceId: instanceId,
+            },
+            metricName: "StatusCheckFailed_Instance",
+            statistic: "Maximum",
+            unit: "Count",
+            comparisonOperator: "GreaterThanOrEqualToThreshold",
+            threshold: 1,
+            period: 300,
+            evaluationPeriods: 2,
+            datapointsToAlarm: 2,
+            alarmActions: [
+                notifications_snsTopic.arn,
+                "arn:aws:swf:eu-west-1:012345678901:action/actions/AWS_EC2.InstanceId.Reboot/1.0",
+            ],
+        },
+    );
+
+    new aws.cloudwatch.MetricAlarm(
+        `${instanceId}-cpuUtilization`,
+        {
+            name: `${instanceId}_CPUUtilization`,
+            alarmDescription: "Notify on Slack when the CPU utilization is above 80% 3 consecutive times over 15 minutes.",
+            tags: {
+                Controls: "SOC2/CC7.2",
+            },
+
+            namespace: "AWS/EC2",
+            dimensions: {
+                InstanceId: instanceId
+            },
+            metricName: "CPUUtilization",
+            statistic: "Average",
+            comparisonOperator: "GreaterThanThreshold",
+            threshold:  80,
+            period: 300,
+            evaluationPeriods: 3,
+            datapointsToAlarm: 3,
+            alarmActions: [
+                notifications_snsTopic.arn,
+            ],
+        },
+    );
+
+});
