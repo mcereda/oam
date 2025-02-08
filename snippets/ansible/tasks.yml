@@ -870,14 +870,15 @@
         - name: Take difference between dotnet (100ns precision) and iso8601 microsecond timestamps
           vars:
             date1: '2022-11-15T03:23:13.6869568Z'
-            date2: '2021-12-15T16:06:24.400087Z'
+            date2: '2021-12-15 16:06:24.400087Z'
             date1_short:
-              # Shorten to microseconds
-              # Works for any timestamp that has higher than microsecond precision by cutting off anything more precise than that
-              '{{ date1 | regex_replace("([^.]+)(\.\d{6})(\d*)(.+)", "\1\2\4") }}'
+              # Cap to microseconds for any timestamp with higher precision
+              '{{ date1 | regex_replace("([^.]+)(\.\d{6})\d*(.+)", "\1\2\3") }}'
             iso8601format: '%Y-%m-%dT%H:%M:%S.%fZ'
+            rfc3339format: '%Y-%m-%d %H:%M:%S.%fZ'
           ansible.builtin.set_fact:
-            date_diff_isoed: '{{ (date1_short|to_datetime(iso8601format) - date2|to_datetime(iso8601format)).total_seconds() }}'
+            date_diff: >-
+              {{ (date1_short|to_datetime(iso8601format) - date2|to_datetime(rfc3339format)).total_seconds() }}
 
 - name: AWS-specific operations
   tags:
