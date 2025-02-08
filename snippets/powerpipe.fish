@@ -18,6 +18,9 @@ powerpipe mod install 'github.com/turbot/steampipe-mod-aws-compliance@^1'
 powerpipe mod install --dry-run 'steampipe-mod-aws-compliance'
 powerpipe mod install --dry-run 'github.com/turbot/steampipe-mod-aws-compliance@v0.93.0' 'github.com/turbot/steampipe-mod-aws-insights'
 
+powerpipe mod update
+powerpipe mod update 'github.com/turbot/steampipe-mod-aws-insights'
+
 powerpipe benchmark list
 
 powerpipe plugin install 'aws_compliance.benchmark.soc2'
