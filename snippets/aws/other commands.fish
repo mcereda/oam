@@ -246,6 +246,11 @@ aws ec2 describe-network-interfaces --output 'text' \
 # ------------------
 ###
 
+# Create users
+# Only 1 user can exist with a specific username, no matter its path
+aws iam create-user --user-name 'quistis'
+aws iam create-user --path '/alumni/' --user-name 'squall'
+
 # Get users' information
 aws iam get-user --user-name 'michele'
 
@@ -279,6 +284,28 @@ basename (aws sts get-caller-identity --query 'Arn' --output 'text') \
 
 # Add users to user groups
 aws iam add-user-to-group --group-name 'infra' --user-name 'matt'
+
+# Delete users
+aws iam delete-user --user-name 'sophie'
+
+
+# Create roles
+# Only 1 role can exist with a specific name, no matter its path
+aws iam create-role --role-name 'captain' --assume-role-policy-document 'file://captain-trustPolicy.json'
+aws iam create-role --role-name 'someService' --path '/services/' --assume-role-policy-document '{
+	"Version": "2012-10-17",
+	"Statement": [{
+		"Sid": "AllowEc2ToAssumeThisVeryRole",
+		"Effect": "Allow",
+		"Principal": {
+			"Service": "ec2.amazonaws.com"
+		},
+		"Action": "sts:AssumeRole"
+	}]
+}'
+
+# Delete roles
+aws iam delete-role --role-name 'someService'
 
 
 ###

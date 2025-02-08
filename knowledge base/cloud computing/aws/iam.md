@@ -103,6 +103,8 @@ Any activity performed by IAM Users in one's account is billed to the account.
 The number and size of IAM resources in an AWS account are limited.<br/>
 Refer [IAM and AWS STS quotas].
 
+Only **one** IAM User can exist with a specific username, no matter the path defined at its creation.
+
 ## Groups
 
 Refer [IAM user groups].
@@ -225,6 +227,8 @@ Trust is needed **both** ways, meaning Roles can be assumed if and only if **bot
 Roles are assumed in _sessions_.<br/>
 When assuming Roles, they provide the assuming identity with **temporary** security credentials that are only valid for
 that session.
+
+Only **one** IAM Role can exist with a specific name, no matter the path defined at its creation.
 
 ### Assume Roles
 
