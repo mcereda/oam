@@ -1,6 +1,9 @@
 {
     "editor.formatOnPaste": true,
     "editor.formatOnSaveMode": "modificationsIfAvailable",
+    "editor.rulers": [
+        120
+    ],
     "json.schemas": [
         {
             "fileMatch": [
