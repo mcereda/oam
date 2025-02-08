@@ -1246,6 +1246,80 @@
         all: true
       register: awx_export_output
 
+- name: DBLab-specific operations
+  tags: never
+  hosts: localhost
+  connection: local
+  vars:
+    dblab_port: 2345
+    max_snapshot_age_in_days: 15
+  vars_prompt:
+    - name: dblab_host
+      private: false
+    - name: dblab_token
+  pre_tasks:
+    - name: Print out run's variables
+      ansible.builtin.debug:
+        verbosity: 3
+        msg: >-
+          {{
+            dict([
+              [ 'host', dblab_host ],
+              [ 'port', dblab_port ],
+              [ 'token', dblab_token ],
+              [ 'max_snapshot_age_in_days', max_snapshot_age_in_days ],
+            ])
+          }}
+    - name: Check the snapshots
+      block:
+        - name: Gather snapshots' status
+          check_mode: false
+          ansible.builtin.uri:
+            url: https://{{ dblab_host }}:{{ dblab_port }}/snapshots
+            headers:
+              'verification-token': "{{ dblab_token }}"
+          register: snapshots_status
+        - name: Print out the request's results
+          ansible.builtin.debug:
+            verbosity: 3
+            var: snapshots_status.json
+        - name: Check the data is recent enough on both snapshots
+          ansible.builtin.assert:
+            that: >-
+              (
+                ansible_date_time.iso8601|to_datetime('%Y-%m-%dT%H:%M:%SZ') -
+                item.dataStateAt|to_datetime('%Y-%m-%dT%H:%M:%SZ')
+              ).days < max_snapshot_age_in_days
+            fail_msg: snapshot {{ item.id }} for pool {{ item.pool }} is too old
+          loop: "{{ snapshots_status.json }}"
+  tasks:
+    - name: Reset protected clones on {{ dblab_host }}
+      tags: reset_protected_clones
+      block:
+        - name: Gather clones on {{ dblab_host }}
+          check_mode: false
+          ansible.builtin.uri:
+            url: http://{{ dblab_host }}:{{ dblab_port }}/status
+            headers:
+              'verification-token': "{{ dblab_token }}"
+          register: instance_status
+        - name: Print out the request's results
+          ansible.builtin.debug:
+            verbosity: 3
+            var: instance_status.json
+        - name: Reset protected clones
+          vars:
+            protected_clones: "{{ instance_status.json.cloning.clones | selectattr('protected', 'equalto', true) }}"
+          ansible.builtin.uri:
+            url: http://{{ dblab_host }}:{{ dblab_port }}/clone/{{ item.id }}/reset
+            headers:
+              'verification-token': "{{ dblab_token }}"
+            body_format: json
+            body:
+              latest: true
+          loop: "{{ protected_clones }}"
+          register: reset_requests
+
 - name: Gitea-specific operations
   tags:
     - gitea
