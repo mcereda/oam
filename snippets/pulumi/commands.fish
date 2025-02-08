@@ -13,6 +13,12 @@ pulumi gen-completion 'fish' > "$HOME/.config/fish/completions/pulumi.fish"
 
 docker run --rm --name 'pulumi-nodejs-3.127.0' -ti 'pulumi/pulumi-nodejs:3.127.0' --version
 docker run --rm --name 'pulumi-nodejs-3.128.0' -ti --entrypoint 'bash' 'pulumi/pulumi-nodejs:3.128.0'
+docker run --rm --name 'pulumi' \
+	--env 'AWS_DEFAULT_REGION' --env 'AWS_ACCESS_KEY_ID' --env 'AWS_SECRET_ACCESS_KEY' --env 'AWS_PROFILE' \
+	--env-file '.env' --env-file '.env.local' \
+	-v '${PWD}:/pulumi/projects' -v '${HOME}/.aws:/root/.aws:ro' \
+	'pulumi/pulumi-nodejs:3.148.0@sha256:2463ac69ec760635a9320b9aaca4e374a9c220f54a6c8badef35fd47c1da5976' \
+	pulumi preview --suppress-outputs --stack 'dev'
 
 pulumi install
 pulumi install --reinstall
