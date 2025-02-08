@@ -12,6 +12,12 @@ docker volume inspect -f '{{ .Mountpoint }}' 'website'
 sudo vim '/var/lib/docker/volumes/website/_data/index.html'
 
 docker run -d --name 'some-nginx' -v '/some/content:/usr/share/nginx/html:ro' 'nginx'
+docker run --rm --name 'pulumi' \
+	--env 'AWS_DEFAULT_REGION' --env 'AWS_ACCESS_KEY_ID' --env 'AWS_SECRET_ACCESS_KEY' --env 'AWS_PROFILE' \
+	--env-file '.env' --env-file '.env.local' \
+	-v '${PWD}:/pulumi/projects' -v '${HOME}/.aws:/root/.aws:ro' \
+	'pulumi/pulumi-nodejs:3.148.0@sha256:2463ac69ec760635a9320b9aaca4e374a9c220f54a6c8badef35fd47c1da5976' \
+	pulumi preview --suppress-outputs --stack 'dev'
 
 docker logs --since '5m' -f 'dblab_server'
 docker logs --since '2024-09-07' 'dblab_server'
