@@ -52,20 +52,7 @@
     "markdown.extension.toc.orderedList": true,
     "markdown.validate.enabled": true,
     "[markdown]": {
-        "editor.rulers": [
-            120
-        ],
         "editor.wordWrap": "off"
-    },
-    "[python]": {
-        "editor.rulers": [
-            120
-        ]
-    },
-    "[yaml]": {
-        "editor.rulers": [
-            120
-        ]
     },
 
     "cSpell.language": "en,en-GB",
