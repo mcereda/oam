@@ -1,16 +1,15 @@
 # ZFS
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Gotchas](#gotchas)
-1. [Manjaro](#manjaro)
-1. [Raspberry Pi](#raspberry-pi)
-1. [Mac OS X](#mac-os-x)
+1. [Setup](#setup)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
 ## TL;DR
+
+<details>
+  <summary>Usage</summary>
 
 Pool-related:
 
@@ -149,29 +148,43 @@ sudo chown "$USER":'users' '/vault/data'
 sudo zpool export 'vault'
 ```
 
+</details>
+
 ## Gotchas
 
 - One **cannot shrink** an existing pool.
 - One **cannot remove vdevs** after a pool is created.
-- More than 9 drives in one RAIDZ can cause performance regression; use 2 RAIDZ with 5 drives each instead of 1 RAIDZ with 10 drives to avoid this.
+- More than 9 drives in one RAIDZ pool can cause performance regression.<br/>
+  Split drives up into multiple, possibly balanced, pools when reaching the 10 disks mark. E.g. use 2 RAIDZ pools with
+  5 drives each instead of a single pool with 10 drives.
 - One can **add** hot spares to a RAIDZ1 or RAIDZ2 pool.
 - One can replace a drive with a bigger one (but **not a smaller one**) one at a time.
 - One can mix MIRROR, RAIDZ1 and RAIDZ2 in a pool.
-- Datasets needs the mountpoint to be an **empty** folder to be mounted, unless explicitly mounted with the -O option of `zfs mount`.
-- Since the ZFS kernel modules are upgraded much less than the kernel (at least on Linux), **always make sure** the kernel version and the ZFS modules are compatible and upgraded together.
+- Datasets needs the mountpoint to be an **empty** folder to be mounted, unless explicitly mounted with `zfs mount`'s -O
+  option.
+- The ZFS kernel modules are upgraded **much less frequently** than the kernel (at least on Linux).<br/>
+  **Always make sure** one's kernel version and ZFS modules are compatible and upgraded together.
 
-## Manjaro
+## Setup
 
-Manjaro has prebuilt modules for ZFS, which package is the kernel's package postfixed by `-zfs` (e.g. for `linux-515` it is `linux515-zfs`)
+<details>
+  <summary>Manjaro</summary>
+
+Manjaro has prebuilt modules for ZFS, which package is the kernel's package postfixed by `-zfs` (e.g. `linux515-zfs` for
+for `linux-515`).
 
 ```sh
 # Install the modules' packages for all installed kernels.
 sudo pamac install $(mhwd-kernel --listinstalled | grep '*' | awk -F '* ' '{print $2}' | xargs -I {} echo {}-zfs)
 ```
 
-## Raspberry Pi
+</details>
 
-The `zfs-dkms` package cannot handle downloading and installing the Raspberry Pi kernel headers automatically, so they have to be installed prior of the ZFS-related packages:
+<details>
+  <summary>Raspberry Pi</summary>
+
+The `zfs-dkms` package cannot handle downloading and installing the Raspberry Pi kernel headers automatically, so they
+have to be installed prior of the ZFS-related packages:
 
 ```sh
 sudo apt install --upgrade 'raspberrypi-kernel' 'raspberrypi-kernel-headers'
@@ -181,7 +194,10 @@ sudo apt install 'zfs-dkms' 'zfsutils-linux'
 
 To be tested: If the running kernel has no updates, the packages installation might be performed together.
 
-## Mac OS X
+</details>
+
+<details>
+  <summary>Mac OS X</summary>
 
 ```sh
 # On M1 devices, this requires system extensions to be enabled in the Startup
@@ -192,23 +208,23 @@ brew install --cask 'openzfs'
 Pool options (`-o option`):
 
 - `ashift=XX`
-   - XX=9 for 512B sectors, XX=12 for 4KB sectors, XX=16 for 8KB sectors
-   - [reference](http://open-zfs.org/wiki/Performance_tuning#Alignment_Shift_.28ashift.29)
+  - XX=9 for 512B sectors, XX=12 for 4KB sectors, XX=16 for 8KB sectors
+  - [reference](http://open-zfs.org/wiki/Performance_tuning#Alignment_Shift_.28ashift.29)
 - `version=28`
-   - compatibility with ZFS on Linux
+  - compatibility with ZFS on Linux
 
 Filesystem options (`-O option`):
 
 - `atime=off`
 - `compression=on`
-   - activates compression with the default algorithm
-   - pool version 28 cannot use lz4
+  - activates compression with the default algorithm
+  - pool version 28 cannot use lz4
 - `copies=2`
-   - number of copies of data stored for the dataset
+  - number of copies of data stored for the dataset
 - `dedup=on`
-   - deduplication
-   - halves write speed
-   - [reference](http://open-zfs.org/wiki/Performance_tuning#Deduplication)
+  - deduplication
+  - halves write speed
+  - [reference](http://open-zfs.org/wiki/Performance_tuning#Deduplication)
 - `xattr=sa`
 
 ```sh
@@ -267,6 +283,8 @@ sudo zpool \
     '/dev/sdb'
 ```
 
+</details>
+
 ## Further readings
 
 - [OpenZFS docs]
@@ -286,15 +304,16 @@ All the references in the [further readings] section, plus the following:
 - [ZFS support + kernel, best approach]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- In-article sections -->
+[further readings]: #further-readings
 
 <!-- Upstream -->
 [openzfs docs]: https://openzfs.github.io/openzfs-docs/
 [oracle solaris zfs administration guide]: https://docs.oracle.com/cd/E19253-01/819-5461/index.html
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Others -->
 [aaron toponce's article on zfs administration]: https://pthree.org/2012/12/04/zfs-administration-part-i-vdevs/
