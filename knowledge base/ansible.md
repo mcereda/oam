@@ -48,6 +48,7 @@
     1. [Only run a task when explicitly requested](#only-run-a-task-when-explicitly-requested)
     1. [Using AWS' SSM with Ansible fails with error _Failed to create temporary directory_](#using-aws-ssm-with-ansible-fails-with-error-failed-to-create-temporary-directory)
     1. [Future feature annotations is not defined](#future-feature-annotations-is-not-defined)
+    1. [Boolean variables given from the CLI are treated as strings](#boolean-variables-given-from-the-cli-are-treated-as-strings)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -89,6 +90,8 @@ ansible-playbook 'path/to/playbook.yml' --syntax-check
 ansible-playbook 'path/to/playbook.yml' -i 'hosts.list'
 ansible-playbook … -i 'host1,host2,hostN,' -l 'hosts,list'
 ansible-playbook … -i 'host1,host2,other,' -l 'hosts-pattern' --step
+ansible-playbook … -e 'someKey=someValue someOtherKey=someOtherValue' -e 'extraKey=extraValue'
+ansible-playbook … -e '{ "boolean_value_requires_json_format": true }'
 
 # Show what changes (with details) a play would apply to the local machine.
 ansible-playbook 'path/to/playbook.yml' -i 'localhost,' -c 'local' -vvC
@@ -165,8 +168,8 @@ diff 'some_role/files/ssh.key.plain' <(ansible-vault view --vault-password-file 
 
 # Use AWS SSM for connections.
 ansible-playbook 'playbook.yaml' -DCvvv \
-  -e 'ansible_aws_ssm_plugin=/usr/local/sessionmanagerplugin/bin/session-manager-plugin' \
-  -e 'ansible_connection=aws_ssm' -e 'ansible_aws_ssm_bucket_name=ssm-bucket' -e 'ansible_aws_ssm_region=eu-west-1' \
+  -e 'ansible_aws_ssm_plugin=/usr/local/sessionmanagerplugin/bin/session-manager-plugin ansible_connection=aws_ssm' \
+  -e 'ansible_aws_ssm_bucket_name=ssm-bucket ansible_aws_ssm_region=eu-west-1' \
   -e 'ansible_remote_tmp=/tmp/.ansible-\${USER}/tmp' \
   -i 'i-0123456789abcdef0,'
 ```
@@ -1438,6 +1441,22 @@ Error message example:
 
 Solution: use a version of `ansible-core` lower than 2.17.
 
+### Boolean variables given from the CLI are treated as strings
+
+Refer [defining variables at runtime].<br/>
+Also see [How can I pass variable to ansible playbook in the command line?].
+
+> Values passed in using the `key=value` syntax are interpreted as strings.<br/>
+> Use the JSON format if you need to pass non-string values such as Booleans, integers, floats, lists, and so on.
+
+So yeah. Use the JSON format.
+
+```sh
+ansible … --extra-vars '{ "i_wasted_30_mins_debugging_a_boolean_string": true }'
+```
+
+Another _better (?)_ solution in playbooks/roles would be to sanitize the input as a pre-flight task.
+
 ## Further readings
 
 - [Configuration]
@@ -1462,6 +1481,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 - [Introduction to Ansible Builder]
 - [Ansible Navigator]
 - [Ansible Runner]
+- [Using variables]
 
 ### Sources
 
@@ -1507,6 +1527,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 - [How to use ansible with S3 - Ansible aws_s3 examples]
 - [How to run Ansible with_fileglob in alphabetical order?]
 - [Ansible v2.14 CHANGELOG]
+- [How can I pass variable to ansible playbook in the command line?]
 
 <!--
   Reference
@@ -1537,6 +1558,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 [collections index]: https://docs.ansible.com/ansible/latest/collections/index.html
 [configuration]: https://docs.ansible.com/ansible/latest/reference_appendices/config.html
 [debugging tasks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_debugger.html
+[defining variables at runtime]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html#defining-variables-at-runtime
 [developing and testing ansible roles with molecule and podman - part 1]: https://www.ansible.com/blog/developing-and-testing-ansible-roles-with-molecule-and-podman-part-1/
 [execution environment definition]: https://ansible.readthedocs.io/projects/builder/en/stable/definition/
 [galaxy  sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
@@ -1552,6 +1574,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 [special variables]: https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
 [templating]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html
 [tests]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html
+[using variables]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html
 
 <!-- Others -->
 [6 ways to speed up ansible playbook execution]: https://wearenotch.com/speed-up-ansible-playbook-execution/
@@ -1566,6 +1589,7 @@ Solution: use a version of `ansible-core` lower than 2.17.
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
 [handling secrets in your ansible playbooks]: https://www.redhat.com/sysadmin/ansible-playbooks-secrets
 [how can i hide skipped tasks output in ansible]: https://stackoverflow.com/questions/39189549/how-can-i-hide-skipped-tasks-output-in-ansible#76147924
+[how can i pass variable to ansible playbook in the command line?]: https://stackoverflow.com/questions/30662069/how-can-i-pass-variable-to-ansible-playbook-in-the-command-line#30662156
 [how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
 [how to get an arbitrary remote user's home directory in ansible?]: https://stackoverflow.com/questions/33343215/how-to-get-an-arbitrary-remote-users-home-directory-in-ansible#45447488
 [how to install sshpass on mac]: https://stackoverflow.com/questions/32255660/how-to-install-sshpass-on-mac/62623099#62623099
