@@ -1,0 +1,7 @@
+---
+pre-commit:
+  commands:
+    check-unwanted-data:
+      run: >-
+        ! ( grep -Hin -e 'example.org' -e '012345678901' {staged_files} )
+        || ( printf %b '\n' 'found possibly unwanted data' >&2 && false )
