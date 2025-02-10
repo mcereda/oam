@@ -24,6 +24,7 @@
 1. [Create custom filter plugins](#create-custom-filter-plugins)
 1. [Execution environments](#execution-environments)
     1. [Build execution environments](#build-execution-environments)
+1. [Ansible Navigator\`](#ansible-navigator)
 1. [Secrets management](#secrets-management)
     1. [Ansible Vault](#ansible-vault)
 1. [Best practices](#best-practices)
@@ -91,7 +92,7 @@ ansible-playbook 'path/to/playbook.yml' -i 'hosts.list'
 ansible-playbook … -i 'host1,host2,hostN,' -l 'hosts,list'
 ansible-playbook … -i 'host1,host2,other,' -l 'hosts-pattern' --step
 ansible-playbook … -e 'someKey=someValue someOtherKey=someOtherValue' -e 'extraKey=extraValue'
-ansible-playbook … -e '{ "boolean_value_requires_json_format": true }'
+ansible-playbook … -e '{ "boolean_value_requires_json_format": true, "some_list": [ true, "someString" ] }'
 
 # Show what changes (with details) a play would apply to the local machine.
 ansible-playbook 'path/to/playbook.yml' -i 'localhost,' -c 'local' -vvC
@@ -161,10 +162,11 @@ ansible -i 'host1,hostN,' -m 'setup' 'host1' -u 'remote-user'
 ansible -i 'localhost,' -c 'local' -km 'setup' 'localhost'
 
 # Execute locally using Ansible from the virtual environment in the current directory.
-ansible -i 'localhost ansible_python_interpreter=venv/bin/python3,' -c 'local' -m 'ansible.builtin.copy' -a 'src=/tmp/src' -a 'dest=/tmp/dest' 'localhost'
+venv/bin/python3ansible -i 'localhost ansible_python_interpreter=venv/bin/python3,' -c 'local' \
+  -m 'ansible.builtin.copy' -a 'src=/tmp/src' -a 'dest=/tmp/dest' 'localhost'
 
 # Check the Vault password file is correct.
-diff 'some_role/files/ssh.key.plain' <(ansible-vault view --vault-password-file 'password_file.txt' 'some_role/files/ssh.key.enc')
+diff 'path/to/plain/file' <(ansible-vault view --vault-password-file 'password_file.txt' 'path/to/vault/encrypted/file')
 
 # Use AWS SSM for connections.
 ansible-playbook 'playbook.yaml' -DCvvv \
@@ -876,6 +878,54 @@ collections:
 
 </details>
 
+## Ansible Navigator`
+
+Refer [Ansible Navigator documentation].
+
+<details>
+  <summary>Setup</summary>
+
+Settings for Navigator can be provided on the command line, via environment variables, or specified in a settings file.
+
+  <details style="padding-left: 1em;">
+    <summary>Settings file</summary>
+
+File name and path can be specified via an environment variable, or it can be placed in one of two default
+directories.<br/>
+It can be in the `JSON` or `YAML` format. JSON format files must end with the `.json` extension; YAML format files must
+end with the `.yml` or `.yaml` extension.
+
+Navigator checks the following and uses the **first** that matches:
+
+1. The file name specified by the `ANSIBLE_NAVIGATOR_CONFIG` environment variable, if set.
+1. The `ansible-navigator.<ext>` file in the current directory. It is **not** a dotfile.
+1. The `.ansible-navigator.<ext>` **dot**file in the user's home directory.
+
+The current and home directories can have **only one** settings file **each**.<br/>
+Should more than one settings file be found in either directory, the program **will** error out.
+
+```yml
+---
+# refer <https://ansible.readthedocs.io/projects/navigator/settings/>.
+# corresponds to `ansible-navigator --log-file='/dev/null' --container-options='--platform=linux/amd64'
+#   --execution-environment-image='012345678901.dkr.ecr.eu-west-1.amazonaws.com/custom-ee' --pull-policy='missing'
+#   run --enable-prompts …`
+ansible-navigator:
+  enable-prompts: true
+  execution-environment:
+    container-options:
+      - --platform=linux/amd64
+    image: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/custom-ee
+    pull:
+      policy: missing
+  logging:
+    file: /dev/null  # avoid leftovers
+```
+
+  </details>
+
+</details>
+
 ## Secrets management
 
 Refer [handling secrets in your Ansible playbooks].
@@ -1479,7 +1529,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 - [Debugging tasks]
 - [AWX]
 - [Introduction to Ansible Builder]
-- [Ansible Navigator]
+- [Ansible Navigator documentation]
 - [Ansible Runner]
 - [Using variables]
 
@@ -1549,7 +1599,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 <!-- Upstream -->
 [8 ways to speed up your ansible playbooks]: https://www.redhat.com/sysadmin/faster-ansible-playbook-execution
 [ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
-[ansible navigator]: https://ansible.readthedocs.io/projects/navigator/en/stable/
+[ansible navigator documentation]: https://ansible.readthedocs.io/projects/navigator/
 [ansible runner]: https://ansible.readthedocs.io/projects/runner/en/stable/
 [ansible v2.14 changelog]: https://github.com/ansible/ansible/blob/7bb078bd740fba8ad43cc69e18fc8aeb4719180a/changelogs/CHANGELOG-v2.14.rst#id11
 [asynchronous actions and polling]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_async.html
