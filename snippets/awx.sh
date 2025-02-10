@@ -11,6 +11,9 @@ pip install 'git+https://github.com/ansible/awx.git@24.6.1#egg=awxkit&subdirecto
 
 # Export settings to environment variables to avoid having to set them on the command line all the time
 export TOWER_HOST='https://awx.example.org' TOWER_USERNAME='admin' TOWER_PASSWORD='password'
+set -x 'TOWER_HOST' 'https://awx.example.org' \
+&& set -x 'TOWER_USERNAME' 'admin' \
+&& set -x 'TOWER_PASSWORD' (kubectl get secrets -n 'awx' 'admin-password' -o jsonpath='{.data.password}' | base64 -d)
 
 # Show the client configuration
 awx config
@@ -31,6 +34,9 @@ awx job_templates list
 awx job_templates list --name 'Dump DBs' | jq '.results[]' -
 curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/job_templates/' | jq '.' -
 
+# Show one job template
+awx job_templates get "This job template's name" | jq -S '.' -
+
 # Modify job templates
 awx job_templates modify '1' --extra_vars "@vars.yml"
 awx job_templates modify '5' --extra_vars "@vars.json"
@@ -43,6 +49,9 @@ curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/notification_te
 awx schedules list
 awx … schedules --schedules 'schedule-1' 'schedule-n'
 curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/schedules/' | jq '.' -
+
+# Show one schedule
+awx schedule get "This schedule's name" | jq -S '.' -
 
 # Import SSH keys
 awx credentials create --credential_type 'Machine' \
