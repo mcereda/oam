@@ -46,6 +46,10 @@ curl 'https://dblab.example.org:2345/status' -H "Verification-Token: $(gopass sh
 curl 'https://dblab.example.org:1234/api/status' -H "Verification-Token: $(gopass show -o 'dblab')"
 dblab instance status
 
+# Show data refresh status
+curl 'https://dblab.example.org:2345/instance/retrieval' -H "Verification-Token: $(gopass show -o 'dblab')"
+curl 'https://dblab.example.org:1234/api/instance/retrieval' -H "Verification-Token: $(gopass show -o 'dblab')"
+
 # List snapshots
 curl 'https://dblab.example.org:2345/snapshots' -H "Verification-Token: $(gopass show -o 'dblab')"
 curl 'https://dblab.example.org:1234/api/snapshots' -H "Verification-Token: $(gopass show -o 'dblab')"
@@ -65,14 +69,17 @@ curl -X 'POST' 'https://dblab.example.org:1234/api/clone' -H "Verification-Token
 	}'
 
 # List clones
+curl 'https://dblab.example.org:2345/status' -H "Verification-Token: $(gopass show -o 'dblab')" | jq '.' -
 curl 'https://dblab.example.org:1234/api/status' -H "Verification-Token: $(gopass show -o 'dblab')"
 dblab clone list
 
 # Get clones' information
+curl 'https://dblab.example.org:1234/clone/some-clone' -H "Verification-Token: $(gopass show -o 'dblab')"
 curl 'https://dblab.example.org:1234/api/clone/some-clone' -H "Verification-Token: $(gopass show -o 'dblab')"
 dblab clone status 'some-clone'
 
 # Reset clones
+# Only available via the '/api' endpoints, no direct ones
 curl -X 'POST' 'https://dblab.example.org:1234/api/clone/some-clone/reset' \
 	-H "Verification-Token: $(gopass show -o 'dblab')" \
 	-H 'accept: application/json' -H 'content-type: application/json' \
@@ -82,7 +89,7 @@ dblab clone reset --async='true' --latest='true' 'some-clone'
 curl --url 'https://dblab.example.org:2345/status' --header 'verification-token: somePassword' \
 | jq -r '.cloning.clones[]|select(.protected = "true")|.id' \
 | xargs -I '%%' \
-	curl --request 'POST' --url 'https://dblab.example.org:2345/clone/%%/reset' \
+	curl --request 'POST' --url 'https://dblab.example.org:1234/api/clone/%%/reset' \
         --header 'verification-token: somePassword' \
         --header 'content-type: application/json' \
         --data '{ "latest": true }'

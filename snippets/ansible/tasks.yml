@@ -1252,7 +1252,7 @@
   hosts: localhost
   connection: local
   vars:
-    dblab_port: 2345
+    dblab_api_port: 2346  # some operations (reset) are not available on the non-api endpoints
     max_snapshot_age_in_days: 15
   vars_prompt:
     - name: dblab_host
@@ -1266,7 +1266,7 @@
           {{
             dict([
               [ 'host', dblab_host ],
-              [ 'port', dblab_port ],
+              [ 'port', dblab_api_port ],
               [ 'token', dblab_token ],
               [ 'max_snapshot_age_in_days', max_snapshot_age_in_days ],
             ])
@@ -1276,7 +1276,7 @@
         - name: Gather snapshots' status
           check_mode: false
           ansible.builtin.uri:
-            url: https://{{ dblab_host }}:{{ dblab_port }}/snapshots
+            url: https://{{ dblab_host }}:{{ dblab_api_port }}/api/snapshots
             headers:
               'verification-token': "{{ dblab_token }}"
           register: snapshots_status
@@ -1294,13 +1294,13 @@
             fail_msg: snapshot {{ item.id }} for pool {{ item.pool }} is too old
           loop: "{{ snapshots_status.json }}"
   tasks:
-    - name: Reset protected clones on {{ dblab_host }}
-      tags: reset_protected_clones
+    - name: Reset clones on {{ dblab_host }}
+      tags: reset_clones
       block:
         - name: Gather clones on {{ dblab_host }}
           check_mode: false
           ansible.builtin.uri:
-            url: http://{{ dblab_host }}:{{ dblab_port }}/status
+            url: http://{{ dblab_host }}:{{ dblab_api_port }}/api/status
             headers:
               'verification-token': "{{ dblab_token }}"
           register: instance_status
@@ -1310,15 +1310,16 @@
             var: instance_status.json
         - name: Reset protected clones
           vars:
-            protected_clones: "{{ instance_status.json.cloning.clones | selectattr('protected', 'equalto', true) }}"
+            clones: "{{ instance_status.json.cloning.clones | selectattr('protected', 'equalto', true) }}"
           ansible.builtin.uri:
-            url: http://{{ dblab_host }}:{{ dblab_port }}/clone/{{ item.id }}/reset
+            url: http://{{ dblab_host }}:{{ dblab_api_port }}/api/clone/{{ item.id }}/reset
+            method: POST
             headers:
               'verification-token': "{{ dblab_token }}"
             body_format: json
             body:
               latest: true
-          loop: "{{ protected_clones }}"
+          loop: "{{ clones }}"
           register: reset_requests
 
 - name: Gitea-specific operations
