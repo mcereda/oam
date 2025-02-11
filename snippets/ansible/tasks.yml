@@ -656,6 +656,24 @@
     - name: Look for files
       ansible.builtin.set_fact:
         path_list_of_all_txt_files_in_dir: "{{ lookup('ansible.builtin.fileglob', '/my/path/*.txt') }}"
+    - name: Install Docker Compose
+      block:
+        - name: Create Docker's CLI plugins directory
+          become: true
+          ansible.builtin.file:
+            dest: /usr/local/lib/docker/cli-plugins
+            state: directory
+            owner: root
+            group: root
+            mode: u=rwx,g=rx,o=rx
+        - name: Get Docker compose from its official binaries
+          become: true
+          ansible.builtin.get_url:
+            url: https://github.com/docker/compose/releases/latest/download/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}
+            dest: /usr/local/lib/docker/cli-plugins/docker-compose
+            owner: root
+            group: root
+            mode: u=rwx,g=rx,o=rx
     - name: Install packages
       block:
         - name: Via package manager on any supported system
