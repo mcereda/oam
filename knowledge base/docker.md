@@ -10,6 +10,7 @@
 1. [Advanced build with `buildx`](#advanced-build-with-buildx)
    1. [Create builders](#create-builders)
    1. [Build for specific platforms](#build-for-specific-platforms)
+1. [Compose](#compose)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -416,6 +417,51 @@ docker buildx build --platform 'linux/amd64,linux/arm64,linux/arm/v7' -t 'image:
 docker load …
 ```
 
+## Compose
+
+Refer [Docker compose].
+
+<details>
+  <summary>Setup</summary>
+
+  <details style="padding-left: 1em;">
+    <summary>Via shell</summary>
+
+```sh
+mkdir -p '/usr/local/lib/docker/cli-plugins' \
+&& curl 'https://github.com/docker/compose/releases/latest/download/docker-compose-linux-aarch64' \
+    -o '/usr/local/lib/docker/cli-plugins/docker-compose' \
+&& chmod 'ug=rwx,o=rx' '/usr/local/lib/docker/cli-plugins/docker-compose'
+```
+
+  </details>
+
+  <details style="padding-left: 1em;">
+    <summary>Via Ansible</summary>
+
+```yml
+- name: Create Docker's CLI plugins directory
+  become: true
+  ansible.builtin.file:
+    dest: /usr/local/lib/docker/cli-plugins
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+- name: Get Docker compose from its official binaries
+  become: true
+  ansible.builtin.get_url:
+    url: https://github.com/docker/compose/releases/latest/download/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}
+    dest: /usr/local/lib/docker/cli-plugins/docker-compose
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+```
+
+  </details>
+
+</details>
+
 ## Further readings
 
 - [GitHub]
@@ -426,6 +472,7 @@ docker load …
 - [Kaniko]
 - [`amazon-ecr-credential-helper`][amazon-ecr-credential-helper]
 - [Announcing remote cache support in Amazon ECR for BuildKit clients]
+- [Docker compose]
 
 ### Sources
 
@@ -451,13 +498,14 @@ docker load …
 
 <!-- Knowledge base -->
 [containerd]: containerd.md
-[dive]: dive.placeholder
+[dive]: dive.md
 [kaniko]: kaniko.md
 [podman]: podman.md
 [testcontainers]: testcontainers.md
 
 <!-- Upstream -->
 [building multi-arch images for arm and x86 with docker desktop]: https://www.docker.com/blog/multi-arch-images/
+[docker compose]: https://github.com/docker/compose
 [dockerfile reference]: https://docs.docker.com/reference/dockerfile/
 [github]: https://github.com/docker
 
