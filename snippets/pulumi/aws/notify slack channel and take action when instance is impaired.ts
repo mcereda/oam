@@ -147,4 +147,58 @@ instance_output.id.apply( ( instanceId: string ) => {
         },
     );
 
+    // requires the host to have the cloudwatch agent installed and configured to send 'mem_used_percent' metrics
+    new aws.cloudwatch.MetricAlarm(
+        `${instanceId}-memUsedPercent`,
+        {
+            name: `${instanceId}_MemUsedPercent`,
+            alarmDescription: "Notify on Slack when the memory utilization is > 85% 3 consecutive times over 15 minutes.",
+            tags: {
+                Controls: "SOC2/CC7.2",  // FIXME
+            },
+
+            namespace: "CWAgent",
+            dimensions: {
+                InstanceId: instanceId,
+            },
+            metricName: "mem_used_percent",
+            statistic: "Average",
+            comparisonOperator: "GreaterThanThreshold",
+            threshold: 85,
+            period: 300,
+            evaluationPeriods: 3,
+            datapointsToAlarm: 3,
+            alarmActions: [
+                notifications_snsTopic.arn,
+            ],
+        },
+    );
+
+    // requires the host to have the cloudwatch agent installed and configured to send 'disk_used_percent' metrics
+    new aws.cloudwatch.MetricAlarm(
+        `${instanceId}-diskUsedPercent`,
+        {
+            name: `${instanceId}_DiskUsedPercent`,
+            alarmDescription: "Notify on Slack when the disk utilization is > 85% 3 consecutive times over 15 minutes.",
+            tags: {
+                Controls: "SOC2/CC7.2",  // FIXME
+            },
+
+            namespace: "CWAgent",
+            dimensions: {
+                InstanceId: instanceId,
+            },
+            metricName: "disk_used_percent",
+            statistic: "Average",
+            comparisonOperator: "GreaterThanThreshold",
+            threshold: 85,
+            period: 300,
+            evaluationPeriods: 3,
+            datapointsToAlarm: 3,
+            alarmActions: [
+                notifications_snsTopic.arn,
+            ],
+        },
+    );
+
 });
