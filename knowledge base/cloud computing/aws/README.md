@@ -16,12 +16,13 @@
    1. [Security Hub](#security-hub)
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
+1. [Costs](#costs)
 1. [Savings plans](#savings-plans)
 1. [Resource tagging](#resource-tagging)
 1. [API](#api)
    1. [Python](#python)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -270,6 +271,10 @@ Member accounts can administer Security Hub by delegation if given the permissio
 ## Access control
 
 Refer [IAM].
+
+## Costs
+
+See [Understanding data transfer charges].
 
 ## Savings plans
 
@@ -542,6 +547,7 @@ machine if not.
 [subnets for your vpc]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html
 [test your roles' access policies using the aws identity and access management policy simulator]: https://aws.amazon.com/blogs/security/test-your-roles-access-policies-using-the-aws-identity-and-access-management-policy-simulator/
 [tools to build on aws]: https://aws.amazon.com/developer/tools/
+[understanding data transfer charges]: https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
 [what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html

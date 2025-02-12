@@ -6,6 +6,8 @@ Persistent [block storage][what is block storage?] for [EC2 Instances][ec2].
 1. [Volume types](#volume-types)
 1. [Snapshots](#snapshots)
 1. [Encryption](#encryption)
+1. [Troubleshooting](#troubleshooting)
+   1. [Migrate `gp2` volumes to `gp3`](#migrate-gp2-volumes-to-gp3)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -184,6 +186,19 @@ Attaching EBS volumes which data keys are encrypted with unusable KMS keys to EC
 not be able to use the KMS keys to decrypt the data key used for the volume.<br/>
 Make the KMS key usable again to be able to attach such EBS volumes.
 
+## Troubleshooting
+
+### Migrate `gp2` volumes to `gp3`
+
+See also [Hands-on Guide: How to migrate from gp2 to gp3 volumes and lower AWS cost].
+
+It is **strongly advised** to take a snapshot of volumes before changing their type.
+
+```sh
+aws ec2 describe-volumes --filters "Name=volume-type,Values=gp2" --query 'Volumes[].VolumeId' --output 'text' \
+| xargs -pn '1' aws ec2 modify-volume --volume-type 'gp3' --volume-id
+```
+
 ## Further readings
 
 - [Amazon Web Services]
@@ -194,6 +209,7 @@ Make the KMS key usable again to be able to attach such EBS volumes.
 - [Choose the best Amazon EBS volume type for your self-managed database deployment]
 - [Extend the file system after resizing an EBS volume]
 - [Pricing][amazon ebs pricing]
+- [Hands-on Guide: How to migrate from gp2 to gp3 volumes and lower AWS cost]
 
 ### Sources
 
@@ -230,3 +246,4 @@ Make the KMS key usable again to be able to attach such EBS volumes.
 
 <!-- Others -->
 [delete unused aws ebs volumes]: https://www.nops.io/unused-aws-ebs-volumes/
+[hands-on guide: how to migrate from gp2 to gp3 volumes and lower aws cost]: https://www.stream.security/post/hands-on-guide-how-to-migrate-from-gp2-to-gp3-volumes
