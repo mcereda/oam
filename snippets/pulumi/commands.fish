@@ -78,7 +78,7 @@ pulumi stack export | jq -r '.deployment.resources[].provider' | grep -v 'aws::d
 # Avoid permission errors when deleting clusters with charts and stuff.
 PULUMI_K8S_DELETE_UNREACHABLE='true' pulumi destroy
 
-# Move rsources between stacks
+# Move resources between stacks
 pulumi state move --source 'organization/utils/dev' --dest 'organization/iam/dev' \
 	'urn:pulumi:dev::utils::aws:iam/role:Role::rdsToS3Exporter' \
 	'urn:pulumi:dev::utils::aws:iam/rolePolicy:RolePolicy::rdsToS3Exporter-allowExportingSnapshotsToS3'

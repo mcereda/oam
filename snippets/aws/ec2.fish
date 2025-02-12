@@ -62,6 +62,13 @@ aws ec2 describe-instances --output 'text' \
 	--filters 'Name=tag:Name,Values=Prometheus' 'Name=instance-state-name,Values=running' \
 	--query 'Reservations[].Instances[0].BlockDeviceMappings[*].Ebs.VolumeId'
 
+# Change volume type
+aws ec2 modify-volume --volume-type 'gp3' --volume-id 'vol-0123456789abcdef0'
+
+# Migrate gp2 volumes to gp3
+aws ec2 describe-volumes --filters "Name=volume-type,Values=gp2" --query 'Volumes[].VolumeId' --output 'text' \
+| xargs -pn '1' aws ec2 modify-volume --volume-type 'gp3' --volume-id
+
 # Create snapshots of EBS volumes
 aws ec2 create-snapshot --volume-id 'vol-0123456789abcdef0' --description 'Manual snapshot Pre-Update' \
 	--tag-specifications 'ResourceType=snapshot,Tags=[{Key=Name,Value=Prometheus},{Key=Team,Value=Infra}]' \
