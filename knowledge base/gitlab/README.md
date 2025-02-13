@@ -14,6 +14,9 @@
 1. [Maintenance mode](#maintenance-mode)
 1. [Runners](#runners)
 1. [CI/CD pipelines](#cicd-pipelines)
+1. [Artifacts](#artifacts)
+    1. [Default artifacts expiration](#default-artifacts-expiration)
+    1. [Keep the latest artifacts for all jobs in the latest successful pipelines](#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines)
 1. [Troubleshooting](#troubleshooting)
     1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
     1. [GitLab keeps answering with code 502](#gitlab-keeps-answering-with-code-502)
@@ -720,6 +723,67 @@ See [runners](runner.md).
 
 See [pipelines](pipeline.md).
 
+## Artifacts
+
+GitLab allows to configure a **instance-wide** default expiration for artifacts.<br/>
+There is currently **no way** to set up artifacts expiration group-wise or project-wise.
+
+All latest jobs' artifacts are kept by default.<br/>
+The rest of them expire:
+
+- As manually configured in the pipeline, or
+
+  <details style="padding-bottom: 1em;">
+
+  ```yaml
+  default:
+    artifacts:
+      expire_in: 1 week
+
+  someJob:
+    artifacts:
+      expire_in: 1 month
+  ```
+
+  </details>
+
+- As configured instance-wide.
+
+### Default artifacts expiration
+
+Job artifacts expiration can be set **instance-wide** in the Admin area.
+
+If not manually set, it defaults to 30 days.<br/>
+Set the value to `0` to disable artifacts expiration. The default unit is in seconds.
+
+Path: _Admin_ > _Settings_ > _CI/CD_ > _Continuous Integration and Deployment_ > _Default artifacts expiration_.<br/>
+Syntax: [`artifacts:expire_in`](https://docs.gitlab.com/ee/ci/yaml/index.html#artifactsexpire_in).
+
+This setting is set per-job and can be overridden in pipelines.
+
+> Any changes to this setting applies to **new** artifacts only.<br/>
+> The expiration time is **not** updated retroactively (for artifacts created **before** this setting was changed).
+
+### Keep the latest artifacts for all jobs in the latest successful pipelines
+
+Locks the artifacts of the **most recent successful** pipeline for each Git ref (branches and tags) against
+deletion.<br/>
+Those artifacts are kept **regardless** of their expiration.
+
+This setting is enabled by default.<br/>
+When disabled, the latest artifacts for any new successful or fixed pipelines are allowed to expire.
+
+This setting **takes precedence over the project's setting**.<br/>
+If disabled for the entire instance, it **will not** have effect in individual projects.
+
+To disable the setting:
+
+Path: _Admin_ > _Settings_ > _CI/CD_ > _Continuous Integration and Deployment_ > _Keep the latest artifacts for all jobs
+in the latest successful pipelines_.
+
+When disabling this feature, the latest artifacts do **not** immediately expire.<br/>
+A new pipeline must run before the latest artifacts can expire and be deleted.
+
 ## Troubleshooting
 
 ### Use access tokens to clone projects
@@ -794,6 +858,8 @@ Solution: set the correct ownership with
 - [GitLab maintenance mode]
 - [Forks]
 - [Upgrade packaged PostgreSQL server]
+- [Automate storage management]
+- [CI/CD Admin area settings]
 
 <!--
   Reference
@@ -812,12 +878,14 @@ Solution: set the correct ownership with
 <!-- Upstream -->
 [ability to reference maintainers or developers from codeowners]: https://gitlab.com/gitlab-org/gitlab/-/issues/282438
 [adding and removing kubernetes clusters]: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
+[automate storage management]: https://docs.gitlab.com/ee/user/storage_management_automation.html
 [autoscaling gitlab runner on aws ec2]: https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/
 [back up gitlab excluding specific data from the backup]: https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html#excluding-specific-data-from-the-backup
 [back up gitlab using amazon s3]: https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html?tab=Linux+package+%28Omnibus%29#using-amazon-s3
 [caching in ci/cd]: https://docs.gitlab.com/ee/ci/caching/
 [chart cpu and ram resource requirements]: https://docs.gitlab.com/charts/installation/deployment.html#cpu-and-ram-resource-requirements
 [chart]: https://docs.gitlab.com/charts/
+[ci/cd admin area settings]: https://docs.gitlab.com/ee/administration/settings/continuous_integration.html
 [code owners]: https://docs.gitlab.com/ee/user/project/codeowners/
 [codeowners syntax]: https://docs.gitlab.com/ee/user/project/codeowners/reference.html
 [command-line options]: https://docs.gitlab.com/charts/installation/command-line-options.html
