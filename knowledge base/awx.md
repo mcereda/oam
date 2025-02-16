@@ -11,6 +11,10 @@
 
 ## Gotchas
 
+- Not defining values in some resources means they are using the setting of the underlying dependency.<br/>
+  E.g.: A schedule's `job_type: null` attribute means that the job it starts will use the job template's `job_type`
+  setting.
+
 - Consider using only AMD64 nodes to host the containers for AWX instances.
 
   As of 2024-04-11, AWX does **not** appear to provide ARM64 images for all its containers.<br/>
