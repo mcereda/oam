@@ -123,7 +123,8 @@ New tags might take 24 or 48 hours to appear there.
 
 Observability service. with functions for logging, monitoring and alerting.
 
-_Metrics_ are whatever needs to be monitored (e.g. CPU usage). _Data points_ are the values of a metric over time.
+_Metrics_ are whatever needs to be monitored (e.g. CPU usage).<br/>
+_Data points_ are the values of a metric over time.<br/>
 _Namespaces_ are containers for metrics.
 
 Metrics only exist in the region in which they are created.
@@ -131,6 +132,64 @@ Metrics only exist in the region in which they are created.
 [Many AWS services][services that publish cloudwatch metrics] offer basic monitoring by publishing a default set of
 metrics to CloudWatch with no charge.<br/>
 This feature is automatically enabled by default when one starts using one of these services.
+
+API calls for CloudWatch are paid.
+
+It's best practice to **distribute** the `ListMetrics` call to avoid throttling.<br/>
+The default limit for `ListMetrics` is 25 transactions per second.
+
+The [CloudWatch console] offers some default good queries.
+
+<details>
+  <summary>Queries of interest</summary>
+
+| What                                 | Section     | Tab             | How to visualize                                      |
+| ------------------------------------ | ----------- | --------------- | ----------------------------------------------------- |
+| [Top 10 log groups by written bytes] | All Metrics | Graphed metrics | Add Query > Logs > Top 10 log groups by written bytes |
+
+  <details style="padding-left: 1em;">
+    <summary>Get a dashboard of how much data a <b>small</b> set of log groups ingested in the last 30 days</summary>
+
+> This graph works only with the _Absolute_ time period option.<br/>
+> Should you choose _Relative_, the graph returns incorrect data.
+
+1. [CloudWatch console] > _All metrics_ (navigation pane on the left).
+1. Choose _Logs_, _Log group metrics_.
+1. Select the individual `IncomingBytes` metrics of each log group of interest.
+1. Choose the _Graphed metrics_ tab.
+1. For each metric:
+   - Change `Statistic` to `Sum`.
+   - Change `Period` to `30 Days`.
+1. Choose the _Graph options_ tab.
+1. Choose the _Number_ option group.
+1. At the top right of the graph, choose _Custom_ as the time range.
+1. Choose _Absolute_.
+1. Select the last 30 days as start and end date.
+
+  </details>
+
+  <details style="padding-left: 1em;">
+    <summary>Get a dashboard of how much data <b>all</b> log groups ingested in the last 30 days</summary>
+
+> This graph works only with the _Absolute_ time period option.<br/>
+> Should you choose _Relative_, the graph returns incorrect data.
+
+1. [CloudWatch console] > _All metrics_ (navigation pane on the left).
+1. Choose the _Graphed metrics_ tab.
+1. From the _Add math_ dropdown list, choose _Start with an empty expression_.
+1. Paste this as math expression:
+
+   ```plaintext
+   SORT(REMOVE_EMPTY(SEARCH('{AWS/Logs,LogGroupName} MetricName="IncomingBytes"', 'Sum', 2592000)),SUM, DESC)
+   ```
+
+1. At the top right of the graph, choose _Custom_ as the time range.
+1. Choose _Absolute_.
+1. Select the last 30 days as start and end date.
+
+  </details>
+
+</details>
 
 ### Config
 
@@ -274,7 +333,13 @@ Refer [IAM].
 
 ## Costs
 
+One pays for data transfer between instances and services in the **same region** but **different availability
+zone**.<br/>
 See [Understanding data transfer charges].
+
+One pays for sending logs to [CloudWatch].<br/>
+Refer [Which log group is causing a sudden increase in my CloudWatch Logs bill?] to get an idea of what changed in some
+time frame.
 
 ## Savings plans
 
@@ -486,6 +551,7 @@ machine if not.
 - [Boto3 resources]
 - [Boto3 sessions]
 - [Boto3 paginators]
+- [Which log group is causing a sudden increase in my CloudWatch Logs bill?]
 
 <!--
   Reference
@@ -530,6 +596,7 @@ machine if not.
 [boto3 paginators]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/paginators.html
 [boto3 resources]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/resources.html
 [boto3 sessions]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/session.html
+[cloudwatch console]: https://console.aws.amazon.com/cloudwatch/home
 [connect to the internet using an internet gateway]: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
 [constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
 [creating organization policies with aws organizations]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_policies_create.html
@@ -547,10 +614,12 @@ machine if not.
 [subnets for your vpc]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html
 [test your roles' access policies using the aws identity and access management policy simulator]: https://aws.amazon.com/blogs/security/test-your-roles-access-policies-using-the-aws-identity-and-access-management-policy-simulator/
 [tools to build on aws]: https://aws.amazon.com/developer/tools/
+[top 10 log groups by written bytes]: https://console.aws.amazon.com/cloudwatch/home#metricsV2?graph=~(view~'timeSeries~stacked~false~metrics~(~(~(expression~'SELECT*20SUM*28IncomingBytes*29*0aFROM*20SCHEMA*28*22AWS*2fLogs*22*2c*20LogGroupName*29*20*0aGROUP*20BY*20LogGroupName*0aORDER*20BY*20SUM*28*29*20DESC*0aLIMIT*2010~label~'!*7bLABEL*7d*20*5bsum*3a*20!*7bSUM*7d*5d~id~'q1)))~region~'eu-west-1~title~'Top*2010*20log*20groups*20by*20written*20bytes~yAxis~(left~(label~'Bytes~showUnits~false))~stat~'Average~period~300)
 [understanding data transfer charges]: https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
 [what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
+[which log group is causing a sudden increase in my cloudwatch logs bill?]: https://repost.aws/knowledge-center/cloudwatch-logs-bill-increase
 
 <!-- Others -->
 [a guide to tagging resources in aws]: https://medium.com/@staxmarketing/a-guide-to-tagging-resources-in-aws-8f4311afeb46
