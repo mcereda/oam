@@ -4,105 +4,19 @@ ReadMe's Markdown engine.
 
 Compare Markdown implementations at [babelmark].
 
-1. [Syntax highlighting](#syntax-highlighting)
-1. [TODO lists](#todo-lists)
-1. [Folded content](#folded-content)
-1. [Images](#images)
-1. [Diagrams](#diagrams)
-1. [Math](#math)
-1. [Alerts](#alerts)
+1. [TL;DR](#tldr)
 1. [Troubleshooting](#troubleshooting)
    1. [Escape the backtick character](#escape-the-backtick-character)
-   1. [VS Code and mermaid graph in Markdown preview](#vs-code-and-mermaid-graph-in-markdown-preview)
+   1. [Render mermaid.js graphs in VS Code's Markdown preview](#render-mermaidjs-graphs-in-vs-codes-markdown-preview)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
-## Syntax highlighting
+## TL;DR
 
-Specify the language right after the code block's opening:
-
-```ruby
-def index
-  puts "hello world"
-end
-```
-
-```csharp
-private void index(){
-  MessageBox.Show("hello world");
-}
-```
-
-## TODO lists
-
-Use `[ ]` after the bullet point or numbered list character to switch them for an empty ballot box, and `[x]` for a
-checked one.
-
-1. [ ] 1
-1. [ ] 2
-   - [x] a
-
-- [x] Point 3
-
-## Folded content
-
-Use a `<details>` HTML tag:
-
-```md
 <details>
-  <summary>Fold/Open</summary>
-  Folded content
-</details>
-```
+  <summary>Alerts</summary>
 
-## Images
-
-Add an image:
-
-```md
-![description](path/to.image)
-![description][reference name]
-```
-
-Control width and height:
-
-```md
-<img src="./cat.png" width=300px height=200px />
-```
-
-Align in the center:
-
-```md
-<div align="center">![sleep-cat](./cat.png)</div>
-```
-
-## Diagrams
-
-Use [mermaid.js] to include diagrams and graphs.
-
-See also [The magical Markdown I bet you don't know] and [slaise/High-level-Markdown].
-
-## Math
-
-Inline expressions: surround the expression with `$`.
-
-```md
-$\sum_{n=1}^{10} n^2$
-```
-
-$\sum_{n=1}^{10} n^2$
-
-Block expressions: surround the expression with `$$`.
-
-```md
-$$\sum_{n=1}^{10} n^2$$
-```
-
-$$\sum_{n=1}^{10} n^2$$
-
-## Alerts
-
-Uses the Alert extension.
+Requires the Alert extension.
 
 Refer [Github's alert formatting][github formatting  alerts].
 
@@ -148,6 +62,109 @@ Refer [Github's alert formatting][github formatting  alerts].
 > [!CAUTION]
 > Advises about risks or negative outcomes of certain actions.
 
+</details>
+
+<details>
+  <summary>Diagrams</summary>
+
+Use [mermaid.js] to include diagrams and graphs.
+
+See also [The magical Markdown I bet you don't know] and [slaise/High-level-Markdown].
+
+</details>
+
+<details>
+  <summary>Folded content</summary>
+
+Use a `<details>` HTML tag:
+
+```md
+<details>
+  <summary>Fold/Open</summary>
+  Folded content
+</details>
+```
+
+</details>
+
+<details>
+  <summary>Include images</summary>
+
+Add an image:
+
+```md
+![description](path/to.image)
+![description][reference name]
+```
+
+Control width and height:
+
+```md
+<img src="./cat.png" width=300px height=200px />
+```
+
+Align in the center:
+
+```md
+<div align="center">![sleep-cat](./cat.png)</div>
+```
+
+</details>
+
+<details>
+  <summary>Math</summary>
+
+Inline expressions: surround the expression with `$`.
+
+```md
+$\sum_{n=1}^{10} n^2$
+```
+
+$\sum_{n=1}^{10} n^2$
+
+Block expressions: surround the expression with `$$`.
+
+```md
+$$\sum_{n=1}^{10} n^2$$
+```
+
+$$\sum_{n=1}^{10} n^2$$
+
+</details>
+
+<details>
+  <summary>Syntax highlighting in code blocks</summary>
+
+Specify the language right after the code block's opening:
+
+```ruby
+def index
+  puts "hello world"
+end
+```
+
+```csharp
+private void index(){
+  MessageBox.Show("hello world");
+}
+```
+
+</details>
+
+<details>
+  <summary>To do lists</summary>
+
+Use `[ ]` after the bullet point or numbered list character to switch them for an empty ballot box, and `[x]` for a
+checked one.
+
+1. [ ] 1
+1. [ ] 2
+   - [x] a
+
+- [x] Point 3
+
+</details>
+
 ## Troubleshooting
 
 ### Escape the backtick character
@@ -159,7 +176,7 @@ Render it in an inline code block using double backticks instead of single backt
 Alternatively, use a code block. This will wrap everything in a `<pre>` HTML tag.<br/>
 To do this, either indent 4 spaces to start a code block, or use fenced code blocks if supported.
 
-### VS Code and mermaid graph in Markdown preview
+### Render mermaid.js graphs in VS Code's Markdown preview
 
 Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s extension.
 
