@@ -91,6 +91,7 @@ jq '.dependencies."@pulumi/aws" |= "6.66.2"' 'package.json' | sponge 'package.js
 # Could use `--suppress-outputs --generate-code='false' --protect=false` for some
 pulumi import 'aws:chatbot/slackChannelConfiguration:SlackChannelConfiguration' 'alarms' 'arn:aws:chatbot::012345678901:chat-configuration/slack-channel/alarms'
 pulumi import 'aws:cloudwatch/metricAlarm:MetricAlarm' 'prometheus-ec2-CPUUtilization' 'prometheus-ec2-CPUUtilization-drc5644'
+pulumi import 'aws:codedeploy/application:Application' 'my-app-prod' 'my-application-production'
 pulumi import 'aws:ec2/instance:Instance' 'logstash' 'i-abcdef0123456789a'
 pulumi import 'aws:ec2/securityGroup:SecurityGroup' 'internalOps' 'sg-0123456789abcdef0'
 pulumi import 'aws:iam/user:User' 'jimmy' 'jimmy'
