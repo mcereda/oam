@@ -204,6 +204,8 @@ WHERE grantee = 'engineers';
 GRANT USAGE ON SCHEMA bar_schema TO donald;
 GRANT ALL PRIVILEGES ON foo_table TO jonathan;
 GRANT admins TO joe;
+GRANT SELECT, INSERT ON foo_table IN SCHEMA public TO kevin;
+GRANT SELECT (col1), UPDATE (col1) ON ALL TABLES IN SCHEMA public TO zoe;
 
 
 -- Close the connection to the current DB
