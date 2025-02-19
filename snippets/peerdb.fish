@@ -1,5 +1,8 @@
 #!/usr/bin/env fish
 
+# Connect to PeerDB server in SQL mode
+psql 'port=9900 host=localhost password=peerdb'
+
 # List peers
 curl -fsS --url 'http://localhost:3000/api/v1/peers/list' \
 	-H "Authorization: Basic $(gopass show -o 'peerdb/instance' | xargs printf '%s' ':' | base64)"
@@ -24,6 +27,14 @@ curl -fsS --url 'http://localhost:3000/api/v1/peers/create' -X 'POST' \
 			}
 		}
 	}"
+psql 'port=9900 host=localhost password=peerdb' \
+	-c "CREATE PEER some_pg_peer FROM POSTGRES WITH (
+		host = 'localhost',
+		port = '5432',
+		user = 'peerdb',
+		password = '$(gopass show -o 'peerdb/db-user')',
+		database = 'sales'
+	);"
 
 # Update peers
 # Reuse the command for creation but add 'allow_update: true' to the data
@@ -53,6 +64,43 @@ curl -fsS 'http://localhost:3000/api/v1/mirrors/status' -X 'POST' \
 		"includeFlowInfo": true
 	}' \
 | jq '.cdcStatus.config' -
+
+# Create mirrors
+curl -fsS 'http://localhost:3000/api/v1/flows/cdc/create' -X 'POST' \
+	-H 'Content-Type: application/json' \
+	-H "Authorization: Basic $(gopass show -o 'peerdb/instance' | xargs printf '%s' ':' | base64)" \
+	-d '{
+		"connection_configs": {
+			"flow_job_name": "testing_bq_2",
+			"source_name": "some_pg_peer",
+			"destination_name": "some_other_pg_peer",
+			"table_mappings": [
+				{
+					"source_table_identifier": "public.users",
+					"destination_table_identifier": "users_api"
+				},
+				{
+					"source_table_identifier": "public.payments",
+					"destination_table_identifier": "payments_api"
+				},
+				{
+					"source_table_identifier": "public.optional_ordering_key",
+					"destination_table_identifier": "optional_ordering_key",
+					"columns": [
+						{
+							"name": "id",
+							"ordering": 1
+						},
+						{
+							"name": "created_at",
+							"ordering": 2
+						}
+					]
+				},
+			],
+			"do_initial_snapshot": true
+		}
+	}'
 
 # Show alerts' configuration
 curl -fsS --url 'http://localhost:3000/api/v1/alerts/config' \
