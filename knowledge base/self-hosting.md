@@ -20,6 +20,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 | [Home Assistant]      | Home automation platform            |                                           |
 | [Hoppscotch]          | API development environment         | [Yaade]                                   |
 | [Immich]              | Photo and video management solution | Google Photo, [PhotoPrism]                |
+| [IT-tools]            | Handy tools for developers          |                                           |
 | [NextCloud]           | File sharing platform               | [OwnCloud]                                |
 | [Nginx Proxy Manager] | Reverse Proxy                       |                                           |
 | [OpenMediaVault]      | NAS solution                        | [TrueNAS]                                 |
@@ -69,6 +70,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 [gatus]: https://github.com/TwiN/gatus
 [gogs]: https://github.com/gogs/gogs
 [home assistant]: https://www.home-assistant.io/
+[it-tools]: https://github.com/CorentinTh/it-tools
 [owncloud]: https://owncloud.com/
 [radicale]: https://radicale.org/
 [semaphore]: https://semaphoreui.com/
