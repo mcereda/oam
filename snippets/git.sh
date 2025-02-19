@@ -37,6 +37,10 @@ git remote | xargs -n 1 git push
 git lfs pull
 
 
+# Get the top-level directory of the current repository.
+git rev-parse --show-toplevel
+
+
 ##
 # Remove files from the latest commit.
 # --------------------------------------
