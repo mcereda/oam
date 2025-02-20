@@ -6,14 +6,16 @@ psql 'port=9900 host=localhost password=peerdb'
 # List peers
 curl -fsS --url 'http://localhost:3000/api/v1/peers/list' \
 	-H "Authorization: Basic $(gopass show -o 'peerdb/instance' | xargs printf '%s' ':' | base64)"
+psql 'port=9900 host=localhost password=peerdb' \
+	-c "SELECT id, name, type FROM peers;"
 
 # Create peers
 # postgres: peer.type=3|'POSTGRES' + postgres_config={…}
 # clickhouse: peer.type=8 + clickhouse_config={…}
 # kafka: peer.type=9 + kafka_config={…}
 curl -fsS --url 'http://localhost:3000/api/v1/peers/create' -X 'POST' \
-	-H 'Content-Type: application/json' \
 	-H "Authorization: Basic $(gopass show -o 'peerdb/instance' | xargs printf '%s' ':' | base64)" \
+	-H 'Content-Type: application/json' \
 	-d "{
 		\"peer\": {
 			\"name\": \"some_pg_peer\",
@@ -51,14 +53,14 @@ curl -fsS --url 'http://localhost:3000/api/v1/mirrors/list' \
 
 # Get mirrors' status
 curl -fsS 'http://localhost:3000/api/v1/mirrors/status' -X 'POST' \
-	-H 'Content-Type: application/json' \
 	-H "Authorization: Basic $(gopass show -o 'peerdb/instance' | xargs printf '%s' ':' | base64)" \
+	-H 'Content-Type: application/json' \
 	-d '{ "flowJobName": "testing_bq_2" }'
 
 # Get mirrors' configuration
 curl -fsS 'http://localhost:3000/api/v1/mirrors/status' -X 'POST' \
-	-H 'Content-Type: application/json' \
 	-H "Authorization: Basic $(gopass show -o 'peerdb/instance' | xargs printf '%s' ':' | base64)" \
+	-H 'Content-Type: application/json' \
 	-d '{
 		"flowJobName": "testing_bq_2",
 		"includeFlowInfo": true
@@ -67,8 +69,8 @@ curl -fsS 'http://localhost:3000/api/v1/mirrors/status' -X 'POST' \
 
 # Create mirrors
 curl -fsS 'http://localhost:3000/api/v1/flows/cdc/create' -X 'POST' \
-	-H 'Content-Type: application/json' \
 	-H "Authorization: Basic $(gopass show -o 'peerdb/instance' | xargs printf '%s' ':' | base64)" \
+	-H 'Content-Type: application/json' \
 	-d '{
 		"connection_configs": {
 			"flow_job_name": "testing_bq_2",
@@ -106,6 +108,24 @@ curl -fsS 'http://localhost:3000/api/v1/flows/cdc/create' -X 'POST' \
 curl -fsS --url 'http://localhost:3000/api/v1/alerts/config' \
 	-H "Authorization: Basic $(gopass show -o 'peerdb/instance' | xargs printf '%s' ':' | base64)" \
 | jq '.configs[]' -
+
+# Create alerts
+# 'service_config' seems must be a string
+curl -fsS --url 'http://localhost:3000/api/v1/alerts/config' -X 'POST' \
+	-H "Authorization: Basic $(gopass show -o 'peerdb/instance' | xargs printf '%s' ':' | base64)" \
+	-H 'Content-Type: application/json' \
+	-d '{
+		"config": {
+			"id": -1,
+			"service_type": "slack",
+			"service_config": "{\"slot_lag_mb_alert_threshold\":15000,\"open_connections_alert_threshold\":20,\"auth_token\":\"xoxb-012345678901-0123456789012-1234ABcdEFGhijKLMnopQRST\",\"channel_ids\":[\"C01K23X4567\"]}",
+			"alert_for_mirrors": [
+				"odoo_pg_to_sf",
+				"pikachu_ke_pg_to_sf",
+				"pikachu_zm_pg_to_sf"
+			]
+		}
+	}'
 
 # Others
 curl -fsS 'http://localhost:3000/api/v1/dynamic_settings' \
