@@ -109,6 +109,7 @@ ansible-vault view 'ssh.key.pub' --vault-password-file 'password_file.txt'
 ansible-vault edit 'ssh.key.pub'
 ANSIBLE_VAULT_PASSWORD_FILE='password_file.txt' ansible-vault decrypt --output '.ssh/id_rsa' 'ssh.key'
 diff 'some_role/files/ssh.key.plain' <(ansible-vault view --vault-password-file 'password_file.txt' 'some_role/files/ssh.key.enc')
+echo -e '$ANSIBLE_VAULT;1.1;AES256\n386462…86436' | ansible-vault decrypt --ask-vault-password
 
 # List available plugins
 ansible-doc -t 'lookup' -l
