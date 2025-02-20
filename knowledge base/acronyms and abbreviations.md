@@ -162,6 +162,7 @@
 [fish]: fish.md
 [iac]: iac.md
 [kubernetes]: kubernetes/README.md
+[lora]: lora.md
 [siem]: siem.md
 [ssh]: ssh.md
 [sssd]: sssd.md
