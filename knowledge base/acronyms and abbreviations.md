@@ -41,6 +41,7 @@
 | DB      | Data Base                                              |                                                                                                     |
 | DBMS    | DB Management System                                   |                                                                                                     |
 | DDL     | Data Definition Language                               |                                                                                                     |
+| [DePIN] | Decentralized Physical Infrastructure Network          |                                                                                                     |
 | DKIM    | DomainKeys Identified Mail                             |                                                                                                     |
 | DML     | Data Manipulation Language                             |                                                                                                     |
 | EA      | Extended Attributes                                    |                                                                                                     |
@@ -64,6 +65,7 @@
 | HPC     | High Performance Computing                             | Collections of systems and tools used to achieve a greater processing capacity than the single unit |
 | IaC     | [Infrastructure as Code][iac]                          |                                                                                                     |
 | IC      | Integrated Circuit                                     |                                                                                                     |
+| IoT     | Internet of Things                                     | Also see [LoRa]                                                                                     |
 | IP      | Internet Protocol                                      |                                                                                                     |
 | IPvX    | Internet Protocol version X                            |                                                                                                     |
 | ISP     | Internet Service Provider                              |                                                                                                     |
@@ -118,9 +120,9 @@
 | UART    | Universal Asynchronous Receiver and Transmitter        |                                                                                                     |
 | UDP     | User Datagram Protocol                                 |                                                                                                     |
 | UFW     | Uncomplicated FireWall                                 |                                                                                                     |
-| URI     | Uniform Resource Identifier                            |                                                                                                     |
-| URL     | Uniform Resource Locator                               |                                                                                                     |
-| URN     | Uniform Resource Name                                  |                                                                                                     |
+| URI     | Uniform Resource Identifier                            | [uri vs url vs urn]                                                                                 |
+| URL     | Uniform Resource Locator                               | [uri vs url vs urn]                                                                                 |
+| URN     | Uniform Resource Name                                  | [uri vs url vs urn]                                                                                 |
 | USB     | Universal Serial Bus                                   |                                                                                                     |
 | UT      | Unit Test                                              |                                                                                                     |
 | UX      | User eXperience                                        |                                                                                                     |
@@ -158,7 +160,8 @@
 [adr]: adr.md
 [bash]: bash.md
 [cni]: cni.md
-[fhs]: fhs.placeholder
+[depin]: depin.md
+[fhs]: filesystem%20hierarchy%20standard.md
 [fish]: fish.md
 [iac]: iac.md
 [kubernetes]: kubernetes/README.md
@@ -167,6 +170,7 @@
 [ssh]: ssh.md
 [sssd]: sssd.md
 [terraform enterprise]: terraform%20enterprise.md
+[uri vs url vs urn]: uri%20vs%20url%20vs%20urn.webp
 [vim]: vim.md
 [yaml]: yaml.md
 [zfs]: zfs.md
