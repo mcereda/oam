@@ -98,6 +98,8 @@
         first_substr_matching_regex: "{{ 'sator arepo tenet opera rotas' | regex_search('\\stenet\\s') }}"
         value_from_json_string_in_module_output: >-
           {{ 'ansible_job_id' | extract(module_output | regex_search('{.*}') | from_json) }}
+        base64_encoded_string: "{{ 'some string' | ansible.builtin.b64encode }}"
+        base64_decoded_string: "{{ 'c29tZSBzdHJpbmc=' | ansible.builtin.b64decode }}"
     - name: Manipulate lists
       tags: list_manipulation
       block:
