@@ -5,6 +5,7 @@
    1. [Elastic IP addresses](#elastic-ip-addresses)
 1. [Services](#services)
    1. [Billing and Cost Management](#billing-and-cost-management)
+   1. [CloudFront](#cloudfront)
    1. [CloudWatch](#cloudwatch)
    1. [Config](#config)
    1. [Detective](#detective)
@@ -87,6 +88,7 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | ----------------------------- | --------------------------------------------- |
 | [Billing and Cost Management] | FIXME                                         |
 | [CloudWatch]                  | Observability (logging, monitoring, alerting) |
+| [CloudFront]                  | Content delivery                              |
 | [Config]                      | Compliance                                    |
 | [Detective]                   | FIXME                                         |
 | [EC2]                         | Managed virtual machines                      |
@@ -118,6 +120,19 @@ at <https://ip-ranges.amazonaws.com/ip-ranges.json>.
 Costs can be grouped by Tags applied on resources.<br/>
 Tags to use for this kind of grouping need to be activated in the _Cost allocation tags_ section.<br/>
 New tags might take 24 or 48 hours to appear there.
+
+### CloudFront
+
+Web service speeding up distribution of static and dynamic web content such as `.html`, `.css`, `.js`, and image files.
+
+Delivers content through edge locations.<br/>
+When users request content served with CloudFront, the requests are routed to the edge location that provides the lowest
+latency in order to deliver with the best possible performance.
+
+If the content is already in the edge location with the lowest latency, CloudFront delivers it immediately.<br/>
+If the content is not in that edge location, CloudFront retrieves it from the origin defined for it.
+
+Origins can be S3 buckets, MediaPackage channels, or HTTP servers.
 
 ### CloudWatch
 
@@ -560,6 +575,7 @@ machine if not.
 
 <!-- In-article sections -->
 [billing and cost management]: #billing-and-cost-management
+[cloudfront]: #cloudfront
 [cloudwatch]: #cloudwatch
 [config]: #config
 [detective]: #detective
