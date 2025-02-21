@@ -96,6 +96,7 @@
         pattern_is_at_the_beginning_of_string: "{{ 'sator arepo tenet opera rotas' is match('sator arepo') }}"
         regex_is_anywhere_in_string: "{{ 'sator arepo tenet opera rotas' is regex('\\stenet\\s') }}"
         first_substr_matching_regex: "{{ 'sator arepo tenet opera rotas' | regex_search('\\stenet\\s') }}"
+        password_obfuscated: "{{ 'sensitiveString' | regex_replace('^(.{2}).*(.{2})$', '\\1…\\2') }}"
         value_from_json_string_in_module_output: >-
           {{ 'ansible_job_id' | extract(module_output | regex_search('{.*}') | from_json) }}
         base64_encoded_string: "{{ 'some string' | ansible.builtin.b64encode }}"
