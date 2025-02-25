@@ -1,0 +1,39 @@
+---
+version: '3'
+
+set:
+  - errexit   # -e
+  - pipefail  # -o pipefail
+
+vars:
+  VENV_DIR: '{{.ROOT_TASKFILE}}/.venv'
+
+tasks:
+
+  dev-tools:bootstrap:
+    cmds:
+      - task: python:venv:create
+      - npm install
+
+  dev-tools:update:
+    cmds:
+      - task: python:update-venv
+      - npm update --save
+
+  python:venv:create:
+    vars:
+      PYTHON_VERSION: '{{.PYTHON_VERSION | default 3.12}}'
+      REQUIREMENTS_FILE: '{{.ROOT_TASKFILE}}/requirements.txt'
+    cmds:
+      - python{{.PYTHON_VERSION}} -m 'venv' '{{.VENV_DIR}}'
+      - "{{.VENV_DIR}}/bin/pip --require-virtualenv install -r '{{.REQUIREMENTS_FILE}}'"
+
+  python:venv:recreate:
+    cmds:
+      - rm -rf '{{.VENV_DIR}}'
+      - task: python:venv:create
+
+  python:venv:update:
+    cmd: >-
+      {{.VENV_DIR}}/bin/pip freeze -l --require-virtualenv | sed 's/==/>=/'
+      | xargs {{.VENV_DIR}}/bin/pip --require-virtualenv install -U
