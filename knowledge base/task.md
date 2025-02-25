@@ -85,6 +85,7 @@ task --completion 'bash' > '/etc/bash_completion.d/task'
 
 - [Website]
 - [Github]
+- [Demystification of taskfile variables]
 
 ### Sources
 
@@ -109,4 +110,5 @@ task --completion 'bash' > '/etc/bash_completion.d/task'
 [website]: https://taskfile.dev/
 
 <!-- Others -->
+[demystification of taskfile variables]: https://medium.com/@TianchenW/demystification-of-taskfile-variables-29b751950393
 [stop using makefile (use taskfile instead)]: https://dev.to/calvinmclean/stop-using-makefile-use-taskfile-instead-4hm9
