@@ -118,6 +118,7 @@ The LoRaWAN protocol is developed and maintained by the [LoRa Alliance].
 
 - [LoRa Alliance]
 - [The Things Network]
+- [Everything you need to know about LoRaWAN in 60 minutes - Johan Stokking (The Things Industries)]
 
 ### Sources
 
@@ -133,6 +134,7 @@ The LoRaWAN protocol is developed and maintained by the [LoRa Alliance].
 <!-- Files -->
 <!-- Upstream -->
 <!-- Others -->
+[everything you need to know about lorawan in 60 minutes - johan stokking (the things industries)]: https://www.youtube.com/watch?v=ZsVhYiX4_6o
 [lora alliance]: https://lora-alliance.org/
 [the things network]: https://www.thethingsnetwork.org/
 [what are lora and lorawan?]: https://www.thethingsnetwork.org/docs/lorawan/what-is-lorawan/
