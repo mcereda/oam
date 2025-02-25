@@ -120,9 +120,9 @@ curl -fsS --url 'http://localhost:3000/api/v1/alerts/config' -X 'POST' \
 			"service_type": "slack",
 			"service_config": "{\"slot_lag_mb_alert_threshold\":15000,\"open_connections_alert_threshold\":20,\"auth_token\":\"xoxb-012345678901-0123456789012-1234ABcdEFGhijKLMnopQRST\",\"channel_ids\":[\"C01K23X4567\"]}",
 			"alert_for_mirrors": [
-				"odoo_pg_to_sf",
-				"pikachu_ke_pg_to_sf",
-				"pikachu_zm_pg_to_sf"
+				"odoo_postgres_to_snowflake",
+				"product_korea_postgres_to_snowflake",
+				"product_zimbabwe_postgres_to_snowflake"
 			]
 		}
 	}'

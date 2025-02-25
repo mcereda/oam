@@ -64,6 +64,9 @@ find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname
 find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi preview --parallel "$(nproc)" --cwd
 find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi refresh --parallel "$(nproc)" -s 'dev' --non-interactive -v '3' --cwd
 
+# View the selected stack
+pulumi stack --show-name
+
 # Rename stacks
 pulumi stack rename -s 'dev' 'staging'
 # When the project name (and backend) changed
