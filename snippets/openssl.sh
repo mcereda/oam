@@ -142,6 +142,10 @@ openssl pkcs12 -export -out 'certificate.pfx' -inkey 'private.key.pem' -in 'cert
 # Convert PKCS#12 files (.pfx .p12) containing private keys and certificates to PEM
 openssl pkcs12 -in 'keystore.pfx' -out 'keystore.pem' -nodes
 
+# Show certificate details
+openssl x509 -noout -dates -issuer -subject -in 'certificate.pem'
+openssl s_client -connect 'www.google.com:443' | openssl x509 -noout -dates -issuer -subject
+
 
 ##
 # TLS client

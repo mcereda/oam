@@ -151,9 +151,12 @@ pulumi down -t 'targetResourceUrn'
 pulumi dn -s 'stack' --exclude-protected
 
 
+# View the selected stack
+pulumi stack --show-name
+
 # View stacks' state.
 pulumi stack
-pulumi stack -ius 'stack'
+pulumi stack -ius 'stack-name'
 pulumi stack --show-ids --show-urns --show-name --show-secrets
 
 # List stacks.

@@ -36,6 +36,7 @@ curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/job_templates/'
 
 # Show one job template
 awx job_templates get "This job template's name" | jq -S '.' -
+curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/job_templates/' | jq '.results[]|select(.id==22)' -
 
 # Modify job templates
 awx job_templates modify '1' --extra_vars "@vars.yml"
