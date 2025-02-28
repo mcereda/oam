@@ -66,6 +66,15 @@ aws cognito-idp list-users --user-pool-id 'eu-west-1_lrDF9T78a' --query "Users[?
 
 
 ###
+# ECS
+# ------------------
+###
+
+# Execute commands in containers
+aws ecs execute-command --cluster 'staging' --task '0123456789abcdefghijklmnopqrstuv' --container 'pihole' \
+	--interactive --command "dd if=/dev/zero of=/spaceHogger count=16048576 bs=1024"
+
+###
 # ECR
 # ------------------
 ###

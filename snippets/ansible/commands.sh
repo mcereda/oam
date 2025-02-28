@@ -125,6 +125,9 @@ ansible-doc -t 'strategy' 'linear'
 
 # Run commands within Execution Environments
 ansible-navigator exec
+ansible-navigator \
+	--execution-environment-volume-mounts="$HOME/.aws:/runner/.aws:ro" \
+	exec -- ansible-inventory --inventory 'aws_ec2.yml' --limit 'i-0123456789abcdef0' --list
 venv/bin/ansible-navigator --mode='stdout' --container-options='--platform=linux/amd64' \
 	--execution-environment-image='012345678901.dkr.ecr.eu-west-1.amazonaws.com/infra/ansible-ee' \
 	exec -- ansible-galaxy collection list
