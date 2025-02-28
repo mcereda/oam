@@ -2,15 +2,56 @@
 
 CLI for the Google Cloud Platform.
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
+Properties can be set via environment variables following the format `CLOUDSDK_SECTIONNAME_PROPERTYNAME`.
+
+| Variable                      | Default                                       | Summary                     |
+| ----------------------------- | --------------------------------------------- | --------------------------- |
+| `CLOUDSDK_CONFIG`             | `$HOME/.config/gcloud`<br/>`%APPDATA%\gcloud` | CLI configuration directory |
+| `CLOUDSDK_CORE_PROJECT`       | ``                                            | Project                     |
+| `CLOUDSDK_COMPUTE_ZONE`       | ``                                            | Compute zone                |
+| `CLOUDSDK_ACTIVE_CONFIG_NAME` | ``                                            | Active configuration        |
+
+| Path                                                    | Summary                         | Notes            |
+| ------------------------------------------------------- | ------------------------------- | ---------------- |
+| `$CLOUDSDK_CONFIG`                                      | CLI configuration directory     | Must be writable |
+| `$CLOUDSDK_CONFIG/configurations/config_default`        | Default configuration           |                  |
+| `$CLOUDSDK_CONFIG/application_default_credentials.json` | Default application credentials |                  |
+
+<details>
+  <summary>Setup</summary>
+
 ```sh
+# Install.
+asdf plugin add 'gcloud' && asdf install 'gcloud' 'latest'
+
+# [optional if one know what they're doing] Initialize.
+gcloud init
+gcloud init --no-browser
+gcloud --configuration 'secondary' init --console-only
+```
+
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
+# Show information about the installation and the active configuration.
+gcloud info
+gcloud info --format='value(config.paths.global_config_dir)'
+
+# Show information about gcloud commands and other topics.
+gcloud help
+gcloud help compute instances create
+gcloud cheat-sheet
+
+
 # Login.
 gcloud auth login
 gcloud … --brief
@@ -60,6 +101,16 @@ gcloud config configurations list
 
 # Switch to different configurations.
 gcloud config configurations activate "old_profile"
+
+
+# Update the SDK installation to the latest version.
+gcloud components update
+
+# Install components.
+gcloud components install 'skaffold'
+
+# Remove components.
+gcloud components remove 'config-connector'
 
 
 # List all project the current user has access to.
@@ -124,16 +175,17 @@ gcloud config set account "serviceaccount@gcpproject.iam.gserviceaccount.com" \
 && gcloud compute instances list
 ```
 
+</details>
+
 ## Further readings
 
 - [Creating and managing projects]
 - [Install kubectl and configure cluster access]
 - [`gcloud config configurations`][gcloud config configurations]
 
-## Sources
+### Sources
 
-All the references in the [further readings] section, plus the following:
-
+- [Install the Google Cloud CLI]
 - [Reference]
 - [Cheat-sheet]
 - [How to run gcloud command line using a service account]
@@ -148,10 +200,8 @@ All the references in the [further readings] section, plus the following:
 [creating and managing projects]: https://cloud.google.com/resource-manager/docs/creating-managing-projects
 [gcloud config configurations]: https://cloud.google.com/sdk/gcloud/reference/config/configurations
 [install kubectl and configure cluster access]: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl
+[install the google cloud cli]: https://cloud.google.com/sdk/docs/install-sdk
 [reference]: https://cloud.google.com/sdk/gcloud/reference/
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Others -->
 [how to change the active configuration profile in gcloud]: https://stackoverflow.com/questions/35744901/how-to-change-the-active-configuration-profile-in-gcloud#35750001
