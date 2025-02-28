@@ -3,6 +3,7 @@
 
 ##
 # Passwords
+# --------------------------------------
 ##
 
 # Generate pseudo-random passwords
@@ -12,6 +13,7 @@ openssl rand -base64 '18' > 'key.bin'
 
 ##
 # Private keys
+# --------------------------------------
 ##
 
 # Generate RSA keys
@@ -52,7 +54,7 @@ openssl dhparam -out 'dhparams.pem' '2048'
 
 ##
 # Certificate Signing Requests (CSR)
-# ----------------------------------
+# --------------------------------------
 # Digests must be names of supported has functions (md5, sha1, sha224, sha256, sha384, sha512, …)
 ##
 
@@ -89,6 +91,7 @@ openssl req -in 'request.csr' -verify -text -noout  # prints the data given in i
 
 ##
 # X.509 certificates
+# --------------------------------------
 ##
 
 # Create self-signed certificates with their new private key from scratch
@@ -103,16 +106,18 @@ openssl x509 -req -in 'request.csr' -signkey 'private.key' -out 'certificate.crt
 # Very naive example of how to issue new certificates should one be a CA company
 openssl x509 -req -in 'child.csr' -days '365' -CA 'ca.crt' -CAkey 'ca.key' -set_serial '01' -out 'child.crt'
 
-# Print out certificate information
-openssl x509 -in 'certificate.crt' -text -noout                 # textual representation of components
-openssl x509 -in 'certificate.crt' -fingerprint -sha256 -noout  # fingerprint as sha256 digest
-openssl x509 -in 'certificate.crt' -fingerprint -md5 -noout     # fingerprint as md5 digest
+# Show certificate information
+openssl x509 -noout -in 'certificate.crt' -text                    # textual representation of components
+openssl x509 -noout -in 'certificate.crt' -fingerprint -sha256     # fingerprint as sha256 digest
+openssl x509 -noout -in 'certificate.crt' -fingerprint -md5        # fingerprint as md5 digest
+openssl x509 -noout -in 'certificate.pem' -dates -issuer -subject  # expiration date, issuer and subject
+openssl s_client -connect 'www.google.com:443' < /dev/null | openssl x509 -noout -startdate -enddate
 
 # Verify certificate chains
-# If a certificate is its own issuer, it is assumed to be the root CA (needs to be self signed)
-openssl verify 'certificate.crt'  # root and *all* intemediate certificates need to be trusted by the local machine
-openssl verify -untrusted 'intermediate-ca-chain.pem' 'certificate.crt'  # the root certificate needs to be trusted by the local machine
-openssl verify -purpose 'sslserver' -untrusted 'chain.pem' 'fullchain.pem'
+# If a certificate is its own issuer, it is assumed to be the root CA and must be self signed
+openssl verify 'certificate.crt'  # localhost must trust the root and *all* intemediate certificates
+openssl verify -untrusted 'intermediate-ca-chain.pem' 'certificate.crt'  # localhost must trust the root certificate
+openssl verify -purpose 'sslserver' -untrusted 'chain.pem' 'fullchain.pem' -verify_hostname 'smth.example.org'
 openssl verify -CAfile 'root.crt' -untrusted 'intermediate-ca-chain.pem' 'child.crt'
 
 # Verify certificates served by remote servers cover the given hostnames
@@ -141,10 +146,6 @@ openssl pkcs12 -export -out 'certificate.pfx' -inkey 'private.key.pem' -in 'cert
 
 # Convert PKCS#12 files (.pfx .p12) containing private keys and certificates to PEM
 openssl pkcs12 -in 'keystore.pfx' -out 'keystore.pem' -nodes
-
-# Show certificate details
-openssl x509 -noout -dates -issuer -subject -in 'certificate.pem'
-openssl s_client -connect 'www.google.com:443' | openssl x509 -noout -dates -issuer -subject
 
 
 ##
@@ -180,6 +181,7 @@ curl -kso '/dev/null' -w "tcp:%{time_connect}, ssldone:%{time_appconnect}\n" 'ht
 
 ##
 # Others
+# --------------------------------------
 ##
 
 # Verify private keys match certificates and CSRs
