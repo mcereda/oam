@@ -26,3 +26,6 @@ curl --url 'https://gitlab.com/api/v4/runners/all' \
 curl -fsX 'PUT' 'https://gitlab.com/api/v4/runners/{}' -H 'PRIVATE-TOKEN: glpat-m-…' -F 'paused=true'
 curl --fail --silent --request 'PUT' 'https://gitlab.com/api/v4/runners/{}' \
 	--header 'PRIVATE-TOKEN: glpat-m-…' --form 'paused=true'
+
+
+curl -v --cookie "USER_TOKEN=Yes" http://127.0.0.1:5000/
