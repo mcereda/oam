@@ -9,6 +9,7 @@
    1. [CloudWatch](#cloudwatch)
    1. [Config](#config)
    1. [Detective](#detective)
+   1. [Global Accelerator](#global-accelerator)
    1. [GuardDuty](#guardduty)
    1. [EventBridge](#eventbridge)
    1. [ImageBuilder](#imagebuilder)
@@ -232,6 +233,70 @@ Sample templates for compliance standards and benchmarks are available.
 
 Uses ML and graphs to try and identify the root cause of security issues.<br/>
 Creates visualizations with details and context by leveraging events from VPC Flow Logs, CloudTrail and GuardDuty.
+
+### Global Accelerator
+
+Global service creating accelerators to improve the performance of applications.<br/>
+Supports endpoints in multiple Regions.
+
+**Standard** accelerators improve availability of Internet applications used by a global audience.<br/>
+Global Accelerator directs traffic over AWS' global network to endpoints in the nearest Region to the client.<br/>
+Endpoints for standard accelerators can be Network Load Balancers, Application Load Balancers, Amazon EC2 instances,
+or Elastic IP addresses located in one or more Regions.
+
+**Custom** routing accelerators map one or more users to a specific destination among many.
+
+Global Accelerator provides 2 static IPv4 addresses and 2 static IPv6 addresses (for dual-stack VPCs) that are
+associated with accelerators.<br/>
+Those static IP addresses are anycast addresses from AWS' edge network and remain assigned to accelerators for as
+long as they exist, **even** if disabled and no longer accepting or routeing traffic.<br/>
+When deleting accelerators, the static IP addresses assigned to it are lost.
+
+Global Accelerator also assigns each accelerator a default DNS name, similar to
+`a1234567890abcdef.awsglobalaccelerator.com` for single-stack ones or similar to
+`a1234567890abcdef.dualstack.awsglobalaccelerator.com` for dual-stack ones, that points to the static IP addresses
+assigned to the same accelerator.
+
+The static IP addresses provided by Global Accelerator serve as **single fixed entry points** for your clients.<br/>
+They accept incoming traffic onto AWS' global network from the edge location that is closest to the users.<br/>
+From there, traffic is routed based on the type of accelerator configured:
+
+- Standard accelerators route traffic to the optimal endpoint based on several factors including the user's location,
+  the health of the endpoint, and the endpoint weights one configures.
+- Custom routing accelerators route each client to a specific EC2 instance and port in a subnet  based on the external
+  static IP address and listener port that one provided.
+
+Global Accelerator terminates TCP connections from clients at AWS' edge locations and establishes a new TCP connection
+to one's endpoints.
+
+Client IP addresses are preserved for endpoints on custom routing accelerators.<br/>
+Standard accelerators have the option to preserve and access the client IP address for some endpoint types.
+
+Global Accelerator continuously monitors the health of all standard accelerators' endpoints, and reroutes traffic for
+all new connections automatically.<br/>
+Health checks are **not** used with custom routing accelerators and there is no failover, because one specifies the
+destination to route traffic to.
+
+One can configure weights for one's endpoints in standard accelerators.<br/>
+In addition, one can use the traffic dial in Global Accelerator to increase (dial up) or decrease (dial down) the
+percentage of traffic to specific endpoint groups.
+
+Global Accelerator sets an idle timeout to its connections.<br/>
+If no data has been sent nor received by the time that the idle timeout period elapses, it closes the connection.
+
+Idle timeout periods are **not** customizable.
+
+To prevent connection timeout, one must send a packet with a minimum of one byte of data in either direction within the
+TCP connection timeout window. One **cannot** use TCP keep-alive packets to maintain a connection open.
+
+Idle timeouts are set to 340 seconds for TCP connections and 30 seconds for UDP connections.
+
+Global Accelerator continues to direct traffic for established connections to endpoints until the idle timeout is met,
+**even if the endpoint is marked as unhealthy or it is removed from the accelerator**.<br/>
+It selects a new endpoint, if needed, only when a new connection starts or after an idle timeout.
+
+Refer [How AWS Global Accelerator works] for more and updated details.<br/>
+Also see [Using Amazon CloudWatch with AWS Global Accelerator].
 
 ### GuardDuty
 
@@ -520,7 +585,7 @@ Stores configuration information (primarily credentials and selected AWS Region)
 Initiates the connectivity to AWS services.
 
 Leveraged by service Clients and Resources.<br/>
-boto3 creates a default session automatically when needed, using the default credential profile.<br/>
+Boto3 creates a default session automatically when needed, using the default credential profile.<br/>
 The default credentials profile uses the `~/.aws/credentials` file if found, or tries assuming the role of the executing
 machine if not.
 
@@ -567,6 +632,9 @@ machine if not.
 - [Boto3 sessions]
 - [Boto3 paginators]
 - [Which log group is causing a sudden increase in my CloudWatch Logs bill?]
+- [What is AWS Global Accelerator?]
+- [How AWS Global Accelerator works]
+- [Using Amazon CloudWatch with AWS Global Accelerator]
 
 <!--
   Reference
@@ -620,6 +688,7 @@ machine if not.
 [enable or disable aws regions in your account]: https://docs.aws.amazon.com/accounts/latest/reference/manage-acct-regions.html
 [exporting db snapshot data to amazon s3]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ExportSnapshot.html
 [guidance for tagging on aws]: https://aws.amazon.com/solutions/guidance/tagging-on-aws/
+[how aws global accelerator works]: https://docs.aws.amazon.com/global-accelerator/latest/dg/introduction-how-it-works.html
 [how can i use aws kms asymmetric keys to encrypt a file using openssl?]: https://repost.aws/knowledge-center/kms-openssl-encrypt-key
 [i'm trying to export a snapshot from amazon rds mysql to amazon s3, but i'm receiving an error. why is this happening?]: https://repost.aws/knowledge-center/rds-mysql-export-snapshot
 [more info about resource deprecation?]: https://github.com/boto/boto3/discussions/3563
@@ -632,8 +701,10 @@ machine if not.
 [tools to build on aws]: https://aws.amazon.com/developer/tools/
 [top 10 log groups by written bytes]: https://console.aws.amazon.com/cloudwatch/home#metricsV2?graph=~(view~'timeSeries~stacked~false~metrics~(~(~(expression~'SELECT*20SUM*28IncomingBytes*29*0aFROM*20SCHEMA*28*22AWS*2fLogs*22*2c*20LogGroupName*29*20*0aGROUP*20BY*20LogGroupName*0aORDER*20BY*20SUM*28*29*20DESC*0aLIMIT*2010~label~'!*7bLABEL*7d*20*5bsum*3a*20!*7bSUM*7d*5d~id~'q1)))~region~'eu-west-1~title~'Top*2010*20log*20groups*20by*20written*20bytes~yAxis~(left~(label~'Bytes~showUnits~false))~stat~'Average~period~300)
 [understanding data transfer charges]: https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html
+[using amazon cloudwatch with aws global accelerator]: https://docs.aws.amazon.com/global-accelerator/latest/dg/cloudwatch-monitoring.html
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
+[what is aws global accelerator?]: https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html
 [what is cloudwatch]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html
 [which log group is causing a sudden increase in my cloudwatch logs bill?]: https://repost.aws/knowledge-center/cloudwatch-logs-bill-increase
 
