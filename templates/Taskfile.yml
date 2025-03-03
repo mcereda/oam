@@ -26,6 +26,13 @@ tasks:
       - task: python:update-venv
       - npm update --save
 
+  env:debug:
+    desc: print the current shell environment
+    summary: Print the current shell environment
+    cmds:
+      - printenv | sort
+      - set | sort
+
   python:venv:create:
     vars:
       PYTHON_VERSION: '{{ .PYTHON_VERSION | default 3.12}}'
