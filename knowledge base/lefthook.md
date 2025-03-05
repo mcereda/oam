@@ -1,5 +1,7 @@
 # Lefthook
 
+Git hooks manager.
+
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
    1. [Extend other files](#extend-other-files)
@@ -11,10 +13,12 @@
 
 ```sh
 # Installation.
+brew install 'lefthook'
+gem install 'lefthook'
 go install 'github.com/evilmartians/lefthook@latest'
 npm install 'lefthook' --save-dev
-gem install 'lefthook'
-brew install 'lefthook'
+pip install --user 'lefthook'
+yay -S 'lefthook-bin'
 
 # Get help about any command.
 lefthook help

@@ -49,8 +49,10 @@ variables** with the same name.
 # Install the executable.
 brew install 'go-task'
 choco install 'go-task'
+docker pull 'taskfile/task'
 dnf install 'go-task'
 go install 'github.com/go-task/task/v3/cmd/task@latest'
+pip install --user 'go_task_bin'
 snap install 'task' --classic
 zypper install 'https://github.com/go-task/task/releases/download/v3.39.2/task_linux_amd64.rpm'
 
