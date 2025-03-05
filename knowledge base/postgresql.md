@@ -239,6 +239,7 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 - [PostgreSQL: Show all the privileges for a concrete user]
 - [PostgreSQL - disabling constraints]
 - [Hashing a String to a Numeric Value in PostgreSQL]
+- [I replaced my entire tech stack with Postgres...]
 
 <!--
   Reference
@@ -269,6 +270,7 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 [how to scram in postgres with pgbouncer]: https://www.crunchydata.com/blog/pgbouncer-scram-authentication-postgresql
 [how to search a specific value in all tables (postgresql)?]: https://stackoverflow.com/questions/5350088/how-to-search-a-specific-value-in-all-tables-postgresql/23036421#23036421
 [how to write update function (stored procedure) in postgresql?]: https://stackoverflow.com/questions/21087710/how-to-write-update-function-stored-procedure-in-postgresql
+[i replaced my entire tech stack with postgres...]: https://www.youtube.com/watch?v=3JW732GrMdg
 [pgxn-manager]: https://github.com/pgxn/pgxn-manager
 [postgresql - disabling constraints]: https://stackoverflow.com/questions/2679854/postgresql-disabling-constraints#2681413
 [postgresql_anonymizer]: https://postgresql-anonymizer.readthedocs.io/en/stable/
