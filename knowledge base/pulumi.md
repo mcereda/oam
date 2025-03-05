@@ -49,6 +49,7 @@ Target single resources with `-t`, `--target`. Target also those that depend on 
 # Install.
 brew install 'pulumi/tap/pulumi'
 choco install 'pulumi'
+docker pull 'pulumi/pulumi'  # pulumi/pulumi-[nodejs|python|java|…]:3.148.0
 
 # Create completions for the shell.
 source <(pulumi gen-completion 'zsh')
@@ -61,6 +62,17 @@ pulumi gen-completion 'fish' > "$HOME/.config/fish/completions/pulumi.fish"
   <summary>Usage</summary>
 
 ```sh
+# Run in Docker
+docker container run --rm --name 'pulumi' \
+  --volume 'pulumi-home:/root/.pulumi:rw' \
+  --volume "${PWD}:/pulumi/projects:rw" \
+  --env 'PULUMI_SKIP_UPDATE_CHECK=true' \
+  --volume "${HOME}/.aws:/root/.aws:ro" \
+  --env 'AWS_REGION' --env 'AWS_ACCESS_KEY_ID' --env 'AWS_SECRET_ACCESS_KEY' \
+  --volume "${HOME}/.config/gcloud:/root/.config/gcloud:ro" \
+  'pulumi/pulumi-nodejs:3.153.1' \
+  pulumi …
+
 # List available templates.
 pulumi new -l
 pulumi new --list-templates
@@ -935,6 +947,7 @@ Solution: follow the suggestion in the warning message:
 - [Resources reference]
 - [Things I wish I knew earlier about Pulumi]
 - [Enable pulumi refresh to solve pending creates]
+- [Docker images]
 
 ### Sources
 
@@ -1000,4 +1013,5 @@ Solution: follow the suggestion in the warning message:
 
 <!-- Others -->
 [assigning tags by default on aws with pulumi]: https://blog.scottlowe.org/2023/09/11/assigning-tags-by-default-on-aws-with-pulumi/
+[docker images]: https://hub.docker.com/u/pulumi
 [things i wish i knew earlier about pulumi]: https://vsupalov.com/pulumi-learnings/
