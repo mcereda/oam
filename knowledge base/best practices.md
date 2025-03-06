@@ -98,10 +98,14 @@ What really worked for me personally, or in my experience.
 - One and one's contributors (e.g. one's teammates and other teams in one's company) _should be_ on the same boat and
   _should be_ shooting for the same goals.<br/>
   Act like it. You may as well collaborate instead of fighting each other.
+- Prefer using standardized execution environments to avoid the _it works on my machine_ conundrum.<br/>
+  This helps to ensure everybody does things the same way, (hopefully) reaching the same results.<br/>
+  E.g., run commands in [`nix`][nix] or containers, use virtual environments specific to repositories, configure
+  standard actions in tools like [`task`][task] or [GNU `make`][make].
 
 ## CI/CD specific
 
-- Keep _integration_, _delivery_ and _deployment_ separated.<br/>
+- Keep _integration_, _delivery_ and _deployment_ **separated**.<br/>
   They are different concepts, and as such should require different tasks.<br/>
   This also allows for checkpoints, and to fail fast with less to no unwanted consequence.
 
@@ -115,7 +119,7 @@ What really worked for me personally, or in my experience.
 - Keep tasks as simple, consistent and reproducible as possible.<br/>
   Avoid like the plague relying on programs or scripts written directly in pipelines: pipeline should act as the _glue_
   connecting tasks, not replace full fledged applications.
-- All tasks should be able to execute from one's own local machine.<br/>
+- Most, if not all, tasks should be able to execute from one's own local machine.<br/>
   This allows to fail fast and avoid wasting time waiting for pipelines to run in a black box somewhere.
 - DevOps pipelines should be meant to be used as **last mile** steps for specific goals.<br/>
   There **cannot** be a single pipeline for everything, the same way as the _one-size-fits-all_ concept never really
@@ -197,9 +201,12 @@ Listed in order of addition:
 [keep a changelog]: keep%20a%20changelog.md
 [kro]: kubernetes/kro.md
 [lefthook]: lefthook.md
+[make]: gnu%20userland/make.md
+[nix]: nix.md
 [pre-commit]: pre-commit.md
 [radius]: cloud%20computing/radius.md
 [safe]: safe.md
+[task]: task.md
 [the automation paradox]: the%20automation%20paradox.md
 
 <!-- Others -->
