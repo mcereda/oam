@@ -126,14 +126,23 @@ New tags might take 24 or 48 hours to appear there.
 
 Web service speeding up distribution of static and dynamic web content such as `.html`, `.css`, `.js`, and image files.
 
-Delivers content through edge locations.<br/>
-When users request content served with CloudFront, the requests are routed to the edge location that provides the lowest
-latency in order to deliver with the best possible performance.
+Caches web content from one's defined _origins_ and delivers it through edge locations.<br/>
+When requesting content served with CloudFront, requests are routed to the edge location with the lowest latency for the
+client.
 
 If the content is already in the edge location with the lowest latency, CloudFront delivers it immediately.<br/>
-If the content is not in that edge location, CloudFront retrieves it from the origin defined for it.
+If the content is not in that edge location, CloudFront retrieves it from the _origin_ defined for it.
 
-Origins can be S3 buckets, MediaPackage channels, or HTTP servers.
+_Origins_ are location where the original version of one's content is stored.<br/>
+They can be S3 buckets, MediaPackage channels, or HTTP servers.<br/>
+Each distribution can have by default up to 25 origins.
+
+1. Set up one or more origins so that they serve their content normally.
+1. Create a CloudFront Distribution.<br/>
+   This usually takes 15 to 30 minutes.
+1. \[optional] Avoid using the provided Distribution's domain name by:
+   1. Configuring alternate domain names so that the Distribution accepts requests for those aliases, **and**
+   1. Creating DNS records of type CNAME pointing to the provided Distribution's domain name.
 
 ### CloudWatch
 
