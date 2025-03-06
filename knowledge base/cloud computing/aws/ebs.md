@@ -6,7 +6,8 @@ Persistent [block storage][what is block storage?] for [EC2 Instances][ec2].
 1. [Volume types](#volume-types)
 1. [Snapshots](#snapshots)
 1. [Encryption](#encryption)
-1. [Troubleshooting](#troubleshooting)
+1. [Operations](#operations)
+   1. [Increase disks' size](#increase-disks-size)
    1. [Migrate `gp2` volumes to `gp3`](#migrate-gp2-volumes-to-gp3)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -186,7 +187,35 @@ Attaching EBS volumes which data keys are encrypted with unusable KMS keys to EC
 not be able to use the KMS keys to decrypt the data key used for the volume.<br/>
 Make the KMS key usable again to be able to attach such EBS volumes.
 
-## Troubleshooting
+## Operations
+
+### Increase disks' size
+
+Refer [Modify an Amazon EBS volume using Elastic Volumes operations] and
+[How do I increase or decrease the size of my EBS volume?].
+
+1. Increase the volume's size:
+
+   ```sh
+   aws ec2 modify-volume --volume-type 'gp3' --volume-id 'vol-0123456789abcdef0' --size '750'
+   aws ec2 describe-volumes-modifications --volume-ids 'vol-0123456789abcdef0' --output 'VolumesModifications[]'
+   ```
+
+1. Extend the volume's partitions from inside the instance using it:
+
+   ```sh
+   lsblk
+   sudo growpart '/dev/nvme0n1' '1'  # nitro
+   sudo growpart '/dev/xvda' '1'     # xen
+   ```
+
+1. Extend the volume's file system from inside the instance using it:
+
+   ```sh
+   sudo xfs_growfs -d '/'           # xfs
+   sudo resize2fs '/dev/nvme0n1p1'  # ext4 on nitro
+   sudo resize2fs '/dev/xvda1'      # ext4 on xen
+   ```
 
 ### Migrate `gp2` volumes to `gp3`
 
@@ -217,6 +246,7 @@ aws ec2 describe-volumes --filters "Name=volume-type,Values=gp2" --query 'Volume
 - [Delete Unused AWS EBS Volumes]
 - [`describe-volumes`][describe-volumes]
 - [`delete-volume`][delete-volume]
+- [Modify an Amazon EBS volume using Elastic Volumes operations]
 - [How do I increase or decrease the size of my EBS volume?]
 - [How Amazon EBS encryption works]
 
@@ -242,6 +272,7 @@ aws ec2 describe-volumes --filters "Name=volume-type,Values=gp2" --query 'Volume
 [extend the file system after resizing an ebs volume]: https://docs.aws.amazon.com/ebs/latest/userguide/recognize-expanded-volume-linux.html
 [how amazon ebs encryption works]: https://docs.aws.amazon.com/ebs/latest/userguide/how-ebs-encryption-works.html
 [how do i increase or decrease the size of my ebs volume?]: https://repost.aws/knowledge-center/ebs-increase-decrease-volume-size
+[modify an amazon ebs volume using elastic volumes operations]: https://docs.aws.amazon.com/ebs/latest/userguide/ebs-modify-volume.html
 [what is block storage?]: https://aws.amazon.com/what-is/block-storage/
 
 <!-- Others -->
