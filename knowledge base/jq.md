@@ -148,6 +148,7 @@ yq -e '(.backend.url|test("^file://")?)|not' 'Pulumi.yaml'
 - [Deleting multiple keys at once with jq]
 - [Remove all null values]
 - [jq: select where .attribute in list]
+- [An Introduction to JQ]
 
 <!--
   Reference
@@ -155,6 +156,7 @@ yq -e '(.backend.url|test("^file://")?)|not' 'Pulumi.yaml'
   -->
 
 <!-- Others -->
+[an introduction to jq]: https://earthly.dev/blog/jq-select/
 [change multiple values at once]: https://stackoverflow.com/questions/47355901/jq-change-multiple-values#47357956
 [deleting multiple keys at once with jq]: https://stackoverflow.com/questions/36227245/deleting-multiple-keys-at-once-with-jq
 [filter objects list with regex]: https://til.hashrocket.com/posts/uv0bjiokwk-use-jq-to-filter-objects-list-with-regex
