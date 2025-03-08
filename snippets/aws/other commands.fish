@@ -39,6 +39,14 @@ aws chatbot describe-slack-channel-configurations --query 'SlackChannelConfigura
 
 
 ###
+# CloudFront
+# ------------------
+###
+
+aws cloudfront get-distribution --id 'E123456ABCDEFG'
+
+
+###
 # CloudWatch
 # ------------------
 ###
