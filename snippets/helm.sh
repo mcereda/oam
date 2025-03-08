@@ -10,6 +10,13 @@ helm repo update 'keda'
 helm search hub --max-col-width '100' 'ingress-nginx'
 helm search repo --versions 'gitlab/gitlab-runner'
 
+# Get the chart version for specific app versions.
+helm search repo --versions --output 'json' … \
+| jq -r '.[]|select(.app_version=="17.9.0").version' -
+# Get the latest chart version matching partial app versions.
+helm search repo --versions --output 'json' … \
+| jq -r 'map(select(.app_version|test("7.8")))|first.version' -
+
 helm show values 'gitlab/gitlab'
 helm show values 'gitlab/gitlab-runner' --version '0.64.1'
 
