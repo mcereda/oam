@@ -5,7 +5,6 @@
    1. [Elastic IP addresses](#elastic-ip-addresses)
 1. [Services](#services)
    1. [Billing and Cost Management](#billing-and-cost-management)
-   1. [CloudFront](#cloudfront)
    1. [CloudWatch](#cloudwatch)
    1. [Config](#config)
    1. [Detective](#detective)
@@ -121,28 +120,6 @@ at <https://ip-ranges.amazonaws.com/ip-ranges.json>.
 Costs can be grouped by Tags applied on resources.<br/>
 Tags to use for this kind of grouping need to be activated in the _Cost allocation tags_ section.<br/>
 New tags might take 24 or 48 hours to appear there.
-
-### CloudFront
-
-Web service speeding up distribution of static and dynamic web content such as `.html`, `.css`, `.js`, and image files.
-
-Caches web content from one's defined _origins_ and delivers it through edge locations.<br/>
-When requesting content served with CloudFront, requests are routed to the edge location with the lowest latency for the
-client.
-
-If the content is already in the edge location with the lowest latency, CloudFront delivers it immediately.<br/>
-If the content is not in that edge location, CloudFront retrieves it from the _origin_ defined for it.
-
-_Origins_ are location where the original version of one's content is stored.<br/>
-They can be S3 buckets, MediaPackage channels, or HTTP servers.<br/>
-Each distribution can have by default up to 25 origins.
-
-1. Set up one or more origins so that they serve their content normally.
-1. Create a CloudFront Distribution.<br/>
-   This usually takes 15 to 30 minutes.
-1. \[optional] Avoid using the provided Distribution's domain name by:
-   1. Configuring alternate domain names so that the Distribution accepts requests for those aliases, **and**
-   1. Creating DNS records of type CNAME pointing to the provided Distribution's domain name.
 
 ### CloudWatch
 
@@ -652,7 +629,6 @@ machine if not.
 
 <!-- In-article sections -->
 [billing and cost management]: #billing-and-cost-management
-[cloudfront]: #cloudfront
 [cloudwatch]: #cloudwatch
 [config]: #config
 [detective]: #detective
@@ -665,6 +641,7 @@ machine if not.
 
 <!-- Knowledge base -->
 [cli]: cli.md
+[cloudfront]: cloudfront.md
 [ec2]: ec2.md
 [ecr]: ecr.md
 [ecs]: ecs.md
