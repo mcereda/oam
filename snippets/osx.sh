@@ -46,7 +46,7 @@ killall 'Dock'
 # Install 'brew' and its bundle
 # Uses the user's global Brewfile if found
 command -v 'brew' > '/dev/null' || /bin/bash -c "$(curl -fsSL 'https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh')"
-[[ -r "${HOME}/.Brewfile" ]] && brew bundle --global --no-lock
+[[ -r "${HOME}/.Brewfile" ]] && brew bundle --global
 
 # Install macports
 if ! command -v 'port' > '/dev/null'
