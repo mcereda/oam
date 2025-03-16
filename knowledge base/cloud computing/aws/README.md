@@ -11,7 +11,6 @@
    1. [Global Accelerator](#global-accelerator)
    1. [GuardDuty](#guardduty)
    1. [EventBridge](#eventbridge)
-   1. [ImageBuilder](#imagebuilder)
    1. [Inspector](#inspector)
    1. [KMS](#kms)
    1. [Security Hub](#security-hub)
@@ -99,7 +98,7 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | [EventBridge]                 | FIXME                                         |
 | [GuardDuty]                   | Threat detection                              |
 | [IAM]                         | Access control                                |
-| [ImageBuilder]                | Build custom AMIs                             |
+| [Image Builder]               | Build custom AMIs                             |
 | [Inspector]                   | FIXME                                         |
 | [KMS]                         | Key management                                |
 | [OpenSearch]                  | ELK, logging                                  |
@@ -304,10 +303,6 @@ _Threat IP List_ is a blacklist of **public IPs and CIDRs** that will be used by
 ### EventBridge
 
 TODO
-
-### ImageBuilder
-
-Also refer [Image baking in AWS using Packer and Image builder].
 
 ### Inspector
 
@@ -602,7 +597,6 @@ machine if not.
 - [Exporting DB snapshot data to Amazon S3]
 - [I'm trying to export a snapshot from Amazon RDS MySQL to Amazon S3, but I'm receiving an error. Why is this happening?]
 - [Rotating AWS KMS keys]
-- [Image baking in AWS using Packer and Image builder]
 - [Using AWS KMS via the CLI with a Symmetric Key]
 - [AWS Public IP Address Ranges Now Available in JSON Form]
 - [Savings Plans user guide]
@@ -621,6 +615,7 @@ machine if not.
 - [What is AWS Global Accelerator?]
 - [How AWS Global Accelerator works]
 - [Using Amazon CloudWatch with AWS Global Accelerator]
+- [What is AWS CloudWatch? Guide for beginners]
 
 <!--
   Reference
@@ -634,7 +629,6 @@ machine if not.
 [detective]: #detective
 [eventbridge]: #eventbridge
 [guardduty]: #guardduty
-[imagebuilder]: #imagebuilder
 [inspector]: #inspector
 [kms]: #kms
 [security hub]: #security-hub
@@ -648,6 +642,7 @@ machine if not.
 [efs]: ecs.md
 [eks]: eks.md
 [iam]: iam.md
+[image builder]: image%20builder.md
 [opensearch]: opensearch.md
 [rds]: rds.md
 [route53]: route53.md
@@ -701,5 +696,5 @@ machine if not.
 [aws savings plans vs. reserved instances: when to use each]: https://www.cloudzero.com/blog/savings-plans-vs-reserved-instances/
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
 [difference in boto3 between resource, client, and session?]: https://stackoverflow.com/questions/42809096/difference-in-boto3-between-resource-client-and-session
-[image baking in aws using packer and image builder]: https://dev.to/santhoshnimmala/image-baking-in-aws-using-packer-and-image-builder-1ed3
 [using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
+[what is aws cloudwatch? guide for beginners]: https://www.educative.io/blog/aws-cloudwatch

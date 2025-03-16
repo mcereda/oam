@@ -109,6 +109,9 @@ When archived, incremental snapshots are converted to **full snapshots** and mov
 When access to archived snapshots is needed, they need to be restored to the standard tier before use. Restoring can
 take **up to 72h**.
 
+Lifecycle policies' `targetTags` attribute targets resources of the specified type in an **OR** fashion, not **AND**,
+meaning they will target all resources with **at least one** of the defined target tags.
+
 ## Encryption
 
 Refer [How Amazon EBS encryption works].

@@ -7,7 +7,7 @@
 1. [Metrics](#metrics)
 1. [Auto scaling](#auto-scaling)
    1. [Lifecycle hooks](#lifecycle-hooks)
-1. [Image builder](#image-builder)
+1. [Image customization](#image-customization)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -187,48 +187,9 @@ Refer [Amazon EC2 Auto Scaling lifecycle hooks].
 
 Also see [CompleteLifecycleAction].
 
-## Image builder
+## Image customization
 
-Refer [EC2 Image Builder].
-
-AWS service automating the creation, management, and deployment of customized AMIs or Docker images.
-
-AMIs created by Image Builder in one's account are owned by that account.
-
-Image Builder supports the following at the time of writing:
-
-| Operating system/distribution      | Supported versions                             |
-| ---------------------------------- | ---------------------------------------------- |
-| Amazon Linux                       | 2, 2023                                        |
-| CentOS                             | 7, 8                                           |
-| CentOS Stream                      | 8                                              |
-| Mac OS X                           | 12.x (Monterey), 13.x (Ventura), 14.x (Sonoma) |
-| Red Hat Enterprise Linux (RHEL)    | 7, 8, 9                                        |
-| SUSE Linux Enterprise Server (SLE) | 12, 15                                         |
-| Ubuntu                             | 18.04 LTS, 20.04 LTS, 22.04 LTS, 24.04 LTS     |
-| Windows Server                     | 2012 R2, 2016, 2019, 2022                      |
-
-Image Builder costs **nothing** to create custom AMI or container images.<br/>
-However, standard pricing applies for other services that are used in the process.
-
-Steps:
-
-<details>
-  <summary>AMI creation</summary>
-
-1. \[optional] Create new components as needed.
-1. \[optional] Create a new image recipe.
-1. \[optional] Create a new infrastructure configuration.
-1. \[optional] Create a new distribution configuration.
-1. Create a new pipeline.
-
-</details>
-<details>
-  <summary>Container creation</summary>
-
-TODO
-
-</details>
+Refer [ImageBuilder].
 
 ## Further readings
 
@@ -247,6 +208,7 @@ TODO
 - [Device names for volumes on Amazon EC2 instances]
 - [Amazon EBS volume limits for Amazon EC2 instances]
 - [Recommended alarms]
+- [Image Builder]
 
 ### Sources
 
@@ -262,7 +224,6 @@ TODO
 - [Create an AMI from an Amazon EC2 Instance]
 - [Amazon EC2 Auto Scaling]
 - [Amazon EC2 Auto Scaling lifecycle hooks]
-- [EC2 Image Builder]
 - [CompleteLifecycleAction]
 - [Instance store temporary block storage for EC2 instances]
 - [Attach an EBS volume to multiple EC2 instances using Multi-Attach]
@@ -277,6 +238,7 @@ TODO
 [amazon web services]: README.md
 [cli]: cli.md
 [ebs]: ebs.md
+[image builder]: image%20builder.md
 [ssm]: ssm.md
 
 <!-- Upstream -->
@@ -294,7 +256,6 @@ TODO
 [describe-images]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-images.html
 [describeimages]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
 [device names for volumes on amazon ec2 instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html
-[ec2 image builder]: https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html
 [how can i send memory and disk metrics from my ec2 instances to cloudwatch?]: https://repost.aws/knowledge-center/cloudwatch-memory-metrics-ec2
 [how to clone instance ec2]: https://repost.aws/questions/QUOrWudF3vRL2Vqtrv0M9lfQ/how-to-clone-instance-ec2
 [iam roles for amazon ec2]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
