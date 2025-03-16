@@ -125,3 +125,7 @@ aws ec2 stop-instances --instance-ids 'i-0123456789abcdef0'
 
 # Terminate instances
 aws ec2 terminate-instances --instance-ids 'i-0123456789abcdef0'
+
+# Delete launch template versions
+aws ec2 delete-launch-template-versions --launch-template-id 'lt-0123456789abcdef0' --versions '1' --dry-run
+aws ec2 delete-launch-template-versions --launch-template-name 'GitLab Runners' --versions (seq 1 10) --dry-run

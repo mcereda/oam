@@ -44,6 +44,7 @@ aws chatbot describe-slack-channel-configurations --query 'SlackChannelConfigura
 ###
 
 aws cloudfront get-distribution --id 'E123456ABCDEFG'
+aws cloudfront get-cache-policy --id '01234567-89ab-cdef-0123-456789abcdef'
 
 
 ###
@@ -419,6 +420,7 @@ aws s3api list-objects-v2 --bucket 'backup'
 aws s3api list-objects-v2 --bucket 'backup' --query "Contents[?LastModified>='2022-01-05T08:05:37+00:00'].Key"
 
 aws s3api list-buckets --output 'text' --query 'Buckets[].Name' | xargs -pn '1' aws s3api list-multipart-uploads --bucket
+aws --profile 'someProfile' s3api head-bucket --bucket 'someBucket'
 
 
 ###
