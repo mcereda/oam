@@ -137,3 +137,10 @@ AWS_PROFILE='AnsibleTaskExecutor' venv/bin/ansible-navigator \
 	--pass-environment-variable='AWS_PROFILE' \
 	--set-environment-variable='AWS_DEFAULT_REGION=eu-west-1' \
 	exec -- aws sts get-caller-identity --no-cli-pager
+
+# Review Navigator's settings
+ansible-navigator settings --effective
+
+# Check the Execution Environment's shell environment
+ansible-navigator … exec -- set | sort
+ansible-navigator … exec -- printenv | sort

@@ -24,7 +24,8 @@
 1. [Create custom filter plugins](#create-custom-filter-plugins)
 1. [Execution environments](#execution-environments)
     1. [Build execution environments](#build-execution-environments)
-1. [Ansible Navigator\`](#ansible-navigator)
+1. [Ansible Navigator](#ansible-navigator)
+    1. [Navigator configuration files](#navigator-configuration-files)
 1. [Secrets management](#secrets-management)
     1. [Ansible Vault](#ansible-vault)
 1. [Best practices](#best-practices)
@@ -878,17 +879,27 @@ collections:
 
 </details>
 
-## Ansible Navigator`
+## Ansible Navigator
 
 Refer [Ansible Navigator documentation].
 
-<details>
-  <summary>Setup</summary>
+Settings for Navigator can be provided, in order of priority from **highest** to lowest:
 
-Settings for Navigator can be provided on the command line, via environment variables, or specified in a settings file.
+1. On the command line.
+1. Via environment variables.
+1. By specifying them in [Navigator configuration files].<br/>
+   Their **own** priority applies.
 
-  <details style="padding-left: 1em;">
-    <summary>Settings file</summary>
+Environment variables **inside** Navigator's shell are set, in order of priority from **highest** to lowest:
+
+- From _Passed_ environment variables, **if the passed variable is set**.
+- From environment variables set from the CLI (with `--senv, --set-environment-variable`).
+- From environment variables set in the evaluated config file (in
+  `ansible-navigator.execution-environment.environment-variables.set`).
+
+Volume mount paths **must** exist.
+
+### Navigator configuration files
 
 File name and path can be specified via an environment variable, or it can be placed in one of two default
 directories.<br/>
@@ -898,17 +909,25 @@ end with the `.yml` or `.yaml` extension.
 Navigator checks the following and uses the **first** that matches:
 
 1. The file name specified by the `ANSIBLE_NAVIGATOR_CONFIG` environment variable, if set.
-1. The `ansible-navigator.<ext>` file in the current directory. It is **not** a dotfile.
+1. The `ansible-navigator.<ext>` file in the current directory.<br/>
+   This must **not** be a dotfile.
 1. The `.ansible-navigator.<ext>` **dot**file in the user's home directory.
 
 The current and home directories can have **only one** settings file **each**.<br/>
 Should more than one settings file be found in either directory, the program **will** error out.
+
+<details>
+  <summary>File example</summary>
 
 ```yml
 ---
 # refer <https://ansible.readthedocs.io/projects/navigator/settings/>.
 # corresponds to `ansible-navigator --log-file='/dev/null' --container-options='--platform=linux/amd64'
 #   --execution-environment-image='012345678901.dkr.ecr.eu-west-1.amazonaws.com/custom-ee' --pull-policy='missing'
+#   --execution-environment-volume-mounts "$HOME/.aws:/runner/.aws:ro"
+#   --pass-environment-variable 'ANSIBLE_VAULT_PASSWORD' --pass-environment-variable 'ANSIBLE_VAULT_PASSWORD_FILE'
+#   --pass-environment-variable 'AWS_PROFILE' --pass-environment-variable 'AWS_REGION'
+#   --pass-environment-variable 'AWS_DEFAULT_REGION' --set-environment-variable 'AWS_DEFAULT_REGION=eu-west-1'
 #   run --enable-prompts …`
 ansible-navigator:
   enable-prompts: true
@@ -918,11 +937,36 @@ ansible-navigator:
     image: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/custom-ee
     pull:
       policy: missing
+    volume-mounts:  # each must exist
+      - src: ${HOME}/.aws
+        dest: /runner/.aws
+        options: ro
+    environment-variables:  # pass from any > set from cli > set from conf
+      pass:
+        - ANSIBLE_VAULT_PASSWORD
+        - ANSIBLE_VAULT_PASSWORD_FILE
+        - AWS_DEFAULT_REGION
+        - AWS_PROFILE
+        - AWS_REGION
+      set:
+        AWS_DEFAULT_REGION: eu-west-1
   logging:
     file: /dev/null  # avoid leftovers
 ```
 
-  </details>
+</details>
+
+<details>
+  <summary>Commands</summary>
+
+```sh
+# Review the configuration
+ansible-navigator settings --effective
+
+# Check the Execution Environment's shell environment
+ansible-navigator … exec -- set | sort
+ansible-navigator … exec -- printenv | sort
+```
 
 </details>
 
@@ -1586,6 +1630,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 
 <!-- In-article sections -->
 [ansible vault]: #ansible-vault
+[navigator configuration files]: #navigator-configuration-files
 
 <!-- Knowledge base -->
 [awx]: awx.md
