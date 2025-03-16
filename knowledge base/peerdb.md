@@ -8,6 +8,8 @@ Fast, simple, and cost effective Postgres replication.
 
 ## TL;DR
 
+API responses hide error messages behind a `200 OK` HTTP status code as of 2025-03-14.
+
 <details>
   <summary>Setup</summary>
 

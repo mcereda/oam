@@ -8,7 +8,8 @@ What really worked for me personally, or in my experience.
    1. [Pipelining](#pipelining)
 1. [Product engineering](#product-engineering)
 1. [Management](#management)
-1. [Sources](#sources)
+1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 ## Generic concepts
 
@@ -17,7 +18,7 @@ What really worked for me personally, or in my experience.
   issues in the end.
 - Try to understand how something really works, may it be a technology, a tool or what else.<br/>
   Try at least once to do manually what an automation would do in your place. Look at the source code of tools. Read the
-  _fabulous_ documentation.
+  _fabulous_ documentation. Check if they hide error messages behind successful responses.
 - Stay curious. Experiment. Learn and break things (in a sane and safe way). Dive deeper into what interests you.
 - Make the **informed** decision that most satisfies your **current** necessities.<br/>
   There is no _perfect_ nor _correct_ solution, just different sets of tradeoff. Besides, no one will ever have all the
@@ -141,16 +142,29 @@ Consider what follows for _infrastructure_ and _platform engineering_ as well.
 - Consider and fix users' pain points **before** adding new features.<br/>
   If users are not happy with one's tool they'll try moving away from it, bringing the discussion back to the previous
   point in this list.
-- Avoid creating mindless abstractions, like templates using variables for _all_ their attributes.<br/>
-  Prefer providing one or at most a few simplified solutions that use different
+- Avoid creating _effectively useless_ abstractions, like templates that use variables for _all_ their attributes.<br/>
+  Prefer providing one, or at most a few, simplified solution that use different
   [adapters or interfaces][what does it mean to program to interfaces?] in the background instead.<br/>
   E.g., check out how [Crossplane], [Radius] and [KRO] work.
+- Offer **clear** error messages and **immediate** access to them.<br/>
+  Consider leveraging different, more specific status codes for different _global_ results. E.g.:
+
+  - Return `5` instead of `1` in UNIX to point out an executable could not find a required file.
+  - Return [422 Unprocessable Content] instead of [200 OK] if a request was syntactically correct, but the data it
+    contained was wrong.
+  - Return [207 Multi-Status] instead of [200 OK] if an API fulfilled a request successfully, but something in the more
+    global process did not quite _fully_ go as expected.
 
 ## Management
 
 - Beware the [action fallacy][the "action fallacy" tells us that the most effective leaders are unseen].
 
-## Sources
+## Further readings
+
+- [Standard Exit Status Codes in Linux]
+- [200 OK], [207 Multi-Status], [422 Unprocessable Content]
+
+### Sources
 
 Listed in order of addition:
 
@@ -196,7 +210,7 @@ Listed in order of addition:
   -->
 
 <!-- Knowledge base -->
-[crossplane]: https://www.crossplane.io/
+[crossplane]: kubernetes/crossplane.placeholder
 [editorconfig]: editorconfig.md
 [keep a changelog]: keep%20a%20changelog.md
 [kro]: kubernetes/kro.md
@@ -210,6 +224,9 @@ Listed in order of addition:
 [the automation paradox]: the%20automation%20paradox.md
 
 <!-- Others -->
+[200 ok]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200
+[207 multi-status]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/207
+[422 unprocessable content]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/422
 [5 whys]: https://www.mindtools.com/a3mi00v/5-whys
 [a case against "platform teams"]: https://kislayverma.com/organizations/a-case-against-platform-teams/
 [amazon's leadership principles]: https://www.amazon.jobs/content/en/our-workplace/leadership-principles
@@ -233,6 +250,7 @@ Listed in order of addition:
 [murphy's law]: https://en.wikipedia.org/wiki/Murphy%27s_law
 [platform teams need a delightfully different approach, not one that sucks less]: https://www.chkk.io/blog/platform-teams-different-approach
 [simple sabotage for software]: https://erikbern.com/2023/12/13/simple-sabotage-for-software.html
+[standard exit status codes in linux]: https://www.baeldung.com/linux/status-codes
 [the "action fallacy" tells us that the most effective leaders are unseen]: https://bigthink.com/business/action-fallacy-most-effective-leaders-unseen/
 [the 10 commandments of navigating code reviews]: https://angiejones.tech/ten-commandments-code-reviews/
 [the 3-2-1 backup strategy]: https://www.backblaze.com/blog/the-3-2-1-backup-strategy/
