@@ -950,6 +950,32 @@
       # AWS' datetime format is '%Y-%m-%dT%H:%M:%S'.
       # https://stackoverflow.com/questions/48101921/ansible-compare-difference-between-two-dates-for-the-last-hour
       block: []
+    - name: Check the caller can access AWS' APIs
+      tags: check_access_to_aws_api
+      amazon.aws.aws_caller_info:
+    - name: Check the caller can connect to EC2 instances via SSM
+      tags: check_access_to_ec2_instances_via_ssm
+      vars:
+        ssm_bucket: someBucketWhereSsmStoresData
+      block:
+        - name: Check the caller can get information about the S3 bucket used by SSM
+          tags: check_list_on_ssm_bucket
+          amazon.aws.s3_bucket_info:
+            name: "{{ ssm_bucket }}"
+        - name: "Check the caller can act upon objects in the S3 bucket used by SSM"
+          tags: check_usage_on_ssm_bucket
+          check_mode: false
+          amazon.aws.s3_object:
+            bucket: "{{ ssm_bucket }}"
+            object: whatever/test.txt
+            content: just a test file, nothing to see here
+            overwrite: latest
+            expiry: 15
+            mode: "{{ item }}"
+          loop:
+            - put
+            - getstr
+            - delobj
     - name: Assume roles
       tags: assume_role
       block:
