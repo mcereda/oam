@@ -67,6 +67,9 @@ brew search --cask 'gpg'
 brew install 'gettext'
 brew install --cask 'spotify'
 
+# Start managing manually-installed apps
+brew install --cask --adopt 'textmate'
+
 # Get formulae's dependencies.
 brew deps
 brew deps --installed 'azure-cli'
@@ -102,7 +105,7 @@ brew services start 'openssl-osx-ca'
 # Bring an installation up to speed from a Brewfile.
 brew bundle
 brew bundle --global
-brew bundle --no-lock install --file "$HOME/Brewfile"
+brew bundle install --file "$HOME/Brewfile"
 
 # Check what changes from a Brewfile.
 brew bundle check
@@ -154,7 +157,8 @@ git branch -d ${formula_name}-${formula_version}
 
 ## Download packages preemptively
 
-Sometimes the file will continuously fail to download for some reason (like a badly configured antivirus software that keeps cutting out your download).
+Sometimes the file will continuously fail to download for some reason (like a badly configured antivirus software that
+keeps cutting out your download).
 
 You can download the installation file yourself in steps and try the installation again:
 
@@ -191,7 +195,8 @@ See also [How to manually download brew package for installation?].
 
 ## Gotchas
 
-- `moreutils` installs its own old version of `parallel`, which conflicts with the `parallel` formulae; install the standalone `gettext`, `parallel` and `sponge` to have their recent version
+- `moreutils` installs its own old version of `parallel`, which conflicts with the `parallel` formulae.<br/>
+  Install the standalone `gettext`, `parallel` and `sponge` to have a recent version of theirs.
 
 ## Further readings
 
@@ -199,6 +204,7 @@ See also [How to manually download brew package for installation?].
 - Homebrew [bundle]
 - [Mas]
 - [Whalebrew]
+- [Tips and Tricks]
 
 ## Sources
 
@@ -220,6 +226,7 @@ See also [How to manually download brew package for installation?].
 <!-- Upstream -->
 [bundle]: https://github.com/Homebrew/homebrew-bundle
 [manpage]: https://docs.brew.sh/Manpage
+[tips and tricks]: https://docs.brew.sh/Tips-N'-Tricks
 
 <!-- Others -->
 [how to manually download brew package for installation?]: https://stackoverflow.com/questions/53551665/how-to-manually-download-brew-package-for-installation#53579448
