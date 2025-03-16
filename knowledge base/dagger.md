@@ -1,11 +1,11 @@
 # Dagger
 
-> TODO
+Open-source runtime for composable workflows.<br/>
+Intended for systems with many moving parts and strong needs for repeatability, modularity, observability and
+cross-platform support, which makes it good for AI agents and CI/CD workflows.
 
-Programmable tool aiming to replace scripts with a modern API and cross-language scripting engine.
-
-<!-- Remove this line to uncomment if used
-## Table of contents <!-- omit in toc -->
+Tries to replace software projects' artisanal scripts with a modern API and cross-language scripting engine.<br/>
+Helps to create consistent and reliable local development and testing environments that can do whatever one's CI can.
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -13,15 +13,14 @@ Programmable tool aiming to replace scripts with a modern API and cross-language
 
 ## TL;DR
 
-<!-- Uncomment if used
 <details>
   <summary>Setup</summary>
 
 ```sh
+brew install 'dagger/tap/dagger'
 ```
 
 </details>
--->
 
 <!-- Uncomment if used
 <details>

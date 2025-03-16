@@ -1,13 +1,13 @@
 #!/usr/bin/env fish
 
 # Connect to PeerDB server in SQL mode
-psql 'port=9900 host=localhost password=peerdb'
+psql 'host=localhost port=9900 password=peerdb'
 
 # List peers
+psql "host=localhost port=9900 password=$(gopass show -o 'peerdb/instance')" \
+	-c "SELECT id, name, type FROM peers;"
 curl -fsS --url 'http://localhost:3000/api/v1/peers/list' \
 	-H "Authorization: Basic $(gopass show -o 'peerdb/instance' | xargs printf '%s' ':' | base64)"
-psql 'port=9900 host=localhost password=peerdb' \
-	-c "SELECT id, name, type FROM peers;"
 
 # Create peers
 # postgres: peer.type=3|'POSTGRES' + postgres_config={…}
@@ -29,7 +29,7 @@ curl -fsS --url 'http://localhost:3000/api/v1/peers/create' -X 'POST' \
 			}
 		}
 	}"
-psql 'port=9900 host=localhost password=peerdb' \
+psql "host=localhost port=9900 password=$(gopass show -o 'peerdb/instance')" \
 	-c "CREATE PEER some_pg_peer FROM POSTGRES WITH (
 		host = 'localhost',
 		port = '5432',
