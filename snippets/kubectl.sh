@@ -74,3 +74,8 @@ kubectl get --raw "/api/v1/nodes/ip-172-31-69-42.eu-west-1.compute.internal/prox
 # Get ephemeral storage usage for pods
 kubectl get --raw "/api/v1/nodes/ip-172-31-69-42.eu-west-1.compute.internal/proxy/stats/summary" \
 | jq '.pods[] | select(.podRef.name == "gitlab-runner-59dd68c5cb-9vcp4")."ephemeral-storage"'
+# Dynamic way for the same action
+POD_NAME='gitlab-runner-6ddd58fcb6-c9swk' POD_NAMESPACE='gitlab' \
+&& kubectl get pods -n "$POD_NAMESPACE" "$POD_NAME" -o jsonpath='{.status.hostIP}' | tr '.' '-' \
+| xargs -I '%%' kubectl get --raw '/api/v1/nodes/ip-%%.eu-west-1.compute.internal/proxy/stats/summary' \
+| jq --arg 'podName' "$POD_NAME" '.pods[] | select(.podRef.name == $podName)."ephemeral-storage"'

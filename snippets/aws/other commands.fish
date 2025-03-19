@@ -362,6 +362,9 @@ aws kms decrypt --key-id 'arn:aws:kms:eu-west-1:123456789012:key/d74f5077-811b-4
 	--output 'text' --query 'Plaintext' \
 | base64 --decode > 'decryptedKey.bin'
 
+aws kms list-aliases --query 'Aliases[?AliasName.contains(@,`staging`)]'
+aws kms list-aliases --query 'Aliases[?AliasName.contains(@,`prod`)]|[*].{"Alias":@.AliasName,"KeyId":@.TargetKeyId}'
+
 
 ###
 # RDS

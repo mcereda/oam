@@ -17,6 +17,8 @@ Task runner aiming to be simpler and easier to use than [GNU Make].
 Taskfiles are Task's Makefile counterpart.<br/>
 Taskfiles are written in YAML.
 
+_Tasks_ in Task are what _targets_ are for Make.
+
 Task leverages `mvdan.cc/sh` to run commands, which is a native Go shell interpreter.<br/>
 It allows to write `sh`/`bash` commands and have them work even where `sh` or `bash` are usually not available (e.g.:
 Windows) as long as any called executable is available in `PATH`.
@@ -26,9 +28,9 @@ Pros:
 - Taskfiles are more readable than Makefiles.
   Specifically:
 
-  - No need to use tabs.
-  - No need for special symbols.
-  - Easier environment variables management.
+  - There is no need to explicitly use tabs in tasks' definitions.
+  - There is no need for special symbols, like `@`.
+  - Environment variables management is easier.
 
 Cons:
 
@@ -36,7 +38,7 @@ Cons:
   That makes them very much similar to \[[Gitlab] / [Azure Devops]]'s pipelines, and if one has any experience with them
   one knows what a pain that can be.
 
-Uses Go's [text/template] package to interpolate values.
+Uses Go's [text/template] and [slim-sprig] packages to interpolate values.
 
 Environment variables (`env: {}, dotenv: []`) are available in the shell used by commands.<br/>
 Variables (`vars: {}`) are **only** available to Task while executing templates, but **will default to environment
@@ -96,7 +98,7 @@ task --dry --verbose 'lint' 'validate:ansible'
    task --dry 'bootstrap'
    ```
 
-   If task names are omitted, a task named `default` will be assumed.
+   If task names are omitted, Task will try and execute a task named `default`.
 
 ## Variables
 
@@ -260,12 +262,12 @@ Force the print using `-v, --verbose` when `silent` is set to `true`, or set it 
 
 - [Website]
 - [Github]
-- [Demystification of taskfile variables]
 
 ### Sources
 
 - [Usage]
 - [Stop Using Makefile (Use Taskfile Instead)]
+- [Demystification of taskfile variables]
 
 <!--
   Reference
@@ -286,5 +288,6 @@ Force the print using `-v, --verbose` when `silent` is set to `true`, or set it 
 
 <!-- Others -->
 [demystification of taskfile variables]: https://medium.com/@TianchenW/demystification-of-taskfile-variables-29b751950393
+[slim-sprig]: https://github.com/go-task/slim-sprig
 [stop using makefile (use taskfile instead)]: https://dev.to/calvinmclean/stop-using-makefile-use-taskfile-instead-4hm9
 [text/template]: https://pkg.go.dev/text/template
