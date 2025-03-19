@@ -2,6 +2,8 @@
 
 # Connect to PeerDB server in SQL mode
 psql 'host=localhost port=9900 password=peerdb'
+psql 'postgresql://peerdb.example.org:9900/?password=peerdb'
+
 
 # List peers
 psql "host=localhost port=9900 password=$(gopass show -o 'peerdb/instance')" \
@@ -13,6 +15,14 @@ curl -fsS --url 'http://localhost:3000/api/v1/peers/list' \
 # postgres: peer.type=3|'POSTGRES' + postgres_config={…}
 # clickhouse: peer.type=8 + clickhouse_config={…}
 # kafka: peer.type=9 + kafka_config={…}
+psql "host=localhost port=9900 password=$(gopass show -o 'peerdb/instance')" \
+	-c "CREATE PEER some_pg_peer FROM POSTGRES WITH (
+		host = 'localhost',
+		port = '5432',
+		user = 'peerdb',
+		password = '$(gopass show -o 'peerdb/db-user')',
+		database = 'sales'
+	);"
 curl -fsS --url 'http://localhost:3000/api/v1/peers/create' -X 'POST' \
 	-H "Authorization: Basic $(gopass show -o 'peerdb/instance' | xargs printf '%s' ':' | base64)" \
 	-H 'Content-Type: application/json' \
@@ -29,14 +39,6 @@ curl -fsS --url 'http://localhost:3000/api/v1/peers/create' -X 'POST' \
 			}
 		}
 	}"
-psql "host=localhost port=9900 password=$(gopass show -o 'peerdb/instance')" \
-	-c "CREATE PEER some_pg_peer FROM POSTGRES WITH (
-		host = 'localhost',
-		port = '5432',
-		user = 'peerdb',
-		password = '$(gopass show -o 'peerdb/db-user')',
-		database = 'sales'
-	);"
 
 # Update peers
 # Reuse the command for creation but add 'allow_update: true' to the data
@@ -45,6 +47,11 @@ curl -fsS --url 'http://localhost:3000/api/v1/peers/create' -X 'POST' … \
 		\"peer\": { … },
 		allow_update: true
 	}"
+
+# Delete peers
+psql "host=localhost port=9900 password=$(gopass show -o 'peerdb/instance')" \
+	-c "DELETE FROM peers WHERE name == 'some_pg_peer';"
+
 
 # List mirrors
 curl -fsS --url 'http://localhost:3000/api/v1/mirrors/list' \
@@ -103,6 +110,7 @@ curl -fsS 'http://localhost:3000/api/v1/flows/cdc/create' -X 'POST' \
 			"do_initial_snapshot": true
 		}
 	}'
+
 
 # Show alerts' configuration
 curl -fsS --url 'http://localhost:3000/api/v1/alerts/config' \

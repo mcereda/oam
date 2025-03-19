@@ -88,11 +88,11 @@ docker restart 'dblab_clone_6000'
 
 # Reset clones
 # Only available via the '/api' endpoints, no direct ones
+dblab clone reset --async='true' --latest='true' 'some-clone'
 curl -X 'POST' 'https://dblab.example.org:1234/api/clone/some-clone/reset' \
 	-H "Verification-Token: $(gopass show -o 'dblab')" \
 	-H 'accept: application/json' -H 'content-type: application/json' \
 	-d '{ "latest": true }'
-dblab clone reset --async='true' --latest='true' 'some-clone'
 # Reset all protected clones
 curl --url 'https://dblab.example.org:2345/status' --header 'verification-token: somePassword' \
 | jq -r '.cloning.clones[]|select(.protected = "true")|.id' \

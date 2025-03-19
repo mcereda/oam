@@ -66,13 +66,15 @@ EOF
 # If not given:
 # - the hostname defaults to 'localhost';
 # - the port defaults to '5432';
-# - the username defaults to the current user.
+# - the username defaults to the current user;
+# - the 'sslmode' parameter defaults to 'prefer'.
 psql 'my-db'
 psql 'my-db' 'user'
+psql 'postgres://host'
 psql 'postgresql://host:5433/my-db?sslmode=require'
 psql -U 'username' -d 'my-db' -h 'hostname' -p 'port' -W
 psql --host 'host.fqnd' --port '5432' --username 'postgres' --database 'postgres' --password
-psql "service=prod sslmode=require"
+psql "service=prod sslmode=disable"
 
 # List available databases.
 psql … --list
@@ -229,6 +231,7 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 - [psql]
 - [pg_settings]
 - [Connect to a PostgreSQL database]
+- [Database connection control functions]
 - [The password file]
 - [How to Generate SCRAM-SHA-256 to Create Postgres 13 User]
 - [PostgreSQL: Get member roles and permissions]
@@ -253,11 +256,12 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 [sql]: sql.md
 
 <!-- Upstream -->
-[docker image]: https://github.com/docker-library/docs/blob/master/postgres/README.md
-[psql]: https://www.postgresql.org/docs/current/app-psql.html
-[pg_settings]: https://www.postgresql.org/docs/current/view-pg-settings.html
-[the password file]: https://www.postgresql.org/docs/current/libpq-pgpass.html
 [create function]: https://www.postgresql.org/docs/current/sql-createfunction.html
+[database connection control functions]: https://www.postgresql.org/docs/current/libpq-connect.html
+[docker image]: https://github.com/docker-library/docs/blob/master/postgres/README.md
+[pg_settings]: https://www.postgresql.org/docs/current/view-pg-settings.html
+[psql]: https://www.postgresql.org/docs/current/app-psql.html
+[the password file]: https://www.postgresql.org/docs/current/libpq-pgpass.html
 
 <!-- Others -->
 [an in-depth guide to postgres data masking with anonymizer]: https://thelinuxcode.com/postgresql-anonymizer-data-masking/
