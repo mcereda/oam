@@ -17,17 +17,17 @@ Automates application deployments to EC2 and on-premises instances, Lambda funct
 Application content can be stored in S3 buckets, or GitHub or Bitbucket repositories.<br/>
 No changes are needed to the application itself.
 
-| Component                | Summary                                                                                                                         |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| Application              | Name that uniquely identifies the application resources to deploy, and to deploy to.                                            |
-| Compute platform         | The platform on which applications are deployed an application.                                                                 |
-| Deployment configuration | Set of rules and success/failure conditions used during deployments.                                                            |
-| Deployment group         | Set of individual EC2/on-premise instances to deploy to, if using them.                                                         |
-| Deployment type          | Method used for deployments to instances in a deployment group.<br/>Available deployment types are _in-place_ and _blue/green_. |
-| IAM instance profile     | IAM role for EC2 instances.<br/>It must have the permissions required to access the application code.                           |
-| Revision                 | Application versions.                                                                                                           |
-| Service role             | IAM role granting permissions to CodeDeploy to access AWS resources.                                                            |
-| Target revision          | The application revision currently targeted for deployment.                                                                     |
+| Component                | Summary                                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| Application              | Name used as reference to ensure the correct components are chosen during a deployment                                   |
+| Compute platform         | Platform on which applications are deployed.<br/>Choices include _EC2/On-Premises_, _AWS Lambda_, and _Amazon ECS_.      |
+| Deployment configuration | Set of rules and success/failure conditions used during deployments                                                      |
+| Deployment group         | Set of tagged EC2/on-premise instances to deploy to, if used                                                             |
+| Deployment type          | How applications are made available to instances in a deployment group.<br/>Choices include _in-place_ and _blue/green_. |
+| IAM instance profile     | IAM role for EC2 instances.<br/>It must have the permissions required to access the application code.                    |
+| Revision                 | Application versions                                                                                                     |
+| Service role             | IAM Role used by CodeDeploy to access AWS resources                                                                      |
+| Target revision          | Application revision currently targeted for deployment                                                                   |
 
 <!-- Uncomment if used
 <details>
@@ -85,13 +85,13 @@ flowchart LR
 
 One must set up the instances before CodeDeploy can deploy application revisions to them for the first time.
 
-Manually provisioned instances must abide the following:
+**Manually** provisioned instances must abide the following:
 
 - The CodeDeploy agent must be present on the instances.
 - They must be tagged, if one is using tags to identify instances in a deployment group.<br/>
   CodeDeploy relies on tags to identify and group instances into deployment groups.
 - They must be launched with an IAM instance profile attached.<br/>
-  The instance profile enables the CodeDeploy agent to verify the identity of the instance.
+  The instance profile is required by the CodeDeploy agent to verify the identity of the instance.
 - They must be modifiable by the [service role] used by CodeDeploy.
 
 Instances are taken offline during deployments so that the latest application revision can be installed.
