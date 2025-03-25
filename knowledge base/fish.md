@@ -4,10 +4,13 @@ The friendly interactive shell.
 
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
+1. [Functions](#functions)
+1. [Aliases](#aliases)
+1. [Abbreviations](#abbreviations)
 1. [Prompt](#prompt)
 1. [Key bindings](#key-bindings)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -97,6 +100,46 @@ end
 
 `fish` offers a web-based configuration interface. Open it executing `fish_config`.
 
+## Functions
+
+TODO
+
+## Aliases
+
+`alias` is a wrapper for the `function` builtin.<br/>
+When creating an alias, it creates a function that wraps the alias' definition as command and in its description.
+
+Works similarly to POSIX's shell alias.<br/>
+For different uses, define a function.<br/>
+To only save typing, consider leveraging [abbreviations] instead.
+
+```sh
+# Show all defined aliases.
+alias
+
+# Create aliases for the session.
+alias 'rmi' 'rm -i'
+alias 'lsl'='ls -l'
+
+# Save aliases into autoload files.
+alias --save 'rmi' 'rm -i'
+alias --save 'lsl'='ls -l'
+
+# Delete aliases.
+functions -e 'rm'
+```
+
+## Abbreviations
+
+FIXME
+
+User-defined words that are replaced with longer phrases.
+
+Only available for typed-in commands, and **not** expanded in scripts.<br/>
+Managed by the `abbr` builtin.
+
+Replacements take place when abbreviations are entered and followed by a `space` or `enter` character.
+
 ## Prompt
 
 See [Starship] or [Tide].
@@ -125,16 +168,14 @@ bind
 
 Prompts:
 
-- [Starship] (prompt)
-- [Tide] (prompt)
+- [Starship]
+- [Tide]
 
 Frameworks:
 
 - [Oh My Fish][oh-my-fish]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Documentation]
 - [Github]
@@ -146,7 +187,7 @@ All the references in the [further readings] section, plus the following:
   -->
 
 <!-- In-article sections -->
-[further readings]: #further-readings
+[abbreviations]: #abbreviations
 
 <!-- Knowledge base -->
 [bash]: bash.md
