@@ -20,7 +20,7 @@ Use an instance profile to allow an EC2 instance to use an IAM role.
 
 `T` instances launch as `unlimited` by default. Launch them in `standard` mode to avoid paying for surplus credits.
 
-The instance type [_can_ be changed][change the instance type]. The procedure depends on the root volume, but does
+The instance type [_can_ be changed][change the instance type]. The procedure depends on the root volume, and **does**
 require downtime.
 
 Clone EC2 instances by:
@@ -189,7 +189,7 @@ Also see [CompleteLifecycleAction].
 
 ## Image customization
 
-Refer [ImageBuilder].
+Refer [Image Builder].
 
 ## Further readings
 

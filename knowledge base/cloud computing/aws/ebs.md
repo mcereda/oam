@@ -49,6 +49,32 @@ Volume costs depend on its type, provisioned size, IOPS and throughput.<br/>
 Volumes are billed per-second increments, with a 60-seconds minimum period.<br/>
 Refer [Amazon EBS pricing]
 
+EBS volumes attached to instances based on the Nitro system are exposed as NVMe devices.
+
+Usage monitoring is available via instance-level metrics on CloudWatch per operations (`EBSReadOps` and `EBSWriteOps`)
+and bytes transferred (`EBSReadBytes` and `EBSWriteBytes`).
+
+[Instances built on the AWS Nitro system] (_EBS-Optimized_) are capable of bursting performance.<br/>
+`large`, `xlarge`, and `2xlarge` instances provide burst balance metrics to give information about the percentage of I/O
+and bytes credits remaining in the respective burst buckets:
+
+- `EBSIOBalance%` monitors the instance's I/O burst bucket.
+- `EBSByteBalance%` monitors the instance's byte burst bucket.
+
+Large block workloads usually do not drive enough IOPS to deplete `EBSIOBalance%`, depleting `EBSByteBalance%`
+instead.<br/>
+Small block workloads usually drive higher IOPS than bytes/second, dropping `EBSIOBalance%` faster than
+`EBSByteBalance%`.
+
+Instances can drive EBS burst performance as long as `EBSIOBalance%` and `EBSByteBalance%` are above 0%.<br/>
+When the I/O activity is below the baseline rate, the burst buckets refill.
+
+The refill rate for burst buckets is the difference between the baseline rate and the I/O activity.<br/>
+In addition, burst buckets are topped off every 24 hours, allowing instances to have burst performance available for at
+least 30 minutes per day.
+
+Refer [Amazon EBS-optimized instance types] for details
+
 ## Volume types
 
 Refer [Amazon EBS volume types].
@@ -242,6 +268,8 @@ aws ec2 describe-volumes --filters "Name=volume-type,Values=gp2" --query 'Volume
 - [Extend the file system after resizing an EBS volume]
 - [Pricing][amazon ebs pricing]
 - [Hands-on Guide: How to migrate from gp2 to gp3 volumes and lower AWS cost]
+- [Amazon EBS-optimized instance types]
+- [Instances built on the AWS Nitro System]
 
 ### Sources
 
@@ -252,6 +280,7 @@ aws ec2 describe-volumes --filters "Name=volume-type,Values=gp2" --query 'Volume
 - [Modify an Amazon EBS volume using Elastic Volumes operations]
 - [How do I increase or decrease the size of my EBS volume?]
 - [How Amazon EBS encryption works]
+- [Improving application performance and reducing costs with Amazon EBS-Optimized Instance burst capability]
 
 <!--
   Reference
@@ -266,6 +295,7 @@ aws ec2 describe-volumes --filters "Name=volume-type,Values=gp2" --query 'Volume
 <!-- Upstream -->
 [amazon ebs pricing]: https://aws.amazon.com/ebs/pricing/
 [amazon ebs volume types]: https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html
+[amazon ebs-optimized instance types]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html
 [archive amazon ebs snapshots]: https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-archive.html
 [automate snapshot lifecycles]: https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-ami-policy.html
 [choose the best amazon ebs volume type for your self-managed database deployment]: https://aws.amazon.com/blogs/storage/how-to-choose-the-best-amazon-ebs-volume-type-for-your-self-managed-database-deployment/
@@ -275,6 +305,8 @@ aws ec2 describe-volumes --filters "Name=volume-type,Values=gp2" --query 'Volume
 [extend the file system after resizing an ebs volume]: https://docs.aws.amazon.com/ebs/latest/userguide/recognize-expanded-volume-linux.html
 [how amazon ebs encryption works]: https://docs.aws.amazon.com/ebs/latest/userguide/how-ebs-encryption-works.html
 [how do i increase or decrease the size of my ebs volume?]: https://repost.aws/knowledge-center/ebs-increase-decrease-volume-size
+[improving application performance and reducing costs with amazon ebs-optimized instance burst capability]: https://aws.amazon.com/blogs/compute/improving-application-performance-and-reducing-costs-with-amazon-ebs-optimized-instance-burst-capability/
+[instances built on the aws nitro system]: https://docs.aws.amazon.com/ec2/latest/instancetypes/ec2-nitro-instances.html
 [modify an amazon ebs volume using elastic volumes operations]: https://docs.aws.amazon.com/ebs/latest/userguide/ebs-modify-volume.html
 [what is block storage?]: https://aws.amazon.com/what-is/block-storage/
 

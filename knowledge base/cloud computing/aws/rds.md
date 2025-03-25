@@ -3,6 +3,7 @@
 1. [TL;DR](#tldr)
 1. [Engine](#engine)
    1. [PostgreSQL](#postgresql)
+1. [Burstable instances](#burstable-instances)
 1. [Storage](#storage)
 1. [Parameter Groups](#parameter-groups)
 1. [Option Groups](#option-groups)
@@ -13,15 +14,19 @@
 1. [Restore](#restore)
 1. [Encryption](#encryption)
 1. [Operations](#operations)
-   1. [PostgreSQL: reduce allocated storage by migrating using transportable databases](#postgresql-reduce-allocated-storage-by-migrating-using-transportable-databases)
+    1. [PostgreSQL: reduce allocated storage by migrating using transportable databases](#postgresql-reduce-allocated-storage-by-migrating-using-transportable-databases)
 1. [Troubleshooting](#troubleshooting)
     1. [ERROR: extension must be loaded via shared\_preload\_libraries](#error-extension-must-be-loaded-via-shared_preload_libraries)
     1. [ERROR: must be superuser to alter _X_ roles or change _X_ attribute](#error-must-be-superuser-to-alter-x-roles-or-change-x-attribute)
     1. [Transport fails asking for the remote user must have superuser, but it already does](#transport-fails-asking-for-the-remote-user-must-have-superuser-but-it-already-does)
+    1. [The instance is unbearably slow](#the-instance-is-unbearably-slow)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
 ## TL;DR
+
+`T` instances are burstable for CPU, EBS, and network.<br/>
+They are **always** configured for `Unlimited` mode in RDS.
 
 <details>
   <summary>CLI usage</summary>
@@ -139,9 +144,20 @@ Maintenance windows are paused when their DB instances are stopped.
 
 Refer [Understanding PostgreSQL roles and permissions].
 
+## Burstable instances
+
+`T` instances are burstable.
+
+Refer [the relative section in the EC2 article](ec2#burstable-instances), with the difference that, instances burst for
+CPU, EBS, **and** network.<br/>
+They are also **always** configured for `Unlimited` mode in RDS.
+
+Burstable performance instances for RDS provide baseline levels of CPU, EBS and network utilization, with the ability to
+burst all those utilization above the baseline levels.
+
 ## Storage
 
-Refer [Amazon RDS DB instance storage].
+Refer [Amazon RDS DB instance storage] and [EBS].
 
 When selecting General Purpose SSD or Provisioned IOPS SSD, RDS automatically stripes storage across multiple volumes to
 enhance performance depending on the engine selected and the amount of storage requested:
@@ -725,7 +741,8 @@ Actions involving altering protected roles or changing protected attributes are 
 
 ### Transport fails asking for the remote user must have superuser, but it already does
 
-Error message example:
+<details>
+  <summary>Error message example</summary>
 
 > ```plaintext
 > Cannot execute SQL 'SELECT transport.import_from_server(
@@ -739,9 +756,42 @@ Error message example:
 > );' None: remote user must have superuser (or rds_superuser if on RDS)
 > ```
 
-_Speculative_ root cause: RDS did not finish to properly apply the settings.
+</details>
 
-Solution: reboot the source and target instance and retry.
+<details>
+  <summary><i>Speculative</i> Root cause</summary>
+
+RDS did not finish to properly apply the settings.
+
+</details>
+
+<details>
+  <summary>Solution</summary>
+
+Reboot the source and target instance and retry.
+
+</details>
+
+### The instance is unbearably slow
+
+<details>
+  <summary>Root cause</summary>
+
+The instance might be out of burst credits.
+
+If the available burst credits are depleted or zero, then the CPU, storage, or network throughput includes heavy read
+or write workloads and exceeds the instance type quotas.
+
+</details>
+
+<details>
+  <summary>Solution</summary>
+
+- Lower the throughput utilization, and/or
+- Scale up to an instance type that has a higher baseline and maximum throughput.<br/>
+  Refer [Amazon EBS-optimized instance types] to choose which one.
+
+</details>
 
 ## Further readings
 
@@ -780,6 +830,7 @@ Solution: reboot the source and target instance and retry.
 [backup]: #backup
 
 <!-- Knowledge base -->
+[ebs]: ebs.md
 [s3]: s3.md
 
 <!-- Files -->
@@ -805,6 +856,7 @@ Solution: reboot the source and target instance and retry.
 [working with db instance read replicas]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html
 [working with parameter groups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html
 [working with parameters on your rds for postgresql db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html
+[amazon ebs-optimized instance types]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html
 
 <!-- Others -->
 [backing up login roles aka users and group roles]: https://www.postgresonline.com/article_pfriendly/81.html
