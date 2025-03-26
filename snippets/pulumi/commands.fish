@@ -110,3 +110,5 @@ pulumi import 'aws:imagebuilder/component:Component' 'requiredPackages' 'arn:aws
 pulumi import 'aws:imagebuilder/imagePipeline:ImagePipeline' 'serverBase' 'arn:aws:imagebuilder:us-east-1:123456789012:image-pipeline/server-base'
 pulumi import 'aws:rds/instance:Instance' 'staging' 'odoo-staging-replica'
 pulumi import 'aws:route53/record:Record' 'hoppscotch' 'ZGG4442BC3E8M_hoppscotch.example.org_A'
+pulumi import 'aws:secretsmanager/secret:Secret' 'example' 'arn:aws:secretsmanager:us-east-1:123456789012:secret:example-123456'
+pulumi import 'aws:secretsmanager/secretVersion:SecretVersion' 'example' 'arn:aws:secretsmanager:us-east-1:123456789012:secret:example-123456|ABCDEF01-2345-6789-ABCD-EF0123456789'
