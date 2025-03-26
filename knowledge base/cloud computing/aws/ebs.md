@@ -55,7 +55,7 @@ Usage monitoring is available via instance-level metrics on CloudWatch per opera
 and bytes transferred (`EBSReadBytes` and `EBSWriteBytes`).
 
 [Instances built on the AWS Nitro system] (_EBS-Optimized_) are capable of bursting performance.<br/>
-`large`, `xlarge`, and `2xlarge` instances provide burst balance metrics to give information about the percentage of I/O
+Instances from `medium` to `4xlarge` provide burst balance metrics to give information about the percentage of I/O
 and bytes credits remaining in the respective burst buckets:
 
 - `EBSIOBalance%` monitors the instance's I/O burst bucket.
@@ -73,7 +73,9 @@ The refill rate for burst buckets is the difference between the baseline rate an
 In addition, burst buckets are topped off every 24 hours, allowing instances to have burst performance available for at
 least 30 minutes per day.
 
-Refer [Amazon EBS-optimized instance types] for details
+Refer [Amazon EBS-optimized instance types] for details about instances performances.<br/>
+Refer [Improving application performance and reducing costs with Amazon EBS-Optimized Instance burst capability] for
+details about EBS balances.
 
 ## Volume types
 
