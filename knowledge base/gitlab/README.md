@@ -828,6 +828,7 @@ Solution: set the correct ownership with
 - [Upgrade Path tool]
 - [Elasticsearch]
 - [CODEOWNERS syntax]
+- [GitLab CLI][glab]
 
 ### Sources
 
@@ -871,6 +872,7 @@ Solution: set the correct ownership with
 
 <!-- Knowledge base -->
 [buildah]: ../buildah.md
+[glab]: glab.md
 [kaniko]: ../kaniko.md
 [self-hosting]: ../self-hosting.md
 
