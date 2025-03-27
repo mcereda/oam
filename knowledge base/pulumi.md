@@ -16,6 +16,8 @@
    1. [Enforce specific backends for projects](#enforce-specific-backends-for-projects)
    1. [Migrate to different backends](#migrate-to-different-backends)
 1. [Compose resources](#compose-resources)
+1. [Import resources](#import-resources)
+   1. [Import components and their children](#import-components-and-their-children)
 1. [Troubleshooting](#troubleshooting)
    1. [A project with the same name already exists](#a-project-with-the-same-name-already-exists)
    1. [Stack init fails because the stack supposedly already exists](#stack-init-fails-because-the-stack-supposedly-already-exists)
@@ -907,6 +909,112 @@ const currentVpc = new StandardAwsVpc(
 
 </details>
 
+## Import resources
+
+FIXME: should this be under [Program] or [Stack]?
+
+Refer [Importing resources] and the [`pulumi import`][pulumi import] command.
+
+```sh
+pulumi import --file 'import.json'
+pulumi import 'aws:ec2/instance:Instance' 'logstash' 'i-abcdef0123456789a' --suppress-outputs
+pulumi import 'aws:cloudwatch/logGroup:LogGroup' 'vulcan' '/ecs/vulcan' --generate-code='false' --protect='false'
+pulumi import 'aws:ec2/subnet:Subnet' 'public_subnet' 'subnet-9d4a7b6c' --parent 'current=urn:pulumi:someStack::someProject::aws:ec2/vpc:Vpc::current'
+```
+
+### Import components and their children
+
+Create an import file for the resources that would be created, then import them using `pulumi import --file
+'import.json'`.
+
+Simplify the process by leveraging the [`preview`][pulumi preview] command.
+
+<details style="padding-left: 1em">
+
+1. Write some code that would create the components:
+
+   ```ts
+   import * as awsx from "@pulumi/awsx";
+
+   const vpc = new awsx.ec2.Vpc("current");
+
+   export const vpcId = vpc.vpcId;
+   export const privateSubnetIds = vpc.privateSubnetIds;
+   export const publicSubnetIds = vpc.publicSubnetIds;
+   ```
+
+1. Generate a placeholder import file for the resources that would be created:
+
+   ```sh
+   pulumi preview --import-file 'import.json'
+   ```
+
+   ```json
+   {
+    "resources": [
+        {
+            "type": "awsx:ec2:Vpc",
+            "name": "current",
+            "component": true
+        },
+        {
+            "type": "aws:ec2/vpc:Vpc",
+            "name": "currentVpc",
+            "id": "<PLACEHOLDER>",
+            "parent": "current",
+            "version": "6.66.3",
+            "logicalName": "current"
+        },
+        {
+            "type": "aws:ec2/subnet:Subnet",
+            "name": "current-public-1",
+            "id": "<PLACEHOLDER>",
+            "parent": "currentVpc",
+            "version": "6.66.3"
+        },
+        …
+   }
+   ```
+
+1. Change the IDs in the import file accordingly:
+
+   ```diff
+    {
+     "resources": [
+         {
+             "type": "awsx:ec2:Vpc",
+             "name": "current",
+             "component": true
+         },
+         {
+             "type": "aws:ec2/vpc:Vpc",
+             "name": "currentVpc",
+   -         "id": "<PLACEHOLDER>",
+   +         "id": "vpc-abcdef26",
+             "parent": "current",
+             "version": "6.66.3",
+             "logicalName": "current"
+         },
+         {
+             "type": "aws:ec2/subnet:Subnet",
+             "name": "current-public-1",
+   -         "id": "<PLACEHOLDER>",
+   +         "id": "subnet-0123456789abcdef0",
+             "parent": "currentVpc",
+             "version": "6.66.3"
+         },
+         …
+    }
+   ```
+
+1. Import using the import file:
+
+   ```sh
+   pulumi import --file 'import.json'
+   ```
+
+</details>
+
 ## Troubleshooting
 
 ### A project with the same name already exists
@@ -1032,6 +1140,7 @@ Solution: follow the suggestion in the warning message:
 - [Pulumi troubleshooting]
 - [`pulumi new`][pulumi new]
 - [`pulumi config set-all`][pulumi config set-all]
+- [Importing resources]
 
 <!--
   Reference
@@ -1063,10 +1172,13 @@ Solution: follow the suggestion in the warning message:
 [get started with pulumi policy as code]: https://www.pulumi.com/docs/using-pulumi/crossguard/get-started/
 [iac recommended practices: developer stacks and git branches]: https://www.pulumi.com/blog/iac-recommended-practices-developer-stacks-git-branches/
 [ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
+[importing resources]: https://www.pulumi.com/docs/iac/adopting-pulumi/import/
 [organizing pulumi projects & stacks]: https://www.pulumi.com/docs/using-pulumi/organizing-projects-stacks/
 [projects]: https://www.pulumi.com/docs/concepts/projects/
 [pulumi config set-all]: https://www.pulumi.com/docs/cli/commands/pulumi_config_set-all/
+[pulumi import]: https://www.pulumi.com/docs/iac/cli/commands/pulumi_import/
 [pulumi new]: https://www.pulumi.com/docs/cli/commands/pulumi_new/
+[pulumi preview]: https://www.pulumi.com/docs/iac/cli/commands/pulumi_preview/
 [pulumi troubleshooting]: https://www.pulumi.com/docs/support/troubleshooting/
 [pulumi up --plan without error message (exit code 255)]: https://github.com/pulumi/pulumi/issues/11303#issuecomment-1311365793
 [resources reference]: https://www.pulumi.com/resources

@@ -92,6 +92,7 @@ jq '.dependencies."@pulumi/aws" |= "6.66.2"' 'package.json' | sponge 'package.js
 
 # Import resources
 # Could use `--suppress-outputs --generate-code='false' --protect=false` for some
+pulumi import --file 'import.json'
 pulumi import 'aws:alb/listener:Listener' 'pihole' 'arn:aws:elasticloadbalancing:us-west-2:012345678901:listener/app/pihole/0123456789abcdef/0123456789abcdef'
 pulumi import 'aws:chatbot/slackChannelConfiguration:SlackChannelConfiguration' 'alarms' 'arn:aws:chatbot::012345678901:chat-configuration/slack-channel/alarms'
 pulumi import 'aws:cloudfront/distribution:Distribution' 'someWebsite' 'E74FTE3EXAMPLE'
@@ -101,6 +102,7 @@ pulumi import 'aws:codedeploy/application:Application' 'my-app-prod' 'my-applica
 pulumi import 'aws:ec2/eipAssociation:EipAssociation' 'gitlab-server' 'eipassoc-abcd1234'
 pulumi import 'aws:ec2/instance:Instance' 'logstash' 'i-abcdef0123456789a'
 pulumi import 'aws:ec2/securityGroup:SecurityGroup' 'internalOps' 'sg-0123456789abcdef0'
+pulumi import 'aws:ec2/subnet:Subnet' 'public_subnet' 'subnet-9d4a7b6c'
 pulumi import 'aws:ecs/cluster:Cluster' 'experiments' 'experiments'
 pulumi import 'aws:ecs/service:Service' 'pihole' 'experiments/pihole'
 pulumi import 'aws:ecs/taskDefinition:TaskDefinition' 'pihole' 'arn:aws:ecs:eu-west-1:012345678901:task-definition/pihole:27'
