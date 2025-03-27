@@ -851,11 +851,124 @@ backend:
 
 ## Compose resources
 
-FIXME
+FIXME: should this be under [Program]?
 
 Refer [Component resources].
 
+Logical grouping of resources.<br/>
+Usually leveraged to instantiate a set of related resources, aggregate them as children, and create larger abstractions
+that encapsulate their implementation details.
+
+Component resources only package a set of other resources.<br/>
+To have full control over resources' lifecycles in a Component, including running code upon updates or deletion, use
+_dynamic providers_ instead.
+
+Refer [Pulumi Crosswalk for AWS] or [Google Cloud Static Website] as examples.
+
 <details>
+  <summary>Procedure</summary>
+
+1. Create a subclass of `ComponentResource`.
+
+   <details style="padding: 0 0 1em 1em">
+
+   ```ts
+   class StandardAwsVpc extends pulumi.ComponentResource {};
+   ```
+
+   </details>
+
+1. Inside its constructor, chain to the base constructor and pass it the subclass' name, arguments, and options.
+
+   Upon creation of a new instance of the Component, the call to the base constructor registers the instance with the
+   Pulumi engine. This records the resource's state and tracks it across deployments, allowing to see differences during
+   updates just like any regular resource.
+
+   All resources must have a name, so Components' constructors must accept one and pass it up.<br/>
+   Components must also register a unique _type name_ with the base constructor. These names are namespaced alongside
+   non-Component resources such as `aws:lambda:Function`.
+
+   <details style="padding: 0 0 1em 1em">
+
+   ```ts
+   class StandardAwsVpc extends pulumi.ComponentResource {
+       constructor(name: string, args: pulumi.Inputs, opts?: pulumi.ComponentResourceOptions) {
+           super("exampleOrg:StandardAwsVpc", name, {}, opts);
+       };
+   };
+   ```
+
+   </details>
+
+1. Inside the subclass' constructor again, create any child resources.<br/>
+   Pass them the `parent` resource option to ensure the children are parented correctly.
+
+   <details style="padding: 0 0 1em 1em">
+
+   ```ts
+   class StandardAwsVpc extends pulumi.ComponentResource {
+       constructor(name: string, args: pulumi.Inputs, opts?: pulumi.ComponentResourceOptions) {
+           …
+
+           const vpc = new aws.ec2.Vpc(
+             `${name}`,
+             { … },
+             { parent: this },
+           );
+           const internetGateway = new aws.ec2.InternetGateway(
+             `${name}`,
+             {
+               vpcId: vpc.id,
+               …
+             },
+             { parent: vpc },
+           );
+       };
+   };
+   ```
+
+   </details>
+
+1. Inside the subclass' constructor once more, define the Component's own output properties with the `registerOutputs()`
+   function.<br/>
+   Pulumi's engine uses it display the logical outputs of the Component resource, and any changes to those outputs will
+   be shown during an update.
+
+   <details style="padding: 0 0 1em 1em">
+
+   ```ts
+   class StandardAwsVpc extends pulumi.ComponentResource {
+       constructor(name: string, args: pulumi.Inputs, opts?: pulumi.ComponentResourceOptions) {
+           …
+
+           this.registerOutputs({
+               vpcId: vpc.id,
+           });
+       };
+   };
+   ```
+
+   </details>
+
+1. Create new instances of the Component resource in the code.
+
+   <details style="padding: 0 0 1em 1em">
+
+   ```ts
+   class StandardAwsVpc extends pulumi.ComponentResource { … };
+   const currentVpc = new StandardAwsVpc(
+       "currentVpc",
+       { cidrBlock: "172.31.0.0/16" },
+       { protect: true },
+   );
+   ```
+
+   </details>
+
+</details>
+
+<details>
+  <summary>Sample code</summary>
 
 ```ts
 import * as aws from "@pulumi/aws";
@@ -891,7 +1004,9 @@ export class StandardAwsVpc extends pulumi.ComponentResource {
         );
         …
 
-        this.registerOutputs();
+        this.registerOutputs({
+            vpcId: vpc.id,
+        });
     };
 };
 
@@ -904,6 +1019,7 @@ const currentVpc = new StandardAwsVpc(
 
         cidrBlock: "172.31.0.0/16",
     },
+    { protect: true },
 );
 ```
 
@@ -1170,12 +1286,14 @@ Solution: follow the suggestion in the warning message:
 [documentation]: https://www.pulumi.com/docs/
 [enable pulumi refresh to solve pending creates]: https://github.com/pulumi/pulumi/pull/10394
 [get started with pulumi policy as code]: https://www.pulumi.com/docs/using-pulumi/crossguard/get-started/
+[google cloud static website]: https://www.pulumi.com/registry/packages/google-cloud-static-website/
 [iac recommended practices: developer stacks and git branches]: https://www.pulumi.com/blog/iac-recommended-practices-developer-stacks-git-branches/
 [ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
 [importing resources]: https://www.pulumi.com/docs/iac/adopting-pulumi/import/
 [organizing pulumi projects & stacks]: https://www.pulumi.com/docs/using-pulumi/organizing-projects-stacks/
 [projects]: https://www.pulumi.com/docs/concepts/projects/
 [pulumi config set-all]: https://www.pulumi.com/docs/cli/commands/pulumi_config_set-all/
+[pulumi crosswalk for aws]: https://www.pulumi.com/docs/iac/clouds/aws/guides/
 [pulumi import]: https://www.pulumi.com/docs/iac/cli/commands/pulumi_import/
 [pulumi new]: https://www.pulumi.com/docs/cli/commands/pulumi_new/
 [pulumi preview]: https://www.pulumi.com/docs/iac/cli/commands/pulumi_preview/
