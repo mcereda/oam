@@ -15,6 +15,7 @@
 1. [Backend](#backend)
    1. [Enforce specific backends for projects](#enforce-specific-backends-for-projects)
    1. [Migrate to different backends](#migrate-to-different-backends)
+1. [Compose resources](#compose-resources)
 1. [Troubleshooting](#troubleshooting)
    1. [A project with the same name already exists](#a-project-with-the-same-name-already-exists)
    1. [Stack init fails because the stack supposedly already exists](#stack-init-fails-because-the-stack-supposedly-already-exists)
@@ -539,44 +540,49 @@ const cluster = new aws.eks.Cluster("cluster", {
 });
 ```
 
-If a resource is assigned a static name, the `deleteBeforeReplace` option _should be_ implicitly enabled.
+If a resource is assigned a static name, the `deleteBeforeReplace` option _should_ be enabled implicitly.
 
 ### Assign tags to resources by default
 
 Read [Assigning tags by default on AWS with Pulumi] first to get an idea of pros and cons of the options, then pick one
 (or both):
 
-1. Assign the wanted tags to the default provider in the stack's configuration file (`Pulumi.{stackName}.yaml`):
+- Assign the wanted tags to the default provider in the stack's configuration file (`Pulumi.{stackName}.yaml`):
 
-   ```yaml
-   config:
-     aws:defaultTags:
-       tags:
-         ManagedBy: "Pulumi",
-         Owner: "user@company.com",
-         Team: "Infra",
-   ```
+  ```yaml
+  config:
+    aws:defaultTags:
+      tags:
+        ManagedBy: "Pulumi",
+        Owner: "user@example.org",
+        Team: "Infra",
+  ```
 
-1. Create a new provider with the wanted tags defined in it, then explicitly use that provider with all the resources
-   involved:
+- Create a new provider with the wanted tags defined in it, then explicitly use that provider with all the resources
+  involved:
 
-   ```ts
-   const provider = new aws.Provider("provider", {
-     defaultTags: {
-       tags: {
-         ManagedBy: "Pulumi",
-         Owner: "user@company.com",
-         Team: "Infra",
-       },
-     },
-   });
-   const fargateProfile = new aws.eks.FargateProfile("fargateProfile", {
-     …
-   }, {
-     provider: provider,
-     …
-   });
-   ```
+  ```ts
+  const customProvider = new aws.Provider(
+    "customProvider",
+    {
+      defaultTags: {
+        tags: {
+          ManagedBy: "Pulumi",
+          Owner: "user@example.org",
+          Team: "Infra",
+        },
+      },
+    },
+  );
+  const fargateProfile = new aws.eks.FargateProfile(
+    "fargateProfile",
+    { … },
+    {
+      provider: customProvider,
+      …
+    },
+  );
+  ```
 
 ### Outputs
 
@@ -841,6 +847,66 @@ backend:
    cat 'Pulumi.mario.yaml'
    ```
 
+## Compose resources
+
+FIXME
+
+Refer [Component resources].
+
+<details>
+
+```ts
+import * as aws from "@pulumi/aws";
+
+export class StandardAwsVpc extends pulumi.ComponentResource {
+    constructor(name: string, args: pulumi.Inputs, opts?: pulumi.ComponentResourceOptions) {
+        super("exampleOrg:StandardAwsVpc", name, {}, opts);
+
+        const vpc = new aws.ec2.Vpc(
+            `${name}`,
+            {
+                tags: {
+                    Name: name,
+                    ...args.tags,
+                },
+
+                cidrBlock: args.cidrBlock,
+                enableDnsSupport: true,
+            },
+            { parent: this },
+        );
+        const internetGateway = new aws.ec2.InternetGateway(
+            name,
+            {
+                tags: {
+                    Name: name,
+                    ...args.tags,
+                },
+
+                vpcId: vpc.id,
+            },
+            { parent: vpc },
+        );
+        …
+
+        this.registerOutputs();
+    };
+};
+
+const currentVpc = new StandardAwsVpc(
+    "currentVpc",
+    {
+        tags: {
+            Name: "CurrentVpc",
+        },
+
+        cidrBlock: "172.31.0.0/16",
+    },
+);
+```
+
+</details>
+
 ## Troubleshooting
 
 ### A project with the same name already exists
@@ -990,6 +1056,7 @@ Solution: follow the suggestion in the warning message:
 [automatically enforcing aws resource tagging policies]: https://www.pulumi.com/blog/automatically-enforcing-aws-resource-tagging-policies/
 [blog]: https://www.pulumi.com/blog
 [code examples]: https://github.com/pulumi/examples
+[component resources]: https://www.pulumi.com/docs/iac/concepts/resources/components/
 [deletebeforereplace]: https://www.pulumi.com/docs/concepts/options/deletebeforereplace/
 [documentation]: https://www.pulumi.com/docs/
 [enable pulumi refresh to solve pending creates]: https://github.com/pulumi/pulumi/pull/10394
