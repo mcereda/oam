@@ -1,12 +1,13 @@
 # OpenSearch
 
-Search and analytics suite [forked from ElasticSearch by Amazon][stepping up for a truly open source elasticsearch].<br/>
+Search and analytics suite
+[forked from ElasticSearch by Amazon][stepping up for a truly open source elasticsearch].<br/>
 Makes it easy to ingest, search, visualize, and analyze data.
 
 Use cases: application search, log analytics, data observability, data ingestion, others.
 
 1. [Concepts](#concepts)
-   1. [Update lifecycle](#update-lifecycle)
+   1. [Update operations lifecycle](#update-operations-lifecycle)
    1. [Translog](#translog)
    1. [Refresh operations](#refresh-operations)
    1. [Flush operations](#flush-operations)
@@ -24,61 +25,61 @@ Use cases: application search, log analytics, data observability, data ingestion
 
 ## Concepts
 
-_Documents_ are the unit storing information.<br/>
-Information is text or structured data.<br/>
+_Documents_ are the unit storing information, consisting of text or structured data.<br/>
 Documents are stored in the JSON format and returned when related information is searched for.
 
 _Indexes_ are collections of documents.<br/>
-Its contents are queried when information is searched for.
+Their contents are queried when information is searched for.
 
-OpenSearch is designed to be a distributed search engine running on one or more _nodes_.<br/>
-Nodes are servers that store data and process search requests.
+_Nodes_ are servers that store data and process search requests.<br/>
+OpenSearch is designed to be a distributed search engine running on one or more nodes.
 
 _Clusters_ are collections of nodes allowing for different responsibilities to be taken on by different node types.<br/>
-In each cluster a _cluster manager node_ is **elected**. It orchestrates cluster-level operations such as creating an
-index.
+A _cluster manager node_ is **elected** in each and every cluster. It orchestrates cluster-level operations such as
+creating indexes.
 
-Nodes in clusters communicate with each other: if a request is routed to a node, it sends requests to other nodes,
-gathers their responses, and returns the final response.
+Nodes in clusters communicate with each other.<br/>
+When a request is routed to any node, it sends requests to other nodes, gathers their responses, and returns the final
+response.
 
 Indexes are split into _shards_, each of them storing a subset of all documents in an index.<br/>
 Shards are evenly distributed across nodes in a cluster.<br/>
 Each shard is effectively a full [Lucene] index. Since each instance of Lucene is a running process consuming CPU and
-memory, having more shards is not necessarily better.
+memory, having more shards is **not** necessarily better.
 
-Shards may be either _primary_ (original) _replicas_ (copy).<br/>
+Shards may be either _primary_ (the original ones) or _replicas_ (copies of the originals).<br/>
 By default, one replica shard is created for each primary shard.
 
-OpenSearch distributes replica shards to different nodes than their corresponding primary shards so that replica shards
-act as backups in the event of node failures.<br/>
+OpenSearch distributes replica shards to **different** nodes than the ones hosting their corresponding primary shards,
+so that replica shards would act as backups in the event of node failures.<br/>
 Replicas also improve the speed at which the cluster processes search requests, encouraging the use of more than one
 replica per index for each search-heavy workload.
 
-Indexes uses a data structure called an _inverted index_. It maps words to the documents in which they occur.<br/>
+Indexes use a data structure called an _inverted index_. It maps words to the documents in which they occur.<br/>
 When searching, OpenSearch matches the words in the query to the words in the documents. Each document is assigned a
-_relevance_ score saying how well the document matched the query.
+_relevance score_ indicating how well the document matched the query.
 
 Individual words in a search query are called _search terms_, and each is scored according to the following rules:
 
-- Search terms that occur more frequently in a document will tend to be scored higher.<br/>
+- Search terms that occur more frequently in a document will tend to be scored **higher**.<br/>
   This is the _term frequency_ component of the score.
-- Search terms that occur in more documents will tend to be scored lower.<br/>
+- Search terms that occur in more documents will tend to be scored **lower**.<br/>
   This is the _inverse document frequency_ component of the score.
-- Matches on longer documents should tend to be scored lower than matches on shorter documents.<br/>
+- Matches on longer documents should tend to be scored **lower** than matches on shorter documents.<br/>
   This corresponds to the _length normalization_ component of the score.
 
-OpenSearch uses the [Okapi BM25] ranking algorithm to calculate document relevance scores and then returns the results
+OpenSearch uses the [Okapi BM25] ranking algorithm to calculate document relevance scores, then returns the results
 sorted by relevance.
 
-### Update lifecycle
+### Update operations lifecycle
 
 Update operations consist of the following steps:
 
 1. An update is received by a primary shard.
-1. The update is written to the shard's transaction log [translog].
+1. The update is written to the shard's transaction log ([_translog_][translog]).
 1. The [translog] is flushed to disk and followed by an `fsync` **before** the update is acknowledged to guarantee
    durability.
-1. The update is passed to the [Lucene] index writer, which adds it to an in-memory buffer.
+1. The update is passed to the [Lucene] index writer, which adds it to an **in-memory** buffer.
 1. On a refresh operation, the Lucene index writer flushes the in-memory buffers to disk.<br/>
    Each buffer becomes a new Lucene segment.
 1. A new index reader is opened over the resulting segment files.<br/>
@@ -91,13 +92,14 @@ Update operations consist of the following steps:
 
 Transition log making updates durable.
 
-Indexing or bulk calls respond when the documents have been written to the translog and the translog is flushed to disk.<br/>
-Updates will **not** be visible to search requests until after a [refresh operation][refresh operations].
+Indexing or bulk calls respond when the documents have been written to the translog and the translog is flushed to
+disk.<br/>
+Updates will **not** be visible to search requests until after a [refresh operation][refresh operations] takes place.
 
 ### Refresh operations
 
 Performed periodically to write the documents from the in-memory [Lucene] index to files.<br/>
-These files are not guaranteed to be durable, because an `fsync` is **not** performed at this point.
+These files are **not** guaranteed to be durable, because an `fsync` is **not** performed at this point.
 
 A refresh makes documents available for search.
 
@@ -131,8 +133,10 @@ Merge policies specify the maximum size and how often merges are performed.
 | Dynamic                  | Delegates specific nodes for custom work (e.g.: machine learning tasks), preventing the consumption of resources from data nodes and therefore not affecting functionality.                                                                                                                               |                                                                                                                                                                                                                                |
 | Search                   | Provides access to searchable snapshots.<br/>Incorporates techniques like frequently caching used segments and removing the least used data segments in order to access the searchable snapshot index (stored in a remote long-term storage source, for example, Amazon S3 or Google Cloud Storage).      | Use nodes with more compute (CPU and memory) than storage capacity (hard disk).                                                                                                                                                |
 
-Each node is a cluster-manager-eligible, data, ingest, **and** coordinating node by default.<br/>
-Number of nodes, assigning node types, and choosing the hardware for each node type should depend on one's own use case.
+Each node is by default a cluster-manager-eligible, data, ingest, **and** coordinating node.
+
+Number of nodes, assigning node types, and choosing the hardware for each node type should depend on one's own use
+case.<br/>
 One should take into account factors like the amount of time to hold on to data, the average size of documents, typical
 workload (indexing, searches, aggregations), expected price-performance ratio, risk tolerance, and so on.
 
@@ -151,7 +155,7 @@ The `_bulk` API takes in one file lumping requests together, offering superior p
 flow of data is less frequent and can be aggregated in a generated file.<br/>
 Enormous documents should still be indexed individually.
 
-When indexing documents, the document's `_id` must be 512 bytes or less in size.
+When indexing documents, the document's `_id` must be **up to** 512 bytes in size.
 
 _Static_ index settings can only be updated on **closed** indexes.<br/>
 _Dynamic_ index settings can be updated at any time through the [APIs].
@@ -197,32 +201,34 @@ Use docker compose.
 ## Tuning
 
 - Disable swapping.<br/>
-  If kept enabled, it can dramatically **decrease** performance and stability.
-- Avoid using network file systems for node storage in a production workflow.<br/>
+  If kept enabled, it can **dramatically decrease** performance and stability.
+- **Avoid** using network file systems for node storage in a production workflows.<br/>
   Using those can cause performance issues due to network conditions (i.e.: latency, limited throughput) or read/write
   speeds.
 - Use solid-state drives (SSDs) on the hosts for node storage where possible.
-- Set the size of the Java heap.<br/>
-  Recommended to use **half** of the system's RAM.
+- Properly set the size of the Java heap.<br/>
+  Recommended to use **half** of the host's RAM.
 - Set up a [hot-warm architecture].
 
 ## The split brain problem
 
 TODO
 
+Refer [Elasticsearch Split Brain] and [Avoiding the Elasticsearch split brain problem, and how to recover].
+
 ## APIs
 
 FIXME: expand
 
 - Close indexes.<br/>
-  Disables read and write operations.
+  Disables read and write operations on the impacted indexes.
 
   ```plaintext
   POST /prometheus-logs-20231205/_close
   ```
 
 - (Re)Open closed indexes.<br/>
-  Enables read and write operations.
+  Enables read and write operations on the impacted indexes.
 
   ```plaintext
   POST /prometheus-logs-20231205/_open
@@ -250,7 +256,7 @@ Refer
 ## Further readings
 
 - [Website]
-- [Github]
+- [Codebase]
 - [Documentation]
 - [Lucene]
 - [Okapi BM25]
@@ -287,9 +293,9 @@ Refer
 
 <!-- Files -->
 <!-- Upstream -->
+[codebase]: https://github.com/opensearch-project
 [creating a cluster]: https://opensearch.org/docs/latest/tuning-your-cluster/
 [documentation]: https://opensearch.org/docs/latest/
-[github]: https://github.com/opensearch-project
 [index management]: https://opensearch.org/docs/latest/dashboards/im-dashboards/index-management/
 [index settings]: https://opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index-settings/
 [website]: https://opensearch.org/
