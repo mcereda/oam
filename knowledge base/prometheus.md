@@ -3,8 +3,9 @@
 Monitoring and alerting system that collects metrics from configured targets at given intervals, evaluates rule
 expressions, displays the results, and can trigger alerts when specified conditions are observed.
 
-Metrics can be pushed using plugins, in the event hosts are behind a firewall or prohibited from opening ports by
-security policy.
+Works normally by scraping metrics from monitored hosts.<br/>
+Metrics can also be pushed to Prometheus servers via plugins, in the event source hosts are behind a firewall or
+prohibited from opening ports by security policies.
 
 1. [TL;DR](#tldr)
 1. [Components](#components)
@@ -19,7 +20,7 @@ security policy.
    1. [Backfilling](#backfilling)
 1. [Write to remote Prometheus servers](#write-to-remote-prometheus-servers)
 1. [Management API](#management-api)
-   1. [Take snapshots of the data](#take-snapshots-of-the-data)
+   1. [Take snapshots of the current data](#take-snapshots-of-the-current-data)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -55,7 +56,7 @@ Prometheus without the need of an agent.
 
 ### Extras
 
-As welcomed addition, [Grafana] can be configured to use Prometheus as a backend of its in order to provide data
+As a welcomed addition, [Grafana] can be configured to use Prometheus as a backend of its, in order to provide data
 visualization and dashboarding functions on the data it provides.
 
 ## Installation
@@ -107,13 +108,6 @@ kubectl -n 'monitoring' get pods -l -l "app=prometheus-pushgateway,component=pus
 
 The default configuration file is at `/etc/prometheus/prometheus.yml`.
 
-Reload the configuration without restarting Prometheus's process by using the `SIGHUP` signal:
-
-```sh
-kill -s 'SIGHUP' '3969'
-pkill --signal 'HUP' 'prometheus'
-```
-
 ```yml
 global:
   scrape_interval: 15s
@@ -133,6 +127,13 @@ scrape_configs:
       - source_labels: [__name__]
         action: keep
         regex: '(node_cpu)'
+```
+
+Reload the configuration with**out** restarting Prometheus's process by using the `SIGHUP` signal:
+
+```sh
+kill -s 'SIGHUP' '3969'
+pkill --signal 'HUP' 'prometheus'
 ```
 
 ### Filter metrics
@@ -167,29 +168,32 @@ Use [metric relabeling configurations][metric_relabel_configs] to select which s
 
 ## Queries
 
-Prometheus' query syntax is [PromQL].
+Prometheus uses the [PromQL] query syntax.
 
-All data is stored as time series, each one identified by a metric name, e.g. `node_filesystem_avail_bytes` for
-available filesystem space.<br/>
-Metrics' names can be used in the expressions to select all of the time series with this name and produce an
-**instant vector**.
+All data is stored as time series, each one identified by a metric name (e.g., `node_filesystem_avail_bytes` for
+available filesystem space).<br/>
+Metrics' names can be used in query expressions to select all the time series with that name, and produce an _instant
+vector_.
 
-Time series can be filtered using selectors and labels (sets of key-value pairs):
+Time series can be filtered using _selectors_ and _labels_ (sets of key-value pairs):
 
 ```promql
 node_filesystem_avail_bytes{fstype="ext4"}
 node_filesystem_avail_bytes{fstype!="xfs"}
 ```
 
-Square brackets allow to select a range of samples from the current time backwards:
+Square brackets allow selecting a range of samples from the current time backwards:
 
 ```promql
 node_memory_MemAvailable_bytes[5m]
 ```
 
-When using time ranges, the vector returned will be a **range vector**.
+When using time ranges, the returned vector will be a _range vector_.
 
-[Functions] can be used to build advanced queries:
+[Functions] can be used to build advanced queries.
+
+<details style="padding: 0 0 1em 1em">
+  <summary>Example</summary>
 
 ```promql
 100 * (1 - avg by(instance)(irate(node_cpu_seconds_total{job='node_exporter',mode='idle'}[5m])))
@@ -197,13 +201,23 @@ When using time ranges, the vector returned will be a **range vector**.
 
 ![advanced query](prometheus%20advanced%20query.png)
 
-Labels are used to filter the job and the mode. `node_cpu_seconds_total` returns a **counter**, and the irate() function
-calculates the **per-second rate of change** based on the last two data points of the range interval.<br/>
-To calculate the overall CPU usage, the idle mode of the metric is used. Since idle percent of a processor is the
-opposite of a busy processor, the irate value is subtracted from 1. To make it a percentage, it is multiplied by 100.
+Labels are used to filter the job and the mode.
+
+`node_cpu_seconds_total` returns a **counter**.<br/>
+The `irate()` function calculates the **per-second rate of change** based on the last two data points of the range
+interval given it as argument.
+
+To calculate the overall CPU usage, the `idle` mode of the metric is used.
+
+Since the idle percentage of a processor is the opposite of a busy processor, the average `irate` value is subtracted
+from 1.
+
+To make it all a percentage, the computed value is multiplied by 100.
+
+</details>
 
 <details>
-  <summary>Examples</summary>
+  <summary>Query examples</summary>
 
 ```promql
 # Get all allocatable CPU cores where the 'node' attribute matches regex ".*-runners-.*" grouped by node
@@ -220,12 +234,13 @@ sum(container_spec_cpu_quota{namespace="gitlab-runners",pod_name=~"runner.*"}/co
 
 Refer [Storage].
 
-Prometheus uses a local on-disk time series database, but can optionally integrate with remote storage systems.
+Prometheus uses a **local**, **on-disk** time series database by default.<br/>
+It can optionally integrate with remote storage systems.
 
 ### Local storage
 
-Local storage is **not** clustered **nor** replicated. This makes it not arbitrarily scalable or durable in the face of
-outages.<br/>
+Local storage is **not** clustered **nor** replicated. This makes it **not** arbitrarily scalable or durable in the face
+of outages.<br/>
 The use of RAID disks is suggested for storage availability, and snapshots are recommended for backups.
 
 > The local storage is **not** intended to be durable long-term storage and external solutions should be used to achieve
@@ -234,27 +249,27 @@ The use of RAID disks is suggested for storage availability, and snapshots are r
 External storage may be used via the remote read/write APIs.<br/>
 These storage systems vary greatly in durability, performance, and efficiency.
 
-Ingested samples are grouped into blocks of two hours.<br/>
-Each two-hours block consists of a uniquely named directory. This contains:
+Ingested samples are grouped into blocks of **two hours**.<br/>
+Each two-hours block consists of a **uniquely** named directory. This directory contains:
 
 - A `chunks` subdirectory, hosting all the time series samples for that window of time.<br/>
-  Samples are grouped into one or more segment files of up to 512MB each by default.
+  Samples are grouped into one or more segment files of up to 512 MB each by default.
 - A metadata file.
 - An index file.<br/>
   This indexes metric names and labels to time series in the `chunks` directory.
 
-When series are deleted via the API, deletion records are stored in separate `tombstones` files and are **not** deleted
-immediately from the chunk segments.
+When series are deleted via the API, deletion records are stored in separate `tombstones` files.<br/>
+Tombstone files are **not** deleted immediately from the chunk segments.
 
 The current block for incoming samples is kept in memory and is **not** fully persisted.<br/>
 This is secured against crashes by a write-ahead log (WAL) that can be replayed when the Prometheus server restarts.
 
-Write-ahead log files are stored in the `wal` directory in segments of 128MB in size.<br/>
+Write-ahead log files are stored in the `wal` directory in segments of 128 MB in size.<br/>
 These files contain raw data that has not yet been _compacted_.<br/>
-Prometheus will retain a minimum of three write-ahead log files. Servers may retain more than three WAL files in order
-to keep at least two hours of raw data stored.
+Prometheus will retain a minimum of **three** write-ahead log files. Servers may retain more than these three WAL files
+in order to keep at least two hours of raw data stored.
 
-The server's `data` directory looks something like follows:
+The server's `data` directory looks something like this:
 
 ```sh
 ./data
@@ -285,28 +300,28 @@ The server's `data` directory looks something like follows:
 The initial two-hour blocks are eventually compacted into longer blocks in the background.<br/>
 Each block will contain data spanning up to 10% of the retention time or 31 days, whichever is smaller.
 
-The retention time defaults to 15 days.<br/>
+The retention time defaults to **15 days**.<br/>
 Expired block cleanup happens in the background. It may take up to two hours to remove expired blocks. Blocks must be
 **fully** expired before they are removed.
 
-Prometheus stores an average of 1-2 bytes per sample.<br/>
+Prometheus stores an average of 1 to 2 bytes per sample.<br/>
 To plan the capacity of a Prometheus server, one can use the following rough formula:
 
 ```plaintext
 needed_disk_space = retention_time_seconds * ingested_samples_per_second * bytes_per_sample
 ```
 
-To lower the rate of ingested samples one can:
+To lower the rate of ingested samples, one can (either-or):
 
-- Either reduce the number of time series scraped (fewer targets or fewer series per target)
-- Or increase the scrape interval.
+- Reduce the number of scraped time series (fewer targets or fewer series per target).
+- Increase the scrape interval.
 
 Reducing the number of series is likely more effective, due to compression of samples within a series.
 
-If the local storage becomes corrupted for whatever reason, the best strategy is to shut down Prometheus and then remove
-the entire storage directory. This means losing **all** the stored data.<br/>
-One can alternatively try removing individual block directories or the WAL directory to resolve the problem. Doing so
-means losing approximately two hours data per block directory.
+Should the local storage become corrupted for whatever reason, the best strategy is to shut down the Prometheus server
+process, and then remove the **entire** storage directory. This does mean losing **all** the stored data.<br/>
+One can alternatively try removing individual block directories or the `wal` directory to resolve the problem. Doing so
+means losing approximately two hours of data per block directory.
 
 > Prometheus does **not** support non-POSIX-compliant filesystems as local storage.<br/>
 > Unrecoverable corruptions may happen.<br/>
@@ -347,7 +362,7 @@ remote_write:
 
 ## Management API
 
-### Take snapshots of the data
+### Take snapshots of the current data
 
 > Requires the TSDB APIs to be enabled (`--web.enable-admin-api`).
 
@@ -383,7 +398,7 @@ The snapshot now exists at `<data-dir>/snapshots/20171210T211224Z-2be650b6d019eb
 ## Further readings
 
 - [Website]
-- [Github]
+- [Codebase]
 - [Documentation]
 - [Helm chart]
 - [`docker/monitoring`][docker/monitoring]
@@ -426,9 +441,9 @@ The snapshot now exists at `<data-dir>/snapshots/20171210T211224Z-2be650b6d019eb
 [docker/monitoring]: ../docker%20compositions/monitoring/README.md
 
 <!-- Upstream -->
+[codebase]: https://github.com/prometheus/prometheus
 [documentation]: https://prometheus.io/docs/
 [functions]: https://prometheus.io/docs/prometheus/latest/querying/functions/
-[github]: https://github.com/prometheus/prometheus
 [helm chart]: https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus
 [metric_relabel_configs]: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs
 [node exporter guide]: https://prometheus.io/docs/guides/node-exporter/
