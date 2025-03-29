@@ -36,7 +36,7 @@ curl -sS \
 ## Setup
 
 <details>
-  <summary>kubernetes</summary>
+  <summary>Kubernetes</summary>
 
 ```sh
 helm repo add 'grafana' 'https://grafana.github.io/helm-charts'
@@ -68,7 +68,7 @@ kubectl delete namespace --ignore-not-found 'monitoring'
 
 Access Prometheus instances in the same namespace using `http://prometheus-server`
 
-<details>
+</details>
 
 ## Provisioning
 
