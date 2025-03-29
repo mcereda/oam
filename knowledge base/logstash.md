@@ -5,6 +5,9 @@ Server-side data processing pipeline that ingests data, transforms it, and then 
 Part of the Elastic Stack along with Beats, [ElasticSearch] and [Kibana].
 
 1. [TL;DR](#tldr)
+1. [Troubleshooting](#troubleshooting)
+   1. [Check a pipeline is processing data](#check-a-pipeline-is-processing-data)
+   1. [Log pipeline data to stdout](#log-pipeline-data-to-stdout)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -14,7 +17,9 @@ Part of the Elastic Stack along with Beats, [ElasticSearch] and [Kibana].
   <summary>Setup</summary>
 
 ```sh
+dnf install 'logstash'
 docker pull 'logstash:7.17.27'
+yum install 'logstash'
 ```
 
 </details>
@@ -55,7 +60,7 @@ logstash-plugin list --group 'output'
 # Get Logstash's status.
 curl -fsS 'localhost:9600/_health_report?pretty'
 
-# Get pipelines statistics.
+# Get pipelines' statistics.
 curl -fsS 'localhost:9600/_node/stats/pipelines?pretty'
 curl -fsS 'localhost:9600/_node/stats/pipelines/somePipeline?pretty'
 ```
@@ -126,6 +131,79 @@ output {
 </details>
 -->
 
+## Troubleshooting
+
+### Check a pipeline is processing data
+
+<details>
+  <summary>Steps in order of likeliness</summary>
+
+1. Check the Logstash process is running correctly
+
+   ```sh
+   systemctl status 'logstash.service'
+   journalctl -xefu 'logstash.service'
+
+   docker ps
+   docker logs 'logstash'
+   ```
+
+1. Check the Logstash process is getting and/or sending data:
+
+   ```sh
+   tcpdump 'dst port 8765 or dst opensearch.example.org'
+   ```
+
+1. Check the pipeline's statistics are changing:
+
+   ```sh
+   curl -fsS 'localhost:9600/_node/stats/pipelines/somePipeline' \
+   | jq '.pipelines."somePipeline"|{"events":.events,"queue":.queue}' -
+   ```
+
+   ```json
+   {
+     "events": {
+       "in": 20169,
+       "out": 20169,
+       "queue_push_duration_in_millis": 11,
+       "duration_in_millis": 257276,
+       "filtered": 20169
+     },
+     "queue": {
+       "type": "memory",
+       "events_count": 0,
+       "queue_size_in_bytes": 0,
+       "max_queue_size_in_bytes": 0
+     }
+   }
+   ```
+
+1. Check the pipeline's input and output plugin's statistics are changing:
+
+   ```sh
+   curl -fsS 'localhost:9600/_node/stats/pipelines/somePipeline' \
+   | jq '.pipelines."somePipeline".plugins|{"in":.inputs,"out":.outputs[]|select(.name=="opensearch")}' -
+   ```
+
+1. [Log the pipeline's data to stdout][log pipeline data to stdout] to check data is parsed correctly.
+
+</details>
+
+### Log pipeline data to stdout
+
+Leverage the `stdout` output plugin in any pipeline's configuration file:
+
+```rb
+output {
+  stdout {
+    codec => rubydebug {
+      metadata => true   # also print metadata in console
+    }
+  }
+}
+```
+
 ## Further readings
 
 - [Website]
@@ -143,6 +221,8 @@ output {
   -->
 
 <!-- In-article sections -->
+[log pipeline data to stdout]: #log-pipeline-data-to-stdout
+
 <!-- Knowledge base -->
 [beats]: beats.md
 [elasticsearch]: elasticsearch.md
