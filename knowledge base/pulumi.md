@@ -1029,14 +1029,49 @@ const currentVpc = new StandardAwsVpc(
 
 FIXME: should this be under [Program] or [Stack]?
 
+Existing resources can be imported in Pulumi's states for Pulumi to manage.
+
+This is different from _referencing_ an existing resource in that:
+
+- A _referenced_ existing resource is effectively ReadOnly for the program.
+- An _imported_ existing resource is **managed** by the program.<br/>
+  This means that the `destroy` command **will** try to destroy it.
+
 Refer [Importing resources] and the [`pulumi import`][pulumi import] command.
 
-```sh
-pulumi import --file 'import.json'
-pulumi import 'aws:ec2/instance:Instance' 'logstash' 'i-abcdef0123456789a' --suppress-outputs
-pulumi import 'aws:cloudwatch/logGroup:LogGroup' 'vulcan' '/ecs/vulcan' --generate-code='false' --protect='false'
-pulumi import 'aws:ec2/subnet:Subnet' 'public_subnet' 'subnet-9d4a7b6c' --parent 'current=urn:pulumi:someStack::someProject::aws:ec2/vpc:Vpc::current'
-```
+The import process uses the selected stack's configured provider to look up the desired resource in the cloud provider,
+read its current configuration, and add the resource to the stack's state.<br/>
+This requires:
+
+- The _type_ of resource to import, either as a _type token_ (a string that uniquely identifies a Pulumi resource type)
+  or as a _resource declaration_ (in code).
+- The _name_ and _value_ of the property to use for the resource lookup.<br/>
+  Lookup properties vary by resource.
+
+One can import existing resources:
+
+- With the [`pulumi import`][pulumi import] CLI command.<br/>
+  It imports the resource into the currently selected stack's state, and generates code for one to add to one's program.
+
+  When needing to bulk import multiple resources, the CLI command can be used with a JSON file that contains references
+  to the desired existing resources.
+
+  <details style="padding: 0 0 1em 1em">
+    <summary>Examples</summary>
+
+  ```sh
+  pulumi import --file 'import.json'
+  pulumi import 'aws:ec2/instance:Instance' 'logstash' 'i-abcdef0123456789a' --suppress-outputs
+  pulumi import 'aws:cloudwatch/logGroup:LogGroup' 'vulcan' '/ecs/vulcan' --generate-code='false' --protect='false'
+  pulumi import 'aws:ec2/subnet:Subnet' 'public_subnet' 'subnet-9d4a7b6c' --parent 'current=urn:pulumi:someStack::someProject::aws:ec2/vpc:Vpc::current'
+  ```
+
+  </details>
+
+- In code, with the `import` resource option.<br/>
+  One needs to supply it as a property on a resource declaration that one writes into one's program oneself.
+
+The two approaches work in slightly different ways, and are suited to slightly different use cases.
 
 ### Import components and their children
 
