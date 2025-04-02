@@ -5,6 +5,7 @@
 1. [Extensions of interest](#extensions-of-interest)
    1. [PostGIS](#postgis)
    1. [`postgresql_anonymizer`](#postgresql_anonymizer)
+1. [Make it distributed](#make-it-distributed)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -123,6 +124,8 @@ ALTER DATABASE postgres SET session_preload_libraries = 'anon';
 
 </details>
 
+Also see [yugabyte/yugabyte-db] for a distributed, PostgreSQL-like DBMS.
+
 ## Functions
 
 Refer [CREATE FUNCTION].
@@ -212,6 +215,11 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 
 </details>
 
+## Make it distributed
+
+Refer [How to Scale a Single-Server Database: A Guide to Distributed PostgreSQL].<br/>
+See also [yugabyte/yugabyte-db].
+
 ## Further readings
 
 - [SQL]
@@ -225,6 +233,8 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 - [MySQL]
 - [pg_flo]
 - [pgAdmin]
+- [How to Scale a Single-Server Database: A Guide to Distributed PostgreSQL]
+- [yugabyte/yugabyte-db]
 
 ### Sources
 
@@ -271,6 +281,7 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 [get count of records affected by insert or update in postgresql]: https://stackoverflow.com/questions/4038616/get-count-of-records-affected-by-insert-or-update-in-postgresql#78459743
 [hashing a string to a numeric value in postgresql]: https://stackoverflow.com/questions/9809381/hashing-a-string-to-a-numeric-value-in-postgresql#69650940
 [how to generate scram-sha-256 to create postgres 13 user]: https://stackoverflow.com/questions/68400120/how-to-generate-scram-sha-256-to-create-postgres-13-user
+[how to scale a single-server database: a guide to distributed postgresql]: https://www.yugabyte.com/postgresql/distributed-postgresql/
 [how to scram in postgres with pgbouncer]: https://www.crunchydata.com/blog/pgbouncer-scram-authentication-postgresql
 [how to search a specific value in all tables (postgresql)?]: https://stackoverflow.com/questions/5350088/how-to-search-a-specific-value-in-all-tables-postgresql/23036421#23036421
 [how to write update function (stored procedure) in postgresql?]: https://stackoverflow.com/questions/21087710/how-to-write-update-function-stored-procedure-in-postgresql
@@ -281,3 +292,4 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 [postgresql: get member roles and permissions]: https://www.cybertec-postgresql.com/en/postgresql-get-member-roles-and-permissions/
 [postgresql: show all the privileges for a concrete user]: https://stackoverflow.com/questions/40759177/postgresql-show-all-the-privileges-for-a-concrete-user
 [what is the pg_dump command for backing up a postgresql database?]: https://www.linkedin.com/advice/3/what-pgdump-command-backing-up-postgresql-ke2ef
+[yugabyte/yugabyte-db]: https://github.com/yugabyte/yugabyte-db
