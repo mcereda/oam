@@ -19,6 +19,7 @@ Use cases: application search, log analytics, data observability, data ingestion
    1. [Bulk indexing](#bulk-indexing)
 1. [Re-index data](#re-index-data)
 1. [Data streams](#data-streams)
+1. [Index patterns](#index-patterns)
 1. [APIs](#apis)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
@@ -30,7 +31,7 @@ Documents are stored in the JSON format, and returned when related information i
 Documents are immutable. However, they can be updated by retrieving them, updating the information in them, and
 re-indexing them using the same document IDs.
 
-_Indexes_ are collections of documents.<br/>
+[_Indexes_][indexes] are collections of documents.<br/>
 Their contents are queried when information is searched for.
 
 _Nodes_ are servers that store data and process search requests.<br/>
@@ -115,6 +116,21 @@ This reduces the overall number of segments on each shard, frees up disk space, 
 Eventually, segments reach a maximum allowed size and are no longer merged into larger segments.<br/>
 _Merge policies_ specify the segments' maximum size and how often merge operations are performed.
 
+Interaction with the cluster is done via REST [APIs].
+
+If indexes do not already exist, OpenSearch automatically creates them while [ingesting data][ingest data].
+
+<details>
+  <summary>Typical setup order of operations</summary>
+
+1. \[optional] Create [index templates].
+1. \[optional] Create [data streams].
+1. \[optional] Create [indexes].
+1. [Ingest data].
+1. Create [index patterns] for the search dashboard to use.
+
+</details>
+
 ## Node types
 
 | Node type                | Description                                                                                                                                                                                                                                                                                               | Best practices for production                                                                                                                                                                                                  |
@@ -142,12 +158,14 @@ and query metrics for these tests improve upon the architecture.
 
 Refer [Managing indexes].
 
-Before one can search through one's data, documents must be indexed.<br/>
-Indexing is how search engines organize data for fast retrieval. The resulting structure is called _index_.
+Indexes are collections of documents that one wants to make searchable.<br/>
+They organize the data for fast retrieval.
 
-Within an index, OpenSearch identifies each document using a **unique** _document ID_.
+To maximise one's ability to search and analyse documents, one can define how documents and their fields are stored and
+indexed.
 
-Data is indexed using the [APIs].<br/>
+Before one can search through one's data, documents **must** be ingested and indexed.<br/>
+Data is ingested and indexed using the [APIs].<br/>
 There are two _indexing APIs_:
 
 - The _Index API_, which adds documents individually as they arrive.<br/>
@@ -159,8 +177,9 @@ There are two _indexing APIs_:
 
   Enormous documents are still better indexed **individually**.
 
-When indexing documents, the document's `_id` must be **up to** 512 bytes in size.<br/>
-Should one **not** provide an ID for the document, OpenSearch generates a document ID itself.
+Within indexes, OpenSearch identifies each document using a **unique** _document ID_.<br/>
+The document's `_id` must be **up to** 512 bytes in size.<br/>
+Should one **not** provide an ID for the document during ingestion, OpenSearch generates a document ID itself.
 
 Upon receiving indexing requests, OpenSearch:
 
@@ -413,7 +432,7 @@ Refer [Set up a hot-warm architecture].
 
 ## Index templates
 
-Refer [Index templates].
+Refer [Index templates][documentation  index templates].
 
 Index templates allow to initialize new indexes with predefined mappings and settings.
 
@@ -505,22 +524,121 @@ The entries in the items array are in the same order as the actions specified in
 
 Refer [Reindex data].
 
-When needing to make an extensive change (e.g., adding a new field to every document, or combining multiple indexes to
-form a new one), one can use the `reindex` operation instead of deleting the old indexes, making the change offline, and
-then indexing the data again.
+The `_reindex` operation copies documents from an index, that one selects through a query, over to another index.
 
-The `reindex` operation copies documents, that one selects through a query, over to another index.
+When needing to make an extensive change (e.g., adding a new field to every document, move documents between indexes, or
+combining multiple indexes into a new one), one can use the `_reindex` operation instead of deleting the old indexes,
+making the change offline, and then indexing the data again.
 
-Reindexing can be an expensive operation depending on the size of the source index.<br/>
-It is recommended to disable replicas in the destination index by setting `number_of_replicas` to `0`, and re-enable
-them once the `reindex` process is complete.
+Re-indexing can be an expensive operation depending on the size of the source index.<br/>
+It is recommended to disable replicas in the destination index by setting its `number_of_replicas` to `0`, and re-enable
+them once the re-indexing process is complete.
 
-`reindex` is a `POST` operation.<br/>
+`_reindex` is a `POST` operation.<br/>
 In its most basic form, requires specifying a source index and a destination index.
+
+Should the destination index not exist, `_reindex` creates a new index **with default configurations**.<br/>
+If the destination index requires field mappings or custom settings, (re)create the destination index **beforehand**
+with the desired ones.
+
+<details>
+  <summary>Reindex <b>all</b> documents</summary>
+
+Copy **all** documents from one index to another.
+
+```plaintext
+POST _reindex
+{
+    "source": {
+        "index": "sourceIndex"
+    },
+    "dest": {
+        "index": "destinationIndex"
+    }
+}
+```
+
+```json
+{
+    "took": 1350,
+    "timed_out": false,
+    "total": 30,
+    "updated": 0,
+    "created": 30,
+    "deleted": 0,
+    "batches": 1,
+    "version_conflicts": 0,
+    "noops": 0,
+    "retries": {
+        "bulk": 0,
+        "search": 0
+    },
+    "throttled_millis": 0,
+    "requests_per_second": -1,
+    "throttled_until_millis": 0,
+    "failures": []
+}
+```
+
+</details>
+
+<details>
+  <summary>Reindex <b>only unique</b> documents</summary>
+
+Copy **only** documents **missing** from a destination index by setting the `op_type` option to `create`.
+
+If a document with the same ID already exists, the operation ignores the one from the source index.<br/>
+To ignore all version conflicts of documents, set the `conflicts` option to `proceed`.
+
+> For some reason, it seems to work better if the `conflicts` option is at the start of the request's data.
+
+```plaintext
+POST _reindex
+{
+    "conflicts": "proceed",
+    "source": {
+        "index": "sourceIndex"
+    },
+    "dest": {
+        "index": "destinationIndex",
+        "op_type": "create"
+    }
+}
+```
+
+</details>
+
+<details>
+  <summary>Combine indexes</summary>
+
+Combine **all** documents from one or more indexes into another by adding the source indexes as a list.
+
+> The number of shards for your source and destination indexes **must be the same**.
+
+```plaintext
+POST _reindex
+{
+    "source": {
+        "index": [
+            "sourceIndex_1",
+            "sourceIndex_2"
+        ]
+    },
+    "dest": {
+        "index": "destinationIndex"
+    }
+}
+```
+
+</details>
 
 ## Data streams
 
-Data streams simplify the management of time-series data.
+Data streams are **managed** indices that are highly optimised for **time-series and append-only data** (typically, logs
+and observability data in general).
+
+They work like any other index, but OpenSearch simplifies some management operations (e.g., rollovers) and stores them
+in a more efficient way.
 
 They are internally composed of multiple _backing_ indexes.<br/>
 Search requests are routed to **all** backing indexes, while indexing requests are routed only to the **latest** write
@@ -529,6 +647,7 @@ index.
 ISM policies allow to automatically handle index rollover or deletion.
 
 <details>
+  <summary>Create data streams</summary>
 
 1. Create an index template containing `index_pattern: []` and `data_stream: {}`.<br/>
    This template will configure all indexes matching the defined patterns as a data stream.
@@ -622,6 +741,151 @@ ISM policies allow to automatically handle index rollover or deletion.
 
 </details>
 
+<details>
+  <summary>Create templates for data streams</summary>
+
+```plaintext
+PUT _index_template/logs-template
+{
+    "data_stream": {},
+    "index_patterns": [
+        "logs-*"
+    ]
+}
+```
+
+```json
+{
+    "acknowledged": true
+}
+```
+
+</details>
+
+<details>
+  <summary>Explicitly create data streams</summary>
+
+```plaintext
+PUT _data_stream/logs-nginx
+```
+
+```json
+{
+    "acknowledged": true
+}
+```
+
+</details>
+
+<details>
+  <summary>Get information about data streams</summary>
+
+```plaintext
+GET _data_stream/logs-nginx
+```
+
+```json
+{
+    "data_streams": [
+        {
+            "name": "logs-nginx",
+            "timestamp_field": {
+                "name": "@timestamp"
+            },
+            "indices": [
+                {
+                    "index_name": ".ds-logs-nginx-000002",
+                    "index_uuid": "UjUVr7haTWePKAfDz2q4Xg"
+                },
+                {
+                    "index_name": ".ds-logs-nginx-000004",
+                    "index_uuid": "gi372IUBSDO-pkaj7klLiQ"
+                },
+                {
+                    "index_name": ".ds-logs-nginx-000005",
+                    "index_uuid": "O60_VDzBStCaVGl8Sud2BA"
+                }
+            ],
+            "generation": 5,
+            "status": "GREEN",
+            "template": "logs-template"
+        }
+    ]
+}
+```
+
+</details>
+
+<details>
+  <summary>Get statistics about data streams</summary>
+
+```plaintext
+GET _data_stream/logs-nginx/_stats
+```
+
+```json
+{
+    "_shards": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0
+    },
+    "data_stream_count": 1,
+    "backing_indices": 1,
+    "total_store_size_bytes": 416,
+    "data_streams": [
+        {
+            "data_stream": "logs-nginx",
+            "backing_indices": 1,
+            "store_size_bytes": 416,
+            "maximum_timestamp": 0
+        }
+    ]
+}
+```
+
+</details>
+
+<details>
+  <summary>Delete data streams</summary>
+
+```plaintext
+DELETE _data_stream/logs-nginx
+```
+
+```json
+{
+    "acknowledged": true
+}
+```
+
+</details>
+
+## Index patterns
+
+Index patterns reference one or more indexes, data streams, or index aliases.<br/>
+They are mostly used in dashboards and in the _discover_ tab to filter indexes to gather data from.
+
+They require data to be indexed before creation.
+
+<details>
+  <summary>Create index patterns</summary>
+
+1. Go to OpenSearch Dashboards.
+1. In the _Management_ section of the side menu, select _Dashboards Management_.
+1. Select _Index patterns_, then _Create index pattern_.
+1. Define the pattern by entering a name in the Index pattern name field.<br/>
+   Dashboards automatically adds a wildcard (`*`). It will make the pattern match multiple sources or indexes.
+1. Specify the time field to use when filtering documents on a time base.<br/>
+   Unless otherwise specified in the source or index properties, `@timestamp` will pop up in the dropdown menu.
+
+   Should one **not** want to use a time filter, select that option from the dropdown menu.<br/>
+   This will make OpenSearch return **all** the data in **all** the indexes that match the index pattern.
+
+1. Select _Create index pattern_.
+
+</details>
+
 ## APIs
 
 OpenSearch clusters offer a REST API.<br/>
@@ -629,25 +893,22 @@ It allows almost everything - changing most settings, modify indexes, check clus
 
 One can interact with the API using every method that can send HTTP requests.<br/>
 One can also send HTTP requests in the Dev Tools console in OpenSearch Dashboards. It uses a simpler syntax to format
-REST requests compared to other tools like `curl`.
+REST requests compared to other tools like [cURL].
 
 OpenSearch returns responses in **flat** JSON format by default.<br/>
 Provide the `pretty` query parameter to obtain response bodies in human-readable form:
 
 ```sh
-curl 'https://localhost:9200/_cluster/health?pretty'
+curl --insecure --user 'admin:someCustomStr0ng!Password' 'https://localhost:9200/_cluster/health?pretty'
+awscurl --service 'es' 'https://search-domain.eu-west-1.es.amazonaws.com/_cluster/health?pretty'
 ```
 
-Requests that contain a body must specify the `Content-Type` header, and provide the request payload:
+Requests that contain a body **must** specify the `Content-Type` header, **and** provide the request's payload:
 
 ```sh
-curl 'https://localhost:9200/students/_search?pretty' \
+curl … \
   -H 'Content-Type: application/json' \
-  -d '{
-    "query": {
-      "match_all": {}
-    }
-  }'
+  -d '{"query":{"match_all":{}}}'
 ```
 
 [REST API reference]
@@ -980,126 +1241,6 @@ DELETE /students
 
   </details>
 
-  <details style="padding-left: 1rem">
-    <summary>Create templates for data streams</summary>
-
-```plaintext
-PUT _index_template/logs-template
-{
-    "data_stream": {},
-    "index_patterns": [
-        "logs-*"
-    ]
-}
-```
-
-```json
-{
-    "acknowledged": true
-}
-```
-
-  </details>
-
-  <details style="padding-left: 1rem">
-    <summary>Explicitly create data streams</summary>
-
-```plaintext
-PUT _data_stream/logs-nginx
-```
-
-```json
-{
-    "acknowledged": true
-}
-```
-
-  </details>
-
-  <details style="padding-left: 1rem">
-    <summary>Get information about data streams</summary>
-
-```plaintext
-GET _data_stream/logs-nginx
-```
-
-```json
-{
-    "data_streams": [
-        {
-            "name": "logs-nginx",
-            "timestamp_field": {
-                "name": "@timestamp"
-            },
-            "indices": [
-                {
-                    "index_name": ".ds-logs-nginx-000002",
-                    "index_uuid": "UjUVr7haTWePKAfDz2q4Xg"
-                },
-                {
-                    "index_name": ".ds-logs-nginx-000004",
-                    "index_uuid": "gi372IUBSDO-pkaj7klLiQ"
-                },
-                {
-                    "index_name": ".ds-logs-nginx-000005",
-                    "index_uuid": "O60_VDzBStCaVGl8Sud2BA"
-                }
-            ],
-            "generation": 5,
-            "status": "GREEN",
-            "template": "logs-template"
-        }
-    ]
-}
-```
-
-  </details>
-
-  <details style="padding-left: 1rem">
-    <summary>Get statistics about data streams</summary>
-
-```plaintext
-GET _data_stream/logs-nginx/_stats
-```
-
-```json
-{
-    "_shards": {
-        "total": 2,
-        "successful": 2,
-        "failed": 0
-    },
-    "data_stream_count": 1,
-    "backing_indices": 1,
-    "total_store_size_bytes": 416,
-    "data_streams": [
-        {
-            "data_stream": "logs-nginx",
-            "backing_indices": 1,
-            "store_size_bytes": 416,
-            "maximum_timestamp": 0
-        }
-    ]
-}
-```
-
-  </details>
-
-  <details style="padding-left: 1rem">
-    <summary>Delete data streams</summary>
-
-```plaintext
-DELETE _data_stream/logs-nginx
-```
-
-```json
-{
-    "acknowledged": true
-}
-```
-
-  </details>
-
 </details>
 
 ## Further readings
@@ -1129,8 +1270,9 @@ DELETE _data_stream/logs-nginx
 - [Stepping up for a truly open source Elasticsearch]
 - [Managing indexes]
 - [Reindex data]
-- [Index templates]
+- [Index templates][documentation  index templates]
 - [OpenSearch Data Streams]
+- [OpenSearch Indexes and Data streams]
 
 <!--
   Reference
@@ -1139,20 +1281,26 @@ DELETE _data_stream/logs-nginx
 
 <!-- In-article sections -->
 [apis]: #apis
+[data streams]: #data-streams
 [hot-warm architecture]: #hot-warm-architecture
+[index patterns]: #index-patterns
+[index templates]: #index-templates
+[indexes]: #indexes
+[ingest data]: #ingest-data
 
 <!-- Knowledge base -->
 [aws' managed opensearch]: cloud%20computing/aws/opensearch.md
+[curl]: curl.md
 
 <!-- Files -->
 <!-- Upstream -->
 [codebase]: https://github.com/opensearch-project
 [creating a cluster]: https://opensearch.org/docs/latest/tuning-your-cluster/
 [data prepper]: https://opensearch.org/docs/latest/data-prepper/
+[documentation  index templates]: https://opensearch.org/docs/latest/im-plugin/index-templates/
 [documentation]: https://opensearch.org/docs/latest/
 [index management]: https://opensearch.org/docs/latest/dashboards/im-dashboards/index-management/
 [index settings]: https://opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index-settings/
-[index templates]: https://opensearch.org/docs/latest/im-plugin/index-templates/
 [managing indexes]: https://opensearch.org/docs/latest/im-plugin/
 [reindex data]: https://opensearch.org/docs/latest/im-plugin/reindex-data/
 [rest api reference]: https://opensearch.org/docs/latest/api-reference/
@@ -1169,6 +1317,7 @@ DELETE _data_stream/logs-nginx
 [lucene]: https://lucene.apache.org/
 [okapi bm25]: https://en.wikipedia.org/wiki/Okapi_BM25
 [opensearch data streams]: https://opster.com/guides/opensearch/opensearch-machine-learning/opensearch-data-streams/
+[opensearch indexes and data streams]: https://stackoverflow.com/questions/75394622/opensearch-indexes-and-data-streams#75494264
 [setting up hot-warm architecture for ism in opensearch]: https://opster.com/guides/opensearch/opensearch-data-architecture/setting-up-hot-warm-architecture-for-ism/
 [stepping up for a truly open source elasticsearch]: https://aws.amazon.com/blogs/opensource/stepping-up-for-a-truly-open-source-elasticsearch/
 [top 14 elk alternatives in 2024]: https://signoz.io/blog/elk-alternatives/

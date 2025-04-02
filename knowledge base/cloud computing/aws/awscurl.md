@@ -22,15 +22,15 @@ brew install 'awscurl'
 
 ```sh
 # Credentials are inferred from the default profile if none is given.
-awscurl -X 'POST' --region 'eu-south-1' --service 'aps' \
-  'https://aps.workspace.url/api/v1/query?query=up'
-awscurl … --profile 'work'
-awscurl … --access_key 'access-key-id' --secret_key 'secret-key'
+awscurl --service 'es' 'https://search-domain.eu-west-1.es.amazonaws.com/_cluster/health?pretty'
+awscurl --region 'eu-south-1' --service 'aps' -X 'POST' 'https://aps.workspace.url/api/v1/query?query=up'
+awscurl --profile 'work' …
+awscurl --access_key 'access-key-id' --secret_key 'secret-key' …
 
 # Set query data out of the URL.
-awscurl … 'https://aps.workspace.url/api/v1/query/api/v1/query' \
+awscurl … --service 'aps' 'https://aps.workspace.url/api/v1/query/api/v1/query' \
   -d 'query=up' -d 'time=1652382537' -d 'stats=all'
-awscurl … 'https://aps.workspace.url/api/v1/query/api/v1/query_range' \
+awscurl … --service 'aps' 'https://aps.workspace.url/api/v1/query/api/v1/query_range' \
   -d 'query=sum+%28rate+%28go_gc_duration_seconds_count%5B1m%5D%29%29' \
   -d 'start=1652382537' -d 'end=1652384705' -d 'step=1000' -d 'stats=all'
 
@@ -46,14 +46,15 @@ docker run --rm -it 'okigan/awscurl' \
 ## Further readings
 
 - [Amazon Web Services]
-- [Github]
+- [Codebase]
 
 ### Sources
 
 - [Using awscurl to query Prometheus-compatible APIs]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
@@ -61,7 +62,7 @@ docker run --rm -it 'okigan/awscurl' \
 [curl]: ../../curl.md
 
 <!-- Upstream -->
-[github]: https://github.com/okigan/awscurl
+[codebase]: https://github.com/okigan/awscurl
 
 <!-- Others -->
 [using awscurl to query prometheus-compatible apis]: https://docs.aws.amazon.com/prometheus/latest/userguide/AMP-compatible-APIs.html
