@@ -1055,6 +1055,51 @@ GET _data_stream/logs-nginx
 
   </details>
 
+  <details style="padding-left: 1rem">
+    <summary>Get statistics about data streams</summary>
+
+```plaintext
+GET _data_stream/logs-nginx/_stats
+```
+
+```json
+{
+    "_shards": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0
+    },
+    "data_stream_count": 1,
+    "backing_indices": 1,
+    "total_store_size_bytes": 416,
+    "data_streams": [
+        {
+            "data_stream": "logs-nginx",
+            "backing_indices": 1,
+            "store_size_bytes": 416,
+            "maximum_timestamp": 0
+        }
+    ]
+}
+```
+
+  </details>
+
+  <details style="padding-left: 1rem">
+    <summary>Delete data streams</summary>
+
+```plaintext
+DELETE _data_stream/logs-nginx
+```
+
+```json
+{
+    "acknowledged": true
+}
+```
+
+  </details>
+
 </details>
 
 ## Further readings
@@ -1063,12 +1108,12 @@ GET _data_stream/logs-nginx
 - [Codebase]
 - [Documentation]
 - [Lucene]
+- [REST API reference]
 - [Okapi BM25]
 - [`fsync`][fsync]
-- [AWS' managed OpenSearch] offering
+- [AWS' managed OpenSearch]
 - [Setting up Hot-Warm architecture for ISM in OpenSearch]
 - [Data Prepper]
-- [REST API reference]
 
 ### Sources
 
@@ -1085,6 +1130,7 @@ GET _data_stream/logs-nginx
 - [Managing indexes]
 - [Reindex data]
 - [Index templates]
+- [OpenSearch Data Streams]
 
 <!--
   Reference
@@ -1122,6 +1168,7 @@ GET _data_stream/logs-nginx
 [index templates in opensearch - how to use composable templates]: https://opster.com/guides/opensearch/opensearch-data-architecture/index-templating-in-opensearch-how-to-use-composable-templates/
 [lucene]: https://lucene.apache.org/
 [okapi bm25]: https://en.wikipedia.org/wiki/Okapi_BM25
+[opensearch data streams]: https://opster.com/guides/opensearch/opensearch-machine-learning/opensearch-data-streams/
 [setting up hot-warm architecture for ism in opensearch]: https://opster.com/guides/opensearch/opensearch-data-architecture/setting-up-hot-warm-architecture-for-ism/
 [stepping up for a truly open source elasticsearch]: https://aws.amazon.com/blogs/opensource/stepping-up-for-a-truly-open-source-elasticsearch/
 [top 14 elk alternatives in 2024]: https://signoz.io/blog/elk-alternatives/
