@@ -53,23 +53,23 @@ gopass create
 gopass new
 
 # Insert new entries.
-gopass insert 'path/to/secret'
+gopass insert 'path/to/entry'
 gopass insert -m …
 
 # Create new entries with generated passwords.
-gopass generate 'path/to/secret'
-gopass generate -g 'xkcd' --lang 'en' 'path/to/secret'
+gopass generate 'path/to/entry'
+gopass generate -g 'xkcd' --lang 'en' 'path/to/entry'
 
 # Copy secrets' password to the clipboard.
 # Do *not* print secrets out.
-gopass show -c 'path/to/secret'
+gopass show -c 'path/to/entry'
 
 # Edit new or existing secrets.
-gopass edit 'path/to/secret'
+gopass edit 'path/to/entry'
 gopass set …
 
 # Delete entries.
-gopass delete 'path/to/secret'
+gopass delete 'path/to/entry'
 gopass remove -r …
 gopass rm …
 
@@ -78,23 +78,23 @@ gopass copy 'from' 'to'
 gopass cp …
 
 # Move entries.
-gopass move 'from' 'to'
+gopass move 'path/to/old/entry' 'path/to/new/entry'
 gopass mv …
 
 # Link entries.
-gopass link 'from' 'to'
-gopass ln …
+gopass link 'path/to/linked/entry' 'path/to/linking/entry'
+gopass ln 'stackexchange.com/me@example.org' 'stackoverflow.com/me@example.org'
 
 # Copy files.
-gopass fscopy '/path/to.file' 'path/to/secret'
-gopass fscopy 'path/to/secret' '/path/to.file'
+gopass fscopy '/path/to.file' 'path/to/entry'
+gopass fscopy 'path/to/entry' '/path/to.file'
 
 # Copy files and remove the source.
-gopass fsmove '/path/to.file' 'path/to/secret'
-gopass fsmove 'path/to/secret' '/path/to.file'
+gopass fsmove '/path/to.file' 'path/to/entry'
+gopass fsmove 'path/to/entry' '/path/to.file'
 
 # Get sha256sum of secrets.
-gopass sum 'path/to/secret'
+gopass sum 'path/to/entry'
 gopass sha …
 gopass sha265 …
 
@@ -140,7 +140,7 @@ gopass templates create …
 gopass templates new …
 
 # Use templates to create new secrets.
-gopass edit -c 'path/to/folder/with/template'/'secret'
+gopass edit -c 'path/to/folder/with/template'/'entry'
 
 # Move templates.
 mv 'path/to/gopass/repo/path/to/folder/with/template/.pass-template' 'path/to/gopass/repo/path/to/destination'

@@ -1,5 +1,8 @@
 #!/usr/bin/env fish
 
+# Link secrets
+gopass ln 'stackexchange.com/me@example.org' 'stackoverflow.com/me@example.org'
+
 # List templates
 gopass templates
 
