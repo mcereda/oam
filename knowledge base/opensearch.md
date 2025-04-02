@@ -320,34 +320,34 @@ Just use the Docker composition.
 ```plaintext
 PUT /students/_doc/1
 {
-  "name": "John Doe",
-  "gpa": 3.89,
-  "grad_year": 2022
+    "name": "John Doe",
+    "gpa": 3.89,
+    "grad_year": 2022
 }
 
 GET /students/_mapping
 
 GET /students/_search
 {
-  "query": {
-    "match_all": {}
-  }
+    "query": {
+        "match_all": {}
+    }
 }
 
 PUT /students/_doc/1
 {
-  "name": "John Doe",
-  "gpa": 3.91,
-  "grad_year": 2022,
-  "address": "123 Main St."
+    "name": "John Doe",
+    "gpa": 3.91,
+    "grad_year": 2022,
+    "address": "123 Main St."
 }
 
 POST /students/_update/1/
 {
-  "doc": {
-    "gpa": 3.92,
-    "address": "123 Main St."
-  }
+    "doc": {
+        "gpa": 3.92,
+        "address": "123 Main St."
+    }
 }
 
 DELETE /students/_doc/1
@@ -356,26 +356,26 @@ DELETE /students
 
 PUT /students
 {
-  "settings": {
-    "index.number_of_shards": 1
-  },
-  "mappings": {
-    "properties": {
-      "name": {
-        "type": "text"
-      },
-      "grad_year": {
-        "type": "date"
-      }
+    "settings": {
+        "index.number_of_shards": 1
+    },
+    "mappings": {
+        "properties": {
+            "name": {
+                "type": "text"
+            },
+            "grad_year": {
+                "type": "date"
+            }
+        }
     }
-  }
 }
 
 PUT /students/_doc/1
 {
-  "name": "John Doe",
-  "gpa": 3.89,
-  "grad_year": 2022
+    "name": "John Doe",
+    "gpa": 3.89,
+    "grad_year": 2022
 }
 
 GET /students/_mapping
@@ -455,42 +455,42 @@ POST _bulk
 
 ```json
 {
-  "took": 7,
-  "errors": false,
-  "items": [
-    {
-      "create": {
-        "_index": "students",
-        "_id": "2",
-        "_version": 1,
-        "result": "created",
-        "_shards": {
-          "total": 2,
-          "successful": 2,
-          "failed": 0
+    "took": 7,
+    "errors": false,
+    "items": [
+        {
+            "create": {
+                "_index": "students",
+                "_id": "2",
+                "_version": 1,
+                "result": "created",
+                "_shards": {
+                    "total": 2,
+                    "successful": 2,
+                    "failed": 0
+                },
+                "_seq_no": 1,
+                "_primary_term": 1,
+                "status": 201
+            }
         },
-        "_seq_no": 1,
-        "_primary_term": 1,
-        "status": 201
-      }
-    },
-    {
-      "create": {
-        "_index": "students",
-        "_id": "3",
-        "_version": 1,
-        "result": "created",
-        "_shards": {
-          "total": 2,
-          "successful": 2,
-          "failed": 0
-        },
-        "_seq_no": 2,
-        "_primary_term": 1,
-        "status": 201
-      }
-    }
-  ]
+        {
+            "create": {
+                "_index": "students",
+                "_id": "3",
+                "_version": 1,
+                "result": "created",
+                "_shards": {
+                    "total": 2,
+                    "successful": 2,
+                    "failed": 0
+                },
+                "_seq_no": 2,
+                "_primary_term": 1,
+                "status": 201
+            }
+        }
+    ]
 }
 ```
 
@@ -530,27 +530,33 @@ ISM policies allow to automatically handle index rollover or deletion.
 
 <details>
 
-1. Create an index template that configures a set of indexes as a data stream.
+1. Create an index template containing `index_pattern: []` and `data_stream: {}`.<br/>
+   This template will configure all indexes matching the defined patterns as a data stream.
 
    <details style="padding: 0 0 1em 1em">
 
-   The `data_stream` object indicates that the template is a data stream, and not just a regular index template.<br/>
-   The `index_patterns` list matches the name of the data stream.
+   Specifying the `data_stream` object causes the template to create data streams, and not just regular indexes.
 
    ```plaintext
    PUT _index_template/logs-template
    {
        "data_stream": {},
        "index_patterns": [
-           "my-data-stream",
            "logs-*"
-       ],
-       "priority": 100
+       ]
    }
    ```
 
-   Each ingested document must have a `@timestamp` field.<br/>
-   One can define one's own custom timestamp field as a property in the `data_stream` object.
+   ```json
+   {
+       "acknowledged": true
+   }
+   ```
+
+   From here on, all indices created with a name starting for `logs-` will be data streams instead.
+
+   By default, documents need to include a `@timestamp` field.<br/>
+   One can define one's own custom timestamp field as a property of the `data_stream` object to customize this.
 
    ```diff
    -"data_stream": {},
@@ -559,35 +565,56 @@ ISM policies allow to automatically handle index rollover or deletion.
    +        "name": "request_time"
    +    }
    +},
-
-   -"index_patterns": [ … ],
-   +"index_patterns": "logs-nginx",
    ```
 
    One can also add index mappings and other settings just as for regular index templates.
 
    </details>
 
-1. Create a data stream.
+1. \[optional] Explicitly create the data stream.<br/>
+   Since indexes are created with the first document they ingest, if they do not exist already, the data stream can be
+   created just by starting ingesting documents for the indexes matching its patterns.
 
-   <details>
-
-   The data stream API initializes the first backing index:
+   <details style="padding: 0 0 1em 1em">
 
    ```plaintext
-   PUT _data_stream/logs-redis
-   PUT _data_stream/logs-nginx
+   PUT _data_stream/logs-example
    ```
 
-   You can also directly start ingesting data without creating a data stream.
+   ```json
+   {
+       "acknowledged": true
+   }
+   ```
 
-   Because we have a matching index template with a data_stream object, OpenSearch automatically creates the data stream:
+   </details>
+
+1. Start indexing documents.<br/>
+   If not already existing, the data stream is created together with the index, with the first document it ingests.
+
+   <details style="padding: 0 0 1em 1em">
 
    ```plaintext
-   POST logs-staging/_doc
+   POST logs-example/_doc
    {
-     "message": "login attempt failed",
-     "@timestamp": "2013-03-01T00:00:00"
+       "message": "login attempt failed",
+       "@timestamp": "2013-03-01T00:00:00"
+   }
+   ```
+
+   ```json
+   {
+       "_index": ".ds-logs-example-000001",
+       "_id": "T_Zq9ZUBf2S2KQCqEc-d",
+       "_version": 1,
+       "result": "created",
+       "_shards": {
+           "total": 2,
+           "successful": 1,
+           "failed": 0
+       },
+       "_seq_no": 0,
+       "_primary_term": 1
    }
    ```
 
@@ -626,7 +653,12 @@ curl 'https://localhost:9200/students/_search?pretty' \
 [REST API reference]
 
 <details>
-  <summary>Get clusters' status</summary>
+  <summary>Cluster</summary>
+
+`/_cluster` endpoint.
+
+  <details style="padding-left: 1rem">
+    <summary>Get clusters' status</summary>
 
 ```plaintext
 GET _cluster/health
@@ -654,19 +686,24 @@ GET _cluster/health
 }
 ```
 
+  </details>
+
 </details>
 
 <details>
-  <summary>Index documents</summary>
+  <summary>Documents</summary>
+
+  <details style="padding-left: 1rem">
+    <summary>Index documents</summary>
 
 Add a JSON document to an OpenSearch index by sending a `PUT` HTTP request to the `/indexName/_doc` endpoint.
 
 ```plaintext
 PUT /students/_doc/1
 {
-  "name": "John Doe",
-  "gpa": 3.89,
-  "grad_year": 2022
+    "name": "John Doe",
+    "gpa": 3.89,
+    "grad_year": 2022
 }
 ```
 
@@ -676,61 +713,24 @@ ingested document in that index.
 
 ```json
 {
-  "_index": "students",
-  "_id": "1",
-  "_version": 1,
-  "result": "created",
-  "_shards": {
-    "total": 2,
-    "successful": 2,
-    "failed": 0
-  },
-  "_seq_no": 0,
-  "_primary_term": 1
+    "_index": "students",
+    "_id": "1",
+    "_version": 1,
+    "result": "created",
+    "_shards": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0
+    },
+    "_seq_no": 0,
+    "_primary_term": 1
 }
 ```
 
-</details>
+  </details>
 
-<details>
-  <summary>View the inferred field types in indexes</summary>
-
-Send `GET` requests to the `_mapping` endpoint:
-
-```plaintext
-GET /students/_mapping
-```
-
-```json
-{
-  "students": {
-    "mappings": {
-      "properties": {
-        "gpa": {
-          "type": "float"
-        },
-        "grad_year": {
-          "type": "long"
-        },
-        "name": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-  <summary>Search for documents</summary>
+  <details style="padding-left: 1rem">
+    <summary>Search for documents</summary>
 
 Specify the index to search for, plus a query that will be used to match documents.<br/>
 The simplest query is the `match_all` query, which matches **all** documents in an index. If no search parameters are
@@ -741,58 +741,58 @@ GET /students/_search
 
 GET /students/_search
 {
-  "query": {
-    "match_all": {}
-  }
+    "query": {
+        "match_all": {}
+    }
 }
 ```
 
 ```json
 {
-  "took": 11,
-  "timed_out": false,
-  "_shards": {
-    "total": 1,
-    "successful": 1,
-    "skipped": 0,
-    "failed": 0
-  },
-  "hits": {
-    "total": {
-      "value": 1,
-      "relation": "eq"
+    "took": 11,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
     },
-    "max_score": 1,
-    "hits": [
-      {
-        "_index": "students",
-        "_id": "1",
-        "_score": 1,
-        "_source": {
-          "name": "John Doe",
-          "gpa": 3.89,
-          "grad_year": 2022
-        }
-      }
-    ]
-  }
+    "hits": {
+        "total": {
+            "value": 1,
+            "relation": "eq"
+        },
+        "max_score": 1,
+        "hits": [
+            {
+                "_index": "students",
+                "_id": "1",
+                "_score": 1,
+                "_source": {
+                    "name": "John Doe",
+                    "gpa": 3.89,
+                    "grad_year": 2022
+                }
+            }
+        ]
+    }
 }
 ```
 
-</details>
+  </details>
 
-<details>
-  <summary>Update documents</summary>
+  <details style="padding-left: 1rem">
+    <summary>Update documents</summary>
 
 Completely, by re-indexing them:
 
 ```plaintext
 PUT /students/_doc/1
 {
-  "name": "John Doe",
-  "gpa": 3.91,
-  "grad_year": 2022,
-  "address": "123 Main St."
+    "name": "John Doe",
+    "gpa": 3.91,
+    "grad_year": 2022,
+    "address": "123 Main St."
 }
 ```
 
@@ -801,33 +801,33 @@ Only parts, by calling the `_update` endpoint:
 ```plaintext
 POST /students/_update/1/
 {
-  "doc": {
-    "gpa": 3.91,
-    "address": "123 Main St."
-  }
+    "doc": {
+        "gpa": 3.91,
+        "address": "123 Main St."
+    }
 }
 ```
 
 ```json
 {
-  "_index": "students",
-  "_id": "1",
-  "_version": 2,
-  "result": "updated",
-  "_shards": {
-    "total": 2,
-    "successful": 2,
-    "failed": 0
-  },
-  "_seq_no": 1,
-  "_primary_term": 1
+    "_index": "students",
+    "_id": "1",
+    "_version": 2,
+    "result": "updated",
+    "_shards": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0
+    },
+    "_seq_no": 1,
+    "_primary_term": 1
 }
 ```
 
-</details>
+  </details>
 
-<details>
-  <summary>Delete documents</summary>
+  <details style="padding-left: 1rem">
+    <summary>Delete documents</summary>
 
 ```plaintext
 DELETE /students/_doc/1
@@ -835,56 +835,98 @@ DELETE /students/_doc/1
 
 ```json
 {
-  "_index": "students",
-  "_id": "1",
-  "_version": 4,
-  "result": "deleted",
-  "_shards": {
-    "total": 2,
-    "successful": 2,
-    "failed": 0
-  },
-  "_seq_no": 3,
-  "_primary_term": 1
+    "_index": "students",
+    "_id": "1",
+    "_version": 4,
+    "result": "deleted",
+    "_shards": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0
+    },
+    "_seq_no": 3,
+    "_primary_term": 1
 }
 ```
+
+  </details>
 
 </details>
 
 <details>
-  <summary>Create indexes and specify their mappings</summary>
+  <summary>Indexes</summary>
+
+  <details style="padding-left: 1rem">
+    <summary>View the inferred field types in indexes</summary>
+
+Send `GET` requests to the `_mapping` endpoint:
+
+```plaintext
+GET /students/_mapping
+```
+
+```json
+{
+    "students": {
+        "mappings": {
+            "properties": {
+                "gpa": {
+                    "type": "float"
+                },
+                "grad_year": {
+                    "type": "long"
+                },
+                "name": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+  </details>
+
+  <details style="padding-left: 1rem">
+    <summary>Create indexes specifying their mappings</summary>
 
 ```plaintext
 PUT /students
 {
-  "settings": {
-    "index.number_of_shards": 1
-  },
-  "mappings": {
-    "properties": {
-      "name": {
-        "type": "text"
-      },
-      "grad_year": {
-        "type": "date"
-      }
+    "settings": {
+        "index.number_of_shards": 1
+    },
+    "mappings": {
+        "properties": {
+            "name": {
+                "type": "text"
+            },
+            "grad_year": {
+                "type": "date"
+            }
+        }
     }
-  }
 }
 ```
 
 ```json
 {
-  "acknowledged": true,
-  "shards_acknowledged": true,
-  "index": "students"
+    "acknowledged": true,
+    "shards_acknowledged": true,
+    "index": "students"
 }
 ```
 
-</details>
+  </details>
 
-<details>
-  <summary>Close indexes</summary>
+  <details style="padding-left: 1rem">
+    <summary>Close indexes</summary>
 
 Disables read and write operations on the impacted indexes.
 
@@ -892,10 +934,10 @@ Disables read and write operations on the impacted indexes.
 POST /prometheus-logs-20231205/_close
 ```
 
-</details>
+  </details>
 
-<details>
-  <summary>(Re)Open closed indexes</summary>
+  <details style="padding-left: 1rem">
+    <summary>(Re)Open closed indexes</summary>
 
 Enables read and write operations on the impacted indexes.
 
@@ -903,28 +945,28 @@ Enables read and write operations on the impacted indexes.
 POST /prometheus-logs-20231205/_open
 ```
 
-</details>
+  </details>
 
-<details>
-  <summary>Update indexes' settings</summary>
+  <details style="padding-left: 1rem">
+    <summary>Update indexes' settings</summary>
 
 _Static_ settings can only be updated on **closed** indexes.
 
 ```plaintext
 PUT /prometheus-logs-20231205/_settings
 {
-  "index": {
-    "codec": "zstd_no_dict",
-    "codec.compression_level": 3,
-    "refresh_interval": "2s"
-  }
+    "index": {
+        "codec": "zstd_no_dict",
+        "codec.compression_level": 3,
+        "refresh_interval": "2s"
+    }
 }
 ```
 
-</details>
+  </details>
 
-<details>
-  <summary>Delete indexes</summary>
+  <details style="padding-left: 1rem">
+    <summary>Delete indexes</summary>
 
 ```plaintext
 DELETE /students
@@ -932,9 +974,86 @@ DELETE /students
 
 ```json
 {
-  "acknowledged": true
+    "acknowledged": true
 }
 ```
+
+  </details>
+
+  <details style="padding-left: 1rem">
+    <summary>Create templates for data streams</summary>
+
+```plaintext
+PUT _index_template/logs-template
+{
+    "data_stream": {},
+    "index_patterns": [
+        "logs-*"
+    ]
+}
+```
+
+```json
+{
+    "acknowledged": true
+}
+```
+
+  </details>
+
+  <details style="padding-left: 1rem">
+    <summary>Explicitly create data streams</summary>
+
+```plaintext
+PUT _data_stream/logs-nginx
+```
+
+```json
+{
+    "acknowledged": true
+}
+```
+
+  </details>
+
+  <details style="padding-left: 1rem">
+    <summary>Get information about data streams</summary>
+
+```plaintext
+GET _data_stream/logs-nginx
+```
+
+```json
+{
+    "data_streams": [
+        {
+            "name": "logs-nginx",
+            "timestamp_field": {
+                "name": "@timestamp"
+            },
+            "indices": [
+                {
+                    "index_name": ".ds-logs-nginx-000002",
+                    "index_uuid": "UjUVr7haTWePKAfDz2q4Xg"
+                },
+                {
+                    "index_name": ".ds-logs-nginx-000004",
+                    "index_uuid": "gi372IUBSDO-pkaj7klLiQ"
+                },
+                {
+                    "index_name": ".ds-logs-nginx-000005",
+                    "index_uuid": "O60_VDzBStCaVGl8Sud2BA"
+                }
+            ],
+            "generation": 5,
+            "status": "GREEN",
+            "template": "logs-template"
+        }
+    ]
+}
+```
+
+  </details>
 
 </details>
 
