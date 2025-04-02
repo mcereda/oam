@@ -6,41 +6,45 @@ Makes it easy to ingest, search, visualize, and analyze data.
 
 Use cases: application search, log analytics, data observability, data ingestion, others.
 
-1. [Concepts](#concepts)
-   1. [Update operations lifecycle](#update-operations-lifecycle)
-   1. [Translog](#translog)
-   1. [Refresh operations](#refresh-operations)
-   1. [Flush operations](#flush-operations)
-   1. [Merge operations](#merge-operations)
-   1. [Node types](#node-types)
-   1. [Indexes](#indexes)
-1. [Requirements](#requirements)
-1. [Quickstart](#quickstart)
-1. [Tuning](#tuning)
-1. [The split brain problem](#the-split-brain-problem)
+1. [TL;DR](#tldr)
+1. [Node types](#node-types)
+1. [Indexes](#indexes)
+1. [Setup](#setup)
+   1. [The split brain problem](#the-split-brain-problem)
+   1. [Tuning](#tuning)
+   1. [Hot-warm architecture](#hot-warm-architecture)
+1. [Index templates](#index-templates)
+   1. [Composable index templates](#composable-index-templates)
+1. [Ingest data](#ingest-data)
+   1. [Bulk indexing](#bulk-indexing)
+1. [Re-index data](#re-index-data)
+1. [Data streams](#data-streams)
 1. [APIs](#apis)
-1. [Hot-warm architecture](#hot-warm-architecture)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
-## Concepts
+## TL;DR
 
 _Documents_ are the unit storing information, consisting of text or structured data.<br/>
-Documents are stored in the JSON format and returned when related information is searched for.
+Documents are stored in the JSON format, and returned when related information is searched for.<br/>
+Documents are immutable. However, they can be updated by retrieving them, updating the information in them, and
+re-indexing them using the same document IDs.
 
 _Indexes_ are collections of documents.<br/>
 Their contents are queried when information is searched for.
 
 _Nodes_ are servers that store data and process search requests.<br/>
-OpenSearch is designed to be a distributed search engine running on one or more nodes.
+OpenSearch is designed to be running on one or more nodes.
 
-_Clusters_ are collections of nodes allowing for different responsibilities to be taken on by different node types.<br/>
-A _cluster manager node_ is **elected** in each and every cluster. It orchestrates cluster-level operations such as
-creating indexes.
+Multiple nodes can be aggregated into _Clusters_.<br/>
+Clusters allow nodes to specialize for different responsibilities depending on their types.
+
+Each and every cluster **elects** a _cluster manager node_ is **elected**.<br/>
+Manager nodes orchestrate cluster-level operations (e.g., creating indexes).
 
 Nodes in clusters communicate with each other.<br/>
-When a request is routed to any node, it sends requests to other nodes, gathers their responses, and returns the final
-response.
+When a request is routed to any node, that node sends requests to the others, gathers their responses, and returns the
+final response.
 
 Indexes are split into _shards_, each of them storing a subset of all documents in an index.<br/>
 Shards are evenly distributed across nodes in a cluster.<br/>
@@ -59,7 +63,8 @@ Indexes use a data structure called an _inverted index_. It maps words to the do
 When searching, OpenSearch matches the words in the query to the words in the documents. Each document is assigned a
 _relevance score_ indicating how well the document matched the query.
 
-Individual words in a search query are called _search terms_, and each is scored according to the following rules:
+Individual words in a search query are called _search terms_.<br/>
+Each term is scored according to the following rules:
 
 - Search terms that occur more frequently in a document will tend to be scored **higher**.<br/>
   This is the _term frequency_ component of the score.
@@ -71,13 +76,11 @@ Individual words in a search query are called _search terms_, and each is scored
 OpenSearch uses the [Okapi BM25] ranking algorithm to calculate document relevance scores, then returns the results
 sorted by relevance.
 
-### Update operations lifecycle
-
-Update operations consist of the following steps:
+_Update operations_ consist of the following steps:
 
 1. An update is received by a primary shard.
-1. The update is written to the shard's transaction log ([_translog_][translog]).
-1. The [translog] is flushed to disk and followed by an `fsync` **before** the update is acknowledged to guarantee
+1. The update is written to the shard's transaction log (_translog_).
+1. The translog is flushed to disk and followed by an `fsync` **before** the update is acknowledged to guarantee
    durability.
 1. The update is passed to the [Lucene] index writer, which adds it to an **in-memory** buffer.
 1. On a refresh operation, the Lucene index writer flushes the in-memory buffers to disk.<br/>
@@ -88,40 +91,31 @@ Update operations consist of the following steps:
    Because the segment files are a durable representation of the updates, the translog is no longer needed to provide
    durability. The updates can be purged from the translog.
 
-### Translog
+Transition logs make updates durable.<br/>
+_Indexing_ or _bulk_ calls respond once the documents have been written to the translog and the translog is flushed to
+disk. Updates will **not** be visible to search requests until after a _refresh operation_ takes place.
 
-Transition log making updates durable.
+Refresh operations are performed periodically to write the documents from the in-memory [Lucene] index to files.<br/>
+These files are **not** guaranteed to be durable, because **no** _flush operation_ is **yet** performed at this
+point.
 
-Indexing or bulk calls respond when the documents have been written to the translog and the translog is flushed to
-disk.<br/>
-Updates will **not** be visible to search requests until after a [refresh operation][refresh operations] takes place.
+A refresh operation makes documents available for search.
 
-### Refresh operations
-
-Performed periodically to write the documents from the in-memory [Lucene] index to files.<br/>
-These files are **not** guaranteed to be durable, because an `fsync` is **not** performed at this point.
-
-A refresh makes documents available for search.
-
-### Flush operations
-
-Persist the files to disk using `fsync`, ensuring durability.<br/>
+Flush operations persist files to disk using `fsync`, ensuring durability.<br/>
 Flushing ensures that the data stored only in the translog is recorded in the [Lucene] index.
 
 Flushes are performed as needed to ensure that the translog does not grow too large.
 
-### Merge operations
-
 Shards are [Lucene] indexes, which consist of segments (or segment files).<br/>
 Segments store the indexed data and are **immutable**.
 
-Smaller segments are merged into larger ones periodically to reduce the overall number of segments on each shard, free
-up disk space, and improve search performance.
+_Merge operations_ merge smaller segments into larger ones periodically.<br/>
+This reduces the overall number of segments on each shard, frees up disk space, and improves search performance.
 
-Eventually, segments reach a maximum size and are no longer merged into larger segments.<br/>
-Merge policies specify the maximum size and how often merges are performed.
+Eventually, segments reach a maximum allowed size and are no longer merged into larger segments.<br/>
+_Merge policies_ specify the segments' maximum size and how often merge operations are performed.
 
-### Node types
+## Node types
 
 | Node type                | Description                                                                                                                                                                                                                                                                                               | Best practices for production                                                                                                                                                                                                  |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -144,23 +138,66 @@ After assessing all requirements, it is suggested to use benchmark testing tools
 Provision a small sample cluster and run tests with varying workloads and configurations. Compare and analyze the system
 and query metrics for these tests improve upon the architecture.
 
-### Indexes
+## Indexes
 
-Data is indexed using the REST API.
+Refer [Managing indexes].
 
-There are two indexing APIs: the index API and the `_bulk` API.<br/>
-The Index API adds documents individually as they arrive, so it is intended for situations in which new data arrives
-incrementally (i.e., customer orders from a small business).<br/>
-The `_bulk` API takes in one file lumping requests together, offering superior performance for situations in which the
-flow of data is less frequent and can be aggregated in a generated file.<br/>
-Enormous documents should still be indexed individually.
+Before one can search through one's data, documents must be indexed.<br/>
+Indexing is how search engines organize data for fast retrieval. The resulting structure is called _index_.
 
-When indexing documents, the document's `_id` must be **up to** 512 bytes in size.
+Within an index, OpenSearch identifies each document using a **unique** _document ID_.
+
+Data is indexed using the [APIs].<br/>
+There are two _indexing APIs_:
+
+- The _Index API_, which adds documents individually as they arrive.<br/>
+  It is intended for situations in which new data arrives incrementally (i.e., logs, or customer orders from a small
+  business).
+- The `_bulk` API, which takes in one file lumping requests together.<br/>
+  It offers superior performance for situations where the flow of data is _less_ frequent, and/or can be aggregated in a
+  generated file.
+
+  Enormous documents are still better indexed **individually**.
+
+When indexing documents, the document's `_id` must be **up to** 512 bytes in size.<br/>
+Should one **not** provide an ID for the document, OpenSearch generates a document ID itself.
+
+Upon receiving indexing requests, OpenSearch:
+
+1. Creates an index if it does not exist already.
+1. Stores the ingested document in that index.
+
+Indexes must follow these naming restrictions:
+
+- All letters must be **lowercase**.
+- Index names cannot begin with underscores (`_`) or hyphens (`-`).
+- Index names cannot contain spaces, commas, or the following characters: `:`, `"`, `*`, `+`, `/`, `\`, `|`, `?`, `#`,
+  `>`, or `<`.
+
+Indexes are configured with _mappings_ and _settings_:
+
+- Mappings are collections of fields and the types of those fields.
+- Settings include index data (i.e., the index name, creation date, and number of shards).
+
+One can specify both mappings and settings in a single request.
+
+Unless an index's type mapping is explicitly defined, OpenSearch infers the field types from the JSON types submitted in
+the documents for the index (_dynamic mapping_).
+
+Fields mapped to `text` are analyzed (lowercased and split into terms) and can be used for full-text search.<br/>
+Fields mapped to `keyword` are used for exact term search.
+
+Numbers are usually dynamically mapped to `long`.<br/>
+Should one want to map them to the `date` type instead, one **will** need to delete the index, then recreate it by
+explicitly specifying the mappings.
 
 _Static_ index settings can only be updated on **closed** indexes.<br/>
 _Dynamic_ index settings can be updated at any time through the [APIs].
 
-## Requirements
+## Setup
+
+<details>
+  <summary>Requirements</summary>
 
 | Port number | Component                                                                        |
 | ----------- | -------------------------------------------------------------------------------- |
@@ -172,33 +209,193 @@ _Dynamic_ index settings can be updated at any time through the [APIs].
 
 For Linux hosts:
 
-- `vm.max_map_count` must be set to at least 262144.
+- `vm.max_map_count` must be set to 262144 or higher.
 
-## Quickstart
+</details>
 
-Use docker compose.
+<details>
+  <summary>Quickstart</summary>
 
-1. Disable memory paging and swapping **on Linux hosts** to improve performance and increase the number of maps
-   available to the service:
+Just use the Docker composition.
+
+1. Disable memory paging and swapping to improve performance.
+
+   <details style="padding: 0 0 1em 1em">
+     <summary>Linux</summary>
 
    ```sh
    sudo swapoff -a
-   sudo echo '262144' > '/proc/sys/vm/max_map_count'
    ```
+
+   </details>
+
+1. \[on Linux hosts] Increase the number of maps available to the service.
+
+   <details style="padding: 0 0 1em 1em">
+     <summary>Linux</summary>
+
+   ```sh
+   # temporarily
+   sudo echo '262144' > '/proc/sys/vm/max_map_count'
+
+   # permanently
+   echo 'vm.max_map_count=262144' | sudo tee -a '/etc/sysctl.conf'
+   sudo sysctl -p
+   ```
+
+   </details>
 
 1. Get the sample compose file:
 
    ```sh
-   curl -O 'https://raw.githubusercontent.com/opensearch-project/documentation-website/2.14/assets/examples/docker-compose.yml'
+   # pick one
+   curl -O 'https://raw.githubusercontent.com/opensearch-project/documentation-website/2.19/assets/examples/docker-compose.yml'
+   wget 'https://raw.githubusercontent.com/opensearch-project/documentation-website/2.19/assets/examples/docker-compose.yml'
    ```
 
-1. Adjust the compose file and run it:
+1. Adjust the compose file as you see fit, then run it.
+
+   The setup requires a **strong** password to be configured, or it will quit midway.<br/>
+   At least 8 characters of which 1 uppercase, 1 lowercase, 1 digit and 1 special.
 
    ```sh
-   docker compose up -d
+   OPENSEARCH_INITIAL_ADMIN_PASSWORD='someCustomStr0ng!Password' docker compose up -d
    ```
 
-## Tuning
+   <details style="padding: 0 0 1em 1em">
+     <summary>Confirm that the containers are running</summary>
+
+   ```sh
+   $ docker compose ps
+   NAME                    COMMAND                  SERVICE                 STATUS    PORTS
+   opensearch-dashboards   "./opensearch-dashbo…"   opensearch-dashboards   running   0.0.0.0:5601->5601/tcp
+   opensearch-node1        "./opensearch-docker…"   opensearch-node1        running   0.0.0.0:9200->9200/tcp, 9300/tcp, 0.0.0.0:9600->9600/tcp, 9650/tcp
+   opensearch-node2        "./opensearch-docker…"   opensearch-node2        running   9200/tcp, 9300/tcp, 9600/tcp, 9650/tcp
+   ```
+
+   </details>
+
+1. Query the APIs to verify that the service is running.<br/>
+   Disable hostname checking, since the default security configuration uses demo certificates.
+
+   <details style="padding: 0 0 1em 1em">
+
+   ```sh
+   curl 'https://localhost:9200' -ku 'admin:someCustomStr0ng!Password'
+   ```
+
+   ```json
+   {
+       "name" : "opensearch-node1",
+       "cluster_name" : "opensearch-cluster",
+       "cluster_uuid" : "Cp2VzzkjR4eqlzK5H5ERJw",
+       "version" : {
+           "distribution" : "opensearch",
+           "number" : "2.19.1",
+           "build_type" : "tar",
+           "build_hash" : "2e4741fb45d1b150aaeeadf66d41445b23ff5982",
+           "build_date" : "2025-02-27T01:22:24.665339607Z",
+           "build_snapshot" : false,
+           "lucene_version" : "9.12.1",
+           "minimum_wire_compatibility_version" : "7.10.0",
+           "minimum_index_compatibility_version" : "7.0.0"
+       },
+       "tagline" : "The OpenSearch Project: https://opensearch.org/"
+   }
+   ```
+
+   </details>
+
+1. Explore OpenSearch Dashboards by opening `http://localhost:5601/` in a web browser from the same host that is running
+   the OpenSearch cluster.<br/>
+   The default username is `admin`, and the password is the one configured in the steps above.
+
+1. Continue interacting with the cluster from the Dashboards, or using the [APIs] or clients.
+
+</details>
+
+<details>
+  <summary>Tutorial requests</summary>
+
+```plaintext
+PUT /students/_doc/1
+{
+  "name": "John Doe",
+  "gpa": 3.89,
+  "grad_year": 2022
+}
+
+GET /students/_mapping
+
+GET /students/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+PUT /students/_doc/1
+{
+  "name": "John Doe",
+  "gpa": 3.91,
+  "grad_year": 2022,
+  "address": "123 Main St."
+}
+
+POST /students/_update/1/
+{
+  "doc": {
+    "gpa": 3.92,
+    "address": "123 Main St."
+  }
+}
+
+DELETE /students/_doc/1
+
+DELETE /students
+
+PUT /students
+{
+  "settings": {
+    "index.number_of_shards": 1
+  },
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text"
+      },
+      "grad_year": {
+        "type": "date"
+      }
+    }
+  }
+}
+
+PUT /students/_doc/1
+{
+  "name": "John Doe",
+  "gpa": 3.89,
+  "grad_year": 2022
+}
+
+GET /students/_mapping
+
+POST _bulk
+{ "create": { "_index": "students", "_id": "2" } }
+{ "name": "Jonathan Powers", "gpa": 3.85, "grad_year": 2025 }
+{ "create": { "_index": "students", "_id": "3" } }
+{ "name": "Jane Doe", "gpa": 3.52, "grad_year": 2024 }
+```
+
+</details>
+
+### The split brain problem
+
+TODO
+
+Refer [Elasticsearch Split Brain] and [Avoiding the Elasticsearch split brain problem, and how to recover].
+
+### Tuning
 
 - Disable swapping.<br/>
   If kept enabled, it can **dramatically decrease** performance and stability.
@@ -210,48 +407,536 @@ Use docker compose.
   Recommended to use **half** of the host's RAM.
 - Set up a [hot-warm architecture].
 
-## The split brain problem
+### Hot-warm architecture
 
-TODO
+Refer [Set up a hot-warm architecture].
 
-Refer [Elasticsearch Split Brain] and [Avoiding the Elasticsearch split brain problem, and how to recover].
+## Index templates
+
+Refer [Index templates].
+
+Index templates allow to initialize new indexes with predefined mappings and settings.
+
+### Composable index templates
+
+Composable index templates can be used to overcome challenges from index template management like index template
+duplication and changes across all index templates.
+
+Composable index templates abstract common settings, mappings, and aliases into reusable building blocks.<br/>
+Those are called _component templates_.
+
+One can combine component templates to compose index templates.
+
+Settings and mappings specified directly in the create index request will override any settings or mappings specified in
+an index template and its component templates.
+
+## Ingest data
+
+One can ingest data by:
+
+- Ingesting **individual** documents.
+- Indexing **multiple documents in bulk**.
+- Using [Data Prepper], a server-side data collector.
+- Using other ingestion tools.
+
+### Bulk indexing
+
+Leverage the `_bulk` API endpoint to index documents in bulk.
+
+<details>
+
+```plaintext
+POST _bulk
+{ "create": { "_index": "students", "_id": "2" } }
+{ "name": "Jonathan Powers", "gpa": 3.85, "grad_year": 2025 }
+{ "create": { "_index": "students", "_id": "3" } }
+{ "name": "Jane Doe", "gpa": 3.52, "grad_year": 2024 }
+```
+
+```json
+{
+  "took": 7,
+  "errors": false,
+  "items": [
+    {
+      "create": {
+        "_index": "students",
+        "_id": "2",
+        "_version": 1,
+        "result": "created",
+        "_shards": {
+          "total": 2,
+          "successful": 2,
+          "failed": 0
+        },
+        "_seq_no": 1,
+        "_primary_term": 1,
+        "status": 201
+      }
+    },
+    {
+      "create": {
+        "_index": "students",
+        "_id": "3",
+        "_version": 1,
+        "result": "created",
+        "_shards": {
+          "total": 2,
+          "successful": 2,
+          "failed": 0
+        },
+        "_seq_no": 2,
+        "_primary_term": 1,
+        "status": 201
+      }
+    }
+  ]
+}
+```
+
+If any one of the actions in the `_bulk` API endpoint fail, OpenSearch continues to execute the other actions.
+
+Examine the items array in the response to figure out what went wrong.<br/>
+The entries in the items array are in the same order as the actions specified in the request.
+
+</details>
+
+## Re-index data
+
+Refer [Reindex data].
+
+When needing to make an extensive change (e.g., adding a new field to every document, or combining multiple indexes to
+form a new one), one can use the `reindex` operation instead of deleting the old indexes, making the change offline, and
+then indexing the data again.
+
+The `reindex` operation copies documents, that one selects through a query, over to another index.
+
+Reindexing can be an expensive operation depending on the size of the source index.<br/>
+It is recommended to disable replicas in the destination index by setting `number_of_replicas` to `0`, and re-enable
+them once the `reindex` process is complete.
+
+`reindex` is a `POST` operation.<br/>
+In its most basic form, requires specifying a source index and a destination index.
+
+## Data streams
+
+Data streams simplify the management of time-series data.
+
+They are internally composed of multiple _backing_ indexes.<br/>
+Search requests are routed to **all** backing indexes, while indexing requests are routed only to the **latest** write
+index.
+
+ISM policies allow to automatically handle index rollover or deletion.
+
+<details>
+
+1. Create an index template that configures a set of indexes as a data stream.
+
+   <details style="padding: 0 0 1em 1em">
+
+   The `data_stream` object indicates that the template is a data stream, and not just a regular index template.<br/>
+   The `index_patterns` list matches the name of the data stream.
+
+   ```plaintext
+   PUT _index_template/logs-template
+   {
+       "data_stream": {},
+       "index_patterns": [
+           "my-data-stream",
+           "logs-*"
+       ],
+       "priority": 100
+   }
+   ```
+
+   Each ingested document must have a `@timestamp` field.<br/>
+   One can define one's own custom timestamp field as a property in the `data_stream` object.
+
+   ```diff
+   -"data_stream": {},
+   +"data_stream": {
+   +    "timestamp_field": {
+   +        "name": "request_time"
+   +    }
+   +},
+
+   -"index_patterns": [ … ],
+   +"index_patterns": "logs-nginx",
+   ```
+
+   One can also add index mappings and other settings just as for regular index templates.
+
+   </details>
+
+1. Create a data stream.
+
+   <details>
+
+   The data stream API initializes the first backing index:
+
+   ```plaintext
+   PUT _data_stream/logs-redis
+   PUT _data_stream/logs-nginx
+   ```
+
+   You can also directly start ingesting data without creating a data stream.
+
+   Because we have a matching index template with a data_stream object, OpenSearch automatically creates the data stream:
+
+   ```plaintext
+   POST logs-staging/_doc
+   {
+     "message": "login attempt failed",
+     "@timestamp": "2013-03-01T00:00:00"
+   }
+   ```
+
+   </details>
+
+</details>
 
 ## APIs
 
-FIXME: expand
+OpenSearch clusters offer a REST API.<br/>
+It allows almost everything - changing most settings, modify indexes, check cluster health, get statistics, etc.
 
-- Close indexes.<br/>
-  Disables read and write operations on the impacted indexes.
+One can interact with the API using every method that can send HTTP requests.<br/>
+One can also send HTTP requests in the Dev Tools console in OpenSearch Dashboards. It uses a simpler syntax to format
+REST requests compared to other tools like `curl`.
 
-  ```plaintext
-  POST /prometheus-logs-20231205/_close
-  ```
+OpenSearch returns responses in **flat** JSON format by default.<br/>
+Provide the `pretty` query parameter to obtain response bodies in human-readable form:
 
-- (Re)Open closed indexes.<br/>
-  Enables read and write operations on the impacted indexes.
+```sh
+curl 'https://localhost:9200/_cluster/health?pretty'
+```
 
-  ```plaintext
-  POST /prometheus-logs-20231205/_open
-  ```
+Requests that contain a body must specify the `Content-Type` header, and provide the request payload:
 
-- Update indexes' settings.<br/>
-  _Static_ settings can only be updated on **closed** indexes.
+```sh
+curl 'https://localhost:9200/students/_search?pretty' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "query": {
+      "match_all": {}
+    }
+  }'
+```
 
-  ```plaintext
-  PUT /prometheus-logs-20231205/_settings
-  {
-    "index": {
-      "codec": "zstd_no_dict",
-      "codec.compression_level": 3,
-      "refresh_interval": "2s"
+[REST API reference]
+
+<details>
+  <summary>Get clusters' status</summary>
+
+```plaintext
+GET _cluster/health
+```
+
+```json
+{
+    "cluster_name": "opensearch-cluster",
+    "status": "green",
+    "timed_out": false,
+    "number_of_nodes": 2,
+    "number_of_data_nodes": 2,
+    "discovered_master": true,
+    "discovered_cluster_manager": true,
+    "active_primary_shards": 9,
+    "active_shards": 18,
+    "relocating_shards": 0,
+    "initializing_shards": 0,
+    "unassigned_shards": 0,
+    "delayed_unassigned_shards": 0,
+    "number_of_pending_tasks": 0,
+    "number_of_in_flight_fetch": 0,
+    "task_max_waiting_in_queue_millis": 0,
+    "active_shards_percent_as_number": 100.0
+}
+```
+
+</details>
+
+<details>
+  <summary>Index documents</summary>
+
+Add a JSON document to an OpenSearch index by sending a `PUT` HTTP request to the `/indexName/_doc` endpoint.
+
+```plaintext
+PUT /students/_doc/1
+{
+  "name": "John Doe",
+  "gpa": 3.89,
+  "grad_year": 2022
+}
+```
+
+In the example, the document ID is specified as the student ID (`1`).<br/>
+Once such a request is sent, OpenSearch creates an index called `students` if it does not exist already, and stores the
+ingested document in that index.
+
+```json
+{
+  "_index": "students",
+  "_id": "1",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 2,
+    "failed": 0
+  },
+  "_seq_no": 0,
+  "_primary_term": 1
+}
+```
+
+</details>
+
+<details>
+  <summary>View the inferred field types in indexes</summary>
+
+Send `GET` requests to the `_mapping` endpoint:
+
+```plaintext
+GET /students/_mapping
+```
+
+```json
+{
+  "students": {
+    "mappings": {
+      "properties": {
+        "gpa": {
+          "type": "float"
+        },
+        "grad_year": {
+          "type": "long"
+        },
+        "name": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        }
+      }
     }
   }
-  ```
+}
+```
 
-## Hot-warm architecture
+</details>
 
-Refer
-[Set up a hot-warm architecture](https://opensearch.org/docs/latest/tuning-your-cluster/#advanced-step-7-set-up-a-hot-warm-architecture).
+<details>
+  <summary>Search for documents</summary>
+
+Specify the index to search for, plus a query that will be used to match documents.<br/>
+The simplest query is the `match_all` query, which matches **all** documents in an index. If no search parameters are
+given, the `match_all` query is assumed.
+
+```plaintext
+GET /students/_search
+
+GET /students/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+```
+
+```json
+{
+  "took": 11,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "students",
+        "_id": "1",
+        "_score": 1,
+        "_source": {
+          "name": "John Doe",
+          "gpa": 3.89,
+          "grad_year": 2022
+        }
+      }
+    ]
+  }
+}
+```
+
+</details>
+
+<details>
+  <summary>Update documents</summary>
+
+Completely, by re-indexing them:
+
+```plaintext
+PUT /students/_doc/1
+{
+  "name": "John Doe",
+  "gpa": 3.91,
+  "grad_year": 2022,
+  "address": "123 Main St."
+}
+```
+
+Only parts, by calling the `_update` endpoint:
+
+```plaintext
+POST /students/_update/1/
+{
+  "doc": {
+    "gpa": 3.91,
+    "address": "123 Main St."
+  }
+}
+```
+
+```json
+{
+  "_index": "students",
+  "_id": "1",
+  "_version": 2,
+  "result": "updated",
+  "_shards": {
+    "total": 2,
+    "successful": 2,
+    "failed": 0
+  },
+  "_seq_no": 1,
+  "_primary_term": 1
+}
+```
+
+</details>
+
+<details>
+  <summary>Delete documents</summary>
+
+```plaintext
+DELETE /students/_doc/1
+```
+
+```json
+{
+  "_index": "students",
+  "_id": "1",
+  "_version": 4,
+  "result": "deleted",
+  "_shards": {
+    "total": 2,
+    "successful": 2,
+    "failed": 0
+  },
+  "_seq_no": 3,
+  "_primary_term": 1
+}
+```
+
+</details>
+
+<details>
+  <summary>Create indexes and specify their mappings</summary>
+
+```plaintext
+PUT /students
+{
+  "settings": {
+    "index.number_of_shards": 1
+  },
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text"
+      },
+      "grad_year": {
+        "type": "date"
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "acknowledged": true,
+  "shards_acknowledged": true,
+  "index": "students"
+}
+```
+
+</details>
+
+<details>
+  <summary>Close indexes</summary>
+
+Disables read and write operations on the impacted indexes.
+
+```plaintext
+POST /prometheus-logs-20231205/_close
+```
+
+</details>
+
+<details>
+  <summary>(Re)Open closed indexes</summary>
+
+Enables read and write operations on the impacted indexes.
+
+```plaintext
+POST /prometheus-logs-20231205/_open
+```
+
+</details>
+
+<details>
+  <summary>Update indexes' settings</summary>
+
+_Static_ settings can only be updated on **closed** indexes.
+
+```plaintext
+PUT /prometheus-logs-20231205/_settings
+{
+  "index": {
+    "codec": "zstd_no_dict",
+    "codec.compression_level": 3,
+    "refresh_interval": "2s"
+  }
+}
+```
+
+</details>
+
+<details>
+  <summary>Delete indexes</summary>
+
+```plaintext
+DELETE /students
+```
+
+```json
+{
+  "acknowledged": true
+}
+```
+
+</details>
 
 ## Further readings
 
@@ -263,6 +948,8 @@ Refer
 - [`fsync`][fsync]
 - [AWS' managed OpenSearch] offering
 - [Setting up Hot-Warm architecture for ISM in OpenSearch]
+- [Data Prepper]
+- [REST API reference]
 
 ### Sources
 
@@ -276,6 +963,9 @@ Refer
 - [Elasticsearch Index Lifecycle Management & Policy]
 - [Top 14 ELK alternatives in 2024]
 - [Stepping up for a truly open source Elasticsearch]
+- [Managing indexes]
+- [Reindex data]
+- [Index templates]
 
 <!--
   Reference
@@ -285,19 +975,23 @@ Refer
 <!-- In-article sections -->
 [apis]: #apis
 [hot-warm architecture]: #hot-warm-architecture
-[refresh operations]: #refresh-operations
-[translog]: #translog
 
 <!-- Knowledge base -->
-[AWS' managed OpenSearch]: cloud%20computing/aws/opensearch.md
+[aws' managed opensearch]: cloud%20computing/aws/opensearch.md
 
 <!-- Files -->
 <!-- Upstream -->
 [codebase]: https://github.com/opensearch-project
 [creating a cluster]: https://opensearch.org/docs/latest/tuning-your-cluster/
+[data prepper]: https://opensearch.org/docs/latest/data-prepper/
 [documentation]: https://opensearch.org/docs/latest/
 [index management]: https://opensearch.org/docs/latest/dashboards/im-dashboards/index-management/
 [index settings]: https://opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index-settings/
+[index templates]: https://opensearch.org/docs/latest/im-plugin/index-templates/
+[managing indexes]: https://opensearch.org/docs/latest/im-plugin/
+[reindex data]: https://opensearch.org/docs/latest/im-plugin/reindex-data/
+[rest api reference]: https://opensearch.org/docs/latest/api-reference/
+[set up a hot-warm architecture]: https://opensearch.org/docs/latest/tuning-your-cluster/#advanced-step-7-set-up-a-hot-warm-architecture
 [website]: https://opensearch.org/
 [what is opensearch?]: https://aws.amazon.com/what-is/opensearch/
 
