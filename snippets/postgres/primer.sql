@@ -73,8 +73,9 @@ DROP SCHEMA IF EXISTS mundane CASCADE;
 
 -- List tables
 \d
-\dt
-\dt+
+\dt *.*
+\dt+ public.*
+SELECT * FROM information_schema.tables WHERE table_schema = 'schema_name';
 
 -- Create tables
 CREATE TABLE people (
@@ -153,6 +154,17 @@ WHERE rolname IN (
   WHERE rolvaliduntil IS NOT NULL
 );
 
+-- Lock roles
+ALTER USER adriana WITH NOLOGIN;
+REVOKE CONNECT ON DATABASE sales FROM 'bob';
+
+-- Check roles are locked
+SELECT rolcanlogin FROM pg_roles WHERE rolname='adriana';
+
+-- Unlock locked roles
+ALTER USER adriana WITH LOGIN;
+GRANT CONNECT ON DATABASE sales TO 'bob';
+
 -- Rename roles
 ALTER ROLE manager RENAME TO boss;
 
@@ -160,7 +172,10 @@ ALTER ROLE manager RENAME TO boss;
 GRANT rds_superuser TO mike;
 
 -- Assume roles for the current session
-SET ROLE admin;
+SET ROLE 'admin';
+SELECT SESSION_USER, CURRENT_USER; SET ROLE 'lucas'; SELECT SESSION_USER, CURRENT_USER; RESET ROLE;
+SET SESSION AUTHORIZATION 'sandra';
+SELECT SESSION_USER, CURRENT_USER; SET SESSION AUTHORIZATION 'thomas'; SELECT SESSION_USER, CURRENT_USER; RESET SESSION AUTHORIZATION;
 
 -- Remove role memberships from users
 REVOKE engineers FROM mike;
