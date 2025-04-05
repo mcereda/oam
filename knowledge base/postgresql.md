@@ -253,6 +253,7 @@ See also [yugabyte/yugabyte-db].
 - [PostgreSQL - disabling constraints]
 - [Hashing a String to a Numeric Value in PostgreSQL]
 - [I replaced my entire tech stack with Postgres...]
+- [What does GRANT USAGE ON SCHEMA do exactly?]
 
 <!--
   Reference
@@ -293,3 +294,4 @@ See also [yugabyte/yugabyte-db].
 [postgresql: show all the privileges for a concrete user]: https://stackoverflow.com/questions/40759177/postgresql-show-all-the-privileges-for-a-concrete-user
 [what is the pg_dump command for backing up a postgresql database?]: https://www.linkedin.com/advice/3/what-pgdump-command-backing-up-postgresql-ke2ef
 [yugabyte/yugabyte-db]: https://github.com/yugabyte/yugabyte-db
+[what does grant usage on schema do exactly?]: https://stackoverflow.com/questions/17338621/what-does-grant-usage-on-schema-do-exactly
