@@ -40,9 +40,12 @@ What really worked for me personally, or in my experience.
   simplicity.<br/>
   Always going for the simple solution makes things complicated on a higher level.<br/>
   Check out [KISS principle is not that simple].
-- Stop modularizing stuff just to [avoid repetitions][don't repeat yourself(dry) in software development].
-- Stop [abstracting away][we have used too many levels of abstractions and now the future looks bleak] stuff that does
-  not need to be (`docker-cli`/`kubectl` wrappers mapping features 1-to-1, anyone?).
+- Modularize stuff when it makes sense, not just to
+  [avoid repetitions][don't repeat yourself(dry) in software development].
+- Create abstractions that **do** hide away the complexity behind them.<br/>
+  Avoid creating wrappers that would map features 1-to-1 with their
+  [_not-abstracted-anymore_ target object][we have used too many levels of abstractions and now the future looks bleak],
+  and just use the original processes and tools when in need of control.
 - Beware of complex things that _should be simple_.<br/>
   E.g., check what the _[SAFe] delusion_ is.
 - Focus on what matters, but also set time aside to work on the rest.<br/>
@@ -63,7 +66,7 @@ What really worked for me personally, or in my experience.
   Do **not** adapt your work to specific tools.
 - Keep track of tools' EOL and keep them updated accordingly.
   Trackers like [endoflife.date] could help in this.
-- Backup your data, especially when you are about to update something.<br/>
+- Backup your data, especially when you are about to make changes to something managing or storing it.<br/>
   [Murphy's law] is lurking. Consider [the 3-2-1 backup strategy].
 - [Branch early, branch often].
 - [Keep a changelog].
@@ -88,6 +91,9 @@ What really worked for me personally, or in my experience.
   They still create a lot of discontent even inside Amazon when used _against_ anybody.
 - Keep Goodhart's law in mind:
   > When a measure becomes a target, it ceases to be a good measure.
+- Always have a plan B.
+- When managing permissions, consider [break glass][break glass explained: why you need it for privileged accounts]
+  procedures and/or tools.
 
 ## Teamwork
 
@@ -109,20 +115,26 @@ What really worked for me personally, or in my experience.
 - Keep _integration_, _delivery_ and _deployment_ **separated**.<br/>
   They are different concepts, and as such should require different tasks.<br/>
   This also allows for checkpoints, and to fail fast with less to no unwanted consequence.
+- Consider adopting the [_main must be green_ principle][keeping green].
 
 ### Pipelining
 
-- Differentiate what the concept of pipelines really is from the idea of pipelines in approaches like DevOps.<br/>
-  Pipelines in general are nothing more than _sequences of actions_. Pipelines in DevOps and alike end up most of the
-  times being _magic tools that take actions away from people_.
+- Differentiate what the **concept** of pipelines really is from the **idea** of pipelines in approaches like
+  DevOps.<br/>
+  Pipelines in general should be nothing more than _sequences of actions_. Pipelines in DevOps (and alike) end up most
+  of the times being _magic tools that take actions away from people_.
 - Keep in mind [the automation paradox].<br/>
   Pipelines tend to become complex systems just like Rube Goldberg machines.
 - Keep tasks as simple, consistent and reproducible as possible.<br/>
   Avoid like the plague relying on programs or scripts written directly in pipelines: pipeline should act as the _glue_
   connecting tasks, not replace full fledged applications.
-- Most, if not all, tasks should be able to execute from one's own local machine.<br/>
+- Most, if not all, pipeline tasks should be able to execute from one's own local machine.<br/>
   This allows to fail fast and avoid wasting time waiting for pipelines to run in a black box somewhere.
-- DevOps pipelines should be meant to be used as **last mile** steps for specific goals.<br/>
+- Pipelines are a good central place from which make changes to critical resources.<br/>
+  Developers should **not** have the access privileges to make such changes _by default_, but selected people **shall**
+  have ways to obtain those permissions for emergencies
+  ([break glass][break glass explained: why you need it for privileged accounts]).
+- DevOps pipelines should be meant to be used as **last mile** steps for **specific** goals.<br/>
   There **cannot** be a single pipeline for everything, the same way as the _one-size-fits-all_ concept never really
   works.
 - Try and strike a balance between what **needs** to be done centrally (e.g. from a repository's `origin` remote) and
@@ -203,6 +215,9 @@ Listed in order of addition:
 - [The 10 Commandments of Navigating Code Reviews]
 - [Less Is More: The Minimum Effective Dose]
 - [AWS re:Invent 2023 - Platform engineering with Amazon EKS (CON311)]
+- [Break Glass Explained: Why You Need It for Privileged Accounts]
+- [Keeping green]
+- [Why committing straight to main/master must be allowed]
 
 <!--
   Reference
@@ -234,6 +249,7 @@ Listed in order of addition:
 [are we celebrating the wrong leaders? - martin gutmann]: https://www.youtube.com/watch?v=b0Z9IpTVfUg
 [aws re:invent 2023 - platform engineering with amazon eks (con311)]: https://www.youtube.com/watch?v=eLxBnGoBltc
 [branch early, branch often]: https://medium.com/@huydotnet/branch-early-branch-often-daadaad9468e
+[break glass explained: why you need it for privileged accounts]: https://www.strongdm.com/blog/break-glass
 [culture eats your structure for lunch]: https://thoughtmanagement.org/2013/07/10/culture-eats-your-structure-for-lunch/
 [death by a thousand microservices]: https://renegadeotter.com/2023/09/10/death-by-a-thousand-microservices.html
 [devops is bullshit]: https://blog.massdriver.cloud/posts/devops-is-bullshit/
@@ -244,6 +260,7 @@ Listed in order of addition:
 [hacking your manager - how to get platform engineering on their radar]: https://www.youtube.com/watch?v=8xprsTXKr0w
 [how to mind goodhart's law and avoid unintended consequences]: https://builtin.com/data-science/goodharts-law
 [how to tackle pull request fatigue]: https://javascript.plainenglish.io/tackling-pr-fatigue-6865edc205ce
+[keeping green]: https://fullstackopen.com/en/part11/keeping_green
 [kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
 [less is more: the minimum effective dose]: https://medium.com/the-mission/less-is-more-the-minimum-effective-dose-e6d56625931e
 [maybe you do need kubernetes]: https://blog.boot.dev/education/maybe-you-do-need-kubernetes/
@@ -261,6 +278,7 @@ Listed in order of addition:
 [understanding the pareto principle (the 80/20 rule)]: https://betterexplained.com/articles/understanding-the-pareto-principle-the-8020-rule/
 [we have used too many levels of abstractions and now the future looks bleak]: https://unixsheikh.com/articles/we-have-used-too-many-levels-of-abstractions-and-now-the-future-looks-bleak.html
 [what does it mean to program to interfaces?]: https://www.baeldung.com/cs/program-to-interface
+[why committing straight to main/master must be allowed]: https://dev.to/jonlauridsen/committing-straight-to-mainmaster-must-be-allowed-138e
 [why the fuck are we templating yaml?]: https://leebriggs.co.uk/blog/2019/02/07/why-are-we-templating-yaml
 [why your platform monolith is probably a bad idea]: https://www.youtube.com/watch?v=3B0TbV-Ipmo
 [wisdom from linus - prime reacts]: https://www.youtube.com/watch?v=EvzB_Q1gSds
