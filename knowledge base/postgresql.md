@@ -235,6 +235,7 @@ See also [yugabyte/yugabyte-db].
 - [pgAdmin]
 - [How to Scale a Single-Server Database: A Guide to Distributed PostgreSQL]
 - [yugabyte/yugabyte-db]
+- [Logical Decoding Concepts]
 
 ### Sources
 
@@ -270,6 +271,7 @@ See also [yugabyte/yugabyte-db].
 [create function]: https://www.postgresql.org/docs/current/sql-createfunction.html
 [database connection control functions]: https://www.postgresql.org/docs/current/libpq-connect.html
 [docker image]: https://github.com/docker-library/docs/blob/master/postgres/README.md
+[logical decoding concepts]: https://www.postgresql.org/docs/current/logicaldecoding-explanation.html
 [pg_settings]: https://www.postgresql.org/docs/current/view-pg-settings.html
 [psql]: https://www.postgresql.org/docs/current/app-psql.html
 [the password file]: https://www.postgresql.org/docs/current/libpq-pgpass.html
