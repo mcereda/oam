@@ -530,6 +530,10 @@ const resource = new.aws.s3.Bucket("bucket", {
 });
 ```
 
+Property names passed to `ignoreChanges` shall always be the _camelCase_ version of those property names.<br/>
+E.g., specify the `CreatedBy` tag as `tags['createdBy']` to ignore it.<br/>
+See also [Property Paths].
+
 ### Delete before replacing
 
 Add the [`deleteBeforeReplace` option][deletebeforereplace] to the resource.
@@ -1292,6 +1296,7 @@ Solution: follow the suggestion in the warning message:
 - [`pulumi new`][pulumi new]
 - [`pulumi config set-all`][pulumi config set-all]
 - [Importing resources]
+- [Property paths]
 
 <!--
   Reference
@@ -1327,6 +1332,7 @@ Solution: follow the suggestion in the warning message:
 [importing resources]: https://www.pulumi.com/docs/iac/adopting-pulumi/import/
 [organizing pulumi projects & stacks]: https://www.pulumi.com/docs/using-pulumi/organizing-projects-stacks/
 [projects]: https://www.pulumi.com/docs/concepts/projects/
+[property paths]: https://www.pulumi.com/docs/iac/concepts/miscellaneous/property-paths/
 [pulumi config set-all]: https://www.pulumi.com/docs/cli/commands/pulumi_config_set-all/
 [pulumi crosswalk for aws]: https://www.pulumi.com/docs/iac/clouds/aws/guides/
 [pulumi import]: https://www.pulumi.com/docs/iac/cli/commands/pulumi_import/
