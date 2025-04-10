@@ -19,7 +19,7 @@ bootstrap:
   parallel: true
   commands:
     venv:
-      run: make create-venv
+      run: task python:create-venv
 
 debug:
   parallel: true

@@ -21,7 +21,7 @@ tasks:
     vars:
       PYTHON_VERSION: 3.12
     cmds:
-      - "python{{.PYTHON_VERSION}} -m 'venv' '{{.VENV_DIR}}'"
+      - python{{.PYTHON_VERSION}} -m 'venv' '{{.VENV_DIR}}'
       - "{{.VENV_DIR}}/bin/pip --require-virtualenv install -r '{{.REQUIREMENTS_FILE}}'"
 
   python:recreate-venv:
