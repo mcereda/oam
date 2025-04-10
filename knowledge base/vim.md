@@ -1,10 +1,9 @@
 # Vim
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Modelines](#modelines)
-1. [Sources](#sources)
+1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -17,8 +16,10 @@
 # Delete all file's lines.
 :1,$d
 
-# Substitute 4-spaces indentations with tabs.
-:%s/    /\t/g
+# Substitute text.
+:s/old/new/    # 'old' to 'new', only once
+:s/some/any/g  # 'some' to 'any', all occurrences from the current cursor's position
+:%s/    /\t/g  # 4-spaces indentations to tabs, all occurrences in the whole file
 
 # Enable auto indentation per file type.
 :filetype plugin indent on
@@ -44,7 +45,8 @@
 Set different options for a particular file.
 
 > The `modeline` option must be enabled in order to take advantage of this.<br/>
-> This option is **set** by default for Vim running in nocompatible mode, but some notable distributions of Vim disable it in the system's `vimrc` for security. In addition, the option is **off** by default when editing as `root`.
+> This option is **set** by default for Vim running in nocompatible mode, but some notable distributions of Vim disable
+> it in the system's `vimrc` for security. In addition, the option is **off** by default when editing as `root`.
 
 See `:help modeline` for more information.
 
@@ -66,19 +68,24 @@ Examples:
 /* ex: set ts=8 sw=4 tw=0 noet : */
 ```
 
-## Sources
+## Further readings
+
+### Sources
 
 - [Modeline magic]
 - [Embed vim settings in file]
 - [Basic vimrc]
 - [Set whitespace preferences by filetype]
+- [Find and Replace in Vim / Vi]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Others -->
 [basic vimrc]: https://github.com/amix/vimrc/blob/master/vimrcs/basic.vim
 [embed vim settings in file]: https://stackoverflow.com/questions/3958416/embed-vim-settings-in-file#3958516
+[find and replace in vim / vi]: https://linuxize.com/post/vim-find-replace/
 [modeline magic]: https://vim.fandom.com/wiki/Modeline_magic
 [set whitespace preferences by filetype]: https://stackoverflow.com/questions/1562633/setting-vim-whitespace-preferences-by-filetype#1563552
