@@ -455,6 +455,8 @@ GET /api/v1/alerts/config
 - [Website]
 - [Codebase]
 - [Documentation]
+- [Blog]
+- [PeerDB UI - Deeper Dive: Part 1]
 
 ### Sources
 
@@ -473,8 +475,10 @@ GET /api/v1/alerts/config
 <!-- Files -->
 <!-- Upstream -->
 [api reference]: https://docs.peerdb.io/peerdb-api/reference
+[blog]: https://blog.peerdb.io/
 [codebase]: https://github.com/PeerDB-io/peerdb
 [documentation]: https://docs.peerdb.io/
+[peerdb ui - deeper dive: part 1]: https://blog.peerdb.io/peerdb-ui-deeper-dive-part-1
 [peers.proto#PostgresConfig]: https://github.com/PeerDB-io/peerdb/blob/6a591128908cbd76df8f7e4094ec838fac08dcda/protos/peers.proto#L73
 [public ips for peerdb cloud]: https://docs.peerdb.io/peerdb-cloud/ip-table
 [sql reference]: https://docs.peerdb.io/sql/reference
