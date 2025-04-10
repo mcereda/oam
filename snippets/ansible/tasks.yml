@@ -692,15 +692,21 @@
               - svn+http://myrepo/svn/MyApp#egg=MyApp
               - git+http://myrepo/app/MyApp
               - file:///path/to/MyApp.tar.gz
+    - name: Replace multiple strings in files
+      ansible.builtin.replace:
+        path: /path/to/file.yml
+        regexp: '(\s+image\:.*)stable-v.*'
+        replace: \g<1>custom
+        backup: true
     - name: Gather facts about hosts previously not in inventory
       delegate_to: host_previously_not_in_inventory
       ansible.builtin.setup:
         filter:
           - '!all'
           - min
-    - name: Apply migrations from folder
+    - name: Apply SQL migrations from files in folder
       # take files in in alphabetical order so they can have a priority set
-      tags: apply_migrations_from_folder
+      tags: apply_sql_migrations_from_files_in_folder
       community.postgresql.postgresql_query:
         login_host: "{{ login_host }}"
         login_port: "{{ login_port }}"
