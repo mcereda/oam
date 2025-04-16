@@ -45,6 +45,8 @@ High-quality, ubiquitous, and portable telemetry to enable effective observabili
 - [Website]
 - [Main project]
 - [Documentation]
+- [OpenTelemetry Auto-instrumentation with Jaeger]
+- [Distributed Tracing in Grafana with Tempo and Jaeger]
 
 ### Sources
 
@@ -62,3 +64,5 @@ High-quality, ubiquitous, and portable telemetry to enable effective observabili
 [website]: https://opentelemetry.io/
 
 <!-- Others -->
+[opentelemetry auto-instrumentation with jaeger]: https://www.infracloud.io/blogs/opentelemetry-auto-instrumentation-jaeger/
+[distributed tracing in grafana with tempo and jaeger]: https://www.infracloud.io/blogs/tracing-grafana-tempo-jaeger/

@@ -406,6 +406,12 @@ The snapshot now exists at `<data-dir>/snapshots/20171210T211224Z-2be650b6d019eb
 - [SNMP exporter]
 - [`ordaa/boinc_exporter`][ordaa/boinc_exporter]
 - [Grafana]
+- [High Availability for Prometheus and Alertmanager: An Overview]
+- [Making Prometheus Highly Available (HA) & Scalable with Thanos]
+- [Scaling Prometheus with Cortex]
+- [Prometheus Definitive Guide Part I - Metrics and Use Cases]
+- [Prometheus Definitive Guide Part II - Prometheus Query Language]
+- [Prometheus Definitive Guide Part III - Prometheus Operator]
 
 ### Sources
 
@@ -458,6 +464,7 @@ The snapshot now exists at `<data-dir>/snapshots/20171210T211224Z-2be650b6d019eb
 <!-- Others -->
 [dropping metrics at scrape time with prometheus]: https://www.robustperception.io/dropping-metrics-at-scrape-time-with-prometheus/
 [getting started with prometheus]: https://opensource.com/article/18/12/introduction-prometheus
+[high availability for prometheus and alertmanager: an overview]: https://promlabs.com/blog/2023/08/31/high-availability-for-prometheus-and-alertmanager-an-overview/
 [how i monitor my openwrt router with grafana cloud and prometheus]: https://grafana.com/blog/2021/02/09/how-i-monitor-my-openwrt-router-with-grafana-cloud-and-prometheus/
 [how relabeling in prometheus works]: https://grafana.com/blog/2022/03/21/how-relabeling-in-prometheus-works/
 [how to integrate prometheus and grafana on kubernetes using helm]: https://semaphoreci.com/blog/prometheus-grafana-kubernetes-helm
@@ -465,8 +472,13 @@ The snapshot now exists at `<data-dir>/snapshots/20171210T211224Z-2be650b6d019eb
 [i need to know about the below kube_state_metrics description. exactly looking is what the particular metrics doing]: https://stackoverflow.com/questions/60440847/i-need-to-know-about-the-below-kube-state-metrics-description-exactly-looking-i#60449570
 [install prometheus and grafana by helm]: https://medium.com/@at_ishikawa/install-prometheus-and-grafana-by-helm-9784c73a3e97
 [install prometheus and grafana with helm 3 on a local machine vm]: https://dev.to/ko_kamlesh/install-prometheus-grafana-with-helm-3-on-local-machine-vm-1kgj
+[making prometheus highly available (ha) & scalable with thanos]: https://www.infracloud.io/blogs/thanos-ha-scalable-prometheus/
 [ordaa/boinc_exporter]: https://gitlab.com/ordaa/boinc_exporter
 [prometheus and grafana setup in minikube]: http://blog.marcnuri.com/prometheus-grafana-setup-minikube/
+[prometheus definitive guide part i - metrics and use cases]: https://www.infracloud.io/blogs/prometheus-architecture-metrics-use-cases/
+[prometheus definitive guide part ii - prometheus query language]: https://www.infracloud.io/blogs/promql-prometheus-guide/
+[prometheus definitive guide part iii - prometheus operator]: https://www.infracloud.io/blogs/prometheus-operator-helm-guide/
+[scaling prometheus with cortex]: https://www.infracloud.io/blogs/cortex-for-ha-monitoring-with-prometheus/
 [scrape selective metrics in prometheus]: https://docs.last9.io/docs/how-to-scrape-only-selective-metrics-in-prometheus
 [set up prometheus and ingress on kubernetes]: https://blog.gojekengineering.com/diy-how-to-set-up-prometheus-and-ingress-on-kubernetes-d395248e2ba
 [snmp monitoring and easing it with prometheus]: https://medium.com/@openmohan/snmp-monitoring-and-easing-it-with-prometheus-b157c0a42c0c
