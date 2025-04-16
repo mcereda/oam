@@ -17,7 +17,7 @@ _Benchmarks_ group controls and other benchmarks into hierarchies of any depth.
 Default files directory (called _installation directory_ by Powerpipe) is `$HOME/.powerpipe`.
 
 <details>
-  <summary>Installation and configuration</summary>
+  <summary>Setup</summary>
 
 ```sh
 brew install 'turbot/tap/powerpipe'
@@ -59,6 +59,7 @@ powerpipe mod install --dry-run 'github.com/turbot/steampipe-mod-aws-compliance@
 powerpipe mod list
 
 # Update mods.
+powerpipe mod update
 powerpipe mod update 'github.com/turbot/steampipe-mod-aws-compliance'
 
 # Uninstall mods.
@@ -84,6 +85,7 @@ powerpipe control run 'aws_compliance.control.cis_v150_3_3'
 powerpipe benchmark list
 
 # Execute benchmarks.
+powerpipe benchmark run 'aws_compliance.benchmark.soc_2'
 powerpipe benchmark run 'aws_compliance.benchmark.cis_v300' 'aws_compliance.benchmark.gdpr'
 powerpipe benchmark run … --where "severity in ('critical', 'high')" --tag 'cis_level=1' --tag 'cis=true'
 powerpipe benchmark run … --output 'brief' --export 'output.csv' --export 'output.json' --export 'md' --export 'nunit3'

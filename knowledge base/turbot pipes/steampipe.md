@@ -9,10 +9,17 @@ Dynamically query APIs, code and more with SQL.
 
 ## TL;DR
 
+Steampipe optimizes for read-only, live data.<br/>
+Use [Flowpipe] to make changes if needed.
+
+Plugins make API calls.<br/>
+Call results are temporarily saved in Postgres as **ephemeral** tables.<br/>
+Ephemeral tables live for **5 minutes** by default.
+
 Default files directory (called _installation directory_ by Steampipe) is `$HOME/.steampipe`.
 
 <details>
-  <summary>Installation and configuration</summary>
+  <summary>Setup</summary>
 
 ```sh
 brew install 'turbot/tap/steampipe'
