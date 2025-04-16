@@ -857,7 +857,7 @@ backend:
 
 FIXME: should this be under [Program]?
 
-Refer [Component resources].
+Refer [Component resources] and [Create a ComponentResource].
 
 Logical grouping of resources.<br/>
 Usually leveraged to instantiate a set of related resources, aggregate them as children, and create larger abstractions
@@ -882,6 +882,19 @@ Refer [Pulumi Crosswalk for AWS] or [Google Cloud Static Website] as examples.
 
    </details>
 
+1. Declare the types of resources one wants to export from the class.
+
+   <details style="padding: 0 0 1rem 1rem">
+
+   ```ts
+   class StandardAwsVpc extends pulumi.ComponentResource {
+       internetGateway: aws.ec2.InternetGateway
+       vpc: aws.ec2.Vpc
+   };
+   ```
+
+   </details>
+
 1. Inside its constructor, chain to the base constructor and pass it the subclass' name, arguments, and options.
 
    Upon creation of a new instance of the Component, the call to the base constructor registers the instance with the
@@ -892,10 +905,12 @@ Refer [Pulumi Crosswalk for AWS] or [Google Cloud Static Website] as examples.
    Components must also register a unique _type name_ with the base constructor. These names are namespaced alongside
    non-Component resources such as `aws:lambda:Function`.
 
-   <details style="padding: 0 0 1em 1em">
+   <details style="padding: 0 0 1rem 1rem">
 
    ```ts
    class StandardAwsVpc extends pulumi.ComponentResource {
+       …
+
        constructor(name: string, args: pulumi.Inputs, opts?: pulumi.ComponentResourceOptions) {
            super("exampleOrg:StandardAwsVpc", name, {}, opts);
        };
@@ -911,15 +926,17 @@ Refer [Pulumi Crosswalk for AWS] or [Google Cloud Static Website] as examples.
 
    ```ts
    class StandardAwsVpc extends pulumi.ComponentResource {
+       …
+
        constructor(name: string, args: pulumi.Inputs, opts?: pulumi.ComponentResourceOptions) {
            …
 
-           const vpc = new aws.ec2.Vpc(
+           this.vpc = new aws.ec2.Vpc(
              `${name}`,
              { … },
              { parent: this },
            );
-           const internetGateway = new aws.ec2.InternetGateway(
+           this.internetGateway = new aws.ec2.InternetGateway(
              `${name}`,
              {
                vpcId: vpc.id,
@@ -946,7 +963,7 @@ Refer [Pulumi Crosswalk for AWS] or [Google Cloud Static Website] as examples.
            …
 
            this.registerOutputs({
-               vpcId: vpc.id,
+               vpcId: this.vpc.id,
            });
        };
    };
@@ -972,16 +989,21 @@ Refer [Pulumi Crosswalk for AWS] or [Google Cloud Static Website] as examples.
 </details>
 
 <details>
-  <summary>Sample code</summary>
+  <summary>Example: standardized AWS VPC</summary>
+
+FIXME: check
 
 ```ts
 import * as aws from "@pulumi/aws";
 
 export class StandardAwsVpc extends pulumi.ComponentResource {
+    internetGateway: aws.ec2.InternetGateway
+    vpc:  aws.ec2.Vpc
+
     constructor(name: string, args: pulumi.Inputs, opts?: pulumi.ComponentResourceOptions) {
         super("exampleOrg:StandardAwsVpc", name, {}, opts);
 
-        const vpc = new aws.ec2.Vpc(
+        this.vpc = new aws.ec2.Vpc(
             `${name}`,
             {
                 tags: {
@@ -994,7 +1016,7 @@ export class StandardAwsVpc extends pulumi.ComponentResource {
             },
             { parent: this },
         );
-        const internetGateway = new aws.ec2.InternetGateway(
+        this.internetGateway = new aws.ec2.InternetGateway(
             name,
             {
                 tags: {
@@ -1002,14 +1024,14 @@ export class StandardAwsVpc extends pulumi.ComponentResource {
                     ...args.tags,
                 },
 
-                vpcId: vpc.id,
+                vpcId: this.vpc.id,
             },
-            { parent: vpc },
+            { parent: this.vpc },
         );
         …
 
         this.registerOutputs({
-            vpcId: vpc.id,
+            vpcId: this.vpc.id,
         });
     };
 };
@@ -1025,6 +1047,93 @@ const currentVpc = new StandardAwsVpc(
     },
     { protect: true },
 );
+```
+
+</details>
+
+<details>
+  <summary>Example: standardized AWS service role</summary>
+
+```ts
+import * as pulumi from '@pulumi/pulumi';
+import * as aws from '@pulumi/aws';
+
+class StandardServiceRole extends pulumi.ComponentResource {
+    assumeRole: {
+        iamPolicy: aws.iam.Policy
+    }
+    iamRole: aws.iam.Role
+
+    constructor(
+            name: string,
+            args: aws.iam.RoleArgs,
+            opts?: pulumi.ComponentResourceOptions,
+    ) {
+        super('exampleOrg:StandardServiceRole', name, {}, opts);
+
+        this.iamRole = new aws.iam.Role(
+            name,
+            {
+                ...args,
+                tags: {
+                    ServiceRole: 'true',
+                    StandardResource: 'true',
+                    ...args.tags,
+                },
+            },
+            { parent: this },
+        );
+
+        this.assumeRole = {
+            iamPolicy: new aws.iam.Policy(
+                `${name}-assumeRole`,
+                {
+                    name: `${args.name}-AssumeRole`,
+                    description: `Allows bearers to try and assume the ${args.name} standard service role`,
+                    tags: {
+                        StandardResource: 'true',
+                    },
+
+                    policy: pulumi.jsonStringify({
+                        Version: '2012-10-17',
+                        Statement: [{
+                            Sid: `AllowAssumingThe${args.name}Role`,
+                            Effect: 'Allow',
+                            Action: 'sts:AssumeRole',
+                            Resource: this.iamRole.arn,
+                        }],
+                    }),
+                },
+                { parent: this },
+            ),
+        };
+
+        this.registerOutputs({
+            iamRole: this.iamRole,
+            assumeRole: this.assumeRole,
+        });
+    };
+};
+
+const serviceRole = new StandardServiceRole(
+    'someServiceRole',
+    {
+        name: 'SomeServiceRole',
+        description: 'SomeServiceRole',
+
+        assumeRolePolicy: pulumi.jsonStringify({
+            Version: '2012-10-17',
+            Statement: [{
+                Effect: 'Allow',
+                Principal: {
+                    AWS: '012345678901',
+                },
+                Action: 'sts:AssumeRole',
+            }],
+        }),
+    },
+);
+serviceRole.assumeRole.iamPolicy.name.apply(policyName => console.log(policyName));
 ```
 
 </details>
@@ -1297,6 +1406,7 @@ Solution: follow the suggestion in the warning message:
 - [`pulumi config set-all`][pulumi config set-all]
 - [Importing resources]
 - [Property paths]
+- [Create a ComponentResource]
 
 <!--
   Reference
@@ -1351,5 +1461,6 @@ Solution: follow the suggestion in the warning message:
 
 <!-- Others -->
 [assigning tags by default on aws with pulumi]: https://blog.scottlowe.org/2023/09/11/assigning-tags-by-default-on-aws-with-pulumi/
+[create a componentresource]: https://pulumi.awsworkshop.io/30_modern_iac_ts/45_componens/10_create_component.html
 [docker images]: https://hub.docker.com/u/pulumi
 [things i wish i knew earlier about pulumi]: https://vsupalov.com/pulumi-learnings/

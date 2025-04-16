@@ -65,13 +65,15 @@ Refer [aws.permissions.cloud] for a community-driven source of truth for AWS IAM
 
 ## Users
 
-Refer [IAM users].
+Refer [IAM Users].
 
-Represent a human user or workload needing to interact with AWS resources.<br/>
+Represent human users or workloads needing to interact with AWS resources.<br/>
 Consist of a name and credentials.<br/>
 Applications using their credentials to make requests are typically referred to as _service accounts_.
 
-IAM Users with administrator permissions are **not** the same thing as the AWS account's root user.
+IAM Users with administrator permissions are **not** the same thing as the AWS Account's root user.<br/>
+The root user is **required** to perform some [specific tasks][tasks that require root user credentials] on the account,
+which will **not** be available if signed in as any other user.
 
 IAM identifies IAM Users via:
 
@@ -140,7 +142,16 @@ Their _effect_ can be to `allow` or `deny` such actions. A `deny` statement **al
 Mostly stored as structured JSON documents.<br/>
 Each Policy comes with one or several _statements_. Each statement defines an effect.
 
-IAM does not expose Policies' `Sid` element in the IAM API, so it can't be used to retrieve statements.
+IAM does **not** expose Policies' `Sid` element in the IAM API, so it **cannot** be used to filter retrieved statements.
+
+Logical evaluation:
+
+- **Statements** in a Policy operate in an `OR` fashion.<br/>
+  As in, **at least one** statement must allow access to a set of resources.
+- **Conditions** in a Statement operate in an `AND` fashion.<br/>
+  As in, **all** conditions must resolve true for the statement to allow access.
+- **Operator values** in a Condition operate in an `OR` fashion.<br/>
+  As in, **at least one** value must match for a Condition to resolve true.
 
 Policy examples:
 
@@ -202,7 +213,7 @@ Policy examples:
 ### Trust Policies
 
 Specific type of resource-based policy for IAM roles.<br/>
-Used to allow Principals ans AWS Services to assume Roles.
+Used to allow Principals and other AWS Services to assume Roles.
 
 ### Trust Relationships
 
@@ -245,7 +256,6 @@ Principals and AWS Services can assume Roles as long as:
        "Version": "2012-10-17",
        "Statement": [
            {
-               "Sid": "AllowMeToAssumeThoseRoles",
                "Effect": "Allow",
                "Action": "sts:AssumeRole",
                "Resource": [
@@ -287,7 +297,7 @@ Principals and AWS Services can assume Roles as long as:
 
 Allowed entities can assume Roles using the [STS AssumeRole API][assumerole api reference].
 
-<details style="margin-top: -1em; padding-bottom: 1em;">
+<details style="margin: -1rem 0 1rem 1rem">
 
 ```sh
 $ aws sts assume-role --role-arn "arn:aws:iam::012345678901:role/EksAdminRole" \
@@ -316,7 +326,7 @@ Refer [Using AWS CLI Securely with IAM Roles and MFA].
 
 Add the `"Bool": {"aws:MultiFactorAuthPresent": true}` condition to the Role's Trust Relationships.
 
-<details style="margin-top: -1em; padding-bottom: 1em;">
+<details style="margin: -1rem 0 1rem 1rem">
 
 ```json
 {
@@ -338,13 +348,32 @@ Add the `"Bool": {"aws:MultiFactorAuthPresent": true}` condition to the Role's T
 
 </details>
 
-When requiring MFA with AssumeRole, identities need to pass values for the SerialNumber and TokenCode parameters.<br/>
-SerialNumbers identify the users' hardware or virtual MFA devices, TokenCodes are the time-based one-time password
-(TOTP) value that devices produce.
+When requiring MFA with AssumeRole, identities **must** pass values for the `SerialNumber` and `TokenCode`
+parameters.<br/>
+`SerialNumber`s identify the users' hardware or virtual MFA devices, while `TokenCode`s are the time-based one-time
+password (TOTP) value that devices produce.
 
-For CLI access, the user will need to add the `mfa_serial` setting to their profile.
+<details style="margin: -1rem 0 1rem 1rem">
 
-<details style="margin-top: -1em; padding-bottom: 1em;">
+```sh
+$ aws sts assume-role --output 'yaml' --duration-seconds '900' \
+  --role-arn 'arn:aws:iam::012345678901:role/EksAdminRole' --role-session-name 'lookAt-him-heIsThe-EksAdmin-now' \
+  --serial-number 'arn:aws:iam::012345678901:mfa/gopass' --token-code '123456'
+AssumedRoleUser:
+  Arn: arn:aws:sts::012345678901:assumed-role/EksAdminRole/lookAt-him-heIsThe-EksAdmin-now
+  AssumedRoleId: AROA2HKHF74L72AABBCCDD:lookAt-him-heIsThe-EksAdmin-now
+Credentials:
+  AccessKeyId: ASIA2HKHF74L7YOAUZHR
+  Expiration: '2025-04-12T08:09:46+00:00'
+  SecretAccessKey: ErhyPKjQkI3GbrnszpOvMTi8AvmziGbSIOIcNS9k
+  SessionToken: IQoJb3JpZ2…LxEOLkm9U
+```
+
+</details>
+
+For CLI access, users will **need** to add the `mfa_serial` setting to their profile.
+
+<details style="margin: -1rem 0 1rem 1rem">
 
 ```ini
 [default]
@@ -372,6 +401,7 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 - [aws.permissions.cloud]
 - [Using service-linked roles]
 - [IAM and AWS STS quotas]
+- [AWS global condition context keys]
 
 ### Sources
 
@@ -412,6 +442,7 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 <!-- Files -->
 <!-- Upstream -->
 [assumerole api reference]: https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html
+[aws global condition context keys]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html
 [can i increase the duration of the iam role chaining session?]: https://repost.aws/knowledge-center/iam-role-chaining-limit
 [creating a role to delegate permissions to an iam user]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user.html
 [how can i monitor the account activity of specific iam users, roles, and aws access keys?]: https://repost.aws/knowledge-center/view-iam-history
@@ -423,6 +454,7 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 [iam user groups]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_groups.html
 [iam users]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users.html
 [not authorized to perform: sts:assumerole]: https://repost.aws/questions/QUOY5XngCtRyOX4Desaygz8Q/not-authorized-to-perform-sts-assumerole
+[tasks that require root user credentials]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html#root-user-tasks
 [troubleshooting iam roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_roles.html
 [use an iam role in the aws cli]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html
 [using iam policy conditions for fine-grained access control to manage resource record sets]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/specifying-rrset-conditions.html

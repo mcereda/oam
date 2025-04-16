@@ -38,6 +38,7 @@ pulumi config set 'boincAcctMgrUrl' 'https://bam.boincstats.com'
 pulumi config set --secret 'boincGuiRpcPasswd' 'something-something-darkside'
 pulumi config set --path 'outer.inner' 'value'
 pulumi config set --path 'list[1]' 'value'
+gpg --export 'smth@example.org' | pulumi config set 'smthTeam:pgpKey-public-raw' --type 'string'
 
 # Gitlab provider
 # 'baseUrl' requires the ending slash
@@ -77,6 +78,9 @@ pulumi stack export | jq -r '.deployment.resources[]|{"urn":.urn,"provider":.pro
 
 # Check providers are all of a specific version
 pulumi stack export | jq -r '.deployment.resources[].provider' | grep -v 'aws::default_6_50_0'
+
+# Get the AWS secret access key of an aws.iam.AccessKey resource
+pulumi stack output 'someAccessKey' | jq -r '.encryptedSecret' - | base64 -d | gpg --decrypt
 
 # Avoid permission errors when deleting clusters with charts and stuff.
 PULUMI_K8S_DELETE_UNREACHABLE='true' pulumi destroy
