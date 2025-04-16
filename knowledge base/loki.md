@@ -510,6 +510,7 @@ analytics:
 - [Grafana Loki Configuration Nuances]
 - [OpenTelemetry / OTLP]
 - [Loki-Operator]
+- [The Quest for HA and DR in Loki]
 
 ### Sources
 
@@ -563,3 +564,4 @@ analytics:
 [loki s3 storage: a guide for efficient log management]: https://last9.io/blog/loki-s3-storage-guide/
 [loki-operator]: https://loki-operator.dev/
 [opentelemetry / otlp]: https://loki-operator.dev/docs/open-telemetry.md/
+[the quest for ha and dr in loki]: https://www.infracloud.io/blogs/high-availability-disaster-recovery-in-loki/
