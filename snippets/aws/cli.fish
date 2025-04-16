@@ -23,6 +23,9 @@ aws --profile 'engineer' sts assume-role \
 aws sts get-caller-identity
 AWS_PROFILE='engineer' aws sts get-caller-identity
 
+# Clear cached credentials
+rm -r ~'/.aws/cli/cache'
+
 
 # Run as Docker container
 docker run --rm -ti 'amazon/aws-cli' --version
