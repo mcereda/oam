@@ -21,8 +21,9 @@ prohibited from opening ports by security policies.
 1. [Write to remote Prometheus servers](#write-to-remote-prometheus-servers)
 1. [Management API](#management-api)
    1. [Take snapshots of the current data](#take-snapshots-of-the-current-data)
+1. [High availability](#high-availability)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -395,6 +396,17 @@ $ curl -X 'POST' 'http://localhost:9090/api/v1/admin/tsdb/snapshot'
 
 The snapshot now exists at `<data-dir>/snapshots/20171210T211224Z-2be650b6d019eb54`
 
+## High availability
+
+Typically achieved by:
+
+1. Running multiple Prometheus replicas.<br/>
+   Replicas could each focus on a subset of the whole data, or just duplicate it.
+1. Running a separate AlertManager instance.<br/>
+   This would handle alerts from all the Prometheus instances, automatically managing eventually duplicated data.
+1. Using tools like [Thanos], [Cortex], or Grafana's [Mimir] to aggregate and deduplicate data.
+1. Directing visualizers like Grafana to the aggregator instead of the Prometheus replicas.
+
 ## Further readings
 
 - [Website]
@@ -412,6 +424,9 @@ The snapshot now exists at `<data-dir>/snapshots/20171210T211224Z-2be650b6d019eb
 - [Prometheus Definitive Guide Part I - Metrics and Use Cases]
 - [Prometheus Definitive Guide Part II - Prometheus Query Language]
 - [Prometheus Definitive Guide Part III - Prometheus Operator]
+- [Cortex]
+- [Thanos]
+- Grafana's [Mimir]
 
 ### Sources
 
@@ -432,6 +447,7 @@ The snapshot now exists at `<data-dir>/snapshots/20171210T211224Z-2be650b6d019eb
 - [Install Prometheus and Grafana by Helm]
 - [Prometheus and Grafana setup in Minikube]
 - [I need to know about the below kube_state_metrics description. Exactly looking is what the particular metrics doing]
+- [High Availability in Prometheus: Best Practices and Tips]
 
 <!--
   Reference
@@ -439,9 +455,12 @@ The snapshot now exists at `<data-dir>/snapshots/20171210T211224Z-2be650b6d019eb
   -->
 
 <!-- Knowledge base -->
+[cortex]: cortex.md
 [grafana]: grafana.md
+[mimir]: mimir.md
 [node exporter]: node%20exporter.md
 [snmp exporter]: snmp%20exporter.md
+[thanos]: thanos.md
 
 <!-- Files -->
 [docker/monitoring]: ../docker%20compositions/monitoring/README.md
@@ -465,6 +484,7 @@ The snapshot now exists at `<data-dir>/snapshots/20171210T211224Z-2be650b6d019eb
 [dropping metrics at scrape time with prometheus]: https://www.robustperception.io/dropping-metrics-at-scrape-time-with-prometheus/
 [getting started with prometheus]: https://opensource.com/article/18/12/introduction-prometheus
 [high availability for prometheus and alertmanager: an overview]: https://promlabs.com/blog/2023/08/31/high-availability-for-prometheus-and-alertmanager-an-overview/
+[high availability in prometheus: best practices and tips]: https://last9.io/blog/high-availability-in-prometheus/
 [how i monitor my openwrt router with grafana cloud and prometheus]: https://grafana.com/blog/2021/02/09/how-i-monitor-my-openwrt-router-with-grafana-cloud-and-prometheus/
 [how relabeling in prometheus works]: https://grafana.com/blog/2022/03/21/how-relabeling-in-prometheus-works/
 [how to integrate prometheus and grafana on kubernetes using helm]: https://semaphoreci.com/blog/prometheus-grafana-kubernetes-helm

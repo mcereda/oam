@@ -52,6 +52,9 @@ dig '@8.8.8.8' 'google.com'
 
 # Return all results.
 dig 'google.com' 'ANY'
+
+# Only return the first answer.
+dig +short 'google.com'
 ```
 
 </details>
@@ -61,6 +64,7 @@ dig 'google.com' 'ANY'
 
 ```sh
 dig +trace '@1.1.1.1' 'google.com'
+dig 'A' +short '@172.31.0.2' 'fs-0123456789abcdef0.efs.eu-west-1.amazonaws.com'
 ```
 
 </details>
