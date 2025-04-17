@@ -316,6 +316,7 @@ yubikeytotp = awscli_plugin_yubikeytotp
 ## Further readings
 
 - [Amazon Web Services]
+- [Codebase]
 - CLI [quickstart]
 - [Configure profiles] in the CLI
 - [How do I assume an IAM role using the AWS CLI?]
@@ -349,6 +350,7 @@ yubikeytotp = awscli_plugin_yubikeytotp
 [cli config files]: ../../../examples/dotfiles/.aws
 
 <!-- Upstream -->
+[codebase]: https://github.com/aws/aws-cli/tree/v2
 [configure profiles]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html
 [how do i assume an iam role using the aws cli?]: https://repost.aws/knowledge-center/iam-assume-role-cli
 [improved cli auto-prompt mode]: https://github.com/aws/aws-cli/issues/5664
