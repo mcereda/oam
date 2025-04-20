@@ -13,6 +13,7 @@
    1. [Docker volumes](#docker-volumes)
    1. [Bind mounts](#bind-mounts)
 1. [Execute commands in tasks' containers](#execute-commands-in-tasks-containers)
+1. [Scrape metrics using Prometheus](#scrape-metrics-using-prometheus)
 1. [Troubleshooting](#troubleshooting)
    1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
 1. [Further readings](#further-readings)
@@ -359,9 +360,13 @@ EFS file systems are supported on
 
 ### Docker volumes
 
+Refer [Use Docker volumes with Amazon ECS].
+
 TODO
 
 ### Bind mounts
+
+Refer [Use bind mounts with Amazon ECS].
 
 TODO
 
@@ -560,6 +565,28 @@ Logging options are configured at the ECS cluster level.<br/>
 The task's role **will** need to have IAM permissions to log the output to S3 and/or CloudWatch should the cluster be
 configured for the above options. If the options are **not** configured, then the permissions are **not** required.
 
+## Scrape metrics using Prometheus
+
+Refer [Prometheus service discovery for AWS ECS] and [Scraping Prometheus metrics from applications running in AWS ECS].
+
+> Prometheus is **not** currently capable to automatically discover ECS components like services or tasks.
+
+Solutions:
+
+- _Push_ the metrics instead by instrumenting the applications, or using tools like [AWS Distro for OpenTelemetry].
+- Use a load balancer to access the service, and point Prometheus to the load balancer.
+
+  Useful if needing to just monitor the availability of services.<br/>
+  The load balancer will take care of monitoring the tasks in the target group.
+
+  The scrape request needs to go through the load balancer.<br/>
+  This **will** cost money.
+
+- Target a lambda that returns a [308 Permanent Redirect] code with the current IP addresses of the requested tasks.
+- Use dynamic service discovery mechanisms like AWS Cloud Map.<br/>
+  Refer [Metrics collection from Amazon ECS using Amazon Managed Service for Prometheus] and
+  [aws-cloudmap-prometheus-sd].
+
 ## Troubleshooting
 
 ### Invalid 'cpu' setting for task
@@ -614,6 +641,11 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [Using Amazon ECS Exec to access your containers on AWS Fargate and Amazon EC2]
 - [A Step-by-Step Guide to Enabling Amazon ECS Exec]
 - [`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]
+- [Prometheus service discovery for AWS ECS]
+- [Metrics collection from Amazon ECS using Amazon Managed Service for Prometheus]
+- [AWS Distro for OpenTelemetry]
+- [aws-cloudmap-prometheus-sd]
+- [Scraping Prometheus metrics from applications running in AWS ECS]
 
 <!--
   Reference
@@ -642,22 +674,30 @@ Specify a supported value for the task CPU and memory in your task definition.
 [amazon ecs task definition differences for the fargate launch type]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html
 [amazon ecs task lifecycle]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html
 [amazon ecs task role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
+[AWS Distro for OpenTelemetry]: https://aws-otel.github.io/
 [ecs execute-command proposal]: https://github.com/aws/containers-roadmap/issues/1050
 [fargate tasks sizes]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html#fargate-tasks-size
 [how amazon ecs manages cpu and memory resources]: https://aws.amazon.com/blogs/containers/how-amazon-ecs-manages-cpu-and-memory-resources/
 [how amazon elastic container service works with iam]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security_iam_service-with-iam.html
 [identity and access management for amazon elastic container service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security-iam.html
 [install the session manager plugin for the aws cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
+[Metrics collection from Amazon ECS using Amazon Managed Service for Prometheus]: https://aws.amazon.com/blogs/opensource/metrics-collection-from-amazon-ecs-using-amazon-managed-service-for-prometheus/
 [storage options for amazon ecs tasks]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html
 [troubleshoot amazon ecs deployment issues]: https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ecs.html
 [troubleshoot amazon ecs task definition invalid cpu or memory errors]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 [use amazon ebs volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html
 [use amazon efs volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html
+[use bind mounts with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/bind-mounts.html
+[use docker volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/docker-volumes.html
 [using amazon ecs exec to access your containers on aws fargate and amazon ec2]: https://aws.amazon.com/blogs/containers/new-using-amazon-ecs-exec-access-your-containers-fargate-ec2/
 
 <!-- Others -->
 [`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]: https://stackoverflow.com/questions/69261159/aws-ecs-execute-command-results-in-targetnotconnectedexception-the-execute
+[308 Permanent Redirect]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/308
 [a step-by-step guide to enabling amazon ecs exec]: https://medium.com/@mariotolic/a-step-by-step-guide-to-enabling-amazon-ecs-exec-a88b05858709
 [attach ebs volume to aws ecs fargate]: https://medium.com/@shujaatsscripts/attach-ebs-volume-to-aws-ecs-fargate-e23fea7bb1a7
+[aws-cloudmap-prometheus-sd]: https://github.com/awslabs/aws-cloudmap-prometheus-sd
 [exposing multiple ports for an aws ecs service]: https://medium.com/@faisalsuhail1/exposing-multiple-ports-for-an-aws-ecs-service-64b9821c09e8
 [guide to using amazon ebs with amazon ecs and aws fargate]: https://stackpioneers.com/2024/01/12/guide-to-using-amazon-ebs-with-amazon-ecs-and-aws-fargate/
+[prometheus service discovery for aws ecs]: https://tomgregory.com/aws/prometheus-service-discovery-for-aws-ecs/
+[Scraping Prometheus metrics from applications running in AWS ECS]: https://towardsaws.com/scraping-prometheus-metrics-from-aws-ecs-9c8d9a1ca1bd
