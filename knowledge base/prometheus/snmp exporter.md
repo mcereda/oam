@@ -1,33 +1,29 @@
 # Prometheus' SNMP exporter
 
-## Table of contents <!-- omit in toc -->
+TODO
 
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## Further readings
 
-- [Github]
+- [Codebase]
 - [Prometheus]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [SNMP monitoring and easing it with Prometheus]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
-<!-- Upstream -->
-[github]: https://github.com/prometheus/snmp_exporter
-
-<!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Knowledge base -->
-[prometheus]: prometheus.md
+[prometheus]: README.md
+
+<!-- Upstream -->
+[codebase]: https://github.com/prometheus/snmp_exporter
 
 <!-- Others -->
 [snmp monitoring and easing it with prometheus]: https://medium.com/@openmohan/snmp-monitoring-and-easing-it-with-prometheus-b157c0a42c0c

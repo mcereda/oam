@@ -317,7 +317,7 @@ Alternatives:
 <!-- Knowledge base -->
 [cortex]: cortex.md
 [grafana]: grafana.md
-[prometheus]: prometheus.md
+[prometheus]: prometheus/README.md
 [thanos]: thanos.md
 
 <!-- Files -->

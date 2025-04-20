@@ -44,7 +44,7 @@ Will be requested to change them upon first login.
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [grafana]: ../../knowledge%20base/grafana.md
-[prometheus]: ../../knowledge%20base/prometheus.md
+[prometheus]: ../../knowledge%20base/prometheus/README.md
 
 <!-- Files -->
 [prometheus' configuration file]: prometheus/prometheus.yml
