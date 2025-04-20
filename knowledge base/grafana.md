@@ -236,7 +236,7 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Knowledge base -->
 [loki]: loki.md
-[prometheus]: prometheus.md
+[prometheus]: prometheus/README.md
 
 <!-- Files -->
 [docker compositions/monitoring]: ../docker%20compositions/monitoring/README.md

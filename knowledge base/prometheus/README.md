@@ -1,11 +1,9 @@
 # Prometheus
 
-Monitoring and alerting system that collects metrics from configured targets at given intervals, evaluates rule
-expressions, displays the results, and can trigger alerts when specified conditions are observed.
+Metrics gathering and alerting tool.
 
-Works normally by scraping metrics from monitored hosts.<br/>
-Metrics can also be pushed to Prometheus servers via plugins, in the event source hosts are behind a firewall or
-prohibited from opening ports by security policies.
+It collects metrics, evaluates rule expressions, displays the results, and can trigger alerts when specified conditions
+are observed.
 
 1. [TL;DR](#tldr)
 1. [Components](#components)
@@ -26,6 +24,23 @@ prohibited from opening ports by security policies.
     1. [Sources](#sources)
 
 ## TL;DR
+
+Metrics are values that measure something.
+
+Prometheus is designed to store metrics' changes over time.
+
+Prometheus collects metrics by:
+
+- Actively **pulling** (_scraping_) them from configured _targets_ at given intervals.<br/>
+  Targets shall expose an HTTP endpoint for Prometheus to scrape.
+- Having them **pushed** to it by clients.<br/>
+  This is most useful in the event the sources are behind firewalls, or otherwise prohibited from opening ports by
+  security policies.
+
+One can leverage _exporters_ collect metrics from targets that do **not** natively provide a suitable HTTP endpoint for
+Prometheus to scrape from.<br/>
+Exporters are small and purpose-built applications that collect their objects' metrics in different ways, then expose
+them in an HTTP endpoint in their place.
 
 ```sh
 # Start the process.
@@ -200,7 +215,7 @@ When using time ranges, the returned vector will be a _range vector_.
 100 * (1 - avg by(instance)(irate(node_cpu_seconds_total{job='node_exporter',mode='idle'}[5m])))
 ```
 
-![advanced query](prometheus%20advanced%20query.png)
+![advanced query](advanced%20query%20result.png)
 
 Labels are used to filter the job and the mode.
 
@@ -414,9 +429,6 @@ Typically achieved by:
 - [Documentation]
 - [Helm chart]
 - [`docker/monitoring`][docker/monitoring]
-- [Node exporter]
-- [SNMP exporter]
-- [`ordaa/boinc_exporter`][ordaa/boinc_exporter]
 - [Grafana]
 - [High Availability for Prometheus and Alertmanager: An Overview]
 - [Making Prometheus Highly Available (HA) & Scalable with Thanos]
@@ -428,13 +440,15 @@ Typically achieved by:
 - [Thanos]
 - Grafana's [Mimir]
 
+Exporters:
+
+- [Node exporter]
+- [SNMP exporter]
+- [`ordaa/boinc_exporter`][ordaa/boinc_exporter]
+
 ### Sources
 
 - [Getting started with Prometheus]
-- [Node exporter guide]
-- [SNMP monitoring and easing it with Prometheus]
-- [`prometheus/node_exporter`][prometheus/node_exporter]
-- [`prometheus/snmp_exporter`][prometheus/snmp_exporter]
 - [How I monitor my OpenWrt router with Grafana Cloud and Prometheus]
 - [Scrape selective metrics in Prometheus]
 - [Dropping metrics at scrape time with Prometheus]
@@ -442,7 +456,6 @@ Typically achieved by:
 - [Install Prometheus and Grafana with helm 3 on a local machine VM]
 - [Set up prometheus and ingress on kubernetes]
 - [How to integrate Prometheus and Grafana on Kubernetes using Helm]
-- [node-exporter's helm chart's values]
 - [How to set up and experiment with Prometheus remote-write]
 - [Install Prometheus and Grafana by Helm]
 - [Prometheus and Grafana setup in Minikube]
@@ -455,15 +468,15 @@ Typically achieved by:
   -->
 
 <!-- Knowledge base -->
-[cortex]: cortex.md
-[grafana]: grafana.md
-[mimir]: mimir.md
+[cortex]: ../cortex.md
+[grafana]: ../grafana.md
+[mimir]: ../mimir.md
 [node exporter]: node%20exporter.md
 [snmp exporter]: snmp%20exporter.md
-[thanos]: thanos.md
+[thanos]: ../thanos.md
 
 <!-- Files -->
-[docker/monitoring]: ../docker%20compositions/monitoring/README.md
+[docker/monitoring]: ../../docker%20compositions/monitoring/README.md
 
 <!-- Upstream -->
 [codebase]: https://github.com/prometheus/prometheus
@@ -471,10 +484,6 @@ Typically achieved by:
 [functions]: https://prometheus.io/docs/prometheus/latest/querying/functions/
 [helm chart]: https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus
 [metric_relabel_configs]: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs
-[node exporter guide]: https://prometheus.io/docs/guides/node-exporter/
-[node-exporter's helm chart's values]: https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-node-exporter
-[prometheus/node_exporter]: https://github.com/prometheus/node_exporter
-[prometheus/snmp_exporter]: https://github.com/prometheus/snmp_exporter
 [promql]: https://prometheus.io/docs/prometheus/latest/querying/basics/
 [remote_write setting]: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write
 [storage]: https://prometheus.io/docs/prometheus/latest/storage/
@@ -501,4 +510,3 @@ Typically achieved by:
 [scaling prometheus with cortex]: https://www.infracloud.io/blogs/cortex-for-ha-monitoring-with-prometheus/
 [scrape selective metrics in prometheus]: https://docs.last9.io/docs/how-to-scrape-only-selective-metrics-in-prometheus
 [set up prometheus and ingress on kubernetes]: https://blog.gojekengineering.com/diy-how-to-set-up-prometheus-and-ingress-on-kubernetes-d395248e2ba
-[snmp monitoring and easing it with prometheus]: https://medium.com/@openmohan/snmp-monitoring-and-easing-it-with-prometheus-b157c0a42c0c

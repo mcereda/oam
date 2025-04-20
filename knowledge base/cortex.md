@@ -66,7 +66,7 @@ Alternatives:
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [mimir]: mimir.md
-[prometheus]: prometheus.md
+[prometheus]: prometheus/README.md
 [thanos]: thanos.md
 
 <!-- Files -->

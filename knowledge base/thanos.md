@@ -67,7 +67,7 @@ Alternatives:
 <!-- Knowledge base -->
 [cortex]: cortex.md
 [mimir]: mimir.md
-[prometheus]: prometheus.md
+[prometheus]: prometheus/README.md
 
 <!-- Files -->
 <!-- Upstream -->

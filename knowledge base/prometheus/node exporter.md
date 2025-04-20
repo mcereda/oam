@@ -1,10 +1,10 @@
 # Prometheus' node exporter
 
-## Table of contents <!-- omit in toc -->
+TODO
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -17,25 +17,23 @@ sudo apt install 'prometheus-node-exporter'
 
 ## Further readings
 
-- [Github]
+- [Codebase]
 - [Prometheus]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Node exporter guide]
+- [Helm chart values]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
-<!-- Upstream -->
-[github]: https://github.com/prometheus/node_exporter
-[node exporter guide]: https://prometheus.io/docs/guides/node-exporter/
-
-<!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Knowledge base -->
-[prometheus]: prometheus.md
+[prometheus]: README.md
+
+<!-- Upstream -->
+[codebase]: https://github.com/prometheus/node_exporter
+[helm chart values]: https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-node-exporter
+[node exporter guide]: https://prometheus.io/docs/guides/node-exporter/
