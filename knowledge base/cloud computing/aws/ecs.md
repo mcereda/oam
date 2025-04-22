@@ -13,6 +13,10 @@
    1. [Docker volumes](#docker-volumes)
    1. [Bind mounts](#bind-mounts)
 1. [Execute commands in tasks' containers](#execute-commands-in-tasks-containers)
+1. [Allow tasks to communicate with each other](#allow-tasks-to-communicate-with-each-other)
+   1. [ECS Service Connect](#ecs-service-connect)
+   1. [ECS service discovery](#ecs-service-discovery)
+   1. [VPC Lattice](#vpc-lattice)
 1. [Scrape metrics using Prometheus](#scrape-metrics-using-prometheus)
 1. [Troubleshooting](#troubleshooting)
    1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
@@ -565,6 +569,84 @@ Logging options are configured at the ECS cluster level.<br/>
 The task's role **will** need to have IAM permissions to log the output to S3 and/or CloudWatch should the cluster be
 configured for the above options. If the options are **not** configured, then the permissions are **not** required.
 
+## Allow tasks to communicate with each other
+
+Refer [How can I allow the tasks in my Amazon ECS services to communicate with each other?] and
+[Interconnect Amazon ECS services].
+
+Tasks in a cluster are **not** normally able to communicate with each other.<br/>
+Use ECS Service Connect, ECS service discovery or VPC Lattice to allow that.
+
+### ECS Service Connect
+
+ECS Service Connect provides ECS clusters with the configuration they need for service discovery, connectivity, and
+traffic monitoring.
+
+Applications can use short names and standard ports to connect to **services** in the same or other clusters.<br/>
+This includes connecting across VPCs in the same AWS Region.
+
+When using Service Connect, ECS dynamically manages DNS entries for each task as they start and stop.<br/>
+It does so by running an agent in each task that is configured to discover the names.
+
+One **must** provide the complete configuration inside **each** service **and** task definition.<br/>
+ECS manages changes to this configuration in each service's deployment and ensures that all tasks in a deployment behave
+in the same way.
+
+Service Connect is **not** compatible with ECS' `host` network mode.
+
+See also [Use Service Connect to connect Amazon ECS services with short names].
+
+### ECS service discovery
+
+Service discovery helps manage HTTP and DNS namespaces for ECS services.
+
+ECS syncs the list of launched tasks to AWS Cloud Map.<br/>
+Cloud Map maintains DNS records that resolve to the internal IP addresses of one or more tasks from registered
+services.<br/>
+Other services in the **same** VPC can use such DNS records to send traffic directly to containers using their internal
+IP addresses.
+
+This approach provides low latency since traffic travels directly between the containers.
+
+ECS service discovery is a good fit when using the `awsvpc` network mode, where:
+
+- Each task is assigned its own, unique IP address.
+- That IP address is an `A` record.
+- Each service can have a unique security group assigned.
+
+When using _bridged network_ mode, `A` records are no longer enough for service discovery and one **must** also use a
+`SRV` DNS record. This is due to containers sharing the same IP address and having ports mapped randomly.<br/>
+`SRV` records can keep track of both IP addresses and port numbers, but requires applications to be appropriately
+configured.
+
+Service discovery supports only the `A` and `SRV` DNS record types.<br/>
+DNS records are automatically added or removed as tasks start or stop for ECS services.
+
+DNS records have a TTL and it might happen that tasks died before this ended.<br/>
+One **must** implement extra logic in one's applications, so that they can handle retries and deal with connection
+failures when the records are not yet updated.
+
+See also [Use service discovery to connect Amazon ECS services with DNS names].
+
+### VPC Lattice
+
+Managed application networking service that customers can use to observe, secure, and monitor applications built across
+AWS compute services, VPCs, and accounts without having to modify their code.
+
+VPC Lattice technically replaces the need for Application Load Balancers by leveraging target groups themselves.<br/>
+Target groups which are a collection of compute resources, and can refer EC2 instances, IP addresses, Lambda functions,
+and Application Load Balancers.<br/>
+Listeners are used to forward traffic to specified target groups when the conditions are met.<br/>
+ECS also automatically replaces unhealthy tasks.
+
+ECS tasks can be enabled **as IP targets** in VPC Lattice by associating their services with a VPC Lattice target
+group.<br/>
+ECS automatically registers tasks to the VPC Lattice target group when they are launched for registered services.
+
+Deployments _might_ take longer when using VPC Lattice due to the extent of changes required.
+
+See also [What is Amazon VPC Lattice?] and its [Amazon VPC Lattice pricing].
+
 ## Scrape metrics using Prometheus
 
 Refer [Prometheus service discovery for AWS ECS] and [Scraping Prometheus metrics from applications running in AWS ECS].
@@ -646,6 +728,8 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [AWS Distro for OpenTelemetry]
 - [aws-cloudmap-prometheus-sd]
 - [Scraping Prometheus metrics from applications running in AWS ECS]
+- [How can I allow the tasks in my Amazon ECS services to communicate with each other?]
+- [Interconnect Amazon ECS services]
 
 <!--
   Reference
@@ -674,13 +758,16 @@ Specify a supported value for the task CPU and memory in your task definition.
 [amazon ecs task definition differences for the fargate launch type]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html
 [amazon ecs task lifecycle]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html
 [amazon ecs task role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
+[Amazon VPC Lattice pricing]: https://aws.amazon.com/vpc/lattice/pricing/
 [AWS Distro for OpenTelemetry]: https://aws-otel.github.io/
 [ecs execute-command proposal]: https://github.com/aws/containers-roadmap/issues/1050
 [fargate tasks sizes]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html#fargate-tasks-size
 [how amazon ecs manages cpu and memory resources]: https://aws.amazon.com/blogs/containers/how-amazon-ecs-manages-cpu-and-memory-resources/
 [how amazon elastic container service works with iam]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security_iam_service-with-iam.html
+[How can I allow the tasks in my Amazon ECS services to communicate with each other?]: https://repost.aws/knowledge-center/ecs-tasks-services-communication
 [identity and access management for amazon elastic container service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security-iam.html
 [install the session manager plugin for the aws cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
+[Interconnect Amazon ECS services]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/interconnecting-services.html
 [Metrics collection from Amazon ECS using Amazon Managed Service for Prometheus]: https://aws.amazon.com/blogs/opensource/metrics-collection-from-amazon-ecs-using-amazon-managed-service-for-prometheus/
 [storage options for amazon ecs tasks]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html
 [troubleshoot amazon ecs deployment issues]: https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ecs.html
@@ -689,7 +776,10 @@ Specify a supported value for the task CPU and memory in your task definition.
 [use amazon efs volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html
 [use bind mounts with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/bind-mounts.html
 [use docker volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/docker-volumes.html
+[Use Service Connect to connect Amazon ECS services with short names]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html
+[Use service discovery to connect Amazon ECS services with DNS names]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html
 [using amazon ecs exec to access your containers on aws fargate and amazon ec2]: https://aws.amazon.com/blogs/containers/new-using-amazon-ecs-exec-access-your-containers-fargate-ec2/
+[What is Amazon VPC Lattice?]: https://docs.aws.amazon.com/vpc-lattice/latest/ug/what-is-vpc-lattice.html
 
 <!-- Others -->
 [`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]: https://stackoverflow.com/questions/69261159/aws-ecs-execute-command-results-in-targetnotconnectedexception-the-execute
