@@ -100,6 +100,7 @@ gopass sha265 …
 
 # Find entries matching the search string.
 gopass find 'github'
+gopass find --regex 'sentry-.*'
 gopass search …
 
 # Find secrets containing the search string when decrypted.
