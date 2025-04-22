@@ -108,6 +108,31 @@ mount -t 'nfs' -o 'nfsvers=4,tcp,rwsize=1048576,hard,timeo=600,retrans=2,noresvp
 
 </details>
 
+<details>
+  <summary>Example: mount an EFS volume and change a file in it</summary>
+
+```sh
+$ aws efs describe-file-systems --query 'FileSystems[].FileSystemId' --output 'text' --creation-token 'mimir'
+fs-abcdef0123456789a
+$ dig 'A' +short '@172.16.0.2' 'fs-abcdef0123456789a.efs.eu-west-1.amazonaws.com'
+172.16.1.20
+$ mkdir -p "$HOME/tmp/efs"
+$ mount -t 'nfs' -o 'nfsvers=4.0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport' \
+    '172.16.1.20:/' "$HOME/tmp/efs"
+$ mount -t 'nfs'
+172.16.1.20:/ on /Users/someuser/tmp/efs (nfs, nodev, nosuid, mounted by someuser)
+$ sudo cp -iv 'config.yaml' "$HOME/tmp/efs/"   # EFS permissions require one to use `sudo` here
+config.yaml -> /Users/someuser/tmp/efs/config.yaml
+$ ls -l "$HOME/tmp/efs/"
+total 1
+-rw-r--r--@ 1 root  wheel  254 Apr 17 17:58 config.yaml
+$ cat "$HOME/tmp/efs/config.yaml"
+$ vim "$HOME/tmp/efs/config.yaml"
+$ umount "$HOME/tmp/efs"
+```
+
+</details>
+
 ## Further readings
 
 - [Amazon Web Services]

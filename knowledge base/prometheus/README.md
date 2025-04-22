@@ -16,7 +16,8 @@ are observed.
    1. [Local storage](#local-storage)
    1. [External storage](#external-storage)
    1. [Backfilling](#backfilling)
-1. [Write to remote Prometheus servers](#write-to-remote-prometheus-servers)
+1. [Send metrics to other Prometheus servers](#send-metrics-to-other-prometheus-servers)
+1. [Exporters](#exporters)
 1. [Management API](#management-api)
    1. [Take snapshots of the current data](#take-snapshots-of-the-current-data)
 1. [High availability](#high-availability)
@@ -42,6 +43,20 @@ Prometheus to scrape from.<br/>
 Exporters are small and purpose-built applications that collect their objects' metrics in different ways, then expose
 them in an HTTP endpoint in their place.
 
+<details>
+  <summary>Setup</summary>
+
+```sh
+docker pull 'prom/prometheus'
+docker run -p '9090:9090' -v "$PWD/config/dir:/etc/prometheus" -v 'prometheus-data:/prometheus' 'prom/prometheus'
+
+```
+
+</details>
+
+<details>
+  <summary>Usage</summary>
+
 ```sh
 # Start the process.
 prometheus
@@ -56,6 +71,8 @@ curl -i -X 'POST' 'localhost:9090/-/reload'  # if admin APIs are enabled
 kill -s 'SIGTERM' '3969'
 pkill --signal 'TERM' 'prometheus'
 ```
+
+</details>
 
 ## Components
 
@@ -355,7 +372,7 @@ TODO
 
 TODO
 
-## Write to remote Prometheus servers
+## Send metrics to other Prometheus servers
 
 Also see [How to set up and experiment with Prometheus remote-write].
 
@@ -375,6 +392,23 @@ remote_write:
     sigv4:
       region: eu-east-1
 ```
+
+## Exporters
+
+Refer [Exporters and integrations].
+
+Exporters are libraries and web servers that gather metrics from third-party systems, then either send them to
+Prometheus servers or expose them as Prometheus metrics.
+
+They are used in cases where it is not feasible to instrument systems to send or expose Prometheus metrics directly.
+
+Exporters of interest:
+
+| Exporter                               | Summary                             |
+| -------------------------------------- | ----------------------------------- |
+| [BOINC exporter][ordaa/boinc_exporter] | Metrics for BOINC client            |
+| [Node exporter]                        | OS-related metrics                  |
+| [SNMP exporter]                        | Basically SNMP in Prometheus format |
 
 ## Management API
 
@@ -416,9 +450,10 @@ The snapshot now exists at `<data-dir>/snapshots/20171210T211224Z-2be650b6d019eb
 Typically achieved by:
 
 1. Running multiple Prometheus replicas.<br/>
-   Replicas could each focus on a subset of the whole data, or just duplicate it.
+   Replicas could each focus _on a subset_ of the whole data, or just scrape the targets multiple times and leave the
+   deduplication to other tools.
 1. Running a separate AlertManager instance.<br/>
-   This would handle alerts from all the Prometheus instances, automatically managing eventually duplicated data.
+   This would handle alerts from **all** the Prometheus instances, automatically managing eventually duplicated data.
 1. Using tools like [Thanos], [Cortex], or Grafana's [Mimir] to aggregate and deduplicate data.
 1. Directing visualizers like Grafana to the aggregator instead of the Prometheus replicas.
 
@@ -439,12 +474,7 @@ Typically achieved by:
 - [Cortex]
 - [Thanos]
 - Grafana's [Mimir]
-
-Exporters:
-
-- [Node exporter]
-- [SNMP exporter]
-- [`ordaa/boinc_exporter`][ordaa/boinc_exporter]
+- [Exporters and integrations]
 
 ### Sources
 
@@ -481,6 +511,7 @@ Exporters:
 <!-- Upstream -->
 [codebase]: https://github.com/prometheus/prometheus
 [documentation]: https://prometheus.io/docs/
+[Exporters and integrations]: https://prometheus.io/docs/instrumenting/exporters/
 [functions]: https://prometheus.io/docs/prometheus/latest/querying/functions/
 [helm chart]: https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus
 [metric_relabel_configs]: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs

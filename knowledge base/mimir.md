@@ -14,9 +14,13 @@ and set up alerting rules across multiple tenants to leverage tenant federation.
    1. [Microservices mode](#microservices-mode)
 1. [Storage](#storage)
    1. [Object storage](#object-storage)
+1. [Authentication and authorization](#authentication-and-authorization)
 1. [APIs](#apis)
 1. [Deduplication of data from multiple Prometheus scrapers](#deduplication-of-data-from-multiple-prometheus-scrapers)
 1. [Migrate to Mimir](#migrate-to-mimir)
+1. [Troubleshooting](#troubleshooting)
+   1. [HTTP status 401 Unauthorized: no org id](#http-status-401-unauthorized-no-org-id)
+   1. [HTTP status 500 Internal Server Error: send data to ingesters: at least 2 live replicas required, could only find 1](#http-status-500-internal-server-error-send-data-to-ingesters-at-least-2-live-replicas-required-could-only-find-1)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -32,6 +36,9 @@ Such blocks are the same that Prometheus and Thanos use, though each application
 uses slightly different metadata files for them.
 
 Mimir supports multiple tenants, and stores blocks on a **per-tenant** level.<br/>
+Multi-tenancy is enabled by default, and can be disabled using the `-auth.multitenancy-enabled=false` option.<br/>
+If enabled, then multi-tenancy **will require every API request** to have the `X-Scope-OrgID` header with the value set
+to the tenant ID one is authenticating for.<br/>
 When multi-tenancy is **disabled**, it will only manage a single tenant going by the name `anonymous`.
 
 Blocks can be uploaded using the `mimirtool` utility, so that Mimir can access them.<br/>
@@ -177,7 +184,12 @@ It will **not** scrape metrics itself.
 
 ```yaml
 remote_write:
-  - url: http://mimir.example.org:9009/api/v1/push
+  - url: http://mimir.example.org:8080/api/v1/push
+    headers:
+      X-Scope-OrgID:
+        # required unless multi-tenancy is disabled
+        # set it to the correct ones, this is the default
+        anonymous
 ```
 
 </details>
@@ -254,7 +266,10 @@ Refer [Configure Grafana Mimir object storage backend].
 Blocks storage must be located under a **different** prefix or bucket than both the ruler's and AlertManager's stores.
 Mimir **will** fail to start if that is the case.
 
-To avoid that, it is suggested to override the `bucket_name` setting in the specific configurations:
+To avoid that, it is suggested to override the `bucket_name` setting in the specific configurations.
+
+<details style="padding: 0 0 0 1rem">
+  <summary>Different buckets</summary>
 
 ```yaml
 common:
@@ -277,6 +292,42 @@ ruler_storage:
     bucket_name: mimir-ruler
 ```
 
+</details>
+
+<details style="padding: 0 0 1rem 1rem">
+  <summary>Same bucket, different prefixes</summary>
+
+```yaml
+common:
+  storage:
+    backend: s3
+    s3:
+      endpoint: s3.us-east-2.amazonaws.com
+      region: us-east-2
+      bucket_name: mimir
+
+blocks_storage:
+  storage_prefix: blocks
+
+alertmanager_storage:
+  storage_prefix: alertmanager
+
+ruler_storage:
+  storage_prefix: ruler
+```
+
+</details>
+
+The WAL is **only** retained on local disk, **not** persisted to the object storage.
+
+Metrics data is uploaded to the object storage every 2 hours, typically when a block is cut from the in-memory TSDB
+head.<br/>
+After the metrics data block is uploaded, its related WAL is truncated too.
+
+## Authentication and authorization
+
+Refer [Grafana Mimir authentication and authorization].
+
 ## APIs
 
 Refer [Grafana Mimir HTTP API].
@@ -287,7 +338,72 @@ Refer [Configure Grafana Mimir high-availability deduplication].
 
 ## Migrate to Mimir
 
-Refer [Migrate from Thanos or Prometheus to Grafana Mimir].
+Refer [Configure TSDB block upload] and [Migrate from Thanos or Prometheus to Grafana Mimir].
+
+## Troubleshooting
+
+### HTTP status 401 Unauthorized: no org id
+
+**Context**: Prometheus servers get this error when trying to push metrics.
+
+**Root cause**: The push request is missing the `X-Scope-OrgID` header that would specify the tenancy for the data.
+
+**Solution**:
+
+Configure Prometheus to add the `X-Scope-OrgID` header to the data pushed.<br/>
+Required even when multi-tenancy is disabled. In this case, use the default `anonymous` tenancy:
+
+```yaml
+remote_write:
+  - url: http://mimir.example.org:8080/api/v1/push
+    headers:
+      X-Scope-OrgID:
+        # required unless multi-tenancy is disabled
+        # set it to the correct ones, this is the default
+        anonymous
+```
+
+### HTTP status 500 Internal Server Error: send data to ingesters: at least 2 live replicas required, could only find 1
+
+**Context**:
+
+Mimir is running on [AWS ECS] in monolithic mode for evaluation.<br/>
+It is loading the following configuration from a mounted [AWS EFS] volume:
+
+```yml
+multitenancy_enabled: false
+
+common:
+  storage:
+    backend: s3
+blocks_storage:
+  s3:
+    bucket_name: my-mimir-blocks
+```
+
+The service is backed by a load balancer.<br/>
+The load balancer is allowing requests to reach the task serving Mimir correctly.
+
+A Prometheus server is configured to send data to Mimir:
+
+```yml
+remote_write:
+  - url: http://mimir.dev.somecompany.com:8080/api/v1/push
+    headers:
+      X-Scope-OrgID: anonymous
+```
+
+The push request passes Mimir's validation for the above header.
+
+Both Mimir and Prometheus print this error when Prometheus tries to push metrics.
+
+**Root cause**:
+
+It seems Mimir requires a minimum of 2 ingester replicas even when running in monolithic mode.
+
+**Solution**:
+
+TODO
 
 ## Further readings
 
@@ -307,6 +423,7 @@ Alternatives:
 - [Migrate from Thanos or Prometheus to Grafana Mimir]
 - [Configure Grafana Mimir object storage backend]
 - [Grafana Mimir configuration parameters]
+- [Grafana Mimir authentication and authorization]
 
 <!--
   Reference
@@ -315,6 +432,8 @@ Alternatives:
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[aws ecs]: cloud%20computing/aws/ecs.md
+[aws efs]: cloud%20computing/aws/efs.md
 [cortex]: cortex.md
 [grafana]: grafana.md
 [prometheus]: prometheus/README.md
@@ -325,7 +444,9 @@ Alternatives:
 [codebase]: https://github.com/grafana/mimir
 [configure grafana mimir high-availability deduplication]: https://grafana.com/docs/mimir/latest/configure/configure-high-availability-deduplication/
 [configure grafana mimir object storage backend]: https://grafana.com/docs/mimir/latest/configure/configure-object-storage-backend/
+[Configure TSDB block upload]: https://grafana.com/docs/mimir/latest/configure/configure-tsdb-block-upload/
 [documentation]: https://grafana.com/docs/mimir/latest/
+[Grafana Mimir authentication and authorization]: https://grafana.com/docs/mimir/next/manage/secure/authentication-and-authorization/
 [grafana mimir configuration parameters]: https://grafana.com/docs/mimir/latest/configure/configuration-parameters/
 [grafana mimir http api]: https://grafana.com/docs/mimir/latest/references/http-api/
 [helm chart]: https://github.com/grafana/mimir/tree/main/operations/helm/charts/mimir-distributed

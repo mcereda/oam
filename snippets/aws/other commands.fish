@@ -120,6 +120,7 @@ aws ecr list-images --registry-id '012345678901' --repository-name 'cache/docker
 # ------------------
 ###
 
+# List tasks given a service name
 aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --service-name 'testService'
 
 aws ecs list-tasks --output 'text' --query 'taskArns' --cluster 'testCluster' --family 'testService' \
@@ -163,6 +164,10 @@ aws ecs describe-tasks --cluster 'staging' --tasks 'ef6260ed8aab49cf926667ab0c52
 aws ecs execute-command --cluster 'staging' --task 'e242654518cf42a7be13a8551e0b3c27' --container 'echo-server' \
 	--interactive --command 'nc -vz 127.0.0.1 28080'
 
+# Stop tasks given a service name
+aws ecs list-tasks --cluster 'staging' --service-name 'mimir' --query 'taskArns' --output 'text' \
+| xargs aws ecs stop-task --cluster 'staging' --output 'text' --query 'task.lastStatus' --task
+
 
 ###
 # EFS
@@ -196,6 +201,18 @@ mount -t 'nfs' -o 'nfsvers=4.0,rsize=1048576,wsize=1048576,hard,timeo=600,retran
 	'fs-0123456789abcdef0.efs.eu-west-1.amazonaws.com:/' "$HOME/efs"
 mount -t 'nfs' -o 'nfsvers=4,tcp,rwsize=1048576,hard,timeo=600,retrans=2,noresvport' \
 	'10.20.30.42:/export-name' "$HOME/efs/export"
+
+# Update a file in an EFS volume, then stop the ECS tasks using it so new can start with the updated file.
+mkdir -p "$HOME/tmp/efs" \
+&&	aws efs describe-file-systems --query 'FileSystems[].FileSystemId' --output 'text' --creation-token 'mimir' \
+	| xargs -I '%%' dig 'A' +short '@172.16.0.2' "%%.efs.eu-west-1.amazonaws.com" \
+	| xargs -I '%%' mount -t 'nfs' -o 'nfsvers=4.0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport' \
+		"%%:/" "$HOME/tmp/efs" \
+&&	sudo cp -iv 'config.yaml' "$HOME/tmp/efs/" \
+&&	diff -q 'config.yaml' "$HOME/tmp/efs/config.yaml" \
+&&	umount "$HOME/tmp/efs" \
+&&	aws --profile 'ro' ecs list-tasks --cluster 'staging' --service-name 'mimir' --query 'taskArns' --output 'text' \
+	| xargs -n '1' aws --profile 'rw' ecs stop-task --cluster 'staging' --output 'text' --query 'task.lastStatus' --task
 
 
 ###
