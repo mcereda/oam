@@ -56,7 +56,7 @@ Access components:
 kubectl -n 'monitoring' get secret 'grafana' -o jsonpath='{.data.admin-password}' | base64 --decode
 kubectl -n 'monitoring' get pods -l 'app.kubernetes.io/name=grafana,app.kubernetes.io/instance=grafana' \
   -o jsonpath='{.items[0].metadata.name}' \
-| xargs -I {} kubectl -n 'monitoring' port-forward {} 3000
+| xargs -I '%%' kubectl -n 'monitoring' port-forward "%%" '3000'
 ```
 
 Clean up:
