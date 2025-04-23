@@ -125,6 +125,11 @@ aws ecs list-task-definitions --family-prefix 'testService' --output 'text' --qu
 aws ecs list-tasks --cluster 'testCluster' --family 'testService' --output 'text' --query 'taskArns' \
 | xargs -p aws ecs wait tasks-running --cluster 'testCluster' --tasks
 while [[ $(aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --service-name 'testService') == "" ]]; do sleep 1; done
+
+# Restart tasks.
+# No real way to do that, just stop the tasks and new ones will be eventually started in their place.
+# To mimic a blue-green deployment, scale the service up by doubling its tasks, then down again to the normal amount.
+
 ```
 
 </details>
@@ -469,6 +474,13 @@ Requirements:
   aws ecs update-service --cluster 'stg' --service 'grafana' --enable-execute-command --force-new-deployment
   ```
 
+  ```ts
+  new aws.ecs.Service(
+    'whatever',
+    { enableExecuteCommand: true,  …, },
+  );
+  ```
+
   </details>
 
 - **Users** initiating the execution:
@@ -586,9 +598,10 @@ Applications can use short names and standard ports to connect to **services** i
 This includes connecting across VPCs in the same AWS Region.
 
 When using Service Connect, ECS dynamically manages DNS entries for each task as they start and stop.<br/>
-It does so by running an agent in each task that is configured to discover the names.
+It does so by running an agent as sidecar container in each task that is configured to discover the names.
 
-One **must** provide the complete configuration inside **each** service **and** task definition.<br/>
+ECS manages the agent's container configuration in the service by itself. The agent's container is **not** available to
+the tasks' definitions, so it **cannot** be configured.<br/>
 ECS manages changes to this configuration in each service's deployment and ensures that all tasks in a deployment behave
 in the same way.
 
