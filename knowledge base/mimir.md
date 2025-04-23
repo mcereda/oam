@@ -29,7 +29,9 @@ and set up alerting rules across multiple tenants to leverage tenant federation.
 Scrapers (like Prometheus or Grafana's Alloy) need to send metrics data to Mimir.<br/>
 Mimir will **not** scrape metrics itself.
 
-Mimir listens by default on port `8080` for HTTP and on port `9095` for GRPC.
+Mimir listens by default on port `8080` for HTTP and on port `9095` for GRPC.<br/>
+It also internally advertises data or actions to members in the cluster using the [gossip protocol]. This uses port
+`7946` by default and **must** be reachable by all members in the cluster to work.
 
 Mimir stores time series in TSDB blocks, that are uploaded to an object storage bucket.<br/>
 Such blocks are the same that Prometheus and Thanos use, though each application stores blocks in different places and
@@ -108,8 +110,10 @@ GET /metrics
 
 ## Setup
 
-Mimir's configuration file is YAML-based.<br/>
-There is no default configuration file, but it _can_ be specified on launch.
+Mimir's configuration file is YAML-based.
+
+There is **no** default configuration file, but one _can_ be specified on launch.<br/>
+If no configuration file is given, **only** the default values will be used.
 
 ```sh
 mimir --config.file='./demo.yaml'
@@ -174,7 +178,20 @@ Mimir can be deployed in one of two modes:
 - _Monolithic_, which runs all required components in a single process.
 - _Microservices_, where components are run as distinct processes.
 
-The deployment mode is determined by the `-target` option given to Mimir's process.
+The deployment mode is determined by the `target` option given to Mimir's process.
+
+<details style="padding: 0 0 1rem 1rem">
+
+```sh
+$ mimir -target='ruler'
+$ mimir -target='all,alertmanager,overrides-exporter'
+
+$ yq -y 'config.yml'
+target: all,alertmanager,overrides-exporter
+$ mimir -config.file='config.yml'
+```
+
+</details>
 
 Whatever the Mimir's deployment mode, it will need to receive data from other applications.<br/>
 It will **not** scrape metrics itself.
@@ -222,6 +239,11 @@ graph LR
   m1 --> os
   mN --> os
 ```
+
+By default Mimir expects 3 ingester replicas, and data ingestion will fail if there are less than 2 in the ingester
+ring.<br/>
+See
+[HTTP status 500 Internal Server Error: send data to ingesters: at least 2 live replicas required, could only find 1].
 
 ### Microservices mode
 
@@ -399,11 +421,26 @@ Both Mimir and Prometheus print this error when Prometheus tries to push metrics
 
 **Root cause**:
 
-It seems Mimir requires a minimum of 2 ingester replicas even when running in monolithic mode.
+Writes to the Mimir cluster are successful **only** if the **majority** of the ingesters received the data.
+
+The default value for the `ingester.ring.replication_factor` setting is `3`. As such, Mimir expects by default `3`
+ingester in its ingester ring, with a minimum of `ceil(replication_factor/2)` that many ingesters (`2` by default) alive
+at all times.<br/>
+Data ingestion **will** fail with that error when less than the minimum alive replica are listed in the ingester ring.
+
+This happens even when running in [monolithic mode].
 
 **Solution**:
 
-TODO
+As a rule of thumb, make sure at least `ceil(replication_factor/2)` ingesters are available to Mimir.
+
+When just testing the setup, configure the ingesters' `replication_factor` to `1`:
+
+```yml
+ingester:
+  ring:
+    replication_factor: 1
+```
 
 ## Further readings
 
@@ -411,6 +448,7 @@ TODO
 - [Codebase]
 - [Prometheus]
 - [Grafana]
+- [Ceiling Function]
 
 Alternatives:
 
@@ -431,6 +469,9 @@ Alternatives:
   -->
 
 <!-- In-article sections -->
+[HTTP status 500 Internal Server Error: send data to ingesters: at least 2 live replicas required, could only find 1]: #http-status-500-internal-server-error-send-data-to-ingesters-at-least-2-live-replicas-required-could-only-find-1
+[Monolithic mode]: #monolithic-mode
+
 <!-- Knowledge base -->
 [aws ecs]: cloud%20computing/aws/ecs.md
 [aws efs]: cloud%20computing/aws/efs.md
@@ -449,8 +490,12 @@ Alternatives:
 [Grafana Mimir authentication and authorization]: https://grafana.com/docs/mimir/next/manage/secure/authentication-and-authorization/
 [grafana mimir configuration parameters]: https://grafana.com/docs/mimir/latest/configure/configuration-parameters/
 [grafana mimir http api]: https://grafana.com/docs/mimir/latest/references/http-api/
+[Grafana mimir-distributed Helm chart documentation]: https://grafana.com/docs/helm-charts/mimir-distributed/latest/
 [helm chart]: https://github.com/grafana/mimir/tree/main/operations/helm/charts/mimir-distributed
 [migrate from thanos or prometheus to grafana mimir]: https://grafana.com/docs/mimir/latest/set-up/migrate/migrate-from-thanos-or-prometheus/
 [website]: https://grafana.com/oss/mimir/
+[Grafana Mimir hash rings]: https://grafana.com/docs/mimir/next/references/architecture/hash-ring/
 
 <!-- Others -->
+[Gossip protocol]: https://en.wikipedia.org/wiki/Gossip_protocol
+[Ceiling Function]: https://www.geeksforgeeks.org/ceiling-function/
