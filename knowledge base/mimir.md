@@ -56,14 +56,14 @@ As a workaround, upload Thanos' blocks directly to Mimir's blocks bucket, using 
 
 ```sh
 docker pull 'grafana/mimir'
+helm repo add 'grafana' 'https://grafana.github.io/helm-charts' && helm repo update 'grafana'
 
-mimir
-docker run --rm --name 'mimir' --publish '8080:8080' --publish '9095:9095' 'grafana/mimir'
-
+# Does *not* look for default configuration files.
+# When no configuration file is given, only default values are used. This is not something one might usually want.
 mimir --config.file='./demo.yaml'
-docker run --rm --name 'mimir' --publish '8080:8080' --publish '9095:9095' \
-  --volume "$PWD/config.yaml:/etc/mimir/config.yaml" \
-  'grafana/mimir' --config.file='/etc/mimir/config.yaml'
+docker run --rm --name 'mimir' -p '8080:8080' -p '9095:9095' -v "$PWD/config.yaml:/etc/mimir/config.yaml" \
+  'grafana/mimir' -- --config.file='/etc/mimir/config.yaml'
+helm --namespace 'mimir-test' upgrade --install --create-namespace 'mimir' 'grafana/mimir-distributed'
 ```
 
 </details>

@@ -50,6 +50,14 @@ them in an HTTP endpoint in their place.
 docker pull 'prom/prometheus'
 docker run -p '9090:9090' -v "$PWD/config/dir:/etc/prometheus" -v 'prometheus-data:/prometheus' 'prom/prometheus'
 
+helm repo add 'prometheus-community' 'https://prometheus-community.github.io/helm-charts' \
+&& helm repo update 'prometheus-community'
+helm show values 'prometheus-community/prometheus'
+helm -n 'prometheus' upgrade -i --create-namespace 'prometheus' 'prometheus-community/prometheus'
+kubectl -n 'prometheus' get pods -l 'app.kubernetes.io/name=prometheus,app.kubernetes.io/instance=prometheus' \
+  -o jsonpath='{.items[0].metadata.name}' \
+| xargs -I '%%' kubectl -n 'prometheus' port-forward "%%" '9090'
+helm --namespace 'prometheus' uninstall 'prometheus'
 ```
 
 </details>
