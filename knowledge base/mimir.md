@@ -212,7 +212,35 @@ remote_write:
 </details>
 
 [Grafana] considers Mimir a data source of type _Prometheus_, and must be [provisioned](grafana.md#datasources)
-accordingly.<br/>
+accordingly.
+
+<details style="padding: 0 0 1rem 1rem">
+  <summary>Example</summary>
+
+```yml
+---
+apiVersion: 1
+datasources:
+  - id: 1
+    name: Mimir
+    orgId: 1
+    uid: abcdef01-a0c1-432e-8ef5-7b277cb0b32b
+    type: prometheus
+    typeName: Prometheus
+    typeLogoUrl: public/app/plugins/datasource/prometheus/img/prometheus_logo.svg
+    access: proxy
+    url: http://mimir.example.org:8080/prometheus
+    user: ''
+    database: ''
+    basicAuth: false
+    isDefault: true
+    jsonData:
+      httpMethod: POST
+    readOnly: false
+```
+
+</details>
+
 From there, metrics can be queried in Grafana's _Explore_ tab, or can populate dashboards that use Mimir as their data
 source.
 
@@ -298,7 +326,7 @@ common:
   storage:
     backend: s3
     s3:
-      endpoint: s3.us-east-2.amazonaws.com
+      endpoint: s3.us-east-2.amazonaws.com  # required
       region: us-east-2
 
 blocks_storage:
@@ -324,7 +352,7 @@ common:
   storage:
     backend: s3
     s3:
-      endpoint: s3.us-east-2.amazonaws.com
+      endpoint: s3.us-east-2.amazonaws.com  # required
       region: us-east-2
       bucket_name: mimir
 
@@ -398,6 +426,8 @@ multitenancy_enabled: false
 common:
   storage:
     backend: s3
+    s3:
+      endpoint: s3.us-east-2.amazonaws.com  # required
 blocks_storage:
   s3:
     bucket_name: my-mimir-blocks
@@ -462,6 +492,8 @@ Alternatives:
 - [Configure Grafana Mimir object storage backend]
 - [Grafana Mimir configuration parameters]
 - [Grafana Mimir authentication and authorization]
+- [Grafana mimir-distributed Helm chart documentation]
+- [Grafana Mimir hash rings]
 
 <!--
   Reference
