@@ -600,23 +600,135 @@ Use ECS Service Connect, ECS service discovery or VPC Lattice to allow that.
 
 ### ECS Service Connect
 
-ECS Service Connect provides ECS clusters with the configuration they need for service discovery, connectivity, and
-traffic monitoring.
+Refer [Use Service Connect to connect Amazon ECS services with short names].
+
+ECS Service Connect provides ECS clusters with the configuration they need for service-to-service discovery,
+connectivity, and traffic monitoring by building both service discovery and a service mesh in the clusters.
+
+It provides:
+
+- The complete configuration services need to join the mesh.
+- A unified way to refer to services within namespaces that does **not** depend on the VPC's DNS configuration.
+- Standardized metrics and logs to monitor all the applications.
+
+The feature creates a virtual network of related services.<br/>
+The same service configuration can be used across different namespaces to run independent yet identical sets of
+applications.
+
+When using Service Connect, ECS dynamically manages Service Connect endpoints for each task as they start and stop. It
+does so by injecting the definition of a _sidecar_ proxy container **in services**. This does **not** change their task
+definition.<br/>
+Each task created for each registered service will end up running the sidecar proxy container in order, so that the task
+is added to the mesh.
+
+Injecting the proxy in the services and not in the task definitions allows for the same task definition to be reused to
+run identical applications in different namespaces with different Service Connect configurations.<br/>
+It also means that, since the proxy is **not** in the task definition, it **cannot** be configured by users.
+
+Service Connect **only** interconnects **services** within the **same** namespace.
+
+One can add one Service Connect configuration to new or existing services.<br/>
+When that happens, ECS creates:
+
+- A Service Connect endpoint in the namespace.
+- A new deployment in the service that replaces the tasks that are currently running with ones equipped with the proxy.
+
+Existing tasks and other applications can continue to connect to existing endpoints and external applications.<br/>
+If a service using Service Connect adds tasks by scaling out, new connections from clients will be load balanced between
+**all** of the running tasks. If the service is updated, new connections from clients will be load balanced only between
+the **new** version of the tasks.
+
+The list of endpoints in the namespace changes every time **any** service in that namespace is deployed.<br/>
+Existing tasks, and replacement tasks, continue to behave the same as they did after the most recent deployment.<br/>
+Existing tasks **cannot** resolve and connect to new endpoints. Only tasks with a Service Connect configuration in the
+same namespace **and** that start running after this deployment can.
 
 Applications can use short names and standard ports to connect to **services** in the same or other clusters.<br/>
 This includes connecting across VPCs in the same AWS Region.
 
-When using Service Connect, ECS dynamically manages DNS entries for each task as they start and stop.<br/>
-It does so by running an agent as sidecar container in each task that is configured to discover the names.
+By default, the Service Connect proxy listens on the `containerPort` specified in the task definition's port
+mapping.<br/>
+The service's Security Group rules **must** allow incoming traffic to this port from the subnets where clients will run.
 
-ECS manages the agent's container configuration in the service by itself. The agent's container is **not** available to
-the tasks' definitions, so it **cannot** be configured.<br/>
-ECS manages changes to this configuration in each service's deployment and ensures that all tasks in a deployment behave
-in the same way.
+The proxy will consume some of the resources allocated to their task.<br/>
+It is recommended:
 
-Service Connect is **not** compatible with ECS' `host` network mode.
+- Adding at least 256 CPU units and 64 MiB of memory to the task's resources.
+- \[If expecting tasks to receive more than 500 requests per second at their peak load] Increasing the sidecar's
+  resources addition to at least 512 CPU units.
+- \[If expecting to create more than 100 Service Connect services in the namespace, or 2000 tasks in total across all
+  ECS services within the namespace], Adding 128 MiB extra of memory for the Service Connect proxy container.<br/>
+  One **must** do this in **every** task definition that is used by **any** of the ECS services in the namespace.
 
-See also [Use Service Connect to connect Amazon ECS services with short names].
+It is recommended one sets the log configuration in the Service Connect configuration.
+
+Proxy configuration:
+
+- Tasks in a Service Connect endpoint are load balanced in a `round-robin` strategy.
+- The proxy uses data about prior failed connections to avoid sending new connections to the tasks that had the failed
+  connections for some time.<br/>
+  At the time of writing, failing 5 or more connections in the last 30 seconds makes the proxy avoid that task for 30 to
+  300 seconds.
+- Connection that pass through the proxy and fail are retried, but **avoid** the host that failed the previous
+  connection.<br/>
+  This ensures that each connection through Service Connect doesn't fail for one-off reasons.
+- Wait a maximum time for applications to respond.<br/>
+  The default timeout value is 15 seconds, but it can be updated.
+
+<details>
+  <summary>Limitations</summary>
+
+Service Connect does **not** support:
+
+- ECS' `host` network mode.
+- Windows containers.
+- HTTP 1.0.
+- Standalone tasks and any task created by other resources than services.
+- Services using the `blue/green` or `external deployment` types.
+- External container instance for ECS Anywhere.
+- PPv2.
+- Task definitions that set _container_ memory limits.
+  It is required to set the _task_ memory limit though.
+
+Tasks using the `bridge` network mode and Service Connect will **not** support the `hostname` container definition
+parameter.
+
+Each service can belong to only one namespace.
+
+Service Connect can use any AWS Cloud Map namespace, as long as they are in the **same** Region **and** AWS account.
+
+Service Connect does **not** delete namespaces when clusters are deleted.<br/>
+One must delete namespaces in AWS Cloud Map themselves.
+
+</details>
+
+<details>
+  <summary>Requirements</summary>
+
+- Tasks running in Fargate **must** use the Fargate Linux platform version 1.4.0 or higher.
+- The ECS agent on container instances must be version 1.67.2 or higher.
+- Container instances must run the ECS-optimized Amazon Linux 2023 AMI version `20230428` or later, or the ECS-optimized
+  Amazon Linux 2 AMI version `2.0.20221115` or later.<br/>
+  These versions equip the Service Connect agent in addition to the ECS container agent.
+- Container instances must have the `ecs:Poll` permission assigned to them for resource
+  `arn:aws:ecs:{{region}}:{{accountId}}:task-set/cluster/*`.<br/>
+  If using the `ecsInstanceRole` or `AmazonEC2ContainerServiceforEC2Role` IAM roles, there is no need for additional
+  permissions.
+- Services **must** use the **rolling deployment** strategy, as it is the only one supported.
+- Task definitions **must** set their task's memory limit.
+- The task memory limit must be set to a number **greater** than the sum of the container memory limits.<br/>
+  The CPU and memory in the task limits that aren't allocated in the container limits will be used by the
+  Service Connect proxy container and other containers that don't set container limits.
+- All endpoints must be **unique** within their namespace.
+- All discovery names must be **unique** within their namespace.
+- One **must** redeploy existing services before applications can resolve the new endpoints.<br/>
+  New endpoints that are added to the namespace **after** the service's most recent deployment **will not** be added to
+  the proxy configuration.
+- Application Load Balancer traffic defaults to routing through the Service Connect agent in `awsvpc` network mode.<br/>
+  If one wants non-service traffic to bypass the Service Connect agent, one will need to use the `ingressPortOverride`
+  parameter in their Service Connect service configuration.
+
+</details>
 
 ### ECS service discovery
 
