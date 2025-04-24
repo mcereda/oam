@@ -155,10 +155,17 @@ aws ecs update-service --cluster 'stg' --service 'grafana' --enable-execute-comm
 
 # Check tasks' attributes
 aws ecs describe-tasks --cluster 'staging' --tasks 'ef6260ed8aab49cf926667ab0c52c313' --output 'yaml' \
---query 'tasks[0] | {
-	"managedAgents": containers[].managedAgents[?@.name==`ExecuteCommandAgent`][],
-	"enableExecuteCommand": enableExecuteCommand
+	--query 'tasks[0] | {
+		"managedAgents": containers[].managedAgents[?@.name==`ExecuteCommandAgent`][],
+		"enableExecuteCommand": enableExecuteCommand
 	}'
+aws ecs list-tasks --cluster 'staging' --service-name 'mimir' --query 'taskArns' --output 'text' \
+| xargs aws ecs describe-tasks --cluster 'staging' \
+	--output 'yaml' --query 'tasks[0] | {
+		"managedAgents": containers[].managedAgents[?@.name==`ExecuteCommandAgent`][],
+		"enableExecuteCommand": enableExecuteCommand
+    }' \
+    --tasks
 
 # Execute commands in tasks
 aws ecs execute-command --cluster 'staging' --task 'e242654518cf42a7be13a8551e0b3c27' --container 'echo-server' \
