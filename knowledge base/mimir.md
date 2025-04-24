@@ -15,14 +15,15 @@ and set up alerting rules across multiple tenants to leverage tenant federation.
 1. [Storage](#storage)
    1. [Object storage](#object-storage)
 1. [Authentication and authorization](#authentication-and-authorization)
-1. [APIs](#apis)
-1. [Deduplication of data from multiple Prometheus scrapers](#deduplication-of-data-from-multiple-prometheus-scrapers)
 1. [Migrate to Mimir](#migrate-to-mimir)
+1. [Ingest Out-Of-Order samples](#ingest-out-of-order-samples)
+1. [Deduplication of data from multiple Prometheus scrapers](#deduplication-of-data-from-multiple-prometheus-scrapers)
+1. [APIs](#apis)
 1. [Troubleshooting](#troubleshooting)
    1. [HTTP status 401 Unauthorized: no org id](#http-status-401-unauthorized-no-org-id)
    1. [HTTP status 500 Internal Server Error: send data to ingesters: at least 2 live replicas required, could only find 1](#http-status-500-internal-server-error-send-data-to-ingesters-at-least-2-live-replicas-required-could-only-find-1)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -378,17 +379,26 @@ After the metrics data block is uploaded, its related WAL is truncated too.
 
 Refer [Grafana Mimir authentication and authorization].
 
-## APIs
+## Migrate to Mimir
 
-Refer [Grafana Mimir HTTP API].
+Refer [Configure TSDB block upload] and [Migrate from Thanos or Prometheus to Grafana Mimir].
+
+## Ingest Out-Of-Order samples
+
+Refer [Configure out-of-order samples ingestion].
+
+```yml
+limits:
+  out_of_order_time_window: 5m  # Allow up to 5 minutes since the latest received sample for the series.
+```
 
 ## Deduplication of data from multiple Prometheus scrapers
 
 Refer [Configure Grafana Mimir high-availability deduplication].
 
-## Migrate to Mimir
+## APIs
 
-Refer [Configure TSDB block upload] and [Migrate from Thanos or Prometheus to Grafana Mimir].
+Refer [Grafana Mimir HTTP API].
 
 ## Troubleshooting
 
@@ -514,19 +524,20 @@ Alternatives:
 
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/grafana/mimir
+[Codebase]: https://github.com/grafana/mimir
 [configure grafana mimir high-availability deduplication]: https://grafana.com/docs/mimir/latest/configure/configure-high-availability-deduplication/
 [configure grafana mimir object storage backend]: https://grafana.com/docs/mimir/latest/configure/configure-object-storage-backend/
+[Configure out-of-order samples ingestion]: https://grafana.com/docs/mimir/latest/configure/configure-out-of-order-samples-ingestion/
 [Configure TSDB block upload]: https://grafana.com/docs/mimir/latest/configure/configure-tsdb-block-upload/
 [documentation]: https://grafana.com/docs/mimir/latest/
 [Grafana Mimir authentication and authorization]: https://grafana.com/docs/mimir/next/manage/secure/authentication-and-authorization/
 [grafana mimir configuration parameters]: https://grafana.com/docs/mimir/latest/configure/configuration-parameters/
+[Grafana Mimir hash rings]: https://grafana.com/docs/mimir/next/references/architecture/hash-ring/
 [grafana mimir http api]: https://grafana.com/docs/mimir/latest/references/http-api/
 [Grafana mimir-distributed Helm chart documentation]: https://grafana.com/docs/helm-charts/mimir-distributed/latest/
 [helm chart]: https://github.com/grafana/mimir/tree/main/operations/helm/charts/mimir-distributed
 [migrate from thanos or prometheus to grafana mimir]: https://grafana.com/docs/mimir/latest/set-up/migrate/migrate-from-thanos-or-prometheus/
 [website]: https://grafana.com/oss/mimir/
-[Grafana Mimir hash rings]: https://grafana.com/docs/mimir/next/references/architecture/hash-ring/
 
 <!-- Others -->
 [Gossip protocol]: https://en.wikipedia.org/wiki/Gossip_protocol
