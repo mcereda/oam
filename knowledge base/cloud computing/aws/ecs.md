@@ -522,10 +522,19 @@ Procedure:
 
    ```sh
    aws ecs describe-tasks --cluster 'staging' --tasks 'ef6260ed8aab49cf926667ab0c52c313' --output 'yaml' \
-   --query 'tasks[0] | {
+     --query 'tasks[0] | {
        "managedAgents": containers[].managedAgents[?@.name==`ExecuteCommandAgent`][],
        "enableExecuteCommand": enableExecuteCommand
      }'
+
+   aws ecs list-tasks --cluster 'staging' --service-name 'mimir' --query 'taskArns' --output 'text' \
+   | xargs \
+       aws ecs describe-tasks --cluster 'Staging' \
+         --output 'yaml' --query 'tasks[0] | {
+           "managedAgents": containers[].managedAgents[?@.name==`ExecuteCommandAgent`][],
+           "enableExecuteCommand": enableExecuteCommand
+         }' \
+         --tasks
    ```
 
    ```yaml
