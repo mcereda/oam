@@ -26,6 +26,9 @@ awk '$2 > 100' sales.txt
 # Print only the last column.
 echo 'maps.google.com' | awk -F. '{print $NF}'
 awk -F '/' '{print $NF}' <<< 'test/with/slashes'
+
+# Make only the first character uppercase.
+echo 'something' | awk '{print toupper(substr($0,0,1))tolower(substr($0,2))}'
 ```
 
 ## Further readings
