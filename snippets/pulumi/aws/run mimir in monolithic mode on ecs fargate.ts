@@ -53,12 +53,12 @@ new aws.vpc.SecurityGroupIngressRule(
 new aws.vpc.SecurityGroupIngressRule(
     'mimir-VPC:IPv4-httpServer',
     {
-        securityGroupId: securityGroup.id,
+        description: 'Access the Mimir HTTP server from resources in the VPC via IPv4',
         tags: {
             Name: 'VPC IPv4 to HTTP server',
         },
 
-        description: 'Access the Mimir HTTP server from resources in the VPC via IPv4',
+        securityGroupId: securityGroup.id,
         cidrIpv4: vpc.cidrBlock,
         ipProtocol: 'tcp',
         fromPort: 8080,
@@ -72,12 +72,12 @@ new aws.vpc.SecurityGroupIngressRule(
 new aws.vpc.SecurityGroupIngressRule(
     'mimir-VPC:IPv6-httpServer',
     {
-        securityGroupId: securityGroup.id,
+        description: 'Access the Mimir HTTP server from resources in the VPC via IPv6',
         tags: {
             Name: 'VPC IPv6 to HTTP server',
         },
 
-        description: 'Access the Mimir HTTP server from resources in the VPC via IPv6',
+        securityGroupId: securityGroup.id,
         cidrIpv6: vpc.ipv6CidrBlock,
         ipProtocol: 'tcp',
         fromPort: 8080,
@@ -91,12 +91,12 @@ new aws.vpc.SecurityGroupIngressRule(
 new aws.vpc.SecurityGroupIngressRule(
     'mimir-VPC:IPv4-gRPCServer',
     {
-        securityGroupId: securityGroup.id,
+        description: 'Access the Mimir gRPC server from resources in the VPC via IPv4',
         tags: {
             Name: 'VPC IPv4 to gRPC server',
         },
 
-        description: 'Access the Mimir gRPC server from resources in the VPC via IPv4',
+        securityGroupId: securityGroup.id,
         cidrIpv4: vpc.cidrBlock,
         ipProtocol: 'tcp',
         fromPort: 9095,
@@ -110,12 +110,12 @@ new aws.vpc.SecurityGroupIngressRule(
 new aws.vpc.SecurityGroupIngressRule(
     'mimir-VPC:IPv6-gRPCServer',
     {
-        securityGroupId: securityGroup.id,
+        description: 'Access the Mimir gRPC server from resources in the VPC via IPv6',
         tags: {
             Name: 'CurrentEverythingVpc IPv6 to gRPC server',
         },
 
-        description: 'Access the Mimir gRPC server from resources in the VPC via IPv6',
+        securityGroupId: securityGroup.id,
         cidrIpv6: vpc.ipv6CidrBlock,
         ipProtocol: 'tcp',
         fromPort: 9095,
@@ -129,12 +129,12 @@ new aws.vpc.SecurityGroupIngressRule(
 new aws.vpc.SecurityGroupEgressRule(
     'mimir-allowAllIPv4',
     {
-        securityGroupId: securityGroup.id,
+        description: 'Connect everywhere from Mimir on IPv4',
         tags: {
             Name: 'All IPv4',
         },
 
-        description: 'Connect everywhere from Mimir on IPv4',
+        securityGroupId: securityGroup.id,
         cidrIpv4: '0.0.0.0/0',
         ipProtocol: '-1',
     },
@@ -146,12 +146,12 @@ new aws.vpc.SecurityGroupEgressRule(
 new aws.vpc.SecurityGroupEgressRule(
     'mimir-allowAllIPv6',
     {
-        securityGroupId: securityGroup.id,
+        description: 'Connect everywhere from Mimir on IPv6',
         tags: {
             Name: 'All IPv6',
         },
 
-        description: 'Connect everywhere from Mimir on IPv6',
+        securityGroupId: securityGroup.id,
         cidrIpv6: '::/0',
         ipProtocol: '-1',
     },
