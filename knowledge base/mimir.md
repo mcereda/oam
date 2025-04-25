@@ -12,6 +12,7 @@ and set up alerting rules across multiple tenants to leverage tenant federation.
 1. [Setup](#setup)
    1. [Monolithic mode](#monolithic-mode)
    1. [Microservices mode](#microservices-mode)
+   1. [Run on AWS ECS Fargate](#run-on-aws-ecs-fargate)
 1. [Storage](#storage)
    1. [Object storage](#object-storage)
 1. [Authentication and authorization](#authentication-and-authorization)
@@ -31,8 +32,8 @@ Scrapers (like Prometheus or Grafana's Alloy) need to send metrics data to Mimir
 Mimir will **not** scrape metrics itself.
 
 Mimir listens by default on port `8080` for HTTP and on port `9095` for GRPC.<br/>
-It also internally advertises data or actions to members in the cluster using the [gossip protocol]. This uses port
-`7946` by default and **must** be reachable by all members in the cluster to work.
+It also internally advertises data or actions to members in the cluster using [hashicorp/memberlist], which implements a
+[gossip protocol]. This uses port `7946` by default, and **must** be reachable by all members in the cluster to work.
 
 Mimir stores time series in TSDB blocks, that are uploaded to an object storage bucket.<br/>
 Such blocks are the same that Prometheus and Thanos use, though each application stores blocks in different places and
@@ -79,21 +80,28 @@ helm --namespace 'mimir-test' upgrade --install --create-namespace 'mimir' 'graf
 mimir -help
 mimir -help-all
 
-# Validate configuration files
+# Validate configuration files.
 mimir -modules -config.file 'path/to/config.yaml'
 
-# See the current configuration of components
+# Run tests.
+# Refer <https://grafana.com/docs/mimir/latest/manage/tools/mimir-continuous-test/>.
+mimir -target='continuous-test' \
+  -tests.write-endpoint='http://localhost:8080' -tests.read-endpoint='http://localhost:8080' \
+  -tests.smoke-test \  # just once
+  -server.http-listen-port='18080' -server.grpc-listen-port='19095'  # avoid colliding with the running instance
+
+# See the current configuration of components.
 GET /config
 GET /runtime_config
 
-# See changes in the runtime configuration from the default one
+# See changes in the runtime configuration from the default one.
 GET /runtime_config?mode=diff
 
-# Check the service is ready
-# A.K.A. readiness probe
+# Check the service is ready.
+# A.K.A. readiness probe.
 GET /ready
 
-# Get metrics
+# Get metrics.
 GET /metrics
 ```
 
@@ -305,6 +313,27 @@ Recommended using Kubernetes and the [`mimir-distributed` Helm chart][helm chart
 Each component scales up independently.<br/>
 This allows for greater flexibility and more granular failure domains.
 
+### Run on AWS ECS Fargate
+
+See also [AWS ECS] and [Mimir on AWS ECS Fargate].
+
+Things to consider:
+
+- Go for [ECS service discovery] instead of [ECS Service Connect].
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  > This needs to be confirmed, but it is how it worked for me.
+
+  Apparently, at the time of writing, Service Connect _prefers_ answering in IPv6 for ECS-related queries.<br/>
+  There seems to be no way to customize this for now.
+
+  At the same time, [hashicorp/memberlist] seems to only use IPv4 unless explicitly required to listen on a IPv6
+  address.<br/>
+  Which, one would have no way to programmatically set **before** creating the resources.
+
+  </details>
+
 ## Storage
 
 Mimir supports the `s3`, `gcs`, `azure`, `swift`, and `filesystem` backends.<br/>
@@ -488,6 +517,8 @@ ingester:
 - [Codebase]
 - [Prometheus]
 - [Grafana]
+- [hashicorp/memberlist]
+- [Gossip protocol]
 - [Ceiling Function]
 
 Alternatives:
@@ -518,6 +549,8 @@ Alternatives:
 [aws ecs]: cloud%20computing/aws/ecs.md
 [aws efs]: cloud%20computing/aws/efs.md
 [cortex]: cortex.md
+[ecs service connect]: cloud%20computing/aws/ecs.md#ecs-service-connect
+[ecs service discovery]: cloud%20computing/aws/ecs.md#ecs-service-discovery
 [grafana]: grafana.md
 [prometheus]: prometheus/README.md
 [thanos]: thanos.md
@@ -540,5 +573,7 @@ Alternatives:
 [website]: https://grafana.com/oss/mimir/
 
 <!-- Others -->
-[Gossip protocol]: https://en.wikipedia.org/wiki/Gossip_protocol
 [Ceiling Function]: https://www.geeksforgeeks.org/ceiling-function/
+[Gossip protocol]: https://en.wikipedia.org/wiki/Gossip_protocol
+[hashicorp/memberlist]: https://github.com/hashicorp/memberlist
+[Mimir on AWS ECS Fargate]: https://github.com/grafana/mimir/discussions/3807#discussioncomment-4602413
