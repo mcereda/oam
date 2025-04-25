@@ -65,6 +65,7 @@
 | HPC     | High Performance Computing                             | Collections of systems and tools used to achieve a greater processing capacity than the single unit |
 | IaC     | [Infrastructure as Code][iac]                          |                                                                                                     |
 | IC      | Integrated Circuit                                     |                                                                                                     |
+| IIRC    | If I Remember/Recall Correctly                         |                                                                                                     |
 | IoT     | Internet of Things                                     | Also see [LoRa]                                                                                     |
 | IP      | Internet Protocol                                      |                                                                                                     |
 | IPvX    | Internet Protocol version X                            |                                                                                                     |
