@@ -702,7 +702,7 @@ One must delete namespaces in AWS Cloud Map themselves.
 
 </details>
 
-<details>
+<details style="padding-bottom: 1rem">
   <summary>Requirements</summary>
 
 - Tasks running in Fargate **must** use the Fargate Linux platform version 1.4.0 or higher.
@@ -730,11 +730,75 @@ One must delete namespaces in AWS Cloud Map themselves.
 
 </details>
 
+Procedure:
+
+1. Configure the ECS cluster to use the desired AWS Cloud Map namespace.
+
+   <details style="padding: 0 0 1rem 1rem">
+     <summary>Simplified process</summary>
+
+   Create the cluster with the desired name for the AWS Cloud Map namespace, and specify that name for the namespace
+   when asked.<br/>
+   ECS will create a new HTTP namespace with the necessary configuration.<br/>
+   As reminder, Service Connect doesn't use or create DNS hosted zones in Amazon Route 53. FIXME: check this
+
+   </details>
+
+1. Configure port names in the server services' task definitions for all the port mappings that the services will expose
+   in Service Connect.
+
+   <details style="padding: 0 0 1rem 1rem">
+
+   ```json
+   containerDefinitions: [
+       {
+           "name": "postgres",
+           "protocol": "tcp",
+           "containerPort": 5432,
+       },
+       …
+   ]
+   ```
+
+   </details>
+
+1. Configure the server services to create Service Connect endpoints within the namespace.
+
+   <details style="padding: 0 0 1rem 1rem">
+
+   ```json
+   "serviceConnectConfiguration": {
+       "enabled": true,
+       "namespace": "ecs-dev-cluster",
+       "services": [
+           {
+               "portName": "postgres",
+               "discoveryName": "postgres",
+               "clientAliases": [{
+                   "port": 5432,
+                   "dnsName": "pgsql"
+               }]
+           }
+       ]
+   },
+   ```
+
+   </details>
+
+1. Deploy the services.<br/>
+   This will create the endpoints AWS Cloud Map namespace used by the cluster.<br/>
+   ECS also injects the Service Connect proxy container in each task.
+1. Deploy the client applications as ECS services.<br/>
+   ECS connects them to the Service Connect endpoints through the Service Connect proxy in each task.
+1. Applications only use the proxy to connect to Service Connect endpoints.<br/>
+   No additional configuration is required to use the proxy.
+1. \[optionally] Monitor traffic through the Service Connect proxy in Amazon CloudWatch.
+
 ### ECS service discovery
 
 Service discovery helps manage HTTP and DNS namespaces for ECS services.
 
-ECS syncs the list of launched tasks to AWS Cloud Map.<br/>
+ECS automatically registers and de-registers the list of launched tasks to AWS Cloud Map.<br/>
 Cloud Map maintains DNS records that resolve to the internal IP addresses of one or more tasks from registered
 services.<br/>
 Other services in the **same** VPC can use such DNS records to send traffic directly to containers using their internal
@@ -756,11 +820,30 @@ configured.
 Service discovery supports only the `A` and `SRV` DNS record types.<br/>
 DNS records are automatically added or removed as tasks start or stop for ECS services.
 
+Until ECS registers the tasks, Containers in them might complain about being unable to resolve the services they are
+using.
+
 DNS records have a TTL and it might happen that tasks died before this ended.<br/>
 One **must** implement extra logic in one's applications, so that they can handle retries and deal with connection
 failures when the records are not yet updated.
 
 See also [Use service discovery to connect Amazon ECS services with DNS names].
+
+Procedure:
+
+1. Create the desired AWS Cloud Map namespace.
+1. Create the desired Cloud Map service in the namespace.
+1. Configure ECS services to use the Cloud Map service.
+
+   <details style="padding: 0 0 1rem 1rem">
+
+   ```json
+   "serviceRegistries": [{
+       "registryArn": "arn:aws:servicediscovery:eu-west-1:012345678901:service/srv-uuf33b226vw93biy"
+   }],
+   ```
+
+   </details>
 
 ### VPC Lattice
 
@@ -799,7 +882,7 @@ Solutions:
   This **will** cost money.
 
 - Target a lambda that returns a [308 Permanent Redirect] code with the current IP addresses of the requested tasks.
-- Use dynamic service discovery mechanisms like AWS Cloud Map.<br/>
+- Use dynamic service discovery mechanisms like [AWS Cloud Map][What Is AWS Cloud Map?].<br/>
   Refer [Metrics collection from Amazon ECS using Amazon Managed Service for Prometheus] and
   [aws-cloudmap-prometheus-sd].
 
@@ -838,6 +921,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [EFS]
 - [Amazon ECS Exec Checker]
 - [ECS Execute-Command proposal]
+- [What Is AWS Cloud Map?]
 
 ### Sources
 
@@ -864,6 +948,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [Scraping Prometheus metrics from applications running in AWS ECS]
 - [How can I allow the tasks in my Amazon ECS services to communicate with each other?]
 - [Interconnect Amazon ECS services]
+- [Amazon ECS Service Discovery]
 
 <!--
   Reference
@@ -887,6 +972,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 
 <!-- Upstream -->
 [amazon ecs exec checker]: https://github.com/aws-containers/amazon-ecs-exec-checker
+[Amazon ECS Service Discovery]: https://aws.amazon.com/blogs/aws/amazon-ecs-service-discovery/
 [amazon ecs services]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html
 [amazon ecs standalone tasks]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/standalone-tasks.html
 [amazon ecs task definition differences for the fargate launch type]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html
@@ -914,6 +1000,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [Use service discovery to connect Amazon ECS services with DNS names]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html
 [using amazon ecs exec to access your containers on aws fargate and amazon ec2]: https://aws.amazon.com/blogs/containers/new-using-amazon-ecs-exec-access-your-containers-fargate-ec2/
 [What is Amazon VPC Lattice?]: https://docs.aws.amazon.com/vpc-lattice/latest/ug/what-is-vpc-lattice.html
+[What Is AWS Cloud Map?]: https://docs.aws.amazon.com/cloud-map/latest/dg/what-is-cloud-map.html
 
 <!-- Others -->
 [`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]: https://stackoverflow.com/questions/69261159/aws-ecs-execute-command-results-in-targetnotconnectedexception-the-execute
