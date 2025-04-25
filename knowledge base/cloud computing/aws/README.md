@@ -54,6 +54,10 @@ the region is completely disabled.
 Enabling Regions takes a few minutes to several hours. They **cannot** be used until the preparation process is
 complete.
 
+The API for _some_ AWS services (e.g. EC2) are **_eventually_ consistent**.<br/>
+This means that the result of an API request that affects resources _might_ **not** be immediately visible to the
+subsequent requests that API receives.
+
 ## Networking
 
 VPCs define isolated virtual networking environments.<br/>
