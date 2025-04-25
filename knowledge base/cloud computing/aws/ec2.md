@@ -13,6 +13,8 @@
 
 ## TL;DR
 
+The API for EC2 are [**eventually** consistent][Eventual consistency in the Amazon EC2 API].
+
 EC2 instances are billed by the second, with a minimum of 60s,
 [since 2017-10-02][announcing amazon ec2 per second billing].
 
@@ -209,6 +211,7 @@ Refer [Image Builder].
 - [Amazon EBS volume limits for Amazon EC2 instances]
 - [Recommended alarms]
 - [Image Builder]
+- [Eventual consistency in the Amazon EC2 API]
 
 ### Sources
 
@@ -256,6 +259,7 @@ Refer [Image Builder].
 [describe-images]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-images.html
 [describeimages]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
 [device names for volumes on amazon ec2 instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html
+[Eventual consistency in the Amazon EC2 API]: https://docs.aws.amazon.com/ec2/latest/devguide/eventual-consistency.html
 [how can i send memory and disk metrics from my ec2 instances to cloudwatch?]: https://repost.aws/knowledge-center/cloudwatch-memory-metrics-ec2
 [how to clone instance ec2]: https://repost.aws/questions/QUOrWudF3vRL2Vqtrv0M9lfQ/how-to-clone-instance-ec2
 [iam roles for amazon ec2]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
