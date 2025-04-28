@@ -61,7 +61,16 @@ helm --namespace 'loki' upgrade --create-namespace --install --cleanup-on-fail '
   --repo 'https://grafana.github.io/helm-charts' 'loki-distributed'
 ```
 
-Default configuration file for package-based installations is `/etc/loki/config.yml` or `/etc/loki/loki.yaml`.
+On startup, Loki tries to load a configuration file named `config.yaml` from the current working directory, or from the
+`config/` subdirectory if the first does not exist.<br/>
+Should none of those files exist, it **will** give up and fail.
+
+The default configuration file **for package-based installations** is located at `/etc/loki/config.yml` or
+`/etc/loki/loki.yaml`.<br/>
+The docker image tries using `/etc/loki/local-config.yml` by default (via the `COMMAND` setting).
+
+Some settings are currently **not** reachable via direct CLI flags (e.g. `schema_configs`, `storage_config.aws.*`).<br/>
+Use a configuration file for those.
 
   <details style="padding: 0 0 1em 1em;">
     <summary>Disable reporting</summary>
@@ -79,20 +88,32 @@ Default configuration file for package-based installations is `/etc/loki/config.
   <summary>Usage</summary>
 
 ```sh
-# Verify configuration files
+# Get help.
+loki -help
+docker run --rm --name 'loki-help' 'grafana/loki:3.3.2' -help
+
+# Verify configuration files.
 loki -verify-config
-loki -config.file='/etc/loki/local-config.yaml' -verify-config
+loki -config.file='/etc/loki/local-config.yaml' -print-config-stderr -verify-config
+docker run --rm 'grafana/loki' \
+  -verify-config -config.file '/etc/loki/local-config.yaml'
+docker run --rm -v "$PWD/custom-config.yaml:/etc/loki/local-config.yaml:ro" 'grafana/loki:3.3.2' \
+  -verify-config -config.file '/etc/loki/local-config.yaml' -log-config-reverse-order
 
-# List available component targets
+# List available component targets.
 loki -list-targets
-docker run 'docker.io/grafana/loki' -config.file='/etc/loki/local-config.yaml' -list-targets
+docker run --rm 'docker.io/grafana/loki' -config.file='/etc/loki/local-config.yaml' -list-targets
 
-# Start server components
+# Start server components.
 loki
 loki -target='all'
 loki -config.file='/etc/loki/config.yaml' -target='read'
 
-# Print the final configuration to stderr and start
+# Print the final configuration to the logs and continue.
+loki -log-config-reverse-order …
+loki -log.level='info' -log-config-reverse-order …
+
+# Print the final configuration to stderr and continue.
 loki -print-config-stderr …
 
 # Check the server is working
@@ -106,6 +127,33 @@ curl 'http://loki.fqdn:3100/services'
 curl 'http://loki.fqdn:3101/ready'
 # The write component returns ready when browsing to <http://localhost:3102/ready>.
 curl 'http://loki.fqdn:3102/ready'
+```
+
+```plaintext
+GET /ready
+GET /metrics
+GET /services
+```
+
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
+# Check some values are applied to the final configuration.
+docker run --rm --name 'validate-cli-config' 'grafana/loki:3.3.2' \
+  -verify-config -config.file '/etc/loki/local-config.yaml' -print-config-stderr \
+  -common.storage.ring.instance-addr='127.0.0.1' -server.path-prefix='/loki' \
+  2>&1 \
+| grep -E 'instance_addr' -E 'path_prefix'
+docker run --rm --name 'validate-cli-config' 'grafana/loki:3.3.2' \
+  -verify-config -config.file '/etc/loki/local-config.yaml' -print-config-stderr \
+  -common.storage.ring.instance-addr='127.0.0.1' -server.path-prefix='/loki' \
+  2> '/tmp/loki.config.yaml' \
+&& sed '/msg="config is valid"/d' '/tmp/loki.config.yaml' \
+|  yq -Sy '.common|.instance_addr,.path_prefix' - \
+|| cat '/tmp/loki.config.yaml'
 ```
 
 </details>

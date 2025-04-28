@@ -463,7 +463,7 @@ Typically achieved by:
 1. Running a separate AlertManager instance.<br/>
    This would handle alerts from **all** the Prometheus instances, automatically managing eventually duplicated data.
 1. Using tools like [Thanos], [Cortex], or Grafana's [Mimir] to aggregate and deduplicate data.
-1. Directing visualizers like Grafana to the aggregator instead of the Prometheus replicas.
+1. Directing visualizers like [Grafana] to query the aggregator instead of any Prometheus replica.
 
 ## Further readings
 
