@@ -31,29 +31,34 @@ and set up alerting rules across multiple tenants to leverage tenant federation.
 Scrapers (like Prometheus or Grafana's Alloy) need to send metrics data to Mimir.<br/>
 Mimir will **not** scrape metrics itself.
 
-Mimir listens by default on port `8080` for HTTP and on port `9095` for GRPC.<br/>
+The server listens by default on port `8080` for HTTP and on port `9095` for GRPC.<br/>
 It also internally advertises data or actions to members in the cluster using [hashicorp/memberlist], which implements a
 [gossip protocol]. This uses port `7946` by default, and **must** be reachable by all members in the cluster to work.
 
-Mimir stores time series in TSDB blocks, that are uploaded to an object storage bucket.<br/>
-Such blocks are the same that Prometheus and Thanos use, though each application stores blocks in different places and
-uses slightly different metadata files for them.
+Mimir stores time series in TSDB blocks on the local file system by default.<br/>
+It can uploaded those blocks to an object storage bucket.
+
+The data blocks use the same format that Prometheus and Thanos use for storage, though each application stores blocks in
+different places and uses slightly different metadata files for them.
 
 Mimir supports multiple tenants, and stores blocks on a **per-tenant** level.<br/>
-Multi-tenancy is enabled by default, and can be disabled using the `-auth.multitenancy-enabled=false` option.<br/>
-If enabled, then multi-tenancy **will require every API request** to have the `X-Scope-OrgID` header with the value set
+Multi-tenancy is **enabled** by default. It can be disabled using the `-auth.multitenancy-enabled=false` option.
+
+Multi-tenancy, if **enabled**, **will require every API request** to have the `X-Scope-OrgID` header with the value set
 to the tenant ID one is authenticating for.<br/>
-When multi-tenancy is **disabled**, it will only manage a single tenant going by the name `anonymous`.
+When multi-tenancy is **disabled**, Mimir will store everything under a single tenant going by the name `anonymous`, and
+will assume all API requests are for it by automatically filling the `X-Scope-OrgID` header if not given.
 
 Blocks can be uploaded using the `mimirtool` utility, so that Mimir can access them.<br/>
-Mimir **will** perform some sanitization and validation of each block's metadata.
+The server **will** perform some sanitization and validation of each block's metadata.
 
 ```sh
 mimirtool backfill --address='http://mimir.example.org' --id='anonymous' 'block_1' … 'block_N'
 ```
 
 As a result of validation, Mimir will probably reject Thanos' blocks due to unsupported labels.<br/>
-As a workaround, upload Thanos' blocks directly to Mimir's blocks bucket, using the `<tenant>/<block ID>/` prefix.
+As a workaround, upload Thanos' blocks directly to Mimir's blocks directory, or bucket using the `<tenant>/<block ID>/`
+prefix.
 
 <details>
   <summary>Setup</summary>
@@ -122,7 +127,7 @@ GET /metrics
 Mimir's configuration file is YAML-based.
 
 There is **no** default configuration file, but one _can_ be specified on launch.<br/>
-If no configuration file is given, **only** the default values will be used.
+If no configuration file nor CLI options are given, **only** the default values will be used.
 
 ```sh
 mimir --config.file='./demo.yaml'
