@@ -24,27 +24,27 @@ See [Native installation on SLE].
 sudo tee '/etc/zypp/repos.d/amdgpu.repo' <<EOF
 [amdgpu]
 name=amdgpu
-baseurl=https://repo.radeon.com/amdgpu/6.2.2/sle/15.6/main/x86_64/
+baseurl=https://repo.radeon.com/amdgpu/6.4/sle/15.6/main/x86_64/
 enabled=1
 gpgcheck=1
 gpgkey=https://repo.radeon.com/rocm/rocm.gpg.key
 EOF
 
 sudo tee --append '/etc/zypp/repos.d/rocm.repo' <<EOF
-[ROCm-6.2.2]
-name=ROCm6.2.2
-baseurl=https://repo.radeon.com/rocm/zyp/6.2.2/main
+[ROCm-6.4]
+name=ROCm6.4
+baseurl=https://repo.radeon.com/rocm/zyp/6.4/main
 enabled=1
 gpgcheck=1
 gpgkey=https://repo.radeon.com/rocm/rocm.gpg.key
 EOF
 
-sudo zypper ref
+sudo zypper refresh
 sudo zypper --gpg-auto-import-keys install 'amdgpu-dkms' 'rocm-opencl-runtime'
 sudo reboot
 
 dkms status
-/opt/rocm-6.2.2/bin/clinfo
+/opt/rocm-6.4.0/bin/clinfo
 ```
 
   </details>
@@ -60,7 +60,7 @@ See [Native installation on SLE].
 ```sh
 sudo zypper remove 'rocm-core'
 sudo zypper remove --clean-deps 'amdgpu-dkms'
-sudo zypper removerepo 'ROCm-6.2.2'
+sudo zypper removerepo 'ROCm-6.4'
 sudo zypper removerepo 'amdgpu'
 sudo zypper clean --all
 sudo reboot
