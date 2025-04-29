@@ -162,9 +162,11 @@ bind
 ## Further readings
 
 - [Website]
+- [Codebase]
 - [`bash`][bash]
 - [`zsh`][zsh]
 - [Fish shell cheatsheet]
+- [The fish language]
 
 Prompts:
 
@@ -178,7 +180,6 @@ Frameworks:
 ### Sources
 
 - [Documentation]
-- [Github]
 - [Brace expansion with range in fish shell]
 
 <!--
@@ -197,8 +198,9 @@ Frameworks:
 
 <!-- Files -->
 <!-- Upstream -->
+[codebase]: https://github.com/fish-shell/fish-shell
 [documentation]: https://fishshell.com/docs/current/
-[github]: https://github.com/fish-shell/fish-shell
+[the fish language]: https://fishshell.com/docs/current/language.html
 [website]: https://fishshell.com/
 
 <!-- Others -->
