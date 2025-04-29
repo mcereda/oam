@@ -33,6 +33,23 @@ az disk-encryption-set show --ids 'id' \
     \"keyId\": activeKey.keyUrl,
     \"accessPolicyId\": join('/', [activeKey.sourceVault.id, 'objectId', identity.principalId])
   }"
+
+# Sort elements in a list.
+# Refer <https://jmespath.org/specification.html#sort-by>.
+# Ascending. Use `reverse(sort_by(…))` to get the list in descending order.
+# Refer <https://jmespath.org/specification.html#reverse>.
+aws ec2 describe-images --filters 'Name=tag:Name,Values=[RunnerBaseline]' \
+  --query 'sort_by(Images, &LastLaunchedTime)[]'
+
+# Slice arrays.
+# Refer <https://jmespath.org/specification.html#slices>.
+aws ec2 describe-images … --query 'Images[]'       # all elements
+aws ec2 describe-images … --query 'Images[3:]'     # elements from 4th onwards
+aws ec2 describe-images … --query 'Images[:6]'     # elements from 1st to 5th
+aws ec2 describe-images … --query 'Images[1:4]'    # elements from 2nd to 5th
+aws ec2 describe-images … --query 'Images[5:9:2]'  # odd elements from 5th to 9th
+aws ec2 describe-images … --query 'Images[-3:]'    # the last 3 elements
+aws ec2 describe-images … --query 'Images[::-1]'   # all elements in reverse order
 ```
 
 ## Further readings
