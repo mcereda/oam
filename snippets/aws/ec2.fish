@@ -17,6 +17,13 @@ aws ec2 describe-images --output 'yaml' \
 aws ec2 describe-images --image-ids 'ami-01234567890abcdef'
 aws ec2 describe-images --image-ids 'ami-01234567890abcdef' --query 'Images[].Description'
 
+# List AMIs with a specific name tag by LastLaunchedTime in descending order
+aws ec2 describe-images --filters 'Name=tag:Name,Values=[GitLabRunnerBaseline]' \
+	--query 'reverse(sort_by(Images, &LastLaunchedTime))[]'
+
+# Delete AMIs
+aws ec2 deregister-image --dry-run --image-id 'ami-0123456789abcdef0'
+
 
 # Check instances are available for use with SSM
 aws ssm get-connection-status --query "Status=='connected'" --output 'text' --target 'i-0915612ff82914822'
@@ -62,10 +69,10 @@ aws ec2 describe-instances --output 'text' \
 	--filters 'Name=tag:Name,Values=Prometheus' 'Name=instance-state-name,Values=running' \
 	--query 'Reservations[].Instances[0].BlockDeviceMappings[*].Ebs.VolumeId'
 
-# Change volume type
+# Change volumes' type
 aws ec2 modify-volume --volume-type 'gp3' --volume-id 'vol-0123456789abcdef0'
 
-# Migrate gp2 volumes to gp3
+# Migrate all gp2 volumes to gp3
 aws ec2 describe-volumes --filters "Name=volume-type,Values=gp2" --query 'Volumes[].VolumeId' --output 'text' \
 | xargs -pn '1' aws ec2 modify-volume --volume-type 'gp3' --volume-id
 
@@ -77,7 +84,7 @@ aws ec2 create-snapshot --volume-id 'vol-0123456789abcdef0' --description 'Manua
 aws ec2 describe-snapshots --snapshot-ids 'snap-0123456789abcdef0' \
 	--query 'Snapshots[].{"State": State,"Progress": Progress}' --output 'yaml'
 
-# Wait for snapshots to finish.
+# Wait for snapshots to finish
 aws ec2 wait snapshot-completed --snapshot-ids 'snap-0123456789abcdef0'
 
 # Take snapshots of EC2 volumes and wait for them to finish
@@ -89,6 +96,9 @@ aws ec2 describe-instances --output 'text' \
 	--tag-specifications 'ResourceType=snapshot,Tags=[{Key=Name,Value=Prometheus},{Key=Team,Value=Infra}]' \
 	--volume-id \
 | xargs -t aws ec2 wait snapshot-completed --snapshot-ids
+
+# Delete snapshots
+aws ec2 delete-snapshot --snapshot-id 'snap-0123456789abcdef0' --dry-run
 
 
 # Retrieve the security credentials for an IAM role named 's3access' from instances
@@ -126,6 +136,31 @@ aws ec2 stop-instances --instance-ids 'i-0123456789abcdef0'
 # Terminate instances
 aws ec2 terminate-instances --instance-ids 'i-0123456789abcdef0'
 
+
+# Get launch templates information
+aws ec2 describe-launch-templates --launch-template-names 'Gitlab Runners'
+
+# Get launch template versions information
+aws ec2 describe-launch-template-versions --launch-template-name 'GitlabRunners' --versions '16' '$Default' '$Latest'
+aws ec2 describe-launch-template-versions --launch-template-name 'GitlabRunners' --min-version '10' --max-version '12'
+
 # Delete launch template versions
 aws ec2 delete-launch-template-versions --launch-template-id 'lt-0123456789abcdef0' --versions '1' --dry-run
-aws ec2 delete-launch-template-versions --launch-template-name 'GitLab Runners' --versions (seq 1 10) --dry-run
+aws ec2 delete-launch-template-versions --launch-template-name 'GitLabRunners' --versions (seq 1 10) --dry-run
+
+
+# Get the snapshot ID of all AMIs with specific tags but the one used in the default version of a launch template.
+CURRENT_AMI=( \
+	aws ec2 describe-launch-template-versions --launch-template-name 'GitlabRunners' --versions '$Default' \
+		--query 'LaunchTemplateVersions[].LaunchTemplateData.ImageId' --output 'text' \
+) \
+aws ec2 describe-images \
+	--filters \
+		"Name=tag:Application,Values=['GitLab']" \
+		"Name=tag:Component,Values=['Runner']" \
+		"Name=tag:CreatedBy,Values=['EC2 Image Builder']" \
+	--query "Images[?ImageId!='$CURRENT_AMI'].ImageId" --output 'text' \
+| xargs \
+	aws ec2 describe-images \
+		--query "Images[].[ImageID,BlockDeviceMappings[?DeviceName=='/dev/xvda'].Ebs.SnapshotId]" --output 'text' \
+		--image-ids
