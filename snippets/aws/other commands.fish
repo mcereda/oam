@@ -55,10 +55,12 @@ aws cloudfront get-cache-policy --id '01234567-89ab-cdef-0123-456789abcdef'
 # List available metrics
 aws cloudwatch list-metrics --namespace 'AWS/EC2'
 aws cloudwatch list-metrics --namespace 'AWS/EC2' --metric-name 'CPUUtilization'
-aws cloudwatch list-metrics --namespace 'AWS/EC2' --dimensions 'Name=InstanceId,Value=i-1234567890abcdef0' --query 'Metrics[].MetricName'
+aws cloudwatch list-metrics --namespace 'AWS/EC2' --dimensions 'Name=InstanceId,Value=i-1234567890abcdef0' \
+	--query 'Metrics[].MetricName'
 
 # Show alarms information
-aws cloudwatch describe-alarms-for-metric --metric-name 'CPUUtilization' --namespace 'AWS/EC2' --dimensions 'Name=InstanceId,Value=i-1234567890abcdef0'
+aws cloudwatch describe-alarms-for-metric --metric-name 'CPUUtilization' --namespace 'AWS/EC2' \
+	--dimensions 'Name=InstanceId,Value=i-1234567890abcdef0'
 
 
 ###
@@ -73,15 +75,6 @@ aws cognito-idp list-user-pools --max-results '10' --query 'UserPools'
 # List users in pools
 aws cognito-idp list-users --user-pool-id 'eu-west-1_lrDF9T78a' --query "Users[?Username=='john']"
 
-
-###
-# ECS
-# ------------------
-###
-
-# Execute commands in containers
-aws ecs execute-command --cluster 'staging' --task '0123456789abcdefghijklmnopqrstuv' --container 'pihole' \
-	--interactive --command "dd if=/dev/zero of=/spaceHogger count=16048576 bs=1024"
 
 ###
 # ECR
@@ -125,14 +118,18 @@ aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --
 
 aws ecs list-tasks --output 'text' --query 'taskArns' --cluster 'testCluster' --family 'testService' \
 | xargs -t aws ecs wait tasks-running --cluster 'testCluster' --tasks
-while [[ $$(aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --service-name 'testService') == "" ]]; do sleep 1; done
+while [[ $$( \
+	aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --service-name 'testService' \
+) == "" ]]; do sleep 1; done
 
 aws ecs list-task-definitions --family-prefix 'testService' --output 'text' --query 'taskDefinitionArns' \
 | xargs -pn '1' aws ecs deregister-task-definition --task-definition
 
 aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'testCluster' --service-name 'testService' \
 | tee \
-| xargs -t aws ecs describe-tasks --query "tasks[].attachments[].details[?(name=='privateIPv4Address')].value" --output 'text' --cluster 'testCluster' --tasks \
+| xargs -t -I '%%' \
+	aws ecs describe-tasks --cluster 'testCluster' --tasks '%%' \
+		--query "tasks[].attachments[].details[?(name=='privateIPv4Address')].value" --output 'text' \
 | tee \
 | xargs -I{} curl -fs "http://{}:8080"
 
@@ -170,6 +167,8 @@ aws ecs list-tasks --cluster 'staging' --service-name 'mimir' --query 'taskArns'
 # Execute commands in tasks
 aws ecs execute-command --cluster 'staging' --task 'e242654518cf42a7be13a8551e0b3c27' --container 'echo-server' \
 	--interactive --command 'nc -vz 127.0.0.1 28080'
+aws ecs execute-command --cluster 'staging' --task '0123456789abcdefghijklmnopqrstuv' --container 'pihole' \
+	--interactive --command "dd if=/dev/zero of=/spaceHogger count=16048576 bs=1024"
 
 # Stop tasks given a service name
 aws ecs list-tasks --cluster 'staging' --service-name 'mimir' --query 'taskArns' --output 'text' \
@@ -201,7 +200,9 @@ aws efs describe-mount-targets --query 'MountTargets[].IpAddress' --output 'text
 
 # Get mount targets' IP address from the filesystem's name.
 aws efs describe-mount-targets --query 'MountTargets[].IpAddress' --output 'json' \
-	--file-system-id (aws efs describe-file-systems --query 'FileSystems[].FileSystemId' --output 'text' --creation-token 'fs-name')
+	--file-system-id ( \
+		aws efs describe-file-systems  --creation-token 'fs-name' --query 'FileSystems[].FileSystemId' --output 'text' \
+	)
 
 # Mount volumes.
 mount -t 'nfs' -o 'nfsvers=4.0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport' \
@@ -423,7 +424,8 @@ aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
 	--query "Parameters[?ParameterName=='shared_preload_libraries']" --output 'table'
 aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
 	--query "Parameters[?ParameterName=='shared_preload_libraries'].ApplyMethod" --output 'text'
-aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' --output 'json' --query "Parameters[?ApplyType!='dynamic']"
+aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
+	--output 'json' --query "Parameters[?ApplyType!='dynamic']"
 
 
 ###
@@ -446,7 +448,7 @@ aws s3 cp 's3://my-first-bucket/test.txt' 's3://my-other-bucket/'
 aws s3api list-objects-v2 --bucket 'backup'
 aws s3api list-objects-v2 --bucket 'backup' --query "Contents[?LastModified>='2022-01-05T08:05:37+00:00'].Key"
 
-aws s3api list-buckets --output 'text' --query 'Buckets[].Name' | xargs -pn '1' aws s3api list-multipart-uploads --bucket
+aws s3api list-buckets --output 'text' --query 'Buckets[].Name' | xargs -n '1' aws s3api list-multipart-uploads --bucket
 aws --profile 'someProfile' s3api head-bucket --bucket 'someBucket'
 
 
@@ -467,4 +469,5 @@ aws sns list-subscriptions --query 'Subscriptions'
 aws sns list-subscriptions-by-topic --topic-arn 'arn:aws:sns:eu-west-1:012345678901:aSucculentTopic'
 
 # Get information about subscriptions
-aws sns get-subscription-attributes --subscription-arn 'arn:aws:sns:eu-west-1:012345678901:aSucculentTopic:abcdef01-2345-6789-abcd-ef0123456789'
+aws sns get-subscription-attributes \
+	--subscription-arn 'arn:aws:sns:eu-west-1:012345678901:aSucculentTopic:abcdef01-2345-6789-abcd-ef0123456789'
