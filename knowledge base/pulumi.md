@@ -151,6 +151,7 @@ pulumi update --refresh --yes -f --secrets-provider 'hashivault'
 # Access outputs.
 pulumi stack output 'vpcId'
 pulumi stack output 'subnetName' --show-secrets -s 'stack'
+pulumi stack output 'serviceAccount' | jq -r '.accessKey.encryptedSecret' - | base64 -d | gpg -d
 
 # Import existing resources.
 pulumi import 'aws:ecr/pullThroughCacheRule:PullThroughCacheRule' 'resourceName' 'prefix'
@@ -335,8 +336,7 @@ pulumi config set-all --path \
   --plaintext 'aws:defaultTags.tags.Owner=SomeOne' \
   --plaintext 'aws:defaultTags.tags.Team=SomeTeam'
 
-# Using the same number of threads of the machine seems to give the best
-# performance ratio.
+# Using the same number of threads of the machine seems to give the best performance ratio.
 pulumi pre --parallel "$(nproc)" --diff
 pulumi up --parallel "$(nproc)"
 
@@ -393,6 +393,29 @@ yq -iy '. += {"backend": {"url": "s3://myBucket/prefix"}}' 'Pulumi.yaml'
 
 # Diff the two states
 # TODO
+
+
+# Get the AWS secret access key of an aws.iam.AccessKey resource
+pulumi stack output 'someAccessKey' | jq -r '.encryptedSecret' - | base64 -d | gpg --decrypt
+pulumi stack export \
+| jq -r '
+  .deployment.resources[]
+  | select(.type=="aws:iam/accessKey:AccessKey" and .outputs.user=="someUserId")
+  | .outputs.encryptedSecret' \
+| base64 -d | gpg -d
+
+# Get the initial password created by an aws.iam.UserLoginProfile resource.
+# If no encryption is set in the resource, it will be available in plaintext at runtime as the resource's
+#   'encryptedPassword' attribute - just log it out.
+# If a PGP key is set in the resource, it will be available as base64 cyphertext at runtime as the resource's
+#   'encryptedPassword' attribute *and* it will also be available in the state for later reference.
+pulumi stack output 'someUserLoginProfile' | jq -r '.encryptedPassword' - | base64 -d | gpg --decrypt
+pulumi stack export \
+| jq -r '
+  .deployment.resources[]
+  | select(.type=="aws:iam/userLoginProfile:UserLoginProfile" and .id=="someUserId")
+  | .outputs.encryptedPassword' \
+| base64 -d | gpg -d
 ```
 
 ```ts
