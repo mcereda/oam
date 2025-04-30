@@ -81,6 +81,25 @@ pulumi stack export | jq -r '.deployment.resources[].provider' | grep -v 'aws::d
 
 # Get the AWS secret access key of an aws.iam.AccessKey resource
 pulumi stack output 'someAccessKey' | jq -r '.encryptedSecret' - | base64 -d | gpg --decrypt
+pulumi stack export \
+| jq -r '
+	.deployment.resources[]
+	| select(.type=="aws:iam/accessKey:AccessKey" and .outputs.user=="someUserId")
+	| .outputs.encryptedSecret' \
+| base64 -d | gpg -d
+
+# Get the initial password created by an aws.iam.UserLoginProfile resource.
+# If no encryption is set in the resource, it will be available in plaintext at runtime as the resource's
+#   'encryptedPassword' attribute - just log it out.
+# If a PGP key is set in the resource, it will be available as base64 cyphertext at runtime as the resource's
+#   'encryptedPassword' attribute *and* it will also be available in the state for later reference.
+pulumi stack output 'someUserLoginProfile' | jq -r '.encryptedPassword' - | base64 -d | gpg --decrypt
+pulumi stack export \
+| jq -r '
+	.deployment.resources[]
+	| select(.type=="aws:iam/userLoginProfile:UserLoginProfile" and .id=="someUserId")
+	| .outputs.encryptedPassword' \
+| base64 -d | gpg -d
 
 # Avoid permission errors when deleting clusters with charts and stuff.
 PULUMI_K8S_DELETE_UNREACHABLE='true' pulumi destroy
