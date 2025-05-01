@@ -20,7 +20,7 @@
     1. [`sign_and_send_pubkey: signing failed for … from agent: agent refused operation`](#sign_and_send_pubkey-signing-failed-for--from-agent-agent-refused-operation)
     1. [New configuration settings are ineffective](#new-configuration-settings-are-ineffective)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -154,6 +154,13 @@ gpg --export-ssh-key 'ed25519_key' > ~'/.ssh/id_ed25519.pub'
 
 # Integrate with Pinentry.
 export GPG_TTY="$(tty)"
+
+
+# Only get the base64 armored string in the key
+# -e '/^-----/d' removes the header and footer
+# -e '/^=/d' removes the base64 checksum at the bottom
+# -e '/^$/d' removes empty lines
+gpg --armor --export 'someone@example.org' | sed -e '/^-----/d' -e '/^=/d' -e '/^$/d'
 ```
 
 ## Encryption
@@ -518,9 +525,7 @@ gpg-connect-agent reloadagent '/bye'
 - [OpenPGP best practices]
 - [GNU/Linux crypto series]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Decrypt multiple openpgp files in a directory]
 - [ask redhat]
@@ -536,16 +541,14 @@ All the references in the [further readings] section, plus the following:
 - [Stick with security: YubiKey, SSH, GnuPG, macOS]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Upstream -->
 [commonly seen problems]: https://www.gnupg.org/documentation/manuals/gnupg/Common-Problems.html
 [modify .gnupg home directories]: https://www.gnupg.org/documentation/manuals/gnupg/gpgconf.html
 [unattended key generation]: https://www.gnupg.org/documentation/manuals/gnupg/Unattended-GPG-key-generation.html
-
-<!-- In-article sections -->
-[further readings]: #further-readings
 
 <!-- Others -->
 [archlinux's gnupg wiki page]: https://wiki.archlinux.org/title/GnuPG

@@ -34,3 +34,9 @@ gpgconf --launch gpg-agent
 find . -type f -not -name '*.gpg' \
 	-path '*/values.*.y*ml' -path '*/secrets/*.*' \
 	-exec gpg --batch --encrypt-files --yes -r "0123...CDEF" "{}" ';'
+
+# Only get the base64 armored string in the key
+# -e '/^-----/d' removes the header and footer
+# -e '/^=/d' removes the base64 checksum at the bottom
+# -e '/^$/d' removes empty lines
+gpg --armor --export 'someone@example.org' | sed -e '/^-----/d' -e '/^=/d' -e '/^$/d'
