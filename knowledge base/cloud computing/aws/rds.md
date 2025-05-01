@@ -150,6 +150,10 @@ aws rds cancel-export-task --export-task-identifier 'my_export'
 
 Refer [Understanding PostgreSQL roles and permissions].
 
+PostgreSQL-flavoured RDS multi-AZ clusters do **not** ensure Snapshot Isolation. Instead, they _may_ provide Parallel
+Snapshot Isolation, a slightly weaker model.<br/>
+Refer [Kyle Kingsbury's Amazon RDS for PostgreSQL 17.4 analysis].
+
 ## Burstable instances
 
 `T` instances are burstable.
@@ -801,6 +805,7 @@ or write workloads and exceeds the instance type quotas.
 - [Working with parameter groups]
 - [How can I resolve the "ERROR: <module/extension> must be loaded via shared_preload_libraries" error?]
 - [Understanding PostgreSQL roles and permissions]
+- [Kyle Kingsbury's Amazon RDS for PostgreSQL 17.4 analysis]
 
 ### Sources
 
@@ -863,3 +868,4 @@ or write workloads and exceeds the instance type quotas.
 <!-- Others -->
 [backing up login roles aka users and group roles]: https://www.postgresonline.com/article_pfriendly/81.html
 [disabling aws rds backups when creating/updating instances?]: https://stackoverflow.com/questions/35709153/disabling-aws-rds-backups-when-creating-updating-instances
+[Kyle Kingsbury's Amazon RDS for PostgreSQL 17.4 analysis]: https://jepsen.io/analyses/amazon-rds-for-postgresql-17.4
