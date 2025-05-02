@@ -7,6 +7,7 @@
    1. [Standalone tasks](#standalone-tasks)
    1. [Services](#services)
 1. [Resource constraints](#resource-constraints)
+1. [Environment variables](#environment-variables)
 1. [Storage](#storage)
    1. [EBS volumes](#ebs-volumes)
    1. [EFS volumes](#efs-volumes)
@@ -21,7 +22,7 @@
 1. [Troubleshooting](#troubleshooting)
    1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -279,6 +280,42 @@ the `memoryReservation` value.<br/>
 If specifying `memoryReservation`, that value is guaranteed to the container and subtracted from the available memory
 resources for the container instance that the container is placed on. Otherwise, the value of `memory` is used.
 
+## Environment variables
+
+Refer [Amazon ECS environment variables].
+
+ECS sets default environment variables for any task it runs.
+
+<details>
+
+```sh
+$ aws ecs list-tasks --cluster 'devel' --service-name 'prometheus' --query 'taskArns' --output 'text' \
+  | xargs -I '%%' aws ecs execute-command --cluster 'devel' --task '%%' --container 'prometheus' \
+      --interactive --command 'printenv'
+
+The Session Manager plugin was installed successfully. Use the AWS CLI to start a session.
+
+
+Starting session with SessionId: ecs-execute-command-abcdefghijklmnopqrstuvwxyz
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=ip-172-31-10-103.eu-west-1.compute.internal
+AWS_CONTAINER_CREDENTIALS_RELATIVE_URI=/v2/credentials/abcdefgh-1234-abcd-9876-abcdefgh0123
+AWS_DEFAULT_REGION=eu-west-1
+AWS_EXECUTION_ENV=AWS_ECS_FARGATE
+AWS_REGION=eu-west-1
+ECS_AGENT_URI=http://169.254.170.2/api/abcdef0123456789abcdef0123456789-1111111111
+ECS_CONTAINER_METADATA_URI=http://169.254.170.2/v3/abcdef0123456789abcdef0123456789-1111111111
+ECS_CONTAINER_METADATA_URI_V4=http://169.254.170.2/v4/abcdef0123456789abcdef0123456789-1111111111
+HOME=/root
+TERM=xterm-256color
+LANG=C.UTF-8
+
+
+Exiting session with sessionId: ecs-execute-command-abcdefghijklmnopqrstuvwxyz.
+```
+
+</details>
+
 ## Storage
 
 Refer [Storage options for Amazon ECS tasks].
@@ -503,7 +540,7 @@ Requirements:
         "Statement": [{
             "Effect": "Allow",
             "Action": "ecs:ExecuteCommand",
-            "Resource": "arn:aws:ecs:eu-west-1:012345678901:cluster/staging",
+            "Resource": "arn:aws:ecs:eu-west-1:012345678901:cluster/devel",
             "Condition": {
                 "StringEquals": {
                     "aws:ResourceTag/application": "appName",
@@ -527,15 +564,15 @@ Procedure:
     <summary>Example</summary>
 
    ```sh
-   aws ecs describe-tasks --cluster 'staging' --tasks 'ef6260ed8aab49cf926667ab0c52c313' --output 'yaml' \
+   aws ecs describe-tasks --cluster 'devel' --tasks 'ef6260ed8aab49cf926667ab0c52c313' --output 'yaml' \
      --query 'tasks[0] | {
        "managedAgents": containers[].managedAgents[?@.name==`ExecuteCommandAgent`][],
        "enableExecuteCommand": enableExecuteCommand
      }'
 
-   aws ecs list-tasks --cluster 'staging' --service-name 'mimir' --query 'taskArns' --output 'text' \
+   aws ecs list-tasks --cluster 'devel' --service-name 'mimir' --query 'taskArns' --output 'text' \
    | xargs \
-       aws ecs describe-tasks --cluster 'Staging' \
+       aws ecs describe-tasks --cluster 'devel' \
          --output 'yaml' --query 'tasks[0] | {
            "managedAgents": containers[].managedAgents[?@.name==`ExecuteCommandAgent`][],
            "enableExecuteCommand": enableExecuteCommand
@@ -560,7 +597,7 @@ Procedure:
 
    ```sh
    aws ecs execute-command --interactive --command 'df -h' \
-     --cluster 'staging' --task 'ef6260ed8aab49cf926667ab0c52c313' --container 'nginx'
+     --cluster 'devel' --task 'ef6260ed8aab49cf926667ab0c52c313' --container 'nginx'
    ```
 
    ```plaintext
@@ -977,6 +1014,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [efs]: efs.md
 
 <!-- Upstream -->
+[Amazon ECS environment variables]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-environment-variables.html
 [amazon ecs exec checker]: https://github.com/aws-containers/amazon-ecs-exec-checker
 [Amazon ECS Service Discovery]: https://aws.amazon.com/blogs/aws/amazon-ecs-service-discovery/
 [amazon ecs services]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html
