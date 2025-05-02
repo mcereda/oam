@@ -43,6 +43,8 @@ Prometheus to scrape from.<br/>
 Exporters are small and purpose-built applications that collect their objects' metrics in different ways, then expose
 them in an HTTP endpoint in their place.
 
+Prometheus requires a configuration file for scraping settings.
+
 <details>
   <summary>Setup</summary>
 
@@ -70,6 +72,11 @@ helm --namespace 'prometheus' uninstall 'prometheus'
 prometheus
 prometheus --web.enable-admin-api
 
+# Validate the configuration file.
+promtool check config /etc/prometheus/prometheus.yml
+docker run --rm -v "$PWD/config.yaml:/etc/prometheus/prometheus.yml:ro" --entrypoint 'promtool' 'prom/prometheus' \
+  check config /etc/prometheus/prometheus.yml
+
 # Reload the configuration file *without* restarting the process.
 kill -s 'SIGHUP' '3969'
 pkill --signal 'HUP' 'prometheus'
@@ -78,6 +85,10 @@ curl -i -X 'POST' 'localhost:9090/-/reload'  # if admin APIs are enabled
 # Shut down the process *gracefully*.
 kill -s 'SIGTERM' '3969'
 pkill --signal 'TERM' 'prometheus'
+
+# Push test metrics to a remote.
+promtool push metrics 'http://mimir.example.org:8080/api/v1/push'
+docker run --rm --entrypoint 'promtool' 'prom/prometheus' push metrics 'http://mimir.example.org:8080/api/v1/push'
 ```
 
 </details>
@@ -147,7 +158,21 @@ kubectl -n 'monitoring' get pods -l -l "app=prometheus-pushgateway,component=pus
 
 ## Configuration
 
+Refer [Configuration].
+
+Prometheus is configured via **both** command-line flags **and** a configuration file.
+
+The command-line flags configure **immutable system parameters** (e.g. storage locations, amount of data to keep on disk
+and in memory).<br/>
+The configuration file is a YAML file that defines everything related to:
+
+- Scraping jobs and their instances.
+- Which rule files to load.
+
 The default configuration file is at `/etc/prometheus/prometheus.yml`.
+
+<details>
+  <summary>Configuration file example</summary>
 
 ```yml
 global:
@@ -170,12 +195,22 @@ scrape_configs:
         regex: '(node_cpu)'
 ```
 
-Reload the configuration with**out** restarting Prometheus's process by using the `SIGHUP` signal:
+</details>
 
-```sh
-kill -s 'SIGHUP' '3969'
-pkill --signal 'HUP' 'prometheus'
-```
+Prometheus can reload the configuration file with**out** restarting its process by
+
+- Sending the `SIGHUP` signal to the process:
+
+  ```sh
+  kill -s 'SIGHUP' '3969'
+  pkill --signal 'HUP' 'prometheus'
+  ```
+
+- Sending a `POST` HTTP request to the `/-/reload` endpoint.<br/>
+  Requires the process to start with the `--web.enable-lifecycle` flag enabled.
+
+If the new configuration is **not** well-formed, changes will **not** be applied.<br/>
+This will also reload any configured rule files.
 
 ### Filter metrics
 
@@ -518,6 +553,7 @@ Typically achieved by:
 
 <!-- Upstream -->
 [codebase]: https://github.com/prometheus/prometheus
+[Configuration]: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
 [documentation]: https://prometheus.io/docs/
 [Exporters and integrations]: https://prometheus.io/docs/instrumenting/exporters/
 [functions]: https://prometheus.io/docs/prometheus/latest/querying/functions/
