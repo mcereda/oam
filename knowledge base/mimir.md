@@ -19,6 +19,8 @@ and set up alerting rules across multiple tenants to leverage tenant federation.
 1. [Migrate to Mimir](#migrate-to-mimir)
 1. [Ingest Out-Of-Order samples](#ingest-out-of-order-samples)
 1. [Deduplication of data from multiple Prometheus scrapers](#deduplication-of-data-from-multiple-prometheus-scrapers)
+   1. [Configure Prometheus for deduplication](#configure-prometheus-for-deduplication)
+   1. [Configure Mimir for deduplication](#configure-mimir-for-deduplication)
 1. [APIs](#apis)
 1. [Troubleshooting](#troubleshooting)
    1. [HTTP status 401 Unauthorized: no org id](#http-status-401-unauthorized-no-org-id)
@@ -430,6 +432,94 @@ limits:
 
 Refer [Configure Grafana Mimir high-availability deduplication].
 
+Mimir can deduplicate the data received from HA pairs of Prometheus instances.<br/>
+It does so by:
+
+- Electing a _leader_ replica for each data source pair.
+- Only ingesting samples from the leader, and dropping the ones from the other replica.
+- Switching the leader to the standby replica, should Mimir see no new samples from the leader for some time (30s by
+  default).
+
+The failure timeout should be kept low enough to avoid dropping too much data before failing over to the standby
+replica.<br/>
+For queries using the `rate()` function, it is suggested to make the rate time interval at least four times that of the
+scrape period to account for any of these failover scenarios (e.g., a rate time-interval of at least 1-minutes for a
+scrape period of 15 seconds).
+
+The distributor includes a high-availability (HA) tracker.<br/>
+It deduplicates incoming samples based on a `cluster` and `replica` label that it expects on each incoming series.
+
+The `cluster` label uniquely identifies the cluster of redundant Prometheus servers for a given tenant.<br/>
+The `replica` label uniquely identifies the replica instance within that Prometheus cluster.<br/>
+Incoming samples are considered duplicated (and thus dropped) if they are received from any replica that is **not** the
+currently elected leader within any cluster.
+
+> For performance reasons, the HA tracker only checks the `cluster` and `replica` label of the **first** series in the
+> request to determine whether **all** series in the request should be deduplicated.
+
+### Configure Prometheus for deduplication
+
+Set the two labels for each Prometheus server.
+
+The easiest approach is to set them as _external labels_.<br/>
+The default labels are `cluster` and `__replica__`.
+
+```yml
+global:
+  external_labels:
+    cluster: infra
+    __replica__: replica1  # since Prometheus 3.0 one can use vars like ${HOSTNAME}
+```
+
+### Configure Mimir for deduplication
+
+The **minimal** configuration requires the following:
+
+1. Enable the distributor's HA tracker.
+
+   <details style="padding: 0 0 1rem 1rem">
+     <summary>Example: enable for <b>all</b> tenants</summary>
+
+   ```sh
+   mimir … \
+     -distributor.ha-tracker.enable='true' \
+     -distributor.ha-tracker.enable-for-all-users='true'
+   ```
+
+   ```yml
+   limits:
+     accept_ha_samples: true
+   distributor:
+     ha_tracker:
+       enable_ha_tracker: true
+   ```
+
+   </details>
+
+1. Configure the HA tracker's KV store.
+
+   `memberlist` support is currently experimental.<br/>
+   See also [In-Depth Comparison of Distributed Coordination Tools: Consul, etcd, ZooKeeper, and Nacos].
+
+   <details style="padding: 0 0 1rem 1rem">
+     <summary>Example: <code>inmemory</code></summary>
+
+   ```sh
+   mimir … -distributor.ha-tracker.store='inmemory'
+   ```
+
+   ```yml
+   distributor:
+     ha_tracker:
+       kvstore:
+         store: inmemory
+   ```
+
+   </details>
+
+1. Configure the expected label names for each cluster and its replica.<br/>
+   Only needed when using different labels than the default ones.
+
 ## APIs
 
 Refer [Grafana Mimir HTTP API].
@@ -525,6 +615,7 @@ ingester:
 - [hashicorp/memberlist]
 - [Gossip protocol]
 - [Ceiling Function]
+- [In-Depth Comparison of Distributed Coordination Tools: Consul, etcd, ZooKeeper, and Nacos]
 
 Alternatives:
 
@@ -581,4 +672,5 @@ Alternatives:
 [Ceiling Function]: https://www.geeksforgeeks.org/ceiling-function/
 [Gossip protocol]: https://en.wikipedia.org/wiki/Gossip_protocol
 [hashicorp/memberlist]: https://github.com/hashicorp/memberlist
+[In-Depth Comparison of Distributed Coordination Tools: Consul, etcd, ZooKeeper, and Nacos]: https://medium.com/@karim.albakry/in-depth-comparison-of-distributed-coordination-tools-consul-etcd-zookeeper-and-nacos-a6f8e5d612a6
 [Mimir on AWS ECS Fargate]: https://github.com/grafana/mimir/discussions/3807#discussioncomment-4602413
