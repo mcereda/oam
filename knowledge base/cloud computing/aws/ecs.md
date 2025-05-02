@@ -401,7 +401,7 @@ Whe whole procedure is transparent and does **not** compel requirements changes 
 Requirements:
 
 - The required SSM components must be available on the EC2 instances hosting the container.
-  Amazon's ECS optimized AMI and Fargate 1.4 include their latest version already.
+  Amazon's ECS optimized AMI and Fargate 1.4.0+ include their latest version already.
 - The container's image must have `script` and `cat` installed.<br/>
   Required in order to have command logs uploaded correctly to S3 and/or CloudWatch.
 - The task's role (**not** the Task's _execution_ role) must have specific permissions assigned.
@@ -438,26 +438,32 @@ Requirements:
                   "logs:DescribeLogStreams",
                   "logs:PutLogEvents"
               ],
-              "Resource": "arn:aws:logs:eu-west-1:012345678901:log-group:/ecs/log-group-name:*"
+              "Resource": [
+                  "arn:aws:logs:eu-west-1:012345678901:log-group:log-group-name",
+                  "arn:aws:logs:eu-west-1:012345678901:log-group:log-group-name:log-stream:log-stream-name"
+              ]
           },
           {
-              "Sid": "OptionalGlobalS3Permissions",
+              "Sid": "OptionalS3PermissionsIfSSMRecordsLogsInBuckets",
               "Effect": "Allow",
-              "Action": "s3:GetEncryptionConfiguration",
-              "Resource": "arn:aws:s3:::ecs-exec-bucket"
+              "Action": [
+                  "s3:GetEncryptionConfiguration",
+                  "s3:PutObject"
+              ],
+              "Resource": [
+                  "arn:aws:s3:::ecs-exec-bucket",
+                  "arn:aws:s3:::ecs-exec-bucket/session-logs/*"
+              ]
           },
           {
-              "Sid": "OptionalSpecificS3Permissions",
+              "Sid": "OptionalKMSPermissionsIfSSMRecordsLogsInEncryptedBuckets",
               "Effect": "Allow",
-              "Action": "s3:PutObject",
-              "Resource": "arn:aws:s3:::ecs-exec-bucket/*"
-          },
-          {
-              "Sid": "OptionalKMSPermissions",
-              "Effect": "Allow",
-              "Action": "kms:Decrypt",
+              "Action": [
+                  "kms:Decrypt",
+                  "kms:GenerateDataKey"
+              ],
               "Resource": "arn:aws:kms:eu-west-1:012345678901:key/abcdef01-2345-6789-abcd-ef0123456789"
-          }
+          },
       ]
   }
   ```

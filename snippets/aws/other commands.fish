@@ -169,6 +169,10 @@ aws ecs execute-command --cluster 'staging' --task 'e242654518cf42a7be13a8551e0b
 	--interactive --command 'nc -vz 127.0.0.1 28080'
 aws ecs execute-command --cluster 'staging' --task '0123456789abcdefghijklmnopqrstuv' --container 'pihole' \
 	--interactive --command "dd if=/dev/zero of=/spaceHogger count=16048576 bs=1024"
+# Execute commands in tasks given their service name
+aws ecs list-tasks --cluster 'staging' --service-name 'prometheus' --query 'taskArns' --output 'text' \
+| xargs -I '%%' aws ecs execute-command --cluster 'staging' --task '%%' --container 'prometheus' \
+	--interactive --command 'nc -vz 127.0.0.1 9090'
 
 # Stop tasks given a service name
 aws ecs list-tasks --cluster 'staging' --service-name 'mimir' --query 'taskArns' --output 'text' \
