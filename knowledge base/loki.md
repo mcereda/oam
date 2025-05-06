@@ -323,8 +323,10 @@ See also [OpenTelemetry / OTLP].
 
 ## Labels
 
-The content of each log line is **not** indexed. Instead, log entries are grouped into streams.<br/>
-The streams are then indexed with labels.
+Refer [Understand labels], [Cardinality] and [What is structured metadata].
+
+The content of _each_ log line is **not** indexed. Instead, log entries are grouped into _streams_.<br/>
+The streams are then indexed using _labels_.
 
 Labels are key-value pairs, e.g.:
 
@@ -334,10 +336,15 @@ cloud_region = us-west-1
 namespace = grafana-server
 ```
 
-Sets of log messages that share all the labels above would be called a _log stream_.
+Sets of log messages that share **all** the labels above would be called a _log stream_.<br/>
+Each log stream must have **at least one** label to be stored and queried in Loki.
+
+Labels are intended to store **low-cardinality** values with the goal to describe the logs' source.<br/>
+If frequently searching high-cardinality data in logs, one should use
+[_structured metadata_][what is structured metadata] instead.
 
 Loki has a default limit of 15 index labels.<br/>
-I can't seem to find ways to set this up as of 2025-01-21.
+I can't seem to find ways to set this value as of 2025-01-21.
 
 When Loki performs searches, it:
 
@@ -354,11 +361,11 @@ This label is mainly used to find and explore logs in the `Explore Logs` feature
 
 When receiving data from Grafana Alloy or the OpenTelemetry Collector as client, Loki automatically assigns some of the
 OTel resource attributes as labels.<br/>
-By default, some resource attributes will be stored as labels, with periods (.) replaced with underscores (_). The
+By default, some resource attributes will be stored as labels, with periods (`.`) replaced with underscores (`_`). The
 remaining attributes are stored as structured metadata with each log entry.
 
-_Cardinality_ is the combination of unique labels and values (how many values can each label have). It impacts the
-number of log streams one creates and can lead to significant performance degradation.<br/>
+[_Cardinality_][cardinality] is the combination of unique labels and values (how many values can each label have). It
+impacts the number of log streams one creates and can lead to significant performance degradation.<br/>
 Prefer fewer labels with bounded values.
 
 Loki performs very poorly when labels have high cardinality, as it is forced to build a huge index and flush thousands
@@ -392,7 +399,7 @@ Use labels to separate streams so they can be ingested separately:
 
 - Use labels for things like regions, clusters, servers, applications, namespaces, and environments.
 
-  <details>
+  <details style="padding: 0 0 1rem 1rem">
 
   They will be fixed for given systems/apps and have bounded values.<br/>
   Static labels like these make it easier to query logs in a logical sense.
@@ -593,17 +600,20 @@ analytics:
 <!-- Files -->
 <!-- Upstream -->
 [aws deployment (s3 single store)]: https://grafana.com/docs/loki/latest/configure/storage/#aws-deployment-s3-single-store
+[Cardinality]: https://grafana.com/docs/loki/latest/get-started/labels/cardinality/
 [codebase]: https://github.com/grafana/loki
 [deploy the loki helm chart on aws]: https://grafana.com/docs/loki/latest/setup/install/helm/deployment-guides/aws/
 [documentation]: https://grafana.com/docs/loki/latest/
 [grafana loki store log data on s3 bucket on aws fargate]: https://community.grafana.com/t/grafana-loki-store-log-data-on-s3-bucket-on-aws-fargate/112861
 [how to install loki on (aws) eks using terraform with s3]: https://community.grafana.com/t/how-to-install-loki-on-aws-eks-using-terraform-with-s3/136489
 [http api reference]: https://grafana.com/docs/loki/latest/reference/loki-http-api/
+[logstash plugin]: https://grafana.com/docs/loki/latest/send-data/logstash/
 [loki-distributed]: https://github.com/grafana/helm-charts/tree/main/charts/loki-distributed
 [send log data to loki]: https://grafana.com/docs/loki/latest/send-data/
 [storage]: https://grafana.com/docs/loki/latest/configure/storage/
+[Understand labels]: https://grafana.com/docs/loki/latest/get-started/labels/
 [website]: https://grafana.com/oss/loki/
-[logstash plugin]: https://grafana.com/docs/loki/latest/send-data/logstash/
+[What is structured metadata]: https://grafana.com/docs/loki/latest/get-started/labels/structured-metadata/
 
 <!-- Others -->
 [deploying grafana, loki, and prometheus on aws ecs with efs and cloud formation (part 3 of 3)]: https://medium.com/@ahmadbilalch891/deploying-grafana-loki-and-prometheus-on-aws-ecs-with-efs-and-cloud-formation-part-3-of-3-24140ea8ccfb
