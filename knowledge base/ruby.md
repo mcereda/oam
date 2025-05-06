@@ -17,6 +17,7 @@ Intro
   <summary>Setup</summary>
 
 ```sh
+apt install 'ruby'
 brew install 'ruby'
 
 SSL_CERT_FILE='path/to/ssl.cert'
@@ -24,15 +25,18 @@ SSL_CERT_FILE='path/to/ssl.cert'
 
 </details>
 
-<!-- Uncomment if used
 <details>
   <summary>Usage</summary>
 
 ```sh
+# Create ruby gems from code.
+gem build
+
+# Unpack gems into code.
+gem unpack 'logstash-filter-custom-0.1.2.gem'
 ```
 
 </details>
--->
 
 <!-- Uncomment if used
 <details>
