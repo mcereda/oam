@@ -5,6 +5,7 @@ Server-side data processing pipeline that ingests data, transforms it, and then 
 Part of the Elastic Stack along with Beats, [ElasticSearch] and [Kibana].
 
 1. [TL;DR](#tldr)
+1. [Create plugins](#create-plugins)
 1. [Troubleshooting](#troubleshooting)
    1. [Check a pipeline is processing data](#check-a-pipeline-is-processing-data)
    1. [Log pipeline data to stdout](#log-pipeline-data-to-stdout)
@@ -34,9 +35,9 @@ docker run --rm -ti --name 'logstash' --entrypoint 'bash' 'logstash:7.17.27'
 # Validate configuration files.
 logstash -tf 'config.conf'
 logstash --config.test_and_exit --path.config 'config.conf' --api.enabled='false'
-# If given a directory, will load and check all files in it.
+# If given a directory, will load and check all files in it *as if they were a single pipeline*.
 logstash --config.test_and_exit --path.config 'configDir' --log.level='debug'
-docker run --rm -ti -v "$PWD:/usr/share/logstash/custom" 'docker.io/library/logstash:7.17.27' -tf 'custom'
+docker run --rm -ti -v "$PWD:/usr/share/logstash/custom-dir" 'docker.io/library/logstash:7.17.27' -tf 'custom-dir'
 
 # Automatically reload configuration files on change.
 # Default interval is '3s'.
@@ -130,6 +131,124 @@ output {
 
 </details>
 -->
+
+## Create plugins
+
+Refer [How to write a Logstash input plugin] for input plugins.<br/>
+Refer [How to write a Logstash codec plugin] for codec plugins.<br/>
+Refer [How to write a Logstash filter plugin] for filter plugins.<br/>
+Refer [How to write a Logstash output plugin] for output plugins.
+
+Whatever the type of plugin, it will need to be a self-contained Ruby gem.
+
+`logstash-plugin generate` creates a foundation for new Logstash plugins with files from templates.<br/>
+It creates the standard directory structure, gemspec files, and dependencies a new plugin needs to get started.
+
+The directory structure should look something like the following.<br/>
+Replace `filter`/`filters` with `codec`/`codecs`, `input`/`inputs`, or `output`/`outputs` accordingly.
+
+```sh
+$ logstash-plugin generate --type 'filter' --name 'test'
+[ … ]
+
+$ tree 'logstash-filter-test'
+logstash-filter-test
+├── CHANGELOG.md
+├── CONTRIBUTORS
+├── DEVELOPER.md
+├── docs
+│   └── index.asciidoc
+├── Gemfile
+├── lib
+│   └── logstash
+│       └── filters
+│           └── test.rb
+├── LICENSE
+├── logstash-filter-test.gemspec
+├── Rakefile
+├── README.md
+└── spec
+    ├── filters
+    │   └── test_spec.rb
+    └── spec_helper.rb
+```
+
+Plugins:
+
+- Require parent classes defined in `logstash/filters/base` (or the appropriate plugin type's) and `logstash/namespace`.
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  ```rb
+  require "logstash/filters/base"
+  require "logstash/namespace"
+  ```
+
+  </details>
+
+- Shall be subclass of `LogStash::Filters::Base` (or the appropriate plugin type's).<br/>
+  The class name shall closely mirror the plugin name.
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  ```rb
+  class LogStash::Filters::Test < LogStash::Filters::Base
+  ```
+
+  </details>
+
+- Shall set their `config_name` to their own name inside the configuration block.
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  ```rb
+  class LogStash::Filters::Test < LogStash::Filters::Base
+    config_name "test"
+  ```
+
+  </details>
+
+- Include a configuration section defining as many parameters as needed to enable Logstash to process events.
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  ```rb
+  class LogStash::Filters::Test < LogStash::Filters::Base
+    config_name "test"
+    config :message, :validate => :string, :default => "Hello World!"
+  ```
+
+  </details>
+
+- Must implement the `register` method, plus one or more other methods specific to the plugin's type.
+
+Once ready:
+
+1. Fix the `gemspec` file.
+1. Build the Ruby gem.
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  ```sh
+  gem build
+  ```
+
+  </details>
+
+1. Install the plugin in Logstash.
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  ```sh
+  $ logstash-plugin install 'logstash-filter-test-0.1.0.gem'
+  Using bundled JDK: /usr/share/logstash/jdk
+  OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.
+  io/console on JRuby shells out to stty for most operations
+  Validating logstash-filter-test-0.1.0.gem
+  Installing logstash-filter-test
+  ```
+
+  </details>
 
 ## Troubleshooting
 
@@ -232,6 +351,10 @@ output {
 <!-- Upstream -->
 [codebase]: https://github.com/elastic/logstash
 [documentation]: https://www.elastic.co/guide/en/logstash/current/
+[How to write a Logstash codec plugin]: https://www.elastic.co/docs/extend/logstash/codec-new-plugin
+[How to write a Logstash filter plugin]: https://www.elastic.co/docs/extend/logstash/filter-new-plugin
+[How to write a Logstash input plugin]: https://www.elastic.co/docs/extend/logstash/input-new-plugin
+[How to write a Logstash output plugin]: https://www.elastic.co/docs/extend/logstash/output-new-plugin
 [website]: https://www.elastic.co/logstash
 
 <!-- Others -->
