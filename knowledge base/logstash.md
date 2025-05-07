@@ -29,13 +29,18 @@ yum install 'logstash'
   <summary>Usage</summary>
 
 ```sh
+# Start the service.
+docker run --rm --detach --name 'logstash' --publish '5044:5044' 'logstash:7.17.27'
+
 # Get a shell in the docker image.
 docker run --rm -ti --name 'logstash' --entrypoint 'bash' 'logstash:7.17.27'
 
 # Validate configuration files.
 logstash -tf 'config.conf'
 logstash --config.test_and_exit --path.config 'config.conf' --api.enabled='false'
-# If given a directory, will load and check all files in it *as if they were a single pipeline*.
+docker run --rm --name 'logstash' -v "$PWD:/usr/share/logstash/custom-config" 'logstash:7.17.7' \
+  --api.enabled='false' --config.test_and_exit --path.config 'staging.conf'
+# Should `path.config` be a directory, loads and checks *all* files in it as if they were a *single* pipeline.
 logstash --config.test_and_exit --path.config 'configDir' --log.level='debug'
 docker run --rm -ti -v "$PWD:/usr/share/logstash/custom-dir" 'docker.io/library/logstash:7.17.27' -tf 'custom-dir'
 
@@ -45,7 +50,9 @@ logstash … --config.reload.automatic
 logstash … --config.reload.automatic --config.reload.interval '5s'
 
 # Force configuration files reload and restart the pipelines.
+# Does not really seem to work, honestly. Just restart the whole service.
 kill -SIGHUP '14175'
+pkill --signal 'SIGHUP' 'logstash'
 
 
 # Install plugins.
@@ -116,6 +123,10 @@ output {
     }
     index => "something-%{+YYYY.MM.dd}"
     action => "create"
+  }
+  stdout { codec => rubydebug }
+  file {
+    path => "/tmp/debug.json"
   }
 }
 ```
