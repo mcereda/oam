@@ -29,6 +29,10 @@ SSL_CERT_FILE='path/to/ssl.cert'
   <summary>Usage</summary>
 
 ```sh
+# Check file syntax.
+# Does *not* run the code.
+ruby -c '/etc/gitlab/gitlab.rb'
+
 # Create ruby gems from code.
 gem build
 
