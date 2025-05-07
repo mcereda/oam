@@ -30,17 +30,21 @@ very cost-effective and easy to operate.
 ## TL;DR
 
 It indexes **a set of labels** for each log stream instead of the full logs' contents.<br/>
-The log data itself is then compressed and stored in chunks in object storage solutions, or locally on the host's
-filesystem.
+The log data itself is compressed after indexing, and stored into _chunks_ on the local filesystem or in configured
+object storage solutions.
 
-Can be executed in _single binary_ mode, with all its components running simultaneously in one process, or in
-_simple scalable deployment_ mode, which groups components into read, write, and backend parts.
+Can be executed in (either-or):
 
-Files can be _index_es or _chunk_s.<br/>
-Indexes are tables of contents in TSDB format of where to find logs for specific sets of labels.<br/>
-Chunks are containers for log entries for specific sets of labels.
+- _single binary_ mode, where all its components run simultaneously in a single process.
+- _simple scalable deployment_ mode, which groups components into _read_, _write_, and _backend_ parts.
+- _microservices mode_, which runs every component by itself in multiple, different processes.
 
-Needs agents or other clients to collect and push logs to the Loki server.
+Files, in Loki, can be _index_es or _chunk_s.<br/>
+Indexes are tables of contents, in TSDB format, of where to find logs for specific sets of labels.<br/>
+Chunks are containers for log entries that are assigned specific sets of labels.
+
+Loki does **not** collect logs itself.<br/>
+It needs _agents_, or other logs producers, to collect and push logs to its _ingesters_.
 
 <details>
   <summary>Setup</summary>
@@ -61,13 +65,13 @@ helm --namespace 'loki' upgrade --create-namespace --install --cleanup-on-fail '
   --repo 'https://grafana.github.io/helm-charts' 'loki-distributed'
 ```
 
-On startup, Loki tries to load a configuration file named `config.yaml` from the current working directory, or from the
-`config/` subdirectory if the first does not exist.<br/>
-Should none of those files exist, it **will** give up and fail.
+On startup, unless explicitly configured otherwise, Loki tries to load a configuration file named `config.yaml` from the
+current working directory, or from the `./config/` subdirectory if the first does not exist.<br/>
+Should **none** of those files exist, it **will** give up and fail.
 
 The default configuration file **for package-based installations** is located at `/etc/loki/config.yml` or
 `/etc/loki/loki.yaml`.<br/>
-The docker image tries using `/etc/loki/local-config.yml` by default (via the `COMMAND` setting).
+The docker image tries using `/etc/loki/local-config.yml` by default (as per the image's `COMMAND` setting).
 
 Some settings are currently **not** reachable via direct CLI flags (e.g. `schema_configs`, `storage_config.aws.*`).<br/>
 Use a configuration file for those.
@@ -117,16 +121,16 @@ loki -log.level='info' -log-config-reverse-order …
 loki -print-config-stderr …
 
 # Check the server is working
-curl 'http://loki.fqdn:3100/ready'
-curl 'http://loki.fqdn:3100/metrics'
-curl 'http://loki.fqdn:3100/services'
+curl 'http://loki.example.org:3100/ready'
+curl 'http://loki.example.org:3100/metrics'
+curl 'http://loki.example.org:3100/services'
 
 # Check components in Loki clusters are up and running.
 # Such components must run by themselves for this.
-# The read component returns ready when browsing to <http://localhost:3101/ready>.
-curl 'http://loki.fqdn:3101/ready'
-# The write component returns ready when browsing to <http://localhost:3102/ready>.
-curl 'http://loki.fqdn:3102/ready'
+# The 'read' component returns ready when browsing to <http://localhost:3101/ready>.
+curl 'http://loki.example.org:3101/ready'
+# The 'write' component returns ready when browsing to <http://localhost:3102/ready>.
+curl 'http://loki.example.org:3102/ready'
 ```
 
 ```plaintext
@@ -164,16 +168,17 @@ docker run --rm --name 'validate-cli-config' 'grafana/loki:3.3.2' \
 
 Handles incoming push requests from clients.
 
-Once it receives a set of streams in an HTTP request, validates each stream for correctness and to ensure the stream is
-within the configured tenant (or global) limits.<br/>
-Each **valid** stream is sent to `n` ingesters in parallel, with `n` being the replication factor for the data.
+Once it receives a set of streams in an HTTP request, it validates each stream for correctness and to ensure the stream
+is within the configured tenant (or global) limits.
 
-The distributor determines the ingesters to which send a stream to by using consistent hashing.
+Each **valid** stream is forwarded to `n` ingesters in parallel to ensure its data is recorded.<br/>
+`n` is the replication factor for the data.<br/>
+The distributor determines which ingesters to send a stream to by using consistent hashing.
 
 A load balancer **must** sit in front of the distributor to properly balance incoming traffic to them.<br/>
 In Kubernetes, this is provided by the internal service load balancer.
 
-The distributor is stateless and can be properly scaled.
+The distributor is state**less** and can be _properly_ scaled.
 
 ### Ingester
 
@@ -302,7 +307,7 @@ Refer [Send log data to Loki].
 ### Logstash
 
 Loki provides the `logstash-output-loki` Logstash output plugin to enable shipping logs to a Loki or Grafana Cloud
-instance.<br/>
+instance, though Grafana's folks suggest to **not** use it.<br/>
 Refer [Logstash plugin].
 
 ```sh
@@ -317,13 +322,43 @@ output {
 }
 ```
 
+Should one end up sending too many high cardinality labels to Loki, one can leverage the `include_fields` option to
+limit the fields that would be mapped to labels and sent to the destination.<br/>
+When this list is configured, **only** these fields will be sent and all the other fields will be ignored. Use the
+`metadata_fields` option to map those to structured metadata and send them to Loki too.
+
+<details style="padding: 0 0 1rem 1rem">
+
+```rb
+output {
+  loki {
+    url => "http://loki.example.org:3100/loki/api/v1/push"
+    include_fields => [
+      "agentId",
+      "cancelledAt",
+      "completedAt",
+      "event",
+      "statusCode",
+      "subtaskId",
+      "totalCount",
+      "taskId",
+      "uri"
+    ]
+    metadata_fields => [ "durationInMilliseconds" ]
+  }
+}
+```
+
+</details>
+
 ### OpenTelemetry
 
 See also [OpenTelemetry / OTLP].
 
 ## Labels
 
-Refer [Understand labels], [Cardinality] and [What is structured metadata].
+Refer [Understand labels], [Cardinality] and [What is structured metadata].<br/>
+See also [The concise guide to Grafana Loki: Everything you need to know about labels].
 
 The content of _each_ log line is **not** indexed. Instead, log entries are grouped into _streams_.<br/>
 The streams are then indexed using _labels_.
@@ -623,3 +658,4 @@ analytics:
 [loki-operator]: https://loki-operator.dev/
 [opentelemetry / otlp]: https://loki-operator.dev/docs/open-telemetry.md/
 [the quest for ha and dr in loki]: https://www.infracloud.io/blogs/high-availability-disaster-recovery-in-loki/
+[The concise guide to Grafana Loki: Everything you need to know about labels]: https://grafana.com/blog/2023/12/20/the-concise-guide-to-grafana-loki-everything-you-need-to-know-about-labels/
