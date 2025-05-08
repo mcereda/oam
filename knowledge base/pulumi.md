@@ -549,12 +549,14 @@ const resource = new.aws.s3.Bucket("bucket", {
 }, {
   ignoreChanges: [
     "tags['last-deploy-at']"
+    "tags.CreatedBy"
+    "tagsAll"
   ]
 });
 ```
 
 Property names passed to `ignoreChanges` shall always be the _camelCase_ version of those property names.<br/>
-E.g., specify the `CreatedBy` tag as `tags['createdBy']` to ignore it.<br/>
+E.g., specify the `nested_resource` property as `nestedResource`.<br/>
 See also [Property Paths].
 
 ### Delete before replacing
