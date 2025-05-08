@@ -813,16 +813,14 @@ Procedure:
    "serviceConnectConfiguration": {
        "enabled": true,
        "namespace": "ecs-dev-cluster",
-       "services": [
-           {
-               "portName": "postgres",
-               "discoveryName": "postgres",
-               "clientAliases": [{
-                   "port": 5432,
-                   "dnsName": "pgsql"
-               }]
-           }
-       ]
+       "services": [{
+           "portName": "postgres",
+           "discoveryName": "postgres",
+           "clientAliases": [{
+               "port": 5432,
+               "dnsName": "pgsql"
+           }]
+       }]
    },
    ```
 
@@ -876,7 +874,7 @@ Procedure:
 
 1. Create the desired AWS Cloud Map namespace.
 1. Create the desired Cloud Map service in the namespace.
-1. Configure ECS services to use the Cloud Map service.
+1. Configure the ECS service offering acting as server to use the Cloud Map service.
 
    <details style="padding: 0 0 1rem 1rem">
 
@@ -887,6 +885,47 @@ Procedure:
    ```
 
    </details>
+
+NS lookup commands from within containers might fail, but they might still be able to resolve services registered in
+CloudMap namespaces.
+
+<details style="padding: 0 0 1rem 1rem">
+
+```sh
+$ aws ecs execute-command --cluster 'dev' \
+    --task 'arn:aws:ecs:eu-west-1:012345678901:task/dev/abcdef0123456789abcdef0123456789' --container 'prometheus' \
+    --interactive --command 'nslookup mimir.dev.ecs.internal'
+
+The Session Manager plugin was installed successfully. Use the AWS CLI to start a session.
+
+Starting session with SessionId: ecs-execute-command-p3pkkrysjdptxa8iu3cz3kxnke
+Server:   172.16.0.2
+Address:  172.16.0.2:53
+
+Non-authoritative answer:
+
+$ aws ecs execute-command --cluster 'dev' \
+    --task 'arn:aws:ecs:eu-west-1:012345678901:task/dev/abcdef0123456789abcdef0123456789' --container 'prometheus' \
+    --interactive --command 'wget -SO- mimir.dev.ecs.local:8080/ready'
+
+The Session Manager plugin was installed successfully. Use the AWS CLI to start a session.
+
+Starting session with SessionId: ecs-execute-command-hjgyio7n6nf2o9h4qn6ht7lzri
+Connecting to mimir.dev.ecs.local:8080 (172.16.88.99:8080)
+  HTTP/1.1 200 OK
+  Date: Thu, 08 May 2025 09:35:02 GMT
+  Content-Type: text/plain
+  Content-Length: 5
+  Connection: close
+
+saving to '/dev/stdout'
+stdout               100% |********************************|     5  0:00:00 ETA
+'/dev/stdout' saved
+
+Exiting session with sessionId: ecs-execute-command-hjgyio7n6nf2o9h4qn6ht7lzri.
+```
+
+</details>
 
 ### VPC Lattice
 
