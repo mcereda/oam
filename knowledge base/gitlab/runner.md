@@ -45,7 +45,7 @@ gitlab-runner exec docker \
 
 # Force a configuration file reload.
 sudo kill -HUP $(pidof 'gitlab-runner')
-sudo pkill --signal 'SIGHUP' 'gitlab-runner'
+sudo pkill -HUP 'gitlab-runner'
 ```
 
 </details>

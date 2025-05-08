@@ -79,12 +79,12 @@ docker run --rm -v "$PWD/config.yaml:/etc/prometheus/prometheus.yml:ro" --entryp
 
 # Reload the configuration file *without* restarting the process.
 kill -s 'SIGHUP' '3969'
-pkill --signal 'HUP' 'prometheus'
+pkill -HUP 'prometheus'
 curl -i -X 'POST' 'localhost:9090/-/reload'  # if admin APIs are enabled
 
 # Shut down the process *gracefully*.
 kill -s 'SIGTERM' '3969'
-pkill --signal 'TERM' 'prometheus'
+pkill -TERM 'prometheus'
 
 # Push test metrics to a remote.
 promtool push metrics 'http://mimir.example.org:8080/api/v1/push'
@@ -203,7 +203,7 @@ Prometheus can reload the configuration file with**out** restarting its process 
 
   ```sh
   kill -s 'SIGHUP' '3969'
-  pkill --signal 'HUP' 'prometheus'
+  pkill -HUP 'prometheus'
   ```
 
 - Sending a `POST` HTTP request to the `/-/reload` endpoint.<br/>

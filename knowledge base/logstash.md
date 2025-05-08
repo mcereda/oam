@@ -52,7 +52,7 @@ logstash … --config.reload.automatic --config.reload.interval '5s'
 # Force configuration files reload and restart the pipelines.
 # Does not really seem to work, honestly. Just restart the whole service.
 kill -SIGHUP '14175'
-pkill --signal 'SIGHUP' 'logstash'
+pkill -HUP 'logstash'
 
 
 # Install plugins.
