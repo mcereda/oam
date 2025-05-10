@@ -180,6 +180,7 @@
         "hoppscotch",
         "imager",
         "ingester",
+        "ingesters",
         "istio",
         "istioctl",
         "jdupes",

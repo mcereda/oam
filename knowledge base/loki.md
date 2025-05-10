@@ -1,7 +1,11 @@
 # Grafana Loki
 
-Horizontally scalable, highly available, multi-tenant log aggregation system inspired by Prometheus and designed to be
-very cost-effective and easy to operate.
+Log aggregation system.
+
+Inspired by Prometheus<br/>
+Designed to be cost-effective and easy to operate.
+
+Horizontally scalable, highly available, multi-tenant
 
 1. [TL;DR](#tldr)
 1. [Components](#components)
@@ -13,7 +17,7 @@ very cost-effective and easy to operate.
    1. [Index gateway](#index-gateway)
    1. [Compactor](#compactor)
    1. [Ruler](#ruler)
-1. [Clients](#clients)
+1. [Logs ingestion](#logs-ingestion)
    1. [Logstash](#logstash)
    1. [OpenTelemetry](#opentelemetry)
 1. [Labels](#labels)
@@ -29,22 +33,38 @@ very cost-effective and easy to operate.
 
 ## TL;DR
 
-It indexes **a set of labels** for each log stream instead of the full logs' contents.<br/>
-The log data itself is compressed after indexing, and stored into _chunks_ on the local filesystem or in configured
-object storage solutions.
+Loki does **not** require specific formats in input, but does require log entries to have at least one label.
 
-Can be executed in (either-or):
+Loki works differently from stores like ElasticSearch.<br/>
+For one, Loki indexes log streams **by their labels**, and not by the logs' full contents. This allows for smaller
+indexes and higher parallelization, but prevents full text searches.<br/>
+It then compresses the entries' data, and stores it as _chunks_ on the local file system or in configured object storage
+solutions.
 
-- _single binary_ mode, where all its components run simultaneously in a single process.
-- _simple scalable deployment_ mode, which groups components into _read_, _write_, and _backend_ parts.
-- _microservices mode_, which runs every component by itself in multiple, different processes.
+Loki is built from a set of different components that work together as a set of microservices.<br/>
+Those can be executed in one of 3 different modes:
 
-Files, in Loki, can be _index_es or _chunk_s.<br/>
-Indexes are tables of contents, in TSDB format, of where to find logs for specific sets of labels.<br/>
+- **Single Binary**.<br/>
+  All components run simultaneously in and from a single process.<br/>
+  Suggested for testing, and ingesting up to a few GB of logs daily.
+- **Simple Scalable Deployment**.<br/>
+  Multiple processes run components in groups, namely _read_, _write_, and _backend_ parts.<br/>
+  Suggested when ingesting from a few GB up to a few TB of logs daily.
+- **Microservices**.<br/>
+  Multiple processes run each a single component.<br/>
+  Designed to be executed in Kubernetes clusters.
+
+Data is stored in 2 main file types: _index_es, or _chunk_s.<br/>
+Indexes define where to find logs for specific sets of labels.<br/>
 Chunks are containers for log entries that are assigned specific sets of labels.
 
 Loki does **not** collect logs itself.<br/>
-It needs _agents_, or other logs producers, to collect and push logs to its _ingesters_.
+It needs _agents_, _collectors_, or other logs producers to push entries to it. They recommend using Grafana Alloy.
+
+The _distributors_ receive and check the logs, then forward them to one or more _ingesters_ to ensure proper storage.
+
+The _query frontend_, _query schedulers_, and _queriers_ organize and execute user queries against indexed data.<br/>
+Loki uses LogQL for such user queries. One can also query logs from the CLI by using LogCLI.
 
 <details>
   <summary>Setup</summary>
@@ -73,8 +93,8 @@ The default configuration file **for package-based installations** is located at
 `/etc/loki/loki.yaml`.<br/>
 The docker image tries using `/etc/loki/local-config.yml` by default (as per the image's `COMMAND` setting).
 
-Some settings are currently **not** reachable via direct CLI flags (e.g. `schema_configs`, `storage_config.aws.*`).<br/>
-Use a configuration file for those.
+Some settings are currently **not** reachable via direct CLI flags (e.g. `schema_configs`, `storage_config.aws.*`), and
+as such _require_ one to use a configuration file.
 
   <details style="padding: 0 0 1em 1em;">
     <summary>Disable reporting</summary>
@@ -300,9 +320,17 @@ and caching offered by the query frontend.
 
 Multiple rulers will use a consistent hash ring to distribute rule groups amongst available ruler instances.
 
-## Clients
+## Logs ingestion
 
 Refer [Send log data to Loki].
+
+Logs are pushed to Loki via the `/api/v1/push` HTTP API endpoint as logproto or JSON payloads.<br/>
+The distributors receive and validate the received requests, then forward the data to one or more ingesters.<br/>
+Ingesters prepare and write the data into storage.
+
+Loki stores logs as streams of log entries, all in the same format regardless of the format they were when ingested.
+
+Indexes come in the form of labels, distinguishing log streams from one another.
 
 ### Logstash
 
@@ -609,6 +637,7 @@ analytics:
 - [How to Set Up Grafana, Loki, and Prometheus Locally with Docker Compose: Part 1 of 3]
 - [Deploying Grafana, Loki, and Prometheus on AWS ECS with EFS and Cloud Formation (Part 3 of 3)]
 - [AWS deployment (S3 Single Store)]
+- [Zero to Hero: Loki] video playlist
 
 <!--
   Reference
@@ -649,6 +678,7 @@ analytics:
 [Understand labels]: https://grafana.com/docs/loki/latest/get-started/labels/
 [website]: https://grafana.com/oss/loki/
 [What is structured metadata]: https://grafana.com/docs/loki/latest/get-started/labels/structured-metadata/
+[Zero to Hero: Loki]: https://www.youtube.com/playlist?list=PLDGkOdUX1Ujr9QOsM--ogwJAYu6JD48W7
 
 <!-- Others -->
 [deploying grafana, loki, and prometheus on aws ecs with efs and cloud formation (part 3 of 3)]: https://medium.com/@ahmadbilalch891/deploying-grafana-loki-and-prometheus-on-aws-ecs-with-efs-and-cloud-formation-part-3-of-3-24140ea8ccfb
