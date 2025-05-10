@@ -178,6 +178,13 @@ aws ecs list-tasks --cluster 'staging' --service-name 'prometheus' --query 'task
 aws ecs list-tasks --cluster 'staging' --service-name 'mimir' --query 'taskArns' --output 'text' \
 | xargs aws ecs stop-task --cluster 'staging' --output 'text' --query 'task.lastStatus' --task
 
+# Open the query page of a random task of a prometheus service running on ECS
+aws ecs list-tasks --cluster 'dev' --service-name 'prometheus' --query 'taskArns' --output 'text' \
+| xargs aws ecs describe-tasks --cluster 'dev' --query 'tasks[].attachments[].details[?@.name==`privateIPv4Address`].value' --output 'text' --tasks \
+| shuf \
+| head -n '1' \
+| xargs -pI '%%' open 'http://%%:9090/query'
+
 
 ###
 # EFS
