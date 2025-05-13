@@ -1,0 +1,29 @@
+---
+
+services:
+  loki-1: &loki
+    image: grafana/loki:3.5.0
+    command: >-
+      -config.file=/etc/loki/local-config.yaml
+      -target=all
+
+      -reporting.enabled=false
+      -auth.enabled=false
+
+      -common.storage.ring.instance-addr=localhost
+      -common.storage.ring.store=memberlist
+      -memberlist.join=dns+localhost:7946
+
+      -s3.region=eu-west-1
+      -s3.buckets=loki-chunks
+  loki-2:
+    <<: *loki
+  load-balancer:
+    image: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - loki-1
+      - loki-2
+    ports:
+      - 3100:3100
