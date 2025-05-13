@@ -44,12 +44,12 @@ Technically a stripped-down version of [Fluentd].
 ## Further readings
 
 - [Website]
-- [Main repository]
+- [Codebase]
 - [Fluentd]
+- [Fluentd vs. Fluent Bit: side by side comparison]
+- [Fluent Bit with ECS: Configuration Tips and Tricks]
 
 ### Sources
-
-- [Fluentd vs. Fluent Bit: side by side comparison]
 
 <!--
   Reference
@@ -62,8 +62,9 @@ Technically a stripped-down version of [Fluentd].
 
 <!-- Files -->
 <!-- Upstream -->
-[main repository]: https://github.com/fluent/fluent-bit
+[codebase]: https://github.com/fluent/fluent-bit
 [website]: https://www.fluentbit.io/
 
 <!-- Others -->
 [fluentd vs. fluent bit: side by side comparison]: https://logz.io/blog/fluentd-vs-fluent-bit/
+[Fluent Bit with ECS: Configuration Tips and Tricks]: https://dev.to/aws-builders/fluent-bit-with-ecs-configuration-tips-and-tricks-4acp

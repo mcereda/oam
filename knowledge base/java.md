@@ -34,6 +34,7 @@ TODO
 - [Amazon Corretto documentation]
 - [Azul]
 - [Adoptium]
+- [JVM in a Container]
 
 ### Sources
 
@@ -56,3 +57,4 @@ TODO
 [amazon corretto docker images]: https://hub.docker.com/_/amazoncorretto
 [azul]: https://www.azul.com
 [adoptium]: https://adoptium.net/
+[JVM in a Container]: https://www.merikan.com/2019/04/jvm-in-a-container/
