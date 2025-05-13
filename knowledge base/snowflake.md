@@ -9,6 +9,7 @@ Intro
 
 1. [TL;DR](#tldr)
 1. [Snowflake CLI](#snowflake-cli)
+1. [RoleOut](#roleout)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -17,31 +18,71 @@ Intro
 <details>
   <summary>Setup</summary>
 
-```sh
-# Install Snowflake CLI.
-# Get it from the [Snowflake CLI repository].
-curl -fsSLO 'https://sfc-repo.snowflakecomputing.com/snowflake-cli/linux_aarch64/3.4.1/snowflake-cli-3.4.1.aarch64.deb' \
-&& dpkg -i 'snowflake-cli-3.4.1.aarch64.deb'
-curl -fsSLO 'https://sfc-repo.snowflakecomputing.com/snowflake-cli/darwin_arm64/3.4.1/snowflake-cli-3.4.1-darwin-arm64.pkg' \
-&& sudo installer -pkg 'snowflake-cli-3.4.1-darwin-arm64.pkg' -target '/'
-curl -fsSLO 'https://sfc-repo.snowflakecomputing.com/snowflake-cli/linux_aarch64/3.4.1/snowflake-cli-3.4.1.aarch64.rpm' \
-&& rpm -i 'snowflake-cli-3.4.1.rpm'
+  <details style='padding: 0 0 0 1rem'>
+    <summary>Linux (DEB)</summary>
 
-# Check it works.
-snow --help
+```sh
+# Install Snowflake's CLI.
+# Get it from the [Snowflake CLI repository].
+curl --continue-at '-' --location --fail --show-error --remote-name \
+  --url 'https://sfc-repo.snowflakecomputing.com/snowflake-cli/linux_aarch64/3.7.2/snowflake-cli-3.7.2.aarch64.deb' \
+&& sudo dpkg -i 'snowflake-cli-3.7.2.aarch64.deb'
 ```
+
+  </details>
+
+  <details style='padding: 0 0 0 1rem'>
+    <summary>Linux (RPM)</summary>
+
+```sh
+# Install Snowflake's CLI.
+# Get it from the [Snowflake CLI repository].
+curl --continue-at '-' --location --fail --show-error --remote-name \
+  --url 'https://sfc-repo.snowflakecomputing.com/snowflake-cli/linux_aarch64/3.7.2/snowflake-cli-3.7.2.aarch64.rpm' \
+&& sudo rpm -i 'snowflake-cli-3.7.2.rpm'
+```
+
+  </details>
+
+  <details style='padding: 0 0 0 1rem'>
+    <summary>Mac OS X</summary>
+
+```sh
+# Install Snowflake's CLI.
+brew install 'snowflake-cli'
+
+# Install RoleOut's UI and CLI.
+curl -C '-' -LfSO --url 'https://github.com/Snowflake-Labs/roleout/releases/download/v2.0.1/Roleout-2.0.1-arm64.dmg' \
+&& sudo installer -pkg 'Roleout-2.0.1-arm64.dmg' -target '/' \
+&& curl -C '-' -LfS --url 'https://github.com/Snowflake-Labs/roleout/releases/download/v2.0.1/roleout-cli-macos' \
+     --output "$HOME/bin/roleout-cli" \
+&& chmod 'u+x' "$HOME/bin/roleout-cli" \
+&& xattr -d 'com.apple.quarantine' "$HOME/bin/roleout-cli"
+```
+
+  </details>
 
 </details>
 
-<!-- Uncomment if used
 <details>
   <summary>Usage</summary>
 
 ```sh
+# Check it works.
+snow --version
+
+# Get help.
+snow --help
+snow helpers -h
+
+# List configured connections to Snowflake.
+snow connection list
+
+# Executes Snowflake queries.
+snow sql
 ```
 
 </details>
--->
 
 <!-- Uncomment if used
 <details>
@@ -62,8 +103,36 @@ Meant to replace the SnowSQL tool.
 Download from the [Snowflake CLI repository].
 
 ```sh
-curl -fsSLO 'https://sfc-repo.snowflakecomputing.com/snowflake-cli/darwin_arm64/3.4.1/snowflake-cli-3.4.1-darwin-arm64.pkg' \
-&& sudo installer -pkg 'snowflake-cli-3.4.1-darwin-arm64.pkg' -target '/'
+# Linux (DEB).
+curl --continue-at '-' --location --fail --show-error --remote-name \
+  --url 'https://sfc-repo.snowflakecomputing.com/snowflake-cli/linux_aarch64/3.7.2/snowflake-cli-3.7.2.aarch64.deb' \
+&& sudo dpkg -i 'snowflake-cli-3.7.2.aarch64.deb'
+
+# Linux (RPM).
+curl --continue-at '-' --location --fail --show-error --remote-name \
+  --url 'https://sfc-repo.snowflakecomputing.com/snowflake-cli/linux_aarch64/3.7.2/snowflake-cli-3.7.2.aarch64.rpm' \
+&& sudo rpm -i 'snowflake-cli-3.7.2.rpm'
+
+# Mac OS X.
+# Via Homebrew.
+brew install 'snowflake-cli'
+# Via the [Snowflake CLI repository].
+curl --continue-at '-' --location --fail --show-error --remote-name \
+  --url 'https://sfc-repo.snowflakecomputing.com/snowflake-cli/darwin_arm64/3.7.2/snowflake-cli-3.7.2-darwin-arm64.pkg' \
+&& sudo installer -pkg 'snowflake-cli-3.7.2-darwin-arm64.pkg' -target '/' \
+&& ln -swiv '/Applications/SnowflakeCLI.app/Contents/MacOS/snow' "$HOME/bin/snow"
+```
+
+## RoleOut
+
+```sh
+# Mac OS X.
+curl -C '-' -LfSO --url 'https://github.com/Snowflake-Labs/roleout/releases/download/v2.0.1/Roleout-2.0.1-arm64.dmg' \
+&& sudo installer -pkg 'Roleout-2.0.1-arm64.dmg' -target '/' \
+&& curl -C '-' -LfS --url 'https://github.com/Snowflake-Labs/roleout/releases/download/v2.0.1/roleout-cli-macos' \
+     --output "$HOME/bin/roleout-cli" \
+&& chmod 'u+x' "$HOME/bin/roleout-cli" \
+&& xattr -d 'com.apple.quarantine' "$HOME/bin/roleout-cli"
 ```
 
 ## Further readings
