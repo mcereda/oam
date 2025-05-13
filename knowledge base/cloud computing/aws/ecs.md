@@ -19,8 +19,11 @@
    1. [ECS service discovery](#ecs-service-discovery)
    1. [VPC Lattice](#vpc-lattice)
 1. [Scrape metrics using Prometheus](#scrape-metrics-using-prometheus)
+1. [Send logs to a central location](#send-logs-to-a-central-location)
+   1. [FireLens](#firelens)
+   1. [Fluent Bit or Fluentd](#fluent-bit-or-fluentd)
 1. [Troubleshooting](#troubleshooting)
-   1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
+    1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -968,6 +971,168 @@ Solutions:
   Refer [Metrics collection from Amazon ECS using Amazon Managed Service for Prometheus] and
   [aws-cloudmap-prometheus-sd].
 
+## Send logs to a central location
+
+### FireLens
+
+Refer [Example Amazon ECS task definition: Route logs to FireLens], [Under the hood: FireLens for Amazon ECS Tasks] and
+[Amazon ECS FireLens Examples].
+
+Allows containers in ECS tasks to send logs to multiple destinations. Those can be AWS services (E.G. CloudWatch Logs
+and OpenSearch), AWS partners (E.G. Splunk and Datadog), or any service supporting Fluent* output.
+
+It uses Fluent Bit or Fluentd under the hood.<br/>
+One can tweak their behaviour using according custom Fluent Bit or Fluentd configuration files from S3 or the container
+image.
+
+Requires a FireLens sidecar container to run alongside the main application's containers in order to process and forward
+logs from them.<br/>
+This log router sidecar container should be marked as `essential` in order to prevent silent log loss should it crash.
+
+The log router's container image **can** be `amazon/aws-for-fluent-bit` if one wants to send data to an AWS service or
+Partner.<br/>
+It **must** be a custom image equipped with the required output plugins if not.
+
+<details style='padding: 0 0 0 1rem'>
+  <summary>Example: send logs to OpenSearch</summary>
+
+```json
+{
+    "family": "nginx-to-opensearch",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": [ "FARGATE" ],
+    "cpu": "256",
+    "memory": "512",
+    "executionRoleArn": "arn:aws:iam::012345678901:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+        {
+            "name": "nginx",
+            "essential": true,
+            "image": "012345678901.dkr.ecr.eu-west-1.amazonaws.com/docker-hub-cache/nginx:latest",
+            "portMappings": [{
+                "protocol": "tcp",
+                "containerPort": 80
+            }],
+            "logConfiguration": {
+                "logDriver": "awsfirelens",
+                "options": {
+                    "Name": "ElasticSearch",
+                    "Host": "sweet-os-domain-of-mine.eu-west-1.es.amazonaws.com",
+                    "Port": "443",
+                    "AWS_Auth": "On",
+                    "AWS_Region": "eu-west-1",
+                    "Index": "nginx-logs",
+                    "Type": "_doc",
+                    "tls": "On"
+                }
+            }
+        },
+        {
+          "name": "log_router",
+          "essential": true,
+          "image": "amazon/aws-for-fluent-bit:latest",
+          "memoryReservation": 128,
+          "firelensConfiguration": {
+              "type": "fluentbit",
+              "options": {
+                  "enable-ecs-log-metadata": "true"
+              }
+          }
+        }
+    ]
+}
+```
+
+</details>
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Example: send logs to Grafana Loki</summary>
+
+```json
+{
+    "family": "nginx-to-loki",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": [ "FARGATE" ],
+    "cpu": "256",
+    "memory": "512",
+    "executionRoleArn": "arn:aws:iam::012345678901:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+        {
+            "name": "nginx",
+            "essential": true,
+            "image": "012345678901.dkr.ecr.eu-west-1.amazonaws.com/docker-hub-cache/nginx:latest",
+            "portMappings": [{
+                "protocol": "tcp",
+                "containerPort": 80
+            }],
+            "logConfiguration": {
+                "logDriver": "awsfirelens",
+                "options": {
+                  "Name": "loki",
+                  "Host": "loki.example.org",
+                  "Port": "3100",
+                  "LogLevel": "info",
+                  "Labels": "{job=\"nginx\", container=\"nginx\"}",
+                  "tls": "off",
+                  "remove_keys": "ecs_task_arn,ecs_cluster"
+                }
+            }
+        },
+        {
+            "name": "log_router",
+            "essential": true,
+            "image": "012345678901.dkr.ecr.eu-west-1.amazonaws.com/custom/fluent-bit-with-loki-output-plugin:latest",
+            "memoryReservation": 128,
+            "firelensConfiguration": {
+                "type": "fluentbit",
+                "options": {
+                    "enable-ecs-log-metadata": "true",
+                    "config-file-type": "s3",
+                    "config-file-value": "s3://custom-configs-bucket/fluent-bit/nginx-log-router.conf"
+                }
+            }
+        }
+    ]
+}
+```
+
+</details>
+
+### Fluent Bit or Fluentd
+
+Refer [Centralized Container Logging with Fluent Bit].
+
+Use the fluentd log driver in task definitions.<br/>
+The fluentd-address value is specified as a secret option as it may be treated as sensitive data.
+
+```json
+"containerDefinitions": [{
+    "logConfiguration": {
+        "logDriver": "fluentd",
+        "options": {
+            "tag": "fluentd demo"
+        },
+        "secretOptions": [{
+            "name": "fluentd-address",
+            "valueFrom": "arn:aws:secretsmanager:region:aws_account_id:secret:fluentd-address-KnrBkD"
+        }]
+    },
+    "entryPoint": [],
+    "portMappings": [
+        {
+            "hostPort": 80,
+            "protocol": "tcp",
+            "containerPort": 80
+        },
+        {
+            "hostPort": 24224,
+            "protocol": "tcp",
+            "containerPort": 24224
+        }
+    ]
+}],
+```
+
 ## Troubleshooting
 
 ### Invalid 'cpu' setting for task
@@ -1004,6 +1169,8 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [Amazon ECS Exec Checker]
 - [ECS Execute-Command proposal]
 - [What Is AWS Cloud Map?]
+- [Centralized Container Logging with Fluent Bit]
+- [Effective Logging Strategies with Amazon ECS and Fluentd]
 
 ### Sources
 
@@ -1055,6 +1222,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 <!-- Upstream -->
 [Amazon ECS environment variables]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-environment-variables.html
 [amazon ecs exec checker]: https://github.com/aws-containers/amazon-ecs-exec-checker
+[Amazon ECS FireLens Examples]: https://github.com/aws-samples/amazon-ecs-firelens-examples
 [Amazon ECS Service Discovery]: https://aws.amazon.com/blogs/aws/amazon-ecs-service-discovery/
 [amazon ecs services]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html
 [amazon ecs standalone tasks]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/standalone-tasks.html
@@ -1063,7 +1231,9 @@ Specify a supported value for the task CPU and memory in your task definition.
 [amazon ecs task role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
 [Amazon VPC Lattice pricing]: https://aws.amazon.com/vpc/lattice/pricing/
 [AWS Distro for OpenTelemetry]: https://aws-otel.github.io/
+[Centralized Container Logging with Fluent Bit]: https://aws.amazon.com/blogs/opensource/centralized-container-logging-fluent-bit/
 [ecs execute-command proposal]: https://github.com/aws/containers-roadmap/issues/1050
+[Example Amazon ECS task definition: Route logs to FireLens]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/firelens-taskdef.html
 [fargate tasks sizes]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html#fargate-tasks-size
 [how amazon ecs manages cpu and memory resources]: https://aws.amazon.com/blogs/containers/how-amazon-ecs-manages-cpu-and-memory-resources/
 [how amazon elastic container service works with iam]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security_iam_service-with-iam.html
@@ -1075,6 +1245,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [storage options for amazon ecs tasks]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html
 [troubleshoot amazon ecs deployment issues]: https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ecs.html
 [troubleshoot amazon ecs task definition invalid cpu or memory errors]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
+[Under the hood: FireLens for Amazon ECS Tasks]: https://aws.amazon.com/blogs/containers/under-the-hood-firelens-for-amazon-ecs-tasks/
 [use amazon ebs volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html
 [use amazon efs volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html
 [use bind mounts with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/bind-mounts.html
@@ -1091,6 +1262,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [a step-by-step guide to enabling amazon ecs exec]: https://medium.com/@mariotolic/a-step-by-step-guide-to-enabling-amazon-ecs-exec-a88b05858709
 [attach ebs volume to aws ecs fargate]: https://medium.com/@shujaatsscripts/attach-ebs-volume-to-aws-ecs-fargate-e23fea7bb1a7
 [aws-cloudmap-prometheus-sd]: https://github.com/awslabs/aws-cloudmap-prometheus-sd
+[Effective Logging Strategies with Amazon ECS and Fluentd]: https://reintech.io/blog/effective-logging-strategies-amazon-ecs-fluent
 [exposing multiple ports for an aws ecs service]: https://medium.com/@faisalsuhail1/exposing-multiple-ports-for-an-aws-ecs-service-64b9821c09e8
 [guide to using amazon ebs with amazon ecs and aws fargate]: https://stackpioneers.com/2024/01/12/guide-to-using-amazon-ebs-with-amazon-ecs-and-aws-fargate/
 [prometheus service discovery for aws ecs]: https://tomgregory.com/aws/prometheus-service-discovery-for-aws-ecs/
