@@ -26,6 +26,8 @@ Designed to be cost-effective and easy to operate.
    1. [Microservices mode](#microservices-mode)
 1. [Object storage](#object-storage)
 1. [Analytics](#analytics)
+1. [Troubleshooting](#troubleshooting)
+   1. [Too many storage configs provided in the common config](#too-many-storage-configs-provided-in-the-common-config)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -70,6 +72,8 @@ Loki runs in multi-tenant mode by default. It:
 - Pulls the tenant ID from the `X-Scope-OrgID` header in HTTP requests when running in multi-tenant mode, or
 - Ignores that header, and sets the tenant ID to `fake` when multi-tenant mode is disabled.
   This **will** appear in the index and in stored chunks.
+
+Loki accepts out-of-order writes by default.
 
 <details>
   <summary>Setup</summary>
@@ -694,6 +698,93 @@ Explicitly disable reporting if wanted:
 analytics:
   reporting_enabled: false
 ```
+
+## Troubleshooting
+
+### Too many storage configs provided in the common config
+
+Error message example:
+
+> failed parsing config: too many storage configs provided in the common config, please only define one storage backend
+
+<details>
+  <summary>Context</summary>
+
+Loki is running locally from its Docker container image using the default configuration file and the following flags:
+
+```yml
+---
+# docker-compose.yml
+services:
+  loki:
+    image: grafana/loki:3.5.0
+    command: >-
+      -config.file=/etc/loki/local-config.yaml
+      -target=all
+
+      -reporting.enabled=false
+      -auth.enabled=false
+
+      -common.storage.ring.instance-addr=localhost
+      -common.storage.ring.store=memberlist
+      -memberlist.join=dns+localhost:7946
+
+      -common.storage.s3.region=eu-west-1
+      -common.storage.s3.buckets=loki-chunks
+```
+
+</details>
+
+<details>
+  <summary>Root cause</summary>
+
+It seems the command flags for S3 storage are not working as expected.
+
+</details>
+
+<details>
+  <summary>Solution</summary>
+
+Configure those settings (or):
+
+- In the configuration file:
+
+  ```yml
+  storage_config:
+    aws:
+      bucketnames: loki-chunks
+      region: eu-west-1
+  ```
+
+- By removing the `common.storage` part in the command:
+
+  ```yml
+  command: >-
+    …
+    -s3.region=eu-west-1
+    -s3.buckets=loki-chunks
+  ```
+
+The end result in `GET /config` is the same:
+
+```yml
+…
+storage_config:
+  alibabacloud: …
+  aws:
+    dynamodb: …
+    s3: ""
+    s3forcepathstyle: false
+    bucketnames: loki-chunks
+    endpoint: ""
+    region: eu-west-1
+    access_key_id: ""
+    secret_access_key: ""
+    …
+  azure: …
+```
+
+</details>
 
 ## Further readings
 

@@ -52,3 +52,6 @@ docker volume create --driver 'convoy' --opt 'size=100m' 'test'
 # The example uses a 2GB RAM disk
 hdiutil attach -nomount 'ram://4194304' | xargs diskutil erasevolume HFS+ 'ramdisk' \
 && docker run --rm --name 'alpine' -v "/Volumes/ramdisk/:/ramdisk" -it 'alpine' sh
+
+# Remove containers
+docker ps -aq | xargs docker container rm
