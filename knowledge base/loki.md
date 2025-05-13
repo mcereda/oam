@@ -5,8 +5,6 @@ Log aggregation system.
 Inspired by Prometheus<br/>
 Designed to be cost-effective and easy to operate.
 
-Horizontally scalable, highly available, multi-tenant
-
 1. [TL;DR](#tldr)
 1. [Components](#components)
    1. [Distributor](#distributor)
@@ -65,6 +63,13 @@ The _distributors_ receive and check the logs, then forward them to one or more 
 
 The _query frontend_, _query schedulers_, and _queriers_ organize and execute user queries against indexed data.<br/>
 Loki uses LogQL for such user queries. One can also query logs from the CLI by using LogCLI.
+
+All data, both in memory **and** in long-term storage, is partitioned by a tenant ID.<br/>
+Loki runs in multi-tenant mode by default. It:
+
+- Pulls the tenant ID from the `X-Scope-OrgID` header in HTTP requests when running in multi-tenant mode, or
+- Ignores that header, and sets the tenant ID to `fake` when multi-tenant mode is disabled.
+  This **will** appear in the index and in stored chunks.
 
 <details>
   <summary>Setup</summary>
@@ -145,6 +150,10 @@ curl 'http://loki.example.org:3100/ready'
 curl 'http://loki.example.org:3100/metrics'
 curl 'http://loki.example.org:3100/services'
 
+# Check the hash rings' state
+curl 'http://loki.example.org:3100/ring'
+curl 'http://loki.example.org:3100/distributor/ring'
+
 # Check components in Loki clusters are up and running.
 # Such components must run by themselves for this.
 # The 'read' component returns ready when browsing to <http://localhost:3101/ready>.
@@ -157,6 +166,9 @@ curl 'http://loki.example.org:3102/ready'
 GET /ready
 GET /metrics
 GET /services
+
+GET /ring
+GET /distributor/ring
 ```
 
 </details>
@@ -184,6 +196,74 @@ docker run --rm --name 'validate-cli-config' 'grafana/loki:3.3.2' \
 
 ## Components
 
+```mermaid
+flowchart LR
+  lb(Load Balancer)
+  d(Distributors ring)
+  i(Ingesters ring)
+  q(Queriers ring)
+  qf(Query Frontends ring)
+  r(Rulers ring)
+  s(Storage)
+
+  subgraph Write Flow
+    lb --> d
+    d --> i
+  end
+
+  i --> s
+  s --> q
+  s --> r
+
+  subgraph Read Flow
+    i --> q
+    i --> r
+    q --> qf
+  end
+```
+
+<details>
+  <summary>Write flow (A.K.A. path)</summary>
+
+1. The distributor receives an HTTP POST request with streams and log lines.
+1. The distributor hashes each stream contained in the request.<br/>
+   The hash determines the ingester instance to send the stream to, based on the information from the hash ring.
+1. The distributor sends each stream to the appropriate ingester and its replicas, based on the configured replication
+   factor.
+1. The ingester receives the stream with log lines
+1. The ingester creates a new chunk for the stream's data, or appends it to an existing chunk.<br/>
+   Every chunk is unique per tenant and per label set.
+1. The ingester acknowledges the write.
+1. The distributor waits for a majority (quorum) of the ingesters to acknowledge their own writes.
+1. The distributor responds with a success (2xx status code) when it received at least a quorum of acknowledged
+   writes.<br/>
+   Should it not receive a quorum of acknowledged writes, it responds with an error (4xx or 5xx status code).
+
+```mermaid
+```
+
+</details>
+
+<details>
+  <summary>Read flow (A.K.A. path)</summary>
+
+1. The query frontend receives an HTTP GET request with a LogQL query.
+1. The query frontend splits the query into sub-queries and passes them to the query scheduler.
+1. The querier pulls sub-queries from the query scheduler.
+1. The querier passes the query to all ingesters for in-memory data.
+1. The ingesters return in-memory data matching the query, if any.
+1. The querier lazily loads data from the backing store.
+1. The querier runs the query against the backing store if ingesters returned no or insufficient data.
+1. The querier iterates over all received data and deduplicates it
+1. The querier returns the result of the sub-query to the query frontend.
+1. The query frontend waits for all sub-queries of a query to be finished and returned by the queriers.
+1. The query frontend merges the individual results into a final result and return it to the client.
+
+```mermaid
+```
+
+</details>
+
 ### Distributor
 
 Handles incoming push requests from clients.
@@ -195,7 +275,8 @@ Each **valid** stream is forwarded to `n` ingesters in parallel to ensure its da
 `n` is the replication factor for the data.<br/>
 The distributor determines which ingesters to send a stream to by using consistent hashing.
 
-A load balancer **must** sit in front of the distributor to properly balance incoming traffic to them.<br/>
+When using multiple replicas of the distributor, a load balancer **must** sit in front of them to properly balance
+incoming requests.<br/>
 In Kubernetes, this is provided by the internal service load balancer.
 
 The distributor is state**less** and can be _properly_ scaled.
