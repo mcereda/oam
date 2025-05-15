@@ -75,6 +75,9 @@ Loki runs in multi-tenant mode by default. It:
 
 Loki accepts out-of-order writes by default.
 
+Retention in Loki is taken care of through the Compactor.<br/>
+By default the `-compactor.retention-enabled` flag is **not** set, so logs sent to Loki live forever.
+
 <details>
   <summary>Setup</summary>
 
