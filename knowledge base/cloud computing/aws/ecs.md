@@ -14,14 +14,16 @@
    1. [Docker volumes](#docker-volumes)
    1. [Bind mounts](#bind-mounts)
 1. [Execute commands in tasks' containers](#execute-commands-in-tasks-containers)
+1. [Scale the number of tasks automatically](#scale-the-number-of-tasks-automatically)
+   1. [Target tracking](#target-tracking)
 1. [Allow tasks to communicate with each other](#allow-tasks-to-communicate-with-each-other)
    1. [ECS Service Connect](#ecs-service-connect)
    1. [ECS service discovery](#ecs-service-discovery)
    1. [VPC Lattice](#vpc-lattice)
 1. [Scrape metrics using Prometheus](#scrape-metrics-using-prometheus)
 1. [Send logs to a central location](#send-logs-to-a-central-location)
-   1. [FireLens](#firelens)
-   1. [Fluent Bit or Fluentd](#fluent-bit-or-fluentd)
+    1. [FireLens](#firelens)
+    1. [Fluent Bit or Fluentd](#fluent-bit-or-fluentd)
 1. [Troubleshooting](#troubleshooting)
     1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
 1. [Further readings](#further-readings)
@@ -606,7 +608,6 @@ Procedure:
    ```plaintext
    The Session Manager plugin was installed successfully. Use the AWS CLI to start a session.
 
-
    Starting session with SessionId: ecs-execute-command-zobkrf3qrif9j962h9pecgnae8
    Filesystem      Size  Used Avail Use% Mounted on
    overlay          31G   12G   18G  40% /
@@ -617,7 +618,6 @@ Procedure:
    /dev/nvme0n1p1  4.9G  2.1G  2.8G  43% /managed-agents/execute-command
    tmpfs           464M     0  464M   0% /proc/acpi
    tmpfs           464M     0  464M   0% /sys/firmware
-
 
    Exiting session with sessionId: ecs-execute-command-zobkrf3qrif9j962h9pecgnae8.
    ```
@@ -635,6 +635,26 @@ The command itself will still be logged in CloudTrail as part of the ECS Execute
 Logging options are configured at the ECS cluster level.<br/>
 The task's role **will** need to have IAM permissions to log the output to S3 and/or CloudWatch should the cluster be
 configured for the above options. If the options are **not** configured, then the permissions are **not** required.
+
+## Scale the number of tasks automatically
+
+Refer [Automatically scale your Amazon ECS service].
+
+Scaling**_out_** **increases** the number of tasks, scaling-**_in_** **decreases** it.
+
+ECS sends metrics in **1-minute intervals** to CloudWatch.<br/>
+Keep this in mind when tweaking the values for scaling.
+
+### Target tracking
+
+Refer [Target tracking scaling policies for Application Auto Scaling] and
+[How target tracking scaling for Application Auto Scaling works].
+
+The **only** available metrics for the integrated checks are currently:
+
+- The service's **average** CPU utilization (`ECSServiceCPUUtilization`) for the last minute.
+- The service's **average** memory utilization (`ECSServiceMemoryUtilization`) for the last minute.
+- The service's Application Load Balancer's **average** requests count (`ALBRequestCountPerTarget`) for the last minute.
 
 ## Allow tasks to communicate with each other
 
@@ -1198,6 +1218,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [How can I allow the tasks in my Amazon ECS services to communicate with each other?]
 - [Interconnect Amazon ECS services]
 - [Amazon ECS Service Discovery]
+- [AWS Fargate Pricing Explained]
 
 <!--
   Reference
@@ -1255,12 +1276,16 @@ Specify a supported value for the task CPU and memory in your task definition.
 [using amazon ecs exec to access your containers on aws fargate and amazon ec2]: https://aws.amazon.com/blogs/containers/new-using-amazon-ecs-exec-access-your-containers-fargate-ec2/
 [What is Amazon VPC Lattice?]: https://docs.aws.amazon.com/vpc-lattice/latest/ug/what-is-vpc-lattice.html
 [What Is AWS Cloud Map?]: https://docs.aws.amazon.com/cloud-map/latest/dg/what-is-cloud-map.html
+[Automatically scale your Amazon ECS service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
+[Target tracking scaling policies for Application Auto Scaling]: https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-target-tracking.html
+[How target tracking scaling for Application Auto Scaling works]: https://docs.aws.amazon.com/autoscaling/application/userguide/target-tracking-scaling-policy-overview.html
 
 <!-- Others -->
 [`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]: https://stackoverflow.com/questions/69261159/aws-ecs-execute-command-results-in-targetnotconnectedexception-the-execute
 [308 Permanent Redirect]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/308
 [a step-by-step guide to enabling amazon ecs exec]: https://medium.com/@mariotolic/a-step-by-step-guide-to-enabling-amazon-ecs-exec-a88b05858709
 [attach ebs volume to aws ecs fargate]: https://medium.com/@shujaatsscripts/attach-ebs-volume-to-aws-ecs-fargate-e23fea7bb1a7
+[AWS Fargate Pricing Explained]: https://www.vantage.sh/blog/fargate-pricing
 [aws-cloudmap-prometheus-sd]: https://github.com/awslabs/aws-cloudmap-prometheus-sd
 [Effective Logging Strategies with Amazon ECS and Fluentd]: https://reintech.io/blog/effective-logging-strategies-amazon-ecs-fluent
 [exposing multiple ports for an aws ecs service]: https://medium.com/@faisalsuhail1/exposing-multiple-ports-for-an-aws-ecs-service-64b9821c09e8
