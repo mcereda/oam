@@ -78,8 +78,28 @@ snow helpers -h
 # List configured connections to Snowflake.
 snow connection list
 
+# Add connections.
+snow connection add
+
+# Test connections.
+snow connection test
+snow connection test -c 'connection-name'
+
 # Executes Snowflake queries.
 snow sql
+```
+
+```sql
+SHOW USERS;
+SHOW USERS LIKE '%john%';
+
+CREATE USER alice;
+CREATE USER IF NOT EXISTS bob;
+CREATE OR REPLACE USER claude
+  PASSWORD='somePassword' DISPLAY_NAME='Claude' EMAIL='claude@example.org'
+  LOGIN_NAME='CLAUDE@EXAMPLE.ORG' MUST_CHANGE_PASSWORD=TRUE;
+
+GRANT ROLE someRole TO USER diane;
 ```
 
 </details>
