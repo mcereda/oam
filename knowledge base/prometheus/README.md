@@ -207,7 +207,7 @@ Prometheus can reload the configuration file with**out** restarting its process 
   ```
 
 - Sending a `POST` HTTP request to the `/-/reload` endpoint.<br/>
-  Requires the process to start with the `--web.enable-lifecycle` flag enabled.
+  This is **only** possible if the process started with the `--web.enable-lifecycle` flag enabled.
 
 If the new configuration is **not** well-formed, changes will **not** be applied.<br/>
 This will also reload any configured rule files.
@@ -271,6 +271,8 @@ When using time ranges, the returned vector will be a _range vector_.
 <details style="padding: 0 0 1em 1em">
   <summary>Example</summary>
 
+Functions are case **in**sensitive.
+
 ```promql
 100 * (1 - avg by(instance)(irate(node_cpu_seconds_total{job='node_exporter',mode='idle'}[5m])))
 ```
@@ -297,7 +299,7 @@ To make it all a percentage, the computed value is multiplied by 100.
 
 ```promql
 # Get all allocatable CPU cores where the 'node' attribute matches regex ".*-runners-.*" grouped by node
-sum(kube_node_status_allocatable_cpu_cores{node=~".*-runners-.*"}) BY (node)
+SUM(kube_node_status_allocatable_cpu_cores{node=~".*-runners-.*"}) BY (node)
 
 # FIXME
 sum(rate(container_cpu_usage_seconds_total{namespace="gitlab-runners",container="build",pod_name=~"runner.*"}[30s])) by (pod_name,container) /
