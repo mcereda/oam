@@ -133,10 +133,11 @@ pulumi config cp -s 'prod' -d 'dev'
 
 
 # Get a summary of what would be deployed.
-pulumi pre
+pulumi preview
 pulumi pre --diff -p '10' -m 'message' -s 'stack'
 pulumi pre --expect-no-changes --parallel '10' --show-reads
-pulumi preview -t 'targetResourceUrn' --target-dependents -v '2'
+pulumi pre -t 'targetResourceUrn' --target-dependents -v '2'
+pulumi pre --suppress-outputs --except 'targetResource1Urn' --except 'targetResourceNUrn' --except-dependents
 
 # Save any resource creation seen during the preview into an import file to use
 # with the `import` subcommand.
