@@ -887,6 +887,8 @@ Leverage taints and node affinity:
 
 ### Golang applications have trouble performing as expected
 
+Also see [Container CPU Requests & Limits Explained with GOMAXPROCS Tuning].
+
 By default, Golang sets the `GOMAXPROCS` environment variable (the number of OS threads for Go code execution) **to the
 number of available CPUs on the node running the Pod**.<br/>
 This is **different** from the amount of resources the Pod is allocated when a CPU limit is set in the Pod's
@@ -1072,7 +1074,7 @@ Others:
 [cluster autoscaler]: cluster%20autoscaler.md
 [connection tracking]: ../connection%20tracking.placeholder
 [create an admission webhook]: ../../examples/kubernetes/create%20an%20admission%20webhook/README.md
-[etcd]: ../etcd.placeholder
+[etcd]: ../etcd.md
 [external-dns]: external-dns.md
 [flux]: flux.md
 [gitops]: ../gitops.md
@@ -1081,7 +1083,7 @@ Others:
 [istio]: istio.md
 [k0s]: k0s.placeholder
 [k3s]: k3s.md
-[karpenter]: karpenter.placeholder
+[karpenter]: karpenter.md
 [keda]: keda.md
 [kubectl]: kubectl.md
 [kubescape]: kubescape.md
@@ -1129,6 +1131,7 @@ Others:
 [cloudzero kubernetes best practices]: https://www.cloudzero.com/blog/kubernetes-best-practices
 [cncf]: https://www.cncf.io/
 [container capabilities in kubernetes]: https://unofficial-kubernetes.readthedocs.io/en/latest/concepts/policy/container-capabilities/
+[Container CPU Requests & Limits Explained with GOMAXPROCS Tuning]: https://victoriametrics.com/blog/kubernetes-cpu-go-gomaxprocs/
 [elasticsearch]: https://github.com/elastic/helm-charts/issues/689
 [how to run a command in a pod after initialization]: https://stackoverflow.com/questions/44140593/how-to-run-command-after-initialization/44146351#44146351
 [k8s-ephemeral-storage-metrics]: https://github.com/jmcgrath207/k8s-ephemeral-storage-metrics
