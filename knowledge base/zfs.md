@@ -14,8 +14,14 @@
 Pool-related:
 
 ```sh
-# Create pools on single devices.
-zpool create 'pool_name' 'path_to_device'
+# Create pools.
+zpool create 'pool_name' 'path/to/device'
+zpool create -n 'dry_run_pool_name' 'path/to/device'
+zpool create -f 'forcefully_created_pool_name' 'path/to/device'
+zpool create -m 'path/to/mount/point' 'pool_name' 'path/to/device'
+zpool create 'pool_name' raidz 'path/to/device/1' … 'path/to/device/N'
+zpool create 'pool_name' raidz1 'path/to/device/1' … 'path/to/device/N'
+zpool create 'pool_name' raidz2 'path/to/device/1' … 'path/to/device/N'
 
 # Create encrypted pools using multiple devices.
 zpool create \
@@ -26,10 +32,12 @@ zpool create \
 
 # List available pools.
 zpool list
+zpool list -o 'name,size'
+zpool list -Ho 'name'
 
 # Show pools configuration and status.
 zpool status
-zpool status 'pool_name' 'time_in_seconds'
+zpool status -x 'pool_name' 'time_in_seconds'
 
 # Show pools i/o statistics.
 zpool iostat
@@ -44,6 +52,8 @@ zpool scrub 'pool_name'
 zpool import
 
 # Import pools.
+zpool import -a
+zpool import -d
 zpool import 'pool_name'
 zpool import 'pool_name' -N
 zpool import 'encrypted_pool_name' -l
@@ -51,6 +61,7 @@ zpool import 'encrypted_pool_name' -l
 # Export pools.
 # Unmounts all filesystems in the pool.
 zpool export 'pool_name'
+zpool export -f 'pool_name'
 
 # Show the history of all pool's operations.
 zpool history 'pool_name'
@@ -102,9 +113,12 @@ zfs unmount 'pool_name/filesystem_name'
 
 # Create new filesystems.
 zfs create 'pool_name/filesystem_name'
+zfs create -V '1gb' 'pool_name/filesystem_name'
 
 # Delete filesystems.
 zfs destroy 'pool_name/filesystem_name'
+zfs destroy -r 'pool_name'
+zfs destroy -fr 'pool_name/filesystem_name'
 
 # List all snapshots.
 zfs list -t 'snapshot'
@@ -116,8 +130,22 @@ zfs list -r -t 'snapshot' -o 'name,creation' 'pool_name/filesystem_name'
 # Create new snapshots.
 zfs snapshot 'pool_name/filesystem_name@snapshot_name'
 
-# Destroy snapshots.
-zfs destroy  'pool_name/filesystem_name@snapshot_name'
+# Rollback to snapshots.
+zfs rollback -r 'pool_name/filesystem_name@snapshot_name'
+zfs rollback -rf 'pool_name/filesystem_name@snapshot_name'
+
+# Clone snapshots.
+zfs clone 'pool_name/filesystem_name@snapshot_name' 'path/to/destination'
+
+# Copy snapshots.
+zfs send 'source_pool_name/filesystem_name@snapshot_name' > 'path/to/local/destination'
+zfs receive 'destination_pool_name/filesystem_name@snapshot_name' < 'path/to/local/snapshot'
+zfs send 'source_pool_name/filesystem_name@snapshot_name' | zfs receive 'destination_pool_name/filesystem_name'
+zfs send 'source_pool_name/filesystem_name@snapshot_name' | ssh node02 "zfs receive 'destination_pool_name/filesystem_name'"
+
+# Destroy snapshots and clones.
+zfs destroy 'pool_name/filesystem_name@snapshot_name'
+zfs destroy 'path/to/clone'
 
 # Query a file system or volume configuration (get properties).
 zfs get 'all' 'pool_name'
@@ -126,6 +154,9 @@ zfs get 'aclmode,aclinherit,acltype,xattr' 'pool_name/filesystem_name'
 # Enable or change settings on a filesystem.
 zfs set 'compression=on' 'pool_name/filesystem_name'
 zfs set 'mountpoint=/my/mount/path' 'pool_name/filesystem_name'
+zfs set 'mountpoint=legacy' 'pool_name/filesystem_name'
+zfs set 'quota=1G' 'pool_name/filesystem_name'
+zfs set 'reservation=1G' 'pool_name/filesystem_name'
 
 # Reset properties to default.
 zfs inherit 'compression' 'pool_name/filesystem_name'
