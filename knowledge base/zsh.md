@@ -50,7 +50,8 @@ Exit files load sequence:
 1. `/etc/zlogout`
 1. `${ZDOTDIR}/.zlogout`
 
-Aliases are expanded when the function definition is parsed, not when the function is executed. Define aliases **before** functions to avoid problems.
+Aliases are expanded when the function definition is parsed, not when the function is executed.<br/>
+Define aliases **before** functions to avoid problems.
 
 ```sh
 # Logout after 3 minutes of inactivity.
@@ -116,7 +117,8 @@ When one writes an alias, one can also press `ctrl-x` followed by `a` to see the
 
 ## Parameter expansion
 
-Parameter expansions can involve flags like `${(@kv)aliases}` and other operators such as `${PREFIX:-"/usr/local"}`.<br/>
+Parameter expansions can involve flags like `${(@kv)aliases}` and other operators such as
+`${PREFIX:-"/usr/local"}`.<br/>
 Nested parameters expand from the inside out.
 
 If the parameter is a **scalar** (a number or string) then the value, if any, is substituted:
@@ -127,7 +129,8 @@ $ echo "$scalar"
 hello
 ```
 
-Curly braces are required if the expansion is followed by letters, digits or underscores that are not to be interpreted as part of name:
+Curly braces are required if the expansion is followed by letters, digits or underscores that are not to be interpreted
+as part of name:
 
 ```sh
 $ echo "${scalar}_world"
@@ -362,11 +365,14 @@ zsh: name: parameter not set
 
 ### Matching and replacement
 
-In the following expressions, when _name_ is an array and the substitution is not quoted, or if the `(@)` flag or the `name[@]` syntax is used, matching and replacement is performed **on each array element** separately.
+In the following expressions, when _name_ is an array and the substitution is not quoted, or if the `(@)` flag or the
+`name[@]` syntax is used, matching and replacement is performed **on each array element** separately.
 
 FIXME
 
 ## Arrays
+
+Also see [Associative arrays in zsh].
 
 ```sh
 # Get a slice of an array.
@@ -429,7 +435,8 @@ bindkey  "^[[3~"  delete-char
    - `RCS` affects all startup files
    - `GLOBAL_RCS` only affects global startup files (those shown here with an path starting with a /)
 
-   If one of the options is unset at any point, any subsequent startup file(s) of the corresponding type will not be read.<br/>
+   If one of the options is unset at any point, any subsequent startup file(s) of the corresponding type will not be
+   read.<br/>
    It is also possible for a file in `$ZDOTDIR` to re-enable `GLOBAL_RCS`.<br/>
    Both `RCS` and `GLOBAL_RCS` are set by default
 
@@ -454,17 +461,25 @@ bindkey  "^[[3~"  delete-char
    1. `$ZDOTDIR/.zlogout`
    1. `/etc/zlogout`
 
-   This happens with either an explicit exit via the `exit` or `logout` commands, or an implicit exit by reading `end-of-file` from the terminal.<br/>
-   However, if the shell terminates due to exec'ing another process, the files are not read. These are also affected by the `RCS` and `GLOBAL_RCS` options.<br/>
-   The `RCS` option affects the saving of history files, i.e. if `RCS` is unset when the shell exits, no history file will be saved.
+   This happens with either an explicit exit via the `exit` or `logout` commands, or an implicit exit by reading
+   `end-of-file` from the terminal.<br/>
+   However, if the shell terminates due to exec'ing another process, the files are not read. These are also affected by
+   the `RCS` and `GLOBAL_RCS` options.<br/>
+   The `RCS` option affects the saving of history files, i.e. if `RCS` is unset when the shell exits, no history file
+   will be saved.
 
-If `ZDOTDIR` is unset, `HOME` is used instead. Files listed above as being in `/etc` may be in another directory, depending on the installation.
+If `ZDOTDIR` is unset, `HOME` is used instead. Files listed above as being in `/etc` may be in another directory,
+depending on the installation.
 
 `/etc/zshenv` is run for **all** instances of zsh.<br/>
-it is a good idea to put code that does not need to be run for every single shell behind a test of the form `if [[ -o rcs ]]; then ...` so that it will not be executed when zsh is invoked with the `-f` option.
+it is a good idea to put code that does not need to be run for every single shell behind a test of the form
+`if [[ -o rcs ]]; then ...` so that it will not be executed when zsh is invoked with the `-f` option.
 
-When `/etc/zprofile` is installed it will override `PATH` and possibly other variables that a user may set in `~/.zshenv`. Custom `PATH` settings and similar overridden variables can be moved to `~/.zprofile` or other user startup files that are sourced after the `/etc/zprofile`.<br/>
-If `PATH` must be set in `~/.zshenv` to affect things like non-login ssh shells, one method is to use a separate path-setting file that is conditionally sourced in `~/.zshenv` and also sourced from `~/.zprofile`.
+When `/etc/zprofile` is installed it will override `PATH` and possibly other variables that a user may set in
+`~/.zshenv`. Custom `PATH` settings and similar overridden variables can be moved to `~/.zprofile` or other user startup
+files that are sourced after the `/etc/zprofile`.<br/>
+If `PATH` must be set in `~/.zshenv` to affect things like non-login ssh shells, one method is to use a separate
+path-setting file that is conditionally sourced in `~/.zshenv` and also sourced from `~/.zprofile`.
 
 ### History
 
@@ -557,7 +572,8 @@ bindkey  "^[[3~"  delete-char
 
 ### Compinit warnings of insecure directories and files
 
-Compinit is complaining of some critical files being group writable. Running `compaudit` will list those files. Just use it to remove the group's write permission:
+Compinit is complaining of some critical files being group writable. Running `compaudit` will list those files. Just use
+it to remove the group's write permission:
 
 ```sh
 compaudit | xargs chmod g-w
@@ -588,26 +604,27 @@ compaudit | xargs chmod g-w
 [antibody]: https://github.com/getantibody/antibody
 [antidote]: https://getantidote.github.io/
 [antigen]: https://github.com/zsh-users/antigen
-[fzf]: https://github.com/junegunn/fzf
-[ohmyzsh]: https://github.com/ohmyzsh/ohmyzsh
-[zcomet]: https://github.com/agkozak/zcomet
-[zplug]: https://github.com/zplug/zplug
-[zsh-autosuggestions]: https://github.com/zsh-users/zsh-autosuggestions
-[zsh-completions]: https://github.com/zsh-users/zsh-completions
-[zsh-history-substring-search]: https://github.com/zsh-users/zsh-history-substring-search
-[zsh-syntax-highlighting]: https://github.com/zsh-users/zsh-syntax-highlighting
+[Associative arrays in zsh]: https://scriptingosx.com/2019/11/associative-arrays-in-zsh/
 [awesome zsh plugins]: https://github.com/unixorn/awesome-zsh-plugins
 [completion config example]: https://github.com/ThiefMaster/zsh-config/blob/master/zshrc.d/completion.zsh
 [fix key settings (home/end/insert/delete) in .zshrc when running zsh in terminator terminal emulator]: https://stackoverflow.com/questions/8638012/fix-key-settings-home-end-insert-delete-in-zshrc-when-running-zsh-in-terminat#8645267
+[fzf]: https://github.com/junegunn/fzf
 [gentoo wiki]: https://wiki.gentoo.org/wiki/Zsh
 [handling signals with trap]: https://stackoverflow.com/questions/59911669/proper-way-to-use-a-trap-to-exit-a-shell-script-in-zsh#59925138
 [how can i convert an array into a comma separated string?]: https://stackoverflow.com/questions/53839253/how-can-i-convert-an-array-into-a-comma-separated-string
 [how to list all variables names and their current values?]: https://askubuntu.com/questions/275965/how-to-list-all-variables-names-and-their-current-values#275972
+[ohmyzsh]: https://github.com/ohmyzsh/ohmyzsh
 [pattern matching in a conditional expression]: https://unix.stackexchange.com/questions/553607/pattern-matching-in-a-zsh-conditional-expression
 [remove duplicates in zsh path]: https://til.hashrocket.com/posts/7evpdebn7g-remove-duplicates-in-zsh-path
 [substitutions]: http://zsh.sourceforge.net/Guide/zshguide05.html
 [the z shell manual]: http://zsh.sourceforge.net/Doc/Release/
 [upper- or lower-casing strings]: https://scriptingosx.com/2019/12/upper-or-lower-casing-strings-in-bash-and-zsh/
 [what should/shouldn't go in .zshenv, .zshrc, .zlogin, .zprofile, .zlogout?]: https://unix.stackexchange.com/questions/71253/what-should-shouldnt-go-in-zshenv-zshrc-zlogin-zprofile-zlogout#487889
+[zcomet]: https://github.com/agkozak/zcomet
+[zplug]: https://github.com/zplug/zplug
 [zsh compinit: insecure directories and files, run compaudit for list]: https://github.com/zsh-users/zsh-completions/issues/433#issuecomment-619321054
 [zsh delete keybinding]: https://superuser.com/questions/983016/zsh-delete-keybinding#983018
+[zsh-autosuggestions]: https://github.com/zsh-users/zsh-autosuggestions
+[zsh-completions]: https://github.com/zsh-users/zsh-completions
+[zsh-history-substring-search]: https://github.com/zsh-users/zsh-history-substring-search
+[zsh-syntax-highlighting]: https://github.com/zsh-users/zsh-syntax-highlighting
