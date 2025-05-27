@@ -18,6 +18,21 @@ Open-source platform for monitoring and observability.
   <summary>Usage</summary>
 
 ```sh
+docker run -d --rm --name 'grafana-oss' -p '3000:3000' 'grafana/grafana-oss'
+docker run -d --rm --name 'grafana-enterprise' -p '3000:3000' -ti -entrypoint 'bash' 'grafana/grafana-enterprise'
+```
+
+```plaintext
+# Return health information
+GET /api/health
+```
+
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
 # Export all existing dashboards by ID.
 curl -sS \
   -H 'Authorization: Basic YWRtaW46YWRtaW4=' \
