@@ -113,6 +113,10 @@ pulumi state move --source 'organization/utils/dev' --dest 'organization/iam/dev
 jq '.dependencies."@pulumi/aws" |= "6.66.2"' 'package.json' | sponge 'package.json' \
 && pulumi install && pulumi update --suppress-outputs
 
+# Enable patch force for target resources (k8s-helm only)
+PULUMI_K8S_ENABLE_PATCH_FORCE='true' \
+pulumi up --target 'urn:pulumi:someStack::someProj::kubernetes:helm.sh/v4:Chart$kubernetes:apiextensions.k8s.io/v1:CustomResourceDefinition::awsLoadBalancerController:targetgroupbindings.elbv2.k8s.aws'
+
 # Import resources
 # Could use `--suppress-outputs --generate-code='false' --protect=false` for some
 pulumi import --file 'import.json'
