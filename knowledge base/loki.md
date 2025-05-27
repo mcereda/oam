@@ -804,6 +804,8 @@ storage_config:
 - [OpenTelemetry / OTLP]
 - [Loki-Operator]
 - [The Quest for HA and DR in Loki]
+- [The concise guide to Loki: How to get the most out of your query performance]
+- [Open source log monitoring: The concise guide to Grafana Loki]
 
 ### Sources
 
@@ -848,8 +850,11 @@ storage_config:
 [http api reference]: https://grafana.com/docs/loki/latest/reference/loki-http-api/
 [logstash plugin]: https://grafana.com/docs/loki/latest/send-data/logstash/
 [loki-distributed]: https://github.com/grafana/helm-charts/tree/main/charts/loki-distributed
+[Open source log monitoring: The concise guide to Grafana Loki]: https://grafana.com/blog/2023/12/11/open-source-log-monitoring-the-concise-guide-to-grafana-loki/?pg=blog&plcmt=body-txt
 [send log data to loki]: https://grafana.com/docs/loki/latest/send-data/
 [storage]: https://grafana.com/docs/loki/latest/configure/storage/
+[The concise guide to Grafana Loki: Everything you need to know about labels]: https://grafana.com/blog/2023/12/20/the-concise-guide-to-grafana-loki-everything-you-need-to-know-about-labels/
+[The concise guide to Loki: How to get the most out of your query performance]: https://grafana.com/blog/2023/12/28/the-concise-guide-to-loki-how-to-get-the-most-out-of-your-query-performance/
 [Understand labels]: https://grafana.com/docs/loki/latest/get-started/labels/
 [website]: https://grafana.com/oss/loki/
 [What is structured metadata]: https://grafana.com/docs/loki/latest/get-started/labels/structured-metadata/
@@ -863,4 +868,3 @@ storage_config:
 [loki-operator]: https://loki-operator.dev/
 [opentelemetry / otlp]: https://loki-operator.dev/docs/open-telemetry.md/
 [the quest for ha and dr in loki]: https://www.infracloud.io/blogs/high-availability-disaster-recovery-in-loki/
-[The concise guide to Grafana Loki: Everything you need to know about labels]: https://grafana.com/blog/2023/12/20/the-concise-guide-to-grafana-loki-everything-you-need-to-know-about-labels/
