@@ -390,7 +390,7 @@ aws kms encrypt --key-id '01234567-89ab-cdef-0123-456789abcdef' --plaintext 'My 
 	--query 'CiphertextBlob' --output 'text' \
 | base64 --decode > 'ciphertext.dat'
 
-aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat'
+aws kms decrypt --ciphertext-blob 'AQICA…0zzdXzQLAw='
 aws kms decrypt --ciphertext-blob 'fileb://ciphertext.dat' --query 'Plaintext' --output 'text' \
 | base64 --decode
 aws kms decrypt --key-id 'arn:aws:kms:eu-west-1:123456789012:key/d74f5077-811b-4447-af65-71f5f64f37d3' \
