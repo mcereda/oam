@@ -806,6 +806,7 @@ or write workloads and exceeds the instance type quotas.
 - [How can I resolve the "ERROR: <module/extension> must be loaded via shared_preload_libraries" error?]
 - [Understanding PostgreSQL roles and permissions]
 - [Kyle Kingsbury's Amazon RDS for PostgreSQL 17.4 analysis]
+- [AWS RDS Max Connections Limit As Per Instance Type]
 
 ### Sources
 
@@ -866,6 +867,7 @@ or write workloads and exceeds the instance type quotas.
 [amazon ebs-optimized instance types]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html
 
 <!-- Others -->
+[AWS RDS Max Connections Limit As Per Instance Type]: https://sysadminxpert.com/aws-rds-max-connections-limit/
 [backing up login roles aka users and group roles]: https://www.postgresonline.com/article_pfriendly/81.html
 [disabling aws rds backups when creating/updating instances?]: https://stackoverflow.com/questions/35709153/disabling-aws-rds-backups-when-creating-updating-instances
 [Kyle Kingsbury's Amazon RDS for PostgreSQL 17.4 analysis]: https://jepsen.io/analyses/amazon-rds-for-postgresql-17.4
