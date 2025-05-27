@@ -74,6 +74,11 @@ aws ecr describe-repositories --repository-names 'docker-tools/image-builder' \
 > This might™ introduce a small latency and be cause of pull failures. Pulling that (not-yet)cached image from an
 > interactive shell session worked flawlessly.
 
+The user or role pulling the image must be granted the `ecr:BatchImportUpstreamImage` permission for the feature to
+work as expected.
+
+Refer [Troubleshooting pull through cache issues in Amazon ECR].
+
 ## Troubleshooting
 
 ### Docker pull errors with `no basic auth credentials`
@@ -113,3 +118,4 @@ Context: trying to pull an image on an EC2 instance that is using the amazon-ecr
 [cli subcommand reference]: https://docs.aws.amazon.com/cli/latest/reference/ecr/
 [creating a lifecycle policy preview]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/lpp_creation.html
 [using pull through cache rules]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache.html
+[Troubleshooting pull through cache issues in Amazon ECR]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/error-pullthroughcache.html
