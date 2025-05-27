@@ -55,3 +55,7 @@ aws eks --region 'eu-west-1' update-kubeconfig --name 'custom-eks-cluster' \
 	--set 'affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].key'='app.kubernetes.io/name' \
 	--set 'affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].operator'='In' \
 	--set 'affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].values[0]'='aws-cluster-autoscaler'
+
+helm --namespace 'kube-system' diff upgrade 'metrics-server' 'metrics-server/metrics-server' \
+	--version '3.12.2' --values 'metrics-server.values.yml' \
+	--set 'args[0]'='--kubelet-insecure-tls'
