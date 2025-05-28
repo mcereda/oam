@@ -8,6 +8,19 @@
 ## TL;DR
 
 <details>
+  <summary>Setup</summary>
+
+```sh
+brew install 'clamav' \
+&& cp '/opt/homebrew/etc/clamav/clamd.conf.sample' '/opt/homebrew/etc/clamav/clamd.conf' \
+&& cp '/opt/homebrew/etc/clamav/freshclam.conf.sample' '/opt/homebrew/etc/clamav/freshclam.conf' \
+&& sudo chown ':_clamav' '/opt/homebrew/var/lib/clamav' \
+&& sudo chmod 'g+w' '/opt/homebrew/var/lib/clamav'
+```
+
+</details>
+
+<details>
   <summary>Usage</summary>
 
 ```sh
