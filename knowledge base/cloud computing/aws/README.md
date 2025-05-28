@@ -7,12 +7,14 @@
    1. [Billing and Cost Management](#billing-and-cost-management)
    1. [Config](#config)
    1. [Detective](#detective)
+   1. [Direct Connect](#direct-connect)
    1. [Global Accelerator](#global-accelerator)
    1. [GuardDuty](#guardduty)
    1. [EventBridge](#eventbridge)
    1. [Inspector](#inspector)
    1. [Kinesis](#kinesis)
    1. [KMS](#kms)
+   1. [PrivateLink](#privatelink)
    1. [Security Hub](#security-hub)
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
@@ -61,8 +63,10 @@ subsequent requests that API receives.
 ## Networking
 
 VPCs define isolated virtual networking environments.<br/>
-AWS accounts include one default VPC for each AWS Region. These allow for immediate launch and connection to EC2
-instances.
+AWS accounts include one default VPC for each AWS Region.
+
+VPCs can be _peered_ to enable direct connectivity between them via private IP addresses.<br/>
+The peer connection also requires exchanging route table entries between the VPCs.
 
 Subnets are ranges of IP addresses in VPCs.<br/>
 Each subnet resides in a single Availability Zone.<br/>
@@ -77,6 +81,67 @@ Gateways connect VPCs to other networks.<br/>
 networks. They can communicate with services outside the VPC, but cannot receive unsolicited connection requests.<br/>
 [_VPC endpoints_][access aws services through aws privatelink] connect VPCs to AWS services privately, without the need
 of Internet gateways or NAT devices.
+
+By default, connections to AWS services use the services' **public** endpoint.
+
+Traffic from instances in **public** subnets is routed to the VPC's internet gateway, then forwarded to the requested
+AWS service.
+
+<details style="padding: 0 0 1rem 1rem">
+
+```mermaid
+graph LR
+  i(Internet)
+  subgraph Region
+    as(AWS Service)
+    subgraph VPC
+      ig(Internet<br/>Gateway)
+      subgraph Public Network
+        ei(Instance)
+      end
+    end
+  end
+  ei --> ig
+  ig --> i
+  ig --> as
+```
+
+</details>
+
+Traffic from instances in **private** subnets is routed to a NAT gateway, which forwards it to the VPC's internet
+gateway, which then forwards it to the requested AWS service.<br/>
+This traffic does **not** leave the AWS network, even if it does traverse the internet gateway.
+
+<details style="padding: 0 0 1rem 1rem">
+
+```mermaid
+graph LR
+  i(Internet)
+  subgraph Region
+    as(AWS Service)
+    subgraph VPC
+      ig(Internet<br/>Gateway)
+      subgraph Public Network
+        ng(NAT Gateway)
+      end
+      subgraph Private Network
+        ei(Instance)
+      end
+    end
+  end
+  ei --> ng
+  ng --> ig
+  ig --> i
+  ig --> as
+```
+
+</details>
+
+[PrivateLink] leverages VPC endpoints to create a private and direct connection between a VPC and an AWS service.<br/>
+[Gateway endpoints] do the same in a more convenient way that does not use Elastic Network Interfaces, but can be used
+only for some services ([S3] and DynamoDB).
+
+[Direct Connect] creates a dedicated network connection between on-premises data centers or offices and AWS.
 
 ### Elastic IP addresses
 
@@ -94,6 +159,7 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | [CloudWatch]                  | Observability (logging, monitoring, alerting) |
 | [Config]                      | Compliance                                    |
 | [Detective]                   | Behaviour anomalies                           |
+| [Direct Connect]              | Private on-premise to AWS connection          |
 | [EC2]                         | Managed virtual machines                      |
 | [ECR]                         | Container registry                            |
 | [ECS]                         | Run containers as a service                   |
@@ -107,6 +173,7 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | [Kinesis]                     | Video or data streams                         |
 | [KMS]                         | Key management                                |
 | [OpenSearch]                  | ELK, logging                                  |
+| [PrivateLink]                 | Private VPC to AWS service connection         |
 | [RDS]                         | Databases                                     |
 | [Route53]                     | DNS                                           |
 | [S3]                          | Storage                                       |
@@ -151,6 +218,20 @@ Sample templates for compliance standards and benchmarks are available.
 
 Uses ML and graphs to try and identify the root cause of security issues.<br/>
 Creates visualizations with details and context by leveraging events from VPC Flow Logs, CloudTrail and GuardDuty.
+
+### Direct Connect
+
+Provides a dedicated, private network connection from on-premise to the AWS network.
+
+One needs to establish a dedicated connection from a on-premise location to an AWS Direct Connect location.<br/>
+This typically involves a **physical** connection between the on-premises network and the AWS infrastructure.
+
+Once the connection is established, one can create one or more virtual interfaces to act as logical connections within
+the physical Direct Connect connection.<br/>
+Virtual interfaces can be configured with specific routing details, virtual private gateway associations, and bandwidth
+settings.
+
+Direct Connect uses link layer encryption over the connection to secure the traffic.
 
 ### Global Accelerator
 
@@ -292,6 +373,51 @@ AWS charges a monthly fee for the first and second rotation of key material main
 This price increase is capped at the second rotation. Any subsequent rotations will **not** be billed.
 
 Each key counts as one when calculating key resource quotas, regardless of the number of rotated key material versions.
+
+### PrivateLink
+
+See also [Access AWS services through AWS PrivateLink].
+
+Allows private access to AWS services from within a VPC without the need of Internet Gateways.<br/>
+
+It needs one to create:
+
+- One _interface VPC endpoint_ for each desired AWS service.<br/>
+  Each interface endpoint establishes a connection between the subnet they are in and their specific AWS service by
+  means of Elastic Network Interfaces.
+- A route in the subnet's route table for each interface endpoint.<br/>
+  This will route all traffic destined to the AWS service referred by the interface endpoint to the endpoint.
+
+The service's endpoint is resolved with the **private** IP addresses of the relative endpoint's network interface,
+instead of the default public endpoint.<br/>
+This allows traffic to be sent to the requested AWS service using the private connection between the VPC endpoint and
+the AWS service.
+
+<details style="padding: 0 0 1rem 1rem">
+
+```mermaid
+graph
+  subgraph Region
+    as(AWS Service)
+    subgraph VPC
+      e(VPC Endpoint)
+      subgraph Private Network
+        ei(Instance)
+        ie(Interface<br/>Endpoint)
+      end
+    end
+  end
+  ei --> ie
+  ie --> e
+  e --> as
+```
+
+</details>
+
+Services will **not** be able to initiate requests to resources through their VPC endpoint.
+
+Bills per each VPC endpoint provisioned, per each Availability Zone, per hour, per GB of data processed.<br/>
+Refer [AWS PrivateLink Pricing].
 
 ### Security Hub
 
@@ -509,6 +635,7 @@ machine if not.
 
 ## Further readings
 
+- [Learn AWS]
 - [EC2]
 - [Best Practices for Tagging AWS Resources]
 - [Automating DNS-challenge based LetsEncrypt certificates with AWS Route 53]
@@ -557,11 +684,13 @@ machine if not.
 [billing and cost management]: #billing-and-cost-management
 [config]: #config
 [detective]: #detective
+[direct connect]: #direct-connect
 [eventbridge]: #eventbridge
 [guardduty]: #guardduty
 [inspector]: #inspector
 [kinesis]: #kinesis
 [kms]: #kms
+[privatelink]: #privatelink
 [security hub]: #security-hub
 
 <!-- Knowledge base -->
@@ -584,8 +713,9 @@ machine if not.
 [sqs]: sqs.md
 
 <!-- Upstream -->
-[access aws services through aws privatelink]: https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-access-aws-services.html
+[Access AWS services through AWS PrivateLink]: https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-access-aws-services.html
 [aws icons]: https://aws-icons.com/
+[AWS PrivateLink pricing]: https://aws.amazon.com/privatelink/pricing/
 [aws public ip address ranges now available in json form]: https://aws.amazon.com/blogs/aws/aws-ip-ranges-json/
 [aws re:invent 2022 - advanced vpc design and new amazon vpc capabilities (net302)]: https://www.youtube.com/watch?v=cbUNbK8ZdA0&pp=ygUWYW1hem9uIGludmVudCAyMDIyIHZwYw%3D%3D
 [best practices for tagging aws resources]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html
@@ -599,6 +729,7 @@ machine if not.
 [elastic ip addresses]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html
 [enable or disable aws regions in your account]: https://docs.aws.amazon.com/accounts/latest/reference/manage-acct-regions.html
 [exporting db snapshot data to amazon s3]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ExportSnapshot.html
+[Gateway endpoints]: https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html
 [guidance for tagging on aws]: https://aws.amazon.com/solutions/guidance/tagging-on-aws/
 [how aws global accelerator works]: https://docs.aws.amazon.com/global-accelerator/latest/dg/introduction-how-it-works.html
 [how can i use aws kms asymmetric keys to encrypt a file using openssl?]: https://repost.aws/knowledge-center/kms-openssl-encrypt-key
@@ -623,4 +754,5 @@ machine if not.
 [aws savings plans vs. reserved instances: when to use each]: https://www.cloudzero.com/blog/savings-plans-vs-reserved-instances/
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
 [difference in boto3 between resource, client, and session?]: https://stackoverflow.com/questions/42809096/difference-in-boto3-between-resource-client-and-session
+[Learn AWS]: https://www.learnaws.org/
 [using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
