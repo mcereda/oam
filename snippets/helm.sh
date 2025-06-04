@@ -26,8 +26,9 @@ helm template --namespace 'gitlab' --values "values.gitlab-runner.yaml" --set gl
 	'gitlab-runner' 'gitlab/gitlab-runner'
 
 helm --namespace 'gitlab' upgrade --install --create-namespace --version '0.64.1' 'gitlab-runner' \
-	--values 'values.gitlab-runner.yml' 'gitlab/gitlab-runner'
+	--values 'values.gitlab-runner.yml' 'gitlab/gitlab-runner' --dry-run='server'
 helm upgrade --install 'keda' 'keda' --repo 'https://kedacore.github.io/charts' --namespace 'keda' --create-namespace
+helm upgrade --install … --atomic --cleanup-on-fail
 
 helm list -n 'default'
 helm list -A

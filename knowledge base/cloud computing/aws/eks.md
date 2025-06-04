@@ -1389,7 +1389,7 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [control plane]: ../../kubernetes/README.md#control-plane
 [kubernetes' cluster autoscaler component]: ../../kubernetes/cluster%20autoscaler.md
 [ebs]: ebs.md
-[karpenter]: ../../kubernetes/karpenter.placeholder
+[karpenter]: ../../kubernetes/karpenter.md
 [kubernetes]: ../../kubernetes/README.md
 [pulumi]: ../../pulumi.md
 [terraform]: ../../pulumi.md
