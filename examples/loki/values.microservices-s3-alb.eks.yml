@@ -1,0 +1,132 @@
+---
+
+# Refer <https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml>.
+
+loki:
+  analytics:
+    reporting_enabled: false
+  auth_enabled: false
+  schemaConfig:
+    configs:
+      - from: '2020-10-24'
+        store: tsdb
+        object_store: aws
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+  storage_config:
+    aws:
+      region: eu-west-1
+      bucketnames: exampleorg-loki-chunks
+  ingester:
+    chunk_encoding: snappy
+  limits_config:
+    allow_structured_metadata: true
+
+  querier:
+    max_concurrent: 4
+
+  storage:
+    type: s3
+    bucketNames:
+      chunks: exampleorg-loki-chunks
+    s3:
+      region: eu-west-1
+
+global:
+  image:
+    registry: 012345678901.dkr.ecr.eu-west-1.amazonaws.com
+
+serviceAccount:
+  create: true
+  annotations:
+    'eks.amazonaws.com/role-arn': 'arn:aws:iam::012345678901:role/Loki-ServiceAccount'
+
+deploymentMode: Distributed
+
+# Disable resources from other deployment modes - Simple Scalable Deployment
+backend:
+  replicas: 0
+read:
+  replicas: 0
+write:
+  replicas: 0
+
+# Disable resources from other deployment modes - Single Binary Mode
+singleBinary:
+  replicas: 0
+
+# Configure resources from the chosen deployment mode
+.sharedConfig: &shared_config
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: example.org/reservation.app
+                operator: In
+                values:
+                  - loki
+  tolerations:
+    - key: example.com/reservation.app
+      operator: Equal
+      value: loki
+      effect: NoSchedule
+chunksCache:
+  <<: *shared_config
+compactor:
+  <<: *shared_config
+  replicas: 1
+distributor:
+  <<: *shared_config
+  replicas: 2
+  maxUnavailable: 1
+indexGateway:
+  <<: *shared_config
+  replicas: 2
+  maxUnavailable: 1
+ingester:
+  <<: *shared_config
+  replicas: 2
+  zoneAwareReplication:
+    enabled: false
+querier:
+  <<: *shared_config
+  replicas: 2
+  maxUnavailable: 1
+queryFrontend:
+  <<: *shared_config
+  replicas: 2
+  maxUnavailable: 1
+queryScheduler:
+  <<: *shared_config
+  replicas: 1
+ruler:
+  <<: *shared_config
+  replicas: 0
+  maxUnavailable: 1
+
+# Expose the Loki gateway so it can be written to and queried externally
+gateway:
+  <<: *shared_config
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/load-balancer-name: loki-eks
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/certificate-arn:
+        'arn:aws:acm:eu-west-1:012345678901:certificate/01234567-abcd-9876-fedc-0123456789ab'
+      alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-2016-08
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+    hosts:
+      - host: loki-eks.dev.example.org
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+# Check on Loki
+lokiCanary:
+  <<: *shared_config
