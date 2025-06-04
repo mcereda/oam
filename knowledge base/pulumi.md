@@ -20,11 +20,12 @@
    1. [Import components and their children](#import-components-and-their-children)
 1. [Troubleshooting](#troubleshooting)
    1. [A project with the same name already exists](#a-project-with-the-same-name-already-exists)
+   1. [Assume role with MFA enabled but AssumeRoleTokenProvider session option not set](#assume-role-with-mfa-enabled-but-assumeroletokenprovider-session-option-not-set)
+   1. [Attempting to deploy or update resources with pending operations from previous deployment](#attempting-to-deploy-or-update-resources-with-pending-operations-from-previous-deployment)
+   1. [Change your program back to the original providers](#change-your-program-back-to-the-original-providers)
    1. [Stack init fails because the stack supposedly already exists](#stack-init-fails-because-the-stack-supposedly-already-exists)
    1. [Stack init fails due to missing scheme](#stack-init-fails-due-to-missing-scheme)
    1. [Stack init fails due to invalid key identifier](#stack-init-fails-due-to-invalid-key-identifier)
-   1. [Change your program back to the original providers](#change-your-program-back-to-the-original-providers)
-   1. [`Attempting to deploy or update resources with X pending operations from previous deployment`](#attempting-to-deploy-or-update-resources-with-x-pending-operations-from-previous-deployment)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -1319,64 +1320,33 @@ Root cause: Pulumi found a project with the same name saved in the backend.
 
 Solution: Continue using the name if you are repurposing the project. Consider using a different name otherwise.
 
-### Stack init fails because the stack supposedly already exists
+### Assume role with MFA enabled but AssumeRoleTokenProvider session option not set
 
-Context: a stack fails to initialize.
+Context:
 
-Error message example:
-
-> Sorry, could not create stack 'dev': stack 'organization/infra/dev' already exists
-
-Root cause: Pulumi found a stack with the same name saved in the backend.
-
-Solution: Delete the residual files for the stack from the backend and retry.
-
-### Stack init fails due to missing scheme
-
-Context: a stack fails to initialize.
+- Pulumi is used to manage resources in AWS.
+- The user running Pulumi must assume an IAM Role.
+- The IAM Role _could_ require the user to be logged in with MFA.
 
 Error message example:
 
-> Sorry, could not create stack 'dev': open secrets.Keeper: no scheme in URL "awskms"
+> error: unable to open bucket s3://example-org-infra/pulumi: open bucket s3://example-org-infra/pulumi: couldn't create
+> session AssumeRoleTokenProviderNotSetError: assume role with MFA enabled, but AssumeRoleTokenProvider session option
+> not set.
 
-Root cause: the secrets provider is set to use a KMS key, but one did not provide any key identifier.
+Root cause: As of 2025-06-03, Pulumi seems to be unable to prompt the user for MFA tokens while assuming AWS IAM Roles.
+Refer [pulumi-aws/issues/1366].
 
-Solution: Read [secrets] and fix the configuration by providing a key identifier.
+Short term solutions:
 
-### Stack init fails due to invalid key identifier
+- Get temporary session credentials manually via AWS CLI, then export the resulting `AWS_ACCESS_KEY_ID`,
+  `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` environment variables.<br/>
+  Only then, run Pulumi.
 
-Context: a stack fails to initialize.
+  Refer [Use the AWS CLI with MFA to authenticate].
+- Configure the AWS CLI to **not** use MFA, should the Role **not _require_** it.
 
-Error message example:
-
-> Sorry, could not create stack 'dev': unable to parse the secrets provider URL: parse
-> "awskms://arn:aws:kms:eu-east-2:123456789012:key/aaaabbbb-cccc-dddd-eeee-ffff00001111": invalid port ":key" after host
-
-Root cause: the secrets provider is set to use a KMS key, but one did not provide a correct key identifier.
-
-Solution: Read [secrets] and fix the configuration by providing a correct key identifier.
-
-### Change your program back to the original providers
-
-Context: Typescript project, `preview` or `update` action.
-
-Error message example:
-
-> error: provider
-> urn:pulumi:dev::projectName::pulumi:providers:aws::default_6_29_0::159e5843-63ae-4789-b332-4658578ba34c for resource
-> urn:pulumi:dev::projectName::aws:ec2/instance:Instance::instanceName has not been registered yet, this is due to a
-> change of providers mixed with --target. Change your program back to the original providers
-
-Root cause: one is using a different provider version than the one the resource has been created with.
-
-Solution:
-
-1. Get the provider version the resource wants from the run output.
-1. Fix the provider's version to the one wanted by the resource.
-1. Run `pulumi install` to gather the required version.
-1. Try the action again now.
-
-### `Attempting to deploy or update resources with X pending operations from previous deployment`
+### Attempting to deploy or update resources with pending operations from previous deployment
 
 Also see [Enable pulumi refresh to solve pending creates].
 
@@ -1402,6 +1372,63 @@ Solution: follow the suggestion in the warning message:
 
 1. Run `pulumi refresh` interactively.
 1. Choose to clear the pending operations if the resource is created, or other options depending on the outcome.
+
+### Change your program back to the original providers
+
+Context: Typescript project, `preview` or `update` action.
+
+Error message example:
+
+> error: provider
+> urn:pulumi:dev::projectName::pulumi:providers:aws::default_6_29_0::159e5843-63ae-4789-b332-4658578ba34c for resource
+> urn:pulumi:dev::projectName::aws:ec2/instance:Instance::instanceName has not been registered yet, this is due to a
+> change of providers mixed with --target. Change your program back to the original providers
+
+Root cause: one is using a different provider version than the one the resource has been created with.
+
+Solution:
+
+1. Get the provider version the resource wants from the run output.
+1. Fix the provider's version to the one wanted by the resource.
+1. Run `pulumi install` to gather the required version.
+1. Try the action again now.
+
+### Stack init fails because the stack supposedly already exists
+
+Context: a stack fails to initialize.
+
+Error message example:
+
+> Sorry, could not create stack 'dev': stack 'organization/infra/dev' already exists
+
+Root cause: Pulumi found a stack with the same name saved in the backend.
+
+Solution: Delete the residual files for the stack from the backend and retry.
+
+### Stack init fails due to missing scheme
+
+Context: a stack fails to initialize.
+
+Error message example:
+
+> Sorry, could not create stack 'dev': open secrets.Keeper: no scheme in URL "awskms"
+
+Root cause: the secrets provider is set to use a KMS key, but one did not provide any key identifier.
+
+Solution: Read [secrets], and fix the configuration by providing a key identifier.
+
+### Stack init fails due to invalid key identifier
+
+Context: a stack fails to initialize.
+
+Error message example:
+
+> Sorry, could not create stack 'dev': unable to parse the secrets provider URL: parse
+> "awskms://arn:aws:kms:eu-east-2:123456789012:key/aaaabbbb-cccc-dddd-eeee-ffff00001111": invalid port ":key" after host
+
+Root cause: the secrets provider is set to use a KMS key, but one did not provide a correct key identifier.
+
+Solution: Read [secrets], and fix the configuration by providing a correct key identifier.
 
 ## Further readings
 
@@ -1476,6 +1503,7 @@ Solution: follow the suggestion in the warning message:
 [pulumi preview]: https://www.pulumi.com/docs/iac/cli/commands/pulumi_preview/
 [pulumi troubleshooting]: https://www.pulumi.com/docs/support/troubleshooting/
 [pulumi up --plan without error message (exit code 255)]: https://github.com/pulumi/pulumi/issues/11303#issuecomment-1311365793
+[pulumi-aws/issues/1366]: https://github.com/pulumi/pulumi-aws/issues/1366
 [resources reference]: https://www.pulumi.com/resources
 [secrets]: https://www.pulumi.com/docs/concepts/secrets/
 [stack references]: https://www.pulumi.com/docs/concepts/stack/#stackreferences
@@ -1490,3 +1518,4 @@ Solution: follow the suggestion in the warning message:
 [create a componentresource]: https://pulumi.awsworkshop.io/30_modern_iac_ts/45_componens/10_create_component.html
 [docker images]: https://hub.docker.com/u/pulumi
 [things i wish i knew earlier about pulumi]: https://vsupalov.com/pulumi-learnings/
+[Use the AWS CLI with MFA to authenticate]: https://repost.aws/knowledge-center/authenticate-mfa-cli
