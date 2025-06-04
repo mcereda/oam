@@ -198,20 +198,23 @@ Compliance service for assessing and auditing AWS resources.
 
 Provides an inventory of resources.<br/>
 Records and monitors resource configurations and their changes.<br/>
-The data is stored in a bucket (default name `config-bucket-{aws-account-number}`)<br/>
-Changes can be streamed to 1 SNS topic for notification purposes.<br/>
+Allows for automatic remediation for non-compliant resources by leveraging Systems Manager Automation documents.
+
+The service's data is stored in an S3 bucket.<br/>
+The bucket is named `config-bucket-{aws-account-number}` by default and created upon service's activation.
+
+The changes logs can be streamed to 1! SNS topic for notification purposes.
+
 Uses _rules_ to evaluate whether the resources configurations comply.<br/>
-Rule evaluation is done once every time a configuration changes, or periodically.<br/>
+Rule evaluation is done either **once** every time a configuration changes, or **periodically**.<br/>
 Resources are marked with the evaluation result (_compliant_, _non-compliant_).
 
 Custom rules can be used to evaluate for uncommon requirements.<br/>
 Custom rules leverage lambda functions.
 
-Allows for automatic remediation for non-compliant resources by leveraging Systems Manager Automation documents.
-
-_Conformance packs_ are set of rules bundled together as a deployable single entity.<br/>
+_Conformance packs_ are set of rules bundled together as a deployable, single, immutable entity.<br/>
 Defined as YAML templates.<br/>
-Immutable: users cannot make changes without updating the whole rule package.<br/>
+Users cannot make changes without updating the **whole** rule package.<br/>
 Sample templates for compliance standards and benchmarks are available.
 
 ### Detective
