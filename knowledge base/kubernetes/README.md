@@ -26,6 +26,8 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
    1. [downwardAPI](#downwardapi)
    1. [PersistentVolumes](#persistentvolumes)
       1. [Resize PersistentVolumes](#resize-persistentvolumes)
+1. [Authorization](#authorization)
+   1. [RBAC](#rbac)
 1. [Autoscaling](#autoscaling)
    1. [Pod scaling](#pod-scaling)
    1. [Node scaling](#node-scaling)
@@ -36,7 +38,7 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 1. [Sysctl settings](#sysctl-settings)
 1. [Backup and restore](#backup-and-restore)
 1. [Managed Kubernetes Services](#managed-kubernetes-services)
-   1. [Best practices in cloud environments](#best-practices-in-cloud-environments)
+    1. [Best practices in cloud environments](#best-practices-in-cloud-environments)
 1. [Edge computing](#edge-computing)
 1. [Troubleshooting](#troubleshooting)
     1. [Dedicate Nodes to specific workloads](#dedicate-nodes-to-specific-workloads)
@@ -613,6 +615,182 @@ Gotchas:
 
   </details>
 
+## Authorization
+
+### RBAC
+
+Refer [Using RBAC Authorization].
+
+_Role_s and _ClusterRole_s contain rules, each representing a set of permissions.<br/>
+Permissions are purely additive - there are no _deny_ rules.
+
+Roles are constrained to the namespace they are defined into.<br/>
+ClusterRoles are **non**-namespaced resources, and are meant for cluster-wide roles.
+
+<details style='padding: 0 0 0 1rem'>
+  <summary>Role definition example</summary>
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: pod-reader
+rules:
+  - apiGroups:
+      - ""  # "" = core API group
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+```
+
+</details>
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>ClusterRole definition example</summary>
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  # no `namespace` as ClusterRoles are non-namespaced
+  name: secret-reader
+rules:
+  - apiGroups:
+      - ""  # "" = core API group
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+```
+
+</details>
+
+Roles are usually used to grant access to workloads in Pods.<br/>
+ClusterRoles are usually used to grant access to cluster-scoped resources (nodes), non-resource endpoints (`/healthz`),
+and namespaced resources across all namespaces.
+
+_RoleBinding_s grant the permissions defined in Roles or ClusterRoles to the _Subjects_ (Users, Groups, or Service
+Accounts) they reference, only within the namespace they are defined.
+_ClusterRoleBinding_s do the same, but cluster-wide.
+
+Bindings require the roles and the Subjects they refer to already exist.
+
+<details style='padding: 0 0 0 1rem'>
+  <summary>RoleBinding definition example</summary>
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-pods
+  namespace: default
+subjects:
+  - kind: User
+    name: jane  # case sensitive
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-secrets
+  namespace: development
+subjects:
+  - kind: User
+    name: bob  # case sensitive
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: secret-reader
+  apiGroup: rbac.authorization.k8s.io
+```
+
+</details>
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>ClusterRoleBinding definition example</summary>
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: read-secrets-global
+subjects:
+  - kind: Group
+    name: manager  # case sensitive
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: secret-reader
+  apiGroup: rbac.authorization.k8s.io
+```
+
+</details>
+
+Roles, ClusterRoles, RoleBindings and ClusterRoleBindings must be given valid [path segment names].
+
+Bindings are **immutable**. After creating a binding, one **cannot** change the Role or ClusterRole it refers to.<br/>
+Trying to change a binding's `roleRef` causes a validation error. To change it, one needs to remove the binding and
+replace it whole.
+
+Use the `kubectl auth reconcile` utility to create or update a manifest file containing RBAC objects.<br/>
+It also handles deleting and recreating binding objects, if required, to change the role they refer to.
+
+Wildcards can be used in resources and verb entries, but is not advised as it could result in overly permissive access
+being granted to sensitive resources.
+
+ClusterRoles can be **aggregated** into a single combined ClusterRole.
+
+<details style='padding: 0 0 0 1rem'>
+
+A controller watches for ClusterRole objects with `aggregationRule`s.
+
+`aggregationRule`s define at least one label selector.<br/>
+That selector will be used by the controller to match and combine other ClusterRoles into the rules field of the source
+one.
+
+New ClusterRoles matching the label selector of an existing aggregated ClusterRole will trigger adding the new rules
+into the aggregated ClusterRole.
+
+</details>
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Aggregated ClusterRole definition example</summary>
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: monitoring-endpoints
+  labels:
+    rbac.example.com/aggregate-to-monitoring: "true"
+rules:
+  - apiGroups: [""]
+    resources: ["services", "endpointslices", "pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: monitoring
+aggregationRule:
+  clusterRoleSelectors:
+    - matchLabels:
+        rbac.example.com/aggregate-to-monitoring: "true"
+rules: []  # The control plane automatically fills in the rules
+```
+
+</details>
+
 ## Autoscaling
 
 Controllers are available to scale Pods or Nodes automatically, both in number or size.
@@ -1114,6 +1292,7 @@ Others:
 [labels and selectors]: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 [namespaces]: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 [no new privileges design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/no-new-privs.md
+[path segment names]: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#path-segment-names
 [production best practices checklist]: https://learnk8s.io/production-best-practices
 [recommended labels]: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
 [resource management for pods and containers]: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
