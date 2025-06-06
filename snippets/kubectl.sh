@@ -25,6 +25,7 @@ kubectl top nodes
 kubectl top pods
 
 # Create containers
+kubectl run --image 'alpine' 'alpine' --dry-run='server' --output 'yaml'
 kubectl run --rm -it --image 'alpine' 'alpine' --command -- sh
 kubectl run --rm -t --image 'amazon/aws-cli:2.17.16' 'awscli' -- autoscaling describe-auto-scaling-groups
 kubectl -n 'kube-system' run --rm -it 'awscli' --overrides '{"spec":{"serviceAccountName":"cluster-autoscaler-aws"}}' \
@@ -56,8 +57,9 @@ EOF
 kubectl -n 'gitea' exec 'gitea-766fd5fb64-2qlqb' -c 'gitea' -- df -h '/data'
 
 # Create a fictious job large enough to trigger a scale up in clusters with cluster-autoscaler
-kubectl run --rm -i --restart 'Never' 'resource-grabber' --image='alpine' \
-	--overrides '{"spec":{"containers":[{"name":"alpine","image":"alpine","resources":{"requests":{"cpu":"1700m"}}}]}}' \
+kubectl run --restart 'Never' 'resource-grabber' --image='alpine' --dry-run='client' --output 'yaml'
+kubectl run --rm -i --restart 'Never' --image='whatever' 'resource-grabber' \
+	--overrides '{"spec":{"containers":[{"image":"alpine","resources":{"requests":{"cpu":"1700m"}}}]}}' \
 	-- \
 	sleep '3s'
 
