@@ -1049,11 +1049,15 @@ Requirements:
 
 - An existing EKS cluster (_duh!_).
 - An existing IAM [OIDC provider][oidc providers] for the cluster.<br/>
-  Alternatively, [Pod Identity] must be installed in the cluster and the role in the next step must be configured to
-  use it.
+  Alternatively, one can use [Pod Identity] as long as (**_and_**)
+
+  - The add-on is installed in the cluster.
+  - The role in the next step is correctly configured for it.
+  - A Pod Identity Association is correctly configured for the Kubernetes service account.
+
 - A dedicated IAM role for the load balancer controller.
 
-  <details style="margin-bottom: 1em">
+  <details style="margin: 0 0 0 1rem">
     <summary>Pulumi (OIDC)</summary>
 
   ```ts
@@ -1086,6 +1090,53 @@ Requirements:
       {
           policyArn: "arn:aws:iam::012345678901:policy/EksElbControllerPolicy",
           role: eksElbController_role.name,
+      },
+  );
+  ```
+
+   </details>
+
+  <details style="margin: 0 0 1rem 1rem">
+    <summary>Pulumi (Pod Identity)</summary>
+
+  ```ts
+  const loadBalancerController_serviceRole = new aws.iam.Role(
+      "loadBalancerControllerRole",
+      {
+          name: "EKSLoadBalancerControllerRole",
+          description: "Allows EKS' load balancer controller component to control ELBs on behalf of the user",
+
+          assumeRolePolicy: JSON.stringify({
+              Version: "2012-10-17",
+              Statement: [{
+                  Effect: "Allow",
+                  Principal: {
+                      Service: "pods.eks.amazonaws.com",
+                  },
+                  Action: [
+                      "sts:AssumeRole",
+                      "sts:TagSession",
+                  ],
+              }],
+          }),
+      },
+  );
+  new aws.iam.RolePolicy(
+      "loadBalancerControllerRole-allowRoleFunctions",
+      {
+          role: loadBalancerController_serviceRole,
+          name: "AllowRoleFunctions",
+          policy: fs.readFileSync("./elb-controller.policy.json", "utf8"),
+      },
+  );
+
+  new aws.eks.PodIdentityAssociation(
+      "loadBalancerControllerRole-to-k8s-aws-load-balancer-controller",
+      {
+          clusterName: cluster.name,
+          roleArn: loadBalancerController_serviceRole.arn,
+          serviceAccount: "aws-load-balancer-controller",
+          namespace: "kube-system",
       },
   );
   ```
