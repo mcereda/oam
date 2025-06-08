@@ -9,7 +9,7 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
       1. [`kube-scheduler`](#kube-scheduler)
       1. [`kube-controller-manager`](#kube-controller-manager)
       1. [`cloud-controller-manager`](#cloud-controller-manager)
-   1. [Worker nodes](#worker-nodes)
+   1. [Worker Nodes](#worker-nodes)
       1. [`kubelet`](#kubelet)
       1. [`kube-proxy`](#kube-proxy)
       1. [Container runtime](#container-runtime)
@@ -33,7 +33,7 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
    1. [Node scaling](#node-scaling)
 1. [Scheduling](#scheduling)
    1. [Dedicate Nodes to specific workloads](#dedicate-nodes-to-specific-workloads)
-   1. [Spread pods on nodes](#spread-pods-on-nodes)
+   1. [Spread Pods on Nodes](#spread-pods-on-nodes)
 1. [Quality of service](#quality-of-service)
 1. [Containers with high privileges](#containers-with-high-privileges)
    1. [Capabilities](#capabilities)
@@ -57,36 +57,37 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 
 When using Kubernetes, one is using a cluster.
 
-Kubernetes clusters consist of one or more hosts (_nodes_) executing containerized applications.<br/>
-In cloud environments, nodes are also available in grouped sets (_node pools_) capable of automatic scaling.
+Kubernetes clusters consist of one or more hosts (_Nodes_) executing containerized applications.<br/>
+In cloud environments, Nodes are also available in grouped sets (_Node Pools_) capable of automatic scaling.
 
-Nodes host application workloads in the form of [_pods_][pods].
+Nodes host application workloads in the form of [_Pods_][pods].
 
-The [_control plane_](#control-plane) manages the nodes and the pods in the cluster. It is itself a set of pods
-which expose the APIs and interfaces used to define, deploy, and manage the lifecycle of the cluster's resources.<br/>
-In higher environments, the control plane usually runs across multiple **dedicated** nodes to provide improved
-fault-tolerance and high availability.
+The [_control plane_](#control-plane) manages the cluster's Nodes and Pods.
 
 ![Cluster components](components.svg)
 
 ### Control plane
 
 Makes global decisions about the cluster (like scheduling).<br/>
-Detects and responds to cluster events (like starting up a new pod when a deployment has less replicas then it
-requests).
+Detects and responds to cluster events (like starting up a new Pod when a deployment has less replicas then it
+requests).<br/>
+Exposes the Kubernetes APIs and interfaces used to define, deploy, and manage the lifecycle of the cluster's
+resources.
 
 The control plane is composed by:
 
-- [the API server](#api-server);
+- The [API server](#api-server);
 - The _distributed store_ for the cluster's configuration data.<br/>
-  The current store of choice is [`etcd`][etcd].
-- [the scheduler](#kube-scheduler);
-- [the cluster controller](#kube-controller-manager);
-- [the cloud controller](#cloud-controller-manager).
+  The current default store of choice is [`etcd`][etcd].
+- The [scheduler](#kube-scheduler);
+- The [cluster controller](#kube-controller-manager);
+- The [cloud controller](#cloud-controller-manager).
 
-Control plane components run on one or more cluster nodes.<br/>
+Control plane components run on one or more cluster Nodes as Pods.<br/>
 For ease of use, setup scripts typically start all control plane components on the **same** host and avoid **running**
-other workloads on it.
+other workloads on it.<br/>
+In higher environments, the control plane usually runs across multiple **dedicated** Nodes in order to provide improved
+fault-tolerance and high availability.
 
 #### API server
 
@@ -124,13 +125,13 @@ The Kubernetes API can be extended:
 
 #### `kube-scheduler`
 
-Detects newly created pods with no assigned node, and selects one for them to run on.
+Detects newly created Pods with no assigned Node, and selects one for them to run on.
 
 Scheduling decisions take into account:
 
 - individual and collective resource requirements;
 - hardware/software/policy constraints;
-- affinity and anti-affinity specifications;
+- Affinity and anti-Affinity specifications;
 - data locality;
 - inter-workload interference;
 - deadlines.
@@ -143,12 +144,12 @@ process to reduce complexity.
 
 Examples of these controllers are:
 
-- the node controller, which notices and responds when nodes go down;
-- the replication controller, which maintains the correct number of pods for every replication controller object in the
+- the Node controller, which notices and responds when Nodes go down;
+- the Replication controller, which maintains the correct number of Pods for every replication controller object in the
   system;
-- the job controller, which checks one-off tasks (_job_) objects and creates pods to run them to completion;
-- the EndpointSlice controller, which populates _EndpointSlice_ objects providing a link between services and pods;
-- the ServiceAccount controller, which creates default ServiceAccounts for new namespaces.
+- the Job controller, which checks one-off tasks (_Job_) objects and creates Pods to run them to completion;
+- the EndpointSlice controller, which populates _EndpointSlice_ objects providing a link between services and Pods;
+- the ServiceAccount controller, which creates default ServiceAccounts for new Namespaces.
 
 #### `cloud-controller-manager`
 
@@ -165,28 +166,28 @@ It can scale horizontally to improve performance or to help tolerate failures.
 
 The following controllers can have cloud provider dependencies:
 
-- the node controller, which checks the cloud provider to determine if a node has been deleted in the cloud after it
+- the Node controller, which checks the cloud provider to determine if a Node has been deleted in the cloud after it
   stops responding;
 - the route controller, which sets up routes in the underlying cloud infrastructure;
 - the service controller, which creates, updates and deletes cloud provider load balancers.
 
-### Worker nodes
+### Worker Nodes
 
-Each and every node runs components providing a runtime environment for the cluster, and syncing with the control plane
+Each and every Node runs components providing a runtime environment for the cluster, and syncing with the control plane
 to maintain workloads running as requested.
 
 #### `kubelet`
 
-A `kubelet` runs as an agent on each and every node in the cluster, making sure that containers are run in a pod.
+A `kubelet` runs as an agent on each and every Node in the cluster, making sure that containers are run in a Pod.
 
 It takes a set of _PodSpecs_ and ensures that the containers described in them are running and healthy.<br/>
 It only manages containers created by Kubernetes.
 
 #### `kube-proxy`
 
-Network proxy running on each node and implementing part of the Kubernetes Service concept.
+Network proxy running on each Node and implementing part of the Kubernetes Service concept.
 
-It maintains all the network rules on nodes which allow network communication to the Pods from network sessions inside
+It maintains all the network rules on Nodes which allow network communication to the Pods from network sessions inside
 or outside of one's cluster.
 
 It uses the operating system's packet filtering layer, if there is one and it's available; if not, it just forwards the
@@ -208,8 +209,8 @@ See [addons] for an extended list of the available addons.
 
 ### Workloads
 
-Workloads consist of groups of containers ([_pods_][pods]) and a specification for how to run them (_manifest_).<br/>
-Configuration files are written in YAML (preferred) or JSON format and are composed of:
+Workloads consist of groups of containers ([_Pods_][pods]) and a specification for how to run them (_Manifest_).<br/>
+Manifest files are written in YAML (preferred) or JSON format and are composed of:
 
 - metadata,
 - resource specifications, with attributes specific to the kind of resource they are describing, and
@@ -224,7 +225,7 @@ specification for how to run them.
 
 Pods are (and _should be_) usually created trough other workload resources (like _Deployments_, _StatefulSets_, or
 _Jobs_) and **not** directly.<br/>
-Such parent resources leverage and manage _ReplicaSets_, which in turn manage copies of the same pod. When deleted,
+Such parent resources leverage and manage _ReplicaSets_, which in turn manage copies of the same Pod. When deleted,
 **all** the resources they manage are deleted with them.
 
 Gotchas:
@@ -240,8 +241,9 @@ Also see [configuration best practices] and the [production best practices check
   The upstream project maintains release branches for the most recent three minor releases.<br/>
   Kubernetes 1.19 and newer receive approximately 1 year of patch support. Kubernetes 1.18 and older received
   approximately 9 months of patch support.
-- Prefer **stable** versions of Kubernetes and **multiple nodes** for production clusters.
-- Prefer **consistent** versions of Kubernetes components throughout **all** nodes.<br/>
+- Prefer **stable** versions of Kubernetes for production clusters.
+- Prefer using **multiple Nodes** for production clusters.
+- Prefer **consistent** versions of Kubernetes components throughout **all** Nodes.<br/>
   Components support [version skew][version skew policy] up to a point, with specific tools placing additional
   restrictions.
 - Consider keeping **separation of ownership and control** and/or group related resources.<br/>
@@ -249,24 +251,24 @@ Also see [configuration best practices] and the [production best practices check
 - Consider **organizing** cluster and workload resources.<br/>
   Leverage [Labels][labels and selectors]; see [recommended Labels].
 - Consider forwarding logs to a central log management system for better storage and easier access.
-- Avoid sending traffic to pods which are not ready to manage it.<br/>
+- Avoid sending traffic to Pods which are not ready to manage it.<br/>
   [Readiness probes][Configure Liveness, Readiness and Startup Probes] signal services to not forward requests until the
-  probe verifies its own pod is up.<br/>
-  [Liveness probes][configure liveness, readiness and startup probes] ping the pod for a response and check its health;
-  if the check fails, they kill the current pod and launch a new one.
-- Avoid workloads and nodes fail due limited resources being available.<br/>
+  probe verifies its own Pod is up.<br/>
+  [Liveness probes][configure liveness, readiness and startup probes] ping the Pod for a response and check its health;
+  if the check fails, they kill the current Pod and launch a new one.
+- Avoid workloads and Nodes fail due limited resources being available.<br/>
   Set [resource requests and limits][resource management for pods and containers] to reserve a minimum amount of
-  resources for pods and limit their hogging abilities.
+  resources for Pods and limit their hogging abilities.
 - Prefer smaller container images.
 - Prioritize critical workloads.<br/>
   Leverage [quality of service](#quality-of-service).
 - Instrument workloads to detect and respond to the `SIGTERM` signal to allow them to safely and cleanly shutdown.
-- Avoid using bare pods.<br/>
+- Avoid using bare Pods.<br/>
   Prefer defining them as part of a replica-based resource, like Deployments, StatefulSets, ReplicaSets or DaemonSets.
 - Leverage [autoscalers](#autoscaling).
 - Try to avoid workload disruption.<br/>
-  Leverage pod disruption budgets.
-- Try to use all available nodes.<br/>
+  Leverage Pod disruption budgets.
+- Try to use all available Nodes.<br/>
   Leverage affinities, taint and tolerations.
 - Push for automation.<br/>
   [GitOps].
@@ -318,13 +320,13 @@ spec:
 
 ### hostPaths
 
-Mount files or directories from the host node's filesystem into Pods.
+Mount files or directories from the host Node's filesystem into Pods.
 
 **Not** something most Pods will need, but powerful escape hatches for some applications.
 
 Use cases:
 
-- Containers needing access to node-level system components<br/>
+- Containers needing access to Node-level system components<br/>
   E.g., containers transferring system logs to a central location and needing access to those logs using a read-only
   mount of `/var/log`.
 - Making configuration files stored on the host system available read-only to _static_ Pods.
@@ -543,7 +545,7 @@ spec:
 Gotchas:
 
 - It's possible to recreate StatefulSets **without** the need of killing the Pods it controls.<br/>
-  Reapply the STS' declaration with a new PersistentVolume size, and start new pods to resize the underlying filesystem.
+  Reapply the STS' declaration with a new PersistentVolume size, and start new Pods to resize the underlying filesystem.
 
   <details>
     <summary>If deploying the STS via Helm</summary>
@@ -554,7 +556,7 @@ Gotchas:
      kubectl edit persistentVolumeClaims 'my-pvc'
      ```
 
-  1. Delete the STS **without killing its pods**:
+  1. Delete the STS **without killing its Pods**:
 
      ```sh
      kubectl delete statefulSets.apps 'my-sts' --cascade 'orphan'
@@ -563,7 +565,7 @@ Gotchas:
   1. Redeploy the STS with the changed size.
      It will retake ownership of existing Pods.
 
-  1. Delete the STS' pods one-by-one.<br/>
+  1. Delete the STS' Pods one-by-one.<br/>
      During Pod restart, the Kubelet will resize the filesystem to match new block device size.
 
      ```sh
@@ -595,7 +597,7 @@ Gotchas:
   1. Remove any extra field (like `metadata.{selfLink,resourceVersion,creationTimestamp,generation,uid}` and `status`)
      and set the template's PVC size to the value you want.
 
-  1. Delete the STS **without killing its pods**:
+  1. Delete the STS **without killing its Pods**:
 
      ```sh
      kubectl delete sts 'my-sts' --cascade 'orphan'
@@ -608,7 +610,7 @@ Gotchas:
      kubectl apply -f 'my-sts.yaml'
      ```
 
-  1. Delete the STS' pods one-by-one.<br/>
+  1. Delete the STS' Pods one-by-one.<br/>
      During Pod restart, the Kubelet will resize the filesystem to match new block device size.
 
      ```sh
@@ -674,7 +676,7 @@ rules:
 </details>
 
 Roles are usually used to grant access to workloads in Pods.<br/>
-ClusterRoles are usually used to grant access to cluster-scoped resources (nodes), non-resource endpoints (`/healthz`),
+ClusterRoles are usually used to grant access to cluster-scoped resources (Nodes), non-resource endpoints (`/healthz`),
 and namespaced resources across all namespaces.
 
 _RoleBinding_s grant the permissions defined in Roles or ClusterRoles to the _Subjects_ (Users, Groups, or Service
@@ -831,27 +833,37 @@ Autoscaling of Nodes by size requires add-ons like [Karpenter].
 
 ## Scheduling
 
+When Pods are created, they go to a queue and wait to be scheduled.
+
+The scheduler picks a Pod from the queue and tries to schedule it on a Node.<br/>
+If no Node satisfies **all** the requirements of the Pod, preemption logic is triggered for that Pod.
+
+Preemption logic tries to find a Node where the removal of one or more other _lower priority_ Pods would allow the
+pending one to be scheduled on that Node.<br/>
+If such a Node is found, one or more other lower priority Pods are evicted from that Node to make space for the pending
+Pod. After the evicted Pods are gone, the pending Pod can be scheduled on that Node.
+
 ### Dedicate Nodes to specific workloads
 
-Leverage [taints][Taints and Tolerations] and [node affinity][Affinity and anti-affinity].
+Leverage [taints][Taints and Tolerations] and [Node Affinity][Affinity and anti-affinity].
 
 Refer [Assigning Pods to Nodes].
 
-1. Taint the dedicated nodes:
+1. Taint the dedicated Nodes:
 
    ```sh
    $ kubectl taint nodes 'host1' 'dedicated=devs:NoSchedule'
    node "host1" tainted
    ```
 
-1. Add Labels to the same nodes:
+1. Add Labels to the same Nodes:
 
    ```sh
    $ kubectl label nodes 'host1' 'dedicated=devs'
    node "host1" labeled
    ```
 
-1. Add matching tolerations and node affinity preferences to the dedicated workloads' pod's `spec`:
+1. Add matching tolerations and Node Affinity preferences to the dedicated workloads' Pod's `spec`:
 
    ```yaml
    spec:
@@ -871,7 +883,7 @@ Refer [Assigning Pods to Nodes].
          effect: "NoSchedule"
    ```
 
-### Spread pods on nodes
+### Spread Pods on Nodes
 
 Leverage [Pod Topology Spread Constraints] and/or [Pod anti-affinity][Affinity and anti-affinity].
 
@@ -1089,18 +1101,18 @@ Most cloud providers offer their managed versions of Kubernetes. Check their web
 All kubernetes clusters should:
 
 - be created using **IaC** ([terraform], [pulumi]);
-- have different node pools dedicated to different workloads;
-- have at least one node pool composed by **non-preemptible** dedicated to critical services like Admission Controller
+- have different Node Pools dedicated to different workloads;
+- have at least one Node Pool composed by **non-preemptible** dedicated to critical services like Admission Controller
   Webhooks.
 
-Each node pool should:
+Each Node Pool should:
 
 - have a _meaningful_ **name** (like `<prefix…>-<workload_type>-<random_id>`) to make it easy to recognize the workloads
-  running on it or the features of the nodes in it;
+  running on it or the features of the Nodes in it;
 - have a _minimum_ set of _meaningful_ **labels**, like:
   - cloud provider information;
-  - node information and capabilities;
-- sparse nodes on multiple **availability zones**.
+  - Node information and capabilities;
+- sparse Nodes on multiple **availability zones**.
 
 ## Edge computing
 
@@ -1114,7 +1126,7 @@ If planning to run Kubernetes on a Raspberry Pi, see [k3s] and the
 Also see [Container CPU Requests & Limits Explained with GOMAXPROCS Tuning].
 
 By default, Golang sets the `GOMAXPROCS` environment variable (the number of OS threads for Go code execution) **to the
-number of available CPUs on the node running the Pod**.<br/>
+number of available CPUs on the Node running the Pod**.<br/>
 This is **different** from the amount of resources the Pod is allocated when a CPU limit is set in the Pod's
 specification, and the Go scheduler might try to run more or less threads than the application has CPU time for.
 
@@ -1220,7 +1232,7 @@ Concepts:
 - [Runtime privilege and Linux capabilities in Docker containers]
 - [Container capabilities in Kubernetes]
 - [Kubernetes SecurityContext Capabilities Explained]
-- [Best practices for pod security in Azure Kubernetes Service (AKS)]
+- [Best practices for Pod security in Azure Kubernetes Service (AKS)]
 - [Network policies]
 
 Distributions:
