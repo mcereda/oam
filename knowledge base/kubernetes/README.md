@@ -31,6 +31,9 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
 1. [Autoscaling](#autoscaling)
    1. [Pod scaling](#pod-scaling)
    1. [Node scaling](#node-scaling)
+1. [Scheduling](#scheduling)
+   1. [Dedicate Nodes to specific workloads](#dedicate-nodes-to-specific-workloads)
+   1. [Spread pods on nodes](#spread-pods-on-nodes)
 1. [Quality of service](#quality-of-service)
 1. [Containers with high privileges](#containers-with-high-privileges)
    1. [Capabilities](#capabilities)
@@ -41,7 +44,6 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
     1. [Best practices in cloud environments](#best-practices-in-cloud-environments)
 1. [Edge computing](#edge-computing)
 1. [Troubleshooting](#troubleshooting)
-    1. [Dedicate Nodes to specific workloads](#dedicate-nodes-to-specific-workloads)
     1. [Golang applications have trouble performing as expected](#golang-applications-have-trouble-performing-as-expected)
     1. [Recreate Pods upon ConfigMap's or Secret's content change](#recreate-pods-upon-configmaps-or-secrets-content-change)
     1. [Run a command in a Pod right after its initialization](#run-a-command-in-a-pod-right-after-its-initialization)
@@ -827,6 +829,88 @@ Autoscaling of Nodes by number requires the [Cluster Autoscaler].
 
 Autoscaling of Nodes by size requires add-ons like [Karpenter].
 
+## Scheduling
+
+### Dedicate Nodes to specific workloads
+
+Leverage [taints][Taints and Tolerations] and [node affinity][Affinity and anti-affinity].
+
+Refer [Assigning Pods to Nodes].
+
+1. Taint the dedicated nodes:
+
+   ```sh
+   $ kubectl taint nodes 'host1' 'dedicated=devs:NoSchedule'
+   node "host1" tainted
+   ```
+
+1. Add Labels to the same nodes:
+
+   ```sh
+   $ kubectl label nodes 'host1' 'dedicated=devs'
+   node "host1" labeled
+   ```
+
+1. Add matching tolerations and node affinity preferences to the dedicated workloads' pod's `spec`:
+
+   ```yaml
+   spec:
+     affinity:
+       nodeAffinity:
+         requiredDuringSchedulingIgnoredDuringExecution:
+           nodeSelectorTerms:
+             - matchExpressions:
+               - key: dedicated
+                 operator: In
+                 values:
+                 - devs
+     tolerations:
+       - key: "dedicated"
+         operator: "Equal"
+         value: "devs"
+         effect: "NoSchedule"
+   ```
+
+### Spread pods on nodes
+
+Leverage [Pod Topology Spread Constraints] and/or [Pod anti-affinity][Affinity and anti-affinity].
+
+See also [Avoiding Kubernetes Pod Topology Spread Constraint Pitfalls].
+
+<details>
+  <summary>Basic examples<summary>
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    example.org/app: someService
+spec:
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                example.org/app: someService
+            topologyKey: kubernetes.io/hostname
+          weight: 100
+  topologySpreadConstraints:
+    - labelSelector:
+        matchLabels:
+          example.org/app: someService
+      maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: DoNotSchedule
+    - labelSelector:
+        matchLabels:
+          example.org/app: someService
+      maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+```
+
 ## Quality of service
 
 See [Configure Quality of Service for Pods] for more information.
@@ -1025,44 +1109,6 @@ If planning to run Kubernetes on a Raspberry Pi, see [k3s] and the
 
 ## Troubleshooting
 
-### Dedicate Nodes to specific workloads
-
-Leverage taints and node affinity:
-
-1. Taint the Nodes:
-
-   ```sh
-   $ kubectl taint nodes 'host1' 'dedicated=devs:NoSchedule'
-   node "host1" tainted
-   ```
-
-1. Add Labels to the nodes:
-
-   ```sh
-   $ kubectl label nodes 'host1' 'dedicated=devs'
-   node "host1" labeled
-   ```
-
-1. add tolerations and node affinity to any Pod's `spec`:
-
-   ```yaml
-   spec:
-     affinity:
-       nodeAffinity:
-         requiredDuringSchedulingIgnoredDuringExecution:
-           nodeSelectorTerms:
-           - matchExpressions:
-             - key: dedicated
-               operator: In
-               values:
-               - devs
-     tolerations:
-     - key: "dedicated"
-       operator: "Equal"
-       value: "devs"
-       effect: "NoSchedule"
-   ```
-
 ### Golang applications have trouble performing as expected
 
 Also see [Container CPU Requests & Limits Explained with GOMAXPROCS Tuning].
@@ -1236,6 +1282,7 @@ Others:
 - [What is Kubernetes?]
 - [Using RBAC Authorization]
 - [Expose Pod information to Containers through files]
+- [Avoiding Kubernetes Pod Topology Spread Constraint Pitfalls]
 
 <!--
   Reference
@@ -1277,7 +1324,9 @@ Others:
 
 <!-- Upstream -->
 [addons]: https://kubernetes.io/docs/concepts/cluster-administration/addons/
+[Affinity and anti-affinity]: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
 [api deprecation policy]: https://kubernetes.io/docs/reference/using-api/deprecation-policy/
+[Assigning Pods to Nodes]: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
 [common labels]: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
 [concepts]: https://kubernetes.io/docs/concepts/
 [configuration best practices]: https://kubernetes.io/docs/concepts/configuration/overview/
@@ -1293,18 +1342,21 @@ Others:
 [namespaces]: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 [no new privileges design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/no-new-privs.md
 [path segment names]: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#path-segment-names
+[Pod Topology Spread Constraints]: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
 [production best practices checklist]: https://learnk8s.io/production-best-practices
 [recommended labels]: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
 [resource management for pods and containers]: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 [security context design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security_context.md
 [security design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/security.md
 [set capabilities for a container]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container
+[Taints and Tolerations]: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
 [using rbac authorization]: https://kubernetes.io/docs/reference/access-authn-authz/rbac/
 [using sysctls in a kubernetes cluster]: https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/
 [version skew policy]: https://kubernetes.io/releases/version-skew-policy/
 [volumes]: https://kubernetes.io/docs/concepts/storage/volumes/
 
 <!-- Others -->
+[Avoiding Kubernetes Pod Topology Spread Constraint Pitfalls]: https://medium.com/wise-engineering/avoiding-kubernetes-pod-topology-spread-constraint-pitfalls-d369bb04689e
 [best practices for pod security in azure kubernetes service (aks)]: https://learn.microsoft.com/en-us/azure/aks/developer-best-practices-pod-security
 [build your very own self-hosting platform with raspberry pi and kubernetes]: https://kauri.io/build-your-very-own-self-hosting-platform-with-raspberry-pi-and-kubernetes/5e1c3fdc1add0d0001dff534/c
 [cloudzero kubernetes best practices]: https://www.cloudzero.com/blog/kubernetes-best-practices
