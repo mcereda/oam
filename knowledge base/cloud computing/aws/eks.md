@@ -20,6 +20,7 @@
    1. [EBS CSI driver](#ebs-csi-driver)
       1. [EBS CSI driver as aws-managed add-on](#ebs-csi-driver-as-aws-managed-add-on)
       1. [EBS CSI driver as self-managed add-on](#ebs-csi-driver-as-self-managed-add-on)
+1. [Handle EC2 worker nodes' shutdown gracefully](#handle-ec2-worker-nodes-shutdown-gracefully)
 1. [Troubleshooting](#troubleshooting)
     1. [Identify common issues](#identify-common-issues)
     1. [The worker nodes fail to join the cluster](#the-worker-nodes-fail-to-join-the-cluster)
@@ -1316,6 +1317,19 @@ helm upgrade -i --repo 'https://kubernetes-sigs.github.io/aws-ebs-csi-driver' \
 
 </details>
 
+## Handle EC2 worker nodes' shutdown gracefully
+
+AWS has a number of events that can cause EC2 instances to become unavailable, such as EC2 maintenance events, EC2 Spot
+interruptions, ASG Scale-In, ASG AZ Rebalance, and EC2 Instance Termination via the API or Console.
+
+Those events are usually announced in some way (I.E., a spot instance's metadata server, or an SQS queue) and can be
+monitored in order to respond appropriately and with grace to them.
+
+EKS managed node groups are already configured to react to such events.
+
+When not using managed node groups, one can install the [AWS Node Termination Handler] helm chart in the cluster.<br/>
+It will monitor for such events and react automatically.
+
 ## Troubleshooting
 
 See [Amazon EKS troubleshooting].
@@ -1459,6 +1473,7 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [aws eks create-cluster]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-cluster.html
 [aws eks create-fargate-profile]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-fargate-profile.html
 [aws eks create-nodegroup]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-nodegroup.html
+[AWS Node Termination Handler]: https://github.com/aws/aws-node-termination-handler
 [awssupport-troubleshooteksworkernode runbook]: https://docs.aws.amazon.com/systems-manager-automation-runbooks/latest/userguide/automation-awssupport-troubleshooteksworkernode.html
 [choosing an amazon ec2 instance type]: https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html
 [configure instance permissions required for systems manager]: https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-policies-overview
