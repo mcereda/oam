@@ -1134,6 +1134,29 @@ Properly set the `GOMAXPROCS` environment variable in the Pod's specification to
 Pod.<br/>
 If the CPU limit is less than `1000m` (1 CPU core), set `GOMAXPROCS=1`.
 
+An easy way to do this is to reference the environment variable's value from other fields.<br/>
+Refer [Expose Pod Information to Containers Through Environment Variables].
+
+<details style='padding-left: 1rem'>
+
+```yml
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - env:
+        - name: GOMAXPROCS
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.cpu
+              divisor: "1"
+      resources:
+        limits:
+          cpu: 2560m
+```
+
+</details>
+
 ### Recreate Pods upon ConfigMap's or Secret's content change
 
 Use a checksum annotation to do the trick:
@@ -1349,6 +1372,7 @@ Others:
 [container hooks]: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
 [distribute credentials securely using secrets]: https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/
 [documentation]: https://kubernetes.io/docs/home/
+[Expose Pod Information to Containers Through Environment Variables]: https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/
 [expose pod information to containers through files]: https://kubernetes.io/docs/tasks/inject-data-application/downward-api-volume-expose-pod-information/
 [labels and selectors]: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 [namespaces]: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
