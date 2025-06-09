@@ -36,6 +36,8 @@ git remote | xargs -n 1 git push
 
 git lfs pull
 
+# Recursively remove files not under version control.
+git clean -df
 
 # Get the top-level directory of the current repository.
 git rev-parse --show-toplevel
