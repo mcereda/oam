@@ -1149,7 +1149,7 @@ spec:
           valueFrom:
             resourceFieldRef:
               resource: limits.cpu
-              divisor: "1"
+              divisor: "1"  # quantity resource core, canonicalizes value to X digits - '1': 2560m -> 3
       resources:
         limits:
           cpu: 2560m
