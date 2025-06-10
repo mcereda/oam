@@ -30,6 +30,8 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
    1. [RBAC](#rbac)
 1. [Autoscaling](#autoscaling)
    1. [Pod scaling](#pod-scaling)
+      1. [Horizontal Pod Autoscaler](#horizontal-pod-autoscaler)
+      1. [Vertical Pod Autoscaler](#vertical-pod-autoscaler)
    1. [Node scaling](#node-scaling)
 1. [Scheduling](#scheduling)
    1. [Dedicate Nodes to specific workloads](#dedicate-nodes-to-specific-workloads)
@@ -814,8 +816,29 @@ This requires the [metrics server] addon to be installed and accessible.
 
 ### Pod scaling
 
-Autoscaling of Pods by number requires the use of the Horizontal Pod Autoscaler.<br/>
-Autoscaling of Pods by size requires the use of the Vertical Pod Autoscaler.
+Autoscaling of Pods by number requires the use of the [Horizontal Pod Autoscaler].<br/>
+Autoscaling of Pods by size requires the use of the [Vertical Pod Autoscaler].
+
+> Avoid running both the HPA **and** the VPA on the same workload.<br/>
+> The two will easily collide and try to one-up each other, leading to the workload's Pods changing resources **and**
+> number of replicas as frequently as they can.
+
+Both HPA and VPA can currently monitor only CPU and Memory.<br/>
+Use add-ons like [KEDA] to scale workloads based on different metrics.
+
+#### Horizontal Pod Autoscaler
+
+Refer [Horizontal Pod Autoscaling] and [HorizontalPodAutoscaler Walkthrough].<br/>
+See also [HPA not scaling down].
+
+The HPA decides on the amount of replicas on the premise of their **current** amount.<br/>
+The algorithm's formula is `desiredReplicas = ceil[ currentReplicas * ( currentMetricValue / desiredMetricValue ) ]`.
+
+Downscaling has a default cooldown period.
+
+#### Vertical Pod Autoscaler
+
+TODO
 
 ### Node scaling
 
@@ -1280,7 +1303,7 @@ Tools:
 - [Minikube]
 - [Kubescape]
 
-Applications:
+Add-ons of interest:
 
 - [Certmanager][cert-manager]
 - [ExternalDNS][external-dns]
@@ -1325,6 +1348,8 @@ Others:
   -->
 
 <!-- In-article sections -->
+[horizontal pod autoscaler]: #horizontal-pod-autoscaler
+[vertical pod autoscaler]: #vertical-pod-autoscaler
 [pods]: #pods
 [privileged container vs privilege escalation]: #privileged-container-vs-privilege-escalation
 
@@ -1374,6 +1399,8 @@ Others:
 [documentation]: https://kubernetes.io/docs/home/
 [Expose Pod Information to Containers Through Environment Variables]: https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/
 [expose pod information to containers through files]: https://kubernetes.io/docs/tasks/inject-data-application/downward-api-volume-expose-pod-information/
+[Horizontal Pod Autoscaling]: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+[HorizontalPodAutoscaler Walkthrough]: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/
 [labels and selectors]: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 [namespaces]: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 [no new privileges design proposal]: https://github.com/kubernetes/design-proposals-archive/blob/main/auth/no-new-privs.md
@@ -1401,6 +1428,7 @@ Others:
 [Container CPU Requests & Limits Explained with GOMAXPROCS Tuning]: https://victoriametrics.com/blog/kubernetes-cpu-go-gomaxprocs/
 [elasticsearch]: https://github.com/elastic/helm-charts/issues/689
 [how to run a command in a pod after initialization]: https://stackoverflow.com/questions/44140593/how-to-run-command-after-initialization/44146351#44146351
+[HPA not scaling down]: https://stackoverflow.com/questions/65704583/hpa-not-scaling-down#65770916
 [k8s-ephemeral-storage-metrics]: https://github.com/jmcgrath207/k8s-ephemeral-storage-metrics
 [kube-ps1]: https://github.com/jonmosco/kube-ps1
 [kubectx+kubens]: https://github.com/ahmetb/kubectx
