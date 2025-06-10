@@ -1,13 +1,16 @@
 # KEDA
 
-The _Kubernetes-based Event Driven Auto-Scaler_ will automatically scale a resource in a Kubernetes cluster based on a scale trigger: KEDA will monitor the event source, and feed that data to Kubernetes to scale the resource out/in accordingly, leveraging standard Kubernetes components (e.g. HPA) and extending the existing functionality without overwriting or duplicating components.
+The _Kubernetes-based Event Driven Auto-Scaler_ automatically scales workloads in a Kubernetes cluster based on defined
+triggers.
+
+KEDA monitors the event source, and feeds that data to the cluster. This allows it to scale the monitored workload
+accordingly, both leveraging standard Kubernetes components (e.g. HPA) and extending the existing functionality without
+overwriting or duplicating components.
 
 Any Kubernetes cluster **>= 1.16.0** should work.
 
-## Table of contents <!-- omit in toc -->
-
 1. [How KEDA works](#how-keda-works)
-1. [Deployment](#deployment)
+1. [Setup](#setup)
    1. [Helm chart](#helm-chart)
    1. [Manual deployment](#manual-deployment)
 1. [Usage](#usage)
@@ -20,34 +23,42 @@ Any Kubernetes cluster **>= 1.16.0** should work.
    1. [Long running executions](#long-running-executions)
    1. [Manually uninstall everything](#manually-uninstall-everything)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## How KEDA works
 
 For details and updated information see KEDA's [concepts] page.
 
-Upon installation, KEDA creates the following custom resources to enable one to map an event source to a Deployment, StatefulSet, Custom Resource or Job for scaling:
+Upon installation, KEDA creates the following custom resources to enable one to map an event source to a Deployment,
+StatefulSet, Custom Resource or Job for scaling:
 
 - `scaledobjects.keda.sh`
 - `scaledjobs.keda.sh`
 - `triggerauthentications.keda.sh`
 
-_ScaledObjects_ represent a mapping between an event source (e.g. Rabbit MQ) and any K8S resource (Deployment, StatefulSet or Custom) defining the `/scale` subresource; _ScaledJobs_ specifically represent a mapping between an event source and a Kubernetes Job.
+_ScaledObjects_ represent a mapping between an event source (e.g. Rabbit MQ) and any K8S resource (Deployment,
+StatefulSet or Custom) that defines the `/scale` subresource.<br/>
+_ScaledJobs_, specifically, represent a mapping between an event source and a Kubernetes Job.
 
-_TriggerAuthentication_ are referenced by ScaledObjects and ScaledJobs when they need to access authentication configurations or secrets to monitor the event source.
+_TriggerAuthentication_ are referenced by ScaledObjects and ScaledJobs when they need to access authentication
+configurations or secrets to monitor the event source.
 
 KEDA also creates the following containers:
 
 - `keda-operator`
 - `keda-operator-metrics-apiserver`
 
-The _operator_ acts as an agent which activates, regulates and deactivates the scaling of K8S resources defined in a ScaledObject based on the trigger events.
+The _operator_ acts as an agent which activates, regulates and deactivates the scaling of K8S resources defined in a
+ScaledObject based on the trigger events.
 
-The _metrics apiserver_ exposes rich event data, like queue length or stream lag, to the Horizontal Pod Autoscaler to drive the scale out. It is then up to the resource to consume such events directly from the source.
+The _metrics apiserver_ exposes rich event data, like _queue length_ or _stream lag_, to the Horizontal Pod Autoscaler
+to drive the scaling actions. It is then up to the resource to consume such events directly from the source.
 
-KEDA offers a wide range of triggers (A.K.A. _scalers_) that can both detect if a resource should be activated or deactivated and feed custom metrics for a specific event source. The full list of scalers is available [here][scalers].
+KEDA offers a wide range of triggers (A.K.A. _scalers_) that can both detect if a resource should be activated or
+deactivated and feed custom metrics for a specific event source.<br/>
+Refer the full list of scalers [here][scalers].
 
-## Deployment
+## Setup
 
 ### Helm chart
 
@@ -86,16 +97,14 @@ VERSION=2.0.0 make undeploy  # uninstallation
 
 ## Usage
 
-One can just add a resource to their deployment using the Custom Resource Definitions KEDA offers:
-
-- **ScaledObject** for Deployments, StatefulSets and Custom Resources
-- **ScaledJob** for Jobs
+One can just add KEDA-specific resources to their workload's manifest.
 
 ### ScaledObject
 
-For details and updated information see KEDA's [Scaling Deployments, StatefulSets and Custom Resources] page.
+Refer KEDA's [Scaling Deployments, StatefulSets and Custom Resources] page.
 
-The ScaledObject Custom Resource definition is what defines how KEDA should scale one's application and what the triggers (A.K.A. scalers) are. The full list of scalers is available [here][scalers]:
+ScaledObjects define how KEDA should scale one's workload, and what the triggers (A.K.A. scalers) are.
+Refer the full list of scalers [here][scalers].
 
 ```yaml
 apiVersion: keda.sh/v1alpha1
@@ -125,25 +134,45 @@ spec:
   triggers: []                                     # mandatory; list of the triggers (= scalers) which will scale the target resource
 ```
 
-Custom Resources are scaled the same way as Deployments and StatefulSets, as long as the target Custom Resource defines the `/scale` [subresource][/scale subresource].
+Custom Resources are scaled the same way as Deployments and StatefulSets, as long as the target Custom Resource defines
+the `/scale` [subresource][/scale subresource].
 
-When a ScaledObject is already in place and one first creates the target resource, KEDA will immediately scale it to the value of the `minReplicaCount` specification and will then scale it up according to the triggers.
+When a ScaledObject is already in place and one first creates the target resource, KEDA will:
 
-The `scaleTargetRef` specification references the resource KEDA will scale up/down and setup an HPA for, based on the triggers defined in `triggers`. The resource referenced by `name` (and `apiVersion` and `kind`) must reside in the same namespace as the ScaledObject.
+1. Immediately scale it to the value of the `minReplicaCount` specification.
+1. Scale it up according to the triggers.
 
-`envSourceContainerName` specifies the name of the container inside the target resource from which KEDA will retrieve the environment properties holding secrets etc. If not defined, KEDA will try to retrieve the environment properties from the first Container in the resource's definition.
+The `scaleTargetRef` specification references the resource KEDA will scale and setup an HPA for, based on the triggers
+defined in `triggers`.<br/>
+The resource referenced by `name` (and `apiVersion` and `kind`) must reside in the same namespace as the ScaledObject.
 
-`pollingInterval` is the interval to check each trigger on. In a queue scenario, for example, KEDA will check the `queueLength` every `pollingInterval` seconds, and scale the resource up or down accordingly.
+`envSourceContainerName` specifies the name of the container inside the target resource from which KEDA will retrieve
+the environment properties holding secrets etc.<br/>
+If not defined, KEDA will try to retrieve them from the **first** Container in the resource's definition.
 
-`cooldownPeriod` sets how much time to wait after the last trigger reported active, before scaling the resource back to `minReplicaCount`. This only applies after a trigger occurs **and** when scaling down to a `minReplicaCount` value of 0: scaling from 1 to N replicas is handled by the Kubernetes Horizontal Pod Autoscaler.
+`pollingInterval` is the interval to check each trigger on.<br/>
+I.E., in a _queue_ scenario, KEDA will check the `queueLength` every `pollingInterval` seconds, and scale the referenced
+resource up or down accordingly.
 
-`minReplicaCount` is the minimum amount of replicas KEDA will scale the resource down to. If a non default value (> 0) is used, it will not be enforced, meaning one can manually scale the resource to 0 and KEDA will not scale it back up. However, KEDA will respect the value set there when scaling the resource afterwards.
+`cooldownPeriod` sets how much time to wait after the last trigger reported active, before scaling the resource back to
+`minReplicaCount`.<br/>
+This only applies after a trigger occurs **and** when scaling down to a `minReplicaCount` value of 0. Scaling from 1 to
+N replicas is handled by the Kubernetes Horizontal Pod Autoscaler.
 
-`maxReplicaCount` sets the maximum amount of replicas for the resource. This setting is passed to the HPA definition that KEDA will create for the target.
+`minReplicaCount` is the minimum amount of replicas KEDA will scale the resource down to. If a non default value (>0)
+is used, it will **not** be enforced (meaning that one can _manually_ scale the resource to 0 and KEDA will **not**
+scale it back up). However, KEDA will respect the value set there when scaling the resource afterwards.
 
-`restoreToOriginalReplicaCount` specifies whether the target resource should be scaled back to original replicas count after the ScaledObject is deleted. The default behavior is to keep the replica count at the number it is set to at the moment of the ScaledObject's deletion.
+`maxReplicaCount` sets the maximum amount of replicas for the resource.<br/>
+This setting is passed to the HPA definition that KEDA will create for the target.
 
-If running on Kubernetes v1.18+, the `horizontalPodAutoscalerConfig.behavior` field allows the HPA's scaling behavior to be configured feeding the values from this section directly to the HPA's behavior field.
+`restoreToOriginalReplicaCount` specifies whether the target resource should be scaled back to original replicas count
+after the ScaledObject is deleted.<br/>
+The default behavior is to keep the replica count at the number it is set to at the moment of the ScaledObject's
+deletion.
+
+The `horizontalPodAutoscalerConfig.behavior` field allows the HPA's scaling behavior to be configured by feeding the
+values from this section directly to the HPA's behavior field.
 
 Example:
 
@@ -170,11 +199,14 @@ spec:
 
 ### ScaledJobs
 
-For details and updated information see KEDA's [Scaling Jobs] page.
+Refer KEDA's [Scaling Jobs] page.
 
-The ScaledJob Custom Resource definition is what defines how KEDA should scale a Job and what the triggers (_scalers_) are. The full list of scalers is available [here][scalers].
+ScaledJobs define how KEDA should scale a Job and what the triggers (_scalers_) are.<br/>
+Refer the full list of scalers [here][scalers].
 
-Instead of scaling up the number of replicas, KEDA will schedule a single Job for each detected event. For this, a ScaledJob is primarily used for long running executions or small tasks being able to run in parallel in massive spikes like processing queue messages:
+Instead of scaling up the number of replicas, KEDA will schedule a single Job for each detected event.<br/>
+For this, a ScaledJob is primarily used for long running executions or small tasks being able to run in parallel in
+massive spikes like processing queue messages.
 
 ```yaml
 apiVersion: keda.sh/v1alpha1
@@ -202,14 +234,21 @@ spec:
 
 `pollingInterval` is the interval in seconds KEDA will check each trigger on.
 
-`successfulJobsHistoryLimit` and `failedJobsHistoryLimit` specify how many _completed_ and _failed_ jobs should be kept, similarly to Jobs History Limits; it allows to learn what the outcome of the jobs are.<br/>
-The actual number of jobs could exceed the limit in a short time, but it is going to resolve in the cleanup period. Currently, the cleanup period is the same as the Polling interval.
+`successfulJobsHistoryLimit` and `failedJobsHistoryLimit` specify how many _completed_ and _failed_ jobs should be kept,
+similarly to Jobs History Limits; it allows to learn what the outcome of the jobs are.<br/>
+The actual number of jobs **could exceed** that limit in a short time, but it is going to resolve in the cleanup period.
+Currently, the cleanup period is the same as the Polling interval.
 
-`envSourceContainerName` specifies the name of container in the target Job from which KEDA will retrieve the environment properties holding secrets etc. If not defined, KEDA will try to retrieve the environment properties from the first Container in the target resource's definition.
+`envSourceContainerName` specifies the name of container in the target Job from which KEDA will retrieve the environment
+properties holding secrets etc.<br/>
+If not defined, KEDA will try to retrieve them from the **first** Container in the target resource's definition.
 
-`maxReplicaCount` is the max number of Job Pods to be in existence within a single polling period. If there are already some running Jobs others will be created only up to this numbers, or none if their number exceeds this value.
+`maxReplicaCount` is the maximum number of Job Pods that can be in existence within a single polling period.<br/>
+Should there be Jobs already running, others will be created only up to this numbers (or none if their number exceeds
+this value).
 
-`scalingStrategy` is one from _default_, _custom_, or _accurate_. For details and updated information see [this PR](https://github.com/kedacore/keda/pull/1227).
+`scalingStrategy` is one from _default_, _custom_, or _accurate_.<br/>
+Refer [this PR](https://github.com/kedacore/keda/pull/1227).
 
 Example:
 
@@ -277,10 +316,14 @@ kubectl logs --namespace keda keda-operator-metrics-apiserver-5b488bc7f6-8vbpl
 
 ### Long running executions
 
-There is at the moment of writing no way to control which of the replicas get terminated when a HPA decides to scale down a resource. This means the HPA may attempt to terminate a replica that is deep into processing a long execution (e.g. a 3 hour queue message). To handle this:
+There is, at the moment of writing, no way to control which of the replicas is terminated when a HPA decides to scale
+down a resource. This means that the HPA may attempt to terminate a replica that is deep into processing a long
+execution (e.g. a 3 hour queue message).
 
-- leverage `lifecycle hooks` to delay termination
-- use a Job to do the processing instead of a Deployment/StatefulSet/Custom Resource.
+To handle this:
+
+- Leverage `lifecycle hooks` to delay termination.
+- Use a Job to do the processing, instead of a Deployment/StatefulSet/Custom Resource.
 
 ### Manually uninstall everything
 
@@ -292,7 +335,7 @@ kubectl delete -f https://raw.githubusercontent.com/kedacore/keda/main/config/cr
 kubectl delete -f https://raw.githubusercontent.com/kedacore/keda/main/config/crd/bases/keda.sh_triggerauthentications.yaml
 ```
 
-and then delete the namespace.
+Then, delete the namespace.
 
 ## Further readings
 
@@ -306,17 +349,20 @@ and then delete the namespace.
 - The project's [FAQ]s
 - [Kubernetes]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [KEDA: Event Driven and Serverless Containers in Kubernetes] by Jeff Hollan, Microsoft
 - The `/scale` [subresource][/scale subresource]
 - The [ScaledObject specification]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- In-article sections -->
+<!-- Knowledge base -->
+[kubernetes]: README.md
 
 <!-- Upstream -->
 [authentication]: https://keda.sh/docs/2.0/concepts/authentication/
@@ -327,12 +373,6 @@ All the references in the [further readings] section, plus the following:
 [scaling deployments, statefulsets and custom resources]: https://keda.sh/docs/2.0/concepts/scaling-deployments/
 [scaling jobs]: https://keda.sh/docs/2.0/concepts/scaling-jobs/
 [website]: https://keda.sh/
-
-<!-- In-article sections -->
-[further readings]: #further-readings
-
-<!-- Knowledge base -->
-[kubernetes]: README.md
 
 <!-- Others -->
 [keda: event driven and serverless containers in kubernetes]: https://www.youtube.com/watch?v=ZK2SS_GXF-g
