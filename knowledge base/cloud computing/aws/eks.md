@@ -1325,10 +1325,10 @@ interruptions, ASG Scale-In, ASG AZ Rebalance, and EC2 Instance Termination via 
 Those events are usually announced in some way (I.E., a spot instance's metadata server, or an SQS queue) and can be
 monitored in order to respond appropriately and with grace to them.
 
-EKS managed node groups are already configured to react to such events.
+EKS [managed node groups] are already configured to react to such events.
 
-When not using managed node groups, one can install the [AWS Node Termination Handler] helm chart in the cluster.<br/>
-It will monitor for such events and react automatically.
+When **not** using managed node groups, one can install the [AWS Node Termination Handler] helm chart in the
+cluster. It will be the one monitoring for such events and reacting accordingly.
 
 ## Troubleshooting
 
@@ -1397,6 +1397,7 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 - [How do I use persistent storage in Amazon EKS?]
 - [Running stateful workloads with Amazon EKS on AWS Fargate using Amazon EFS]
 - [Use Amazon EBS storage]
+- [Hybrid Pod Scheduling: Optimising AWS — EKS with On-Demand and Spot Instances]
 
 ### Sources
 
@@ -1514,6 +1515,7 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [external-snapshotter]: https://github.com/kubernetes-csi/external-snapshotter
 [how do you get kubectl to log in to an aws eks cluster?]: https://stackoverflow.com/questions/53266960/how-do-you-get-kubectl-to-log-in-to-an-aws-eks-cluster
 [how to add iam user and iam role to aws eks cluster?]: https://antonputra.com/kubernetes/add-iam-user-and-iam-role-to-eks/
+[Hybrid Pod Scheduling: Optimising AWS — EKS with On-Demand and Spot Instances]: https://medium.com/@rajatgupta828/hybrid-pod-scheduling-optimising-aws-eks-with-on-demand-and-spot-instances-6b94e62e9dd4
 [reaching failed to introspect region from ec2metadata... on container start-up - vanilla eks/fargate]: https://github.com/kubernetes-sigs/aws-load-balancer-controller/issues/1561
 [upgrade default storage class for eks]: https://www.argonaut.dev/docs/guides/migrate-eks-to-gp3
 [visualizing aws eks kubernetes clusters with relationship graphs]: https://dev.to/aws-builders/visualizing-aws-eks-kubernetes-clusters-with-relationship-graphs-46a4
