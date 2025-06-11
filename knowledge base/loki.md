@@ -26,6 +26,7 @@ Designed to be cost-effective and easy to operate.
    1. [Microservices mode](#microservices-mode)
 1. [Object storage](#object-storage)
 1. [Analytics](#analytics)
+1. [Queries](#queries)
 1. [Troubleshooting](#troubleshooting)
    1. [Too many storage configs provided in the common config](#too-many-storage-configs-provided-in-the-common-config)
 1. [Further readings](#further-readings)
@@ -702,6 +703,53 @@ analytics:
   reporting_enabled: false
 ```
 
+## Queries
+
+Loki uses LogQL for queries.
+
+Refer [Querying Logs with LogQL].
+
+LogQL expressions consist of two main parts:
+
+- A log stream selector.<br/>
+  This is in curly braces and defines which log streams to include or exclude.<br/>
+  It **must** define at least one stream to try and match, even if it does not exist.
+- An optional pipeline of one or more expressions.<br/>
+  Those parse, filter, and format the log content from the stream.
+
+```mermaid
+graph LR
+  LSS(Log Stream selector)
+  LSF(Log Stream filter)
+  LLF(Log Line filter)
+  LLP(Log Line processor)
+  R(Results)
+
+  subgraph LogQL pipeline
+    direction LR
+    LSF --> LLF
+    LLF --> LLP
+  end
+
+  LSS --> LSF
+  LLP --> R
+```
+
+<details>
+  <summary>Examples</summary>
+
+| Example                                        | Summary                                                                                        |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `{level="INFO"}`                               | Select lines with label `level` being `INFO`                                                   |
+| `{service_name="prometheus", level="WARN"}`    | Select lines with label `service_name` being `prometheus` **and** label `level` being `WARN`   |
+| `{service_name=~"app1\|app2"} \|= "someValue"` | Select lines with label `service_name` being `app1` or `app2` that contain `someValue` in them |
+| `{level="DEBUG"} \| logfmt`                    | Parse lines using the `logfmt` format                                                          |
+| `{level="DEBUG"} \| json \| UserID="nick"`     | Filter on parsed fields                                                                        |
+| `count_over_time({app="loki"}[5m])`            | Count lines over a window of 5m                                                                |
+| `{job="mysql"} \|= "error" != "timeout"`       | Include lines containing `error` but exclude the ones containing `timeout`                     |
+
+</details>
+
 ## Troubleshooting
 
 ### Too many storage configs provided in the common config
@@ -867,4 +915,5 @@ storage_config:
 [loki s3 storage: a guide for efficient log management]: https://last9.io/blog/loki-s3-storage-guide/
 [loki-operator]: https://loki-operator.dev/
 [opentelemetry / otlp]: https://loki-operator.dev/docs/open-telemetry.md/
+[Querying Logs with LogQL]: https://deepwiki.com/grafana/loki-k6-handson/4-querying-logs-with-logql
 [the quest for ha and dr in loki]: https://www.infracloud.io/blogs/high-availability-disaster-recovery-in-loki/
