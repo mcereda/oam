@@ -55,3 +55,12 @@ hdiutil attach -nomount 'ram://4194304' | xargs diskutil erasevolume HFS+ 'ramdi
 
 # Remove containers
 docker ps -aq | xargs docker container rm
+
+# Build images
+docker build -t 'someTag' '.'
+docker buildx build -t 'someTag' '.'
+docker buildx build '.' -t 'someTag' --platform 'linux/amd64' --progress=plain --no-cache
+
+# Remove build cache and leftovers
+docker builder prune -a
+docker buildx prune -a

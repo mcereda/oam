@@ -5,14 +5,20 @@
 1. [Daemon configuration](#daemon-configuration)
    1. [Credentials](#credentials)
 1. [Images configuration](#images-configuration)
+1. [Building images](#building-images)
+   1. [Exclude files from the build context](#exclude-files-from-the-build-context)
+   1. [Only include what the final image needs](#only-include-what-the-final-image-needs)
 1. [Containers configuration](#containers-configuration)
 1. [Health checks](#health-checks)
 1. [Advanced build with `buildx`](#advanced-build-with-buildx)
    1. [Create builders](#create-builders)
    1. [Build for specific platforms](#build-for-specific-platforms)
 1. [Compose](#compose)
+1. [Best practices](#best-practices)
+1. [Troubleshooting](#troubleshooting)
+    1. [Use environment variables in the ENTRYPOINT](#use-environment-variables-in-the-entrypoint)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -144,6 +150,8 @@ docker logout
 docker rmi 'alpine'
 docker image prune -a
 docker system prune -a
+docker builder prune -a
+docker buildx prune -a
 
 # List networks.
 docker network ls
@@ -325,6 +333,20 @@ dnf install 'amazon-ecr-credential-helper'
 
 One should follow the [OpenContainers Image Spec].
 
+## Building images
+
+Also see [Advanced build with `buildx`](#advanced-build-with-buildx).
+
+### Exclude files from the build context
+
+Leverage a `.dockerignore` file.
+
+Refer [How to Use a .dockerignore File: A Comprehensive Guide with Examples]
+
+### Only include what the final image needs
+
+Leverage [Multi-stage builds].
+
 ## Containers configuration
 
 Docker mounts specific system files in all containers to forward its settings:
@@ -462,6 +484,46 @@ mkdir -p '/usr/local/lib/docker/cli-plugins' \
 
 </details>
 
+## Best practices
+
+- Use multi-stage `Dockerfile`s when possible to reduce the final image's size.
+- Use a `.dockerignore` file to exclude from the build context all files that are not needed for it.
+
+## Troubleshooting
+
+### Use environment variables in the ENTRYPOINT
+
+Refer [Exec form ENTRYPOINT example].
+
+<details>
+  <summary>Root cause</summary>
+
+The ENTRYPOINT's _exec_ form does **not** invoke a command shell. This means that environment substitution
+does not happen like it would in shell environments.<br/>
+I.E., `ENTRYPOINT [ "echo", "$HOME" ]` will **not** do variable substitution on `$HOME`, while `ENTRYPOINT echo $HOME`
+will.
+
+</details>
+
+<details>
+  <summary>Solution</summary>
+
+Use the ENTRYPOINT's _shell_ form instead of its _exec_ form:
+
+```diff
+-ENTRYPOINT [ "echo", "$HOME" ]
++ENTRYPOINT echo $HOME
+```
+
+Alternatively, keep the exec form but force invoking a shell in it:
+
+```diff
+-ENTRYPOINT [ "echo", "$HOME" ]
++ENTRYPOINT [ "sh", "-c", "echo", "$HOME" ]
+```
+
+</details>
+
 ## Further readings
 
 - [GitHub]
@@ -507,7 +569,9 @@ mkdir -p '/usr/local/lib/docker/cli-plugins' \
 [building multi-arch images for arm and x86 with docker desktop]: https://www.docker.com/blog/multi-arch-images/
 [docker compose]: https://github.com/docker/compose
 [dockerfile reference]: https://docs.docker.com/reference/dockerfile/
+[Exec form ENTRYPOINT example]: https://docs.docker.com/reference/dockerfile/#exec-form-entrypoint-example
 [github]: https://github.com/docker
+[Multi-stage builds]: https://docs.docker.com/build/building/multi-stage/
 
 <!-- Others -->
 [amazon-ecr-credential-helper]: https://github.com/awslabs/amazon-ecr-credential-helper
@@ -521,6 +585,7 @@ mkdir -p '/usr/local/lib/docker/cli-plugins' \
 [docker buildx bake + gitlab ci matrix]: https://teymorian.medium.com/docker-buildx-bake-gitlab-ci-matrix-77edb6b9863f
 [getting around docker's host network limitation on mac]: https://medium.com/@lailadahi/getting-around-dockers-host-network-limitation-on-mac-9e4e6bfee44b
 [how to list the content of a named volume in docker 1.9+?]: https://stackoverflow.com/questions/34803466/how-to-list-the-content-of-a-named-volume-in-docker-1-9
+[How to Use a .dockerignore File: A Comprehensive Guide with Examples]: https://hn.mrugesh.dev/how-to-use-a-dockerignore-file-a-comprehensive-guide-with-examples
 [improve docker volume performance on macos with a ram disk]: https://thoughts.theden.sh/posts/docker-ramdisk-macos-benchmark/
 [opencontainers image spec]: https://specs.opencontainers.org/image-spec/
 [unable to reach services behind vpn from docker container]: https://github.com/docker/for-mac/issues/5322
