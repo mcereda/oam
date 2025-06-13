@@ -89,7 +89,7 @@ CREATE TABLE people (
 -- Includes constraints
 \d sales
 \d+ clients
-SELECT column_name, data_type, character_maximum_length FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'vendors';
+SELECT column_name, data_type, character_maximum_length FROM information_schema.columns WHERE table_name = 'vendors';
 
 
 -- Insert data
