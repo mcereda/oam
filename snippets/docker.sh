@@ -64,3 +64,7 @@ docker buildx build '.' -t 'someTag' --platform 'linux/amd64' --progress=plain -
 # Remove build cache and leftovers
 docker builder prune -a
 docker buildx prune -a
+
+# Check logs
+docker compose logs
+docker compose --file 'prod.docker-compose.yml' logs --since '30m' --follow 'some-service'
