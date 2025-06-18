@@ -1,0 +1,49 @@
+---
+
+- name: Configure automatic updates
+  tags: configure_automatic_updates
+  hosts: all
+  tasks:
+    - name: Configure 'unattended-upgrades' on APT-based systems
+      when: ansible_pkg_mgr | lower == 'apt'
+      block:
+        - name: Install 'unattended-upgrades'
+          become: true
+          ansible.builtin.apt:
+            name: unattended-upgrades
+            install_recommends: false
+            update_cache: true
+        - name: Configure 'unattended-upgrades'
+          become: true
+          ansible.builtin.copy:
+            dest: /etc/apt/apt.conf.d/20auto-upgrades
+            content: |-
+              APT::Periodic::Update-Package-Lists "1";
+              APT::Periodic::Unattended-Upgrade "1";
+            owner: root
+            group: root
+            mode: u=rw,g=r,o=r
+            backup: true
+        - name: Test configuration with a dry run
+          tags:
+            - never
+            - test_unattended_upgrades
+          become: true
+          ansible.builtin.command: unattended-upgrade --dry-run
+    - name: Configure 'unattended-upgrades' on DNF and YUM-based systems
+      when: ansible_pkg_mgr | lower in ['dnf', 'yum']
+      block:
+        - name: Install a cron daemon
+          become: true
+          ansible.builtin.package:
+            name: chrony
+        - name: Create the cron job
+          ansible.builtin.copy:
+            dest: /etc/cron.daily/security-updates
+            content: |-
+              #!/bin/bash
+              {{ ansible_pkg_mgr }} -y upgrade --bugfix --security
+            owner: root
+            group: root
+            mode: u=rwx,g=rx,o=rx
+            backup: true

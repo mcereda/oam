@@ -4,13 +4,14 @@ sudo dnf makecache
 
 sudo dnf list --available --showduplicates 'gitlab-runner'
 
-sudo dnf check-update --bugfix --security
-
 sudo dnf install 'https://prerelease.keybase.io/keybase_amd64.rpm'
 sudo dnf --assumeyes install 'git-lfs'
 sudo dnf --assumeyes install \
 	"https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm" \
 	"https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
+
+sudo dnf check-update --bugfix --security
+sudo dnf check-update --releasever='2023.7.20250609' --allowerasing --changelogs
 
 sudo dnf upgrade --security --sec-severity 'Critical' --downloadonly
 sudo dnf -y upgrade --security --nobest --sec-severity 'Important'

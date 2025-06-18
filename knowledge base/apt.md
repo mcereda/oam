@@ -90,11 +90,14 @@ EOF
 Leverage `unattended-upgrades` for this.
 
 ```sh
-# Configure the packages to keep up to date.
+# Install the tool.
+sudo apt install 'unattended-upgrades'
+
+# Configure self updating.
 sudo dpkg-reconfigure -p 'low' 'unattended-upgrades'
 
-# Check what packages would be installed.
-sudo unattended-upgrade -d --dry-run
+# Check what packages would be installed or upgraded.
+sudo unattended-upgrade --debug --dry-run
 
 # Run manually.
 sudo unattended-upgrade
@@ -184,7 +187,8 @@ sudo apt update
          100 /var/lib/dpkg/status
    ```
 
-1. The package might depend on other packages which are not upgradable at the moment, i.e. their current version might be required by other packages.<br/>
+1. The package might depend on other packages which are not upgradable at the moment, i.e. their current version might
+   be required by other packages.<br/>
    Try installing/upgrading it specifying the desired release and version of the package:
 
    ```sh
@@ -230,14 +234,9 @@ All the references in the [further readings] section, plus the following:
 - [Fix a "Problem with MergeList" or "status file could not be parsed" error]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
-
-<!-- Upstream -->
-[apt configuration]: https://wiki.debian.org/AptConfiguration
-[apt_preferences man page]: https://manpages.debian.org/testing/apt/apt_preferences.5.en.html
-[configuring apt sources]: https://wiki.debian.org/SourcesList
-[unattended upgrades]: https://wiki.debian.org/UnattendedUpgrades
 
 <!-- In-article sections -->
 [further readings]: #further-readings
@@ -246,6 +245,12 @@ All the references in the [further readings] section, plus the following:
 [apt-file]: apt-file.md
 [dpkg]: dpkg.md
 [netselect-apt]: netselect-apt.md
+
+<!-- Upstream -->
+[apt configuration]: https://wiki.debian.org/AptConfiguration
+[apt_preferences man page]: https://manpages.debian.org/testing/apt/apt_preferences.5.en.html
+[configuring apt sources]: https://wiki.debian.org/SourcesList
+[unattended upgrades]: https://wiki.debian.org/UnattendedUpgrades
 
 <!-- Others -->
 [cheat.sh]: https://cheat.sh/apt
