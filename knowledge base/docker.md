@@ -208,6 +208,10 @@ docker buildx build … --push \
   --cache-from type=registry,ref=012345678901.dkr.ecr.eu-west-2.amazonaws.com/buildkit-test:cache \
   --platform 'linux/amd64,linux/arm64,linux/arm/v7' '.'
 
+# Clean up the build cache.
+docker buildx prune
+docker buildx prune -a
+
 # Remove builders.
 docker buildx rm 'builder_name'
 

@@ -3,6 +3,7 @@
 Tool to build container images from a Dockerfile with**out** the need of the Docker engine.
 
 1. [TL;DR](#tldr)
+1. [Create local images using local cache](#create-local-images-using-local-cache)
 1. [Usage in GitLab pipelines](#usage-in-gitlab-pipelines)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -82,7 +83,19 @@ docker run -it --rm -v "$PWD/cache:/cache" 'gcr.io/kaniko-project/warmer' \
   <summary>Real world use cases</summary>
 
   <details style="padding-left: 1rem">
-    <summary>Create local images using local cache</summary>
+    <summary>Test the Dockerfile for an Ansible execution environment the way a GitLab pipeline would need to execute it</summary>
+
+```sh
+docker run --rm -ti -v "$PWD:/workspace" 'gcr.io/kaniko-project/executor:debug' /kaniko/executor --no-push
+docker run --rm -ti -v "$PWD:/workspace" --entrypoint '' 'gcr.io/kaniko-project/executor:v1.23.2-debug' \
+  /kaniko/executor --context '/workspace/someDir' --dockerfile '/workspace/someDir/someDockerfile' --no-push
+```
+
+  </details>
+
+</details>
+
+## Create local images using local cache
 
 Uses images from the local cache.<br/>
 It does **not** _save_ cache images in the local cache directory since Kaniko is currently **not** able to manage such
@@ -99,21 +112,6 @@ docker run --rm -ti -v "$PWD:/workspace" 'gcr.io/kaniko-project/executor:debug' 
   --no-push --tar-path '/workspace/image.tar' --destination 'image:1.0' \
   --cache --cache-dir '/workspace/cache' --cache-repo 'oci://cache'
 ```
-
-  </details>
-
-  <details style="padding-left: 1rem">
-    <summary>Test the Dockerfile for an Ansible execution environment the way a GitLab pipeline would need to execute it</summary>
-
-```sh
-docker run --rm -ti -v "$PWD:/workspace" 'gcr.io/kaniko-project/executor:debug' /kaniko/executor --no-push
-docker run --rm -ti -v "$PWD:/workspace" --entrypoint '' 'gcr.io/kaniko-project/executor:v1.23.2-debug' \
-  /kaniko/executor --context '/workspace/someDir' --dockerfile '/workspace/someDir/someDockerfile' --no-push
-```
-
-  </details>
-
-</details>
 
 ## Usage in GitLab pipelines
 
