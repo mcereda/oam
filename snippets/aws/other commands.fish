@@ -165,6 +165,8 @@ aws ecs list-tasks --cluster 'staging' --service-name 'mimir' --query 'taskArns'
     --tasks
 
 # Execute commands in tasks
+aws ecs execute-command --cluster 'dev' --task '5724249c0b734923841c82f54464e12b' --container 'debug' \
+	--interactive --command 'bash'
 aws ecs execute-command --cluster 'staging' --task 'e242654518cf42a7be13a8551e0b3c27' --container 'echo-server' \
 	--interactive --command 'nc -vz 127.0.0.1 28080'
 aws ecs execute-command --cluster 'staging' --task '0123456789abcdefghijklmnopqrstuv' --container 'pihole' \
@@ -405,6 +407,7 @@ aws kms list-aliases --query 'Aliases[?AliasName.contains(@,`prod`)]|[*].{"Alias
 ###
 # RDS
 # ------------------
+# Names are case-insensitive and will be shown as lowercase.
 ###
 
 aws rds start-export-task \
@@ -437,6 +440,8 @@ aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
 	--query "Parameters[?ParameterName=='shared_preload_libraries'].ApplyMethod" --output 'text'
 aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
 	--output 'json' --query "Parameters[?ApplyType!='dynamic']"
+
+aws rds create-db-snapshot --db-instance-identifier 'some-db-instance' --db-snapshot-identifier 'some-db-snapshot'
 
 
 ###

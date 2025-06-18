@@ -15,6 +15,7 @@
 1. [Encryption](#encryption)
 1. [Operations](#operations)
     1. [PostgreSQL: reduce allocated storage by migrating using transportable databases](#postgresql-reduce-allocated-storage-by-migrating-using-transportable-databases)
+    1. [Stop instances](#stop-instances)
 1. [Troubleshooting](#troubleshooting)
     1. [ERROR: extension must be loaded via shared\_preload\_libraries](#error-extension-must-be-loaded-via-shared_preload_libraries)
     1. [ERROR: must be superuser to alter _X_ roles or change _X_ attribute](#error-must-be-superuser-to-alter-x-roles-or-change-x-attribute)
@@ -725,6 +726,16 @@ Interruptions are due to the exhaustion of I/O burst credits, which tainted the 
   </details>
 </details>
 
+### Stop instances
+
+Refer [Stopping an Amazon RDS DB instance temporarily].
+
+RDS instances can be stopped **only up to 7 days**.<br/>
+The service will automatically start DB instances that have been stopped for 7 consecutive days so that they do not fall
+behind required maintenance updates.
+
+One can still stop and start DB instances on a schedule via Step Functions.
+
 ## Troubleshooting
 
 ### ERROR: extension must be loaded via shared_preload_libraries
@@ -843,6 +854,7 @@ or write workloads and exceeds the instance type quotas.
 
 <!-- Files -->
 <!-- Upstream -->
+[amazon ebs-optimized instance types]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html
 [amazon rds db instance storage]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
 [amazon rds db instances]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.DBInstance.html
 [aws kms key management]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.Keys.html
@@ -856,6 +868,7 @@ or write workloads and exceeds the instance type quotas.
 [pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
 [renaming a db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RenameInstance.html
 [restoring from a db snapshot]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html
+[Stopping an Amazon RDS DB instance temporarily]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_StopInstance.html
 [transport postgresql databases between two amazon rds db instances using pg_transport]: https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/transport-postgresql-databases-between-two-amazon-rds-db-instances-using-pg_transport.html
 [transporting postgresql databases between db instances]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.TransportableDB.html
 [understanding postgresql roles and permissions]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Roles.html
@@ -864,7 +877,6 @@ or write workloads and exceeds the instance type quotas.
 [working with db instance read replicas]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html
 [working with parameter groups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html
 [working with parameters on your rds for postgresql db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html
-[amazon ebs-optimized instance types]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html
 
 <!-- Others -->
 [AWS RDS Max Connections Limit As Per Instance Type]: https://sysadminxpert.com/aws-rds-max-connections-limit/

@@ -548,12 +548,14 @@ Requirements:
             "Resource": "arn:aws:ecs:eu-west-1:012345678901:cluster/devel",
             "Condition": {
                 "StringEquals": {
-                    "aws:ResourceTag/application": "appName",
-                    "StringEquals": {
-                        "ecs:container-name": "nginx"
-                    }
+                    "aws:ResourceTag/application": "someApp",
+                    "aws:ResourceTag/component": [
+                        "someComponent",
+                        "someOtherComponent"
+                    ],
+                    "ecs:container-name": "nginx"
                 }
-            },
+            }
         }]
     }
     ```
