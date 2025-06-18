@@ -3,9 +3,13 @@
 Fast, simple, and cost effective Postgres replication.
 
 1. [TL;DR](#tldr)
-1. [Peers](#peers)
-1. [Mirrors](#mirrors)
-1. [Alerts](#alerts)
+1. [Setup](#setup)
+   1. [Authentication](#authentication)
+   1. [High availability](#high-availability)
+1. [Components](#components)
+   1. [Peers](#peers)
+   1. [Mirrors](#mirrors)
+   1. [Alerts](#alerts)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -64,7 +68,27 @@ curl -fsS --url 'http://localhost:3000/api/v1/peers/list' \
 
 </details>
 
-## Peers
+## Setup
+
+Deploy to K8S clusters using the [helm chart].<br/>
+Make sure to override the `version` parameter.
+
+The helm chart's repository was open sourced after ClickHouse's acquisition.<br/>
+It was what PeerDB was using for on-premise customers beforehand.
+
+### Authentication
+
+By default, PeerDB UI is open.
+
+Add authentication by setting the `PEERDB_PASSWORD` environment variable.
+
+### High availability
+
+If Catalog and Temporal are HA, then the whole service is pretty much HA.
+
+## Components
+
+### Peers
 
 Peers are connection settings to databases that PeerDB can operate upon.
 
@@ -158,7 +182,7 @@ DELETE FROM peers WHERE name == 'some_postgresql_peer';
 
 </details>
 
-## Mirrors
+### Mirrors
 
 Mirrors can be in the following states:
 
@@ -283,7 +307,7 @@ POST /api/v1/mirrors/status
 
 </details>
 
-## Alerts
+### Alerts
 
 Operations:
 
@@ -478,6 +502,7 @@ GET /api/v1/alerts/config
 [blog]: https://blog.peerdb.io/
 [codebase]: https://github.com/PeerDB-io/peerdb
 [documentation]: https://docs.peerdb.io/
+[helm chart]: https://github.com/PeerDB-io/peerdb-enterprise
 [peerdb ui - deeper dive: part 1]: https://blog.peerdb.io/peerdb-ui-deeper-dive-part-1
 [peers.proto#PostgresConfig]: https://github.com/PeerDB-io/peerdb/blob/6a591128908cbd76df8f7e4094ec838fac08dcda/protos/peers.proto#L73
 [public ips for peerdb cloud]: https://docs.peerdb.io/peerdb-cloud/ip-table
