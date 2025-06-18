@@ -19,12 +19,18 @@
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
 1. [Costs](#costs)
-1. [Savings plans](#savings-plans)
+   1. [Free Tier](#free-tier)
+   1. [Spot Instances](#spot-instances)
+   1. [Savings plans](#savings-plans)
+   1. [Reserved instances](#reserved-instances)
+   1. [Tiered pricing](#tiered-pricing)
+   1. [Enterprise discount program](#enterprise-discount-program)
+   1. [Other tools](#other-tools)
 1. [Resource tagging](#resource-tagging)
 1. [API](#api)
    1. [Python](#python)
 1. [Further readings](#further-readings)
-    1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -466,14 +472,57 @@ See [Understanding data transfer charges].
 
 One pays for sending logs and metrics to [CloudWatch].
 
-## Savings plans
+Available discount options:
 
-Refer [Savings Plans user guide].
+| Discount type                 | Discount range      | Commitment length               | Flexibility                            | Applies to                          | Limitations                                                                       |
+| ----------------------------- | ------------------- | ------------------------------- | -------------------------------------- | ----------------------------------- | --------------------------------------------------------------------------------- |
+| [Free tier]                   | 100%                | 1 year                          | None                                   | Selected services (EC2, S3, Lambda) | Low usage limits<br/>Overuse is billed<br/>Only available to new accounts for 1y  |
+| [Spot instances]              | Up to 90%           | None                            | High (for stateless/batch)             | EC2, EMR, ECS, EKS, Batch           | Can be terminated anytime<br/>Avoid for critical or long-running workloads        |
+| [Savings plans]               | Up to 72%           | 1 or 3 years                    | Medium to high                         | EC2, Lambda, Fargate                | Must commit to a $/hour spend<br/>Not cancellable<br/>Unused commitment is wasted |
+| [Reserved instances]          | Up to 75%           | 1 or 3 years                    | Low (standard) or Medium (convertible) | EC2, RDS, Redshift, ElastiCache     | Specific instance type/region<br/>Harder to manage<br/>Non-refundable             |
+| [Tiered pricing]              | Various             | None                            | Automatic depending on usage           | S3, CloudFront, Lambda, DynamoDB    | Requires high volume<br/>Tiers and availability vary by service                   |
+| [Enterprise discount program] | Custom (10 to >30%) | Custom (1 to 3 years typically) | High (custom contract)                 | All AWS                             | Requires large spend<br/>Enterprise-only<br/>Contract-based                       |
+
+| Use case                                                     | Best discount options                           |
+| ------------------------------------------------------------ | ----------------------------------------------- |
+| Long-term predictable workloads                              | [Savings plans] or [Reserved instances]         |
+| Short-term batch or flexible tasks                           | [Spot instances]                                |
+| New to AWS / testing a service                               | [Free tier]                                     |
+| High-volume services (e.g., S3 storage)                      | [Tiered pricing]                                |
+| Large-scale enterprise planning to stay on AWS for some time | [Enterprise discount program] + [Savings plans] |
+
+Order of application: reserved instances -> Savings plans (EC2 instances -> Compute)
+
+### Free Tier
+
+**New** AWS customers get **1 year** of free tier access to **selected** services only.
+
+Only allows for **limited monthly usage** (E.G., up to 750 hours of t2.micro EC2, 5GB S3 per month).
+
+Free tier is only available in specific regions.<br/>
+Usage in multiple regions counts as a whole.  _FIXME: check_
+
+Automatically charges standard rates when one exceeds one's account limits.
+
+### Spot Instances
+
+Lends **spare** EC2 instance capacity at up to 90% discount.<br/>
+Prices vary based on regional supply and demand.
+
+Instances can be interrupted by AWS with a 2-minute warning.<br/>
+Not suitable for workloads needing guaranteed uptime or long-term execution.
+
+Works great for **stateless**, **fault-tolerant**, or **batch** workloads.
+
+### Savings plans
+
+Refer [Savings Plans user guide].<br/>
+See also [Understanding how Savings Plans apply to your usage].
 
 Pricing models offering lower prices compared to On-Demand prices. They require specific usage commitments ($/hour) for
 1-**year** or 3-**years** terms.
 
-Dedicated Instances, Spot Instances and Reserved Instances are **not** discounted by Savings Plans.
+_Dedicated_ Instances, _Spot_ Instances and _Reserved_ Instances are **not** discounted by Savings Plans.
 
 | Savings Plan     | Included resources                                                                                                                                                                                                                                                                     | Up to |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
@@ -513,12 +562,54 @@ Plans do **not** provide capacity reservations.<br/>
 One **can** however reserve capacity with On Demand Capacity Reservations and pay lower prices on them with Savings
 Plans.
 
-EC2 Instance Savings Plans are applied **before** Compute Savings Plans.
+Savings Plans are applied **after** Reserved Instances.<br/>
+Furthermore, _EC2 Instance_ Savings Plans are applied **before** _Compute_ Savings Plans.
 
 Savings Plans are applied to the highest savings percentage first. If there are multiple usages with equal savings
 percentages, Savings Plans are applied to the first usage with the lowest Savings Plans rate.<br/>
 Savings Plans continue to apply until there are no more remaining usages, or one's commitment is exhausted. Any
 remaining usage is then charged at the On-Demand rates.
+
+### Reserved instances
+
+Gives discounts of up to 75% compared to On-Demand pricing for EC2, RDS, Redshift and ElastiCache instances in exchange
+for an advance payment for either 1 or 3 years.
+
+Available as follows:
+
+- _Standard_: higher discounts, but very little flexibility.<br/>
+  Limits to **specific** instance types, regions, OS, etc for the **whole** duration of the term.
+- _Convertible_: lower discounts, but can switch instance families, OS, or tenancy during the term.
+
+Reserved Instances are available in the following payment options:
+
+- _No Upfront_: no upfront payments, commitment charged purely on a monthly basis.
+- _Partial Upfront_: lower prices, at least half of one's commitment upfront, remainder charged on a monthly basis.
+- _All Upfront_: lowest prices, entire commitment charged in one payment at the start.
+
+Reserved instances plans are usually hard to manage at scale, and can lead to unused capacity if your usage changes.
+
+### Tiered pricing
+
+_Selected_ services like S3, Lambda, CloudFront, and DynamoDB offer automatic tiered pricing.<br/>
+Tiered pricing lowers the per-unit cost of resources the more one uses them (E.G., S3 gets cheaper per GB as one stores
+more and more data).
+
+Tiered pricing requires large usage volumes to see meaningful savings.
+
+### Enterprise discount program
+
+Large customers, with high level of committed AWS spend (typically hundreds of thousands to millions per year), _can_
+negotiate custom discounts and support terms.
+
+These negotiations are only available to large enterprises, and **require** long-term contractual commitment.
+
+### Other tools
+
+AWS offers tools that can help optimize cost:
+
+- Cost Explorer: analyzes past usage and helps forecast costs and savings.
+- Trusted Advisor: provides recommendations for RIs, underutilized resources, etc.
 
 ## Resource tagging
 
@@ -688,13 +779,19 @@ machine if not.
 [config]: #config
 [detective]: #detective
 [direct connect]: #direct-connect
+[enterprise discount program]: #enterprise-discount-program
 [eventbridge]: #eventbridge
+[free tier]: #free-tier
 [guardduty]: #guardduty
 [inspector]: #inspector
 [kinesis]: #kinesis
 [kms]: #kms
 [privatelink]: #privatelink
+[reserved instances]: #reserved-instances
+[savings plans]: #savings-plans
 [security hub]: #security-hub
+[spot instances]: #spot-instances
+[tiered pricing]: #tiered-pricing
 
 <!-- Knowledge base -->
 [cli]: cli.md
@@ -745,6 +842,7 @@ machine if not.
 [test your roles' access policies using the aws identity and access management policy simulator]: https://aws.amazon.com/blogs/security/test-your-roles-access-policies-using-the-aws-identity-and-access-management-policy-simulator/
 [tools to build on aws]: https://aws.amazon.com/developer/tools/
 [understanding data transfer charges]: https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html
+[Understanding how Savings Plans apply to your usage]: https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-applying.html
 [using amazon cloudwatch with aws global accelerator]: https://docs.aws.amazon.com/global-accelerator/latest/dg/cloudwatch-monitoring.html
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
