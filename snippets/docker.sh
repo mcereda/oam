@@ -62,7 +62,7 @@ docker buildx build -t 'someTag' '.'
 docker buildx build '.' -t 'someTag' --platform 'linux/amd64' --progress=plain --no-cache
 
 # Remove build cache and leftovers
-docker builder prune -a
+docker buildx prune
 docker buildx prune -a
 
 # Check logs
