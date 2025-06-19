@@ -8,6 +8,7 @@
 1. [Auto scaling](#auto-scaling)
    1. [Lifecycle hooks](#lifecycle-hooks)
 1. [Image customization](#image-customization)
+1. [Automatic recovery](#automatic-recovery)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -193,6 +194,10 @@ Also see [CompleteLifecycleAction].
 
 Refer [Image Builder].
 
+## Automatic recovery
+
+Also see [Automatic instance recovery].
+
 ## Further readings
 
 - [Amazon Web Services]
@@ -250,6 +255,7 @@ Refer [Image Builder].
 [amazon ec2 auto scaling]: https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html
 [announcing amazon ec2 per second billing]: https://aws.amazon.com/about-aws/whats-new/2017/10/announcing-amazon-ec2-per-second-billing/
 [attach an ebs volume to multiple ec2 instances using multi-attach]: https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volumes-multi.html
+[Automatic instance recovery]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html
 [best practices for handling ec2 spot instance interruptions]: https://aws.amazon.com/blogs/compute/best-practices-for-handling-ec2-spot-instance-interruptions/
 [burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html
 [change the instance type]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html
