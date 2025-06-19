@@ -418,15 +418,20 @@
               [ 'install_method in supported_install_methods', install_method in supported_install_methods ],
             ])
           }}
-    - name: Output variable values
+    - name: Output variables' values
       vars:
         install_method: package
       ansible.builtin.debug:
         var: install_method
+    - name: Print all available variables
+      ansible.builtin.debug:
+        var: vars  # magic variable
     - name: Output messages depending on the verbosity level
       ansible.builtin.debug:
         msg: I only display with 'ansible-playbook -vvv' or with more 'v's
         verbosity: 3
+    - name: Print the run's shell environment
+      ansible.builtin.shell: printenv | sort
     - name: Start the debugger on failure
       # print all variables at this point => p task_vars
       # continue => c
