@@ -42,6 +42,8 @@ curl "https://${COMPANY}.atlassian.net/rest/api/2/issue" \
 
 ## Further readings
 
+- [Spenhouet/confluence-markdown-exporter]
+
 ### Sources
 
 - [Creating JIRA issue using curl from command line]
@@ -53,3 +55,4 @@ curl "https://${COMPANY}.atlassian.net/rest/api/2/issue" \
 
 <!-- Others -->
 [creating jira issue using curl from command line]: https://stackoverflow.com/questions/31052721/creating-jira-issue-using-curl-from-command-line#31052990
+[Spenhouet/confluence-markdown-exporter]: https://github.com/Spenhouet/confluence-markdown-exporter
