@@ -48,12 +48,15 @@
         }
     ],
 
-    "markdown.extension.toc.levels": "2..6",
-    "markdown.extension.toc.orderedList": true,
-    "markdown.validate.enabled": true,
     "[markdown]": {
         "editor.wordWrap": "off"
     },
+    "markdown.validate.enabled": true,
+    "markdown.validate.duplicateLinkDefinitions.enabled": "warning",
+    "markdown.validate.fileLinks.enabled": "warning",
+    "markdown.validate.unusedLinkDefinitions.enabled": "warning",
+    "markdown.extension.toc.levels": "2..6",
+    "markdown.extension.toc.orderedList": true,
 
     "cSpell.language": "en,en-GB",
     "cSpell.words": [
