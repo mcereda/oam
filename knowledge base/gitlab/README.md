@@ -17,6 +17,7 @@
 1. [Artifacts](#artifacts)
     1. [Default artifacts expiration](#default-artifacts-expiration)
     1. [Keep the latest artifacts for all jobs in the latest successful pipelines](#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines)
+1. [Login via Google, Github or other services](#login-via-google-github-or-other-services)
 1. [Troubleshooting](#troubleshooting)
     1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
     1. [GitLab keeps answering with code 502](#gitlab-keeps-answering-with-code-502)
@@ -784,6 +785,50 @@ in the latest successful pipelines_.
 When disabling this feature, the latest artifacts do **not** immediately expire.<br/>
 A new pipeline must run before the latest artifacts can expire and be deleted.
 
+## Login via Google, Github or other services
+
+Refer [OmniAuth].<br/>
+See also [Password authentication enabled] to disable authentication via local user.
+
+Users can sign in a GitLab server by using their credentials from Google, GitHub, and other popular services.
+
+GitLab uses the _OmniAuth_ Rack framework to provide this kind of integration.
+
+When configured, additional sign-in options are displayed on the sign-in page.
+
+When configuring an OmniAuth provider, one should also configure the settings that are common for all providers.<br/>
+Changes to those values will have **no** effect until the provider they reference is effectively configured.
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Settings of interest</summary>
+
+| Option                     | Summary                                                                                                                                                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `allow_single_sign_on`     | When `true`, automatically creates GitLab accounts when signing in with OmniAuth.<br/>When `false`, a GitLab account must be created first.<br/>When an array, limit for what providers to act as it if was `true`. |
+| `auto_link_user`           | Automatically link existing GitLab users to an OmniAuth provider if their emails match when authenticating through the provider.<br/>Does **not** work with SAML.                                                   |
+| `block_auto_created_users` | When `true`, GitLab puts automatically-created users in a pending approval state until they are approved by an administrator.<br/>In this state, users are unable to sign in.                                       |
+| `enabled`                  | When `true`, enable usage of OmniAuth providers.                                                                                                                                                                    |
+| `external_providers`       | Define which OmniAuth providers will **not** grant access to _internal_ GitLab projects.                                                                                                                            |
+| `providers`                | What providers to enable.                                                                                                                                                                                           |
+
+```rb
+gitlab_rails['omniauth_enabled'] = true
+gitlab_rails['omniauth_allow_single_sign_on'] = ['saml', 'google_oauth2']
+gitlab_rails['omniauth_block_auto_created_users'] = true
+gitlab_rails['omniauth_auto_link_user'] = ['google_oauth2', 'openid_connect']
+gitlab_rails['omniauth_allow_bypass_two_factor'] = ['google_oauth2']
+gitlab_rails['omniauth_sync_profile_from_provider'] = ['google_oauth2']
+gitlab_rails['omniauth_external_providers'] = ['saml']
+gitlab_rails['omniauth_providers'] = [{
+  name: 'google_oauth2',
+  app_id: '012345678901-abcdefghijklmnopqrstuvwxyz012345.apps.googleusercontent.com',
+  app_secret: 'GOCSPX-something',
+  args: { access_type: 'offline', approval_prompt: '' }
+}]
+```
+
+</details>
+
 ## Troubleshooting
 
 ### Use access tokens to clone projects
@@ -905,9 +950,11 @@ Solution: set the correct ownership with
 [install self-managed gitlab]: https://about.gitlab.com/install
 [merge request approval rules]: https://docs.gitlab.com/ee/user/project/merge_requests/approvals/rules.html
 [minimal minikube example values file]: https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/values-minikube-minimum.yaml
+[OmniAuth]: https://docs.gitlab.com/integration/omniauth/
 [operator code]: https://gitlab.com/gitlab-org/cloud-native/gitlab-operator
 [operator guide]: https://docs.gitlab.com/operator/
 [package configuration file template]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/raw/master/files/gitlab-config-template/gitlab.rb.template
+[Password authentication enabled]: https://gitlab.com/help/administration/settings/sign_in_restrictions.md#password-authentication-enabled
 [reset a user's password]: https://docs.gitlab.com/ee/security/reset_user_password.html
 [restore gitlab]: https://docs.gitlab.com/ee/administration/backup_restore/restore_gitlab.html
 [runners on kubernetes]: https://docs.gitlab.com/runner/install/kubernetes.html
