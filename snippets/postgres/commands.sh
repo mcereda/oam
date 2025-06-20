@@ -82,4 +82,13 @@ pg_restore -h 'host.fqdn' -U 'master' -d 'sales' -Oxj '8' 'sales.dump'
 pgbench -i 'test-db'
 pgbench -i 'test-db' -h 'hostname' -p '5555' -U 'user'
 
+# Check a DB is ready for use
 pg_isready -U 'denis' -d 'sales'
+
+# Skip materialized views during a restore
+pg_dump 'database' -Fc 'backup.dump'
+pg_restore -l 'backup.dump' | sed '/MATERIALIZED VIEW DATA/d' > 'restore.lst'
+pg_restore -L 'restore.lst' -d 'database' 'backup.dump'
+# Only then, refresh with them
+pg_restore -l 'backup.dump' | grep 'MATERIALIZED VIEW DATA' > 'refresh.lst'
+pg_restore -L 'refresh.lst' -d 'database' 'backup.dump'
