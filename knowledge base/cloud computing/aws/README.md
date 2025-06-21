@@ -613,20 +613,55 @@ AWS offers tools that can help optimize cost:
 
 ## Resource tagging
 
-Suggested:
+Refer [What are tags?], [Tagging best practices and strategies], [Best Practices for Tagging AWS Resources] and
+[Tag naming limits and requirements].
 
-| Tag                     | Purpose | Example                                                         | Notes |
-| ----------------------- | ------- | --------------------------------------------------------------- | ----- |
-| `Name`                  | AWS UI  | `GitlabRunner`                                                  |       |
-| `Owner`                 |         | `SecurityLead`, `SecOps`, `Workload-1-Development-team`         |       |
-| `BusinessUnitId`        |         | `Finance`, `Retail`, `API-1`, `DevOps`                          |       |
-| `Environment`           |         | `Sandbox`, `Dev`, `PreProd`, `QA`, `Prod`, `Testing`            |       |
-| `CostCenter`            |         | `FIN123`, `Retail-123`, `Sales-248`, `HR-333`                   |       |
-| `FinancialOwner`        |         | `HR`, `SecurityLead`, `DevOps-3`, `Workload-1-Development-team` |       |
-| `ComplianceRequirement` |         | `NIST`, `HIPAA`, `GDPR`                                         |       |
+Tags are labels consisting of a key and an optional value.<br/>
+One can apply them to resources in order to add metadata to them.
+
+Most, but not all, AWS services and resource types currently support tags. See
+[Services that support the Resource Groups Tagging API] for a list of which of them do.<br/>
+Services other then the ones in the list may support tags via their own APIs.
+
+> [!note]
+> Tags are **not** encrypted.<br/>
+> They should **not** be used to store sensitive data like personally identifiable information (PII).
+
+Tags that users create are known as _user-defined_ tags.
+
+Several AWS services automatically assign tags to those resources that they create and manage.<br/>
+These keys are known as _AWS generated_, tags and are usually prefixed with `aws:`.<br/>
+As such, the `aws:` prefix **cannot** be used in user-defined tag keys.
+
+User-defined tags have usage requirements, and there are limits on the number that can be added to any AWS
+resource.<br/>
+AWS generated tags do **not** count against these limits.
+
+AWS generated tags use a namespace format, e.g. `aws:cloudformation:some-stack`.<br/>
+User-defined tags _can_ also use that format.
+
+Using an organizational identifier as a prefix in tags is recommended to help identify where tags come from.
+
+Suggested tags from AWS:
+
+| Tag                                             | Value example                                                   | Notes                                           |
+| ----------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------- |
+| `Name`                                          | `GitlabRunner`, `Prometheus Server`                             | Shows as human-friendly name in the AWS console |
+| `Owner`                                         | `SecurityLead`, `SecOps`, `Workload-1-Development-team`         |                                                 |
+| `BusinessUnitId`                                | `Finance`, `Retail`, `API-1`, `DevOps`                          |                                                 |
+| `Environment`, `example-org:devops:environment` | `Sandbox`, `Dev`, `PreProd`, `QA`, `Prod`, `Testing`            |                                                 |
+| `CostCenter`, `company-b:CostCenter`            | `FIN123`, `Retail-123`, `Sales-248`, `HR-333`                   |                                                 |
+| `FinancialOwner`                                | `HR`, `SecurityLead`, `DevOps-3`, `Workload-1-Development-team` |                                                 |
+| `ComplianceRequirement`                         | `NIST`, `HIPAA`, `GDPR`                                         |                                                 |
 
 [Create tag policies][creating organization policies with aws organizations] to enforce values, and to prevent the
 creation of non-compliant resources.
+
+> [!note]
+> Once created, tags cannot be deleted.
+
+If unused for some time, they will **not** show up in services like Cost Explorer.<br/>
+Deletion aside, one can manage tags in the Tag Editor.
 
 ## API
 
@@ -818,7 +853,7 @@ machine if not.
 [AWS PrivateLink pricing]: https://aws.amazon.com/privatelink/pricing/
 [aws public ip address ranges now available in json form]: https://aws.amazon.com/blogs/aws/aws-ip-ranges-json/
 [aws re:invent 2022 - advanced vpc design and new amazon vpc capabilities (net302)]: https://www.youtube.com/watch?v=cbUNbK8ZdA0&pp=ygUWYW1hem9uIGludmVudCAyMDIyIHZwYw%3D%3D
-[best practices for tagging aws resources]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html
+[Best Practices for Tagging AWS Resources]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html
 [boto3 documentation]: https://boto3.amazonaws.com/v1/documentation/api/latest/index.html
 [boto3 paginators]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/paginators.html
 [boto3 resources]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/resources.html
@@ -838,12 +873,16 @@ machine if not.
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [rotating aws kms keys]: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
 [savings plans user guide]: https://docs.aws.amazon.com/savingsplans/latest/userguide/
+[Services that support the Resource Groups Tagging API]: https://docs.aws.amazon.com/resourcegroupstagging/latest/APIReference/supported-services.html
 [subnets for your vpc]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html
+[Tag naming limits and requirements]: https://docs.aws.amazon.com/tag-editor/latest/userguide/best-practices-and-strats.html#tag-conventions
+[Tagging best practices and strategies]: https://docs.aws.amazon.com/tag-editor/latest/userguide/best-practices-and-strats.html
 [test your roles' access policies using the aws identity and access management policy simulator]: https://aws.amazon.com/blogs/security/test-your-roles-access-policies-using-the-aws-identity-and-access-management-policy-simulator/
 [tools to build on aws]: https://aws.amazon.com/developer/tools/
 [understanding data transfer charges]: https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html
 [Understanding how Savings Plans apply to your usage]: https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-applying.html
 [using amazon cloudwatch with aws global accelerator]: https://docs.aws.amazon.com/global-accelerator/latest/dg/cloudwatch-monitoring.html
+[What are tags?]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/what-are-tags.html
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
 [what is aws global accelerator?]: https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html
