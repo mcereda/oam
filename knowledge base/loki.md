@@ -30,7 +30,7 @@ Designed to be cost-effective and easy to operate.
 1. [Troubleshooting](#troubleshooting)
    1. [Too many storage configs provided in the common config](#too-many-storage-configs-provided-in-the-common-config)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -854,6 +854,7 @@ storage_config:
 - [The Quest for HA and DR in Loki]
 - [The concise guide to Loki: How to get the most out of your query performance]
 - [Open source log monitoring: The concise guide to Grafana Loki]
+- [Gossip Protocol Explained]
 
 ### Sources
 
@@ -910,6 +911,7 @@ storage_config:
 
 <!-- Others -->
 [deploying grafana, loki, and prometheus on aws ecs with efs and cloud formation (part 3 of 3)]: https://medium.com/@ahmadbilalch891/deploying-grafana-loki-and-prometheus-on-aws-ecs-with-efs-and-cloud-formation-part-3-of-3-24140ea8ccfb
+[Gossip Protocol Explained]: https://highscalability.com/gossip-protocol-explained/
 [grafana loki configuration nuances]: https://medium.com/lonto-digital-services-integrator/grafana-loki-configuration-nuances-2e9b94da4ac1
 [how to set up grafana, loki, and prometheus locally with docker compose: part 1 of 3]: https://medium.com/@ahmadbilalch891/how-to-set-up-grafana-loki-and-prometheus-locally-with-docker-compose-part-1-of-3-62fb25e51d92
 [loki s3 storage: a guide for efficient log management]: https://last9.io/blog/loki-s3-storage-guide/
