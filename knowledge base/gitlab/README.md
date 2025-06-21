@@ -41,6 +41,9 @@ curl -X 'PUT' -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/applic
 curl -X 'PUT' -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings?maintenance_mode=false'
 ```
 
+GitLab uses [GitLab Flavored Markdown (GLFM)] to render Markdown files in its UI.<br/>
+Since v17.10, one can use Alerts to highlight or call attention to something in GitHub-like fashion.
+
 ## Package
 
 Previously known as 'Omnibus'.
@@ -941,6 +944,7 @@ Solution: set the correct ownership with
 [environment variables]: https://docs.gitlab.com/ee/administration/environment_variables.html
 [forks]: https://docs.gitlab.com/ee/user/project/repository/forking_workflow.html
 [gitlab 17.8 release - use roles to define project members as code owners]: https://about.gitlab.com/releases/2025/01/16/gitlab-17-8-released/#use-roles-to-define-project-members-as-code-owners
+[GitLab Flavored Markdown (GLFM)]: https://docs.gitlab.com/user/markdown/
 [gitlab ha scaling runner vending machine for aws ec2 asg]: https://gitlab.com/guided-explorations/aws/gitlab-runner-autoscaling-aws-asg#gitlab-runners-on-aws-spot-best-practices
 [gitlab maintenance mode]: https://docs.gitlab.com/ee/administration/maintenance_mode/
 [global settings]: https://docs.gitlab.com/charts/charts/globals.html
