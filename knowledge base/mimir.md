@@ -614,6 +614,7 @@ ingester:
 - [Grafana]
 - [hashicorp/memberlist]
 - [Gossip protocol]
+- [Gossip Protocol Explained]
 - [Ceiling Function]
 - [In-Depth Comparison of Distributed Coordination Tools: Consul, etcd, ZooKeeper, and Nacos]
 - [Planning Grafana Mimir capacity]
@@ -667,11 +668,12 @@ Alternatives:
 [Grafana mimir-distributed Helm chart documentation]: https://grafana.com/docs/helm-charts/mimir-distributed/latest/
 [helm chart]: https://github.com/grafana/mimir/tree/main/operations/helm/charts/mimir-distributed
 [migrate from thanos or prometheus to grafana mimir]: https://grafana.com/docs/mimir/latest/set-up/migrate/migrate-from-thanos-or-prometheus/
-[website]: https://grafana.com/oss/mimir/
 [Planning Grafana Mimir capacity]: https://grafana.com/docs/mimir/latest/manage/run-production-environment/planning-capacity/
+[website]: https://grafana.com/oss/mimir/
 
 <!-- Others -->
 [Ceiling Function]: https://www.geeksforgeeks.org/ceiling-function/
+[Gossip Protocol Explained]: https://highscalability.com/gossip-protocol-explained/
 [Gossip protocol]: https://en.wikipedia.org/wiki/Gossip_protocol
 [hashicorp/memberlist]: https://github.com/hashicorp/memberlist
 [In-Depth Comparison of Distributed Coordination Tools: Consul, etcd, ZooKeeper, and Nacos]: https://medium.com/@karim.albakry/in-depth-comparison-of-distributed-coordination-tools-consul-etcd-zookeeper-and-nacos-a6f8e5d612a6
