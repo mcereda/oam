@@ -1,0 +1,18 @@
+---
+
+# <https://docs.ansible.com/ansible/latest/collections/ansible/builtin/import_tasks_module.html>
+# <https://docs.ansible.com/ansible/latest/collections/ansible/builtin/include_tasks_module.html>
+
+- name: Use tasks from other files
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - ansible.builtin.import_tasks: debug.yml
+    - ansible.builtin.import_tasks:
+        file: control flows.yml
+    # - ansible.builtin.include_tasks: manipulate data.yml
+    - ansible.builtin.include_tasks:
+        file: manipulate data.yml
+        apply:
+          tags: data_manipulation

@@ -1,0 +1,15 @@
+---
+
+# Only *single* target patterns allowed
+# No groups
+
+- name: Forcefully run on the controller
+  delegate_to: 127.0.0.1
+  connection: local
+  changed_when: false
+  ansible.builtin.command: hostname
+
+- name: Forcefully run on a target from the inventory
+  delegate_to: copernicus
+  changed_when: false
+  ansible.builtin.command: hostname

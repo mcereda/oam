@@ -1,0 +1,46 @@
+---
+
+
+- name: Output messages
+  ansible.builtin.debug:
+    msg: I always display!
+
+- name: Pretty print messages
+  vars:
+    install_method: package
+    supported_install_methods: ['package']
+  ansible.builtin.debug:
+    msg: >-
+      {{
+        dict([
+          [ 'install_method', install_method ],
+          [ 'install_method in supported_install_methods', install_method in supported_install_methods ],
+        ])
+      }}
+
+- name: Output variables' values
+  vars:
+    install_method: package
+  ansible.builtin.debug:
+    var: install_method
+
+- name: Print all available variables
+  ansible.builtin.debug:
+    var: vars  # magic variable
+
+- name: Output messages depending on the verbosity level
+  ansible.builtin.debug:
+    msg: I only display with 'ansible-playbook -vvv' or with more 'v's
+    verbosity: 3
+
+- name: Print the run's shell environment
+  ansible.builtin.shell: printenv | sort
+
+- name: Start the debugger on failure
+  tags: never
+  # print all variables at this point => p task_vars
+  # continue => c
+  # abort and quit => q
+  debugger: on_failed
+  ansible.builtin.fail:
+    msg: Manually enforced failure
