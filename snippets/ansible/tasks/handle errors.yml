@@ -1,0 +1,36 @@
+---
+
+
+- name: Recover from errors
+  tags:
+    - error_handling
+    - recover_from_errors
+  block:
+    - name: This executes normally
+      ansible.builtin.debug:
+        msg: I execute normally
+    - name: This errors out
+      changed_when: false
+      ansible.builtin.command: /bin/false
+    - name: This never executes
+      ansible.builtin.debug:
+        msg: I never execute due to the above task failing
+  rescue:
+    - name: This executes if any errors arose in the block
+      ansible.builtin.debug:
+        msg: I caught an error and can do stuff here to fix it
+  always:
+    - name: This always executes
+      ansible.builtin.debug:
+        msg: I always execute
+
+- name: Retry tasks on failure
+  tags:
+    - error_handling
+    - retry_on_failure
+  changed_when: false
+  ansible.builtin.command: /usr/bin/false
+  retries: 3
+  delay: 1
+  register: command_result
+  until: command_result is not failed

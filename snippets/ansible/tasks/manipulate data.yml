@@ -1,0 +1,310 @@
+---
+
+- name: Convert between types
+  tags:
+    - convert_types
+    - type_conversion
+  ansible.builtin.set_fact:
+    string_to_int_is_integer: "{{ 'string' | int is integer }}"
+    string_to_float_is_float: "{{ 'string' | float is float }}"
+    integer_to_float_is_float: "{{ 12 | float is float }}"
+    float_to_int_is_integer: "{{ 21.02 | int is integer }}"
+    integer_to_string_is_string: "{{ 43 | string is string }}"
+    float_to_string_is_string: "{{ 74.93 | string is string }}"
+    integer_to_bool_is_boolean: "{{ 4 | bool is boolean }}"
+
+- name: Manipulate dictionaries
+  tags:
+    - dictionary_manipulation
+    - manipulate_dictionaries
+  vars:
+    organization:
+      address: 123 common lane
+      id: 123abc
+  block:
+    - name: Add keys to dictionaries
+      ansible.builtin.set_fact:
+        organization: "{{ organization | combine({ 'name': 'ExampleOrg' }) }}"
+    - name: Sort keys in dictionaries
+      ansible.builtin.set_fact:
+        organization: "{{ organization | dictsort }}"
+    - name: Pretty print dictionaries
+      ansible.builtin.set_fact:
+        organization: "{{ organization | to_nice_json }}"
+    - name: Merge dictionaries
+      vars:
+        dict_1:
+          a: 43
+          b: some string
+        dict_2:
+          y: true
+          z:
+            - 4
+            - test
+      ansible.builtin.set_fact:
+        merged_dict: "{{ dict_1 | ansible.builtin.combine(dict_2, {'z':'new_value','w':[44]}) }}"
+        recursively_merged_dict: >-
+          {{ {'rest':'test'} | ansible.builtin.combine({'z':'newValue','w':[44]}, dict_1, dict_2, recursive=true) }}
+    - name: Register the list of extensions per DB
+      tags: never
+      ansible.builtin.set_fact:
+        db_extensions: >-
+          {{
+            db_extensions
+            | combine({
+                item.item: item.query_result | map(attribute='extname')
+            })
+          }}
+      with_items: "{{ db_extensions_query.results }}"
+    - name: Register the list of extensions per DB as 'db:extensions[]' pairs
+      vars:
+        db_extensions:
+          sales:
+            - pgaudit
+            - plpgsql
+          countries:
+            - pgcrypto
+            - postgis
+            - pg_stat_statements
+      ansible.builtin.set_fact:
+        db_extension_pairs:
+          # Refer https://jinja.palletsprojects.com/en/3.0.x/templates/#assignments for the namespace object's
+          # reason
+          >-
+            {%- set ns = namespace(output = []) -%}
+            {%- for db in db_extensions.keys() -%}
+              {%- for extension in db_extensions[db] -%}
+                {{- ns.output.append({'db':db, 'extension': extension}) -}}
+              {%- endfor -%}
+            {%- endfor -%}
+            {{- ns.output -}}
+    - name: Get the device name and last snapshot id for all block devices in an EC2 instance
+      # Useful to create AMIs from instance snapshots
+      tags: never
+      ansible.builtin.set_fact:
+        last_snap_for_device:
+          # Refer https://jinja.palletsprojects.com/en/3.0.x/templates/#assignments for the namespace object's
+          # reason
+          >-
+            {%- set ns = namespace(devices_list = []) -%}
+            {%- for result in current_instance_snapshots.results -%}
+            {%-   for device in current_instance_information.instances[0].block_device_mappings
+                  | selectattr('ebs.volume_id', 'equalto', result.volume_id) -%}
+            {{-
+                    ns.devices_list.append({
+                      'device_name': device.device_name,
+                      'snapshot_id': result.snapshots
+                      | sort(attribute='start_time') | last
+                      | json_query('snapshot_id'),
+                    })
+            -}}
+            {%-   endfor -%}
+            {%- endfor -%}
+            {{  ns.devices_list }}
+
+- name: Manipulate lists
+  tags:
+    - list_manipulation
+    - manipulate_lists
+  vars:
+    mounts:
+      - block_available: 237681860
+        block_size: 4096
+        block_total: 239859712
+        block_used: 2177852
+        device: /dev/mapper/vg0-root
+        fstype: btrfs
+        inode_available: 0
+        inode_total: 0
+        inode_used: 0
+        mount: /
+        options: rw,relatime,compress-force=zstd:15,ssd,space_cache,autodefrag,subvolid=256,subvol=/os,bind
+        size_available: 973544898560
+        size_total: 982465380352
+        uuid: 6fc42685-8f3f-43a3-b698-a135b2b59ac5
+      - block_available: 110948
+        block_size: 4096
+        block_total: 130812
+        block_used: 19864
+        device: /dev/sda1
+        fstype: vfat
+        inode_available: 0
+        inode_total: 0
+        inode_used: 0
+        mount: /boot
+        options: rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,utf8,errors=remount-ro
+        size_available: 454443008
+        size_total: 535805952
+        uuid: 8ACA-ADB8
+    snapshots_list:
+      - name: some_available_snapshot
+        status: available
+      - name: some_unavailable_snapshot
+        status: creating
+  block:
+    - name: Add elements to lists
+      vars:
+        programming_languages:
+          - C
+          - Python
+      ansible.builtin.set_fact:
+        programming_languages: "{{ programming_languages + ['Ruby'] }}"
+    - name: Remove elements from lists
+      vars:
+        dbs_list: ['primary', 'sales']
+      ansible.builtin.set_fact:
+        list_without_items: "{{ dbs_list | difference(['template0','template1','postgres','rdsadmin']) }}"
+    - name: Get elements
+      ansible.builtin.set_fact:
+        random_item: "{{ ['a','b','c'] | random }}"
+        last_item_array_mode: "{{ ['a','b','c'][-1] }}"
+        last_item_filter: "{{ ['a','b','c'] | last }}"
+        first_item_filter: "{{ ['a','b','c'] | first }}"
+    - name: Sort dict elements in lists by attribute
+      tags: order_by
+      vars:
+        snapshots:
+          - name: sales
+            create_time: '2024-06-25T00:52:55.127000+00:00'
+          - name: test
+            create_time: '2024-05-17T01:53:12.103220+00:00'
+      ansible.builtin.set_fact:
+        snapshot_latest: "{{ snapshots | sort(attribute='create_time') | last }}"
+    - name: Give back the first not null value
+      tags: coalesce
+      vars:
+        list_with_null_values:
+          - null
+          - null
+          - something
+          - something else
+      ansible.builtin.set_fact:
+        first_non_null_value: "{{ list_with_null_values | select | first }}"
+    - name: Get values for a specific attribute in a list of dictionaries
+      vars:
+        instances_information:
+          instances:
+            - block_device_mappings:
+                - ebs:
+                    volume_id: vol-0123456
+              vpc_security_groups:
+                - vpc_security_group_id: sg-0123456789abcdef
+        instance_information: "{{ instances_information.instances[0] }}"
+      ansible.builtin.set_fact:
+        vpc_security_group_ids: >-
+          {{ instance_information.vpc_security_groups | map(attribute='vpc_security_group_id') }}
+        volume_ids: >-
+          {{ instances_information.instances[0].block_device_mappings | map(attribute='ebs.volume_id') }}
+    - name: Return only elements with specific attributes matching a filter
+      ansible.builtin.set_fact:
+        available_rds_snapshots: "{{ snapshots_list | selectattr('status', 'equalto', 'available') }}"
+        mounts_with_path: "{{ mounts | selectattr('mount', 'in', ['/boot']) }}"
+    - name: Return all elements *but* the ones with specific attributes matching a filter
+      ansible.builtin.set_fact:
+        available_rds_snapshots: "{{ snapshots_list | rejectattr('status', 'equalto', 'creating') }}"
+        mounts_without_path: "{{ mounts | rejectattr('mount', 'in', ['/boot']) }}"
+    - name: Remove lines about RDS protected users and permissions from a dump file
+      tags: never
+      # remove empty lines
+      # remove comments
+      # remove creation of the master user
+      # remove anything involving 'rdsadmin'
+      # remove changes to protected RDS users
+      # remove protected 'superuser' and 'replication' assignments
+      vars:
+        # **Hack notice**: Ansible has issues with splitting on new lines if this template is quoted differently
+        permissions_dump_content_as_lines: "{{ dump_file.content | ansible.builtin.b64decode | split('\n') }}"
+        master_username: postgresql
+      ansible.builtin.set_fact:
+        permissions_commands: >-
+          {{
+            permissions_dump_content_as_lines
+            | reject('match', '^$')
+            | reject('match', '^--')
+            | reject('match', '^CREATE ROLE ' + master_username)
+            | reject('match', '.*rdsadmin.*')
+            | reject('match', '^(CREATE|ALTER) ROLE rds_')
+            | map('regex_replace', '(NO)(SUPERUSER|REPLICATION)\s?', '')
+          }}
+
+- name: Manipulate strings
+  tags:
+    - manipulate_strings
+    - string_manipulation
+  vars:
+    module_output: >-
+      u001b]0;@smth:/u0007{
+      "failed": 0, "started": 1, "finished": 0, "ansible_job_id": "j968817333249.114504",
+      "results_file": "/home/ssm-user/.ansible_async/j968817333249.114504", "_ansible_suppress_tmpdir_delete": true
+      }\r\r
+    pattern: >-
+      {{ '"failed": 0, "started": 1, "finished": 0' | regex_escape() }}
+  ansible.builtin.set_fact:
+    first_letter_to_uppercase: "{{ 'all_lowercase' | capitalize }}"
+    something_replaced: "{{ 'dots.to.dashes' | replace('.','-') }}"
+    split_string: "{{ 'testMe@example.com' | split('@') | first }}"
+    pattern_replaced: >-
+      {{ '*.domain.com...' | regex_replace('*' | regex_escape, 'star') | regex_replace('\.+$', '') }}
+    pattern_is_anywhere_in_module_output: "{{ module_output is search(pattern) }}"
+    pattern_is_at_the_beginning_of_string: "{{ 'sator arepo tenet opera rotas' is match('sator arepo') }}"
+    regex_is_anywhere_in_string: "{{ 'sator arepo tenet opera rotas' is regex('\\stenet\\s') }}"
+    first_substr_matching_regex: "{{ 'sator arepo tenet opera rotas' | regex_search('\\stenet\\s') }}"
+    password_obfuscated: "{{ 'sensitiveString' | regex_replace('^(.{2}).*(.{2})$', '\\1…\\2') }}"
+    value_from_json_string_in_module_output: >-
+      {{ 'ansible_job_id' | extract(module_output | regex_search('{.*}') | from_json) }}
+    base64_encoded_string: "{{ 'some string' | ansible.builtin.b64encode }}"
+    base64_decoded_string: "{{ 'c29tZSBzdHJpbmc=' | ansible.builtin.b64decode }}"
+
+- name: Return data types
+  tags:
+    - return_type
+    - type_return
+  ansible.builtin.set_fact:
+    returns_AnsibleUndefined: "{{ null | type_debug }}"
+    returns_int: "{{ 3 | type_debug }}"
+    returns_NoneType: "{{ None | type_debug }}"
+    returns_str: "{{ 'this' | type_debug }}"
+
+- name: Test data types
+  tags:
+    - test_types
+    - type_test
+  ansible.builtin.set_fact:
+    # strings are classified as 'string', 'iterable' and 'sequence', but not 'mapping'
+    aa_is_string: "{{ 'aa' is string }}"
+    aa_is_iterable: "{{ 'aa' is iterable }}"
+    aa_is_sequence: "{{ 'aa' is sequence }}"
+    # numbers are classified as 'numbers', with 'integer' and 'float' being subclasses
+    i42_is_number: "{{ 42 is number }}"
+    i5_is_integer: "{{ 5 is integer }}"
+    f21_34_is_number: "{{ 21.34 is number }}"
+    f12_1_is_float: "{{ 12.1 is float }}"
+    # lists are classified as 'iterable' and 'sequence', but not as 'string' nor 'mapping'
+    list_is_iterable: "{{ ['list'] is iterable }}"
+    list_is_sequence: "{{ ['list'] is sequence }}"
+    list_is_string: "{{ ['list'] is string }}"
+    list_is_mapping: "{{ ['list'] is mapping }}"
+    # dictionaries are classified as 'iterable', 'sequence' and 'mapping', but not as 'string'
+    dict_is_iterable: "{{ {'a': 'dict'} is iterable }}"
+    dict_is_sequence: "{{ {'a': 'dict'} is sequence }}"
+    dict_is_mapping: "{{ {'a': 'dict'} is mapping }}"
+    dict_is_string: "{{ {'a': 'dict'} is string }}"
+    # native booleans
+    true_is_boolean: "{{ true is boolean }}"
+    upper_true_is_boolean: "{{ True is boolean }}"
+    false_is_boolean: "{{ false is boolean }}"
+    upper_false_is_boolean: "{{ False is boolean }}"
+    # null is not really the same as None in ansible
+    aa_is_not_null: "{{ 'aa' != None }}"
+    aa_is_not_null_nor_empty: "{{ 'aa' not in [ None, '' ] }}"
+
+- name: Test truthfulness
+  tags:
+    - test_truthfulness
+    - truthfulness
+  ansible.builtin.set_fact:
+    this_is_true: true
+    this_is_false: false
+    this_is_true_again: "{{ not false }}"
+    true_is_truthy: "{{ true is truthy }}"
+    false_is_falsy: "{{ false is falsy }}"

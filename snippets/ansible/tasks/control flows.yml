@@ -1,0 +1,89 @@
+---
+
+- name: Do nothing
+  tags: noop
+  ansible.builtin.meta: noop
+
+- name: Execute long-running tasks
+  tags: long-running
+  vars:
+    ansible_async_dir: /tmp/.ansible/async  # defaults to '~/.ansible_async'
+  block:
+    - name: Long-running task with integrated poll
+      tags: async_with_self_poll
+      when: ansible_check_mode is falsy  # check mode and async cannot be used on same task
+      ansible.builtin.command: /bin/sleep 15
+      changed_when: false
+      async: 45  # run max 45s
+      poll: 5  # check once every 5s
+    - name: Long-running task with external poll
+      tags: async_with_external_poll
+      block:
+        - name: Long-running task with external poll
+          when: ansible_check_mode is falsy  # check mode and async cannot be used on same task
+          ansible.builtin.command: /bin/sleep 15
+          changed_when: false
+          async: 45  # run max 45s
+          poll: 0  # fire and forget
+          register: long_running_task_with_external_poll
+        - name: Check on long_running_task_with_external_poll
+          when: long_running_task_with_external_poll is not skipped
+          ansible.builtin.async_status:
+            jid: "{{ long_running_task_with_external_poll.ansible_job_id }}"
+          register: job_result
+          until: job_result.finished
+          retries: 9
+          delay: 5
+
+- name: Fail task on any non-compliance
+  tags: assertion
+  vars:
+    installation_method: package
+    url: https://www.google.com/
+  ansible.builtin.assert:
+    that:
+      - installation_method in ['container', 'package']
+      - "'https://www.google.com/' is ansible.builtin.url"
+      - "'domain.example.com' is community.general.fqdn_valid(min_labels=2)"
+      - url is regex('\w\.com/')
+    fail_msg: What to say if any of the above conditions fail
+    success_msg: What to say if all of the above conditions succeed
+
+- name: Force execution of *notified* handlers
+  tags: force_handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Force failures
+  tags: force_failure
+  ansible.builtin.fail:
+    msg: Manually enforced failure
+
+- name: Only run in check mode
+  tags: check_mode_only
+  when: ansible_check_mode is truthy
+  ansible.builtin.set_fact:
+    check_mode_active: ansible_check_mode
+
+- name: Pause
+  tags:
+    - pause
+    - sleep
+  ansible.builtin.pause:
+    seconds: 1
+
+- name: Ternary A.K.A. Elvis operator
+  # (condition) | ternary(value_for_true_condition, value_for_false_condition, optional_value_for_null_condition)
+  tags:
+    - elvis_operator
+    - ternary
+  ansible.builtin.set_fact:
+    acme_directory: >-
+      {{
+        this_is_a_test_run
+        | default(true)
+        | bool
+        | ternary(
+          'https://acme-staging-v02.api.letsencrypt.org/directory',
+          'https://acme-v02.api.letsencrypt.org/directory'
+        )
+      }}
