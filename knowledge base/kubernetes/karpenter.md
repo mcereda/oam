@@ -114,6 +114,7 @@ Requirements:
 - [Karpenter: Amazon EKS Best Practice and Cloud Cost Optimization]
 - [Run Kubernetes Clusters for Less with Amazon EC2 Spot and Karpenter]
 - [Karpenter best practices]
+- [Karpenter AKS Production Issues: Why Auto Node Upgrades Caused Our Outage]
 
 <!--
   Reference
@@ -129,6 +130,7 @@ Requirements:
 [website]: https://karpenter.sh/
 
 <!-- Others -->
+[Karpenter AKS Production Issues: Why Auto Node Upgrades Caused Our Outage]: https://medium.com/@sridharcloud/karpenter-aks-production-issues-why-auto-node-upgrades-caused-our-outage-498da5fc140c
 [Karpenter best practices]: https://docs.aws.amazon.com/eks/latest/best-practices/karpenter.html
 [Karpenter EKS workshop]: https://www.eksworkshop.com/docs/autoscaling/compute/karpenter/
 [Karpenter provider for AWS]: https://github.com/aws/karpenter-provider-aws

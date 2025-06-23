@@ -2,6 +2,8 @@
 
 Monitoring application providing real-time cost visibility and insights.
 
+Used as base by [KubeCost].
+
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -64,6 +66,7 @@ open 'http://localhost:9090'
 
 - [Website]
 - [Codebase]
+- [KubeCost]
 
 ### Sources
 
@@ -78,6 +81,7 @@ open 'http://localhost:9090'
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[KubeCost]: kubecost.md
 [Prometheus]: ../prometheus/README.md
 
 <!-- Files -->
