@@ -427,6 +427,7 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 - [IAM roles]
 - [Get to Grips with AWS IAM Roles: Terms, Concepts, and Examples]
 - [What is exactly "Assume" a role in AWS?]
+- [Conditions with multiple context keys or values]
 
 <!--
   Reference
@@ -444,6 +445,7 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 [assumerole api reference]: https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html
 [aws global condition context keys]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html
 [can i increase the duration of the iam role chaining session?]: https://repost.aws/knowledge-center/iam-role-chaining-limit
+[Conditions with multiple context keys or values]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-logic-multiple-context-keys-or-values.html
 [creating a role to delegate permissions to an iam user]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user.html
 [how can i monitor the account activity of specific iam users, roles, and aws access keys?]: https://repost.aws/knowledge-center/view-iam-history
 [how to use the passrole permission with iam roles]: https://aws.amazon.com/blogs/security/how-to-use-the-passrole-permission-with-iam-roles/
