@@ -2,6 +2,8 @@
 
 Monitoring application providing real-time cost visibility and insights.
 
+Built on top of [OpenCost].
+
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -57,6 +59,7 @@ kubectl --namespace 'kubecost' port-forward 'svc/kubecost-cost-analyzer' '9090' 
 
 - [Website]
 - [Codebase]
+- [OpenCost]
 
 ### Sources
 
@@ -70,6 +73,8 @@ kubectl --namespace 'kubecost' port-forward 'svc/kubecost-cost-analyzer' '9090' 
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[OpenCost]: opencost.md
+
 <!-- Files -->
 <!-- Upstream -->
 [Amazon EKS Integration]: https://www.ibm.com/docs/en/kubecost/self-hosted/2.x?topic=installations-amazon-eks-integration
