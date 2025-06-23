@@ -32,6 +32,7 @@ I might accept suggestions, though. Use the repository's hosting platform's tool
 ## Sources
 
 - [myshittycode.com]
+- [freekb.net]
 
 <!--
   Reference
@@ -45,4 +46,5 @@ I might accept suggestions, though. Use the repository's hosting platform's tool
 [license]: LICENSE
 
 <!-- Others -->
+[freekb.net]: https://www.freekb.net/
 [myshittycode.com]: https://myshittycode.com/

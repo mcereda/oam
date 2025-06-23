@@ -236,6 +236,7 @@ Also see [Automatic instance recovery].
 - [Instance store temporary block storage for EC2 instances]
 - [Attach an EBS volume to multiple EC2 instances using Multi-Attach]
 - [Monitor AWS EC2 memory utilization and set CloudWatch Alarm]
+- [Automating Instance Reboots with Amazon CloudWatch EC2 Actions]
 
 <!--
   Reference
@@ -279,7 +280,8 @@ Also see [Automatic instance recovery].
 [using instance profiles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
 
 <!-- Others -->
+[Automating Instance Reboots with Amazon CloudWatch EC2 Actions]: https://devops.supportsages.com/automating-instance-reboots-with-amazon-cloudwatch-ec2-actions-375f633a658d
 [aws ec2 instance pricing comparison]: https://ec2instances.github.io/
-[ec2instances.info on vantage.sh]: https://instances.vantage.sh/
 [configuring ec2 disk alert using amazon cloudwatch]: https://medium.com/@chandinims001/configuring-ec2-disk-alert-using-amazon-cloudwatch-793807e40d72
+[ec2instances.info on vantage.sh]: https://instances.vantage.sh/
 [monitor aws ec2 memory utilization and set cloudwatch alarm]: https://medium.com/@VaibhaviDeshmukh07/monitor-aws-ec2-memory-utilization-and-set-cloudwatch-alarm-a53d0e0b1eeb

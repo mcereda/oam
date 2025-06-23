@@ -1341,6 +1341,7 @@ Others:
 - [Using RBAC Authorization]
 - [Expose Pod information to Containers through files]
 - [Avoiding Kubernetes Pod Topology Spread Constraint Pitfalls]
+- [Kubernetes Complete Hands‑On Guides]
 
 <!--
   Reference
@@ -1433,6 +1434,7 @@ Others:
 [kube-ps1]: https://github.com/jonmosco/kube-ps1
 [kubectx+kubens]: https://github.com/ahmetb/kubectx
 [kubernetes cluster autoscaler]: https://www.kubecost.com/kubernetes-autoscaling/kubernetes-cluster-autoscaler/
+[Kubernetes Complete Hands‑On Guides]: https://github.com/anveshmuppeda/kubernetes
 [kubernetes securitycontext capabilities explained]: https://www.golinuxcloud.com/kubernetes-securitycontext-capabilities/
 [kubernetes troubleshooting - the complete guide]: https://komodor.com/learn/kubernetes-troubleshooting-the-complete-guide/
 [kubeswitch]: https://github.com/danielfoehrKn/kubeswitch

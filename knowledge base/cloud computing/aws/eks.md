@@ -1432,6 +1432,7 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 - [Install the AWS Load Balancer Controller using Helm]
 - [Reaching failed to introspect region from EC2Metadata... on container start-up - vanilla EKS/Fargate]
 - [Route application and HTTP traffic with Application Load Balancers]
+- [Hands-On Guide to Creating an Amazon EKS Cluster with Self-Managed Worker Nodes]
 
 <!--
   Reference
@@ -1519,3 +1520,4 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [reaching failed to introspect region from ec2metadata... on container start-up - vanilla eks/fargate]: https://github.com/kubernetes-sigs/aws-load-balancer-controller/issues/1561
 [upgrade default storage class for eks]: https://www.argonaut.dev/docs/guides/migrate-eks-to-gp3
 [visualizing aws eks kubernetes clusters with relationship graphs]: https://dev.to/aws-builders/visualizing-aws-eks-kubernetes-clusters-with-relationship-graphs-46a4
+[Hands-On Guide to Creating an Amazon EKS Cluster with Self-Managed Worker Nodes]: https://medium.com/@muppedaanvesh/hands-on-guide-to-creating-an-amazon-eks-cluster-with-self-managed-worker-nodes-fad026c34482
