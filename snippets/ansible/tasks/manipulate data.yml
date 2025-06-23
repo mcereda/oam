@@ -227,6 +227,16 @@
             | map('regex_replace', '(NO)(SUPERUSER|REPLICATION)\s?', '')
           }}
 
+- name: Manipulate numbers
+  tags:
+    - manipulate_numbers
+    - number_manipulation
+  ansible.builtin.set_fact:
+    round: "{{ 42.21 | round }}"
+    round_up: "{{ 42.21 | round(method='ceil') }}"
+    round_down_to_2nd_decimal: "{{ (2.5 * (42.2109 / 3) + 1) | round(2, 'floor') }}"
+    round_to_int: "{{ 42.21 | round | int }}"
+
 - name: Manipulate strings
   tags:
     - manipulate_strings
@@ -294,8 +304,9 @@
     upper_true_is_boolean: "{{ True is boolean }}"
     false_is_boolean: "{{ false is boolean }}"
     upper_false_is_boolean: "{{ False is boolean }}"
-    # null is not really the same as None in ansible
-    aa_is_not_null: "{{ 'aa' != None }}"
+    # null ~= None in ansible (python gotcha)
+    aa_is_not_NoneType: "{{ 'aa' | type_debug != 'NoneType' }}"
+    aa_is_not_null: "{{ 'aa' != None }}"  # same as 'aa_is_not_NoneType' but easier to read
     aa_is_not_null_nor_empty: "{{ 'aa' not in [ None, '' ] }}"
 
 - name: Test truthfulness
