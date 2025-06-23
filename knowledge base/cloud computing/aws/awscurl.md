@@ -9,10 +9,12 @@
 ## TL;DR
 
 <details>
-  <summary>Installation</summary>
+  <summary>Setup</summary>
 
 ```sh
 brew install 'awscurl'
+docker pull 'okigan/awscurl'
+pip install 'awscurl'
 ```
 
 </details>
@@ -35,7 +37,8 @@ awscurl … --service 'aps' 'https://aps.workspace.url/api/v1/query/api/v1/query
   -d 'start=1652382537' -d 'end=1652384705' -d 'step=1000' -d 'stats=all'
 
 # Run in containers.
-docker run --rm -it 'okigan/awscurl' \
+docker run --rm -it -v "$HOME/.aws:/root/.aws:ro" 'okigan/awscurl' …
+docker run --rm -it -e 'AWS_ACCESS_KEY_ID' -e 'AWS_SECRET_ACCESS_KEY' 'okigan/awscurl' \
   --region 'eu-south-1' --service 'aps' \
   --access_key "$AWS_ACCESS_KEY_ID" --secret_key "$AWS_SECRET_ACCESS_KEY" \
   'https://aps.workspace.url/api/v1/query/api/v1/query?query=up'

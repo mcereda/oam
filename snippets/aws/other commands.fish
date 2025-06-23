@@ -298,6 +298,18 @@ aws ec2 describe-network-interfaces --output 'text' \
 
 
 ###
+# Grafana
+# ------------------
+###
+
+aws grafana create-workspace-api-key --workspace-id 'g-abcdef0123' \
+	--key-name 'test' --key-role 'VIEWER' --seconds-to-live '60'
+
+aws grafana delete-workspace-api-key --workspace-id 'g-abcdef0123' --key-name 'test'
+
+
+
+###
 # IAM
 # ------------------
 ###
