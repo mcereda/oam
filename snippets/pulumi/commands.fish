@@ -109,9 +109,23 @@ pulumi state move --source 'organization/utils/dev' --dest 'organization/iam/dev
 	'urn:pulumi:dev::utils::aws:iam/role:Role::rdsToS3Exporter' \
 	'urn:pulumi:dev::utils::aws:iam/rolePolicy:RolePolicy::rdsToS3Exporter-allowExportingSnapshotsToS3'
 
-# Upgrade providers' versions
+# Upgrade providers' versions in projects' definition files.
 jq '.dependencies."@pulumi/aws" |= "6.66.2"' 'package.json' | sponge 'package.json' \
 && pulumi install && pulumi update --suppress-outputs
+
+# Update only resources with a specific provider version.
+pulumi update --suppress-output ( \
+	pulumi stack export \
+	| jq -r '.deployment.resources[]|select(.provider)|select(.provider|test("6.80.0")).urn' \
+	| sed 's/^/-t /g' \
+	| xargs \
+)
+
+# Limit the update run to only execute the 'delete' operations.
+pulumi pre --suppress-outputs --json \
+| jq -r '.steps[]|select(.op=="delete").urn' - \
+| sed 's/^/-t /g' \
+| xargs -o pulumi update --suppress-outputs
 
 # Enable patch force for target resources (k8s-helm only)
 PULUMI_K8S_ENABLE_PATCH_FORCE='true' \
