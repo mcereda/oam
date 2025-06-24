@@ -46,7 +46,7 @@ helm --namespace 'opencost' uninstall 'opencost' \
 
 ```sh
 kubectl --namespace 'opencost' port-forward 'service/opencost' '9003' '9090'
-curl 'http://localhost:9003/allocation/compute?window=60m' \
+curl 'http://localhost:9003/allocation/compute?window=60m'
 open 'http://localhost:9090'
 ```
 

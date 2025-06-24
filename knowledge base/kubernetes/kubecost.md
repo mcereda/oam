@@ -15,6 +15,7 @@ Built on top of [OpenCost].
 
 ```sh
 helm repo add 'kubecost' 'https://kubecost.github.io/cost-analyzer/' && helm repo update 'kubecost'
+helm search repo 'kubecost/cost-analyzer' --versions
 
 helm show values --repo 'https://kubecost.github.io/cost-analyzer/' 'cost-analyzer'
 
@@ -24,10 +25,10 @@ helm --namespace 'kubecost' upgrade --install 'kubecost' --create-namespace \
   --set 'persistentVolume.enabled=false'
 
 # EKS-specific
-VERSION='' \
+VERSION='2.8.0' \
 helm --namespace 'kubecost' upgrade --install 'kubecost' --create-namespace \
   'oci://public.ecr.aws/kubecost/cost-analyzer' --version "$VERSION" \
-  --values "https://raw.githubusercontent.com/kubecost/cost-analyzer-helm-chart/$VERSION/cost-analyzer/values-eks-cost-monitoring.yaml"
+  --values "https://raw.githubusercontent.com/kubecost/cost-analyzer-helm-chart/v$VERSION/cost-analyzer/values-eks-cost-monitoring.yaml"
 
 helm --namespace 'kubecost' uninstall 'kubecost' \
 && kubectl delete namespace 'kubecost'
@@ -39,8 +40,8 @@ helm --namespace 'kubecost' uninstall 'kubecost' \
   <summary>Usage</summary>
 
 ```sh
-kubectl --namespace 'kubecost' port-forward 'svc/kubecost-cost-analyzer' '9090' \
-&& open 'http://localhost:9090'
+kubectl --namespace 'kubecost' port-forward 'deployment/kubecost-cost-analyzer' '9090'
+open 'http://localhost:9090'
 ```
 
 </details>
