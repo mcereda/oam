@@ -16,6 +16,7 @@
 1. [Operations](#operations)
     1. [PostgreSQL: reduce allocated storage by migrating using transportable databases](#postgresql-reduce-allocated-storage-by-migrating-using-transportable-databases)
     1. [Stop instances](#stop-instances)
+    1. [Cancel pending modifications](#cancel-pending-modifications)
 1. [Troubleshooting](#troubleshooting)
     1. [ERROR: extension must be loaded via shared\_preload\_libraries](#error-extension-must-be-loaded-via-shared_preload_libraries)
     1. [ERROR: must be superuser to alter _X_ roles or change _X_ attribute](#error-must-be-superuser-to-alter-x-roles-or-change-x-attribute)
@@ -736,6 +737,50 @@ behind required maintenance updates.
 
 One can still stop and start DB instances on a schedule via Step Functions.
 
+### Cancel pending modifications
+
+Refer [How do I cancel pending maintenance in Amazon RDS for PostgreSQL?].
+
+<details>
+  <summary>Cancel maintenance actions</summary>
+
+Explicitly issue a new pending maintenance action with `opt-in-type` set to `undo-opt-in`.
+
+```sh
+# FIXME: check
+$ aws rds describe-pending-maintenance-actions --resource-identifier 'some-db' \
+  --query 'PendingMaintenanceActions[]' --output 'yaml'
+- ResourceIdentifier: arn:aws:rds:ap-southeast-2:123456789:db:testsnapshot,
+  PendingMaintenanceActionDetails:
+  - Action: system-update
+    OptInStatus: next-maintenance
+    CurrentApplyDate: 2024-07-10T12:51:00+00:00
+    Description: New Operating System update is available
+$ aws rds apply-pending-maintenance-action --resource-identifier 'some-db' \
+  --apply-action 'system-update' --opt-in-type 'undo-opt-in' \
+  --query 'PendingMaintenanceActions[]' --output 'yaml'
+- {}
+```
+
+</details>
+
+<details>
+  <summary>Cancel instance class change</summary>
+
+Explicitly issue a new _immediate_ modification with the current instance settings.
+
+```sh
+$ aws rds describe-db-instances --db-instance-identifier 'some-db' \
+  --query 'DBInstances[*].PendingModifiedValues' --output 'yaml'
+- DBInstanceClass: db.t3.medium
+$ aws rds modify-db-instance --db-instance-identifier 'some-db' \
+  --db-instance-class 'db.t3.small' --apply-immediately \
+  --query 'DBInstances[*].PendingModifiedValues' --output 'yaml'
+- {}
+```
+
+</details>
+
 ## Troubleshooting
 
 ### ERROR: extension must be loaded via shared_preload_libraries
@@ -877,6 +922,7 @@ or write workloads and exceeds the instance type quotas.
 [working with db instance read replicas]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html
 [working with parameter groups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html
 [working with parameters on your rds for postgresql db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html
+[How do I cancel pending maintenance in Amazon RDS for PostgreSQL?]: https://repost.aws/knowledge-center/rds-postgresql-cancel-maintenance
 
 <!-- Others -->
 [AWS RDS Max Connections Limit As Per Instance Type]: https://sysadminxpert.com/aws-rds-max-connections-limit/
