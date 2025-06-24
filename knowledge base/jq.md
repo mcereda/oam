@@ -135,12 +135,15 @@ yq -e '(.backend.url|test("^file://")?)|not' 'Pulumi.yaml'
 
 ## Further readings
 
+- [Website]
+- [Codebase]
 - [JQ recipes]
 
 [jq recipes]: https://remysharp.com/drafts/jq-recipes
 
 ### Sources
 
+- [Documentation]
 - [Filter objects list with regex]
 - [Select multiple conditions]
 - [Change multiple values at once]
@@ -154,6 +157,11 @@ yq -e '(.backend.url|test("^file://")?)|not' 'Pulumi.yaml'
   Reference
   ═╬═Time══
   -->
+
+<!-- Upstream -->
+[codebase]: https://github.com/jqlang/jq
+[documentation]: https://jqlang.org/manual/
+[website]: https://jqlang.org/
 
 <!-- Others -->
 [an introduction to jq]: https://earthly.dev/blog/jq-select/
