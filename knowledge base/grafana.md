@@ -9,6 +9,7 @@ Open-source platform for monitoring and observability.
    1. [Dashboards](#dashboards)
 1. [Dashboards of interest](#dashboards-of-interest)
 1. [Alerting](#alerting)
+1. [APIs](#apis)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -34,14 +35,10 @@ GET /api/health
 
 ```sh
 # Export all existing dashboards by ID.
-curl -sS \
-  -H 'Authorization: Basic YWRtaW46YWRtaW4=' \
-  'http://grafana:3000/api/search' \
+curl -sS 'http://grafana:3000/api/search' -H 'Authorization: Basic YWRtaW46YWRtaW4=' \
 | jq -r '.[].uid' - \
 | parallel " \
-    curl -sS \
-      -H 'Authorization: Basic YWRtaW46YWRtaW4=' \
-      'http://grafana:3000/api/dashboards/uid/{}' \
+    curl -sS 'http://grafana:3000/api/dashboards/uid/{}' -H 'Authorization: Basic YWRtaW46YWRtaW4=' \
     > '{}.json' \
   "
 ```
@@ -188,27 +185,24 @@ Save existing dashboards like [you would for the datasources][datasources provis
 Save the dashboard definitions in JSON files in the path searched by the provider (e.g. `/var/lib/grafana/dashboards`).
 
 ```sh
-$ curl -sS \
-  -H 'Authorization: Basic YWRtaW46YWRtaW4=' \
-  'http://grafana:3000/api/search' \
+curl -sS 'http://grafana:3000/api/search' -H 'Authorization: Basic YWRtaW46YWRtaW4=' \
 | jq -r '.[].uid' - \
 | parallel " \
-    curl -sS \
-      -H 'Authorization: Basic YWRtaW46YWRtaW4=' \
-      'http://grafana:3000/api/dashboards/uid/{}' \
+    curl -sS 'http://grafana:3000/api/dashboards/uid/{}' -H 'Authorization: Basic YWRtaW46YWRtaW4=' \
     > '/var/lib/grafana/dashboards/{}.json' \
   "
 ```
 
 ## Dashboards of interest
 
-| Name                            | Grafana ID | URLs                                                                                                                                                                                           |
-| ------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Node exporter full              | 1860       | [grafana](https://grafana.com/grafana/dashboards/1860-node-exporter-full/), [github raw](https://raw.githubusercontent.com/rfmoz/grafana-dashboards/master/prometheus/node-exporter-full.json) |
-| OpenWRT                         | 11147      | [grafana](https://grafana.com/grafana/dashboards/11147-openwrt/)                                                                                                                               |
-| prometheus 2.0 overview         | 3662       | FIXME                                                                                                                                                                                          |
-| kubernetes cluster (prometheus) | 6417       | FIXME                                                                                                                                                                                          |
-| Nextcloud                       | 9632       | FIXME                                                                                                                                                                                          |
+| Name                                           | Grafana ID | URLs                                                                                                                                                                                                          |
+| ---------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Node exporter full                             | 1860       | [summary](https://grafana.com/grafana/dashboards/1860-node-exporter-full/)<br/>[code](https://raw.githubusercontent.com/rfmoz/grafana-dashboards/master/prometheus/node-exporter-full.json)                   |
+| OpenWRT                                        | 11147      | [summary](https://grafana.com/grafana/dashboards/11147-openwrt/)<br/>[code](https://raw.githubusercontent.com/try2codesecure/grafana_dashboards/refs/heads/master/OpenWRT/openwrt.json)                       |
+| Prometheus                                     | 19105      | [summary](https://grafana.com/grafana/dashboards/19105-prometheus/)<br/>[code](https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/refs/heads/master/dashboards/k8s-addons-prometheus.json) |
+| Kubernetes Cluster (Prometheus)                | 6417       | [summary](https://grafana.com/grafana/dashboards/6417-kubernetes-cluster-prometheus/)                                                                                                                         |
+| Kubernetes cluster monitoring (via Prometheus) | 315        | [summary](https://grafana.com/grafana/dashboards/315-kubernetes-cluster-monitoring-via-prometheus/)                                                                                                           |
+| Nextcloud                                      | 20716      | [summary](https://grafana.com/grafana/dashboards/20716-nextcloud/)                                                                                                                                            |
 
 ## Alerting
 
@@ -216,6 +210,10 @@ Refer [alerting] and [Get started with Grafana Alerting].
 
 1. Create a contact point if not existing already.
 1. Create an alert rule.
+
+## APIs
+
+Refer [HTTP API reference].
 
 ## Further readings
 
