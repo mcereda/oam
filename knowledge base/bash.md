@@ -378,7 +378,8 @@ All the references in the [further readings] section, plus the following:
 - [6 Bash tricks you can use daily]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
