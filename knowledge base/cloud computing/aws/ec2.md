@@ -237,6 +237,7 @@ Also see [Automatic instance recovery].
 - [Attach an EBS volume to multiple EC2 instances using Multi-Attach]
 - [Monitor AWS EC2 memory utilization and set CloudWatch Alarm]
 - [Automating Instance Reboots with Amazon CloudWatch EC2 Actions]
+- [Understanding AWS Tenancy Options]
 
 <!--
   Reference
@@ -285,3 +286,4 @@ Also see [Automatic instance recovery].
 [configuring ec2 disk alert using amazon cloudwatch]: https://medium.com/@chandinims001/configuring-ec2-disk-alert-using-amazon-cloudwatch-793807e40d72
 [ec2instances.info on vantage.sh]: https://instances.vantage.sh/
 [monitor aws ec2 memory utilization and set cloudwatch alarm]: https://medium.com/@VaibhaviDeshmukh07/monitor-aws-ec2-memory-utilization-and-set-cloudwatch-alarm-a53d0e0b1eeb
+[Understanding AWS Tenancy Options]: https://medium.com/@simrankumari1344/understanding-aws-tenancy-options-shared-tenancy-dedicated-hosts-and-dedicated-instances-2221bc288a9b
