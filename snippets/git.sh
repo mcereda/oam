@@ -77,12 +77,14 @@ git push origin --delete 'master'
 
 # create patches from the last commit
 git format-patch -n HEAD^
-git format-patch HEAD^ -o './patchfile.patch'
+git format-patch HEAD^ -o './patchDir'
 git format-patch HEAD~1 --stdout
 
 # create patches from specific commits
 git format-patch -1 '3918a1d036e74d47a5c830e4bbabba6f507162b1'
 
+# apply patches
+git apply 'patchDir/patchFile.patch'
 
 ###
 # Take actions on multiple repositories
