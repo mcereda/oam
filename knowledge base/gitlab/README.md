@@ -877,6 +877,7 @@ Solution: set the correct ownership with
 - [Elasticsearch]
 - [CODEOWNERS syntax]
 - [GitLab CLI][glab]
+- [Integrations]
 
 ### Sources
 
@@ -921,6 +922,7 @@ Solution: set the correct ownership with
 <!-- Knowledge base -->
 [buildah]: ../buildah.md
 [glab]: glab.md
+[integrations]: integrations.md
 [kaniko]: ../kaniko.md
 [self-hosting]: ../self-hosting.md
 
