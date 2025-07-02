@@ -1,0 +1,88 @@
+# List indices
+# in cold storage
+GET _cold/indices/_search
+# in warm storage
+GET _cat/indices/_warm
+
+# Search for indices in cold storage
+GET _cold/indices/_search
+{
+    "filters": {
+        "index_pattern": "production-*"
+    }
+}
+
+# Migrate indices between storage tiers
+# cold to ultrawarm (aws-managed domains only)
+POST _cold/migration/_warm
+{
+    "indices": "debug-logs-sata,app-logs-data-000001,.app-logs-production-000003"
+}
+# ultrawarm to hot (aws-managed domains only)
+POST _ultrawarm/migration/index-name-here/_hot
+
+# Check on migrations
+GET _cold/migration/_status
+GET _ultrawarm/migration/_status?v
+
+# Copy *all* documents from an index to another
+POST _reindex?pretty
+{
+    "source": {"index": "sourceIndex"},
+    "dest":   {"index": "destinationIndex"}
+}
+
+# Copy *only missing* documents from an index to another
+POST _reindex?pretty
+{
+    "conflicts": "proceed",
+    "source": {"index": "sourceIndex"},
+    "dest": {
+        "index": "destinationIndex",
+        "op_type": "create"
+    }
+}
+
+# Combine indexes into one
+POST _reindex?pretty
+{
+    "source": {
+        "index": [
+            "sourceIndex_1",
+            …
+            "sourceIndex_N"
+        ]
+    },
+    "dest": {"index": "destinationIndex"}
+}
+
+# Register snapshot repositories
+# aws-managed domains
+PUT _snapshot/repository-name-here
+{
+    "type": "s3",
+    "settings": {
+        "bucket": "exampleorg-opensearch-snapshots",
+        "base_path": "staging",
+        "region": "eu-west-2",
+        "role_arn": "arn:aws:iam::012345678901:role/OpensearchSnapshotExporter"
+    }
+}
+
+# List snapshot repositories
+GET _snapshot
+
+# Get running snapshots' status
+GET _snapshot/_status
+
+# List snapshots in repositories
+GET _snapshot/repository-name-here/_all
+
+# Take snapshots
+POST _snapshot/repository-name-here/snapshot-name-here
+{
+    "indices": "debug-logs-sata-000001,app-logs-*,-.app-logs-production-000003",
+    "ignore_unavailable": true,
+    "include_global_state": false,
+    "partial": true
+}
