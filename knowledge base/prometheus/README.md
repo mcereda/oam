@@ -543,6 +543,7 @@ Typically achieved by:
 - [Prometheus and Grafana setup in Minikube]
 - [I need to know about the below kube_state_metrics description. Exactly looking is what the particular metrics doing]
 - [High Availability in Prometheus: Best Practices and Tips]
+- [How to Reduce Prometheus High Memory Usage]
 
 <!--
   Reference
