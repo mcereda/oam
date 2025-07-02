@@ -595,3 +595,4 @@ Typically achieved by:
 [scaling prometheus with cortex]: https://www.infracloud.io/blogs/cortex-for-ha-monitoring-with-prometheus/
 [scrape selective metrics in prometheus]: https://docs.last9.io/docs/how-to-scrape-only-selective-metrics-in-prometheus
 [set up prometheus and ingress on kubernetes]: https://blog.gojekengineering.com/diy-how-to-set-up-prometheus-and-ingress-on-kubernetes-d395248e2ba
+[How to Reduce Prometheus High Memory Usage]: https://signoz.io/guides/why-does-prometheus-consume-so-much-memory/
