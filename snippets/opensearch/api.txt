@@ -1,7 +1,11 @@
 # List indices
+GET _list/indices
+GET _list/indices/index-name-here?v
+GET _list/indices/index1,index2,index3?v
 # in cold storage
 GET _cold/indices/_search
-# in warm storage
+# in hot or warm storage (aws-managed domains only)
+GET _cat/indices/_hot
 GET _cat/indices/_warm
 
 # Search for indices in cold storage
@@ -55,6 +59,29 @@ POST _reindex?pretty
     },
     "dest": {"index": "destinationIndex"}
 }
+
+# Close open indices
+# disables read and write operations on the impacted index
+POST /prometheus-logs-20231205/_close
+
+# Re-open closed indices
+# re-enables read and write operations on the impacted index
+POST /prometheus-logs-20231205/_open
+
+# Update indices' settings.
+# static settings can only be updated on *closed* indexes.
+PUT /prometheus-logs-20231205/_settings
+{
+    "index": {
+        "codec": "zstd_no_dict",
+        "codec.compression_level": 3,
+        "refresh_interval": "2s"
+    }
+}
+
+# Delete indices
+# one at a time
+DELETE /index-name-here
 
 # Register snapshot repositories
 # aws-managed domains

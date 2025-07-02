@@ -6,9 +6,9 @@ Amazon offering for managed OpenSearch clusters.
    1. [UltraWarm storage](#ultrawarm-storage)
    1. [Cold storage](#cold-storage)
 1. [Operations](#operations)
-   1. [Migrate indexes to UltraWarm storage](#migrate-indexes-to-ultrawarm-storage)
-   1. [Return warm indexes to hot storage](#return-warm-indexes-to-hot-storage)
-   1. [Migrate indexes to Cold storage](#migrate-indexes-to-cold-storage)
+   1. [Migrate indices to UltraWarm storage](#migrate-indices-to-ultrawarm-storage)
+   1. [Return warm indices to hot storage](#return-warm-indices-to-hot-storage)
+   1. [Migrate indices to Cold storage](#migrate-indices-to-cold-storage)
 1. [Index state management plugin](#index-state-management-plugin)
 1. [Snapshots](#snapshots)
 1. [Best practices](#best-practices)
@@ -19,27 +19,26 @@ Amazon offering for managed OpenSearch clusters.
 
 ## Storage
 
-Clusters can be set up to use the [hot-warm architecture].\
-Compared to OpenSearch's, AWS' managed OpenSearch service offers the two extra `UltraWarm` and `Cold` storage options.
+Clusters can be set up to use the [hot-warm architecture].<br/>
+Compared to the plain OpenSearch product, AWS' managed OpenSearch service offers the two extra `UltraWarm` and `Cold`
+storage options.
 
-_Hot_ storage provides the fastest possible performance for indexing and searching **new** data.
-
+_Hot_ storage provides the fastest possible performance for indexing and searching **new** data.<br/>
 _Data_ nodes use **hot** storage in the form of instance stores or EBS volumes attached to each node.
 
-Indexes that are **not** actively written to (e.g., immutable data like logs), that are queried less frequently, or that
+Indices that are **not** actively written to (e.g., immutable data like logs), that are queried less frequently, or that
 don't need the hot storage's performance can be moved to _warm_ storage.
 
-Warm indexes are **read-only** unless returned to hot storage.<br/>
+Warm indices are **read-only** unless returned to hot storage.<br/>
 Aside that, they behave like any other hot index.
 
-_UltraWarm_ nodes use **warm** storage in the form of S3 and caching.
+[_UltraWarm_][ultrawarm storage for amazon opensearch service] nodes use **warm** storage in the form of S3 and caching.
 
 _Cold_ storage is meant for data accessed only occasionally or no longer in active use.<br/>
-Cold indexes are normally detached from nodes and stored in S3, meaning one **can't** read from nor write to cold
-indexes by default.<br/>
-Should one need to query them, one needs to selectively attach them to UltraWarm nodes.
+Cold indices are normally detached from nodes and stored in S3, meaning one **can't** read from nor write to cold
+indices by default. Should one need to query them, one needs to selectively attach them to UltraWarm nodes.
 
-If using the [hot-warm architecture], leverage the [Index State Management plugin] to automate indexes migration to
+If using the [hot-warm architecture], leverage the [Index State Management plugin] to automate indices migration to
 lower storage states after they meet specific conditions.
 
 ### UltraWarm storage
@@ -60,13 +59,13 @@ Considerations:
 - When calculating UltraWarm storage requirements, consider only the size of the primary shards.<br/>
   S3 removes the need for replicas and abstracts away any operating system or service considerations.
 - Dashboards and `_cat/indices` will still report UltraWarm index size as the _total_ of all primary and replica shards.
-- There are [limits](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/limits.html#limits-ultrawarm)
-  to the amount of storage each instance type can address and the maximum number of warm nodes supported by Domains.
+- There are [limits][ultrawarm storage quotas] to the amount of storage each instance type can address and the maximum
+  number of warm nodes supported by Domains.
 - Amazon recommends a maximum shard size of 50 GiB.
 - Upon enablement, UltraWarm might not be available to use for several hours even if the domain state is _Active_.
 - The minimum amount of UltraWarm instances allowed by AWS is 2.
 
-> Before disabling UltraWarm, one **must** either delete **all** warm indexes or migrate them back to hot storage.<br/>
+> Before disabling UltraWarm, one **must** either delete **all** warm indices or migrate them back to hot storage.<br/>
 > After warm storage is empty, wait five minutes before attempting to disable UltraWarm.
 
 ### Cold storage
@@ -80,13 +79,13 @@ Requirements:
 
 Considerations:
 
-- One **can't** read from nor write to cold indexes.
+- One **can't** read from, nor write to, cold indices.
 
 ## Operations
 
-### Migrate indexes to UltraWarm storage
+### Migrate indices to UltraWarm storage
 
-> Indexes' health **must** be green to perform migrations.
+> Indices' health **must** be green to perform migrations.
 
 Migrations are executed one index at a time, sequentially.<br/>
 There can be up to 200 migrations in the queue.<br/>
@@ -94,7 +93,7 @@ Any request that exceeds the limit will be rejected.
 
 > Index migrations to UltraWarm storage require a force merge operation, which purges documents that were marked for
 > deletion.<br/>
-> By default, UltraWarm merges indexes into one segment. One can set this value up to 1000.
+> By default, UltraWarm merges indices into one segment. One can set this value up to 1000.
 
 Migrations might fail during snapshots, shard relocations, or force merges.<br/>
 Failures during snapshots or shard relocation are typically due to node failures or S3 connectivity issues.<br/>
@@ -135,7 +134,7 @@ If a migration is in the queue but has not yet started, it can be removed from t
 POST _ultrawarm/migration/_cancel/my-index
 ```
 
-### Return warm indexes to hot storage
+### Return warm indices to hot storage
 
 Migrate them back to hot storage:
 
@@ -146,11 +145,11 @@ POST _ultrawarm/migration/my-index/_hot
 There can be up to 10 queued migrations from warm to hot storage at a time.<br/>
 Migrations requests are processed one at a time in the order they were queued.
 
-Indexes return to hot storage with **one** replica.
+Indices return to hot storage with **one** replica.
 
-### Migrate indexes to Cold storage
+### Migrate indices to Cold storage
 
-As for [UltraWarm storage][migrate indexes to ultrawarm storage], just change the endpoints accordingly:
+As for [UltraWarm storage][migrate indices to ultrawarm storage], just change the endpoints accordingly:
 
 ```plaintext
 POST _ultrawarm/migration/my-index/_cold
@@ -174,12 +173,12 @@ Compared to [OpenSearch] and [ElasticSearch], ISM for Amazon's managed OpenSearc
 - The managed OpenSearch service supports the three unique ISM operations `warm_migration`, `cold_migration`, and
   `cold_delete`.
 
-  If one's domain has [UltraWarm storage] enabled, the `warm_migration` action transitions indexes to warm storage.\
-  If one's domain has [cold storage] enabled, the `cold_migration` action transitions indexes to cold storage, and the
+  If one's domain has [UltraWarm storage] enabled, the `warm_migration` action transitions indices to warm storage.<br/>
+  If one's domain has [cold storage] enabled, the `cold_migration` action transitions indices to cold storage, and the
   `cold_delete` action deletes them from cold storage.
 
   Should one of these actions not complete within the set timeout period, the migration or deletion of the affected
-  indexes will continue.\
+  indices will continue.<br/>
   Setting an `error_notification` for one of the above actions will send a notification about the action failing,
   should it not complete within the timeout period, but the notification is only for one's own reference. The actual
   operation has no inherent timeout, and will continue to run until it eventually succeeds or fails.
@@ -189,16 +188,16 @@ Compared to [OpenSearch] and [ElasticSearch], ISM for Amazon's managed OpenSearc
 - \[should the domain run OpenSearch or Elasticsearch 7.7 or later] The managed OpenSearch service supports the ISM
   `snapshot` operation.
 
-- Cold indexes API:
+- Cold indices API:
   - Require specifying the `?type=_cold` parameter when you use the following ISM APIs:
     - Add policy
     - Remove policy
     - Update policy
     - Retry failed index
     - Explain index
-  - Do **not** support wildcard operators, except when used at the end of the path.\
+  - Do **not** support wildcard operators, except when used at the end of the path.<br/>
     I.E., `_plugins/_ism/add/logstash-*` is supported, but `_plugins/_ism/add/iad-*-prod` is not.
-  - Do **not** support multiple index names and patterns.\
+  - Do **not** support multiple index names and patterns.<br/>
     I.E., `_plugins/_ism/remove/app-logs` is supported, but `_plugins/_ism/remove/app-logs,sample-data` is not.
 
 - The managed OpenSearch service allows to change only the following ISM settings:
@@ -211,10 +210,11 @@ Refer [Snapshots][opensearch  snapshots] and [Creating index snapshots in Amazon
 
 AWS-managed OpenSearch Service snapshots come in the following forms:
 
-- _Automated_ snapshots: only for cluster recovery, stored in a **preconfigured** S3 bucket at **no** additional cost.\
+- _Automated_ snapshots: only for cluster recovery, stored in a **preconfigured** S3 bucket at **no** additional
+  cost.<br/>
   One can use them to restore the domain in the event of red cluster status or data loss.
-- _Manual_ snapshots: for cluster recovery or moving data from one cluster to another.\
-  Users must be those initiating manual snapshots.\
+- _Manual_ snapshots: for cluster recovery or moving data from one cluster to another.<br/>
+  Users must be those initiating manual snapshots.<br/>
   These snapshots are stored in one's own S3 bucket. Standard S3 charges apply.
 
 All AWS-managed OpenSearch Service domains take automated snapshots, but with a frequency difference:
@@ -232,10 +232,10 @@ To be able to create snapshots manually:
 - An S3 bucket must exist to store snapshots.
 
   > [!IMPORTANT]
-  > Manual snapshots do **not** support the S3 Glacier storage class.\
+  > Manual snapshots do **not** support the S3 Glacier storage class.<br/>
   > Do **not** apply any S3 Glacier lifecycle rule to this bucket.
 
-- An IAM role that delegates permissions to the OpenSearch Service must be defined.\
+- An IAM role that delegates permissions to the OpenSearch Service must be defined.<br/>
   This role must be able to act on the S3 bucket above.
 
   <details style='padding: 0 0 0 1rem'>
@@ -327,7 +327,7 @@ To be able to create snapshots manually:
 
     </details>
 
-Snapshots can be taken only from indices in the hot or warm storage tiers.\
+Snapshots can be taken only from indices in the hot or warm storage tiers.<br/>
 Only **one** index from warm storage is allowed at a time, and the request **cannot** contain indices in mixed tiers.
 
 ## Best practices
@@ -354,7 +354,7 @@ Cluster management tasks are:
 
 - Tracking all nodes in the cluster.
 - Maintaining routing information for nodes in the cluster.
-- Tracking the number of indexes in the cluster.
+- Tracking the number of indices in the cluster.
 - Tracking the number of shards belonging to each index.
 - Updating the cluster state after state changes.<br/>
   I.e., creating an index and adding or removing nodes in the cluster.
@@ -375,7 +375,7 @@ As such, an even number of dedicated master nodes are essentially equivalent to 
 > both fail.<br/>
 > This behavior differs from the OpenSearch default.
 
-Master nodes size is highly correlated with the data instance size and the number of instances, indexes, and shards they
+Master nodes size is highly correlated with the data instance size and the number of instances, indices, and shards they
 can manage.
 
 ## Cost-saving measures
@@ -394,10 +394,10 @@ can manage.
   By default, AWS OpenSearch takes **daily** snapshots and retains them for **14 days**.
 - If using `gp2` EBS volumes, move to `gp3`.
 - Enable autoscaling (serverless only).
-- Optimize indexes' sharding and replication.
+- Optimize indices' sharding and replication.
 - Optimize queries.
 - Optimize data ingestion.
-- Optimize indexes' mapping and settings.
+- Optimize indices' mapping and settings.
 - Optimize the JVM heap size.
 - Summarize and compress historical data using [index rollups].
 - Check out caches.
@@ -438,7 +438,7 @@ can manage.
 <!-- In-article sections -->
 [Cold storage]: #cold-storage
 [Index State Management plugin]: #index-state-management-plugin
-[migrate indexes to ultrawarm storage]: #migrate-indexes-to-ultrawarm-storage
+[migrate indices to ultrawarm storage]: #migrate-indices-to-ultrawarm-storage
 [ultrawarm storage]: #ultrawarm-storage
 
 <!-- Knowledge base -->
@@ -453,7 +453,7 @@ can manage.
 <!-- Files -->
 <!-- Upstream -->
 [best practices for configuring your amazon opensearch service domain]: https://aws.amazon.com/blogs/big-data/best-practices-for-configuring-your-amazon-opensearch-service-domain/
-[cold storage for amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/cold-storage.html
+[Cold storage for amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/cold-storage.html
 [Creating index snapshots in Amazon OpenSearch Service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-snapshots.html
 [dedicated master nodes in amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-dedicatedmasternodes.html
 [how do i reduce the cost of using opensearch service domains?]: https://repost.aws/knowledge-center/opensearch-domain-pricing
@@ -463,6 +463,7 @@ can manage.
 [or1 storage for amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/or1.html
 [supported instance types in amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/supported-instance-types.html
 [ultrawarm storage for amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ultrawarm.html
+[UltraWarm storage quotas]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/limits.html#limits-ultrawarm
 
 <!-- Others -->
 [cost-saving strategies for aws opensearch(finops): optimize performance without breaking the bank]: https://ramchandra-vadranam.medium.com/cost-saving-strategies-for-aws-opensearch-finops-optimize-performance-without-breaking-the-bank-f87f0bb2ce37
