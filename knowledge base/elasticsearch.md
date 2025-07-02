@@ -9,7 +9,8 @@ Part of the Elastic Stack along with Beats, [Kibana] and [Logstash].
 
 Use cases: application search, log analytics, data observability, data ingestion, others.
 
-Forked by Amazon into OpenSearch after Elastic's [2021 license change announcement].
+[Forked by Amazon][stepping up for a truly open source elasticsearch] into OpenSearch after Elastic's
+[2021 license change announcement][elastic license update].
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -50,7 +51,7 @@ Forked by Amazon into OpenSearch after Elastic's [2021 license change announceme
 ## Further readings
 
 - [Website]
-- [Main repository]
+- [Codebase]
 - [OpenSearch], open source fork by Amazon
 - [Beats], [Kibana] and [Logstash]: the rest of the Elastic stack
 
@@ -63,15 +64,16 @@ Forked by Amazon into OpenSearch after Elastic's [2021 license change announceme
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[beats]: beats.md
-[kibana]: kibana.md
-[logstash]: logstash.md
-[opensearch]: opensearch.md
+[Beats]: beats.md
+[Kibana]: kibana.md
+[Logstash]: logstash.md
+[OpenSearch]: opensearch.md
 
 <!-- Files -->
 <!-- Upstream -->
-[2021 license change announcement]: https://www.elastic.co/blog/elastic-license-update
-[main repository]: https://github.com/elastic/elasticsearch
-[website]: https://www.elastic.co/elasticsearch
+[Codebase]: https://github.com/elastic/elasticsearch
+[Elastic License Update]: https://www.elastic.co/blog/elastic-license-update
+[Website]: https://www.elastic.co/elasticsearch
 
 <!-- Others -->
+[Stepping up for a truly open source Elasticsearch]: https://aws.amazon.com/blogs/opensource/stepping-up-for-a-truly-open-source-elasticsearch/

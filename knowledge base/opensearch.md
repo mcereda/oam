@@ -7,12 +7,14 @@ Makes it easy to ingest, search, visualize, and analyze data.
 Use cases: application search, log analytics, data observability, data ingestion, others.
 
 1. [TL;DR](#tldr)
-1. [Node types](#node-types)
-1. [Indexes](#indexes)
+1. [Concepts](#concepts)
+   1. [Node types](#node-types)
+   1. [Indexes](#indexes)
 1. [Setup](#setup)
    1. [The split brain problem](#the-split-brain-problem)
    1. [Tuning](#tuning)
    1. [Hot-warm architecture](#hot-warm-architecture)
+1. [Manage indexes](#manage-indexes)
 1. [Index templates](#index-templates)
    1. [Composable index templates](#composable-index-templates)
 1. [Ingest data](#ingest-data)
@@ -20,6 +22,9 @@ Use cases: application search, log analytics, data observability, data ingestion
 1. [Re-index data](#re-index-data)
 1. [Data streams](#data-streams)
 1. [Index patterns](#index-patterns)
+1. [Index state management plugin](#index-state-management-plugin)
+1. [Snapshots](#snapshots)
+    1. [Take snapshots](#take-snapshots)
 1. [APIs](#apis)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
@@ -131,7 +136,9 @@ If indexes do not already exist, OpenSearch automatically creates them while [in
 
 </details>
 
-## Node types
+## Concepts
+
+### Node types
 
 | Node type                | Description                                                                                                                                                                                                                                                                                               | Best practices for production                                                                                                                                                                                                  |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -154,9 +161,7 @@ After assessing all requirements, it is suggested to use benchmark testing tools
 Provision a small sample cluster and run tests with varying workloads and configurations. Compare and analyze the system
 and query metrics for these tests improve upon the architecture.
 
-## Indexes
-
-Refer [Managing indexes].
+### Indexes
 
 Indexes are collections of documents that one wants to make searchable.<br/>
 They organize the data for fast retrieval.
@@ -430,6 +435,16 @@ Refer [Elasticsearch Split Brain] and [Avoiding the Elasticsearch split brain pr
 
 Refer [Set up a hot-warm architecture].
 
+Enables using the [Index State Management plugin] to automate indexes migration to lower storage states after they meet
+specific conditions.
+
+## Manage indexes
+
+Refer [Managing indexes].
+
+If using the [hot-warm architecture], leverage the [Index State Management plugin] to automate indexes migration to
+lower storage states after they meet specific conditions.
+
 ## Index templates
 
 Refer [Index templates][documentation  index templates].
@@ -542,7 +557,7 @@ If the destination index requires field mappings or custom settings, (re)create 
 with the desired ones.
 
 <details>
-  <summary>Reindex <b>all</b> documents</summary>
+  <summary>Re-index <b>all</b> documents</summary>
 
 Copy **all** documents from one index to another.
 
@@ -583,7 +598,7 @@ POST _reindex
 </details>
 
 <details>
-  <summary>Reindex <b>only unique</b> documents</summary>
+  <summary>Re-index <b>only unique</b> documents</summary>
 
 Copy **only** documents **missing** from a destination index by setting the `op_type` option to `create`.
 
@@ -886,6 +901,83 @@ They require data to be indexed before creation.
 
 </details>
 
+## Index state management plugin
+
+Requires the cluster to use the [hot-warm architecture].
+
+Refer [Index State Management][documentation  index state management].
+
+## Snapshots
+
+Backups of a cluster's indexes and state.
+
+Index snapshots include the affected indexes' data.\
+State snapshots includes cluster settings, node information, index metadata (mappings, settings, or templates), and
+shard allocation.
+
+Snapshots are typically used for:
+
+- Recovering from failure.
+- Migrating existing data from one cluster to another.
+
+One can take and restore snapshots using the snapshot-related [API][apis].\
+If needing to automate snapshot creation, one can use the [snapshot management] feature.
+
+> [!NOTE]
+> Snapshots **do take time to complete**.\
+> While a snapshot is in progress, the cluster continues to index documents and respond to requests. New documents, and
+> updates to existing documents, will **not** included in the snapshot.
+
+Snapshots includes primary shards as they existed when the cluster initiated the snapshot.\
+Depending on the size of the snapshot thread pool, different shards might be included in a snapshot at slightly
+different times.
+
+Snapshots are incremental, meaning that they only store data that has changed since the last successful snapshot.\
+The difference in disk usage between frequent and infrequent snapshots is often minimal. Users are advised to prefer
+taking more snapshots more frequently, then one every so often.
+
+> [!IMPORTANT]
+> When deleting a snapshot, be sure to use the [API][apis] rather than navigating to the storage location and purging
+> files.\
+> Incremental snapshots often share a lot of the same data. When using the API, OpenSearch only removes data that no
+> other snapshot is using.
+
+Snapshots are stored in snapshot repositories.
+Repositories are just storage locations. They can be a shared file system, S3 buckets, Hadoop Distributed File System
+(HDFS), or Azure Storage.
+
+Before one can take snapshots, one **must register** a snapshot repository in the cluster.
+
+### Take snapshots
+
+Refer [Take and restore snapshots].
+
+When taking snapshots, one must specify the name of the snapshot repository and the name of the snapshot.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+This snapshot includes all indexes **and** the cluster's state:
+
+```plaintext
+PUT _snapshot/some-repository/1
+```
+
+Add a request body to include or exclude certain indexes, or specify other settings:
+
+```plaintext
+PUT /_snapshot/my-repository/2
+{
+  "indices": "opensearch-dashboards*,my-index*,-my-index-2016",
+  "ignore_unavailable": true,
+  "include_global_state": false,
+  "partial": false
+}
+```
+
+</details>
+
+Check snapshots' progress with `GET _snapshot/_status`.
+
 ## APIs
 
 OpenSearch clusters offer a REST API.<br/>
@@ -1115,10 +1207,19 @@ DELETE /students/_doc/1
 </details>
 
 <details>
-  <summary>Indexes</summary>
+  <summary>Indices</summary>
 
   <details style="padding-left: 1rem">
-    <summary>View the inferred field types in indexes</summary>
+    <summary>List indices</summary>
+
+```plaintext
+GET _list/indices
+```
+
+  </details>
+
+  <details style="padding-left: 1rem">
+    <summary>View the inferred field types in indices</summary>
 
 Send `GET` requests to the `_mapping` endpoint:
 
@@ -1243,6 +1344,20 @@ DELETE /students
 
 </details>
 
+<details>
+  <summary>Snapshots</summary>
+
+`/_snapshot` endpoint.
+
+  <details style="padding-left: 1rem">
+    <summary>Delete snapshots</summary>
+
+```plaintext
+DELETE _snapshot/repository-name/snapshot-name
+```
+
+</details>
+
 ## Further readings
 
 - [Website]
@@ -1273,6 +1388,7 @@ DELETE /students
 - [Index templates][documentation  index templates]
 - [OpenSearch Data Streams]
 - [OpenSearch Indexes and Data streams]
+- [Snapshot Operations in OpenSearch]
 
 <!--
   Reference
@@ -1284,6 +1400,7 @@ DELETE /students
 [data streams]: #data-streams
 [hot-warm architecture]: #hot-warm-architecture
 [index patterns]: #index-patterns
+[Index State Management plugin]: #index-state-management-plugin
 [index templates]: #index-templates
 [indexes]: #indexes
 [ingest data]: #ingest-data
@@ -1297,6 +1414,7 @@ DELETE /students
 [codebase]: https://github.com/opensearch-project
 [creating a cluster]: https://opensearch.org/docs/latest/tuning-your-cluster/
 [data prepper]: https://opensearch.org/docs/latest/data-prepper/
+[Documentation  Index State Management]: https://docs.opensearch.org/docs/latest/im-plugin/ism/index/
 [documentation  index templates]: https://opensearch.org/docs/latest/im-plugin/index-templates/
 [documentation]: https://opensearch.org/docs/latest/
 [index management]: https://opensearch.org/docs/latest/dashboards/im-dashboards/index-management/
@@ -1305,6 +1423,9 @@ DELETE /students
 [reindex data]: https://opensearch.org/docs/latest/im-plugin/reindex-data/
 [rest api reference]: https://opensearch.org/docs/latest/api-reference/
 [set up a hot-warm architecture]: https://opensearch.org/docs/latest/tuning-your-cluster/#advanced-step-7-set-up-a-hot-warm-architecture
+[Snapshot management]: https://docs.opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-management/
+[Snapshot Operations in OpenSearch]: https://opensearch.org/blog/snapshot-operations/
+[Take and restore snapshots]: https://docs.opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/
 [website]: https://opensearch.org/
 [what is opensearch?]: https://aws.amazon.com/what-is/opensearch/
 

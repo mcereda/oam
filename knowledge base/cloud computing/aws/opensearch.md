@@ -9,6 +9,8 @@ Amazon offering for managed OpenSearch clusters.
    1. [Migrate indexes to UltraWarm storage](#migrate-indexes-to-ultrawarm-storage)
    1. [Return warm indexes to hot storage](#return-warm-indexes-to-hot-storage)
    1. [Migrate indexes to Cold storage](#migrate-indexes-to-cold-storage)
+1. [Index state management plugin](#index-state-management-plugin)
+1. [Snapshots](#snapshots)
 1. [Best practices](#best-practices)
    1. [Dedicated master nodes](#dedicated-master-nodes)
 1. [Cost-saving measures](#cost-saving-measures)
@@ -17,7 +19,8 @@ Amazon offering for managed OpenSearch clusters.
 
 ## Storage
 
-Clusters can be set up to use the [hot-warm architecture].
+Clusters can be set up to use the [hot-warm architecture].\
+Compared to OpenSearch's, AWS' managed OpenSearch service offers the two extra `UltraWarm` and `Cold` storage options.
 
 _Hot_ storage provides the fastest possible performance for indexing and searching **new** data.
 
@@ -31,13 +34,12 @@ Aside that, they behave like any other hot index.
 
 _UltraWarm_ nodes use **warm** storage in the form of S3 and caching.
 
-AWS' managed OpenSearch service offers also _Cold_ storage.<br/>
-It is meant for data accessed only occasionally or no longer in active use.<br/>
+_Cold_ storage is meant for data accessed only occasionally or no longer in active use.<br/>
 Cold indexes are normally detached from nodes and stored in S3, meaning one **can't** read from nor write to cold
 indexes by default.<br/>
 Should one need to query them, one needs to selectively attach them to UltraWarm nodes.
 
-Use [Index State Management][index state management in amazon opensearch service] to automate indexes migration to
+If using the [hot-warm architecture], leverage the [Index State Management plugin] to automate indexes migration to
 lower storage states after they meet specific conditions.
 
 ### UltraWarm storage
@@ -162,6 +164,172 @@ GET _cold/migration/my-index/_status
 POST _cold/migration/my-index/_cancel
 ```
 
+## Index state management plugin
+
+Refer [OpenSearch's Index State Management plugin][opensearch  index state management] and
+[Index State Management in Amazon OpenSearch Service].
+
+Compared to [OpenSearch] and [ElasticSearch], ISM for Amazon's managed OpenSearch service has several differences:
+
+- The managed OpenSearch service supports the three unique ISM operations `warm_migration`, `cold_migration`, and
+  `cold_delete`.
+
+  If one's domain has [UltraWarm storage] enabled, the `warm_migration` action transitions indexes to warm storage.\
+  If one's domain has [cold storage] enabled, the `cold_migration` action transitions indexes to cold storage, and the
+  `cold_delete` action deletes them from cold storage.
+
+  Should one of these actions not complete within the set timeout period, the migration or deletion of the affected
+  indexes will continue.\
+  Setting an `error_notification` for one of the above actions will send a notification about the action failing,
+  should it not complete within the timeout period, but the notification is only for one's own reference. The actual
+  operation has no inherent timeout, and will continue to run until it eventually succeeds or fails.
+
+- \[should the domain run OpenSearch or Elasticsearch 7.4 or later] The managed OpenSearch service supports the ISM
+  `open` and `close` operations.
+- \[should the domain run OpenSearch or Elasticsearch 7.7 or later] The managed OpenSearch service supports the ISM
+  `snapshot` operation.
+
+- Cold indexes API:
+  - Require specifying the `?type=_cold` parameter when you use the following ISM APIs:
+    - Add policy
+    - Remove policy
+    - Update policy
+    - Retry failed index
+    - Explain index
+  - Do **not** support wildcard operators, except when used at the end of the path.\
+    I.E., `_plugins/_ism/add/logstash-*` is supported, but `_plugins/_ism/add/iad-*-prod` is not.
+  - Do **not** support multiple index names and patterns.\
+    I.E., `_plugins/_ism/remove/app-logs` is supported, but `_plugins/_ism/remove/app-logs,sample-data` is not.
+
+- The managed OpenSearch service allows to change only the following ISM settings:
+  - `plugins.index_state_management.enabled` and `plugins.index_state_management.history.enabled` at cluster level.
+  - `plugins.index_state_management.rollover_alias` at index level.
+
+## Snapshots
+
+Refer [Snapshots][opensearch  snapshots] and [Creating index snapshots in Amazon OpenSearch Service].
+
+AWS-managed OpenSearch Service snapshots come in the following forms:
+
+- _Automated_ snapshots: only for cluster recovery, stored in a **preconfigured** S3 bucket at **no** additional cost.\
+  One can use them to restore the domain in the event of red cluster status or data loss.
+- _Manual_ snapshots: for cluster recovery or moving data from one cluster to another.\
+  Users must be those initiating manual snapshots.\
+  These snapshots are stored in one's own S3 bucket. Standard S3 charges apply.
+
+All AWS-managed OpenSearch Service domains take automated snapshots, but with a frequency difference:
+
+- Domains running OpenSearch or Elasticsearch 5.3 and later take **hourly** automated snapshots and retain up to 336 of
+  them for 14 days.
+- Domains running Elasticsearch 5.1 and earlier take **daily** automated snapshots during off-peak hours and retain up
+  to 14 of them. No snapshot data is retained for more than 30 days.
+
+> [!IMPORTANT]
+> Should a cluster enter the red status, all automated snapshots will fail for the time that status persists.
+
+To be able to create snapshots manually:
+
+- An S3 bucket must exist to store snapshots.
+
+  > [!IMPORTANT]
+  > Manual snapshots do **not** support the S3 Glacier storage class.\
+  > Do **not** apply any S3 Glacier lifecycle rule to this bucket.
+
+- An IAM role that delegates permissions to the OpenSearch Service must be defined.\
+  This role must be able to act on the S3 bucket above.
+
+  <details style='padding: 0 0 0 1rem'>
+    <summary>Trust relationship (A.K.A. assume role policy)</summary>
+
+  ```json
+  {
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "es.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }]
+  }
+  ```
+
+  </details>
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Policy</summary>
+
+  ```json
+  {
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::{{ bucket name here }}",
+        "arn:aws:s3:::{{ bucket name here }}/*"
+      ]
+    }]
+  }
+  ```
+
+  </details>
+
+- The IAM user or role whose credentials will be used to sign the requests must have permissions to:
+
+  - Pass the role above to the OpenSearch Service.
+
+    <details style='padding: 0 0 1rem 1rem'>
+      <summary>Policy</summary>
+
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": "iam:PassRole",
+        "Resource": "arn:aws:iam::{{ aws account id }}:role/{{ role name }}"
+      }]
+    }
+    ```
+
+    </details>
+
+    Should one use the domain's dashboards' dev tools, and should the domain use Cognito for authentication, those
+    permissions need to be added to the IAM role that cognito uses for the user pool.
+
+    Should the user or role making the requests be missing such permissions, they might encounter this error when trying
+    to register a repository in the next step:
+
+    > User: arn:aws:iam::123456789012:user/MyUserAccount is not authorized to perform: iam:PassRole on resource:
+    > arn:aws:iam::123456789012:role/TheSnapshotRole
+
+  - Use the `es:ESHttpPut` action in the domain.
+
+    <details style='padding: 0 0 1rem 1rem'>
+      <summary>Policy</summary>
+
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": "es:ESHttpPut",
+        "Resource": "arn:aws:es:{{ region}}:{{ aws account id }}:domain/{{ domain name }}/*"
+      }]
+    }
+    ```
+
+    </details>
+
+Snapshots can be taken only from indices in the hot or warm storage tiers.\
+Only **one** index from warm storage is allowed at a time, and the request **cannot** contain indices in mixed tiers.
+
 ## Best practices
 
 Refer [Operational best practices for Amazon OpenSearch Service] and
@@ -242,6 +410,7 @@ can manage.
 ## Further readings
 
 - [OpenSearch]
+- [ElasticSearch]
 - [Hot-warm architecture]
 - [Supported instance types in Amazon OpenSearch Service]
 
@@ -267,19 +436,25 @@ can manage.
   -->
 
 <!-- In-article sections -->
+[Cold storage]: #cold-storage
+[Index State Management plugin]: #index-state-management-plugin
 [migrate indexes to ultrawarm storage]: #migrate-indexes-to-ultrawarm-storage
 [ultrawarm storage]: #ultrawarm-storage
 
 <!-- Knowledge base -->
-[dedicated master nodes]: #dedicated-master-nodes
-[hot-warm architecture]: ../../opensearch.md#hot-warm-architecture
-[opensearch]: ../../opensearch.md
-[s3]: s3.md
+[Dedicated master nodes]: #dedicated-master-nodes
+[Hot-warm architecture]: ../../opensearch.md#hot-warm-architecture
+[ElasticSearch]: ../../elasticsearch.md
+[OpenSearch]: ../../opensearch.md
+[OpenSearch  index state management]: ../../opensearch.md#index-state-management-plugin
+[OpenSearch  snapshots]: ../../opensearch.md#snapshots
+[S3]: s3.md
 
 <!-- Files -->
 <!-- Upstream -->
 [best practices for configuring your amazon opensearch service domain]: https://aws.amazon.com/blogs/big-data/best-practices-for-configuring-your-amazon-opensearch-service-domain/
 [cold storage for amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/cold-storage.html
+[Creating index snapshots in Amazon OpenSearch Service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-snapshots.html
 [dedicated master nodes in amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-dedicatedmasternodes.html
 [how do i reduce the cost of using opensearch service domains?]: https://repost.aws/knowledge-center/opensearch-domain-pricing
 [index state management in amazon opensearch service]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ism.html

@@ -273,6 +273,7 @@
         "poweroff",
         "powerpipe",
         "powersave",
+        "powertop",
         "preemptible",
         "printenv",
         "privs",
