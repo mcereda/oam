@@ -9,12 +9,12 @@ Use cases: application search, log analytics, data observability, data ingestion
 1. [TL;DR](#tldr)
 1. [Concepts](#concepts)
    1. [Node types](#node-types)
-   1. [Indexes](#indexes)
+   1. [Indices](#indices)
 1. [Setup](#setup)
    1. [The split brain problem](#the-split-brain-problem)
    1. [Tuning](#tuning)
    1. [Hot-warm architecture](#hot-warm-architecture)
-1. [Manage indexes](#manage-indexes)
+1. [Manage indices](#manage-indices)
 1. [Index templates](#index-templates)
    1. [Composable index templates](#composable-index-templates)
 1. [Ingest data](#ingest-data)
@@ -32,11 +32,11 @@ Use cases: application search, log analytics, data observability, data ingestion
 ## TL;DR
 
 _Documents_ are the unit storing information, consisting of text or structured data.<br/>
-Documents are stored in the JSON format, and returned when related information is searched for.<br/>
-Documents are immutable. However, they can be updated by retrieving them, updating the information in them, and
-re-indexing them using the same document IDs.
+Stored in the JSON format, and returned when related information is searched for.<br/>
+The JSON file for a document is immutable, but documents can be updated by retrieving them, updating the information
+they contain, and re-indexing them using the same document IDs.
 
-[_Indexes_][indexes] are collections of documents.<br/>
+[_Indices_][indices] are collections of documents.<br/>
 Their contents are queried when information is searched for.
 
 _Nodes_ are servers that store data and process search requests.<br/>
@@ -46,13 +46,13 @@ Multiple nodes can be aggregated into _Clusters_.<br/>
 Clusters allow nodes to specialize for different responsibilities depending on their types.
 
 Each and every cluster **elects** a _cluster manager node_ is **elected**.<br/>
-Manager nodes orchestrate cluster-level operations (e.g., creating indexes).
+Manager nodes orchestrate cluster-level operations (e.g., creating indices).
 
 Nodes in clusters communicate with each other.<br/>
 When a request is routed to any node, that node sends requests to the others, gathers their responses, and returns the
 final response.
 
-Indexes are split into _shards_, each of them storing a subset of all documents in an index.<br/>
+Indices are split into _shards_, each of them storing a subset of all documents in an index.<br/>
 Shards are evenly distributed across nodes in a cluster.<br/>
 Each shard is effectively a full [Lucene] index. Since each instance of Lucene is a running process consuming CPU and
 memory, having more shards is **not** necessarily better.
@@ -65,7 +65,7 @@ so that replica shards would act as backups in the event of node failures.<br/>
 Replicas also improve the speed at which the cluster processes search requests, encouraging the use of more than one
 replica per index for each search-heavy workload.
 
-Indexes use a data structure called an _inverted index_. It maps words to the documents in which they occur.<br/>
+Indices use a data structure called an _inverted index_. It maps words to the documents in which they occur.<br/>
 When searching, OpenSearch matches the words in the query to the words in the documents. Each document is assigned a
 _relevance score_ indicating how well the document matched the query.
 
@@ -112,7 +112,7 @@ Flushing ensures that the data stored only in the translog is recorded in the [L
 
 Flushes are performed as needed to ensure that the translog does not grow too large.
 
-Shards are [Lucene] indexes, which consist of segments (or segment files).<br/>
+Shards are [Lucene] indices, which consist of segments (or segment files).<br/>
 Segments store the indexed data and are **immutable**.
 
 _Merge operations_ merge smaller segments into larger ones periodically.<br/>
@@ -123,14 +123,14 @@ _Merge policies_ specify the segments' maximum size and how often merge operatio
 
 Interaction with the cluster is done via REST [APIs].
 
-If indexes do not already exist, OpenSearch automatically creates them while [ingesting data][ingest data].
+If indices do not already exist, OpenSearch automatically creates them while [ingesting data][ingest data].
 
 <details>
   <summary>Typical setup order of operations</summary>
 
 1. \[optional] Create [index templates].
 1. \[optional] Create [data streams].
-1. \[optional] Create [indexes].
+1. \[optional] Create [indices].
 1. [Ingest data].
 1. Create [index patterns] for the search dashboard to use.
 
@@ -142,7 +142,7 @@ If indexes do not already exist, OpenSearch automatically creates them while [in
 
 | Node type                | Description                                                                                                                                                                                                                                                                                               | Best practices for production                                                                                                                                                                                                  |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Cluster manager          | Manages the overall operation of a cluster and keeps track of the cluster state.<br/>This includes creating and deleting indexes, keeping track of the nodes that join and leave the cluster, checking the health of each node in the cluster (by running ping requests), and allocating shards to nodes. | Three dedicated cluster manager nodes in three different availability zones ensures the cluster never loses quorum.<br/>Two nodes will be idle for most of the time, except when one node goes down or needs some maintenance. |
+| Cluster manager          | Manages the overall operation of a cluster and keeps track of the cluster state.<br/>This includes creating and deleting indices, keeping track of the nodes that join and leave the cluster, checking the health of each node in the cluster (by running ping requests), and allocating shards to nodes. | Three dedicated cluster manager nodes in three different availability zones ensures the cluster never loses quorum.<br/>Two nodes will be idle for most of the time, except when one node goes down or needs some maintenance. |
 | Cluster manager eligible | Elects one node among them as the cluster manager node through a voting process.                                                                                                                                                                                                                          | Make sure to have dedicated cluster manager nodes by marking all other node types as not cluster manager eligible.                                                                                                             |
 | Data                     | Stores and searches data.<br/>Performs all data-related operations (indexing, searching, aggregating) on local shards.<br/>These are the worker nodes and need more disk space than any other node type.                                                                                                  | Keep them balanced between zones.<br/>Storage and RAM-heavy nodes are recommended.                                                                                                                                             |
 | Ingest                   | Pre-processes data before storing it in the cluster.<br/>Runs an ingest pipeline that transforms data before adding it to an index.                                                                                                                                                                       | Use dedicated ingest nodes if you plan to ingest a lot of data and run complex ingest pipelines.<br/>Optionally offload your indexing from the data nodes so that they are used exclusively for searching and aggregating.     |
@@ -161,9 +161,9 @@ After assessing all requirements, it is suggested to use benchmark testing tools
 Provision a small sample cluster and run tests with varying workloads and configurations. Compare and analyze the system
 and query metrics for these tests improve upon the architecture.
 
-### Indexes
+### Indices
 
-Indexes are collections of documents that one wants to make searchable.<br/>
+Indices are collections of documents that one wants to make searchable.<br/>
 They organize the data for fast retrieval.
 
 To maximise one's ability to search and analyse documents, one can define how documents and their fields are stored and
@@ -182,7 +182,7 @@ There are two _indexing APIs_:
 
   Enormous documents are still better indexed **individually**.
 
-Within indexes, OpenSearch identifies each document using a **unique** _document ID_.<br/>
+Within indices, OpenSearch identifies each document using a **unique** _document ID_.<br/>
 The document's `_id` must be **up to** 512 bytes in size.<br/>
 Should one **not** provide an ID for the document during ingestion, OpenSearch generates a document ID itself.
 
@@ -191,14 +191,14 @@ Upon receiving indexing requests, OpenSearch:
 1. Creates an index if it does not exist already.
 1. Stores the ingested document in that index.
 
-Indexes must follow these naming restrictions:
+Indices must follow these naming restrictions:
 
 - All letters must be **lowercase**.
 - Index names cannot begin with underscores (`_`) or hyphens (`-`).
 - Index names cannot contain spaces, commas, or the following characters: `:`, `"`, `*`, `+`, `/`, `\`, `|`, `?`, `#`,
   `>`, or `<`.
 
-Indexes are configured with _mappings_ and _settings_:
+Indices are configured with _mappings_ and _settings_:
 
 - Mappings are collections of fields and the types of those fields.
 - Settings include index data (i.e., the index name, creation date, and number of shards).
@@ -215,7 +215,7 @@ Numbers are usually dynamically mapped to `long`.<br/>
 Should one want to map them to the `date` type instead, one **will** need to delete the index, then recreate it by
 explicitly specifying the mappings.
 
-_Static_ index settings can only be updated on **closed** indexes.<br/>
+_Static_ index settings can only be updated on **closed** indices.<br/>
 _Dynamic_ index settings can be updated at any time through the [APIs].
 
 ## Setup
@@ -435,21 +435,21 @@ Refer [Elasticsearch Split Brain] and [Avoiding the Elasticsearch split brain pr
 
 Refer [Set up a hot-warm architecture].
 
-Enables using the [Index State Management plugin] to automate indexes migration to lower storage states after they meet
+Enables using the [Index State Management plugin] to automate indices migration to lower storage states after they meet
 specific conditions.
 
-## Manage indexes
+## Manage indices
 
-Refer [Managing indexes].
+Refer [Managing indices].
 
-If using the [hot-warm architecture], leverage the [Index State Management plugin] to automate indexes migration to
+If using the [hot-warm architecture], leverage the [Index State Management plugin] to automate indices migration to
 lower storage states after they meet specific conditions.
 
 ## Index templates
 
 Refer [Index templates][documentation  index templates].
 
-Index templates allow to initialize new indexes with predefined mappings and settings.
+Index templates allow to initialize new indices with predefined mappings and settings.
 
 ### Composable index templates
 
@@ -541,8 +541,8 @@ Refer [Reindex data].
 
 The `_reindex` operation copies documents from an index, that one selects through a query, over to another index.
 
-When needing to make an extensive change (e.g., adding a new field to every document, move documents between indexes, or
-combining multiple indexes into a new one), one can use the `_reindex` operation instead of deleting the old indexes,
+When needing to make an extensive change (e.g., adding a new field to every document, move documents between indices, or
+combining multiple indices into a new one), one can use the `_reindex` operation instead of deleting the old indices,
 making the change offline, and then indexing the data again.
 
 Re-indexing can be an expensive operation depending on the size of the source index.<br/>
@@ -624,11 +624,11 @@ POST _reindex
 </details>
 
 <details>
-  <summary>Combine indexes</summary>
+  <summary>Combine indices</summary>
 
-Combine **all** documents from one or more indexes into another by adding the source indexes as a list.
+Combine **all** documents from one or more indices into another by adding the source indices as a list.
 
-> The number of shards for your source and destination indexes **must be the same**.
+> The number of shards for your source and destination indices **must be the same**.
 
 ```plaintext
 POST _reindex
@@ -655,8 +655,8 @@ and observability data in general).
 They work like any other index, but OpenSearch simplifies some management operations (e.g., rollovers) and stores them
 in a more efficient way.
 
-They are internally composed of multiple _backing_ indexes.<br/>
-Search requests are routed to **all** backing indexes, while indexing requests are routed only to the **latest** write
+They are internally composed of multiple _backing_ indices.<br/>
+Search requests are routed to **all** backing indices, while indexing requests are routed only to the **latest** write
 index.
 
 ISM policies allow to automatically handle index rollover or deletion.
@@ -665,11 +665,11 @@ ISM policies allow to automatically handle index rollover or deletion.
   <summary>Create data streams</summary>
 
 1. Create an index template containing `index_pattern: []` and `data_stream: {}`.<br/>
-   This template will configure all indexes matching the defined patterns as a data stream.
+   This template will configure all indices matching the defined patterns as a data stream.
 
    <details style="padding: 0 0 1em 1em">
 
-   Specifying the `data_stream` object causes the template to create data streams, and not just regular indexes.
+   Specifying the `data_stream` object causes the template to create data streams, and not just regular indices.
 
    ```plaintext
    PUT _index_template/logs-template
@@ -706,8 +706,8 @@ ISM policies allow to automatically handle index rollover or deletion.
    </details>
 
 1. \[optional] Explicitly create the data stream.<br/>
-   Since indexes are created with the first document they ingest, if they do not exist already, the data stream can be
-   created just by starting ingesting documents for the indexes matching its patterns.
+   Since indices are created with the first document they ingest, if they do not exist already, the data stream can be
+   created just by starting ingesting documents for the indices matching its patterns.
 
    <details style="padding: 0 0 1em 1em">
 
@@ -878,8 +878,8 @@ DELETE _data_stream/logs-nginx
 
 ## Index patterns
 
-Index patterns reference one or more indexes, data streams, or index aliases.<br/>
-They are mostly used in dashboards and in the _discover_ tab to filter indexes to gather data from.
+Index patterns reference one or more indices, data streams, or index aliases.<br/>
+They are mostly used in dashboards and in the _discover_ tab to filter indices to gather data from.
 
 They require data to be indexed before creation.
 
@@ -890,12 +890,12 @@ They require data to be indexed before creation.
 1. In the _Management_ section of the side menu, select _Dashboards Management_.
 1. Select _Index patterns_, then _Create index pattern_.
 1. Define the pattern by entering a name in the Index pattern name field.<br/>
-   Dashboards automatically adds a wildcard (`*`). It will make the pattern match multiple sources or indexes.
+   Dashboards automatically adds a wildcard (`*`). It will make the pattern match multiple sources or indices.
 1. Specify the time field to use when filtering documents on a time base.<br/>
    Unless otherwise specified in the source or index properties, `@timestamp` will pop up in the dropdown menu.
 
    Should one **not** want to use a time filter, select that option from the dropdown menu.<br/>
-   This will make OpenSearch return **all** the data in **all** the indexes that match the index pattern.
+   This will make OpenSearch return **all** the data in **all** the indices that match the index pattern.
 
 1. Select _Create index pattern_.
 
@@ -909,9 +909,9 @@ Refer [Index State Management][documentation  index state management].
 
 ## Snapshots
 
-Backups of a cluster's indexes and state.
+Backups of a cluster's indices and state.
 
-Index snapshots include the affected indexes' data.\
+Index snapshots include the affected indices' data.\
 State snapshots includes cluster settings, node information, index metadata (mappings, settings, or templates), and
 shard allocation.
 
@@ -956,13 +956,13 @@ When taking snapshots, one must specify the name of the snapshot repository and 
 
 <details style='padding: 0 0 1rem 1rem'>
 
-This snapshot includes all indexes **and** the cluster's state:
+This snapshot includes all indices **and** the cluster's state:
 
 ```plaintext
 PUT _snapshot/some-repository/1
 ```
 
-Add a request body to include or exclude certain indexes, or specify other settings:
+Add a request body to include or exclude certain indices, or specify other settings:
 
 ```plaintext
 PUT /_snapshot/my-repository/2
@@ -981,7 +981,7 @@ Check snapshots' progress with `GET _snapshot/_status`.
 ## APIs
 
 OpenSearch clusters offer a REST API.<br/>
-It allows almost everything - changing most settings, modify indexes, check cluster health, get statistics, etc.
+It allows almost everything - changing most settings, modify indices, check cluster health, get statistics, etc.
 
 One can interact with the API using every method that can send HTTP requests.<br/>
 One can also send HTTP requests in the Dev Tools console in OpenSearch Dashboards. It uses a simpler syntax to format
@@ -1256,7 +1256,7 @@ GET /students/_mapping
   </details>
 
   <details style="padding-left: 1rem">
-    <summary>Create indexes specifying their mappings</summary>
+    <summary>Create indices specifying their mappings</summary>
 
 ```plaintext
 PUT /students
@@ -1288,9 +1288,9 @@ PUT /students
   </details>
 
   <details style="padding-left: 1rem">
-    <summary>Close indexes</summary>
+    <summary>Close indices</summary>
 
-Disables read and write operations on the impacted indexes.
+Disables read and write operations on the impacted indices.
 
 ```plaintext
 POST /prometheus-logs-20231205/_close
@@ -1299,9 +1299,9 @@ POST /prometheus-logs-20231205/_close
   </details>
 
   <details style="padding-left: 1rem">
-    <summary>(Re)Open closed indexes</summary>
+    <summary>(Re)Open closed indices</summary>
 
-Enables read and write operations on the impacted indexes.
+Enables read and write operations on the impacted indices.
 
 ```plaintext
 POST /prometheus-logs-20231205/_open
@@ -1310,9 +1310,9 @@ POST /prometheus-logs-20231205/_open
   </details>
 
   <details style="padding-left: 1rem">
-    <summary>Update indexes' settings</summary>
+    <summary>Update indices' settings</summary>
 
-_Static_ settings can only be updated on **closed** indexes.
+_Static_ settings can only be updated on **closed** indices.
 
 ```plaintext
 PUT /prometheus-logs-20231205/_settings
@@ -1328,7 +1328,7 @@ PUT /prometheus-logs-20231205/_settings
   </details>
 
   <details style="padding-left: 1rem">
-    <summary>Delete indexes</summary>
+    <summary>Delete indices</summary>
 
 ```plaintext
 DELETE /students
@@ -1383,11 +1383,11 @@ DELETE _snapshot/repository-name/snapshot-name
 - [Elasticsearch Index Lifecycle Management & Policy]
 - [Top 14 ELK alternatives in 2024]
 - [Stepping up for a truly open source Elasticsearch]
-- [Managing indexes]
+- [Managing indices]
 - [Reindex data]
 - [Index templates][documentation  index templates]
 - [OpenSearch Data Streams]
-- [OpenSearch Indexes and Data streams]
+- [OpenSearch Indices and Data streams]
 - [Snapshot Operations in OpenSearch]
 
 <!--
@@ -1402,7 +1402,7 @@ DELETE _snapshot/repository-name/snapshot-name
 [index patterns]: #index-patterns
 [Index State Management plugin]: #index-state-management-plugin
 [index templates]: #index-templates
-[indexes]: #indexes
+[indices]: #indices
 [ingest data]: #ingest-data
 
 <!-- Knowledge base -->
@@ -1419,7 +1419,7 @@ DELETE _snapshot/repository-name/snapshot-name
 [documentation]: https://opensearch.org/docs/latest/
 [index management]: https://opensearch.org/docs/latest/dashboards/im-dashboards/index-management/
 [index settings]: https://opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index-settings/
-[managing indexes]: https://opensearch.org/docs/latest/im-plugin/
+[managing indices]: https://opensearch.org/docs/latest/im-plugin/
 [reindex data]: https://opensearch.org/docs/latest/im-plugin/reindex-data/
 [rest api reference]: https://opensearch.org/docs/latest/api-reference/
 [set up a hot-warm architecture]: https://opensearch.org/docs/latest/tuning-your-cluster/#advanced-step-7-set-up-a-hot-warm-architecture
@@ -1438,7 +1438,7 @@ DELETE _snapshot/repository-name/snapshot-name
 [lucene]: https://lucene.apache.org/
 [okapi bm25]: https://en.wikipedia.org/wiki/Okapi_BM25
 [opensearch data streams]: https://opster.com/guides/opensearch/opensearch-machine-learning/opensearch-data-streams/
-[opensearch indexes and data streams]: https://stackoverflow.com/questions/75394622/opensearch-indexes-and-data-streams#75494264
+[opensearch indices and data streams]: https://stackoverflow.com/questions/75394622/opensearch-indices-and-data-streams#75494264
 [setting up hot-warm architecture for ism in opensearch]: https://opster.com/guides/opensearch/opensearch-data-architecture/setting-up-hot-warm-architecture-for-ism/
 [stepping up for a truly open source elasticsearch]: https://aws.amazon.com/blogs/opensource/stepping-up-for-a-truly-open-source-elasticsearch/
 [top 14 elk alternatives in 2024]: https://signoz.io/blog/elk-alternatives/

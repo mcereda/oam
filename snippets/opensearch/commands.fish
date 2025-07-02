@@ -21,7 +21,8 @@ awscurl --service 'es' \
 | jq -r '.indices[].index' - \
 | tr '\n' ','
 
-# Migrate all indices from warm to hot storage
+# Migrate all indices from ultrawarm to hot storage
+# only aws-managed opensearch domains
 awscurl --service 'es' \
 	'https://search-aws-domain-abcdefghijklmnopqrstuvwxyz.eu-west-1.es.amazonaws.com/_cat/indices/_warm' \
 | grep 'app-cwl-' | sort | cut -d ' ' -f 3 \
@@ -34,6 +35,13 @@ seq 83 72 \
 | xargs -pI '%%' awscurl --service 'es' --request 'POST' \
 	'https://search-aws-domain-abcdefghijklmnopqrstuvwxyz.eu-west-1.es.amazonaws.com/_snapshot/repo/app-logs-0000%%' \
 	-d '{"indices": "app-logs-0000%%", "include_global_state": false}'
+
+# Keep an eye on snapshots
+watch -n '5' " \
+	awscurl --service 'es' \
+		'https://search-aws-domain-abcdefghijklmnopqrstuvwxyz.eu-west-1.es.amazonaws.com/_snapshot/_status' \
+	| jq '.snapshots[]?|{\"name\":.snapshot,\"state\":.state,\"shards\":.shards_stats}' - \
+"
 
 # Delete indices that have been snapshotted
 awscurl --service 'es' \
