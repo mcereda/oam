@@ -2,10 +2,11 @@
 
 1. [TL;DR](#tldr)
 1. [How it works](#how-it-works)
+1. [Standalone tasks](#standalone-tasks)
+1. [Services](#services)
+1. [Launch type](#launch-type)
    1. [EC2 launch type](#ec2-launch-type)
    1. [Fargate launch type](#fargate-launch-type)
-   1. [Standalone tasks](#standalone-tasks)
-   1. [Services](#services)
 1. [Capacity providers](#capacity-providers)
    1. [EC2 capacity providers](#ec2-capacity-providers)
    1. [Fargate for ECS](#fargate-for-ecs)
@@ -148,7 +149,7 @@ while [[ $(aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'test
 Tasks must be registered in _task definitions_ **before** they can be launched.
 
 Tasks can be executed as [Standalone tasks] or [services].<br/>
-Whatever the _launch type_:
+Whatever the [launch type] or [capacity provider][capacity providers]:
 
 1. On launch, a task is created and moved to the `PROVISIONING` state.<br/>
    While in this state, ECS needs to find compute capacity for the task and neither the task nor its containers exist.
@@ -164,23 +165,7 @@ Whatever the _launch type_:
 1. ECS starts the task's containers.
 1. ECS moves the task into the `RUNNING` state.
 
-### EC2 launch type
-
-Starts tasks onto _registered_ EC2 instances.
-
-Instances can be registered:
-
-- Manually.
-- Automatically, by using the _cluster auto scaling_ feature to dynamically scale the cluster's compute capacity.
-
-### Fargate launch type
-
-Starts tasks on dedicated, managed EC2 instances that are **not** reachable by the users.
-
-Instances are automatically provisioned, configured, and registered to scale one's cluster capacity.<br/>
-The service takes care itself of all the infrastructure management for the tasks.
-
-### Standalone tasks
+## Standalone tasks
 
 Refer [Amazon ECS standalone tasks].
 
@@ -188,7 +173,7 @@ Meant to perform some work, then stop similarly to batch processes.
 
 Can be executed on schedules using the EventBridge Scheduler.
 
-### Services
+## Services
 
 Refer [Amazon ECS services].
 
@@ -238,9 +223,27 @@ Available service scheduler strategies:
 
   Fargate does **not** support the `DAEMON` scheduling strategy.
 
+## Launch type
+
+### EC2 launch type
+
+Starts tasks onto _registered_ EC2 instances.
+
+Instances can be registered:
+
+- Manually.
+- Automatically, by using the _cluster auto scaling_ feature to dynamically scale the cluster's compute capacity.
+
+### Fargate launch type
+
+Starts tasks on dedicated, managed EC2 instances that are **not** reachable by the users.
+
+Instances are automatically provisioned, configured, and registered to scale one's cluster capacity.<br/>
+The service takes care itself of all the infrastructure management for the tasks.
+
 ## Capacity providers
 
-Refer [Capacity providers].
+Refer [Capacity providers][upstream  capacity providers].
 
 Clusters can contain a mix of tasks that are hosted on Fargate, Amazon EC2 instances, or external instances.<br/>
 Tasks can run on Fargate or EC2 infrastructure as a launch type or a capacity provider strategy.<br/>
@@ -249,11 +252,63 @@ Capacity providers manage the scaling of infrastructure for tasks in one's clust
 Each cluster can have one or more _capacity providers_, and an optional _capacity provider strategy_.
 
 The capacity provider strategy determines how tasks are spread across a cluster's capacity providers.<br/>
-One can assign a **default** capacity provider strategy to a cluster. This strategy **only** applies when one does not
-specify a launch type nor a capacity provider strategy for a task or service. If either of these parameters is provided,
-the default strategy is ignored.<br/>
+One can assign a **default** capacity provider strategy to a cluster.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+  "clusterName": "some-cluster",
+  "capacityProviders": [
+      "FARGATE",
+      "FARGATE_SPOT"
+  ],
+  "defaultCapacityProviderStrategy": [
+      {
+          "capacityProvider": "FARGATE_SPOT",
+          "weight": 100,
+      },
+      {
+          "capacityProvider": "FARGATE",
+          "weight": 0,
+      }
+  ],
+```
+
+</details>
+
 When running a standalone task or creating a service, one can either use the cluster's default capacity provider
-strategy or provide one that overrides the default.
+strategy or provide one that overrides the default.<br/>
+The default capacity provider strategy **only** applies when one does **not** specify a launch type **nor** a capacity
+provider strategy for a task or service. If either of these parameters is provided, the cluster's default strategy is
+ignored.
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Override the cluster's default strategy</summary>
+
+```json
+{
+  "serviceName": "some-ecs-service",
+  … ,
+  "capacityProviderStrategy": [
+    {
+      "capacityProvider": "FARGATE",
+      "weight": 1,
+      "base": 1
+    },
+    {
+      "capacityProvider": "FARGATE_SPOT",
+      "weight": 2
+    },
+    {
+      "capacityProvider": "some-custom-ec2-capacity-provider",
+      "weight": 0
+    }
+  ]
+}
+```
+
+</details>
 
 One must associate a capacity provider with a cluster **before** associating it with a capacity provider strategy.<br/>
 Strategies allow to specify a maximum of 20 capacity providers.
@@ -261,7 +316,8 @@ Strategies allow to specify a maximum of 20 capacity providers.
 Strategies' weight value defaults to `1` when creating it from the Console, and to `0` if using the API or CLI.
 
 To run tasks on Fargate, one only needs to associate one or more of the pre-defined Fargate-specific capacity providers
-with the cluster. This takes away the need to create or manage that cluster's capacity.
+with the cluster.<br/>
+Leveraging the Fargate providers lifts the need to create or manage that cluster's capacity.
 
 Clusters _can_ contain a mix of Fargate and Auto Scaling group capacity providers. However, a capacity provider strategy
 can only contain either Fargate or Auto Scaling group capacity providers, but **not both**.
@@ -269,13 +325,92 @@ can only contain either Fargate or Auto Scaling group capacity providers, but **
 One **cannot** update a service that is using an Auto Scaling Group capacity provider to use a Fargate one, and
 vice versa.
 
-When multiple capacity providers are specified within a strategy, at least one of the providers **must** have a weight
-value greater than zero.<br/>
-Capacity providers with a weight of zero are **not** used to run tasks. Should all specified providers in a strategy
-have the same weight of zero, any RunTask or CreateService actions using that strategy will fail.
+A strategy's capacity provider can have a defined `base` value. This determines the **guaranteed minimum** number of
+tasks that that provider will host. If no `base` value is specified for the provider, it defaults to `0`.<br/>
+When multiple capacity providers are specified within a strategy, only **one** of them can have a defined `base` value.
 
-In strategies, only **one** capacity provider can have a defined `base` value. If no base value is specified for a
-provider, it defaults to zero.
+The `weight` value determines **the relative ratio** of tasks to place over the long run, **after the `base` values are
+satisfied**.<br/>
+When multiple capacity providers are specified within a strategy, at least one of the providers **must** have a `weight`
+value greater than zero (`0`).
+
+Capacity providers with a `weight` value of zero are **not** used to run tasks. Should _all_ providers in a strategy
+have a weight of `0`, any RunTask or CreateService actions using that strategy will fail.
+
+The `weight` ratio is computed by summing up all providers' weights, then determining the percentage per provider.
+
+<details style='padding: 0 0 0 1rem'>
+  <summary>Simple example</summary>
+
+Provider 1 is `FARGATE`, with weight of `1`.<br/>
+Provider 2 is `FARGATE_SPOT`, with weight of `3`.
+
+```json
+{
+  …
+  "capacityProviderStrategy": [
+    {
+      "capacityProvider": "FARGATE",
+      "weight": 1,
+      "base": 1
+    },
+    {
+      "capacityProvider": "FARGATE_SPOT",
+      "weight": 3
+    }
+  ],
+}
+```
+
+Sum of weights: `1 + 3 = 4`.<br/>
+Percentage per provider:
+
+- `FARGATE`: `1 / 4 = 0.25`.
+- `FARGATE_SPOT`: `3 / 4 = 0.75`.
+
+`FARGATE` will receive 25% of the tasks, while `FARGATE_SPOT` will receive the remaining 75%.
+
+</details>
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>More advanced example</summary>
+
+Provider 1 is `FARGATE`, with a weight of `1` and base of `2`.<br/>
+Provider 2 is `FARGATE_SPOT`, with a weight of `19`.<br/>
+Provider 3 is `some-custom-ec2-capacity-provider`, with a weight of `0`.
+
+```json
+{
+  …
+  "capacityProviderStrategy": [
+    {
+      "capacityProvider": "FARGATE",
+      "weight": 1,
+      "base": 1
+    },
+    {
+      "capacityProvider": "FARGATE_SPOT",
+      "weight": 19
+    },
+    {
+      "capacityProvider": "some-custom-ec2-capacity-provider",
+      "weight": 0
+    }
+  ]
+}
+```
+
+`some-custom-ec2-capacity-provider` will just be ignored due to its weight being `0`.<br/>
+Sum of the remaining weights: `1 + 19 = 20`.<br/>
+Percentage per provider:
+
+- `FARGATE`: `1 / 20 = 0.05`.
+- `FARGATE_SPOT`: `19 / 20 = 0.95`.
+
+`FARGATE` will receive 2 task for the `base` value being `2`, then 5% of the remaining tasks.<br/>
+`FARGATE_SPOT` will receive the remaining 95% of the remaining tasks.
+
+</details>
 
 A cluster can contain a mix of services and standalone tasks that use both capacity providers and launch types.<br/>
 Services _can_ be updated to use a capacity provider strategy instead of a launch type, but one will need to force a new
@@ -294,17 +429,20 @@ Refer [AWS Fargate Spot Now Generally Available] and [Amazon ECS clusters for Fa
 
 ECS can run tasks on the `Fargate` and `Fargate Spot` capacity when they are associated with a cluster.
 
+The Fargate provider runs tasks on on-demand compute capacity.
+
 Fargate Spot is intended for **interruption tolerant** tasks.<br/>
-runs tasks on spare compute capacity. This makes it cost less the normal Fargate price, but comes with the ability for
-AWS to interrupt tasks when it needs capacity back.
+It runs tasks on spare compute capacity. This makes it cost less than Fargate's normal price, but allows AWS to
+interrupt those tasks when it needs capacity back.
 
 During periods of extremely high demand, Fargate Spot capacity might be unavailable.<br/>
 When this happens, ECS services retry launching tasks until the required capacity becomes available.
 
-ECS sends **a two-minute warning** before Spot tasks are stopped due to a Spot interruption. This warning is sent as a
-task state change event to EventBridge and as a SIGTERM signal to the running task.
+ECS sends **a two-minute warning** before Spot tasks are stopped due to a Spot interruption.<br/>
+This warning is sent as a task state change event to EventBridge and as a SIGTERM signal to the running task.
 
 <details style='padding: 0 0 1rem 1rem'>
+  <summary>EventBridge event example</summary>
 
 ```json
 {
@@ -332,7 +470,7 @@ task state change event to EventBridge and as a SIGTERM signal to the running ta
 </details>
 
 When Spot tasks are terminated, the service scheduler receives the interruption signal and attempts to launch additional
-tasks on Fargate Spot if such capacity is available, possibly from a different Availability Zone.
+tasks on Fargate Spot, possibly from a different Availability Zone, provided such capacity is available.
 
 Fargate will **not** replace Spot capacity with on-demand capacity.
 
@@ -341,7 +479,7 @@ Ensure containers exit gracefully before the task stops by configuring the follo
 - Specify a `stopTimeout` value of 120 seconds or less in the container definition that the task is using.<br/>
   The default value is 30 seconds. A higher value will provide more time between the moment that the task's state change
   event is received and the point in time when the container is forcefully stopped.
-- Make sure the `SIGTERM` signal is caught from within the container and triggers any cleanup actions.<br/>
+- Make sure the `SIGTERM` signal is caught from within the container, and that it triggers any needed cleanup.<br/>
   Not processing this signal results in the task receiving a `SIGKILL` signal after the configured `stopTimeout` value,
   which may result in data loss or corruption.
 
@@ -1339,9 +1477,11 @@ Specify a supported value for the task CPU and memory in your task definition.
 
 <!-- In-article sections -->
 [bind mounts]: #bind-mounts
+[Capacity providers]: #capacity-providers
 [docker volumes]: #docker-volumes
 [ebs volumes]: #ebs-volumes
 [efs volumes]: #efs-volumes
+[Launch type]: #launch-type
 [resource constraints]: #resource-constraints
 [services]: #services
 [standalone tasks]: #standalone-tasks
@@ -1368,7 +1508,6 @@ Specify a supported value for the task CPU and memory in your task definition.
 [Automatically scale your Amazon ECS service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
 [AWS Distro for OpenTelemetry]: https://aws-otel.github.io/
 [AWS Fargate Spot Now Generally Available]: https://aws.amazon.com/blogs/aws/aws-fargate-spot-now-generally-available/
-[Capacity providers]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/clusters.html#capacity-providers
 [Centralized Container Logging with Fluent Bit]: https://aws.amazon.com/blogs/opensource/centralized-container-logging-fluent-bit/
 [ecs execute-command proposal]: https://github.com/aws/containers-roadmap/issues/1050
 [Example Amazon ECS task definition: Route logs to FireLens]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/firelens-taskdef.html
@@ -1386,6 +1525,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [troubleshoot amazon ecs deployment issues]: https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ecs.html
 [troubleshoot amazon ecs task definition invalid cpu or memory errors]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 [Under the hood: FireLens for Amazon ECS Tasks]: https://aws.amazon.com/blogs/containers/under-the-hood-firelens-for-amazon-ecs-tasks/
+[upstream  capacity providers]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/clusters.html#capacity-providers
 [use amazon ebs volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html
 [use amazon efs volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html
 [use bind mounts with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/bind-mounts.html
