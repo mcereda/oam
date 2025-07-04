@@ -28,6 +28,7 @@
 1. [Send logs to a central location](#send-logs-to-a-central-location)
     1. [FireLens](#firelens)
     1. [Fluent Bit or Fluentd](#fluent-bit-or-fluentd)
+1. [Best practices](#best-practices)
 1. [Troubleshooting](#troubleshooting)
     1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
 1. [Further readings](#further-readings)
@@ -118,9 +119,9 @@ aws ecs describe-tasks --output 'text' \
   --query "tasks[].attachments[].details[?(name=='privateDnsName')].value"
 
 # Connect to the private DNS name of containers in ECS.
-curl -fs "http://$(\
-  aws ecs describe-tasks --cluster 'testCluster' --tasks "$(\
-      aws ecs list-tasks --cluster 'testCluster' --service-name 'testService' --query 'taskArns' --output 'text' \
+curl -fs "http://$( \
+  aws ecs describe-tasks --cluster 'testCluster' --tasks "$( \
+    aws ecs list-tasks --cluster 'testCluster' --service-name 'testService' --query 'taskArns' --output 'text' \
   )" --query "tasks[].attachments[].details[?(name=='privateDnsName')].value" --output 'text' \
 ):8080"
 
@@ -1413,6 +1414,35 @@ The `fluentd-address` value is specified as a secret option as it may be treated
 }]
 ```
 
+## Best practices
+
+Cost-saving measures:
+
+- If deploying state**less** or otherwise **interruption tolerant** tasks, consider **only** specifying a
+  [capacity provider][capacity providers] that employs **spot** compute capacity (e.g., `FARGATE_SPOT`).
+
+- If deploying state**ful** or otherwise **interruption sensitive** tasks, consider:
+
+  - Specifying a capacity provider that employs **on-demand** compute capacity (e.g., `FARGATE`) to ensure a percentage
+    of tasks execute on a stable base, but limiting its `weight` value (and hence the number of tasks) to a
+    minimum.
+
+    Alternatively, directly set the **on-demand** capacity provider's weight to `0` and specify the **minimum** amount
+    of replicas required by your application in the provider's `base` value.
+
+  - Specifying a **second** capacity provider that employs **spot** compute capacity (e.g., `FARGATE_SPOT`), and raising
+    its `weight` value above the one for the on-demand capacity provider.
+
+- Consider configuring [Service auto scaling][scale the number of tasks automatically] for the application to reduce the
+  number of tasks to a minimum during schedules (e.g., at night) or when otherwise unused.
+
+  > [!WARNING]
+  > Mind the limitations that come with the auto scaling settings.
+
+- If only used internally (e.g., via a VPN), consider **not** using a load balancer, but configuring intra-network
+  communication capabilities for the application in its place.<br/>
+  Refer [Allow tasks to communicate with each other].
+
 ## Troubleshooting
 
 ### Invalid 'cpu' setting for task
@@ -1486,6 +1516,7 @@ Specify a supported value for the task CPU and memory in your task definition.
   -->
 
 <!-- In-article sections -->
+[Allow tasks to communicate with each other]: #allow-tasks-to-communicate-with-each-other
 [bind mounts]: #bind-mounts
 [Capacity providers]: #capacity-providers
 [docker volumes]: #docker-volumes
@@ -1493,6 +1524,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [efs volumes]: #efs-volumes
 [Launch type]: #launch-type
 [resource constraints]: #resource-constraints
+[Scale the number of tasks automatically]: #scale-the-number-of-tasks-automatically
 [services]: #services
 [standalone tasks]: #standalone-tasks
 
