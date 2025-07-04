@@ -19,11 +19,11 @@
    1. [Bind mounts](#bind-mounts)
 1. [Execute commands in tasks' containers](#execute-commands-in-tasks-containers)
 1. [Scale the number of tasks automatically](#scale-the-number-of-tasks-automatically)
-   1. [Target tracking](#target-tracking)
+    1. [Target tracking](#target-tracking)
 1. [Allow tasks to communicate with each other](#allow-tasks-to-communicate-with-each-other)
-   1. [ECS Service Connect](#ecs-service-connect)
-   1. [ECS service discovery](#ecs-service-discovery)
-   1. [VPC Lattice](#vpc-lattice)
+    1. [ECS Service Connect](#ecs-service-connect)
+    1. [ECS service discovery](#ecs-service-discovery)
+    1. [VPC Lattice](#vpc-lattice)
 1. [Scrape metrics using Prometheus](#scrape-metrics-using-prometheus)
 1. [Send logs to a central location](#send-logs-to-a-central-location)
     1. [FireLens](#firelens)
@@ -171,15 +171,15 @@ Refer [Amazon ECS standalone tasks].
 
 Meant to perform some work, then stop similarly to batch processes.
 
-Can be executed on schedules using the EventBridge Scheduler.
+Can be executed on schedules using the [EventBridge Scheduler].
 
 ## Services
 
 Refer [Amazon ECS services].
 
-Execute and maintain a defined number of instances of the same task simultaneously in a cluster.
+Services execute and maintain a defined number of instances of the same task simultaneously in a cluster.
 
-Tasks executed in services are meant to stay active until decommissioned, much like web services.<br/>
+Tasks executed in services are meant to stay active until decommissioned, much like web servers.<br/>
 Should any of such tasks fail or stops, the service scheduler will launch another instance of the same task to replace
 the one that failed.
 
@@ -221,7 +221,8 @@ Available service scheduler strategies:
   There is no need to specify a desired number of tasks, a task placement strategy, or use Service Auto Scaling policies
   when using this strategy.
 
-  Fargate does **not** support the `DAEMON` scheduling strategy.
+  > [!NOTE]
+  > Fargate does **not** support the `DAEMON` scheduling strategy.
 
 ## Launch type
 
@@ -513,7 +514,7 @@ Such tasks support CPU values between 0.25 and 10 vCPUs. these fields are option
 
 Task definitions specifying `FARGATE` as value for the `requiresCompatibilities` attribute, **even if they also specify
 the `EC2` value**, **are required** to set both settings **and** to set them to one of the couples specified in the
-table.<br/>
+next table.<br/>
 Fargate task definitions support **only** those [specific values for tasks' CPU and memory][fargate tasks sizes].
 
 | CPU units | vCPUs | Memory values                               | Supported OSes | Notes                            |
@@ -526,8 +527,9 @@ Fargate task definitions support **only** those [specific values for tasks' CPU 
 | 8192      | 8     | Between 16 GB and 60 GB in 4 GB increments  | Linux          | Requires Linux platform >= 1.4.0 |
 | 16384     | 16    | Between 32 GB and 120 GB in 8 GB increments | Linux          | Requires Linux platform >= 1.4.0 |
 
-The task's settings are **separate** from the CPU and memory values that can be defined at the container definition
-level.<br/>
+The _task's_ settings are **separate** from the CPU and memory values that can be defined at the _container definition_
+level.
+
 Should both a container-level `memory` and `memoryReservation` value be set, the `memory` value **must be higher** than
 the `memoryReservation` value.<br/>
 If specifying `memoryReservation`, that value is guaranteed to the container and subtracted from the available memory
@@ -539,7 +541,7 @@ Refer [Amazon ECS environment variables].
 
 ECS sets default environment variables for any task it runs.
 
-<details>
+<details style='padding: 0 0 1rem 1rem'>
 
 ```sh
 $ aws ecs list-tasks --cluster 'devel' --service-name 'prometheus' --query 'taskArns' --output 'text' \
@@ -614,7 +616,7 @@ Tasks **must**:
 - Reference the EFS volumes in the `volumes` attribute of their definition.
 - Reference the defined volumes in the `mountPoints` attribute in the containers' specifications.
 
-<details style="padding: 0 0 1em 1em;">
+<details style='padding: 0 0 1rem 1rem'>
 
 ```json
 {
@@ -650,7 +652,7 @@ Tasks **must**:
 
 </details>
 
-EFS file systems are supported on
+EFS file systems are supported on:
 
 - EC2 nodes using ECS-optimized AMI version 20200319 with container agent version 1.38.0.
 - Fargate since platform version 1.4.0 or later (Linux).
@@ -676,7 +678,8 @@ Refer [Using Amazon ECS Exec to access your containers on AWS Fargate and Amazon
 [`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]
 and [Amazon ECS Exec Checker].
 
-Leverage ECS Exec, which in turn leverages SSM to create a secure channel between one's device and the target container.
+Leverage ECS Exec, which in turn leverages SSM to create a secure channel between one's device and the target
+container.<br/>
 It does so by bind-mounting the necessary SSM agent binaries into the container while the ECS (or Fargate) agent starts
 the SSM core agent inside the container.<br/>
 The agent, when invoked, calls SSM to create the secure channel. In order to do so, the container's ECS task must have
@@ -686,7 +689,7 @@ The SSM agent does **not** run as a separate container sidecar, but as an additi
 container.<br/>
 Refer [ECS Execute-Command proposal] for details.
 
-Whe whole procedure is transparent and does **not** compel requirements changes in the container's content.
+The whole procedure is transparent and does **not** compel requirements changes in the container's content.
 
 Requirements:
 
@@ -696,7 +699,7 @@ Requirements:
   Required in order to have command logs uploaded correctly to S3 and/or CloudWatch.
 - The task's role (**not** the Task's _execution_ role) must have specific permissions assigned.
 
-  <details style="padding-bottom: 1em;">
+  <details style='padding: 0 0 1rem 1rem'>
     <summary>Policy example</summary>
 
   ```json
@@ -762,7 +765,7 @@ Requirements:
 
 - The service or the `run-task` command that start the task **must have the `enable-execute-command` set to `true`**.
 
-  <details style="padding-bottom: 1em;">
+  <details style='padding: 0 0 1rem 1rem'>
     <summary>Examples</summary>
 
   ```sh
@@ -784,7 +787,7 @@ Requirements:
   - Must [install the Session Manager plugin for the AWS CLI].
   - Must be allowed the `ecs:ExecuteCommand` action on the ECS cluster.
 
-    <details style="padding-bottom: 1em;">
+    <details style='padding: 0 0 1rem 1rem'>
       <summary>Policy example</summary>
 
     ```json
@@ -815,8 +818,8 @@ Procedure:
 1. Confirm that the task's `ExecuteCommandAgent` status is `RUNNING` and the `enableExecuteCommand` attribute is set to
    `true`.
 
-   <details style="padding-bottom: 1em;">
-    <summary>Example</summary>
+   <details style='padding: 0 0 1rem 1rem'>
+     <summary>Example</summary>
 
    ```sh
    aws ecs describe-tasks --cluster 'devel' --tasks 'ef6260ed8aab49cf926667ab0c52c313' --output 'yaml' \
@@ -847,8 +850,8 @@ Procedure:
 
 1. Execute the command.
 
-   <details style="padding-bottom: 1em;">
-    <summary>Example</summary>
+   <details style='padding: 0 0 1rem 1rem'>
+     <summary>Example</summary>
 
    ```sh
    aws ecs execute-command --interactive --command 'df -h' \
@@ -1003,8 +1006,8 @@ Service Connect does **not** support:
 - Services using the `blue/green` or `external deployment` types.
 - External container instance for ECS Anywhere.
 - PPv2.
-- Task definitions that set _container_ memory limits.
-  It is required to set the _task_ memory limit though.
+- Task definitions that set _container_ memory limits.<br/>
+  It is required to set the _task_ memory limit, though.
 
 Tasks using the `bridge` network mode and Service Connect will **not** support the `hostname` container definition
 parameter.
@@ -1033,8 +1036,8 @@ One must delete namespaces in AWS Cloud Map themselves.
 - Services **must** use the **rolling deployment** strategy, as it is the only one supported.
 - Task definitions **must** set their task's memory limit.
 - The task memory limit must be set to a number **greater** than the sum of the container memory limits.<br/>
-  The CPU and memory in the task limits that aren't allocated in the container limits will be used by the
-  Service Connect proxy container and other containers that don't set container limits.
+  The CPU and memory in the task limits that aren't allocated in the container limits will be used by the Service
+  Connect's proxy container and other containers that don't set container limits.
 - All endpoints must be **unique** within their namespace.
 - All discovery names must be **unique** within their namespace.
 - One **must** redeploy existing services before applications can resolve the new endpoints.<br/>
@@ -1134,6 +1137,7 @@ configured.
 Service discovery supports only the `A` and `SRV` DNS record types.<br/>
 DNS records are automatically added or removed as tasks start or stop for ECS services.
 
+Task registration in CloudMap might take some seconds to finish.<br/>
 Until ECS registers the tasks, Containers in them might complain about being unable to resolve the services they are
 using.
 
@@ -1223,6 +1227,7 @@ See also [What is Amazon VPC Lattice?] and its [Amazon VPC Lattice pricing].
 
 Refer [Prometheus service discovery for AWS ECS] and [Scraping Prometheus metrics from applications running in AWS ECS].
 
+> [!WARNING]
 > Prometheus is **not** currently capable to automatically discover ECS components like services or tasks.
 
 Solutions:
@@ -1372,8 +1377,8 @@ It **must** be a custom image equipped with the required output plugins if not.
 
 Refer [Centralized Container Logging with Fluent Bit].
 
-Use the fluentd log driver in task definitions.<br/>
-The fluentd-address value is specified as a secret option as it may be treated as sensitive data.
+Use the `fluentd` log driver in task definitions.<br/>
+The `fluentd-address` value is specified as a secret option as it may be treated as sensitive data.
 
 ```json
 "containerDefinitions": [{
@@ -1510,6 +1515,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [AWS Fargate Spot Now Generally Available]: https://aws.amazon.com/blogs/aws/aws-fargate-spot-now-generally-available/
 [Centralized Container Logging with Fluent Bit]: https://aws.amazon.com/blogs/opensource/centralized-container-logging-fluent-bit/
 [ecs execute-command proposal]: https://github.com/aws/containers-roadmap/issues/1050
+[EventBridge Scheduler]: https://docs.aws.amazon.com/scheduler/latest/UserGuide/what-is-scheduler.html
 [Example Amazon ECS task definition: Route logs to FireLens]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/firelens-taskdef.html
 [fargate tasks sizes]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html#fargate-tasks-size
 [how amazon ecs manages cpu and memory resources]: https://aws.amazon.com/blogs/containers/how-amazon-ecs-manages-cpu-and-memory-resources/
