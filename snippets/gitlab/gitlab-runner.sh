@@ -46,6 +46,7 @@ curl -fs 'https://gitlab.com/api/v4/runners/all?status=offline&per_page=100' -H 
 # Force reloading the configuration file
 sudo kill -HUP $(pidof 'gitlab-runner')
 sudo kill -s 'SIGHUP' $(pgrep 'gitlab-runner')
+sudo pkill -HUP 'gitlab-runner'
 
 # Stop accepting new builds and exit as soon as currently running builds finish
 # A.K.A. graceful shutdown
