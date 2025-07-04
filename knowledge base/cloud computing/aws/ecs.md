@@ -259,21 +259,22 @@ One can assign a **default** capacity provider strategy to a cluster.
 
 ```json
 {
-  "clusterName": "some-cluster",
-  "capacityProviders": [
-      "FARGATE",
-      "FARGATE_SPOT"
-  ],
-  "defaultCapacityProviderStrategy": [
-      {
-          "capacityProvider": "FARGATE_SPOT",
-          "weight": 100,
-      },
-      {
-          "capacityProvider": "FARGATE",
-          "weight": 0,
-      }
-  ],
+    "clusterName": "some-cluster",
+    "capacityProviders": [
+        "FARGATE",
+        "FARGATE_SPOT"
+    ],
+    "defaultCapacityProviderStrategy": [
+        {
+            "capacityProvider": "FARGATE_SPOT",
+            "weight": 100
+        },
+        {
+            "capacityProvider": "FARGATE",
+            "weight": 0
+        }
+    ]
+}
 ```
 
 </details>
@@ -289,23 +290,23 @@ ignored.
 
 ```json
 {
-  "serviceName": "some-ecs-service",
-  … ,
-  "capacityProviderStrategy": [
-    {
-      "capacityProvider": "FARGATE",
-      "weight": 1,
-      "base": 1
-    },
-    {
-      "capacityProvider": "FARGATE_SPOT",
-      "weight": 2
-    },
-    {
-      "capacityProvider": "some-custom-ec2-capacity-provider",
-      "weight": 0
-    }
-  ]
+    "serviceName": "some-ecs-service",
+    … ,
+    "capacityProviderStrategy": [
+        {
+            "capacityProvider": "FARGATE",
+            "weight": 1,
+            "base": 1
+        },
+        {
+            "capacityProvider": "FARGATE_SPOT",
+            "weight": 2
+        },
+        {
+            "capacityProvider": "some-custom-ec2-capacity-provider",
+            "weight": 0
+        }
+    ]
 }
 ```
 
@@ -354,18 +355,17 @@ Provider 2 is `FARGATE_SPOT`, with weight of `3`.
 
 ```json
 {
-  …
-  "capacityProviderStrategy": [
-    {
-      "capacityProvider": "FARGATE",
-      "weight": 1,
-      "base": 1
-    },
-    {
-      "capacityProvider": "FARGATE_SPOT",
-      "weight": 3
-    }
-  ],
+    …
+    "capacityProviderStrategy": [
+        {
+            "capacityProvider": "FARGATE",
+            "weight": 1
+        },
+        {
+            "capacityProvider": "FARGATE_SPOT",
+            "weight": 3
+        }
+    ]
 }
 ```
 
@@ -382,42 +382,42 @@ Percentage per provider:
 <details style='padding: 0 0 1rem 1rem'>
   <summary>More advanced example</summary>
 
-Provider 1 is `FARGATE`, with a weight of `1` and base of `2`.<br/>
+Provider 1 is `FARGATE`, with a weight of `1`.<br/>
 Provider 2 is `FARGATE_SPOT`, with a weight of `19`.<br/>
-Provider 3 is `some-custom-ec2-capacity-provider`, with a weight of `0`.
+Provider 3 is `some-custom-ec2-capacity-provider`, with a weight of `0` and base of `2`.
 
 ```json
 {
-  …
-  "capacityProviderStrategy": [
-    {
-      "capacityProvider": "FARGATE",
-      "weight": 1,
-      "base": 2
-    },
-    {
-      "capacityProvider": "FARGATE_SPOT",
-      "weight": 19
-    },
-    {
-      "capacityProvider": "some-custom-ec2-capacity-provider",
-      "weight": 0
-    }
-  ]
+    …
+    "capacityProviderStrategy": [
+        {
+            "capacityProvider": "FARGATE",
+            "weight": 1
+        },
+        {
+            "capacityProvider": "FARGATE_SPOT",
+            "weight": 19
+        },
+        {
+            "capacityProvider": "some-custom-ec2-capacity-provider",
+            "base": 2,
+            "weight": 0
+        }
+    ]
 }
 ```
 
-`FARGATE` will maintain tasks just for having the `base` value between the bunch.<br/>
-It will get at least 2 of them since the `base` value is `2`.
+`some-custom-ec2-capacity-provider` will run tasks just for being the provider with the `base` value defined.<br/>
+Aside assigning it the 2 base tasks as per configuration, the scheduler will just ignore
+`some-custom-ec2-capacity-provider` due to its weight being `0`.
 
-`some-custom-ec2-capacity-provider` will just be ignored during scheduling due to its weight being `0`.<br/>
 Sum of the remaining weights: `1 + 19 = 20`.<br/>
 Percentage per provider:
 
 - `FARGATE`: `1 / 20 = 0.05`.
 - `FARGATE_SPOT`: `19 / 20 = 0.95`.
 
-`FARGATE` will receive 5% of the remaining tasks, while `FARGATE_SPOT` will receive 95% of them.
+`FARGATE` will receive 5% of the tasks over the base, while `FARGATE_SPOT` will receive 95% of them.
 
 </details>
 
@@ -455,24 +455,24 @@ This warning is sent as a task state change event to EventBridge and as a SIGTER
 
 ```json
 {
-  "version": "0",
-  "id": "9bcdac79-b31f-4d3d-9410-fbd727c29fab",
-  "detail-type": "ECS Task State Change",
-  "source": "aws.ecs",
-  "account": "111122223333",
-  "resources": [
-    "arn:aws:ecs:us-east-1:111122223333:task/b99d40b3-5176-4f71-9a52-9dbd6f1cebef"
-  ],
-  "detail": {
-    "clusterArn": "arn:aws:ecs:us-east-1:111122223333:cluster/default",
-    "createdAt": "2016-12-06T16:41:05.702Z",
-    "desiredStatus": "STOPPED",
-    "lastStatus": "RUNNING",
-    "stoppedReason": "Your Spot Task was interrupted.",
-    "stopCode": "SpotInterruption",
-    "taskArn": "arn:aws:ecs:us-east-1:111122223333:task/b99d40b3-5176-4f71-9a52-9dbd6fEXAMPLE",
-    ...
-  }
+    "version": "0",
+    "id": "9bcdac79-b31f-4d3d-9410-fbd727c29fab",
+    "detail-type": "ECS Task State Change",
+    "source": "aws.ecs",
+    "account": "111122223333",
+    "resources": [
+        "arn:aws:ecs:us-east-1:111122223333:task/b99d40b3-5176-4f71-9a52-9dbd6f1cebef"
+    ],
+    "detail": {
+        "clusterArn": "arn:aws:ecs:us-east-1:111122223333:cluster/default",
+        "createdAt": "2016-12-06T16:41:05.702Z",
+        "desiredStatus": "STOPPED",
+        "lastStatus": "RUNNING",
+        "stoppedReason": "Your Spot Task was interrupted.",
+        "stopCode": "SpotInterruption",
+        "taskArn": "arn:aws:ecs:us-east-1:111122223333:task/b99d40b3-5176-4f71-9a52-9dbd6fEXAMPLE",
+        …
+    }
 }
 ```
 
@@ -634,7 +634,7 @@ Tasks **must**:
             "fileSystemId": "fs-1234",
             "rootDirectory": "/path/to/my/data",
             "transitEncryption": "ENABLED",
-            "transitEncryptionPort": integer,
+            "transitEncryptionPort": 9076,
             "authorizationConfig": {
                 "accessPointId": "fsap-1234",
                 "iam": "ENABLED"
@@ -764,7 +764,7 @@ Requirements:
                   "kms:GenerateDataKey"
               ],
               "Resource": "arn:aws:kms:eu-west-1:012345678901:key/abcdef01-2345-6789-abcd-ef0123456789"
-          },
+          }
       ]
   }
   ```
@@ -783,8 +783,8 @@ Requirements:
 
   ```ts
   new aws.ecs.Service(
-    'whatever',
-    { enableExecuteCommand: true,  …, },
+      'whatever',
+      { enableExecuteCommand: true,  …, },
   );
   ```
 
@@ -1077,14 +1077,11 @@ Procedure:
    <details style="padding: 0 0 1rem 1rem">
 
    ```json
-   containerDefinitions: [
-       {
-           "name": "postgres",
-           "protocol": "tcp",
-           "containerPort": 5432,
-       },
-       …
-   ]
+   containerDefinitions: [{
+       "name": "postgres",
+       "protocol": "tcp",
+       "containerPort": 5432
+   }]
    ```
 
    </details>
@@ -1105,7 +1102,7 @@ Procedure:
                "dnsName": "pgsql"
            }]
        }]
-   },
+   }
    ```
 
    </details>
@@ -1166,7 +1163,7 @@ Procedure:
    ```json
    "serviceRegistries": [{
        "registryArn": "arn:aws:servicediscovery:eu-west-1:012345678901:service/srv-uuf33b226vw93biy"
-   }],
+   }]
    ```
 
    </details>
@@ -1311,16 +1308,16 @@ It **must** be a custom image equipped with the required output plugins if not.
             }
         },
         {
-          "name": "log_router",
-          "essential": true,
-          "image": "amazon/aws-for-fluent-bit:latest",
-          "memoryReservation": 128,
-          "firelensConfiguration": {
-              "type": "fluentbit",
-              "options": {
-                  "enable-ecs-log-metadata": "true"
-              }
-          }
+            "name": "log_router",
+            "essential": true,
+            "image": "amazon/aws-for-fluent-bit:latest",
+            "memoryReservation": 128,
+            "firelensConfiguration": {
+                "type": "fluentbit",
+                "options": {
+                    "enable-ecs-log-metadata": "true"
+                }
+            }
         }
     ]
 }
@@ -1351,13 +1348,13 @@ It **must** be a custom image equipped with the required output plugins if not.
             "logConfiguration": {
                 "logDriver": "awsfirelens",
                 "options": {
-                  "Name": "loki",
-                  "Host": "loki.example.org",
-                  "Port": "3100",
-                  "LogLevel": "info",
-                  "Labels": "{job=\"nginx\", container=\"nginx\"}",
-                  "tls": "off",
-                  "remove_keys": "ecs_task_arn,ecs_cluster"
+                    "Name": "loki",
+                    "Host": "loki.example.org",
+                    "Port": "3100",
+                    "LogLevel": "info",
+                    "Labels": "{job=\"nginx\", container=\"nginx\"}",
+                    "tls": "off",
+                    "remove_keys": "ecs_task_arn,ecs_cluster"
                 }
             }
         },
@@ -1413,7 +1410,7 @@ The `fluentd-address` value is specified as a secret option as it may be treated
             "containerPort": 24224
         }
     ]
-}],
+}]
 ```
 
 ## Troubleshooting
