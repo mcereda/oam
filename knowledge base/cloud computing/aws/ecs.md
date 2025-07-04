@@ -326,19 +326,25 @@ can only contain either Fargate or Auto Scaling group capacity providers, but **
 One **cannot** update a service that is using an Auto Scaling Group capacity provider to use a Fargate one, and
 vice versa.
 
-A strategy's capacity provider can have a defined `base` value. This determines the **guaranteed minimum** number of
-tasks that that provider will host. If no `base` value is specified for the provider, it defaults to `0`.<br/>
+A strategy's capacity provider can have a defined `base` value. This determines how many **guaranteed** tasks that
+provider will be given **as minimum** when enough replicas are requested.<br/>
+Setting the `base` value higher than the service or standalone task's `desiredCount` only results in `desiredCount`
+tasks being placed on that provider. If no `base` value is specified for a provider, it defaults to `0`.<br/>
 When multiple capacity providers are specified within a strategy, only **one** of them can have a defined `base` value.
 
-The `weight` value determines **the relative ratio** of tasks to place over the long run, **after the `base` values are
-satisfied**.<br/>
+The `weight` value determines **the relative ratio** of tasks to execute over the long run.<br/>
+This value is taken into account **only after the `base` values are satisfied**.<br/>
 When multiple capacity providers are specified within a strategy, at least one of the providers **must** have a `weight`
 value greater than zero (`0`).
 
-Capacity providers with a `weight` value of zero are **not** used to run tasks. Should _all_ providers in a strategy
-have a weight of `0`, any RunTask or CreateService actions using that strategy will fail.
+Aside from their `base` value (if not `0`), capacity providers with a `weight` value of `0` are **not** considered when
+the scheduler decides where to place tasks. Should _all_ providers in a strategy have a weight of `0`, any `RunTask` or
+`CreateService` actions using that strategy will fail.
 
-The `weight` ratio is computed by summing up all providers' weights, then determining the percentage per provider.
+The `weight` ratio is computed by:
+
+1. Summing up all providers' weights.
+1. Determining the percentage per provider.
 
 <details style='padding: 0 0 0 1rem'>
   <summary>Simple example</summary>
@@ -387,7 +393,7 @@ Provider 3 is `some-custom-ec2-capacity-provider`, with a weight of `0`.
     {
       "capacityProvider": "FARGATE",
       "weight": 1,
-      "base": 1
+      "base": 2
     },
     {
       "capacityProvider": "FARGATE_SPOT",
@@ -401,15 +407,17 @@ Provider 3 is `some-custom-ec2-capacity-provider`, with a weight of `0`.
 }
 ```
 
-`some-custom-ec2-capacity-provider` will just be ignored due to its weight being `0`.<br/>
+`FARGATE` will maintain tasks just for having the `base` value between the bunch.<br/>
+It will get at least 2 of them since the `base` value is `2`.
+
+`some-custom-ec2-capacity-provider` will just be ignored during scheduling due to its weight being `0`.<br/>
 Sum of the remaining weights: `1 + 19 = 20`.<br/>
 Percentage per provider:
 
 - `FARGATE`: `1 / 20 = 0.05`.
 - `FARGATE_SPOT`: `19 / 20 = 0.95`.
 
-`FARGATE` will receive 2 task for the `base` value being `2`, then 5% of the remaining tasks.<br/>
-`FARGATE_SPOT` will receive the remaining 95% of the remaining tasks.
+`FARGATE` will receive 5% of the remaining tasks, while `FARGATE_SPOT` will receive 95% of them.
 
 </details>
 
