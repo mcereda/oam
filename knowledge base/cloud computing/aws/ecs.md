@@ -6,6 +6,9 @@
    1. [Fargate launch type](#fargate-launch-type)
    1. [Standalone tasks](#standalone-tasks)
    1. [Services](#services)
+1. [Capacity providers](#capacity-providers)
+   1. [EC2 capacity providers](#ec2-capacity-providers)
+   1. [Fargate for ECS](#fargate-for-ecs)
 1. [Resource constraints](#resource-constraints)
 1. [Environment variables](#environment-variables)
 1. [Storage](#storage)
@@ -234,6 +237,113 @@ Available service scheduler strategies:
   when using this strategy.
 
   Fargate does **not** support the `DAEMON` scheduling strategy.
+
+## Capacity providers
+
+Refer [Capacity providers].
+
+Clusters can contain a mix of tasks that are hosted on Fargate, Amazon EC2 instances, or external instances.<br/>
+Tasks can run on Fargate or EC2 infrastructure as a launch type or a capacity provider strategy.<br/>
+Capacity providers manage the scaling of infrastructure for tasks in one's clusters.
+
+Each cluster can have one or more _capacity providers_, and an optional _capacity provider strategy_.
+
+The capacity provider strategy determines how tasks are spread across a cluster's capacity providers.<br/>
+One can assign a **default** capacity provider strategy to a cluster. This strategy **only** applies when one does not
+specify a launch type nor a capacity provider strategy for a task or service. If either of these parameters is provided,
+the default strategy is ignored.<br/>
+When running a standalone task or creating a service, one can either use the cluster's default capacity provider
+strategy or provide one that overrides the default.
+
+One must associate a capacity provider with a cluster **before** associating it with a capacity provider strategy.<br/>
+Strategies allow to specify a maximum of 20 capacity providers.
+
+Strategies' weight value defaults to `1` when creating it from the Console, and to `0` if using the API or CLI.
+
+To run tasks on Fargate, one only needs to associate one or more of the pre-defined Fargate-specific capacity providers
+with the cluster. This takes away the need to create or manage that cluster's capacity.
+
+Clusters _can_ contain a mix of Fargate and Auto Scaling group capacity providers. However, a capacity provider strategy
+can only contain either Fargate or Auto Scaling group capacity providers, but **not both**.
+
+One **cannot** update a service that is using an Auto Scaling Group capacity provider to use a Fargate one, and
+vice versa.
+
+When multiple capacity providers are specified within a strategy, at least one of the providers **must** have a weight
+value greater than zero.<br/>
+Capacity providers with a weight of zero are **not** used to run tasks. Should all specified providers in a strategy
+have the same weight of zero, any RunTask or CreateService actions using that strategy will fail.
+
+In strategies, only **one** capacity provider can have a defined `base` value. If no base value is specified for a
+provider, it defaults to zero.
+
+A cluster can contain a mix of services and standalone tasks that use both capacity providers and launch types.<br/>
+Services _can_ be updated to use a capacity provider strategy instead of a launch type, but one will need to force a new
+deployment to do so.
+
+### EC2 capacity providers
+
+Refer [Amazon ECS capacity providers for the EC2 launch type].
+
+When using EC2 instances for capacity, one really uses Auto Scaling groups to manage the EC2 instances.<br/>
+Auto Scaling helps ensure that one has the correct number of EC2 instances available to handle the application's load.
+
+### Fargate for ECS
+
+Refer [AWS Fargate Spot Now Generally Available] and [Amazon ECS clusters for Fargate].
+
+ECS can run tasks on the `Fargate` and `Fargate Spot` capacity when they are associated with a cluster.
+
+Fargate Spot is intended for **interruption tolerant** tasks.<br/>
+runs tasks on spare compute capacity. This makes it cost less the normal Fargate price, but comes with the ability for
+AWS to interrupt tasks when it needs capacity back.
+
+During periods of extremely high demand, Fargate Spot capacity might be unavailable.<br/>
+When this happens, ECS services retry launching tasks until the required capacity becomes available.
+
+ECS sends **a two-minute warning** before Spot tasks are stopped due to a Spot interruption. This warning is sent as a
+task state change event to EventBridge and as a SIGTERM signal to the running task.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+  "version": "0",
+  "id": "9bcdac79-b31f-4d3d-9410-fbd727c29fab",
+  "detail-type": "ECS Task State Change",
+  "source": "aws.ecs",
+  "account": "111122223333",
+  "resources": [
+    "arn:aws:ecs:us-east-1:111122223333:task/b99d40b3-5176-4f71-9a52-9dbd6f1cebef"
+  ],
+  "detail": {
+    "clusterArn": "arn:aws:ecs:us-east-1:111122223333:cluster/default",
+    "createdAt": "2016-12-06T16:41:05.702Z",
+    "desiredStatus": "STOPPED",
+    "lastStatus": "RUNNING",
+    "stoppedReason": "Your Spot Task was interrupted.",
+    "stopCode": "SpotInterruption",
+    "taskArn": "arn:aws:ecs:us-east-1:111122223333:task/b99d40b3-5176-4f71-9a52-9dbd6fEXAMPLE",
+    ...
+  }
+}
+```
+
+</details>
+
+When Spot tasks are terminated, the service scheduler receives the interruption signal and attempts to launch additional
+tasks on Fargate Spot if such capacity is available, possibly from a different Availability Zone.
+
+Fargate will **not** replace Spot capacity with on-demand capacity.
+
+Ensure containers exit gracefully before the task stops by configuring the following:
+
+- Specify a `stopTimeout` value of 120 seconds or less in the container definition that the task is using.<br/>
+  The default value is 30 seconds. A higher value will provide more time between the moment that the task's state change
+  event is received and the point in time when the container is forcefully stopped.
+- Make sure the `SIGTERM` signal is caught from within the container and triggers any cleanup actions.<br/>
+  Not processing this signal results in the task receiving a `SIGKILL` signal after the configured `stopTimeout` value,
+  which may result in data loss or corruption.
 
 ## Resource constraints
 
@@ -1243,6 +1353,8 @@ Specify a supported value for the task CPU and memory in your task definition.
 [efs]: efs.md
 
 <!-- Upstream -->
+[Amazon ECS capacity providers for the EC2 launch type]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/asg-capacity-providers.html
+[Amazon ECS clusters for Fargate]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html
 [Amazon ECS environment variables]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-environment-variables.html
 [amazon ecs exec checker]: https://github.com/aws-containers/amazon-ecs-exec-checker
 [Amazon ECS FireLens Examples]: https://github.com/aws-samples/amazon-ecs-firelens-examples
@@ -1253,7 +1365,10 @@ Specify a supported value for the task CPU and memory in your task definition.
 [amazon ecs task lifecycle]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html
 [amazon ecs task role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
 [Amazon VPC Lattice pricing]: https://aws.amazon.com/vpc/lattice/pricing/
+[Automatically scale your Amazon ECS service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
 [AWS Distro for OpenTelemetry]: https://aws-otel.github.io/
+[AWS Fargate Spot Now Generally Available]: https://aws.amazon.com/blogs/aws/aws-fargate-spot-now-generally-available/
+[Capacity providers]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/clusters.html#capacity-providers
 [Centralized Container Logging with Fluent Bit]: https://aws.amazon.com/blogs/opensource/centralized-container-logging-fluent-bit/
 [ecs execute-command proposal]: https://github.com/aws/containers-roadmap/issues/1050
 [Example Amazon ECS task definition: Route logs to FireLens]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/firelens-taskdef.html
@@ -1261,11 +1376,13 @@ Specify a supported value for the task CPU and memory in your task definition.
 [how amazon ecs manages cpu and memory resources]: https://aws.amazon.com/blogs/containers/how-amazon-ecs-manages-cpu-and-memory-resources/
 [how amazon elastic container service works with iam]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security_iam_service-with-iam.html
 [How can I allow the tasks in my Amazon ECS services to communicate with each other?]: https://repost.aws/knowledge-center/ecs-tasks-services-communication
+[How target tracking scaling for Application Auto Scaling works]: https://docs.aws.amazon.com/autoscaling/application/userguide/target-tracking-scaling-policy-overview.html
 [identity and access management for amazon elastic container service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security-iam.html
 [install the session manager plugin for the aws cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
 [Interconnect Amazon ECS services]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/interconnecting-services.html
 [Metrics collection from Amazon ECS using Amazon Managed Service for Prometheus]: https://aws.amazon.com/blogs/opensource/metrics-collection-from-amazon-ecs-using-amazon-managed-service-for-prometheus/
 [storage options for amazon ecs tasks]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html
+[Target tracking scaling policies for Application Auto Scaling]: https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-target-tracking.html
 [troubleshoot amazon ecs deployment issues]: https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ecs.html
 [troubleshoot amazon ecs task definition invalid cpu or memory errors]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 [Under the hood: FireLens for Amazon ECS Tasks]: https://aws.amazon.com/blogs/containers/under-the-hood-firelens-for-amazon-ecs-tasks/
@@ -1278,9 +1395,6 @@ Specify a supported value for the task CPU and memory in your task definition.
 [using amazon ecs exec to access your containers on aws fargate and amazon ec2]: https://aws.amazon.com/blogs/containers/new-using-amazon-ecs-exec-access-your-containers-fargate-ec2/
 [What is Amazon VPC Lattice?]: https://docs.aws.amazon.com/vpc-lattice/latest/ug/what-is-vpc-lattice.html
 [What Is AWS Cloud Map?]: https://docs.aws.amazon.com/cloud-map/latest/dg/what-is-cloud-map.html
-[Automatically scale your Amazon ECS service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
-[Target tracking scaling policies for Application Auto Scaling]: https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-target-tracking.html
-[How target tracking scaling for Application Auto Scaling works]: https://docs.aws.amazon.com/autoscaling/application/userguide/target-tracking-scaling-policy-overview.html
 
 <!-- Others -->
 [`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]: https://stackoverflow.com/questions/69261159/aws-ecs-execute-command-results-in-targetnotconnectedexception-the-execute
