@@ -222,7 +222,7 @@ Available service scheduler strategies:
   There is no need to specify a desired number of tasks, a task placement strategy, or use Service Auto Scaling policies
   when using this strategy.
 
-  > [!NOTE]
+  > [!important]
   > Fargate does **not** support the `DAEMON` scheduling strategy.
 
 ## Launch type
@@ -1233,7 +1233,7 @@ See also [What is Amazon VPC Lattice?] and its [Amazon VPC Lattice pricing].
 
 Refer [Prometheus service discovery for AWS ECS] and [Scraping Prometheus metrics from applications running in AWS ECS].
 
-> [!WARNING]
+> [!important]
 > Prometheus is **not** currently capable to automatically discover ECS components like services or tasks.
 
 Solutions:
@@ -1418,25 +1418,56 @@ The `fluentd-address` value is specified as a secret option as it may be treated
 
 Cost-saving measures:
 
-- If deploying state**less** or otherwise **interruption tolerant** tasks, consider **only** specifying a
-  [capacity provider][capacity providers] that employs **spot** compute capacity (e.g., `FARGATE_SPOT`).
+- When deploying state**less** or otherwise **interruption tolerant** tasks, consider **only** using **spot** compute
+  capacity (e.g., `FARGATE_SPOT`).<br/>
+  Refer [Capacity providers].
 
-- If deploying state**ful** or otherwise **interruption sensitive** tasks, consider:
+- If deploying state**ful** or otherwise **interruption sensitive** tasks, consider using on-demand compute capacity
+  (e.g., `FARGATE`) **only** for the **minimum** amount of required tasks.<br/>
+  Refer [Capacity providers].
 
-  - Specifying a capacity provider that employs **on-demand** compute capacity (e.g., `FARGATE`) to ensure a percentage
-    of tasks execute on a stable base, but limiting its `weight` value (and hence the number of tasks) to a
-    minimum.
+  <details style='padding: 0 0 1rem 1rem'>
 
-    Alternatively, directly set the **on-demand** capacity provider's weight to `0` and specify the **minimum** amount
-    of replicas required by your application in the provider's `base` value.
+  Ensure **only a set number** of tasks execute on on-demand capacity by specifying the `base` value and a **zero**
+  `weight` value for the on-demand capacity provider.
 
-  - Specifying a **second** capacity provider that employs **spot** compute capacity (e.g., `FARGATE_SPOT`), and raising
-    its `weight` value above the one for the on-demand capacity provider.
+    <details style='padding: 0 0 1rem 1rem'>
+
+    ```json
+    {
+        "capacityProvider": "FARGATE",
+        "base": 2,
+        "weight": 0
+    }
+    ```
+
+    </details>
+
+  Ensure a **percentage** or **ratio** of all the desired tasks execute on on-demand capacity by specifying a **low**
+  `weight` value for the on-demand capacity provider, and a **higher** `weight` value for a **second**, **spot**
+  capacity provider.
+
+    <details style='padding: 0 0 1rem 1rem'>
+
+    ```json
+    {
+        "capacityProvider": "FARGATE",
+        "weight": 1
+    }
+    {
+        "capacityProvider": "FARGATE_SPOT",
+        "weight": 19
+    }
+    ```
+
+    </details>
+
+  </details>
 
 - Consider configuring [Service auto scaling][scale the number of tasks automatically] for the application to reduce the
   number of tasks to a minimum during schedules (e.g., at night) or when otherwise unused.
 
-  > [!WARNING]
+  > [!caution]
   > Mind the limitations that come with the auto scaling settings.
 
 - If only used internally (e.g., via a VPN), consider **not** using a load balancer, but configuring intra-network
