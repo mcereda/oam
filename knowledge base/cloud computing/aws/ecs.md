@@ -7,6 +7,7 @@
 1. [Launch type](#launch-type)
    1. [EC2 launch type](#ec2-launch-type)
    1. [Fargate launch type](#fargate-launch-type)
+   1. [External launch type](#external-launch-type)
 1. [Capacity providers](#capacity-providers)
    1. [EC2 capacity providers](#ec2-capacity-providers)
    1. [Fargate for ECS](#fargate-for-ecs)
@@ -227,6 +228,8 @@ Available service scheduler strategies:
 
 ## Launch type
 
+Defines the underlying infrastructure effectively running containers within ECS.
+
 ### EC2 launch type
 
 Starts tasks onto _registered_ EC2 instances.
@@ -242,6 +245,11 @@ Starts tasks on dedicated, managed EC2 instances that are **not** reachable by t
 
 Instances are automatically provisioned, configured, and registered to scale one's cluster capacity.<br/>
 The service takes care itself of all the infrastructure management for the tasks.
+
+### External launch type
+
+Manages containers running **outside** the ECS ecosystem, e.g., on-premises servers, other cloud providers, or hybrid
+deployments.
 
 ## Capacity providers
 
@@ -674,11 +682,25 @@ Refer [Use Docker volumes with Amazon ECS].
 
 TODO
 
+Only supported by EC2 or external instances.
+
 ### Bind mounts
 
 Refer [Use bind mounts with Amazon ECS].
 
 TODO
+
+Mount files or directories from a host into a container.
+
+Supported for tasks on both Fargate and EC2 instances.
+
+Bind mounts are tied to the lifecycle of the container that uses them.<br/>
+After all the containers using a specific bind mount stop, that data is removed.<br/>
+The data can be tied to the lifecycle of an EC2 instance by specifying a `host` value in the task's definition.
+
+Tasks running on Fargate receive a minimum of 20 GiB of ephemeral storage for bind mounts.<br/>
+This can be increased up to a maximum of 200 GiB by specifying the `ephemeralStorage` parameter in the task's
+definition.
 
 ## Execute commands in tasks' containers
 
@@ -1570,6 +1592,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [Interconnect Amazon ECS services]
 - [Amazon ECS Service Discovery]
 - [AWS Fargate Pricing Explained]
+- [The Ultimate Beginner's Guide to AWS ECS]
 
 <!--
   Reference
@@ -1654,3 +1677,4 @@ Specify a supported value for the task CPU and memory in your task definition.
 [guide to using amazon ebs with amazon ecs and aws fargate]: https://stackpioneers.com/2024/01/12/guide-to-using-amazon-ebs-with-amazon-ecs-and-aws-fargate/
 [prometheus service discovery for aws ecs]: https://tomgregory.com/aws/prometheus-service-discovery-for-aws-ecs/
 [Scraping Prometheus metrics from applications running in AWS ECS]: https://towardsaws.com/scraping-prometheus-metrics-from-aws-ecs-9c8d9a1ca1bd
+[The Ultimate Beginner's Guide to AWS ECS]: https://awsfundamentals.com/blog/aws-ecs-beginner-guide

@@ -25,6 +25,7 @@
 | CD      | Continuous Deployment                                  |                                                                                                     |
 | CDN     | Content Delivery Network                               |                                                                                                     |
 | CI      | Continuous Integration                                 |                                                                                                     |
+| CIDR    | Classless Inter-Domain Routing                         |                                                                                                     |
 | CLI     | Command Line Interface                                 |                                                                                                     |
 | CMS     | Content Management System                              |                                                                                                     |
 | CN      | Canonical Name                                         | In Active Directory, the full path of an object in a canonical format                               |
