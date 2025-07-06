@@ -71,15 +71,29 @@ subsequent requests that API receives.
 VPCs define isolated virtual networking environments.<br/>
 AWS accounts include one default VPC for each AWS Region.
 
+Every VPC will have at least one CIDR block.<br/>
+Every new AWS account will have one default VPC in every region, all with the `172.31.0.0/16` CIDR block assigned.
+
 VPCs can be _peered_ to enable direct connectivity between them via private IP addresses.<br/>
 The peer connection also requires exchanging route table entries between the VPCs.
 
-Subnets are ranges of IP addresses in VPCs.<br/>
+Subnets are virtual networks, each of which carves out smaller range of IP addresses from their VPC's CIDR block.<br/>
 Each subnet resides in a single Availability Zone.<br/>
 _Public_ subnets have a direct route to an Internet gateway. Resources in public subnets **can** access the public
 Internet.<br/>
 _Private_ subnets do **not** have a direct route to an Internet gateway. Resources in private subnets **require** a NAT
 device to access the public internet.
+
+_Security groups_ control the traffic in and out of the resources associated with them, like firewalls would do.<br/>
+_Security group rules_ are **stateful**, meaning that connections initiated from the security group will allow the
+corresponding answers to come back in (but not new connections).<br/>
+The default value for Egress traffic is to allow all connections.
+
+_Network Access Control Lists_ also control the traffic in and out. However, they are associated with subnets, and
+affect all resources within that subnet.<br/>
+NACLs are **stateless**, meaning that both the Inbound and Outbound rules must match traffic patterns to allow
+communications in **any** direction.<br/>
+_NACL rules_ allow all traffic by default. They also have a priority.
 
 Gateways connect VPCs to other networks.<br/>
 [_Internet gateways_][connect to the internet using an internet gateway] connect VPCs to the Internet.<br/>
@@ -87,6 +101,10 @@ Gateways connect VPCs to other networks.<br/>
 networks. They can communicate with services outside the VPC, but cannot receive unsolicited connection requests.<br/>
 [_VPC endpoints_][access aws services through aws privatelink] connect VPCs to AWS services privately, without the need
 of Internet gateways or NAT devices.
+
+_Route tables_ control how traffic flows throughout, and in or out, a VPC.<br/>
+They are associated with subnets, and affect all resources within those subnets.<br/>
+By default, a VPC only comes with a single route table. It is referred to as the `Main` route table.
 
 By default, connections to AWS services use the services' **public** endpoint.
 
@@ -109,7 +127,7 @@ graph LR
   end
   ei --> ig
   ig --> i
-  ig --> as
+  i --> as
 ```
 
 </details>
@@ -138,14 +156,39 @@ graph LR
   ei --> ng
   ng --> ig
   ig --> i
-  ig --> as
+  i --> as
 ```
 
 </details>
 
 [PrivateLink] leverages VPC endpoints to create a private and direct connection between a VPC and an AWS service.<br/>
-[Gateway endpoints] do the same in a more convenient way that does not use Elastic Network Interfaces, but can be used
-only for some services ([S3] and DynamoDB).
+[Gateway endpoints] do the same in a more convenient way that does not use Elastic Network Interfaces, but are only
+supported by specific AWS services ([S3] and DynamoDB).
+
+<details style="padding: 0 0 1rem 1rem">
+
+```mermaid
+graph LR
+  i(Internet)
+  subgraph Region
+    direction LR
+    subgraph VPC
+      subgraph Public Network
+        ng(NAT Gateway)
+      end
+      subgraph Private Network
+        ei(Instance)
+      end
+      ge(Gateway<br/>Endpoint)
+      ig(Internet<br/>Gateway)
+    end
+    as(AWS Service)
+  end
+  ei --> ge
+  ge --> as
+```
+
+</details>
 
 [Direct Connect] creates a dedicated network connection between on-premises data centers or offices and AWS.
 
@@ -772,6 +815,8 @@ machine if not.
 - [Tools to Build on AWS]
 - [Boto3 documentation]
 - [More info about resource deprecation?]
+- [What Is OIDC and Why Do We Need It?]
+- [AWS Fundamentals Blog]
 
 ### Sources
 
@@ -803,6 +848,12 @@ machine if not.
 - [What is AWS Global Accelerator?]
 - [How AWS Global Accelerator works]
 - [Using Amazon CloudWatch with AWS Global Accelerator]
+- [Gateway Endpoints vs Internet Routing for S3]
+- Introduction to the AWS Virtual Private Cloud (VPC) -
+  [Part 1][Introduction to the AWS Virtual Private Cloud (VPC) - Part 1],
+  [Part 2][Introduction to the AWS Virtual Private Cloud (VPC) - Part 2],
+  [Part 3][Introduction to the AWS Virtual Private Cloud (VPC) - Part 3]
+- [VPC Endpoints: Secure and Direct Access to AWS Services]
 
 <!--
   Reference
@@ -894,5 +945,12 @@ machine if not.
 [aws savings plans vs. reserved instances: when to use each]: https://www.cloudzero.com/blog/savings-plans-vs-reserved-instances/
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
 [difference in boto3 between resource, client, and session?]: https://stackoverflow.com/questions/42809096/difference-in-boto3-between-resource-client-and-session
+[Gateway Endpoints vs Internet Routing for S3]: https://awsfundamentals.com/blog/gateway-endpoints-vs-internet-routing-s3
+[Introduction to the AWS Virtual Private Cloud (VPC) - Part 1]: https://awsfundamentals.com/blog/amazon-vpc-introduction-part-1
+[Introduction to the AWS Virtual Private Cloud (VPC) - Part 2]: https://awsfundamentals.com/blog/introduction-to-the-aws-virtual-private-cloud-vpc-part-2
+[Introduction to the AWS Virtual Private Cloud (VPC) - Part 3]: https://awsfundamentals.com/blog/amazon-vpc-introduction-part-3
 [Learn AWS]: https://www.learnaws.org/
 [using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
+[VPC Endpoints: Secure and Direct Access to AWS Services]: https://awsfundamentals.com/blog/vpc-endpoints
+[What Is OIDC and Why Do We Need It?]: https://awsfundamentals.com/blog/oidc-introduction
+[AWS Fundamentals Blog]: https://awsfundamentals.com/blog

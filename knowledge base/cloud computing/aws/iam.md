@@ -428,6 +428,7 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 - [Get to Grips with AWS IAM Roles: Terms, Concepts, and Examples]
 - [What is exactly "Assume" a role in AWS?]
 - [Conditions with multiple context keys or values]
+- [AWS IAM Users: Understanding Identity Center, Organizations, and Federation]
 
 <!--
   Reference
@@ -466,9 +467,10 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 <!-- Others -->
 [avoid the 60 minutes timeout when using the aws cli with iam roles]: https://cloudonaut.io/avoid-the-60-minutes-timeout-when-using-the-aws-cli-with-iam-roles/
 [aws iam roles - everything you need to know & examples]: https://spacelift.io/blog/aws-iam-roles
+[AWS IAM Users: Understanding Identity Center, Organizations, and Federation]: https://awsfundamentals.com/blog/aws-iam-users
 [aws.permissions.cloud]: https://aws.permissions.cloud/
 [get to grips with aws iam roles: terms, concepts, and examples]: https://blog.awsfundamentals.com/aws-iam-roles-terms-concepts-and-examples
 [introduction to aws iam assumerole]: https://aws.plainenglish.io/introduction-to-aws-iam-assumerole-fbef3ce8e90b
 [using aws cli securely with iam roles and mfa]: https://dev.to/albac/using-aws-cli-securely-with-iam-roles-and-mfa-56c3
-[you might be clueless as to why aws assume role isn't working, despite being correctly set up]: https://medium.com/@kamal.maiti/you-might-be-clueless-as-to-why-aws-assume-role-isnt-working-despite-being-correctly-set-up-1b3138519c07
 [what is exactly "assume" a role in aws?]: https://stackoverflow.com/questions/50082732/what-is-exactly-assume-a-role-in-aws
+[you might be clueless as to why aws assume role isn't working, despite being correctly set up]: https://medium.com/@kamal.maiti/you-might-be-clueless-as-to-why-aws-assume-role-isnt-working-despite-being-correctly-set-up-1b3138519c07
