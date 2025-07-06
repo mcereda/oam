@@ -502,7 +502,7 @@ apply to the cgroup running **all** the containers in the task.
 The CPU quota controls the amount of CPU time granted to a cgroup during a given CPU period. Both settings are expressed
 in terms of microseconds.<br/>
 When the CPU quota equals the CPU period, a cgroup can execute up to 100% on one vCPU (or any other fraction that totals
-to 100% for multiple vCPUs). The CPU quota has a maximum of 1000000us, and the CPU period has a minimum of 1ms.
+to 100% for multiple vCPUs). The CPU quota has a maximum of 1000000µs, and the CPU period has a minimum of 1ms.<br/>
 Use these values to set the limits for the tasks' CPU count.
 
 When changing the CPU period with**out** changing the CPU quota, the task will have different effective limits than what
@@ -1416,12 +1416,40 @@ The `fluentd-address` value is specified as a secret option as it may be treated
 
 ## Best practices
 
+- Consider configuring [resource constraints].
+- Consider making sure the `SIGTERM` signal is caught from within the container, and that it triggers any cleanup action
+  that might be needed.
+- When using **spot** compute capacity, consider ensuring containers exit gracefully before the task stops.\
+  Refer [Capacity providers].
+
 Cost-saving measures:
+
+- Prefer using ARM-based compute capacity over the default `X86_64`, where feasible.<br/>
+  Specify the CPU architecture in the task's definition.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  ```diff
+   {
+       "family": "bb-arm64",
+       "networkMode": "awsvpc",
+       …,
+  +    "runtimePlatform": {
+  +        "cpuArchitecture": "ARM64"
+  +    }
+   }
+  ```
+
+  </details>
+
+- When configuring [resource constraints]:
+
+  - Consider granting tasks a _reasonable_ amount of resources to work with.
+  - Keep an eye on the task's effective resource usage and adjust the constraints accordingly.
 
 - When deploying state**less** or otherwise **interruption tolerant** tasks, consider **only** using **spot** compute
   capacity (e.g., `FARGATE_SPOT`).<br/>
   Refer [Capacity providers].
-
 - If deploying state**ful** or otherwise **interruption sensitive** tasks, consider using on-demand compute capacity
   (e.g., `FARGATE`) **only** for the **minimum** amount of required tasks.<br/>
   Refer [Capacity providers].
@@ -1512,6 +1540,8 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [What Is AWS Cloud Map?]
 - [Centralized Container Logging with Fluent Bit]
 - [Effective Logging Strategies with Amazon ECS and Fluentd]
+- [ECS pricing]
+- [Announcing AWS Graviton2 Support for AWS Fargate]
 
 ### Sources
 
@@ -1554,7 +1584,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [ebs volumes]: #ebs-volumes
 [efs volumes]: #efs-volumes
 [Launch type]: #launch-type
-[resource constraints]: #resource-constraints
+[Resource constraints]: #resource-constraints
 [Scale the number of tasks automatically]: #scale-the-number-of-tasks-automatically
 [services]: #services
 [standalone tasks]: #standalone-tasks
@@ -1609,6 +1639,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [using amazon ecs exec to access your containers on aws fargate and amazon ec2]: https://aws.amazon.com/blogs/containers/new-using-amazon-ecs-exec-access-your-containers-fargate-ec2/
 [What is Amazon VPC Lattice?]: https://docs.aws.amazon.com/vpc-lattice/latest/ug/what-is-vpc-lattice.html
 [What Is AWS Cloud Map?]: https://docs.aws.amazon.com/cloud-map/latest/dg/what-is-cloud-map.html
+[Announcing AWS Graviton2 Support for AWS Fargate]: https://aws.amazon.com/blogs/aws/announcing-aws-graviton2-support-for-aws-fargate-get-up-to-40-better-price-performance-for-your-serverless-containers/
 
 <!-- Others -->
 [`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]: https://stackoverflow.com/questions/69261159/aws-ecs-execute-command-results-in-targetnotconnectedexception-the-execute
@@ -1617,6 +1648,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [attach ebs volume to aws ecs fargate]: https://medium.com/@shujaatsscripts/attach-ebs-volume-to-aws-ecs-fargate-e23fea7bb1a7
 [AWS Fargate Pricing Explained]: https://www.vantage.sh/blog/fargate-pricing
 [aws-cloudmap-prometheus-sd]: https://github.com/awslabs/aws-cloudmap-prometheus-sd
+[ECS pricing]: https://awsfundamentals.com/blog/amazon-ecs-pricing
 [Effective Logging Strategies with Amazon ECS and Fluentd]: https://reintech.io/blog/effective-logging-strategies-amazon-ecs-fluent
 [exposing multiple ports for an aws ecs service]: https://medium.com/@faisalsuhail1/exposing-multiple-ports-for-an-aws-ecs-service-64b9821c09e8
 [guide to using amazon ebs with amazon ecs and aws fargate]: https://stackpioneers.com/2024/01/12/guide-to-using-amazon-ebs-with-amazon-ecs-and-aws-fargate/
