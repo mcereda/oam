@@ -18,6 +18,7 @@
    1. [EFS volumes](#efs-volumes)
    1. [Docker volumes](#docker-volumes)
    1. [Bind mounts](#bind-mounts)
+1. [Networking](#networking)
 1. [Execute commands in tasks' containers](#execute-commands-in-tasks-containers)
 1. [Scale the number of tasks automatically](#scale-the-number-of-tasks-automatically)
     1. [Target tracking](#target-tracking)
@@ -166,6 +167,9 @@ Whatever the [launch type] or [capacity provider][capacity providers]:
 1. ECS uses the container agent to pull the task's container images.
 1. ECS starts the task's containers.
 1. ECS moves the task into the `RUNNING` state.
+
+> [!important]
+> Task definition's parameters differ depending on the launch type.
 
 ## Standalone tasks
 
@@ -520,11 +524,11 @@ The 100ms period allows for vCPUs ranging from 0.125 to 10.
 
 Task-level CPU and memory parameters are ignored for Windows containers.
 
-The `cpu` value must be expressed in _CPU units_ or _vCPUs_.<br/>
-_vCPUs_ are converted to _CPU units_ when task definitions are registered.
+The `cpu` value must be expressed in _CPU units_ or _vCPUs_. A CPU unit is 1/1024 of a full vCPU.<br/>
+_vCPUs_ values are converted to _CPU units_ when task definitions are registered.
 
 The `memory` value can be expressed in _MiB_ or _GB_.<br/>
-_GB_s are converted to _MiB_ when tasks definitions are registered.
+_GB_ values are converted to _MiB_ when tasks definitions are registered.
 
 These fields are optional for tasks hosted on EC2.<br/>
 Such tasks support CPU values between 0.25 and 10 vCPUs. these fields are optional
@@ -547,10 +551,51 @@ Fargate task definitions support **only** those [specific values for tasks' CPU 
 The _task's_ settings are **separate** from the CPU and memory values that can be defined at the _container definition_
 level.
 
+Reservations configure the **minimum** amount of resources that containers or tasks receive.<br/>
+Using more than the reservation's amount is known as _bursting_.<br/>
+ECS _guarantees_ reservations. It doesn't place a task on an instance that cannot fulfill the task's reservation.
+
+Limits are the **maximum** amount of resources that containers or tasks can use.<br/>
+Attempts to use more CPU more than the limit results in throttling. Attempt to use more memory then the limit results in
+the container being stopped for OOM reasons.
+
 Should both a container-level `memory` and `memoryReservation` value be set, the `memory` value **must be higher** than
 the `memoryReservation` value.<br/>
 If specifying `memoryReservation`, that value is guaranteed to the container and subtracted from the available memory
 resources for the container instance that the container is placed on. Otherwise, the value of `memory` is used.
+
+Swap usage is controlled at container-level.<br/>
+Swap space must be enabled and allocated on the EC2 instance hosting the task, for the containers to use it. By default,
+ECS optimized AMIs do **not** have swap enabled. Also, Fargate does **not** support it.
+
+`maxSwap` determines the total amount of swap memory in MiB a container can use.<br/>
+It must be `0`, or any positive integer number. Setting it to `0` disables swapping.<br/>
+If omitted, the container uses the swap configuration for the container instance it is running on.
+
+`swappiness` tunes a container's memory swappiness behavior.<br/>
+It **requires** the `maxSwap` value to be set. If a value isn't specified for `maxSwap`, `swappiness` is ignored.<br/>
+It accepts whole numbers between 0 and 100. `0` causes swapping to **not occur unless required**. `100` causes pages to
+be swapped aggressively.<br/>
+If omitted, it defaults to `60`.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+    "containerDefinitions": [
+        {
+            "linuxParameters": {
+                "maxSwap": 512,
+                "swappiness": 10
+            },
+            …
+        }
+    ],
+    …
+}
+```
+
+</details>
 
 ## Environment variables
 
@@ -701,6 +746,42 @@ The data can be tied to the lifecycle of an EC2 instance by specifying a `host` 
 Tasks running on Fargate receive a minimum of 20 GiB of ephemeral storage for bind mounts.<br/>
 This can be increased up to a maximum of 200 GiB by specifying the `ephemeralStorage` parameter in the task's
 definition.
+
+## Networking
+
+The networking behavior of tasks that are hosted on EC2 instances is dependent on the network mode that one defined in
+the task's definition.
+
+In `awsvpc` network mode, each task is allocated its own Elastic Network Interface (ENI) and a primary private IPv4
+address. This gives the task the same networking properties as EC2 instances.<br/>
+AWS recommends using the `awsvpc` network mode, unless one has the specific need to use a different network mode.
+
+In `host` network mode, the networking of the container is tied directly to the underlying host executing it.<br/>
+Only supported for tasks hosted on EC2 instances, not supported when using Fargate.
+
+With `bridge` mode, a virtual network bridge creates a layer between the host and the container's networking.<br/>
+It allows to create port mappings to remap host ports to container ports. Mappings can be static or dynamic.<br/>
+Only supported for tasks hosted on EC2 instances, not supported when using Fargate.
+
+Tasks on Fargate are each provided an ENI with a primary **private** IP address, which allows them to use networking
+features such as VPC Flow Logs or PrivateLink.<br/>
+When using a public subnet, one can _optionally_ assign a public IP address to the task's ENI.<br/>
+If the VPC is configured for dual-stack mode, and tasks are using a subnet with an IPv6 CIDR block, the tasks' ENI
+**also** receive an IPv6 address.
+
+Fargate fully manages the ENIs it creates.<br/>
+One cannot manually detach nor modify those ENIs. To release the ENIs for a task, stop the task.
+
+A task can only have **one** ENI associated with it at a time.
+
+Containers belonging to the same task **can** communicate over the `localhost` interface.
+
+Tasks on Fargate that need to pull a container image must have a route to the container registry.
+
+An ECS service-linked role is **required** to provide ECS with the permissions to make calls to other AWS services on
+one's behalf.<br/>
+Such role is automatically created when creating a cluster, or when creating or updating a service in the AWS Management
+Console.
 
 ## Execute commands in tasks' containers
 
