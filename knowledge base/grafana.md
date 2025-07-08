@@ -4,6 +4,7 @@ Open-source platform for monitoring and observability.
 
 1. [TL;DR](#tldr)
 1. [Setup](#setup)
+1. [Configuration](#configuration)
 1. [Provisioning](#provisioning)
    1. [Datasources](#datasources)
    1. [Dashboards](#dashboards)
@@ -14,6 +15,13 @@ Open-source platform for monitoring and observability.
 1. [Sources](#sources)
 
 ## TL;DR
+
+Grafana needs a database to store users, dashboards, and other data. It supports `mysql`, `postgres` or `sqlite3`.<br/>
+By default it uses the `sqlite3` embedded database included in the main Grafana binary.
+
+Grafana creates a folder for each installed plugin, containing its associated files and data.<br/>
+Plugin files are located by default in `$PWD/data/plugins` (`/var/lib/grafana/plugins` for `deb` or `rpm`
+packages).
 
 <details>
   <summary>Usage</summary>
@@ -78,9 +86,90 @@ helm -n 'monitoring' delete 'grafana'
 kubectl delete namespace --ignore-not-found 'monitoring'
 ```
 
-Access Prometheus instances in the same namespace using `http://prometheus-server`
+Access Prometheus instances in the same namespace using `http://prometheus-server`.
 
 </details>
+
+## Configuration
+
+Refer [Configuration file location].
+
+Grafana searches for default settings in the `${PWD}/conf/defaults.ini` file. Do **not** change this file.<br/>
+Depending on the executing OS, Grafana searches for custom configuration in the `${PWD}/conf/custom.ini` or in the
+`/usr/local/etc/grafana/grafana.ini` files. Specify a custom file path with the `--config` option.
+
+`deb` and `rpm` packages put the custom configuration file at `/etc/grafana/grafana.ini`, and do **not** use a separate
+`custom.ini` file. That path is specified in Grafana's init script using the `--config` option.
+
+Prefer using environmental variables to **override** existing options (and not to _add_ them).
+
+All letters must be **uppercase**.<br/>
+Replace periods (`.`) and dashes (`-`) with underscores (_).
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```ini
+# default section
+instance_name = ${HOSTNAME}
+
+[security]
+admin_user = admin
+
+[auth.google]
+client_secret = 0ldS3cretKey
+
+[plugin.grafana-image-renderer]
+rendering_ignore_https_errors = true
+
+[feature_toggles]
+enable = newNavigation
+```
+
+```sh
+# export GF_${SECTION NAME}_${KEY}='value'
+export \
+  GF_DEFAULT_INSTANCE_NAME='some-instance' \
+  GF_SECURITY_ADMIN_USER='owner' \
+  GF_AUTH_GOOGLE_CLIENT_SECRET='newS3cretKey' \
+  GF_PLUGIN_GRAFANA_IMAGE_RENDERER_RENDERING_IGNORE_HTTPS_ERRORS=true \
+  GF_FEATURE_TOGGLES_ENABLE='newNavigation'
+```
+
+</details>
+
+Grafana evaluates options containing the expression `$__<PROVIDER>{<ARGUMENT>}or ${<ENVIRONMENT VARIABLE>}`.<br/>
+The evaluation runs the specified provider with the provided argument to get the final value of the option.
+
+Available providers are `env`, `file`, and `vault`.
+
+The `env` provider expands environment variables.<br/>
+One can also use the short-hand syntax `${PORT}`.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```ini
+instance_name = ${HOSTNAME}
+
+[paths]
+logs = $__env{LOGDIR}/grafana
+```
+
+</details>
+
+The `file` provider reads a value from a file in the filesystem.<br/>
+It trims whitespace from the beginning and the end of files.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```ini
+[database]
+password = $__file{/etc/secrets/gf_sql_password}
+```
+
+</details>
+
+The `vault` provider integrates with [Hashicorp Vault].
+It is only available in Grafana Enterprise.
 
 ## Provisioning
 
@@ -248,6 +337,7 @@ All the references in the [further readings] section, plus the following:
 [further readings]: #further-readings
 
 <!-- Knowledge base -->
+[Hashicorp Vault]: vault.md
 [loki]: loki.md
 [prometheus]: prometheus/README.md
 
@@ -265,6 +355,7 @@ All the references in the [further readings] section, plus the following:
 [provision dashboards and data sources]: https://grafana.com/tutorials/provision-dashboards-and-data-sources/
 [provisioning]: https://grafana.com/docs/grafana/latest/administration/provisioning/
 [website]: https://grafana.com
+[Configuration file location]: https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#configuration-file-location
 
 <!-- Others -->
 [how to integrate prometheus and grafana on kubernetes using helm]: https://semaphoreci.com/blog/prometheus-grafana-kubernetes-helm
