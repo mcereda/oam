@@ -17,8 +17,11 @@
 
 ### Sources
 
+- [Give SageMaker AI Access to Resources in your Amazon VPC]
+
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
@@ -27,4 +30,6 @@
 
 <!-- Files -->
 <!-- Upstream -->
+[Give SageMaker AI Access to Resources in your Amazon VPC]: https://docs.aws.amazon.com/sagemaker/latest/dg/infrastructure-give-access.html
+
 <!-- Others -->
