@@ -1,4 +1,4 @@
-# Title
+# LocalStack
 
 AWS service emulator that runs in a single container.
 
