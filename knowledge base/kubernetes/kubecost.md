@@ -66,6 +66,7 @@ open 'http://localhost:9090'
 
 - [Documentation]
 - [Amazon EKS Integration]
+- [Deploying Kubecost on an Amazon EKS cluster]
 
 <!--
   Reference
@@ -84,3 +85,4 @@ open 'http://localhost:9090'
 [website]: https://www.kubecost.com/
 
 <!-- Others -->
+[Deploying Kubecost on an Amazon EKS cluster]: https://kubecost.awsworkshop.io/4_deploy_kubecost/41_deployingkubecost.html
