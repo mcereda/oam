@@ -17,7 +17,7 @@ Open-source platform for monitoring and observability.
 ## TL;DR
 
 Grafana needs a database to store users, dashboards, and other data. It supports `mysql`, `postgres` or `sqlite3`.<br/>
-By default it uses the `sqlite3` embedded database included in the main Grafana binary.
+By default it uses the `sqlite3` embedded database included in the main `grafana` binary.
 
 Grafana creates a folder for each installed plugin, containing its associated files and data.<br/>
 Plugin files are located by default in `$PWD/data/plugins` (`/var/lib/grafana/plugins` for `deb` or `rpm`
