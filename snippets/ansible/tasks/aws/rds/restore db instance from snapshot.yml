@@ -1,0 +1,181 @@
+---
+
+###
+# Restore an RDS instance from snapshot
+# ------------------
+# Creates an RDS instance from a specified snapshot.
+# Usage examples:
+#  - ansible-navigator run 'restore db instance from snapshot.yml' \
+#      --pass-environment-variable='ANSIBLE_VAULT_PASSWORD' \
+#      --pass-environment-variable='ANSIBLE_VAULT_PASSWORD_FILE' \
+#      --pass-environment-variable='AWS_ACCESS_KEY_ID' \
+#      --pass-environment-variable='AWS_DEFAULT_REGION' \
+#      --pass-environment-variable='AWS_PROFILE' \
+#      --pass-environment-variable='AWS_REGION' \
+#      --pass-environment-variable='AWS_SECRET_ACCESS_KEY' \
+#      --log-file='/dev/null'
+#      -- \
+#        --inventory 'localhost,' --diff -Cvvv \
+#        -e 'db_snapshot_identifier=some-snapshot-identifier' \
+#        -e 'db_instance_identifier=some-restored-db-identifier'
+# TODO:
+#  - improve input checks?
+#  - increase db creation parameters?
+###
+
+- name: Restore RDS DB instance from snapshot
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_prompt:
+    - name: db_instance_identifier
+      prompt: Identifier for the restored RDS DB instance
+      private: false
+    - name: db_snapshot_identifier
+      prompt: Identifier for the restored RDS DB instance
+      private: false
+  pre_tasks:
+    - name: PRE  DEBUG  Print run's variables
+      tags:
+        - pre_flight
+        - debug
+      ansible.builtin.debug:
+        verbosity: 3
+        var: vars
+    - name: PRE  DEBUG  Print shell environment
+      tags:
+        - pre_flight
+        - debug
+      check_mode: false
+      ansible.builtin.shell: set
+    - name: PRE  CHECK  Check input is usable
+      tags:
+        - pre_flight
+        - check_input
+      ansible.builtin.assert:
+        that:
+          - db_snapshot_identifier not in [None, '']
+          - db_instance_identifier | length < 64
+  tasks:
+    - name: Get information for snapshot '{{ db_snapshot_identifier }}'
+      tags: get_snapshot_information
+      amazon.aws.rds_snapshot_info:
+        db_snapshot_identifier: "{{ db_snapshot_identifier }}"
+      register: get_snapshot_information
+    - name: Check at least one snapshot with identifier '{{ db_snapshot_identifier }}' is in the 'available' state
+      ansible.builtin.assert:
+        that: get_snapshot_information.snapshots | selectattr("status", "equalto", "available") | length > 0
+        fail_msg: No snapshots found in the 'available' state for identifier '{{ db_snapshot_identifier }}'
+        success_msg: >-
+          At least one snapshot found in the 'available' state for identifier '{{ db_snapshot_identifier }}'
+    - name: Save latest available snapshot's information for identifier '{{ db_snapshot_identifier }}' for later use
+      ansible.builtin.set_fact:
+        snapshot: >-
+          {{
+            get_snapshot_information.snapshots
+            | selectattr("status", "equalto", "available")
+            | sort(attribute='snapshot_create_time')
+            | last
+          }}
+    - name: >-
+        Create new RDS DB instance '{{ db_instance_identifier }}' from snapshot '{{ snapshot.db_snapshot_identifier }}'
+      tags: create_instance
+      amazon.aws.rds_instance:
+        creation_source: snapshot
+        db_snapshot_identifier: "{{ snapshot.db_snapshot_identifier }}"
+        db_instance_identifier: "{{ db_instance_identifier }}"
+        tags: >-
+          {{
+            snapshot.tags
+            | combine({
+                'Description': [
+                    'Restore of', snapshot.db_instance_identifier, 'from snapshot', snapshot.db_snapshot_identifier,
+                  ] | join(" "),
+                'ManagedByAnsible': 'true',
+              })
+          }}
+        db_subnet_group_name: >-
+          {{
+            [
+              db_subnet_group_name | default(None),
+              'default-private',
+            ] | select | first
+          }}
+        publicly_accessible: >-
+          {{
+            [
+              publicly_accessible | default(None),
+              false,
+            ] | reject("none") | first
+          }}
+        vpc_security_group_ids: >-
+          {{
+            [
+              vpc_security_group_ids | default(None),
+              [],
+            ] | reject("none") | first
+          }}
+        port: >-
+          {{
+            [
+              port | default(None),
+              snapshot.port,
+            ] | reject("none") | first
+          }}
+        master_user_password: "{{ master_user_password | default(omit) }}"
+        force_update_password: "{{ (master_user_password is truthy) | ternary(true, false, omit) }}"
+        engine: "{{ snapshot.engine }}"
+        engine_version: "{{ snapshot.engine_version }}"
+        db_instance_class: >-
+          {{
+            [
+              db_instance_class | default(None),
+              'db.t4g.micro',
+            ] | select | first
+          }}
+        storage_type: >-
+          {{
+            [
+              storage_type | default(None),
+              snapshot.storage_type,
+            ] | select | first
+          }}
+        iops: >-
+          {{
+            [
+              iops | default(None),
+              snapshot.iops,
+            ] | select | first
+          }}
+        storage_throughput: >-
+          {{
+            [
+              storage_throughput | default(None),
+              snapshot.storage_throughput,
+            ] | select | first
+          }}
+        storage_encrypted: >-
+          {{
+            [
+              storage_encrypted | default(None),
+              snapshot.encrypted,
+            ] | reject("none") | first
+          }}
+        kms_key_id: >-
+          {{
+            [
+              kms_key_id | default(None),
+              snapshot.kms_key_id,
+            ] | select | first
+          }}
+        option_group_name: >-
+          {{
+            [
+              option_group_name | default(None),
+              snapshot.option_group_name,
+            ] | select | first
+          }}
+        db_parameter_group_name: "{{ db_parameter_group_name | default(omit) }}"
+        auto_minor_version_upgrade: "{{ auto_minor_version_upgrade | default(omit) }}"
+        apply_immediately: true
+      register: db_instance

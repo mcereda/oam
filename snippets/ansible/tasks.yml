@@ -756,30 +756,54 @@
                   # 'amazon.aws.rds_instance' will *not* have the 'endpoint' key defined if not waiting
                   ansible.builtin.set_fact:
                     pitr_restored_instance: "{{ pitr_restored_instance_ready_check.instances[0] }}"
-        - name: Dump roles' privileges
+        - name: Dump roles and their permissions
+          environment:
+            PGHOST: instance-id.0123456789ab.eu-west-1.rds.amazonaws.com
+            PGPORT: 5432
+            PGDATABASE: postgres
+            PGUSER: postgres
+            PGPASSWORD: someSecurePassword
           block:
             - name: Dump to file
-              environment:
-                PGPASSWORD: someRandomString
               vars:
                 out_file: /tmp/instance-id_roles.sql
-              ansible.builtin.command: >-
-                pg_dumpall
-                --host 'instance-id.0123456789ab.eu-west-1.rds.amazonaws.com' --port '5432'
-                --user 'postgres' --database 'postgres' --no-password
-                --roles-only --no-role-passwords
-                --file '{{ out_file }}'
+              ansible.builtin.shell:
+                cmd: >-
+                  pg_dumpall --no-password
+                  --roles-only --no-role-passwords
+                  --file '{{ out_file }}'
+                  | grep -v -e 'rds_superuser'
+                creates: "{{ out_file }}"
               changed_when: false
             - name: Dump to variable for later use through 'dump_execution.stdout_lines'
-              environment:
-                PGPASSWORD: someRandomString
-              ansible.builtin.command: >-
-                pg_dumpall
-                -h 'instance-id.0123456789ab.eu-west-1.rds.amazonaws.com' -p '5432'
-                -U 'postgres' -l 'postgres' -w
-                -r --no-role-passwords
-              changed_when: false
-              register: dump_execution
+              block:
+                - name: FIXME
+                  ansible.builtin.command: >-
+                    pg_dumpall -w
+                    -r --no-role-passwords
+                  changed_when: false
+                  register: dump_execution
+                - name: FIXME
+                  # remove empty lines
+                  # remove comments
+                  # remove creation of the master user
+                  # remove anything involving 'rdsadmin'
+                  # remove changes to protected RDS users
+                  # remove protected 'superuser' and 'replication' assignments
+                  vars:
+                    dump_content_as_lines: "{{ dump_execution.content | ansible.builtin.b64decode | split('\n') }}"
+                    master_username: postgres
+                  ansible.builtin.set_fact:
+                    permissions_commands: >-
+                      {{
+                        dump_content_as_lines
+                        | reject('match', '^$')
+                        | reject('match', '^--')
+                        | reject('match', '^CREATE ROLE ' + master_username)
+                        | reject('match', '.*rdsadmin.*')
+                        | reject('match', '^(CREATE|ALTER) ROLE rds_')
+                        | map('regex_replace', '(NO)(SUPERUSER|REPLICATION)\s?', '')
+                      }}
         - name: Wait for pending changes to be applied
           amazon.aws.rds_instance_info:
             db_instance_identifier: identifier-for-db-instance
@@ -796,7 +820,7 @@
         - name: Download objects from S3
           # The 'amazon.aws.s3_object' module might be *not* suitable for files bigger than the executor's currently
           # available memory. See <https://github.com/ansible-collections/amazon.aws/issues/2395>.
-          # TL:DR: at the time of writing, the module keeps downloaded data in memory before flushing it to disk,
+          # TL;DR: at the time of writing, the module keeps downloaded data in memory before flushing it to disk,
           # filling up the host's memory when downloading big files and causing it to stall or crash.
           amazon.aws.s3_object:
             bucket: my-bucket

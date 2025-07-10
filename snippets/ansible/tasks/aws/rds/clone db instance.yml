@@ -1,0 +1,191 @@
+---
+
+###
+# Clone an RDS instance
+# ------------------
+# Usage examples:
+#  - ansible-navigator run 'clone db instance.yml' \
+#      --pass-environment-variable='ANSIBLE_VAULT_PASSWORD' \
+#      --pass-environment-variable='ANSIBLE_VAULT_PASSWORD_FILE' \
+#      --pass-environment-variable='AWS_ACCESS_KEY_ID' \
+#      --pass-environment-variable='AWS_DEFAULT_REGION' \
+#      --pass-environment-variable='AWS_PROFILE' \
+#      --pass-environment-variable='AWS_REGION' \
+#      --pass-environment-variable='AWS_SECRET_ACCESS_KEY' \
+#      --log-file='/dev/null'
+#      -- \
+#        --inventory 'localhost,' --diff -Cvvv \
+#        -e 'db_instance_identifier=some-db-identifier'
+# TODO:
+#  - improve input checks?
+#  - increase db creation parameters?
+###
+
+- name: Clone RDS instance
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_prompt:
+    - name: db_instance_identifier
+      prompt: Identifier of the RDS DB instance to clone
+      private: false
+  vars:
+    clone_db_instance_identifier: "{{ db_instance_identifier }}-clone"
+  pre_tasks:
+    - name: PRE  DEBUG  Print run's variables
+      tags:
+        - pre_flight
+        - debug
+      ansible.builtin.debug:
+        verbosity: 3
+        var: vars
+    - name: PRE  DEBUG  Print shell environment
+      tags:
+        - pre_flight
+        - debug
+      check_mode: false
+      ansible.builtin.shell: set
+    - name: PRE  CHECK  Check input is usable
+      tags:
+        - pre_flight
+        - check_input
+      ansible.builtin.assert:
+        that:
+          - db_instance_identifier not in [None, '']
+          - clone_db_instance_identifier | length < 64
+  tasks:
+    - name: Get source DB instance information
+      tags: get_source_instance_information
+      block:
+        - name: Get information about source DB instance '{{ db_instance_identifier }}'
+          amazon.aws.rds_instance_info:
+            db_instance_identifier: "{{ db_instance_identifier }}"
+          register: source_instance_information_gathering
+        - name: Check source DB instance '{{ db_instance_identifier }}' has been found
+          ansible.builtin.assert:
+            that: source_instance_information_gathering.instances | length > 0
+            fail_msg: No RDS DB instances found with identifier '{{ db_instance_identifier }}'
+            success_msg: At least one RDS DB instance found with identifier '{{ db_instance_identifier }}'
+        - name: Register information about source DB instance '{{ db_instance_identifier }}' for later use
+          ansible.builtin.set_fact:
+            source_db_instance: "{{ source_instance_information_gathering.instances | first }}"
+    - name: >-
+        Create clone DB instance '{{ clone_db_instance_identifier }}' from
+        '{{ source_db_instance.db_instance_identifier }}'
+      tags: create_clone_instance
+      when: source_db_instance.db_parameter_groups is defined
+      amazon.aws.rds_instance:
+        creation_source: instance
+        source_db_instance_identifier: "{{ source_db_instance.db_instance_identifier }}"
+        db_instance_identifier: "{{ clone_db_instance_identifier }}"
+        tags: >-
+          {{
+            source_db_instance.tags
+            | combine({
+                'Description': 'Clone of ' + source_db_instance.db_instance_identifier,
+                'ManagedByAnsible': 'true',
+              })
+          }}
+        db_subnet_group_name: >-
+          {{
+            [
+              clone_db_subnet_group_name | default(None),
+              source_db_instance.db_subnet_group.db_subnet_group_name,
+            ] | select | first
+          }}
+        publicly_accessible: >-
+          {{
+            [
+              clone_publicly_accessible | default(None),
+              source_db_instance.publicly_accessible,
+            ] | select | first
+          }}
+        vpc_security_group_ids: >-
+          {{
+            [
+              clone_vpc_security_group_ids | default(None),
+              source_db_instance.db_security_groups,
+            ] | reject("none") | first
+          }}
+        port: >-
+          {{
+            [
+              clone_port | default(None),
+              source_db_instance.endpoint.port,
+            ] | select | first
+          }}
+        db_name: >-
+          {{
+            [
+              clone_db_name | default(None),
+              source_db_instance.db_name,
+            ] | select | first
+          }}
+        master_username: >-
+          {{
+            [
+              clone_master_username | default(None),
+              source_db_instance.master_username,
+            ] | select | first
+          }}
+        master_user_password: >-
+          {{
+            clone_master_user_password
+            | default(lookup('ansible.builtin.password', '/dev/null', seed=db_instance_identifier, length=16))
+          }}
+        engine: "{{ source_db_instance.engine }}"
+        engine_version: "{{ source_db_instance.engine_version }}"
+        db_instance_class: >-
+          {{
+            [
+              clone_db_instance_class | default(None),
+              source_db_instance.db_instance_class,
+            ] | select | first
+          }}
+        storage_type: >-
+          {{
+            [
+              clone_storage_type | default(None),
+              source_db_instance.storage_type,
+            ] | select | first
+          }}
+        iops: "{{ clone_iops | default(omit) }}"
+        storage_throughput: "{{ clone_storage_throughput | default(omit) }}"
+        storage_encrypted: >-
+          {{
+            [
+              clone_storage_encrypted | default(None),
+              source_db_instance.storage_encrypted,
+            ] | select | first
+          }}
+        kms_key_id: >-
+          {{
+            [
+              clone_kms_key_id | default(None),
+              source_db_instance.kms_key_id | default(None),
+              'aws/rds',
+            ] | select | first
+          }}
+        option_group_name: >-
+          {{
+            [
+              clone_option_group_name | default(None),
+              source_db_instance.option_group_memberships[0].option_group_name,
+            ] | select | first
+          }}
+        db_parameter_group_name: >-
+          {{
+            [
+              clone_db_parameter_group_name | default(None),
+              source_db_instance.db_parameter_groups[0].db_parameter_group_name,
+            ] | select | first
+          }}
+        auto_minor_version_upgrade: >-
+          {{
+            [
+              clone_auto_minor_version_upgrade | default(None),
+              source_db_instance.auto_minor_version_upgrade,
+            ] | reject("none") | first
+          }}
+        apply_immediately: true
+      register: clone_db_instance

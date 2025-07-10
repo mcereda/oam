@@ -42,21 +42,23 @@ psql 'postgres' 'admin'
 psql --host 'prod.db.lan' --port '5432' --username 'postgres' --database 'postgres' --password
 psql -h 'host.fqnd' -p '5432' -U 'admin' -d 'postgres' -W
 psql 'postgresql://localhost:5433/games?sslmode=require'
-PGPASSWORD='password' psql 'host=host.fqdn port=5467 user=admin dbname=postgres'
+psql 'host=host.fqdn port=5467 user=admin dbname=postgres'
 psql "service=prod sslmode=require"
+PGHOST='host.fqdn' PGPORT=5432 PGDATABASE='postgres' PGUSER='postgres' PGPASSWORD='somePassword' …
 
 # List available databases
-psql … --list
+psql --list
 
 # Change passwords
 psql … -U 'jonathan' -c '\password'
 psql … -U 'admin' -c '\password jonathan'
 
 # Execute SQL commands
-psql … -c 'select * from tableName;' -o 'out.file'
-psql … -c 'select * from tableName;' -H
-psql … -f 'commands.sql'
-psql … -f 'dump.sql' -e
+# The action is done in a single transaction
+psql -c 'select * from tableName;' -o 'out.file'
+psql -c 'select * from tableName;' -H
+psql -f 'commands.sql'
+psql -f 'dump.sql' -e
 
 # Dump DBs
 pg_dump --host 'host.fqnd' --port '5432' --username 'postgres' --dbname 'postgres' --password
@@ -67,28 +69,32 @@ pg_dump … -s --format 'custom'
 pg_dump … -F'd' --jobs '3'
 
 # Dump DBs' schema only
-pg_dump --host 'host.fqnd' --port '5432' --username 'postgres' --dbname 'postgres' --password --schema-only
-pg_dump -h 'host.fqnd' -p '5432' -U 'admin' -d 'postgres' -Ws
+pg_dump … --schema-only
 
-# Dump users and groups to file
-pg_dumpall -h 'host.fqnd' -p '5432' -U 'postgres' -l 'postgres' -W --roles-only --file 'roles.sql'
-pg_dumpall -h 'host.fqnd' -p '5432' -U 'postgres' -l 'postgres' -Wrf 'roles.sql' --no-role-passwords
+# Dump only users and groups to file
+pg_dumpall … --roles-only --file 'roles.sql'
+pg_dumpall … -rf 'roles.sql' --no-role-passwords
 
 # Restore backups
-pg_restore -U 'postgres' -d 'sales' 'sales.dump'
-pg_restore -h 'host.fqdn' -U 'master' -d 'sales' -Oxj '8' 'sales.dump'
+pg_restore … --dbname 'sales' 'sales.dump'
+pg_restore … -d 'sales' -Oxj '8' 'sales.dump'
+pg_restore … -d 'sales' --clean --if-exists 'sales.dump'
 
 # Initialize a test DB
-pgbench -i 'test-db'
-pgbench -i 'test-db' -h 'hostname' -p '5555' -U 'user'
+pgbench … -i 'test-db'
 
 # Check a DB is ready for use
-pg_isready -U 'denis' -d 'sales'
+pg_isready
 
 # Skip materialized views during a restore
 pg_dump 'database' -Fc 'backup.dump'
-pg_restore -l 'backup.dump' | sed '/MATERIALIZED VIEW DATA/d' > 'restore.lst'
-pg_restore -L 'restore.lst' -d 'database' 'backup.dump'
-# Only then, refresh with them
-pg_restore -l 'backup.dump' | grep 'MATERIALIZED VIEW DATA' > 'refresh.lst'
-pg_restore -L 'refresh.lst' -d 'database' 'backup.dump'
+pg_restore --list 'backup.dump' | sed -E '/[[:digit:]]+ VIEW/,+1d' > 'no-views.lst'
+pg_restore -d 'database' --use-list 'no-views.lst' 'backup.dump'
+# Only then, if needed, refresh the dump with the views
+pg_restore --list 'backup.dump' | grep -E --after-context=1 '[[:digit:]]+ VIEW' | sed '/--/d' > 'only-views.lst'
+pg_restore -d 'database' --use-list 'only-views.lst' 'backup.dump'
+
+# Recreate databases
+# Cannot be done in a single transaction
+psql -c 'DROP DATABASE IF EXISTS sales;' && psql -c 'CREATE DATABASE sales;'
+dropdb --if-exists 'sales' && createdb 'sales'
