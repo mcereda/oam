@@ -3,17 +3,21 @@
 1. [Gotchas](#gotchas)
 1. [Instance setup](#instance-setup)
    1. [Deployment](#deployment)
+   1. [Update](#update)
    1. [Removal](#removal)
    1. [Testing](#testing)
+1. [Jobs execution](#jobs-execution)
+1. [Workflow automation](#workflow-automation)
 1. [API](#api)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
 ## Gotchas
 
-- Not defining values in some resources means they are using the setting of the underlying dependency.<br/>
-  E.g.: A schedule's `job_type: null` attribute means that the job it starts will use the job template's `job_type`
-  setting.
+- When one does **not** define values in a resource, it will use the setting defined by the underlying dependency (if
+  any).<br/>
+  E.g.: not setting a schedule's `job_type` (or setting it to `null`) makes the job it starts use the job template's
+  `job_type` setting.
 
 - Consider using only AMD64 nodes to host the containers for AWX instances.
 
@@ -23,10 +27,10 @@
 - K8S tolerations set in AWX custom resources only affect K8S-based AWX instances' deployments.<br/>
   They are **not** applied to other resources like automation Jobs.
 
-  <details>
+  <details style='padding: 0 0 1rem 1rem'>
 
   Jobs' specific K8S settings need to be configured in the `pod_spec_override` attribute of Instance Groups of type
-  Container Group.
+  _Container Group_:
 
   ```yaml
   ---
@@ -83,26 +87,41 @@
 
 ### Deployment
 
-Starting from version 18.0, the [AWX Operator][operator's documentation] is the preferred way to install AWX.<br/>
-It is meant to provide a Kubernetes-native installation method for AWX via an AWX Custom Resource Definition (CRD).
+Starting from version 18.0, the [AWX Kubernetes Operator][operator's documentation] is the preferred way to deploy
+AWX instances.<br/>
+It is meant to provide a Kubernetes-native installation method for AWX via the `AWX` Custom Resource Definition (CRD).
 
-The operator will use an Ansible role to create all the AWX resources under its hood.<br/>
+Deploying AWS instances is just a matter of:
+
+1. Installing the operator on the K8S cluster.<br/>
+   Make sure to include Ansible's CRDs.
+1. Create a resource of kind `AWX`.
+
+Whenever a resource of the `AWX` kind is created, the [kubernetes operator] executes an Ansible role that creates all
+the other resources an AWX instance requires to start in the cluster.<br/>
 See [Iterating on the installer without deploying the operator].
+
+The operator _can_ be configured to automatically deploy a default AWX instance once running, but its input options are
+limited. This prevents changing specific settings for the AWX instance one might need to set.<br/>
+Creating resources of the `AWX` kind, instead, allows to include their specific configuration, and hence for more of its
+settings to be customized. It should™ also be less prone to deployment errors.
 
 Requirements:
 
-- An existing K8S cluster.
-- The ability to create PersistentVolumeClaims and PersistentVolumes in said K8S cluster.
-- The ability for the cluster to create load balancers if setting the service type to load balancer.
+- An existing K8S cluster with AMD64 nodes (see [Gotchas]).
+- A DB instance, either in the cluster or external to it.<br/>
+  If internal, one shall be able to create PersistentVolumeClaims and PersistentVolumes in the cluster for it (unless
+  data persistence is not a wanted feature).
+- The ability for the cluster to create load balancers (if setting the service type to load balancer).
 
-<details style="padding-top: 1em;">
+<details style='padding-top: 1em'>
 <summary>Deploy the operator with <code>kustomize</code></summary>
 
 ```sh
 $ mkdir -p '/tmp/awx'
 $ cd '/tmp/awx'
 
-# Specify the tag to use.
+# Specify the version tag to use
 /tmp/awx$ cat <<EOF > 'kustomization.yaml'
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -113,7 +132,7 @@ resources:
     # https://github.com/ansible/awx-operator/releases
 EOF
 
-# Start the operator.
+# Start the operator
 /tmp/awx$ kubectl apply -k '.'
 namespace/awx created
 …
@@ -125,7 +144,7 @@ awx-operator-controller-manager-8b7dfcb58-k7jt8   2/2     Running   0          1
 
 </details>
 
-<details style="padding-bottom: 1em;">
+<details>
 <summary>Deploy the operator with <code>helm</code></summary>
 
 ```sh
@@ -159,22 +178,90 @@ awx-operator-controller-manager-75b667b745-g9g9c   2/2     Running     0        
 
 </details>
 
-Once the operator is installed, AWX instances can be created by leveraging the `AWX` CRD.<br/>
-The basic definition for a quick testing instance is as follows:
+<details style='padding-bottom: 1rem'>
+<summary>Deploy the operator with a kustomized Helm chart</summary>
+
+```sh
+$ mkdir -p '/tmp/awx'
+$ cd '/tmp/awx'
+
+/tmp/awx$ cat <<EOF > 'namespace.yaml'
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: awx
+EOF
+/tmp/awx$ cat <<EOF > 'kustomization.yaml'
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: awx
+helmCharts:
+  - name: awx-operator
+    repo: https://ansible.github.io/awx-operator/
+    version: 2.19.0
+    releaseName: awx-operator
+    includeCRDs: true  # Important. Not namespaced. Watch out upon removal.
+resources:
+  - namespace.yaml
+EOF
+
+# Start the operator
+/tmp/awx$ helm repo add 'awx-operator' 'https://ansible.github.io/awx-operator/'
+/tmp/awx$ kubectl kustomize --enable-helm '.' | kubectl apply -f -
+namespace/awx created
+…
+deployment.apps/awx-operator-controller-manager created
+/tmp/awx$ kubectl -n 'awx' get pods
+NAME                                              READY   STATUS    RESTARTS   AGE
+awx-operator-controller-manager-8b7dfcb58-k7jt8   2/2     Running   0          10m
+```
+
+</details>
+
+Once the operator is installed, AWX instances can be created by leveraging the `AWX` CRD.
+
+<details style='padding-left: 1rem'>
+<summary>Basic definition for a quick testing instance</summary>
 
 ```yaml
 ---
-# file: 'awx-demo.yaml'
 apiVersion: awx.ansible.com/v1beta1
 kind: AWX
 metadata:
   name: awx-demo
 spec:
   no_log: false
-  service_type: nodeport
+  service_type: NodePort
   node_selector: |
     kubernetes.io/arch: amd64
 ```
+
+</details>
+
+<details style='padding: 0 0 1rem 1rem'>
+<summary>Definition for an instance on AWS' EKS</summary>
+
+```yaml
+---
+apiVersion: awx.ansible.com/v1beta1
+kind: AWX
+metadata:
+  name: awx
+spec:
+  no_log: false
+  admin_email: infra@example.org
+  postgres_configuration_secret: awx-postgres-configuration
+  node_selector: |
+    kubernetes.io/arch: amd64
+  service_type: LoadBalancer
+  ingress_type: ingress
+  ingress_annotations: |
+    kubernetes.io/ingress.class: alb
+```
+
+</details>
 
 Due to the operator being the one creating its resources, one's control is limited to what one can define in the AWX
 resource's `spec` key.<br/>
@@ -210,7 +297,7 @@ $ cd '/tmp/awx'
 
 </details>
 
-<details style="padding-bottom: 1em;">
+<details style='padding-bottom: 1rem'>
   <summary>Deploy AWX instances using the operator's helm chart's integrated definition</summary>
 
 ```sh
@@ -252,6 +339,15 @@ kubectl -n 'awx' port-forward 'service/awx-service' '8080:http'
 open 'http://localhost:8080'
 ```
 
+### Update
+
+The documentation suggests to:
+
+1. Temporarily set up the operator to automatically update any AWX instance it manages.
+1. Delete the AWX instance resource.<br/>
+   This will force the operator to pull fresh, updated images for the new deployment.
+1. Restore the operator's settings to the previous version.
+
 ### Removal
 
 Remove the `AWX` resource associated to the instance to delete it:
@@ -264,11 +360,14 @@ awx.awx.ansible.com "awx-demo" deleted
 Remove the operator if not needed anymore:
 
 ```sh
-# Using `kustomize`.
+# Using `kustomize`
 kubectl delete -k '/tmp/awx'
 
-# Using `helm`.
+# Using `helm`
 helm -n 'awx' uninstall 'my-awx-operator'
+
+# Using the kustomized helm chart
+kubectl kustomize --enable-helm '.' | kubectl delete -f -
 ```
 
 Eventually, remove the namespace too to clean all things up:
@@ -654,6 +753,155 @@ deployment.apps "awx-operator-controller-manager" deleted
   </details>
 </details>
 
+## Jobs execution
+
+Unless explicitly defined in Job Templates or Schedules, Jobs using a containerized execution environment are executed
+by the _default_ container group.
+
+Normally, the _default_ container group does **not** limit where a Job's pod is executed, **nor** limits its assigned
+resources.<br/>
+By explicitly configuring this container group, one can change the settings for Jobs that do not ask for custom
+executors.
+
+E.g., one could set affinity and tolerations to assign Jobs to specific nodes by default, and set specific default
+resource limits.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```yaml
+# ansible playbook
+- name: Configure instance group 'default'
+  tags: configure_instance_group_default_spot
+  awx.awx.instance_group:
+    name: default
+    is_container_group: true
+    pod_spec_override: |-
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        namespace: awx
+      spec:
+        serviceAccountName: default
+        automountServiceAccountToken: false
+        containers:
+          - image: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/infrastructure/awx-ee:latest
+            name: worker
+            args:
+              - ansible-runner
+              - worker
+              - '--private-data-dir=/runner'
+            resources:
+              requests:
+                cpu: 250m
+                memory: 100Mi
+              limits:
+                cpu: 1930m
+                memory: 3297Mi
+                cpu: 1830m
+                memory: 1425Mi
+        tolerations:
+          - key: example.org/reservation.app
+            operator: Equal
+            value: awx
+            effect: NoSchedule
+          - key: awx.example.org/reservation.component
+            operator: Equal
+            value: job
+            effect: NoSchedule
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: example.org/reservation.app
+                      operator: In
+                      values:
+                        - awx
+                    - key: awx.example.org/reservation.component
+                      operator: In
+                      values:
+                        - job
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 1
+                preference:
+                  matchExpressions:
+                    - key: awx/component
+                    - key: eks.amazonaws.com/capacityType
+                      operator: In
+                      values:
+                        - SPOT
+- name: Configure instance group 'ondemand'
+  tags: configure instance_group_ondemand
+  awx.awx.instance_group:
+    name: ondemand
+    is_container_group: true
+    pod_spec_override: |-
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        namespace: awx
+      spec:
+        serviceAccountName: default
+        automountServiceAccountToken: false
+        containers:
+          - image: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/infrastructure/awx-ee:latest
+            name: worker
+            args:
+              - ansible-runner
+              - worker
+              - '--private-data-dir=/runner'
+            resources:
+              requests:
+                cpu: 250m
+                memory: 100Mi
+              limits:
+                cpu: 1830m
+                memory: 1425Mi
+        tolerations:
+          - key: example.org/reservation.app
+            operator: Equal
+            value: awx
+            effect: NoSchedule
+          - key: awx.example.org/reservation.component
+            operator: Equal
+            value: job
+            effect: NoSchedule
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: example.org/reservation.app
+                      operator: In
+                      values:
+                        - awx
+                    - key: awx.example.org/reservation.component
+                      operator: In
+                      values:
+                        - job
+                    - key: eks.amazonaws.com/capacityType
+                      operator: In
+                      values:
+                        - ON_DEMAND
+```
+
+</details>
+
+## Workflow automation
+
+Refer [How to use workflow job templates in Ansible], [Workflow job templates] and [Workflows].<br/>
+Also see [Passing Ansible variables in Workflows using set_stats].
+
+_Workflow Job Templates_ coordinate the linking and execution of multiple resources by:
+
+- Synchronizing repositories with code for Projects.
+- Synchronize Inventories.
+- Having different Jobs run sequentially or in parallel.
+- Running Jobs based on the success or failure of one or more previous Jobs.
+- Requesting an admin's approval to proceed with one or more executions.
+
+Each action is a _node_ on a Workflow Job Template, and allows visualizing the flow of actions.
+
 ## API
 
 Refer [AWX API Reference] and [How to use AWX REST API to execute jobs].
@@ -664,16 +912,25 @@ AWX offers the `awx` client CLI tool:
 # Install the 'awx' client
 pipx install 'awxkit'
 pip3 install --user 'awxkit'
+```
 
-# Normally `awx` would require setting the configuration every command like so:
-#   awx --conf.host https://awx.example.org --conf.username 'admin' --conf.password 'password' config
-#   awx --conf.host https://awx.example.org --conf.username 'admin' --conf.password 'password' export --schedules
+> [!tip]
+> Normally `awx` would require setting the configuration every command like so:
+>
+> ```sh
+> awx --conf.host https://awx.example.org --conf.username 'admin' --conf.password 'password' config
+> awx --conf.host https://awx.example.org --conf.username 'admin' --conf.password 'password' export --schedules
+> ```
+>
+> Export settings to environment variables to avoid having to set them on the command line all the time:
+>
+> ```sh
+> export TOWER_HOST='https://awx.example.org' TOWER_USERNAME='admin' TOWER_PASSWORD='password'
+> ```
 
-# Export settings to environment variables to avoid having to set them on the command line all the time
-export TOWER_HOST='https://awx.example.org' TOWER_USERNAME='admin' TOWER_PASSWORD='password'
-
-# Show the client configuration
-awx … config
+```sh
+# Show the client's configuration
+awx config
 
 # List all available endpoints
 curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/' | jq '.' -
@@ -696,18 +953,18 @@ curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/job_templates/'
 awx job_templates get 'Some Job'
 
 # Show notification templates
-awx … notification_templates list
+awx notification_templates list
 curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/notification_templates/' | jq '.' -
 
 # Show schedules
-awx … schedules list
-awx … schedules --schedules 'schedule-1' 'schedule-n'
+awx schedules list
+awx schedules --schedules 'schedule-1' 'schedule-n'
 awx schedules get 'Some Schedule'
 curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/schedules/' | jq '.' -
 
 # Export data
-awx … export
-awx … export --job_templates 'job-template-1' 'job-template-n' --schedules
+awx export
+awx export --job_templates 'job-template-1' 'job-template-n' --schedules
 curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/export/' | jq '.' -
 ```
 
@@ -742,6 +999,8 @@ Refer [AWX Command Line Interface] for more information.
   ═╬═Time══
   -->
 
+[gotchas]: #gotchas
+
 <!-- Knowledge base -->
 [helm]: kubernetes/helm.md
 [kubernetes]: kubernetes/README.md
@@ -755,13 +1014,18 @@ Refer [AWX Command Line Interface] for more information.
 [awx's repository]: https://github.com/ansible/awx/
 [basic install]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/installation/basic-install.html
 [helm install on existing cluster]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/installation/helm-install-on-existing-cluster.html
+[How to use workflow job templates in Ansible]: https://www.redhat.com/en/blog/ansible-workflow-job-templates
 [installer role's defaults]: https://github.com/ansible/awx-operator/blob/devel/roles/installer/defaults/main.yml
 [iterating on the installer without deploying the operator]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/troubleshooting/debugging.html#iterating-on-the-installer-without-deploying-the-operator
 [operator's documentation]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/
 [operator's repository]: https://github.com/ansible/awx-operator/
 [website]: https://www.ansible.com/awx/
+[Workflow job templates]: https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.4/html/automation_controller_user_guide/controller-workflow-job-templates
+[Workflows]: https://docs.ansible.com/automation-controller/4.4/html/userguide/workflows.html
 
 <!-- Others -->
 [arm64 image pulled shows amd64 as its arch]: https://github.com/brancz/kube-rbac-proxy/issues/79#issuecomment-826557647
 [automation job isn't created with tolerations from awx manifest]: https://github.com/ansible/awx-operator/issues/1099#issuecomment-1298706083
 [how to use awx rest api to execute jobs]: https://www.dbi-services.com/blog/how-to-use-awx-rest-api-to-execute-jobs/
+[Kubernetes operator]: https://kubernetes.io/docs/concepts/extend-kubernetes/operator/
+[Passing Ansible variables in Workflows using set_stats]: https://gregsowell.com/?p=7540
