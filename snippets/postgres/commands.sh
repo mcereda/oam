@@ -75,7 +75,7 @@ pg_dump … --schema-only
 pg_dumpall … --roles-only --file 'roles.sql'
 pg_dumpall … -rf 'roles.sql' --no-role-passwords
 
-# Restore backups
+# Restore dumps
 pg_restore … --dbname 'sales' 'sales.dump'
 pg_restore … -d 'sales' -Oxj '8' 'sales.dump'
 pg_restore … -d 'sales' --clean --if-exists 'sales.dump'
