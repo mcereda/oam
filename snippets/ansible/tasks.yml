@@ -727,6 +727,9 @@
               delay: 120
               until: snapshot_check.snapshots | selectattr('status', 'equalto', 'available') | length > 0
         - name: Restore instance with automatic backup enabled to point in time
+          # requires backup period > 0
+          # refer https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_RestoreDBInstanceToPointInTime.html for
+          #   the available parameters
           block:
             - name: Restore DB instance
               amazon.aws.rds_instance:
