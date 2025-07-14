@@ -2,6 +2,8 @@
 
 1. [TL;DR](#tldr)
 1. [Functions](#functions)
+1. [Backup](#backup)
+1. [Restore](#restore)
 1. [Extensions of interest](#extensions-of-interest)
    1. [PostGIS](#postgis)
    1. [`postgresql_anonymizer`](#postgresql_anonymizer)
@@ -11,7 +13,9 @@
 
 ## TL;DR
 
-One can store one's credentials in `~/.pgpass`:
+One can store one's credentials in the `~/.pgpass` file.
+
+<details style='padding: 0 0 1rem 1rem'>
 
 ```plaintext
 # line format => hostname:port:database:username:password`
@@ -20,13 +24,16 @@ postgres.lan:5643:postgres:postgres:BananaORama
 *:*:sales:elaine:modestPassword
 ```
 
-The credential file's permissions must be `0600`, or it will be ignored.
+> [!important]
+> The credentials file's permissions must be `0600`, or it will be ignored.
 
-Database roles represent both users and groups.<br/>
+</details>
+
+Database roles represent **both** users and groups.<br/>
 Roles are **distinct** from the OS' users and groups, and are global across the whole installation (there are **no**
 DB-specific roles).
 
-Extensions in PostgreSQL are managed per database.
+Extensions in PostgreSQL are managed **per database**.
 
 <details>
   <summary>Setup</summary>
@@ -164,6 +171,93 @@ $func$;
 SELECT * FROM entries_in_column('vendors','vendor_id');
 ```
 
+## Backup
+
+Refer [pg_dump] and [pg_dumpall].
+
+PostgreSQL offers the `pg_dump` and `pg_dumpall` native client utilities to dump databases to files.<br/>
+They produce sets of SQL statements that can be executed to reproduce the original databases' object definitions and
+table data.
+
+These utilities are suitable when:
+
+- The databases' size is less than 100 GB.<br/>
+  They tend to start giving issues for bigger databases.
+- One plans to migrate the databases' metadata as well as the table data.
+- There is a relatively large number of tables to migrate.
+
+> [!important]
+> These utilities work better when the database is taken offline (but do **not** require it).
+
+Objects like roles, groups, tablespace and others are **not** dumped by `pg_dump`. It also only dumps a **single**
+database per execution.<br/>
+Use `pg_dumpall` to back up entire clusters and/or global objects like roles and tablespaces.
+
+Dumps can be output as script or archive file formats.<br/>
+Script dumps are plain-text files containing the SQL commands that would allow to reconstruct the dumped database to the
+state it was in at the time it was saved.
+
+The _custom_ format (`-F='c'`) and the _directory_ format (`-F='d'`) are the most flexible output file formats.<br/>
+They allow for selection and reordering of archived items, support parallel restoration, and are compressed by default.
+
+The directory format is the only format that supports parallel dumps.
+
+```sh
+# Dump single DBs
+pg_dump --host 'host.fqnd' --port '5432' --username 'postgres' --dbname 'postgres' --password
+pg_dump -h 'host.fqnd' -p '5432' -U 'admin' -d 'postgres' -W
+pg_dump -U 'postgres' -d 'sales' -F 'custom' -f 'sales.bak' --schema-only
+pg_dump … -T 'customers,orders' -t 'salespeople,performances'
+pg_dump … -s --format 'custom'
+pg_dump … -bF'd' --jobs '3'
+
+# Dump DBs' schema only
+pg_dump … --schema-only
+
+# Dump only users and groups to file
+pg_dumpall … --roles-only --file 'roles.sql'
+pg_dumpall … -rf 'roles.sql' --no-role-passwords
+
+# Dump roles and tablespace
+pg_dumpall … --globals-only
+pg_dumpall … -g --no-role-passwords
+```
+
+## Restore
+
+Refer [psql] and [pg_restore].
+
+PostgreSQL offers the `pg_restore` native client utility for restoration of databases from dumps.
+
+Feed script dumps to `psql` to execute the commands in them and restore the data.
+
+One can give archives created with `pg_dump` or `pg_dumpall` in one of the non-plain-text formats in input to
+`pg_restore`. It issues the commands necessary to reconstruct the database to the state it was in at the time it was
+saved.
+
+The archive files allow `pg_restore` to be _somewhat_ selective about what it restores, or reorder the items prior to
+being restored.
+
+The archive files are designed to be portable across architectures.
+
+> [!important]
+> Executing a restore on an online database will very much take if offline.
+
+```sh
+# Restore dumps
+pg_restore … --dbname 'sales' 'sales.dump'
+pg_restore … -d 'sales' -Oxj '8' 'sales.dump'
+pg_restore … -d 'sales' --clean --if-exists 'sales.dump'
+
+# Skip materialized views during a restore
+pg_dump 'database' -Fc 'backup.dump'
+pg_restore --list 'backup.dump' | sed -E '/[[:digit:]]+ VIEW/,+1d' > 'no-views.lst'
+pg_restore -d 'database' --use-list 'no-views.lst' 'backup.dump'
+# Only then, if needed, refresh the dump with the views
+pg_restore --list 'backup.dump' | grep -E --after-context=1 '[[:digit:]]+ VIEW' | sed '/--/d' > 'only-views.lst'
+pg_restore -d 'database' --use-list 'only-views.lst' 'backup.dump'
+```
+
 ## Extensions of interest
 
 ### PostGIS
@@ -272,6 +366,9 @@ See also [yugabyte/yugabyte-db].
 [database connection control functions]: https://www.postgresql.org/docs/current/libpq-connect.html
 [docker image]: https://github.com/docker-library/docs/blob/master/postgres/README.md
 [logical decoding concepts]: https://www.postgresql.org/docs/current/logicaldecoding-explanation.html
+[pg_dump]: https://www.postgresql.org/docs/current/app-pgdump.html
+[pg_dumpall]: https://www.postgresql.org/docs/current/app-pg-dumpall.html
+[pg_restore]: https://www.postgresql.org/docs/current/app-pgrestore.html
 [pg_settings]: https://www.postgresql.org/docs/current/view-pg-settings.html
 [psql]: https://www.postgresql.org/docs/current/app-psql.html
 [the password file]: https://www.postgresql.org/docs/current/libpq-pgpass.html
