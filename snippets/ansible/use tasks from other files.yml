@@ -8,11 +8,11 @@
   connection: local
   gather_facts: false
   tasks:
-    - ansible.builtin.import_tasks: debug.yml
+    - ansible.builtin.import_tasks: tasks/debug.yml
     - ansible.builtin.import_tasks:
-        file: control flows.yml
-    # - ansible.builtin.include_tasks: manipulate data.yml
+        file: tasks/control flows.yml
+    - ansible.builtin.include_tasks: tasks/manipulate data.yml
     - ansible.builtin.include_tasks:
-        file: manipulate data.yml
+        file: tasks/manipulate data.yml
         apply:
           tags: data_manipulation
