@@ -223,6 +223,20 @@ pg_dumpall … --globals-only
 pg_dumpall … -g --no-role-passwords
 ```
 
+> [!important]
+> Prefer separating command line options from their values via the `=` character than using a space.<br/>
+> This prevents confusion and errors.
+>
+> <details style='padding: 0 0 0 1rem'>
+>
+> ```diff
+>  pg_dumpall --no-publications \
+> -  --format d --jobs 4 --exclude-schema archived --exclude-schema bi
+> +  --format='d' --jobs=4 --exclude-schema='archived' --exclude-schema='bi'
+> ```
+>
+> </details>
+
 ## Restore
 
 Refer [psql] and [pg_restore].
@@ -241,7 +255,8 @@ being restored.
 The archive files are designed to be portable across architectures.
 
 > [!important]
-> Executing a restore on an online database will very much take if offline.
+> Executing a restore on an online database will probably introduce conflicts of some kind.
+> It is very much suggested to take the target offline before restoring.
 
 ```sh
 # Restore dumps
