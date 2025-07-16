@@ -6,6 +6,7 @@
 1. [Inventories](#inventories)
    1. [AWS](#aws)
    1. [Patterns](#patterns)
+1. [Variables](#variables)
 1. [Templating](#templating)
    1. [Tests](#tests)
    1. [Loops](#loops)
@@ -355,6 +356,48 @@ The `,` is preferred when dealing with ranges and IPv6 addresses.
 
 One can use **wildcard** patterns with FQDNs or IP addresses, as long as the hosts are named in your inventory by FQDN
 or IP address.
+
+## Variables
+
+Refer [Using variables].
+
+In general, Ansible gives precedence to those variables that were defined more recently, actively, and/or with more
+_explicit_ (and **not** necessarily _strict_) scope.
+
+Undefined variables are assigned the values defined in a role's `default` directory, if any.<br/>
+Host and/or inventory variables override roles' defaults.<br/>
+Definitions in a role's `vars` directory override previous definitions of the same variables in the role's namespace
+(including defaults).<br/>
+Explicit includes (e.g., an `include_vars` task) override existing values.
+
+Different variables sets in inventories are merged so that more specific settings override more generic ones.<br/>
+E.g., `ansible_user` specified as `host_var` overrides `ansible_ssh_user` specified as `group_var`.
+
+The current hierarchy is as follows (from lowest to highest priority, with the last setting overriding previous ones):
+
+1. Ansible direct command line values like `-u my_user` (these are **not** considered variables).
+1. Files in roles' `defaults` directory.<br/>
+   Tasks inside a role see their own role's defaults; tasks defined outside of a role see the defaults of the last role.
+1. Group variables defined in inventory files or provided by dynamic inventories.
+1. Shared group variables in inventories (`group_vars/all`).
+1. Shared group variables in playbooks (`group_vars/all`).
+1. Child-specific group variables in inventories (`group_vars/*`).
+1. Child-specific group variables in playbooks (`group_vars/*`).
+1. Host variables defined in inventory files or provided by dynamic inventories.
+1. Host variables in inventories (`host_vars/*`).
+1. Host variables in playbooks (`host_vars/*`).
+1. Host facts and **cached** `set_facts`.
+1. Play-specific variables defined in the `vars` key.
+1. Play-specific variables defined in the `vars_prompt` key.
+1. Play-specific variables defined in the `vars_files` key.
+1. Files in roles' `vars` directory.
+1. Block-specific variables.
+1. Task-specific variables.
+1. Values from included variables (`include_vars`).
+1. Values from `set_facts` and `register`ed as output of tasks.
+1. Parameters from a play's `role` key and `include_role` tasks.
+1. Parameters from `import_tasks` and `include_tasks` statements.
+1. Extra variables specified in the command line like `-e "user=my_user"`.
 
 ## Templating
 
