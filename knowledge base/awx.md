@@ -900,7 +900,38 @@ _Workflow Job Templates_ coordinate the linking and execution of multiple resour
 - Running Jobs based on the success or failure of one or more previous Jobs.
 - Requesting an admin's approval to proceed with one or more executions.
 
-Each action is a _node_ on a Workflow Job Template, and allows visualizing the flow of actions.
+Each action is a _node_ on a Workflow Job Template.
+
+<details>
+<summary>Creation process</summary>
+
+```mermaid
+flowchart LR
+  job_template("Job Template")
+  playbook("Playbook")
+  project("Project")
+  workflow_job_template("Workflow Job Template")
+  workflow_node("Workflow Node")
+
+  playbook --> project --> job_template --> workflow_node --> workflow_job_template
+```
+
+All the playbooks used in the workflow must be visible to AWX, meaning that one or more projects containing them must be
+already configured in the instance.
+
+Workflows need nodes to refer. Nodes reference a job template, which in turn refer a playbook to run.
+
+The AWX UI does not allow creating nodes directly, but it can be done via the visualizer.
+
+1. Open _Resources_ > _Templates_ in the sidebar.
+1. Click on the _Add_ button and choose _Add job template_ to add every job template that is needed.<br/>
+   Repeat as required.
+1. Click on the _Add_ button and choose _Add workflow template_.
+1. Fill in the form with the resources all nodes should share, and _save_.<br/>
+   The visualizer will open.
+1. In the visualizer, create the needed nodes.
+
+</details>
 
 ## API
 
