@@ -57,3 +57,28 @@ awx projects update --monitor --interval '3' '4'
 
 # list schedules
 awx schedules list --all | jq '.results[].name'
+
+###
+# Workflows
+# --------------------------------------
+###
+
+# list workflow job templates
+awx workflow_job_templates list --all | jq '.results[].name'
+
+# show info about workflow job templates
+awx workflow_job_templates get '28'
+awx workflow get 'Restore DEV DBs' --conf.format 'jq' --filter '.id'
+
+# list workflow job nodes
+awx workflow_job_nodes list
+awx workflow_job_nodes list --all | jq '.results[].identifier'
+
+# show info about workflow job nodes
+awx workflow_job_nodes get '33'
+
+# list workflow job template nodes
+awx workflow_job_template_nodes list --all | jq '.results[].name'
+
+# show info about workflow job template nodes
+awx workflow_job_template_nodes get '3'
