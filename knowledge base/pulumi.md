@@ -231,6 +231,7 @@ pulumi state delete --force --target-dependents \
 
 # Unprotect resources that are protected in states.
 pulumi state unprotect 'resourceUrn'
+pulumi state unprotect 'resourceUrn1' … 'resourceUrnN'
 
 
 # Rename projects.
