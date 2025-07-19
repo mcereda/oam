@@ -10,6 +10,8 @@ Fast, simple, and cost effective Postgres replication.
    1. [Peers](#peers)
    1. [Mirrors](#mirrors)
    1. [Alerts](#alerts)
+1. [PostgreSQL peers](#postgresql-peers)
+   1. [AWS RDS PostgresSQL peers](#aws-rds-postgressql-peers)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -91,96 +93,6 @@ If Catalog and Temporal are HA, then the whole service is pretty much HA.
 ### Peers
 
 Peers are connection settings to databases that PeerDB can operate upon.
-
-_Source_ PostgreSQL peers **require** logical replication to be enabled.
-
-<details style="padding: 0 0 1rem 1rem">
-
-```sql
--- Check settings
-sourceDb=> SELECT name,setting FROM pg_settings WHERE name IN ('wal_level','rds.logical_replication');
-          name           | setting
--------------------------+---------
- rds.logical_replication | on
- wal_level               | logical
-(2 rows)
-```
-
-```sql
--- Configure sources
-ALTER SYSTEM SET wal_level = logical;
-ALTER SYSTEM SET max_wal_senders = 10;
-ALTER SYSTEM SET max_replication_slots = 10;
-```
-
-</details>
-
-Operations:
-
-<details style="padding: 0 0 0 1rem">
-  <summary>List</summary>
-
-```sql
-SELECT id, name, type FROM peers;
-```
-
-```plaintext
-GET /api/v1/peers/list
-```
-
-</details>
-
-<details style="padding: 0 0 0 1rem">
-  <summary>Create or update</summary>
-
-```sql
-CREATE PEER IF NOT EXISTS some_postgresql_peer
-FROM POSTGRES
-WITH (
-  host='pg.example.org',
-  port='5432',
-  database='postgres',
-  user='postgres',
-  password='password'
-);
-```
-
-| Peer type  | `peer.type` attribute | Configuration attribute |
-| ---------- | --------------------- | ----------------------- |
-| ClickHouse | `8`                   | `clickhouse_config`     |
-| Kafka      | `9`                   | `kafka_config`          |
-| PostgreSQL | `3` or `'POSTGRES'`   | `postgres_config`       |
-
-> The optional `"allow_update": true` attribute in the API seems to do **absolutely nothing** as of the time of writing.
-
-```plaintext
-POST /api/v1/peers/create
-{
-  "allow_update": true,
-  "peer": {
-    "name": "some_postgresql_peer",
-    "type": "POSTGRES",
-    "postgres_config": {
-      "host": "pg.example.org",
-      "port": "5432",
-      "database": "postgres",
-      "user": "postgres",
-      "password": "password"
-    }
-  }
-}
-```
-
-</details>
-
-<details style="padding: 0 0 0 1rem">
-  <summary>Delete</summary>
-
-```sql
-DELETE FROM peers WHERE name == 'some_postgresql_peer';
-```
-
-</details>
 
 ### Mirrors
 
@@ -339,6 +251,192 @@ GET /api/v1/alerts/config
 ```
 
 </details>
+
+## PostgreSQL peers
+
+> [!caution]
+> Specific implementations of PostgreSQL (e.g., AWS RDS) should be configured in their specific way.<br/>
+> Refer the specific section or upstream documentation.
+
+Refer [Generic PostgreSQL Source Setup Guide].
+
+Requirements:
+
+1. Configure _generic_ _source_ PostgreSQL DBs as follows:
+
+   - WAL level must be set to `logical`.
+   - Max WAL senders must be set to a reasonable amount (more than `1` is advised).
+   - Max replication slots must be set to a reasonable amount (at least `4` is advised).
+
+   <details style="padding: 0 0 1rem 1rem">
+
+   ```sql
+   -- Check settings
+   postgres=> SELECT name,setting FROM pg_settings WHERE name IN ('wal_level','max_wal_senders','max_replication_slots');
+             name           | setting
+   -------------------------+---------
+    max_replication_slots   | 20
+    max_wal_senders         | 35
+    wal_level               | logical
+   (3 rows)
+
+   -- Configure settings
+   ALTER SYSTEM SET wal_level = logical;
+   ALTER SYSTEM SET max_wal_senders = 10;
+   ALTER SYSTEM SET max_replication_slots = 10;
+   ```
+
+   </details>
+
+1. Create a DB user with `REPLICATION` permissions.
+
+   <details style="padding: 0 0 1rem 1rem">
+
+   ```sql
+   CREATE ROLE peerdb WITH LOGIN REPLICATION PASSWORD 'someSecurePassword';
+   GRANT USAGE ON SCHEMA public TO peerdb;
+   GRANT SELECT ON ALL TABLES IN SCHEMA public TO peerdb;
+   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO peerdb;
+   ```
+
+   </details>
+
+1. Create a publication for the mirrors to use.
+
+   <details style="padding: 0 0 1rem 1rem">
+
+   ```sql
+   CREATE PUBLICATION peerdb FOR ALL TABLES;
+   ```
+
+   </details>
+
+Operations:
+
+<details style="padding: 0 0 0 1rem">
+  <summary>List</summary>
+
+```sql
+SELECT id, name, type FROM peers;
+```
+
+```plaintext
+GET /api/v1/peers/list
+```
+
+</details>
+
+<details style="padding: 0 0 0 1rem">
+  <summary>Create or update</summary>
+
+```sql
+CREATE PEER IF NOT EXISTS some_postgresql_peer
+FROM POSTGRES
+WITH (
+  host='pg.example.org',
+  port='5432',
+  database='postgres',
+  user='postgres',
+  password='password'
+);
+```
+
+| Peer type  | `peer.type` attribute | Configuration attribute |
+| ---------- | --------------------- | ----------------------- |
+| ClickHouse | `8`                   | `clickhouse_config`     |
+| Kafka      | `9`                   | `kafka_config`          |
+| PostgreSQL | `3` or `'POSTGRES'`   | `postgres_config`       |
+
+> The optional `"allow_update": true` attribute in the API seems to do **absolutely nothing** as of the time of writing.
+
+```plaintext
+POST /api/v1/peers/create
+{
+  "allow_update": true,
+  "peer": {
+    "name": "some_postgresql_peer",
+    "type": "POSTGRES",
+    "postgres_config": {
+      "host": "pg.example.org",
+      "port": "5432",
+      "database": "postgres",
+      "user": "postgres",
+      "password": "password"
+    }
+  }
+}
+```
+
+</details>
+
+<details style="padding: 0 0 0 1rem">
+  <summary>Delete</summary>
+
+```sql
+DELETE FROM peers WHERE name == 'some_postgresql_peer';
+```
+
+</details>
+
+### AWS RDS PostgresSQL peers
+
+Refer [RDS Postgres Source Setup Guide].
+
+- Configure _source_ AWS RDS PostgreSQL DBs as follows:
+
+  - RDS logical replication must be enabled.
+  - WAL sender timeout must be set to `0`.
+  - WAL level must be set to `logical`.
+  - Max WAL senders must be set to a reasonable amount (more than `1` is advised).
+  - Max replication slots must be set to a reasonable amount (at least `4` is advised).
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  ```sql
+  -- Check settings
+  postgres=> SELECT name,setting
+  FROM pg_settings
+  WHERE name IN ('rds.logical_replication','wal_sender_timeout','wal_level','max_wal_senders','max_replication_slots');
+            name           | setting
+  -------------------------+---------
+   max_replication_slots   | 20
+   max_wal_senders         | 35
+   rds.logical_replication | on
+   wal_level               | logical
+   wal_sender_timeout      | 0
+   (5 rows)
+  ```
+
+  </details>
+
+  Prefer modifying the settings by creating a parameter group for one's Postgres version and apply that to the RDS
+  instance.<br/>
+  It will require the instance to be rebooted.
+
+- Peers need a DB user with `REPLICATION` permissions.<br/>
+  AWS RDS does not allow that directly. Assign the `rds_replication` role to that user instead.
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  ```sql
+  CREATE ROLE peerdb WITH LOGIN PASSWORD 'someSecurePassword';
+  GRANT USAGE ON SCHEMA public TO peerdb;
+  GRANT SELECT ON ALL TABLES IN SCHEMA public TO peerdb;
+  ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO peerdb;
+  GRANT rds_replication TO peerdb;
+  ```
+
+  </details>
+
+- Create a publication for the mirrors to use.
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  ```sql
+  CREATE PUBLICATION peerdb FOR ALL TABLES;
+  ```
+
+  </details>
 
 ## Gotchas
 
@@ -502,10 +600,12 @@ GET /api/v1/alerts/config
 [blog]: https://blog.peerdb.io/
 [codebase]: https://github.com/PeerDB-io/peerdb
 [documentation]: https://docs.peerdb.io/
+[Generic PostgreSQL Source Setup Guide]: https://docs.peerdb.io/connect/postgres/generic_postgres
 [helm chart]: https://github.com/PeerDB-io/peerdb-enterprise
 [peerdb ui - deeper dive: part 1]: https://blog.peerdb.io/peerdb-ui-deeper-dive-part-1
 [peers.proto#PostgresConfig]: https://github.com/PeerDB-io/peerdb/blob/6a591128908cbd76df8f7e4094ec838fac08dcda/protos/peers.proto#L73
 [public ips for peerdb cloud]: https://docs.peerdb.io/peerdb-cloud/ip-table
+[RDS Postgres Source Setup Guide]: https://docs.peerdb.io/connect/postgres/rds_postgres
 [sql reference]: https://docs.peerdb.io/sql/reference
 [website]: https://www.peerdb.io/
 
