@@ -16,6 +16,11 @@ sudo dnf check-update --releasever='2023.7.20250609' --allowerasing --changelogs
 sudo dnf upgrade --security --sec-severity 'Critical' --downloadonly
 sudo dnf -y upgrade --security --nobest --sec-severity 'Important'
 
+# Like 'upgrade', but limits updates to the *nearest* available version providing bugfixes, enhancements or fixes for
+# security issues.
+sudo dnf upgrade --minimal
+sudo dnf upgrade-minimal --security
+
 sudo rpmkeys --import 'https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg'
 
 cat <<-EOF | sudo tee -a /etc/yum.repos.d/vscodium.repo
