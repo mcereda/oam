@@ -8,6 +8,7 @@
    1. [Testing](#testing)
 1. [Jobs execution](#jobs-execution)
 1. [Workflow automation](#workflow-automation)
+   1. [Pass data between workflow nodes](#pass-data-between-workflow-nodes)
 1. [API](#api)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -933,6 +934,60 @@ The AWX UI does not allow creating nodes directly, but it can be done via the vi
 
 </details>
 
+### Pass data between workflow nodes
+
+Refer [Passing Ansible variables in Workflows using set_stats].
+
+Leverage the [`set_stats` builtin module][ansible.builtin.set_stats module].
+
+> [!important]
+> Make sure the module's `per_host` argument remains `false` (the default) for this to work.
+
+The next play running in the flow will be given what is defined the module's `data` argument as variables.
+
+<details>
+  <summary>Example</summary>
+
+Considering a workflow where Node1 needs to pass data to Node2:
+
+1. Playbook for Node1:
+
+   ```yml
+   ---
+   - name: Get an AWS S3 object's information and pass them along
+     hosts: [ … ]
+     tasks: [ … ]
+     post_tasks:
+       - name: Pass the S3 object's information along when found
+         tags:
+           - always  # important if one plans to test workflows by leveraging tags
+           - pass_data_along
+         when: s3_object_info is defined
+         ansible.builtin.set_stats:
+           data:
+             s3_object_info: "{{ s3_object_info }}"
+   ```
+
+1. Playbook for Node2:
+
+   ```yml
+   ---
+   - name: Do something knowing an AWS S3 object exists because it got passed along
+     hosts: [ … ]
+     pre_tasks:
+       - name: Ensure the S3 object exists beforehand and is in the STANDARD storage tier
+         tags:
+           - always  # important if one plans to test workflows by leveraging tags
+           - ensure_s3_object_is_usable
+         ansible.builtin.assert:
+           that:
+             - s3_object_info.object_data.content_length | default(0) > 0
+             - s3_object_info.object_data.storage_class | default('') == 'STANDARD'
+     tasks: [ … ]
+   ```
+
+</details>
+
 ## API
 
 Refer [AWX API Reference] and [How to use AWX REST API to execute jobs].
@@ -1039,6 +1094,7 @@ Refer [AWX Command Line Interface] for more information.
 [minikube]: kubernetes/minikube.md
 
 <!-- Upstream -->
+[ansible.builtin.set_stats module]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/set_stats_module.html
 [awx api reference]: https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/
 [awx command line interface]: https://docs.ansible.com/ansible-tower/latest/html/towercli/
 [awx's documentation]: https://ansible.readthedocs.io/projects/awx/en/latest/
