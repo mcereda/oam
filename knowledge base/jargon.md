@@ -1,4 +1,6 @@
-# Acronyms and abbreviations
+# Jargon
+
+## Acronyms and abbreviations
 
 | Acronym | Expansion                                              | Description                                                                                         |
 | ------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
@@ -42,15 +44,16 @@
 | DB      | Data Base                                              |                                                                                                     |
 | DBMS    | DB Management System                                   |                                                                                                     |
 | DDL     | Data Definition Language                               |                                                                                                     |
-| [DePIN] | Decentralized Physical Infrastructure Network          |                                                                                                     |
+| DePIN   | [Decentralized Physical Infrastructure Network][depin] |                                                                                                     |
 | DKIM    | DomainKeys Identified Mail                             |                                                                                                     |
 | DML     | Data Manipulation Language                             |                                                                                                     |
 | EA      | Extended Attributes                                    |                                                                                                     |
 | EEPROM  | Electronically Erasable Programmable Read-Only Memory  |                                                                                                     |
 | ELI5    | Explain Like I'm 5                                     |                                                                                                     |
+| ELT     | Extract, Load and Transform                            | The process of transforming data after loading it into a [data warehouse] from multiple sources     |
 | ESS     | Extended Service Set                                   | Group of WAPs working together to offer the same wireless network                                   |
 | ESSID   | Extended Service Set IDentifier                        | The wireless network name shared in an ESS                                                          |
-| ETL     | Extract, Transform and Load                            | The process of combining data from multiple sources into a large, central data warehouse            |
+| ETL     | Extract, Transform and Load                            | The process of transforming data from multiple sources before combining it into a [data warehouse]  |
 | FDW     | Foreign Data Wrapper                                   | Standardized way of handling access to remote objects from SQL databases                            |
 | FHS     | [Filesystem Hierarchy Standard][fhs]                   |                                                                                                     |
 | FIFO    | First In First Out                                     |                                                                                                     |
@@ -103,7 +106,7 @@
 | SaaSS   | [Service as a Software Substitute]                     | Using a service as a substitute for running a copy of a program.                                    |
 | SAFE    | Scaled Agile FramEwork                                 |                                                                                                     |
 | SBOM    | Software Bill Of Materials                             | See [SBOM at a Glance]                                                                              |
-| SIEM    | [Security Information and Event Management)][siem]     |                                                                                                     |
+| SIEM    | [Security Information and Event Management][siem]      |                                                                                                     |
 | SLA     | Service-Level Agreement                                |                                                                                                     |
 | SLI     | Service-Level Indicator                                |                                                                                                     |
 | SLO     | Service-Level Objective                                |                                                                                                     |
@@ -162,6 +165,7 @@
 [adr]: adr.md
 [bash]: bash.md
 [cni]: cni.md
+[data warehouse]: data%20warehouse.md
 [depin]: depin.md
 [fhs]: filesystem%20hierarchy%20standard.md
 [fish]: fish.md
