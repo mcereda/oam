@@ -19,9 +19,12 @@ helm search repo --versions --output 'json' … \
 
 helm show values 'gitlab/gitlab'
 helm show values 'gitlab/gitlab-runner' --version '0.64.1'
+helm show values --repo 'https://grafana.github.io/helm-charts' 'loki' --version '6.30.1'
 
 helm pull 'ingress-nginx/ingress-nginx' --version '4.0.6' --destination '/tmp' --untar --untardir 'ingress-nginx'
 
+helm template --repo 'https://prometheus-community.github.io/helm-charts' 'prometheus' 'prometheus'
+helm template 'loki' --repo 'https://grafana.github.io/helm-charts' 'loki' --version '6.30.1' --values 'values.aws.yml'
 helm template --namespace 'gitlab' --values "values.gitlab-runner.yaml" --set global.hosts.hostSuffix='test' \
 	'gitlab-runner' 'gitlab/gitlab-runner'
 
@@ -60,3 +63,8 @@ aws eks --region 'eu-west-1' update-kubeconfig --name 'custom-eks-cluster' \
 helm --namespace 'kube-system' diff upgrade 'metrics-server' 'metrics-server/metrics-server' \
 	--version '3.12.2' --values 'metrics-server.values.yml' \
 	--set 'args[0]'='--kubelet-insecure-tls'
+
+helm template 'loki' \
+	--repo 'https://grafana.github.io/helm-charts' 'loki' --version '6.30.1' \
+	--values 'staging/values.eks.yml' \
+| yq -rs '[.[].spec.template?.spec.containers[]?.image]|unique|.[]' -
