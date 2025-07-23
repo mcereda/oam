@@ -1,0 +1,107 @@
+---
+
+version: '3'
+silent: true
+vars:
+  GITEA_ADMIN_SECRET_NAME: gitea-admin-secret
+  HELM_CHART_NAME: gitea
+  HELM_CHART_REPOSITORY: https://dl.gitea.com/charts/
+  HELM_CHART_VERSION: 12.1.0
+  HELM_RELEASE_NAME: gitea
+  HELM_RELEASE_NAMESPACE: gitea
+  HELM_VALUES_FILE: values.eks.yml
+tasks:
+  apply:
+    deps:
+      - ecr:ensure-container-images
+      - ensure-k8s-secret
+    requires:
+      vars:
+        - GITEA_MAILER_PASSWORD
+        - HELM_CHART_NAME
+        - HELM_CHART_REPOSITORY
+        - HELM_CHART_VERSION
+        - HELM_RELEASE_NAME
+        - HELM_RELEASE_NAMESPACE
+        - HELM_VALUES_FILE
+    vars:
+      GITEA_MAILER_PASSWORD:
+        sh: pulumi config get 'giteaMailerPassword'
+    cmd: >-
+      helm --namespace '{{.HELM_RELEASE_NAMESPACE}}' upgrade --install --cleanup-on-fail
+      '{{.HELM_RELEASE_NAME}}'
+      --repo '{{.HELM_CHART_REPOSITORY}}' '{{.HELM_CHART_NAME}}' --version '{{.HELM_CHART_VERSION}}'
+      --values '{{.HELM_VALUES_FILE}}'
+      --set 'gitea.config.mailer.PASSWD'='{{.GITEA_MAILER_PASSWORD}}'
+  diff:
+    requires:
+      vars:
+        - GITEA_MAILER_PASSWORD
+        - HELM_CHART_NAME
+        - HELM_CHART_REPOSITORY
+        - HELM_CHART_VERSION
+        - HELM_RELEASE_NAME
+        - HELM_RELEASE_NAMESPACE
+        - HELM_VALUES_FILE
+    vars:
+      GITEA_MAILER_PASSWORD:
+        sh: pulumi config get 'giteaMailerPassword'
+    cmd: >-
+      helm --namespace '{{.HELM_RELEASE_NAMESPACE}}' diff upgrade
+      '{{.HELM_RELEASE_NAME}}'
+      --repo '{{.HELM_CHART_REPOSITORY}}' '{{.HELM_CHART_NAME}}' --version '{{.HELM_CHART_VERSION}}'
+      --values '{{.HELM_VALUES_FILE}}'
+      --set 'gitea.config.mailer.PASSWD'='{{.GITEA_MAILER_PASSWORD}}'
+  ecr:ensure-container-images:
+    requires:
+      vars:
+        - ECR_URL
+        - IMAGES
+    vars:
+      ECR_URL:
+        sh: yq -r '.image.registry' '{{.HELM_VALUES_FILE}}'
+      IMAGES:
+        sh: >-
+          helm template '{{.HELM_RELEASE_NAME}}'
+          --repo '{{.HELM_CHART_REPOSITORY}}' '{{.HELM_CHART_NAME}}' --version '{{.HELM_CHART_VERSION}}'
+          --values '{{.HELM_VALUES_FILE}}'
+          | yq -rs '[.[].spec.template?.spec.containers[]?.image]|unique|.[]' -
+    cmds:
+      - >-
+          aws ecr get-login-password
+          | docker login --username 'AWS' --password-stdin '{{.ECR_URL}}'
+      - for:
+          var: IMAGES
+        cmd: docker image pull '{{.ITEM}}'
+  enforce-k8s-secret:
+    deps:
+      - ensure-k8s-namespace
+    requires:
+      vars:
+        - GITEA_ADMIN_SECRET_NAME
+        - HELM_RELEASE_NAMESPACE
+    cmds:
+      - >-
+          kubectl --namespace '{{.HELM_RELEASE_NAMESPACE}}' get secret '{{.GITEA_ADMIN_SECRET_NAME}}' &&
+          kubectl --namespace '{{.HELM_RELEASE_NAMESPACE}}' delete secret '{{.GITEA_ADMIN_SECRET_NAME}}'
+      - task: ensure-k8s-secret
+  ensure-k8s-namespace:
+    requires:
+      vars:
+        - HELM_RELEASE_NAMESPACE
+    cmd: kubectl get namespaces '{{.HELM_RELEASE_NAMESPACE}}' || kubectl create namespace '{{.HELM_RELEASE_NAMESPACE}}'
+  ensure-k8s-secret:
+    deps:
+      - ensure-k8s-namespace
+    requires:
+      vars:
+        - GITEA_ADMIN_PASSWORD
+        - GITEA_ADMIN_SECRET_NAME
+        - HELM_RELEASE_NAMESPACE
+    vars:
+      GITEA_ADMIN_PASSWORD:
+        sh: pulumi config get 'giteaAdminPassword'
+    cmd: >-
+      kubectl --namespace '{{.HELM_RELEASE_NAMESPACE}}' get secret '{{.GITEA_ADMIN_SECRET_NAME}}' ||
+      kubectl --namespace '{{.HELM_RELEASE_NAMESPACE}}' create secret generic '{{.GITEA_ADMIN_SECRET_NAME}}'
+      --from-literal 'username=gitea_admin' --from-literal 'password={{.GITEA_ADMIN_PASSWORD}}'
