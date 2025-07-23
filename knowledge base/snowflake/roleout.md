@@ -1,43 +1,23 @@
-#!/usr/bin/env fish
+# RoleOut
 
-###
-# Snowflake CLI
-# ------------------
-###
+Project trying to accelerate the design and deployment of Snowflake environments through Infrastructure as Code.
 
-# Install
-curl -C '-' -LfSO \
-	--url 'https://sfc-repo.snowflakecomputing.com/snowflake-cli/darwin_arm64/3.7.2/snowflake-cli-3.7.2-darwin-arm64.pkg' \
-&& sudo installer -pkg 'snowflake-cli-3.7.2-darwin-arm64.pkg' -target '/' \
-&& ln -swiv '/Applications/SnowflakeCLI.app/Contents/MacOS/snow' "$HOME/bin/snow"
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
 
-# Show the configuration
-cat "$HOME/Library/Application Support/snowflake/config.toml"
+## TL;DR
 
-# Add connections
-snow connection add
-snow --config-file 'my_config.toml' connection add -n 'myconnection2' --account 'myaccount2' --user 'jdoe2' --no-interactive
+Administrators define Snowflake resources in a YAML file. RoleOut then uses it to generate SQL or Terraform code for
+deployment.
 
-# List connections
-snow connection list
+> [!important]
+> The tool applies opinionated best practices.<br/>
+> It also comes with its own naming convention, but it can be tweaked.
 
-# Test connections
-snow connection test
-snow --config-file='my_config.toml' connection test -c 'myconnection2' --enable-diag --diag-log-path "$HOME/report"
+<details>
+  <summary>Setup</summary>
 
-# Set the default connection
-snow connection set-default 'myconnection2'
-
-# Execute SQL commands
-snow sql
-
-
-###
-# Roleout
-# ------------------
-###
-
-# Install
+```sh
 # Mac OS X
 curl -C '-' -LfSO --url 'https://github.com/Snowflake-Labs/roleout/releases/download/v2.0.1/Roleout-2.0.1-arm64.dmg' \
 && sudo installer -pkg 'Roleout-2.0.1-arm64.dmg' -target '/' \
@@ -51,7 +31,14 @@ curl -C '-' -LfSO --url 'https://github.com/Snowflake-Labs/roleout/releases/down
 export SNOWFLAKE_ACCOUNT='ab01234.eu-west-1' \
   SNOWFLAKE_USER='DIANE' SNOWFLAKE_PRIVATE_KEY_PATH='some-private-key-path' \
   SNOWFLAKE_WAREHOUSE='DEV_DIANE_WH' SNOWFLAKE_ROLE='ACCOUNTADMIN'
+```
 
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
 # Load objects from Snowflake
 roleout-cli snowflake populateProject -o 'my_config.yml'
 
@@ -62,4 +49,36 @@ roleout-cli snowflake populateProject -c 'my_config.yml' -o 'my_new_config.yml'
 roleout-cli terraform import -c 'my_config.yml'
 # Just write the `terraform import` commands to a file instead of running them
 roleout-cli terraform import -c 'my_config.yml' --output 'my_import_commands.sh'
-roleout-cli terraform import -c 'my_config.yml' -o '/dev/stdout'
+```
+
+</details>
+
+<!-- Uncomment if used
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
+```
+
+</details>
+-->
+
+## Further readings
+
+- [Snowflake]
+- [Codebase]
+
+<!--
+  Reference
+  ═╬═Time══
+  -->
+
+<!-- In-article sections -->
+<!-- Knowledge base -->
+[Snowflake]: README.md
+
+<!-- Files -->
+<!-- Upstream -->
+[Codebase]: https://github.com/Snowflake-Labs/roleout
+
+<!-- Others -->
