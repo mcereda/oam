@@ -27,8 +27,9 @@
 1. [Remove a file from the repository](#remove-a-file-from-the-repository)
 1. [Troubleshooting](#troubleshooting)
     1. [Debug](#debug)
-    1. [GPG cannot sign a commit](#gpg-cannot-sign-a-commit)
+    1. [Change author information for multiple commits](#change-author-information-for-multiple-commits)
     1. [Git does not accept self-signed certificates](#git-does-not-accept-self-signed-certificates)
+    1. [GPG cannot sign a commit](#gpg-cannot-sign-a-commit)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -716,7 +717,7 @@ git branch --delete --remotes 'feat-branch'
 
 ### Delete branches which have been merged or are otherwise absent from a remote
 
-Command source [here][prune local tracking branches that do not exist on remote anymore].
+Command source: [prune local tracking branches that do not exist on remote anymore].
 
 ```sh
 # Branches merged on the remote are tagged as 'gone' in `git branch -vv`'s output.
@@ -967,6 +968,44 @@ When everything else fails, enable tracing:
 export GIT_TRACE=1
 ```
 
+### Change author information for multiple commits
+
+Useful when using the wrong email (e.g., the personal one instead of the work one) for a number of commits.
+
+Refer [How do I change the author and committer name/email for multiple commits?].
+
+1. Fix the author's information in the git config file.
+1. Rebase commits and execute the reset author command like this:
+
+   ```sh
+   git rebase --interactive --rebase-merges --exec 'git commit --amend --reset-author --no-edit' 'last-good-commit-hash'
+   ```
+
+The rebase will create a todo list that looks similar to this:
+
+```plaintext
+pick ef11092  # Blah blah blah
+exec git commit --amend --reset-author --no-edit
+pick 52d6391  # Blah bloh bloo
+exec git commit --amend --reset-author --no-edit
+pick 30ebbfe  # Blah bluh bleh
+exec git commit --amend --reset-author --no-edit
+…
+```
+
+Accepting it will rebase and apply the author reset to each commit automatically.
+
+As per normal rebase action, the timestamp of each commit will be updated.
+
+### Git does not accept self-signed certificates
+
+Disable certificate verification:
+
+```sh
+GIT_SSL_NO_VERIFY=true git …
+git -c http.sslVerify=false …
+```
+
 ### GPG cannot sign a commit
 
 > ```sh
@@ -979,15 +1018,6 @@ If `gnupg2` and `gpg-agent` 2.x are used, be sure to set the environment variabl
 
 ```sh
 export GPG_TTY=$(tty)
-```
-
-### Git does not accept self-signed certificates
-
-Disable certificate verification:
-
-```sh
-export GIT_SSL_NO_VERIFY=true
-git -c http.sslVerify=false …
 ```
 
 ## Further readings
@@ -1070,6 +1100,7 @@ git -c http.sslVerify=false …
 [git submodules: adding, using, removing, updating]: https://chrisjean.com/git-submodules-adding-using-removing-and-updating/
 [git-extras]: https://github.com/tj/git-extras/
 [gpg failed to sign the data fatal: failed to write commit object]: https://stackoverflow.com/questions/39494631/gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object-git-2-10-0
+[How do I change the author and committer name/email for multiple commits?]: https://stackoverflow.com/questions/750172/how-do-i-change-the-author-and-committer-name-email-for-multiple-commits#1320317
 [how do i check out a remote git branch]: https://stackoverflow.com/questions/1783405/how-do-i-check-out-a-remote-git-branch/#1787014
 [how to add and update git submodules]: https://devconnected.com/how-to-add-and-update-git-submodules/
 [how to change a git remote]: https://careerkarma.com/blog/git-change-remote/
