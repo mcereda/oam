@@ -7,7 +7,6 @@
    1. [Removal](#removal)
    1. [Testing](#testing)
    1. [Job execution](#job-execution)
-1. [Job templates](#job-templates)
 1. [Workflow automation](#workflow-automation)
    1. [Pass data between workflow nodes](#pass-data-between-workflow-nodes)
 1. [API](#api)
@@ -29,61 +28,26 @@
 - K8S tolerations set in AWX custom resources only affect K8S-based AWX instances' deployments.<br/>
   They are **not** applied to other resources like automation Jobs.
 
-  <details style='padding: 0 0 1rem 1rem'>
+  Job-related specific K8S settings need to be configured in the `pod_spec_override` attribute of Instance Groups of
+  type _Container Group_.<br/>
+  Refer [Job execution].
 
-  Jobs' specific K8S settings need to be configured in the `pod_spec_override` attribute of Instance Groups of type
-  _Container Group_:
+- Variables configured in job templates are given to the `ansible-playbook` command for the job using its
+  `-e, --extra-vars` option.
 
-  ```yaml
-  ---
-  # awx instance_groups get 'default' -f 'yaml'
-  …
-  pod_spec_override: |
-    apiVersion: v1
-    kind: Pod
-    metadata:
-      namespace: awx
-      spec:
-        …
-        containers:
-          - …
-            image: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/custom/awx-ee:latest
-            resources:
-              requests:
-                cpu: 250m
-                memory: 100Mi
-              limits:
-                cpu: 1930m
-                memory: 3297Mi
-        tolerations:
-          - key: org.example.k8s/reservation/app
-            operator: Equal
-            value: awx
-            effect: NoSchedule
-          - key: org.example.k8s/awx/component
-            operator: Equal
-            value: job
-            effect: NoSchedule
-        affinity:
-          nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              nodeSelectorTerms:
-                - matchExpressions:
-                  - key: org.example.k8s/reservation/app
-                    operator: In
-                    values:
-                      - awx
-            preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 10
-                preference:
-                  matchExpressions:
-                    - key: org.example.k8s/awx/component
-                      operator: In
-                      values:
-                        - job
-  ```
+  These variables will have the **highest** precedence of all variables, and as such it is their value that will be used
+  throughout the whole execution. They will **not** be overridden by any other definition for similarly named variables
+  (not at play, host, block nor task level; not even the `set_facts` module will override them).<br/>
+  Refer [Ansible variables].
 
-  </details>
+- Once a variable is defined in a job template, it **will** be passed to the ansible command for the job, even if its
+  value is set to `null` (it will be an empty string).
+
+  When launching a job that allows for variables editing, the edited variables will be **merged** on top of the initial
+  setting.<br/>
+  As such, values configured in the job template can **at most** be overridden, but **never deleted**. They also cannot
+  be set to `null`, since `null` values in the override will **not** be considered in the merge, resulting in the job
+  template's predefined value being picked.
 
 ## Setup
 
@@ -796,8 +760,6 @@ resource limits.
                 cpu: 250m
                 memory: 100Mi
               limits:
-                cpu: 1930m
-                memory: 3297Mi
                 cpu: 1830m
                 memory: 1425Mi
         tolerations:
@@ -887,20 +849,6 @@ resource limits.
 ```
 
 </details>
-
-## Job templates
-
-> [!warning]
-> Variables configured in job templates are given to the `ansible-playbook` command for the job using its
-> `-e, --extra-vars` option.<br/>
-> This means they will have the **highest** precedence of all variables, and as such they will override **any** other
-> block or task variable named like that. Refer [Ansible variables].
-
-> [!caution]
-> Once a variable is defined in a job template, it **will** be passed to the ansible command for the job.<br/>
-> When launching a job that allows for variables editing, the edited ones will be **merged** with the initial setting.
-> As such, deleting variables while launching a job will result in them still being passed on with the value they had in
-> the initial variables setting.
 
 ## Workflow automation
 
@@ -1100,7 +1048,8 @@ Refer [AWX Command Line Interface] for more information.
   -->
 
 <!-- In-article sections -->
-[gotchas]: #gotchas
+[Gotchas]: #gotchas
+[Job execution]: #job-execution
 
 <!-- Knowledge base -->
 [Ansible variables]: ansible.md#variables
