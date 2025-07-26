@@ -74,6 +74,7 @@
 | IP      | Internet Protocol                                      |                                                                                                     |
 | IPvX    | Internet Protocol version X                            |                                                                                                     |
 | ISP     | Internet Service Provider                              |                                                                                                     |
+| JDBC    | Java DataBase Connectivity                             | Java API used for accessing databases                                                               |
 | JDK     | Java Development Kit                                   |                                                                                                     |
 | JIC     | Just In Case                                           |                                                                                                     |
 | JIT     | Just In Time                                           |                                                                                                     |
@@ -91,6 +92,7 @@
 | NACL    | Network ACL                                            |                                                                                                     |
 | OAM     | [Open Application Model]                               |                                                                                                     |
 | OAM     | Operations, Administration and Management              |                                                                                                     |
+| ODBC    | Open DataBase Connectivity                             | Open standard API used for accessing databases                                                      |
 | OIDC    | OpenID Connect                                         |                                                                                                     |
 | OKR     | Objectives and Key Results                             | Framework helping teams set and track measurable goals                                              |
 | OOM     | Out Of Memory                                          |                                                                                                     |

@@ -44,25 +44,15 @@ Accounts can connect to Snowflake via:
 - Native connectors (e.g., Python or Spark).
 - Third-party connectors.
 
+<!-- Uncomment if used
 <details>
   <summary>Setup</summary>
 
-  <details style='padding: 0 0 0 1rem'>
-    <summary>Mac OS X</summary>
-
 ```sh
-# Install RoleOut's UI and CLI.
-curl -C '-' -LfSO --url 'https://github.com/Snowflake-Labs/roleout/releases/download/v2.0.1/Roleout-2.0.1-arm64.dmg' \
-&& sudo installer -pkg 'Roleout-2.0.1-arm64.dmg' -target '/' \
-&& curl -C '-' -LfS --url 'https://github.com/Snowflake-Labs/roleout/releases/download/v2.0.1/roleout-cli-macos' \
-     --output "$HOME/bin/roleout-cli" \
-&& chmod 'u+x' "$HOME/bin/roleout-cli" \
-&& xattr -d 'com.apple.quarantine' "$HOME/bin/roleout-cli"
 ```
 
-  </details>
-
 </details>
+-->
 
 <details>
   <summary>Usage</summary>
