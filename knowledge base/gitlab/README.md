@@ -17,6 +17,7 @@
 1. [Artifacts](#artifacts)
     1. [Default artifacts expiration](#default-artifacts-expiration)
     1. [Keep the latest artifacts for all jobs in the latest successful pipelines](#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines)
+1. [Environments](#environments)
 1. [Login via Google, Github or other services](#login-via-google-github-or-other-services)
 1. [Troubleshooting](#troubleshooting)
     1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
@@ -788,6 +789,59 @@ in the latest successful pipelines_.
 When disabling this feature, the latest artifacts do **not** immediately expire.<br/>
 A new pipeline must run before the latest artifacts can expire and be deleted.
 
+## Environments
+
+Refer [Environments].
+
+Specific deployment targets, e.g. `development`, `staging`, or `production`.<br/>
+They manage different configurations and code.
+
+One requires the _developer_ or higher role to manage environments.<br/>
+One must stop an environment before it can be deleted.
+
+Can be either _static_ or _dynamic_.
+
+Static environments:
+
+- Have names that do not change nor depend on anything else, e.g. `staging` or `production`.
+- Are usually reused in successive deployments.
+
+Dynamic environments:
+
+- Have names that depend on something, usually based on the value of a CI/CD variable.
+- Are usually created in a CI/CD pipeline.
+- Are usually used only for a single deployment, then are stopped or deleted.
+
+Environment have one of three states, depending on whether its _on stop job_ has run:
+
+- _available_: the environment exists; there might be a deployment.
+- _stopping_: the _on stop job_ has started.<br/>
+  This state does **not** apply when there is no _on stop job_ defined.
+- _stopped_ : either the _on stop job_ has run, or a user manually stopped the environment.
+
+One can create static environments in the UI, or in the project's `.gitlab-ci.yml` file.
+
+GitLab by default automatically stops environments when the associated branch is deleted or merged.<br/>
+This behavior persists even if no explicit `on_stop` CI/CD job is defined.
+
+When using the merge request pipelines configuration, the `stop` trigger is automatically enabled for pipelines.
+
+Environment can be configured to stop automatically after a certain time period by specifying the jobs'
+`environment.auto_stop_in` keyword.<br/>
+When this is the case, the `environment.action` keyword can be used to reset the time that an environment is scheduled
+to stop.
+
+Maintainers or higher roles can clean up stale environments in projects by:
+
+1. Opening the project's page.
+1. Selecting _Operate_ > _Environments_ from the left sidebar.
+1. Selecting _Clean up environments_ on the top right corner.
+1. Selecting a date that will be used to determine which environments to consider stale.
+1. Confirming.
+
+Active environments that have **not** been updated after the specified date will be stopped.<br/>
+Protected environments are ignored.
+
 ## Login via Google, Github or other services
 
 Refer [OmniAuth].<br/>
@@ -974,6 +1028,7 @@ Solution: set the correct ownership with
 [upgrade packaged postgresql server]: https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server
 [upgrade path tool]: https://gitlab-com.gitlab.io/support/toolbox/upgrade-path/
 [use kaniko to build docker images]: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
+[Environments]: https://docs.gitlab.com/ci/environments/
 
 <!-- Others -->
 [chef infra]: https://www.chef.io/products/chef-infra
