@@ -5,6 +5,8 @@ ReadMe's Markdown engine.
 Compare Markdown implementations at [babelmark].
 
 1. [TL;DR](#tldr)
+1. [Alerts](#alerts)
+1. [Images](#images)
 1. [Troubleshooting](#troubleshooting)
    1. [Escape the backtick character](#escape-the-backtick-character)
    1. [Render mermaid.js graphs in VS Code's Markdown preview](#render-mermaidjs-graphs-in-vs-codes-markdown-preview)
@@ -12,57 +14,6 @@ Compare Markdown implementations at [babelmark].
    1. [Sources](#sources)
 
 ## TL;DR
-
-<details>
-  <summary>Alerts</summary>
-
-Requires the Alert extension.
-
-Refer [Github's alert formatting][github formatting  alerts].
-
-```md
-> [!NOTE]
-> Useful information that users should know, even when skimming content.
-
-> [!TIP]
-> Helpful advice for doing things better or more easily.
-
-> [!IMPORTANT]
-> Key information users need to know to achieve their goal.
-
-> [!WARNING]
-> Urgent info that needs immediate user attention to avoid problems.
-
-> [!CAUTION]
-> Advises about risks or negative outcomes of certain actions.
-```
-
----
-
-> [!NOTE]
-> Useful information that users should know, even when skimming content.
-
----
-
-> [!TIP]
-> Helpful advice for doing things better or more easily.
-
----
-
-> [!IMPORTANT]
-> Key information users need to know to achieve their goal.
-
----
-
-> [!WARNING]
-> Urgent info that needs immediate user attention to avoid problems.
-
----
-
-> [!CAUTION]
-> Advises about risks or negative outcomes of certain actions.
-
-</details>
 
 <details>
   <summary>Diagrams</summary>
@@ -83,30 +34,6 @@ Use a `<details>` HTML tag:
   <summary>Fold/Open</summary>
   Folded content
 </details>
-```
-
-</details>
-
-<details>
-  <summary>Include images</summary>
-
-Add an image:
-
-```md
-![description](path/to.image)
-![description][reference name]
-```
-
-Control width and height:
-
-```md
-<img src="./cat.png" width=300px height=200px />
-```
-
-Align in the center:
-
-```md
-<div align="center">![sleep-cat](./cat.png)</div>
 ```
 
 </details>
@@ -149,6 +76,9 @@ private void index(){
 }
 ```
 
+Refer [Syntax highlighting in markdown] and [linguist supported language syntax list] for recognized languages and their
+aliases.
+
 </details>
 
 <details>
@@ -164,6 +94,130 @@ checked one.
 - [x] Point 3
 
 </details>
+
+## Alerts
+
+Alerts are not defined in the base Markdown specification.<br/>
+They are extensions that the most famous flavours introduced or adopted, each with small but annoying differences.
+
+<details>
+  <summary>GitHub formatting</summary>
+
+Refer [GitHub's alert formatting][github formatting  alerts].
+
+```md
+> [!NOTE]
+> Useful information that users should know, even when skimming content.
+
+> [!TIP]
+> Helpful advice for doing things better or more easily.
+
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
+
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+
+> [!CAUTION]
+> Advises about risks or negative outcomes of certain actions.
+```
+
+---
+
+> [!NOTE]
+> Useful information that users should know, even when skimming content.
+
+---
+
+> [!TIP]
+> Helpful advice for doing things better or more easily.
+
+---
+
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
+
+---
+
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+
+---
+
+> [!CAUTION]
+> Advises about risks or negative outcomes of certain actions.
+
+</details>
+
+<details>
+  <summary>GitLab formatting</summary>
+
+Refer [GitLab Flavored Markdown][gitlab flavored markdown  alerts].
+
+```md
+> [!note]
+> Information that users should take into account, even when skimming.
+
+> [!tip]
+> Optional information to help a user be more successful.
+
+> [!important]
+> Crucial information necessary for users to succeed.
+
+> [!caution]
+> Negative potential consequences of an action.
+
+> [!warning]
+> Critical potential risks.
+```
+
+---
+
+> [!note]
+> Information that users should take into account, even when skimming.
+
+---
+
+> [!tip]
+> Optional information to help a user be more successful.
+
+---
+
+> [!important]
+> Crucial information necessary for users to succeed.
+
+---
+
+> [!caution]
+> Negative potential consequences of an action.
+
+---
+
+> [!warning]
+> Critical potential risks.
+
+</details>
+
+## Images
+
+Add an image:
+
+```md
+![description](path/to.image)
+![description][reference name]
+```
+
+Control width and height:
+
+```md
+<img src="./cat.png" width=300px height=200px />
+```
+
+Align in the center:
+
+```md
+<div align="center">![sleep-cat](./cat.png)</div>
+```
 
 ## Troubleshooting
 
@@ -199,6 +253,8 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 - [The magical Markdown I bet you don't know]
 - [slaise/High-level-Markdown]
 - [Syntax highlighting in Markdown]
+- [Writing on GitHub]
+- [GitLab Flavored Markdown]
 
 <!--
   Reference
@@ -220,9 +276,12 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 [escaping backtick in markdown]: https://www.growingwiththeweb.com/2015/06/escaping-backtick-in-markdown.html
 [escaping backticks]: https://www.markdownguide.org/basic-syntax/#escaping-backticks
 [github formatting  alerts]: https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
+[GitLab Flavored Markdown  alerts]: https://docs.gitlab.com/user/markdown/#alerts
+[GitLab Flavored Markdown]: https://docs.gitlab.com/user/markdown/
 [linguist supported language syntax list]: https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
 [live editor]: https://mermaid.live/edit
+[myst]: https://mystmd.org/
 [slaise/high-level-markdown]: https://github.com/slaise/High-level-Markdown
 [syntax highlighting in markdown]: https://support.codebasehq.com/articles/tips-tricks/syntax-highlighting-in-markdown
 [the magical markdown i bet you don't know]: https://medium.com/codex/the-magical-markdown-i-bet-you-dont-know-b51f8c049773
-[myst]: https://mystmd.org/
+[Writing on GitHub]: https://docs.github.com/en/get-started/writing-on-github

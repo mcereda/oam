@@ -8,11 +8,23 @@
   connection: local
   gather_facts: false
   tasks:
-    - ansible.builtin.import_tasks: tasks/debug.yml
-    - ansible.builtin.import_tasks:
+    - name: Import tasks in-line
+      ansible.builtin.import_tasks: tasks/debug.yml
+    - name: Import tasks with arguments and set variables for them
+      vars:
+        somevar: some value
+      ansible.builtin.import_tasks:
         file: tasks/control flows.yml
-    - ansible.builtin.include_tasks: tasks/manipulate data.yml
-    - ansible.builtin.include_tasks:
+    - name: Include tasks in-line
+      tags: always
+      ansible.builtin.include_tasks: tasks/manipulate data.yml
+    - name: Include tasks with arguments and set variables for them
+      tags: always
+      vars:
+        somevar: some value
+      ansible.builtin.include_tasks:
         file: tasks/manipulate data.yml
         apply:
           tags: data_manipulation
+          vars:
+            someothervar: some other value

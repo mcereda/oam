@@ -1,12 +1,13 @@
 # Ansible AWX
 
 1. [Gotchas](#gotchas)
-1. [Instance setup](#instance-setup)
+1. [Setup](#setup)
    1. [Deployment](#deployment)
    1. [Update](#update)
    1. [Removal](#removal)
    1. [Testing](#testing)
-1. [Jobs execution](#jobs-execution)
+   1. [Job execution](#job-execution)
+1. [Job templates](#job-templates)
 1. [Workflow automation](#workflow-automation)
    1. [Pass data between workflow nodes](#pass-data-between-workflow-nodes)
 1. [API](#api)
@@ -84,7 +85,7 @@
 
   </details>
 
-## Instance setup
+## Setup
 
 ### Deployment
 
@@ -592,8 +593,7 @@ $ minikube kubectl -- delete ns 'awx'
 <details>
 <summary>Run: kustomized helm chart</summary>
 
-> #### Warning
->
+> [!warning]
 > Remember to include the CRDs from the helm chart.
 
   <details style="margin-left: 1em">
@@ -754,7 +754,7 @@ deployment.apps "awx-operator-controller-manager" deleted
   </details>
 </details>
 
-## Jobs execution
+### Job execution
 
 Unless explicitly defined in Job Templates or Schedules, Jobs using a containerized execution environment are executed
 by the _default_ container group.
@@ -887,6 +887,20 @@ resource limits.
 ```
 
 </details>
+
+## Job templates
+
+> [!warning]
+> Variables configured in job templates are given to the `ansible-playbook` command for the job using its
+> `-e, --extra-vars` option.<br/>
+> This means they will have the **highest** precedence of all variables, and as such they will override **any** other
+> block or task variable named like that. Refer [Ansible variables].
+
+> [!caution]
+> Once a variable is defined in a job template, it **will** be passed to the ansible command for the job.<br/>
+> When launching a job that allows for variables editing, the edited ones will be **merged** with the initial setting.
+> As such, deleting variables while launching a job will result in them still being passed on with the value they had in
+> the initial variables setting.
 
 ## Workflow automation
 
@@ -1085,9 +1099,11 @@ Refer [AWX Command Line Interface] for more information.
   ═╬═Time══
   -->
 
+<!-- In-article sections -->
 [gotchas]: #gotchas
 
 <!-- Knowledge base -->
+[Ansible variables]: ansible.md#variables
 [helm]: kubernetes/helm.md
 [kubernetes]: kubernetes/README.md
 [kustomize]: kubernetes/kustomize.md

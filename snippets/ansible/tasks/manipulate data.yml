@@ -319,3 +319,13 @@
     this_is_true_again: "{{ not false }}"
     true_is_truthy: "{{ true is truthy }}"
     false_is_falsy: "{{ false is falsy }}"
+
+- name: Undefined variables
+  tags: undefined_variable
+  # refer <https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_templating_undef.html>
+  # only works for variables of lesser priority
+  # e.g., works in tasks' `vars:`, but not in the `set_facts` module to (re)define a variable
+  vars:
+    test_var: "{{ undef() }}"
+  ansible.builtin.debug:
+    var: test_var

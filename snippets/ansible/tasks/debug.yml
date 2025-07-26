@@ -25,6 +25,7 @@
     var: install_method
 
 - name: Print all available variables
+  tags: print_all
   ansible.builtin.debug:
     var: vars  # magic variable
 
@@ -37,7 +38,9 @@
   ansible.builtin.shell: printenv | sort
 
 - name: Start the debugger on failure
-  tags: never
+  tags:
+    - never  # avoid execution unless explicitly requested with other tags
+    - debugger
   # print all variables at this point => p task_vars
   # continue => c
   # abort and quit => q

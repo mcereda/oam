@@ -19,6 +19,9 @@ This is the collection of all notes, reminders and whatnot I gathered during the
     #!/usr/bin/env zsh
   ```
 
+- Prefer **GitHub**'s markdown flavour where multiple are available.<br/>
+  Just because GitHub seems to be the place most people will look at this repository.
+
 - Group related options in commands where possible.<br/>
   It gives enhanced clarity and a sense of continuation.
 
