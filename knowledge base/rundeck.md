@@ -39,7 +39,7 @@ Refer [Integrate with Ansible].
 [ansible]: ansible.md
 
 <!-- Files -->
-[docker-compose.yml]: ../containers/rundeck/docker-compose.yml
+[docker-compose.yml]: ../docker%20compositions/rundeck/docker-compose.yml
 
 <!-- Upstream -->
 [basic exhibit]: https://github.com/rundeck/docker-zoo/blob/master/basic/

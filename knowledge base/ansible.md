@@ -188,12 +188,12 @@ Galaxy collections and roles worth a check:
 
 UIs:
 
-| UI          | Static inventories | Dynamic inventories |
-| ----------- | ------------------ | ------------------- |
-| [AWX]       | ✓                  | ✓                   |
-| [Rundeck]   | ✓                  | ?                   |
-| [Semaphore] | ✓                  | ✗                   |
-| [Zuul]      | ?                  | ?                   |
+| UI             | Static inventories | Dynamic inventories |
+| -------------- | ------------------ | ------------------- |
+| [AWX]          | ✓                  | ✓                   |
+| [Rundeck]      | ✓                  | ?                   |
+| [Semaphore UI] | ✓                  | ✗                   |
+| [Zuul]         | ?                  | ?                   |
 
 ## Configuration
 
@@ -534,17 +534,21 @@ Return a boolean result.
 
 Refer [Asynchronous actions and polling].
 
-Used to avoid connection timeouts and to run tasks concurrently.
+Useful for:
 
-Executing tasks in the background will return a Job ID that can be polled for information about that task.<br/>
+- Avoiding connection timeouts.
+- Running **independent** tasks concurrently.
+
+Tasks executing in asynchronous mode will return a Job ID that can be polled for information about that task.<br/>
 Polling keeps the connection to the remote node open between polls.
 
 Use the `async` keyword in playbook tasks.<br/>
 Leaving it off makes tasks run synchronously, which is Ansible's default.
 
+> [!warning]
 > As of Ansible 2.3, `async` does **not** support check mode and tasks using it **will fail** when run in check mode.
 
-Asynchronous tasks will create temporary async job cache file (in `~/.ansible_async/` by default).<br/>
+Asynchronous tasks will create temporary async job cache files (in `~/.ansible_async/` by default).<br/>
 When asynchronous tasks complete **with** polling enabled, the related temporary async job cache file is automatically
 removed. This does **not** happen for tasks that do **not** use polling.
 
@@ -575,9 +579,9 @@ Asynchronous playbook tasks **always** return changed.
 ### Run tasks in parallel
 
 Use `async` with `poll` set to _0_.<br/>
-When `poll` is _0_, Ansible starts the task and immediately moves on to the next one with**out** waiting for a result
+When `poll` is _0_, Ansible starts the task, then immediately moves on to the next one with**out** waiting for a result
 from the first.<br/>
-Each asynchronous task runs until it either completes, fails or times out (running longer than the value set for its
+Each asynchronous task runs until it either completes, fails, or times out (running longer than the value set for its
 `async`). Playbook runs end with**out** checking back on asynchronous tasks.
 
 ```yaml
@@ -589,11 +593,11 @@ Each asynchronous task runs until it either completes, fails or times out (runni
       poll: 0
 ```
 
-Operations requiring exclusive locks, such as YUM transactions, will make successive operations that require those files
-wait or fail.
+Operations requiring exclusive locks, such as YUM transactions, will make successive operations that require those same
+files wait or fail.
 
-Synchronize asynchronous tasks by registering them to obtain their job ID and using it with the `async_status` module in
-later tasks:
+Synchronize asynchronous tasks by registering them to obtain their job ID, and using it with the `async_status` module
+in later tasks:
 
 ```yaml
 - tasks:
@@ -705,9 +709,9 @@ $ ANSIBLE_STDOUT_CALLBACK='json' ansible-playbook --inventory='localhost,' 'loca
 
 ## Handlers
 
-Blocks and `import_tasks` tend to make the handlers unreachable.
+Using blocks and `import_tasks` for handlers tends to make the handlers inside them unreachable.
 
-Instead of using blocks, give the same listen string to all involved handlers:
+Instead of using blocks, give the same `listen` key to all involved handlers:
 
 ```diff
 - - name: Block name
@@ -724,7 +728,7 @@ Instead of using blocks, give the same listen string to all involved handlers:
 +   …
 ```
 
-Instead of using `ìmport_tasks`, use `include_tasks`:
+Instead of using `import_tasks`, use `include_tasks`:
 
 ```diff
   - name: First task
@@ -787,7 +791,7 @@ In playbooks:
       message: some message
 ```
 
-Role assignments can**not** be parallelized at the time of writing.
+Roles are applied in order, and can**not** be parallelized at the time of writing.
 
 ### Role dependencies
 
@@ -819,7 +823,8 @@ See [Creating your own Ansible filter plugins].
 
 ## Execution environments
 
-Container images that can be used as Ansible control nodes.
+Container images that can be used as Ansible control nodes.<br/>
+Refer [Getting started with Execution Environments].
 
 Prefer using `ansible-navigator` to `ansible-runner` for local runs as the latter is a pain in the ass to use directly.
 
@@ -926,6 +931,9 @@ collections:
 
 Refer [Ansible Navigator documentation].
 
+Command-line tool and text-based user interface for creating, reviewing, running and troubleshooting Ansible content,
+including inventories, playbooks, collections, documentation and container images (execution environments).
+
 Settings for Navigator can be provided, in order of priority from **highest** to lowest:
 
 1. On the command line.
@@ -1015,7 +1023,7 @@ ansible-navigator … exec -- printenv | sort
 
 ## Secrets management
 
-Refer [handling secrets in your Ansible playbooks].
+Refer [Handling secrets in your Ansible playbooks].
 
 Use **interactive prompts** to ask for values at runtime.
 
@@ -1033,8 +1041,7 @@ Use **interactive prompts** to ask for values at runtime.
         line: "API_KEY={{ api_key }}"
 ```
 
-Use [Ansible Vault] for automated execution when one does **not** require
-to use specific secrets or password managers.
+Use [Ansible Vault] for automated execution when one does **not** require using specific secrets or password managers.
 
 ### Ansible Vault
 
@@ -1077,18 +1084,18 @@ Provide the Vault's password:
   ; ask_vault_pass = True
   ```
 
-  Should the password file be executable, Ansible will execute it and use its output as the password for Vault.<br/>
-  This works well to integrate with CLI-capable password managers:
+Should the password file be executable, Ansible will execute it, then use its output as the password for Vault.<br/>
+This works well to integrate with CLI-capable password managers:
 
-  ```sh
-  # File 'password_file.sh'
+```sh
+# File 'password_file.sh'
 
-  # Gopass
-  gopass show -o 'ansible/vault'
+# Gopass
+gopass show -o 'ansible/vault'
 
-  # Bitwarden CLI
-  # bw login --check >/dev/null && bw get password 'ansible vault'
-  ```
+# Bitwarden CLI
+# bw login --check >'/dev/null' && bw get password 'ansible vault'
+```
 
 Vault passwords can be any string, and there is currently no special command to create one.<br/>
 One must provide the/a Vault password **every time one encrypts and/or decrypts data** with Vault.<br/>
@@ -1678,30 +1685,33 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 <!-- Knowledge base -->
 [awx]: awx.md
 [integrate with aws ssm]: cloud%20computing/aws/ssm.md#integrate-with-ansible
-[rundeck]: rundeck.md
+[Rundeck]: rundeck.md
+[Semaphore UI]: semaphoreui.md
+
 
 <!-- Files -->
 [examples]: ../examples/ansible/
 [examples  templating]: ../examples/ansible/templating.yml
 
 <!-- Upstream -->
-[8 ways to speed up your ansible playbooks]: https://www.redhat.com/sysadmin/faster-ansible-playbook-execution
+[8 ways to speed up your Ansible playbooks]: https://www.redhat.com/sysadmin/faster-ansible-playbook-execution
 [ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
 [ansible navigator documentation]: https://ansible.readthedocs.io/projects/navigator/
 [ansible runner]: https://ansible.readthedocs.io/projects/runner/en/stable/
 [ansible v2.14 changelog]: https://github.com/ansible/ansible/blob/7bb078bd740fba8ad43cc69e18fc8aeb4719180a/changelogs/CHANGELOG-v2.14.rst#id11
 [asynchronous actions and polling]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_async.html
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
-[blocks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_blocks.html
+[Blocks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_blocks.html
 [collections index]: https://docs.ansible.com/ansible/latest/collections/index.html
 [configuration]: https://docs.ansible.com/ansible/latest/reference_appendices/config.html
 [debugging tasks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_debugger.html
 [defining variables at runtime]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html#defining-variables-at-runtime
 [developing and testing ansible roles with molecule and podman - part 1]: https://www.ansible.com/blog/developing-and-testing-ansible-roles-with-molecule-and-podman-part-1/
-[execution environment definition]: https://ansible.readthedocs.io/projects/builder/en/stable/definition/
-[galaxy  sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
-[galaxy]: https://galaxy.ansible.com/
-[introduction to ansible builder]: https://www.ansible.com/blog/introduction-to-ansible-builder/
+[Execution environment definition]: https://ansible.readthedocs.io/projects/builder/en/stable/definition/
+[Galaxy  sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
+[Galaxy]: https://galaxy.ansible.com/
+[Getting started with Execution Environments]: https://docs.ansible.com/ansible/latest/getting_started_ee/index.html
+[Introduction to Ansible Builder]: https://www.ansible.com/blog/introduction-to-ansible-builder/
 [patterns: targeting hosts and groups]: https://docs.ansible.com/ansible/latest/inventory_guide/intro_patterns.html
 [protecting sensitive data with ansible vault]: https://docs.ansible.com/ansible/latest/vault_guide/index.html
 [roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
@@ -1722,10 +1732,10 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [ansible vault with awx]: https://medium.com/t%C3%BCrk-telekom-bulut-teknolojileri/ansible-vault-with-awx-80b603617798
 [ansible: set variable to file content]: https://stackoverflow.com/questions/24003880/ansible-set-variable-to-file-content
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
-[creating your own ansible filter plugins]: https://www.dasblinkenlichten.com/creating-ansible-filter-plugins/
-[easy things you can do to speed up ansible]: https://mayeu.me/post/easy-things-you-can-do-to-speed-up-ansible/
+[Creating your own Ansible filter plugins]: https://www.dasblinkenlichten.com/creating-ansible-filter-plugins/
+[Easy things you can do to speed up ansible]: https://mayeu.me/post/easy-things-you-can-do-to-speed-up-ansible/
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
-[handling secrets in your ansible playbooks]: https://www.redhat.com/sysadmin/ansible-playbooks-secrets
+[Handling secrets in your Ansible playbooks]: https://www.redhat.com/sysadmin/ansible-playbooks-secrets
 [how can i hide skipped tasks output in ansible]: https://stackoverflow.com/questions/39189549/how-can-i-hide-skipped-tasks-output-in-ansible#76147924
 [how can i pass variable to ansible playbook in the command line?]: https://stackoverflow.com/questions/30662069/how-can-i-pass-variable-to-ansible-playbook-in-the-command-line#30662156
 [how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
@@ -1734,13 +1744,13 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [how to recursively set directory and file permissions]: https://superuser.com/questions/1024677/ansible-how-to-recursively-set-directory-and-file-permissions#1317715
 [how to run ansible with_fileglob in alphabetical order?]: https://stackoverflow.com/questions/59162054/how-to-run-ansible-with-fileglob-in-alpabetical-order#59162339
 [how to set up and use python virtual environments for ansible]: https://www.redhat.com/sysadmin/python-venv-ansible
-[how to speed up ansible playbooks drastically?]: https://www.linkedin.com/pulse/how-speed-up-ansible-playbooks-drastically-lionel-gurret
+[How to speed up Ansible playbooks drastically?]: https://www.linkedin.com/pulse/how-speed-up-ansible-playbooks-drastically-lionel-gurret
 [how to use ansible with s3 - ansible aws_s3 examples]: https://www.middlewareinventory.com/blog/ansible-aws_s3-example/
 [how to work with lists and dictionaries in ansible]: https://www.redhat.com/sysadmin/ansible-lists-dictionaries-yaml
 [human-readable output format]: https://www.shellhacks.com/ansible-human-readable-output-format/
 [include task only if file exists]: https://stackoverflow.com/questions/28119521/ansible-include-task-only-if-file-exists#comment118578470_62289639
 [is it possible to use inline templates?]: https://stackoverflow.com/questions/33768690/is-it-possible-to-use-inline-templates#33783423
-[jinja2 templating]: https://jinja.palletsprojects.com/en/3.1.x/templates/
+[jinja2 templating]: https://jinja.palletsprojects.com/en/stable/templates/
 [looping over lists inside of a dict]: https://www.reddit.com/r/ansible/comments/1b28dtm/looping_over_lists_inside_of_a_dict/
 [merging two dictionaries by key in ansible]: https://serverfault.com/questions/1084157/merging-two-dictionaries-by-key-in-ansible#1084164
 [mitogen for ansible]: https://mitogen.networkgenomics.com/ansible_detailed.html
@@ -1748,10 +1758,9 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [only do something if another action changed]: https://raymii.org/s/tutorials/Ansible_-_Only-do-something-if-another-action-changed.html
 [removing empty values from a list and assigning it to a new list]: https://stackoverflow.com/questions/60525961/ansible-removing-empty-values-from-a-list-and-assigning-it-to-a-new-list#60526774
 [running your ansible playbooks in parallel and other strategies]: https://toptechtips.github.io/2023-06-26-ansible-parallel/
-[semaphore]: https://semaphoreui.com/
 [unique filter of list in jinja2]: https://stackoverflow.com/questions/44329598/unique-filter-of-list-in-jinja2
 [what is the exact list of ansible setup min?]: https://stackoverflow.com/questions/71060833/what-is-the-exact-list-of-ansible-setup-min#71061125
-[why ansible and python fork break on macos high sierra+ and how to solve]: https://ansiblepilot.medium.com/why-ansible-and-python-fork-break-on-macos-high-sierra-and-how-to-solve-d11540cd2a1b
+[Why Ansible and Python fork break on macOS High Sierra+ and how to solve]: https://ansiblepilot.medium.com/why-ansible-and-python-fork-break-on-macos-high-sierra-and-how-to-solve-d11540cd2a1b
 [windows playbook example]: https://geekflare.com/ansible-playbook-windows-example/
 [working with versions]: https://docs.ansible.com/ansible/latest/collections/community/general/docsite/filter_guide_working_with_versions.html
 [yes and no, true and false]: https://chronicler.tech/red-hat-ansible-yes-no-and/
