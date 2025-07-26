@@ -42,6 +42,20 @@ git clean -df
 # Get the top-level directory of the current repository.
 git rev-parse --show-toplevel
 
+# create patches from the last commit
+git format-patch -n HEAD^
+git format-patch HEAD^ -o './patchDir'
+git format-patch HEAD~1 --stdout
+
+# create patches from specific commits
+git format-patch -1 '3918a1d036e74d47a5c830e4bbabba6f507162b1'
+
+# apply patches
+git apply 'patchDir/patchFile.patch'
+
+# Change author information for multiple commits.
+git rebase --interactive --rebase-merges --exec 'git commit --amend --reset-author --no-edit' '3918a1d0'
+
 
 ##
 # Remove files from the latest commit.
@@ -74,17 +88,6 @@ git symbolic-ref 'refs/remotes/origin/HEAD' 'refs/remotes/origin/main'
 
 # delete the master branch on the remote
 git push origin --delete 'master'
-
-# create patches from the last commit
-git format-patch -n HEAD^
-git format-patch HEAD^ -o './patchDir'
-git format-patch HEAD~1 --stdout
-
-# create patches from specific commits
-git format-patch -1 '3918a1d036e74d47a5c830e4bbabba6f507162b1'
-
-# apply patches
-git apply 'patchDir/patchFile.patch'
 
 ###
 # Take actions on multiple repositories
