@@ -274,13 +274,24 @@ Users can only be created by those with (or):
 
 Add users to the account executing a SQL Query by means of Snowflake's web UI found in the `Account` section.
 
+Service users are users with `TYPE=SERVICE`.<br/>
+Users have accepted attributes depending on their type. Incompatible properties will be stored, but kept disabled.<br/>
+Changing the user type could reenable the now compatible, disabled, properties.
+
+Assess a user's type with the `DESCRIBE USER` command, or by querying the `snowflake.account_usage.users` table.
+
 ```sql
 -- List users
 SHOW USERS;
+SHOW USERS LIKE 'BILLY';
 SHOW USERS LIKE '%john%';
+-- List service users
+-- requires running in a warehouse
+SELECT LOGIN_NAME FROM snowflake.account_usage.users WHERE TYPE = 'SERVICE';
 
 -- Get information about users
 DESC USER zoe;
+DESCRIBE USER william;
 
 -- Create users
 CREATE USER alice;
@@ -288,11 +299,15 @@ CREATE USER IF NOT EXISTS bob;
 CREATE OR REPLACE USER claude
   LOGIN_NAME='CLAUDE@EXAMPLE.ORG' DISPLAY_NAME='Claude' EMAIL='claude@example.org'
   PASSWORD='somePassword' MUST_CHANGE_PASSWORD=TRUE;
+-- Create service users by specifying TYPE = SERVICE
+-- Default resources do *not* need to exist beforehand, but *will* be used on login
+CREATE USER IF NOT EXISTS some_service TYPE = SERVICE
+  DEFAULT_ROLE = some_service_role DEFAULT_WAREHOUSE = dev_wh DEFAULT_NAMESPACE = dev_db.dev_schema;
 ```
 
 Prefer setting a `DEFAULT_WAREHOUSE` and `DEFAULT_ROLE` for users, specially if they use non-Snowflake client tools.
 
-Remember to `GRANT ROLE a=Access` after creating a user.<br/>
+Remember to `GRANT ROLE` after creating a user.<br/>
 Snowflake does **not** offer access to a user's default role automatically. After a user is created, one **must**
 provide that user access to its default role.<br/>
 If a user can't access their default role, they won't be able to log in.
@@ -306,6 +321,17 @@ When using SSO:
   it.<br/>
   Setting up a password gives the user the option of selecting what method to use to login. This is required by tools
   that do not support logging in via SSO.
+
+Change users to service users:
+
+```sql
+ALTER USER my_service_user SET TYPE = SERVICE;
+ALTER USER my_service_user UNSET PASSWORD;
+ALTER USER my_service_user UNSET FIRST_NAME;
+ALTER USER my_service_user UNSET MIDDLE_NAME;
+ALTER USER my_service_user UNSET LAST_NAME;
+ALTER USER my_service_user SET DISABLE_MFA = TRUE;
+```
 
 ## Virtual warehouses
 
