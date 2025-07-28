@@ -118,9 +118,13 @@ USE ROLE USERADMIN;
 SHOW USERS;
 SHOW USERS LIKE 'BILLY';
 SHOW USERS LIKE '%john%';
+-- List service users
+-- requires running in a warehouse
+SELECT LOGIN_NAME FROM snowflake.account_usage.users WHERE TYPE = 'SERVICE';
 
 -- Get information about users
 DESC USER zoe;
+DESCRIBE USER william;
 
 -- Create users
 CREATE USER alice;
@@ -135,6 +139,7 @@ CREATE USER IF NOT EXISTS data_service TYPE='SERVICE'
 
 -- Change user attributes
 ALTER USER bob SET DEFAULT_WAREHOUSE = NULL;
+ALTER USER my_service_user SET TYPE = SERVICE; ALTER USER my_service_user UNSET PASSWORD;
 
 -- Show permissions users have
 SHOW GRANTS TO USER CLAUDE;
@@ -595,6 +600,7 @@ Refer [RoleOut].
 - [Overview of Access Control]
 - [Programmatically Accessing Snowflake Model Inference Endpoints]
 - [Programmatic Access Token (PAT) in Snowflake]
+- [Unpacking Snowflake's New User Type Property]
 
 <!--
   Reference
@@ -624,3 +630,4 @@ Refer [RoleOut].
 [Programmatically Accessing Snowflake Model Inference Endpoints]: https://medium.com/snowflake/programmatically-accessing-snowpark-model-inference-endpoints-9c11727076d1
 [Snowflake CREATE USERS: Syntax, Usage & Practical Examples]: https://hevodata.com/learn/snowflake-create-users/
 [Snowflake terraform provider authentication]: https://registry.terraform.io/providers/Snowflake-Labs/snowflake/latest/docs#authentication
+[Unpacking Snowflake's New User Type Property]: https://select.dev/posts/snowflake-user-type

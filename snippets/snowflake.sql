@@ -21,6 +21,9 @@ DROP NETWORK POLICY allow_all_net_policy;
 -- List warehouses
 SHOW WAREHOUSES;
 
+-- Use warehouses
+USE WAREHOUSE dev_public_wh;
+
 -- Delete warehouses
 DROP WAREHOUSE IF EXISTS tuts_wh;
 
@@ -57,9 +60,13 @@ USE ROLE USERADMIN;
 SHOW USERS;
 SHOW USERS LIKE 'BILLY';
 SHOW USERS LIKE '%john%';
+-- List service users
+-- requires running in a warehouse
+SELECT LOGIN_NAME FROM snowflake.account_usage.users WHERE TYPE = 'SERVICE';
 
 -- Get information about users
 DESC USER zoe;
+DESCRIBE USER william;
 
 -- Create users
 CREATE USER alice;
@@ -74,6 +81,7 @@ CREATE USER IF NOT EXISTS some_service TYPE = SERVICE
 
 -- Change user attributes
 ALTER USER bob SET DEFAULT_WAREHOUSE = NULL;
+ALTER USER my_service_user SET TYPE = SERVICE; ALTER USER my_service_user UNSET PASSWORD;
 
 -- Show permissions users have
 SHOW GRANTS TO USER CLAUDE;
