@@ -320,7 +320,8 @@ Procedure:
 
 ## Access with programmatic access tokens
 
-Refer [Using programmatic access tokens for authentication].
+Refer [Using programmatic access tokens for authentication],
+[Programmatically Accessing Snowflake Model Inference Endpoints] and [Programmatic Access Token (PAT) in Snowflake].
 
 Programmatic access tokens (PATs) allow non-interactive access to Snowflake _without_ using username and password
 credentials or key pairs.<br/>
