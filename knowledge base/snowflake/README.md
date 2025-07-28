@@ -7,6 +7,7 @@ Cloud-based [data warehousing][data warehouse] platform.
 1. [Users](#users)
 1. [Virtual warehouses](#virtual-warehouses)
 1. [Access with private keys](#access-with-private-keys)
+1. [Access with programmatic access tokens](#access-with-programmatic-access-tokens)
 1. [Snowflake CLI](#snowflake-cli)
 1. [RoleOut](#roleout)
 1. [Further readings](#further-readings)
@@ -58,8 +59,55 @@ Accounts can connect to Snowflake via:
   <summary>Usage</summary>
 
 ```sql
+-- List authentication policies
+SHOW AUTHENTICATION POLICIES;
+
+-- Create authentication policies
+CREATE AUTHENTICATION POLICY allow_pats_policy AUTHENTICATION_METHODS = ('PROGRAMMATIC_ACCESS_TOKEN');
+
+
+-- List network policies
+SHOW NETWORK POLICIES;
+
+-- Create network policies
+CREATE NETWORK POLICY IF NOT EXISTS allow_all_net_policy ALLOWED_IP_LIST = ('0.0.0.0/0');
+
+
+-- List warehouses
+SHOW WAREHOUSES;
+
+-- Delete warehouses
+DROP WAREHOUSE IF EXISTS tuts_wh;
+
+
+-- List databases
+SHOW DATABASES;
+
+-- Delete databases
+DROP DATABASE IF EXISTS tuts_db;
+
+
+-- List roles
+SHOW ROLES;
+SHOW ROLES LIKE '%DATA%';
+
+-- Create roles
+CREATE ROLE IF NOT EXISTS some_service_role;
+
+-- Grant permissions to roles
+GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE SYSADMIN;
+GRANT USAGE ON DATABASE dev_dwh TO ROLE some_service_role;
+GRANT USAGE ON SCHEMA dev_dwh.public TO ROLE some_service_role;
+GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA dev_dwh.public TO ROLE some_service_role;
+
+-- Assume roles
+USE ROLE ACCOUNTADMIN;
+USE ROLE USERADMIN;
+
+
 -- List users
 SHOW USERS;
+SHOW USERS LIKE 'BILLY';
 SHOW USERS LIKE '%john%';
 
 -- Get information about users
@@ -71,33 +119,43 @@ CREATE USER IF NOT EXISTS bob;
 CREATE OR REPLACE USER claude
   PASSWORD='somePassword' DISPLAY_NAME='Claude' EMAIL='claude@example.org'
   LOGIN_NAME='CLAUDE@EXAMPLE.ORG' MUST_CHANGE_PASSWORD=TRUE;
+-- Default resources do *not* need to exist beforehand, but *will* be used on login
+CREATE USER IF NOT EXISTS data_service TYPE='SERVICE'
+  DEFAULT_ROLE='data_service_role' DEFAULT_WAREHOUSE='dev_wh' DEFAULT_NAMESPACE='dev_db.dev_schema';
 
--- Make changes to users
+-- Change user attributes
+ALTER USER bob SET DEFAULT_WAREHOUSE = NULL;
+
+-- Show permissions users have
+SHOW GRANTS TO USER CLAUDE;
+-- Show permissions the current user has on other users
+SHOW GRANTS ON USER CLAUDE;
+
+-- Grant permissions to users
+GRANT ROLE some_service_role TO USER some_service;
+GRANT USAGE ON WAREHOUSE COMPUTE_WH TO USER mike;
+
+-- Assign policies to users
+ALTER USER some_service SET AUTHENTICATION POLICY allow_pats_policy;
+ALTER USER some_service SET NETWORK_POLICY = allow_all_net_policy;
+-- Create PATs for users
+
+ALTER USER some_service ADD PROGRAMMATIC ACCESS TOKEN some_service_pat
+  ROLE_RESTRICTION = 'SOME_SERVICE_ROLE'  -- roles here must be referred to in uppercase
+  DAYS_TO_EXPIRY = 90
+  COMMENT = 'PAT for some_service';
+
+-- Reset password
 ALTER USER IF EXISTS elijah RESET PASSWORD;
+
+-- Disable MFA
 ALTER USER fred SET DISABLE_MFA=TRUE;
+
+-- Unlock users
 ALTER USER greg SET MINS_TO_UNLOCK=0;
 
 -- Delete users
 DROP USER snowman;
-
-
--- List roles
-SHOW ROLES;
-SHOW ROLES LIKE '%DATA%';
-
--- Grant permissions
-GRANT ROLE someRole TO USER diane;
-GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE SYSADMIN;
-
--- Show permissions resources have
-SHOW GRANTS TO USER CLAUDE;
--- Show permissions the current user has on resources
-SHOW GRANTS ON USER CLAUDE;
-
-
--- FIXME
-DROP DATABASE IF EXISTS sf_tuts;
-DROP WAREHOUSE IF EXISTS sf_tuts_wh;
 ```
 
 </details>
@@ -260,6 +318,230 @@ Procedure:
    snow connection add -n 'jwt' --authenticator 'SNOWFLAKE_JWT' --private-key-file "$HOME/.ssh/snowflake_key"
    ```
 
+## Access with programmatic access tokens
+
+Refer [Using programmatic access tokens for authentication].
+
+Programmatic access tokens (PATs) allow non-interactive access to Snowflake _without_ using username and password
+credentials or key pairs.<br/>
+PATs **bypass** MFA and username/password logins entirely. They are **not** usable in the Snowflake UI or web interface.
+
+PATs are supported by the following Snowflake endpoints:
+
+- Snowflake REST APIs.
+- Snowflake SQL APIs.
+- Snowflake Catalog SDK.
+- Snowpark Container Services.
+
+PATs are usable as replacement for passwords in the following:
+
+- Snowflake drivers.
+- Third-party applications that connect to Snowflake (e.g., Tableau, PowerBI).
+- Snowflake APIs and libraries (e.g., Snowpark APIs, Snowflake Python APIs).
+- Snowflake command-line clients (Snowflake CLI, SnowSQL).
+
+One can generate programmatic access tokens for _human_ users (whose `TYPE` is `PERSON`) or _service_ users (which
+`TYPE` is `SERVICE`).
+
+PATs can be valid for up to 365 days. This is a security requirement on Snowflake's side.
+
+Tokens are _immutable_. Role restriction and expiry date **cannot** be changed later, requiring to rotate or recreate
+the PAT instead.
+
+Newly generated tokens' secret is visible only **once** and during its creation.<br/>
+They **cannot** be retrieved afterwards, and administrators can only view their metadata later.
+
+Users can have up to 15 _**active**_ PATs.<br/>
+_Expired_ tokens do **not** count, but _disabled_ tokens still do.
+
+Rotating a PAT generates a new secret (and a new expiration) for it, and invalidates the old one.
+
+Deletion is **permanent**, and allows for **no** recovery/restoration.
+
+Requirements:
+
+- Tokens must belong to Snowflake users with `TYPE=PERSON` or `TYPE=SERVICE`.
+- Users using tokens must have assigned the following:
+  - One or more [authentication policies] allowing PATs usage.
+  - \[optionally] One or more [network policies][controlling network traffic with network policies] restricting the IP
+    address for their requests' origin.
+
+<details style='padding-bottom: 1rem'>
+  <summary>Usage</summary>
+
+```sql
+-- List
+SHOW USER PROGRAMMATIC ACCESS TOKENS FOR USER <username>;
+
+-- Generate
+ALTER USER <username> ADD PROGRAMMATIC ACCESS TOKEN <token_name>
+  ROLE_RESTRICTION = '<role_name>'        -- Required for SERVICE users. Fixes the role the token can operate under.
+  DAYS_TO_EXPIRY = <integer>              -- 1 <= X <= 365. Cannot be modified later.
+  MINS_TO_BYPASS_NETWORK_POLICY_REQUIREMENT = <integer>  -- Optional
+  COMMENT = '<optional comment>';
+
+-- Rotate
+ALTER USER <username> ROTATE PROGRAMMATIC ACCESS TOKEN <token_name>;
+
+-- Rename
+ALTER USER <username> MODIFY PROGRAMMATIC ACCESS TOKEN <current_token_name>
+  RENAME TO <new_token_name> COMMENT = '<new>';
+
+-- Disable
+ALTER USER <username> MODIFY PROGRAMMATIC ACCESS TOKEN <token_name> SET DISABLED = TRUE;
+
+-- Delete
+ALTER USER <username> REMOVE PROGRAMMATIC ACCESS TOKEN <token_name>;
+```
+
+Use the PAT:
+
+- As one's password in Snowflake clients or APIs, or when prompted for a password in tools.<br/>
+  The username and account parameters remain as usual.
+
+  ```py
+  conn = snowflake.connector.connect(
+    user="PAT_USER",
+    account="<account>",
+    authenticator="snowflake",
+    password="<PAT_token_string>",
+    role="…",
+    warehouse="…" )
+  ```
+
+- In the `Authorization: Bearer <token>` header when calling Snowflake's REST APIs.
+
+</details>
+
+Procedure:
+
+1. \[if needed] Create the user.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   ```sql
+   CREATE USER my_service_user TYPE=SERVICE DEFAULT_ROLE=my_service_role;
+   ```
+
+   </details>
+
+1. \[if needed] Grant it the required roles and privileges.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   ```sql
+   CREATE ROLE my_service_role;
+
+   GRANT USAGE ON DATABASE my_db TO ROLE my_service_role;
+   GRANT USAGE ON SCHEMA my_db.my_schema TO ROLE my_service_role;
+   GRANT SELECT ON ALL TABLES IN SCHEMA my_db.my_schema TO ROLE my_service_role;
+
+   GRANT ROLE my_service_role TO USER my_service_user;
+   ```
+
+   </details>
+
+1. Assign it an authentication policy that allows using PATs.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   ```sql
+   CREATE AUTHENTICATION POLICY my_auth_policy_for_pats AUTHENTICATION_METHODS=('PROGRAMMATIC_ACCESS_TOKEN');
+   ALTER USER my_service_user SET AUTHENTICATION POLICY my_auth_policy_for_pats;
+   ```
+
+   </details>
+
+1. Assign it a network policy.
+
+   Optional for users, required for services.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   ```sql
+   CREATE NETWORK POLICY IF NOT EXISTS my_net_policy ALLOWED_IP_LIST=('203.0.113.42', '198.51.100.0/24');
+   ALTER USER my_service_user SET NETWORK_POLICY=my_net_policy;
+   ```
+
+   </details>
+
+1. Create a PAT for it.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   ```sql
+   ALTER USER my_service_user ADD PROGRAMMATIC ACCESS TOKEN my_pat_token
+     ROLE_RESTRICTION='MY_SERVICE_ROLE'  -- roles must be referred to in uppercase
+     DAYS_TO_EXPIRY=90
+     COMMENT='My PAT for My Service User';
+   ```
+
+   </details>
+
+   > [!important]
+   > The PAT secret will only show now and **cannot** be retrieved ever again.<br/>
+   > Note it down somewhere.
+
+1. Use the PAT to authenticate.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   ```sh
+   snowsql -a 'xy12345' -u 'MY_SERVICE_USER' -r 'SVC_ETL_ROLE' -p '<PAT_token>'
+   snow connection test --temporary-connection --account 'xy12345' --username 'MY_SERVICE_USER' --password '<PAT_token>'
+   ```
+
+   </details>
+
+<details>
+  <summary>Procedure example</summary>
+
+Service: `data`, username: `data_service_user`, role: `data_service_role`, database: `data_db`, schema: `data_schema`.
+
+```sql
+USE ROLE ACCOUNTADMIN;
+
+CREATE AUTHENTICATION POLICY allow_pats_auth_policy AUTHENTICATION_METHODS=('PROGRAMMATIC_ACCESS_TOKEN');
+CREATE NETWORK POLICY IF NOT EXISTS allow_all_net_policy ALLOWED_IP_LIST=('0.0.0.0/0');
+
+USE ROLE USERADMIN;
+
+CREATE USER IF NOT EXISTS data_service_user TYPE=SERVICE DEFAULT_ROLE=data_service_role;
+
+CREATE ROLE IF NOT EXISTS data_service_role;
+GRANT USAGE ON DATABASE data_db TO ROLE data_service_role;
+GRANT USAGE ON SCHEMA data_db.data_schema TO ROLE data_service_role;
+GRANT SELECT ON ALL TABLES IN SCHEMA data_db.data_schema TO ROLE data_service_role;
+GRANT ROLE data_service_role TO USER data_service_user;
+
+ALTER USER data_service_user SET AUTHENTICATION POLICY allow_pats_auth_policy;
+ALTER USER data_service_user SET NETWORK_POLICY=allow_all_net_policy;
+
+ALTER USER data_service_user ADD PROGRAMMATIC ACCESS TOKEN data_service_pat
+     ROLE_RESTRICTION='DATA_SERVICE_ROLE'
+     DAYS_TO_EXPIRY=90
+     COMMENT='Test PAT';
+```
+
+```sh
+$ snow connection test -x --account 'ABCDEFG-ZY01234' --username 'DATA_SERVICE_USER' --password 'REDACTED'
+WARNING! Using --password via the CLI is insecure. Use environment variables instead.
++----------------------------------------------------------+
+| key             | value                                  |
+|-----------------+----------------------------------------|
+| Connection name | None                                   |
+| Status          | OK                                     |
+| Host            | ABCDEFG-ZY01234.snowflakecomputing.com |
+| Account         | ABCDEFG-ZY01234                        |
+| User            | DATA_SERVICE_USER                      |
+| Role            | DATA_SERVICE_ROLE                      |
+| Database        | not set                                |
+| Warehouse       | not set                                |
++----------------------------------------------------------+
+```
+
+</details>
+
 ## Snowflake CLI
 
 See [Snowflake CLI].
@@ -275,11 +557,16 @@ Refer [RoleOut].
 - [Data warehouse]
 - [Snowflake CLI]
 - [Roleout]
+- [Authentication policies]
+- [Controlling network traffic with network policies]
+- [Network rules]
 
 ### Sources
 
 - [Snowflake CREATE USERS: Syntax, Usage & Practical Examples]
 - [Overview of Access Control]
+- [Programmatically Accessing Snowflake Model Inference Endpoints]
+- [Programmatic Access Token (PAT) in Snowflake]
 
 <!--
   Reference
@@ -296,10 +583,16 @@ Refer [RoleOut].
 
 <!-- Files -->
 <!-- Upstream -->
+[Authentication policies]: https://docs.snowflake.com/en/user-guide/authentication-policies
+[Controlling network traffic with network policies]: https://docs.snowflake.com/en/user-guide/network-policies
 [Documentation]: https://docs.snowflake.com/en/
+[Network rules]: https://docs.snowflake.com/en/user-guide/network-rules
 [Overview of Access Control]: https://docs.snowflake.com/en/user-guide/security-access-control-overview
+[Using programmatic access tokens for authentication]: https://docs.snowflake.com/en/user-guide/programmatic-access-tokens
 [Website]: https://www.snowflake.com/en/
 
 <!-- Others -->
+[Programmatic Access Token (PAT) in Snowflake]: https://medium.com/%40mohitaverma0712/programmatic-access-token-pat-in-snowflake-how-to-use-754c28db8952
+[Programmatically Accessing Snowflake Model Inference Endpoints]: https://medium.com/snowflake/programmatically-accessing-snowpark-model-inference-endpoints-9c11727076d1
 [Snowflake CREATE USERS: Syntax, Usage & Practical Examples]: https://hevodata.com/learn/snowflake-create-users/
 [Snowflake terraform provider authentication]: https://registry.terraform.io/providers/Snowflake-Labs/snowflake/latest/docs#authentication
