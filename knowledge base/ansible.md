@@ -60,9 +60,13 @@
 <details>
   <summary>Setup</summary>
 
+> [!tip]
+> Prefer installing Ansible in a project's Python virtual environment.
+
 ```sh
 # Install.
-pip3 install --user 'ansible'
+pipx install 'ansible'
+pip3 install --user --require-virtualenv 'ansible'
 brew install 'ansible' 'sshpass'         # darwin
 sudo pamac install 'ansible' 'sshpass'   # manjaro linux
 
@@ -1687,7 +1691,6 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [integrate with aws ssm]: cloud%20computing/aws/ssm.md#integrate-with-ansible
 [Rundeck]: rundeck.md
 [Semaphore UI]: semaphoreui.md
-
 
 <!-- Files -->
 [examples]: ../examples/ansible/

@@ -958,8 +958,9 @@ AWX offers the `awx` client CLI tool:
 
 ```sh
 # Install the 'awx' client
-pipx install 'awxkit'
-pip3 install --user 'awxkit'
+# As of 2025-07-28, Python 3.11 is the last Python version for which the AWX CLI works correctly.
+pipx install --python '3.11' 'awxkit'
+pip3.11 install --user 'awxkit'
 ```
 
 > [!tip]

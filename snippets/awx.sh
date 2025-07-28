@@ -1,9 +1,10 @@
 #!/usr/bin/env sh
 
-# Install the 'awx' client
-pipx install 'awxkit'
-pip3 install --user 'awxkit'
-pip install 'git+https://github.com/ansible/awx.git@24.6.1#egg=awxkit&subdirectory=awxkit'
+# Install the 'awx' client.
+# As of 2025-07-28, Python 3.11 is the last Python version for which the AWX CLI works correctly.
+pipx install --python '3.11' 'awxkit'
+pip3.11 install --user 'awxkit'
+pip3.11 install 'git+https://github.com/ansible/awx.git@24.6.1#egg=awxkit&subdirectory=awxkit'
 
 # Normally `awx` would require setting the configuration every command like so:
 #   awx --conf.host https://awx.example.org --conf.username 'admin' --conf.password 'password' config
