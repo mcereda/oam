@@ -4,12 +4,18 @@ SHOW AUTHENTICATION POLICIES;
 -- Create authentication policies
 CREATE AUTHENTICATION POLICY allow_pats_policy AUTHENTICATION_METHODS = ('PROGRAMMATIC_ACCESS_TOKEN');
 
+-- Delete authentication policies
+DROP AUTHENTICATION POLICY allow_pats_policy;
+
 
 -- List network policies
 SHOW NETWORK POLICIES;
 
 -- Create network policies
 CREATE NETWORK POLICY IF NOT EXISTS allow_all_net_policy ALLOWED_IP_LIST = ('0.0.0.0/0');
+
+-- Delete network policies
+DROP NETWORK POLICY allow_all_net_policy;
 
 
 -- List warehouses
@@ -29,6 +35,9 @@ DROP DATABASE IF EXISTS sf_tuts;
 -- List roles
 SHOW ROLES;
 SHOW ROLES LIKE '%DATA%';
+
+-- Get information about users
+DESC ROLE some_service_role;
 
 -- Create roles
 CREATE ROLE IF NOT EXISTS some_service_role;
@@ -58,7 +67,7 @@ CREATE USER IF NOT EXISTS bob;
 CREATE OR REPLACE USER claude
   LOGIN_NAME='CLAUDE@EXAMPLE.ORG' DISPLAY_NAME='Claude' EMAIL='claude@example.org'
   PASSWORD='somePassword' MUST_CHANGE_PASSWORD=TRUE;
--- Create service users
+-- Create service users by specifying TYPE = SERVICE
 -- Default resources do *not* need to exist beforehand, but *will* be used on login
 CREATE USER IF NOT EXISTS some_service TYPE = SERVICE
   DEFAULT_ROLE = some_service_role DEFAULT_WAREHOUSE = dev_wh DEFAULT_NAMESPACE = dev_db.dev_schema;
@@ -72,20 +81,37 @@ SHOW GRANTS TO USER CLAUDE;
 SHOW GRANTS ON USER CLAUDE;
 
 -- Grant permissions to users
-GRANT ROLE some_service_role TO USER some_service;
+GRANT ROLE some_service_role TO USER some_service_user;
 GRANT USAGE ON WAREHOUSE COMPUTE_WH TO USER mike;
 
 -- Assign policies to users
-ALTER USER some_service SET AUTHENTICATION POLICY allow_pats_policy;
-ALTER USER some_service SET NETWORK_POLICY = allow_all_net_policy;
+ALTER USER some_service_user SET AUTHENTICATION POLICY allow_pats_policy;
+ALTER USER some_service_user SET NETWORK_POLICY = allow_all_net_policy;
 
--- Create PATs for users
-ALTER USER some_service ADD PROGRAMMATIC ACCESS TOKEN some_service_pat
-  ROLE_RESTRICTION = 'SOME_SERVICE_ROLE'  -- roles here must be referred to in uppercase
-  DAYS_TO_EXPIRY = 90
-  COMMENT = 'PAT for some_service';
+-- List PATs for users
+SHOW USER PROGRAMMATIC ACCESS TOKENS FOR USER some_service_user;
 
--- Reset password
+-- Generate PATs for users
+ALTER USER some_service_user ADD PROGRAMMATIC ACCESS TOKEN some_service_pat
+  ROLE_RESTRICTION='SOME_SERVICE_ROLE'  -- Uppercase. Required for SERVICE users. Sets the role for the token.
+  DAYS_TO_EXPIRY=365                    -- 1 <= X <= 365. Cannot be modified later.
+  MINS_TO_BYPASS_NETWORK_POLICY_REQUIREMENT=3  -- Optional
+  COMMENT='Some comment';
+
+-- Rotate PATs for users
+ALTER USER some_service_user ROTATE PROGRAMMATIC ACCESS TOKEN some_service_pat;
+
+-- Rename PATs for users
+ALTER USER some_service_user MODIFY PROGRAMMATIC ACCESS TOKEN some_service_pat
+  RENAME TO some_service_pat_new COMMENT = 'new name';
+
+-- Disable PATs for users
+ALTER USER some_service_user MODIFY PROGRAMMATIC ACCESS TOKEN some_service_pat SET DISABLED = TRUE;
+
+-- Delete PATs for users
+ALTER USER some_service_user REMOVE PROGRAMMATIC ACCESS TOKEN some_service_pat;
+
+-- Reset passwords
 ALTER USER IF EXISTS elijah RESET PASSWORD;
 
 -- Disable MFA
