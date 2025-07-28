@@ -157,3 +157,15 @@ ALTER USER data_service_user SET NETWORK_POLICY=allow_all_net_policy;
 -- 4. create pat
 ALTER USER data_service_user ADD PROGRAMMATIC ACCESS TOKEN data_service_pat
   ROLE_RESTRICTION='DATA_SERVICE_ROLE' DAYS_TO_EXPIRY=90 COMMENT='Test PAT';
+
+
+-- -----------------
+-- change users to service users
+-- -----------------
+
+ALTER USER my_service_user SET TYPE = SERVICE;
+ALTER USER my_service_user UNSET PASSWORD;
+ALTER USER my_service_user UNSET FIRST_NAME;
+ALTER USER my_service_user UNSET MIDDLE_NAME;
+ALTER USER my_service_user UNSET LAST_NAME;
+ALTER USER my_service_user SET DISABLE_MFA = TRUE;
