@@ -35,7 +35,9 @@ The total cost is the aggregate of the cost of using data transfer, storage, and
 Snowflake's system analyzes queries and identifies patterns to optimize using historical data. The results of frequently
 executed queries is cached.
 
-Administrators use Role-Based Access Control (RBAC) to define and manage user roles and permissions.
+Administrators use Role-Based Access Control (RBAC) to define and manage user roles and permissions.<br/>
+Users should **not** have permissions on their own. Permissions should instead be given to roles, that should then be
+granted to users.
 
 Accounts can connect to Snowflake via:
 
@@ -82,6 +84,12 @@ DROP NETWORK POLICY allow_all_net_policy;
 -- List warehouses
 SHOW WAREHOUSES;
 
+-- Start warehouses
+USE WAREHOUSE dev_analytics_wh;
+
+-- Show permissions objects have on warehouses
+SHOW GRANTS ON WAREHOUSE dev_analytics_wh;
+
 -- Delete warehouses
 DROP WAREHOUSE IF EXISTS tuts_wh;
 
@@ -95,6 +103,7 @@ DROP DATABASE IF EXISTS tuts_db;
 
 -- List roles
 SHOW ROLES;
+SHOW ROLES LIKE 'REDASH_SERVICE_ROLE';
 SHOW ROLES LIKE '%DATA%';
 
 -- Get information about users
@@ -102,6 +111,11 @@ DESC ROLE some_service_role;
 
 -- Create roles
 CREATE ROLE IF NOT EXISTS some_service_role;
+
+-- Show permissions roles have
+SHOW GRANTS TO ROLE SYSADMIN;
+-- Show permissions the current role has on other objects
+SHOW GRANTS ON ROLE SYSADMIN;
 
 -- Grant permissions to roles
 GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE SYSADMIN;
@@ -274,9 +288,15 @@ Users can only be created by those with (or):
 
 Add users to the account executing a SQL Query by means of Snowflake's web UI found in the `Account` section.
 
-Service users are users with `TYPE=SERVICE`.<br/>
 Users have accepted attributes depending on their type. Incompatible properties will be stored, but kept disabled.<br/>
 Changing the user type could reenable the now compatible, disabled, properties.
+
+User accounts (_human users_ in Snowflake) are users with `TYPE` not set or set to `PERSON`.<br/>
+Service accounts (_service users_ in Snowflake) are users with `TYPE` set to `SERVICE` and cannot use passwords for
+logging in.<br/>
+Legacy service accounts (_legacy service users_ in Snowflake) are users with `TYPE` set to `LEGACY_SERVICE` and use
+passwords for logging in. Legacy service accounts are
+[deprecated and will be removed][planning for the deprecation of single-factor password sign-ins].
 
 Assess a user's type with the `DESCRIBE USER` command, or by querying the `snowflake.account_usage.users` table.
 
@@ -500,7 +520,11 @@ Procedure:
 
    </details>
 
-1. Assign it an authentication policy that allows using PATs.
+1. \[semi-optionally] Assign it an authentication policy that allows using PATs.
+
+   > [!important]
+   > If no other policy limits a user's authentication methods (e.g., the user has assigned **no** authentication
+   > policy), that user can already use PATs.
 
    <details style='padding: 0 0 1rem 1rem'>
 
@@ -513,7 +537,8 @@ Procedure:
 
 1. Assign it a network policy.
 
-   Optional for users, required for services.
+   > [!important]
+   > **Required** by default for service accounts, _optional_ by default for users.
 
    <details style='padding: 0 0 1rem 1rem'>
 
@@ -577,9 +602,7 @@ ALTER USER data_service_user SET AUTHENTICATION POLICY allow_pats_auth_policy;
 ALTER USER data_service_user SET NETWORK_POLICY=allow_all_net_policy;
 
 ALTER USER data_service_user ADD PROGRAMMATIC ACCESS TOKEN data_service_pat
-     ROLE_RESTRICTION='DATA_SERVICE_ROLE'
-     DAYS_TO_EXPIRY=90
-     COMMENT='Test PAT';
+  ROLE_RESTRICTION='DATA_SERVICE_ROLE' DAYS_TO_EXPIRY=90;
 ```
 
 ```sh
@@ -650,6 +673,7 @@ Refer [RoleOut].
 [Overview of Access Control]: https://docs.snowflake.com/en/user-guide/security-access-control-overview
 [Using programmatic access tokens for authentication]: https://docs.snowflake.com/en/user-guide/programmatic-access-tokens
 [Website]: https://www.snowflake.com/en/
+[Planning for the deprecation of single-factor password sign-ins]: https://docs.snowflake.com/en/user-guide/security-mfa-rollout
 
 <!-- Others -->
 [Programmatic Access Token (PAT) in Snowflake]: https://medium.com/%40mohitaverma0712/programmatic-access-token-pat-in-snowflake-how-to-use-754c28db8952
