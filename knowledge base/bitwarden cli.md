@@ -1,6 +1,6 @@
-# Bitwarden CLI
+# Bitwarden Password Manager CLI
 
-CLI to access and manage Bitwarden vaults.
+CLI to access and manage Bitwarden Password Managers' vaults.
 
 ## TL;DR
 
@@ -28,11 +28,14 @@ bw login
 bw login 'user_email' 'master_password' --method '1' --code '249213'
 bw login 'user_email' --passwordenv 'BW_MASTER_PASSWORD'
 bw login --passwordfile 'path/to/file.txt'
+BW_CLIENTID="API key's client_id" BW_CLIENTSECRET="API key's client_secret" bw login --apikey
 bw login --sso
 
 # Unlock the vault.
 export BW_SESSION='session_key'
 bw unlock 'master_password'
+bw unlock --passwordenv 'BW_PASSWORD'
+bw unlock --passwordfile 'path/to/mater/password.txt'
 
 # Lock the vault.
 bw lock
@@ -65,9 +68,14 @@ bw get folder 'email'
 bw get template 'folder'
 
 # Create an entry.
+# Must be a base64-encoded valid JSON object.
 bw create item 'eyJuYW1lIjogIkl0ZW0gTmFtZSJ9Cg=='
 echo '{"name": "Item Name"}' | bw encode | bw create item
 echo -n '{"name": "Item Name"}' | base64 | bw create item
+bw get template item \
+| jq --argjson 'LOGIN' "$(bw get template item.login | jq '.username="jdoe" | .password="myp@ssword123"')" \
+    '.name="New Login Item" | .login=$LOGIN' \
+| bw encode | bw create item
 
 # Attach a file to an existing entry.
 bw create attachment --file './myfile.csv' --itemid 'entry_id'
@@ -135,11 +143,14 @@ bw logout
 
 ## Sources
 
+- [Password Manager CLI]
 - [cheat.sh]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Others -->
 [cheat.sh]: https://cheat.sh/bw
+[Password Manager CLI]: https://bitwarden.com/help/cli/
