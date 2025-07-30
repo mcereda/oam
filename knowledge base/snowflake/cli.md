@@ -6,7 +6,6 @@ Meant to replace the SnowSQL tool.
 
 1. [TL;DR](#tldr)
 1. [Setup](#setup)
-1. [Usage](#usage)
 1. [Further readings](#further-readings)
 
 ## TL;DR
@@ -24,6 +23,10 @@ curl --continue-at '-' --location --fail --show-error --remote-name \
 curl --continue-at '-' --location --fail --show-error --remote-name \
   --url 'https://sfc-repo.snowflakecomputing.com/snowflake-cli/linux_aarch64/3.7.2/snowflake-cli-3.7.2.aarch64.rpm' \
 && sudo rpm -i 'snowflake-cli-3.7.2.rpm'
+
+# Configure for the session via environment variables
+export SNOWFLAKE_ACCOUNT='ABCDEFG-YZ01234' SNOWFLAKE_USER='JDOE' SNOWFLAKE_PASSWORD='SuperSecur3Pa$$word'
+export SNOWFLAKE_CLI_LOGS_PATH='/Users/jondoe/snowcli_logs' SNOWFLAKE_DEFAULT_CONNECTION_NAME='myconnection'
 ```
 
 </details>
@@ -44,10 +47,17 @@ snow connection list
 
 # Add connections.
 snow connection add
+snow --config-file 'my_config.toml' connection add \
+  -n 'myconnection2' --account 'myaccount2' --user 'jdoe2' --no-interactive
 
 # Test connections.
 snow connection test
 snow connection test -c 'connection-name'
+snow connection test --temporary-connection --account 'account-id' --username 'login-name' --password 'password-or-pat'
+snow --config-file='my_config.toml' connection test -c 'myconnection2' --enable-diag --diag-log-path "$HOME/report"
+
+# Set the default connection
+snow connection set-default 'myconnection2'
 
 # Executes Snowflake queries.
 snow sql
@@ -55,15 +65,17 @@ snow sql
 
 </details>
 
-<!-- Uncomment if used
 <details>
   <summary>Real world use cases</summary>
 
 ```sh
+# Test credentials
+snow connection test --temporary-connection --account 'ABCDEFG-YZ01234' --username 'JDOE' --password '<PAT>'
+SNOWFLAKE_ACCOUNT='ABCDEFG-YZ01234' SNOWFLAKE_USER='JDOE' SNOWFLAKE_PASSWORD='SuperSecur3Pa$$word' snow \
+  connection test --temporary-connection
 ```
 
 </details>
--->
 
 ## Setup
 
@@ -161,32 +173,17 @@ Use the format `SNOWFLAKE_<config-section>_<variable>=<value>`, where:
 SNOWFLAKE_CLI_LOGS_PATH='/Users/jondoe/snowcli_logs' snow …
 
 # Set the password for the 'myconnection' connection
-SNOWFLAKE_CONNECTIONS_MYCONNECTION_PASSWORD='SomePassword'
+SNOWFLAKE_CONNECTIONS_MYCONNECTION_PASSWORD='SomePassword' snow …
 
 # Set the default connection name
-SNOWFLAKE_DEFAULT_CONNECTION_NAME='myconnection'
+SNOWFLAKE_DEFAULT_CONNECTION_NAME='myconnection' snow …
+
+# Test credentials
+SNOWFLAKE_ACCOUNT='ABCDEFG-YZ01234' SNOWFLAKE_USER='JDOE' SNOWFLAKE_PASSWORD='SuperSecur3Pa$$word' \
+snow connection test --temporary-connection
 ```
 
 </details>
-
-## Usage
-
-```sh
-# Add connections
-snow connection add
-snow --config-file 'my_config.toml' connection add \
-  -n 'myconnection2' --account 'myaccount2' --user 'jdoe2' --no-interactive
-
-# List connections
-snow connection list
-
-# Test connections
-snow connection test
-snow --config-file='my_config.toml' connection test -c 'myconnection2' --enable-diag --diag-log-path "$HOME/report"
-
-# Set the default connection
-snow connection set-default 'myconnection2'
-```
 
 ## Further readings
 

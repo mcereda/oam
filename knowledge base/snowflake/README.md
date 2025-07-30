@@ -153,7 +153,8 @@ CREATE USER IF NOT EXISTS data_service TYPE='SERVICE'
 
 -- Change user attributes
 ALTER USER bob SET DEFAULT_WAREHOUSE = NULL;
-ALTER USER my_service_user SET TYPE = SERVICE; ALTER USER my_service_user UNSET PASSWORD;
+ALTER USER some_service_user SET TYPE = SERVICE;
+ALTER USER some_service_user UNSET PASSWORD;
 
 -- Show permissions users have
 SHOW GRANTS TO USER CLAUDE;
@@ -161,22 +162,26 @@ SHOW GRANTS TO USER CLAUDE;
 SHOW GRANTS ON USER CLAUDE;
 
 -- Grant permissions to users
-GRANT ROLE some_service_role TO USER some_service;
+GRANT ROLE some_service_role TO USER some_service_user;
 GRANT USAGE ON WAREHOUSE COMPUTE_WH TO USER mike;
 
 -- Assign policies to users
-ALTER USER some_service SET AUTHENTICATION POLICY allow_pats_policy;
-ALTER USER some_service SET NETWORK_POLICY = allow_all_net_policy;
+ALTER USER some_service_user SET AUTHENTICATION POLICY allow_pats_policy;
+ALTER USER some_service_user SET NETWORK_POLICY = allow_all_net_policy;
 
 -- List PATs for users
 SHOW USER PROGRAMMATIC ACCESS TOKENS FOR USER some_service_user;
 
 -- Generate PATs for users
+-- 'ROLE_RESTRICTION' required for SERVICE users. Sets the role for the token. Must be uppercase.
+-- 'DAYS_TO_EXPIRY' must be between 1 and 365. Cannot be modified later.
+-- 'MINS_TO_BYPASS_NETWORK_POLICY_REQUIREMENT' and 'COMMENT' are optional.
+ALTER USER nora ADD PROGRAMMATIC ACCESS TOKEN act_as_nora DAYS_TO_EXPIRY=15;
 ALTER USER some_service_user ADD PROGRAMMATIC ACCESS TOKEN some_service_pat
-  ROLE_RESTRICTION='SOME_SERVICE_ROLE'  -- Uppercase. Required for SERVICE users. Sets the role for the token.
-  DAYS_TO_EXPIRY=365                    -- 1 <= X <= 365. Cannot be modified later.
-  MINS_TO_BYPASS_NETWORK_POLICY_REQUIREMENT=3  -- Optional
-  COMMENT='Some comment';
+  ROLE_RESTRICTION='SOME_SERVICE_ROLE'
+  DAYS_TO_EXPIRY=365
+  MINS_TO_BYPASS_NETWORK_POLICY_REQUIREMENT=3
+  COMMENT='Some optional comment';
 
 -- Rotate PATs for users
 ALTER USER some_service_user ROTATE PROGRAMMATIC ACCESS TOKEN some_service_pat;
@@ -199,6 +204,9 @@ ALTER USER fred SET DISABLE_MFA=TRUE;
 
 -- Unlock users
 ALTER USER greg SET MINS_TO_UNLOCK=0;
+
+-- Disable users
+ALTER USER heather SET DISABLED=TRUE;
 
 -- Delete users
 DROP USER snowman;
@@ -284,7 +292,7 @@ SHOW GRANTS ON USER CLAUDE;
 Users can only be created by those with (or):
 
 - The `USERADMIN` role or higher.
-- Roles granting them the CREATE USER capability on the account.
+- Roles granting them the `CREATE USER` capability on the account.
 
 Add users to the account executing a SQL Query by means of Snowflake's web UI found in the `Account` section.
 
@@ -424,6 +432,9 @@ One can generate programmatic access tokens for _human_ users (whose `TYPE` is `
 
 PATs can be valid for up to 365 days. This is a security requirement on Snowflake's side.
 
+Each token is restricted to a single role.<br/>
+Users that can assume multiple roles need to have a token **per each role** they want to use that way.
+
 Tokens are _immutable_. Role restriction and expiry date **cannot** be changed later, requiring to rotate or recreate
 the PAT instead.
 
@@ -520,7 +531,7 @@ Procedure:
 
    </details>
 
-1. \[semi-optionally] Assign it an authentication policy that allows using PATs.
+1. \[semi-optional] Assign it an authentication policy that allows using PATs.
 
    > [!important]
    > If no other policy limits a user's authentication methods (e.g., the user has assigned **no** authentication
@@ -626,9 +637,15 @@ WARNING! Using --password via the CLI is insecure. Use environment variables ins
 
 ## Snowflake CLI
 
+CLI tool for Snowflake.<br/>
+Meant to replace the SnowSQL tool.
+
 See [Snowflake CLI].
 
 ## RoleOut
+
+Project trying to accelerate the design and deployment of Snowflake environments through Infrastructure as Code.<br/>
+Useful to view and configure the permissions matrix in a graphical way.
 
 Refer [RoleOut].
 
