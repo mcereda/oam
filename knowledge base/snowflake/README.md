@@ -377,17 +377,37 @@ Auto-suspend and resume are both enabled by default.
 
 ## Access with private keys
 
-Refer [Snowflake terraform provider authentication].
+Refer [Key-pair authentication and key-pair rotation] and [Snowflake terraform provider authentication].
+
+> [!important]
+> Snowflake only accepts keys in the Privacy Enhanced Mail (PEM) format.
+
+Snowflake supports multiple active keys to allow for uninterrupted rotation.<br/>
+Use the `RSA_PUBLIC_KEY` and `RSA_PUBLIC_KEY_2` parameters in `ALTER USER` to associate up to 2 public keys to one user.
+
+> [!tip]
+> Prefer using private keys in the PEM PKCS#8 format, as that is the one Snowflake accepts during authentication.<br/>
+> Some tools (e.g., the [Snowflake CLI]) can use private keys in other formats.
 
 Procedure:
 
 1. Generate a keypair.
 
    ```sh
-   openssl genrsa -out "$HOME/.ssh/snowflake_key" 4096
-   openssl rsa -in "$HOME/.ssh/snowflake_key" -pubout -out "$HOME/.ssh/snowflake_key.pub"
-   openssl pkcs8 -topk8 -inform 'pem' -in "$HOME/.ssh/snowflake_key" \
-     -outform 'PEM' -v2 aes-256-cbc -out "$HOME/.ssh/snowflake_key.p8"
+   openssl genrsa -out "$HOME/.ssh/snowflake.pem" '4096'
+   openssl rsa -inform 'PEM' -in "$HOME/.ssh/snowflake.pem" -pubout -outform 'PEM' -out "$HOME/.ssh/snowflake.pub"
+   ```
+
+1. Make sure the private key uses the PKCS#8 format.
+
+   ```sh
+   # unencrypted
+   openssl pkcs8 -inform 'PEM' -in "$HOME/.ssh/snowflake.pem" -outform 'PEM' -out "$HOME/.ssh/snowflake.p8" \
+     -topk8 -nocrypt
+
+   # encrypted (will require a password)
+   openssl pkcs8 -inform 'PEM' -in "$HOME/.ssh/snowflake.pem" -outform 'PEM' -out "$HOME/.ssh/snowflake.p8" \
+     -topk8 -v2 'aes-256-cbc'
    ```
 
 1. Assign the key to your user in Snowflake.
@@ -399,9 +419,11 @@ Procedure:
 1. Configure tools to use the key.
 
    ```sh
-   export SNOWFLAKE_PRIVATE_KEY="$(cat ~/.ssh/snowflake_key.p8)"
-   export SNOWFLAKE_PRIVATE_KEY_PATH="$HOME/.ssh/snowflake_key" SNOWFLAKE_PRIVATE_KEY_PASSPHRASE='somePassword'
-   snow connection add -n 'jwt' --authenticator 'SNOWFLAKE_JWT' --private-key-file "$HOME/.ssh/snowflake_key"
+   export SNOWFLAKE_PRIVATE_KEY="$(cat ~/.ssh/snowflake.p8)"
+   export SNOWFLAKE_PRIVATE_KEY_PATH="$HOME/.ssh/snowflake.pem" SNOWFLAKE_PRIVATE_KEY_PASSPHRASE='somePassword'
+   snow connection add -n 'jwt' --authenticator 'SNOWFLAKE_JWT' --private-key-file "$HOME/.ssh/snowflake.p8"
+   snow connection test -x --account 'xy12345' --username 'MY_SERVICE_USER' \
+     --authenticator 'SNOWFLAKE_JWT' --private-key-file "$HOME/.ssh/snowflake.p8"
    ```
 
 ## Access with programmatic access tokens
@@ -447,6 +469,10 @@ _Expired_ tokens do **not** count, but _disabled_ tokens still do.
 Rotating a PAT generates a new secret (and a new expiration) for it, and invalidates the old one.
 
 Deletion is **permanent**, and allows for **no** recovery/restoration.
+
+> [!important]
+> One **cannot** modify, rename, rotate, or revoke programmatic access tokens in a session where one used a programmatic
+> access token for authentication.
 
 Requirements:
 
@@ -686,11 +712,12 @@ Refer [RoleOut].
 [Authentication policies]: https://docs.snowflake.com/en/user-guide/authentication-policies
 [Controlling network traffic with network policies]: https://docs.snowflake.com/en/user-guide/network-policies
 [Documentation]: https://docs.snowflake.com/en/
+[Key-pair authentication and key-pair rotation]: https://docs.snowflake.com/en/user-guide/key-pair-auth
 [Network rules]: https://docs.snowflake.com/en/user-guide/network-rules
 [Overview of Access Control]: https://docs.snowflake.com/en/user-guide/security-access-control-overview
+[Planning for the deprecation of single-factor password sign-ins]: https://docs.snowflake.com/en/user-guide/security-mfa-rollout
 [Using programmatic access tokens for authentication]: https://docs.snowflake.com/en/user-guide/programmatic-access-tokens
 [Website]: https://www.snowflake.com/en/
-[Planning for the deprecation of single-factor password sign-ins]: https://docs.snowflake.com/en/user-guide/security-mfa-rollout
 
 <!-- Others -->
 [Programmatic Access Token (PAT) in Snowflake]: https://medium.com/%40mohitaverma0712/programmatic-access-token-pat-in-snowflake-how-to-use-754c28db8952

@@ -39,6 +39,7 @@ pulumi config set --secret 'boincGuiRpcPasswd' 'something-something-darkside'
 pulumi config set --path 'outer.inner' 'value'
 pulumi config set --path 'list[1]' 'value'
 gpg --export 'smth@example.org' | pulumi config set 'smthTeam:pgpKey-public-raw' --type 'string'
+cat "$HOME/.ssh/snowflake.key" | pulumi config set 'snowflake:privateKey' --secret
 
 # Gitlab provider
 # 'baseUrl' requires the ending slash
