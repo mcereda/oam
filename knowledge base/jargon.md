@@ -96,8 +96,11 @@
 | OIDC    | OpenID Connect                                         |                                                                                                     |
 | OKR     | Objectives and Key Results                             | Framework helping teams set and track measurable goals                                              |
 | OOM     | Out Of Memory                                          |                                                                                                     |
+| PAT     | Personal Access Token                                  |                                                                                                     |
+| PAT     | Programmatic Access Token                              | Used in [Snowflake]                                                                                 |
 | PDF     | Portable Document Format                               |                                                                                                     |
 | PEBCAK  | Problem Exists Between Chair And Keyboard              |                                                                                                     |
+| PEM     | Privacy Enhanced Mail                                  |                                                                                                     |
 | PGP     | Pretty Good Privacy                                    |                                                                                                     |
 | PII     | Personally Identifiable Information                    |                                                                                                     |
 | PR      | Pull Request                                           | Prevalently used in GitHub                                                                          |
@@ -175,6 +178,7 @@
 [kubernetes]: kubernetes/README.md
 [lora]: lora.md
 [siem]: siem.md
+[snowflake]: snowflake/README.md
 [ssh]: ssh.md
 [sssd]: sssd.md
 [terraform enterprise]: terraform%20enterprise.md

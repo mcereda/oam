@@ -12,16 +12,18 @@ openssl rand -base64 '18' > 'key.bin'
 
 
 ##
-# Private keys
+# Key pairs
 # --------------------------------------
 ##
 
-# Generate RSA keys
+# Generate (unencrypted) RSA keys
 openssl genrsa -out 'rsa4096.key' '4096'
 openssl genrsa -out 'rsa8192.key' '8192'
+openssl genrsa '2048' | openssl pkcs8 -topk8 -inform 'PEM' -out 'rsa2048.p8' -nocrypt
 
-# Generate RSA keys encrypted with passphrases based on AES CBC 256
+# Generate encrypted RSA keys
 openssl genrsa -aes256 -out 'rsa4096.withPassphrase.key' '4096'
+openssl genrsa '2048' | openssl pkcs8 -topk8 -v2 'des3' -inform 'PEM' -out 'rsa2048.withPassphrase.p8'
 
 # Generate ECDSA keys
 # Supported curves: prime256v1, secp384r1, secp521r1, others
@@ -31,8 +33,9 @@ openssl ecparam -genkey -name 'secp521r1' | openssl ec -out 'ec521.key'
 openssl ecparam -list_curves
 
 # Print out key information
-openssl rsa -in 'rsa.key' -pubout          # public key
-openssl rsa -in 'rsa.key' -noout -modulus  # modulus
+openssl rsa -in 'rsa.key' -pubout                        # public key
+openssl rsa -in 'rsa_key.p8' -pubout -out 'rsa_key.pub'  # public key
+openssl rsa -in 'rsa.key' -noout -modulus                # modulus
 
 # Print out key information
 # Textual representation of components
@@ -41,6 +44,7 @@ openssl ec -in 'ec.key' -text -noout
 
 # Check keys and verify their consistency.
 openssl rsa -check -in 'private.key'
+openssl ec -check -in 'private.key'
 
 # Remove passphrases from keys
 openssl rsa -in 'withPassphrase.key' -out 'plain.key'
@@ -50,6 +54,17 @@ openssl rsa -des3 -in 'plain.key' -out 'withPassphrase.key'
 
 # Generate Diffie-Hellman params with given lengths (in bits)
 openssl dhparam -out 'dhparams.pem' '2048'
+
+# Convert private keys to other formats
+openssl pkcs8 -in 'key.pem' -topk8 -out 'encrypted.key.pem'  # traditional to PKCS#8 with default parameters (AES-256 and hmacWithSHA256)
+openssl pkcs8 -in 'key.pem' -topk8 -nocrypt -out 'unencrypted.key.pem'  # traditional to PKCS#8 unencrypted
+openssl pkcs8 -in 'key.pem' -topk8 -v2 'des3' -out 'encrypted.key.pem'  # traditional to PKCS#5 v2.0 with triple DES encryption
+openssl pkcs8 -in 'key.pem' -topk8 -v2 'aes-256-cbc' -v2prf 'hmacWithSHA512' -out 'encrypted.key.pem'  # traditional to PKCS#5 v2.0 with AES-256 and hmacWithSHA256
+openssl pkcs8 -in 'key.pem' -topk8 -v1 'PBE-MD5-DES' -out 'encrypted.key.pem'  # PKCS#5 v1.5 to PKCS#8
+openssl pkcs8 -in 'key.pem' -topk8 -out 'encrypted.key.pem' -v1 'PBE-SHA1-3DES'  # PKCS#12 to PKCS#8
+openssl pkcs8 -inform 'DER' -nocrypt -in 'key.der' -out 'unencrypted.key.pem'  # DER unencrypted to PKCS#8 unencrypted
+openssl pkcs8 -in 'pk8.pem' -traditional -out 'encrypted.key.pem'  # PKCS#8 encrypted to traditional
+openssl pkcs8 -in 'key.pem' -topk8 -v2 'aes-256-cbc' -iter '1000000' -out 'pk8.pem'  # traditional to PKCS#8 with AES-256 and 1M iterations of the password
 
 
 ##
