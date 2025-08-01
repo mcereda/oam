@@ -5,9 +5,12 @@ Cloud-based [data warehousing][data warehouse] platform.
 1. [TL;DR](#tldr)
 1. [Roles](#roles)
 1. [Users](#users)
+   1. [Access with private keys](#access-with-private-keys)
+   1. [Access with programmatic access tokens](#access-with-programmatic-access-tokens)
 1. [Virtual warehouses](#virtual-warehouses)
-1. [Access with private keys](#access-with-private-keys)
-1. [Access with programmatic access tokens](#access-with-programmatic-access-tokens)
+1. [Policies](#policies)
+   1. [Authentication policies](#authentication-policies)
+   1. [Network policies](#network-policies)
 1. [Snowflake CLI](#snowflake-cli)
 1. [RoleOut](#roleout)
 1. [Further readings](#further-readings)
@@ -84,6 +87,9 @@ DROP NETWORK POLICY allow_all_net_policy;
 -- List warehouses
 SHOW WAREHOUSES;
 
+-- Show the warehouse in use
+SELECT CURRENT_WAREHOUSE();
+
 -- Start warehouses
 USE WAREHOUSE dev_analytics_wh;
 
@@ -97,17 +103,33 @@ DROP WAREHOUSE IF EXISTS tuts_wh;
 -- List databases
 SHOW DATABASES;
 
+-- Show the database in use
+SELECT CURRENT_DATABASE();
+
 -- Delete databases
 DROP DATABASE IF EXISTS tuts_db;
 
+
+-- Show current role
+SELECT CURRENT_ROLE();
+
+-- Show roles available to the user
+SELECT CURRENT_AVAILABLE_ROLES();
 
 -- List roles
 SHOW ROLES;
 SHOW ROLES LIKE 'REDASH_SERVICE_ROLE';
 SHOW ROLES LIKE '%DATA%';
 
--- Get information about users
+-- Get information about roles
 DESC ROLE some_service_role;
+
+-- Assume roles
+-- the object assuming the role must have that role granted to it
+USE ROLE USERADMIN;      -- create users and roles, manage the ones it owns
+USE ROLE SYSADMIN;       -- create objects in an account
+USE ROLE SECURITYADMIN;  -- manage objects' grants globally + create, monitor, and manage users and roles
+USE ROLE ACCOUNTADMIN;   -- manage *all* resources in an account
 
 -- Create roles
 CREATE ROLE IF NOT EXISTS some_service_role;
@@ -118,15 +140,15 @@ SHOW GRANTS TO ROLE SYSADMIN;
 SHOW GRANTS ON ROLE SYSADMIN;
 
 -- Grant permissions to roles
+GRANT ROLE USERADMIN TO ROLE some_service_role;
 GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE SYSADMIN;
 GRANT USAGE ON DATABASE dev_dwh TO ROLE some_service_role;
 GRANT USAGE ON SCHEMA dev_dwh.public TO ROLE some_service_role;
 GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA dev_dwh.public TO ROLE some_service_role;
 
--- Assume roles
-USE ROLE ACCOUNTADMIN;
-USE ROLE USERADMIN;
 
+-- Show current user
+SELECT CURRENT_USER();
 
 -- List users
 SHOW USERS;
@@ -210,19 +232,27 @@ ALTER USER heather SET DISABLED=TRUE;
 
 -- Delete users
 DROP USER snowman;
+
+
+-- Show current IP address
+SELECT CURRENT_IP_ADDRESS();
+
+
+-- Get the IDs of the AWS Virtual Network hosting the current Snowflake account
+SELECT SYSTEM$GET_SNOWFLAKE_PLATFORM_INFO();
 ```
 
 </details>
 
-<!-- Uncomment if used
 <details>
   <summary>Real world use cases</summary>
 
-```sh
+```sql
+-- Show the warehouse, database, and schema in use
+SELECT CURRENT_WAREHOUSE(), CURRENT_DATABASE(), CURRENT_SCHEMA();
 ```
 
 </details>
--->
 
 ## Roles
 
@@ -361,21 +391,7 @@ ALTER USER my_service_user UNSET LAST_NAME;
 ALTER USER my_service_user SET DISABLE_MFA = TRUE;
 ```
 
-## Virtual warehouses
-
-Dedicated, independent clusters of compute resources in Snowflake.
-
-They are required for queries and all DML operations, including loading data into tables.
-
-Available in two types: _Standard_ or _Snowpark-optimized_.<br/>
-Type aside, warehouses are defined by their size and those other properties that control and automate their activity.
-
-Billing depends on how long the warehouse runs continuously.
-
-Warehouses can be set to automatically resume or suspend, based on activity.<br/>
-Auto-suspend and resume are both enabled by default.
-
-## Access with private keys
+### Access with private keys
 
 Refer [Key-pair authentication and key-pair rotation] and [Snowflake terraform provider authentication].
 
@@ -410,7 +426,7 @@ Procedure:
      -topk8 -v2 'aes-256-cbc'
    ```
 
-1. Assign the key to your user in Snowflake.
+1. Assign the key to one's Snowflake user.
 
    ```sql
    ALTER USER jsmith SET RSA_PUBLIC_KEY='MIIBIjANBgkqh...';
@@ -426,7 +442,7 @@ Procedure:
      --authenticator 'SNOWFLAKE_JWT' --private-key-file "$HOME/.ssh/snowflake.p8"
    ```
 
-## Access with programmatic access tokens
+### Access with programmatic access tokens
 
 Refer [Using programmatic access tokens for authentication],
 [Programmatically Accessing Snowflake Model Inference Endpoints] and [Programmatic Access Token (PAT) in Snowflake].
@@ -457,8 +473,8 @@ PATs can be valid for up to 365 days. This is a security requirement on Snowflak
 Each token is restricted to a single role.<br/>
 Users that can assume multiple roles need to have a token **per each role** they want to use that way.
 
-Tokens are _immutable_. Role restriction and expiry date **cannot** be changed later, requiring to rotate or recreate
-the PAT instead.
+Tokens are _immutable_.<br/>
+Role restriction and expiry date **cannot** be changed later, requiring to rotate or recreate the PAT instead.
 
 Newly generated tokens' secret is visible only **once** and during its creation.<br/>
 They **cannot** be retrieved afterwards, and administrators can only view their metadata later.
@@ -531,6 +547,16 @@ Use the PAT:
 
 Procedure:
 
+1. \[if needed] Acquire enough privileges.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   ```sql
+   USE ROLE SECURITYADMIN;
+   ```
+
+   </details>
+
 1. \[if needed] Create the user.
 
    <details style='padding: 0 0 1rem 1rem'>
@@ -592,7 +618,7 @@ Procedure:
 
    ```sql
    ALTER USER my_service_user ADD PROGRAMMATIC ACCESS TOKEN my_pat_token
-     ROLE_RESTRICTION='MY_SERVICE_ROLE'  -- roles must be referred to in uppercase
+     ROLE_RESTRICTION='MY_SERVICE_ROLE'  -- roles must be referred to in uppercase; required for service users
      DAYS_TO_EXPIRY=90
      COMMENT='My PAT for My Service User';
    ```
@@ -661,6 +687,95 @@ WARNING! Using --password via the CLI is insecure. Use environment variables ins
 
 </details>
 
+## Virtual warehouses
+
+Dedicated, independent clusters of compute resources in Snowflake.
+
+They are required for queries and all DML operations, including loading data into tables.
+
+Available in two types: _Standard_ or _Snowpark-optimized_.<br/>
+Type aside, warehouses are defined by their size and those other properties that control and automate their activity.
+
+Billing depends on how long the warehouse runs continuously.
+
+Warehouses can be set to automatically resume or suspend, based on activity.<br/>
+Auto-suspend and resume are both enabled by default.
+
+## Policies
+
+Refer [Authentication policies] and [Network policies].
+
+Authentication policies control _**how**_ clients or users authenticate.<br/>
+Network policies control _**from where**_ clients or users can authenticate.
+
+### Authentication policies
+
+Can be set on the whole account, or assigned to users in it.<br/>
+When set on the whole account, policies apply to **all** users in that account.<br/>
+When set on **both** the account and a user, the user-level policy overrides the account-level policy.
+
+Having no active policy just allows everything.
+
+Network policies take precedence over authentication policies.
+
+### Network policies
+
+By default, Snowflake allows users to connect from any computer or device.
+
+Security administrators (or higher roles) can configure network policies to allow or deny access to requests based on
+their origin.<br/>
+The policy's _allowed list_ controls which requests are allowed to access, the _blocked list_ controls which requests
+should be explicitly blocked.
+
+Network policies do **not** directly specify the network identifiers in its allowed list or blocked list; rather, it
+adds _network rules_ to them.
+
+> [!important]
+> Network rules group related identifiers into logical units, but do not specify whether to allow or block them. Adding
+> rules to the allowed list and blocked list of network policies does that.
+
+> [!important]
+> All new network policies should use network rules **instead of** putting identifiers directly in their
+> `ALLOWED_IP_LIST` and `BLOCKED_IP_LIST` parameters.<br/>
+> Avoid using both network rules and parameters to restrict access in the same network policy.
+
+The general workflow is as follows:
+
+1. Create network rules based on their purpose and type of network identifier.
+1. Create one or more network policies. Each of them should include all the network rules that contain the identifiers
+   to be allowed or blocked.
+1. Activate the policies for an account, user, or security integration.<br/>
+   A network policy does **not** restrict network traffic until it is activated.
+
+When adding network rules to the allowed list of a network policy, Snowflake grants access only to the specified
+identifiers and blocks the rest.
+
+If a policy has the same IP address values in both its `ALLOWED_IP_LIST` and `BLOCKED_IP_LIST` parameters, the values in
+the `BLOCKED_IP_LIST` parameter applies first.<br/>
+This behavior also applies to the `ALLOWED_NETWORK_RULE_LIST` and `BLOCKED_NETWORK_RULE_LIST` parameters.
+
+Over private connections, if a policy has a network rule specifying VPCE IDs (AWS) or LinkIDs (Azure) in the
+`ALLOWED_NETWORK_RULE_LIST` parameter, IP network rules in the `BLOCKED_NETWORK_RULE_LIST` are ignored, and the
+specified VPCE IDs or LinkIDs take precedence.
+
+Rules using private endpoint identifiers such as Azure LinkIDs or AWS VPCE IDs to restrict access have **no** effect on
+requests coming from the public network.<br/>
+To restrict access based on private endpoint identifiers, and completely block requests from public IPv4 addresses, one
+must create two separate network rules, one for the allowed list and another for the blocked list.
+
+Network policies can apply to an account, a security integration, or a user.<br/>
+If more than one policy is applied to more than one of these, the most **specific** policy overrides more general ones.
+
+```mermaid
+graph LR
+  Account -->|overridden by| SI[Security Integration] -->|overridden by| User
+```
+
+Configure an user's `MINS_TO_BYPASS_NETWORK_POLICY` property to allow it to temporarily bypass a network policy for a
+set number of minutes.
+
+Network rules are **schema**-level objects.
+
 ## Snowflake CLI
 
 CLI tool for Snowflake.<br/>
@@ -713,6 +828,7 @@ Refer [RoleOut].
 [Controlling network traffic with network policies]: https://docs.snowflake.com/en/user-guide/network-policies
 [Documentation]: https://docs.snowflake.com/en/
 [Key-pair authentication and key-pair rotation]: https://docs.snowflake.com/en/user-guide/key-pair-auth
+[Network policies]: https://docs.snowflake.com/en/user-guide/network-policies
 [Network rules]: https://docs.snowflake.com/en/user-guide/network-rules
 [Overview of Access Control]: https://docs.snowflake.com/en/user-guide/security-access-control-overview
 [Planning for the deprecation of single-factor password sign-ins]: https://docs.snowflake.com/en/user-guide/security-mfa-rollout
