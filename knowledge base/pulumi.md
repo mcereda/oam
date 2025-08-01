@@ -1216,12 +1216,11 @@ The two approaches work in slightly different ways, and are suited to slightly d
 
 ### Import components and their children
 
-Create an import file for the resources that would be created, then import them using `pulumi import --file
-'import.json'`.
+The best and usually easier solution is to create an import file for the resources that would be created, then import
+them in block using `pulumi import --file 'import.json'`.<br/>
+Simplify the process by leveraging the `--import-file` option of the [`preview`][pulumi preview] command.
 
-Simplify the process by leveraging the [`preview`][pulumi preview] command.
-
-<details style="padding-left: 1em">
+<details style='padding: 0 0 1rem 1rem'>
 
 1. Write some code that would create the components:
 
@@ -1303,6 +1302,47 @@ Simplify the process by leveraging the [`preview`][pulumi preview] command.
 
    ```sh
    pulumi import --file 'import.json'
+   ```
+
+</details>
+
+A manual alternative is to create the parent component, then import each child in the order they would be created by
+using `pulumi import --parent …`.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```sh
+$ pulumi preview
+  Previewing update (dev):
+       Type                                                  Name          Plan       Info
+       pulumi:pulumi:Stack                                   someProj-dev             1 message
+   +   └─ someOrg:StandardSnowflakeServiceAccount            n8n           create
+   +      └─ snowflake:index:ServiceUser                     n8n           create
+   +         └─ snowflake:index:UserProgrammaticAccessToken  n8n           create
+
+  Resources:
+      + 3 to create
+```
+
+1. Create only the component resource:
+
+   ```sh
+   pulumi up --suppress-outputs --target 'urn:pulumi:dev::someProj::someOrg:SnowflakeServiceAccount::n8n'
+   ```
+
+1. Import the component's direct children:
+
+   ```sh
+   pulumi import 'snowflake:index/serviceUser:ServiceUser' 'n8n' 'N8N' \
+      --parent 'urn:pulumi:dev::someProj::someOrg:SnowflakeServiceAccount::n8n'
+   ```
+
+1. Import children of lower order:
+
+   ```sh
+   pulumi import 'snowflake:index/userProgrammaticAccessToken:UserProgrammaticAccessToken' \
+     'n8n' 'N8N_SERVICE_USER|N8N_SERVICE_PAT' \
+     --parent 'urn:pulumi:dev::someProj::someOrg:SnowflakeServiceAccount$snowflake:index/serviceUser:ServiceUser::n8n'
    ```
 
 </details>
