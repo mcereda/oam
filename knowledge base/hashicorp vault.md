@@ -1,6 +1,4 @@
-# Hashicorp Vault
-
-## Table of contents <!-- omit in toc -->
+# HashiCorp Vault
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -38,11 +36,16 @@ vault read -format 'json' 'secret/data/demo-app/config'
 
 ## Further readings
 
-- [HashiCorp Vault]
+- [Website]
+- [Secrets management]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
+<!-- Knowledge base -->
+[Secrets management]: secrets%20management.md
+
 <!-- Upstream -->
-[hashicorp vault]: https://www.vaultproject.io/
+[Website]: https://www.vaultproject.io/

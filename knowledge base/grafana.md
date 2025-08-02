@@ -337,7 +337,7 @@ All the references in the [further readings] section, plus the following:
 [further readings]: #further-readings
 
 <!-- Knowledge base -->
-[Hashicorp Vault]: vault.md
+[HashiCorp Vault]: hashicorp%20vault.md
 [loki]: loki.md
 [prometheus]: prometheus/README.md
 

@@ -1,23 +1,26 @@
 # Pulumi
 
 1. [TL;DR](#tldr)
-1. [Project](#project)
-1. [Program](#program)
+1. [Projects](#projects)
+1. [Programs](#programs)
    1. [Ignore changes](#ignore-changes)
    1. [Delete before replacing](#delete-before-replacing)
    1. [Assign tags to resources by default](#assign-tags-to-resources-by-default)
    1. [Outputs](#outputs)
    1. [Policy enforcement](#policy-enforcement)
-1. [Stack](#stack)
+1. [Stacks](#stacks)
    1. [Monolith vs micro-stack](#monolith-vs-micro-stack)
-   1. [State](#state)
-   1. [Configuration](#configuration)
-1. [Backend](#backend)
+   1. [States](#states)
+   1. [Configurations](#configurations)
+1. [Backends](#backends)
    1. [Enforce specific backends for projects](#enforce-specific-backends-for-projects)
    1. [Migrate to different backends](#migrate-to-different-backends)
-1. [Compose resources](#compose-resources)
-1. [Import resources](#import-resources)
+1. [Composing resources](#composing-resources)
+1. [Importing resources](#importing-resources)
    1. [Import components and their children](#import-components-and-their-children)
+1. [Pulumi Cloud](#pulumi-cloud)
+   1. [ESC](#esc)
+   1. [IDP](#idp)
 1. [Troubleshooting](#troubleshooting)
    1. [A project with the same name already exists](#a-project-with-the-same-name-already-exists)
    1. [Assume role with MFA enabled but AssumeRoleTokenProvider session option not set](#assume-role-with-mfa-enabled-but-assumeroletokenprovider-session-option-not-set)
@@ -27,18 +30,18 @@
    1. [Stack init fails due to missing scheme](#stack-init-fails-due-to-missing-scheme)
    1. [Stack init fails due to invalid key identifier](#stack-init-fails-due-to-invalid-key-identifier)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
-| Concept         | ELI5 summary                                               | Notes                                                                                |
-| --------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| [Project]       | Any folder that contains a `Pulumi.yaml` file              | Collection of code                                                                   |
-| [Program]       | The code in a project                                      | Defines resources                                                                    |
-| [Stack]         | An isolated, independent instance of a _program_           | Has its own _configuration_ and _state_<br/>Usually defines an environment or branch |
-| [Configuration] | The specific data used in a _stack_                        | Each _stack_ has its own _configuration_                                             |
-| [State]         | Metadata about resources in a _stack_                      | Each _stack_ has its own _state_                                                     |
-| [Backend]       | Storage place for one or more _projects_' sets of _states_ |                                                                                      |
+| Concept             | ELI5 summary                                               | Notes                                                                                |
+| ------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [Project][projects] | Any folder that contains a `Pulumi.yaml` file              | Collection of code                                                                   |
+| [Program][programs]           | The code in a project                                      | Defines resources                                                                    |
+| [Stack][stacks]             | An isolated, independent instance of a _program_           | Has its own _configuration_ and _state_<br/>Usually defines an environment or branch |
+| [Configuration][configurations]     | The specific data used in a _stack_                        | Each _stack_ has its own _configuration_                                             |
+| [State][states]             | Metadata about resources in a _stack_                      | Each _stack_ has its own _state_                                                     |
+| [Backend][backends]           | Storage place for one or more _projects_' sets of _states_ |                                                                                      |
 
 When a stack is not explicitly requested in a command (`-s`, `--stack`), Pulumi defaults to the currently selected
 one.<br/>
@@ -511,9 +514,9 @@ Learning resources:
 - [Code examples]
 - [Resources reference]
 
-## Project
+## Projects
 
-Refer to [projects] for more and updated information.
+Refer [Project][pulumi projects] for more and updated information.
 
 Projects are collections of code.<br/>
 Namely, they are the folders containing a `Pulumi.yaml` project file.<br/>
@@ -537,10 +540,10 @@ pulumi new 'kubernetes-yaml' --generate-only
 pulumi new 'oci-java'
 ```
 
-## Program
+## Programs
 
 Programs are the the files containing the resources' definitions.<br/>
-They are deployed into [stacks][stack].
+They are deployed into [stacks].
 
 ### Ignore changes
 
@@ -628,30 +631,30 @@ TODO
 
 See [Automatically Enforcing AWS Resource Tagging Policies], [Get started with Pulumi policy as code].
 
-## Stack
+## Stacks
 
-Refer to [stacks] for more and updated information.
+Refer [Stack][pulumi stack] for more and updated information.
 
-Single isolated, independent instance of a [program].<br/>
+Single isolated, independent instance of a [program][programs].<br/>
 Each stack has its own separate set of configuration and secrets, role-based access controls (RBAC), policies and
 resources.
 
 The stack name can be specified in one of these formats:
 
 - `stackName`: identifies the stack named `stackName` in the current user account or default organization.<br/>
-  Its [project] is specified by the nearest `Pulumi.yaml` project file.
+  Its [project][projects] is specified by the nearest `Pulumi.yaml` project file.
 - `orgName/stackName`: identifies the stack named `stackName` in the organization named `orgName`<br/>
-  Its [project] is specified by the nearest `Pulumi.yaml` project file.
+  Its [project][projects] is specified by the nearest `Pulumi.yaml` project file.
 - `orgName/projectName/stackName`: identifies the stack named `stackName` for the project named `projectName` in the
   organization named `orgName`.<br/>
   `projectName` must match the project specified by the nearest `Pulumi.yaml` project file.
 
-For self-managed [backends][backend], the `orgName` portion of the stack name must always be the constant string value
+For self-managed [backends], the `orgName` portion of the stack name must always be the constant string value
 `organization`.
 
 ### Monolith vs micro-stack
 
-Refer to [organizing pulumi projects & stacks] for more and updated information.
+Refer [Organizing pulumi projects & stacks] for more and updated information.
 
 Monoliths are single, big projects defining all the resources (infrastructure, application, others) for an entire set of
 services.<br/>
@@ -718,24 +721,23 @@ root/
         └── app/…
 ```
 
-### State
+### States
 
-Refer to [state] for more and updated information.
+Refer [State][pulumi state] for more and updated information.
 
-Every [stack] has its own state.
+Every [Stack][stacks] has its own state.
 
 States are stored in transactional snapshots called _checkpoints_ and are saved as JSON files.<br/>
 Pulumi records checkpoints early and often, so that it can execute similarly to how database transactions work.<br/>
-Checkpoints are stored in the [backend], under the `.pulumi/stacks/{project.name}` folder. See the
-[backend] section for details.
+Checkpoints are stored in the stack's [backend][backends], under the `.pulumi/stacks/{project.name}` folder.
 
-### Configuration
+### Configurations
 
 TODO
 
-## Backend
+## Backends
 
-Refer to [state] for more and updated information.
+Refer [State][pulumi state] for more and updated information.
 
 > Pulumi is designed to use only a single backend at a time.
 
@@ -760,7 +762,7 @@ The Pulumi Cloud backend records every checkpoint to allow to recover from exoti
 Self-managed backends may have more trouble recovering from these situations, as they typically store a single state
 file instead.
 
-Backends store the states of one or more [stacks][stack], divided by [project].
+Backends store the states of one or more [stacks], divided by [project][projects].
 Everything **but** the credentials for the backend (`~/.pulumi/credentials.json`) is stored in the backend's root
 directory, under the `.pulumi` folder:
 
@@ -881,9 +883,9 @@ backend:
    cat 'Pulumi.mario.yaml'
    ```
 
-## Compose resources
+## Composing resources
 
-FIXME: should this be under [Program]?
+FIXME: should this be under [Programs]?
 
 Refer [Component resources] and [Create a ComponentResource].
 
@@ -1166,9 +1168,9 @@ serviceRole.assumeRole.iamPolicy.name.apply(policyName => console.log(policyName
 
 </details>
 
-## Import resources
+## Importing resources
 
-FIXME: should this be under [Program] or [Stack]?
+FIXME: should this be under [Programs] or [Stacks]?
 
 Existing resources can be imported in Pulumi's states for Pulumi to manage.
 
@@ -1347,6 +1349,35 @@ $ pulumi preview
 
 </details>
 
+## Pulumi Cloud
+
+### ESC
+
+Environments, Secrets, and Configuration.
+
+Integrates with most popular secrets stores to pull and synchronize secrets and configuration data.
+
+Refer [Pulumi ESC][pulumi esc docs] for more and updated information.
+
+> [!important]
+> ESC is currently provided **exclusively** as part of Pulumi Cloud. One **will** need to create a Pulumi account to be
+> able to use it.
+
+### IDP
+
+Internal Developer Platform.
+
+Allows defining building blocks using [components][composing resources] and templates, enabling developers to provision
+infrastructure resources in the way that best suits them.<br/>
+Developers can write Pulumi programs in their preferred programming language, scaffold components using low-code YAML
+templates, or deploy no-code programs from the Pulumi console.
+
+Refer [Pulumi IDP][pulumi idp docs] for more and updated information.
+
+> [!important]
+> IDP is currently provided **exclusively** as part of the Enterprise tier of Pulumi Cloud. One **will** need to create
+> a Pulumi account to be able to use it.
+
 ## Troubleshooting
 
 ### A project with the same name already exists
@@ -1484,8 +1515,6 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 ### Sources
 
 - [Documentation]
-- [Stacks]
-- [State]
 - [Assigning tags by default on AWS with Pulumi]
 - [Organizing Pulumi projects & stacks]
 - [Aligning Projects between Service and Self-Managed Backends]
@@ -1508,16 +1537,18 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
   -->
 
 <!-- In-article sections -->
-[backend]: #backend
-[configuration]: #configuration
-[enforce specific backends for projects]: #enforce-specific-backends-for-projects
-[monolith vs micro-stack]: #monolith-vs-micro-stack
-[program]: #program
-[project]: #project
-[stack]: #stack
+[Backends]: #backends
+[Configurations]: #configurations
+[Enforce specific backends for projects]: #enforce-specific-backends-for-projects
+[Monolith vs micro-stack]: #monolith-vs-micro-stack
+[Programs]: #programs
+[Projects]: #projects
+[Stacks]: #stacks
+[States]: #states
+[Composing resources]: #composing-resources
 
 <!-- Knowledge base -->
-[terraform]: terraform.md
+[Terraform]: terraform.md
 
 <!-- Files -->
 <!-- Upstream -->
@@ -1535,21 +1566,23 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 [ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
 [importing resources]: https://www.pulumi.com/docs/iac/adopting-pulumi/import/
 [organizing pulumi projects & stacks]: https://www.pulumi.com/docs/using-pulumi/organizing-projects-stacks/
-[projects]: https://www.pulumi.com/docs/concepts/projects/
 [property paths]: https://www.pulumi.com/docs/iac/concepts/miscellaneous/property-paths/
 [pulumi config set-all]: https://www.pulumi.com/docs/cli/commands/pulumi_config_set-all/
 [pulumi crosswalk for aws]: https://www.pulumi.com/docs/iac/clouds/aws/guides/
+[pulumi esc docs]: https://www.pulumi.com/docs/esc/
+[pulumi idp docs]: https://www.pulumi.com/docs/idp/
 [pulumi import]: https://www.pulumi.com/docs/iac/cli/commands/pulumi_import/
 [pulumi new]: https://www.pulumi.com/docs/cli/commands/pulumi_new/
 [pulumi preview]: https://www.pulumi.com/docs/iac/cli/commands/pulumi_preview/
+[pulumi projects]: https://www.pulumi.com/docs/concepts/projects/
+[pulumi stack]: https://www.pulumi.com/docs/concepts/stack/
+[pulumi state]: https://www.pulumi.com/docs/concepts/state/
 [pulumi troubleshooting]: https://www.pulumi.com/docs/support/troubleshooting/
 [pulumi up --plan without error message (exit code 255)]: https://github.com/pulumi/pulumi/issues/11303#issuecomment-1311365793
 [pulumi-aws/issues/1366]: https://github.com/pulumi/pulumi-aws/issues/1366
 [resources reference]: https://www.pulumi.com/resources
 [secrets]: https://www.pulumi.com/docs/concepts/secrets/
 [stack references]: https://www.pulumi.com/docs/concepts/stack/#stackreferences
-[stacks]: https://www.pulumi.com/docs/concepts/stack/
-[state]: https://www.pulumi.com/docs/concepts/state/
 [update plans]: https://www.pulumi.com/docs/concepts/update-plans/
 [website]: https://www.pulumi.com/
 [workshops]: https://github.com/pulumi/workshops
