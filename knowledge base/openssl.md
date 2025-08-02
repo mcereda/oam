@@ -125,8 +125,10 @@ $ openssl req -x509 -out 'cert.pem' \
   -newkey 'rsa:4096' -keyout 'key.pem' -days '365' -nodes \
   -subj "/C=NL/ST=Nederlands/L=Amsterdam/O=Mek Net/OU=Org/CN=mek.info"
 Generating a 4096 bit RSA private key
-..............................................................................................................................................................................................................................++
-...........................................................................................................................................................................++
+........................................................................................................................
+......................................................................................................++
+........................................................................................................................
+...................................................++
 writing new private key to 'key.pem'
 -----
 
@@ -220,6 +222,7 @@ See [code 20](#code-20-unable-to-get-local-issuer-certificate).
 - [Verify certificate chain with OpenSSL]
 - [How to put domain correctly in CSR?]
 - [OpenSSL command cheatsheet]
+- [The Only OpenSSL CheatSheet You Will Need!]
 
 <!--
   Reference
@@ -236,4 +239,5 @@ See [code 20](#code-20-unable-to-get-local-issuer-certificate).
 [openssl commands to check and verify your ssl certificate, key and csr]: https://www.ibm.com/support/pages/openssl-commands-check-and-verify-your-ssl-certificate-key-and-csr
 [openssl unable to verify the first certificate for experian url]: https://stackoverflow.com/questions/7587851/openssl-unable-to-verify-the-first-certificate-for-experian-url
 [the most common openssl commands]: https://www.sslshopper.com/article-most-common-openssl-commands.html
+[The Only OpenSSL CheatSheet You Will Need!]: https://www.golinuxcloud.com/openssl-cheatsheet
 [verify certificate chain with openssl]: https://www.itsfullofstars.de/2016/02/verify-certificate-chain-with-openssl/

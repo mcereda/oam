@@ -490,6 +490,18 @@ aws --profile 'someProfile' s3api head-bucket --bucket 'someBucket'
 
 
 ###
+# Secrets
+# ------------------
+###
+
+aws secretsmanager create-secret --name 'TestSecretFromFile' --secret-string 'file://mycreds.json'
+aws secretsmanager create-secret \
+	--name 'MyTestSecret' --description 'A test secret created with the CLI.' \
+	--secret-string '{"user":"diegor","password":"EXAMPLE-PASSWORD"}' \
+	--tags '[{"Key": "FirstTag", "Value": "FirstValue"}, {"Key": "SecondTag", "Value": "SecondValue"}]'
+
+
+###
 # SNS
 # ------------------
 ###

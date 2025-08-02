@@ -227,6 +227,7 @@ One can can rapidly remapping addresses to other instances in one's account and 
 | [Route53]                     | DNS                                           |
 | [S3]                          | Storage                                       |
 | [Sagemaker]                   | Machine learning                              |
+| [Secrets Manager]             | Secrets management                            |
 | [Security Hub]                | Aggregator for security findings              |
 | [SNS]                         | Pub/sub message delivery                      |
 | [SQS]                         | Queues                                        |
@@ -895,6 +896,7 @@ machine if not.
 [route53]: route53.md
 [s3]: s3.md
 [sagemaker]: sagemaker.md
+[secrets manager]: secrets%20manager.md
 [sns]: sns.md
 [sqs]: sqs.md
 
