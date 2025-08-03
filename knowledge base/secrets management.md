@@ -7,13 +7,13 @@
 
 ## TL;DR
 
-_Vaults_ and _secrets managers_ are centralized solution that manage secrets.<br/>
+_Secrets managers_ (A.K.A. _vaults_ or _secrets stores_) are centralized solution that manage secrets.<br/>
 Examples: [HashiCorp Vault], [OpenBao], [Bitwarden Secrets Manager], [1Password Secrets Automation], [CyberArk Conjur],
 [Akeyless].
 
-_Secrets orchestration platforms_ offer a transparent access point for users while being a vault itself and/or syncing
-secrets between multiple other vaults and secrets managers.<br/>
-Examples: [Doppler], [Infisical], [Pulumi ESC].
+_Secrets orchestration platforms_ offer a transparent access point for users while being a secrets manager itself and/or
+syncing secrets between multiple other secrets managers.<br/>
+Examples: [Doppler], [Infisical], [Phase], [Pulumi ESC].
 
 Solutions should be easy to use and get **out** of their users' way, so that they can be more easily adopted.
 
@@ -38,7 +38,7 @@ Though git hooks exist, it is likely for them to be misconfigured or simply skip
 Having a centralized solution to manage secrets can come to the rescue, as long as it is adopted profusely.<br/>
 The only way this can happen is if that solution is easy to use and manage, and get **out** of the way of
 developers.<br/>
-_Vaults_ and _secrets managers_ usually do a good job for this.
+_Secrets managers_ usually do a good job for this.
 
 Tools might also integrate with or support only one or a small set of solutions, limiting the choice of platforms.<br/>
 It would be good to have a way to sync secrets between multiple platforms. Even better, to use a single access point to
@@ -73,4 +73,5 @@ This is what _secrets orchestration platforms_ try to solve.
 [CyberArk Conjur]: https://www.conjur.org/
 [Doppler]: https://www.doppler.com/
 [OpenBao]: https://openbao.org/
+[Phase]: https://phase.dev/
 [Secrets Management Tools: The Complete 2025 Guide]: https://www.pulumi.com/blog/secrets-management-tools-guide/
