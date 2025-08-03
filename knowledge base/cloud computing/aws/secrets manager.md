@@ -19,7 +19,7 @@ Critical secrets can be replicated cross-region.
 Costs $0.40 per secret per month, plus $0.05 per 10,000 API calls.<br/>
 Secrets that are marked for deletion are not paid for.
 
-Secrets Manager uses keys from KMS to encrypt the secrets it manages.<br/>
+Secrets Manager uses keys from [KMS] to encrypt the secrets it manages.<br/>
 On first use, Secrets Manager creates the AWS-managed key `aws/secretsmanager` to encrypt the secrets given to it. There
 is **no** cost for using this key.<br/>
 When _automatic_ rotation is turned on for a secret, Secrets Manager uses a Lambda function to rotate it. The use of the
@@ -58,6 +58,10 @@ Managed secrets use a naming convention that includes the ID of the service mana
 
 ## Further readings
 
+- [Secrets management]
+- [KMS]
+- [IAM]
+
 ### Sources
 
 <!--
@@ -68,6 +72,8 @@ Managed secrets use a naming convention that includes the ID of the service mana
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [IAM]: iam.md
+[KMS]: iam.md
+[Secrets management]: ../../secrets%20management.md
 
 <!-- Upstream -->
 <!-- Others -->

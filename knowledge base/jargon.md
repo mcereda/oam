@@ -58,6 +58,7 @@
 | FHS     | [Filesystem Hierarchy Standard][fhs]                   |                                                                                                     |
 | FIFO    | First In First Out                                     |                                                                                                     |
 | FILO    | First In Last Out                                      |                                                                                                     |
+| FIPS    | Federal Information Protection Standard                | Security standard created by NIST to protect US government data                                     |
 | FISH    | [Friendly Interactive SHell][fish]                     |                                                                                                     |
 | FQDN    | Fully Qualified Domain Name                            |                                                                                                     |
 | FS      | FileSystem                                             |                                                                                                     |
@@ -67,6 +68,7 @@
 | GUI     | Graphical User Interface                               |                                                                                                     |
 | HA      | High Availability                                      | Characteristic of a system which aims to ensure better or longer availability for its services      |
 | HPC     | High Performance Computing                             | Collections of systems and tools used to achieve a greater processing capacity than the single unit |
+| HSM     | Hardware Security Module                               | Hardware cryptographic appliance designed to provide dedicated cryptographic functions              |
 | IaC     | [Infrastructure as Code][iac]                          |                                                                                                     |
 | IC      | Integrated Circuit                                     |                                                                                                     |
 | IDP     | Internal Developer Platform                            |                                                                                                     |
@@ -91,6 +93,7 @@
 | M2COTS  | Mass Market COTS                                       | Widely available COTS products                                                                      |
 | MR      | Merge Request                                          | Prevalently used in GitLab                                                                          |
 | NACL    | Network ACL                                            |                                                                                                     |
+| NIST    | National Institute of Science and Technology           |                                                                                                     |
 | OAM     | [Open Application Model]                               |                                                                                                     |
 | OAM     | Operations, Administration and Management              |                                                                                                     |
 | ODBC    | Open DataBase Connectivity                             | Open standard API used for accessing databases                                                      |

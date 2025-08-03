@@ -47,8 +47,18 @@ This is what _secrets orchestration platforms_ try to solve.
 
 ## Further readings
 
+- [1Password Secrets Automation]
+- [Akeyless]
+- [AWS KMS]
+- [AWS Secrets Manager]
+- [Bitwarden Secrets Manager]
+- [CyberArk Conjur]
+- [Doppler]
 - [HashiCorp Vault]
 - [Infisical]
+- [OpenBao]
+- [Phase]
+- [Pulumi ESC]
 
 ### Sources
 
@@ -61,6 +71,8 @@ This is what _secrets orchestration platforms_ try to solve.
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[AWS KMS]: cloud%20computing/aws/kms.md
+[AWS Secrets Manager]: cloud%20computing/aws/secrets%20manager.md
 [HashiCorp Vault]: hashicorp%20vault.md
 [Infisical]: infisical.md
 [Pulumi ESC]: pulumi.md#esc
