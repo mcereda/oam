@@ -13,6 +13,8 @@ Cloud-based [data warehousing][data warehouse] platform.
    1. [Network policies](#network-policies)
 1. [Snowflake CLI](#snowflake-cli)
 1. [RoleOut](#roleout)
+1. [Connecting privately](#connecting-privately)
+   1. [From AWS accounts](#from-aws-accounts)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -75,10 +77,31 @@ DROP AUTHENTICATION POLICY allow_pats_policy;
 
 
 -- List network policies
+SHOW NETWORK RULES;
+SHOW NETWORK RULES LIKE 'PYPI_RULE';
+
+-- Get information about network rules
+DESC NETWORK RULE 'PYPI_RULE';
+DESCRIBE NETWORK RULE 'CLOUD_NETWORK';
+
+-- Create network rules
+CREATE NETWORK RULE cloud_network TYPE=IPV4 MODE=INGRESS VALUE_LIST=('47.88.25.32/27');
+
+-- Delete network policies
+DROP NETWORK RULE PYPI_RULE;
+DROP NETWORK RULE IF EXISTS cloud_network;
+
+-- List network policies
 SHOW NETWORK POLICIES;
 
 -- Create network policies
-CREATE NETWORK POLICY IF NOT EXISTS allow_all_net_policy ALLOWED_IP_LIST = ('0.0.0.0/0');
+CREATE NETWORK POLICY allow_all_net_policy ALLOWED_IP_LIST = ('0.0.0.0/0');
+CREATE NETWORK POLICY IF NOT EXISTS allow_aws_vpceid_block_public_policy
+  ALLOWED_NETWORK_RULE_LIST = ('allow_aws_vpceid_access')
+  BLOCKED_NETWORK_RULE_LIST = ('block_public_access_rule');
+
+-- Set network policies at the account level
+ALTER ACCOUNT SET NETWORK_POLICY = allow_aws_net_policy;
 
 -- Delete network policies
 DROP NETWORK POLICY allow_all_net_policy;
@@ -156,7 +179,7 @@ SHOW USERS LIKE 'BILLY';
 SHOW USERS LIKE '%john%';
 -- List service users
 -- requires running in a warehouse
-SELECT LOGIN_NAME FROM snowflake.account_usage.users WHERE TYPE = 'SERVICE';
+SELECT LOGIN_NAME FROM snowflake.account_usage.users WHERE TYPE='SERVICE';
 
 -- Get information about users
 DESC USER zoe;
@@ -233,13 +256,26 @@ ALTER USER heather SET DISABLED=TRUE;
 -- Delete users
 DROP USER snowman;
 
+-- Ensure multi-factor authentication (MFA) is turned on for all human users with password-based authentication
+CREATE AUTHENTICATION POLICY enforce_password_mfa
+  MFA_AUTHENTICATION_METHODS = ('PASSWORD')  -- enforce MFA when logging in with username and password
+  MFA_ENROLLMENT = REQUIRED;                 -- require MFA enrollment when logging in with username and password
+ALTER ACCOUNT SET AUTHENTICATION POLICY enforce_password_mfa;
+
 
 -- Show current IP address
 SELECT CURRENT_IP_ADDRESS();
 
-
 -- Get the IDs of the AWS Virtual Network hosting the current Snowflake account
 SELECT SYSTEM$GET_SNOWFLAKE_PLATFORM_INFO();
+
+-- Get hostnames and port numbers to open to access Snowflake from behind firewalls
+-- The output of this function can then be passed to SnowCD
+SELECT SYSTEM$ALLOWLIST();
+
+-- Get the Snowflake account's information necessary to facilitate the self-service configuration of private
+-- connectivity to the Snowflake service or Snowflake internal stages.
+SELECT SYSTEM$GET_PRIVATELINK_CONFIG();
 ```
 
 </details>
@@ -538,7 +574,8 @@ Use the PAT:
     authenticator="snowflake",
     password="<PAT_token_string>",
     role="…",
-    warehouse="…" )
+    warehouse="…",
+  )
   ```
 
 - In the `Authorization: Bearer <token>` header when calling Snowflake's REST APIs.
@@ -722,24 +759,22 @@ Network policies take precedence over authentication policies.
 
 By default, Snowflake allows users to connect from any computer or device.
 
-Security administrators (or higher roles) can configure network policies to allow or deny access to requests based on
+Security administrators (or higher roles) can configure _network policies_ to allow or deny access to requests based on
 their origin.<br/>
-The policy's _allowed list_ controls which requests are allowed to access, the _blocked list_ controls which requests
+A policy's _allowed lists_ control which requests are allowed to access, the _blocked lists_ control which requests
 should be explicitly blocked.
 
-Network policies do **not** directly specify the network identifiers in its allowed list or blocked list; rather, it
-adds _network rules_ to them.
+> [!tip]
+> Network policies should prefer referencing _network rules_ **instead of** using CIDRs in their IP lists.
 
-> [!important]
-> Network rules group related identifiers into logical units, but do not specify whether to allow or block them. Adding
-> rules to the allowed list and blocked list of network policies does that.
+Network rules group related identifiers into logical units and define the traffic's direction, but do **not** specify
+whether to allow or block them.<br/>
+Adding rules to the allowed list and blocked list of network policies does that.
 
-> [!important]
-> All new network policies should use network rules **instead of** putting identifiers directly in their
-> `ALLOWED_IP_LIST` and `BLOCKED_IP_LIST` parameters.<br/>
-> Avoid using both network rules and parameters to restrict access in the same network policy.
+> [!tip]
+> Avoid specifying both network rules and IP lists in the same network policy.
 
-The general workflow is as follows:
+The general preferred workflow is as follows:
 
 1. Create network rules based on their purpose and type of network identifier.
 1. Create one or more network policies. Each of them should include all the network rules that contain the identifiers
@@ -758,13 +793,13 @@ Over private connections, if a policy has a network rule specifying VPCE IDs (AW
 `ALLOWED_NETWORK_RULE_LIST` parameter, IP network rules in the `BLOCKED_NETWORK_RULE_LIST` are ignored, and the
 specified VPCE IDs or LinkIDs take precedence.
 
-Rules using private endpoint identifiers such as Azure LinkIDs or AWS VPCE IDs to restrict access have **no** effect on
-requests coming from the public network.<br/>
+Rules using private endpoint identifiers, such as Azure LinkIDs or AWS VPCE IDs, have **no** effect on requests coming
+from the public network.<br/>
 To restrict access based on private endpoint identifiers, and completely block requests from public IPv4 addresses, one
-must create two separate network rules, one for the allowed list and another for the blocked list.
+must create two separate network rules, one for the allowed list and another one for the blocked list.
 
 Network policies can apply to an account, a security integration, or a user.<br/>
-If more than one policy is applied to more than one of these, the most **specific** policy overrides more general ones.
+The most **specific** policy overrides more general ones.
 
 ```mermaid
 graph LR
@@ -790,6 +825,34 @@ Useful to view and configure the permissions matrix in a graphical way.
 
 Refer [RoleOut].
 
+## Connecting privately
+
+### From AWS accounts
+
+Refer [Why Snowflake doesn't share static IP address range with the customer - AWS].
+
+Snowflake's platform is designed to take full advantage of the elasticity AWS offers.<br/>
+Resources in the Snowflake account do **not** use any stable element, including IP addresses.
+
+There are two ways to lock down communications with Snowflake:
+
+1. Integrating with AWS PrivateLink.<br/>
+   This allows using only local IPs from one's VPCs in AWS to connect to Snowflake.
+1. Snowflake offers the `SYSTEM$ALLOWLIST` and its PrivateLink equivalent `SYSTEM$ALLOWLIST_PRIVATELINK` commands.<br/>
+   They return a complete list of URLs that one can use to allow outbound communications from one's network to the
+   Snowflake platform.<br/>
+   These are guaranteed to be unique on an account-by-account basis, and stable for the lifetime of that account.
+
+If configured to, Snowflake can reach out to one's S3 resources to load or unload data.<br/>
+In this scenario, Snowflake supplies the VPC information for use in an S3 policy that would allow communications, IAM,
+and other controls used to gate access when setting up the External Stage.
+
+Should one required IP-address-only controls, the only current solution is to allow the whole AWS IP range from which
+all Snowflake's dynamic IPs may originate. This amounts to the IP addresses for an entire AWS region.<br/>
+AWS provides region-wide IP ranges as a JSON file. These are subject to change, and will need to be updated in
+rules.<br/>
+Snowflake recommends **avoiding** this approach.
+
 ## Further readings
 
 - [Website]
@@ -800,6 +863,7 @@ Refer [RoleOut].
 - [Authentication policies]
 - [Controlling network traffic with network policies]
 - [Network rules]
+- [Create a Snowflake data source with key pair authentication in IntelliJ IDEA]
 
 ### Sources
 
@@ -834,8 +898,10 @@ Refer [RoleOut].
 [Planning for the deprecation of single-factor password sign-ins]: https://docs.snowflake.com/en/user-guide/security-mfa-rollout
 [Using programmatic access tokens for authentication]: https://docs.snowflake.com/en/user-guide/programmatic-access-tokens
 [Website]: https://www.snowflake.com/en/
+[Why Snowflake doesn't share static IP address range with the customer - AWS]: https://community.snowflake.com/s/article/Why-Snowflake-doesn-t-share-static-IP-address-with-customer
 
 <!-- Others -->
+[Create a Snowflake data source with key pair authentication in IntelliJ IDEA]: https://www.jetbrains.com/help/idea/create-snowflake-data-source-with-key-pair-authentication.html#create_a_data_source
 [Programmatic Access Token (PAT) in Snowflake]: https://medium.com/%40mohitaverma0712/programmatic-access-token-pat-in-snowflake-how-to-use-754c28db8952
 [Programmatically Accessing Snowflake Model Inference Endpoints]: https://medium.com/snowflake/programmatically-accessing-snowpark-model-inference-endpoints-9c11727076d1
 [Snowflake CREATE USERS: Syntax, Usage & Practical Examples]: https://hevodata.com/learn/snowflake-create-users/
