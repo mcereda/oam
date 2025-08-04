@@ -3,6 +3,7 @@
 1. [TL;DR](#tldr)
 1. [Networking](#networking)
    1. [Elastic IP addresses](#elastic-ip-addresses)
+   1. [Proxying connections](#proxying-connections)
 1. [Services](#services)
    1. [Billing and Cost Management](#billing-and-cost-management)
    1. [Config](#config)
@@ -161,9 +162,11 @@ graph LR
 
 </details>
 
-[PrivateLink] leverages VPC endpoints to create a private and direct connection between a VPC and an AWS service.<br/>
-[Gateway endpoints] do the same in a more convenient way that does not use Elastic Network Interfaces, but are only
-supported by specific AWS services ([S3] and DynamoDB).
+[PrivateLink] leverages VPC endpoints to create a private and direct connection between a VPC and a service inside the
+AWS backbone (usually, AWS-provided services).<br/>
+[Gateway endpoints] do the same thing PrivateLink does, but in a more convenient way that does not require Elastic
+Network Interfaces. These endpoints are only supported by specific AWS services ([S3] and DynamoDB at the time of
+writing).
 
 <details style="padding: 0 0 1rem 1rem">
 
@@ -198,6 +201,65 @@ Refer [Elastic IP addresses].
 
 **Static**, **public** IPv4 addresses allocated to one's AWS account until one releases it.<br/>
 One can can rapidly remapping addresses to other instances in one's account and use them as targets in DNS records.
+
+### Proxying connections
+
+AWS does not currently really offer a proxy-like service like HA Proxy or Squid would be.
+
+Options:
+
+1. Consider using [PrivateLink], if the destination service is **inside** the AWS network.
+1. Consider routing traffic to the destination **directly** through a NAT Gateway, if one can set static CIDRs in the
+   subnets' Route Tables.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   This is the most basic way to accomplish the goal, while keeping maintenance efforts at a minimum.
+
+   The idea is to:
+
+   1. Create, or reuse, NAT Gateways as the points of exit.
+   1. Create Route Tables accordingly.
+   1. Configure the Route Table to route traffic to the wanted CIDRs to the NAT Gateway serving the AZ.
+
+   Route Tables require defining sets of CIDRs.<br/>
+   If the destination is inside a cloud provider and do not use static IPs, one might need to add **all** of the cloud
+   provider's CIDRs for the Region, which change without notice and require updating.<br/>
+   Even doing that, the sheer number of CIDRs might too high for a single Route Table to manage.
+
+   </details>
+
+1. Route all traffic through an AWS Network Firewall, then re-route traffic to the destination service through a NAT
+   Gateway.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   Network Firewalls can re-route traffic based on its URL instead of based on its CIRDs.<br/>
+   This solves the issue requires Route Tables to use CIDRs, but requires all traffic in a Subnet to go through the
+   Firewall's endpoint for its AZ.
+
+   The idea is to:
+
+   1. Create, or reuse, NAT Gateways as the points of exit.
+   1. Create Network Firewall Endpoints accordingly.
+   1. Configure the Network Firewalls to intercept all traffic from the subnets in the AZ each Endpoint covers, and
+      re-route the packets for the destination to the NAT Gateway for the AZ.
+
+   > [!warning]
+   > Network Firewalls might be way too expensive to be used only for proxying purposes, with a baseline estimation just
+   > shy of €900/month only for 3 Endpoints existing (for AZs A to C, for instance). Add to this the charges for data
+   > processing for the entire traffic exiting or entering every Subnet served by a Network Firewall Endpoint.
+
+   </details>
+
+1. Route traffic to the destination service through a custom proxy instance.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   This **will** require clients to configure their tools to use the proxy.<br/>
+   This could be an EC2 instance, or some containerized solution.
+
+   </details>
 
 ## Services
 
