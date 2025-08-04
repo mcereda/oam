@@ -132,3 +132,16 @@ git fetch 'upstream'
 git checkout 'master'
 git reset --hard 'upstream/master'
 git push 'origin' 'master' --force
+
+
+###
+# Pull and accept forced updates without merging or rebasing
+# ---------------------------------------------
+# 1. download updates from the remote without trying to merge or rebase
+# 2. [if needed] backup the current branch
+# 3. reset the branch to the updates fetched just now
+###
+
+git fetch --all
+git branch 'backup-main'
+git reset --hard 'origin/main'
