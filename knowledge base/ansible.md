@@ -28,6 +28,7 @@
 1. [Ansible Navigator](#ansible-navigator)
     1. [Navigator configuration files](#navigator-configuration-files)
 1. [Secrets management](#secrets-management)
+    1. [Hiding sensitive values in verbose runs](#hiding-sensitive-values-in-verbose-runs)
     1. [Ansible Vault](#ansible-vault)
 1. [Best practices](#best-practices)
 1. [Troubleshooting](#troubleshooting)
@@ -1047,6 +1048,10 @@ Use **interactive prompts** to ask for values at runtime.
 
 Use [Ansible Vault] for automated execution when one does **not** require using specific secrets or password managers.
 
+### Hiding sensitive values in verbose runs
+
+Refer [Hide sensitive data in Ansible verbose logs].
+
 ### Ansible Vault
 
 Refer [Protecting sensitive data with Ansible Vault], [Ansible Vault tutorial] and [Ansible Vault with AWX].
@@ -1768,3 +1773,4 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [working with versions]: https://docs.ansible.com/ansible/latest/collections/community/general/docsite/filter_guide_working_with_versions.html
 [yes and no, true and false]: https://chronicler.tech/red-hat-ansible-yes-no-and/
 [zuul]: https://zuul-ci.org/
+[Hide sensitive data in Ansible verbose logs]: https://harshanu.space/en/tech/ansible-redact/

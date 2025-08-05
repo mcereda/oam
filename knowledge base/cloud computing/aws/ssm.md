@@ -396,6 +396,7 @@ $ sudo ssm-cli get-diagnostics --output 'table'
 - [Using Ansible in AWS]
 - [Troubleshooting managed node availability]
 - [Troubleshooting managed node availability using `ssm-cli`][troubleshooting managed node availability using ssm-cli]
+- [Find AMIs with the SSM Agent preinstalled]
 
 <!--
   Reference
@@ -422,6 +423,7 @@ $ sudo ssm-cli get-diagnostics --output 'table'
 [start a session]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-sessions-start.html
 [troubleshooting managed node availability using ssm-cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-cli.html
 [troubleshooting managed node availability]: https://docs.aws.amazon.com/systems-manager/latest/userguide/troubleshooting-managed-instances.html
+[Find AMIs with the SSM Agent preinstalled]: https://docs.aws.amazon.com/systems-manager/latest/userguide/ami-preinstalled-agent.html
 
 <!-- Others -->
 [ansible temp dir change]: https://devops.stackexchange.com/questions/10703/ansible-temp-dir-change
