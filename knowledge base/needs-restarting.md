@@ -2,8 +2,6 @@
 
 `needs-restarting -r` returns 1 if a reboot is needed, and 0 if it is not.
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Sources](#sources)
 
@@ -42,10 +40,13 @@ Reboot is required to ensure that your system benefits from these updates.
 ## Sources
 
 - [Automatic Reboot on Kernel Update]
+- [How to check if CentOS / RHEL needs a full reboot]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Others -->
 [automatic reboot on kernel update]: https://access.redhat.com/discussions/3106621#comment-1196821
+[How to check if CentOS / RHEL needs a full reboot]: https://www.cyberciti.biz/faq/how-to-check-if-centos-rhel-needs-a-full-reboot/

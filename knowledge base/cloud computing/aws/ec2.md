@@ -238,6 +238,7 @@ Also see [Automatic instance recovery].
 - [Monitor AWS EC2 memory utilization and set CloudWatch Alarm]
 - [Automating Instance Reboots with Amazon CloudWatch EC2 Actions]
 - [Understanding AWS Tenancy Options]
+- [Find AMIs with the SSM Agent preinstalled]
 
 <!--
   Reference
@@ -279,6 +280,7 @@ Also see [Automatic instance recovery].
 [unlimited mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-unlimited-mode.html
 [using al2023 based amazon ecs amis to host containerized workloads]: https://docs.aws.amazon.com/linux/al2023/ug/ecs.html
 [using instance profiles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
+[Find AMIs with the SSM Agent preinstalled]: https://docs.aws.amazon.com/systems-manager/latest/userguide/ami-preinstalled-agent.html
 
 <!-- Others -->
 [Automating Instance Reboots with Amazon CloudWatch EC2 Actions]: https://devops.supportsages.com/automating-instance-reboots-with-amazon-cloudwatch-ec2-actions-375f633a658d
