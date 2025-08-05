@@ -9,6 +9,7 @@
    1. [Send emails](#send-emails)
    1. [Use Oauth2 for authentication](#use-oauth2-for-authentication)
       1. [Map OAuth2 users to Gitea teams and organizations](#map-oauth2-users-to-gitea-teams-and-organizations)
+   1. [Search](#search)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -211,7 +212,7 @@ PASSWD    = `App_Password`
 
 ### Use Oauth2 for authentication
 
-Remember to set up a mailer should one want to require email confirmation during registration.
+Remember to set up a mailer, should one want to require email confirmation during registration.
 
 <details>
   <summary>Google Cloud example</summary>
@@ -254,6 +255,23 @@ Remember to set up a mailer should one want to require email confirmation during
 
 TODO
 
+### Search
+
+Users can do repository-level code search by default.
+
+The builtin code search is based on the `git grep` command. It is fast and efficient for small repositories.<br/>
+Better code search support could be achieved by setting up the repository indexer.
+
+Refer [Repository indexer].
+
+Indexing the repository's contents can consume lots of resources.<br/>
+This is especially true when an index is created for the first time or globally updated (e.g. after upgrading Gitea).
+
+```ini
+[mailer]
+REPO_INDEXER_ENABLED = true
+```
+
 ## Further readings
 
 - [Self-hosting]
@@ -292,4 +310,5 @@ Alternatives:
 [https setup to encrypt connections to gitea]: https://docs.gitea.com/administration/https-setup
 [installation with docker]: https://docs.gitea.com/installation/install-with-docker-rootless
 [installation with helm]: https://docs.gitea.com/installation/install-on-kubernetes
+[repository indexer]: https://docs.gitea.com/administration/repo-indexer
 [website]: https://about.gitea.com/
