@@ -520,3 +520,15 @@ aws sns list-subscriptions-by-topic --topic-arn 'arn:aws:sns:eu-west-1:012345678
 # Get information about subscriptions
 aws sns get-subscription-attributes \
 	--subscription-arn 'arn:aws:sns:eu-west-1:012345678901:aSucculentTopic:abcdef01-2345-6789-abcd-ef0123456789'
+
+
+###
+# SSM
+# ------------------
+###
+
+# Check SSM registered an EC2 instance
+aws ssm get-connection-status --target 'i-0123456789abcdef0' --query 'Status' --output 'text'
+
+# Start a shell
+aws ssm start-session --target 'i-0123456789abcdef0'

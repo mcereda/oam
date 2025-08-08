@@ -319,6 +319,8 @@
     this_is_true_again: "{{ not false }}"
     true_is_truthy: "{{ true is truthy }}"
     false_is_falsy: "{{ false is falsy }}"
+    any_element_in_list_is_truthy_results_false: "{{ [false, '', None, 0] is any }}"
+    all_elements_in_list_are_truthy_results_true: "{{ [true, 'some string', 1] is all }}"
 
 - name: Undefined variables
   tags: undefined_variable

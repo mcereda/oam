@@ -179,7 +179,7 @@ diff 'path/to/plain/file' <(ansible-vault view --vault-password-file 'password_f
 ansible-playbook 'playbook.yaml' -DCvvv \
   -e 'ansible_aws_ssm_plugin=/usr/local/sessionmanagerplugin/bin/session-manager-plugin ansible_connection=aws_ssm' \
   -e 'ansible_aws_ssm_bucket_name=ssm-bucket ansible_aws_ssm_region=eu-west-1' \
-  -e 'ansible_remote_tmp=/tmp/.ansible-\${USER}/tmp' \
+  -e 'ansible_remote_tmp=/tmp/.ansible/tmp' \
   -i 'i-0123456789abcdef0,'
 ```
 
@@ -208,7 +208,8 @@ keywords, and variables.
 The `ansible-config` utility allows to see all the configuration settings available, their defaults, how to set them and
 where their current value comes from.
 
-Ansible will process the following list and use the first file found; all the other files are ignored even if existing:
+Ansible will process the following list and use the **first** file it founds, ignoring all the others even if they do
+exist:
 
 1. the `ANSIBLE_CONFIG` environment variable;
 1. the `ansible.cfg` file in the current directory;
@@ -223,6 +224,31 @@ ansible-config init --disabled > 'ansible.cfg'
 # Includes existing plugins.
 ansible-config init --disabled -t all > 'ansible.cfg'
 ```
+
+One _can_ specify string values containing environment variables in the configuration file, e.g.:
+
+```ini
+[defaults]
+remote_tmp = /tmp/ansible-${USER}/tmp
+```
+
+> [!warning]
+> As of 2025-08-06, environment variables set in a configuration file are **not** expanded.<br/>
+> Refer [async_dir not properly expanding variables].
+
+Those values are passed to Ansible during execution **as-is**.<br/>
+Since they are sometimes given as part of CLI commands, they might™ work as expected. Most of the times, in my
+experience, they **did not**.
+
+There are _some_ shell-expanded characters that do seem to mostly work, though, like `~`:
+
+```ini
+[defaults]
+async_dir = ~/.ansible/async
+```
+
+> [!tip]
+> Prefer just using static values in the configuration file.
 
 ### Performance tuning
 
@@ -1707,6 +1733,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [ansible navigator documentation]: https://ansible.readthedocs.io/projects/navigator/
 [ansible runner]: https://ansible.readthedocs.io/projects/runner/en/stable/
 [ansible v2.14 changelog]: https://github.com/ansible/ansible/blob/7bb078bd740fba8ad43cc69e18fc8aeb4719180a/changelogs/CHANGELOG-v2.14.rst#id11
+[async_dir not properly expanding variables]: https://github.com/ansible/ansible/issues/85370
 [asynchronous actions and polling]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_async.html
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
 [Blocks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_blocks.html
