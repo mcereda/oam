@@ -1,0 +1,55 @@
+###
+# Provide AWS EC2 instances by their Instance ID
+# ------------------
+# Dynamic inventory for integration with AWS SSM.
+# Makes use of the 'aws_ec2' plugin.
+# The file must be named 'aws_ec2.yml', or its name must end with it.
+# Even if YAML file, it must *not* start with '---' or ansible will fail parsing it.
+# Refer <https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html> and
+# <https://docs.ansible.com/ansible/latest/plugins/inventory.html#using-inventory-plugins>.
+###
+
+plugin: amazon.aws.aws_ec2
+region: eu-north-1
+include_filters:
+  - # exclude instances that are not running, which are inoperable
+    instance-state-name: running
+exclude_filters:
+  - # skip EKS nodes, since they are managed in their own way
+    tag-key:
+      - aws:eks:cluster-name
+  - # skip GitLab Runners, since they are volatile and managed in their own way
+    tag:Application:
+      - GitLab
+    tag:Component:
+      - Runner
+use_ssm_inventory: true  # requires 'ssm:GetInventory' permissions on 'arn:aws:ssm:<region>:<account-id>:*'
+hostnames:
+  - instance-id
+keyed_groups:
+  - key: architecture
+    prefix: arch
+  - key: ssm_inventory.platform_name
+    prefix: os_Name
+  - key: ssm_inventory.platform_type
+    prefix: os_Type
+  - key: ssm_inventory.platform_version
+    prefix: os_Version
+  # - key: tags  # would create a group per each tag value; prefer limiting groups to the useful ones
+  #   prefix: tag
+  - key: tags.Team
+    prefix: tag_Team
+  - key: tags.Environment
+    prefix: tag_Environment
+  - key: tags.Application
+    prefix: tag_Application
+  - key: tags.Component
+    prefix: tag_Component
+  - key: tags.Name
+    prefix: tag_Name
+compose:
+  # use non-jinja values (e.g. strings) by wrapping them in two sets of quotes
+  # if using awx, prefer keeping double quotes external (e.g. "'something'") as it just looks better in the ui
+  ansible_connection: "'aws_ssm'"
+  ansible_aws_ssm_region: "'eu-north-1'"
+  ansible_aws_ssm_timeout: "'300'"

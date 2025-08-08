@@ -12,6 +12,11 @@ ansible-inventory -i 'aws_ec2.yml' --list
 ansible-playbook -i 'self-hosting.yml' 'gitlab.yml' --list-hosts
 ansible -i 'webservers.yml' all --list-hosts
 
+# List hosts with their variables
+ansible-inventory -i 'aws_ec2.yml' --list
+ansible-inventory -i 'inventory.ini' --graph --vars
+ansible-inventory -i 'inventory.yml' --host 'client2'
+
 # Show hosts' ansible facts
 ansible -i 'inventory.yml' -m 'setup' all
 ansible -i '192.168.1.34,gitlab.lan,' -m 'setup' 'gitlab.lan' -u 'admin'
