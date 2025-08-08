@@ -34,14 +34,14 @@
 
 ## TL;DR
 
-| Concept             | ELI5 summary                                               | Notes                                                                                |
-| ------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| [Project][projects] | Any folder that contains a `Pulumi.yaml` file              | Collection of code                                                                   |
-| [Program][programs]           | The code in a project                                      | Defines resources                                                                    |
-| [Stack][stacks]             | An isolated, independent instance of a _program_           | Has its own _configuration_ and _state_<br/>Usually defines an environment or branch |
-| [Configuration][configurations]     | The specific data used in a _stack_                        | Each _stack_ has its own _configuration_                                             |
-| [State][states]             | Metadata about resources in a _stack_                      | Each _stack_ has its own _state_                                                     |
-| [Backend][backends]           | Storage place for one or more _projects_' sets of _states_ |                                                                                      |
+| Concept                         | ELI5 summary                                               | Notes                                                                                |
+| ------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [Project][projects]             | Any folder that contains a `Pulumi.yaml` file              | Collection of code                                                                   |
+| [Program][programs]             | The code in a project                                      | Defines resources                                                                    |
+| [Stack][stacks]                 | An isolated, independent instance of a _program_           | Has its own _configuration_ and _state_<br/>Usually defines an environment or branch |
+| [Configuration][configurations] | The specific data used in a _stack_                        | Each _stack_ has its own _configuration_                                             |
+| [State][states]                 | Metadata about resources in a _stack_                      | Each _stack_ has its own _state_                                                     |
+| [Backend][backends]             | Storage place for one or more _projects_' sets of _states_ |                                                                                      |
 
 When a stack is not explicitly requested in a command (`-s`, `--stack`), Pulumi defaults to the currently selected
 one.<br/>
