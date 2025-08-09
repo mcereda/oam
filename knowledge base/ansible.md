@@ -430,6 +430,59 @@ The current hierarchy is as follows (from lowest to highest priority, with the l
 1. Parameters from `import_tasks` and `include_tasks` statements.
 1. Extra variables specified in the command line like `-e "user=my_user"`.
 
+> [!warning]
+> Values set in the `vars` key of `import_tasks` or `include_tasks` statements did **not** always override the ones
+> configured in the `vars` key of imported tasks.<br/>
+> While this _may_ very well be a skill issue of mine, one can get around this by setting defaults for modules in the
+> modules' attributes themselves, e.g.:
+>
+> ```diff
+>  - name: Create an RDS DB instance
+> -  vars:
+> -    allow_major_version_upgrade: false
+> -    auto_minor_version_upgrade: true
+> -    availability_zone: eu-north-1a
+>    amazon.aws.rds_instance:
+> -    allow_major_version_upgrade: "{{ allow_major_version_upgrade }}"
+> -    auto_minor_version_upgrade: "{{ auto_minor_version_upgrade }}"
+> -    availability_zone: "{{ availability_zone }}"
+> +    allow_major_version_upgrade: "{{ allow_major_version_upgrade | default(false) | bool }}"
+> +    auto_minor_version_upgrade: "{{ auto_minor_version_upgrade | default(true) | bool }}"
+> +    availability_zone: "{{ availability_zone | default('eu-west-1b') }}"
+> ```
+
+Consider setting _private_ defaults when some variables depend on multiple other variables (e.g. abstractions), so tasks
+can easily use or reference them, e.g.:
+
+```yml
+- name: Set 'private' defaults for other tasks to use
+  ansible.builtin.set_fact:
+    _db_instance_identifier: >-
+      {{
+        [
+          db_instance_identifier | default(None),
+          instance_identifier | default(None),
+          instance_id | default(None),
+          id | default(None),
+        ] | select | first
+      }}
+- name: Set 'private' defaults for only this task
+  vars:
+    _allocated_storage: "{{ allocated_storage | default(20) | int }}"
+    _master_username: &master_username >-
+      {{
+        [
+          master_username | default(None),
+          username | default(None),
+        ] | select | first
+      }}
+  amazon.aws.rds_instance:
+    db_instance_identifier: "{{ _db_instance_identifier }}"
+    master_username: *master_username
+    allocated_storage: "{{ _allocated_storage }}"
+    max_allocated_storage: "{{ max_allocated_storage | default(_allocated_storage) }}"
+```
+
 ## Templating
 
 Ansible leverages [Jinja2 templating], which can be used directly in tasks or through the `template` module.
