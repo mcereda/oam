@@ -164,34 +164,68 @@ aws ssm describe-instance-associations-status --instance-id 'instance-id'
 ## Integrate with Ansible
 
 Create a dynamic inventory which name ends with `aws_ec2.yml` (e.g. `test.aws_ec2.yml` or simply `aws_ec2.yml`).<br/>
-Refer the [amazon.aws.aws_ec2 inventory] for more information about the file specifications.<br/>
 It needs to be named like that to be found by the
 ['community.aws.aws_ssm' connection plugin][community.aws.aws_ssm connection].
 
+Refer the [amazon.aws.aws_ec2 inventory] for more information about the file specifications.
+
+> [!important]
+> Even if this is a YAML file, it must **not** start with '---'.<br/>
+> Ansible will **fail** parsing it in this case.
+
 ```yml
-# File: 'aws_ec2.yml'.
-plugin: aws_ec2
-regions:
-  - eu-east-2
+plugin: amazon.aws.aws_ec2
+region: eu-north-1
+include_filters:
+  - # exclude instances that are not running, which are inoperable
+    instance-state-name: running
 exclude_filters:
   - tag-key:
-      - aws:eks:cluster-name  # EKS nodes do not use SSM-capable images
-include_filters:
-  - instance-state-name: running
-keyed_groups:
-  - key: tags.Name
-    # add hosts to 'tag_Name_<tag_value>' groups for each aws_ec2 host's 'Tags.Name' attribute
-    prefix: tag_Name_
-    separator: ""
-  - key: tags.application
-    # add hosts to 'tag_application_<tag_value>' groups for each aws_ec2 host's 'Tags.application' attribute
-    prefix: tag_application_
-    separator: ""
+      - aws:eks:cluster-name  # skip EKS nodes, since they are managed in their own way
+  - # skip GitLab Runners, since they are volatile and managed in their own way
+    tag:Application:
+      - GitLab
+    tag:Component:
+      - Runner
+use_ssm_inventory:
+  # requires 'ssm:GetInventory' permissions on 'arn:aws:ssm:<region>:<account-id>:*'
+  # this makes the sync fail miserably if configured on AWX inventories
+  true
 hostnames:
   - instance-id
     # acts as keyword to use the instances' 'InstanceId' attribute
     # use 'private-ip-address' to use the instances' 'PrivateIpAddress' attribute instead
     # or any option in <https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html#options> really
+keyed_groups:
+  # add hosts to '<prefix>_<value>' groups for each aws_ec2 host's matching attribute
+  # e.g.: 'arch_x86_64', 'os_Name_Amazon_Linux', 'tag_Name_GitLab_Server'
+  - key: architecture
+    prefix: arch
+  - key: ssm_inventory.platform_name
+    prefix: os_Name
+  - key: ssm_inventory.platform_type
+    prefix: os_Type
+  - key: ssm_inventory.platform_version
+    prefix: os_Version
+  # - key: tags  # would create a group per each tag value; prefer limiting groups to the useful ones
+  #   prefix: tag
+  - key: tags.Team
+    prefix: tag_Team
+  - key: tags.Environment
+    prefix: tag_Environment
+  - key: tags.Application
+    prefix: tag_Application
+  - key: tags.Component
+    prefix: tag_Component
+  - key: tags.Name
+    prefix: tag_Name
+compose:
+  # add extra host variables
+  # use non-jinja values (e.g. strings) by wrapping them in two sets of quotes
+  # if using awx, prefer keeping double quotes external (e.g. "'something'") as it just looks better in the ui
+  ansible_connection: "'aws_ssm'"
+  ansible_aws_ssm_region: "'eu-north-1'"
+  ansible_aws_ssm_timeout: "'300'"
 ```
 
 Pitfalls:
@@ -199,15 +233,15 @@ Pitfalls:
 - One **shall not use the `remote_user` connection option**, as it is not supported by the plugin.<br/>
   From the [plugin notes][aws_ssm connection plugin notes]:
 
-  > The `community.aws.aws_ssm` connection plugin does not support using the `remote_user` and `ansible_user` variables
-  > to configure the remote user.  The `become_user` parameter should be used to configure which user to run commands
-  > as. Remote commands will often default to running as the `ssm-agent` user, however this will also depend on how SSM
-  > has been configured.
+  > The `community.aws.aws_ssm` connection plugin does not support using the `remote_user` and `ansible_user`
+  > variables to configure the remote user. The `become_user` parameter should be used to configure which user to run
+  > commands as. Remote commands will often default to running as the `ssm-agent` user, however this will also depend
+  > on how SSM has been configured.
 
 - SSM sessions' duration is limited by SSM's _idle session timeout_ setting.<br/>
   That might impact tasks that need to run for more than said duration.
 
-  <details style="padding-bottom: 1em">
+  <details style="padding: 0 0 1rem 1rem">
 
   Some modules (e.g.: `community.postgresql.postgresql_db`) got their session terminated and SSM retried the task,
   killing and restarting the running process.<br/>
@@ -216,27 +250,27 @@ Pitfalls:
 
   </details>
 
-  Consider extending the SSM idle session timeout setting, or using `async` tasks (which come with their own SSM
-  caveats) to circumvent this issue.
+  Consider extending the SSM idle session timeout setting, or using `async` tasks to circumvent this issue.<br/>
+  Mind that `async` tasks come with their own SSM caveats.
 
 - Since [SSM starts shell sessions under `/usr/bin`][gotchas], one must explicitly set Ansible's temporary directory to
   a folder the remote user can write to ([source][ansible temp dir change]).
 
-  <details style="padding-bottom: 1em">
+  <details style="padding: 0 0 1rem 1rem">
 
   ```sh
-  ANSIBLE_REMOTE_TMP="/tmp/.ansible-${USER}/tmp" ansible…
+  ANSIBLE_REMOTE_TMP="/tmp/.ansible/tmp" ansible…
   ```
 
   ```ini
   # file: ansible.cfg
-  remote_tmp=/tmp/.ansible-${USER}/tmp
+  remote_tmp=/tmp/.ansible/tmp
   ```
 
   ```diff
    - hosts: all
   +  vars:
-  +    ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp
+  +    ansible_remote_tmp: /tmp/.ansible/tmp
      tasks: …
   ```
 
@@ -248,7 +282,7 @@ Pitfalls:
 - In similar fashion to the point above, SSM might mess up the directory used by `async` tasks.<br/>
   To avoid this, set it to a folder the remote user can write to.
 
-  <details style="padding-bottom: 1em">
+  <details style="padding: 0 0 1rem 1rem">
 
   ```sh
   ANSIBLE_ASYNC_DIR="/tmp/.ansible-${USER}/async" ansible…
@@ -262,24 +296,25 @@ Pitfalls:
   ```diff
    - hosts: all
   +  vars:
-  +    ansible_async_dir: /tmp/.ansible-ssm-user/async
+  +    ansible_async_dir: /tmp/.ansible/async
      tasks: …
   ```
 
   </details>
 
 - When using `async` tasks, SSM will fire the task and disconnect<br/>
-  This makes the task **fail**, but the process will still run on the target host.
+  This made the task **fail** at some point. Even so, the process will still run on the target host.
 
-  <details style="margin-top: -1em; padding: 0 0 1em 0;">
+  <details style="padding: 0 0 1rem 1rem">
 
   ```json
   {
-    "changed": false,
-    "module_stderr": "",
-    "module_stdout": "\u001b]0;@ip-172-31-42-42:/usr/bin\u0007{\"failed\": 0, \"started\": 1, \"finished\": 0, \"ansible_job_id\": \"j604343782826.4885\", \"results_file\": \"/tmp/.ansible-ssm-user/async/j604343782826.4885\", \"_ansible_suppress_tmpdir_delete\": true}\r\r",
-    "msg": "MODULE FAILURE\nSee stdout/stderr for the exact error",
-    "rc": 0
+    "failed": 0,
+    "started": 1,
+    "finished": 0,
+    "ansible_job_id": "j604343782826.4885",
+    "results_file": "/tmp/.ansible/async/j604343782826.4885",
+    "_ansible_suppress_tmpdir_delete": true
   }
   ```
 
@@ -288,43 +323,46 @@ Pitfalls:
   Fire these tasks with `poll` set to `0` and forcing a specific failure test.<br/>
   Then, use a different task to check up on them.
 
+  > [!important]
   > When checking up tasks with `ansible.builtin.async_status`, SSM will use a single connection.<br/>
-  > Said connection must be kept alive until the end of the task.
+  > Consider keeping alive said connection until the end of the task.
+  >
+  > FIXME: check. This seems to not happen anymore.
 
-  <details>
+  <details style="padding: 0 0 1rem 1rem">
+    <summary>Example</summary>
 
   ```yaml
-  - name: Dump a DB from an RDS instance
+  - name: Dump a PostgreSQL DB from an RDS instance
+    hosts: all
     vars:
-      ansible_connection: community.aws.aws_ssm
-      ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp   #-- see previous gotchas
-      ansible_async_dir: /tmp/.ansible-ssm-user/async  #-- see previous gotchas
-      wanted_pattern_in_module_output: >-
-        {{ '"failed": 0, "started": 1, "finished": 0' | regex_escape() }}
-    community.postgresql.postgresql_db: { … }
-    async: "{{ 60 * 60 * 2 }}"                         #-- wait up to 2 hours ( 60s * 60m * 2h )
-    poll: 0                                            #-- fire and forget; ssm would not allow self-checking anyways
-    register: dump
-    changed_when:
-      - dump.rc == 0
-      - dump.module_stderr == ''
-      - "'started' | extract(dump.module_stdout | regex_search('{.*}') | from_json) == 1"
-      - "'failed'  | extract(dump.module_stdout | regex_search('{.*}') | from_json) == 0"
-    failed_when: dump.rc != 0                          #-- specify the failure yourself
-  - name: Check on the dump task
-    vars:
-      max_wait: "{{ 60 * 60 * 2 }}"                    #-- wait for the async task to end
-      ansible_aws_ssm_timeout: "{{ max_wait }}"        #-- keep active the ssm connection the whole time
-      ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp   #-- see previous gotchas
-      ansible_async_dir: /tmp/.ansible-ssm-user/async  #-- see previous gotchas
-      dump_stdout_as_obj: "{{ dump.module_stdout | regex_search('{.*}') | from_json }}"
-      ansible_job_id: "{{ dump_stdout_as_obj.ansible_job_id }}"
-    ansible.builtin.async_status:
-      jid: "{{ ansible_job_id }}"
-    register: dump_result
-    until: dump_result.finished
-    retries: "{{ (max_wait/60) | int }}"               #-- ( ( ( max_wait/60s ) * 1/( delay/60s ) ) | int )
-    delay: 60                                          #-- set high to avoid overloading the ssm agent with sessions
+      ansible_connection: amazon.aws.aws_ssm
+      ansible_remote_tmp: /tmp/.ansible/tmp             #-- see pitfalls (ssm starts sessions in '/usr/bin')
+      ansible_async_dir: /tmp/.ansible/async            #-- see pitfalls (ssm starts sessions in '/usr/bin')
+      pg_dump_max_wait_in_seconds: "{{ 60 * 60 * 2 }}"  #-- wait up to 2 hours (60s * 60m * 2h)
+      pg_dump_check_delay_in_seconds: 60                #-- avoid overloading the ssm agent with sessions
+      pg_dump_check_retries:                            #-- max_wait/delay
+        "{{ pg_dump_max_wait_in_seconds/pg_dump_check_delay_in_seconds) }}"
+    tasks:
+      - name: Dump the DB from the RDS instance
+        community.postgresql.postgresql_db: { … }
+        async: "{{ pg_dump_max_wait_in_seconds | int }}"
+        poll: 0                                         #-- fire and forget; ssm would not allow self-checking anyways
+        register: pg_dump_task_execution                #-- expected: { "failed": 0, "started": 1, "finished": 0 }
+        changed_when:
+          - pg_dump_task_execution.started == 1
+          - pg_dump_task_execution.failed  == 0
+        failed_when: pg_dump_task_execution.failed  == 1  #-- specify the failure yourself
+      - name: Check on the PG dump task
+        vars:
+          ansible_aws_ssm_timeout: "{{ pg_dump_max_wait_in_seconds }}"  #-- keep the connection active the whole time
+          ansible_job_id: "{{ dump_stdout_as_obj.ansible_job_id }}"
+        ansible.builtin.async_status:
+          jid: "{{ pg_dump_task_execution.ansible_job_id }}"
+        register: pg_dump_task_execution_result
+        until: pg_dump_task_execution_result.finished
+        retries: "{{ pg_dump_check_retries | int }}"          #-- mind the argument's type
+        delay: "{{ pg_dump_check_delay_in_seconds | int }}"   #-- mind the argument's type
   ```
 
   </details>

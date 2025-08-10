@@ -15,18 +15,25 @@ include_filters:
   - # exclude instances that are not running, which are inoperable
     instance-state-name: running
 exclude_filters:
-  - # skip EKS nodes, since they are managed in their own way
-    tag-key:
-      - aws:eks:cluster-name
+  - tag-key:
+      - aws:eks:cluster-name  # skip EKS nodes, since they are managed in their own way
   - # skip GitLab Runners, since they are volatile and managed in their own way
     tag:Application:
       - GitLab
     tag:Component:
       - Runner
-use_ssm_inventory: true  # requires 'ssm:GetInventory' permissions on 'arn:aws:ssm:<region>:<account-id>:*'
+use_ssm_inventory:
+  # requires 'ssm:GetInventory' permissions on 'arn:aws:ssm:<region>:<account-id>:*'
+  # this makes the sync fail miserably if configured on AWX inventories
+  true
 hostnames:
   - instance-id
+    # acts as keyword to use the instances' 'InstanceId' attribute
+    # use 'private-ip-address' to use the instances' 'PrivateIpAddress' attribute instead
+    # or any option in <https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html#options> really
 keyed_groups:
+  # add hosts to '<prefix>_<value>' groups for each aws_ec2 host's matching attribute
+  # e.g.: 'arch_x86_64', 'os_Name_Amazon_Linux', 'tag_Name_GitLab_Server'
   - key: architecture
     prefix: arch
   - key: ssm_inventory.platform_name
@@ -48,6 +55,7 @@ keyed_groups:
   - key: tags.Name
     prefix: tag_Name
 compose:
+  # add extra host variables
   # use non-jinja values (e.g. strings) by wrapping them in two sets of quotes
   # if using awx, prefer keeping double quotes external (e.g. "'something'") as it just looks better in the ui
   ansible_connection: "'aws_ssm'"
