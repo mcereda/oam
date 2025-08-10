@@ -35,6 +35,11 @@ DB-specific roles).
 
 Extensions in PostgreSQL are managed **per database**.
 
+Prefer using [pg_dumpall] to create **logical** backups.<br/>
+Consider using [pgBackRest] to create **physical** backups.
+
+Consider using the [Percona toolkit] to ease management.
+
 <details>
   <summary>Setup</summary>
 
@@ -173,7 +178,8 @@ SELECT * FROM entries_in_column('vendors','vendor_id');
 
 ## Backup
 
-Refer [pg_dump] and [pg_dumpall].
+Refer [pg_dump] and [pg_dumpall] for **logical** backups.<br/>
+Should one have **physical** access to the DB data directory (`$PGDATA`), consider using [pgBackRest] instead.
 
 PostgreSQL offers the `pg_dump` and `pg_dumpall` native client utilities to dump databases to files.<br/>
 They produce sets of SQL statements that can be executed to reproduce the original databases' object definitions and
@@ -239,7 +245,9 @@ pg_dumpall … -g --no-role-passwords
 
 ## Restore
 
-Refer [psql] and [pg_restore].
+Refer [psql] and [pg_restore] to restore **logical** dumps created via [pg_dump] and [pg_dumpall].<br/>
+Should one have **physical** access to the DB data directory (`$PGDATA`), consider using [pgBackRest] for both processes
+instead.
 
 PostgreSQL offers the `pg_restore` native client utility for restoration of databases from dumps.
 
@@ -372,8 +380,10 @@ See also [yugabyte/yugabyte-db].
 
 <!-- Knowledge base -->
 [mysql]: mysql.md
+[Percona toolkit]: percona%20toolkit.md
 [pg_flo]: pg_flo.md
 [pgadmin]: pgadmin.md
+[pgBackRest]: pgbackrest.md
 [sql]: sql.md
 
 <!-- Upstream -->

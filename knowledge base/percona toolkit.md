@@ -1,4 +1,4 @@
-# Title
+# Percona toolkit
 
 > TODO
 
@@ -61,8 +61,8 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[Codebase]: https://github.com/project/
-[Documentation]: https://website/docs/
-[Website]: https://website/
+[Codebase]: https://github.com/percona/percona-toolkit
+[Documentation]: https://docs.percona.com/percona-toolkit/
+[Website]: https://www.percona.com/percona-toolkit
 
 <!-- Others -->
