@@ -9,16 +9,26 @@ Reliable backup and restore solution for PostgreSQL.
 ## TL;DR
 
 > [!caution]
-> I still need to understand if the application requires access to the host running the PostgreSQL server, or if it
-> can just use the connection (e.g. to backup AWS RDS instances).
+> pgBackRest performs **physical** backups, and it requires **file-level** access to the data directory (`$PGDATA`) of
+> the target PostgreSQL server.<br/>
+> Use `pg_dump` or `pg_dumpall` to create **logical** backups instead.
 
 Prefer installing pgBackRest from a package, instead of building from source.
 
 Configuration files follow a Windows INI-like convention.<br/>
-Multiple loaded files are concatenated as if they were one big file, and each of them must be valid individually.
+pgBackRest tries to load the configuration file from `/etc/pgbackrest/pgbackrest.conf` first. If no file exists in that
+location, it checks `/etc/pgbackrest.conf`.
 
-_Stanzas_ configure where PostgreSQL database clusters are located, how they will be backed up, archiving options, and
-so on.
+One can load multiple configuration files by using the `--config` option multiple times, or by specifying the
+`--config-include-path` option to include a directory with multiple `.conf` files.<br/>
+Each given file must exist, and be valid individually.<br/>
+Multiple loaded files are **concatenated** as if they were one big file.
+
+_Stanzas_ define the backup configuration for specific PostgreSQL database clusters.<br/>
+They configure where the clusters are located, how they will be backed up, archiving options, and so on.
+
+Each stanza must define the cluster's path, and its host and user if the cluster is remote.<br/>
+Stanza-specific settings override any global configuration.
 
 > [!tip]
 > Prefer using names that describe the databases contained in the cluster.<br/>
@@ -94,25 +104,40 @@ backup.
 
 Replication slots are **not** restored as per recommendation of PostgreSQL.
 
-<!-- Uncomment if used
 <details>
   <summary>Setup</summary>
 
 ```sh
+# Install
+brew install 'pgbackrest'
+
+# Validate the configuration
+# Give configuration files as option using their *absolute* path, or also use '--config-path'
+pgbackrest check
+pgbackrest check --config-path "$PWD"
+pgbackrest --config-include-path '/opt/homebrew/etc/pgbackrest' check
+pgbackrest --config "$PWD/pgBackRest.conf" --log-level-console 'debug' check
 ```
 
 </details>
--->
 
-<!-- Uncomment if used
 <details>
   <summary>Usage</summary>
 
 ```sh
+# Get help
+pgbackrest help
+pgbackrest --help
+
+# Show logs on the CLI
+pgbackrest … --log-level-console='info'
+pgbackrest … --log-level-console 'debug'
+
+# Create stanzas
+pgbackrest … --stanza 'prod-app' stanza-create
 ```
 
 </details>
--->
 
 <!-- Uncomment if used
 <details>
