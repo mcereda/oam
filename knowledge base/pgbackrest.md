@@ -157,6 +157,7 @@ pgbackrest … --stanza 'prod-app' stanza-create
 ### Sources
 
 - [User guide][user guide rhel]
+- [Configuration]
 
 <!--
   Reference
@@ -168,7 +169,8 @@ pgbackrest … --stanza 'prod-app' stanza-create
 <!-- Files -->
 <!-- Upstream -->
 [Codebase]: https://github.com/pgbackrest/pgbackrest
-[User guide rhel]: https://website/docs/
+[Configuration]: https://pgbackrest.org/configuration.html
+[User guide rhel]: https://pgbackrest.org/user-guide-rhel.html
 [Website]: https://pgbackrest.org/
 
 <!-- Others -->
