@@ -7,6 +7,7 @@
    1. [OIDC providers](#oidc-providers)
 1. [Create worker nodes](#create-worker-nodes)
    1. [Create managed node groups](#create-managed-node-groups)
+      1. [Managed node groups' gotchas](#managed-node-groups-gotchas)
    1. [Schedule pods on Fargate](#schedule-pods-on-fargate)
 1. [Secrets encryption through KMS](#secrets-encryption-through-kms)
 1. [Storage](#storage)
@@ -63,6 +64,18 @@ roles by leveraging:
 
 - [OIDC providers], and/or
 - [Pod Identity].
+
+Nodes can have up to a [maximum number of pods][maximum number of pods per EKS instance].<br/>
+This number defaults to `N * (M-1) + 2`, where:
+
+- `N` is the number of Elastic Network Interfaces (ENI) of the instance type.
+- `M` is the number of IP addresses of a single ENI.
+
+[Elastic network interfaces] and its children pages describe values for N and M for each instance type.
+
+[Since September 2021][amazon vpc cni plugin increases pods per node limits], it is possible to increase the default
+maximum limit of pods per node when using the CNI plugin.<br/>
+Refer [Assign more IP addresses to Amazon EKS nodes with prefixes].
 
 <details>
   <summary>Usage</summary>
@@ -561,6 +574,19 @@ Procedure:
    ```
 
    </details>
+
+#### Managed node groups' gotchas
+
+- When using ARM-based instance types (e.g., `t4g`), one will need to specify the node group's AMI type since it
+  defaults to an X86 one.<br/>
+  Good examples are `AL2023_ARM_64_STANDARD` and `BOTTLEROCKET_ARM_64`.
+- The `BOTTLEROCKET_ARM_64`-type AMIs will create 2 unencrypted EBS disks of type `gp2` by default:
+
+  - A 2 GB root disk at `/dev/xvda`.
+  - A disk for EKS ephemeral storage at `/dev/xvdb` of whatever size is the default or is defined in the node group.
+
+- Specifying `blockDeviceMappings.ebs.noDevice="true"` in the node group's launch template to try and avoid creating
+  disks for ephemeral storage (e.g., the second disk for `BOTTLEROCKET_ARM_64`-type AMIs) has **no** effect.
 
 ### Schedule pods on Fargate
 
@@ -1507,6 +1533,10 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [using iam groups to manage kubernetes cluster access]: https://archive.eksworkshop.com/beginner/091_iam-groups/
 [using service-linked roles for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles.html
 [view resource usage with the kubernetesmetrics server]: https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html
+[Maximum number of pods per EKS instance]: https://github.com/awslabs/amazon-eks-ami/blob/main/templates/shared/runtime/eni-max-pods.txt
+[Elastic network interfaces]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html
+[Amazon VPC CNI plugin increases pods per node limits]: https://aws.amazon.com/blogs/containers/amazon-vpc-cni-increases-pods-per-node-limits/
+[Assign more IP addresses to Amazon EKS nodes with prefixes]: https://docs.aws.amazon.com/eks/latest/userguide/cni-increase-ip-addresses.html
 
 <!-- Others -->
 [amazon elastic block store (ebs) csi driver]: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/README.md
