@@ -178,9 +178,6 @@ SELECT * FROM entries_in_column('vendors','vendor_id');
 
 ## Backup
 
-Refer [pg_dump] and [pg_dumpall] for **logical** backups.<br/>
-Should one have **physical** access to the DB data directory (`$PGDATA`), consider using [pgBackRest] instead.
-
 PostgreSQL offers the `pg_dump` and `pg_dumpall` native client utilities to dump databases to files.<br/>
 They produce sets of SQL statements that can be executed to reproduce the original databases' object definitions and
 table data.
@@ -243,13 +240,15 @@ pg_dumpall … -g --no-role-passwords
 >
 > </details>
 
+A list of common backup tools can be found in the [PostgreSQL Wiki][wiki], in the [Backup][wiki backup] page.<br/>
+For the _limited_™ experience accrued until now, the TL;DR is:
+
+- Prefer [pg_dumpall], and eventually [pg_dump], for **logical** backups.<br/>
+- Should one have **physical** access to the DB data directory (`$PGDATA`), consider using [pgBackRest] instead.
+
 ## Restore
 
-Refer [psql] and [pg_restore] to restore **logical** dumps created via [pg_dump] and [pg_dumpall].<br/>
-Should one have **physical** access to the DB data directory (`$PGDATA`), consider using [pgBackRest] for both processes
-instead.
-
-PostgreSQL offers the `pg_restore` native client utility for restoration of databases from dumps.
+PostgreSQL offers the `pg_restore` native client utility for restoration of databases from **logical** dumps.
 
 Feed script dumps to `psql` to execute the commands in them and restore the data.
 
@@ -280,6 +279,11 @@ pg_restore -d 'database' --use-list 'no-views.lst' 'backup.dump'
 pg_restore --list 'backup.dump' | grep -E --after-context=1 '[[:digit:]]+ VIEW' | sed '/--/d' > 'only-views.lst'
 pg_restore -d 'database' --use-list 'only-views.lst' 'backup.dump'
 ```
+
+For the _limited_™ experience accrued until now, the TL;DR is:
+
+- Prefer [pg_restore], and eventually [psql], for restoring **logical** dumps.<br/>
+- Use the restore feature of the external tool used for the backup.
 
 ## Extensions of interest
 
@@ -397,6 +401,8 @@ See also [yugabyte/yugabyte-db].
 [pg_settings]: https://www.postgresql.org/docs/current/view-pg-settings.html
 [psql]: https://www.postgresql.org/docs/current/app-psql.html
 [the password file]: https://www.postgresql.org/docs/current/libpq-pgpass.html
+[wiki]: https://wiki.postgresql.org/wiki/
+[wiki backup]: https://wiki.postgresql.org/wiki/Ecosystem:Backup
 
 <!-- Others -->
 [an in-depth guide to postgres data masking with anonymizer]: https://thelinuxcode.com/postgresql-anonymizer-data-masking/
