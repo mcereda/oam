@@ -78,6 +78,38 @@
               {%- endfor -%}
             {%- endfor -%}
             {{- ns.output -}}
+    - name: Create a list of hosts patterns from an EC2 instance's tags
+      vars:
+        ec2_instance:
+          instance_id: i-01234567890abcdef
+          tags:
+            Application: PostgreSQL
+            Component: DB restorer
+            RestoreSource: s3://some-bucket/db/backups/test_2024-12-31.sqlc
+            RestoreTarget: restored-test
+      ansible.builtin.set_fact:
+        hosts_pattern:
+          # if 'ec2_instance' exists
+          #   return 'instance_id' if 'ec2_instance' has it
+          # else if 'ec2_instance' has tags
+          #   return a ',&'-separated list of 'tag_tagKey_tagValue' strings
+          # else
+          #   return 'all'
+          >-
+            {% set ns = namespace(tag_based_patterns = []) %}
+            {% for k, v in (ec2_instance.tags | default({}) | items) %}
+            {{
+                ns.tag_based_patterns.append(
+                  ['tag', k, v] | join('_') | regex_replace('[ :/\-\.]', '_')
+                )
+            }}
+            {% endfor %}
+            {{
+              [
+                ec2_instance.instance_id | default(None),
+                ns.tag_based_patterns | join(',&'),
+              ] | select | first | default('all')
+            }}
     - name: Get the device name and last snapshot id for all block devices in an EC2 instance
       # Useful to create AMIs from instance snapshots
       tags: never
