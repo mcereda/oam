@@ -1,5 +1,6 @@
 # Ansible AWX
 
+1. [TL;DR](#tldr)
 1. [Gotchas](#gotchas)
 1. [Setup](#setup)
    1. [Deployment](#deployment)
@@ -12,6 +13,10 @@
 1. [API](#api)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
+
+## TL;DR
+
+When in doubt about AWX's inner workings, consider [asking Devin][deepwiki ansible/awx].
 
 ## Gotchas
 
@@ -1027,6 +1032,7 @@ Refer [AWX Command Line Interface] for more information.
 - [Kustomize]
 - [Helm]
 - [AWX Command Line Interface]
+- [DeepWiki][deepwiki ansible/awx]
 
 ### Sources
 
@@ -1079,6 +1085,7 @@ Refer [AWX Command Line Interface] for more information.
 <!-- Others -->
 [arm64 image pulled shows amd64 as its arch]: https://github.com/brancz/kube-rbac-proxy/issues/79#issuecomment-826557647
 [automation job isn't created with tolerations from awx manifest]: https://github.com/ansible/awx-operator/issues/1099#issuecomment-1298706083
+[DeepWiki ansible/awx]: https://deepwiki.com/ansible/awx
 [how to use awx rest api to execute jobs]: https://www.dbi-services.com/blog/how-to-use-awx-rest-api-to-execute-jobs/
 [Kubernetes operator]: https://kubernetes.io/docs/concepts/extend-kubernetes/operator/
 [Passing Ansible variables in Workflows using set_stats]: https://gregsowell.com/?p=7540
