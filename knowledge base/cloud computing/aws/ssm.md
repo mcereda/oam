@@ -302,8 +302,91 @@ Pitfalls:
 
   </details>
 
-- When using `async` tasks, SSM will fire the task and disconnect<br/>
-  This made the task **fail** at some point. Even so, the process will still run on the target host.
+- Depending on how one configured SSM, it could happen to scramble or pollute the output of some Ansible modules.<br/>
+  When this happens, the module might report a failure, but the process will run. This happened especially frequently
+  when using `async` tasks.
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  Task:
+
+  ```yml
+  - name: Download S3 object
+    ansible.builtin.command:
+      cmd: >-
+        aws s3 cp 's3://some-bucket/some.object' '{{ ansible_user_dir }}/some.object'
+      creates: "{{ ansible_user_dir }}/some.object"
+    async: 900
+    poll: 0  # fire and forget, since ssm would not allow self-checking anyways
+    register: s3_object_download
+  - name: Check on the S3 object download task
+     when:
+       - s3_object_download is not skipped
+       - s3_object_download is not failed
+     vars:
+       ansible_aws_ssm_timeout: 900  # keep the connection active the whole time
+     ansible.builtin.async_status:
+       jid: "{{ s3_object_download.ansible_job_id }}"
+     register: s3_object_download_result
+     until: s3_object_download_result.finished
+     retries: 5
+     delay: 60
+  ```
+
+  Task output:
+
+  > ```json
+  > {
+  >   "module_stdout": "\u001b]0;@ip-172-31-33-33:/usr/bin\u0007{\"failed\": 0, \"started\": 1, \"finished\": 0, \"ansible_job_id\": \"j924541890996.43612\", \"results_file\": \"/tmp/.ansible/async/j924541890996.43612\", \"_ansible_suppress_tmpdir_delete\": true}\r\r",
+  >   "module_stderr": "",
+  >   "msg": "MODULE FAILURE\nSee stdout/stderr for the exact error",
+  >   "rc": 0,
+  >   "changed": true,
+  >   "_ansible_no_log": false,
+  >   "failed_when_result": false
+  > }
+
+  </details>
+
+  To get around this, one will need to set custom conditions for _changed_ and _failed_ states by parsing the polluted
+  output and checking the specific values required.
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  ```diff
+   - name: Download S3 object
+     ansible.builtin.command:
+       cmd: >-
+         aws s3 cp 's3://some-bucket/some.object' '{{ ansible_user_dir }}/some.object'
+       creates: "{{ ansible_user_dir }}/some.object"
+     async: 900
+     poll: 0  # fire and forget, since ssm would not allow self-checking anyways
+     register: s3_object_download
+  +  changed_when:
+  +    - "'started' | extract(s3_object_download.module_stdout | regex_search('{.*}') | from_json) == 1"
+  +    - "'failed'  | extract(s3_object_download.module_stdout | regex_search('{.*}') | from_json) == 0"
+  +  failed_when: "'failed' | extract(s3_object_download.module_stdout | regex_search('{.*}') | from_json) == 1"
+   - name: Check on the S3 object download task
+     when:
+       - s3_object_download is not skipped
+       - s3_object_download is not failed
+     vars:
+       ansible_aws_ssm_timeout: 900  # keep the connection active the whole time
+  +    s3_object_download_stdout_as_obj: >-
+  +      {{ s3_object_download.module_stdout | regex_search('{.*}') | from_json }}
+     ansible.builtin.async_status:
+  -    jid: "{{ s3_object_download.ansible_job_id }}"
+  +    jid: "{{ s3_object_download_stdout_as_obj.ansible_job_id }}"
+     register: s3_object_download_result
+     until: s3_object_download_result.finished
+     retries: 5
+     delay: 60
+  ```
+
+  </details>
+
+- When using `async` tasks, SSM fires up the task and disconnects.<br/>
+  This made the task **fail** at some point. Even so, the process still runs on the target host.
 
   <details style="padding: 0 0 1rem 1rem">
 
@@ -327,7 +410,7 @@ Pitfalls:
   > When checking up tasks with `ansible.builtin.async_status`, SSM will use a single connection.<br/>
   > Consider keeping alive said connection until the end of the task.
   >
-  > FIXME: check. This seems to not happen anymore.
+  > FIXME: check. This seems to not be needed anymore.
 
   <details style="padding: 0 0 1rem 1rem">
     <summary>Example</summary>
@@ -347,8 +430,8 @@ Pitfalls:
       - name: Dump the DB from the RDS instance
         community.postgresql.postgresql_db: { … }
         async: "{{ pg_dump_max_wait_in_seconds | int }}"
-        poll: 0                                         #-- fire and forget; ssm would not allow self-checking anyways
-        register: pg_dump_task_execution                #-- expected: { "failed": 0, "started": 1, "finished": 0 }
+        poll: 0                           #-- fire and forget; ssm would not allow self-checking anyways
+        register: pg_dump_task_execution  #-- expected: { failed: 0, started: 1, finished: 0, ansible_job_id: … }
         changed_when:
           - pg_dump_task_execution.started == 1
           - pg_dump_task_execution.failed  == 0
