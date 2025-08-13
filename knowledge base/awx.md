@@ -54,6 +54,11 @@ When in doubt about AWX's inner workings, consider [asking Devin][deepwiki ansib
   type _Container Group_.<br/>
   Refer [Executing Jobs].
 
+- Playbooks that use the `vars_prompt` key, but do **not** receive the corresponding values through job templates'
+  `extra_vars`, will cause AWX runs **to hang** by waiting for user input in an unreachable TTY.<br/>
+  Consider avoiding using `vars_prompt` in playbooks that need to be run by AWX, or ensuring that those variables are
+  provided ahead of time.
+
 ## Setup
 
 ### Deployment
