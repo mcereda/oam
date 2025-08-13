@@ -21,6 +21,7 @@ ansible-inventory -i 'inventory.yml' --host 'client2'
 ansible -i 'inventory.yml' -m 'setup' all
 ansible -i '192.168.1.34,gitlab.lan,' -m 'setup' 'gitlab.lan' -u 'admin'
 ansible -i 'localhost,' -c 'local' -km 'setup' 'localhost'
+ansible -i 'ec2_instances_by_instance_id.aws_ec2.yml' -m 'setup' 'tag_Application_Logstash,&tag_Component_Server'
 
 # List tasks what would be executed
 ansible-playbook 'gitlab.yml' --list-tasks

@@ -7,7 +7,7 @@
    1. [Update](#update)
    1. [Removal](#removal)
    1. [Testing](#testing)
-   1. [Job execution](#job-execution)
+   1. [Executing jobs](#executing-jobs)
 1. [Workflow automation](#workflow-automation)
    1. [Pass data between workflow nodes](#pass-data-between-workflow-nodes)
 1. [API](#api)
@@ -20,10 +20,27 @@ When in doubt about AWX's inner workings, consider [asking Devin][deepwiki ansib
 
 ## Gotchas
 
-- When one does **not** define values in a resource, it will use the setting defined by the underlying dependency (if
-  any).<br/>
-  E.g.: not setting a schedule's `job_type` (or setting it to `null`) makes the job it starts use the job template's
-  `job_type` setting.
+- When one does **not** define values in a resource during its creation, the resource will default to the settings of
+  the same name defined by the underlying dependency (if any).<br/>
+  E.g.: not setting the `job_type` parameter in a schedule (or setting it to `null`) makes the job it starts use the
+  `job_type` setting defined in the job template that the schedule references.
+
+- Extra variables configured in job templates will take precedence over the ones defined in the playbook and its tasks,
+  as if they were given to the `ansible-playbook` command for the job using its `-e, --extra-vars` option.
+
+  These variables will have the **highest** precedence of all variables, and as such it is their value that will be used
+  throughout the whole execution. They will **not** be overridden by any other definition for similarly named variables
+  (not at play, host, block nor task level; not even the `set_facts` module will override them).<br/>
+  Refer [Extra variables].
+
+- Once a variable is defined in a job template, it **will** be passed to the ansible command for the job, even if its
+  value is set to `null` (it will be an empty string).
+
+  When launching a job that allows for variables editing, the edited variables will be **merged** on top of the initial
+  setting.<br/>
+  As such, values configured in the job template can **at most** be overridden, but **never deleted**. They also cannot
+  be set to `null`, since `null` values in the override will **not** be considered in the merge, resulting in the job
+  template's predefined value being picked.
 
 - Consider using only AMD64 nodes to host the containers for AWX instances.
 
@@ -35,24 +52,7 @@ When in doubt about AWX's inner workings, consider [asking Devin][deepwiki ansib
 
   Job-related specific K8S settings need to be configured in the `pod_spec_override` attribute of Instance Groups of
   type _Container Group_.<br/>
-  Refer [Job execution].
-
-- Variables configured in job templates are given to the `ansible-playbook` command for the job using its
-  `-e, --extra-vars` option.
-
-  These variables will have the **highest** precedence of all variables, and as such it is their value that will be used
-  throughout the whole execution. They will **not** be overridden by any other definition for similarly named variables
-  (not at play, host, block nor task level; not even the `set_facts` module will override them).<br/>
-  Refer [Ansible variables].
-
-- Once a variable is defined in a job template, it **will** be passed to the ansible command for the job, even if its
-  value is set to `null` (it will be an empty string).
-
-  When launching a job that allows for variables editing, the edited variables will be **merged** on top of the initial
-  setting.<br/>
-  As such, values configured in the job template can **at most** be overridden, but **never deleted**. They also cannot
-  be set to `null`, since `null` values in the override will **not** be considered in the merge, resulting in the job
-  template's predefined value being picked.
+  Refer [Executing Jobs].
 
 ## Setup
 
@@ -723,7 +723,7 @@ deployment.apps "awx-operator-controller-manager" deleted
   </details>
 </details>
 
-### Job execution
+### Executing jobs
 
 Unless explicitly defined in Job Templates or Schedules, Jobs using a containerized execution environment are executed
 by the _default_ container group.
@@ -901,6 +901,23 @@ The AWX UI does not allow creating nodes directly, but it can be done via the vi
 
 </details>
 
+Workflow job's variables have **higher** precedence than node-level variables, functioning as if they were given with
+the `--extra-vars` option.<br/>
+When workflow nodes combine variables, the `extra_vars` defined in workflow jobs take precedence over the nodes' and
+the node's template's variables. They **cannot** be overridden by individual nodes or tasks within the workflow.<br/>
+This limitation ensures predictable behavior, where workflow-level configurations remain consistent across all jobs
+within a workflow.
+
+The AWX API has a specific restriction that does **not** allow `null` values for prompts.<br/>
+If a field is not being overridden, that key should **not** be provided in the payload.
+
+When in need to conditionally use variables, one would need to:
+
+1. Specify those variable only in the nodes that require them, and not at the workflow job's level.
+1. Set different variables at the workflow level, rather than trying to unset them.
+1. Design the workflow logic to handle the variable's presence at the playbook level using Ansible's conditionals.
+1. Use separate workflow job templates, if fundamentally different variable sets are needed.
+
 ### Pass data between workflow nodes
 
 Refer [Passing Ansible variables in Workflows using set_stats].
@@ -908,9 +925,43 @@ Refer [Passing Ansible variables in Workflows using set_stats].
 Leverage the [`set_stats` builtin module][ansible.builtin.set_stats module].
 
 > [!important]
-> Make sure the module's `per_host` argument remains `false` (the default) for this to work.
+> The artifact system requires Ansible >= v2.2.1.0-0.3.rc3 and the default `set_stats` parameters `per_host: false`
+> to work correctly with AWX.
 
-The next play running in the flow will be given what is defined the module's `data` argument as variables.
+When using `set_stats` in a workflow, AWX saves the pairs configured in the module's `data` parameter as artifact.<br/>
+The workflow system implements _cumulative_ artifact inheritance, where artifacts flow down through the workflow graph.
+Artifacts are available to **all** the nodes that are descendants of the one that created it, and **not** only to the
+node that immediately follows in the flow.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+1. When any job uses `set_stats`, AWX stores pairs in the module's `data` parameter as artifacts.<br/>
+   **All** artifacts become available to **all descendant** nodes in the workflow.
+
+   I.E: suppose having a workflow like follows:
+
+   ```plaintext
+   Node A* → Node B* → Node C
+           ↘ Node D
+
+   * = creates artifacts
+   ```
+
+   Both `Node C` and `Node D` will receive the artifacts created by `Node A`, but only `Node C` will **also** receive
+   any artifacts created by `Node B`.
+
+1. Child nodes of the workflow receive the **cumulative** artifacts from **all** their ancestor nodes, with the
+   specific rule that **children's artifacts overwrite parent's ones**.
+
+   I.E.: suppose having a workflow which path is _Grandparent_ → _Parent_ → _Child_, where both Grandparent and Parent
+   generate artifact.<br/>
+   Parent's artifacts **will overwrite any conflicting keys** from Grandparent when passed to the Child node.
+
+</details>
+
+> [!warning]
+> Artifacts are passed as `extra_vars` to subsequent nodes.<br/>
+> This gives them higher precedence than the job template's default variables.
 
 <details>
   <summary>Example</summary>
@@ -1056,10 +1107,9 @@ Refer [AWX Command Line Interface] for more information.
 
 <!-- In-article sections -->
 [Gotchas]: #gotchas
-[Job execution]: #job-execution
+[Executing Jobs]: #executing-jobs
 
 <!-- Knowledge base -->
-[Ansible variables]: ansible.md#variables
 [helm]: kubernetes/helm.md
 [kubernetes]: kubernetes/README.md
 [kustomize]: kubernetes/kustomize.md
@@ -1072,6 +1122,7 @@ Refer [AWX Command Line Interface] for more information.
 [awx's documentation]: https://ansible.readthedocs.io/projects/awx/en/latest/
 [awx's repository]: https://github.com/ansible/awx/
 [basic install]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/installation/basic-install.html
+[Extra variables]: https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.4/html/automation_controller_user_guide/controller-job-templates#controller-extra-variables
 [helm install on existing cluster]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/installation/helm-install-on-existing-cluster.html
 [How to use workflow job templates in Ansible]: https://www.redhat.com/en/blog/ansible-workflow-job-templates
 [installer role's defaults]: https://github.com/ansible/awx-operator/blob/devel/roles/installer/defaults/main.yml
