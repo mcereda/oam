@@ -63,10 +63,12 @@ pulumi state rename -y 'urn:pulumi:dev::custom-images::aws:imagebuilder/imageRec
 pulumi state edit
 EDITOR='vim' pulumi state edit
 
+find . -type f -name Pulumi.yaml -not -path "*/node_modules/*" -print | tee | xargs -n1 dirname | tee | xargs -n1 -tI '%%' pulumi -C '%%' install
+
 find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -print -exec yq '.backend.url' {} '+'
 
 find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi install --cwd
-find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi preview --parallel "$(nproc)" --cwd
+find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi preview --parallel "$(nproc)" --suppress-outputs --cwd
 find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + | xargs -pn '1' pulumi refresh --parallel "$(nproc)" -s 'dev' --non-interactive -v '3' --cwd
 
 # View the selected stack
