@@ -20,6 +20,13 @@ docker pull 'ghcr.io/jqlang/jq'
   <summary>Usage</summary>
 
 ```sh
+# Run using containers
+docker run --rm -i -v "$PWD:/workdir:ro" --workdir '/workdir' 'ghcr.io/jqlang/jq' '.' 'package.json'
+
+# Include the name of the file in the filtered output
+jq -r 'input_filename' 'package.json'
+jq '{"start":.start,"end":.end,"file":input_filename}' '/tmp/.ansible/async'/*
+
 # Only list keys.
 jq 'keys' 'file.json'
 docker run --rm -i 'ghcr.io/jqlang/jq' 'keys' 'file.json'
@@ -32,6 +39,9 @@ jq --sort-keys '.' 'file.json' | sponge 'file.json'
 # Notice the postfix operator '?'.
 jq '.spec.template.spec.containers[]?.env?' 'manifest.kube.json'
 
+# Update values of keys
+jq '.dependencies."@pulumi/aws" |= "6.57.0"' 'package.json' | sponge 'package.json'
+
 # Add elements to lists.
 jq '.orchestrators += [{"orchestratorVersion": "1.24.9"}]'
 jq --arg 'REGION' "${AWS_REGION}" \
@@ -42,7 +52,7 @@ yq -iy '.resources+=["awx.yaml"]' 'kustomization.yaml'
 # Delete keys from objects.
 jq 'del(.items[].spec.clusterIP)' '/tmp/service.kube.json'
 jq 'del(.country, .number, .language)' …
-# Remember ranges are **exclusive** of the end index.
+# Remember ranges are *exclusive* of the end index.
 jq 'del(.[0,1,2])' …
 jq 'del(.[0:3])' …
 
@@ -75,7 +85,7 @@ jq '.extensionsGallery + {
       itemUrl: "https://marketplace.visualstudio.com/items"
     }' '/usr/lib/code/product.json'
 
-# Merge objects from 2 files
+# Merge objects from 2 files.
 jq '.[0] * .[1]' '1.json' '2.json'
 
 # Only show ('select'ed) elements which specific attribute's value is in a list.
