@@ -423,9 +423,35 @@ $ aws rds cancel-export-task --export-task-identifier 'my_export'
 
 ## Restore
 
+Since RDS does **not** allow physical access to its managed instances, one **cannot** restore physical backups.<br/>
+It **does allow** restoring _logical_ backups, though.
+
+> [!warning]
+> RDS does **not** _restore_ data in the strictest sense of the word, e.g. by rolling it back or replacing it in the
+> same RDS DB instance.<br/>
+> Instead, the service forces users to create a **new** RDS DB instance from the desired backup point.
+
+Should one want to replace the data in an existing RDS DB instance, they **will** need to (either-or):
+
+- Restore a _logical_ backup via other means (e.g., `pg_restore`).
+- **Replace** the RDS DB instance with a new one from the desired backup.
+
+If an RDS DB instance **has automated backups enabled**, one can use it as source to create a **new** RDS DB instance
+that has the _same_ attributes and data up to a specific point in time.<br/>
+This does **not** modify the source DB instance.
+
+Refer [Restoring a DB instance to a specified time for Amazon RDS].
+
+One can restore to any point in time within the source RDS DB instance's automatic backup retention period.
+
+Restored DB instances are automatically associated with the **default** DB parameter and option groups, unless one
+specifies a custom parameter group and/or option group during the restore process.
+
+If the source DB instance has resource tags, RDS adds them by default to the restored DB instance.
+
 DB instances **can** be restored from DB snapshots.<br/>
-Restoring instances from snapshots requires the new instances to have **equal or more** allocated storage than what the
-original instance had allocated at the time the snapshot was taken.
+This requires the new instances to have **equal or more** allocated storage than what the original instance had
+allocated _at the time the snapshot was taken_.
 
 ```sh
 aws rds restore-db-instance-from-db-snapshot \
@@ -436,18 +462,18 @@ aws rds restore-db-instance-to-point-in-time \
   --use-latest-restorable-time
 ```
 
-Should source snapshots be from an instance with automatic backups enabled, the restored DB instance will backup itself
-right after creation.<br/>
+Should snapshot one used as source be from an instance that had automatic backups enabled, the restored DB instance
+**will** have automatic backups enabled too, and **will** backup itself **right after creation**.<br/>
 Refer the [Backup] section for what this means.
 
 > There is currently **no** way to prevent the backup being generated at instance creation time.<br/>
-> That process is triggered automatically and the feature can only be toggled on and off for existing instances.
+> That process is triggered automatically and the feature can only be toggled on and off for _existing_ instances.
 >
-> The `BackupRetentionPeriod` flag is part of both instances and snapshot definitions, but can only be set on
+> The `BackupRetentionPeriod` flag is part of both instances and snapshot definitions, but can only be configured for
 > instances.<br/>
-> To create instances with this flag set to `0` and thus have **no** backup automatically taken, the source snapshot
-> _must_ have this flag already set to `0`. This can only happen if the source instance had the flag set to `0` when the
-> snapshot was taken in the first place.
+> To create instances with this flag set to `0` from snapshots, and thus have **no** backup automatically taken, the
+> source snapshot _must_ have this flag **already** set to `0`. This can only happen if the original instance was
+> configured that way when the snapshot was taken in the first place.
 
 ## Encryption
 
@@ -905,6 +931,7 @@ or write workloads and exceeds the instance type quotas.
 [aws kms key management]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.Keys.html
 [how can i decrease the total provisioned storage size of my amazon rds db instance?]: https://repost.aws/knowledge-center/rds-db-storage-size
 [how can i resolve the "error: <module/extension> must be loaded via shared_preload_libraries" error?]: https://repost.aws/knowledge-center/rds-postgresql-resolve-preload-error
+[How do I cancel pending maintenance in Amazon RDS for PostgreSQL?]: https://repost.aws/knowledge-center/rds-postgresql-cancel-maintenance
 [importing data into postgresql on amazon rds]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.Procedural.Importing.html
 [introduction to backups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
 [maintaining a db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html
@@ -912,6 +939,7 @@ or write workloads and exceeds the instance type quotas.
 [migrating databases using rds postgresql transportable databases]: https://aws.amazon.com/blogs/database/migrating-databases-using-rds-postgresql-transportable-databases/
 [pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
 [renaming a db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RenameInstance.html
+[Restoring a DB instance to a specified time for Amazon RDS]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIT.html
 [restoring from a db snapshot]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html
 [Stopping an Amazon RDS DB instance temporarily]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_StopInstance.html
 [transport postgresql databases between two amazon rds db instances using pg_transport]: https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/transport-postgresql-databases-between-two-amazon-rds-db-instances-using-pg_transport.html
@@ -922,7 +950,6 @@ or write workloads and exceeds the instance type quotas.
 [working with db instance read replicas]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html
 [working with parameter groups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html
 [working with parameters on your rds for postgresql db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html
-[How do I cancel pending maintenance in Amazon RDS for PostgreSQL?]: https://repost.aws/knowledge-center/rds-postgresql-cancel-maintenance
 
 <!-- Others -->
 [AWS RDS Max Connections Limit As Per Instance Type]: https://sysadminxpert.com/aws-rds-max-connections-limit/
