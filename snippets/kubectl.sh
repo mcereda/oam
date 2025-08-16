@@ -84,3 +84,8 @@ POD_NAME='gitlab-runner-6ddd58fcb6-c9swk' POD_NAMESPACE='gitlab' \
 && kubectl get pods -n "$POD_NAMESPACE" "$POD_NAME" -o jsonpath='{.status.hostIP}' | tr '.' '-' \
 | xargs -I '%%' kubectl get --raw '/api/v1/nodes/ip-%%.eu-west-1.compute.internal/proxy/stats/summary' \
 | jq --arg 'podName' "$POD_NAME" '.pods[] | select(.podRef.name == $podName)."ephemeral-storage"'
+
+# Show changes from the live version against a would-be applied version
+kubectl kustomize 'https://github.com/kubernetes-csi/external-snapshotter/deploy/kubernetes/snapshot-controller' \
+| kubectl diff -f -
+kubectl diff -k 'external-snapshotter'
