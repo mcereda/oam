@@ -790,7 +790,7 @@ kubectl exec -it 'app' -- cat '/data/out.txt'
 kubectl delete -f 'manifests/'
 ```
 
-'gp2' seem to still be the default EBS type at the time of writing.<br/>
+`gp2` seem to still be the default EBS volume type at the time of writing.<br/>
 Though it seems to be possible to add storage custom storage classes to the values file for the EBS CSI driver's helm
 chart, this is not configurable from the AWS-managed add-on.
 
@@ -1291,6 +1291,12 @@ Requirements:
   git clone 'https://github.com/kubernetes-csi/external-snapshotter.git'
   kubectl kustomize 'external-snapshotter/client/config/crd' | kubectl apply -f -
   kubectl -n 'kube-system' kustomize 'external-snapshotter/deploy/kubernetes/snapshot-controller' | kubectl apply -f -
+
+  # or, without cloning:
+  kubectl kustomize 'https://github.com/kubernetes-csi/external-snapshotter/client/config/crd' | kubectl apply -f -
+  kubectl -n 'kube-system' kustomize \
+    'https://github.com/kubernetes-csi/external-snapshotter/deploy/kubernetes/snapshot-controller' \
+  | kubectl apply -f -
   ```
 
   </details>

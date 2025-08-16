@@ -54,13 +54,17 @@ docker run -p '9090:9090' -v "$PWD/config/dir:/etc/prometheus" -v 'prometheus-da
 
 helm repo add 'prometheus-community' 'https://prometheus-community.github.io/helm-charts' \
 && helm repo update 'prometheus-community'
-helm show values 'prometheus-community/prometheus'
+helm search repo --versions 'prometheus-community/prometheus'
+helm show values --version '27.30.0' 'prometheus-community/prometheus'
 
 helm --namespace 'prometheus' upgrade --install --create-namespace 'prometheus' 'prometheus-community/prometheus'
 helm --namespace 'prometheus' upgrade --install --create-namespace 'prometheus' \
   --repo 'https://prometheus-community.github.io/helm-charts' 'prometheus' \
   --set 'prometheus-pushgateway.enabled=false' --set 'alertmanager.enabled=false' \
   --set 'server.persistentVolume.enabled=false'
+
+helm --namespace 'prometheus' diff upgrade 'prometheus' 'prometheus-community/prometheus' \
+  --version '27.30.0' --values 'values/prometheus.yml'
 
 kubectl -n 'prometheus' get pods -l 'app.kubernetes.io/name=prometheus,app.kubernetes.io/instance=prometheus' \
   -o jsonpath='{.items[0].metadata.name}' \

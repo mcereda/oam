@@ -111,3 +111,6 @@ helm template 'chartName' \
 
 # Check that the 'backend.url key' in a 'Pulumi.yaml' file is not 'file://' and fail otherwise
 yq -e '(.backend.url|test("^file://")?)|not' 'Pulumi.yaml'
+
+# Apply formatting to the same file you read from
+yq -iY --explicit-start '.' 'external-snapshotter/crds.yml'
