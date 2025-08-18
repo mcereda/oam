@@ -56,6 +56,10 @@ ALTER DATABASE reviser SET pgaudit.log TO none;
 \c sales
 \connect vendor
 
+-- Get databases' size
+SELECT pg_database_size('postgres');
+SELECT pg_size_pretty(pg_database_size('postgres'));
+
 
 -- List schemas
 \dn
@@ -90,6 +94,10 @@ CREATE TABLE people (
 \d sales
 \d+ clients
 SELECT column_name, data_type, character_maximum_length FROM information_schema.columns WHERE table_name = 'vendors';
+
+-- Get tables' size
+SELECT pg_relation_size('vendors');
+SELECT pg_size_pretty(pg_relation_size('vendors'));
 
 
 -- Insert data
