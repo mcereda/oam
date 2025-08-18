@@ -114,12 +114,14 @@ Refer [IAM user groups].
 Collections of IAM users.<br/>
 They allow to specify permissions for multiple users.
 
-Groups can be assigned Policies. Any User in a Group inherits the Group's permissions.
+Groups can be assigned Policies.<br/>
+Any User in a Group inherits all of that Group's permissions.
 
 Groups **cannot** be used as Principals in a Policy.<br/>
 Groups relate to permissions, not authentication, and Principals are authenticated IAM entities.
 
-One Group can contain many Users, and one User can belong to multiple Groups.
+One Group can contain many Users, and one User can belong to up to 10 Groups at any time.<br/>
+That limit is a hard limit, and **cannot** be increased in the account's quotas.
 
 Groups can contain only Users, not Roles nor other Groups.
 
@@ -136,13 +138,16 @@ Define which _actions_ are available for _principals_ on which _resources_ under
 Their _effect_ can be to `allow` or `deny` such actions. A `deny` statement **always overwrites** `allow` statements.
 
 > Watch out for explicit `Deny` statements, as they could prevent users from do seemingly completely unrelated things -
-> like accessing a Pulumi state file in a S3 bucket when an explicit `Deny` statement blocks IAM users from listing IAM
-> Groups when they are not logged in with MFA.
+> like accessing an object in a S3 bucket when an explicit `Deny` statement blocks IAM Users from listing IAM Groups
+> when they are not logged in with MFA.
 
 Mostly stored as structured JSON documents.<br/>
 Each Policy comes with one or several _statements_. Each statement defines an effect.
 
 IAM does **not** expose Policies' `Sid` element in the IAM API, so it **cannot** be used to filter retrieved statements.
+
+A User, Role or Group can have up to 10 policies by default.<br/>
+This limit can be increased to 20 via quotas only for Users and Roles.
 
 Logical evaluation:
 
@@ -450,7 +455,7 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 [creating a role to delegate permissions to an iam user]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user.html
 [how can i monitor the account activity of specific iam users, roles, and aws access keys?]: https://repost.aws/knowledge-center/view-iam-history
 [how to use the passrole permission with iam roles]: https://aws.amazon.com/blogs/security/how-to-use-the-passrole-permission-with-iam-roles/
-[iam and aws sts quotas]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-quotas.html
+[IAM and AWS STS quotas]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-quotas.html
 [iam json policy elements: principal]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html
 [iam json policy elements: sid]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_sid.html
 [iam roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html
