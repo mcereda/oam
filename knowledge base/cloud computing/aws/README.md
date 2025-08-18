@@ -30,8 +30,10 @@
 1. [Resource tagging](#resource-tagging)
 1. [API](#api)
    1. [Python](#python)
+1. [Container images](#container-images)
+   1. [Amazon Linux](#amazon-linux)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -868,6 +870,21 @@ machine if not.
 
 </details>
 
+## Container images
+
+### Amazon Linux
+
+Refer [Pulling the Amazon Linux container image].
+
+Amazon Linux container images are **infamous** for having issues when connecting to their package repositories from
+**outside** of AWS' network.<br/>
+While it can connect to them _sometimes™_ when running locally, one can get much easier and more consistent results by
+just running it from **inside** AWS.
+
+Disconnect from the VPN, start the container, and reconnect to the VPN before installing packages when running the
+container locally.<br/>
+If one can, prefer just build the image from an EC2 instance.
+
 ## Further readings
 
 - [Learn AWS]
@@ -1001,11 +1018,13 @@ machine if not.
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
 [what is aws global accelerator?]: https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html
+[Pulling the Amazon Linux container image]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/amazon_linux_container_image.html
 
 <!-- Others -->
 [a guide to tagging resources in aws]: https://medium.com/@staxmarketing/a-guide-to-tagging-resources-in-aws-8f4311afeb46
 [automating dns-challenge based letsencrypt certificates with aws route 53]: https://johnrix.medium.com/automating-dns-challenge-based-letsencrypt-certificates-with-aws-route-53-8ba799dd207b
 [aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
+[AWS Fundamentals Blog]: https://awsfundamentals.com/blog
 [aws savings plans vs. reserved instances: when to use each]: https://www.cloudzero.com/blog/savings-plans-vs-reserved-instances/
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
 [difference in boto3 between resource, client, and session?]: https://stackoverflow.com/questions/42809096/difference-in-boto3-between-resource-client-and-session
@@ -1017,4 +1036,3 @@ machine if not.
 [using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
 [VPC Endpoints: Secure and Direct Access to AWS Services]: https://awsfundamentals.com/blog/vpc-endpoints
 [What Is OIDC and Why Do We Need It?]: https://awsfundamentals.com/blog/oidc-introduction
-[AWS Fundamentals Blog]: https://awsfundamentals.com/blog

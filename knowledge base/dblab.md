@@ -1,6 +1,6 @@
 # `dblab`
 
-Database Lab Engine client CLI.
+DBLab Engine's CLI client.
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -91,7 +91,7 @@ curl -X 'DELETE' 'https://dblab.company.com:1234/api/clone/smth' \
 
 ## Further readings
 
-- [Database Lab]
+- [DBLab engine]
 - [Database Lab Client CLI reference (dblab)]
 - [API reference]
 
@@ -107,11 +107,11 @@ curl -X 'DELETE' 'https://dblab.company.com:1234/api/clone/smth' \
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[database lab]: database%20lab.md
+[DBLab engine]: dblab%20engine.md
 
 <!-- Files -->
 <!-- Upstream -->
-[api reference]: https://dblab.readme.io/reference/
+[API reference]: https://dblab.readme.io/reference/
 [database lab client cli reference (dblab)]: https://postgres.ai/docs/reference-guides/dblab-client-cli-reference
 [how to install and initialize database lab cli]: https://postgres.ai/docs/how-to-guides/cli/cli-install-init
 [How to refresh data when working in the "logical" mode]: https://postgres.ai/docs/how-to-guides/administration/logical-full-refresh

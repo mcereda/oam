@@ -805,7 +805,7 @@
                         | reject('match', '^CREATE ROLE ' + master_username)
                         | reject('match', '.*rdsadmin.*')
                         | reject('match', '^(CREATE|ALTER) ROLE rds_')
-                        | map('regex_replace', '(NO)(SUPERUSER|REPLICATION)\s?', '')
+                        | map('regex_replace', '(\s+(NO)?(SUPERUSER|REPLICATION))?', '')
                       }}
         - name: Wait for pending changes to be applied
           amazon.aws.rds_instance_info:

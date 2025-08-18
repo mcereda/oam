@@ -4,9 +4,11 @@
 dblab --url 'http://dblab.example.org:1234/' --token "$(gopass show -o 'dblab')" …
 
 # Check logs
+# Only available from the server hosting the engine
 docker logs --since '5m' -f 'dblab_server'
 
 # Reload the configuration
+# Only available from the server hosting the engine
 docker exec -it 'dblab_server' kill -SIGHUP '1'
 
 # Check the running container's version
@@ -83,7 +85,7 @@ curl 'https://dblab.example.org:1234/clone/some-clone' -H "Verification-Token: $
 curl 'https://dblab.example.org:1234/api/clone/some-clone' -H "Verification-Token: $(gopass show -o 'dblab')"
 
 # Restart clones
-# Only doable from the instance
+# Only available from the server hosting the engine
 docker restart 'dblab_clone_6000'
 
 # Reset clones
@@ -111,7 +113,14 @@ curl -X 'PATCH' 'https://dblab.example.org:1234/api/clone/some-clone' \
 
 # Delete clones
 dblab clone destroy 'some-clone'
-curl -X 'DELETE' 'https://dblab.example.org:1234/api/clone/some-clone' -H "Verification-Token: $(gopass show -o 'dblab')"
+curl -X 'DELETE' 'https://dblab.example.org:1234/api/clone/some-clone' \
+	-H "Verification-Token: $(gopass show -o 'dblab')"
 
 # Get admin config in YAML format
 curl 'https://dblab.example.org:1234/api/admin/config.yaml' -H "Verification-Token: $(gopass show -o 'dblab')"
+
+# Display the engine's status
+dblab instance status
+
+# Display the engine's version
+dblab instance version
