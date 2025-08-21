@@ -8,6 +8,7 @@
    1. [Removal](#removal)
    1. [Testing](#testing)
    1. [Executing jobs](#executing-jobs)
+1. [Elevating privileges in tasks](#elevating-privileges-in-tasks)
 1. [Workflow automation](#workflow-automation)
    1. [Pass data between workflow nodes](#pass-data-between-workflow-nodes)
 1. [API](#api)
@@ -859,6 +860,38 @@ resource limits.
 ```
 
 </details>
+
+## Elevating privileges in tasks
+
+AWX requires one to configure specific settings throughout its resources in order to be able to successfully use
+`become` and privileges-related keys in playbooks.
+
+1. The playbook must be configured to elevate privileges as per normal Ansible operations.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   ```yml
+   - name: Do something by escalating privileges
+     hosts: all
+     become: true
+     tasks: []
+   ```
+
+   </details>
+
+1. The Job Template referencing the playbook must have the _Privilege Escalation_ option **enabled**.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   This corresponds to providing the `--become` flag when running the playbook.
+
+   </details>
+
+1. The Credential used in the Job (either in the Job Template or whatever overrides them) must specify a user that is
+   able to run `sudo` (or whatever `become_method` the playbook uses).
+
+   > [!important]
+   > Should the `become_method` require a password, one must also supply that password in the Credential.
 
 ## Workflow automation
 
