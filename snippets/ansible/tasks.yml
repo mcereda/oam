@@ -627,6 +627,11 @@
       ansible.builtin.pause:
         seconds: 60
     - name: EC2-specific operations
+      # Notice: tasks using the 'ec2_instance' module might create a new instance even if older ones exist from a
+      # different run, but return the *old* instance's ID and information.
+      # This seems to be an issue with how the module filters EC2 instances out when deciding whether existing
+      # instances match and should be altered. By default, instances are filtered by 'Name' tag, base AMI, state, and
+      # subnet ID. Refer the module's 'filters' property.
       block:
         - name: Get running instances with 'K8S' as the 'Application' tag
           amazon.aws.ec2_instance_info:
