@@ -225,14 +225,19 @@ Make the KMS key usable again to be able to attach such EBS volumes.
 Refer [Modify an Amazon EBS volume using Elastic Volumes operations] and
 [How do I increase or decrease the size of my EBS volume?].
 
+If an EC2 instance uses EBS volumes, a volume's size can be increased **without** needing to detach the volume first or
+restart the EC2 instance. This allows to continue using the EC2 instance while the changes take effect.
+
 1. Increase the volume's size:
 
    ```sh
-   aws ec2 modify-volume --volume-type 'gp3' --volume-id 'vol-0123456789abcdef0' --size '750'
-   aws ec2 describe-volumes-modifications --volume-ids 'vol-0123456789abcdef0' --output 'VolumesModifications[]'
+   aws ec2 modify-volume --volume-id 'vol-0123456789abcdef0' --size '512'
+
+   # Check on the operation
+   aws ec2 describe-volumes-modifications --volume-ids 'vol-0123456789abcdef0' --query 'VolumesModifications[]'
    ```
 
-1. Extend the volume's partitions from inside the instance using it:
+1. Extend the volume's partitions **from inside the instance using it**:
 
    ```sh
    lsblk
@@ -240,13 +245,21 @@ Refer [Modify an Amazon EBS volume using Elastic Volumes operations] and
    sudo growpart '/dev/xvda' '1'     # xen
    ```
 
-1. Extend the volume's file system from inside the instance using it:
+1. Extend the volume's file system **from inside the instance using it**:
 
    ```sh
    sudo xfs_growfs -d '/'           # xfs
    sudo resize2fs '/dev/nvme0n1p1'  # ext4 on nitro
    sudo resize2fs '/dev/xvda1'      # ext4 on xen
    ```
+
+After modifying a volume, one must wait at least **six hours** and ensure that the volume is in the `in-use` or
+`available` states before one can modify the same volume.
+
+Modifying the volume can take from a few minutes to a few hours, depending on the changes being applied, and it does
+**not** always scale linearly.<br/>
+A volume of 1 TiB in size can typically take up to six hours to be modified, but it could take 24 hours or longer in
+certain situations.
 
 ### Migrate `gp2` volumes to `gp3`
 
@@ -255,9 +268,16 @@ See also [Hands-on Guide: How to migrate from gp2 to gp3 volumes and lower AWS c
 It is **strongly advised** to take a snapshot of volumes before changing their type.
 
 ```sh
+aws ec2 modify-volume --volume-id 'vol-0123456789abcdef0' --volume-type 'gp3'
+
+# Do it for all volumes that are currently of type 'gp2'
 aws ec2 describe-volumes --filters "Name=volume-type,Values=gp2" --query 'Volumes[].VolumeId' --output 'text' \
 | xargs -pn '1' aws ec2 modify-volume --volume-type 'gp3' --volume-id
 ```
+
+If changing the volume type from `gp2` to `gp3` **without** specifying IOPS or throughput performance, EBS
+automatically provisions either equivalent performance to that of the source `gp2` volume, or the baseline `gp3`
+performance, whichever is higher.
 
 ## Further readings
 
