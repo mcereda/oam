@@ -132,8 +132,13 @@ journalctl --no-full
 # Print everything.
 journalctl -a
 
+# Rotate journal files.
+# Marks the journal logs currently active as archive, and creates fresh new logs.
+sudo journalctl --rotate
+
 # Show current logs disk usage.
 journalctl --disk-usage
+sudo du -sh '/var/log/journal'
 
 # Delete old logs.
 sudo journalctl --vacuum-size='1G'
@@ -324,6 +329,7 @@ Restart the `systemd-resolved` service to apply the new settings.
 - [Suspend and hibernate]
 - [Changing DNS with systemd-resolved]
 - [systemctl Commands: Restart, Reload, and Stop Service]
+- [How to Clear Systemd Journal Logs]
 
 <!--
   Reference
@@ -335,6 +341,7 @@ Restart the `systemd-resolved` service to apply the new settings.
 
 <!-- Others -->
 [changing dns with systemd-resolved]: https://notes.enovision.net/linux/changing-dns-with-resolve
+[How to Clear Systemd Journal Logs]: https://linuxhandbook.com/clear-systemd-journal-logs/
 [how to disable systemd-resolved in ubuntu]: https://askubuntu.com/questions/907246/how-to-disable-systemd-resolved-in-ubuntu
 [how to set hostname using hostnamectl command?]: https://linuxhint.com/set-hostname-using-hostnamectl-command/
 [how to set time, timezone and synchronize system clock using timedatectl command]: https://www.tecmint.com/set-time-timezone-and-synchronize-time-using-timedatectl-command/
