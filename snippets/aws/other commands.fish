@@ -431,6 +431,9 @@ aws kms list-aliases --query 'Aliases[?AliasName.contains(@,`prod`)]|[*].{"Alias
 # Names are case-insensitive and will be shown as lowercase.
 ###
 
+aws rds describe-db-instances --db-instance-identifier 'some-test' --output 'yaml' \
+	--query 'DBInstances[].{"DBInstanceStatus":DBInstanceStatus,"PendingModifiedValues":PendingModifiedValues}'
+
 aws rds start-export-task \
 	--export-task-identifier 'db-finalSnapshot-2024' \
 	--source-arn 'arn:aws:rds:eu-west-1:012345678901:snapshot:db-prod-final-2024' \
@@ -485,7 +488,7 @@ aws s3 cp 's3://my-first-bucket/test.txt' 's3://my-other-bucket/'
 aws s3api list-objects-v2 --bucket 'backup'
 aws s3api list-objects-v2 --bucket 'backup' --query "Contents[?LastModified>='2022-01-05T08:05:37+00:00'].Key"
 
-aws s3api list-buckets --output 'text' --query 'Buckets[].Name' | xargs -n '1' aws s3api list-multipart-uploads --bucket
+aws s3api list-buckets --output 'text' --query 'Buckets[].Name' | xargs -n1 aws s3api list-multipart-uploads --bucket
 aws --profile 'someProfile' s3api head-bucket --bucket 'someBucket'
 
 
@@ -494,11 +497,19 @@ aws --profile 'someProfile' s3api head-bucket --bucket 'someBucket'
 # ------------------
 ###
 
+# List secrets
+aws secretsmanager list-secrets
+
+# Create secrets
 aws secretsmanager create-secret --name 'TestSecretFromFile' --secret-string 'file://mycreds.json'
 aws secretsmanager create-secret \
 	--name 'MyTestSecret' --description 'A test secret created with the CLI.' \
-	--secret-string '{"user":"diegor","password":"EXAMPLE-PASSWORD"}' \
+	--secret-string '{"user":"diego","password":"EXAMPLE-PASSWORD"}' \
 	--tags '[{"Key": "FirstTag", "Value": "FirstValue"}, {"Key": "SecondTag", "Value": "SecondValue"}]'
+
+# Retrieve secrets
+aws secretsmanager get-secret-value --secret-id 'prod/ecr/pullthroughcache/dockerhub'
+aws secretsmanager get-secret-value --secret-id 'dev/db/master' --output 'text' --query 'SecretString' | jq '.' -
 
 
 ###
