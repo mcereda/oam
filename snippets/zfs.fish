@@ -61,7 +61,7 @@ zdb -S 'rpool'
 ###
 # File Systems
 # --------------------------------------
-# data set = file system
+# dataset = file system
 ###
 
 # List available datasets
@@ -87,3 +87,7 @@ zfs snapshot 'vault/good_memories@2024-12-31'
 
 # Check key parameters are fine
 zfs get -r checksum,compression,readonly,canmount 'tank'
+
+# Delete datasets
+zfs destroy 'vault/good_memories@2024-12-31'  # snapshot
+zfs destroy 'vault/good_memories'             # filesystem
