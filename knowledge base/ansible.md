@@ -1760,6 +1760,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 - [How to run Ansible with_fileglob in alphabetical order?]
 - [Ansible v2.14 CHANGELOG]
 - [How can I pass variable to ansible playbook in the command line?]
+- [Ansible Map Examples - Filter List and Dictionaries]
 
 <!--
   Reference
@@ -1815,6 +1816,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 <!-- Others -->
 [6 ways to speed up ansible playbook execution]: https://wearenotch.com/speed-up-ansible-playbook-execution/
 [ansible - how to remove an item from a list?]: https://stackoverflow.com/questions/40927792/ansible-how-to-remove-an-item-from-a-list#40927834
+[Ansible Map Examples - Filter List and Dictionaries]: https://www.middlewareinventory.com/blog/ansible-map/
 [ansible roles: basics, creating & using]: https://spacelift.io/blog/ansible-roles
 [ansible vault tutorial]: https://piyops.com/ansible-vault-tutorial
 [ansible vault with awx]: https://medium.com/t%C3%BCrk-telekom-bulut-teknolojileri/ansible-vault-with-awx-80b603617798
@@ -1824,6 +1826,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [Easy things you can do to speed up ansible]: https://mayeu.me/post/easy-things-you-can-do-to-speed-up-ansible/
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
 [Handling secrets in your Ansible playbooks]: https://www.redhat.com/sysadmin/ansible-playbooks-secrets
+[Hide sensitive data in Ansible verbose logs]: https://harshanu.space/en/tech/ansible-redact/
 [how can i hide skipped tasks output in ansible]: https://stackoverflow.com/questions/39189549/how-can-i-hide-skipped-tasks-output-in-ansible#76147924
 [how can i pass variable to ansible playbook in the command line?]: https://stackoverflow.com/questions/30662069/how-can-i-pass-variable-to-ansible-playbook-in-the-command-line#30662156
 [how to append to lists]: https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
@@ -1853,4 +1856,3 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [working with versions]: https://docs.ansible.com/ansible/latest/collections/community/general/docsite/filter_guide_working_with_versions.html
 [yes and no, true and false]: https://chronicler.tech/red-hat-ansible-yes-no-and/
 [zuul]: https://zuul-ci.org/
-[Hide sensitive data in Ansible verbose logs]: https://harshanu.space/en/tech/ansible-redact/

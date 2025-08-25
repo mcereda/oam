@@ -628,16 +628,34 @@
         seconds: 60
     - name: EC2-specific operations
       # Notice: tasks using the 'ec2_instance' module might create a new instance even if older ones exist from a
-      # different run, but return the *old* instance's ID and information.
-      # This seems to be an issue with how the module filters EC2 instances out when deciding whether existing
-      # instances match and should be altered. By default, instances are filtered by 'Name' tag, base AMI, state, and
-      # subnet ID. Refer the module's 'filters' property.
+      #   different run, but return the *old* instance's ID and information.
+      #   This seems to be an issue with how the module filters EC2 instances out when deciding whether existing
+      #   instances match and should be altered. By default, instances are filtered by 'Name' tag, base AMI, state, and
+      #   subnet ID. Refer the module's 'filters' property.
+      # `filters` accepts inputs as the API would. Refer
+      #   <https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html>
+      # ALERT: `filters` takes precedence over `instance_ids` - do *not* do something like
+      #   amazon.aws.ec2_instance:
+      #     instance_ids: i-0123456789abcdef0
+      #     filters:
+      #       instance-state-name: running
+      #     state: terminated
+      #   as it will terminate *all* running instances, not only the specified instance *if* running.
+      #   The AWS API, instead, work as expected as of 2025-08-25.
       block:
-        - name: Get running instances with 'K8S' as the 'Application' tag
+        - name: Get information about running instances with 'K8S' as the 'Application' tag
           amazon.aws.ec2_instance_info:
             filters:
-              "tag:Application": K8S
+              tag:Application: K8S
               instance-state-name: ["running"]
+        - name: Start stopped PG dumper instances
+          tags: dumper
+          amazon.aws.ec2_instance:
+            filters:
+              instance-state-name: stopped
+              tag:Application: Postgres
+              tag:Component: Dumper
+            state: started
         - name: Clone EC2 instances
           vars:
             source_instance_id: i-0123456789abcdef0
@@ -869,10 +887,11 @@
         ansible_remote_tmp: /tmp/.ansible-ssm-user/tmp
         ansible_async_dir: /tmp/.ansible-ssm-user/async
   tasks:
-    - name: Start the PG dumper instance
+    - name: Start stopped PG dumper instances
       tags: dumper
       amazon.aws.ec2_instance:
         filters:
+          instance-state-name: stopped
           tag:Application: Postgres
           tag:Component: Dumper
         state: started
