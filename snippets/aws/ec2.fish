@@ -1,17 +1,20 @@
 #!/usr/bin/env fish
 
-# Get Name and Description of all AMIs by Amazon for arm64 that are in the 'available' state
-# and which name starts for 'al2023-ami-'
+# Get Name and Description of all AMIs matching the filters
 aws ec2 describe-images --output 'yaml' \
 	--owners 'amazon' \
 	--filters \
-		'Name=architecture,Values=['arm64']' \
-		'Name=state,Values=['available']' \
-	--query '
-		Images[]
-		.{"Name":@.Name,"Description":@.Description}
-	' \
-| yq '.[]|select(.Name|test("^al2023-ami-"))' -
+		"Name=state,Values=['available']" \
+		"Name=architecture,Values=['arm64']" \
+		"Name=name,Values=['al2023-ami-*']" \
+	--query 'Images[].{"Name":@.Name,"Description":@.Description}'
+aws ec2 describe-images --output 'yaml' \
+	--owners 'amazon' 'aws-marketplace' \
+	--filters \
+		"Name=state,Values=['available']" \
+		"Name=architecture,Values=['x86_64']" \
+		"Name=name,Values=['ubuntu/images/*-noble-*']" \
+	--query 'Images[].{"Name":@.Name,"Description":@.Description}'
 
 # Show information about AMIs
 aws ec2 describe-images --image-ids 'ami-01234567890abcdef'
@@ -125,8 +128,8 @@ aws ec2 describe-instances --instance-ids 'i-0123456789abcdef0' --output 'json' 
 # Start stopped instances
 # Requires the 'ec2:StartInstances' permission for the instances
 # Also requires the 'kms:GenerateDataKeyWithoutPlaintext' and 'kms:CreateGrant' permissions for the keys used by the
-#   instances, if any.
-#   See https://docs.aws.amazon.com/ebs/latest/userguide/how-ebs-encryption-works.html#how-ebs-encryption-works-encrypted-snapshot
+# instances, if any.
+# See https://docs.aws.amazon.com/ebs/latest/userguide/how-ebs-encryption-works.html#how-ebs-encryption-works-encrypted-snapshot
 aws ec2 start-instances --instance-ids 'i-0123456789abcdef0'
 
 # Stop started instances

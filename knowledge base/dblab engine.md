@@ -7,6 +7,12 @@ Can be self-hosted.<br/>
 The [website] hosts the SaaS version.
 
 1. [TL;DR](#tldr)
+1. [Setup](#setup)
+   1. [Configure the storage to enable thin cloning](#configure-the-storage-to-enable-thin-cloning)
+   1. [Prepare the database data directory](#prepare-the-database-data-directory)
+   1. [Launch DBLab server](#launch-dblab-server)
+   1. [Clean up](#clean-up)
+1. [Automatically full refresh data without downtime](#automatically-full-refresh-data-without-downtime)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -89,6 +95,301 @@ Container images for the _Community_ edition are available at <https://gitlab.co
 Specialized images for only the _Standard_ and _Enterprise_ editions are available at
 <https://gitlab.com/postgres-ai/se-images/container_registry/>.
 
+## Setup
+
+Refer [How to install DBLab manually].
+
+> [!tip]
+> Prefer using PostgresAI Console or AWS Marketplace when installing DBLab in _Standard_ or _Enterprise_ Edition.
+
+Requirements:
+
+- [Docker Engine] must be installed, and usable by the user running DBLab.
+- One or more extra disks or partitions to store all DBLab Engine's data.
+
+  > [!tip]
+  > Prefer dedicating extra disks to the data for better performance.<br/>
+  > The Engine can also use two or more disks or partitions to [automatically full refresh data without downtime].
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  ```sh
+  $ sudo lsblk
+  NAME    MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+  ...
+  nvme0n1     259:0    0    8G  0 disk
+  └─nvme0n1p1 259:1    0    8G  0 part /
+  nvme1n1     259:2    0   777G  0 disk
+
+  $ export DBLAB_DISK='/dev/nvme1n1'
+  ```
+
+  </details>
+
+Procedure:
+
+1. [Configure the storage to enable thin cloning].
+1. [Prepare the database data directory].
+1. [Launch DBLab server].
+
+### Configure the storage to enable thin cloning
+
+> [!tip]
+> [ZFS] is the recommended way to enable thin cloning in Database Lab.
+>
+> DBLab also supports LVM volumes, but this method:
+>
+> - Has much less flexible disk space consumption.
+> - Risks clones to be destroyed when executing massive maintenance operations on it.
+> - Does not work with multiple snapshots, forcing clones to **always** use the _most recent_ version of the data.
+
+<details style='padding: 0 0 0 1rem'>
+  <summary>ZFS pool</summary>
+
+1. Install [ZFS].
+
+   ```sh
+   sudo apt-get install 'zfsutils-linux'
+   ```
+
+1. Create the pool:
+
+   ```sh
+   sudo zpool create \
+     -O 'compression=on' \
+     -O 'atime=off' \
+     -O 'recordsize=128k' \
+     -O 'logbias=throughput' \
+     -m '/var/lib/dblab/dblab_pool' \
+     'dblab_pool' \
+     "${DBLAB_DISK}"
+   ```
+
+   > [!tip]
+   > When planning to set `physicalRestore.sync.enabled: true` in DBLab' configuration, consider lowering the value
+   > of the `recordsize` option.
+   >
+   > <details style='padding: 0 0 1rem 1rem'>
+   >
+   > Using `recordsize=128k` might provide better compression ratio and performance of massive IO-bound operations,
+   > like the creation of an index, but worse performance of WAL replay, causing the lag to be higher.<br/>
+   > Vice versa, using `recordsize=8k` improves the performance of WAL replay, but lowers the compression ratio and
+   > causes longer duration of index creation.
+   >
+   > </details>
+
+1. Check the creation results:
+
+   ```sh
+   $ sudo zfs list
+   NAME         USED  AVAIL  REFER  MOUNTPOINT
+   dblab_pool   106K  777G    24K  /var/lib/dblab/dblab_pool
+
+   $ sudo lsblk
+   NAME      MAJ:MIN  RM  SIZE RO TYPE MOUNTPOINT
+   ...
+   nvme0n1     259:0    0     8G  0 disk
+   └─nvme0n1p1 259:1    0     8G  0 part /
+   nvme1n1     259:0    0   777G  0 disk
+   ├─nvme1n1p1 259:3    0   777G  0 part
+   └─nvme1n1p9 259:4    0     8M  0 part
+   ```
+
+</details>
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>LVM volume</summary>
+
+1. Install LVM2:
+
+   ```sh
+   sudo apt-get install -y 'lvm2'
+   ```
+
+1. Create an LVM volume:
+
+   ```sh
+   # Create Physical Volume and Volume Group
+   sudo pvcreate "${DBLAB_DISK}"
+   sudo vgcreate 'dblab_vg' "${DBLAB_DISK}"
+
+   # Create Logical Volume and filesystem
+   sudo lvcreate -l '10%FREE' -n 'pool_lv' 'dblab_vg'
+   sudo mkfs.ext4 '/dev/dblab_vg/pool_lv'
+
+   # Mount Database Lab pool
+   sudo mkdir -p '/var/lib/dblab/dblab_vg-pool_lv'
+   sudo mount '/dev/dblab_vg/pool_lv' '/var/lib/dblab/dblab_vg-pool_lv'
+
+   # Bootstrap LVM snapshots so they could be used inside Docker containers
+   sudo lvcreate --snapshot --extents '10%FREE' --yes --name 'dblab_bootstrap' 'dblab_vg/pool_lv'
+   sudo lvremove --yes 'dblab_vg/dblab_bootstrap'
+   ```
+
+> [!important]
+> The logical volume size must be defined at volume creation time.<br/>
+> By default, it is suggested to allocate 10% of the available system memory. If the volume size exceeds the allocated
+> memory, the volume will be destroyed and potentially lead to data loss.<br/>
+> To prevent volumes from being destroyed, consider enabling the LVM auto-extend feature.
+
+Enable the auto-extend feature by updating the LVM configuration with the following options:
+
+- `snapshot_autoextend_threshold`: auto-extend _snapshot_ volumes when their usage exceed the specified percentage.
+- `snapshot_autoextend_percent`: auto-extend _snapshot_ volumes by the specified percentage of the available space
+  once their usage exceeds the threshold.
+
+```sh
+sudo sed -i 's/snapshot_autoextend_threshold.*/snapshot_autoextend_threshold = 70/g' '/etc/lvm/lvm.conf'
+sudo sed -i 's/snapshot_autoextend_percent.*/snapshot_autoextend_percent = 20/g' '/etc/lvm/lvm.conf'
+```
+
+</details>
+
+### Prepare the database data directory
+
+The DBLab Engine server needs data to use as source.<br/>
+There are 3 options:
+
+- Use a _generated database_ by generating a synthetic database for testing purposes.
+- Create a _physical_ copy of an existing database using _physical_ methods such as `pg_basebackup`.<br/>
+  See also [PostgreSQL backup].
+- Perform a _logical_ copy of an existing database using _logical_ methods like dumping it and restoring the dump in
+  the data directory.
+
+<details style='padding: 0 0 0 1rem'>
+  <summary>Generated database</summary>
+
+Preferred when one doesn't have an existing database for testing.
+
+1. Generate some synthetic database in the `PGDATA` directory (located at `/var/lib/dblab/dblab_pool/data` by default).
+   A simple way of doing this is to use `pgbench`.<br/>
+   With scale factor `-s 100`, the database will occupy ~1.4 GiB.
+
+   ```sh
+   sudo docker run --detach \
+     --name 'dblab_pg_initdb' --label 'dblab_sync' \
+     --env 'PGDATA=/var/lib/postgresql/pgdata' --env 'POSTGRES_HOST_AUTH_METHOD=trust' \
+     --volume '/var/lib/dblab/dblab_pool/data:/var/lib/postgresql/pgdata' \
+     'postgres:15-alpine'
+   sudo docker exec -it 'dblab_pg_initdb' psql -U 'postgres' -c 'create database test'
+   sudo docker exec -it 'dblab_pg_initdb' pgbench -U 'postgres' -i -s '100' 'test'
+   sudo docker stop 'dblab_pg_initdb'
+   sudo docker rm 'dblab_pg_initdb'
+   ```
+
+1. Copy the contents of the configuration file example `config.example.logical_generic.yml` from the Database Lab
+   repository to `~/.dblab/engine/configs/server.yml`.
+
+   ```sh
+   mkdir -p "$HOME/.dblab/engine/configs"
+   curl -fsSL \
+     --url 'https://gitlab.com/postgres-ai/database-lab/-/raw/v4.0.0/engine/configs/config.example.logical_generic.yml' \
+     --output "$HOME/.dblab/engine/configs/server.yml"
+   ```
+
+1. Edit the following options in the configuration file:
+
+   - Set `server:verificationToken`.<br/>
+     It will be used to authorize API requests to the DBLab Engine.
+   - Remove the `logicalDump` section completely.
+   - Remove the `logicalRestore` section completely.
+   - Leave `logicalSnapshot` as is.
+   - If the PostgreSQL major version is **not** 17, set the proper image tag version in `databaseContainer:dockerImage`.
+
+</details>
+
+<details style='padding: 0 0 0 1rem'>
+  <summary>Physical copy</summary>
+
+TODO
+
+</details>
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Logical copy</summary>
+
+Copy the existing database's data to the `/var/lib/dblab/dblab_pool/data` directory on the DBLab server.<br/>
+This step also known as _thick cloning_, and it only needs to be completed once.
+
+1. Copy the contents of the configuration file example `config.example.logical_generic.yml` from the Database Lab
+   repository to `~/.dblab/engine/configs/server.yml`.
+
+   ```sh
+   mkdir -p "$HOME/.dblab/engine/configs"
+   curl -fsSL \
+     --url 'https://gitlab.com/postgres-ai/database-lab/-/raw/v4.0.0/engine/configs/config.example.logical_generic.yml' \
+     --output "$HOME/.dblab/engine/configs/server.yml"
+   ```
+
+1. Edit the following options in the configuration file:
+
+   - Set `server:verificationToken`.<br/>
+     It will be used to authorize API requests to the DBLab Engine.
+   - Set the connection options in `retrieval:spec:logicalDump:options:source:connection`:
+     - `host`: database server host
+     - `port`: database server port
+     - `dbname`: database name to connect to
+     - `username`: database user name
+     - `password`: database master password.<br/>
+       This can be also set as the `PGPASSWORD` environment variable, and passed to the container using the `--env`
+       option of `docker run`.
+   - If the PostgreSQL major version is **not** 17, set the proper image tag version in `databaseContainer:dockerImage`.
+
+</details>
+
+### Launch DBLab server
+
+```sh
+sudo docker run --privileged --detach --restart on-failure \
+  --name 'dblab_server' --label 'dblab_control' \
+  --publish '127.0.0.1:2345:2345' \
+  --volume '/var/run/docker.sock:/var/run/docker.sock' \
+  --volume '/var/lib/dblab:/var/lib/dblab/:rshared' \
+  --volume "$HOME/.dblab/engine/configs:/home/dblab/configs" \
+  --volume "$HOME/.dblab/engine/meta:/home/dblab/meta" \
+  --volume "$HOME/.dblab/engine/logs:/home/dblab/logs" \
+  --volume '/sys/kernel/debug:/sys/kernel/debug:rw' \
+  --volume '/lib/modules:/lib/modules:ro' \
+  --volume '/proc:/host_proc:ro' \
+  --env 'DOCKER_API_VERSION=1.39' \
+  'postgresai/dblab-server:4.0.0'
+```
+
+> [!important]
+> With `--publish 127.0.0.1:2345:2345`, **only local connections** will be allowed.<br/>
+> To allow external connections, prepend proxies like NGINX or Envoy (preferred) or change the parameter to
+> `--publish 2345:2345` to listen to all available network interfaces.
+
+### Clean up
+
+```sh
+# Stop and remove all Docker containers
+sudo docker ps -aq | xargs --no-run-if-empty sudo docker rm -f
+
+# Remove all Docker images
+sudo docker images -q | xargs --no-run-if-empty sudo docker rmi
+
+# Clean up the data directory
+sudo rm -rf '/var/lib/dblab/dblab_pool/data'/*
+
+# Remove the dump directory
+sudo umount '/var/lib/dblab/dblab_pool/dump'
+sudo rm -rf '/var/lib/dblab/dblab_pool/dump'
+
+# Start from the beginning by destroying the ZFS storage pool
+sudo zpool destroy 'dblab_pool'
+```
+
+## Automatically full refresh data without downtime
+
+Refer [Automatic full refresh data from a source].
+
+DBLab Engine can use two or more ZFS pools or LVM logical volumes to perform an automatic full refresh on schedule and
+without downtime.
+
+> [!tip]
+> Dedicate a disk or a partition to each pool or logical volume to avoid overloading a single disk.
+
 ## Further readings
 
 - [Website]
@@ -99,7 +400,7 @@ Specialized images for only the _Standard_ and _Enterprise_ editions are availab
 ### Sources
 
 - [DeepWiki][deepwiki postgres-ai/database-lab-engine]
-- [Database Lab Engine configuration reference]
+- [DBLab Engine configuration reference]
 - [Installation guide for DBLab Community Edition][how to install dblab manually]
 
 <!--
@@ -108,15 +409,24 @@ Specialized images for only the _Standard_ and _Enterprise_ editions are availab
   -->
 
 <!-- In-article sections -->
+[Automatically full refresh data without downtime]: #automatically-full-refresh-data-without-downtime
+[Configure the storage to enable thin cloning]: #configure-the-storage-to-enable-thin-cloning
+[Launch DBLab server]: #launch-dblab-server
+[Prepare the database data directory]: #prepare-the-database-data-directory
+
 <!-- Knowledge base -->
 [dblab]: dblab.md
+[Docker engine]: docker.md
+[PostgreSQL backup]: postgresql#backup
+[ZFS]: zfs.md
 
 <!-- Files -->
 <!-- Upstream -->
-[database lab engine configuration reference]: https://postgres.ai/docs/reference-guides/database-lab-engine-configuration-reference
-[Documentation]: https://postgres.ai/docs/
-[how to install dblab manually]: https://postgres.ai/docs/how-to-guides/administration/install-dle-manually
+[Automatic full refresh data from a source]: https://v2.postgres.ai/docs/dblab-howtos/administration/logical-full-refresh#automatic-full-refresh-data-from-a-source
 [Codebase]: https://gitlab.com/postgres-ai/database-lab
+[DBLab Engine configuration reference]: https://postgres.ai/docs/reference-guides/database-lab-engine-configuration-reference
+[Documentation]: https://postgres.ai/docs/
+[How to install DBLab manually]: https://postgres.ai/docs/how-to-guides/administration/install-dle-manually
 [Website]: https://postgres.ai/
 
 <!-- Others -->
