@@ -276,6 +276,14 @@ SELECT SYSTEM$ALLOWLIST();
 -- Get the Snowflake account's information necessary to facilitate the self-service configuration of private
 -- connectivity to the Snowflake service or Snowflake internal stages.
 SELECT SYSTEM$GET_PRIVATELINK_CONFIG();
+
+
+-- Kill queries
+-- in order of roughness
+ALTER USER … ABORT ALL QUERIES
+ALTER WAREHOUSE … ABORT ALL QUERIES
+SELECT SYSTEM$CANCEL_QUERY('query_id');
+SELECT SYSTEM$CANCEL_ALL_QUERIES(123456789);  -- use session id
 ```
 
 </details>
