@@ -296,6 +296,15 @@
       {{ 'ansible_job_id' | extract(module_output | regex_search('{.*}') | from_json) }}
     base64_encoded_string: "{{ 'some string' | ansible.builtin.b64encode }}"
     base64_decoded_string: "{{ 'c29tZSBzdHJpbmc=' | ansible.builtin.b64decode }}"
+    csv_to_command_options: >-
+      {{
+        [
+          pg_shared_preload_libraries|split(',')|reject('equalto','pgaudit')|map('regex_replace','^','--extension='),
+          '--no-publications',
+          '--no-subscriptions',
+          '--exclude-schema=transient_views',
+        ] | flatten | unique
+      }}
 
 - name: Return data types
   tags:
