@@ -24,7 +24,8 @@ vim '/etc/pganalyze-collector.conf' && pganalyze-collector --test --reload \
 
 ## Further readings
 
-- [Main repository]
+- [PostgreSQL]
+- [Codebase]
 - [Documentation]
 
 ### Sources
@@ -36,9 +37,11 @@ vim '/etc/pganalyze-collector.conf' && pganalyze-collector --test --reload \
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[PostgreSQL]: README.md
+
 <!-- Files -->
 <!-- Upstream -->
-[documentation]: https://pganalyze.com/docs/collector/
-[main repository]: https://github.com/pganalyze/collector
+[Codebase]: https://github.com/pganalyze/collector
+[Documentation]: https://pganalyze.com/docs/collector/
 
 <!-- Others -->

@@ -188,6 +188,7 @@ Periodic status updates are sent to the source DB to maintain the replication's 
 
 ## Further readings
 
+- [PostgreSQL]
 - [Website]
 - [Main repository]
 - [Transformation rules]
@@ -206,7 +207,8 @@ Periodic status updates are sent to the source DB to maintain the replication's 
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[nats]: nats.md
+[NATS]: ../nats.md
+[PostgreSQL]: README.md
 
 <!-- Files -->
 <!-- Upstream -->

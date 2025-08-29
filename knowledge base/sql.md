@@ -34,7 +34,7 @@ They reference either the primary key or another `UNIQUE` constraint of the refe
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [mysql]: mysql.md
-[postgresql]: postgresql.md
+[postgresql]: postgresql/README.md
 
 <!-- Files -->
 <!-- Upstream -->

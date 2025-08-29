@@ -1,12 +1,6 @@
-# Percona toolkit
+# pgAdmin
 
-> [!caution]
-> TODO
-
-Intro
-
-<!-- Remove this line to uncomment if used
-## Table of contents <!-- omit in toc -->
+Browser-based management tool for [PostgreSQL].
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -14,15 +8,15 @@ Intro
 
 ## TL;DR
 
-<!-- Uncomment if used
 <details>
   <summary>Setup</summary>
 
 ```sh
+brew install --cask 'pgadmin4'
+docker pull 'dpage/pgadmin4'
 ```
 
 </details>
--->
 
 <!-- Uncomment if used
 <details>
@@ -46,10 +40,9 @@ Intro
 
 ## Further readings
 
+- [PostgreSQL]
 - [Website]
 - [Codebase]
-- [MySQL]
-- [PostgreSQL]
 
 ### Sources
 
@@ -62,13 +55,12 @@ Intro
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[MySQL]: mysql.md
-[PostgreSQL]: postgresql/README.md
+[PostgreSQL]: README.md
 
 <!-- Files -->
 <!-- Upstream -->
-[Codebase]: https://github.com/percona/percona-toolkit
-[Documentation]: https://docs.percona.com/percona-toolkit/
-[Website]: https://www.percona.com/percona-toolkit
+[codebase]: https://github.com/pgadmin-org/pgadmin4
+[documentation]: https://www.pgadmin.org/docs/
+[website]: https://www.pgadmin.org/
 
 <!-- Others -->

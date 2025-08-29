@@ -1,4 +1,4 @@
-# Percona toolkit
+# pg_restore
 
 > [!caution]
 > TODO
@@ -46,10 +46,9 @@ Intro
 
 ## Further readings
 
-- [Website]
-- [Codebase]
-- [MySQL]
 - [PostgreSQL]
+- [pg_dump]
+- [pg_dumpall]
 
 ### Sources
 
@@ -62,13 +61,12 @@ Intro
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[MySQL]: mysql.md
-[PostgreSQL]: postgresql/README.md
+[pg_dump]: pg_dump.md
+[pg_dumpall]: pg_dumpall.md
+[PostgreSQL]: README.md
 
 <!-- Files -->
 <!-- Upstream -->
-[Codebase]: https://github.com/percona/percona-toolkit
-[Documentation]: https://docs.percona.com/percona-toolkit/
-[Website]: https://www.percona.com/percona-toolkit
+[Documentation]: https://www.postgresql.org/docs/current/app-pgrestore.html
 
 <!-- Others -->

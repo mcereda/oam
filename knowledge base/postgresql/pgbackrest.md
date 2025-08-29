@@ -151,6 +151,7 @@ pgbackrest … --stanza 'prod-app' stanza-create
 
 ## Further readings
 
+- [PostgreSQL]
 - [Website]
 - [Codebase]
 
@@ -166,6 +167,8 @@ pgbackrest … --stanza 'prod-app' stanza-create
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[PostgreSQL]: README.md
+
 <!-- Files -->
 <!-- Upstream -->
 [Codebase]: https://github.com/pgbackrest/pgbackrest
