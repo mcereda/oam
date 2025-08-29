@@ -51,7 +51,7 @@ grant ALL on db.* to 'username'@'127.0.0.1';
   -->
 
 <!-- Knowledge base -->
-[postgresql]: postgresql.md
+[postgresql]: postgresql/README.md
 [sql]: sql.md
 
 <!-- Others -->

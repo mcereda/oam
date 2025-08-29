@@ -1,6 +1,12 @@
-# pgAdmin
+# pg_dump
 
-Browser-based management tool for [PostgreSQL].
+> [!caution]
+> TODO
+
+Intro
+
+<!-- Remove this line to uncomment if used
+## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -8,15 +14,15 @@ Browser-based management tool for [PostgreSQL].
 
 ## TL;DR
 
+<!-- Uncomment if used
 <details>
   <summary>Setup</summary>
 
 ```sh
-brew install --cask 'pgadmin4'
-docker pull 'dpage/pgadmin4'
 ```
 
 </details>
+-->
 
 <!-- Uncomment if used
 <details>
@@ -40,13 +46,14 @@ docker pull 'dpage/pgadmin4'
 
 ## Further readings
 
-- [Website]
-- [Codebase]
 - [PostgreSQL]
+- [pg_dumpall]
+- [pg_restore]
 
 ### Sources
 
 - [Documentation]
+- [A Complete Guide to pg_dump With Examples, Tips, and Tricks]
 
 <!--
   Reference
@@ -55,12 +62,13 @@ docker pull 'dpage/pgadmin4'
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[postgresql]: postgresql.md
+[pg_dumpall]: pg_dumpall.md
+[pg_restore]: pg_restore.md
+[PostgreSQL]: README.md
 
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/pgadmin-org/pgadmin4
-[documentation]: https://www.pgadmin.org/docs/
-[website]: https://www.pgadmin.org/
+[Documentation]: https://www.postgresql.org/docs/current/app-pgdump.html
 
 <!-- Others -->
+[A Complete Guide to pg_dump With Examples, Tips, and Tricks]: https://www.dbvis.com/thetable/a-complete-guide-to-pg-dump-with-examples-tips-and-tricks/

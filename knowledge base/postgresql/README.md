@@ -383,21 +383,21 @@ See also [yugabyte/yugabyte-db].
   -->
 
 <!-- Knowledge base -->
-[mysql]: mysql.md
-[Percona toolkit]: percona%20toolkit.md
+[mysql]: ../mysql.md
+[Percona toolkit]: ../percona%20toolkit.md
+[pg_dump]: pg_dump.md
+[pg_dumpall]: pg_dumpall.md
 [pg_flo]: pg_flo.md
+[pg_restore]: pg_restore.md
 [pgadmin]: pgadmin.md
 [pgBackRest]: pgbackrest.md
-[sql]: sql.md
+[sql]: ../sql.md
 
 <!-- Upstream -->
 [create function]: https://www.postgresql.org/docs/current/sql-createfunction.html
 [database connection control functions]: https://www.postgresql.org/docs/current/libpq-connect.html
 [docker image]: https://github.com/docker-library/docs/blob/master/postgres/README.md
 [logical decoding concepts]: https://www.postgresql.org/docs/current/logicaldecoding-explanation.html
-[pg_dump]: https://www.postgresql.org/docs/current/app-pgdump.html
-[pg_dumpall]: https://www.postgresql.org/docs/current/app-pg-dumpall.html
-[pg_restore]: https://www.postgresql.org/docs/current/app-pgrestore.html
 [pg_settings]: https://www.postgresql.org/docs/current/view-pg-settings.html
 [psql]: https://www.postgresql.org/docs/current/app-psql.html
 [the password file]: https://www.postgresql.org/docs/current/libpq-pgpass.html
@@ -422,6 +422,6 @@ See also [yugabyte/yugabyte-db].
 [postgresql_anonymizer]: https://postgresql-anonymizer.readthedocs.io/en/stable/
 [postgresql: get member roles and permissions]: https://www.cybertec-postgresql.com/en/postgresql-get-member-roles-and-permissions/
 [postgresql: show all the privileges for a concrete user]: https://stackoverflow.com/questions/40759177/postgresql-show-all-the-privileges-for-a-concrete-user
+[what does grant usage on schema do exactly?]: https://stackoverflow.com/questions/17338621/what-does-grant-usage-on-schema-do-exactly
 [what is the pg_dump command for backing up a postgresql database?]: https://www.linkedin.com/advice/3/what-pgdump-command-backing-up-postgresql-ke2ef
 [yugabyte/yugabyte-db]: https://github.com/yugabyte/yugabyte-db
-[what does grant usage on schema do exactly?]: https://stackoverflow.com/questions/17338621/what-does-grant-usage-on-schema-do-exactly
