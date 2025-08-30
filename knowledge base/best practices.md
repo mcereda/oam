@@ -218,6 +218,7 @@ Listed in order of addition:
 - [Break Glass Explained: Why You Need It for Privileged Accounts]
 - [Keeping green]
 - [Why committing straight to main/master must be allowed]
+- [The harsh reality of good software - prime reacts]
 
 <!--
   Reference
@@ -272,6 +273,7 @@ Listed in order of addition:
 [the 10 commandments of navigating code reviews]: https://angiejones.tech/ten-commandments-code-reviews/
 [the 3-2-1 backup strategy]: https://www.backblaze.com/blog/the-3-2-1-backup-strategy/
 [the art of small pull requests]: https://essenceofcode.com/2019/10/29/the-art-of-small-pull-requests/
+[The harsh reality of good software - prime reacts]: https://www.youtube.com/watch?v=NiljDyzAOcI
 [the xy problem]: https://xyproblem.info/
 [thinking about lockdowns]: https://www.youtube.com/watch?v=SVmEXdGqO-s
 [trunk-based development: a comprehensive guide]: https://launchdarkly.com/blog/introduction-to-trunk-based-development/
