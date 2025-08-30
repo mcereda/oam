@@ -105,11 +105,11 @@ Refer [How to install DBLab manually].
 Requirements:
 
 - [Docker Engine] must be installed, and usable by the user running DBLab.
-- One or more extra disks or partitions to store all DBLab Engine's data.
+- One or more extra disks, or partitions, to dedicate to DBLab Engine's data.
 
   > [!tip]
   > Prefer dedicating extra disks to the data for better performance.<br/>
-  > The Engine can also use two or more disks or partitions to [automatically full refresh data without downtime].
+  > The Engine can use multiple ZFS pools (or LVM volumes) to [automatically full refresh data without downtime].
 
   <details style='padding: 0 0 1rem 1rem'>
 
@@ -388,12 +388,14 @@ DBLab Engine can use two or more ZFS pools or LVM logical volumes to perform an 
 without downtime.
 
 > [!tip]
-> Dedicate a disk or a partition to each pool or logical volume to avoid overloading a single disk.
+> Prefer dedicating an entire disk to each pool or logical volume.<br/>
+> This avoids overloading a single disk when syncing, and prevents the whole data failing should a disk fail.
 
 ## Further readings
 
 - [Website]
 - [Codebase]
+- [PostgreSQL]
 - [Documentation]
 - [`dblab`][dblab]
 
@@ -417,7 +419,8 @@ without downtime.
 <!-- Knowledge base -->
 [dblab]: dblab.md
 [Docker engine]: docker.md
-[PostgreSQL backup]: postgresql#backup
+[PostgreSQL]: postgresql/README.md
+[PostgreSQL backup]: postgresql/README.md#backup
 [ZFS]: zfs.md
 
 <!-- Files -->
