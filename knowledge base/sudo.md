@@ -7,7 +7,8 @@
 1. [Execute commands as a specific user](#execute-commands-as-a-specific-user)
 1. [Troubleshooting](#troubleshooting)
    1. [I modified a sudoers file manually, messed it up, and now I cannot use sudo anymore](#i-modified-a-sudoers-file-manually-messed-it-up-and-now-i-cannot-use-sudo-anymore)
-1. [Sources](#sources)
+1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -25,7 +26,8 @@ Defaults:
 Sudoers files use the Extended Backus-Naur Form (EBNF) grammar.
 
 Files in included directories are loaded in sorted lexical order.<br/>
-Files which name ends in `~` or contains `.` are skipped to avoid causing problems with package manager or temporary or backup files.
+Files which name ends in `~` or contains `.` are skipped to avoid causing problems with package manager or temporary or
+backup files.
 
 When multiple entries match for the same user, they are applied in order.<br/>
 Where there are multiple matches, the last match is used (which is not necessarily the most specific one).
@@ -99,7 +101,11 @@ try using another access method like `PolicyKit` and fix the file up:
 pkexec visudo -f '/etc/sudoers.d/michael'
 ```
 
-## Sources
+## Further readings
+
+- [`pkexec`][pkexec]
+
+### Sources
 
 - [How to modify an invalid sudoers file]
 - [sudo as another user with their environment]
@@ -107,9 +113,17 @@ pkexec visudo -f '/etc/sudoers.d/michael'
 - [Linux fundamentals: A to Z of a sudoers file]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
+<!-- In-article sections -->
+<!-- Knowledge base -->
+[pkexec]: pkexec.md
+
+<!-- Files -->
+<!-- Upstream -->
+<!-- Others -->
 <!-- Others -->
 [how to modify an invalid sudoers file]: https://askubuntu.com/questions/73864/how-to-modify-an-invalid-etc-sudoers-file
 [linux fundamentals: a to z of a sudoers file]: https://medium.com/kernel-space/linux-fundamentals-a-to-z-of-a-sudoers-file-a5da99a30e7f
