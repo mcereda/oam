@@ -53,6 +53,7 @@ Intro
 ### Sources
 
 - [Documentation]
+- [How to use pg_restore]
 
 <!--
   Reference
@@ -70,3 +71,4 @@ Intro
 [Documentation]: https://www.postgresql.org/docs/current/app-pgrestore.html
 
 <!-- Others -->
+[How to use pg_restore]: https://postgres.ai/docs/postgres-howtos/database-administration/backup-recovery/how-to-use-pg-restore
