@@ -178,7 +178,8 @@ SELECT * FROM entries_in_column('vendors','vendor_id');
 
 ## Backup
 
-PostgreSQL offers the `pg_dump` and `pg_dumpall` native client utilities to dump databases to files.<br/>
+PostgreSQL offers the [`pg_dump`][pg_dump] and [`pg_dumpall`][pg_dumpall] native client utilities to dump databases to
+files.<br/>
 They produce sets of SQL statements that can be executed to reproduce the original databases' object definitions and
 table data.
 
@@ -241,6 +242,7 @@ pg_dumpall … -g --no-role-passwords
 > </details>
 
 A list of common backup tools can be found in the [PostgreSQL Wiki][wiki], in the [Backup][wiki backup] page.<br/>
+See also [dimitri/pgcopydb].<br/>
 For the _limited_™ experience accrued until now, the TL;DR is:
 
 - Prefer [pg_dumpall], and eventually [pg_dump], for **logical** backups.<br/>
@@ -357,6 +359,7 @@ See also [yugabyte/yugabyte-db].
 - [How to Scale a Single-Server Database: A Guide to Distributed PostgreSQL]
 - [yugabyte/yugabyte-db]
 - [Logical Decoding Concepts]
+- [dimitri/pgcopydb]
 
 ### Sources
 
@@ -403,6 +406,7 @@ See also [yugabyte/yugabyte-db].
 [the password file]: https://www.postgresql.org/docs/current/libpq-pgpass.html
 [wiki]: https://wiki.postgresql.org/wiki/
 [wiki backup]: https://wiki.postgresql.org/wiki/Ecosystem:Backup
+[dimitri/pgcopydb]: https://github.com/dimitri/pgcopydb
 
 <!-- Others -->
 [an in-depth guide to postgres data masking with anonymizer]: https://thelinuxcode.com/postgresql-anonymizer-data-masking/
