@@ -25,7 +25,7 @@ pulumi install --reinstall
 
 pulumi pre
 pulumi pre --cwd 'observability' --diff
-pulumi up --suppress-outputs
+pulumi up --suppress-outputs --show-secrets
 
 # Get the URN (or other stuff) of resources that would be deleted
 pulumi preview --json | jq -r '.steps[]|select(.op=="delete").urn' -
@@ -139,7 +139,6 @@ pulumi up --target 'urn:pulumi:someStack::someProj::kubernetes:helm.sh/v4:Chart$
 
 # Import resources
 # Could use `--suppress-outputs --generate-code='false' --protect=false` for some
-pulumi import --file 'import.json'
 pulumi import 'aws:alb/listener:Listener' 'pihole' 'arn:aws:elasticloadbalancing:us-west-2:012345678901:listener/app/pihole/0123456789abcdef/0123456789abcdef'
 pulumi import 'aws:chatbot/slackChannelConfiguration:SlackChannelConfiguration' 'alarms' 'arn:aws:chatbot::012345678901:chat-configuration/slack-channel/alarms'
 pulumi import 'aws:cloudfront/distribution:Distribution' 'someWebsite' 'E74FTE3EXAMPLE'
@@ -163,3 +162,11 @@ pulumi import 'aws:secretsmanager/secret:Secret' 'example' 'arn:aws:secretsmanag
 pulumi import 'aws:secretsmanager/secretVersion:SecretVersion' 'example' 'arn:aws:secretsmanager:us-east-1:123456789012:secret:example-123456|ABCDEF01-2345-6789-ABCD-EF0123456789'
 pulumi import 'aws:vpc/securityGroupEgressRule:SecurityGroupEgressRule' 'allowAll' 'sgr-02108b27edd666983'
 pulumi import 'aws:vpc/securityGroupIngressRule:SecurityGroupIngressRule' 'allowAll' 'sgr-02108b27edd666984'
+pulumi import \
+	'snowflake:index/userProgrammaticAccessToken:UserProgrammaticAccessToken' 'someServiceUser' 'SOME_SERVICE_PAT' \
+	--parent 'urn:pulumi:dev::access::exampleorg:StandardSnowflakeServiceAccount$snowflake:index/serviceUser:ServiceUser::someServiceUser'
+
+# Import resources in block
+#  1. pulumi preview --import-file 'import.json'
+#  2. change <PLACEHOLDER> with the ids
+#  3. pulumi import --file 'import.json'
