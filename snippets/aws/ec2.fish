@@ -107,7 +107,7 @@ aws ec2 delete-snapshot --snapshot-id 'snap-0123456789abcdef0' --dry-run
 # Retrieve the security credentials for an IAM role named 's3access' from instances
 # IMDSv2
 TOKEN=$(curl -X PUT 'http://169.254.169.254/latest/api/token' -H 'X-aws-ec2-metadata-token-ttl-seconds: 21600') \
-&& curl -H "X-aws-ec2-metadata-token: ${TOKEN}" 'http://169.254.169.254/latest/meta-data/iam/security-credentials/s3access'
+&& curl -H "X-aws-ec2-metadata-token: $TOKEN" 'http://169.254.169.254/latest/meta-data/iam/security-credentials/s3access'
 # IMDSv1
 curl 'http://169.254.169.254/latest/meta-data/iam/security-credentials/s3access'
 

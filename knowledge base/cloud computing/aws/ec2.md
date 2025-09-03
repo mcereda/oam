@@ -76,6 +76,10 @@ curl 'http://instance-data/latest/meta-data/instance-id'
 curl 'http://169.254.169.254/latest/meta-data/instance-type'
 curl 'http://[fd00:ec2::254]/latest/meta-data/local-ipv4'
 
+# Query the onboard IMDSv2 metadata server.
+TOKEN="$(curl -X 'PUT' 'http://169.254.169.254/latest/api/token' -H 'X-aws-ec2-metadata-token-ttl-seconds: 60')" \
+&& curl -H "X-aws-ec2-metadata-token: $TOKEN" 'http://169.254.169.254/latest/meta-data/iam/security-credentials'
+
 # Configure the CloudWatch agent
 amazon-cloudwatch-agent-ctl -a 'status'
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a 'set-log-level' -l 'INFO'
