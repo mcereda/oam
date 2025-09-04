@@ -47,6 +47,7 @@ Intro
 
 - [Website]
 - [Codebase]
+- [Backrest]
 
 ### Sources
 
@@ -66,3 +67,4 @@ Intro
 [Website]: https://restic.net/
 
 <!-- Others -->
+[Backrest]: https://github.com/garethgeorge/backrest
