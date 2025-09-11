@@ -25,6 +25,14 @@ aws ecr delete-repository --repository-name 'banana/slug'
 aws ecr list-images --repository-name 'repository'
 aws ecr list-images --registry-id '123456789012' --repository-name 'my-image'
 
+# Check images exist in the ECR.
+[[ \
+  $(
+    aws ecr list-images --repository-name 'repository' \
+      --query "length(imageIds[?@.imageTag=='latest'])" --output 'text' \
+  ) -le 0 \
+]] && echo "image 'repository:latest' exists" || echo "image 'repository:latest' does not exist"
+
 
 # Use ECRs as Docker registries.
 aws ecr get-login-password \
@@ -66,6 +74,13 @@ docker pull '123456789012.dkr.ecr.us-west-2.amazonaws.com/docker-hub/grafana/gra
 aws ecr describe-repositories --repository-names 'docker-tools/image-builder' \
 || aws ecr create-repository --repository-name 'docker-tools/image-builder'
 ```
+
+Constraints:
+
+| What            | Type   | Constraints                                                                                        | Reference                                                                                             |
+| --------------- | ------ | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Image tag       | String | 1 <= length <= 300                                                                                 | [ImageIdentifier](https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_ImageIdentifier.html) |
+| Repository name | String | 2 <= length <= 256<br/>Must match `(?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*` | [Image](https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_Image.html)                     |
 
 ## Pull through cache feature
 
