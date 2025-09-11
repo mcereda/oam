@@ -1003,6 +1003,7 @@ If one can, prefer just build the image from an EC2 instance.
 [i'm trying to export a snapshot from amazon rds mysql to amazon s3, but i'm receiving an error. why is this happening?]: https://repost.aws/knowledge-center/rds-mysql-export-snapshot
 [more info about resource deprecation?]: https://github.com/boto/boto3/discussions/3563
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
+[Pulling the Amazon Linux container image]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/amazon_linux_container_image.html
 [rotating aws kms keys]: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
 [savings plans user guide]: https://docs.aws.amazon.com/savingsplans/latest/userguide/
 [Services that support the Resource Groups Tagging API]: https://docs.aws.amazon.com/resourcegroupstagging/latest/APIReference/supported-services.html
@@ -1018,7 +1019,6 @@ If one can, prefer just build the image from an EC2 instance.
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
 [what is aws global accelerator?]: https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html
-[Pulling the Amazon Linux container image]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/amazon_linux_container_image.html
 
 <!-- Others -->
 [a guide to tagging resources in aws]: https://medium.com/@staxmarketing/a-guide-to-tagging-resources-in-aws-8f4311afeb46

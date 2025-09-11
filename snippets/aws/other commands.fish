@@ -116,6 +116,13 @@ aws ecr describe-pull-through-cache-rules --registry-id '012345678901' --ecr-rep
 
 aws ecr list-images --registry-id '012345678901' --repository-name 'cache/docker-hub'
 
+# Check images exist in the ECR.
+[[ $(
+	aws ecr list-images --repository-name 'repository' \
+		--query "length(imageIds[?@.imageTag=='latest'])" --output 'text' \
+	) -le 0 \
+]] && echo "image 'repository:latest' exists" || echo "image 'repository:latest' does not exist"
+
 
 ###
 # ECS
