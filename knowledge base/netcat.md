@@ -1,5 +1,13 @@
 # Netcat
 
+1. [TL;DR](#tldr)
+1. [Further readings](#further-readings)
+   1. [Sources](#sources)
+
+## TL;DR
+
+Options of interest:
+
 - `-N`: close the network socket when finished; not available in nmap's netcat
 - `-l`: bind to the port and listen for incoming connections (server mode)
 - `-n`: do not resolve hostnames via DNS
@@ -10,14 +18,11 @@
 - `-w=SECS`: timeout for connects and final net reads, in seconds
 - `-z`: zero-I/O mode, exit once connected
 
-## Table of contents <!-- omit in toc -->
-
-1. [TL;DR](#tldr)
-1. [Sources](#sources)
-
-## TL;DR
-
 ```sh
+# Install
+dnf install 'nmap-ncat'
+yum install 'nmap-ncat'
+
 # Check ports on hosts.
 nc -Nnvz 192.168.0.81 22-25
 nc -Nvz host.name 443
@@ -35,12 +40,15 @@ until nc -Nvz -w 3 pi.lan 22; do sleep 3; done
 nc -l 5666
 ```
 
-## Sources
+## Further readings
+
+### Sources
 
 - [How To use Netcat to establish and test TCP and UDP connections]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Others -->
