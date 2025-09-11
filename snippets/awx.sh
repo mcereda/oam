@@ -43,6 +43,10 @@ curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/job_templates/'
 awx job_templates modify '1' --extra_vars "@vars.yml"
 awx job_templates modify '5' --extra_vars "@vars.json"
 
+# Show workflow job templates
+awx workflow_job_templates get 'some workflow job template'
+awx workflow_job_templates get -f 'yaml' 'some workflow job template returned as yaml'
+
 # Show notification templates
 awx notification_templates list
 curl -fs --user 'admin:password' 'https://awx.example.org/api/v2/notification_templates/' | jq '.' -

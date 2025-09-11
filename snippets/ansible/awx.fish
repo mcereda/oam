@@ -1,4 +1,4 @@
-#!/usr/bin/env
+#!/usr/bin/env fish
 
 # configure access
 set -x 'TOWER_HOST' 'https://awx.example.com/'
