@@ -114,3 +114,17 @@ yq -e '(.backend.url|test("^file://")?)|not' 'Pulumi.yaml'
 
 # Apply formatting to the same file you read from
 yq -iY --explicit-start '.' 'external-snapshotter/crds.yml'
+
+# Sort
+# Refer <https://stackoverflow.com/questions/30331504/how-to-sort-a-json-file-by-keys-and-values-of-those-keys-in-jq>
+# by key
+jq -r --sort-keys '.' 'file.json'
+jq -r 'to_entries | sort_by(.key) | from_entries' 'file.json'
+# by value
+jq -r 'to_entries | sort_by(.value) | from_entries' 'file.json'
+# array, by 'age'
+jq -r 'sort_by(.age)' 'file.json'
+# array, by 'age', limit to the first 3 elements
+jq -r 'sort_by(.age)|[limit(3;.[])]' 'file.json'
+# array, by 'age' descending
+jq -r 'sort_by(.age)|reverse' 'file.json'
