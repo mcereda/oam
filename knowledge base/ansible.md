@@ -10,6 +10,7 @@
 1. [Templating](#templating)
    1. [Tests](#tests)
    1. [Loops](#loops)
+1. [Use raw strings](#use-raw-strings)
 1. [Validation](#validation)
    1. [Assertions](#assertions)
 1. [Asynchronous actions](#asynchronous-actions)
@@ -599,6 +600,38 @@ Return a boolean result.
     - ['outer1', 'outer2']
     - "{{ middles }}"
     - ['inner1', 'inner2']
+```
+
+## Use raw strings
+
+Refer [Advanced playbook syntax].
+
+Ansible uses the custom `!unsafe` data type to mark data as unsafe, and block Jinja2 templating in YAML.<br/>
+This prevents abusing Jinja2 templates to execute arbitrary code on target machines, with the Ansible implementation
+ensuring that unsafe values are never templated.
+
+```yml
+mypassword: !unsafe '234%234{435lkj{{lkjsdf'
+
+vars:
+  my_unsafe_variable: !unsafe 'unsafe % value'
+  my_unsafe_array:
+    - !unsafe 'unsafe element'
+    - 'safe element'
+  my_unsafe_hash:
+    unsafe_key: !unsafe 'unsafe value'
+```
+
+The most common use cases include:
+
+- Allowing passwords containing special characters like `{` or `%`.
+- Allowing JSON arguments that look like templates but should not be templated.
+
+The same result can be achieved by surrounding the Jinja2 code with the `{% raw %}` and `{% endraw %}` tags, though this
+makes it less readable.
+
+```yml
+mypassword: "{% raw -%} 234%234{435lkj{{lkjsdf {%- endraw %}"
 ```
 
 ## Validation
@@ -1761,6 +1794,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 - [Ansible v2.14 CHANGELOG]
 - [How can I pass variable to ansible playbook in the command line?]
 - [Ansible Map Examples - Filter List and Dictionaries]
+- [Advanced playbook syntax]
 
 <!--
   Reference
@@ -1783,6 +1817,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 
 <!-- Upstream -->
 [8 ways to speed up your Ansible playbooks]: https://www.redhat.com/sysadmin/faster-ansible-playbook-execution
+[Advanced playbook syntax]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_advanced_syntax.html
 [ansible galaxy user guide]: https://docs.ansible.com/ansible/latest/galaxy/user_guide.html
 [ansible navigator documentation]: https://ansible.readthedocs.io/projects/navigator/
 [ansible runner]: https://ansible.readthedocs.io/projects/runner/en/stable/

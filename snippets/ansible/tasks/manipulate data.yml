@@ -305,6 +305,8 @@
           '--exclude-schema=transient_views',
         ] | flatten | unique
       }}
+    raw_string: !unsafe "{{ this template is not executed, but given as-is as string }}"
+    raw_string_via_jinja_specification: "{% raw -%} 234%234{435lkj{{lkjsdf {%- endraw %}"
 
 - name: Return data types
   tags:
