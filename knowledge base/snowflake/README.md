@@ -12,7 +12,7 @@ Cloud-based [data warehousing][data warehouse] platform.
    1. [Authentication policies](#authentication-policies)
    1. [Network policies](#network-policies)
 1. [Snowflake CLI](#snowflake-cli)
-1. [RoleOut](#roleout)
+1. [Roleout](#roleout)
 1. [Connecting privately](#connecting-privately)
    1. [From AWS accounts](#from-aws-accounts)
 1. [Further readings](#further-readings)
@@ -826,12 +826,12 @@ Meant to replace the SnowSQL tool.
 
 See [Snowflake CLI].
 
-## RoleOut
+## Roleout
 
 Project trying to accelerate the design and deployment of Snowflake environments through Infrastructure as Code.<br/>
 Useful to view and configure the permissions matrix in a graphical way.
 
-Refer [RoleOut].
+Refer [Roleout].
 
 ## Connecting privately
 
@@ -891,7 +891,7 @@ Snowflake recommends **avoiding** this approach.
 
 <!-- Knowledge base -->
 [Data warehouse]: ../data%20warehouse.md
-[RoleOut]: roleout.md
+[Roleout]: roleout.md
 [Snowflake CLI]: cli.md
 
 <!-- Files -->
