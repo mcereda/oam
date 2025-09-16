@@ -18,6 +18,22 @@ curl -sSL 'dblab.sh' | bash
 # Initialize CLI configuration.
 # Assumes that 'localhost:2345' forwards to the Database Lab Engine machine's at port 2345'.
 dblab init --environment-id 'tutorial' --url 'http://localhost:2345' --token 'secret_token' --insecure
+
+# Show global CLI environment configuration
+dblab config show-global
+
+# Create CLI environments
+dblab config create 'staging'
+
+# Show available CLI environments
+dblab config list
+
+# Show current CLI environment configuration
+dblab config view
+
+# Modify CLI environments
+# Errors out should one specify the current set of settings
+dblab config update --url --insecure=true 'staging'
 ```
 
 </details>
@@ -26,6 +42,17 @@ dblab init --environment-id 'tutorial' --url 'http://localhost:2345' --token 'se
   <summary>Usage</summary>
 
 ```sh
+# Check the running container's version
+# Used to check the instance is up and running
+dblab instance version
+curl 'http://127.0.0.1:2345/healthz'
+
+# Display the engine's status
+dblab instance status
+
+# Change environment
+dblab config switch 'prod'
+
 # Fetch the status of the Engine's instance.
 dblab instance status
 
@@ -53,6 +80,10 @@ curl -X 'PATCH' 'https://dblab.instance.fqdn/api/clone/clone-id' -H 'Verificatio
 
 # Delete clones.
 curl -X 'DELETE' 'https://dblab.instance.fqdn/api/clone/clone-id/reset' -H 'Verification-Token: verification-token-here'
+
+# Force full refresh
+# v4.0.0+
+dblab instance full-refresh
 ```
 
 </details>
