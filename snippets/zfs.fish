@@ -89,5 +89,6 @@ zfs snapshot 'vault/good_memories@2024-12-31'
 zfs get -r checksum,compression,readonly,canmount 'tank'
 
 # Delete datasets
+# optionally add '-n' for dry run, '-r' for recursive, '-v' for verbose
 zfs destroy 'vault/good_memories@2024-12-31'  # snapshot
 zfs destroy 'vault/good_memories'             # filesystem
