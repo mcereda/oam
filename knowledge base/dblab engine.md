@@ -13,6 +13,8 @@ The [website] hosts the SaaS version.
    1. [Launch DBLab server](#launch-dblab-server)
    1. [Clean up](#clean-up)
 1. [Automatically full refresh data without downtime](#automatically-full-refresh-data-without-downtime)
+1. [Troubleshooting](#troubleshooting)
+   1. [The automatic full refresh fails claiming it cannot find available pools](#the-automatic-full-refresh-fails-claiming-it-cannot-find-available-pools)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -390,6 +392,36 @@ without downtime.
 > [!tip]
 > Prefer dedicating an entire disk to each pool or logical volume.<br/>
 > This avoids overloading a single disk when syncing, and prevents the whole data failing should a disk fail.
+
+## Troubleshooting
+
+### The automatic full refresh fails claiming it cannot find available pools
+
+Root cause: in version 4.0.0, the DBLab Engine happened to consider a pool used by clones, even if those clones were
+destroyed.<br/>
+This seems to have been solved in version 4.0.1.
+
+Solution: remove all ZFS snapshots in the pool that should be used for the refresh and restart the Engine.
+
+<details>
+
+1. Ensure no clone is using snapshots on the pool that should be used for the refresh.<br/>
+   Reset those that do if necessary.
+1. Destroy all ZFS snapshots in the pool that should be used for the refresh.
+
+   ```sh
+   sudo zfs list
+   sudo zfs destroy -rv 'dblab_pool_0/branch/main'
+   ```
+
+1. Restart the DBLab Engine's container.<br/>
+   Needed to make it recognize the pool as available.
+
+   ```sh
+   sudo docker container restart 'dblab_server'
+   ```
+
+</details>
 
 ## Further readings
 

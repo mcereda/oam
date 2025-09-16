@@ -11,11 +11,6 @@ docker logs --since '5m' -f 'dblab_server'
 # Only available from the server hosting the engine
 docker exec -it 'dblab_server' kill -SIGHUP '1'
 
-# Check the running container's version
-# Used to check the instance is up and running
-dblab instance version
-curl 'http://127.0.0.1:2345/healthz'
-
 # Initialize the CLI client
 dblab init
 
@@ -37,6 +32,14 @@ dblab config update --url --insecure=true 'staging'
 
 # Switch CLI environments
 dblab config switch 'staging'
+
+# Check the running container's version
+# Used to check the instance is up and running
+dblab instance version
+curl 'http://127.0.0.1:2345/healthz'
+
+# Display the engine's status
+dblab instance status
 
 # Get the APIs' specification
 # JS page
@@ -119,8 +122,6 @@ curl -X 'DELETE' 'https://dblab.example.org:1234/api/clone/some-clone' \
 # Get admin config in YAML format
 curl 'https://dblab.example.org:1234/api/admin/config.yaml' -H "Verification-Token: $(gopass show -o 'dblab')"
 
-# Display the engine's status
-dblab instance status
-
-# Display the engine's version
-dblab instance version
+# Force full refresh
+# v4.0.0+
+dblab instance full-refresh
