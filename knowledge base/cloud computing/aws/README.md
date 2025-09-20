@@ -17,6 +17,7 @@
    1. [KMS](#kms)
    1. [PrivateLink](#privatelink)
    1. [Security Hub](#security-hub)
+1. [Step Functions](#step-functions)
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
 1. [Costs](#costs)
@@ -31,7 +32,7 @@
 1. [API](#api)
    1. [Python](#python)
 1. [Container images](#container-images)
-   1. [Amazon Linux](#amazon-linux)
+    1. [Amazon Linux](#amazon-linux)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -295,6 +296,7 @@ Options:
 | [Security Hub]                | Aggregator for security findings              |
 | [SNS]                         | Pub/sub message delivery                      |
 | [SQS]                         | Queues                                        |
+| [Step Functions]              | Task orchestration                            |
 
 [Service icons][aws icons] are publicly available for diagrams and such.
 Public service IP address ranges are [available in JSON form][aws public ip address ranges now available in json form]
@@ -559,6 +561,52 @@ Can use custom insights.
 Custom actions can be sent to EventBridge for automation.
 
 Member accounts can administer Security Hub by delegation if given the permissions to do so.
+
+## Step Functions
+
+Refer [What is Step Functions?].
+
+Workflows (A.K.A. _state machines_) for building applications, automating processes, orchestrating microservices, and
+creating pipelines.<br/>
+Can also be long-running and require human interaction.
+
+Step Functions call AWS services or external workers to perform tasks.
+
+In the context of Step Functions:
+
+- State machines are called _workflows_.<br/>
+  Workflows are a series of event-driven steps.
+- Each step in a workflow is called _state_.
+- _Task states_ represent units of work performed by **another AWS service**, like calling another service or API.<br/>
+  Instances of running workflows performing tasks are called executions in Step Functions.
+- _Activities_ represent units of work executed by workers that exist **outside** of Step Functions.
+
+Workflows can be:
+
+- _Standard_, if they run each step **exactly** once, for long time.<br/>
+  They can run for up to 1y, are auditable, and show execution history and visual debugging.
+
+  Step Functions counts a _state transition_ each time a step in a standard workflow is executed.<br/>
+  It charges for the total number of state transitions across **all** one's state machines, **including** retries.<br/>
+  4000 state transitions per month are free, then they are charged $0.025 per every 1000 transitions.<br/>
+  Charges are metered daily and billed monthly.
+
+- _Express_, if they run each step **at least once**, for up to 5 minutes.<br/>
+  They are ideal for high-event-rate workloads like streaming data processing and IoT data ingestion.
+
+  Pricing is based off of number of requests and duration.
+
+  Step Functions counts a request each time it starts executing an express workflow.<br/>
+  It charges for the total number of requests across **all** the workflows, **including** tests from the console.
+
+  Duration is calculated:
+
+  1. From the time a workflow begins executing until it completes or otherwise terminates.
+  1. Rounded **up** to the nearest 100ms.
+
+  The amount of memory used in the execution of a workflow is billed in 64MB chunks.<br/>
+  Memory consumption is based on the size of a workflow definition, the use of map or parallel states, and the execution
+  (payload) data size.
 
 ## Resource constraints
 
@@ -956,6 +1004,7 @@ If one can, prefer just build the image from an EC2 instance.
 [reserved instances]: #reserved-instances
 [savings plans]: #savings-plans
 [security hub]: #security-hub
+[Step Functions]: #step-functions
 [spot instances]: #spot-instances
 [tiered pricing]: #tiered-pricing
 
@@ -1019,6 +1068,7 @@ If one can, prefer just build the image from an EC2 instance.
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
 [what is aws global accelerator?]: https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html
+[What is Step Functions?]: https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html
 
 <!-- Others -->
 [a guide to tagging resources in aws]: https://medium.com/@staxmarketing/a-guide-to-tagging-resources-in-aws-8f4311afeb46
