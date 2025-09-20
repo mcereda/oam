@@ -601,6 +601,7 @@
       tags:
         - update_inventory
         - new_instance
+        - add_host_to_inventory
       when: new_instance.instance_id is defined
       block:
         - name: Add the new instance to the play's inventory
