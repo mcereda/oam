@@ -1795,6 +1795,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 - [How can I pass variable to ansible playbook in the command line?]
 - [Ansible Map Examples - Filter List and Dictionaries]
 - [Advanced playbook syntax]
+- [Ansible delegation madness: delegate_to and variable substitution]
 
 <!--
   Reference
@@ -1851,6 +1852,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 <!-- Others -->
 [6 ways to speed up ansible playbook execution]: https://wearenotch.com/speed-up-ansible-playbook-execution/
 [ansible - how to remove an item from a list?]: https://stackoverflow.com/questions/40927792/ansible-how-to-remove-an-item-from-a-list#40927834
+[Ansible delegation madness: delegate_to and variable substitution]: https://makk.es/blog/ansible-delegation-madness/
 [Ansible Map Examples - Filter List and Dictionaries]: https://www.middlewareinventory.com/blog/ansible-map/
 [ansible roles: basics, creating & using]: https://spacelift.io/blog/ansible-roles
 [ansible vault tutorial]: https://piyops.com/ansible-vault-tutorial
