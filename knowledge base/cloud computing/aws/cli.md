@@ -239,6 +239,9 @@ $ export AWS_PROFILE="work"
 
 See [CLI config files] for examples.
 
+Refer [Configuring environment variables for the AWS CLI] to use environment variables to override settings for a shell
+session.
+
 ## Session Manager integration
 
 > The instance's IAM role must have at least the required permissions to allow to login.<br/>
@@ -352,6 +355,7 @@ yubikeytotp = awscli_plugin_yubikeytotp
 <!-- Upstream -->
 [codebase]: https://github.com/aws/aws-cli/tree/v2
 [configure profiles]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html
+[Configuring environment variables for the AWS CLI]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
 [how do i assume an iam role using the aws cli?]: https://repost.aws/knowledge-center/iam-assume-role-cli
 [improved cli auto-prompt mode]: https://github.com/aws/aws-cli/issues/5664
 [install the session manager plugin for the aws cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-macos-overview.html#install-plugin-macos-signed

@@ -239,11 +239,11 @@ Used to enable and configure additional features and functionalities in a DB.
 
 ## Backup
 
-RDS backup storage for each Region is calculated from both the automated backups and manual DB snapshots for that
-Region.<br/>
-Moving snapshots to other Regions increases the backup storage in the destination Regions.
+RDS snapshot storage is calculated per Region.<br/>
+Both the automated backups and manual DB snapshots for that Region concur to the total value.<br/>
+Moving snapshots to other Regions increases the backup storage value for the destination Regions.
 
-Backups are stored in [S3].
+Snapshots are stored in [S3].
 
 Should one choose to retain automated backups when deleting DB instances, those backups are saved for the full retention
 period; otherwise, all automated backups are deleted with the instance.<br/>
@@ -253,7 +253,7 @@ Should one choose to have RDS create a final DB snapshot before deleting a DB in
 created manual snapshots to recover it.
 
 Taking backups can be unbearably slow depending on the amount of data needing to be copied.<br/>
-For comparison, the first snapshot of a DB instance with standard 100 GiB `gp3` storage took about 3h to complete.
+For reference, the first snapshot of a DB instance with standard 100 GiB `gp3` storage took about 3h to complete.
 
 ### Automatic backups
 
@@ -889,6 +889,7 @@ or write workloads and exceeds the instance type quotas.
 - [Understanding PostgreSQL roles and permissions]
 - [Kyle Kingsbury's Amazon RDS for PostgreSQL 17.4 analysis]
 - [AWS RDS Max Connections Limit As Per Instance Type]
+- [Amazon RDS and Aurora credentials format]
 
 ### Sources
 
@@ -910,6 +911,7 @@ or write workloads and exceeds the instance type quotas.
 - [Maintaining a DB instance]
 - [Disabling AWS RDS backups when creating/updating instances?]
 - [Viewing instance status]
+- [Recommended alarms for RDS]
 
 <!--
   Reference
@@ -926,6 +928,7 @@ or write workloads and exceeds the instance type quotas.
 <!-- Files -->
 <!-- Upstream -->
 [amazon ebs-optimized instance types]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html
+[Amazon RDS and Aurora credentials format]: https://docs.aws.amazon.com/secretsmanager/latest/userguide/reference_secret_json_structure.html#reference_secret_json_structure_rds
 [amazon rds db instance storage]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
 [amazon rds db instances]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.DBInstance.html
 [aws kms key management]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.Keys.html
@@ -938,6 +941,7 @@ or write workloads and exceeds the instance type quotas.
 [migrating databases to their amazon rds equivalents with aws dms]: https://docs.aws.amazon.com/dms/latest/userguide/data-migrations.html
 [migrating databases using rds postgresql transportable databases]: https://aws.amazon.com/blogs/database/migrating-databases-using-rds-postgresql-transportable-databases/
 [pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
+[Recommended alarms for RDS]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Best_Practice_Recommended_Alarms_AWS_Services.html#RDS
 [renaming a db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RenameInstance.html
 [Restoring a DB instance to a specified time for Amazon RDS]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIT.html
 [restoring from a db snapshot]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html

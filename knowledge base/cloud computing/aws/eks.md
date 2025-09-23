@@ -1465,6 +1465,7 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 - [Reaching failed to introspect region from EC2Metadata... on container start-up - vanilla EKS/Fargate]
 - [Route application and HTTP traffic with Application Load Balancers]
 - [Hands-On Guide to Creating an Amazon EKS Cluster with Self-Managed Worker Nodes]
+- [EKS nodegroup AMI types]
 
 <!--
   Reference
@@ -1502,8 +1503,10 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [amazon eks security group requirements and considerations]: https://docs.aws.amazon.com/eks/latest/userguide/sec-group-reqs.html
 [amazon eks troubleshooting]: https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html
 [amazon eks vpc and subnet requirements and considerations]: https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html
+[Amazon VPC CNI plugin increases pods per node limits]: https://aws.amazon.com/blogs/containers/amazon-vpc-cni-increases-pods-per-node-limits/
 [amazoneksclusterpolicy]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonEKSClusterPolicy.html
 [amazoneksservicepolicy]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonEKSServicePolicy.html
+[Assign more IP addresses to Amazon EKS nodes with prefixes]: https://docs.aws.amazon.com/eks/latest/userguide/cni-increase-ip-addresses.html
 [aws eks create-cluster]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-cluster.html
 [aws eks create-fargate-profile]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-fargate-profile.html
 [aws eks create-nodegroup]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-nodegroup.html
@@ -1513,7 +1516,9 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [configure instance permissions required for systems manager]: https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-policies-overview
 [create an amazon ebs csi driver iam role]: https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html
 [de-mystifying cluster networking for amazon eks worker nodes]: https://aws.amazon.com/blogs/containers/de-mystifying-cluster-networking-for-amazon-eks-worker-nodes/
+[EKS nodegroup AMI types]: https://docs.aws.amazon.com/eks/latest/APIReference/API_Nodegroup.html#AmazonEKS-Type-Nodegroup-amiType
 [eks workshop]: https://www.eksworkshop.com/
+[Elastic network interfaces]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html
 [enabling iam principal access to your cluster]: https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html
 [enabling secret encryption on an existing cluster]: https://docs.aws.amazon.com/eks/latest/userguide/enable-kms.html
 [fargate storage]: https://docs.aws.amazon.com/eks/latest/userguide/fargate-pod-configuration.html#fargate-storage
@@ -1527,6 +1532,7 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [learn how eks pod identity grants pods access to aws services]: https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html
 [manage the amazon ebs csi driver as an amazon eks add-on]: https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html
 [managed node groups]: https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html
+[Maximum number of pods per EKS instance]: https://github.com/awslabs/amazon-eks-ami/blob/main/templates/shared/runtime/eni-max-pods.txt
 [migrating amazon eks clusters from gp2 to gp3 ebs volumes]: https://aws.amazon.com/blogs/containers/migrating-amazon-eks-clusters-from-gp2-to-gp3-ebs-volumes/
 [private cluster requirements]: https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html
 [required permissions to view eks resources]: https://docs.aws.amazon.com/eks/latest/userguide/view-kubernetes-resources.html#view-kubernetes-resources-permissions
@@ -1539,10 +1545,6 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [using iam groups to manage kubernetes cluster access]: https://archive.eksworkshop.com/beginner/091_iam-groups/
 [using service-linked roles for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles.html
 [view resource usage with the kubernetesmetrics server]: https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html
-[Maximum number of pods per EKS instance]: https://github.com/awslabs/amazon-eks-ami/blob/main/templates/shared/runtime/eni-max-pods.txt
-[Elastic network interfaces]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html
-[Amazon VPC CNI plugin increases pods per node limits]: https://aws.amazon.com/blogs/containers/amazon-vpc-cni-increases-pods-per-node-limits/
-[Assign more IP addresses to Amazon EKS nodes with prefixes]: https://docs.aws.amazon.com/eks/latest/userguide/cni-increase-ip-addresses.html
 
 <!-- Others -->
 [amazon elastic block store (ebs) csi driver]: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/README.md
@@ -1550,10 +1552,10 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [aws load balancer controller repository]: https://github.com/kubernetes-sigs/aws-load-balancer-controller
 [enable ebs gp3 for eks by default]: https://geko.cloud/en/aws-enable-ebs-gp3-for-eks-by-default/
 [external-snapshotter]: https://github.com/kubernetes-csi/external-snapshotter
+[Hands-On Guide to Creating an Amazon EKS Cluster with Self-Managed Worker Nodes]: https://medium.com/@muppedaanvesh/hands-on-guide-to-creating-an-amazon-eks-cluster-with-self-managed-worker-nodes-fad026c34482
 [how do you get kubectl to log in to an aws eks cluster?]: https://stackoverflow.com/questions/53266960/how-do-you-get-kubectl-to-log-in-to-an-aws-eks-cluster
 [how to add iam user and iam role to aws eks cluster?]: https://antonputra.com/kubernetes/add-iam-user-and-iam-role-to-eks/
 [Hybrid Pod Scheduling: Optimising AWS — EKS with On-Demand and Spot Instances]: https://medium.com/@rajatgupta828/hybrid-pod-scheduling-optimising-aws-eks-with-on-demand-and-spot-instances-6b94e62e9dd4
 [reaching failed to introspect region from ec2metadata... on container start-up - vanilla eks/fargate]: https://github.com/kubernetes-sigs/aws-load-balancer-controller/issues/1561
 [upgrade default storage class for eks]: https://www.argonaut.dev/docs/guides/migrate-eks-to-gp3
 [visualizing aws eks kubernetes clusters with relationship graphs]: https://dev.to/aws-builders/visualizing-aws-eks-kubernetes-clusters-with-relationship-graphs-46a4
-[Hands-On Guide to Creating an Amazon EKS Cluster with Self-Managed Worker Nodes]: https://medium.com/@muppedaanvesh/hands-on-guide-to-creating-an-amazon-eks-cluster-with-self-managed-worker-nodes-fad026c34482
