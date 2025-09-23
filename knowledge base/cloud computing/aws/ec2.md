@@ -167,6 +167,7 @@ Instance store volumes are **included** as part of the usage cost of an instance
 Instances publish a default set of metrics to CloudWatch with no charge.<br/>
 One can change this set by configuring the CloudWatch agent.
 
+[Config file reference][manually create or edit the cloudwatch agent configuration file].<br/>
 [Recommended alarms].
 
 Refer [How can I send memory and disk metrics from my EC2 instances to CloudWatch?] and
@@ -285,6 +286,7 @@ Also see [Automatic instance recovery].
 [using al2023 based amazon ecs amis to host containerized workloads]: https://docs.aws.amazon.com/linux/al2023/ug/ecs.html
 [using instance profiles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
 [Find AMIs with the SSM Agent preinstalled]: https://docs.aws.amazon.com/systems-manager/latest/userguide/ami-preinstalled-agent.html
+[Manually create or edit the CloudWatch agent configuration file]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-Configuration-File-Details.html
 
 <!-- Others -->
 [Automating Instance Reboots with Amazon CloudWatch EC2 Actions]: https://devops.supportsages.com/automating-instance-reboots-with-amazon-cloudwatch-ec2-actions-375f633a658d
