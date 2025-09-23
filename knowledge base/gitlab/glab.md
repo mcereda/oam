@@ -78,6 +78,7 @@ glab mr list --repo 'someGroup/someNamespace/someRepo'
 ## Further readings
 
 - [Codebase]
+- [Documentation]
 
 <!--
   Reference
@@ -88,6 +89,7 @@ glab mr list --repo 'someGroup/someNamespace/someRepo'
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://gitlab.com/gitlab-org/cli
+[Codebase]: https://gitlab.com/gitlab-org/cli
+[Documentation]: https://gitlab.com/gitlab-org/cli/-/blob/main/docs/source/index.md
 
 <!-- Others -->

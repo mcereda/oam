@@ -285,7 +285,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [customize pipeline configuration]: https://docs.gitlab.com/ee/ci/pipelines/settings.html
 [debugging ci/cd pipelines]: https://docs.gitlab.com/ee/ci/debugging.html
 [pipeline schedules api]: https://docs.gitlab.com/ee/api/pipeline_schedules.html
-[predefined ci/cd variables reference]: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
+[Predefined CI/CD variables reference]: https://docs.gitlab.com/ci/variables/predefined_variables/
 [push options]: https://docs.gitlab.com/ee/user/project/push_options.html
 [specify when jobs run with rules]: https://docs.gitlab.com/ee/ci/jobs/job_rules.html
 [use ci/cd configuration from other files]: https://docs.gitlab.com/ee/ci/yaml/includes.html

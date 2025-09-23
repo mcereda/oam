@@ -430,6 +430,8 @@ Solution: remove all ZFS snapshots in the pool that should be used for the refre
 - [PostgreSQL]
 - [Documentation]
 - [`dblab`][dblab]
+- [Extended Docker Images with PostgreSQL for Database Lab]
+- [SE Docker Images with PostgreSQL]
 
 ### Sources
 
@@ -461,7 +463,9 @@ Solution: remove all ZFS snapshots in the pool that should be used for the refre
 [Codebase]: https://gitlab.com/postgres-ai/database-lab
 [DBLab Engine configuration reference]: https://postgres.ai/docs/reference-guides/database-lab-engine-configuration-reference
 [Documentation]: https://postgres.ai/docs/
+[Extended Docker Images with PostgreSQL for Database Lab]: https://gitlab.com/postgres-ai/custom-images
 [How to install DBLab manually]: https://postgres.ai/docs/how-to-guides/administration/install-dle-manually
+[SE Docker Images with PostgreSQL]: https://gitlab.com/postgres-ai/se-images
 [Website]: https://postgres.ai/
 
 <!-- Others -->
