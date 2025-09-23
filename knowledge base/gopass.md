@@ -2,7 +2,8 @@
 
 1. [TL;DR](#tldr)
 1. [File formats](#file-formats)
-1. [Browsers integration](#browsers-integration)
+1. [Plugins of interest](#plugins-of-interest)
+1. [Browser integration](#browser-integration)
    1. [Browserpass](#browserpass)
 1. [Troubleshooting](#troubleshooting)
 1. [Further readings](#further-readings)
@@ -193,9 +194,21 @@ rm -r "${HOME}/.local/share/gopass/stores/root"
 
 See [secrets], but mostly [features].
 
-## Browsers integration
+## Plugins of interest
+
+| Plugin                  | Summary                                   |
+| ----------------------- | ----------------------------------------- |
+| [browserpass]             | Browser integration                       |
+| [gopassbridge]          | Browser plugin wrapping `gopass-jsonapi`  |
+| [gopass-jsonapi]        | Communicate with gopass via JSON messages |
+| [git-credential-gopass] | Cache git credentials                     |
+| [gopass-hibp]           | [haveibeenpwnd.com] integration           |
+
+## Browser integration
 
 ### Browserpass
+
+Refer [browserpass extension installation guide].
 
 ```sh
 brew tap amar1729/formulae
@@ -214,6 +227,10 @@ See the [FAQ] page.
 - GoPass' [website]
 - GoPass' [documentation]
 - [woile's cheatsheet]
+- [gopass-jsonapi]
+- [gopass-hibp]
+- [gopassbridge]
+- [git-credential-gopass]
 
 ### Sources
 
@@ -221,8 +238,12 @@ See the [FAQ] page.
 - [Configuration][config]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- In-article sections -->
+[browserpass]: #browserpass
 
 <!-- Upstream -->
 [config]: https://github.com/gopasspw/gopass/blob/master/docs/config.md
@@ -234,4 +255,9 @@ See the [FAQ] page.
 
 <!-- Others -->
 [browserpass extension installation guide]: https://github.com/browserpass/browserpass-extension#
+[git-credential-gopass]: https://github.com/gopasspw/git-credential-gopass
+[gopass-hibp]: https://github.com/gopasspw/gopass-hibp
+[gopass-jsonapi]: https://github.com/gopasspw/gopass-jsonapi
+[gopassbridge]: https://github.com/gopasspw/gopassbridge
+[haveibeenpwnd.com]: https://haveibeenpwned.com/
 [woile's cheatsheet]: https://woile.github.io/gopass-cheat-sheet/
