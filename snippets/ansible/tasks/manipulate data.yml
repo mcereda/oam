@@ -1,5 +1,7 @@
 ---
 
+# Refer <https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_filters.html>.
+
 - name: Convert between types
   tags:
     - convert_types
@@ -264,6 +266,10 @@
     - manipulate_numbers
     - number_manipulation
   ansible.builtin.set_fact:
+    max_of_n: "{{ [ 3, 4, 2 ] | max }}"
+    max_of_values: "{{ [{'val': 1}, {'val': 2}] | max(attribute='val') }}"
+    min_of_n: "{{ [ 3, 4, 2 ] | min }}"
+    min_of_values: "{{ [{'val': 1}, {'val': 2}] | min(attribute='val') }}"
     round: "{{ 42.21 | round }}"
     round_up: "{{ 42.21 | round(method='ceil') }}"
     round_down_to_2nd_decimal: "{{ (2.5 * (42.2109 / 3) + 1) | round(2, 'floor') }}"
