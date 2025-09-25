@@ -506,6 +506,7 @@ aws --profile 'someProfile' s3api head-bucket --bucket 'someBucket'
 
 # List secrets
 aws secretsmanager list-secrets
+aws secretsmanager list-secrets --query 'SecretList[].Name|sort(@)' --output 'json'
 
 # Create secrets
 aws secretsmanager create-secret --name 'TestSecretFromFile' --secret-string 'file://mycreds.json'

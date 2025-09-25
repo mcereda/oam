@@ -30,6 +30,7 @@
 1. [Send logs to a central location](#send-logs-to-a-central-location)
     1. [FireLens](#firelens)
     1. [Fluent Bit or Fluentd](#fluent-bit-or-fluentd)
+1. [Secrets](#secrets)
 1. [Best practices](#best-practices)
 1. [Troubleshooting](#troubleshooting)
     1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
@@ -1517,6 +1518,12 @@ The `fluentd-address` value is specified as a secret option as it may be treated
 }]
 ```
 
+## Secrets
+
+Options:
+
+- [Set environment variables to secrets from Secrets Manager][pass secrets manager secrets through amazon ecs environment variables].
+
 ## Best practices
 
 - Consider configuring [resource constraints].
@@ -1712,6 +1719,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [amazon ecs task lifecycle]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html
 [amazon ecs task role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
 [Amazon VPC Lattice pricing]: https://aws.amazon.com/vpc/lattice/pricing/
+[Announcing AWS Graviton2 Support for AWS Fargate]: https://aws.amazon.com/blogs/aws/announcing-aws-graviton2-support-for-aws-fargate-get-up-to-40-better-price-performance-for-your-serverless-containers/
 [Automatically scale your Amazon ECS service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
 [AWS Distro for OpenTelemetry]: https://aws-otel.github.io/
 [AWS Fargate Spot Now Generally Available]: https://aws.amazon.com/blogs/aws/aws-fargate-spot-now-generally-available/
@@ -1728,6 +1736,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [install the session manager plugin for the aws cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
 [Interconnect Amazon ECS services]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/interconnecting-services.html
 [Metrics collection from Amazon ECS using Amazon Managed Service for Prometheus]: https://aws.amazon.com/blogs/opensource/metrics-collection-from-amazon-ecs-using-amazon-managed-service-for-prometheus/
+[Pass Secrets Manager secrets through Amazon ECS environment variables]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/secrets-envvar-secrets-manager.html
 [storage options for amazon ecs tasks]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html
 [Target tracking scaling policies for Application Auto Scaling]: https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-target-tracking.html
 [troubleshoot amazon ecs deployment issues]: https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ecs.html
@@ -1743,7 +1752,6 @@ Specify a supported value for the task CPU and memory in your task definition.
 [using amazon ecs exec to access your containers on aws fargate and amazon ec2]: https://aws.amazon.com/blogs/containers/new-using-amazon-ecs-exec-access-your-containers-fargate-ec2/
 [What is Amazon VPC Lattice?]: https://docs.aws.amazon.com/vpc-lattice/latest/ug/what-is-vpc-lattice.html
 [What Is AWS Cloud Map?]: https://docs.aws.amazon.com/cloud-map/latest/dg/what-is-cloud-map.html
-[Announcing AWS Graviton2 Support for AWS Fargate]: https://aws.amazon.com/blogs/aws/announcing-aws-graviton2-support-for-aws-fargate-get-up-to-40-better-price-performance-for-your-serverless-containers/
 
 <!-- Others -->
 [`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]: https://stackoverflow.com/questions/69261159/aws-ecs-execute-command-results-in-targetnotconnectedexception-the-execute
