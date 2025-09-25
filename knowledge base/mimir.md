@@ -618,6 +618,7 @@ ingester:
 - [Ceiling Function]
 - [In-Depth Comparison of Distributed Coordination Tools: Consul, etcd, ZooKeeper, and Nacos]
 - [Planning Grafana Mimir capacity]
+- [Configuring Alerts and Rules in Grafana Mimir]
 
 Alternatives:
 
@@ -673,6 +674,7 @@ Alternatives:
 
 <!-- Others -->
 [Ceiling Function]: https://www.geeksforgeeks.org/ceiling-function/
+[Configuring Alerts and Rules in Grafana Mimir]: https://freedium.cfd/https://learning.sepich.dev/configuring-alerts-and-rules-in-grafana-mimir-cd9565dae397
 [Gossip Protocol Explained]: https://highscalability.com/gossip-protocol-explained/
 [Gossip protocol]: https://en.wikipedia.org/wiki/Gossip_protocol
 [hashicorp/memberlist]: https://github.com/hashicorp/memberlist
