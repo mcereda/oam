@@ -5,6 +5,8 @@
    1. [PostgreSQL](#postgresql)
 1. [Burstable instances](#burstable-instances)
 1. [Storage](#storage)
+   1. [Storage optimization](#storage-optimization)
+   1. [Storage encryption](#storage-encryption)
 1. [Parameter Groups](#parameter-groups)
 1. [Option Groups](#option-groups)
 1. [Backup](#backup)
@@ -12,7 +14,7 @@
    1. [Manual backups](#manual-backups)
    1. [Export snapshots to S3](#export-snapshots-to-s3)
 1. [Restore](#restore)
-1. [Encryption](#encryption)
+1. [Multi-AZ instances](#multi-az-instances)
 1. [Operations](#operations)
     1. [PostgreSQL: reduce allocated storage by migrating using transportable databases](#postgresql-reduce-allocated-storage-by-migrating-using-transportable-databases)
     1. [Stop instances](#stop-instances)
@@ -94,7 +96,7 @@ Maintenance windows are paused when their DB instances are stopped.
   <summary>CLI commands</summary>
 
 ```sh
-# Show RDS instances.
+# Show details of RDS instances.
 aws rds describe-db-instances
 aws rds describe-db-instances --output 'json' --query "DBInstances[?(DBInstanceIdentifier=='master-prod')]"
 
@@ -103,10 +105,11 @@ aws rds modify-db-cluster --db-cluster-identifier 'staging-cluster' \
   --enable-performance-insights --performance-insights-retention-period '93' \
   --database-insights-mode 'standard'
 
+
 # Show Parameter Groups.
 aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15'
 
-# Create parameter Groups.
+# Create Parameter Groups.
 aws rds create-db-parameter-group --db-parameter-group-name 'pg15-source-transport-group' \
   --db-parameter-group-family 'postgres15' --description 'Parameter group with transport parameters enabled'
 
@@ -118,6 +121,7 @@ aws rds modify-db-parameter-group --db-parameter-group-name 'pg15-source-transpo
     'ParameterName=pg_transport.work_mem,ParameterValue=131072,ApplyMethod=pending-reboot' \
     'ParameterName=shared_preload_libraries,ParameterValue="pg_stat_statements,pg_transport",ApplyMethod=pending-reboot' \
     'ParameterName=max_worker_processes,ParameterValue=24,ApplyMethod=pending-reboot'
+
 
 # Restore instances from snapshots.
 aws rds restore-db-instance-from-db-snapshot \
@@ -140,8 +144,12 @@ aws rds start-export-task \
 aws rds describe-export-tasks
 aws rds describe-export-tasks --export-task-identifier 'my-snapshot-export'
 
-# Cancel tasks.
+# Cancel export tasks.
 aws rds cancel-export-task --export-task-identifier 'my_export'
+
+
+# Change the storage type.
+aws rds modify-db-instance --db-instance-identifier 'instance-name' --storage-type 'gp3' --apply-immediately
 ```
 
 </details>
@@ -167,18 +175,19 @@ Refer [the relative section in the EC2 article](ec2#burstable-instances), with t
 
 Refer [Amazon RDS DB instance storage] and [EBS].
 
-When selecting General Purpose SSD or Provisioned IOPS SSD, RDS automatically stripes storage across multiple volumes to
-enhance performance depending on the engine selected and the amount of storage requested:
+When selecting General Purpose SSD or Provisioned IOPS SSD, RDS automatically stripes storage across multiple EBS
+volumes.<br/>
+This enhances performance depending on the selected engine, and the amount of storage requested:
 
-| DB engine                        | Storage size      | Number of volumes provisioned |
-| -------------------------------- | ----------------- | ----------------------------- |
-| MariaDB<br/>MySQL<br/>PostgreSQL | Less than 400 GiB | 1                             |
-| MariaDB<br/>MySQL<br/>PostgreSQL | 400 to 65,536 GiB | 4                             |
-| Db2                              | Less than 400 GiB | 1                             |
-| Db2                              | 400 to 65,536 GiB | 4                             |
-| Oracle                           | Less than 200 GiB | 1                             |
-| Oracle                           | 200 to 65,536 GiB | 4                             |
-| SQL Server                       | Any               | 1                             |
+| DB engine                        | Storage size      | Number of EBS volumes |
+| -------------------------------- | ----------------- | --------------------- |
+| MariaDB<br/>MySQL<br/>PostgreSQL | Less than 400 GiB | 1                     |
+| MariaDB<br/>MySQL<br/>PostgreSQL | 400 to 65,536 GiB | 4                     |
+| Db2                              | Less than 400 GiB | 1                     |
+| Db2                              | 400 to 65,536 GiB | 4                     |
+| Oracle                           | Less than 200 GiB | 1                     |
+| Oracle                           | 200 to 65,536 GiB | 4                     |
+| SQL Server                       | Any               | 1                     |
 
 When modifying a General Purpose SSD or Provisioned IOPS SSD volume, it goes through a sequence of states.<br/>
 While the volume is in the `optimizing` state, volume performance is between the source and target configuration
@@ -189,6 +198,7 @@ When increasing allocated storage, increases must be by at least of 10%. Trying 
 will result in an error.<br/>
 The allocated storage **cannot** be increased when restoring RDS for SQL Server DB instances.
 
+> [!warning]
 > The allocated storage size of any DB instance **cannot be reduced** after creation.
 
 Decrease the storage size of DB instances by creating a new instance with lower provisioned storage size, then migrate
@@ -203,6 +213,48 @@ Use one of the following methods:
 - [Perform an homogeneous data migration][migrating databases to their amazon rds equivalents with aws dms] using AWS's
   [DMS][what is aws database migration service?]<br/>
   This **should** require **minimal** downtime.
+
+RDS instances using GP2 storage can convert their volumes to GP3.<br/>
+There seems to be no downtime associated with this operation, but performances **will** be impacted until the process
+ends and the change will trigger [storage optimization].<br/>
+Refer [Changing RDS storage from gp2 to gp3].
+
+### Storage optimization
+
+Refer [Why is my Amazon RDS DB instance in the storage-optimization state for a long time?].
+
+When modifying the storage size or type of a DB instance, that instance enters the `storage-optimization` state.<br/>
+RDS automatically performs the storage optimization process and evenly distributes the data to the EBS volumes after
+storage modification.
+
+> [!warning]
+> One **cannot** make further storage modifications for either 6 hours, or until storage optimization completes on the
+> instance (whatever is longer).<br/>
+> One _can_ still perform any other instance modifications, such as scaling the instance size or performing a reboot.
+
+In _most_ cases, scaled storage does **not** cause outages or performance degradation. However, the storage optimization
+process still takes typically several hours and up to more than a day.<br/>
+The impacted instance is operational and still available during the whole process, unless reboots are required for
+specific cases, such as a change to the storage type between SSD and magnetic disks.
+
+> [!important]
+> One cannot speed up storage optimization, and must wait for the process to complete.<br/>
+> The process takes longer for larger storage size increases and storage usage. Because it's automated, there's no real
+> way to determine how long it will takes to complete.
+
+### Storage encryption
+
+RDS automatically integrates with AWS KMS for key management.
+
+By default, RDS uses the _RDS AWS managed key_ (`aws/rds`) from KMS for encryption.<br/>
+This key can't be managed, rotated, nor deleted by users.
+
+RDS will automatically put databases into a terminal state when access to the KMS key is required but the key has been
+disabled or deleted, or its permissions have been somehow revoked.<br/>
+This change could be immediate or deferred depending on the use case that required access to the KMS key.<br/>
+In this terminal state, DB instances are no longer available and their databases' current state can't be recovered. To
+restore DB instances, one must first re-enable access to the KMS key for RDS, and then restore the instances from their
+latest available backup.
 
 ## Parameter Groups
 
@@ -475,19 +527,49 @@ Refer the [Backup] section for what this means.
 > source snapshot _must_ have this flag **already** set to `0`. This can only happen if the original instance was
 > configured that way when the snapshot was taken in the first place.
 
-## Encryption
+## Multi-AZ instances
 
-RDS automatically integrates with AWS KMS for key management.
+Refer [Multi-AZ DB instance deployments for Amazon RDS] and
+[When modifying a Multi-AZ RDS to Single Instance the AZ was changed!!].
 
-By default, RDS uses the _RDS AWS managed key_ (`aws/rds`) from KMS for encryption.<br/>
-This key can't be managed, rotated, nor deleted by users.
+RDS DB instances can be configured for high availability and failover support by using Multi-AZ deployments.
 
-RDS will automatically put databases into a terminal state when access to the KMS key is required but the key has been
-disabled or deleted, or its permissions have been somehow revoked.<br/>
-This change could be immediate or deferred depending on the use case that required access to the KMS key.<br/>
-In this terminal state, DB instances are no longer available and their databases' current state can't be recovered. To
-restore DB instances, one must first re-enable access to the KMS key for RDS, and then restore the instances from their
-latest available backup.
+RDS uses several different technologies to provide failover support. It supports MariaDB, MySQL, Oracle, PostgreSQL,
+and RDS Custom for SQL Server DB instances.<br/>
+Microsoft SQL Server DB instances use SQL Server Database Mirroring or Always On Availability Groups.
+
+RDS provisions and maintains a synchronous standby replica in a different AZ, which continuously syncs with the primary
+DB instance.<br/>
+This provides data redundancy, minimizes latency spikes during system backups, enhances availability during planned
+system maintenance, and helps protect the database against DB instance failure and AZ disruption.
+
+> [!important]
+> One **cannot** use the standby replica to serve read traffic.<br/>
+> To serve read-only traffic, use a Multi-AZ DB cluster or a read replica instance instead.
+
+One can convert existing Single-AZ DB instances to Multi-AZ deployments just by modifying the DB instance.<br/>
+This process involves minimal to no downtime, and requires planning around storage and performance impacts.
+
+During a Single-AZ to Multi-AZ conversion, RDS:
+
+1. Takes a snapshot of the primary DB instance's EBS volumes.
+1. Creates new volumes for the standby replica from that snapshot.
+1. Turns on synchronous block-level replication between the volumes of the primary and standby replicas.
+
+It seems one can convert existing Multi-AZ DB instances to Single-AZ deployments just by modifying the DB instance.<br/>
+This process seems to involve minimal to no downtime, and requires planning around storage and performance impacts.
+
+During a Multi-AZ to Single-AZ conversion, RDS typically keeps the instance in the AZ where the primary was located.
+
+Multi-AZ DB instance deployments have increased costs, and write and commit latency compared to Single-AZ deployments
+due to the synchronous data replication to the standby replica.
+
+If an infrastructure defect results in any outage of a Multi-AZ DB instance, RDS automatically switches to the standby
+replica.<br/>
+The failover typically takes 60 to 120 seconds, but it depends on the database activity and other conditions at the time
+the primary DB instance became unavailable. Large transactions or a lengthy recovery process can increase failover
+time.<br/>
+When the failover is complete, it can take additional time for the RDS console to reflect the new AZ.
 
 ## Operations
 
@@ -920,6 +1002,7 @@ or write workloads and exceeds the instance type quotas.
 
 <!-- In-article sections -->
 [backup]: #backup
+[storage optimization]: #storage-optimization
 
 <!-- Knowledge base -->
 [ebs]: ebs.md
@@ -932,6 +1015,7 @@ or write workloads and exceeds the instance type quotas.
 [amazon rds db instance storage]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
 [amazon rds db instances]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.DBInstance.html
 [aws kms key management]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.Keys.html
+[Changing RDS storage from gp2 to gp3]: https://repost.aws/questions/QUDPKCzJclQbCwOt47lf7lFQ/changing-rds-storage-from-gp2-to-gp3
 [how can i decrease the total provisioned storage size of my amazon rds db instance?]: https://repost.aws/knowledge-center/rds-db-storage-size
 [how can i resolve the "error: <module/extension> must be loaded via shared_preload_libraries" error?]: https://repost.aws/knowledge-center/rds-postgresql-resolve-preload-error
 [How do I cancel pending maintenance in Amazon RDS for PostgreSQL?]: https://repost.aws/knowledge-center/rds-postgresql-cancel-maintenance
@@ -940,6 +1024,7 @@ or write workloads and exceeds the instance type quotas.
 [maintaining a db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html
 [migrating databases to their amazon rds equivalents with aws dms]: https://docs.aws.amazon.com/dms/latest/userguide/data-migrations.html
 [migrating databases using rds postgresql transportable databases]: https://aws.amazon.com/blogs/database/migrating-databases-using-rds-postgresql-transportable-databases/
+[Multi-AZ DB instance deployments for Amazon RDS]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html
 [pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
 [Recommended alarms for RDS]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Best_Practice_Recommended_Alarms_AWS_Services.html#RDS
 [renaming a db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RenameInstance.html
@@ -951,6 +1036,8 @@ or write workloads and exceeds the instance type quotas.
 [understanding postgresql roles and permissions]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Roles.html
 [viewing instance status]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/accessing-monitoring.html
 [what is aws database migration service?]: https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html
+[When modifying a Multi-AZ RDS to Single Instance the AZ was changed!!]: https://repost.aws/questions/QUmpYrb5etT0-de8woCv4rYQ/when-modifying-a-multi-az-rds-to-single-instance-the-az-was-changed
+[Why is my Amazon RDS DB instance in the storage-optimization state for a long time?]: https://repost.aws/knowledge-center/rds-stuck-in-storage-optimization
 [working with db instance read replicas]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html
 [working with parameter groups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html
 [working with parameters on your rds for postgresql db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html

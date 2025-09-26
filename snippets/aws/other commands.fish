@@ -448,6 +448,9 @@ aws rds start-export-task \
 	--iam-role-arn 'arn:aws:iam::012345678901:role/CustomRdsS3Exporter' \
 	--kms-key-id 'arn:aws:kms:eu-west-1:012345678901:key/abcdef01-2345-6789-abcd-ef0123456789'
 
+# Change the storage type
+aws rds modify-db-instance --db-instance-identifier 'instance-name' --storage-type 'gp3' --apply-immediately
+
 # Max 5 running at any given time, RDS cannot queue
 echo {1..5} | xargs -p -n '1' -I '{}' aws rds start-export-task …
 
