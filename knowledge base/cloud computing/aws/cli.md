@@ -324,6 +324,7 @@ yubikeytotp = awscli_plugin_yubikeytotp
 - [Configure profiles] in the CLI
 - [How do I assume an IAM role using the AWS CLI?]
 - [tommie-lie/awscli-plugin-yubikeytotp]
+- [How do I use the AWS CLI to authenticate access to AWS resources with an MFA token?]
 
 ### Sources
 
@@ -357,6 +358,7 @@ yubikeytotp = awscli_plugin_yubikeytotp
 [configure profiles]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html
 [Configuring environment variables for the AWS CLI]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
 [how do i assume an iam role using the aws cli?]: https://repost.aws/knowledge-center/iam-assume-role-cli
+[How do I use the AWS CLI to authenticate access to AWS resources with an MFA token?]: https://repost.aws/knowledge-center/authenticate-mfa-cli
 [improved cli auto-prompt mode]: https://github.com/aws/aws-cli/issues/5664
 [install the session manager plugin for the aws cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-macos-overview.html#install-plugin-macos-signed
 [quickstart]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html
