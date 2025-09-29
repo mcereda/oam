@@ -8,9 +8,10 @@
    1. [Removal](#removal)
    1. [Testing](#testing)
    1. [Executing jobs](#executing-jobs)
+1. [Value precedence](#value-precedence)
 1. [Elevating privileges in tasks](#elevating-privileges-in-tasks)
 1. [Workflow automation](#workflow-automation)
-   1. [Pass data between workflow nodes](#pass-data-between-workflow-nodes)
+   1. [Pass data between workflow Nodes](#pass-data-between-workflow-nodes)
 1. [API](#api)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -122,7 +123,7 @@ awx-operator-controller-manager-8b7dfcb58-k7jt8   2/2     Running   0          1
 </details>
 
 <details>
-<summary>Deploy the operator with <code>helm</code></summary>
+  <summary>Deploy the operator with <code>helm</code></summary>
 
 ```sh
 # Add the operator's repository.
@@ -356,7 +357,7 @@ kubectl delete ns 'awx'
 ### Testing
 
 <details>
-<summary>Run: follow the basic installation guide</summary>
+  <summary>Run: follow the basic installation guide</summary>
 
 [Guide][basic install]
 
@@ -495,7 +496,7 @@ $ minikube kubectl -- delete -k '.'
 </details>
 
 <details>
-<summary>Run: follow the helm installation guide</summary>
+  <summary>Run: follow the helm installation guide</summary>
 
 [Guide][helm install on existing cluster]
 
@@ -566,7 +567,7 @@ $ minikube kubectl -- delete ns 'awx'
 </details>
 
 <details>
-<summary>Run: kustomized helm chart</summary>
+  <summary>Run: kustomized helm chart</summary>
 
 > [!warning]
 > Remember to include the CRDs from the helm chart.
@@ -861,6 +862,122 @@ resource limits.
 
 </details>
 
+## Value precedence
+
+If an AWX resource **both** references another AWX resource **and** sets a property it already defines, the uppermost
+setting in the chain takes priority and overrides the value for the rest of the chain.
+
+<details style='padding: 0 0 0 1rem'>
+  <summary>Example: Scheduled Job</summary>
+
+```yml
+- awx.awx.job_template:
+    organization: ExampleOrg
+    name: Some job
+    …
+    inventory: EC2 instances by Instance ID
+    execution_environment: ExampleOrg-EE
+    credentials:
+      - SSM User  # required to use SSM
+      - AWX Central Key  # required to 'become' in tasks
+    project: Some project
+    playbook: some_playbook.yml
+    job_type: check
+    verbosity: 3
+    diff_mode: true
+- awx.awx.schedule:
+    organization: ExampleOrg
+    …
+    enabled: true
+    unified_job_template: Some Job
+    job_type: run      # spawned jobs override the job template's "job_type" property
+    verbosity: 0       # spawned jobs override the job template's "verbosity" property
+    diff_mode: false   # spawned jobs override the job template's "diff_mode" property
+```
+
+```mermaid
+flowchart LR
+  job_template("Job Template")
+  schedule("Schedule")
+
+  schedule --> workflow_job_template --> workflow_node --> job_template
+```
+
+</details>
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Example: Scheduled Workflow</summary>
+
+```yml
+- awx.awx.job_template:
+    organization: ExampleOrg
+    name: Some job
+    …
+    inventory: EC2 instances by Instance ID
+    execution_environment: ExampleOrg-EE
+    credentials:
+      - SSM User  # required to use SSM
+      - AWX Central Key  # required to 'become' in tasks
+    project: Some project
+    playbook: some_playbook.yml
+    job_type: check
+    verbosity: 3
+    diff_mode: true
+- awx.awx.workflow_job_template:
+    organization: ExampleOrg
+        name: Some workflow
+        …
+- awx.awx.workflow_job_template_node:
+    workflow_job_template: Some workflow
+    unified_job_template: Some job
+    job_type: check  # spawned jobs override the job template's "job_type" property
+    verbosity: 3     # spawned jobs override the job template's "verbosity" property
+    diff_mode: true  # spawned jobs override the job template's "diff_mode" property
+- awx.awx.schedule:
+    organization: ExampleOrg
+    …
+    enabled: true
+    unified_job_template: Some workflow
+    job_type: run      # spawned workflows override the node's "job_type" property
+    verbosity: 0       # spawned workflows override the node's "verbosity" property
+    diff_mode: false   # spawned workflows override the node's "diff_mode" property
+```
+
+```mermaid
+flowchart LR
+  job_template("Job Template")
+  workflow_job_template("Workflow Job Template")
+  workflow_node("Workflow Node")
+  schedule("Schedule")
+
+  schedule --> workflow_job_template --> workflow_node --> job_template
+```
+
+</details>
+
+In a similar fashion, extra variables or prompts defined in AWX resources that reference another AWX resource are
+granted **higher** priority than those defined in the referenced resource.<br/>
+This effectively ends up applying to the resulting Job as if they were given it with the `--extra-vars` option.<br/>
+Refer [Ansible variables].
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Example: Workflows</summary>
+
+When Nodes combine variables, they merge the `extra_vars` defined in their Workflow Job Templates **on top** of their
+own.<br/>
+This gives the values defined in their Workflow Job Templates precedence over the ones defined in the Nodes, and by
+extension over the ones defined in the Job Template referenced by the node.<br/>
+Workflow Job Templates' variables **cannot** be overridden by individual Nodes nor by any task within the
+Workflow.<br/>
+This limitation is enforced to try and ensure predictable behavior, with workflow-level configurations remaining
+consistent across all jobs within a workflow.
+
+</details>
+
+> [!warning]
+> The AWX API has a specific restriction that does **not** allow nullified values for variables in templates.<br/>
+> If a template does not override a variable, that variable should just **not** be provided in the payload.
+
 ## Elevating privileges in tasks
 
 AWX requires one to configure specific settings throughout its resources in order to be able to successfully use
@@ -906,9 +1023,9 @@ _Workflow Job Templates_ coordinate the linking and execution of multiple resour
 - Running Jobs based on the success or failure of one or more previous Jobs.
 - Requesting an admin's approval to proceed with one or more executions.
 
-Each action is a _node_ on a Workflow Job Template.
+Workflow Job Templates define their every action as a _Node_ resource.
 
-<details>
+<details style='padding: 0 0 1rem 1rem'>
 <summary>Creation process</summary>
 
 ```mermaid
@@ -918,8 +1035,9 @@ flowchart LR
   project("Project")
   workflow_job_template("Workflow Job Template")
   workflow_node("Workflow Node")
+  schedule("Schedule")
 
-  playbook --> project --> job_template --> workflow_node --> workflow_job_template
+  playbook --> project --> job_template --> workflow_node --> workflow_job_template --> schedule
 ```
 
 All the playbooks used in the workflow must be visible to AWX, meaning that one or more projects containing them must be
@@ -939,24 +1057,83 @@ The AWX UI does not allow creating nodes directly, but it can be done via the vi
 
 </details>
 
-Workflow job's variables have **higher** precedence than node-level variables, functioning as if they were given with
-the `--extra-vars` option.<br/>
-When workflow nodes combine variables, the `extra_vars` defined in workflow jobs take precedence over the nodes' and
-the node's template's variables. They **cannot** be overridden by individual nodes or tasks within the workflow.<br/>
-This limitation ensures predictable behavior, where workflow-level configurations remain consistent across all jobs
-within a workflow.
+When creating nodes via the `awx.awx.workflow_job_template_node` module, nodes link by referencing the **next** step in
+the workflow.<br/>
+As such, Nodes must be defined **last-to-first** in playbooks.
 
-The AWX API has a specific restriction that does **not** allow `null` values for prompts.<br/>
-If a field is not being overridden, that key should **not** be provided in the payload.
+<details style='padding: 0 0 1rem 1rem'>
 
-When in need to conditionally use variables, one would need to:
+```yml
+- awx.awx.workflow_job_template_node:
+    workflow_job_template: Some workflow
+    identifier: Next action
+    …
+- awx.awx.workflow_job_template_node:
+    workflow_job_template: Some workflow
+    identifier: Previous action
+    …
+    success_nodes:
+      - Next action
+```
 
-1. Specify those variable only in the nodes that require them, and not at the workflow job's level.
-1. Set different variables at the workflow level, rather than trying to unset them.
-1. Design the workflow logic to handle the variable's presence at the playbook level using Ansible's conditionals.
-1. Use separate workflow job templates, if fundamentally different variable sets are needed.
+</details>
 
-### Pass data between workflow nodes
+FIXME
+When needing to use specific variables only in some Nodes within a workflow, consider:
+
+1. Specifying those variable **only in the Nodes** that require them, and **not** at the Workflow Job Template's
+   level.<br/>
+   This prevents them to the overridden by values set at the Workflow Job Template's level.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   Workflow Job Template:
+
+   ```diff
+   -assume_role_arn: 'arn:aws:iam::012345678901:role/PowerfulRole'
+   ```
+
+   Node:
+
+   ```diff
+   +assume_role_arn: 'arn:aws:iam::012345678901:role/PowerfulRole'
+    rds_db_instance_identifier: some-db-to-create
+   ```
+
+   </details>
+
+1. Designing playbooks to handle variables' presence using Ansible's conditionals, defaults, and facts by using play- or
+   task-specific variables, and populating them with the input from workflows.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   ```yml
+   - hosts: all
+     vars:
+       playbook__assume_role_arn: "{{ role_arn }}"
+     tasks:
+       - vars:
+           do_something__rds_instance_identifier: "{{ rds_instance_identifier }}"
+         amazon.aws.rds_instance: …
+   ```
+
+   Alternatively, enabling jinja evaluation at any level, then using jinja expressions to populate nodes' extra vars for
+   differently named variables.<br/>
+   This is especially useful when [passing data between Nodes][pass data between workflow nodes].
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   Node's `extra_vars`:
+
+   ```yml
+   do_something__rds_instance_identifier: "{{ rds_instance_identifier }}"
+   ```
+
+   </details>
+
+1. Using separate Workflow Job Templates altogether, when fundamentally different variable sets are needed.
+
+### Pass data between workflow Nodes
 
 Refer [Passing Ansible variables in Workflows using set_stats].
 
@@ -1116,6 +1293,7 @@ Refer [AWX Command Line Interface] for more information.
 ## Further readings
 
 - [Website]
+- [Ansible]
 - [Kubernetes]
 - [Minikube]
 - [Kustomize]
@@ -1146,12 +1324,15 @@ Refer [AWX Command Line Interface] for more information.
 <!-- In-article sections -->
 [Gotchas]: #gotchas
 [Executing Jobs]: #executing-jobs
+[Pass data between workflow Nodes]: #pass-data-between-workflow-nodes
 
 <!-- Knowledge base -->
-[helm]: kubernetes/helm.md
-[kubernetes]: kubernetes/README.md
-[kustomize]: kubernetes/kustomize.md
-[minikube]: kubernetes/minikube.md
+[Ansible]: ansible.md
+[Ansible variables]: ansible.md#variables
+[Helm]: kubernetes/helm.md
+[Kubernetes]: kubernetes/README.md
+[Kustomize]: kubernetes/kustomize.md
+[Minikube]: kubernetes/minikube.md
 
 <!-- Upstream -->
 [ansible.builtin.set_stats module]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/set_stats_module.html
