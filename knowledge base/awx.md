@@ -1,4 +1,7 @@
-# Ansible AWX
+# AWX
+
+Web-based UI, REST API, and task engine built on top of [Ansible].<br/>
+Part of the upstream projects for the [Red Hat Ansible Automation Platform].
 
 1. [TL;DR](#tldr)
 1. [Gotchas](#gotchas)
@@ -19,7 +22,8 @@
 
 ## TL;DR
 
-When in doubt about AWX's inner workings, consider [asking Devin][deepwiki ansible/awx].
+> [!tip]
+> When in doubt about AWX's inner workings, consider [asking Devin][deepwiki ansible/awx].
 
 ## Gotchas
 
@@ -976,17 +980,24 @@ Variables inheritance works in a similar fashion to [Attribute inheritance and o
 
 Also see [Extra variables].
 
-Variables defined in parent resources recursively override those defined in children resources.<br/>
+Variables defined in parent AWX resources recursively override those defined in children AWX resources **and**, by
+extension, Ansible resources (playbooks, blocks, tasks, etc).<br/>
 Variables defined in ancestors **cannot** be overridden by any of the children in the chain, **nor are affected by any
-task** during playbook execution.<br/>
+Ansible module or component** during playbook execution.<br/>
 The result is effectively as if they were passed down with the `--extra-vars` CLI option. Refer [Ansible variables].
+
+> [!warning]
+> Once a variable is defined in a Job Template or parent resources, it **will** be passed to the Ansible command during
+> Job execution, even if its value is set to `null` (it will just be an empty string).<br/>
+> This also means the values configured in children resources can **at most** be overridden, but **never deleted**.
 
 This limitation is enforced to try and ensure predictable behavior, with higher-level configurations remaining
 consistent across the whole execution chain.
 
 > [!warning]
-> The AWX API has a specific restriction that does **not** allow nullified values for variables in templates.<br/>
-> If a template does not override a variable, that variable should just **not** be provided in the payload.
+> The AWX API has a specific restriction that does **not** consider nullified values for extra variables in resources
+> that allow their definition.<br/>
+> If a resource does not specify a variable with a value, that variable should just **not** be provided in the payload.
 
 ## Elevating privileges in tasks
 
@@ -1359,6 +1370,7 @@ Refer [AWX Command Line Interface] for more information.
 [iterating on the installer without deploying the operator]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/troubleshooting/debugging.html#iterating-on-the-installer-without-deploying-the-operator
 [operator's documentation]: https://ansible.readthedocs.io/projects/awx-operator/en/latest/
 [operator's repository]: https://github.com/ansible/awx-operator/
+[Red Hat Ansible Automation Platform]: https://www.redhat.com/en/technologies/management/ansible
 [website]: https://www.ansible.com/awx/
 [Workflow job templates]: https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.4/html/automation_controller_user_guide/controller-workflow-job-templates
 [Workflows]: https://docs.ansible.com/automation-controller/4.4/html/userguide/workflows.html
