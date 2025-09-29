@@ -8,7 +8,8 @@
    1. [Removal](#removal)
    1. [Testing](#testing)
    1. [Executing jobs](#executing-jobs)
-1. [Value precedence](#value-precedence)
+1. [Attribute inheritance and overriding](#attribute-inheritance-and-overriding)
+   1. [Variables inheritance and overriding](#variables-inheritance-and-overriding)
 1. [Elevating privileges in tasks](#elevating-privileges-in-tasks)
 1. [Workflow automation](#workflow-automation)
    1. [Pass data between workflow Nodes](#pass-data-between-workflow-nodes)
@@ -25,7 +26,8 @@ When in doubt about AWX's inner workings, consider [asking Devin][deepwiki ansib
 - When one does **not** define values in a resource during its creation, the resource will default to the settings of
   the same name defined by the underlying dependency (if any).<br/>
   E.g.: not setting the `job_type` parameter in a schedule (or setting it to `null`) makes the job it starts use the
-  `job_type` setting defined in the job template that the schedule references.
+  `job_type` setting defined in the job template that the schedule references.<br/>
+  Refer [Attribute inheritance and overriding].
 
 - Extra variables configured in job templates will take precedence over the ones defined in the playbook and its tasks,
   as if they were given to the `ansible-playbook` command for the job using its `-e, --extra-vars` option.
@@ -33,7 +35,7 @@ When in doubt about AWX's inner workings, consider [asking Devin][deepwiki ansib
   These variables will have the **highest** precedence of all variables, and as such it is their value that will be used
   throughout the whole execution. They will **not** be overridden by any other definition for similarly named variables
   (not at play, host, block nor task level; not even the `set_facts` module will override them).<br/>
-  Refer [Extra variables].
+  Refer [Variables inheritance and overriding].
 
 - Once a variable is defined in a job template, it **will** be passed to the ansible command for the job, even if its
   value is set to `null` (it will be an empty string).
@@ -732,14 +734,13 @@ deployment.apps "awx-operator-controller-manager" deleted
 
 ### Executing jobs
 
-Unless explicitly defined in Job Templates or Schedules, Jobs using a containerized execution environment are executed
-by the _default_ container group.
+Unless explicitly defined in Job Templates, Schedules, or other resources that allow specifying the `instance_groups`
+key, Jobs using a containerized execution environment will execute in the _default_ container group.
 
 Normally, the _default_ container group does **not** limit where a Job's pod is executed, **nor** limits its assigned
 resources.<br/>
 By explicitly configuring this container group, one can change the settings for Jobs that do not ask for custom
-executors.
-
+executors.<br/>
 E.g., one could set affinity and tolerations to assign Jobs to specific nodes by default, and set specific default
 resource limits.
 
@@ -862,13 +863,22 @@ resource limits.
 
 </details>
 
-## Value precedence
+## Attribute inheritance and overriding
 
-If an AWX resource **both** references another AWX resource **and** sets a property it already defines, the uppermost
-setting in the chain takes priority and overrides the value for the rest of the chain.
+Some AWX-specific resources allow configuring similar attributes.<br/>
+E.g., Schedules, Workflow Job Template Nodes and Job Templates all define `diff_mode`, `job_type`, and other properties.
 
-<details style='padding: 0 0 0 1rem'>
-  <summary>Example: Scheduled Job</summary>
+This is usually true for resource types that can reference another resource type.<br/>
+It is meant to allow _parent_ resource to override properties of their _child_ through hierarchical inheritance.<br/>
+E.g.:
+
+- Schedules and Workflow Job Template Nodes can both reference Job Templates via the `unified_job_template` key.
+- Schedules and Workflow Job Template Nodes specifying attributes like `diff_mode` or `job_type` will override the
+  attribute of the same name specified by the Job Templates they reference.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+Scheduled Jobs' attributes can override referenced Job Templates properties:
 
 ```yml
 - awx.awx.job_template:
@@ -900,13 +910,17 @@ flowchart LR
   job_template("Job Template")
   schedule("Schedule")
 
-  schedule --> workflow_job_template --> workflow_node --> job_template
+  schedule --> job_template
 ```
 
 </details>
 
+This effect is applied recursively to the full reference chain.
+
 <details style='padding: 0 0 1rem 1rem'>
-  <summary>Example: Scheduled Workflow</summary>
+
+Scheduled Jobs' attributes can override referenced Workflow Job Templates' properties, which are propagated to the Job
+Templates used by its Nodes:
 
 ```yml
 - awx.awx.job_template:
@@ -955,24 +969,20 @@ flowchart LR
 
 </details>
 
-In a similar fashion, extra variables or prompts defined in AWX resources that reference another AWX resource are
-granted **higher** priority than those defined in the referenced resource.<br/>
-This effectively ends up applying to the resulting Job as if they were given it with the `--extra-vars` option.<br/>
-Refer [Ansible variables].
+### Variables inheritance and overriding
 
-<details style='padding: 0 0 1rem 1rem'>
-  <summary>Example: Workflows</summary>
+Variables inheritance works in a similar fashion to [Attribute inheritance and overriding], but is specific to the
+`extra_vars` key (A.K.A. _prompts_ in the Web UI).
 
-When Nodes combine variables, they merge the `extra_vars` defined in their Workflow Job Templates **on top** of their
-own.<br/>
-This gives the values defined in their Workflow Job Templates precedence over the ones defined in the Nodes, and by
-extension over the ones defined in the Job Template referenced by the node.<br/>
-Workflow Job Templates' variables **cannot** be overridden by individual Nodes nor by any task within the
-Workflow.<br/>
-This limitation is enforced to try and ensure predictable behavior, with workflow-level configurations remaining
-consistent across all jobs within a workflow.
+Also see [Extra variables].
 
-</details>
+Variables defined in parent resources recursively override those defined in children resources.<br/>
+Variables defined in ancestors **cannot** be overridden by any of the children in the chain, **nor are affected by any
+task** during playbook execution.<br/>
+The result is effectively as if they were passed down with the `--extra-vars` CLI option. Refer [Ansible variables].
+
+This limitation is enforced to try and ensure predictable behavior, with higher-level configurations remaining
+consistent across the whole execution chain.
 
 > [!warning]
 > The AWX API has a specific restriction that does **not** allow nullified values for variables in templates.<br/>
@@ -1078,7 +1088,6 @@ As such, Nodes must be defined **last-to-first** in playbooks.
 
 </details>
 
-FIXME
 When needing to use specific variables only in some Nodes within a workflow, consider:
 
 1. Specifying those variable **only in the Nodes** that require them, and **not** at the Workflow Job Template's
@@ -1325,6 +1334,8 @@ Refer [AWX Command Line Interface] for more information.
 [Gotchas]: #gotchas
 [Executing Jobs]: #executing-jobs
 [Pass data between workflow Nodes]: #pass-data-between-workflow-nodes
+[Attribute inheritance and overriding]: #attribute-inheritance-and-overriding
+[Variables inheritance and overriding]: #variables-inheritance-and-overriding
 
 <!-- Knowledge base -->
 [Ansible]: ansible.md
