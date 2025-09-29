@@ -892,7 +892,7 @@ Scheduled Jobs' attributes can override referenced Job Templates properties:
     inventory: EC2 instances by Instance ID
     execution_environment: ExampleOrg-EE
     credentials:
-      - SSM User  # required to use SSM
+      - SSM User         # required to use SSM
       - AWX Central Key  # required to 'become' in tasks
     project: Some project
     playbook: some_playbook.yml
@@ -901,12 +901,12 @@ Scheduled Jobs' attributes can override referenced Job Templates properties:
     diff_mode: true
 - awx.awx.schedule:
     organization: ExampleOrg
-    …
-    enabled: true
     unified_job_template: Some Job
-    job_type: run      # spawned jobs override the job template's "job_type" property
-    verbosity: 0       # spawned jobs override the job template's "verbosity" property
-    diff_mode: false   # spawned jobs override the job template's "diff_mode" property
+    enabled: true
+    …
+    job_type: run     # spawned jobs override the job template's "job_type" property
+    verbosity: 0      # spawned jobs override the job template's "verbosity" property
+    diff_mode: false  # spawned jobs override the job template's "diff_mode" property
 ```
 
 ```mermaid
@@ -934,7 +934,7 @@ Templates used by its Nodes:
     inventory: EC2 instances by Instance ID
     execution_environment: ExampleOrg-EE
     credentials:
-      - SSM User  # required to use SSM
+      - SSM User         # required to use SSM
       - AWX Central Key  # required to 'become' in tasks
     project: Some project
     playbook: some_playbook.yml
@@ -943,22 +943,23 @@ Templates used by its Nodes:
     diff_mode: true
 - awx.awx.workflow_job_template:
     organization: ExampleOrg
-        name: Some workflow
-        …
+    name: Some workflow
+    …
 - awx.awx.workflow_job_template_node:
     workflow_job_template: Some workflow
     unified_job_template: Some job
+    …
     job_type: check  # spawned jobs override the job template's "job_type" property
     verbosity: 3     # spawned jobs override the job template's "verbosity" property
     diff_mode: true  # spawned jobs override the job template's "diff_mode" property
 - awx.awx.schedule:
     organization: ExampleOrg
-    …
-    enabled: true
     unified_job_template: Some workflow
-    job_type: run      # spawned workflows override the node's "job_type" property
-    verbosity: 0       # spawned workflows override the node's "verbosity" property
-    diff_mode: false   # spawned workflows override the node's "diff_mode" property
+    enabled: true
+    …
+    job_type: run     # spawned workflows override the node's "job_type" property
+    verbosity: 0      # spawned workflows override the node's "verbosity" property
+    diff_mode: false  # spawned workflows override the node's "diff_mode" property
 ```
 
 ```mermaid
@@ -1342,10 +1343,10 @@ Refer [AWX Command Line Interface] for more information.
   -->
 
 <!-- In-article sections -->
-[Gotchas]: #gotchas
-[Executing Jobs]: #executing-jobs
-[Pass data between workflow Nodes]: #pass-data-between-workflow-nodes
 [Attribute inheritance and overriding]: #attribute-inheritance-and-overriding
+[Executing Jobs]: #executing-jobs
+[Gotchas]: #gotchas
+[Pass data between workflow Nodes]: #pass-data-between-workflow-nodes
 [Variables inheritance and overriding]: #variables-inheritance-and-overriding
 
 <!-- Knowledge base -->
