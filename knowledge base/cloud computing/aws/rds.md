@@ -214,9 +214,9 @@ Use one of the following methods:
   [DMS][what is aws database migration service?]<br/>
   This **should** require **minimal** downtime.
 
-RDS instances using GP2 storage can convert their volumes to GP3.<br/>
-There seems to be no downtime associated with this operation, but performances **will** be impacted until the process
-ends and the change will trigger [storage optimization].<br/>
+RDS instances using GP2 storage can convert their volumes to GP3 just by modifying the DB instance.<br/>
+This operation does cause downtime, but performances **will** be impacted until the process ends and the change **will**
+trigger [storage optimization] for the instance.<br/>
 Refer [Changing RDS storage from gp2 to gp3].
 
 ### Storage optimization
@@ -547,20 +547,6 @@ system maintenance, and helps protect the database against DB instance failure a
 > One **cannot** use the standby replica to serve read traffic.<br/>
 > To serve read-only traffic, use a Multi-AZ DB cluster or a read replica instance instead.
 
-One can convert existing Single-AZ DB instances to Multi-AZ deployments just by modifying the DB instance.<br/>
-This process involves minimal to no downtime, and requires planning around storage and performance impacts.
-
-During a Single-AZ to Multi-AZ conversion, RDS:
-
-1. Takes a snapshot of the primary DB instance's EBS volumes.
-1. Creates new volumes for the standby replica from that snapshot.
-1. Turns on synchronous block-level replication between the volumes of the primary and standby replicas.
-
-It seems one can convert existing Multi-AZ DB instances to Single-AZ deployments just by modifying the DB instance.<br/>
-This process seems to involve minimal to no downtime, and requires planning around storage and performance impacts.
-
-During a Multi-AZ to Single-AZ conversion, RDS typically keeps the instance in the AZ where the primary was located.
-
 Multi-AZ DB instance deployments have increased costs, and write and commit latency compared to Single-AZ deployments
 due to the synchronous data replication to the standby replica.
 
@@ -570,6 +556,22 @@ The failover typically takes 60 to 120 seconds, but it depends on the database a
 the primary DB instance became unavailable. Large transactions or a lengthy recovery process can increase failover
 time.<br/>
 When the failover is complete, it can take additional time for the RDS console to reflect the new AZ.
+
+One can convert existing Single-AZ DB instances to Multi-AZ deployments just by modifying the DB instance.<br/>
+This process involves minimal to no downtime, but requires planning around storage and performance impacts if done on
+active instances.
+
+During a Single-AZ to Multi-AZ conversion, RDS:
+
+1. Takes a snapshot of the primary DB instance's EBS volumes.
+1. Creates new volumes for the standby replica from that snapshot.
+1. Turns on synchronous block-level replication between the volumes of the primary and standby replicas.
+
+One can convert existing Multi-AZ DB instances to Single-AZ deployments just by modifying the DB instance.<br/>
+This process involves minimal to no downtime, but requires planning around storage and performance impacts if done on
+active instances.
+
+During a Multi-AZ to Single-AZ conversion, RDS typically keeps the instance in the AZ where the primary was located.
 
 ## Operations
 
