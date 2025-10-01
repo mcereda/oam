@@ -15,6 +15,7 @@
    1. [Export snapshots to S3](#export-snapshots-to-s3)
 1. [Restore](#restore)
 1. [Multi-AZ instances](#multi-az-instances)
+   1. [Converting instances between Multi-AZ and Single-AZ](#converting-instances-between-multi-az-and-single-az)
 1. [Operations](#operations)
     1. [PostgreSQL: reduce allocated storage by migrating using transportable databases](#postgresql-reduce-allocated-storage-by-migrating-using-transportable-databases)
     1. [Stop instances](#stop-instances)
@@ -529,14 +530,9 @@ Refer the [Backup] section for what this means.
 
 ## Multi-AZ instances
 
-Refer [Multi-AZ DB instance deployments for Amazon RDS] and
-[When modifying a Multi-AZ RDS to Single Instance the AZ was changed!!].
+Refer [Multi-AZ DB instance deployments for Amazon RDS].
 
-RDS DB instances can be configured for high availability and failover support by using Multi-AZ deployments.
-
-RDS uses several different technologies to provide failover support. It supports MariaDB, MySQL, Oracle, PostgreSQL,
-and RDS Custom for SQL Server DB instances.<br/>
-Microsoft SQL Server DB instances use SQL Server Database Mirroring or Always On Availability Groups.
+DB instances can be configured for high availability and failover support by using Multi-AZ deployments.
 
 RDS provisions and maintains a synchronous standby replica in a different AZ, which continuously syncs with the primary
 DB instance.<br/>
@@ -550,12 +546,38 @@ system maintenance, and helps protect the database against DB instance failure a
 Multi-AZ DB instance deployments have increased costs, and write and commit latency compared to Single-AZ deployments
 due to the synchronous data replication to the standby replica.
 
+A Single-AZ configuration deploys a DB instance and its EBS storage volumes in one AZ.<br/>
+A Multi-AZ configuration deploys a DB instance and its EBS storage volumes across two or more AZs.
+
+RDS uses several different technologies to provide failover support. It supports MariaDB, MySQL, Oracle, PostgreSQL,
+and RDS Custom for SQL Server DB instances.<br/>
+Microsoft SQL Server DB instances use SQL Server Database Mirroring or Always On Availability Groups.
+
 If an infrastructure defect results in any outage of a Multi-AZ DB instance, RDS automatically switches to the standby
 replica.<br/>
 The failover typically takes 60 to 120 seconds, but it depends on the database activity and other conditions at the time
 the primary DB instance became unavailable. Large transactions or a lengthy recovery process can increase failover
 time.<br/>
 When the failover is complete, it can take additional time for the RDS console to reflect the new AZ.
+
+For a Multi-AZ deployment, RDS creates DB snapshots and automated backups **from the secondary instance** during the
+automatic backup window. This prevents the backup process from suspending I/O activity on the primary instance on all
+engines but SQL Server.<br/>
+In a Single-AZ deployment, the backup process does result in a brief I/O suspension that can last from a few seconds to
+a few minutes. The amount of time depends on the size and class of the DB instance.
+
+A Single-AZ instance is unavailable during a scaling operation.<br/>
+For Multi-AZ deployments, RDS achieves minimal downtime during certain OS patches or scaling operations by:
+
+1. Applying OS maintenance and scaling operations to the secondary instance first.
+1. Promoting the secondary instance to primary, and demoting the old primary instance to secondary.
+1. Performing maintenance or modifications on the old primary, now secondary instance.
+
+### Converting instances between Multi-AZ and Single-AZ
+
+Refer
+[What happens when I change my RDS DB instance from a Single-AZ to a Multi-AZ deployment or a Multi-AZ to a Single-AZ deployment?]
+and [When modifying a Multi-AZ RDS to Single Instance the AZ was changed!!].
 
 One can convert existing Single-AZ DB instances to Multi-AZ deployments just by modifying the DB instance.<br/>
 This process involves minimal to no downtime, but requires planning around storage and performance impacts if done on
@@ -564,14 +586,16 @@ active instances.
 During a Single-AZ to Multi-AZ conversion, RDS:
 
 1. Takes a snapshot of the primary DB instance's EBS volumes.
-1. Creates new volumes for the standby replica from that snapshot.
+1. Creates new volumes for the standby replica from that snapshot in another AZ.
 1. Turns on synchronous block-level replication between the volumes of the primary and standby replicas.
+1. Creates the new standby replica instance in the AZ where the volumes were created, and attaches them to it.
 
 One can convert existing Multi-AZ DB instances to Single-AZ deployments just by modifying the DB instance.<br/>
 This process involves minimal to no downtime, but requires planning around storage and performance impacts if done on
 active instances.
 
-During a Multi-AZ to Single-AZ conversion, RDS typically keeps the instance in the AZ where the primary was located.
+During a Multi-AZ to Single-AZ conversion, RDS typically keeps the instance in the AZ where the primary was located and
+deletes only the secondary instance and volumes. The change does **not** typically affect the primary instance.
 
 ## Operations
 
@@ -1037,6 +1061,7 @@ or write workloads and exceeds the instance type quotas.
 [transporting postgresql databases between db instances]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.TransportableDB.html
 [understanding postgresql roles and permissions]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Roles.html
 [viewing instance status]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/accessing-monitoring.html
+[What happens when I change my RDS DB instance from a Single-AZ to a Multi-AZ deployment or a Multi-AZ to a Single-AZ deployment?]: https://repost.aws/knowledge-center/rds-convert-single-az-multi-az
 [what is aws database migration service?]: https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html
 [When modifying a Multi-AZ RDS to Single Instance the AZ was changed!!]: https://repost.aws/questions/QUmpYrb5etT0-de8woCv4rYQ/when-modifying-a-multi-az-rds-to-single-instance-the-az-was-changed
 [Why is my Amazon RDS DB instance in the storage-optimization state for a long time?]: https://repost.aws/knowledge-center/rds-stuck-in-storage-optimization
