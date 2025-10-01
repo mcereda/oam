@@ -63,6 +63,9 @@ dblab snapshot list
 curl 'https://dblab.example.org:2345/snapshots' -H "Verification-Token: $(gopass show -o 'dblab')"
 curl 'https://dblab.example.org:1234/api/snapshots' -H "Verification-Token: $(gopass show -o 'dblab')"
 
+# Get the ID of the latest snapshot.
+dblab snapshot list | jq -r 'max_by(.createdAt).id'
+
 # Create clones
 dblab clone create --id 'some-clone' --protected --username 'geppetto' --password 'pinocchio' --db-name 'puppetshop'
 curl -X 'POST' 'https://dblab.example.org:1234/api/clone' -H "Verification-Token: $(gopass show -o 'dblab')" \
