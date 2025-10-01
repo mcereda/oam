@@ -56,6 +56,9 @@ dblab config switch 'prod'
 # Fetch the status of the Engine's instance.
 dblab instance status
 
+# Get the ID of the latest snapshot.
+dblab snapshot list | jq -r 'max_by(.createdAt).id'
+
 # Create clones.
 dblab clone create --username 'dblab_user_1' --password 'secret_password' --id 'my_first_clone'
 curl -X 'POST' 'https://dblab.instance.fqdn/api/clone' -H 'Verification-Token: verification-token-here' \
