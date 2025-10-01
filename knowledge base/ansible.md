@@ -264,26 +264,33 @@ Suggestions:
 
 - Optimize fact gathering:
 
-  - Disable fact gathering when not used.
+  - Disable fact gathering when no fact is used by the play.
+
+    ```yml
+    - name: Play with selected facts
+      gather_facts: true
+    ```
+
   - Consider using smart fact gathering:
 
     ```ini
     [defaults]
     gathering = smart
     fact_caching = jsonfile
-    fact_caching_connection = /tmp/ansible/facts.json  ; /tmp/ansible to use the directory and have a file per host
+    fact_caching_connection = /tmp/ansible/facts.json  ; '/tmp/ansible' to create a file per host in the directory
     fact_caching_timeout = 86400
     ```
 
-  - Only gather subsets of facts:
+  - Consider reducing the subsets of facts to gather when only using specific facts:
 
-    ```yaml
+    ```yml
     - name: Play with selected facts
       gather_facts: true
       gather_subset:
         - '!all'
         - '!min'
         - system
+        - date_time
     ```
 
     Refer the [setup module] for more information, and the [setup module source code] for available keys.
