@@ -629,7 +629,8 @@ TODO
 
 TODO
 
-See [Automatically Enforcing AWS Resource Tagging Policies], [Get started with Pulumi policy as code].
+Refer [Automatically Enforcing AWS Resource Tagging Policies], [Get started with Pulumi policy as code] and
+[How to Implement Robust Security Guardrails Using Policy as Code].
 
 ## Stacks
 
@@ -1530,6 +1531,7 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 - [Importing resources]
 - [Property paths]
 - [Create a ComponentResource]
+- [How to Manage Secrets with Pulumi]
 
 <!--
   Reference
@@ -1562,6 +1564,8 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 [enable pulumi refresh to solve pending creates]: https://github.com/pulumi/pulumi/pull/10394
 [get started with pulumi policy as code]: https://www.pulumi.com/docs/using-pulumi/crossguard/get-started/
 [google cloud static website]: https://www.pulumi.com/registry/packages/google-cloud-static-website/
+[How to Implement Robust Security Guardrails Using Policy as Code]: https://www.pulumi.com/blog/deployment-guardrails-with-policy-as-code/
+[How to Manage Secrets with Pulumi]: https://www.pulumi.com/blog/managing-secrets-with-pulumi/
 [iac recommended practices: developer stacks and git branches]: https://www.pulumi.com/blog/iac-recommended-practices-developer-stacks-git-branches/
 [ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
 [importing resources]: https://www.pulumi.com/docs/iac/adopting-pulumi/import/
