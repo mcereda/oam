@@ -293,11 +293,22 @@ To solve this, use a different network mode and **explicitly publish** the ports
   8eaaae8c0c72   hello-world   "/hello"   45 seconds ago   Exited (0) 10 seconds ago           sleepy_brown
   ```
 
-- Docker's host networking feature is not supported on Mac, even though the `docker run` command doesn't complain about
-  it.<br/>
-  This is due to the fact that the Docker daemon on Mac is running in a virtual machine, and not natively; hence, ports
-  are exposed on the VM and not of the host running it.<br/>
-  One way around it is port forwarding to localhost (the `-p` or `-P` options).
+- From inside a container, `localhost` and `127.0.0.1` will always refer to the container itself unless it is configured
+  to use the `host` networking feature.
+- One **cannot** reach containers directly via the network on Mac, even when started with the `--network=host` setting.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  Docker Desktop runs the Engine in a virtual machine, not natively; hence, ports are exposed on the VM and not of the
+  host running Docker Desktop.<br/>
+  Refer [I cannot ping my containers][docker docs  i cannot ping my containers].
+
+  One can go around this limitation by:
+
+  - Forwarding ports to localhost (the `-p, --publish` or `-P, --publish-all` options).
+  - Using tools like [chipmk/docker-mac-net-connect].
+
+  </details>
 
 ## Daemon configuration
 
@@ -556,6 +567,7 @@ Alternatively, keep the exec form but force invoking a shell in it:
 - [Difference between Expose and Ports in Docker Compose]
 - [Unable to reach services behind VPN from docker container]
 - [Improve docker volume performance on MacOS with a RAM disk]
+- [How to Connect to Localhost Within a Docker Container]
 
 <!--
   Reference
@@ -572,6 +584,7 @@ Alternatively, keep the exec form but force invoking a shell in it:
 <!-- Upstream -->
 [building multi-arch images for arm and x86 with docker desktop]: https://www.docker.com/blog/multi-arch-images/
 [docker compose]: https://github.com/docker/compose
+[docker docs  I cannot ping my containers]: https://docs.docker.com/desktop/features/networking/#i-cannot-ping-my-containers
 [dockerfile reference]: https://docs.docker.com/reference/dockerfile/
 [Exec form ENTRYPOINT example]: https://docs.docker.com/reference/dockerfile/#exec-form-entrypoint-example
 [github]: https://github.com/docker
@@ -582,12 +595,14 @@ Alternatively, keep the exec form but force invoking a shell in it:
 [announcing remote cache support in amazon ecr for buildkit clients]: https://aws.amazon.com/blogs/containers/announcing-remote-cache-support-in-amazon-ecr-for-buildkit-clients/
 [arch linux wiki]: https://wiki.archlinux.org/index.php/Docker
 [cheatsheet]: https://collabnix.com/docker-cheatsheet/
+[chipmk/docker-mac-net-connect]: https://github.com/chipmk/docker-mac-net-connect
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html
 [configuring healthcheck in docker-compose]: https://medium.com/@saklani1408/configuring-healthcheck-in-docker-compose-3fa6439ee280
 [difference between expose and ports in docker compose]: https://www.baeldung.com/ops/docker-compose-expose-vs-ports
 [docker arg, env and .env - a complete guide]: https://vsupalov.com/docker-arg-env-variable-guide/
 [docker buildx bake + gitlab ci matrix]: https://teymorian.medium.com/docker-buildx-bake-gitlab-ci-matrix-77edb6b9863f
 [getting around docker's host network limitation on mac]: https://medium.com/@lailadahi/getting-around-dockers-host-network-limitation-on-mac-9e4e6bfee44b
+[How to Connect to Localhost Within a Docker Container]: https://www.howtogeek.com/devops/how-to-connect-to-localhost-within-a-docker-container/
 [how to list the content of a named volume in docker 1.9+?]: https://stackoverflow.com/questions/34803466/how-to-list-the-content-of-a-named-volume-in-docker-1-9
 [How to Use a .dockerignore File: A Comprehensive Guide with Examples]: https://hn.mrugesh.dev/how-to-use-a-dockerignore-file-a-comprehensive-guide-with-examples
 [improve docker volume performance on macos with a ram disk]: https://thoughts.theden.sh/posts/docker-ramdisk-macos-benchmark/
