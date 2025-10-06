@@ -26,6 +26,7 @@
    1. [Assume role with MFA enabled but AssumeRoleTokenProvider session option not set](#assume-role-with-mfa-enabled-but-assumeroletokenprovider-session-option-not-set)
    1. [Attempting to deploy or update resources with pending operations from previous deployment](#attempting-to-deploy-or-update-resources-with-pending-operations-from-previous-deployment)
    1. [Change your program back to the original providers](#change-your-program-back-to-the-original-providers)
+   1. [RangeError: Invalid string length](#rangeerror-invalid-string-length)
    1. [Stack init fails because the stack supposedly already exists](#stack-init-fails-because-the-stack-supposedly-already-exists)
    1. [Stack init fails due to missing scheme](#stack-init-fails-due-to-missing-scheme)
    1. [Stack init fails due to invalid key identifier](#stack-init-fails-due-to-invalid-key-identifier)
@@ -1465,6 +1466,35 @@ Solution:
 1. Fix the provider's version to the one wanted by the resource.
 1. Run `pulumi install` to gather the required version.
 1. Try the action again now.
+
+### RangeError: Invalid string length
+
+Error message example:
+
+```plaintext
+Diagnostics:
+  pulumi:pulumi:Stack (someStack-dev):
+    error: Running program '/path/to/pulumi/project/index.ts' failed with an unhandled exception:
+    RangeError: Invalid string length
+        at markNodeModules (node:internal/util/inspect:1601:21)
+        at formatError (node:internal/util/inspect:1691:18)
+        at formatRaw (node:internal/util/inspect:1084:14)
+        at formatValue (node:internal/util/inspect:932:10)
+        at Object.inspect (node:internal/util/inspect:409:10)
+        at process.uncaughtHandler (/path/to/pulumi/project/node_modules/@pulumi/cmd/run/run.ts:302:48)
+        at process.emit (node:events:520:35)
+        at process.emit (/path/to/pulumi/project/node_modules/@pulumi/pulumi/vendor/ts-node@7.0.1/index.js:2204:25)
+        at process.emit (/path/to/pulumi/project/node_modules/source-map-support/source-map-support.js:516:21)
+        at emitUnhandledRejection (node:internal/process/promises:252:13)
+    error: an unhandled error occurred: Program exited with non-zero exit code: 1
+```
+
+Root cause: something is wrong in the stack's configuration; most likely, the code tries to load a key from it and fails
+because it is missing in the file.
+
+Solution: add all required missing keys to the stack's configuration file.
+
+</details>
 
 ### Stack init fails because the stack supposedly already exists
 
