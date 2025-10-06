@@ -775,7 +775,10 @@ One cannot manually detach nor modify those ENIs. To release the ENIs for a task
 
 A task can only have **one** ENI associated with it at a time.
 
-Containers belonging to the same task **can** communicate over the `localhost` interface.
+Containers within the same task are placed on the same virtual network interface.<br/>
+However, differently from Docker or Kubernetes, they **must** use `localhost` should they wish to communicate with each
+other. Container name-based DNS resolution (e.g. `postgresql://postgres:5432) will **not** work by default, and ECS
+will **not** create DNS records for container names inside a task.
 
 Tasks on Fargate that need to pull a container image must have a route to the container registry.
 
@@ -1522,7 +1525,10 @@ The `fluentd-address` value is specified as a secret option as it may be treated
 
 Options:
 
-- [Set environment variables to secrets from Secrets Manager][pass secrets manager secrets through amazon ecs environment variables].
+- [Pass Secrets Manager secrets through Amazon ECS environment variables].
+
+When setting environment variables to secrets from Secrets Manager, it is the **execution** role (and **not** the task
+role) that must have the permissions required to access them.
 
 ## Best practices
 
