@@ -14,6 +14,7 @@ The [website] hosts the SaaS version.
    1. [Clean up](#clean-up)
 1. [Automatically full refresh data without downtime](#automatically-full-refresh-data-without-downtime)
 1. [Troubleshooting](#troubleshooting)
+   1. [Cannot destroy automatic snapshot in the pool](#cannot-destroy-automatic-snapshot-in-the-pool)
    1. [The automatic full refresh fails claiming it cannot find available pools](#the-automatic-full-refresh-fails-claiming-it-cannot-find-available-pools)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -394,6 +395,48 @@ without downtime.
 > This avoids overloading a single disk when syncing, and prevents the whole data failing should a disk fail.
 
 ## Troubleshooting
+
+### Cannot destroy automatic snapshot in the pool
+
+Error message example:
+
+```plaintext
+2025/10/07 09:49:32 cannot destroy automatic snapshot in the pool
+```
+
+Root cause: still unknown.
+
+Short term solution: manually delete the ZFS snapshots and restart the Engine.
+
+<details>
+
+1. Decide what snapshots need to be deleted.
+
+   ```sh
+   $ zfs list -t 'snapshot'
+   NAME                                   USED  AVAIL  REFER  MOUNTPOINT
+   dblab_pool_0@snapshot_20250924055533  92.3G      -   266G  -
+   dblab_pool_1@snapshot_20250923130042   132G      -   144G  -
+   dblab_pool_1@snapshot_20250915224319   142G      -   145G  -
+   dblab_pool_1@snapshot_20251002175419  87.5K      -   145G  -
+   ```
+
+1. Ensure no clone is using those snapshots.\
+   Reset those that do if necessary.
+1. Destroy the chosen ZFS snapshots.
+
+   ```sh
+   sudo zfs destroy 'dblab_pool_1@snapshot_20250923130042'
+   ```
+
+1. Restart the DBLab Engine's container.\
+   Needed to make it recognize the snapshots are gone.
+
+   ```sh
+   sudo docker container restart 'dblab_server'
+   ```
+
+</details>
 
 ### The automatic full refresh fails claiming it cannot find available pools
 

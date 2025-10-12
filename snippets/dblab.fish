@@ -122,6 +122,10 @@ dblab clone destroy 'some-clone'
 curl -X 'DELETE' 'https://dblab.example.org:1234/api/clone/some-clone' \
 	-H "Verification-Token: $(gopass show -o 'dblab')"
 
+# Delete snapshots
+# Cannot currently delete automatic snapshots via API
+zfs destroy 'dblab_pool_1@snapshot_20250826190434'
+
 # Get admin config in YAML format
 curl 'https://dblab.example.org:1234/api/admin/config.yaml' -H "Verification-Token: $(gopass show -o 'dblab')"
 
