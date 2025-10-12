@@ -355,7 +355,7 @@ sudo docker run --privileged --detach --restart on-failure \
   --volume '/lib/modules:/lib/modules:ro' \
   --volume '/proc:/host_proc:ro' \
   --env 'DOCKER_API_VERSION=1.39' \
-  'postgresai/dblab-server:4.0.0'
+  'postgresai/dblab-server:4.0.1'
 ```
 
 > [!important]
@@ -406,7 +406,7 @@ Error message example:
 
 Root cause: still unknown.
 
-Short term solution: manually delete the ZFS snapshots and restart the Engine.
+_**Short-term**_ solution: manually delete the ZFS snapshots and restart the Engine.
 
 <details>
 
@@ -421,7 +421,7 @@ Short term solution: manually delete the ZFS snapshots and restart the Engine.
    dblab_pool_1@snapshot_20251002175419  87.5K      -   145G  -
    ```
 
-1. Ensure no clone is using those snapshots.\
+1. Ensure no clone is using those snapshots.<br/>
    Reset those that do if necessary.
 1. Destroy the chosen ZFS snapshots.
 
@@ -429,7 +429,7 @@ Short term solution: manually delete the ZFS snapshots and restart the Engine.
    sudo zfs destroy 'dblab_pool_1@snapshot_20250923130042'
    ```
 
-1. Restart the DBLab Engine's container.\
+1. Restart the DBLab Engine's container.<br/>
    Needed to make it recognize the snapshots are gone.
 
    ```sh
@@ -440,25 +440,28 @@ Short term solution: manually delete the ZFS snapshots and restart the Engine.
 
 ### The automatic full refresh fails claiming it cannot find available pools
 
-Root cause: in version 4.0.0, the DBLab Engine happened to consider a pool used by clones, even if those clones were
-destroyed.<br/>
-This seems to have been solved in version 4.0.1.
+Context: since version 4.0.0, when starting a full refresh, the operation fails with error _cannot find available
+pools_.
 
-Solution: remove all ZFS snapshots in the pool that should be used for the refresh and restart the Engine.
+_**Apparent**_ root cause: the branching feature seems to consider a pool used by clones, even if those clones have
+been destroyed.
+
+_**Short-term**_ solution: **recursively** remove the branch's ZFS dataset from the pool that should be used for the
+refresh, and restart the Engine.
 
 <details>
 
 1. Ensure no clone is using snapshots on the pool that should be used for the refresh.<br/>
    Reset those that do if necessary.
-1. Destroy all ZFS snapshots in the pool that should be used for the refresh.
+1. Destroy the branch's ZFS dataset in the pool that should be used for the refresh.
 
    ```sh
    sudo zfs list
    sudo zfs destroy -rv 'dblab_pool_0/branch/main'
    ```
 
-1. Restart the DBLab Engine's container.<br/>
-   Needed to make it recognize the pool as available.
+1. Restart the DBLab Engine's containers.<br/>
+   This will make it recognize the pool as available.
 
    ```sh
    sudo docker container restart 'dblab_server'
