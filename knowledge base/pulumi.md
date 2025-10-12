@@ -1562,6 +1562,7 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 - [Property paths]
 - [Create a ComponentResource]
 - [How to Manage Secrets with Pulumi]
+- [Deploy WordPress to AWS using Pulumi and Ansible]
 
 <!--
   Reference
@@ -1590,6 +1591,7 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 [code examples]: https://github.com/pulumi/examples
 [component resources]: https://www.pulumi.com/docs/iac/concepts/resources/components/
 [deletebeforereplace]: https://www.pulumi.com/docs/concepts/options/deletebeforereplace/
+[Deploy WordPress to AWS using Pulumi and Ansible]: https://www.pulumi.com/blog/deploy-wordpress-aws-pulumi-ansible/
 [documentation]: https://www.pulumi.com/docs/
 [enable pulumi refresh to solve pending creates]: https://github.com/pulumi/pulumi/pull/10394
 [get started with pulumi policy as code]: https://www.pulumi.com/docs/using-pulumi/crossguard/get-started/

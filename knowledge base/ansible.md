@@ -1805,6 +1805,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 - [Ansible delegation madness: delegate_to and variable substitution]
 - [Tim Grützmacher's Ansible best practices]
 - [set_fact vs set_stats]
+- [Deploy WordPress to AWS using Pulumi and Ansible]
 
 <!--
   Reference
@@ -1869,6 +1870,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [ansible: set variable to file content]: https://stackoverflow.com/questions/24003880/ansible-set-variable-to-file-content
 [check if a list contains an item in ansible]: https://stackoverflow.com/questions/28080145/check-if-a-list-contains-an-item-in-ansible/28084746
 [Creating your own Ansible filter plugins]: https://www.dasblinkenlichten.com/creating-ansible-filter-plugins/
+[Deploy WordPress to AWS using Pulumi and Ansible]: https://www.pulumi.com/blog/deploy-wordpress-aws-pulumi-ansible/
 [Easy things you can do to speed up ansible]: https://mayeu.me/post/easy-things-you-can-do-to-speed-up-ansible/
 [edit .ini file in other servers using ansible playbook]: https://syslint.com/blog/tutorial/edit-ini-file-in-other-servers-using-ansible-playbook/
 [Handling secrets in your Ansible playbooks]: https://www.redhat.com/sysadmin/ansible-playbooks-secrets
