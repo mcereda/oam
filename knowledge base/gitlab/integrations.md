@@ -1,18 +1,20 @@
 # GitLab integrations
 
 1. [Linear](#linear)
-   1. [Integration setup](#integration-setup)
+   1. [Linear integration setup](#linear-integration-setup)
    1. [Create MRs that are recognized and automatically linked by Linear](#create-mrs-that-are-recognized-and-automatically-linked-by-linear)
+   1. [Linear integration troubleshooting](#linear-integration-troubleshooting)
+      1. [The integration configuration seems OK, but tickets stopped updating](#the-integration-configuration-seems-ok-but-tickets-stopped-updating)
 1. [Further reading](#further-reading)
 
 ## [Linear]
 
-### Integration setup
+### Linear integration setup
 
 Refer Linear's documentation for [GitLab integration].
 
-> [!IMPORTANT]
-> The GitLab installation must be reachable from the Linear servers through the public Internet.
+> [!important]
+> The GitLab installation must be reachable from Linear's servers through the public Internet.
 
 Linear requires an API access token to communicate with the GitLab instance.\
 The access token is used both to query GitLab's API for information and to post issue linkbacks.
@@ -79,12 +81,36 @@ The TL;DR is the following:
 
 1. Enjoy the issue's status changing automatically when the MR is closed.
 
+### Linear integration troubleshooting
+
+> [!important]
+> [Linear's support team][support@linear.app] has access to internal diagnostic logs built by their engineering team
+> for debugging and system monitoring.<br/>
+> Those are **not** exposed externally, nor are accessible through the Linear interface or API.
+
+#### The integration configuration seems OK, but tickets stopped updating
+
+Root cause: it could be that the TLS certificate used by the integrations proxy is expired.<br/>
+If this is the case, [Linear's support team][support@linear.app] will be able to see logs like the following:
+
+> ```plaintext
+> Error fetching merge request from GitLab: request to https://gitlab.example.org/api/v4/projects/... failed, reason:
+> certificate has expired
+> ```
+
+Solution: make sure the certificate is still valid, and renew it if not.
+
 ## Further reading
 
 - [GitLab integration]
 - [GitLab service accounts]
 
-<!-- References -->
+<!--
+  Reference
+  ═╬═Time══
+  -->
+
+<!-- Upstream -->
 
 [GitLab integration]: https://linear.app/docs/gitlab
 [GitLab personal access tokens]: https://docs.gitlab.com/user/profile/personal_access_tokens/
@@ -93,4 +119,5 @@ The TL;DR is the following:
 [Linear's GitLab integration's settings]: https://linear.app/settings/integrations/gitlab
 [Linear]: https://linear.app/
 [Link Merge Requests⁠]: https://linear.app/docs/gitlab#link-merge-requests
+[support@linear.app]: mailto:support@linear.app
 [Use a magic word]: https://linear.app/docs/gitlab#use-a-magic-word
