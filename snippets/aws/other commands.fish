@@ -218,6 +218,15 @@ aws ec2 describe-network-interfaces --output 'text' \
 	--filters Name=description,Values='ELB classic-load-balancer-name' \
 	--query 'NetworkInterfaces[*].Association.PublicIp'
 
+# Create listener rules
+# Conditions' 'host-header' values allow up to 90 chars total, not 128 as said in the docs
+# Priority 0 is highest
+aws engineer elbv2 create-rule \
+    --listener-arn 'arn:aws:elasticloadbalancing:eu-west-1:012345678901:listener/app/some-listener/0123456789abcedf/0123456789abcdef' \
+    --conditions 'Field=host-header,Values=["some-host.dev.example.org"]' \
+    --actions 'Type=forward,TargetGroupArn=arn:aws:elasticloadbalancing:eu-west-1:012345678901:targetgroup/0123456789abcdef0123456789abcdef/0123456789abcdef' \
+    --priority 1000
+
 
 ###
 # Grafana
