@@ -16,7 +16,11 @@ Renders Markdown-inspired text definitions to create and modify diagrams dynamic
 
 ## Live editor
 
-Mermaid.js offers a [live editor] to check the diagrams' code.
+Mermaid.js offers a [live editor] and a [playground] to check and experiment on diagrams' code on the fly.
+
+> [!tip]
+> Prefer the playground to the live editor.<br/>
+> It offers more features and a generally better experience.
 
 ## Diagrams
 
@@ -319,6 +323,7 @@ gitGraph:
 [documentation]: https://mermaid.js.org/intro/
 [examples]: https://mermaid.js.org/syntax/examples.html
 [live editor]: https://mermaid.live
+[playground]: https://www.mermaidchart.com/play
 [state diagrams]: https://mermaid.js.org/syntax/stateDiagram.html
 
 <!-- Knowledge base -->
