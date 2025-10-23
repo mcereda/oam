@@ -17,7 +17,7 @@
    1. [KMS](#kms)
    1. [PrivateLink](#privatelink)
    1. [Security Hub](#security-hub)
-1. [Step Functions](#step-functions)
+   1. [Step Functions](#step-functions)
 1. [Resource constraints](#resource-constraints)
 1. [Access control](#access-control)
 1. [Costs](#costs)
@@ -32,7 +32,7 @@
 1. [API](#api)
    1. [Python](#python)
 1. [Container images](#container-images)
-    1. [Amazon Linux](#amazon-linux)
+   1. [Amazon Linux](#amazon-linux)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -562,7 +562,7 @@ Custom actions can be sent to EventBridge for automation.
 
 Member accounts can administer Security Hub by delegation if given the permissions to do so.
 
-## Step Functions
+### Step Functions
 
 Refer [What is Step Functions?].
 
@@ -570,15 +570,17 @@ Workflows (A.K.A. _state machines_) for building applications, automating proces
 creating pipelines.<br/>
 Can also be long-running and require human interaction.
 
-Step Functions call AWS services or external workers to perform tasks.
+Step Functions call AWS services or external workers to perform tasks.<br/>
+They can also call other Step Functions in various ways (wait for finish, just start, …). See
+[Start a new AWS Step Functions state machine from a running execution].
 
 In the context of Step Functions:
 
 - State machines are called _workflows_.<br/>
   Workflows are a series of event-driven steps.
-- Each step in a workflow is called _state_.
-- _Task states_ represent units of work performed by **another AWS service**, like calling another service or API.<br/>
-  Instances of running workflows performing tasks are called executions in Step Functions.
+- Each step in a workflow is known as _state_.
+- _Task states_ represent units of work performed by **AWS services**, like calling another service.<br/>
+  Instances of running workflows performing tasks are called _executions_ in Step Functions.
 - _Activities_ represent units of work executed by workers that exist **outside** of Step Functions.
 
 Workflows can be:
@@ -607,6 +609,32 @@ Workflows can be:
   The amount of memory used in the execution of a workflow is billed in 64MB chunks.<br/>
   Memory consumption is based on the size of a workflow definition, the use of map or parallel states, and the execution
   (payload) data size.
+
+Step functions require to assume an IAM Role during execution.<br/>
+Such roles need to allow being assumed by the `states.amazonaws.com` Principal.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": [
+                    "states.amazonaws.com"
+                ],
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+```
+
+</details>
+
+If wanting to send logs to CloudWatch, the execution role must be able to access the log group.
 
 ## Resource constraints
 
@@ -1056,6 +1084,7 @@ If one can, prefer just build the image from an EC2 instance.
 [rotating aws kms keys]: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
 [savings plans user guide]: https://docs.aws.amazon.com/savingsplans/latest/userguide/
 [Services that support the Resource Groups Tagging API]: https://docs.aws.amazon.com/resourcegroupstagging/latest/APIReference/supported-services.html
+[Start a new AWS Step Functions state machine from a running execution]: https://docs.aws.amazon.com/step-functions/latest/dg/connect-stepfunctions.html
 [subnets for your vpc]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html
 [Tag naming limits and requirements]: https://docs.aws.amazon.com/tag-editor/latest/userguide/best-practices-and-strats.html#tag-conventions
 [Tagging best practices and strategies]: https://docs.aws.amazon.com/tag-editor/latest/userguide/best-practices-and-strats.html
