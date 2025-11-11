@@ -29,6 +29,8 @@ type StateMachineBaseState = {
 /**
  * Choice state.\
  * Enables conditional branching.
+ *
+ * Refer <https://docs.aws.amazon.com/step-functions/latest/dg/state-choice.html>.
  */
 interface StateMachineChoiceState extends StateMachineBaseState {
     Type: "Choice";
@@ -47,6 +49,8 @@ type StateMachineParallelBranch = {
 /**
  * Parallel state.\
  * Runs other step states in parallel.
+ *
+ * Refer <https://docs.aws.amazon.com/step-functions/latest/dg/state-parallel.html>.
  */
 interface StateMachineParallelState extends StateMachineBaseState {
     Type: "Parallel";
@@ -56,6 +60,8 @@ interface StateMachineParallelState extends StateMachineBaseState {
 /**
  * Task state.\
  * Runs a service integration or Lambda function.
+ *
+ * Refer <https://docs.aws.amazon.com/step-functions/latest/dg/state-task.html>.
  */
 interface StateMachineTaskState extends StateMachineBaseState {
     Type: "Task";
@@ -67,6 +73,8 @@ interface StateMachineTaskState extends StateMachineBaseState {
 /**
  * Wait state.\
  * Pauses execution for a fixed duration or until a specified time or date.
+ *
+ * Refer <https://docs.aws.amazon.com/step-functions/latest/dg/state-wait.html>.
  */
 interface StateMachineWaitState extends StateMachineBaseState {
     Type: "Wait";
@@ -110,7 +118,7 @@ const checkClonedDbInstanceIsAvailable: StateMachineChoiceState = {
     Type: "Choice",
     Choices: [
         {
-            Condition: "{% $states.input.ClonedDBInstance.DBInstanceStatus in ['available'] %}",
+            Condition: "{% $states.input.ClonedDBInstance.DbInstanceStatus in ['available'] %}",
             Next: "ChangeClonedDBInstancePassword",
         },
     ],
