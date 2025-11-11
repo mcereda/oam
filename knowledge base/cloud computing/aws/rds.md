@@ -520,7 +520,8 @@ Should snapshot one used as source be from an instance that had automatic backup
 Refer the [Backup] section for what this means.
 
 > There is currently **no** way to prevent the backup being generated at instance creation time.<br/>
-> That process is triggered automatically and the feature can only be toggled on and off for _existing_ instances.
+> That process is triggered automatically and the feature can only be toggled on and off for _existing_ instances.<br/>
+> Refer [Disabling AWS RDS backups when creating/updating instances?].
 >
 > The `BackupRetentionPeriod` flag is part of both instances and snapshot definitions, but can only be configured for
 > instances.<br/>
@@ -1072,5 +1073,5 @@ or write workloads and exceeds the instance type quotas.
 <!-- Others -->
 [AWS RDS Max Connections Limit As Per Instance Type]: https://sysadminxpert.com/aws-rds-max-connections-limit/
 [backing up login roles aka users and group roles]: https://www.postgresonline.com/article_pfriendly/81.html
-[disabling aws rds backups when creating/updating instances?]: https://stackoverflow.com/questions/35709153/disabling-aws-rds-backups-when-creating-updating-instances
+[Disabling AWS RDS backups when creating/updating instances?]: https://stackoverflow.com/questions/35709153/disabling-aws-rds-backups-when-creating-updating-instances#35730978
 [Kyle Kingsbury's Amazon RDS for PostgreSQL 17.4 analysis]: https://jepsen.io/analyses/amazon-rds-for-postgresql-17.4
