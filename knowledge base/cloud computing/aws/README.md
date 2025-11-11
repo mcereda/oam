@@ -568,7 +568,7 @@ Refer [What is Step Functions?].
 
 Workflows (A.K.A. _state machines_) for building applications, automating processes, orchestrating microservices, and
 creating pipelines.<br/>
-Can also be long-running and require human interaction.
+Can also be long-running, and require human interaction if correctly configured.
 
 Step Functions call AWS services or external workers to perform tasks.<br/>
 They can also call other Step Functions in various ways (wait for finish, just start, …). See
@@ -585,7 +585,7 @@ In the context of Step Functions:
 
 Workflows can be:
 
-- _Standard_, if they run each step **exactly** once, for long time.<br/>
+- _Standard_, if they run each step **exactly** once, eventually for long time.<br/>
   They can run for up to 1y, are auditable, and show execution history and visual debugging.
 
   Step Functions counts a _state transition_ each time a step in a standard workflow is executed.<br/>
@@ -662,6 +662,9 @@ If wanting to send logs to CloudWatch, the execution role must be able to access
 
 </details>
 
+The casing of arguments is inconsistent and might change from one called resource to another or even inside them.<br/>
+E.g., `arn:aws:states:::aws-sdk:rds:restoreDBInstanceToPointInTime` uses both `SourceDBInstanceIdentifier` (focus on
+`DB`, both letters being uppercase) and `DbInstanceClass` (focus on `Db`, only `D` being uppercase).<br/>
 Unless one knows exactly what one is doing, prefer setting arguments from the service's Console to have _some_ level of
 suggestions.
 
