@@ -636,6 +636,52 @@ Such roles need to allow being assumed by the `states.amazonaws.com` Principal.
 
 If wanting to send logs to CloudWatch, the execution role must be able to access the log group.
 
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Example: get an RDS DB instance's information and pass it as a specific attribute
+
+```json
+{
+  "Comment": "Get an RDS DB instance's information and pass it as a specific attribute",
+  "StartAt": "Get RDS DB Instance information",
+  "States": {
+    "Get RDS DB Instance information": {
+      "Type": "Task",
+      "Arguments": {
+        "DbInstanceIdentifier": "some-rds-db-instance-identifier"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:rds:describeDBInstances",
+      "End": true,
+      "Output": {
+        "RdsDbInstanceInformation": "{% $states.result.DbInstances[0] %}"
+      }
+    }
+  },
+  "QueryLanguage": "JSONata"
+}
+```
+
+</details>
+
+Unless one knows exactly what one is doing, prefer setting arguments from the service's Console to have _some_ level of
+suggestions.
+
+<details>
+  <summary>FIXME - using variables in DescribeDBSnapshots</summary>
+
+```json
+{
+  "DbInstanceIdentifier": "{% $states.input.ProdDBInstanceInfo.DbInstanceIdentifier %}"
+}
+```
+
+```json
+{
+  "AvailableDBSnapshots": "{% $states.result.DbSnapshots[Status='available'] %}"
+}
+```
+
+</details>
+
 ## Resource constraints
 
 | Data type    | Component | Summary                                    | Description                                                                                                                                                                                                                                                | Type   | Length   | Pattern                           | Required |
