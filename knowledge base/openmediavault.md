@@ -25,23 +25,31 @@ Default web UI login is `admin`:`openmediavault`.
 
 ```sh
 # Make users OMV administrators.
-gpasswd -a 'me' 'openmediavault-admin'
 usermod -aG 'openmediavault-admin' 'me'
+gpasswd -a 'me' 'openmediavault-admin'
+adduser 'me' 'openmediavault-admin'
+
+# Allow users to connect via SSH.
+usermod -aG '_ssh' 'me'
+gpasswd -a 'me' '_ssh'
+adduser 'me' '_ssh'
 
 # Revoke WebUI access from the 'admin' user.
 gpasswd -d 'admin' 'openmediavault-admin'
 deluser 'admin' 'openmediavault-admin'
 
 # Install plugins from the CLI.
-apt install 'openmediavault-clamav'
+apt install 'openmediavault-clamav' … 'openmediavault-nut'
 
 # Install OMV-Extras.
 wget -O - 'https://github.com/OpenMediaVault-Plugin-Developers/packages/raw/master/install' | bash
 
-# Disable the kernel's backports sources.
-mv -v \
-  '/etc/apt/sources.list.d/openmediavault-kernel-backports.list' \
-  '/etc/apt/sources.list.d/openmediavault-kernel-backports.list.disabled'
+# Use ZFS.
+# Requires OMV-Extras.
+apt install 'openmediavault-kernel'
+# Install the Proxmox kernel and reboot
+apt install 'openmediavault-zfs'
+zpool import -a
 
 # Upgrade packages.
 sudo omv-upgrade
@@ -197,7 +205,8 @@ From the CLI, as the `root` user:
 
 1. Install the `openmediavault-clamav` plugin.
 1. Enable the service under _Services_ > _Antivirus_ > _Settings_.
-1. Apply pending changes.
+1. Apply pending changes.<br/>
+   The first run will take a long time.
 
 ## UPS
 
