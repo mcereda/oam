@@ -380,7 +380,9 @@ aws rds restore-db-instance-from-db-snapshot \
 	--db-instance-identifier 'awx-pitr-snapshot' \
 	--db-snapshot-identifier 'rds:awx-2024-07-30-14-15'
 
-aws rds delete-db-instance --skip-final-snapshot --db-instance-identifier 'awx'
+aws rds delete-db-instance --db-instance-identifier 'awx'
+aws rds delete-db-instance --db-instance-identifier 'awx-with-backups' \
+	--skip-final-snapshot --delete-automated-backups --no-cli-pager
 
 aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15'
 aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
@@ -469,3 +471,22 @@ aws ssm get-connection-status --target 'i-0123456789abcdef0' --query 'Status' --
 
 # Start a shell
 aws ssm start-session --target 'i-0123456789abcdef0'
+
+
+###
+# Step Functions
+# ------------------
+###
+
+# Start an execution
+aws stepfunctions start-execution --state-machine-arn 'arn:aws:states:eu-west-1:012345678901:stateMachine:SomeMachine'
+
+# List executions
+aws stepfunctions list-executions --state-machine-arn 'arn:aws:states:eu-west-1:012345678901:stateMachine:SomeMachine'
+aws stepfunctions list-executions --state-machine-arn 'arn:aws:states:eu-west-1:012345678901:stateMachine:SomeMachine' \
+	--query "executions[?status=='RUNNING']"
+
+# Stop executions
+aws stepfunctions list-executions --state-machine-arn 'arn:aws:states:eu-west-1:012345678901:stateMachine:SomeMachine' \
+	--query "executions[?status=='RUNNING'].executionArn" --output 'text' \
+| xargs -n1 aws stepfunctions stop-execution --execution-arn
