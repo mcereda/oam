@@ -79,10 +79,11 @@ find . -type f | parallel --group --jobs 0 -d '\n' clamscan {}
 - [Codebase]
 - [Documentation]
 - [Gentoo Wiki]
+- [On-Access Scanning]
 
 ### Sources
 
-- [Install ClamAV on Fedora Linux 35]
+- [Install ClamAV on Fedora Linux]
 
 <!--
   Reference
@@ -93,10 +94,11 @@ find . -type f | parallel --group --jobs 0 -d '\n' clamscan {}
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/Cisco-Talos/clamav
-[documentation]: https://docs.clamav.net/
-[website]: https://www.clamav.net/
+[Codebase]: https://github.com/Cisco-Talos/clamav
+[Documentation]: https://docs.clamav.net/
+[On-Access Scanning]: https://docs.clamav.net/manual/OnAccess.html
+[Website]: https://www.clamav.net/
 
 <!-- Others -->
-[gentoo wiki]: https://wiki.gentoo.org/wiki/ClamAV
-[install clamav on fedora linux 35]: https://www.linuxcapable.com/how-to-install-clamav-on-fedora-35/
+[Gentoo Wiki]: https://wiki.gentoo.org/wiki/ClamAV
+[Install ClamAV on Fedora Linux]: https://linuxcapable.com/install-clamav-on-fedora-linux/
