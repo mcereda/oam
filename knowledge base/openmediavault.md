@@ -8,6 +8,7 @@ NAS solution based on [Debian Linux][debian].
 1. [Create users](#create-users)
 1. [Make users OpenMediaVault administrators](#make-users-openmediavault-administrators)
 1. [Disable the default `admin` user](#disable-the-default-admin-user)
+1. [Configuration backup](#configuration-backup)
 1. [Wake On Lan](#wake-on-lan)
 1. [Power management](#power-management)
    1. [CPU governor](#cpu-governor)
@@ -59,6 +60,8 @@ sudo omv-upgrade
 # E.g.: Debian 11 -> 12 + OMV 6 -> 7
 tmux new-session -As 'omv-release-upgrade' "sudo omv-release-upgrade"
 ```
+
+Backup the current OMV configuration by backing up the `/etc/openmediavault/config.xml` file.
 
 ## First access
 
@@ -130,6 +133,14 @@ From the safest to the less safe option:
    userdel -r 'admin'
    deluser --remove-home 'admin'
    ```
+
+## Configuration backup
+
+OMV's whole configuration is saved in the `/etc/openmediavault/config.xml` file.<br/>
+Keep a backup of it somewhere **outside** the host running it.
+
+Alternatively, consider using [omv-regen] as suggested in
+[this thread][migrate/restore omv settings to another system with omv-regen].
 
 ## Wake On Lan
 
@@ -282,6 +293,7 @@ Just enable that property in the pool or datasets.
 
 <!-- Upstream -->
 [documentation]: https://docs.openmediavault.org/en/latest/
+[Migrate/Restore OMV Settings to Another System with omv-regen]: https://forum.openmediavault.org/index.php?thread/47589-how-to-migrate-restore-omv-settings-to-another-system-with-omv-regen/
 [omv-extras]: https://wiki.omv-extras.org/
 [software & update management]: https://docs.openmediavault.org/en/stable/various/apt.html
 [website]: https://www.openmediavault.org/
@@ -290,3 +302,4 @@ Just enable that property in the pool or datasets.
 <!-- Others -->
 [hdparm]: https://linux.die.net/man/8/hdparm
 [how to lock or disable an user account]: https://www.thegeekdiary.com/unix-linux-how-to-lock-or-disable-an-user-account/
+[omv-regen]: https://github.com/xhente/omv-regen
