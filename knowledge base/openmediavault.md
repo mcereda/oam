@@ -4,24 +4,27 @@ NAS solution based on [Debian Linux][debian].
 
 1. [TL;DR](#tldr)
 1. [First access](#first-access)
-1. [Make other users administrators](#make-other-users-administrators)
-1. [Remove access for the default admin user](#remove-access-for-the-default-admin-user)
+1. [Suggested first steps](#suggested-first-steps)
+1. [Create users](#create-users)
+1. [Make users OpenMediaVault administrators](#make-users-openmediavault-administrators)
+1. [Disable the default `admin` user](#disable-the-default-admin-user)
 1. [Wake On Lan](#wake-on-lan)
 1. [Power management](#power-management)
    1. [CPU governor](#cpu-governor)
    1. [Disk power options](#disk-power-options)
 1. [OMV Extras](#omv-extras)
+1. [Antivirus](#antivirus)
+1. [UPS](#ups)
 1. [ZFS](#zfs)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
-Default web UI login: `admin`:`openmediavault`<br/>
-The root password is the one set during installation.
+Default web UI login is `admin`:`openmediavault`.
 
 ```sh
-# Make other users administrators.
+# Make users OMV administrators.
 gpasswd -a 'me' 'openmediavault-admin'
 usermod -aG 'openmediavault-admin' 'me'
 
@@ -51,21 +54,52 @@ tmux new-session -As 'omv-release-upgrade' "sudo omv-release-upgrade"
 
 ## First access
 
-Default web UI login: `admin`:`openmediavault`<br/>
-The root password is the one set during installation.
+The SSH and web UI servers are active by default on port 22 and 80 respectively.
 
-## Make other users administrators
+The default web UI administrator login is `admin`:`openmediavault`.<br/>
+This user **cannot** login locally, **nor** connect via SSH by default. It only can access OMV's web UI.
 
-Just add the user to the `openmediavault-admin` group:
+The `root` user's password is set during OS installation.<br/>
+This user **can** connect via SSH by default.
+
+## Suggested first steps
+
+1. [Create a custom user][create users].<br/>
+   Make the new custom user a system administrator to avoid using `root` for normal usage.
+1. [Make the new custom user an OpenMediaVault administrator][make users openmediavault administrators].
+1. Change the `admin` user's password and [disable it][disable the default admin user].
+1. Disable SSH access for the `root` user in _Services_ > _SSH_.
+
+## Create users
+
+Just do it as for any other GNU/Linux system:
 
 ```sh
-gpasswd -a 'me' 'openmediavault-admin'
-usermod -aG 'openmediavault-admin' 'me'
+useradd -mG 'users' 'me' && passwd 'me'
+adduser 'me' && adduser 'me' 'users'
 ```
 
-## Remove access for the default admin user
+If the user needs administrator privileges, consider adding it to the `sudo` group:
 
-Only do this **after** you created another user and [made it an admin][make other users administrators].
+```sh
+usermod -aG 'sudo' 'me'
+gpasswd -a 'me' 'sudo'
+adduser 'me' 'sudo'
+```
+
+## Make users OpenMediaVault administrators
+
+Just add the users to the `openmediavault-admin` group:
+
+```sh
+usermod -aG 'openmediavault-admin' 'me'
+gpasswd -a 'me' 'openmediavault-admin'
+adduser 'me' 'openmediavault-admin'
+```
+
+## Disable the default `admin` user
+
+Only do this **after** you created another user and [made it an OMV admin][make users openmediavault administrators].
 
 From the safest to the less safe option:
 
@@ -86,7 +120,7 @@ From the safest to the less safe option:
 
    ```sh
    userdel -r 'admin'
-   deluser 'admin'
+   deluser --remove-home 'admin'
    ```
 
 ## Wake On Lan
@@ -97,6 +131,12 @@ WOL is **not** enabled by default in the kernel driver.<br/>
 Enable the option under _Network_ > _Interfaces_, in **every** NIC's settings you want to respond.
 
 ## Power management
+
+```sh
+sudo apt install 'powertop'
+sudo powertop --auto-tune
+sudo powertop --calibrate
+```
 
 ### CPU governor
 
@@ -153,14 +193,35 @@ From the CLI, as the `root` user:
    | bash
    ```
 
+## Antivirus
+
+1. Install the `openmediavault-clamav` plugin.
+1. Enable the service under _Services_ > _Antivirus_ > _Settings_.
+1. Apply pending changes.
+
+## UPS
+
+1. Install the `openmediavault-nut` plugin.
+1. Enable the service under _Services_ > _UPS_.
+1. Apply pending changes.
+
 ## ZFS
 
 1. [Install OMV-Extras][omv extras].
 1. Pick one:
 
-   - Disable the kernel's backports APT sources and stick to the mainline one.<br/>
-     Linux backport kernels are released quickly enough to leave the userland incomplete at times. This often happens
-     with ZFS, resulting in broken package issues.
+   - \[preferred] Install the `openmediavault-kernel` plugin and use it to install the Proxmox kernel.
+
+     Debian does **not** build ZFS kernel modules into any of their kernels due to licensing conflicts, and doing it
+     manually may result in an extensive build process during installation, which is prone to errors.<br/>
+     The Proxmox-Debian kernel has the ZFS kernel modules preinstalled by default. As kernel upgrades become available
+     and are performed, the userland for the Proxmox kernel will always have the required packages to support ZFS.
+
+   - Disable the kernel's backports APT sources and stick to the mainline one.
+
+     > [!warning]
+     > Linux backport kernels are released quickly enough to leave the userland incomplete at times. This happens often
+     > with ZFS, resulting in broken package issues.
 
      ```sh
      mv -v \
@@ -168,19 +229,14 @@ From the CLI, as the `root` user:
        '/etc/apt/sources.list.d/openmediavault-kernel-backports.list.disabled'
      ```
 
-   - Install the `openmediavault-kernel` plugin and use it to install the Proxmox kernel.<br/>
-     Debian does not build ZFS kernel modules into any of their kernels by default due to licensing conflicts. This may
-     result in an extensive build process during installation, which is prone to errors.
-
-     The Proxmox-Debian kernel has the ZFS kernel modules preinstalled by default. As kernel upgrades become available
-     and are performed, the userland for the Proxmox kernel will always have the required packages to support ZFS.
-
 1. Install the `openmediavault-zfs` plugin.
-1. Create pools and such.<br/>
-   You might need to wipe the disks first.
+1. Create new pools, or import existing ones.
 
-ZFS provides ACL support, but it is not enabled by default.<br/>
-Just enable property in the pool or dataset.
+   > [!note]
+   > One might need to wipe the disks before creating new pools.
+
+ZFS does provide ACL support, but it is **not** enabled by default.<br/>
+Just enable that property in the pool or datasets.
 
 ## Further readings
 
@@ -204,7 +260,9 @@ Just enable property in the pool or dataset.
   -->
 
 <!-- In-article sections -->
-[make other users administrators]: #make-other-users-administrators
+[Create users]: #create-users
+[Disable the default admin user]: #disable-the-default-admin-user
+[Make users OpenMediaVault administrators]: #make-users-openmediavault-administrators
 [omv extras]: #omv-extras
 
 <!-- Knowledge base -->
