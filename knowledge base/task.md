@@ -7,6 +7,8 @@ Task runner aiming to be simpler and easier to use than [GNU Make].
 1. [Variables](#variables)
 1. [Call other tasks](#call-other-tasks)
    1. [Call root tasks from non-flattened included files](#call-root-tasks-from-non-flattened-included-files)
+1. [Run tasks in a specific order](#run-tasks-in-a-specific-order)
+1. [Run tasks concurrently](#run-tasks-concurrently)
 1. [Troubleshooting](#troubleshooting)
    1. [Dry run does not print the commands that would be executed](#dry-run-does-not-print-the-commands-that-would-be-executed)
 1. [Further readings](#further-readings)
@@ -35,8 +37,7 @@ Pros:
 Cons:
 
 - Taskfiles are written in YAML. ≈(・ཀ・≈)<br/>
-  That makes them very much similar to \[[Gitlab] / [Azure Devops]]'s pipelines, and if one has any experience with them
-  one knows what a pain that can be.
+  That makes them very much similar to \[[Gitlab] and [Azure Devops]]'s pipelines, with all the pain that comes with it.
 
 Uses Go's [text/template] and [slim-sprig] packages to interpolate values.
 
@@ -216,6 +217,10 @@ tasks:
   task:being:called: { … }
   task:calling:
     cmd: task: task:being:called
+  another:task:calling:
+    cmds:
+      - task: task:being:called
+        vars: { … }
 ```
 
 ### Call root tasks from non-flattened included files
@@ -239,6 +244,37 @@ tasks:
     cmd:
       task: :task:of:interest
 ```
+
+## Run tasks in a specific order
+
+Specify them in order in the `cmds` key of another task:
+
+```yml
+tasks:
+  default:
+    desc: Run lint, build, and test in order
+    cmds:
+      - task: lint
+      - task: build
+      - task: test
+```
+
+Do **not** name them in the task's `deps`, as they will run concurrently and with no order.
+
+## Run tasks concurrently
+
+Execute `task` with the `--parallel` option and naming all the tasks that should run concurrently:
+
+```sh
+task --parallel 'task1' 'task2'
+```
+
+Tasks that run in parallel are **not** guaranteed to run in order.<br/>
+Parallelization is meant for tasks that are independent from each other.
+
+Tasks' dependencies run concurrently by default.<br/>
+Naming other tasks in tasks' `deps` key ensures that all of them are executed **before** the one calling them starts,
+but does **not** guarantee their order other than the dependencies they define themselves.
 
 ## Troubleshooting
 
@@ -268,6 +304,7 @@ Force the print using `-v, --verbose` when `silent` is set to `true`, or set it 
 - [Usage]
 - [Stop Using Makefile (Use Taskfile Instead)]
 - [Demystification of taskfile variables]
+- [KarChunT's notes]
 
 <!--
   Reference
@@ -288,6 +325,7 @@ Force the print using `-v, --verbose` when `silent` is set to `true`, or set it 
 
 <!-- Others -->
 [demystification of taskfile variables]: https://medium.com/@TianchenW/demystification-of-taskfile-variables-29b751950393
+[KarChunT's notes]: https://karchunt.com/docs/taskfile/
 [slim-sprig]: https://github.com/go-task/slim-sprig
 [stop using makefile (use taskfile instead)]: https://dev.to/calvinmclean/stop-using-makefile-use-taskfile-instead-4hm9
 [text/template]: https://pkg.go.dev/text/template
