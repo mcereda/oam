@@ -1,7 +1,5 @@
 # The `usermod` command
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Sources](#sources)
 
