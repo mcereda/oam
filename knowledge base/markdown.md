@@ -5,6 +5,7 @@ ReadMe's Markdown engine.
 Compare Markdown implementations at [babelmark].
 
 1. [TL;DR](#tldr)
+1. [Tables](#tables)
 1. [Alerts](#alerts)
 1. [Images](#images)
 1. [Troubleshooting](#troubleshooting)
@@ -20,7 +21,10 @@ Compare Markdown implementations at [babelmark].
 
 Use [mermaid.js] to include diagrams and graphs.
 
-See also [The magical Markdown I bet you don't know] and [slaise/High-level-Markdown].
+See also:
+
+- [The magical Markdown I bet you don't know].
+- [slaise/High-level-Markdown].
 
 </details>
 
@@ -95,9 +99,54 @@ checked one.
 
 </details>
 
+## Tables
+
+```md
+| column 1 | column 2 | column 3 |
+| -------- | -------- | -------- |
+| a        | b        | c        |
+```
+
+| column 1 | column 2 | column 3 |
+| -------- | -------- | -------- |
+| a        | b        | c        |
+
+HTML tags can be used within cells to have _some_ control over the content.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```md
+| column 1 | column 2 | column 3                      |
+| -------- | -------- | ----------------------------- |
+| a        | b<br/>b  | <ul><li>c</li><li>c</li></ul> |
+```
+
+| column 1 | column 2 | column 3                      |
+| -------- | -------- | ----------------------------- |
+| a        | b<br/>b  | <ul><li>c</li><li>c</li></ul> |
+
+</details>
+
+Text in columns can be aligned by putting `:` in the header delimiter line where the alignment should be.<br/>
+`:---` = left, `---:` = right, `:---:` = center.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```md
+| column 4 | column 5 | column 6 |
+| :------- | :------: | -------: |
+| a        |    b     |        c |
+```
+
+| column 4 | column 5 | column 6 |
+| :------- | :------: | -------: |
+| a        |    b     |        c |
+
+</details>
+
 ## Alerts
 
-Alerts are not defined in the base Markdown specification.<br/>
+Alerts are **not** defined in the base Markdown specification.<br/>
 They are extensions that the most famous flavours introduced or adopted, each with small but annoying differences.
 
 <details>
@@ -200,24 +249,26 @@ Refer [GitLab Flavored Markdown][gitlab flavored markdown  alerts].
 
 ## Images
 
-Add an image:
+Simply add an image:
 
 ```md
 ![description](path/to.image)
 ![description][reference name]
 ```
 
-Control width and height:
+More advanced control requires using HTML tags directly:
 
-```md
-<img src="./cat.png" width=300px height=200px />
-```
+- Control width and height:
 
-Align in the center:
+  ```md
+  <img src="cat.png" width=300px height=200px alt="description"/>
+  ```
 
-```md
-<div align="center">![sleep-cat](./cat.png)</div>
-```
+- Center the image:
+
+  ```md
+  <div align="center">![sleep-cat](./cat.png)</div>
+  ```
 
 ## Troubleshooting
 
