@@ -62,6 +62,9 @@ By default, containers behave like other Linux processes with respect to access 
 Unless explicitly protected and guaranteed, all containers running on the same host share CPU, memory, and other
 resources much like normal processes running on that host share those very same resources.
 
+Specify the _execution role_ to allow ECS components to call AWS services when starting tasks.<br/>
+Specify the _task role_ to allow the app running in a task to call AWS services.
+
 <details>
   <summary>Usage</summary>
 
@@ -171,6 +174,57 @@ Whatever the [launch type] or [capacity provider][capacity providers]:
 
 > [!important]
 > Task definition's parameters differ depending on the launch type.
+
+Specifying the _Execution Role_ in a task definition grants that IAM Role's permissions **to the ECS container
+agent**, allowing it to call AWS when starting tasks.<br/>
+This is required when ECS (and **not** the app in the task's container) needs to make calls to, i.e., read a value from
+Secrets Manager.<br/>
+This IAM Role must allow `ecs.amazonaws.com` to assume it.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowECSToAssumeThisVeryRole",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "ecs.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+```
+
+</details>
+
+Specifying the _Task Role_ in a task definition grants that IAM Role's permissions **to the task's container**.<br/>
+This is required when the app in the task's container (and **not** ECS) needs to make calls to, i.e., recover a file
+from S3.<br/>
+This IAM Role must allow `ecs-tasks.amazonaws.com` to assume it.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowECSTasksToAssumeThisVeryRole",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+```
+
+</details>
 
 ## Standalone tasks
 
@@ -1526,6 +1580,8 @@ The `fluentd-address` value is specified as a secret option as it may be treated
 Options:
 
 - [Pass Secrets Manager secrets through Amazon ECS environment variables].
+
+Use Secrets Manager in environment variables
 
 When setting environment variables to secrets from Secrets Manager, it is the **execution** role (and **not** the task
 role) that must have the permissions required to access them.
