@@ -699,6 +699,11 @@ Refer [IAM].
 
 ## Costs
 
+Unless the AWS account is configured to use VPC Endpoints, compute instances get and send data from and to AWS services
+via the NAT and the Internet Gateways. This means, that traffic is charged for.<br/>
+Consider activating VPC Endpoints as soon as possible to bypass them.<br/>
+See [The $1,000 AWS mistake].
+
 One pays for data transfer between instances and services in the **same region** but **different availability
 zone**.<br/>
 See [Understanding data transfer charges].
@@ -1059,6 +1064,7 @@ If one can, prefer just build the image from an EC2 instance.
   [Part 2][Introduction to the AWS Virtual Private Cloud (VPC) - Part 2],
   [Part 3][Introduction to the AWS Virtual Private Cloud (VPC) - Part 3]
 - [VPC Endpoints: Secure and Direct Access to AWS Services]
+- [The $1,000 AWS mistake]
 
 <!--
   Reference
@@ -1164,3 +1170,4 @@ If one can, prefer just build the image from an EC2 instance.
 [using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
 [VPC Endpoints: Secure and Direct Access to AWS Services]: https://awsfundamentals.com/blog/vpc-endpoints
 [What Is OIDC and Why Do We Need It?]: https://awsfundamentals.com/blog/oidc-introduction
+[The $1,000 AWS mistake]: https://www.geocod.io/code-and-coordinates/2025-11-18-the-1000-aws-mistake/
