@@ -50,7 +50,9 @@ When replicating a secret, Secrets Manager creates a copy of the original (A.K.A
 as a _replica_ secret.<br/>
 The replica secret remains linked to the primary secret, and is updated when a new version of the primary is created.
 
-Secrets Manager uses [IAM] to allow only authorized users to access or modify a secret.
+Secrets Manager uses [IAM] to allow only authorized users to access or modify a secret.<br/>
+Permissions for them can be set in IAM Policies that are _identity-based_ (the usual ones, granted to IAM Identities),
+or _resource-based_ (secret-specific).
 
 _Managed_ secrets are created and managed by the AWS service that created them.<br/>
 The managing service might also restrict users from updating secrets, or deleting them without a recovery period.<br/>
@@ -64,6 +66,8 @@ Managed secrets use a naming convention that includes the ID of the service mana
 
 ### Sources
 
+- [Authentication and access control for AWS Secrets Manager]
+
 <!--
   Reference
   ═╬═Time══
@@ -76,5 +80,7 @@ Managed secrets use a naming convention that includes the ID of the service mana
 [Secrets management]: ../../secrets%20management.md
 
 <!-- Upstream -->
+[Authentication and access control for AWS Secrets Manager]: https://docs.aws.amazon.com/secretsmanager/latest/userguide/auth-and-access.html
+
 <!-- Others -->
 [JSON structure of AWS Secrets Manager secrets]: https://docs.aws.amazon.com/secretsmanager/latest/userguide/reference_secret_json_structure.html
