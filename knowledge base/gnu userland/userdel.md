@@ -1,4 +1,4 @@
-# The `useradd` command
+# The `userdel` command
 
 Delete users accounts and their related files.
 

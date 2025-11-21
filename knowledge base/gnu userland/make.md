@@ -1,4 +1,4 @@
-# GNU Make
+# Make
 
 1. [TL;DR](#tldr)
 1. [Load .env files in the Makefile](#load-env-files-in-the-makefile)
