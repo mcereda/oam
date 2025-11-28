@@ -73,6 +73,12 @@ snow sql
 snow connection test --temporary-connection --account 'ABCDEFG-YZ01234' --username 'JDOE' --password '<PAT>'
 SNOWFLAKE_ACCOUNT='ABCDEFG-YZ01234' SNOWFLAKE_USER='JDOE' SNOWFLAKE_PASSWORD='SuperSecur3Pa$$word' snow \
   connection test --temporary-connection
+
+# Execute SQL
+snow sql --temporary-connection \
+  --account 'ABCDEFG-YZ01234' --username 'REDASH_SERVICE_USER' --role 'ANALYST_FR' --warehouse 'REDASH_WH' \
+  --password 'ey…W3.ey…1Z.wT…F4--8N…gV-91L_C3…me_tGQf' \
+  --query 'SELECT * FROM VENDORS limit 1;'
 ```
 
 </details>
