@@ -161,12 +161,14 @@ CREATE ROLE IF NOT EXISTS some_service_role;
 SHOW GRANTS TO ROLE SYSADMIN;
 -- Show permissions the current role has on other objects
 SHOW GRANTS ON ROLE SYSADMIN;
+SHOW CALLER GRANTS ON TABLE PROD_DWH.APP_PRODUCTION.FEATURES;
 
 -- Grant permissions to roles
 GRANT ROLE USERADMIN TO ROLE some_service_role;
 GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE SYSADMIN;
 GRANT USAGE ON DATABASE dev_dwh TO ROLE some_service_role;
 GRANT USAGE ON SCHEMA dev_dwh.public TO ROLE some_service_role;
+GRANT SELECT ON TABLE features IN SCHEMA dev_dwh.public TO ROLE some_service_role;
 GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA dev_dwh.public TO ROLE some_service_role;
 
 
