@@ -2,6 +2,7 @@
 
 1. [TL;DR](#tldr)
 1. [How it works](#how-it-works)
+1. [Execution and task roles](#execution-and-task-roles)
 1. [Standalone tasks](#standalone-tasks)
 1. [Services](#services)
 1. [Launch type](#launch-type)
@@ -14,10 +15,10 @@
 1. [Resource constraints](#resource-constraints)
 1. [Environment variables](#environment-variables)
 1. [Storage](#storage)
-   1. [EBS volumes](#ebs-volumes)
-   1. [EFS volumes](#efs-volumes)
-   1. [Docker volumes](#docker-volumes)
-   1. [Bind mounts](#bind-mounts)
+    1. [EBS volumes](#ebs-volumes)
+    1. [EFS volumes](#efs-volumes)
+    1. [Docker volumes](#docker-volumes)
+    1. [Bind mounts](#bind-mounts)
 1. [Networking](#networking)
 1. [Execute commands in tasks' containers](#execute-commands-in-tasks-containers)
 1. [Scale the number of tasks automatically](#scale-the-number-of-tasks-automatically)
@@ -62,8 +63,8 @@ By default, containers behave like other Linux processes with respect to access 
 Unless explicitly protected and guaranteed, all containers running on the same host share CPU, memory, and other
 resources much like normal processes running on that host share those very same resources.
 
-Specify the _execution role_ to allow ECS components to call AWS services when starting tasks.<br/>
-Specify the _task role_ to allow the app running in a task to call AWS services.
+Specify the _execution role_ to allow **ECS components** to call AWS services when starting tasks.<br/>
+Specify the _task role_ to allow **a task's containers** to call AWS services.
 
 <details>
   <summary>Usage</summary>
@@ -175,11 +176,14 @@ Whatever the [launch type] or [capacity provider][capacity providers]:
 > [!important]
 > Task definition's parameters differ depending on the launch type.
 
+## Execution and task roles
+
 Specifying the _Execution Role_ in a task definition grants that IAM Role's permissions **to the ECS container
-agent**, allowing it to call AWS when starting tasks.<br/>
-This is required when ECS (and **not** the app in the task's container) needs to make calls to, i.e., read a value from
-Secrets Manager.<br/>
-This IAM Role must allow `ecs.amazonaws.com` to assume it.
+agent**, allowing it to make calls to other AWS services when starting tasks.<br/>
+This is required when ECS itself (and **not** the app in the task's container) needs to make calls to, i.e., pull images
+from ECRs, write logs to CloudWatch, or retrieve secrets from Secrets Manager.<br/>
+
+The Execution Role must allow `ecs.amazonaws.com` to assume it.
 
 <details style='padding: 0 0 1rem 1rem'>
 
@@ -201,9 +205,64 @@ This IAM Role must allow `ecs.amazonaws.com` to assume it.
 
 </details>
 
+It is common practice to attach the Execution Role the `AmazonECSTaskExecutionRolePolicy` IAM Policy (or equivalent
+permissions) to grant it the minimum permissions required to run Tasks.
+
+> [!warning]
+> For ECS to be able to start a task (OR):
+>
+> - \[easier] The execution role itself must trust `ecs-tasks.amazonaws.com` **in addition** to `ecs.amazonaws.com`.
+>
+>   <details style='padding: 0 0 1rem 1rem'>
+>
+>   ```diff
+>    {
+>        "Version": "2012-10-17",
+>        "Statement": [
+>            {
+>                "Sid": "AllowECSToAssumeThisVeryRole",
+>                "Effect": "Allow",
+>                "Principal": {
+>                    "Service": [
+>                        "ecs.amazonaws.com",
+>   +                    "ecs-tasks.amazonaws.com",
+>                    ]
+>                },
+>                "Action": "sts:AssumeRole"
+>            }
+>        ]
+>    }
+>   ```
+>
+>   </details>
+>
+> - The IAM User or Role that creates the ECS service must have `iam:PassRole` permission for **both** the execution
+>   role **and** the task role.
+>
+>   <details style='padding: 0 0 1rem 1rem'>
+>
+>   ```json
+>   {
+>       "Version": "2012-10-17",
+>       "Statement": [
+>           {
+>               "Sid": "AllowPassExecutionAndTaskRoles",
+>               "Effect": "Allow",
+>               "Action": "iam:PassRole",
+>               "Resource": [
+>                   "arn:aws:iam::012345678901:role/SomeServiceECSExecutionRole",
+>                   "arn:aws:iam::012345678901:role/SomeServiceECSTaskRole"
+>               ]
+>           }
+>       ]
+>   }
+>   ```
+>
+>   </details>
+
 Specifying the _Task Role_ in a task definition grants that IAM Role's permissions **to the task's container**.<br/>
-This is required when the app in the task's container (and **not** ECS) needs to make calls to, i.e., recover a file
-from S3.<br/>
+This is required when the apps in the task's containers (and **not** ECS) needs to make calls to, i.e., recover a file
+from S3 or read values from SQS.<br/>
 This IAM Role must allow `ecs-tasks.amazonaws.com` to assume it.
 
 <details style='padding: 0 0 1rem 1rem'>
