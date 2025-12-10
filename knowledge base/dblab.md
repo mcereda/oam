@@ -69,6 +69,7 @@ curl -X 'POST' 'https://dblab.instance.fqdn/api/clone' -H 'Verification-Token: v
 curl -X 'GET' 'https://dblab.instance.fqdn/api/clone/clone-id' -H 'Verification-Token: verification-token-here'
 
 # Reset clones.
+dblab clone reset --latest 'clone-id'
 curl -X 'POST' 'https://dblab.instance.fqdn/api/clone/clone-id/reset' -H 'Verification-Token: verification-token-here' \
   -H 'accept: application/json' -H 'content-type: application/json' \
   -d '{ "latest": true }'
@@ -119,6 +120,13 @@ curl -X 'PATCH' 'https://dblab.company.com:1234/api/clone/smth' \
   -d '{ "protected": false }'
 curl -X 'DELETE' 'https://dblab.company.com:1234/api/clone/smth' \
   -H 'Verification-Token: something-something-dark-side'
+
+# Reset all the clones that are *not* using the latest snapshot to it
+dblab clone list \
+| jq -r \
+    --arg latest_snapshot $(dblab snapshot list | jq -r 'max_by(.createdAt).id') \
+    '.[]|select(.snapshot.id != $latest_snapshot).id' - \
+| xargs -n1 -p dblab clone reset --latest
 ```
 
 </details>
