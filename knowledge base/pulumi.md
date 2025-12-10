@@ -50,6 +50,21 @@ Projects (and hence stacks) [can be nested][monolith vs micro-stack].
 
 Target single resources with `-t`, `--target`. Target also those that depend on them with `--target-dependents`.
 
+Since v3.208.0, all CLI arguments can be set via environment variables by setting `PULUMI_OPTION_`-prefixed variables
+followed by the capitalized snake case version of the argument name.<br/>
+Boolean arguments can be set using either `true` and `false`, or `1` and `0`.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+| Variable                       | CLI flag                    |
+| ------------------------------ | --------------------------- |
+| `PULUMI_OPTION_PARALLEL=8`     | `--parallel 8`              |
+| `PULUMI_OPTION_REFRESH=true`   | `--refresh`                 |
+| `PULUMI_OPTION_YES=1`          | `--yes`                     |
+| `PULUMI_OPTION_TARGET=foo,bar` | `--target foo --target bar` |
+
+</details>
+
 <details>
   <summary>Setup</summary>
 
