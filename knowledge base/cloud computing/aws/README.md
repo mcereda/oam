@@ -70,6 +70,41 @@ The API for _some_ AWS services (e.g. EC2) are **_eventually_ consistent**.<br/>
 This means that the result of an API request that affects resources _might_ **not** be immediately visible to the
 subsequent requests that API receives.
 
+AWS has some pretty _**inconsistent**_ rules regarding what is allowed in its resources' identifiers.<br/>
+What most seems to work is to keep those identifiers boring, short, simple, and try avoiding super rigid formats.
+
+To avoid multiple formats where possible, all identifiers should should comply to the most restrictive
+requirements.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+Fields:
+
+- Should all be lowercase, since that is how RDS stores all DB identifiers.
+- Should only contain letters, numbers, or hyphens.<br/>
+  Underscores are **not** allowed everywhere.
+- Should start only with a letter.
+- Should end only with a letter or number.
+- Should **not** contain two consecutive hyphens.
+
+</details>
+
+Doing that results in what is objectively an awful naming convention, but it does works well when dealing with unique
+identifiers with unique formats.<br/>
+To make names more user friendly in the UI, AWS allows using the `Name` tag. One should be _encouraged_ to take
+advantage of that.
+
+A good example of naming convention might be `application-environment-component-identifier-others…`.
+
+Regexp: `/[a-z][a-z0-9]+(-[a-z]{2})?(-[a-z]{3,})?(-[a-z0-9]+)?(-[a-z0-9]+)?(-[a-z0-9]+)*/i`.<br/>
+Regexp with labels: `/(?<application>[a-z][a-z0-9]+)(-(?<environment>[a-z]{3,}))?(-(?<component>[a-z0-9]+))?(-(?<identifier>[a-z0-9]+))?(-(?<other>[a-z0-9]+))*/i`.
+
+Not all the fields should be needed for all resources, but the more specific an identifier is and the easier it will
+be to understand at a glance what the resource is and does.
+
+Shortening fields as much as possible might be needed to deal with identifier that must be limited to just a few
+characters in length, while yet cramming as much information as they can.
+
 ## Networking
 
 VPCs define isolated virtual networking environments.<br/>
