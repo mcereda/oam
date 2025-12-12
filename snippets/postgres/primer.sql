@@ -222,14 +222,24 @@ SELECT grantor, grantee, table_schema, table_name, privilege_type
 FROM information_schema.table_privileges
 WHERE grantee = 'engineers';
 
+-- default privileges
+\ddp
+\ddp public
 
--- Assign permissions
+
+-- Assign permissions on existing resources
+-- Will *not* work on future resources
+-- Refer <https://www.postgresql.org/docs/current/sql-grant.html>
 GRANT USAGE ON SCHEMA bar_schema TO donald;
 GRANT ALL PRIVILEGES ON foo_table TO jonathan;
 GRANT admins TO joe;
-GRANT SELECT, INSERT ON foo_table IN SCHEMA public TO kevin;
+GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA public TO kevin;
+GRANT ALL ON TABLE public.assignments TO kevin;
 GRANT SELECT (col1), UPDATE (col1) ON ALL TABLES IN SCHEMA public TO zoe;
-ALTER DEFAULT PRIVILEGES IN SCHEMA bar_schema GRANT SELECT ON TABLES TO foo;
+
+-- Assign permissions on existing and future resources
+-- Refer <https://www.postgresql.org/docs/current/sql-alterdefaultprivileges.html>
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO bar;
 
 
 -- Close the connection to the current DB
