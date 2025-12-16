@@ -15,6 +15,9 @@
    1. [Inspector](#inspector)
    1. [Kinesis](#kinesis)
    1. [KMS](#kms)
+   1. [Lambda functions](#lambda-functions)
+   1. [Load balancing](#load-balancing)
+       1. [Application Load Balancers](#application-load-balancers)
    1. [PrivateLink](#privatelink)
    1. [Security Hub](#security-hub)
    1. [Step Functions](#step-functions)
@@ -314,6 +317,7 @@ Options:
 | [ECS]                         | Run containers as a service                   |
 | [EFS]                         | Serverless file storage                       |
 | [EKS]                         | Managed Kubernetes clusters                   |
+| [ELB]                         | Load balancers                                |
 | [EventBridge]                 | Stream real time data                         |
 | [GuardDuty]                   | Threat detection                              |
 | [IAM]                         | Access control                                |
@@ -527,6 +531,45 @@ AWS charges a monthly fee for the first and second rotation of key material main
 This price increase is capped at the second rotation. Any subsequent rotations will **not** be billed.
 
 Each key counts as one when calculating key resource quotas, regardless of the number of rotated key material versions.
+
+### Lambda functions
+
+TODO.
+
+### Load balancing
+
+#### Application Load Balancers
+
+Application load balancers can use rules to forward traffic to different targets depending on the requests' data (e.g.
+its `path`).
+
+> [!warning]
+> ALBs **cannot** rewrite requests' `host` header or path.<br/>
+> Use [CloudFront] or other solutions like custom forwarder or [Lambda functions] instead.
+
+Using rules in AWS application load balancers to redirect by path **keeps the path** in the forwarded request.<br/>
+Applications that serve their files using _relative_ paths will not be able to find the resources, as the path will not
+be available in the app's folder (and hence in the browser).
+
+E.g.: given an ALB with a rule forwarding requests for paths matching `/some-app`, requests for
+`https://example.com/some-app/static/js/index.js` will be forwarded _as-is_ and try fetching content from the
+`/some-app` folder _in the application_.
+
+> [!important]
+> This does **not** happen for targets that are tasks to ECS.<br/>
+> Those are treated differently by the ALB (insert quotation here), and the requests' path is replaced with `/`.
+>
+> FIXME: since 2025-10-15, it looks like they can by using Rule Transforms.<br/>
+> Check the [news post](https://aws.amazon.com/about-aws/whats-new/2025/10/application-load-balancer-url-header-rewrite),
+> the [blog post](https://aws.amazon.com/blogs/networking-and-content-delivery/introducing-url-and-host-header-rewrite-with-aws-application-load-balancers/),
+> and [Rule Transforms](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/rule-transforms.html).
+
+Solutions for this include:
+
+- Rewriting the requests' path to `/` before forwarding them.
+- Using an ECS-backed target.
+- Using an ALB dedicated for the host (e.g. `some-app.example.com`) to forward requests **directly** using only the
+  default rule (`path = /*`).
 
 ### PrivateLink
 
@@ -1111,6 +1154,7 @@ If one can, prefer just build the image from an EC2 instance.
 [config]: #config
 [detective]: #detective
 [direct connect]: #direct-connect
+[ELB]: #load-balancing
 [enterprise discount program]: #enterprise-discount-program
 [eventbridge]: #eventbridge
 [free tier]: #free-tier
@@ -1118,12 +1162,13 @@ If one can, prefer just build the image from an EC2 instance.
 [inspector]: #inspector
 [kinesis]: #kinesis
 [kms]: #kms
+[Lambda functions]: #lambda-functions
 [privatelink]: #privatelink
 [reserved instances]: #reserved-instances
 [savings plans]: #savings-plans
 [security hub]: #security-hub
-[Step Functions]: #step-functions
 [spot instances]: #spot-instances
+[Step Functions]: #step-functions
 [tiered pricing]: #tiered-pricing
 
 <!-- Knowledge base -->
