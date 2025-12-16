@@ -48,11 +48,16 @@ When a stack is not explicitly requested in a command (`-s`, `--stack`), Pulumi 
 one.<br/>
 Projects (and hence stacks) [can be nested][monolith vs micro-stack].
 
-Target single resources with `-t`, `--target`. Target also those that depend on them with `--target-dependents`.
+Target single resources with `-t`, `--target`. Target also those that depend on them with `--target-dependents`.<br/>
+Exclude single resources with `-e`, `--exclude`. Exclude also those that depend on them with `--exclude-dependents`.
+
+Since v3.207.0, resources can be replaced together with others.<br/>
+Refer [New in Pulumi IaC: `replaceWith` Resource Option].
 
 Since v3.208.0, all CLI arguments can be set via environment variables by setting `PULUMI_OPTION_`-prefixed variables
 followed by the capitalized snake case version of the argument name.<br/>
 Boolean arguments can be set using either `true` and `false`, or `1` and `0`.
+Refer [All Pulumi CLI flags are now supported as environment variables].
 
 <details style='padding: 0 0 1rem 1rem'>
 
@@ -1601,6 +1606,7 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 <!-- Files -->
 <!-- Upstream -->
 [aligning projects between service and self-managed backends]: https://www.pulumi.com/blog/project-scoped-stacks-in-self-managed-backend/
+[All Pulumi CLI flags are now supported as environment variables]: https://www.pulumi.com/blog/controlling-the-cli-through-environment-variables/
 [automatically enforcing aws resource tagging policies]: https://www.pulumi.com/blog/automatically-enforcing-aws-resource-tagging-policies/
 [blog]: https://www.pulumi.com/blog
 [code examples]: https://github.com/pulumi/examples
@@ -1616,6 +1622,7 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 [iac recommended practices: developer stacks and git branches]: https://www.pulumi.com/blog/iac-recommended-practices-developer-stacks-git-branches/
 [ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
 [importing resources]: https://www.pulumi.com/docs/iac/adopting-pulumi/import/
+[New in Pulumi IaC: `replaceWith` Resource Option]: https://www.pulumi.com/blog/dependent-resource-replacements/
 [organizing pulumi projects & stacks]: https://www.pulumi.com/docs/using-pulumi/organizing-projects-stacks/
 [property paths]: https://www.pulumi.com/docs/iac/concepts/miscellaneous/property-paths/
 [pulumi config set-all]: https://www.pulumi.com/docs/cli/commands/pulumi_config_set-all/
