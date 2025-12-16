@@ -1,0 +1,58 @@
+---
+version: "3"
+tasks:
+  pulumi:install:
+    desc: install packages and plugins for the current pulumi program or policy pack
+    summary: |-
+      Install packages and plugins for the current Pulumi program or policy pack.
+    cmd: pulumi install
+    preconditions:
+      - test -r 'Pulumi.yaml'
+  pulumi:preview:
+    desc: show a preview of updates to a pulumi stack's resources
+    summary: |-
+      Show a preview of updates to a Pulumi stack's resources.
+    aliases:
+      - pulumi:pre
+    interactive: true
+    deps:
+      - pulumi:install
+    requires:
+      vars:
+        - AWS_PROFILE
+    cmd: pulumi pre
+  pulumi:refresh:
+    deps:
+      - pulumi:install
+    desc: refresh the resources in a pulumi stack
+    summary: |-
+      Refresh the resources in a Pulumi stack.
+    interactive: true
+    requires:
+      vars:
+        - AWS_PROFILE
+    cmd: pulumi refresh
+  pulumi:stack:init:
+    desc: create an empty pulumi stack with the given name
+    summary: |-
+      Create an empty Pulumi stack with the given name, ready for updates.
+    interactive: true
+    deps:
+      - pulumi:install
+    requires:
+      vars:
+        - AWS_PROFILE
+    cmd: pulumi stack init dev
+  pulumi:up:
+    desc: create or update the resources in a pulumi stack
+    summary: |-
+      Create or update the resources in a Pulumi stack.
+    aliases:
+      - pulumi:update
+    interactive: true
+    deps:
+      - pulumi:install
+    requires:
+      vars:
+        - AWS_PROFILE
+    cmd: pulumi up

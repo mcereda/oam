@@ -1,0 +1,102 @@
+---
+version: "3"
+
+tasks:
+
+  cli:session-manager-plugin:install:
+    desc: install the session manager plugin for the aws cli
+    summary: |-
+      Install the session manager plugin for the AWS CLI.
+    platforms:
+      - darwin/arm64
+    interactive: true
+    cmds:
+      - >-
+          curl --continue-at '-'
+          --url 'https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac_arm64/session-manager-plugin.pkg'
+          --output 'session-manager-plugin.pkg'
+      - sudo installer -pkg 'session-manager-plugin.pkg' -target '/'
+      - sudo ln -fs '/usr/local/sessionmanagerplugin/bin/session-manager-plugin' '/usr/local/bin/session-manager-plugin'
+    status:
+      - test -r '/usr/local/sessionmanagerplugin/bin/session-manager-plugin'
+      - test -r '/usr/local/bin/session-manager-plugin'
+
+  ecr:login:
+    desc: login to an ecr
+    summary: |-
+      Login to an ECR.
+
+      Enables pulling and pushing images to it, as long as the AWS user has sufficient permissions.
+    internal: true
+    requires:
+      vars:
+        - ECR_URL
+    cmd: aws ecr get-login-password | docker login --username 'AWS' --password-stdin '{{.ECR_URL}}'
+
+  ecs:service:check:can-execute:
+    desc: check one can execute commands in an ecs service's tasks
+    summary: |-
+      Check one can execute commands in an ECS service's tasks.
+    internal: true
+    requires:
+      vars:
+        - AWS_PROFILE
+        - CLUSTER
+        - SERVICE_NAME
+    vars:
+      CLUSTER: '{{.CLUSTER}}'
+    cmd: >-
+      aws ecs list-tasks --cluster '{{.CLUSTER}}' --service-name '{{.SERVICE_NAME}}' --query 'taskArns' --output 'text'
+      | xargs aws ecs describe-tasks --cluster '{{.CLUSTER}}' --output 'yaml'
+      --query 'tasks[0] | {
+        "managedAgents": containers[].managedAgents[?@.name==`ExecuteCommandAgent`][],
+        "enableExecuteCommand": enableExecuteCommand
+      }'
+      --tasks
+  ecs:service:execute:
+    desc: execute a command in an ecs service's task
+    summary: |-
+      Execute a command in an ECS service's task.
+    internal: true
+    interactive: true
+    deps:
+      - cli:session-manager-plugin:install
+    requires:
+      vars:
+        - AWS_PROFILE
+        - CLUSTER
+        - CONTAINER_NAME
+        - SERVICE_NAME
+        - COMMAND
+    vars:
+      CLUSTER: '{{.CLUSTER}}'
+    cmd: >-
+      aws ecs list-tasks --cluster '{{.CLUSTER}}' --service-name '{{.SERVICE_NAME}}' --query 'taskArns[0]' --output 'text'
+      | xargs -o -I '%%' aws ecs execute-command --interactive --command '{{.COMMAND}}' --cluster '{{.CLUSTER}}' --container '{{.CONTAINER_NAME}}' --task '%%'
+  ecs:service:get-shell:
+    desc: get a shell in an ecs service's task
+    summary: |-
+      Get a shell in an ECS service's task.
+    internal: true
+    interactive: true
+    cmd:
+      task: ecs:service:execute
+      vars:
+        COMMAND: bash
+        CONTAINER_NAME: '{{.CONTAINER_NAME}}'
+        SERVICE_NAME: '{{.SERVICE_NAME}}'
+  ecs:service:get-tasks-ips:
+    desc: get the ip addresses of an ecs service's tasks
+    summary: |-
+      Get the IP addresses of an ECS service's tasks.
+    internal: true
+    requires:
+      vars:
+        - AWS_PROFILE
+        - CLUSTER
+        - SERVICE_NAME
+    vars:
+      CLUSTER: '{{.CLUSTER}}'
+    cmd: >-
+      aws ecs list-tasks --cluster '{{.CLUSTER}}' --service-name '{{.SERVICE_NAME}}' --query 'taskArns[0]' --output 'text'
+      | xargs -I '%%' aws ecs describe-tasks --cluster '{{.CLUSTER}}' --tasks '%%' --query "tasks[].attachments[].details[?(@.name=='privateIPv4Address')].value" --output 'text'
