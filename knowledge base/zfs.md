@@ -32,8 +32,7 @@ zpool create \
 
 # List available pools.
 zpool list
-zpool list -o 'name,size'
-zpool list -Ho 'name'
+zpool list -Hp -o 'name,size'
 
 # Show pools configuration and status.
 zpool status
@@ -103,8 +102,10 @@ man zpool-features
 Filesystem-related:
 
 ```sh
-# List all available datasets (filesystems).
+# List available datasets (filesystems).
 zfs list
+zfs list -o 'space'  # shortcut for -o 'name,avail,used,usedsnap,usedds,usedrefreserv,usedchild -t filesystem,volume'
+zfs list -Hp -o 'name,used' -S 'used'  # sort by 'used' in descending order
 
 # Automatically mount or unmount filesystems.
 # See 'zfs get mountpoint pool_name' for a dataset's mountpoint's root path.
@@ -120,8 +121,9 @@ zfs destroy 'pool_name/filesystem_name'
 zfs destroy -r 'pool_name'
 zfs destroy -fr 'pool_name/filesystem_name'
 
-# List all snapshots.
+# List snapshots.
 zfs list -t 'snapshot'
+zfs list -Hp -t 'snapshot' -S 'creation' -o 'name,creation'
 
 # Recursively list snapshots for a given dataset, outputting only name and
 # creation date
@@ -146,6 +148,9 @@ zfs send 'source_pool_name/filesystem_name@snapshot_name' | ssh node02 "zfs rece
 # Destroy snapshots and clones.
 zfs destroy 'pool_name/filesystem_name@snapshot_name'
 zfs destroy 'path/to/clone'
+
+# Destroy datasets older than the most recent 4
+zfs list -Hp -t 'snapshot' -S 'creation' -o 'name' | sed '1,4d' | xargs -n '1' -t zfs destroy -nv
 
 # Query a file system or volume configuration (get properties).
 zfs get 'all' 'pool_name'
@@ -322,6 +327,8 @@ sudo zpool \
 - [Oracle Solaris ZFS Administration Guide]
 - [Gentoo Wiki]
 - [Archlinux Wiki]
+- [Sanoid][jimsalterjrs/sanoid]
+- [Zrepl][zrepl/zrepl]
 
 ## Sources
 
@@ -354,4 +361,6 @@ All the references in the [further readings] section, plus the following:
 [creating fully encrypted zfs pool]: https://timor.site/2021/11/creating-fully-encrypted-zfs-pool/
 [gentoo wiki]: https://wiki.gentoo.org/wiki/ZFS
 [how to enable zfs deduplication]: https://linuxhint.com/zfs-deduplication/
+[jimsalterjrs/sanoid]: https://github.com/jimsalterjrs/sanoid
 [zfs support + kernel, best approach]: https://forum.manjaro.org/t/zfs-support-kernel-best-approach/33329/2
+[zrepl/zrepl]: https://github.com/zrepl/zrepl
