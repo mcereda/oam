@@ -152,6 +152,16 @@ zfs destroy 'path/to/clone'
 # Destroy datasets older than the most recent 4
 zfs list -Hp -t 'snapshot' -S 'creation' -o 'name' | sed '1,4d' | xargs -n '1' -t zfs destroy -nv
 
+# Destroy all snapshots older than 31d (pre zfs-2.3)
+zfs list -Hp -t 'snapshot' -o 'name,creation' | while read -r SNAPSHOT CREATION; do
+  if [[ $CREATION -ge $(date -d "31 days ago" +%s) ]]; then
+    echo "'$SNAPSHOT' is recent enough to be kept."
+  else
+    echo "'$SNAPSHOT' is old and is about to be deleted."
+    zfs destroy -nv "$SNAPSHOT"
+  fi
+done
+
 # Query a file system or volume configuration (get properties).
 zfs get 'all' 'pool_name'
 zfs get 'aclmode,aclinherit,acltype,xattr' 'pool_name/filesystem_name'
