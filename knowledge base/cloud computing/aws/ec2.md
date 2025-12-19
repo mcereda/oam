@@ -175,6 +175,25 @@ Refer [How can I send memory and disk metrics from my EC2 instances to CloudWatc
 
 > Make sure the instance the permissions it needs to publish extra metrics.<br/>
 > Consider assigning it the AWS-managed `CloudWatchAgentServerPolicy` IAM policy or similar permissions.
+>
+> <details style='padding: 0 0 1rem 1rem'>
+>
+> ```json
+> {
+>     Version: "2012-10-17",
+>     Statement: [{
+>         Effect: "Allow",
+>         Action: [
+>             "ec2:DescribeTags",
+>             "ec2:DescribeVolumes",
+>             "cloudwatch:PutMetricData"
+>         ],
+>         Resource: "*"
+>     }]
+> }
+> ```
+>
+> </details>
 
 CloudWatch agent's logs are saved by default to `/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log`.
 
