@@ -13,6 +13,7 @@ The [website] hosts the SaaS version.
    1. [Launch DBLab server](#launch-dblab-server)
    1. [Clean up](#clean-up)
 1. [Automatically full refresh data without downtime](#automatically-full-refresh-data-without-downtime)
+1. [Deleting snapshots](#deleting-snapshots)
 1. [Troubleshooting](#troubleshooting)
    1. [Cannot destroy automatic snapshot in the pool](#cannot-destroy-automatic-snapshot-in-the-pool)
    1. [The automatic full refresh fails claiming it cannot find available pools](#the-automatic-full-refresh-fails-claiming-it-cannot-find-available-pools)
@@ -393,6 +394,31 @@ without downtime.
 > [!tip]
 > Prefer dedicating an entire disk to each pool or logical volume.<br/>
 > This avoids overloading a single disk when syncing, and prevents the whole data failing should a disk fail.
+
+## Deleting snapshots
+
+Prefer deleting snapshots via the server (CLI, API or UI).<br/>
+In case that is not possible, consider using the `zfs` utility to delete them.
+
+> [!caution]
+> The engine will **not** notice snapshots deletion until the server is restarted.
+
+```sh
+# Delete all but the 4 most recent snapshots
+zfs list -Hp -t 'snapshot' -S 'creation' -o 'name' \
+| sed '1,4d' \
+| xargs -n '1' zfs destroy -nv
+
+# Delete all snapshots older than 31d (pre zfs-2.3)
+zfs list -Hp -t 'snapshot' -o 'name,creation' | while read -r SNAPSHOT CREATION; do
+  if [[ $CREATION -ge $(date -d "31 days ago" +%s) ]]; then
+    echo "'$SNAPSHOT' is recent enough to be kept."
+  else
+    echo "'$SNAPSHOT' is old and is about to be deleted."
+    zfs destroy -nv "$SNAPSHOT"
+  fi
+done
+```
 
 ## Troubleshooting
 
