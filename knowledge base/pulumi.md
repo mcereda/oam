@@ -56,17 +56,19 @@ Refer [New in Pulumi IaC: `replaceWith` Resource Option].
 
 Since v3.208.0, all CLI arguments can be set via environment variables by setting `PULUMI_OPTION_`-prefixed variables
 followed by the capitalized snake case version of the argument name.<br/>
-Boolean arguments can be set using either `true` and `false`, or `1` and `0`.
+Boolean arguments can be set using either `true` and `false`, or `1` and `0`.<br/>
+Other arguments (e.g. `--parallel`) do require specific types, and might fail if given string values.
 Refer [All Pulumi CLI flags are now supported as environment variables].
 
 <details style='padding: 0 0 1rem 1rem'>
 
-| Variable                       | CLI flag                    |
-| ------------------------------ | --------------------------- |
-| `PULUMI_OPTION_PARALLEL=8`     | `--parallel 8`              |
-| `PULUMI_OPTION_REFRESH=true`   | `--refresh`                 |
-| `PULUMI_OPTION_YES=1`          | `--yes`                     |
-| `PULUMI_OPTION_TARGET=foo,bar` | `--target foo --target bar` |
+| Variable                             | CLI flag                    |
+| ------------------------------------ | --------------------------- |
+| `PULUMI_OPTION_PARALLEL=8`           | `--parallel 8`              |
+| `PULUMI_OPTION_REFRESH=true`         | `--refresh`                 |
+| `PULUMI_OPTION_NON_INTERACTIVE=true` | `--non-interactive`         |
+| `PULUMI_OPTION_YES=1`                | `--yes`                     |
+| `PULUMI_OPTION_TARGET=foo,bar`       | `--target foo --target bar` |
 
 </details>
 
