@@ -68,6 +68,12 @@ docker pull '123456789012.dkr.ecr.eu-west-1.amazonaws.com/quay/argoproj/argocd:v
 # E.g., 'library/alpine' instead of just 'alpine'.
 docker pull '123456789012.dkr.ecr.eu-south-1.amazonaws.com/docker-hub/library/nginx:perl'
 docker pull '123456789012.dkr.ecr.us-west-2.amazonaws.com/docker-hub/grafana/grafana'
+
+# Check what ECR Basic Scanning technology is used by the account.
+aws ecr get-account-setting --name 'BASIC_SCAN_TYPE_VERSION' --query 'value' --output 'text'
+# Change it.
+aws ecr put-account-setting --name 'BASIC_SCAN_TYPE_VERSION' --value 'AWS_NATIVE'
+aws ecr put-account-setting --name 'BASIC_SCAN_TYPE_VERSION' --value 'CLAIR'
 ```
 
 ```sh
