@@ -7,30 +7,28 @@
     "json.schemas": [
         {
             "fileMatch": [
-                ".lefthook.yaml",
-                ".lefthook.yml"
+                ".lefthook.y*ml"
             ],
-            "url": "https: //json.schemastore.org/lefthook.json"
+            "url": "https://json.schemastore.org/lefthook.json"
         },
         {
             "fileMatch": [
                 ".markdownlint.js",
                 ".markdownlint.json",
                 ".markdownlint.jsonc",
-                ".markdownlint.yaml"
+                ".markdownlint.y*ml"
             ],
             "url": "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json"
         },
         {
             "fileMatch": [
-                ".pre-commit-config.yaml"
+                ".pre-commit-config.y*ml"
             ],
             "url": "https://json.schemastore.org/pre-commit-config.json"
         },
         {
             "fileMatch": [
-                "docker-compose.yaml",
-                "docker-compose.yml"
+                "docker-compose.y*ml"
             ],
             "url": "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"
         },
@@ -47,6 +45,13 @@
             "url": "https://json.schemastore.org/pulumi.json"
         }
     ],
+    "yaml.schemas": {
+        "https://json.schemastore.org/lefthook.json": ".lefthook.y*ml",
+        "https://json.schemastore.org/pre-commit-config.json": ".pre-commit-config.y*ml",
+        "https://json.schemastore.org/pulumi.json": "Pulumi.y*ml",
+        "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json": "docker-compose.y*ml",
+        "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json": ".markdownlint.y*ml"
+    },
 
     "[markdown]": {
         "editor.wordWrap": "off"
