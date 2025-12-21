@@ -26,6 +26,19 @@ On Linux, support for `/etc/cron.d` is included in the cron daemon itself, which
 system-wide crontab spool.<br/>
 This directory can contain any file defining tasks following the format used in `/etc/crontab`).
 
+All crontab files:
+
+- Must be either regular files or symlinks to regular files.
+- Must **not** be executable **nor** writable for anyone else but the owner.<br/>
+  This requirement can be overridden by using the `-p` option on `crond`'s command line.
+
+> [!important]
+> If `inotify` support is in use, changes in symlinked crontabs are **not** automatically noticed by the cron daemon.
+> In this case, the daemon **must** receive a `SIGHUP` signal to reload those crontabs.<br/>
+> This is a limitation of the `inotify` API.
+
+When `sendmail` is not installed in the system, it will not send emails and use the syslog output instead.
+
 Debian uses a default configuration for the cron system that is specific to the distribution.
 
 <details style='padding: 0 0 1rem 1rem'>
@@ -53,7 +66,7 @@ Files have to pass some sanity checks, including:
 
 - Be **executable**.
 - Be owned by the `root` user.
-- **Not** be writable by group or other.
+- **Not** be _writable_ by group or other (but can be _readable_ by them).
 - Be named conforming to the filename requirements of `run-parts` (must match `^[a-zA-Z0-9\_\-]$`).<br/>
   Any file which name does **not** conform to these requirements will **not** be executed by `run-parts`.
 
