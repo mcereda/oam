@@ -41,6 +41,7 @@ sudo crontab -r -u 'nana'
 ## Further readings
 
 - [Cron]
+- [Crontab guru]
 
 ### Sources
 
@@ -56,3 +57,4 @@ sudo crontab -r -u 'nana'
 
 <!-- Others -->
 [cheat.sh]: https://cheat.sh/crontab
+[crontab guru]: https://crontab.guru/
