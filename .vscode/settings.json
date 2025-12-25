@@ -161,6 +161,7 @@
         "filebeat",
         "fileglob",
         "firewalld",
+        "flathub",
         "flatpak",
         "fluentd",
         "foris",
