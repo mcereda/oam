@@ -4,14 +4,55 @@
 1. [Gotchas](#gotchas)
 1. [Setup](#setup)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
 <details>
+  <summary>Setup</summary>
+
+  <details style='padding: 0 0 0 1rem'>
+    <summary>Debian</summary>
+
+Refer the [Debian Wiki].
+
+> [!tip]
+> Prefer using _stable_'s backported kernel and tools.
+
+```sh
+CODENAME="$(lsb_release -cs)"  # or 'stable'
+ARCH="$(uname --kernel-release | sed -E 's|.*-(.*)$|\1|')"  # or 'amd64', 'arm64', …
+cat <<EOF | tee -a '/etc/apt/sources.list.d/zfs.list'
+deb http://deb.debian.org/debian ${CODENAME}-backports main contrib non-free
+EOF
+cat <<EOF | tee -a '/etc/apt/preferences.d/99zfs'
+Package: linux-image-* linux-headers-* libnvpair*linux libuutil*linux libzpool*linux libzfs*linux zfsutils-linux zfs-dkms
+Pin: release a=${CODENAME}-backports
+Pin-Priority: 995
+EOF
+apt update
+apt install -t "${CODENAME}-backports" "linux-image-${ARCH}" "linux-headers-${ARCH}" 'zfsutils-linux' 'zfs-dkms'
+shutdown -r now
+```
+
+  </details>
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Mac OS X</summary>
+
+```sh
+brew install --cask 'openzfs'
+```
+
+  </details>
+
+</details>
+
+<details>
   <summary>Usage</summary>
 
-Pool-related:
+  <details style='padding: 0 0 0 1rem'>
+    <summary>Pools</summary>
 
 ```sh
 # Create pools.
@@ -35,6 +76,7 @@ zpool list
 zpool list -Hp -o 'name,size'
 
 # Show pools configuration and status.
+# Also shows the status of running operations on the pool.
 zpool status
 zpool status -x 'pool_name' 'time_in_seconds'
 
@@ -87,19 +129,25 @@ zpool set 'compression=lz4' 'pool_name'
 # Add vdevs to mirrored pools.
 zpool attach 'pool_name' 'first_drive_in_existing_mirror' 'new_dev'
 
+# Get info about zpools features.
+man zpool-features
+
+# Trim pools.
+zpool trim 'pool_name'
+zpool set 'autotrim=on' 'pool_name'
+
 # Destroy pools.
 zpool destroy 'pool_name'
 
-# Restore a destroyed pool.
-# The pool needs to be reimported straight after the destroy command has been
-# issued.
+# Restore destroyed pools.
+# The pool must be reimported right after the `destroy` command has been issued, before the data is actually deleted.
 zpool import -D
-
-# Get info about zpools features.
-man zpool-features
 ```
 
-Filesystem-related:
+  </details>
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Datasets (filesystems)</summary>
 
 ```sh
 # List available datasets (filesystems).
@@ -107,14 +155,21 @@ zfs list
 zfs list -o 'space'  # shortcut for -o 'name,avail,used,usedsnap,usedds,usedrefreserv,usedchild -t filesystem,volume'
 zfs list -Hp -o 'name,used' -S 'used'  # sort by 'used' in descending order
 
+# Create new filesystems.
+zfs create 'pool_name/filesystem_name'
+zfs create -V '1gb' 'pool_name/filesystem_name'
+zfs create -o 'encryption=on' -o 'keyformat=passphrase' 'pool_name/filesystem_name'
+zfs create -o 'encryption=on' -o 'keylocation=file:///path/to/raw/key' 'pool_name/filesystem_name'
+
+# Load or unload encryption keys.
+# Needed before mounting encrypted datasets, unless using `zfs mount -l`.
+zfs load-key 'pool_name/filesystem_name'
+zfs unload-key 'pool_name/filesystem_name'
+
 # Automatically mount or unmount filesystems.
 # See 'zfs get mountpoint pool_name' for a dataset's mountpoint's root path.
 zfs mount -alv
 zfs unmount 'pool_name/filesystem_name'
-
-# Create new filesystems.
-zfs create 'pool_name/filesystem_name'
-zfs create -V '1gb' 'pool_name/filesystem_name'
 
 # Delete filesystems.
 zfs destroy 'pool_name/filesystem_name'
@@ -166,8 +221,9 @@ done
 zfs get 'all' 'pool_name'
 zfs get 'aclmode,aclinherit,acltype,xattr' 'pool_name/filesystem_name'
 
-# Enable or change settings on a filesystem.
+# Enable or change settings on filesystems.
 zfs set 'compression=on' 'pool_name/filesystem_name'
+zfs set 'dedup=on' 'pool_name/filesystem_name'
 zfs set 'mountpoint=/my/mount/path' 'pool_name/filesystem_name'
 zfs set 'mountpoint=legacy' 'pool_name/filesystem_name'
 zfs set 'quota=1G' 'pool_name/filesystem_name'
@@ -181,10 +237,19 @@ zfs inherit -r 'acltype' 'pool_name/filesystem_name'
 man zfs
 ```
 
-Procedure examples:
+  </details>
+
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
 
 ```sh
-# Create a dataset in a new pool, adjust its permissions and unmount the pool.
+# Encrypt datasets.
+# Needs (re)creation.
+zfs send tank/badMemories | zfs recv -o 'encryption=on' -o 'keyformat=passphrase' backups/badMemories
+
+# Create a dataset in a new pool, adjust its permissions, and unmount the pool.
 sudo zpool create \
   -o 'feature@encryption=enabled' \
   -O 'encryption=on' -O 'keyformat=passphrase' \
@@ -339,10 +404,9 @@ sudo zpool \
 - [Archlinux Wiki]
 - [Sanoid][jimsalterjrs/sanoid]
 - [Zrepl][zrepl/zrepl]
+- [Encrypting ZFS File Systems]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Article on ZFS on Linux]
 - [cheat.sh/zfs]
@@ -356,10 +420,8 @@ All the references in the [further readings] section, plus the following:
   ═╬═Time══
   -->
 
-<!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Upstream -->
+[Encrypting ZFS File Systems]: https://docs.oracle.com/cd/E23824_01/html/821-1448/gkkih.html
 [openzfs docs]: https://openzfs.github.io/openzfs-docs/
 [oracle solaris zfs administration guide]: https://docs.oracle.com/cd/E19253-01/819-5461/index.html
 
@@ -369,6 +431,7 @@ All the references in the [further readings] section, plus the following:
 [article on zfs on linux]: https://blog.heckel.io/2017/01/08/zfs-encryption-openzfs-zfs-on-linux
 [cheat.sh/zfs]: https://cheat.sh/zfs
 [creating fully encrypted zfs pool]: https://timor.site/2021/11/creating-fully-encrypted-zfs-pool/
+[debian wiki]: https://wiki.debian.org/ZFS
 [gentoo wiki]: https://wiki.gentoo.org/wiki/ZFS
 [how to enable zfs deduplication]: https://linuxhint.com/zfs-deduplication/
 [jimsalterjrs/sanoid]: https://github.com/jimsalterjrs/sanoid
