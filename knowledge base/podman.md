@@ -9,6 +9,12 @@ Intended to be a drop-in replacement for [Docker].
 
 ## TL;DR
 
+> [!important]
+> Podman in rootless mode (the default) leverages [subordinate user and group IDs][subordinate ids] to map containers'
+> UID and GID to much higher numbers and avoid conflicts.<br/>
+> This means the IDs used _inside_ containers will **not** be the same as the ones of the user running them, and it
+> will probably raise permissions issues when trying to write or read from volumes.
+
 <details>
   <summary>Setup</summary>
 
@@ -93,10 +99,12 @@ podman system prune --all
 - [Containerd]
 - [Kaniko]
 - [Volumes and rootless Podman]
+- [Subordinate IDs]
 
 ### Sources
 
 - [Pull Official Images From Docker Hub Using Podman]
+- [User IDs and (rootless) containers with Podman]
 
 <!--
   Reference
@@ -104,9 +112,10 @@ podman system prune --all
   -->
 
 <!-- Knowledge base -->
-[containerd]: containerd.md
-[docker]: docker.md
-[kaniko]: kaniko.md
+[Containerd]: containerd.md
+[Docker]: docker.md
+[Kaniko]: kaniko.md
+[Subordinate IDs]: linux/subordinate%20ids.md
 
 <!-- Upstream -->
 [Documentation]: https://docs.podman.io/en/stable/
@@ -114,4 +123,5 @@ podman system prune --all
 
 <!-- Others -->
 [Pull Official Images From Docker Hub Using Podman]: https://www.baeldung.com/ops/podman-pull-image-docker-hub
+[User IDs and (rootless) containers with Podman]: https://blog.christophersmart.com/2021/01/26/user-ids-and-rootless-containers-with-podman/
 [Volumes and rootless Podman]: https://blog.christophersmart.com/2021/01/31/volumes-and-rootless-podman/
