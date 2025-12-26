@@ -158,7 +158,8 @@ zfs list -Hp -o 'name,used' -S 'used'  # sort by 'used' in descending order
 # Create new filesystems.
 zfs create 'pool_name/filesystem_name'
 zfs create -V '1gb' 'pool_name/filesystem_name'
-zfs create -o 'encryption=on' -o 'keyformat=passphrase' 'pool_name/filesystem_name'
+zfs create -o 'encryption=aes-256-ccm' -o 'keyformat=passphrase' 'pool_name/filesystem_name'
+zfs create -o 'encryption=on' -o 'keysource=raw,file:///path/to/raw/key' 'pool_name/filesystem_name'
 zfs create -o 'encryption=on' -o 'keylocation=file:///path/to/raw/key' 'pool_name/filesystem_name'
 
 # Load or unload encryption keys.
@@ -184,6 +185,22 @@ zfs list -Hp -t 'snapshot' -S 'creation' -o 'name,creation'
 # creation date
 zfs list -r -t 'snapshot' -o 'name,creation' 'pool_name/filesystem_name'
 
+# Query a file system or volume configuration (get properties).
+zfs get 'all' 'pool_name'
+zfs get 'aclmode,aclinherit,acltype,xattr' 'pool_name/filesystem_name'
+
+# Enable or change settings on filesystems.
+zfs set 'compression=on' 'pool_name/filesystem_name'
+zfs set 'dedup=on' 'pool_name/filesystem_name'
+zfs set 'mountpoint=/my/mount/path' 'pool_name/filesystem_name'
+zfs set 'mountpoint=legacy' 'pool_name/filesystem_name'
+zfs set 'quota=1G' 'pool_name/filesystem_name'
+zfs set 'reservation=1G' 'pool_name/filesystem_name'
+
+# Reset properties to default.
+zfs inherit 'compression' 'pool_name/filesystem_name'
+zfs inherit -r 'acltype' 'pool_name/filesystem_name'
+
 # Create new snapshots.
 zfs snapshot 'pool_name/filesystem_name@snapshot_name'
 
@@ -203,35 +220,6 @@ zfs send 'source_pool_name/filesystem_name@snapshot_name' | ssh node02 "zfs rece
 # Destroy snapshots and clones.
 zfs destroy 'pool_name/filesystem_name@snapshot_name'
 zfs destroy 'path/to/clone'
-
-# Destroy datasets older than the most recent 4
-zfs list -Hp -t 'snapshot' -S 'creation' -o 'name' | sed '1,4d' | xargs -n '1' -t zfs destroy -nv
-
-# Destroy all snapshots older than 31d (pre zfs-2.3)
-zfs list -Hp -t 'snapshot' -o 'name,creation' | while read -r SNAPSHOT CREATION; do
-  if [[ $CREATION -ge $(date -d "31 days ago" +%s) ]]; then
-    echo "'$SNAPSHOT' is recent enough to be kept."
-  else
-    echo "'$SNAPSHOT' is old and is about to be deleted."
-    zfs destroy -nv "$SNAPSHOT"
-  fi
-done
-
-# Query a file system or volume configuration (get properties).
-zfs get 'all' 'pool_name'
-zfs get 'aclmode,aclinherit,acltype,xattr' 'pool_name/filesystem_name'
-
-# Enable or change settings on filesystems.
-zfs set 'compression=on' 'pool_name/filesystem_name'
-zfs set 'dedup=on' 'pool_name/filesystem_name'
-zfs set 'mountpoint=/my/mount/path' 'pool_name/filesystem_name'
-zfs set 'mountpoint=legacy' 'pool_name/filesystem_name'
-zfs set 'quota=1G' 'pool_name/filesystem_name'
-zfs set 'reservation=1G' 'pool_name/filesystem_name'
-
-# Reset properties to default.
-zfs inherit 'compression' 'pool_name/filesystem_name'
-zfs inherit -r 'acltype' 'pool_name/filesystem_name'
 
 # Get more information about zfs volumes properties.
 man zfs
@@ -257,6 +245,19 @@ sudo zpool create \
 sudo zfs create 'vault/data'
 sudo chown "$USER":'users' '/vault/data'
 sudo zpool export 'vault'
+
+# Destroy datasets older than the most recent 4
+zfs list -Hp -t 'snapshot' -S 'creation' -o 'name' | sed '1,4d' | xargs -n '1' -t zfs destroy -nv
+
+# Destroy all snapshots older than 31d (pre zfs-2.3)
+zfs list -Hp -t 'snapshot' -o 'name,creation' | while read -r SNAPSHOT CREATION; do
+  if [[ $CREATION -ge $(date -d "31 days ago" +%s) ]]; then
+    echo "'$SNAPSHOT' is recent enough to be kept."
+  else
+    echo "'$SNAPSHOT' is old and is about to be deleted."
+    zfs destroy -nv "$SNAPSHOT"
+  fi
+done
 ```
 
 </details>
