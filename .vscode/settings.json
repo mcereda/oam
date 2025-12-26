@@ -334,6 +334,7 @@
         "subvolume",
         "swapfile",
         "swapon",
+        "syncthing",
         "sysctls",
         "sysrc",
         "systool",
