@@ -1,6 +1,5 @@
 ---
 # Refer https://github.com/syncthing/syncthing/blob/main/README-Docker.md
-version: "3"
 services:
   syncthing:
     image: syncthing/syncthing:2.0.12
@@ -11,8 +10,9 @@ services:
       - PGID=${GID-1000}  # use 0 with podman
       - STGUIADDRESS=0.0.0.0:8384
     volumes:
-      - config:/var/syncthing/config:z
+      - ${PWD}/config:/var/syncthing/config:z
       - ${PWD}/data:/var/syncthing/data
+      - ${HOME}/Media:/var/syncthing/media
     network_mode: host
     restart: unless-stopped
     healthcheck:
@@ -20,5 +20,3 @@ services:
       interval: 1m
       timeout: 10s
       retries: 3
-volumes:
-  config:

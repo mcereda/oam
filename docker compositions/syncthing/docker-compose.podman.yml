@@ -4,21 +4,16 @@ services:
   syncthing:
     image: syncthing/syncthing:2.0.12
     container_name: syncthing
-    hostname: MacBook-Pro
+    hostname: ${HOSTNAME}
     environment:
-      - PUID=501
-      - PGID=20
+      - PUID=0  # due to podman's rootless uid mapping
+      - PGID=0  # due to podman's rootless gid mapping
       - STGUIADDRESS=0.0.0.0:8384
     volumes:
       - ${PWD}/config:/var/syncthing/config:z
       - ${PWD}/data:/var/syncthing/data
       # - ${HOME}/media:/var/syncthing/media
-    ports:
-      # No way to use 'host' mode  in OS X
-      - 127.0.0.1:8384:8384/tcp   # Web UI
-      - 22000:22000/tcp           # TCP file transfers
-      - 22000:22000/udp           # QUIC file transfers
-      - 21027:21027/udp           # Receive local discovery broadcasts
+    network_mode: host
     restart: unless-stopped
     healthcheck:
       test: curl -fkLsS -m 2 127.0.0.1:8384/rest/noauth/health | grep -o --color=never OK || exit 1
