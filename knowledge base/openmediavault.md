@@ -227,27 +227,45 @@ From the CLI, as the `root` user:
 
 ## ZFS
 
+Refer [ZFS Plugin For OMV7].
+
 1. [Install OMV-Extras][omv extras].
 1. Pick one:
 
-   - \[preferred] Install the `openmediavault-kernel` plugin and use it to install the Proxmox kernel.
+   <details style='padding: 0 0 0 1rem'>
+     <summary><i><b>[preferred]</b></i> Use the Proxmox kernel.</summary>
 
-     Debian does **not** build ZFS kernel modules into any of their kernels due to licensing conflicts, and doing it
-     manually may result in an extensive build process during installation, which is prone to errors.<br/>
-     The Proxmox-Debian kernel has the ZFS kernel modules preinstalled by default. As kernel upgrades become available
-     and are performed, the userland for the Proxmox kernel will always have the required packages to support ZFS.
+     > [!note]
+     > Debian does **not** build ZFS kernel modules into any of their kernels due to licensing conflicts, and doing it
+     > manually may result in an extensive build process during installation, which is prone to errors.<br/>
+     > The Proxmox-Debian kernel has the ZFS kernel modules preinstalled by default. As kernel upgrades become available
+     > and are performed, the userland for the Proxmox kernel will always have the required packages to support ZFS.
 
-   - Disable the kernel's backports APT sources and stick to the mainline one.
+     1. Install the `openmediavault-kernel` plugin.
+     1. Use the `kernel` plugin to install the Proxmox kernel.
+
+        _System_ > _Kernel_ > _Proxmox_ icon.
+
+     1. Reboot.
+     1. Make sure the default kernel ends with `-pve`, the suffix used for the Proxmox kernel.
+     1. \[optional, but recommended] Remove non-Proxmox kernels.
+
+   </details>
+
+   <details style='padding: 0 0 1rem 1rem'>
+     <summary>Disable APT's backports sources, and stick to Debian's <i>stable</i> kernel.</summary>
 
      > [!warning]
-     > Linux backport kernels are released quickly enough to leave the userland incomplete at times. This happens often
-     > with ZFS, resulting in broken package issues.
+     > Linux backport kernels are released quickly enough to leave the userland incomplete at times.<br/>
+     > This happens often with ZFS, resulting in broken package issues.
 
      ```sh
      mv -v \
        '/etc/apt/sources.list.d/openmediavault-kernel-backports.list' \
        '/etc/apt/sources.list.d/openmediavault-kernel-backports.list.disabled'
      ```
+
+   </details>
 
 1. Install the `openmediavault-zfs` plugin.
 1. Create new pools, or import existing ones.
@@ -264,6 +282,7 @@ Just enable that property in the pool or datasets.
 - [Documentation]
 - [Debian]
 - [Proxmox]
+- [Plugins]
 - [OMV-Extras]
 - [Disks maintenance]
 - [ZFS]
@@ -271,7 +290,7 @@ Just enable that property in the pool or datasets.
 ### Sources
 
 - [How to lock or disable an user account]
-- [ZFS plugin for OMV6]
+- [ZFS plugin for OMV7]
 - [Software & Update Management]
 
 <!--
@@ -292,12 +311,13 @@ Just enable that property in the pool or datasets.
 [zfs]: zfs.md
 
 <!-- Upstream -->
-[documentation]: https://docs.openmediavault.org/en/latest/
+[Documentation]: https://docs.openmediavault.org/en/latest/
 [Migrate/Restore OMV Settings to Another System with omv-regen]: https://forum.openmediavault.org/index.php?thread/47589-how-to-migrate-restore-omv-settings-to-another-system-with-omv-regen/
-[omv-extras]: https://wiki.omv-extras.org/
-[software & update management]: https://docs.openmediavault.org/en/stable/various/apt.html
-[website]: https://www.openmediavault.org/
-[zfs plugin for omv6]: https://wiki.omv-extras.org/doku.php?id=docs_in_draft:zfs
+[OMV-Extras]: https://wiki.omv-extras.org/
+[Plugins]: https://docs.openmediavault.org/en/stable/plugins.html
+[Software & Update Management]: https://docs.openmediavault.org/en/stable/various/apt.html
+[Website]: https://www.openmediavault.org/
+[ZFS Plugin For OMV7]: https://wiki.omv-extras.org/doku.php?id=omv7:omv7_plugins:zfs
 
 <!-- Others -->
 [hdparm]: https://linux.die.net/man/8/hdparm
