@@ -104,6 +104,10 @@ nft -s list ruleset > '/path/to/nftables.dump'
 # Read commands from files.
 nft --file 'path/to/file'
 nft -f 'path/to/file'
+
+# Listen to all events.
+# Reports in the native nft format.
+nft monitor
 ```
 
 </details>
@@ -141,6 +145,8 @@ nft chain 'inet' 'my_table' 'my_input' '{ policy drop ; }'
 
 # Add rules to chains.
 nft add rule 'inet' 'base_table' 'input_filter' tcp dport 80 drop
+nft add rule 'ip' 'ssh' 'ssh_chain' tcp dport 22 accept
+nft add rule 'inet' 'filter' 'input' log
 
 # Delete chains.
 nft delete chain 'inet' 'base_table' 'input_filter'
