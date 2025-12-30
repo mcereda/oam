@@ -85,6 +85,8 @@ iptables-restore '/etc/iptables/rules.v4'
 ## Further readings
 
 - [`nftables`][nftables]
+- [How to set up a stateful firewall with iptables]
+- [Simple stateful firewall]
 
 ### Sources
 
@@ -103,5 +105,7 @@ iptables-restore '/etc/iptables/rules.v4'
 <!-- Files -->
 <!-- Upstream -->
 <!-- Others -->
-[Iptables basics]: https://www.worldstream.com/nl/article/iptables-basics/
 [Archlinux wiki]: https://wiki.archlinux.org/title/Iptables
+[How to set up a stateful firewall with iptables]: https://evilshit.wordpress.com/2013/12/17/how-to-set-up-a-stateful-firewall-with-iptables/
+[Iptables basics]: https://www.worldstream.com/nl/article/iptables-basics/
+[Simple stateful firewall]: https://wiki.archlinux.org/title/Simple_stateful_firewall
