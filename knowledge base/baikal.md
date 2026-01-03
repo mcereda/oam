@@ -9,7 +9,7 @@
 ## TL;DR
 
 <details>
-  <summary>Installation and configuration</summary>
+  <summary>Setup</summary>
 
 ```sh
 docker pull 'ckulka/baikal-docker'
@@ -42,7 +42,7 @@ Ensure the following are available:
 ## Further readings
 
 - [Website]
-- [Github]
+- [Codebase]
 - [Self-hosting]
 
 ### Sources
@@ -65,8 +65,8 @@ Ensure the following are available:
 <!-- Upstream -->
 [baïkal dependencies]: https://github.com/sabre-io/Baikal/wiki/Ba%C3%AFkal-dependencies
 [baikal php error]: https://github.com/sabre-io/Baikal/issues/701
-[github]: https://github.com/sabre-io/Baikal
-[website]: https://sabre.io/baikal/
+[Codebase]: https://github.com/sabre-io/Baikal
+[Website]: https://sabre.io/baikal/
 
 <!-- Others -->
 [ckulka/baikal-docker]: https://github.com/ckulka/baikal-docker

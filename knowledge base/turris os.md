@@ -529,14 +529,15 @@ curl -sSL 'https://install.pi-hole.net' | bash
 /etc/.pihole/pihole -a -p
 
 # Update pi-hole as a whole, if needed.
+/etc/.pihole/pihole updatePihole
 /etc/.pihole/pihole -up
 
 # Set the router as the primary DNS server.
-sed -E -i.bak 's|^#?\s*DNS\s*=\s*.*$|DNS=192.168.1.1|' '/etc/systemd/resolved.conf'
+sed -E -i'.bak' 's|^#?\s*DNS\s*=\s*.*$|DNS=192.168.1.1|' '/etc/systemd/resolved.conf'
 
 # Set Cloudflare as the fallback DNS server.
 # Optional.
-sed -E -i.bak 's|^#?\s*FallbackDNS\s*=\s*.*$|FallbackDNS=1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001 # Cloudflare|' '/etc/systemd/resolved.conf'
+sed -E -i'.bak' 's|^#?\s*FallbackDNS\s*=\s*.*$|FallbackDNS=1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001 # Cloudflare|' '/etc/systemd/resolved.conf'
 
 # Set the interface to ignore DNS lists given by the DHCP server.
 cp '/etc/systemd/network/eth0.network' '/etc/systemd/network/eth0.network.bak'
