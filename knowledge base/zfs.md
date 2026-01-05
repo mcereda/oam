@@ -2,7 +2,6 @@
 
 1. [TL;DR](#tldr)
 1. [Gotchas](#gotchas)
-1. [Setup](#setup)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -16,12 +15,34 @@
 
 Refer the [Debian Wiki].
 
-> [!tip]
-> Prefer using _stable_'s backported kernel and tools.
+> [!important]
+> Prefer using `stable`'s _mainline_ kernel and tools.
+>
+> Debian backports' kernels are released quickly enough to leave the userland incomplete at times.<br/>
+> This happens often with ZFS, resulting in broken package issues.
 
 ```sh
 CODENAME="$(lsb_release -cs)"  # or 'stable'
 ARCH="$(uname --kernel-release | sed -E 's|.*-(.*)$|\1|')"  # or 'amd64', 'arm64', …
+```
+
+```sh
+# Use mainline's kernel and tools
+cat <<EOF | tee -a '/etc/apt/sources.list.d/zfs.list'
+deb http://deb.debian.org/debian ${CODENAME} main contrib non-free
+EOF
+cat <<EOF | tee -a '/etc/apt/preferences.d/99zfs'
+Package: linux-image-* linux-headers-* libnvpair*linux libuutil*linux libzpool*linux libzfs*linux zfsutils-linux zfs-dkms
+Pin: release a=${CODENAME}
+Pin-Priority: 995
+EOF
+apt update
+apt install -t "${CODENAME}" "linux-image-${ARCH}" "linux-headers-${ARCH}" 'zfsutils-linux' 'zfs-dkms'
+shutdown -r now
+```
+
+```sh
+# Use backports'
 cat <<EOF | tee -a '/etc/apt/sources.list.d/zfs.list'
 deb http://deb.debian.org/debian ${CODENAME}-backports main contrib non-free
 EOF
@@ -37,12 +58,44 @@ shutdown -r now
 
   </details>
 
-  <details style='padding: 0 0 1rem 1rem'>
+  <details style='padding: 0 0 0 1rem'>
     <summary>Mac OS X</summary>
+
+> [!important]
+> On M1 and later devices, this requires system extensions to be enabled in the Startup Security Utility.
 
 ```sh
 brew install --cask 'openzfs'
 ```
+
+  </details>
+
+  <details style='padding: 0 0 0 1rem'>
+    <summary>Manjaro</summary>
+
+Manjaro prebuilds modules for ZFS in a specific kernel line, which name is postfixed by `-zfs` (e.g. `linux515-zfs` for
+for `linux-515`).
+
+```sh
+# Install the modules' packages for all installed kernels.
+sudo pamac install $(mhwd-kernel --listinstalled | grep '*' | awk -F '* ' '{print $2}' | xargs -I {} echo {}-zfs)
+```
+
+  </details>
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Raspberry Pi</summary>
+
+The `zfs-dkms` package cannot handle downloading and installing the Raspberry Pi kernel headers automatically, so they
+have to be installed **prior** of the ZFS-related packages:
+
+```sh
+sudo apt install --upgrade 'raspberrypi-kernel' 'raspberrypi-kernel-headers'
+sudo reboot
+sudo apt install 'zfs-dkms' 'zfsutils-linux'
+```
+
+To be tested: If the running kernel has no updates, the packages installation might be performed together.
 
   </details>
 
@@ -53,6 +106,13 @@ brew install --cask 'openzfs'
 
   <details style='padding: 0 0 0 1rem'>
     <summary>Pools</summary>
+
+Pool options of interest:
+
+- `ashift=XX`
+  - Set XX to `9` for 512B sectors, `12` for 4KB sectors, or `16` for 8KB sectors
+    ([reference](http://open-zfs.org/wiki/Performance_tuning#Alignment_Shift_.28ashift.29)).
+- `version=28`: enable compatibility with ZFS on Linux.
 
 ```sh
 # Create pools.
@@ -149,6 +209,17 @@ zpool import -D
   <details style='padding: 0 0 1rem 1rem'>
     <summary>Datasets (filesystems)</summary>
 
+Options of interest:
+
+- `atime=off`.
+- `compression=on`:
+  - Activates data compression with the default algorithm.
+  - Pools of version 28 cannot use lz4 -- FIXME: check
+- `copies=2`: specifies the number of copies of data stored for the dataset.
+- `dedup=on`: enables [data deduplication](http://open-zfs.org/wiki/Performance_tuning#Deduplication), but halves the
+  write speed.
+- `xattr=sa`.
+
 ```sh
 # List available datasets (filesystems).
 zfs list
@@ -233,8 +304,57 @@ man zfs
   <summary>Real world use cases</summary>
 
 ```sh
+# Create pools.
+sudo zpool create -f \
+  -o 'ashift=12' \
+  -o 'feature@allocation_classes=disabled' \
+  -o 'feature@async_destroy=enabled' \
+  -o 'feature@bookmarks=enabled' \
+  -o 'feature@device_removal=enabled' \
+  -o 'feature@embedded_data=enabled' \
+  -o 'feature@empty_bpobj=enabled' \
+  -o 'feature@enabled_txg=enabled' \
+  -o 'feature@encryption=disabled' \
+  -o 'feature@extensible_dataset=enabled' \
+  -o 'feature@hole_birth=enabled' \
+  -o 'feature@large_dnode=disabled' \
+  -o 'feature@obsolete_counts=enabled' \
+  -o 'feature@spacemap_histogram=enabled' \
+  -o 'feature@spacemap_v2=enabled' \
+  -o 'feature@zpool_checkpoint=enabled' \
+  -o 'feature@filesystem_limits=enabled' \
+  -o 'feature@multi_vdev_crash_dump=enabled' \
+  -o 'feature@lz4_compress=enabled' \
+  -o 'feature@project_quota=disabled' \
+  -o 'feature@resilver_defer=disabled' \
+  -o 'feature@sha512=enabled' \
+  -o 'feature@skein=enabled' \
+  -o 'feature@userobj_accounting=disabled' \
+  -O 'atime=off' \
+  -O 'relatime=on' \
+  -O 'compression=lz4' \
+  -O 'logbias=throughput' \
+  -O 'normalization=formD' \
+  -O 'xattr=sa' \
+  'volume_name' \
+  '/dev/sdb'
+
+# Create Linux-compatible pools on Mac OS X.
+sudo zpool create -f \
+  -o comment='USB-C disk 4T' \
+  -o version=28 \
+  -O casesensitivity='mixed' \
+  -O compression='on' \
+  -O com.apple.mimic_hfs='on' \
+  -O copies=2 \
+  -O logbias='throughput' \
+  -O normalization='formD' \
+  -O xattr='sa' \
+  'volume_name' \
+  'disk2'
+
 # Encrypt datasets.
-# Needs (re)creation.
+# Requires (re)creating the dataset.
 zfs send tank/badMemories | zfs recv -o 'encryption=on' -o 'keyformat=passphrase' backups/badMemories
 
 # Create a dataset in a new pool, adjust its permissions, and unmount the pool.
@@ -276,126 +396,6 @@ done
   option.
 - The ZFS kernel modules are upgraded **much less frequently** than the kernel (at least on Linux).<br/>
   **Always make sure** one's kernel version and ZFS modules are compatible and upgraded together.
-
-## Setup
-
-<details>
-  <summary>Manjaro</summary>
-
-Manjaro has prebuilt modules for ZFS, which package is the kernel's package postfixed by `-zfs` (e.g. `linux515-zfs` for
-for `linux-515`).
-
-```sh
-# Install the modules' packages for all installed kernels.
-sudo pamac install $(mhwd-kernel --listinstalled | grep '*' | awk -F '* ' '{print $2}' | xargs -I {} echo {}-zfs)
-```
-
-</details>
-
-<details>
-  <summary>Raspberry Pi</summary>
-
-The `zfs-dkms` package cannot handle downloading and installing the Raspberry Pi kernel headers automatically, so they
-have to be installed prior of the ZFS-related packages:
-
-```sh
-sudo apt install --upgrade 'raspberrypi-kernel' 'raspberrypi-kernel-headers'
-sudo reboot
-sudo apt install 'zfs-dkms' 'zfsutils-linux'
-```
-
-To be tested: If the running kernel has no updates, the packages installation might be performed together.
-
-</details>
-
-<details>
-  <summary>Mac OS X</summary>
-
-```sh
-# On M1 devices, this requires system extensions to be enabled in the Startup
-# Security Utility.
-brew install --cask 'openzfs'
-```
-
-Pool options (`-o option`):
-
-- `ashift=XX`
-  - XX=9 for 512B sectors, XX=12 for 4KB sectors, XX=16 for 8KB sectors
-  - [reference](http://open-zfs.org/wiki/Performance_tuning#Alignment_Shift_.28ashift.29)
-- `version=28`
-  - compatibility with ZFS on Linux
-
-Filesystem options (`-O option`):
-
-- `atime=off`
-- `compression=on`
-  - activates compression with the default algorithm
-  - pool version 28 cannot use lz4
-- `copies=2`
-  - number of copies of data stored for the dataset
-- `dedup=on`
-  - deduplication
-  - halves write speed
-  - [reference](http://open-zfs.org/wiki/Performance_tuning#Deduplication)
-- `xattr=sa`
-
-```sh
-sudo zpool \
-  create \
-    -f \
-    -o comment='LaCie Rugged USB-C 4T' \
-    -o version=28 \
-    -O casesensitivity='mixed' \
-    -O compression='on' \
-    -O com.apple.mimic_hfs='on' \
-    -O copies=2 \
-    -O logbias='throughput' \
-    -O normalization='formD' \
-    -O xattr='sa' \
-    'volume_name' \
-    'disk2'
-sudo zpool import -a
-```
-
-```sh
-sudo zpool \
-  create \
-    -f \
-    -o 'ashift=12' \
-    -o 'feature@allocation_classes=disabled' \
-    -o 'feature@async_destroy=enabled' \
-    -o 'feature@bookmarks=enabled' \
-    -o 'feature@device_removal=enabled' \
-    -o 'feature@embedded_data=enabled' \
-    -o 'feature@empty_bpobj=enabled' \
-    -o 'feature@enabled_txg=enabled' \
-    -o 'feature@encryption=disabled' \
-    -o 'feature@extensible_dataset=enabled' \
-    -o 'feature@hole_birth=enabled' \
-    -o 'feature@large_dnode=disabled' \
-    -o 'feature@obsolete_counts=enabled' \
-    -o 'feature@spacemap_histogram=enabled' \
-    -o 'feature@spacemap_v2=enabled' \
-    -o 'feature@zpool_checkpoint=enabled' \
-    -o 'feature@filesystem_limits=enabled' \
-    -o 'feature@multi_vdev_crash_dump=enabled' \
-    -o 'feature@lz4_compress=enabled' \
-    -o 'feature@project_quota=disabled' \
-    -o 'feature@resilver_defer=disabled' \
-    -o 'feature@sha512=enabled' \
-    -o 'feature@skein=enabled' \
-    -o 'feature@userobj_accounting=disabled' \
-    -O 'atime=off' \
-    -O 'relatime=on' \
-    -O 'compression=lz4' \
-    -O 'logbias=throughput' \
-    -O 'normalization=formD' \
-    -O 'xattr=sa' \
-    'volume_name' \
-    '/dev/sdb'
-```
-
-</details>
 
 ## Further readings
 
