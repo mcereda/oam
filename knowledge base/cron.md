@@ -31,6 +31,8 @@ All crontab files:
 - Must be either regular files or symlinks to regular files.
 - Must **not** be executable **nor** writable for anyone else but the owner.<br/>
   This requirement can be overridden by using the `-p` option on `crond`'s command line.
+- Must escape the `%` character in commands, if used (e.g., in `date`'s formatting).<br/>
+  Cron interprets `%` as a newline. Everything after it is sent to the command's stdin, not as part of the command.
 
 > [!important]
 > If `inotify` support is in use, changes in symlinked crontabs are **not** automatically noticed by the cron daemon.

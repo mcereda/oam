@@ -6,6 +6,10 @@
 
 ## TL;DR
 
+> [!caution]
+> Escape the `%` character if used in commands (e.g., in `date`'s formatting), even if in quotes.<br/>
+> Cron interprets `%` as a newline. Everything after it is sent to the command's stdin, not as part of the command.
+
 ```sh
 # List existing jobs.
 crontab -l
@@ -35,7 +39,9 @@ sudo crontab -r -u 'nana'
 */10 * * * * ls
 
 # Run a script at 02:34 every Friday.
+# `%` needs escaping even in quotes
 34 2 * * Fri /absolute/path/to/script.sh
+35 3 * * FRI /absolute/path/to/script.sh > /absolute/path/to/script.$(date '+\%F').log
 ```
 
 ## Further readings
