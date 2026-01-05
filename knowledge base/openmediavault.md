@@ -235,7 +235,7 @@ Refer [ZFS Plugin For OMV7].
    <details style='padding: 0 0 0 1rem'>
      <summary><i><b>[preferred]</b></i> Use the Proxmox kernel.</summary>
 
-     > [!note]
+     > [!important]
      > Debian does **not** build ZFS kernel modules into any of their kernels due to licensing conflicts, and doing it
      > manually may result in an extensive build process during installation, which is prone to errors.<br/>
      > The Proxmox-Debian kernel has the ZFS kernel modules preinstalled by default. As kernel upgrades become available
@@ -256,7 +256,7 @@ Refer [ZFS Plugin For OMV7].
      <summary>Disable APT's backports sources, and stick to Debian's <i>stable</i> kernel.</summary>
 
      > [!warning]
-     > Linux backport kernels are released quickly enough to leave the userland incomplete at times.<br/>
+     > Debian backports' kernels are released quickly enough to leave the userland incomplete at times.<br/>
      > This happens often with ZFS, resulting in broken package issues.
 
      ```sh
