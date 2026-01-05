@@ -401,7 +401,8 @@ Prefer deleting snapshots via the server (CLI, API or UI).<br/>
 In case that is not possible, consider using the `zfs` utility to delete them.
 
 > [!caution]
-> The engine will **not** notice snapshots deletion until the server is restarted.
+> When using `zfs` to delete snapshots, the pool will clean up the data but DBLab will **still** think the snapshots
+> are available until the engine is restarted.
 
 ```sh
 # Delete all but the 4 most recent snapshots
