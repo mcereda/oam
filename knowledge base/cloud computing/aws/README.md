@@ -546,6 +546,19 @@ its `path`).
 > [!warning]
 > ALBs **cannot** rewrite requests' `host` header or path.<br/>
 > Use [CloudFront] or other solutions like custom forwarder or [Lambda functions] instead.
+>
+> FIXME: since 2025-10-15, it looks like they can by using Rule Transforms.<br/>
+> Check the [news post](https://aws.amazon.com/about-aws/whats-new/2025/10/application-load-balancer-url-header-rewrite),
+> the [blog post](https://aws.amazon.com/blogs/networking-and-content-delivery/introducing-url-and-host-header-rewrite-with-aws-application-load-balancers/),
+> and [Rule Transforms](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/rule-transforms.html).
+
+The service charges per Load Balancer, per hour it exists. Every _partial_ hour is billed as a full hour.<br/>
+It also charges for the number of Load Balancer Capacity Units (LCU) used per minute. When using Load Balancer Capacity
+Unit Reservation, any additional number of LCUs used per minute _beyond_ one's reserved LCUs per hour is added to the
+bill.
+
+> [!tip]
+> To save money, prefer using less ALBs with more than one rule each.
 
 Using rules in AWS application load balancers to redirect by path **keeps the path** in the forwarded request.<br/>
 Applications that serve their files using _relative_ paths will not be able to find the resources, as the path will not
@@ -558,11 +571,6 @@ E.g.: given an ALB with a rule forwarding requests for paths matching `/some-app
 > [!important]
 > This does **not** happen for targets that are tasks to ECS.<br/>
 > Those are treated differently by the ALB (insert quotation here), and the requests' path is replaced with `/`.
->
-> FIXME: since 2025-10-15, it looks like they can by using Rule Transforms.<br/>
-> Check the [news post](https://aws.amazon.com/about-aws/whats-new/2025/10/application-load-balancer-url-header-rewrite),
-> the [blog post](https://aws.amazon.com/blogs/networking-and-content-delivery/introducing-url-and-host-header-rewrite-with-aws-application-load-balancers/),
-> and [Rule Transforms](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/rule-transforms.html).
 
 Solutions for this include:
 
