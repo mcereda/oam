@@ -2,6 +2,11 @@
 
 brew install 'pulumi/tap/pulumi'
 
+pulumi new 'Python'
+pulumi new 'TypeScript' … --name 'someTypescriptProject' --description 'Some TypeScript project'
+pulumi new … --dir 'infrastructure' --stack 'production' --force
+pulumi new … --secrets-provider 'awskms:///arn:aws:kms:eu-east-1:012345678901:key/0123abcd-4567-efab-8901-cdef01234567'
+
 pulumi login
 pulumi login 's3://some-bucket/with-prefix'
 pulumi whoami -v
