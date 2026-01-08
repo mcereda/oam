@@ -7,6 +7,20 @@
 curl 'ipconfig.io'
 curl -fs 'https://ipconfig.io/json' | jq -r '.ip' -
 
+# Specify data for the request
+curl --request 'POST' --url 'https://redash.example.org/api/data_sources' --header 'Authorization: Key aa…00' \
+	--data '{
+		"name": "Some PostgreSQL Data Source",
+		"type": "pg",
+		"options": {
+			"host": "db.example.org",
+			"port": 5432,
+			"dbname": "postgres",
+			"user": "redash",
+			"password": "SomeStr0ngPa$$word"
+		}
+	}'
+curl -X 'POST' 'https://redash.example.org/api/data_sources' -H 'Authorization: Key aa…00' -d '{…}'
 
 # Use different names.
 # Kinda like '--resolve' but to aliases and supports ports.
@@ -29,3 +43,6 @@ curl --fail --silent --request 'PUT' 'https://gitlab.com/api/v4/runners/{}' \
 
 
 curl -v --cookie "USER_TOKEN=Yes" http://127.0.0.1:5000/
+
+curl --head --url 'localhost:5000/healthz'
+curl -I 'localhost:5000/healthz'
