@@ -100,3 +100,22 @@ tasks:
     cmd: >-
       aws ecs list-tasks --cluster '{{.CLUSTER}}' --service-name '{{.SERVICE_NAME}}' --query 'taskArns[0]' --output 'text'
       | xargs -I '%%' aws ecs describe-tasks --cluster '{{.CLUSTER}}' --tasks '%%' --query "tasks[].attachments[].details[?(@.name=='privateIPv4Address')].value" --output 'text'
+  ecs:service:restart:
+    desc: restart an ecs service's tasks
+    summary: |-
+      Restart an ECS service's tasks.
+    requires:
+      vars:
+        - AWS_PROFILE
+        - AWS_USER
+        - CLUSTER
+        - SERVICE_NAME
+        - REASON
+    vars:
+      AWS_USER:
+        sh: aws sts get-caller-identity --output 'json' | jq -r '.Arn'
+      CLUSTER: '{{.CLUSTER | default "Staging"}}'
+      REASON: 'Entity {{.AWS_USER}} requested manual restart'
+    cmd: >-
+      aws ecs list-tasks --cluster '{{.CLUSTER}}' --service-name '{{.SERVICE_NAME}}' --query 'taskArns' --output 'text'
+      | xargs -n '1' aws ecs stop-task --cluster '{{.CLUSTER}}' --output 'text' --query 'task.lastStatus' --reason '{{.REASON}}' --task
