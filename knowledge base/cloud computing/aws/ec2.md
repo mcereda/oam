@@ -293,19 +293,19 @@ Also see [Automatic instance recovery].
 [describeimages]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
 [device names for volumes on amazon ec2 instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html
 [Eventual consistency in the Amazon EC2 API]: https://docs.aws.amazon.com/ec2/latest/devguide/eventual-consistency.html
+[Find AMIs with the SSM Agent preinstalled]: https://docs.aws.amazon.com/systems-manager/latest/userguide/ami-preinstalled-agent.html
 [how can i send memory and disk metrics from my ec2 instances to cloudwatch?]: https://repost.aws/knowledge-center/cloudwatch-memory-metrics-ec2
 [how to clone instance ec2]: https://repost.aws/questions/QUOrWudF3vRL2Vqtrv0M9lfQ/how-to-clone-instance-ec2
 [iam roles for amazon ec2]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
 [instance store temporary block storage for ec2 instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html
 [key concepts and definitions for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-credits-baseline-concepts.html
+[Manually create or edit the CloudWatch agent configuration file]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-Configuration-File-Details.html
 [recommended alarms]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Best_Practice_Recommended_Alarms_AWS_Services.html#EC2
 [retrieve instance metadata]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
 [standard mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-standard-mode.html
 [unlimited mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-unlimited-mode.html
 [using al2023 based amazon ecs amis to host containerized workloads]: https://docs.aws.amazon.com/linux/al2023/ug/ecs.html
 [using instance profiles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
-[Find AMIs with the SSM Agent preinstalled]: https://docs.aws.amazon.com/systems-manager/latest/userguide/ami-preinstalled-agent.html
-[Manually create or edit the CloudWatch agent configuration file]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-Configuration-File-Details.html
 
 <!-- Others -->
 [Automating Instance Reboots with Amazon CloudWatch EC2 Actions]: https://devops.supportsages.com/automating-instance-reboots-with-amazon-cloudwatch-ec2-actions-375f633a658d

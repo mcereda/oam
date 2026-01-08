@@ -188,6 +188,18 @@ aws eks describe-addon-configuration --addon-name 'aws-ebs-csi-driver' --addon-v
 
 
 ###
+# Elasticache
+# ------------------
+###
+
+aws elasticache describe-cache-clusters
+aws elasticache describe-cache-clusters --query 'CacheClusters[].CacheClusterId'
+
+aws elasticache describe-replication-groups
+aws elasticache describe-replication-groups --query 'ReplicationGroups[].ReplicationGroupId'
+
+
+###
 # ELB - Load Balancers
 # ------------------
 ###
