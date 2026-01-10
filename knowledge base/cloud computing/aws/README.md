@@ -817,6 +817,8 @@ Available discount options:
 
 Order of application: reserved instances -> Savings plans (EC2 instances -> Compute)
 
+Also check [Branko Petric's X posts] for further suggestions.
+
 ### Free Tier
 
 **New** AWS customers get **1 year** of free tier access to **selected** services only.
@@ -1248,6 +1250,7 @@ If one can, prefer just build the image from an EC2 instance.
 [aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
 [AWS Fundamentals Blog]: https://awsfundamentals.com/blog
 [aws savings plans vs. reserved instances: when to use each]: https://www.cloudzero.com/blog/savings-plans-vs-reserved-instances/
+[Branko Petric's X posts]: https://x.com/brankopetric00
 [date & time policy conditions at aws - 1-minute iam lesson]: https://www.youtube.com/watch?v=4wpKP1HLEXg
 [difference in boto3 between resource, client, and session?]: https://stackoverflow.com/questions/42809096/difference-in-boto3-between-resource-client-and-session
 [Gateway Endpoints vs Internet Routing for S3]: https://awsfundamentals.com/blog/gateway-endpoints-vs-internet-routing-s3
@@ -1255,7 +1258,7 @@ If one can, prefer just build the image from an EC2 instance.
 [Introduction to the AWS Virtual Private Cloud (VPC) - Part 2]: https://awsfundamentals.com/blog/introduction-to-the-aws-virtual-private-cloud-vpc-part-2
 [Introduction to the AWS Virtual Private Cloud (VPC) - Part 3]: https://awsfundamentals.com/blog/amazon-vpc-introduction-part-3
 [Learn AWS]: https://www.learnaws.org/
+[The $1,000 AWS mistake]: https://www.geocod.io/code-and-coordinates/2025-11-18-the-1000-aws-mistake/
 [using aws kms via the cli with a symmetric key]: https://nsmith.net/aws-kms-cli
 [VPC Endpoints: Secure and Direct Access to AWS Services]: https://awsfundamentals.com/blog/vpc-endpoints
 [What Is OIDC and Why Do We Need It?]: https://awsfundamentals.com/blog/oidc-introduction
-[The $1,000 AWS mistake]: https://www.geocod.io/code-and-coordinates/2025-11-18-the-1000-aws-mistake/
