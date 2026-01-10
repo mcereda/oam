@@ -378,6 +378,18 @@ aws rds start-export-task \
 # Change the storage type
 aws rds modify-db-instance --db-instance-identifier 'instance-name' --storage-type 'gp3' --apply-immediately
 
+# Show available upgrade target versions for a given DB engine version.
+aws rds describe-db-engine-versions --engine 'postgres' --engine-version '13' \
+	--query 'DBEngineVersions[*].ValidUpgradeTarget[*]'
+aws rds describe-db-engine-versions --engine 'postgres' --engine-version '13.12' \
+	--query 'DBEngineVersions[*].ValidUpgradeTarget[*].{AutoUpgrade:AutoUpgrade,EngineVersion:EngineVersion}[?AutoUpgrade==`true`][]'
+
+# Start upgrading.
+# Requires downtime.
+aws rds modify-db-instance --db-instance-identifier 'my-db-instance' --engine-version '14.20' --apply-immediately
+aws rds modify-db-instance --db-instance-identifier 'my-db-instance' \
+	--engine-version '14.15' --allow-major-version-upgrade --no-apply-immediately
+
 # Max 5 running at any given time, RDS cannot queue
 echo {1..5} | xargs -p -n '1' -I '{}' aws rds start-export-task …
 

@@ -17,6 +17,9 @@
 1. [Multi-AZ instances](#multi-az-instances)
    1. [Converting instances between Multi-AZ and Single-AZ](#converting-instances-between-multi-az-and-single-az)
 1. [Operations](#operations)
+    1. [Upgrade the engine version](#upgrade-the-engine-version)
+       1. [Upgrade to a new major version](#upgrade-to-a-new-major-version)
+       1. [Upgrade to a new minor version](#upgrade-to-a-new-minor-version)
     1. [PostgreSQL: reduce allocated storage by migrating using transportable databases](#postgresql-reduce-allocated-storage-by-migrating-using-transportable-databases)
     1. [Stop instances](#stop-instances)
     1. [Cancel pending modifications](#cancel-pending-modifications)
@@ -151,6 +154,20 @@ aws rds cancel-export-task --export-task-identifier 'my_export'
 
 # Change the storage type.
 aws rds modify-db-instance --db-instance-identifier 'instance-name' --storage-type 'gp3' --apply-immediately
+
+
+# Show available upgrade target versions for a given DB engine version.
+aws rds describe-db-engine-versions --engine 'postgres' --engine-version '13' \
+  --query 'DBEngineVersions[*].ValidUpgradeTarget[*]'
+aws rds describe-db-engine-versions --engine 'postgres' --engine-version '13.12' \
+  --query 'DBEngineVersions[*].ValidUpgradeTarget[*].{AutoUpgrade:AutoUpgrade,EngineVersion:EngineVersion}[?AutoUpgrade==`true`][]'
+
+# Start upgrading.
+# Requires downtime.
+aws rds modify-db-instance --db-instance-identifier 'my-db-instance' \
+  --engine-version '14.15' --allow-major-version-upgrade --no-apply-immediately
+aws rds modify-db-instance --db-instance-identifier 'my-db-instance' \
+  --engine-version '14.20' --apply-immediately
 ```
 
 </details>
@@ -599,6 +616,72 @@ During a Multi-AZ to Single-AZ conversion, RDS typically keeps the instance in t
 deletes only the secondary instance and volumes. The change does **not** typically affect the primary instance.
 
 ## Operations
+
+### Upgrade the engine version
+
+> [!caution]
+> Database engine upgrades require downtime.<br/>
+> Minimize the downtime by using a blue/green deployment.
+
+In general, **major** engine version upgrades can introduce breaking changes.<br/>
+**Minor** version upgrades usually only include changes that are backward-compatible with existing applications.
+
+At the time of writing, multi-AZ DB clusters only support major version upgrades of PostgreSQL.<br/>
+Minor version upgrades are supported for **all** engines.
+
+> [!important]
+> One **cannot** modify a DB instance when it is being upgraded.
+>
+> During an engine upgrade, the DB instance status changes to `upgrading`.<br/>
+> This prevents further changes to the instance while the process is being carried out.
+
+#### Upgrade to a new major version
+
+Manually modify a DB engine version through the Console, CLI, or RDS API:
+
+```sh
+# Show available upgrade target versions for a given DB engine version.
+aws rds describe-db-engine-versions \
+        --engine 'postgres' --engine-version '13' \
+        --query 'DBEngineVersions[*].ValidUpgradeTarget[*]'
+
+# Start upgrading.
+aws rds modify-db-instance --db-instance-identifier 'my-db-instance' \
+  --engine-version '14.15' --allow-major-version-upgrade --no-apply-immediately
+aws rds modify-db-instance … --apply-immediately
+```
+
+#### Upgrade to a new minor version
+
+Either:
+
+- Manually modify a DB engine version through the Console, CLI, or RDS API:
+
+  ```sh
+  # Show available automatic minor upgrade target versions for a given DB engine version.
+  aws rds describe-db-engine-versions \
+    --engine 'postgres' --engine-version '13' \
+    --query 'DBEngineVersions[*].ValidUpgradeTarget[*].{AutoUpgrade:AutoUpgrade,EngineVersion:EngineVersion}[?AutoUpgrade==`true`][]'
+
+  # Start upgrading.
+  aws rds modify-db-instance --db-instance-identifier 'my-db-instance' --engine-version '14.20' --no-apply-immediately
+  aws rds modify-db-instance … --apply-immediately
+  ```
+
+- Enable automatic updates for the instance.
+
+Unless changes are applied immediately, RDS schedules the upgrade to run automatically in the preferred maintenance
+window.
+
+Automatic upgrades incur downtime too.<br/>
+The length of the downtime depends on various factors, including the DB engine type and the size of the database.
+
+During the upgrade, RDS:
+
+1. Runs a system pre-check to make sure the database can be upgraded.
+1. Upgrades the DB engine to the target minor engine version.
+1. Runs post-upgrade checks.
+1. Marks the database upgrade as complete.
 
 ### PostgreSQL: reduce allocated storage by migrating using transportable databases
 
