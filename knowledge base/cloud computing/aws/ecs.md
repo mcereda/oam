@@ -10,6 +10,7 @@
    1. [Fargate launch type](#fargate-launch-type)
    1. [External launch type](#external-launch-type)
 1. [Capacity providers](#capacity-providers)
+   1. [Capacity provider strategies](#capacity-provider-strategies)
    1. [EC2 capacity providers](#ec2-capacity-providers)
    1. [Fargate for ECS](#fargate-for-ecs)
 1. [Resource constraints](#resource-constraints)
@@ -348,6 +349,17 @@ Available service scheduler strategies:
 
 Defines the underlying infrastructure effectively running containers within ECS.
 
+```json
+{
+    "serviceName": "some-ecs-service",
+    … ,
+    "launchType": "FARGATE"
+}
+```
+
+The setting is currently **mutually exclusive** with [capacity provider strategies].<br/>
+Prefer using those to leverage enhanced flexibility and advanced features for capacity management.
+
 ### EC2 launch type
 
 Starts tasks onto _registered_ EC2 instances.
@@ -374,12 +386,16 @@ deployments.
 Refer [Capacity providers][upstream  capacity providers].
 
 Clusters can contain a mix of tasks that are hosted on Fargate, Amazon EC2 instances, or external instances.<br/>
-Tasks can run on Fargate or EC2 infrastructure as a launch type or a capacity provider strategy.<br/>
-Capacity providers manage the scaling of infrastructure for tasks in one's clusters.
+Tasks can run on Fargate or EC2 infrastructure, as defined by their [launch type] or a capacity provider strategy.<br/>
+Capacity providers offer enhanced flexibility and advanced features for capacity management compared to launch types.
 
 Each cluster can have one or more _capacity providers_, and an optional _capacity provider strategy_.
 
-The capacity provider strategy determines how tasks are spread across a cluster's capacity providers.<br/>
+### Capacity provider strategies
+
+Capacity provider strategies determine how tasks are spread across a cluster's capacity providers.<br/>
+Cluster that do **not** have a default capacity provider strategy will spread tasks **wherever** they find enough
+capacity.<br/>
 One can assign a **default** capacity provider strategy to a cluster.
 
 <details style='padding: 0 0 1rem 1rem'>
@@ -406,11 +422,13 @@ One can assign a **default** capacity provider strategy to a cluster.
 
 </details>
 
-When running a standalone task or creating a service, one can either use the cluster's default capacity provider
-strategy or provide one that overrides the default.<br/>
-The default capacity provider strategy **only** applies when one does **not** specify a launch type **nor** a capacity
-provider strategy for a task or service. If either of these parameters is provided, the cluster's default strategy is
-ignored.
+When running a standalone task or creating a service, one _can_ specify a capacity provider strategy to override the
+cluster's default one.
+
+> [!important]
+> The default capacity provider strategy **only** applies when one specifies **neither** a launch type **nor** a
+> capacity provider strategy for a task or service.<br/>
+> Should **any** of these parameters be provided, the cluster's default strategy will be **ignored**.
 
 <details style='padding: 0 0 1rem 1rem'>
   <summary>Override the cluster's default strategy</summary>
@@ -1820,6 +1838,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [Scale the number of tasks automatically]: #scale-the-number-of-tasks-automatically
 [services]: #services
 [standalone tasks]: #standalone-tasks
+[capacity provider strategies]: #capacity-provider-strategies
 
 <!-- Knowledge base -->
 [amazon web services]: README.md
