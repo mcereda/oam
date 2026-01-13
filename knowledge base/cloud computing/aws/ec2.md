@@ -9,6 +9,7 @@
    1. [Lifecycle hooks](#lifecycle-hooks)
 1. [Image customization](#image-customization)
 1. [Automatic recovery](#automatic-recovery)
+1. [Cost-saving measures](#cost-saving-measures)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -19,12 +20,14 @@ The API for EC2 are [**eventually** consistent][Eventual consistency in the Amaz
 EC2 instances are billed by the second, with a minimum of 60s,
 [since 2017-10-02][announcing amazon ec2 per second billing].
 
-Use an instance profile to allow an EC2 instance to use an IAM role.
+Use an IAM Instance Profile to allow an EC2 instance to use an IAM role.
 
 `T` instances launch as `unlimited` by default. Launch them in `standard` mode to avoid paying for surplus credits.
 
 The instance type [_can_ be changed][change the instance type]. The procedure depends on the root volume, and **does**
 require downtime.
+
+When using spot instances, prefer instrumenting the application to be aware of [termination notifications].
 
 Clone EC2 instances by:
 
@@ -222,6 +225,25 @@ Refer [Image Builder].
 
 Also see [Automatic instance recovery].
 
+## Cost-saving measures
+
+- Prefer using the most adequate instance type for the job.<br/>
+  E.g., prefer `r*` instances instead of `m*` ones where a lot of RAM is needed, but almost no CPU power is.
+- Prefer using ARM-based (`g`) instances, unless a different architecture is required.
+- Prefer _shared_ instances over _dedicated_ ones unless necessary.
+  Refer [Understanding AWS Tenancy Options].
+- Prefer dedicated _instances_ over dedicated _hosts_ unless necessary.
+  Refer [Understanding AWS Tenancy Options].
+- Prefer using [burstable (`t`) instances][burstable instances], unless steady performance is required and specially
+  for burstable workloads.
+- When employing **underused** burstable instances, prefer re-launching them in `standard` mode to avoid paying for
+  surplus credits.
+- Prefer using [spot instances] instead of on-demand ones where possible.
+- Consider **stopping** or (even better) deleting non-production hosts after working hours.
+- Consider applying for EC2 Instance and/or Compute Savings Plans.
+- Consider [archiving snapshots] should they not be accessed for 90d or more.<br/>
+  Archiving has a 90d minimum storage fee, **and** archived resources have retrieval fees.
+
 ## Further readings
 
 - [Amazon Web Services]
@@ -269,8 +291,12 @@ Also see [Automatic instance recovery].
   ═╬═Time══
   -->
 
+<!-- In-article sections -->
+[burstable instances]: #burstable-instances
+
 <!-- Knowledge base -->
 [amazon web services]: README.md
+[archiving snapshots]: ebs.md#archiving
 [cli]: cli.md
 [ebs]: ebs.md
 [image builder]: image%20builder.md
@@ -302,7 +328,9 @@ Also see [Automatic instance recovery].
 [Manually create or edit the CloudWatch agent configuration file]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-Configuration-File-Details.html
 [recommended alarms]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Best_Practice_Recommended_Alarms_AWS_Services.html#EC2
 [retrieve instance metadata]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
+[Spot Instances]: https://aws.amazon.com/ec2/spot/
 [standard mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-standard-mode.html
+[termination notifications]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-instance-termination-notices.html
 [unlimited mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-unlimited-mode.html
 [using al2023 based amazon ecs amis to host containerized workloads]: https://docs.aws.amazon.com/linux/al2023/ug/ecs.html
 [using instance profiles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html

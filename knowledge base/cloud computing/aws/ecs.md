@@ -36,6 +36,7 @@
 1. [Best practices](#best-practices)
 1. [Troubleshooting](#troubleshooting)
     1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
+1. [Cost-saving measures](#cost-saving-measures)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -133,6 +134,12 @@ curl -fs "http://$( \
   )" --query "tasks[].attachments[].details[?(name=='privateDnsName')].value" --output 'text' \
 ):8080"
 
+# Get the image of specific containers.
+aws ecs list-tasks --cluster 'someCluster' --service-name 'someService' --query 'taskArns[0]' --output 'text' \
+| xargs -oI '%%' \
+    aws ecs describe-tasks --cluster 'someCluster' --task '%%' \
+      --query 'tasks[].containers[?name==`someContainer`].image' --output 'text'
+
 # Delete services.
 aws ecs delete-service --cluster 'testCluster' --service 'testService' --force
 
@@ -148,7 +155,8 @@ while [[ $(aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'test
 # Restart tasks.
 # No real way to do that, just stop the tasks and new ones will be eventually started in their place.
 # To mimic a blue-green deployment, scale the service up by doubling its tasks, then down again to the normal amount.
-
+aws ecs update-service --cluster 'someCluster' --service 'someService' --desired-count '0' \
+&& aws ecs update-service --cluster 'someCluster' --service 'someService' --desired-count '1'
 ```
 
 </details>
@@ -1725,6 +1733,23 @@ Cost-saving measures:
   capacity provider.
 
     <details style='padding: 0 0 1rem 1rem'>
+      <summary> Percentage-like </summary>
+
+    ```json
+    {
+        "capacityProvider": "FARGATE",
+        "weight": 5
+    }
+    {
+        "capacityProvider": "FARGATE_SPOT",
+        "weight": 95
+    }
+    ```
+
+    </details>
+
+    <details style='padding: 0 0 1rem 1rem'>
+      <summary> Ratio-like </summary>
 
     ```json
     {
@@ -1775,6 +1800,13 @@ Specify a supported value for the task CPU and memory in your task definition.
 
 </details>
 
+## Cost-saving measures
+
+- Prefer using [spot capacity][effectively using spot instances in aws ecs for production workloads] for non-critical
+  services and tasks.
+- Consider applying for EC2 Instance and/or Compute Savings Plans if using EC2 capacity.<br/>
+  Consider applying for Compute Savings Plans if using Fargate capacity.
+
 ## Further readings
 
 - [Amazon Web Services]
@@ -1820,6 +1852,8 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [Amazon ECS Service Discovery]
 - [AWS Fargate Pricing Explained]
 - [The Ultimate Beginner's Guide to AWS ECS]
+- [Amazon Amazon ECS launch types and capacity providers]
+- [Effectively Using Spot Instances in AWS ECS for Production Workloads]
 
 <!--
   Reference
@@ -1847,6 +1881,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [efs]: efs.md
 
 <!-- Upstream -->
+[Amazon Amazon ECS launch types and capacity providers]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-launch-type-comparison.html
 [Amazon ECS capacity providers for the EC2 launch type]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/asg-capacity-providers.html
 [Amazon ECS clusters for Fargate]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html
 [Amazon ECS environment variables]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-environment-variables.html
@@ -1865,6 +1900,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [AWS Fargate Spot Now Generally Available]: https://aws.amazon.com/blogs/aws/aws-fargate-spot-now-generally-available/
 [Centralized Container Logging with Fluent Bit]: https://aws.amazon.com/blogs/opensource/centralized-container-logging-fluent-bit/
 [ecs execute-command proposal]: https://github.com/aws/containers-roadmap/issues/1050
+[Effectively Using Spot Instances in AWS ECS for Production Workloads]: https://medium.com/@ankur.ecb/effectively-using-spot-instances-in-aws-ecs-for-production-workloads-d46985d0ae2d
 [EventBridge Scheduler]: https://docs.aws.amazon.com/scheduler/latest/UserGuide/what-is-scheduler.html
 [Example Amazon ECS task definition: Route logs to FireLens]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/firelens-taskdef.html
 [fargate tasks sizes]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html#fargate-tasks-size

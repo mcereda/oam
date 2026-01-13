@@ -28,6 +28,7 @@
     1. [ERROR: must be superuser to alter _X_ roles or change _X_ attribute](#error-must-be-superuser-to-alter-x-roles-or-change-x-attribute)
     1. [Transport fails asking for the remote user must have superuser, but it already does](#transport-fails-asking-for-the-remote-user-must-have-superuser-but-it-already-does)
     1. [The instance is unbearably slow](#the-instance-is-unbearably-slow)
+1. [Cost-saving measures](#cost-saving-measures)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -103,6 +104,10 @@ Maintenance windows are paused when their DB instances are stopped.
 # Show details of RDS instances.
 aws rds describe-db-instances
 aws rds describe-db-instances --output 'json' --query "DBInstances[?(DBInstanceIdentifier=='master-prod')]"
+aws rds describe-db-instances --db-instance-identifier 'some-db-instance' \
+  --query 'DBInstances[0].InstanceCreateTime' --output 'text'
+aws rds describe-db-instances --db-instance-identifier 'some-db-instance' --output 'text' \
+  --query 'DBInstances[0]|join(``,[`postgresql://`,MasterUsername,`@`,Endpoint.Address,to_string(Endpoint.Port),`/`,DBname||`postgres`])'
 
 # Enable Performance Insights.
 aws rds modify-db-cluster --db-cluster-identifier 'staging-cluster' \
@@ -1073,6 +1078,16 @@ or write workloads and exceeds the instance type quotas.
 
 </details>
 
+## Cost-saving measures
+
+- Choose _appropriate_ instance types and sizes.
+- Prefer using [reserved instances][rds reserved instances] when one can stay on a single instance type for the whole
+  duration of the reservation.<br/>
+  Should the DB type **not** change in time, prefer _Standard RIs_. Otherwise, prefer _Convertible RIs_ for
+  flexibility.
+
+  RDS does **not** support Savings Plans at the time of writing.
+
 ## Further readings
 
 - [Working with DB instance read replicas]
@@ -1136,6 +1151,7 @@ or write workloads and exceeds the instance type quotas.
 [migrating databases using rds postgresql transportable databases]: https://aws.amazon.com/blogs/database/migrating-databases-using-rds-postgresql-transportable-databases/
 [Multi-AZ DB instance deployments for Amazon RDS]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html
 [pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
+[RDS reserved instances]: https://aws.amazon.com/rds/reserved-instances/
 [Recommended alarms for RDS]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Best_Practice_Recommended_Alarms_AWS_Services.html#RDS
 [renaming a db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RenameInstance.html
 [Restoring a DB instance to a specified time for Amazon RDS]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIT.html

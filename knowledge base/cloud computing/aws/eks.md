@@ -26,6 +26,7 @@
     1. [Identify common issues](#identify-common-issues)
     1. [The worker nodes fail to join the cluster](#the-worker-nodes-fail-to-join-the-cluster)
     1. [AWS ELB controller fails to get the region from the host's metadata](#aws-elb-controller-fails-to-get-the-region-from-the-hosts-metadata)
+1. [Cost-saving measures](#cost-saving-measures)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -1413,6 +1414,13 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
   --set 'vpcId'='vpc-01234567'
 ```
 
+## Cost-saving measures
+
+- Consider [using spot instances][building for cost optimization and resilience for eks with spot instances] for
+  non-critical workloads.
+- Consider applying for EC2 Instance and/or Compute Savings Plans if using EC2 worker nodes.
+  Consider applying for Compute Savings Plans if using Fargate profiles.
+
 ## Further readings
 
 - [Amazon Web Services]
@@ -1512,6 +1520,7 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [aws eks create-nodegroup]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-nodegroup.html
 [AWS Node Termination Handler]: https://github.com/aws/aws-node-termination-handler
 [awssupport-troubleshooteksworkernode runbook]: https://docs.aws.amazon.com/systems-manager-automation-runbooks/latest/userguide/automation-awssupport-troubleshooteksworkernode.html
+[Building for Cost optimization and Resilience for EKS with Spot Instances]: https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
 [choosing an amazon ec2 instance type]: https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html
 [configure instance permissions required for systems manager]: https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-policies-overview
 [create an amazon ebs csi driver iam role]: https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html

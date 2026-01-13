@@ -6,9 +6,11 @@ Persistent [block storage][what is block storage?] for [EC2 Instances][ec2].
 1. [Volume types](#volume-types)
 1. [Snapshots](#snapshots)
 1. [Encryption](#encryption)
+1. [Archiving](#archiving)
 1. [Operations](#operations)
    1. [Increase disks' size](#increase-disks-size)
    1. [Migrate `gp2` volumes to `gp3`](#migrate-gp2-volumes-to-gp3)
+1. [Cost-saving measures](#cost-saving-measures)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -79,14 +81,16 @@ details about EBS balances.
 
 ## Volume types
 
-Refer [Amazon EBS volume types].
+Refer [Amazon EBS volume types] and [Amazon EBS General Purpose SSD volumes].
 
 |                     | `gp3`                                            | `gp2`          | `io2`             | `io1`             | `st1`            | `sc1`            |
 | ------------------- | ------------------------------------------------ | -------------- | ----------------- | ----------------- | ---------------- | ---------------- |
 | Class               | SSD                                              | SSD            | SSD               | SSD               | HDD              | HDD              |
 | Annual failure rate | 0.1% - 0.2%                                      | 0.1% - 0.2%    | 0.001%            | 0.1% - 0.2%       | 0.1% - 0.2%      | 0.1% - 0.2%      |
 | Size                | 1 GiB - 16 TiB                                   | 1 GiB - 16 TiB | 4 GiB - 64 TiB    | 4 GiB - 16 TiB    | 125 GiB - 16 TiB | 125 GiB - 16 TiB |
+| Baseline IOPS       | 3000                                             | 100            | 4,000             | 100               | N/A              | N/A              |
 | Max IOPS            | 16,000                                           | 16,000         | 256,000           | 64,000            | 500              | 250              |
+| Baseline throughput | 125 MiB/s                                        | 128 MiB/s      | 1,000 MiB/s       | 1 MiB/s           | 5 MiB/s          | 1.5 MiB/s        |
 | Max throughput      | 1,000 MiB/s                                      | 250 MiB/s      | 4,000 MiB/s       | 1,000 MiB/s       | 500 MiB/s        | 250 MiB/s        |
 | Multi-attach        | No                                               | No             | Yes               | Yes               | No               | No               |
 | NVMe reservations   | No                                               | No             | Yes               | No                | No               | No               |
@@ -116,6 +120,33 @@ Total: $1.71 + $0.00 + $1.66 = $3.37
 ```
 
 </details>
+
+`gp3` volumes are normally much better and more cost-effective than `gp2` ones.<br/>
+There are still specific situations where `gp2` volumes _might_ be _slightly_ better than `gp3` ones, namely:
+
+- Burst-based, spiky workloads with low sustained demand, like cron jobs, backups, compactions, and batch analytics.
+
+  <details>
+
+  `gp2` volumes accumulate burst credits when they are underutilized.<br/>
+  Large volumes accumulate credits quickly, and can then burst for a long time.
+
+  Sustained performance for `gp3` volumes costs a pretty penny, even if it's only needed briefly.
+
+  </details>
+
+- Very large volumes (> 1 TiB) that do not require guaranteed throughput tuning.
+
+  <details>
+
+  `gp2` volumes' performance is based on their size, and larger volumes can provide more **baseline** performance for
+  free.<br/>
+  E.g., at 4 TB a `gp2` volume as a baseline of 12000 IOPS, while a `gp3` volume still has a baseline of 3000 IOPS.
+
+  The maximum throughput will still be lower than `gp3` volumes, but as long as up to 250 MiB/s in bursts is fine it
+  can be a better deal.
+
+  </details>
 
 ## Snapshots
 
@@ -218,6 +249,12 @@ Attaching EBS volumes which data keys are encrypted with unusable KMS keys to EC
 not be able to use the KMS keys to decrypt the data key used for the volume.<br/>
 Make the KMS key usable again to be able to attach such EBS volumes.
 
+## Archiving
+
+Refer [Amazon EBS General Purpose SSD volumes].
+
+Archiving has a 90d minimum storage fee, **and** archived resources have retrieval fees.
+
 ## Operations
 
 ### Increase disks' size
@@ -279,6 +316,16 @@ If changing the volume type from `gp2` to `gp3` **without** specifying IOPS or t
 automatically provisions either equivalent performance to that of the source `gp2` volume, or the baseline `gp3`
 performance, whichever is higher.
 
+## Cost-saving measures
+
+- Prefer using `gp3` volumes unless an application requires specific IOPS or throughput.
+- Still prefer `gp3` volumes to `gp2`.<br/>
+  `gp3` volumes cost less, and have better performance per GB (except some specific corner cases).<br/>
+  Performance of `gp3` volumes can also be somewhat tuned, while `gp2`'s only increase with size.
+- Consider using `gp2` volumes _only_ when encountering those corner cases, usually where size > 1 TiB and comparable
+  higher-than-baseline bandwidth is needed only in bursts.
+- Consider [archiving] when snapshots should not be accessed for 90d or more.
+
 ## Further readings
 
 - [Amazon Web Services]
@@ -309,16 +356,20 @@ performance, whichever is higher.
   ═╬═Time══
   -->
 
+<!-- In-article sections -->
+[archiving]: #archiving
+
 <!-- Knowledge base -->
 [amazon web services]: README.md
 [cli]: cli.md
 [ec2]: ec2.md
 
 <!-- Upstream -->
+[Amazon EBS General Purpose SSD volumes]: https://docs.aws.amazon.com/ebs/latest/userguide/general-purpose.html
 [amazon ebs pricing]: https://aws.amazon.com/ebs/pricing/
 [amazon ebs volume types]: https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html
 [amazon ebs-optimized instance types]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html
-[archive amazon ebs snapshots]: https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-archive.html
+[Archive Amazon EBS snapshots]: https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-archive.html
 [automate snapshot lifecycles]: https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-ami-policy.html
 [choose the best amazon ebs volume type for your self-managed database deployment]: https://aws.amazon.com/blogs/storage/how-to-choose-the-best-amazon-ebs-volume-type-for-your-self-managed-database-deployment/
 [delete-volume]: https://docs.aws.amazon.com/cli/latest/reference/ec2/delete-volume.html
