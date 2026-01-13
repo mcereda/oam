@@ -380,7 +380,7 @@ can manage.
 
 ## Cost-saving measures
 
-- Choose appropriate [instance types and sizes][supported instance types in amazon opensearch service].<br/>
+- Choose _appropriate_ [instance types and sizes][supported instance types in amazon opensearch service].<br/>
   Leverage the ability to select them to tailor the service offering to one's needs.
 
   > [OR1 instances][or1 storage for amazon opensearch service] **cannot** (currently?) be selected as master nodes.<br/>

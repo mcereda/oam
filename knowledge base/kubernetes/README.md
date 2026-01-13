@@ -52,6 +52,7 @@ Hosted by the [Cloud Native Computing Foundation][cncf].
     1. [Run a command just before a Pod stops](#run-a-command-just-before-a-pod-stops)
 1. [Examples](#examples)
     1. [Create an admission webhook](#create-an-admission-webhook)
+1. [Cost-saving measures](#cost-saving-measures)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -1256,6 +1257,16 @@ you need:
 
 See the example's [README][create an admission webhook].
 
+## Cost-saving measures
+
+- Reconsider one's choices.<br/>
+  Does one really need a Kubernetes cluster? They introduce multiple redundancy, and have high complexity.<br/>
+  Consider the resources and maintenance efforts that will inevitably go into that.
+- Consider leveraging autoscaling.<br/>
+  See [Horizontal Pod Autoscaling] and [KEDA] to scale Pods depending on metrics.<br/>
+  See [Node Autoscaling][node scaling] to scale Nodes depending on number of Pods, node features, or resource
+  consumption.
+
 ## Further readings
 
 Usage:
@@ -1350,6 +1361,7 @@ Others:
 
 <!-- In-article sections -->
 [horizontal pod autoscaler]: #horizontal-pod-autoscaler
+[node scaling]: #node-scaling
 [vertical pod autoscaler]: #vertical-pod-autoscaler
 [pods]: #pods
 [privileged container vs privilege escalation]: #privileged-container-vs-privilege-escalation
