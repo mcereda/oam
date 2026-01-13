@@ -33,31 +33,100 @@ Reference available variables from [Environment Variables Settings].
 </details>
 -->
 
-<!-- Uncomment if used
 <details>
   <summary>Usage</summary>
 
 ```sh
+# Migrate the DB.
+docker compose run --rm 'server' manage db upgrade
+docker run --rm --name 'redash-db-migrations' \
+  --env 'REDASH_COOKIE_SECRET' --env 'REDASH_DATABASE_URL' --env 'REDASH_REDIS_URL' \
+  'redash/redash' -- manage db upgrade
 ```
 
 </details>
--->
 
-<!-- Uncomment if used
 <details>
   <summary>Real world use cases</summary>
 
 ```sh
+# Migrate the DB from the ECS service when running in AWS.
+# Requires command execution to be enabled and working.
+aws ecs list-tasks --cluster 'someCluster' --service-name 'redash' --query 'taskArns[0]' --output 'text' \
+| xargs -oI '%%' aws ecs execute-command --cluster 'someCluster' --container 'redash' --task '%%' --interactive \
+    --command 'manage db upgrade'
+
+# Migrate the DB from localhost when running in AWS.
+REDASH_IMAGE="$(\
+  aws ecs list-tasks --cluster 'someCluster' --service-name 'redash' --query 'taskArns[0]' --output 'text' \
+  | xargs -oI '%%' aws ecs describe-tasks --cluster 'someCluster' --task '%%' --output 'text' \
+        --query 'tasks[].containers[?name==`server`].image' \
+)"
+REDASH_DATABASE_URL="$(\
+  aws rds describe-db-instances --db-instance-identifier 'redash' --output 'text' \
+    --query '
+      DBInstances[0]
+      | join(``, [
+          `postgresql://`,MasterUsername,`:`,`PASSWORD`,`@`,Endpoint.Address,`:`,to_string(Endpoint.Port),`/`,
+          DBName || `postgres`
+        ])
+    ' \
+)"
+REDASH_REDIS_URL="$(\
+  aws elasticache describe-replication-groups --replication-group-id 'redash' --output 'text' \
+    --query '
+      ReplicationGroups[].NodeGroups[].PrimaryEndpoint[]
+      .join(``,[`redis://`,Address,`:`,to_string(Port),`/0`])
+    ' \
+)"
+REDASH_COOKIE_SECRET="aa…Wd"
+docker run --rm --name 'redash-db-migrations' --platform 'linux/amd64' --dns '172.31.0.2' \
+  --env 'REDASH_COOKIE_SECRET' --env 'REDASH_DATABASE_URL' --env 'REDASH_REDIS_URL' \
+  "$REDASH_IMAGE" manage db upgrade
 ```
 
 </details>
--->
 
 Refer [How to Upgrade] when upgrading a self-hosted instance.
 
-Updating dependencies (DB, redis cache) versions directly seems to work, but mind that they do require downtime.<br/>
-Redash will temporarily lose connection to them during the update's downtime period, then properly connect back to them
-without issues once they are up again.
+When updating Redash or its dependencies (i.e., DB and redis cache):
+
+1. Stop Redash's components.
+
+   <details>
+
+   ```sh
+   docker compose stop 'server' 'scheduler' 'scheduled_worker' 'adhoc_worker'
+   ```
+
+   </details>
+
+   The scheduler will exit should it suddenly be unable to write to the cache.<br/>
+   This usually happens when upgrading the cache's cluster when Redash is still active.
+
+1. Make a backup of the data (DB).
+1. \[if needed] Update Redash's dependencies.
+1. Make sure the DB has enough storage space for the migrations to run.
+1. Update Redash.
+1. \[if needed] Run the migration scripts.
+
+   <details>
+
+   ```sh
+   docker compose run --rm 'server' manage db upgrade
+   ```
+
+   </details>
+
+1. Restart Redash's components.
+
+   <details>
+
+   ```sh
+   docker compose up -d
+   ```
+
+   </details>
 
 ## Authentication
 
@@ -148,7 +217,9 @@ POST /api/data_sources
 ```sh
 curl --request 'GET' --url 'https://redash.example.org/api/data_sources' --header 'Authorization: Key AA…99'
 
-curl --request 'POST' --url 'https://redash.example.org/api/data_sources' --header 'Authorization: Key AA…99' \
+curl --request 'POST' --url 'https://redash.example.org/api/data_sources' \
+  --header 'Authorization: Key AA…99' \
+  --header 'Content-Type: application/json' \
   --data '{
     "name": "some data source",
     "type": "pg",
@@ -181,6 +252,27 @@ response: Response = redash.create_data_source(data_source_name, data_source_typ
 
 </details>
 
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Settings</summary>
+
+```plaintext
+POST /api/settings/organization
+{
+  "auth_password_login_enabled": true,
+  "hide_plotly_mode_bar": true,
+  …
+}
+```
+
+```sh
+curl --request 'POST' --url 'https://redash.example.org/api/settings/organization' \
+  --header 'Authorization: Key AA…99' \
+  --header 'Content-Type: application/json' \
+  --data '{"auth_password_login_enabled": true}'
+```
+
+</details>
+
 ## Further readings
 
 - [Website]
@@ -189,6 +281,7 @@ response: Response = redash.create_data_source(data_source_name, data_source_typ
 ### Sources
 
 - [Documentation]
+- [Ask Devin]
 - [Setting up a Redash Instance]
 - [API]
 
@@ -215,3 +308,4 @@ response: Response = redash.create_data_source(data_source_name, data_source_typ
 [Website]: https://redash.io/
 
 <!-- Others -->
+[Ask Devin]: https://deepwiki.com/getredash/redash

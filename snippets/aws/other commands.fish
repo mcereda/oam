@@ -192,11 +192,34 @@ aws eks describe-addon-configuration --addon-name 'aws-ebs-csi-driver' --addon-v
 # ------------------
 ###
 
+# Describe replication groups
+aws elasticache describe-replication-groups
+aws elasticache describe-replication-groups --query 'ReplicationGroups[].ReplicationGroupId'
+aws elasticache describe-replication-groups --replication-group-id 'some-app' --output 'text' \
+    --query "ReplicationGroups[].NodeGroups[].PrimaryEndpoint[].join(':', [Address, to_string(Port)])"
+aws elasticache describe-replication-groups --replication-group-id 'some-app' --output 'text' \
+    --query "ReplicationGroups[].NodeGroups[].PrimaryEndpoint[].join('', [`redis://`,Address,`:`,to_string(Port),`/0`])"
+
+# List pending changes to replication groups
+aws elasticache describe-replication-groups --query 'ReplicationGroups[].PendingModifiedValues'
+aws elasticache describe-replication-groups --replication-group-id 'some-app' --query 'ReplicationGroups[].PendingModifiedValues'
+
+# Upgrade replication groups' engine
+aws elasticache modify-replication-group --replication-group-id 'some-app' --engine-version '6.2' --apply-immediately
+
+# Describe clusters
 aws elasticache describe-cache-clusters
 aws elasticache describe-cache-clusters --query 'CacheClusters[].CacheClusterId'
 
-aws elasticache describe-replication-groups
-aws elasticache describe-replication-groups --query 'ReplicationGroups[].ReplicationGroupId'
+# List pending changes to clusters
+aws elasticache describe-cache-clusters --query 'CacheClusters[].PendingModifiedValues'
+aws elasticache describe-cache-clusters \
+	--query 'CacheClusters[?length(PendingModifiedValues)>`0`].{"CacheClusterId":CacheClusterId,"PendingModifiedValues":PendingModifiedValues}'
+aws elasticache describe-cache-clusters --cache-cluster-id 'some-cluster' --query 'CacheClusters[].PendingModifiedValues'
+
+# Apply pending changes to clusters
+aws elasticache modify-cache-cluster --cache-cluster-id 'some-cluster' --num-cache-nodes 'current-number-of-nodes' \
+	--apply-immediately
 
 
 ###
@@ -417,6 +440,28 @@ aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
 	--output 'json' --query "Parameters[?ApplyType!='dynamic']"
 
 aws rds create-db-snapshot --db-instance-identifier 'some-db-instance' --db-snapshot-identifier 'some-db-snapshot'
+
+aws rds describe-db-instances --db-instance-identifier 'some-instance' \
+	--query 'DBInstances[0].InstanceCreateTime' --output 'text'
+
+aws rds describe-db-instances --db-instance-identifier 'some-db-instance' --output 'text' \
+	--query 'DBInstances[0].Endpoint|join(`:`,[Address,to_string(Port)])'
+aws rds describe-db-instances --db-instance-identifier 'some-db-instance' --output 'text' \
+    --query '
+		DBInstances[0]
+		| join(``, [
+			`postgresql://`,
+			MasterUsername,
+			`:`,
+			`PASSWORD_PLACEHOLDER`,
+			`@`,
+			Endpoint.Address,
+			`:`,
+			to_string(Endpoint.Port),
+			`/`,
+			DBName || `postgres`
+        ])
+    '
 
 
 ###
