@@ -1804,6 +1804,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 
 - Prefer using [spot capacity][effectively using spot instances in aws ecs for production workloads] for non-critical
   services and tasks.
+- Consider **stopping** (scaling to 0) non-production services after working hours.
 - Consider applying for EC2 Instance and/or Compute Savings Plans if using EC2 capacity.<br/>
   Consider applying for Compute Savings Plans if using Fargate capacity.
 
