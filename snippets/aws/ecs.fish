@@ -37,6 +37,9 @@ aws ecs wait services-stable --cluster 'stg' --services 'grafana'
 # Update services' attributes
 aws ecs update-service --cluster 'stg' --service 'grafana' --enable-execute-command --force-new-deployment
 
+# Scale services
+aws ecs update-service --cluster 'stg' --service 'grafana' --desired-count '3'
+
 # Check tasks' attributes
 aws ecs describe-tasks --cluster 'staging' --tasks 'ef6260ed8aab49cf926667ab0c52c313' --output 'yaml' \
 	--query 'tasks[0] | {
@@ -87,3 +90,8 @@ aws ecs stop-service-deployment --stop-type 'ROLLBACK' \
 aws ecs list-service-deployments --cluster 'staging' --service 'mimir' \
 	--query "serviceDeployments[?@.status=='IN_PROGRESS'].serviceDeploymentArn" --output 'text' \
 | xargs -pn 1 aws ecs stop-service-deployment --service-deployment-arn
+
+# Get the image of specific containers.
+aws ecs list-tasks --cluster 'someCluster' --service-name 'someService' --query 'taskArns[0]' --output 'text' \
+| xargs -oI '%%' aws ecs describe-tasks --cluster 'someCluster' --task '%%' \
+	--query 'tasks[].containers[?name==`someContainer`].image' --output 'text'

@@ -12,6 +12,9 @@ docker volume inspect -f '{{ .Mountpoint }}' 'website'
 sudo vim '/var/lib/docker/volumes/website/_data/index.html'
 
 docker run -d --name 'some-nginx' -v '/some/content:/usr/share/nginx/html:ro' 'nginx'
+docker run --rm --name 'redash-db-migrations' --platform 'linux/amd64' --dns '172.31.0.2' \
+	--env 'REDASH_COOKIE_SECRET' --env 'REDASH_DATABASE_URL' --env 'REDASH_REDIS_URL' \
+	"$REDASH_IMAGE" manage db upgrade
 docker run --rm --name 'pulumi' \
 	--env 'AWS_DEFAULT_REGION' --env 'AWS_ACCESS_KEY_ID' --env 'AWS_SECRET_ACCESS_KEY' --env 'AWS_PROFILE' \
 	--env-file '.env' --env-file '.env.local' \
