@@ -62,24 +62,25 @@ REDASH_IMAGE="$(\
   | xargs -oI '%%' aws ecs describe-tasks --cluster 'someCluster' --task '%%' --output 'text' \
         --query 'tasks[].containers[?name==`server`].image' \
 )"
-REDASH_DATABASE_URL="$(\
-  aws rds describe-db-instances --db-instance-identifier 'redash' --output 'text' \
-    --query '
-      DBInstances[0]
-      | join(``, [
-          `postgresql://`,MasterUsername,`:`,`PASSWORD`,`@`,Endpoint.Address,`:`,to_string(Endpoint.Port),`/`,
-          DBName || `postgres`
-        ])
-    ' \
-)"
-REDASH_REDIS_URL="$(\
-  aws elasticache describe-replication-groups --replication-group-id 'redash' --output 'text' \
-    --query '
-      ReplicationGroups[].NodeGroups[].PrimaryEndpoint[]
-      .join(``,[`redis://`,Address,`:`,to_string(Port),`/0`])
-    ' \
-)"
-REDASH_COOKIE_SECRET="aa…Wd"
+export \
+  REDASH_DATABASE_URL="$(\
+    aws rds describe-db-instances --db-instance-identifier 'redash' --output 'text' \
+      --query '
+        DBInstances[0]
+        | join(``, [
+            `postgresql://`,MasterUsername,`:`,`PASSWORD`,`@`,Endpoint.Address,`:`,to_string(Endpoint.Port),`/`,
+            DBName || `postgres`
+          ])
+      ' \
+  )" \
+  REDASH_REDIS_URL="$(\
+    aws elasticache describe-replication-groups --replication-group-id 'redash' --output 'text' \
+      --query '
+        ReplicationGroups[].NodeGroups[].PrimaryEndpoint[]
+        .join(``,[`redis://`,Address,`:`,to_string(Port)])
+      ' \
+  )" \
+  REDASH_COOKIE_SECRET="aa…Wd"
 docker run --rm --name 'redash-db-migrations' --platform 'linux/amd64' --dns '172.31.0.2' \
   --env 'REDASH_COOKIE_SECRET' --env 'REDASH_DATABASE_URL' --env 'REDASH_REDIS_URL' \
   "$REDASH_IMAGE" manage db upgrade
