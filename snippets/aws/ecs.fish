@@ -38,7 +38,7 @@ aws ecs wait services-stable --cluster 'stg' --services 'grafana'
 aws ecs update-service --cluster 'stg' --service 'grafana' --enable-execute-command --force-new-deployment
 
 # Scale services
-aws ecs update-service --cluster 'stg' --service 'grafana' --desired-count '3'
+aws ecs update-service --cluster 'stg' --service 'grafana' --desired-count '3' --no-cli-pager
 
 # Check tasks' attributes
 aws ecs describe-tasks --cluster 'staging' --tasks 'ef6260ed8aab49cf926667ab0c52c313' --output 'yaml' \
