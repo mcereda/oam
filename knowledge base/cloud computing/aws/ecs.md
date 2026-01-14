@@ -397,14 +397,48 @@ Clusters can contain a mix of tasks that are hosted on Fargate, Amazon EC2 insta
 Tasks can run on Fargate or EC2 infrastructure, as defined by their [launch type] or a capacity provider strategy.<br/>
 Capacity providers offer enhanced flexibility and advanced features for capacity management compared to launch types.
 
-Each cluster can have one or more _capacity providers_, and an optional _capacity provider strategy_.
+Each cluster can have one or more _capacity providers_, and one optional
+[_capacity provider strategy_][capacity provider strategies].
+
+To run tasks on Fargate, one only needs to associate one or more of the pre-defined Fargate-specific capacity providers
+(`FARGATE`, `FARGATE_SPOT`) with the cluster.<br/>
+Leveraging the Fargate providers lifts the need to create or manage that cluster's capacity.
+
+> [!warning]
+> One **cannot** update a service that is using only an Auto Scaling Group capacity provider to use a Fargate-specific
+> one, and vice versa.
+
+Clusters _can_ contain a mix of Fargate and Auto Scaling group capacity providers.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+    "clusterName": "some-cluster",
+    "capacityProviders": [
+        "FARGATE",
+        "FARGATE_SPOT",
+        "some-custom-ec2-capacity-provider"
+    ]
+}
+```
 
 ### Capacity provider strategies
 
-Capacity provider strategies determine how tasks are spread across a cluster's capacity providers.<br/>
-Cluster that do **not** have a default capacity provider strategy will spread tasks **wherever** they find enough
-capacity.<br/>
-One can assign a **default** capacity provider strategy to a cluster.
+Capacity provider strategies determine how tasks are spread across a cluster's capacity providers.
+
+One must associate at least one capacity provider with a cluster **before** specifying a capacity provider strategy
+for it.<br/>
+Strategies allow to specify a maximum of 20 capacity providers.
+
+> [!warning]
+> Even if clusters _can_ contain a mix of Fargate and Auto Scaling group capacity providers, capacity provider
+> strategies can currently only contain **either** Fargate **or** Auto Scaling group capacity providers, but
+> **not both**.
+
+One can assign a **default** capacity provider strategy to a cluster.<br/>
+Clusters that do **not** have a default capacity provider strategy will spread their tasks onto **whatever** configured
+provider will have enough capacity at the moment of deployment.
 
 <details style='padding: 0 0 1rem 1rem'>
 
@@ -434,9 +468,10 @@ When running a standalone task or creating a service, one _can_ specify a capaci
 cluster's default one.
 
 > [!important]
-> The default capacity provider strategy **only** applies when one specifies **neither** a launch type **nor** a
-> capacity provider strategy for a task or service.<br/>
-> Should **any** of these parameters be provided, the cluster's default strategy will be **ignored**.
+> The cluster's default capacity provider strategy **only** applies when a task or service specifies **neither** a
+> launch type **nor** its own capacity provider strategy.<br/>
+> Should a task or service be configured with **either** of these parameters, it will **ignore** the cluster's
+> default strategy.
 
 <details style='padding: 0 0 1rem 1rem'>
   <summary>Override the cluster's default strategy</summary>
@@ -465,26 +500,15 @@ cluster's default one.
 
 </details>
 
-One must associate a capacity provider with a cluster **before** associating it with a capacity provider strategy.<br/>
-Strategies allow to specify a maximum of 20 capacity providers.
-
 Strategies' weight value defaults to `1` when creating it from the Console, and to `0` if using the API or CLI.
-
-To run tasks on Fargate, one only needs to associate one or more of the pre-defined Fargate-specific capacity providers
-with the cluster.<br/>
-Leveraging the Fargate providers lifts the need to create or manage that cluster's capacity.
-
-Clusters _can_ contain a mix of Fargate and Auto Scaling group capacity providers. However, a capacity provider strategy
-can only contain either Fargate or Auto Scaling group capacity providers, but **not both**.
-
-One **cannot** update a service that is using an Auto Scaling Group capacity provider to use a Fargate one, and
-vice versa.
 
 A strategy's capacity provider can have a defined `base` value. This determines how many **guaranteed** tasks that
 provider will be given **as minimum** when enough replicas are requested.<br/>
 Setting the `base` value higher than the service or standalone task's `desiredCount` only results in `desiredCount`
-tasks being placed on that provider. If no `base` value is specified for a provider, it defaults to `0`.<br/>
-When multiple capacity providers are specified within a strategy, only **one** of them can have a defined `base` value.
+tasks being placed on that provider. If no `base` value is specified for a provider, it defaults to `0`.
+
+> [!warning]
+> Only **one** capacity provider can have a `base` value other than `0` in a strategy.
 
 The `weight` value determines **the relative ratio** of tasks to execute over the long run.<br/>
 This value is taken into account **only after the `base` values are satisfied**.<br/>
@@ -561,7 +585,7 @@ Provider 3 is `some-custom-ec2-capacity-provider`, with a weight of `0` and base
 ```
 
 `some-custom-ec2-capacity-provider` will run tasks just for being the provider with the `base` value defined.<br/>
-Aside assigning it the 2 base tasks as per configuration, the scheduler will just ignore
+After assigning it the 2 base tasks as per configuration, the scheduler will just ignore
 `some-custom-ec2-capacity-provider` due to its weight being `0`.
 
 Sum of the remaining weights: `1 + 19 = 20`.<br/>
@@ -1855,6 +1879,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [The Ultimate Beginner's Guide to AWS ECS]
 - [Amazon Amazon ECS launch types and capacity providers]
 - [Effectively Using Spot Instances in AWS ECS for Production Workloads]
+- [Avoiding Common Pitfalls with ECS Capacity Providers and Auto Scaling]
 
 <!--
   Reference
@@ -1935,6 +1960,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [308 Permanent Redirect]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/308
 [a step-by-step guide to enabling amazon ecs exec]: https://medium.com/@mariotolic/a-step-by-step-guide-to-enabling-amazon-ecs-exec-a88b05858709
 [attach ebs volume to aws ecs fargate]: https://medium.com/@shujaatsscripts/attach-ebs-volume-to-aws-ecs-fargate-e23fea7bb1a7
+[Avoiding Common Pitfalls with ECS Capacity Providers and Auto Scaling]: https://medium.com/@bounouh.fedi/avoiding-common-pitfalls-with-ecs-capacity-providers-and-auto-scaling-24899ab6fc25
 [AWS Fargate Pricing Explained]: https://www.vantage.sh/blog/fargate-pricing
 [aws-cloudmap-prometheus-sd]: https://github.com/awslabs/aws-cloudmap-prometheus-sd
 [ECS pricing]: https://awsfundamentals.com/blog/amazon-ecs-pricing
