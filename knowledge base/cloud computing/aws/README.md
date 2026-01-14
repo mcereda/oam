@@ -9,6 +9,7 @@
    1. [Config](#config)
    1. [Detective](#detective)
    1. [Direct Connect](#direct-connect)
+   1. [ElastiCache](#elasticache)
    1. [Global Accelerator](#global-accelerator)
    1. [GuardDuty](#guardduty)
    1. [EventBridge](#eventbridge)
@@ -317,6 +318,7 @@ Options:
 | [ECS]                         | Run containers as a service                   |
 | [EFS]                         | Serverless file storage                       |
 | [EKS]                         | Managed Kubernetes clusters                   |
+| [ElastiCache]                 | Redis/Valkey and Memcached clusters           |
 | [ELB]                         | Load balancers                                |
 | [EventBridge]                 | Stream real time data                         |
 | [GuardDuty]                   | Threat detection                              |
@@ -390,6 +392,28 @@ Virtual interfaces can be configured with specific routing details, virtual priv
 settings.
 
 Direct Connect uses link layer encryption over the connection to secure the traffic.
+
+### ElastiCache
+
+> [!note]
+> Checking at a Redis replication group used for tests, it seems only **one** node of the cluster is used out of 3 at
+> all times.
+>
+> Specifically, the endpoint the replication group provides is the address of the **current primary node**, and not a
+> generic load balancing address.<br/>
+> Clients that do not query that attribute right before using it will have **no** way to be aware of changes, and will
+> still send its queries to the node that was primary at the time of configuration.
+>
+> At this point, it is kinda useless to have a replication group, and one could just use a single node cluster.
+
+```sh
+# Update the engine version of a replication group.
+aws elasticache modify-replication-group --replication-group-id 'someCluster' --engine-version '6.2'
+aws elasticache modify-replication-group … --apply-immediately
+```
+
+> [!caution]
+> Updating the engine version will make all the nodes of the cluster read-only for some time.
 
 ### Global Accelerator
 
