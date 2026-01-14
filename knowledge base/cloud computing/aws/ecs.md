@@ -77,7 +77,7 @@ aws ecs list-services --cluster 'clusterName'
 
 # Scale services.
 aws ecs update-service --cluster 'clusterName' --service 'serviceName' --desired-count '0'
-aws ecs update-service --cluster 'clusterName' --service 'serviceName' --desired-count '10'
+aws ecs update-service --cluster 'clusterName' --service 'serviceName' --desired-count '10' --no-cli-pager
 
 # Wait for services to be running.
 aws ecs wait services-stable --cluster 'clusterName' --services 'serviceName' …
@@ -155,8 +155,8 @@ while [[ $(aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'test
 # Restart tasks.
 # No real way to do that, just stop the tasks and new ones will be eventually started in their place.
 # To mimic a blue-green deployment, scale the service up by doubling its tasks, then down again to the normal amount.
-aws ecs update-service --cluster 'someCluster' --service 'someService' --desired-count '0' \
-&& aws ecs update-service --cluster 'someCluster' --service 'someService' --desired-count '1'
+aws ecs update-service --cluster 'someCluster' --service 'someService' --desired-count '0' --no-cli-pager \
+&& aws ecs update-service --cluster 'someCluster' --service 'someService' --desired-count '1' --no-cli-pager
 ```
 
 </details>
