@@ -40,6 +40,14 @@ tab container indicator and the favourites' star button).
 
 </details>
 
+<details>
+  <summary>Use profiles</summary>
+
+Enable the profile switcher by setting `browser.profiles.enabled` to `true` in `about:config`.<br/>
+This will present a UI-menu-based switcher very similar to what Chrome gives.
+
+</details>
+
 ## Further readings
 
 - [Website]
@@ -50,6 +58,7 @@ tab container indicator and the favourites' star button).
 
 - [How do I use the Split View feature?]
 - [Reduce Window Border Thickness]
+- [Is possible to have different Zen instances, each one linked to a different google account?]
 
 <!--
   Reference
@@ -60,5 +69,6 @@ tab container indicator and the favourites' star button).
 [Codebase]: https://github.com/zen-browser/desktop
 [Documentation]: https://docs.zen-browser.app/
 [How do i use the split view feature?]: https://docs.zen-browser.app/faq#how-do-i-use-the-split-view-feature
+[Is possible to have different Zen instances, each one linked to a different google account?]: https://github.com/zen-browser/desktop/discussions/4133#discussioncomment-13667581
 [Reduce Window Border Thickness]: https://github.com/zen-browser/desktop/discussions/3452#discussioncomment-13363156
 [Website]: https://zen-browser.app/
