@@ -159,7 +159,8 @@ Consider what follows for _infrastructure_ and _platform engineering_ as well.
   [adapters or interfaces][what does it mean to program to interfaces?] in the background instead.<br/>
   E.g., check out how [Crossplane], [Radius] and [KRO] work.
 - Offer **clear** error messages and **immediate** access to them.<br/>
-  Consider leveraging different, more specific status codes for different _global_ results. E.g.:
+  Consider leveraging different, more specific [status codes][http response status codes] for different _global_
+  results. E.g.:
 
   - Return `5` instead of `1` in UNIX to point out an executable could not find a required file.
   - Return [422 Unprocessable Content] instead of [200 OK] if a request was syntactically correct, but the data it
@@ -228,6 +229,7 @@ Listed in order of addition:
 <!-- Knowledge base -->
 [crossplane]: kubernetes/crossplane.placeholder
 [editorconfig]: editorconfig.md
+[http response status codes]: http.md#response-status-codes
 [keep a changelog]: keep%20a%20changelog.md
 [kro]: kubernetes/kro.md
 [lefthook]: lefthook.md
