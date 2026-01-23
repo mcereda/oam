@@ -7,6 +7,8 @@
 1. [Use JSON schemas](#use-json-schemas)
 1. [Use YAML schemas](#use-yaml-schemas)
 1. [Network connections](#network-connections)
+1. [Integrations](#integrations)
+   1. [Claude](#claude)
 1. [Troubleshooting](#troubleshooting)
    1. [Blank window upon launch](#blank-window-upon-launch)
    1. [_No extensions found_ when running from source](#no-extensions-found-when-running-from-source)
@@ -124,6 +126,15 @@ The `recommendations[]` key shall contain the recommended extensions' identifier
 
 See [Network connections in Visual Studio Code].
 
+## Integrations
+
+### Claude
+
+Refer [Use Claude Code in VS Code].
+
+> [!caution]
+> Currently requires a Pro or Max subscription to Claude.
+
 ## Troubleshooting
 
 ### Blank window upon launch
@@ -200,5 +211,6 @@ sudo dscl . append '/Groups/_developer' GroupMembership "$USER"
 [electron applications all crash upon launch]: https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/1944468
 [how do i change vs code settings to use jetbrains mono font]: https://stackoverflow.com/questions/59776906/how-do-i-change-vs-code-settings-to-use-jetbrains-mono-font
 [recommending vscode extensions within your open source projects]: https://tattoocoder.com/recommending-vscode-extensions-within-your-open-source-projects/
+[Use Claude Code in VS Code]: https://code.claude.com/docs/en/vs-code
 [using extensions in compiled vscode]: https://stackoverflow.com/questions/44057402/using-extensions-in-compiled-vscode#45291490
 [vscode (and some non-patched electron applications) doesn't run after tumbleweed update on nvidia]: https://www.reddit.com/r/openSUSE/comments/ptqlfu/psa_vscode_and_some_nonpatched_electron/
