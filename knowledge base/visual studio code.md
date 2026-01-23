@@ -5,6 +5,7 @@
 1. [Handy keyboard shortcuts](#handy-keyboard-shortcuts)
 1. [Recommend extensions](#recommend-extensions)
 1. [Use JSON schemas](#use-json-schemas)
+1. [Use YAML schemas](#use-yaml-schemas)
 1. [Network connections](#network-connections)
 1. [Troubleshooting](#troubleshooting)
    1. [Blank window upon launch](#blank-window-upon-launch)
@@ -92,14 +93,31 @@ The `recommendations[]` key shall contain the recommended extensions' identifier
     "url": "https://raw.githubusercontent.com/hadolint/hadolint/master/contrib/hadolint.json"
   },
   {
-    "fileMatch": ["/.pre-commit-config.yaml"],
-    "url": "https://json.schemastore.org/pre-commit-config.json"
+      "fileMatch": [
+          ".markdownlint.js",
+          ".markdownlint.json",
+          ".markdownlint.jsonc",
+          ".markdownlint.y*ml"
+      ],
+      "url": "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json"
   },
   {
-    "fileMatch": ["/.yamllint.yaml"],
+    "fileMatch": ["/.yamllint.y*ml"],
     "url": "https://json.schemastore.org/yamllint.json"
   }
 ],
+```
+
+## Use YAML schemas
+
+```json
+"yaml.schemas": {
+    "https://json.schemastore.org/lefthook.json": ".lefthook.y*ml",
+    "https://json.schemastore.org/pre-commit-config.json": ".pre-commit-config.y*ml",
+    "https://json.schemastore.org/pulumi.json": "Pulumi.y*ml",
+    "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json": "docker-compose.y*ml",
+    "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json": ".markdownlint.y*ml"
+},
 ```
 
 ## Network connections
