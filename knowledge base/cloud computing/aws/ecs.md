@@ -5,14 +5,15 @@
 1. [Execution and task roles](#execution-and-task-roles)
 1. [Standalone tasks](#standalone-tasks)
 1. [Services](#services)
+1. [CPU architectures](#cpu-architectures)
 1. [Launch type](#launch-type)
    1. [EC2 launch type](#ec2-launch-type)
    1. [Fargate launch type](#fargate-launch-type)
    1. [External launch type](#external-launch-type)
 1. [Capacity providers](#capacity-providers)
-   1. [Capacity provider strategies](#capacity-provider-strategies)
    1. [EC2 capacity providers](#ec2-capacity-providers)
    1. [Fargate for ECS](#fargate-for-ecs)
+   1. [Capacity provider strategies](#capacity-provider-strategies)
 1. [Resource constraints](#resource-constraints)
 1. [Environment variables](#environment-variables)
 1. [Storage](#storage)
@@ -21,6 +22,7 @@
     1. [Docker volumes](#docker-volumes)
     1. [Bind mounts](#bind-mounts)
 1. [Networking](#networking)
+1. [Intra-task container dependencies](#intra-task-container-dependencies)
 1. [Execute commands in tasks' containers](#execute-commands-in-tasks-containers)
 1. [Scale the number of tasks automatically](#scale-the-number-of-tasks-automatically)
     1. [Target tracking](#target-tracking)
@@ -33,10 +35,13 @@
     1. [FireLens](#firelens)
     1. [Fluent Bit or Fluentd](#fluent-bit-or-fluentd)
 1. [Secrets](#secrets)
+    1. [Inject Secrets Manager secrets as environment variables](#inject-secrets-manager-secrets-as-environment-variables)
+    1. [Mount Secrets Manager secrets as files in containers](#mount-secrets-manager-secrets-as-files-in-containers)
+    1. [Make a sidecar container write secrets to shared volumes](#make-a-sidecar-container-write-secrets-to-shared-volumes)
 1. [Best practices](#best-practices)
+1. [Cost-saving measures](#cost-saving-measures)
 1. [Troubleshooting](#troubleshooting)
     1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
-1. [Cost-saving measures](#cost-saving-measures)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -353,6 +358,24 @@ Available service scheduler strategies:
   > [!important]
   > Fargate does **not** support the `DAEMON` scheduling strategy.
 
+## CPU architectures
+
+Containers can use one of different specific CPU architectures, provided the container image referenced in a task's
+containers definition is available for those architectures.
+
+When not specified, the CPU architecture's default value is `X86_64`.
+
+```json
+{
+    "family": "busybox",
+    "containerDefinitions": [ … ],
+    … ,
+    "runtimePlatform": {
+        "cpuArchitecture": "ARM64"
+    }
+}
+```
+
 ## Launch type
 
 Defines the underlying infrastructure effectively running containers within ECS.
@@ -422,6 +445,75 @@ Clusters _can_ contain a mix of Fargate and Auto Scaling group capacity provider
     ]
 }
 ```
+
+</details>
+
+### EC2 capacity providers
+
+Refer [Amazon ECS capacity providers for the EC2 launch type].
+
+When using EC2 instances for capacity, one really uses Auto Scaling groups to manage the EC2 instances.<br/>
+Auto Scaling helps ensure that one has the correct number of EC2 instances available to handle the application's load.
+
+### Fargate for ECS
+
+Refer [AWS Fargate Spot Now Generally Available] and [Amazon ECS clusters for Fargate].
+
+ECS can run tasks on the `Fargate` and `Fargate Spot` capacity when they are associated with a cluster.
+
+The Fargate provider runs tasks on on-demand compute capacity.
+
+Fargate Spot is intended for **interruption tolerant** tasks.<br/>
+It runs tasks on spare compute capacity. This makes it cost less than Fargate's normal price, but allows AWS to
+interrupt those tasks when it needs capacity back.
+
+During periods of extremely high demand, Fargate Spot capacity might be unavailable.<br/>
+When this happens, ECS services retry launching tasks until the required capacity becomes available.
+
+ECS sends **a two-minute warning** before Spot tasks are stopped due to a Spot interruption.<br/>
+This warning is sent as a task state change event to EventBridge and as a SIGTERM signal to the running task.
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>EventBridge event example</summary>
+
+```json
+{
+    "version": "0",
+    "id": "9bcdac79-b31f-4d3d-9410-fbd727c29fab",
+    "detail-type": "ECS Task State Change",
+    "source": "aws.ecs",
+    "account": "111122223333",
+    "resources": [
+        "arn:aws:ecs:us-east-1:111122223333:task/b99d40b3-5176-4f71-9a52-9dbd6f1cebef"
+    ],
+    "detail": {
+        "clusterArn": "arn:aws:ecs:us-east-1:111122223333:cluster/default",
+        "createdAt": "2016-12-06T16:41:05.702Z",
+        "desiredStatus": "STOPPED",
+        "lastStatus": "RUNNING",
+        "stoppedReason": "Your Spot Task was interrupted.",
+        "stopCode": "SpotInterruption",
+        "taskArn": "arn:aws:ecs:us-east-1:111122223333:task/b99d40b3-5176-4f71-9a52-9dbd6fEXAMPLE",
+        …
+    }
+}
+```
+
+</details>
+
+When Spot tasks are terminated, the service scheduler receives the interruption signal and attempts to launch additional
+tasks on Fargate Spot, possibly from a different Availability Zone, provided such capacity is available.
+
+Fargate will **not** replace Spot capacity with on-demand capacity.
+
+Ensure containers exit gracefully before the task stops by configuring the following:
+
+- Specify a `stopTimeout` value of 120 seconds or less in the container definition that the task is using.<br/>
+  The default value is 30 seconds. A higher value will provide more time between the moment that the task's state change
+  event is received and the point in time when the container is forcefully stopped.
+- Make sure the `SIGTERM` signal is caught from within the container, and that it triggers any needed cleanup.<br/>
+  Not processing this signal results in the task receiving a `SIGKILL` signal after the configured `stopTimeout` value,
+  which may result in data loss or corruption.
 
 ### Capacity provider strategies
 
@@ -515,53 +607,93 @@ This value is taken into account **only after the `base` values are satisfied**.
 When multiple capacity providers are specified within a strategy, at least one of the providers **must** have a `weight`
 value greater than zero (`0`).
 
-Aside from their `base` value (if not `0`), capacity providers with a `weight` value of `0` are **not** considered when
-the scheduler decides where to place tasks. Should _all_ providers in a strategy have a weight of `0`, any `RunTask` or
-`CreateService` actions using that strategy will fail.
+_Aside from their `base` value (if not `0`)_, capacity providers with a `weight` value of `0` are **not** considered
+when the scheduler decides where to place tasks. Should _all_ providers in a strategy have a weight of `0`, any
+`RunTask` or `CreateService` actions using that strategy will fail.
 
 The `weight` ratio is computed by:
 
 1. Summing up all providers' weights.
 1. Determining the percentage per provider.
 
-<details style='padding: 0 0 0 1rem'>
-  <summary>Simple example</summary>
+Examples:
 
-Provider 1 is `FARGATE`, with weight of `1`.<br/>
-Provider 2 is `FARGATE_SPOT`, with weight of `3`.
+<details style='padding: 0 0 0 1rem'>
+  <summary>Ensure <b>only a set number</b> of tasks execute on on-demand capacity.</summary>
+
+Specify the `base` value and a **zero** `weight` value for the on-demand capacity provider:
 
 ```json
 {
-    …
-    "capacityProviderStrategy": [
-        {
-            "capacityProvider": "FARGATE",
-            "weight": 1
-        },
-        {
-            "capacityProvider": "FARGATE_SPOT",
-            "weight": 3
-        }
-    ]
+    "capacityProvider": "FARGATE",
+    "base": 2,
+    "weight": 0
 }
 ```
 
-Sum of weights: `1 + 3 = 4`.<br/>
-Percentage per provider:
+</details>
+
+<details style='padding: 0 0 0 1rem'>
+  <summary>
+    Ensure only a <b>percentage</b> (or <b>ratio</b>) of all the desired tasks execute on on-demand capacity.
+  </summary>
+
+Specify a **low** `weight` value for the on-demand capacity provider, and a **higher** `weight` value for a
+**second**, **spot** capacity provider.
+
+One wants `FARGATE` to receive 25% of the tasks, while running the remaining 75% on `FARGATE_SPOT`.
+
+  <details style='padding: 0 0 0 1rem'>
+    <summary>Percentage-like</summary>
+
+  ```json
+  {
+      "capacityProvider": "FARGATE",
+      "weight": 25
+  }
+  {
+      "capacityProvider": "FARGATE_SPOT",
+      "weight": 75
+  }
+  ```
+
+  </details>
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Ratio-like</summary>
+
+25% is ¼, so the percentage per provider will be as follows:
 
 - `FARGATE`: `1 / 4 = 0.25`.
 - `FARGATE_SPOT`: `3 / 4 = 0.75`.
 
-`FARGATE` will receive 25% of the tasks, while `FARGATE_SPOT` will receive the remaining 75%.
+Provider 1 will be `FARGATE`, with weight of `1`.<br/>
+Provider 2 will be `FARGATE_SPOT`, with weight of `3`.
+
+  ```json
+  {
+      "capacityProvider": "FARGATE",
+      "weight": 1
+  }
+  {
+      "capacityProvider": "FARGATE_SPOT",
+      "weight": 3
+  }
+  ```
+
+  </details>
 
 </details>
 
 <details style='padding: 0 0 1rem 1rem'>
-  <summary>More advanced example</summary>
+  <summary>
+    Run a specific number of tasks on EC2, and spread the rest on Fargate so that only 5% of the remaining tasks is on
+    on-demand capacity
+  </summary>
 
-Provider 1 is `FARGATE`, with a weight of `1`.<br/>
-Provider 2 is `FARGATE_SPOT`, with a weight of `19`.<br/>
-Provider 3 is `some-custom-ec2-capacity-provider`, with a weight of `0` and base of `2`.
+Provider 1 will be `FARGATE`, with a weight of `1`.<br/>
+Provider 2 will be `FARGATE_SPOT`, with a weight of `19`.<br/>
+Provider 3 will be `some-custom-ec2-capacity-provider`, with a weight of `0` and base of `2`.
 
 ```json
 {
@@ -601,73 +733,6 @@ Percentage per provider:
 A cluster can contain a mix of services and standalone tasks that use both capacity providers and launch types.<br/>
 Services _can_ be updated to use a capacity provider strategy instead of a launch type, but one will need to force a new
 deployment to do so.
-
-### EC2 capacity providers
-
-Refer [Amazon ECS capacity providers for the EC2 launch type].
-
-When using EC2 instances for capacity, one really uses Auto Scaling groups to manage the EC2 instances.<br/>
-Auto Scaling helps ensure that one has the correct number of EC2 instances available to handle the application's load.
-
-### Fargate for ECS
-
-Refer [AWS Fargate Spot Now Generally Available] and [Amazon ECS clusters for Fargate].
-
-ECS can run tasks on the `Fargate` and `Fargate Spot` capacity when they are associated with a cluster.
-
-The Fargate provider runs tasks on on-demand compute capacity.
-
-Fargate Spot is intended for **interruption tolerant** tasks.<br/>
-It runs tasks on spare compute capacity. This makes it cost less than Fargate's normal price, but allows AWS to
-interrupt those tasks when it needs capacity back.
-
-During periods of extremely high demand, Fargate Spot capacity might be unavailable.<br/>
-When this happens, ECS services retry launching tasks until the required capacity becomes available.
-
-ECS sends **a two-minute warning** before Spot tasks are stopped due to a Spot interruption.<br/>
-This warning is sent as a task state change event to EventBridge and as a SIGTERM signal to the running task.
-
-<details style='padding: 0 0 1rem 1rem'>
-  <summary>EventBridge event example</summary>
-
-```json
-{
-    "version": "0",
-    "id": "9bcdac79-b31f-4d3d-9410-fbd727c29fab",
-    "detail-type": "ECS Task State Change",
-    "source": "aws.ecs",
-    "account": "111122223333",
-    "resources": [
-        "arn:aws:ecs:us-east-1:111122223333:task/b99d40b3-5176-4f71-9a52-9dbd6f1cebef"
-    ],
-    "detail": {
-        "clusterArn": "arn:aws:ecs:us-east-1:111122223333:cluster/default",
-        "createdAt": "2016-12-06T16:41:05.702Z",
-        "desiredStatus": "STOPPED",
-        "lastStatus": "RUNNING",
-        "stoppedReason": "Your Spot Task was interrupted.",
-        "stopCode": "SpotInterruption",
-        "taskArn": "arn:aws:ecs:us-east-1:111122223333:task/b99d40b3-5176-4f71-9a52-9dbd6fEXAMPLE",
-        …
-    }
-}
-```
-
-</details>
-
-When Spot tasks are terminated, the service scheduler receives the interruption signal and attempts to launch additional
-tasks on Fargate Spot, possibly from a different Availability Zone, provided such capacity is available.
-
-Fargate will **not** replace Spot capacity with on-demand capacity.
-
-Ensure containers exit gracefully before the task stops by configuring the following:
-
-- Specify a `stopTimeout` value of 120 seconds or less in the container definition that the task is using.<br/>
-  The default value is 30 seconds. A higher value will provide more time between the moment that the task's state change
-  event is received and the point in time when the container is forcefully stopped.
-- Make sure the `SIGTERM` signal is caught from within the container, and that it triggers any needed cleanup.<br/>
-  Not processing this signal results in the task receiving a `SIGKILL` signal after the configured `stopTimeout` value,
-  which may result in data loss or corruption.
 
 ## Resource constraints
 
@@ -801,12 +866,12 @@ Exiting session with sessionId: ecs-execute-command-abcdefghijklmnopqrstuvwxyz.
 
 Refer [Storage options for Amazon ECS tasks].
 
-| Volume type      | Launch type support | OS support     | Persistence                                                                                                    | Use cases                                                                   |
-| ---------------- | ------------------- | -------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [EBS volumes]    | EC2<br/>Fargate     | Linux          | _Can_ be persisted when used by a standalone task<br/>Ephemeral when attached to tasks maintained by a service | Transactional workloads                                                     |
-| [EFS volumes]    | EC2<br/>Fargate     | Linux          | Persistent                                                                                                     | Data analytics<br/>Media processing<br/>Content management<br/>Web serving  |
-| [Docker volumes] | EC2                 | Linux, Windows | Persistent                                                                                                     | Provide a location for data persistence<br/>Sharing data between containers |
-| [Bind mounts]    | EC2<br/>Fargate     | Linux, Windows | Ephemeral                                                                                                      | Data analytics<br/>Media processing<br/>Content management<br/>Web serving  |
+| Volume type      | Launch type support | OS support     | Persistence                                                                                                      | Use cases                                                                   |
+| ---------------- | ------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [EBS volumes]    | EC2<br/>Fargate     | Linux          | _Can_ be persisted when used by a standalone task.<br/>Ephemeral when attached to tasks maintained by a service. | Transactional workloads                                                     |
+| [EFS volumes]    | EC2<br/>Fargate     | Linux          | Persistent                                                                                                       | Data analytics<br/>Media processing<br/>Content management<br/>Web serving  |
+| [Docker volumes] | EC2                 | Linux, Windows | Persistent                                                                                                       | Provide a location for data persistence<br/>Sharing data between containers |
+| [Bind mounts]    | EC2<br/>Fargate     | Linux, Windows | Ephemeral                                                                                                        | Data analytics<br/>Media processing<br/>Content management<br/>Web serving  |
 
 ### EBS volumes
 
@@ -950,12 +1015,94 @@ one's behalf.<br/>
 Such role is automatically created when creating a cluster, or when creating or updating a service in the AWS Management
 Console.
 
+## Intra-task container dependencies
+
+Containers can depend on other containers **from the same task**.<br/>
+On startup, ECS evaluates all container dependency conditions and starts the containers only when the required
+conditions are met.<br/>
+During shutdown, the dependency order is reversed and containers that depend on others will stop **after** the ones
+they depend on.
+
+One can define these dependencies using a container definition's `dependsOn` attribute.<br/>
+Each dependency requires one to specify:
+
+- `containerName`: the name of the container the current container depends on.
+- `condition`: the state that container must reach before the current container can start.
+- \[optional] `startTimeout`: how long ECS should wait for the dependency condition before marking the task as failed.
+
+Valid conditions are as follows:
+
+- `START`: the required container must be _**started**_ (but not necessarily `running` or `ready`).
+- `HEALTHY`: the required container must have **and** pass its own health check.
+- `COMPLETE`: the required container must have finished its execution (exit) before the dependent containers start.
+
+  Good for one-off init tasks that don't necessarily need to succeed.
+
+  > [!warning]
+  > This condition **cannot** be used on essential containers, since the task will stop should they exit with a
+  > non-zero code.
+
+- `SUCCESS`: same as `COMPLETE`, but the exit code **must** be `0` (successful).
+
+  Useful for initialization containers that must succeed.
+
+<details style='padding: 0 0 1rem 0'>
+  <summary>Definition example</summary>
+
+```json
+{
+    "containerDefinitions": [
+        {
+            "name": "init-task",
+            "image": "busybox",
+            "command": [
+                "sh", "-c",
+                "echo init done"
+            ],
+            "essential": false
+        },
+        {
+            "name": "sidecar",
+            "image": "nginx:latest",
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "curl -f http://localhost/ || exit 1"
+                ],
+                "interval": 10,
+                "retries": 3,
+                "startPeriod": 5,
+                "timeout": 3
+            }
+        },
+        {
+            "name": "app",
+            "image": "some-app:latest",
+            "dependsOn": [
+                {
+                    "containerName": "init",
+                    "condition": "SUCCESS"
+                },
+                {
+                    "containerName": "sidecar",
+                    "condition": "HEALTHY"
+                }
+            ]
+        }
+    ]
+}
+```
+
+</details>
+
 ## Execute commands in tasks' containers
 
-Refer [Using Amazon ECS Exec to access your containers on AWS Fargate and Amazon EC2],
-[A Step-by-Step Guide to Enabling Amazon ECS Exec],
-[`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]
-and [Amazon ECS Exec Checker].
+Refer:
+
+- [Using Amazon ECS Exec to access your containers on AWS Fargate and Amazon EC2].
+- [A Step-by-Step Guide to Enabling Amazon ECS Exec]
+- [`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`].
+- [Amazon ECS Exec Checker].
 
 Leverage ECS Exec, which in turn leverages SSM to create a secure channel between one's device and the target
 container.<br/>
@@ -1172,7 +1319,7 @@ configured for the above options. If the options are **not** configured, then th
 
 Refer [Automatically scale your Amazon ECS service].
 
-Scaling**_out_** **increases** the number of tasks, scaling-**_in_** **decreases** it.
+Scaling-**_out_** **increases** the number of tasks, scaling-**_in_** **decreases** it.
 
 ECS sends metrics in **1-minute intervals** to CloudWatch.<br/>
 Keep this in mind when tweaking the values for scaling.
@@ -1686,118 +1833,235 @@ The `fluentd-address` value is specified as a secret option as it may be treated
 
 ## Secrets
 
+Refer [Pass sensitive data to an Amazon ECS container].
+
 Options:
 
-- [Pass Secrets Manager secrets through Amazon ECS environment variables].
+- [Inject Secrets Manager secrets as environment variables].
+- [Mount Secrets Manager secrets as files in containers].
+- [Make a sidecar container write secrets to shared volumes].
 
-Use Secrets Manager in environment variables
+### Inject Secrets Manager secrets as environment variables
 
-When setting environment variables to secrets from Secrets Manager, it is the **execution** role (and **not** the task
-role) that must have the permissions required to access them.
+Refer [Pass Secrets Manager secrets through Amazon ECS environment variables].
+
+> [!important]
+> When setting environment variables to secrets from Secrets Manager, it is the _**execution**_ role (and **not** the
+> _task_ role) that must have the permissions required to access them.
+
+Configure the `secrets` attribute in the task definition to point to a secret in Secrets Manager:
+
+```json
+{
+    "executionRoleArn": "arn:aws:iam::012345678901:role/some-execution-role",
+    "containerDefinitions": [
+        {
+            "name": "some-app",
+            "image": "some-image",
+            "secrets": [
+                {
+                    "name": "SOME_SECRET",
+                    "valueFrom": "arn:aws:secretsmanager:eu-east-1:012345678901:secret:some-secret"
+                }
+            ]
+        }
+    ]
+}
+```
+
+> [!important]
+> Should a secret change, the current running tasks will retain its old value.<br/>
+> Restart these tasks to allow them to retrieve the secret's latest value version.
+
+### Mount Secrets Manager secrets as files in containers
+
+ECS does **not** currently have such a native feature (unlike Kubernetes with CSI), and can only [inject Secrets
+Manager secrets as environment variables].
+
+There are still some ways to get the same outcome (like a JSON file on disk):
+
+- Use an Entrypoint script to write the environment variables' values to files when the container starts.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  Task definition:
+
+  ```json
+  {
+      "executionRoleArn": "arn:aws:iam::123456789012:role/some-execution-role",
+      "containerDefinitions": [
+          {
+              "name": "some-app",
+              "image": "some-image",
+              "secrets": [
+                  {
+                      "name": "SOME_SECRET_JSON",
+                      "valueFrom": "arn:aws:secretsmanager:eu-east-1:012345678901:secret:some-secret-json"
+                  }
+              ],
+              "entryPoint": ["/entrypoint.sh"]
+          }
+      ]
+  }
+  ```
+
+  Entrypoint script:
+
+  ```sh
+  #!/bin/sh
+  set -e
+
+  echo "$SOME_SECRET_JSON" > '/app/secret.json'
+  chmod 600 '/app/secret.json'
+  unset 'SOME_SECRET_JSON'  # optional, for enhanced security
+
+  exec "$@"
+  ```
+
+  </details>
+
+- Fetch secrets from Secrets Manager directly from containers, being it the app or a startup script.
+
+  This requires:
+
+  - The container image to be equipped with the AWS SDK or CLI.
+  - The _**task**_ role (and **not** the _execution_ role) to have `secretsmanager:GetSecretValue` for the secrets.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  Task definition:
+
+  ```json
+  {
+      "taskRoleArn": "arn:aws:iam::123456789012:role/some-task-role",
+      "containerDefinitions": [
+          {
+              "name": "some-app",
+              "image": "some-image",
+              "entryPoint": ["/entrypoint.sh"]
+          }
+      ]
+  }
+  ```
+
+  Entrypoint script:
+
+  ```sh
+  #!/bin/sh
+  set -e
+
+  aws secretsmanager get-secret-value --secret-id 'some-secret' \
+    --query 'SecretString' --output 'text' \
+  > '/app/secret.json'
+  chmod 600 '/app/secret.json'
+
+  exec "$@"
+  ```
+
+  </details>
+
+### Make a sidecar container write secrets to shared volumes
+
+Use a sidecar container to implement one of the other solutions.<br/>
+Useful when wanting multiple containers to access the same secret, or just clean security boundaries.
+
+1. A sidecar container fetches the secrets (from an injected environment variable, or from Secrets Manager and alike).
+1. The sidecar container writes secret values to files on a shared, empty volume.
+1. The main app reads files from the shared volume.
+
+<details style='padding: 0 0 1rem 0'>
+  <summary>Definitions example</summary>
+
+```json
+{
+    "volumes": [
+        { "name": "shared-secrets" }
+    ],
+    "containerDefinitions": [
+        {
+            "name": "sidecar",
+            "image": "busybox:latest",
+            "secrets": [
+                {
+                  "name": "SOME_SECRET",
+                  "valueFrom": "arn:aws:secretsmanager:eu-west-1:012345678901:secret:some-secret"
+                }
+            ],
+            "mountPoints": [
+                {
+                  "sourceVolume": "shared-secrets",
+                  "containerPath": "/shared"
+                }
+            ],
+            "command": [
+                "sh", "-c",
+                "echo $SOME_SECRET > /shared/secret.txt && chmod 600 /shared/secret.txt"
+            ],
+            "essential": false
+        },
+        {
+            "name": "app",
+            "image": "some-app:latest",
+            "dependsOn": [
+                {
+                    "containerName": "sidecar",
+                    "condition": "SUCCESS"
+                }
+            ],
+            "mountPoints": [
+                {
+                  "sourceVolume": "shared-secrets",
+                  "containerPath": "/shared"
+                }
+            ],
+            "command": [
+                "sh", "-c",
+                "echo 'App read secret:' && cat /shared/secret.txt"
+            ],
+            "essential": true
+        }
+    ]
+}
+```
+
+</details>
 
 ## Best practices
 
 - Consider configuring [resource constraints].
-- Consider making sure the `SIGTERM` signal is caught from within the container, and that it triggers any cleanup action
-  that might be needed.
-- When using **spot** compute capacity, consider ensuring containers exit gracefully before the task stops.\
+- Consider making sure the `SIGTERM` signal is caught from within the container, and that it triggers any cleanup
+  action that might be needed.
+- When using **spot** compute capacity, consider ensuring containers exit gracefully before the task stops.<br/>
   Refer [Capacity providers].
 
-Cost-saving measures:
+## Cost-saving measures
 
 - Prefer using ARM-based compute capacity over the default `X86_64`, where feasible.<br/>
-  Specify the CPU architecture in the task's definition.
+  Refer [CPU architectures].
 
-  <details style='padding: 0 0 1rem 1rem'>
+- Consider **stopping** (scaling to 0) non-production services after working hours.
+- Prefer using [**spot** capacity][effectively using spot instances in aws ecs for production workloads] for
 
-  ```diff
-   {
-       "family": "bb-arm64",
-       "networkMode": "awsvpc",
-       …,
-  +    "runtimePlatform": {
-  +        "cpuArchitecture": "ARM64"
-  +    }
-   }
-  ```
+  - Non-critical services and tasks.
+  - State**less** or otherwise **interruption tolerant** tasks.
 
-  </details>
+  Refer [Capacity providers].
+- Consider applying for EC2 Instance and/or Compute Savings Plans if using EC2 capacity.<br/>
+  Consider applying for Compute Savings Plans if using Fargate capacity.
 
 - When configuring [resource constraints]:
 
   - Consider granting tasks a _reasonable_ amount of resources to work with.
   - Keep an eye on the task's effective resource usage and adjust the constraints accordingly.
 
-- When deploying state**less** or otherwise **interruption tolerant** tasks, consider **only** using **spot** compute
-  capacity (e.g., `FARGATE_SPOT`).<br/>
-  Refer [Capacity providers].
-- If deploying state**ful** or otherwise **interruption sensitive** tasks, consider using on-demand compute capacity
-  (e.g., `FARGATE`) **only** for the **minimum** amount of required tasks.<br/>
-  Refer [Capacity providers].
-
-  <details style='padding: 0 0 1rem 1rem'>
-
-  Ensure **only a set number** of tasks execute on on-demand capacity by specifying the `base` value and a **zero**
-  `weight` value for the on-demand capacity provider.
-
-    <details style='padding: 0 0 1rem 1rem'>
-
-    ```json
-    {
-        "capacityProvider": "FARGATE",
-        "base": 2,
-        "weight": 0
-    }
-    ```
-
-    </details>
-
-  Ensure a **percentage** or **ratio** of all the desired tasks execute on on-demand capacity by specifying a **low**
-  `weight` value for the on-demand capacity provider, and a **higher** `weight` value for a **second**, **spot**
-  capacity provider.
-
-    <details style='padding: 0 0 1rem 1rem'>
-      <summary> Percentage-like </summary>
-
-    ```json
-    {
-        "capacityProvider": "FARGATE",
-        "weight": 5
-    }
-    {
-        "capacityProvider": "FARGATE_SPOT",
-        "weight": 95
-    }
-    ```
-
-    </details>
-
-    <details style='padding: 0 0 1rem 1rem'>
-      <summary> Ratio-like </summary>
-
-    ```json
-    {
-        "capacityProvider": "FARGATE",
-        "weight": 1
-    }
-    {
-        "capacityProvider": "FARGATE_SPOT",
-        "weight": 19
-    }
-    ```
-
-    </details>
-
-  </details>
-
 - Consider configuring [Service auto scaling][scale the number of tasks automatically] for the application to reduce the
   number of tasks to a minimum during schedules (e.g., at night) or when otherwise unused.
 
-  > [!caution]
+  > [!warning]
   > Mind the limitations that come with the auto scaling settings.
 
-- If only used internally (e.g., via a VPN), consider **not** using a load balancer, but configuring intra-network
-  communication capabilities for the application in its place.<br/>
+- If only used internally (e.g., via a VPN), consider configuring intra-network communication capabilities for the
+  application **instead of** using a load balancer.<br/>
   Refer [Allow tasks to communicate with each other].
 
 ## Troubleshooting
@@ -1823,14 +2087,6 @@ must be one of the specific pairs supported by Fargate.
 Specify a supported value for the task CPU and memory in your task definition.
 
 </details>
-
-## Cost-saving measures
-
-- Prefer using [spot capacity][effectively using spot instances in aws ecs for production workloads] for non-critical
-  services and tasks.
-- Consider **stopping** (scaling to 0) non-production services after working hours.
-- Consider applying for EC2 Instance and/or Compute Savings Plans if using EC2 capacity.<br/>
-  Consider applying for Compute Savings Plans if using Fargate capacity.
 
 ## Further readings
 
@@ -1889,16 +2145,20 @@ Specify a supported value for the task CPU and memory in your task definition.
 <!-- In-article sections -->
 [Allow tasks to communicate with each other]: #allow-tasks-to-communicate-with-each-other
 [bind mounts]: #bind-mounts
+[capacity provider strategies]: #capacity-provider-strategies
 [Capacity providers]: #capacity-providers
+[CPU architectures]: #cpu-architectures
 [docker volumes]: #docker-volumes
 [ebs volumes]: #ebs-volumes
 [efs volumes]: #efs-volumes
+[Inject Secrets Manager secrets as environment variables]: #inject-secrets-manager-secrets-as-environment-variables
 [Launch type]: #launch-type
+[Make a sidecar container write secrets to shared volumes]: #make-a-sidecar-container-write-secrets-to-shared-volumes
+[Mount Secrets Manager secrets as files in containers]: #mount-secrets-manager-secrets-as-files-in-containers
 [Resource constraints]: #resource-constraints
 [Scale the number of tasks automatically]: #scale-the-number-of-tasks-automatically
 [services]: #services
 [standalone tasks]: #standalone-tasks
-[capacity provider strategies]: #capacity-provider-strategies
 
 <!-- Knowledge base -->
 [amazon web services]: README.md
@@ -1939,6 +2199,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [Interconnect Amazon ECS services]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/interconnecting-services.html
 [Metrics collection from Amazon ECS using Amazon Managed Service for Prometheus]: https://aws.amazon.com/blogs/opensource/metrics-collection-from-amazon-ecs-using-amazon-managed-service-for-prometheus/
 [Pass Secrets Manager secrets through Amazon ECS environment variables]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/secrets-envvar-secrets-manager.html
+[Pass sensitive data to an Amazon ECS container]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/specifying-sensitive-data.html
 [storage options for amazon ecs tasks]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html
 [Target tracking scaling policies for Application Auto Scaling]: https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-target-tracking.html
 [troubleshoot amazon ecs deployment issues]: https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ecs.html
