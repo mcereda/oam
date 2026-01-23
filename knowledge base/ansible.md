@@ -1898,7 +1898,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [removing empty values from a list and assigning it to a new list]: https://stackoverflow.com/questions/60525961/ansible-removing-empty-values-from-a-list-and-assigning-it-to-a-new-list#60526774
 [running your ansible playbooks in parallel and other strategies]: https://toptechtips.github.io/2023-06-26-ansible-parallel/
 [set_fact vs set_stats]: https://gregsowell.com/?p=7540
-[Tim Grützmacher's Ansible best practices]: https://timgrt.github.io/Ansible-Best-Practices/
+[Tim Grützmacher's Ansible best practices]: https://github.com/computacenter-com/ansible-best-practices
 [unique filter of list in jinja2]: https://stackoverflow.com/questions/44329598/unique-filter-of-list-in-jinja2
 [what is the exact list of ansible setup min?]: https://stackoverflow.com/questions/71060833/what-is-the-exact-list-of-ansible-setup-min#71061125
 [Why Ansible and Python fork break on macOS High Sierra+ and how to solve]: https://ansiblepilot.medium.com/why-ansible-and-python-fork-break-on-macos-high-sierra-and-how-to-solve-d11540cd2a1b
