@@ -7,6 +7,8 @@ kubectl create namespace 'gitlab'
 kubectl apply --namespace 'gitlab' --values 'secrets.yaml'
 kubectl create --namespace 'gitlab' secret generic 'gitlab-runner-token' --dry-run='client' --output 'yaml' \
 	--from-literal='runner-registration-token=""' --from-literal='runner-token=glrt-…'
+kubectl create --namespace='finops' secret generic 'aws-cost-exporter' \
+	--from-literal=aws_access_key='${AWS_ACCESS_KEY}' --from-literal=aws_access_secret='${AWS_ACCESS_SECRET}'
 kubectl --namespace 'gitea' create secret generic 'gitea-admin-secret' \
 	--from-literal 'username=gitea_admin' --from-literal "password=$(pulumi config get 'giteaAdminPassword')"
 kubectl get secrets -n 'gitea' 'gitea' -o jsonpath='{.data.config_environment\.sh}' | base64 -d
