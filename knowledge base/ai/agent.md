@@ -33,6 +33,9 @@ Prefer using **local** agents.
 Consider limiting agent execution to containers or otherwise isolated environments, with only (limited) access to what
 they absolutely need.
 
+Enabling reasoning for the model _could™_ sometimes help avoiding attacks, since the model _might™_ be able to notice
+them during the run.
+
 Prefer **requiring** consent by agents when running them.
 
 ## Concerns
