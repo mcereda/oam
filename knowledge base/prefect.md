@@ -33,9 +33,45 @@ prefect version
   <summary>Usage</summary>
 
 ```sh
-# Start.
+# Check the version.
+prefect version
+
+# Start the server.
 prefect server start
 docker run -d -p '4200:4200' 'prefecthq/prefect:3-latest' -- prefect server start --host '0.0.0.0'
+
+# Schedule workflows.
+prefect schedule 'main/my_first_deployment' '0 8 * * *'
+
+# Cancel running workflows.
+prefect flow-run cancel 'a55a4804-9e3c-4042-8b59-b3b6b7618736'
+
+# List all work queues.
+prefect work-queue ls
+
+# Pause work queues.
+prefect work-queue pause 'queue-name'
+
+# List deployments.
+prefect deployment ls
+
+# Pause deployment schedules.
+prefect deployment pause 'deployment-name'
+
+# List work pools.
+prefect work-pool ls
+
+# Pause work pools.
+prefect work-pool pause 'pool-name'
+
+# Login to the cloud instance.
+prefect cloud login
+
+# List cloud workspaces.
+prefect cloud workspace ls
+
+# Set a default cloud workspace.
+prefect cloud workspace set --workspace "some/workspace"
 ```
 
 </details>
