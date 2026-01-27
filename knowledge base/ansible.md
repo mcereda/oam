@@ -145,17 +145,37 @@ ansible-galaxy list
 
 # Install roles from Galaxy.
 ansible-galaxy install 'namespace.role'
-ansible-galaxy install --roles-path 'path/to/ansible/roles' 'namespace.role'
-ansible-galaxy install 'namespace.role,v1.0.0'
+ansible-galaxy role install --roles-path 'path/to/ansible/roles' 'namespace.role'
+ansible-galaxy role install 'namespace.role,v1.0.0'
 ansible-galaxy install 'git+https://github.com/namespace/role.git,commit-hash'
-ansible-galaxy install -r 'requirements.yml'
+ansible-galaxy role install -r 'requirements.yml'
 
 # Create new roles.
 ansible-galaxy init 'role_name'
 ansible-galaxy role init --type 'container' --init-path 'path/to/role' 'name'
 
+# Import or update roles.
+ansible-galaxy role import 'some_github_user' 'some_github_repository'
+
 # Remove roles installed from Galaxy.
 ansible-galaxy remove 'namespace.role'
+
+# Delete roles.
+ansible-galaxy role delete <github_user> <github_repo>
+
+# List collections installed from Galaxy.
+ansible-galaxy collection list
+
+# Install collections from Galaxy.
+ansible-galaxy collection install 'namespace.collection'
+ansible-galaxy collection install --collections-path 'path/to/ansible/collections' 'namespace.collection'
+ansible-galaxy collection install 'namespace.collection=v1.0.0'
+ansible-galaxy collection install 'git+https://github.com/namespace/collection.git,commit-hash'
+ansible-galaxy collection install -r 'requirements.yml'
+
+# Verify installed collections.
+ansible-galaxy collection verify 'community.dns'
+ansible-galaxy collection verify -r 'requirements.yml'
 ```
 
 </details>
@@ -1754,6 +1774,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 - [Ansible Navigator documentation]
 - [Ansible Runner]
 - [Using variables]
+- [Galaxy Community User Guide][galaxy  community user guide]
 
 ### Sources
 
@@ -1843,6 +1864,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [defining variables at runtime]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html#defining-variables-at-runtime
 [developing and testing ansible roles with molecule and podman - part 1]: https://www.ansible.com/blog/developing-and-testing-ansible-roles-with-molecule-and-podman-part-1/
 [Execution environment definition]: https://ansible.readthedocs.io/projects/builder/en/stable/definition/
+[Galaxy  Community User Guide]: https://docs.ansible.com/projects/galaxy-ng/en/latest/community/userguide.html
 [Galaxy  sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
 [Galaxy]: https://galaxy.ansible.com/
 [Getting started with Execution Environments]: https://docs.ansible.com/ansible/latest/getting_started_ee/index.html
