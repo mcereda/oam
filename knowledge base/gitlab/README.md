@@ -19,6 +19,7 @@
     1. [Keep the latest artifacts for all jobs in the latest successful pipelines](#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines)
 1. [Environments](#environments)
 1. [Login via Google, Github or other services](#login-via-google-github-or-other-services)
+1. [API](#api)
 1. [Troubleshooting](#troubleshooting)
     1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
     1. [GitLab keeps answering with code 502](#gitlab-keeps-answering-with-code-502)
@@ -40,6 +41,10 @@ curl -X 'PUT' -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/applic
 
 # Disable maintenance mode.
 curl -X 'PUT' -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings?maintenance_mode=false'
+
+# List users.
+curl -fsSL -H 'PRIVATE-TOKEN: glpat-something' 'https://gitlab.fqdn/api/v4/users' \
+| jq '.[]|{"name":.name,"username":.username,"state":.state,"locked":.locked}' -
 ```
 
 GitLab uses [GitLab Flavored Markdown (GLFM)] to render Markdown files in its UI.<br/>
@@ -886,6 +891,12 @@ gitlab_rails['omniauth_providers'] = [{
 
 </details>
 
+## API
+
+Refer [Extend with GitLab].
+
+[Python SDK]
+
 ## Troubleshooting
 
 ### Use access tokens to clone projects
@@ -932,6 +943,7 @@ Solution: set the correct ownership with
 - [CODEOWNERS syntax]
 - [GitLab CLI][glab]
 - [Integrations]
+- [Extend with GitLab]
 
 ### Sources
 
@@ -998,6 +1010,8 @@ Solution: set the correct ownership with
 [deployment]: https://docs.gitlab.com/charts/installation/deployment.html
 [elasticsearch]: https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html
 [environment variables]: https://docs.gitlab.com/ee/administration/environment_variables.html
+[Environments]: https://docs.gitlab.com/ci/environments/
+[Extend with GitLab]: https://docs.gitlab.com/api/
 [forks]: https://docs.gitlab.com/ee/user/project/repository/forking_workflow.html
 [gitlab 17.8 release - use roles to define project members as code owners]: https://about.gitlab.com/releases/2025/01/16/gitlab-17-8-released/#use-roles-to-define-project-members-as-code-owners
 [GitLab Flavored Markdown (GLFM)]: https://docs.gitlab.com/user/markdown/
@@ -1015,6 +1029,7 @@ Solution: set the correct ownership with
 [operator guide]: https://docs.gitlab.com/operator/
 [package configuration file template]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/raw/master/files/gitlab-config-template/gitlab.rb.template
 [Password authentication enabled]: https://gitlab.com/help/administration/settings/sign_in_restrictions.md#password-authentication-enabled
+[Python SDK]: https://github.com/python-gitlab/python-gitlab
 [reset a user's password]: https://docs.gitlab.com/ee/security/reset_user_password.html
 [restore gitlab]: https://docs.gitlab.com/ee/administration/backup_restore/restore_gitlab.html
 [runners on kubernetes]: https://docs.gitlab.com/runner/install/kubernetes.html
@@ -1028,7 +1043,6 @@ Solution: set the correct ownership with
 [upgrade packaged postgresql server]: https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server
 [upgrade path tool]: https://gitlab-com.gitlab.io/support/toolbox/upgrade-path/
 [use kaniko to build docker images]: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
-[Environments]: https://docs.gitlab.com/ci/environments/
 
 <!-- Others -->
 [chef infra]: https://www.chef.io/products/chef-infra
