@@ -2,6 +2,7 @@
 
 1. [TL;DR](#tldr)
 1. [Burstable instances](#burstable-instances)
+1. [Spot instances](#spot-instances)
 1. [Disks](#disks)
    1. [Ephemeral storage](#ephemeral-storage)
 1. [Metrics](#metrics)
@@ -11,7 +12,7 @@
 1. [Automatic recovery](#automatic-recovery)
 1. [Cost-saving measures](#cost-saving-measures)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -129,6 +130,36 @@ Earning CPU credits to pay down surplus credits enables EC2 to average the CPU u
 period.<br/>
 If the average CPU usage over a 24-hour period **exceeds** the baseline, instances are
 [billed for the additional usage](https://aws.amazon.com/ec2/pricing/on-demand/#T2.2FT3.2FT4g_Unlimited_Mode_Pricing).
+
+## Spot instances
+
+Refer:
+
+- [Amazon EC2 Spot Instances]
+- [Spot Instance interruptions]
+- [EC2 instance rebalance recommendations]
+
+Regular EC2 capacity offered at up to a 90% discount from On-Demand prices that can be reclaimed by AWS at any time.
+
+Effective reclamation follows a 2-minute notification called the
+[_Spot Instance Interruption Event_][spot instance interruptions].<br/>
+Spot instances are a good fit for applications flexible, fault-tolerant, or stateless applications that are able to
+gracefully handle this notification, and respond by check pointing or draining their work.
+
+In addition to Interruption Notifications, AWS sends
+[Rebalance Recommendation Events][ec2 instance rebalance recommendations] to spot instances that are at higher risk of
+being interrupted.<br/>
+Handling Rebalance Recommendations can potentially give an application more time to gracefully shutdown than the 2
+minutes given by an Interruption Notification.
+
+Test Spot Interruption Notifications and Rebalance Recommendations:
+
+- _Locally_ (and not from EC2) using [EC2 Metadata Mock][aws/amazon-ec2-metadata-mock].
+- _On EC2 instances_ using AWS' Fault Injection Simulator.
+
+The [ec2-spot-interrupter CLI tool][aws/amazon-ec2-spot-interrupter] simplifies FIS' usage by getting a list of
+instance IDs and using them to craft the required experiment templates and then execute those experiments.<br/>
+See [Implementing interruption tolerance in Amazon EC2 Spot with AWS Fault Injection Simulator] for details.
 
 ## Disks
 
@@ -292,7 +323,8 @@ Also see [Automatic instance recovery].
   -->
 
 <!-- In-article sections -->
-[burstable instances]: #burstable-instances
+[Burstable instances]: #burstable-instances
+[Spot instances]: #spot-instances
 
 <!-- Knowledge base -->
 [amazon web services]: README.md
@@ -306,9 +338,12 @@ Also see [Automatic instance recovery].
 [amazon ebs volume limits for amazon ec2 instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/volume_limits.html
 [amazon ec2 auto scaling lifecycle hooks]: https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html
 [amazon ec2 auto scaling]: https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html
+[Amazon EC2 Spot Instances]: https://aws.amazon.com/ec2/spot/
 [announcing amazon ec2 per second billing]: https://aws.amazon.com/about-aws/whats-new/2017/10/announcing-amazon-ec2-per-second-billing/
 [attach an ebs volume to multiple ec2 instances using multi-attach]: https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volumes-multi.html
 [Automatic instance recovery]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html
+[aws/amazon-ec2-metadata-mock]: https://github.com/aws/amazon-ec2-metadata-mock
+[aws/amazon-ec2-spot-interrupter]: https://github.com/aws/amazon-ec2-spot-interrupter
 [best practices for handling ec2 spot instance interruptions]: https://aws.amazon.com/blogs/compute/best-practices-for-handling-ec2-spot-instance-interruptions/
 [burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html
 [change the instance type]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html
@@ -318,17 +353,19 @@ Also see [Automatic instance recovery].
 [describe-images]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-images.html
 [describeimages]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html
 [device names for volumes on amazon ec2 instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html
+[EC2 instance rebalance recommendations]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/rebalance-recommendations.html
 [Eventual consistency in the Amazon EC2 API]: https://docs.aws.amazon.com/ec2/latest/devguide/eventual-consistency.html
 [Find AMIs with the SSM Agent preinstalled]: https://docs.aws.amazon.com/systems-manager/latest/userguide/ami-preinstalled-agent.html
 [how can i send memory and disk metrics from my ec2 instances to cloudwatch?]: https://repost.aws/knowledge-center/cloudwatch-memory-metrics-ec2
 [how to clone instance ec2]: https://repost.aws/questions/QUOrWudF3vRL2Vqtrv0M9lfQ/how-to-clone-instance-ec2
 [iam roles for amazon ec2]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
+[Implementing interruption tolerance in Amazon EC2 Spot with AWS Fault Injection Simulator]: https://aws.amazon.com/blogs/compute/implementing-interruption-tolerance-in-amazon-ec2-spot-with-aws-fault-injection-simulator/
 [instance store temporary block storage for ec2 instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html
 [key concepts and definitions for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-credits-baseline-concepts.html
 [Manually create or edit the CloudWatch agent configuration file]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-Configuration-File-Details.html
 [recommended alarms]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Best_Practice_Recommended_Alarms_AWS_Services.html#EC2
 [retrieve instance metadata]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
-[Spot Instances]: https://aws.amazon.com/ec2/spot/
+[Spot Instance interruptions]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-interruptions.html
 [standard mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-standard-mode.html
 [termination notifications]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-instance-termination-notices.html
 [unlimited mode for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-unlimited-mode.html
