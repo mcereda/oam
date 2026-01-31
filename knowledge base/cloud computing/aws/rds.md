@@ -23,12 +23,13 @@
     1. [PostgreSQL: reduce allocated storage by migrating using transportable databases](#postgresql-reduce-allocated-storage-by-migrating-using-transportable-databases)
     1. [Stop instances](#stop-instances)
     1. [Cancel pending modifications](#cancel-pending-modifications)
+1. [Pricing](#pricing)
+    1. [Cost-saving measures](#cost-saving-measures)
 1. [Troubleshooting](#troubleshooting)
     1. [ERROR: extension must be loaded via shared\_preload\_libraries](#error-extension-must-be-loaded-via-shared_preload_libraries)
     1. [ERROR: must be superuser to alter _X_ roles or change _X_ attribute](#error-must-be-superuser-to-alter-x-roles-or-change-x-attribute)
     1. [Transport fails asking for the remote user must have superuser, but it already does](#transport-fails-asking-for-the-remote-user-must-have-superuser-but-it-already-does)
     1. [The instance is unbearably slow](#the-instance-is-unbearably-slow)
-1. [Cost-saving measures](#cost-saving-measures)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -1004,6 +1005,64 @@ $ aws rds modify-db-instance --db-instance-identifier 'some-db' \
 
 </details>
 
+## Pricing
+
+Refer [RDS pricing].<br/>
+See also [Understanding AWS RDS Pricing].
+
+Impacting factors (from most to least impactful):
+
+1. Instance type and size.
+
+   > [!warning]
+   > Burstable (T-class) instances **cannot** be set to use the _Standard_ credit configuration mode, and **only** come
+   > using _Unlimited_ mode.<br/>
+   > When exceeding the baseline, additional CPU credits are billed at $0.075 per vCPU-hour (`us-east-1`).
+
+1. Storage type and capacity.
+1. Backup storage.
+
+   Backup storage up to 100% of one's total database storage (per region) is free.<br/>
+   Additional backup storage costs ~$0.095 per GB-month (`us-east-1`).<br/>
+   [Exporting snapshots to S3][export snapshots to s3] costs ~$0.10 per GB (`us-east-1`).
+
+1. Multi-AZ deployments.
+
+   One is essentially running two instance instead of one, but really using only one of them at a time.<br/>
+   However, data transfers between the primary instance and its standby is **not** charged for.
+
+1. Data transfers.
+
+   Depends on the source and destination:
+
+   - RDS ↔ EC2 in the same AZ: Free.
+   - RDS Multi-AZ replication (between AZs): Free.
+   - RDS ↔ EC2 between different AZs in the same region: ~$0.01 per GB (`us-east-1`).
+   - **Inbound** Internet data: Free.
+   - **Outbound** Internet data: tiered pricing, starting at ~$0.09 per GB for the first 10 TB per month (`us-east-1`).
+
+1. Zero-ETL integrations.
+1. Extended support.
+
+### Cost-saving measures
+
+- Choose _appropriate_ instance types and sizes.<br/>
+  Consider changing them more appropriate ones (more recent, smaller, or Graviton-based) every few months.
+- Consider leveraging [reserved instances][rds reserved instances].
+
+  Prefer using _Standard RIs_ when sticking with one instance type and **not** needing changing it for the **entire**
+  duration of a reservation.<br/>
+  Otherwise, prefer _Convertible RIs_ for flexibility.
+
+  RDS does **not** support Savings Plans at the time of writing.
+
+- Optimize storage.
+- Set backup retention periods that balance recovery needs and storage costs.
+- Regularly delete unnecessary manual snapshots.
+- Prefer using Single-AZ deployments when high-availability is not necessary (e.g., for development or testing DBs).
+- Prefer disabling Extended support for an instance when not necessary (e.g., for development or testing DBs).<br/>
+  Keep the DBs' engine versions updated to stay out of the Extended support otherwise.
+
 ## Troubleshooting
 
 ### ERROR: extension must be loaded via shared_preload_libraries
@@ -1078,16 +1137,6 @@ or write workloads and exceeds the instance type quotas.
 
 </details>
 
-## Cost-saving measures
-
-- Choose _appropriate_ instance types and sizes.
-- Prefer using [reserved instances][rds reserved instances] when one can stay on a single instance type for the whole
-  duration of the reservation.<br/>
-  Should the DB type **not** change in time, prefer _Standard RIs_. Otherwise, prefer _Convertible RIs_ for
-  flexibility.
-
-  RDS does **not** support Savings Plans at the time of writing.
-
 ## Further readings
 
 - [Working with DB instance read replicas]
@@ -1126,12 +1175,13 @@ or write workloads and exceeds the instance type quotas.
   -->
 
 <!-- In-article sections -->
-[backup]: #backup
-[storage optimization]: #storage-optimization
+[Backup]: #backup
+[Export snapshots to S3]: #export-snapshots-to-s3
+[Storage optimization]: #storage-optimization
 
 <!-- Knowledge base -->
-[ebs]: ebs.md
-[s3]: s3.md
+[EBS]: ebs.md
+[S3]: s3.md
 
 <!-- Files -->
 <!-- Upstream -->
@@ -1151,6 +1201,7 @@ or write workloads and exceeds the instance type quotas.
 [migrating databases using rds postgresql transportable databases]: https://aws.amazon.com/blogs/database/migrating-databases-using-rds-postgresql-transportable-databases/
 [Multi-AZ DB instance deployments for Amazon RDS]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html
 [pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
+[RDS pricing]: https://aws.amazon.com/rds/pricing/
 [RDS reserved instances]: https://aws.amazon.com/rds/reserved-instances/
 [Recommended alarms for RDS]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Best_Practice_Recommended_Alarms_AWS_Services.html#RDS
 [renaming a db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RenameInstance.html
@@ -1174,3 +1225,4 @@ or write workloads and exceeds the instance type quotas.
 [backing up login roles aka users and group roles]: https://www.postgresonline.com/article_pfriendly/81.html
 [Disabling AWS RDS backups when creating/updating instances?]: https://stackoverflow.com/questions/35709153/disabling-aws-rds-backups-when-creating-updating-instances#35730978
 [Kyle Kingsbury's Amazon RDS for PostgreSQL 17.4 analysis]: https://jepsen.io/analyses/amazon-rds-for-postgresql-17.4
+[Understanding AWS RDS Pricing]: https://www.bytebase.com/blog/understanding-aws-rds-pricing/
