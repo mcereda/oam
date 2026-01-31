@@ -895,7 +895,17 @@ gitlab_rails['omniauth_providers'] = [{
 
 Refer [Extend with GitLab].
 
-[Python SDK]
+The [Python SDK] also provides a CLI tool to operate with the API.
+
+<details>
+
+```sh
+pipx install 'python-gitlab'
+export GITLAB_URL='https://gitlab.example.org' GITLAB_PRIVATE_TOKEN='glpat-…'
+gitlab --order-by 'name' user list --get-all --per-page '100'
+```
+
+</details>
 
 ## Troubleshooting
 
