@@ -2,7 +2,7 @@
 
 ## Acronyms and abbreviations
 
-| Acronym | Expansion                                              | Description                                                                                         |
+| Acronym | Expansion                                              | Summary                                                                                             |
 | ------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
 | ACK     | ACKnowledgement                                        |                                                                                                     |
 | ACL     | [Access Control List][acl]                             |                                                                                                     |
@@ -124,19 +124,20 @@
 | SQL     | Structured Query Language                              |                                                                                                     |
 | SRE     | Site Reliability Engineer                              |                                                                                                     |
 | SSH     | [Secure SHell][ssh]                                    |                                                                                                     |
-| SSID    | Service Set IDentifier                                 | A wireless network name                                                                             |
+| SSID    | Service Set IDentifier                                 | Wireless network name                                                                               |
 | SSSD    | [System Security Services Daemon][sssd]                |                                                                                                     |
 | TCP     | Transport Control Protocol                             |                                                                                                     |
 | TFE     | [TerraForm Enterprise]                                 |                                                                                                     |
 | TIL     | Today I Learned                                        |                                                                                                     |
 | TL;DR   | Too Long; Didn't Read                                  |                                                                                                     |
+| TL;DW   | Too Long; Didn't Watch                                 | TL;DR, but for videos                                                                               |
 | TLD     | Top Level Domain                                       |                                                                                                     |
 | UART    | Universal Asynchronous Receiver and Transmitter        |                                                                                                     |
 | UDP     | User Datagram Protocol                                 |                                                                                                     |
 | UFW     | Uncomplicated FireWall                                 |                                                                                                     |
-| URI     | Uniform Resource Identifier                            | [uri vs url vs urn]                                                                                 |
-| URL     | Uniform Resource Locator                               | [uri vs url vs urn]                                                                                 |
-| URN     | Uniform Resource Name                                  | [uri vs url vs urn]                                                                                 |
+| URI     | Uniform Resource Identifier                            | See [URI vs URL vs URN]                                                                             |
+| URL     | Uniform Resource Locator                               | See [URI vs URL vs URN]                                                                             |
+| URN     | Uniform Resource Name                                  | See [URI vs URL vs URN]                                                                             |
 | USB     | Universal Serial Bus                                   |                                                                                                     |
 | UT      | Unit Test                                              |                                                                                                     |
 | UX      | User eXperience                                        |                                                                                                     |
