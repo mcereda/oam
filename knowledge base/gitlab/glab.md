@@ -51,12 +51,15 @@ glab config set 'editor' 'vim'
 glab config set 'token' 'xxxxx' -h 'gitlab.com'
 glab config set 'check_update' 'false' --global
 
+# Get repositories' information.
+glab repo view 'someGroup/someRepo' -F 'json'
+
 # Clone repositories.
 glab repo clone 'someGroup/someRepo'
 
 # List issues.
-glab issues list
-glab issues list --repo 'someGroup/someNamespace/someRepo'
+glab issue list
+glab issue list --repo 'someGroup/someNamespace/someRepo'
 
 # List Merge Requests.
 glab mr list
