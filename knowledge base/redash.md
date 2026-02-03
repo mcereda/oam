@@ -1,11 +1,6 @@
 # Redash
 
-> TODO
-
-Intro
-
-<!-- Remove this line to uncomment if used
-## Table of contents <!-- omit in toc -->
+Dashboard visualization tool.
 
 1. [TL;DR](#tldr)
 1. [Authentication](#authentication)
@@ -17,6 +12,8 @@ Intro
    1. [Sources](#sources)
 
 ## TL;DR
+
+Allows querying multiple _data sources_ at once.
 
 Settings are read by `redash.settings` from environment variables.<br/>
 Most installations set them in `/opt/redash/.env`. Official container images require that `.env` file in the root
@@ -192,7 +189,25 @@ Refer [LDAP/AD Authentication].
 
 Refer [API].
 
-Prefer acting on them via [getredash/redash-toolbelt].
+Prefer acting on them using [getredash/redash-toolbelt].
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Configuration</summary>
+
+The `/api/config` endpoint does **not** require authentication.<br/>
+The `/api/session` endpoint **does** require it.
+
+```plaintext
+GET /api/config
+GET /api/session
+```
+
+```sh
+curl --url 'https://redash.example.org/api/config'
+curl --url 'https://redash.example.org/api/session' --header 'Authorization: Key AA…99'
+```
+
+</details>
 
 <details style='padding: 0 0 1rem 1rem'>
   <summary>Data sources</summary>
