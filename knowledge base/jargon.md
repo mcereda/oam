@@ -90,6 +90,7 @@
 | LAN     | Local Area Network                                     |                                                                                                     |
 | LED     | Light Emitting Diode                                   |                                                                                                     |
 | LIFO    | Last In First Out                                      |                                                                                                     |
+| LLM     | Large Language Model                                   |                                                                                                     |
 | M2COTS  | Mass Market COTS                                       | Widely available COTS products                                                                      |
 | MR      | Merge Request                                          | Prevalently used in GitLab                                                                          |
 | NACL    | Network ACL                                            |                                                                                                     |

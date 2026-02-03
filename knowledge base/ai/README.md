@@ -18,7 +18,7 @@ TODO
 ## Further readings
 
 - [Useful AI]: tools, courses, and more, curated and reviewed by experts.
-- [ChatGPT], [Claude], [Copilot], [Duck AI], [Gemini]
+- LLMs: [ChatGPT], [Claude], [Copilot], [Duck AI], [Gemini]
 
 ### Sources
 
