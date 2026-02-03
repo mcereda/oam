@@ -1,10 +1,11 @@
 # GitLab
 
 1. [TL;DR](#tldr)
-1. [Package](#package)
-1. [Kubernetes](#kubernetes)
-   1. [Helm chart](#helm-chart)
-   1. [Operator](#operator)
+1. [Setup](#setup)
+   1. [Package](#package)
+   1. [Kubernetes](#kubernetes)
+      1. [Helm chart](#helm-chart)
+      1. [Operator](#operator)
 1. [Create resources in GitLab using Pulumi](#create-resources-in-gitlab-using-pulumi)
 1. [Forking](#forking)
 1. [Repository management](#repository-management)
@@ -19,10 +20,12 @@
     1. [Keep the latest artifacts for all jobs in the latest successful pipelines](#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines)
 1. [Environments](#environments)
 1. [Login via Google, Github or other services](#login-via-google-github-or-other-services)
+1. [Reset user's passwords](#reset-users-passwords)
 1. [API](#api)
 1. [Troubleshooting](#troubleshooting)
     1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
     1. [GitLab keeps answering with code 502](#gitlab-keeps-answering-with-code-502)
+    1. [A user is unable to login](#a-user-is-unable-to-login)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -50,7 +53,9 @@ curl -fsSL -H 'PRIVATE-TOKEN: glpat-something' 'https://gitlab.fqdn/api/v4/users
 GitLab uses [GitLab Flavored Markdown (GLFM)] to render Markdown files in its UI.<br/>
 Since v17.10, one can use Alerts to highlight or call attention to something in GitHub-like fashion.
 
-## Package
+## Setup
+
+### Package
 
 Previously known as 'Omnibus'.
 
@@ -269,9 +274,9 @@ sudo dnf remove 'gitlab-ee'
 
 </details>
 
-## Kubernetes
+### Kubernetes
 
-### Helm chart
+#### Helm chart
 
 GitLab offers an official helm chart to to allow for deployments on kubernetes clusters.
 
@@ -554,7 +559,7 @@ or consider using the [minimal Minikube example values file] as reference, as st
 
 </details>
 
-### Operator
+#### Operator
 
 See the [operator guide] and the [operator code] for details.
 
@@ -891,6 +896,58 @@ gitlab_rails['omniauth_providers'] = [{
 
 </details>
 
+## Reset user's passwords
+
+Refer [Reset a user's password].
+
+Users can reset their own password by selecting "Forgot your password?" on the sign-in page.
+
+<details>
+  <summary>In the UI</summary>
+
+1. In the upper-right corner, select Admin.
+1. Select _Overview_ > _Users_ from the left side menu.
+1. Identify the user account to update.
+1. Select _Edit_.
+1. In the Password section, enter and confirm a new password.
+1. Select Save changes.
+
+</details>
+
+<details>
+  <summary>Via Rake task</summary>
+
+```sh
+sudo gitlab-rake "gitlab:password:reset"
+sudo gitlab-rake "gitlab:password:reset[djones]"
+```
+
+</details>
+
+<details>
+  <summary>Via Rails console</summary>
+
+> [!note]
+> The console might take a while to start.
+
+```sh
+sudo gitlab-rails console
+```
+
+```rb
+user = User.find_by_username('djones')
+new_password = 'somePassword'
+user.password = new_password
+user.password_confirmation = new_password
+user.password_automatically_set = false
+user.send_only_admin_changed_your_password_notification!
+user.skip_reconfirmation!
+user.save!
+exit
+```
+
+</details>
+
 ## API
 
 Refer [Extend with GitLab].
@@ -932,6 +989,18 @@ Root cause: the socket's permissions are mapped incorrectly.
 
 Solution: set the correct ownership with
 `docker exec 'gitlab' chown 'gitlab-www:git' '/var/opt/gitlab/gitlab-workhorse/sockets/socket'`.
+
+### A user is unable to login
+
+Refer [Invalid login or password].
+
+1. Check:
+
+   1. The user exists.
+   1. The user is entering the correct credentials.
+   1. The user is not blocked, deactivated, or banned.
+
+1. [Reset their password][reset user's passwords].
 
 ## Further readings
 
@@ -993,7 +1062,8 @@ Solution: set the correct ownership with
   -->
 
 <!-- In-article sections -->
-[maintenance mode]: #maintenance-mode
+[Maintenance mode]: #maintenance-mode
+[Reset user's passwords]: #reset-users-passwords
 
 <!-- Knowledge base -->
 [buildah]: ../buildah.md
@@ -1032,6 +1102,7 @@ Solution: set the correct ownership with
 [icons]: https://gitlab-org.gitlab.io/gitlab-svgs/
 [install gitlab with the linux package]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/doc/installation/index.md
 [install self-managed gitlab]: https://about.gitlab.com/install
+[Invalid login or password]: https://support.gitlab.com/hc/en-us/articles/20488048257052-Invalid-login-or-password
 [merge request approval rules]: https://docs.gitlab.com/ee/user/project/merge_requests/approvals/rules.html
 [minimal minikube example values file]: https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/values-minikube-minimum.yaml
 [OmniAuth]: https://docs.gitlab.com/integration/omniauth/
@@ -1040,7 +1111,7 @@ Solution: set the correct ownership with
 [package configuration file template]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/raw/master/files/gitlab-config-template/gitlab.rb.template
 [Password authentication enabled]: https://gitlab.com/help/administration/settings/sign_in_restrictions.md#password-authentication-enabled
 [Python SDK]: https://github.com/python-gitlab/python-gitlab
-[reset a user's password]: https://docs.gitlab.com/ee/security/reset_user_password.html
+[reset a user's password]: https://docs.gitlab.com/security/reset_user_password/
 [restore gitlab]: https://docs.gitlab.com/ee/administration/backup_restore/restore_gitlab.html
 [runners on kubernetes]: https://docs.gitlab.com/runner/install/kubernetes.html
 [sign-up restrictions]: https://docs.gitlab.com/ee/administration/settings/sign_up_restrictions.html
