@@ -7,7 +7,7 @@
       1. [Helm chart](#helm-chart)
       1. [Operator](#operator)
 1. [Create resources in GitLab using Pulumi](#create-resources-in-gitlab-using-pulumi)
-1. [Forking](#forking)
+1. [Forking projects](#forking-projects)
 1. [Repository management](#repository-management)
    1. [Different owners for parts of the code base](#different-owners-for-parts-of-the-code-base)
    1. [Get the version of the helper image to use for a runner](#get-the-version-of-the-helper-image-to-use-for-a-runner)
@@ -31,9 +31,33 @@
 
 ## TL;DR
 
-Using `-H 'PRIVATE-TOKEN: glpat-m-…'` in API calls is the same as using `-H 'Authorization: bearer glpat-m-…'`.
+_Projects_ contain a code repository, collaborative tools, project management features, and CI/CD capabilities.<br/>
+They can be set to be available _publicly_, _internally_, or _privately_.<br/>
+GitLab does **not** limit the number of private projects one can create.
 
-Use _deploy tokens_ instead of personal access tokens to access repositories in pipelines as they do not expire.
+_Personal Access Tokens_ (PATs) are **an user**'s alternative to OAuth2 to authenticate:
+
+- With GitLab's API.
+- With Git, using HTTP Basic Authentication.
+
+One authenticates with a PAT in place of one's password.<br/>
+Usernames are _required_, but **not** evaluated when authenticating with PATs.<br/>
+Refer [Personal access tokens].
+
+_Project access tokens_ are similar to PATs, but they limit access to **their project's** resources, are granted a
+limited role, and require an expiration date.<br/>
+Refer [Project access tokens].
+
+_Group access tokens_ are similar to PATs and project access tokens, but they relate to **a group** instead.<br/>
+They **cannot** be used to create other group, project, or personal access tokens.<br/>
+Refer [Group access tokens].
+
+_Deploy tokens_ allow accessing resources **without** tying permissions to individual user accounts, and do **not**
+expire.<br/>
+Consider using those in place of PATs for git-related operations, container registries, package registries, and
+repositories from pipelines.
+
+Using `-H 'PRIVATE-TOKEN: glpat-m-…'` in API calls is the same as using `-H 'Authorization: bearer glpat-m-…'`.
 
 ```sh
 # List the current application settings of the GitLab instance.
@@ -41,7 +65,6 @@ curl -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/application/set
 
 # Enable maintenance mode.
 curl -X 'PUT' -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings?maintenance_mode=true'
-
 # Disable maintenance mode.
 curl -X 'PUT' -H 'PRIVATE-TOKEN: glpat-m-…' 'https://gitlab.fqdn/api/v4/application/settings?maintenance_mode=false'
 
@@ -50,8 +73,8 @@ curl -fsSL -H 'PRIVATE-TOKEN: glpat-something' 'https://gitlab.fqdn/api/v4/users
 | jq '.[]|{"name":.name,"username":.username,"state":.state,"locked":.locked}' -
 ```
 
-GitLab uses [GitLab Flavored Markdown (GLFM)] to render Markdown files in its UI.<br/>
-Since v17.10, one can use Alerts to highlight or call attention to something in GitHub-like fashion.
+GitLab uses [GitLab Flavored Markdown (GLFM)] to render Markdown files in its web UI.<br/>
+Since v17.10, one can use [Alerts][glfm alerts] to highlight or call attention to something in GitHub-like fashion.
 
 ## Setup
 
@@ -586,7 +609,7 @@ Refer Pulumi's [GitLab provider installation & configuration] and [GitLab provid
   export GITLAB_TOKEN='glpat-m-Va…zy'
   ```
 
-## Forking
+## Forking projects
 
 Refer [Forks].
 
@@ -1097,7 +1120,9 @@ Refer [Invalid login or password].
 [GitLab Flavored Markdown (GLFM)]: https://docs.gitlab.com/user/markdown/
 [gitlab ha scaling runner vending machine for aws ec2 asg]: https://gitlab.com/guided-explorations/aws/gitlab-runner-autoscaling-aws-asg#gitlab-runners-on-aws-spot-best-practices
 [gitlab maintenance mode]: https://docs.gitlab.com/ee/administration/maintenance_mode/
+[GLFM alerts]: https://docs.gitlab.com/user/markdown/#alerts
 [global settings]: https://docs.gitlab.com/charts/charts/globals.html
+[Group access tokens]: https://docs.gitlab.com/user/group/settings/group_access_tokens/
 [how to restart gitlab]: https://docs.gitlab.com/ee/administration/restart_gitlab.html
 [icons]: https://gitlab-org.gitlab.io/gitlab-svgs/
 [install gitlab with the linux package]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/doc/installation/index.md
@@ -1110,6 +1135,8 @@ Refer [Invalid login or password].
 [operator guide]: https://docs.gitlab.com/operator/
 [package configuration file template]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/raw/master/files/gitlab-config-template/gitlab.rb.template
 [Password authentication enabled]: https://gitlab.com/help/administration/settings/sign_in_restrictions.md#password-authentication-enabled
+[Personal access tokens]: https://docs.gitlab.com/user/profile/personal_access_tokens/
+[Project access tokens]: https://docs.gitlab.com/user/project/settings/project_access_tokens/
 [Python SDK]: https://github.com/python-gitlab/python-gitlab
 [reset a user's password]: https://docs.gitlab.com/security/reset_user_password/
 [restore gitlab]: https://docs.gitlab.com/ee/administration/backup_restore/restore_gitlab.html
