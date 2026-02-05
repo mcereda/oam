@@ -33,6 +33,7 @@
 
 ## Further readings
 
+- [Large Language Model] (LLM)
 - [Ollama]
 - [Continue VSCode extension]
 
@@ -47,6 +48,7 @@
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[Large Language Model]: large%20language%20model.md
 [Ollama]: ollama.md
 
 <!-- Files -->

@@ -90,7 +90,7 @@
 | LAN     | Local Area Network                                     |                                                                                                     |
 | LED     | Light Emitting Diode                                   |                                                                                                     |
 | LIFO    | Last In First Out                                      |                                                                                                     |
-| LLM     | Large Language Model                                   |                                                                                                     |
+| LLM     | [Large Language Model]                                 |                                                                                                     |
 | M2COTS  | Mass Market COTS                                       | Widely available COTS products                                                                      |
 | MR      | Merge Request                                          | Prevalently used in GitLab                                                                          |
 | NACL    | Network ACL                                            |                                                                                                     |
@@ -182,6 +182,7 @@
 [fish]: fish.md
 [iac]: iac.md
 [kubernetes]: kubernetes/README.md
+[Large Language Model]: ai/large%20language%20model.md
 [lora]: lora.md
 [siem]: siem.md
 [snowflake]: snowflake/README.md

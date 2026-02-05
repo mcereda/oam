@@ -17,8 +17,8 @@ TODO
 
 ## Further readings
 
+- [Large Language Model] (LLM)
 - [Useful AI]: tools, courses, and more, curated and reviewed by experts.
-- LLMs: [ChatGPT], [Claude], [Copilot], [Duck AI], [Gemini]
 
 ### Sources
 
@@ -29,12 +29,9 @@ TODO
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[Large Language Model]: large%20language%20model.md
+
 <!-- Files -->
 <!-- Upstream -->
 <!-- Others -->
-[ChatGPT]: https://chatgpt.com/
-[Claude]: https://claude.ai/
-[Copilot]: https://copilot.microsoft.com/
-[Duck AI]: https://duck.ai/c
-[Gemini]: https://gemini.google.com/
 [Useful AI]: https://usefulai.com/
