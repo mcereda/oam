@@ -1,4 +1,4 @@
-# Title
+# vLLM
 
 Open source library for LLM inference and serving.
 
@@ -16,6 +16,7 @@ Open source library for LLM inference and serving.
 
 ```sh
 pip install 'vllm'
+pipx install 'vllm'
 ```
 
 </details>
