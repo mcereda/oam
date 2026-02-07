@@ -57,6 +57,10 @@ aws cloudwatch list-metrics --namespace 'AWS/EC2' --dimensions 'Name=InstanceId,
 aws cloudwatch describe-alarms-for-metric --metric-name 'CPUUtilization' --namespace 'AWS/EC2' \
 	--dimensions 'Name=InstanceId,Value=i-1234567890abcdef0'
 
+# Toggle alarm actions
+aws cloudwatch disable-alarm-actions --alarm-names 'SomeServer_SystemStatusCheck'
+aws cloudwatch ensable-alarm-actions --alarm-names 'SomeServer_SystemStatusCheck' 'SomeServer_InstanceStatusCheck'
+
 
 ###
 # Cognito
