@@ -52,10 +52,16 @@ resolution of 1 hour for 15 months.
 # List available metrics
 aws cloudwatch list-metrics --namespace 'AWS/EC2'
 aws cloudwatch list-metrics --namespace 'AWS/EC2' --metric-name 'CPUUtilization'
-aws cloudwatch list-metrics --namespace 'AWS/EC2' --dimensions 'Name=InstanceId,Value=i-01234567890abcdef' --query 'Metrics[].MetricName'
+aws cloudwatch list-metrics --namespace 'AWS/EC2' --dimensions 'Name=InstanceId,Value=i-01234567890abcdef' \
+  --query 'Metrics[].MetricName'
 
 # Show alarms information
-aws cloudwatch describe-alarms-for-metric --metric-name 'CPUUtilization' --namespace 'AWS/EC2' --dimensions 'Name=InstanceId,Value=i-01234567890abcdef'
+aws cloudwatch describe-alarms-for-metric --metric-name 'CPUUtilization' --namespace 'AWS/EC2' \
+  --dimensions 'Name=InstanceId,Value=i-01234567890abcdef'
+
+# Toggle alarm actions
+aws cloudwatch disable-alarm-actions --alarm-names 'SomeServer_SystemStatusCheck'
+aws cloudwatch ensable-alarm-actions --alarm-names 'SomeServer_SystemStatusCheck' 'SomeServer_InstanceStatusCheck'
 ```
 
 </details>
