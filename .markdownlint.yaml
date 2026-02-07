@@ -8,6 +8,8 @@ MD013:  # line-length
   tables: false
   code_blocks: false
   severity: warning
+MD028:  # no-blanks-blockquote
+  false
 MD033:  # no-inline-html
   allowed_elements:
     - b

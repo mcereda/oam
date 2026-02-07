@@ -108,7 +108,34 @@ Mirrors can be in the following states:
 | Terminated | `STATUS_TERMINATED` | The mirror has been deleted/terminated                                                                |
 | Unknown    | `STATUS_UNKNOWN`    | The mirror is not found in PeerDB's catalog, or its status cannot be obtained due to some other issue |
 
+Existing mirrors can be edited, but **must** be paused beforehand.<br/>
+There are checks in place that will make operations that would edit a mirror fail, if the mirror is not in the
+`STATUS_PAUSED` state.
+
+> [!warning]
+> Once a mirror is created, one **will not** be able to change some of the mirror's settings, like whether to do an
+> initial snapshot or not.
+>
+> Some other parameters, like the number of tables or max workers for initial snapshots, will **only** be configurable
+> via the API (and **not** via the UI).
+
 Mirrors using _PostgreSQL_ peers as sources create [replication slots] in the source DB to get changes from.
+
+During mirrors' initial snapshots, PeerDB creates at least one worker per table (`snapshot_max_parallel_workers` times
+`snapshot_num_tables_in_parallel`).
+
+> [!caution]
+> Newly created mirrors **will start replication right away**.\
+> This _usually_ means taking a snapshot of the tables from the source. While in this state, a mirror **cannot be
+> paused**.
+
+> [!note]
+> It looks like partitions are allocated to workers at the start of the process, which results in a slow worker lagging
+> behind while the rest of the workers for that table already finished.
+
+> [!tip]
+> When dealing with lots of data, prefer starting by adding tables one at a time (with the bigger tables first), then
+> add them in bigger and bigger batches.
 
 Operations:
 
@@ -123,30 +150,6 @@ GET /api/v1/mirrors/list
 
 <details style="padding: 0 0 0 1rem">
   <summary>Create</summary>
-
-| Field                                         | Type            | Required | Default              | Notes                                            |
-| --------------------------------------------- | --------------- | -------- | -------------------- | ------------------------------------------------ |
-| `flow_job_name`                               | string          | yes      |                      | name of the mirror                               |
-| `source_name`                                 | string          | yes      |                      | name of the source peer                          |
-| `destination_name`                            | string          | yes      |                      | name of the destination peer                     |
-| `table_mappings`                              | array           | yes      |                      |                                                  |
-| `table_mappings.source_table_identifier`      | string          | yes      |                      | source schema and table                          |
-| `table_mappings.destination_table_identifier` | string          | yes      |                      | destination schema and table                     |
-| `table_mappings.exclude`                      | list of strings | no       | []                   | columns excluded from the sync                   |
-| `table_mappings.columns`                      | list of objects | no       | []                   | ordering setting; for ClickHouse only            |
-| `table_mappings.columns.name`                 | string          | yes      |                      | name of the column                               |
-| `table_mappings.columns.ordering`             | number          | yes      |                      | rank of the column                               |
-| `idle_timeout_seconds`                        | number          | no       | 60                   |                                                  |
-| `publication_name`                            | string          | no       |                      | will be created if not provided                  |
-| `max_batch_size`                              | number          | no       | 1000000              |                                                  |
-| `do_initial_snapshot`                         | boolean         | yes      |                      |                                                  |
-| `snapshot_num_rows_per_partition`             | number          | no       | 1000000              | only used for the initial snapshot               |
-| `snapshot_max_parallel_workers`               | number          | no       | 4                    | only used for the initial snapshot               |
-| `snapshot_num_tables_in_parallel`             | number          | no       | 1                    | only used for the initial snapshot               |
-| `resync`                                      | boolean         | no       | false                | the mirror **must be dropped** before re-syncing |
-| `initial_snapshot_only`                       | boolean         | no       | false                |                                                  |
-| `soft_delete_col_name`                        | string          | no       | `_PEERDB_IS_DELETED` |                                                  |
-| `synced_at_col_name`                          | string          | no       | `_PEERDB_SYNCED_AT`  |                                                  |
 
 ```sql
 CREATE MIRROR IF NOT EXISTS some_cdc_mirror
@@ -191,6 +194,30 @@ POST /api/v1/flows/cdc/create
   }
 }'
 ```
+
+| Field                                         | Type            | Required | Default              | Notes                                            |
+| --------------------------------------------- | --------------- | -------- | -------------------- | ------------------------------------------------ |
+| `flow_job_name`                               | string          | yes      |                      | name of the mirror                               |
+| `source_name`                                 | string          | yes      |                      | name of the source peer                          |
+| `destination_name`                            | string          | yes      |                      | name of the destination peer                     |
+| `table_mappings`                              | array           | yes      |                      |                                                  |
+| `table_mappings.source_table_identifier`      | string          | yes      |                      | source schema and table                          |
+| `table_mappings.destination_table_identifier` | string          | yes      |                      | destination schema and table                     |
+| `table_mappings.exclude`                      | list of strings | no       | []                   | columns excluded from the sync                   |
+| `table_mappings.columns`                      | list of objects | no       | []                   | ordering setting; for ClickHouse only            |
+| `table_mappings.columns.name`                 | string          | yes      |                      | name of the column                               |
+| `table_mappings.columns.ordering`             | number          | yes      |                      | rank of the column                               |
+| `idle_timeout_seconds`                        | number          | no       | 60                   |                                                  |
+| `publication_name`                            | string          | no       |                      | will be created if not provided                  |
+| `max_batch_size`                              | number          | no       | 1000000              |                                                  |
+| `do_initial_snapshot`                         | boolean         | yes      |                      |                                                  |
+| `snapshot_num_rows_per_partition`             | number          | no       | 1000000              | only used for the initial snapshot               |
+| `snapshot_max_parallel_workers`               | number          | no       | 4                    | only used for the initial snapshot               |
+| `snapshot_num_tables_in_parallel`             | number          | no       | 1                    | only used for the initial snapshot               |
+| `resync`                                      | boolean         | no       | false                | the mirror **must be dropped** before re-syncing |
+| `initial_snapshot_only`                       | boolean         | no       | false                |                                                  |
+| `soft_delete_col_name`                        | string          | no       | `_PEERDB_IS_DELETED` |                                                  |
+| `synced_at_col_name`                          | string          | no       | `_PEERDB_SYNCED_AT`  |                                                  |
 
 </details>
 
@@ -347,6 +374,7 @@ WITH (
 | Kafka      | `9`                   | `kafka_config`          |
 | PostgreSQL | `3` or `'POSTGRES'`   | `postgres_config`       |
 
+> [!note]
 > The optional `"allow_update": true` attribute in the API seems to do **absolutely nothing** as of the time of writing.
 
 ```plaintext
