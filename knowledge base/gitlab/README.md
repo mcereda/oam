@@ -1046,6 +1046,7 @@ Refer [Invalid login or password].
 - [GitLab CLI][glab]
 - [Integrations]
 - [Extend with GitLab]
+- [MinIO]
 
 ### Sources
 
@@ -1089,11 +1090,12 @@ Refer [Invalid login or password].
 [Reset user's passwords]: #reset-users-passwords
 
 <!-- Knowledge base -->
-[buildah]: ../buildah.md
+[Buildah]: ../buildah.md
 [glab]: glab.md
-[integrations]: integrations.md
-[kaniko]: ../kaniko.md
-[self-hosting]: ../self-hosting.md
+[Integrations]: integrations.md
+[Kaniko]: ../kaniko.md
+[MinIO]: ../minio.md
+[Self-hosting]: ../self-hosting.md
 
 <!-- Files -->
 <!-- Upstream -->
