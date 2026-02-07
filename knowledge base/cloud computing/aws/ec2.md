@@ -5,7 +5,8 @@
 1. [Spot instances](#spot-instances)
 1. [Disks](#disks)
    1. [Ephemeral storage](#ephemeral-storage)
-1. [Metrics](#metrics)
+1. [Monitoring](#monitoring)
+   1. [Metrics](#metrics)
 1. [Auto scaling](#auto-scaling)
    1. [Lifecycle hooks](#lifecycle-hooks)
 1. [Image customization](#image-customization)
@@ -196,17 +197,23 @@ Virtual devices for instance store volumes are given device names in order from 
 There is no additional charge for using the instance store volumes provided with instances.<br/>
 Instance store volumes are **included** as part of the usage cost of an instance.
 
-## Metrics
+## Monitoring
 
-Instances publish a default set of metrics to CloudWatch with no charge.<br/>
+### Metrics
+
+Instances publish _a default set_ of metrics to CloudWatch with no charge.<br/>
 One can change this set by configuring the CloudWatch agent.
 
 [Config file reference][manually create or edit the cloudwatch agent configuration file].<br/>
 [Recommended alarms].
 
-Refer [How can I send memory and disk metrics from my EC2 instances to CloudWatch?] and
-[Monitor AWS EC2 memory utilization and set CloudWatch Alarm].
+Refer:
 
+- [Monitor your instances using CloudWatch].
+- [How can I send memory and disk metrics from my EC2 instances to CloudWatch?].
+- [Monitor AWS EC2 memory utilization and set CloudWatch Alarm].
+
+> [!important]
 > Make sure the instance the permissions it needs to publish extra metrics.<br/>
 > Consider assigning it the AWS-managed `CloudWatchAgentServerPolicy` IAM policy or similar permissions.
 >
@@ -363,6 +370,7 @@ Also see [Automatic instance recovery].
 [instance store temporary block storage for ec2 instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html
 [key concepts and definitions for burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-credits-baseline-concepts.html
 [Manually create or edit the CloudWatch agent configuration file]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-Configuration-File-Details.html
+[Monitor your instances using CloudWatch]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-cloudwatch.html
 [recommended alarms]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Best_Practice_Recommended_Alarms_AWS_Services.html#EC2
 [retrieve instance metadata]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
 [Spot Instance interruptions]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-interruptions.html

@@ -130,6 +130,7 @@ Logs in CloudWatch Log Groups can be streamed [Kinesis], [Firehose] or [Lambda] 
 ## Further readings
 
 - [Website]
+- [Analyzing, optimizing, and reducing CloudWatch costs]
 
 ### Sources
 
@@ -152,6 +153,7 @@ Logs in CloudWatch Log Groups can be streamed [Kinesis], [Firehose] or [Lambda] 
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
+[Analyzing, optimizing, and reducing CloudWatch costs]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_billing.html
 [cloudwatch console]: https://console.aws.amazon.com/cloudwatch/home
 [documentation]: https://console.aws.amazon.com/cloudwatch/
 [firehose]: https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html
