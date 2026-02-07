@@ -579,6 +579,7 @@ Refer [RDS Postgres Source Setup Guide].
 - [Documentation]
 - [Blog]
 - [PeerDB UI - Deeper Dive: Part 1]
+- [MinIO]
 
 ### Sources
 
@@ -594,6 +595,8 @@ Refer [RDS Postgres Source Setup Guide].
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[MinIO]: minio.md
+
 <!-- Files -->
 <!-- Upstream -->
 [api reference]: https://docs.peerdb.io/peerdb-api/reference
