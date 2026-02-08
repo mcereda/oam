@@ -40,7 +40,8 @@ pip install -U 'pip'
 ~/Library/Python/3.8/bin/pip3 install --user --upgrade 'pip'
 
 # Upgrade all currently installed packages.
-pip install --requirement <(pip freeze | sed 's/==/>=/') --upgrade
+pip install --requirement <(pip freeze | sed 's/==/>=/') --upgrade        # {,ba,z}sh
+pip install --requirement (pip freeze | sed 's/==/>=/' | psub) --upgrade  # fish
 
 # Generate a list of the outdated packages.
 pip list --outdated
