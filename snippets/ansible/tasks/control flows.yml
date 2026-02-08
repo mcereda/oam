@@ -1,7 +1,11 @@
 ---
 
 - name: Do nothing
-  tags: noop
+  # this really does nothing; it also *cannot* be considered 'changed', 'failed', or 'skipped'
+  tags:
+    - do nothing
+    - noop
+    - pass
   ansible.builtin.meta: noop
 
 - name: Execute long-running tasks
@@ -49,7 +53,20 @@
     fail_msg: What to say if any of the above conditions fail
     success_msg: What to say if all of the above conditions succeed
 
-- name: Force execution of *notified* handlers
+- name: Notify handlers
+  tags: notify_handlers
+  delegate_to: localhost
+  connection: local
+  ansible.builtin.command: 'true'
+  changed_when:
+    # the 'command' module currently always registers as 'changed'
+    # this is only here to ensure the task notifies the handlers in the event "command"'s behaviour changes in time
+    true
+  notify:
+    - some handler
+    - some other handler
+
+- name: Force execution of handlers that have been *notified* up to now
   tags: force_handlers
   ansible.builtin.meta: flush_handlers
 
