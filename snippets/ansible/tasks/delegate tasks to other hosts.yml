@@ -4,7 +4,7 @@
 # No groups
 
 - name: Forcefully run on the controller
-  delegate_to: 127.0.0.1
+  delegate_to: 127.0.0.1  # or 'localhost'
   connection: local
   changed_when: false
   ansible.builtin.command: hostname
