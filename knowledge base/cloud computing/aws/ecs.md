@@ -22,14 +22,16 @@
     1. [Docker volumes](#docker-volumes)
     1. [Bind mounts](#bind-mounts)
 1. [Networking](#networking)
-1. [Intra-task container dependencies](#intra-task-container-dependencies)
+    1. [Connecting to a service](#connecting-to-a-service)
+    1. [Allow tasks to communicate with each other](#allow-tasks-to-communicate-with-each-other)
+       1. [Load Balancer](#load-balancer)
+       1. [ECS Service Connect](#ecs-service-connect)
+       1. [ECS service discovery](#ecs-service-discovery)
+       1. [VPC Lattice](#vpc-lattice)
+1. [Container dependencies](#container-dependencies)
 1. [Execute commands in tasks' containers](#execute-commands-in-tasks-containers)
 1. [Scale the number of tasks automatically](#scale-the-number-of-tasks-automatically)
     1. [Target tracking](#target-tracking)
-1. [Allow tasks to communicate with each other](#allow-tasks-to-communicate-with-each-other)
-    1. [ECS Service Connect](#ecs-service-connect)
-    1. [ECS service discovery](#ecs-service-discovery)
-    1. [VPC Lattice](#vpc-lattice)
 1. [Scrape metrics using Prometheus](#scrape-metrics-using-prometheus)
 1. [Send logs to a central location](#send-logs-to-a-central-location)
     1. [FireLens](#firelens)
@@ -39,9 +41,11 @@
     1. [Mount Secrets Manager secrets as files in containers](#mount-secrets-manager-secrets-as-files-in-containers)
     1. [Make a sidecar container write secrets to shared volumes](#make-a-sidecar-container-write-secrets-to-shared-volumes)
 1. [Best practices](#best-practices)
-1. [Cost-saving measures](#cost-saving-measures)
+1. [Pricing](#pricing)
+    1. [Cost-saving measures](#cost-saving-measures)
 1. [Troubleshooting](#troubleshooting)
     1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
+    1. [Tasks in a service using a Load Balancer are being stopped even if healthy](#tasks-in-a-service-using-a-load-balancer-are-being-stopped-even-if-healthy)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -1015,7 +1019,359 @@ one's behalf.<br/>
 Such role is automatically created when creating a cluster, or when creating or updating a service in the AWS Management
 Console.
 
-## Intra-task container dependencies
+### Connecting to a service
+
+Services create Tasks.<br/>
+Each Task is granted an IP address or can otherwise be reached depending on its network configuration.
+
+At this point there is no way to refer to multiple replicas as a single one.<br/>
+One can:
+
+- Manually add a generic Route53 record, containing the references to those Tasks, and refer to it.
+- Create a proxy that forwards (and maybe load balances) the traffic to those Tasks.
+- Leverage a Load Balancer to forward and balance the traffic.
+
+  > [!warning]
+  > This is the easiest way to allow reachability, but it could be also the most expensive if incorrectly configured.
+
+  ```ts
+  const service = new aws.ecs.Service(
+    "someApp",
+    {
+      name: "someApp",
+      …,
+      loadBalancers: [{
+          containerName: "service",
+          containerPort: 8080,
+          targetGroupArn: targetGroup.arn,
+      }],
+    },
+  );
+  ```
+
+- Leverage other types of resources to allow communication between services and applications.<br/>
+  See also [Allow tasks to communicate with each other].
+
+### Allow tasks to communicate with each other
+
+Refer [How can I allow the tasks in my Amazon ECS services to communicate with each other?] and
+[Interconnect Amazon ECS services].
+
+Tasks in a cluster are **not** normally able to communicate with each other.<br/>
+Use a Load Balancer, ECS Service Connect, ECS service discovery or VPC Lattice to allow that.
+
+#### Load Balancer
+
+Configure a Load Balancer for the services, and optionally a mnemonic Route53 `CNAME` record (or alias) for them, then
+call the corresponding FQDN.<br/>
+Or leverage an existing one if that is the case.
+
+It is the easiest way, but it is overkill and expensive if all one wants to do is routing internal traffic.
+
+#### ECS Service Connect
+
+Refer [Use Service Connect to connect Amazon ECS services with short names].
+
+ECS Service Connect provides ECS clusters with the configuration they need for service-to-service discovery,
+connectivity, and traffic monitoring by building both service discovery and a service mesh in the clusters.
+
+It provides:
+
+- The complete configuration services need to join the mesh.
+- A unified way to refer to services within namespaces that does **not** depend on the VPC's DNS configuration.
+- Standardized metrics and logs to monitor all the applications.
+
+The feature creates a virtual network of related services.<br/>
+The same service configuration can be used across different namespaces to run independent yet identical sets of
+applications.
+
+When using Service Connect, ECS dynamically manages Service Connect endpoints for each task as they start and stop. It
+does so by injecting the definition of a _sidecar_ proxy container **in services**. This does **not** change their task
+definition.<br/>
+Each task created for each registered service will end up running the sidecar proxy container in order, so that the task
+is added to the mesh.
+
+Injecting the proxy in the services and not in the task definitions allows for the same task definition to be reused to
+run identical applications in different namespaces with different Service Connect configurations.<br/>
+It also means that, since the proxy is **not** in the task definition, it **cannot** be configured by users.
+
+Service Connect **only** interconnects **services** within the **same** namespace.
+
+One can add one Service Connect configuration to new or existing services.<br/>
+When that happens, ECS creates:
+
+- A Service Connect endpoint in the namespace.
+- A new deployment in the service that replaces the tasks that are currently running with ones equipped with the proxy.
+
+Existing tasks and other applications can continue to connect to existing endpoints and external applications.<br/>
+If a service using Service Connect adds tasks by scaling out, new connections from clients will be load balanced between
+**all** of the running tasks. If the service is updated, new connections from clients will be load balanced only between
+the **new** version of the tasks.
+
+The list of endpoints in the namespace changes every time **any** service in that namespace is deployed.<br/>
+Existing tasks, and replacement tasks, continue to behave the same as they did after the most recent deployment.<br/>
+Existing tasks **cannot** resolve and connect to new endpoints. Only tasks with a Service Connect configuration in the
+same namespace **and** that start running after this deployment can.
+
+Applications can use short names and standard ports to connect to **services** in the same or other clusters.<br/>
+This includes connecting across VPCs in the same AWS Region.
+
+By default, the Service Connect proxy listens on the `containerPort` specified in the task definition's port
+mapping.<br/>
+The service's Security Group rules **must** allow incoming traffic to this port from the subnets where clients will run.
+
+The proxy will consume some of the resources allocated to their task.<br/>
+It is recommended:
+
+- Adding at least 256 CPU units and 64 MiB of memory to the task's resources.
+- \[If expecting tasks to receive more than 500 requests per second at their peak load] Increasing the sidecar's
+  resources addition to at least 512 CPU units.
+- \[If expecting to create more than 100 Service Connect services in the namespace, or 2000 tasks in total across all
+  ECS services within the namespace], Adding 128 MiB extra of memory for the Service Connect proxy container.<br/>
+  One **must** do this in **every** task definition that is used by **any** of the ECS services in the namespace.
+
+It is recommended one sets the log configuration in the Service Connect configuration.
+
+Proxy configuration:
+
+- Tasks in a Service Connect endpoint are load balanced in a `round-robin` strategy.
+- The proxy uses data about prior failed connections to avoid sending new connections to the tasks that had the failed
+  connections for some time.<br/>
+  At the time of writing, failing 5 or more connections in the last 30 seconds makes the proxy avoid that task for 30 to
+  300 seconds.
+- Connection that pass through the proxy and fail are retried, but **avoid** the host that failed the previous
+  connection.<br/>
+  This ensures that each connection through Service Connect doesn't fail for one-off reasons.
+- Wait a maximum time for applications to respond.<br/>
+  The default timeout value is 15 seconds, but it can be updated.
+
+<details>
+  <summary>Limitations</summary>
+
+Service Connect does **not** support:
+
+- ECS' `host` network mode.
+- Windows containers.
+- HTTP 1.0.
+- Standalone tasks and any task created by other resources than services.
+- Services using the `blue/green` or `external deployment` types.
+- External container instance for ECS Anywhere.
+- PPv2.
+- Task definitions that set _container_ memory limits.<br/>
+  It is required to set the _task_ memory limit, though.
+
+Tasks using the `bridge` network mode and Service Connect will **not** support the `hostname` container definition
+parameter.
+
+Each service can belong to only one namespace.
+
+Service Connect can use any AWS Cloud Map namespace, as long as they are in the **same** Region **and** AWS account.
+
+Service Connect does **not** delete namespaces when clusters are deleted.<br/>
+One must delete namespaces in AWS Cloud Map themselves.
+
+</details>
+
+<details style="padding-bottom: 1rem">
+  <summary>Requirements</summary>
+
+- Tasks running in Fargate **must** use the Fargate Linux platform version 1.4.0 or higher.
+- The ECS agent on container instances must be version 1.67.2 or higher.
+- Container instances must run the ECS-optimized Amazon Linux 2023 AMI version `20230428` or later, or the ECS-optimized
+  Amazon Linux 2 AMI version `2.0.20221115` or later.<br/>
+  These versions equip the Service Connect agent in addition to the ECS container agent.
+- Container instances must have the `ecs:Poll` permission assigned to them for resource
+  `arn:aws:ecs:{{region}}:{{accountId}}:task-set/cluster/*`.<br/>
+  If using the `ecsInstanceRole` or `AmazonEC2ContainerServiceforEC2Role` IAM roles, there is no need for additional
+  permissions.
+- Services **must** use the **rolling deployment** strategy, as it is the only one supported.
+- Task definitions **must** set their task's memory limit.
+- The task memory limit must be set to a number **greater** than the sum of the container memory limits.<br/>
+  The CPU and memory in the task limits that aren't allocated in the container limits will be used by the Service
+  Connect's proxy container and other containers that don't set container limits.
+- All endpoints must be **unique** within their namespace.
+- All discovery names must be **unique** within their namespace.
+- One **must** redeploy existing services before applications can resolve the new endpoints.<br/>
+  New endpoints that are added to the namespace **after** the service's most recent deployment **will not** be added to
+  the proxy configuration.
+- Application Load Balancer traffic defaults to routing through the Service Connect agent in `awsvpc` network mode.<br/>
+  If one wants non-service traffic to bypass the Service Connect agent, one will need to use the `ingressPortOverride`
+  parameter in their Service Connect service configuration.
+
+</details>
+
+Procedure:
+
+1. Configure the ECS cluster to use the desired AWS Cloud Map namespace.
+
+   <details style="padding: 0 0 1rem 1rem">
+     <summary>Simplified process</summary>
+
+   Create the cluster with the desired name for the AWS Cloud Map namespace, and specify that name for the namespace
+   when asked.<br/>
+   ECS will create a new HTTP namespace with the necessary configuration.<br/>
+   As reminder, Service Connect doesn't use or create DNS hosted zones in Amazon Route 53. FIXME: check this
+
+   </details>
+
+1. Configure port names in the server services' task definitions for all the port mappings that the services will expose
+   in Service Connect.
+
+   <details style="padding: 0 0 1rem 1rem">
+
+   ```json
+   containerDefinitions: [{
+       "name": "postgres",
+       "protocol": "tcp",
+       "containerPort": 5432
+   }]
+   ```
+
+   </details>
+
+1. Configure the server services to create Service Connect endpoints within the namespace.
+
+   <details style="padding: 0 0 1rem 1rem">
+
+   ```json
+   "serviceConnectConfiguration": {
+       "enabled": true,
+       "namespace": "ecs-dev-cluster",
+       "services": [{
+           "portName": "postgres",
+           "discoveryName": "postgres",
+           "clientAliases": [{
+               "port": 5432,
+               "dnsName": "pgsql"
+           }]
+       }]
+   }
+   ```
+
+   </details>
+
+1. Deploy the services.<br/>
+   This will create the endpoints AWS Cloud Map namespace used by the cluster.<br/>
+   ECS also injects the Service Connect proxy container in each task.
+1. Deploy the client applications as ECS services.<br/>
+   ECS connects them to the Service Connect endpoints through the Service Connect proxy in each task.
+1. Applications only use the proxy to connect to Service Connect endpoints.<br/>
+   No additional configuration is required to use the proxy.
+1. \[optionally] Monitor traffic through the Service Connect proxy in Amazon CloudWatch.
+
+#### ECS service discovery
+
+Service discovery helps manage HTTP and DNS namespaces for ECS services.
+
+ECS automatically registers and de-registers the list of launched tasks to AWS Cloud Map.<br/>
+Cloud Map maintains DNS records that resolve to the internal IP addresses of one or more tasks from registered
+services.<br/>
+Other services in the **same** VPC can use such DNS records to send traffic directly to containers using their internal
+IP addresses.
+
+This approach provides low latency since traffic travels directly between the containers.
+
+ECS service discovery is a good fit when using the `awsvpc` network mode, where:
+
+- Each task is assigned its own, unique IP address.
+- That IP address is an `A` record.
+- Each service can have a unique security group assigned.
+
+When using _bridged network_ mode, `A` records are no longer enough for service discovery and one **must** also use a
+`SRV` DNS record. This is due to containers sharing the same IP address and having ports mapped randomly.<br/>
+`SRV` records can keep track of both IP addresses and port numbers, but requires applications to be appropriately
+configured.
+
+Service discovery supports only the `A` and `SRV` DNS record types.<br/>
+DNS records are automatically added or removed as tasks start or stop for ECS services.
+
+Task registration in CloudMap might take some seconds to finish.<br/>
+Until ECS registers the tasks, Containers in them might complain about being unable to resolve the services they are
+using.
+
+DNS records have a TTL and it might happen that tasks died before this ended.<br/>
+One **must** implement extra logic in one's applications, so that they can handle retries and deal with connection
+failures when the records are not yet updated.
+
+See also [Use service discovery to connect Amazon ECS services with DNS names].
+
+Procedure:
+
+1. Create the desired AWS Cloud Map namespace.
+1. Create the desired Cloud Map service in the namespace.
+1. Configure the ECS service offering acting as server to use the Cloud Map service.
+
+   <details style="padding: 0 0 1rem 1rem">
+
+   ```json
+   "serviceRegistries": [{
+       "registryArn": "arn:aws:servicediscovery:eu-west-1:012345678901:service/srv-uuf33b226vw93biy"
+   }]
+   ```
+
+   </details>
+
+NS lookup commands from within containers might fail, but they might still be able to resolve services registered in
+CloudMap namespaces.
+
+<details style="padding: 0 0 1rem 1rem">
+
+```sh
+$ aws ecs execute-command --cluster 'dev' \
+    --task 'arn:aws:ecs:eu-west-1:012345678901:task/dev/abcdef0123456789abcdef0123456789' --container 'prometheus' \
+    --interactive --command 'nslookup mimir.dev.ecs.internal'
+
+The Session Manager plugin was installed successfully. Use the AWS CLI to start a session.
+
+Starting session with SessionId: ecs-execute-command-p3pkkrysjdptxa8iu3cz3kxnke
+Server:   172.16.0.2
+Address:  172.16.0.2:53
+
+Non-authoritative answer:
+
+$ aws ecs execute-command --cluster 'dev' \
+    --task 'arn:aws:ecs:eu-west-1:012345678901:task/dev/abcdef0123456789abcdef0123456789' --container 'prometheus' \
+    --interactive --command 'wget -SO- mimir.dev.ecs.local:8080/ready'
+
+The Session Manager plugin was installed successfully. Use the AWS CLI to start a session.
+
+Starting session with SessionId: ecs-execute-command-hjgyio7n6nf2o9h4qn6ht7lzri
+Connecting to mimir.dev.ecs.local:8080 (172.16.88.99:8080)
+  HTTP/1.1 200 OK
+  Date: Thu, 08 May 2025 09:35:02 GMT
+  Content-Type: text/plain
+  Content-Length: 5
+  Connection: close
+
+saving to '/dev/stdout'
+stdout               100% |********************************|     5  0:00:00 ETA
+'/dev/stdout' saved
+
+Exiting session with sessionId: ecs-execute-command-hjgyio7n6nf2o9h4qn6ht7lzri.
+```
+
+</details>
+
+#### VPC Lattice
+
+Managed application networking service that customers can use to observe, secure, and monitor applications built across
+AWS compute services, VPCs, and accounts without having to modify their code.
+
+VPC Lattice technically replaces the need for Application Load Balancers by leveraging target groups themselves.<br/>
+Target groups which are a collection of compute resources, and can refer EC2 instances, IP addresses, Lambda functions,
+and Application Load Balancers.<br/>
+Listeners are used to forward traffic to specified target groups when the conditions are met.<br/>
+ECS also automatically replaces unhealthy tasks.
+
+ECS tasks can be enabled **as IP targets** in VPC Lattice by associating their services with a VPC Lattice target
+group.<br/>
+ECS automatically registers tasks to the VPC Lattice target group when they are launched for registered services.
+
+Deployments _might_ take longer when using VPC Lattice due to the extent of changes required.
+
+See also [What is Amazon VPC Lattice?] and its [Amazon VPC Lattice pricing].
+
+## Container dependencies
 
 Containers can depend on other containers **from the same task**.<br/>
 On startup, ECS evaluates all container dependency conditions and starts the containers only when the required
@@ -1334,317 +1690,6 @@ The **only** available metrics for the integrated checks are currently:
 - The service's **average** CPU utilization (`ECSServiceCPUUtilization`) for the last minute.
 - The service's **average** memory utilization (`ECSServiceMemoryUtilization`) for the last minute.
 - The service's Application Load Balancer's **average** requests count (`ALBRequestCountPerTarget`) for the last minute.
-
-## Allow tasks to communicate with each other
-
-Refer [How can I allow the tasks in my Amazon ECS services to communicate with each other?] and
-[Interconnect Amazon ECS services].
-
-Tasks in a cluster are **not** normally able to communicate with each other.<br/>
-Use ECS Service Connect, ECS service discovery or VPC Lattice to allow that.
-
-### ECS Service Connect
-
-Refer [Use Service Connect to connect Amazon ECS services with short names].
-
-ECS Service Connect provides ECS clusters with the configuration they need for service-to-service discovery,
-connectivity, and traffic monitoring by building both service discovery and a service mesh in the clusters.
-
-It provides:
-
-- The complete configuration services need to join the mesh.
-- A unified way to refer to services within namespaces that does **not** depend on the VPC's DNS configuration.
-- Standardized metrics and logs to monitor all the applications.
-
-The feature creates a virtual network of related services.<br/>
-The same service configuration can be used across different namespaces to run independent yet identical sets of
-applications.
-
-When using Service Connect, ECS dynamically manages Service Connect endpoints for each task as they start and stop. It
-does so by injecting the definition of a _sidecar_ proxy container **in services**. This does **not** change their task
-definition.<br/>
-Each task created for each registered service will end up running the sidecar proxy container in order, so that the task
-is added to the mesh.
-
-Injecting the proxy in the services and not in the task definitions allows for the same task definition to be reused to
-run identical applications in different namespaces with different Service Connect configurations.<br/>
-It also means that, since the proxy is **not** in the task definition, it **cannot** be configured by users.
-
-Service Connect **only** interconnects **services** within the **same** namespace.
-
-One can add one Service Connect configuration to new or existing services.<br/>
-When that happens, ECS creates:
-
-- A Service Connect endpoint in the namespace.
-- A new deployment in the service that replaces the tasks that are currently running with ones equipped with the proxy.
-
-Existing tasks and other applications can continue to connect to existing endpoints and external applications.<br/>
-If a service using Service Connect adds tasks by scaling out, new connections from clients will be load balanced between
-**all** of the running tasks. If the service is updated, new connections from clients will be load balanced only between
-the **new** version of the tasks.
-
-The list of endpoints in the namespace changes every time **any** service in that namespace is deployed.<br/>
-Existing tasks, and replacement tasks, continue to behave the same as they did after the most recent deployment.<br/>
-Existing tasks **cannot** resolve and connect to new endpoints. Only tasks with a Service Connect configuration in the
-same namespace **and** that start running after this deployment can.
-
-Applications can use short names and standard ports to connect to **services** in the same or other clusters.<br/>
-This includes connecting across VPCs in the same AWS Region.
-
-By default, the Service Connect proxy listens on the `containerPort` specified in the task definition's port
-mapping.<br/>
-The service's Security Group rules **must** allow incoming traffic to this port from the subnets where clients will run.
-
-The proxy will consume some of the resources allocated to their task.<br/>
-It is recommended:
-
-- Adding at least 256 CPU units and 64 MiB of memory to the task's resources.
-- \[If expecting tasks to receive more than 500 requests per second at their peak load] Increasing the sidecar's
-  resources addition to at least 512 CPU units.
-- \[If expecting to create more than 100 Service Connect services in the namespace, or 2000 tasks in total across all
-  ECS services within the namespace], Adding 128 MiB extra of memory for the Service Connect proxy container.<br/>
-  One **must** do this in **every** task definition that is used by **any** of the ECS services in the namespace.
-
-It is recommended one sets the log configuration in the Service Connect configuration.
-
-Proxy configuration:
-
-- Tasks in a Service Connect endpoint are load balanced in a `round-robin` strategy.
-- The proxy uses data about prior failed connections to avoid sending new connections to the tasks that had the failed
-  connections for some time.<br/>
-  At the time of writing, failing 5 or more connections in the last 30 seconds makes the proxy avoid that task for 30 to
-  300 seconds.
-- Connection that pass through the proxy and fail are retried, but **avoid** the host that failed the previous
-  connection.<br/>
-  This ensures that each connection through Service Connect doesn't fail for one-off reasons.
-- Wait a maximum time for applications to respond.<br/>
-  The default timeout value is 15 seconds, but it can be updated.
-
-<details>
-  <summary>Limitations</summary>
-
-Service Connect does **not** support:
-
-- ECS' `host` network mode.
-- Windows containers.
-- HTTP 1.0.
-- Standalone tasks and any task created by other resources than services.
-- Services using the `blue/green` or `external deployment` types.
-- External container instance for ECS Anywhere.
-- PPv2.
-- Task definitions that set _container_ memory limits.<br/>
-  It is required to set the _task_ memory limit, though.
-
-Tasks using the `bridge` network mode and Service Connect will **not** support the `hostname` container definition
-parameter.
-
-Each service can belong to only one namespace.
-
-Service Connect can use any AWS Cloud Map namespace, as long as they are in the **same** Region **and** AWS account.
-
-Service Connect does **not** delete namespaces when clusters are deleted.<br/>
-One must delete namespaces in AWS Cloud Map themselves.
-
-</details>
-
-<details style="padding-bottom: 1rem">
-  <summary>Requirements</summary>
-
-- Tasks running in Fargate **must** use the Fargate Linux platform version 1.4.0 or higher.
-- The ECS agent on container instances must be version 1.67.2 or higher.
-- Container instances must run the ECS-optimized Amazon Linux 2023 AMI version `20230428` or later, or the ECS-optimized
-  Amazon Linux 2 AMI version `2.0.20221115` or later.<br/>
-  These versions equip the Service Connect agent in addition to the ECS container agent.
-- Container instances must have the `ecs:Poll` permission assigned to them for resource
-  `arn:aws:ecs:{{region}}:{{accountId}}:task-set/cluster/*`.<br/>
-  If using the `ecsInstanceRole` or `AmazonEC2ContainerServiceforEC2Role` IAM roles, there is no need for additional
-  permissions.
-- Services **must** use the **rolling deployment** strategy, as it is the only one supported.
-- Task definitions **must** set their task's memory limit.
-- The task memory limit must be set to a number **greater** than the sum of the container memory limits.<br/>
-  The CPU and memory in the task limits that aren't allocated in the container limits will be used by the Service
-  Connect's proxy container and other containers that don't set container limits.
-- All endpoints must be **unique** within their namespace.
-- All discovery names must be **unique** within their namespace.
-- One **must** redeploy existing services before applications can resolve the new endpoints.<br/>
-  New endpoints that are added to the namespace **after** the service's most recent deployment **will not** be added to
-  the proxy configuration.
-- Application Load Balancer traffic defaults to routing through the Service Connect agent in `awsvpc` network mode.<br/>
-  If one wants non-service traffic to bypass the Service Connect agent, one will need to use the `ingressPortOverride`
-  parameter in their Service Connect service configuration.
-
-</details>
-
-Procedure:
-
-1. Configure the ECS cluster to use the desired AWS Cloud Map namespace.
-
-   <details style="padding: 0 0 1rem 1rem">
-     <summary>Simplified process</summary>
-
-   Create the cluster with the desired name for the AWS Cloud Map namespace, and specify that name for the namespace
-   when asked.<br/>
-   ECS will create a new HTTP namespace with the necessary configuration.<br/>
-   As reminder, Service Connect doesn't use or create DNS hosted zones in Amazon Route 53. FIXME: check this
-
-   </details>
-
-1. Configure port names in the server services' task definitions for all the port mappings that the services will expose
-   in Service Connect.
-
-   <details style="padding: 0 0 1rem 1rem">
-
-   ```json
-   containerDefinitions: [{
-       "name": "postgres",
-       "protocol": "tcp",
-       "containerPort": 5432
-   }]
-   ```
-
-   </details>
-
-1. Configure the server services to create Service Connect endpoints within the namespace.
-
-   <details style="padding: 0 0 1rem 1rem">
-
-   ```json
-   "serviceConnectConfiguration": {
-       "enabled": true,
-       "namespace": "ecs-dev-cluster",
-       "services": [{
-           "portName": "postgres",
-           "discoveryName": "postgres",
-           "clientAliases": [{
-               "port": 5432,
-               "dnsName": "pgsql"
-           }]
-       }]
-   }
-   ```
-
-   </details>
-
-1. Deploy the services.<br/>
-   This will create the endpoints AWS Cloud Map namespace used by the cluster.<br/>
-   ECS also injects the Service Connect proxy container in each task.
-1. Deploy the client applications as ECS services.<br/>
-   ECS connects them to the Service Connect endpoints through the Service Connect proxy in each task.
-1. Applications only use the proxy to connect to Service Connect endpoints.<br/>
-   No additional configuration is required to use the proxy.
-1. \[optionally] Monitor traffic through the Service Connect proxy in Amazon CloudWatch.
-
-### ECS service discovery
-
-Service discovery helps manage HTTP and DNS namespaces for ECS services.
-
-ECS automatically registers and de-registers the list of launched tasks to AWS Cloud Map.<br/>
-Cloud Map maintains DNS records that resolve to the internal IP addresses of one or more tasks from registered
-services.<br/>
-Other services in the **same** VPC can use such DNS records to send traffic directly to containers using their internal
-IP addresses.
-
-This approach provides low latency since traffic travels directly between the containers.
-
-ECS service discovery is a good fit when using the `awsvpc` network mode, where:
-
-- Each task is assigned its own, unique IP address.
-- That IP address is an `A` record.
-- Each service can have a unique security group assigned.
-
-When using _bridged network_ mode, `A` records are no longer enough for service discovery and one **must** also use a
-`SRV` DNS record. This is due to containers sharing the same IP address and having ports mapped randomly.<br/>
-`SRV` records can keep track of both IP addresses and port numbers, but requires applications to be appropriately
-configured.
-
-Service discovery supports only the `A` and `SRV` DNS record types.<br/>
-DNS records are automatically added or removed as tasks start or stop for ECS services.
-
-Task registration in CloudMap might take some seconds to finish.<br/>
-Until ECS registers the tasks, Containers in them might complain about being unable to resolve the services they are
-using.
-
-DNS records have a TTL and it might happen that tasks died before this ended.<br/>
-One **must** implement extra logic in one's applications, so that they can handle retries and deal with connection
-failures when the records are not yet updated.
-
-See also [Use service discovery to connect Amazon ECS services with DNS names].
-
-Procedure:
-
-1. Create the desired AWS Cloud Map namespace.
-1. Create the desired Cloud Map service in the namespace.
-1. Configure the ECS service offering acting as server to use the Cloud Map service.
-
-   <details style="padding: 0 0 1rem 1rem">
-
-   ```json
-   "serviceRegistries": [{
-       "registryArn": "arn:aws:servicediscovery:eu-west-1:012345678901:service/srv-uuf33b226vw93biy"
-   }]
-   ```
-
-   </details>
-
-NS lookup commands from within containers might fail, but they might still be able to resolve services registered in
-CloudMap namespaces.
-
-<details style="padding: 0 0 1rem 1rem">
-
-```sh
-$ aws ecs execute-command --cluster 'dev' \
-    --task 'arn:aws:ecs:eu-west-1:012345678901:task/dev/abcdef0123456789abcdef0123456789' --container 'prometheus' \
-    --interactive --command 'nslookup mimir.dev.ecs.internal'
-
-The Session Manager plugin was installed successfully. Use the AWS CLI to start a session.
-
-Starting session with SessionId: ecs-execute-command-p3pkkrysjdptxa8iu3cz3kxnke
-Server:   172.16.0.2
-Address:  172.16.0.2:53
-
-Non-authoritative answer:
-
-$ aws ecs execute-command --cluster 'dev' \
-    --task 'arn:aws:ecs:eu-west-1:012345678901:task/dev/abcdef0123456789abcdef0123456789' --container 'prometheus' \
-    --interactive --command 'wget -SO- mimir.dev.ecs.local:8080/ready'
-
-The Session Manager plugin was installed successfully. Use the AWS CLI to start a session.
-
-Starting session with SessionId: ecs-execute-command-hjgyio7n6nf2o9h4qn6ht7lzri
-Connecting to mimir.dev.ecs.local:8080 (172.16.88.99:8080)
-  HTTP/1.1 200 OK
-  Date: Thu, 08 May 2025 09:35:02 GMT
-  Content-Type: text/plain
-  Content-Length: 5
-  Connection: close
-
-saving to '/dev/stdout'
-stdout               100% |********************************|     5  0:00:00 ETA
-'/dev/stdout' saved
-
-Exiting session with sessionId: ecs-execute-command-hjgyio7n6nf2o9h4qn6ht7lzri.
-```
-
-</details>
-
-### VPC Lattice
-
-Managed application networking service that customers can use to observe, secure, and monitor applications built across
-AWS compute services, VPCs, and accounts without having to modify their code.
-
-VPC Lattice technically replaces the need for Application Load Balancers by leveraging target groups themselves.<br/>
-Target groups which are a collection of compute resources, and can refer EC2 instances, IP addresses, Lambda functions,
-and Application Load Balancers.<br/>
-Listeners are used to forward traffic to specified target groups when the conditions are met.<br/>
-ECS also automatically replaces unhealthy tasks.
-
-ECS tasks can be enabled **as IP targets** in VPC Lattice by associating their services with a VPC Lattice target
-group.<br/>
-ECS automatically registers tasks to the VPC Lattice target group when they are launched for registered services.
-
-Deployments _might_ take longer when using VPC Lattice due to the extent of changes required.
-
-See also [What is Amazon VPC Lattice?] and its [Amazon VPC Lattice pricing].
 
 ## Scrape metrics using Prometheus
 
@@ -2034,7 +2079,75 @@ Useful when wanting multiple containers to access the same secret, or just clean
 - When using **spot** compute capacity, consider ensuring containers exit gracefully before the task stops.<br/>
   Refer [Capacity providers].
 
-## Cost-saving measures
+## Pricing
+
+Refer [AWS Fargate Pricing] and [A Simple Breakdown of Amazon ECS Pricing].
+
+20 GB of ephemeral storage per task are **included**.
+
+**Hourly** costs in `eu-west-1` as per 2026-02-10 (tax _excluded_):
+
+| Provider | Capacity Type | Architecture | OS      | Resource                     | Price                           |
+| -------- | ------------- | ------------ | ------- | ---------------------------- | ------------------------------- |
+| Fargate  | On-Demand     | X86          | Linux   | 1 vCPU                       | $0.04048                        |
+| Fargate  | On-Demand     | X86          | Linux   | 1 GB RAM                     | $0.004445                       |
+| Fargate  | SPOT          | X86          | Linux   | 1 vCPU                       | $0.01467395                     |
+| Fargate  | SPOT          | X86          | Linux   | 1 GB RAM                     | $0.00161131                     |
+| Fargate  | On-Demand     | ARM          | Linux   | 1 vCPU                       | $0.03238                        |
+| Fargate  | On-Demand     | ARM          | Linux   | 1 GB RAM                     | $0.00356                        |
+| Fargate  | SPOT          | ARM          | Linux   | 1 vCPU                       | $0.01173771                     |
+| Fargate  | SPOT          | ARM          | Linux   | 1 GB RAM                     | $0.0012905                      |
+| Fargate  | On-Demand     | X86          | Windows | 1 vCPU                       | $0.046552 + $0.046 (OS license) |
+| Fargate  | On-Demand     | X86          | Windows | 1 GB RAM                     | $0.00511175                     |
+| Fargate  | Any           | Any          | Any     | 1 GB extra ephemeral storage | $0.000122                       |
+
+<details>
+  <summary>Example: Fargate (Linux, X86)</summary>
+
+| Resource                | Amount |        1h |       1d |   1m(31d) |   1y(366d) |
+| ----------------------- | -----: | --------: | -------: | --------: | ---------: |
+| vCPU                    |    0.5 |  $0.02024 | $0.48576 | $15.05856 | $177.78816 |
+| RAM                     |   1 GB | $0.004445 | $0.10668 |  $3.30708 |  $39.04488 |
+| Extra ephemeral storage |   5 GB |  $0.00061 | $0.01464 |  $0.45384 |   $5.35824 |
+
+Total: ~$0.03 per hour, ~$0.61 per day, ~$18.82 per 31d-month, ~$222.20 per 366d-year.
+
+---
+
+| Resource                | Amount |       1h |       1d |    1m(31d) |     1y(366d) |
+| ----------------------- | -----: | -------: | -------: | ---------: | -----------: |
+| vCPU                    |      4 | $0.16192 | $3.88608 | $120.46848 | $1,422.30528 |
+| RAM                     |  20 GB |  $0.0889 |  $2.1336 |   $66.1416 |    $780.8976 |
+| Extra ephemeral storage |   0 GB |    $0.00 |    $0.00 |      $0.00 |        $0.00 |
+
+Total: ~$0.26 per hour, ~$6.02 per day, ~$186.62 per 31d-month, ~$2,203.21 per 366d-year.
+
+</details>
+
+<details>
+  <summary>Example: Fargate SPOT (Linux, ARM)</summary>
+
+| Resource                | Amount |           1h |          1d |     1m(31d) |     1y(366d) |
+| ----------------------- | -----: | -----------: | ----------: | ----------: | -----------: |
+| vCPU                    |    0.5 | $0.005868855 | $0.14085252 | $4.36642812 | $51.55202232 |
+| RAM                     |   1 GB |   $0.0012905 |   $0.030972 |   $0.960132 |   $11.335752 |
+| Extra ephemeral storage |   5 GB |     $0.00061 |    $0.01464 |    $0.45384 |     $5.35824 |
+
+Total: ~$0.01 per hour, ~$0.19 per day, ~$5.79 per 31d-month, ~$68.25 per 366d-year.
+
+---
+
+| Resource                | Amount |          1h |          1d |      1m(31d) |      1y(366d) |
+| ----------------------- | -----: | ----------: | ----------: | -----------: | ------------: |
+| vCPU                    |      4 | $0.04695084 | $1.12682016 | $34.93142496 | $412.41617856 |
+| RAM                     |  20 GB |    $0.02581 |    $0.61944 |    $19.20264 |    $226.71504 |
+| Extra ephemeral storage |   0 GB |       $0.00 |       $0.00 |        $0.00 |         $0.00 |
+
+Total: ~$0.08 per hour, ~$1.75 per day, ~$54.14 per 31d-month, ~$639.14 per 366d-year.
+
+</details>
+
+### Cost-saving measures
 
 - Prefer using ARM-based compute capacity over the default `X86_64`, where feasible.<br/>
   Refer [CPU architectures].
@@ -2043,7 +2156,7 @@ Useful when wanting multiple containers to access the same secret, or just clean
 - Prefer using [**spot** capacity][effectively using spot instances in aws ecs for production workloads] for
 
   - Non-critical services and tasks.
-  - State**less** or otherwise **interruption tolerant** tasks.
+  - State**less** or otherwise **interruption-tolerant** tasks.
 
   Refer [Capacity providers].
 - Consider applying for EC2 Instance and/or Compute Savings Plans if using EC2 capacity.<br/>
@@ -2061,7 +2174,7 @@ Useful when wanting multiple containers to access the same secret, or just clean
   > Mind the limitations that come with the auto scaling settings.
 
 - If only used internally (e.g., via a VPN), consider configuring intra-network communication capabilities for the
-  application **instead of** using a load balancer.<br/>
+  application (e.g., CloudMap) **instead of** using load balancers.<br/>
   Refer [Allow tasks to communicate with each other].
 
 ## Troubleshooting
@@ -2088,6 +2201,55 @@ Specify a supported value for the task CPU and memory in your task definition.
 
 </details>
 
+### Tasks in a service using a Load Balancer are being stopped even if healthy
+
+<details>
+  <summary>Context</summary>
+
+One or more containers' definition in the Task define a health check.
+
+Traffic to the Service is served by a Load Balancer.<br/>
+The Load Balancer uses a Target Group where the Service registers Tasks.
+
+The containers' health checks pass and the Task is considered _healthy_.
+
+Messages like the following are visible from the Service's page in ECS or from the Load Balancer or Target Group's
+pages:
+
+- `service X deregistered targets`
+- `task stopped because it failed ELB health checks`
+- `Health checks failed`
+
+</details>
+
+<details>
+  <summary>Cause</summary>
+
+Load Balancing and ECS are integrated.
+
+The Target Group defines its own health check in order to decide whether to serve traffic to specific targets.
+
+The containers' health check and the Target Group's health check are completely separated.
+
+The containers' health check only require ECS to communicate with the container engine.<br/>
+If a container's health check fails, the Task is deemed _unhealthy_ and ECS replaces it.
+
+ECS reacts to an associated Load Balancer (and hence Target Group)'s opinion.<br/>
+If the Target Group's health check fails, traffic is not forwarded to the Task. After `unhealthy_threshold × interval`,
+the integration makes ECS mark the Task as unhealthy and deregister it from the Target Group.<br/>
+ECS will eventually stop the Task, then launch a replacement to maintain the desired count.
+
+</details>
+
+<details>
+  <summary>Solution</summary>
+
+- Align the containers' and the Target Group's health checks.
+- Consider making the Target Group's health check more forgiving, e.g., via higher unhealthy threshold, or more
+  accepted HTTP codes.
+
+</details>
+
 ## Further readings
 
 - [Amazon Web Services]
@@ -2102,8 +2264,9 @@ Specify a supported value for the task CPU and memory in your task definition.
 - [What Is AWS Cloud Map?]
 - [Centralized Container Logging with Fluent Bit]
 - [Effective Logging Strategies with Amazon ECS and Fluentd]
-- [ECS pricing]
+- [A Simple Breakdown of Amazon ECS Pricing]
 - [Announcing AWS Graviton2 Support for AWS Fargate]
+- [Optimize load balancer health check parameters for Amazon ECS]
 
 ### Sources
 
@@ -2183,6 +2346,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [Announcing AWS Graviton2 Support for AWS Fargate]: https://aws.amazon.com/blogs/aws/announcing-aws-graviton2-support-for-aws-fargate-get-up-to-40-better-price-performance-for-your-serverless-containers/
 [Automatically scale your Amazon ECS service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
 [AWS Distro for OpenTelemetry]: https://aws-otel.github.io/
+[AWS Fargate Pricing]: https://aws.amazon.com/fargate/pricing/
 [AWS Fargate Spot Now Generally Available]: https://aws.amazon.com/blogs/aws/aws-fargate-spot-now-generally-available/
 [Centralized Container Logging with Fluent Bit]: https://aws.amazon.com/blogs/opensource/centralized-container-logging-fluent-bit/
 [ecs execute-command proposal]: https://github.com/aws/containers-roadmap/issues/1050
@@ -2198,6 +2362,7 @@ Specify a supported value for the task CPU and memory in your task definition.
 [install the session manager plugin for the aws cli]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
 [Interconnect Amazon ECS services]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/interconnecting-services.html
 [Metrics collection from Amazon ECS using Amazon Managed Service for Prometheus]: https://aws.amazon.com/blogs/opensource/metrics-collection-from-amazon-ecs-using-amazon-managed-service-for-prometheus/
+[Optimize load balancer health check parameters for Amazon ECS]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/load-balancer-healthcheck.html
 [Pass Secrets Manager secrets through Amazon ECS environment variables]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/secrets-envvar-secrets-manager.html
 [Pass sensitive data to an Amazon ECS container]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/specifying-sensitive-data.html
 [storage options for amazon ecs tasks]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html
@@ -2219,12 +2384,12 @@ Specify a supported value for the task CPU and memory in your task definition.
 <!-- Others -->
 [`aws ecs execute-command` results in `TargetNotConnectedException` `The execute command failed due to an internal error`]: https://stackoverflow.com/questions/69261159/aws-ecs-execute-command-results-in-targetnotconnectedexception-the-execute
 [308 Permanent Redirect]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/308
+[A Simple Breakdown of Amazon ECS Pricing]: https://awsfundamentals.com/blog/amazon-ecs-pricing
 [a step-by-step guide to enabling amazon ecs exec]: https://medium.com/@mariotolic/a-step-by-step-guide-to-enabling-amazon-ecs-exec-a88b05858709
 [attach ebs volume to aws ecs fargate]: https://medium.com/@shujaatsscripts/attach-ebs-volume-to-aws-ecs-fargate-e23fea7bb1a7
 [Avoiding Common Pitfalls with ECS Capacity Providers and Auto Scaling]: https://medium.com/@bounouh.fedi/avoiding-common-pitfalls-with-ecs-capacity-providers-and-auto-scaling-24899ab6fc25
 [AWS Fargate Pricing Explained]: https://www.vantage.sh/blog/fargate-pricing
 [aws-cloudmap-prometheus-sd]: https://github.com/awslabs/aws-cloudmap-prometheus-sd
-[ECS pricing]: https://awsfundamentals.com/blog/amazon-ecs-pricing
 [Effective Logging Strategies with Amazon ECS and Fluentd]: https://reintech.io/blog/effective-logging-strategies-amazon-ecs-fluent
 [exposing multiple ports for an aws ecs service]: https://medium.com/@faisalsuhail1/exposing-multiple-ports-for-an-aws-ecs-service-64b9821c09e8
 [guide to using amazon ebs with amazon ecs and aws fargate]: https://stackpioneers.com/2024/01/12/guide-to-using-amazon-ebs-with-amazon-ecs-and-aws-fargate/
