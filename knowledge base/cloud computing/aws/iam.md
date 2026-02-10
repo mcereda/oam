@@ -2,6 +2,20 @@
 
 Controls who is authenticated (signed in) and authorized (has permissions) to use resources.
 
+1. [TL;DR](#tldr)
+1. [Users](#users)
+1. [Groups](#groups)
+1. [Policies](#policies)
+   1. [Trust Policies](#trust-policies)
+   1. [Trust Relationships](#trust-relationships)
+1. [Roles](#roles)
+   1. [Assume Roles](#assume-roles)
+      1. [Require MFA for assuming Roles](#require-mfa-for-assuming-roles)
+1. [Further readings](#further-readings)
+   1. [Sources](#sources)
+
+## TL;DR
+
 Authentication is provided by matching the sign-in credentials to a _principal_ trusted by the AWS account.<br/>
 Principals are IAM users, federated users, IAM roles, and applications.
 
@@ -52,16 +66,7 @@ From [Using service-linked roles]:
 
 Refer [aws.permissions.cloud] for a community-driven source of truth for AWS IAM.
 
-1. [Users](#users)
-1. [Groups](#groups)
-1. [Policies](#policies)
-   1. [Trust Policies](#trust-policies)
-   1. [Trust Relationships](#trust-relationships)
-1. [Roles](#roles)
-   1. [Assume Roles](#assume-roles)
-      1. [Require MFA for assuming Roles](#require-mfa-for-assuming-roles)
-1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+When creating Access Keys, the user owning it will be tagged with the Key's ID for… ahem… easing management, I guess.
 
 ## Users
 
