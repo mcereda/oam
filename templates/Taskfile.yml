@@ -8,7 +8,7 @@ set:
 vars:
   # REPOSITORY_ROOT:
   #   sh: git rev-parse --show-toplevel
-  VENV_DIR: '{{ .ROOT_TASKFILE }}/.venv'
+  VENV_DIR: '{{ .ROOT_DIR }}/.venv'
 
 dotenv:
   - .env
@@ -36,7 +36,7 @@ tasks:
   python:venv:create:
     vars:
       PYTHON_VERSION: '{{ .PYTHON_VERSION | default 3.12}}'
-      REQUIREMENTS_FILE: '{{ .ROOT_TASKFILE }}/requirements.txt'
+      REQUIREMENTS_FILE: '{{ .ROOT_DIR }}/requirements.txt'
     cmds:
       - python{{ .PYTHON_VERSION }} -m 'venv' '{{ .VENV_DIR }}'
       - >-
