@@ -532,6 +532,9 @@ docker model reinstall-runner --gpu 'cuda'
 
 # Check the Model Runner container can access the GPU.
 docker exec docker-model-runner nvidia-smi
+
+# Disable in Docker Desktop.
+docker desktop disable model-runner
 ```
 
 Models are available in Docker Hub under the [ai/](https://hub.docker.com/u/ai) prefix.<br/>
@@ -593,7 +596,7 @@ Docker Model Runner supports the [llama.cpp], [vLLM], and [Diffusers] inference 
 
 ```sh
 # List downloaded models.
-docker model ls
+docker model list
 docker model ls --json
 docker model ls --openai
 docker model ls -q
@@ -618,20 +621,14 @@ docker model rm 'ai/llama2'
 docker model rm -f 'ai/llama2'
 docker model rm $(docker model ls -q)
 
-# Only remove unused models.
-docker model prune
-
 # Print system information.
-docker model system info
+docker model status
 
 # Print disk usage.
-docker model system df
-
-# Clean up unused resources.
-docker model system prune
+docker model df
 
 # Full cleanup (remove all models)
-docker model system prune -a
+docker model purge
 ```
 
 Model Runner collects user data.<br/>
