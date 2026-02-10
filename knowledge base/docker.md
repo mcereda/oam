@@ -14,6 +14,7 @@
    1. [Create builders](#create-builders)
    1. [Build for specific platforms](#build-for-specific-platforms)
 1. [Compose](#compose)
+1. [Running LLMs locally](#running-llms-locally)
 1. [Best practices](#best-practices)
 1. [Troubleshooting](#troubleshooting)
     1. [Use environment variables in the ENTRYPOINT](#use-environment-variables-in-the-entrypoint)
@@ -42,6 +43,9 @@ sudo zypper install 'docker'
 vim '/etc/docker/daemon.json'
 jq -i '."log-level"="info"' '/etc/docker/daemon.json'
 jq -i '.dns=["8.8.8.8", "1.1.1.1"]' "${HOME}/.docker/daemon.json"
+
+# Allow containers to use devices on systems with SELinux.
+sudo setsebool container_use_devices=1
 ```
 
 </details>
@@ -499,6 +503,144 @@ mkdir -p '/usr/local/lib/docker/cli-plugins' \
 
 </details>
 
+## Running LLMs locally
+
+Refer [Run LLMs Locally with Docker: A Quickstart Guide to Model Runner] and [Docker Model Runner].
+
+Docker introduced Model Runner in version 4.40.<br/>
+It makes it easy to pull, run, and experiment with LLMs on local machines.
+
+```sh
+# Enable in Docker Desktop.
+docker desktop enable model-runner
+docker desktop enable model-runner --tcp='12434'  # enable TCP interaction from host processes
+
+# Install the plugin.
+apt install 'docker-model-plugin'
+dnf install 'docker-model-plugin'
+pacman -S 'docker-model-plugin'
+
+# Verify the installation.
+docker model --help
+
+# Stop the current runner.
+docker model stop-runner
+
+# Reinstall runners with CUDA GPU support.
+docker model reinstall-runner --gpu 'cuda'
+
+# Check the Model Runner container can access the GPU.
+docker exec docker-model-runner nvidia-smi
+```
+
+Models are available in Docker Hub under the [ai/](https://hub.docker.com/u/ai) prefix.<br/>
+Tags for models distributed by Docker follow the `{model}:{parameters}-{quantization}` scheme.<br/>
+Alternatively, they can be downloaded from Hugging Face.
+
+```sh
+# Search for model variants.
+docker search ai/llama2
+
+# Pull models.
+docker model pull 'ai/qwen2.5'
+docker model pull 'ai/qwen3-coder:30B'
+docker model pull 'ai/smollm2:360M-Q4_K_M' 'ai/llama2:7b-q4'
+docker model pull 'some.registry.com/models/mistral:latest'
+
+# Run models.
+docker model run 'ai/smollm2:360M-Q4_K_M' 'Give me a fact about whales'
+docker model run -d 'ai/qwen3-coder:30B'
+docker model run -e 'MODEL_API_KEY=my-secret-key' --gpus 'all' …
+docker model run --gpus '0' --gpu-memory '8g' -e 'MODEL_GPU_LAYERS=40' …
+docker model run --gpus '0,1,2' --memory '16g' --memory-swap '16g' …
+docker model run --no-gpu --cpus '4' …
+docker model run -p '3000:8080' …
+docker model run -p '127.0.0.1:8080:8080' …
+docker model run -p '8080:8080' -p '9090:9090' …
+
+# Distribute models across GPUs.
+docker model run --gpus 'all' --tensor-parallel '2' 'ai/llama2-70b'
+
+# Show resource usage.
+docker model stats
+docker model stats llm
+docker model stats --format json
+
+# View models' logs.
+docker model logs
+docker model logs llm | grep -i gpu
+docker model logs -f llm
+docker model logs --tail 100 -t llm
+```
+
+Model Runner exposes an OpenAI endpoint under <http://model-runner.docker.internal/engines/v1> for containers, and
+(if TCP host access was enabled during initialization on port 12434) under <http://localhost:12434/engines/v1>
+for host processes.<br/>
+Use this endpoint to hook up OpenAI-compatible clients or frameworks.
+
+Executing `docker model run` will **not** spin up containers.<br/>
+Instead, it calls an Inference Server API endpoint hosted by Model Runner through Docker Desktop.
+
+The Inference Server runs an inference engine as a native host process, and provides interaction through an
+OpenAI/Ollama-compatible API.<br/>
+When requests come in, Model Runner loads the requested model on demand, then performs the inference on the requests.
+
+The active model will stay in memory until another model is requested, or until a pre-defined inactivity timeout
+(usually 5 minutes) is reached.
+
+Model Runner will transparently load the requested model on-demand, assuming it has been pulled beforehand and is
+locally available. There is no need to execute `docker model run` before interacting with a specific model from host
+processes or from within containers.
+
+Docker Model Runner supports the [llama.cpp], [vLLM], and [Diffusers] inference engines.<br/>
+[llama.cpp] is the default one.
+
+```sh
+# List downloaded models.
+docker model ls
+docker model ls --json
+docker model ls --openai
+docker model ls -q
+
+# List running models.
+docker model ps
+
+# Show models' configuration.
+docker model inspect 'ai/qwen2.5-coder'
+
+# View models' layers.
+docker model history 'ai/llama2'
+
+# Configure models.
+docker model configure --context-size '8192' 'ai/qwen2.5-coder'
+
+# Reset model configuration.
+docker model configure --context-size '-1' 'ai/qwen2.5-coder'
+
+# Remove models.
+docker model rm 'ai/llama2'
+docker model rm -f 'ai/llama2'
+docker model rm $(docker model ls -q)
+
+# Only remove unused models.
+docker model prune
+
+# Print system information.
+docker model system info
+
+# Print disk usage.
+docker model system df
+
+# Clean up unused resources.
+docker model system prune
+
+# Full cleanup (remove all models)
+docker model system prune -a
+```
+
+Model Runner collects user data.<br/>
+Data collection is controlled by the Send usage statistics setting.
+
 ## Best practices
 
 - Use multi-stage `Dockerfile`s when possible to reduce the final image's size.
@@ -568,6 +710,8 @@ Alternatively, keep the exec form but force invoking a shell in it:
 - [Unable to reach services behind VPN from docker container]
 - [Improve docker volume performance on MacOS with a RAM disk]
 - [How to Connect to Localhost Within a Docker Container]
+- [Run LLMs Locally with Docker: A Quickstart Guide to Model Runner]
+- [Docker Model Runner Cheatsheet: Commands & Examples]
 
 <!--
   Reference
@@ -580,15 +724,18 @@ Alternatively, keep the exec form but force invoking a shell in it:
 [kaniko]: kaniko.md
 [podman]: podman.md
 [testcontainers]: testcontainers.md
+[vLLM]: ai/vllm.md
 
 <!-- Upstream -->
 [building multi-arch images for arm and x86 with docker desktop]: https://www.docker.com/blog/multi-arch-images/
 [docker compose]: https://github.com/docker/compose
 [docker docs  I cannot ping my containers]: https://docs.docker.com/desktop/features/networking/#i-cannot-ping-my-containers
+[Docker Model Runner]: https://docs.docker.com/ai/model-runner/
 [dockerfile reference]: https://docs.docker.com/reference/dockerfile/
 [Exec form ENTRYPOINT example]: https://docs.docker.com/reference/dockerfile/#exec-form-entrypoint-example
 [github]: https://github.com/docker
 [Multi-stage builds]: https://docs.docker.com/build/building/multi-stage/
+[Run LLMs Locally with Docker: A Quickstart Guide to Model Runner]: https://www.docker.com/blog/run-llms-locally/
 
 <!-- Others -->
 [amazon-ecr-credential-helper]: https://github.com/awslabs/amazon-ecr-credential-helper
@@ -599,12 +746,15 @@ Alternatively, keep the exec form but force invoking a shell in it:
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html
 [configuring healthcheck in docker-compose]: https://medium.com/@saklani1408/configuring-healthcheck-in-docker-compose-3fa6439ee280
 [difference between expose and ports in docker compose]: https://www.baeldung.com/ops/docker-compose-expose-vs-ports
+[Diffusers]: https://github.com/huggingface/diffusers
 [docker arg, env and .env - a complete guide]: https://vsupalov.com/docker-arg-env-variable-guide/
 [docker buildx bake + gitlab ci matrix]: https://teymorian.medium.com/docker-buildx-bake-gitlab-ci-matrix-77edb6b9863f
+[Docker Model Runner Cheatsheet: Commands & Examples]: https://www.glukhov.org/post/2025/10/docker-model-runner-cheatsheet/
 [getting around docker's host network limitation on mac]: https://medium.com/@lailadahi/getting-around-dockers-host-network-limitation-on-mac-9e4e6bfee44b
 [How to Connect to Localhost Within a Docker Container]: https://www.howtogeek.com/devops/how-to-connect-to-localhost-within-a-docker-container/
 [how to list the content of a named volume in docker 1.9+?]: https://stackoverflow.com/questions/34803466/how-to-list-the-content-of-a-named-volume-in-docker-1-9
 [How to Use a .dockerignore File: A Comprehensive Guide with Examples]: https://hn.mrugesh.dev/how-to-use-a-dockerignore-file-a-comprehensive-guide-with-examples
 [improve docker volume performance on macos with a ram disk]: https://thoughts.theden.sh/posts/docker-ramdisk-macos-benchmark/
+[llama.cpp]: https://github.com/ggml-org/llama.cpp
 [opencontainers image spec]: https://specs.opencontainers.org/image-spec/
 [unable to reach services behind vpn from docker container]: https://github.com/docker/for-mac/issues/5322

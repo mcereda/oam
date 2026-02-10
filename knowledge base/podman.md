@@ -34,6 +34,9 @@ cat <<EOF | tee '/etc/containers/registries.conf.d/shortnames.conf'
 [aliases]
   "orclinx" = "container-registry.oracle.com/os/oraclelinux"
 EOF
+
+# Allow containers to use devices on systems with SELinux.
+sudo setsebool container_use_devices=1
 ```
 
 </details>
