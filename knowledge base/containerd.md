@@ -2,6 +2,11 @@
 
 TODO
 
+```sh
+# Allow containers to use devices on systems with SELinux
+sudo setsebool container_use_devices=1
+```
+
 1. [Further readings](#further-readings)
 
 ## Further readings
