@@ -515,13 +515,14 @@ It makes it easy to pull, run, and experiment with LLMs on local machines.
 docker desktop enable model-runner
 docker desktop enable model-runner --tcp='12434'  # enable TCP interaction from host processes
 
-# Install the plugin.
+# Install as plugin.
 apt install 'docker-model-plugin'
 dnf install 'docker-model-plugin'
 pacman -S 'docker-model-plugin'
 
 # Verify the installation.
 docker model --help
+docker model status
 
 # Stop the current runner.
 docker model stop-runner
@@ -560,11 +561,6 @@ docker model run -p '8080:8080' -p '9090:9090' …
 
 # Distribute models across GPUs.
 docker model run --gpus 'all' --tensor-parallel '2' 'ai/llama2-70b'
-
-# Show resource usage.
-docker model stats
-docker model stats llm
-docker model stats --format json
 
 # View models' logs.
 docker model logs
