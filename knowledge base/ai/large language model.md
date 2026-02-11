@@ -95,14 +95,12 @@ Next step is [agentic AI][agent].
 
 ## Run LLMs Locally
 
-Use one of the following:
+Refer:
 
-- [Ollama]
-- [LMStudio]
-- [vLLM]
-- [Jan]
-- [llama.cpp]
-- [Llamafile]
+- [Local LLM Hosting: Complete 2026 Guide - Ollama, vLLM, LocalAI, Jan, LM Studio & More].
+- [Run LLMs Locally: 6 Simple Methods].
+
+[Ollama]| [Jan] |[LMStudio] | [Docker model runner] | [llama.cpp] | [vLLM] | [Llamafile]
 
 ## Further readings
 
@@ -110,6 +108,7 @@ Use one of the following:
 
 - [Run LLMs Locally: 6 Simple Methods]
 - [OpenClaw: Who are you?]
+- [Local LLM Hosting: Complete 2026 Guide - Ollama, vLLM, LocalAI, Jan, LM Studio & More]
 
 <!--
   Reference
@@ -119,6 +118,7 @@ Use one of the following:
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [Agent]: agent.md
+[Docker model runner]: ../docker.md#running-llms-locally
 [LMStudio]: lmstudio.md
 [Ollama]: ollama.md
 [vLLM]: vllm.md
@@ -133,9 +133,10 @@ Use one of the following:
 [Gemini]: https://gemini.google.com/
 [Grok]: https://grok.com/
 [Jan]: https://www.jan.ai/
-[llama.cpp]: https://github.com/ggml-org/llama.cpp
+[llama.cpp]: llama.cpp.md
 [Llama]: https://www.llama.com/
 [Llamafile]: https://github.com/mozilla-ai/llamafile
+[Local LLM Hosting: Complete 2026 Guide - Ollama, vLLM, LocalAI, Jan, LM Studio & More]: https://www.glukhov.org/post/2025/11/hosting-llms-ollama-localai-jan-lmstudio-vllm-comparison/
 [Mistral]: https://mistral.ai/
 [OpenClaw: Who are you?]: https://www.youtube.com/watch?v=hoeEclqW8Gs
 [Run LLMs Locally: 6 Simple Methods]: https://www.datacamp.com/tutorial/run-llms-locally-tutorial

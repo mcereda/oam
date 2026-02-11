@@ -1,6 +1,7 @@
 # Ollama
 
-The easiest way to get up and running with large language models.
+One of the easiest way to get up and running with large language models.<br/>
+Emerged as one of the most popular tools for local LLM deployment.
 
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
@@ -10,6 +11,21 @@ The easiest way to get up and running with large language models.
    1. [Sources](#sources)
 
 ## TL;DR
+
+Leverages [llama.cpp].
+
+Supports primarily the GGUF file format with quantization levels Q2_K through Q8_0.<br/>
+Offers automatic conversion of models from Hugging Face and allows customization through Modelfile.
+
+Supports tool calling functionality via API.<br/>
+Models can decide when to invoke tools and how to use returned data.<br/>
+Works with models specifically trained for function calling (e.g., Mistral, Llama 3.1, Llama 3.2, and Qwen2.5). However,
+it does not currently allow forcing a specific tool to be called nor receiving tool call responses in streaming mode.
+
+Considered ideal for developers who prefer CLI interfaces and automation, need reliable API integration, value
+open-source transparency, and want efficient resource utilization.
+
+Excellent for building applications that require seamless migration from OpenAI.
 
 <details>
   <summary>Setup</summary>
@@ -118,6 +134,8 @@ ollama signout
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[llama.cpp]: llama.cpp.md
+
 <!-- Files -->
 <!-- Upstream -->
 [Blog]: https://ollama.com/blog
