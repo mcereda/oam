@@ -608,6 +608,7 @@ Refer [RDS Postgres Source Setup Guide].
 - [Blog]
 - [PeerDB UI - Deeper Dive: Part 1]
 - [MinIO]
+- [Achieving Sub‑Second Data Syncs: The Performance Engineering Behind PeerD]
 
 ### Sources
 
@@ -641,4 +642,5 @@ Refer [RDS Postgres Source Setup Guide].
 [website]: https://www.peerdb.io/
 
 <!-- Others -->
+[Achieving Sub‑Second Data Syncs: The Performance Engineering Behind PeerD]: https://thinhdanggroup.github.io/peerdb-subsecond-data-sync/
 [replication slots]: https://www.postgresql.org/docs/current/logicaldecoding-explanation.html#LOGICALDECODING-REPLICATION-SLOTS
