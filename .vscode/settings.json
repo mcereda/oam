@@ -50,7 +50,8 @@
         "https://json.schemastore.org/pre-commit-config.json": ".pre-commit-config.y*ml",
         "https://json.schemastore.org/pulumi.json": "Pulumi.y*ml",
         "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json": "docker-compose.y*ml",
-        "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json": ".markdownlint.y*ml"
+        "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json": ".markdownlint.y*ml",
+        "https://taskfile.dev/schema.json": "*askfile.y*ml"
     },
 
     "[markdown]": {
