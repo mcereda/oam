@@ -46,6 +46,8 @@
             - chat
             - edit
             - apply
+          defaultCompletionOptions:
+            contextLength: 16384  # number of tokens, defaulted to 4096 for this model
       ```
 
    1. If needed, tweak the configuration file.

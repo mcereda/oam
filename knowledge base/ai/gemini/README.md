@@ -1,9 +1,8 @@
-# llama.cpp
+# Gemini
 
 > TODO
 
-LLM inference engine written in in C/C++.<br/>
-Vastly used as base for AI tools like [Ollama] and [Docker model runner].
+Intro
 
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
@@ -46,10 +45,15 @@ Vastly used as base for AI tools like [Ollama] and [Docker model runner].
 
 ## Further readings
 
+- [Website]
 - [Codebase]
-- [ik_llama.cpp]
+- [Large Language Model]
+- [Claude]
+- [CLI]
 
 ### Sources
+
+- [Documentation]
 
 <!--
   Reference
@@ -58,12 +62,14 @@ Vastly used as base for AI tools like [Ollama] and [Docker model runner].
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[Docker model runner]: ../docker.md#running-llms-locally
-[Ollama]: ollama.md
+[Claude]: ../claude/README.md
+[CLI]: cli.md
+[Large Language Model]: ../large%20language%20model.md
 
 <!-- Files -->
 <!-- Upstream -->
-[Codebase]: https://github.com/ggml-org/llama.cpp
+[Codebase]: https://github.com/google-gemini
+[Documentation]: https://ai.google.dev/
+[Website]: https://gemini.google.com
 
 <!-- Others -->
-[ik_llama.cpp]: https://github.com/ikawrakow/ik_llama.cpp

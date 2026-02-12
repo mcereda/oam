@@ -68,10 +68,10 @@ docker exec -it 'ollama' ollama run 'llama3.2'
 # Quickly set up a coding tool with Ollama models.
 ollama launch
 
-# Launch models.
+# Launch integrations.
 ollama launch 'claude' --model 'glm-4.7-flash'
 
-# Only configure models.
+# Only configure models used by integrations.
 # Do *not* launch them.
 ollama launch 'claude' --config
 
@@ -83,6 +83,7 @@ ollama stop 'gemma3'
 
 # Delete models.
 ollama rm 'gemma3'
+ollama rm nomic-embed-text:latest llama3.1:8b
 
 # Create custom models.
 # Requires a Modelfile.
