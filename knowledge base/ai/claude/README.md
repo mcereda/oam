@@ -1,9 +1,8 @@
-# llama.cpp
+# Claude
 
 > TODO
 
-LLM inference engine written in in C/C++.<br/>
-Vastly used as base for AI tools like [Ollama] and [Docker model runner].
+AI platform built by Anthropic.
 
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
@@ -46,10 +45,14 @@ Vastly used as base for AI tools like [Ollama] and [Docker model runner].
 
 ## Further readings
 
-- [Codebase]
-- [ik_llama.cpp]
+- [Website]
+- [Blog]
+- [Large Language Model]
+- [Gemini]
 
 ### Sources
+
+- [Developer documentation]
 
 <!--
   Reference
@@ -58,12 +61,13 @@ Vastly used as base for AI tools like [Ollama] and [Docker model runner].
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[Docker model runner]: ../docker.md#running-llms-locally
-[Ollama]: ollama.md
+[Gemini]: ../gemini/README.md
+[Large Language Model]: ../large%20language%20model.md
 
 <!-- Files -->
 <!-- Upstream -->
-[Codebase]: https://github.com/ggml-org/llama.cpp
+[Blog]: https://claude.com/blog
+[Developer documentation]: https://platform.claude.com/docs/en/home
+[Website]: https://claude.com/product/overview
 
 <!-- Others -->
-[ik_llama.cpp]: https://github.com/ikawrakow/ik_llama.cpp

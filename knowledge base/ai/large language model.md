@@ -118,7 +118,10 @@ Refer:
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [Agent]: agent.md
+[Claude]: claude/README.md
 [Docker model runner]: ../docker.md#running-llms-locally
+[Gemini]: gemini/README.md
+[llama.cpp]: llama.cpp.md
 [LMStudio]: lmstudio.md
 [Ollama]: ollama.md
 [vLLM]: vllm.md
@@ -127,13 +130,10 @@ Refer:
 <!-- Upstream -->
 <!-- Others -->
 [ChatGPT]: https://chatgpt.com/
-[Claude]: https://claude.ai/
 [Copilot]: https://copilot.microsoft.com/
 [Duck AI]: https://duck.ai/
-[Gemini]: https://gemini.google.com/
 [Grok]: https://grok.com/
 [Jan]: https://www.jan.ai/
-[llama.cpp]: llama.cpp.md
 [Llama]: https://www.llama.com/
 [Llamafile]: https://github.com/mozilla-ai/llamafile
 [Local LLM Hosting: Complete 2026 Guide - Ollama, vLLM, LocalAI, Jan, LM Studio & More]: https://www.glukhov.org/post/2025/11/hosting-llms-ollama-localai-jan-lmstudio-vllm-comparison/
