@@ -41,6 +41,8 @@ docker run -d --gpus='all' … 'ollama/ollama'
 
 </details>
 
+The API are available after installation at <http://localhost:11434/api> as default.
+
 Cloud models are automatically offloaded to Ollama's cloud service.<br/>
 This allows to keep using one's local tools while running larger models that wouldn't fit on a personal computer.<br/>
 Those models are _usually_ tagged with the `cloud` suffix.
@@ -49,6 +51,12 @@ Those models are _usually_ tagged with the `cloud` suffix.
   <summary>Usage</summary>
 
 ```sh
+# Access the API via cURL.
+curl 'http://localhost:11434/api/generate' -d '{
+  "model": "gemma3",
+  "prompt": "Why is the sky blue?"
+}'
+
 # Download models.
 ollama pull 'qwen2.5-coder:7b'
 ollama pull 'glm-4.7:cloud'
@@ -83,7 +91,7 @@ ollama stop 'gemma3'
 
 # Delete models.
 ollama rm 'gemma3'
-ollama rm nomic-embed-text:latest llama3.1:8b
+ollama rm 'nomic-embed-text:latest' 'llama3.1:8b'
 
 # Create custom models.
 # Requires a Modelfile.
@@ -108,15 +116,15 @@ ollama signout
 
 </details>
 
-<!-- Uncomment if used
 <details>
   <summary>Real world use cases</summary>
 
 ```sh
+# Run Claude Code on a model served locally by Ollama.
+ANTHROPIC_AUTH_TOKEN=ollama ANTHROPIC_BASE_URL=http://localhost:11434 ANTHROPIC_API_KEY="" claude --model 'lfm2.5-thinking:1.2b'
 ```
 
 </details>
--->
 
 ## Further readings
 

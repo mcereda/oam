@@ -37,15 +37,15 @@ brew install --cask 'claude-code'
 </details>
 -->
 
-<!-- Uncomment if used
 <details>
   <summary>Real world use cases</summary>
 
 ```sh
+# Run Claude Code on a model served locally by Ollama.
+ANTHROPIC_AUTH_TOKEN=ollama ANTHROPIC_BASE_URL=http://localhost:11434 ANTHROPIC_API_KEY="" claude --model 'lfm2.5-thinking:1.2b'
 ```
 
 </details>
--->
 
 ## Further readings
 
