@@ -15,8 +15,19 @@ Works in a terminal, IDE, browser, and as a desktop app.
 ## TL;DR
 
 > [!warning]
-> Requires an Anthropic account to be used.<br/>
-> Unless one uses [Claude Code router] with it.
+> Normally requires an Anthropic account to be used.<br/>
+> One _can_ use [Claude Code router] or [Ollama] to run on a locally server or shared LLM instead, but its performances
+> do seem to take an extreme hit.
+
+Uses a scope system to determine where configurations apply and who they're shared with.<br/>
+When multiple scopes are active, the **more** specific ones take precedence.
+
+| Scope                   | Location                             | Area of effect                     | Shared                                    |
+| ----------------------- | ------------------------------------ | ---------------------------------- | ----------------------------------------- |
+| Managed (A.K.A. System) | System-level `managed-settings.json` | All users on the host              | Yes (usually deployed by IT)              |
+| User                    | `~/.claude/` directory               | Single user, across all projects   | No                                        |
+| Project                 | `.claude/` directory in a repository | All collaborators, repository only | Yes (usually committed to the repository) |
+| Local                   | `.claude/*.local.*` files            | Single user, repository only       | No (usually gitignored)                   |
 
 <details>
   <summary>Setup</summary>
@@ -71,6 +82,7 @@ ANTHROPIC_AUTH_TOKEN=ollama ANTHROPIC_BASE_URL=http://localhost:11434 ANTHROPIC_
 [AI agent]: ../agent.md
 [Claude Code router]: claude%20code%20router.md
 [Gemini CLI]: ../gemini/cli.md
+[Ollama]: ../ollama.md
 [OpenCode]: ../opencode.md
 
 <!-- Files -->
