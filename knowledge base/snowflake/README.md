@@ -15,8 +15,10 @@ Cloud-based [data warehousing][data warehouse] platform.
 1. [Roleout](#roleout)
 1. [Connecting privately](#connecting-privately)
    1. [From AWS accounts](#from-aws-accounts)
+1. [Parameters](#parameters)
+1. [Tagging queries](#tagging-queries)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -863,6 +865,59 @@ AWS provides region-wide IP ranges as a JSON file. These are subject to change, 
 rules.<br/>
 Snowflake recommends **avoiding** this approach.
 
+## Parameters
+
+Refer [Parameters][snowflake parameters].
+
+Parameters allow controlling the behavior of the account, individual user sessions, and objects.<br/>
+All parameters have default values, and can be set and overridden at different levels depending on the parameter's type
+(account, session, or object).
+
+## Tagging queries
+
+Refer [Snowflake query tags 101: A guide to Snowflake query tagging].
+
+Query tags are [parameters] that allow users to assign a descriptive string label of up to 2000 characters to queries
+they execute. Tags can contain _any_ character.
+
+Using them enables users to name queries, group them, and keep better track of how well they are performing.<br/>
+They are usually used to provide enhanced cost attribution and performance monitoring.
+
+_Query_ tags are different from _object_ tags, where object tags label database objects (tables, views and
+schemas).<br/>
+Both types of tags provide valuable functionality, but they are used in different contexts and for different purposes.
+
+```sql
+USE ROLE ACCOUNTADMIN;                                    -- specific permissions are required at the account level
+ALTER ACCOUNT SET QUERY_TAG = 'some_query_tag';           -- attach this tag to all queries
+
+USE ROLE SYSADMIN;                                        -- specific permissions are required at the user level
+ALTER USER johann SET QUERY_TAG = 'infra';                -- attach this tag to all johann's queries
+ALTER USER milo SET QUERY_TAG = 'finance';                -- attach this tag to all milo's queries
+
+ALTER SESSION SET QUERY_TAG = 'some_session';             -- attach this tag to queries in this session
+SELECT * FROM some_table;                                 -- execute a query
+SELECT QUERY_TAG                                          -- check the query has been labelled
+  FROM TABLE(INFORMATION_SCHEMA.QUERY_HISTORY())
+  WHERE QUERY_TEXT LIKE 'SELECT * FROM some_table%';
+
+SELECT user_name, role_name, query_tag                    -- get infra's queries
+  FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
+  WHERE query_tag = 'infra'
+  GROUP BY user_name, role_name, query_tag;
+SELECT user_name, role_name, query_tag                    -- get queries tagged 'HighPriority'
+  FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
+  WHERE query_tag = 'HighPriority'
+```
+
+Since query tags are parameters, they are applied in the same order of precedence when set at multiple levels.<br/>
+E.g., query tags set at the account level are overridden by user-level query tags, which are in turn overridden by
+query tags at the session level.
+
+Query comments can also be used to add metadata to queries, but they are more limited.<br/>
+Query tags are simpler to parse and analyze downstream, while query comments may require additional processing.<br/>
+Query comments also have a size limit of 1MB, whereas query tags are limited to 2000 characters.
+
 ## Further readings
 
 - [Website]
@@ -882,6 +937,7 @@ Snowflake recommends **avoiding** this approach.
 - [Programmatically Accessing Snowflake Model Inference Endpoints]
 - [Programmatic Access Token (PAT) in Snowflake]
 - [Unpacking Snowflake's New User Type Property]
+- [Snowflake query tags 101: A guide to Snowflake query tagging]
 
 <!--
   Reference
@@ -889,6 +945,7 @@ Snowflake recommends **avoiding** this approach.
   -->
 
 <!-- In-article sections -->
+[parameters]: #parameters
 [users]: #users
 
 <!-- Knowledge base -->
@@ -905,6 +962,7 @@ Snowflake recommends **avoiding** this approach.
 [Network policies]: https://docs.snowflake.com/en/user-guide/network-policies
 [Network rules]: https://docs.snowflake.com/en/user-guide/network-rules
 [Overview of Access Control]: https://docs.snowflake.com/en/user-guide/security-access-control-overview
+[Snowflake parameters]: https://docs.snowflake.com/en/sql-reference/parameters
 [Planning for the deprecation of single-factor password sign-ins]: https://docs.snowflake.com/en/user-guide/security-mfa-rollout
 [Using programmatic access tokens for authentication]: https://docs.snowflake.com/en/user-guide/programmatic-access-tokens
 [Website]: https://www.snowflake.com/en/
@@ -917,3 +975,4 @@ Snowflake recommends **avoiding** this approach.
 [Snowflake CREATE USERS: Syntax, Usage & Practical Examples]: https://hevodata.com/learn/snowflake-create-users/
 [Snowflake terraform provider authentication]: https://registry.terraform.io/providers/Snowflake-Labs/snowflake/latest/docs#authentication
 [Unpacking Snowflake's New User Type Property]: https://select.dev/posts/snowflake-user-type
+[Snowflake query tags 101: A guide to Snowflake query tagging]: https://www.flexera.com/blog/finops/snowflake-query-tags/
