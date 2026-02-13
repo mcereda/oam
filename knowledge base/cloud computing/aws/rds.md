@@ -331,6 +331,12 @@ created manual snapshots to recover it.
 Taking backups can be unbearably slow depending on the amount of data needing to be copied.<br/>
 For reference, the first snapshot of a DB instance with standard 100 GiB `gp3` storage took about 3h to complete.
 
+AWS charges only for snapshots that one owns. Public snapshots _owned by other accounts_ are **not** counted.<br/>
+AWS does **not** charge for backup storage of **automated** snapshots up to the size of an RDS instance, as long as
+that instance is active. Any backup storage beyond this incurs additional charges.<br/>
+Manual snapshots are billed **entirely** based on their storage usage.<br/>
+Cross-region snapshot copies also incur additional transfer and storage charges in the destination region.
+
 ### Automatic backups
 
 Automatic backups are storage volume snapshots of **entire** DB instances.
@@ -369,13 +375,14 @@ Automated backups will **not** occur while a DB snapshot copy is running in the 
 ### Manual backups
 
 Back up DB instances manually by creating DB snapshots.<br/>
-The first snapshot contains the data for the full database. Subsequent snapshots of the same database are incremental.
+The first snapshot contains the data for the **full** database. Subsequent snapshots of the same database are
+**incremental**.
 
 One can copy both automatic and manual DB snapshots, but only share manual DB snapshots.
 
-Manual snapshots **never** expire and are retained indefinitely.
+Manual snapshots **never** expire and are retained until explicitly deleted.
 
-One can store up to 100 manual snapshots per Region.
+One can store up to **100** manual snapshots per Region.
 
 ### Export snapshots to S3
 
@@ -1022,7 +1029,7 @@ Impacting factors (from most to least impactful):
 1. Storage type and capacity.
 1. Backup storage.
 
-   Backup storage up to 100% of one's total database storage (per region) is free.<br/>
+   Backup storage _for automatic snapshots_ up to 100% of one's total database storage (per region) is free.<br/>
    Additional backup storage costs ~$0.095 per GB-month (`us-east-1`).<br/>
    [Exporting snapshots to S3][export snapshots to s3] costs ~$0.10 per GB (`us-east-1`).
 
@@ -1043,6 +1050,10 @@ Impacting factors (from most to least impactful):
 
 1. Zero-ETL integrations.
 1. Extended support.
+1. Networking.
+
+   Public IPv4 addresses associated with resources launched in a VPC are charged at standard rates.<br/>
+   This rate is $0.005/h as of 20126-02-13, and is charged in 1s increments for a minimum of 60s.
 
 ### Cost-saving measures
 
@@ -1050,9 +1061,9 @@ Impacting factors (from most to least impactful):
   Consider changing them more appropriate ones (more recent, smaller, or Graviton-based) every few months.
 - Consider leveraging [reserved instances][rds reserved instances].
 
-  Prefer using _Standard RIs_ when sticking with one instance type and **not** needing changing it for the **entire**
+  Prefer using _Standard_ RIs when sticking with one instance type and **not** needing changing it for the **entire**
   duration of a reservation.<br/>
-  Otherwise, prefer _Convertible RIs_ for flexibility.
+  Otherwise, prefer _Convertible_ (A.K.A. _Size-flexible_) RIs for flexibility.
 
   RDS does **not** support Savings Plans at the time of writing.
 
@@ -1146,6 +1157,7 @@ or write workloads and exceeds the instance type quotas.
 - [Kyle Kingsbury's Amazon RDS for PostgreSQL 17.4 analysis]
 - [AWS RDS Max Connections Limit As Per Instance Type]
 - [Amazon RDS and Aurora credentials format]
+- [Amazon RDS: Snapshot, restore, and recovery demystified]
 
 ### Sources
 
@@ -1168,6 +1180,7 @@ or write workloads and exceeds the instance type quotas.
 - [Disabling AWS RDS backups when creating/updating instances?]
 - [Viewing instance status]
 - [Recommended alarms for RDS]
+- [Working With Amazon RDS Snapshots: The Basics and a Quick Tutorial]
 
 <!--
   Reference
@@ -1189,6 +1202,7 @@ or write workloads and exceeds the instance type quotas.
 [Amazon RDS and Aurora credentials format]: https://docs.aws.amazon.com/secretsmanager/latest/userguide/reference_secret_json_structure.html#reference_secret_json_structure_rds
 [amazon rds db instance storage]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
 [amazon rds db instances]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.DBInstance.html
+[Amazon RDS: Snapshot, restore, and recovery demystified]: https://aws.amazon.com/blogs/database/amazon-rds-snapshot-restore-and-recovery-demystified/
 [aws kms key management]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.Keys.html
 [Changing RDS storage from gp2 to gp3]: https://repost.aws/questions/QUDPKCzJclQbCwOt47lf7lFQ/changing-rds-storage-from-gp2-to-gp3
 [how can i decrease the total provisioned storage size of my amazon rds db instance?]: https://repost.aws/knowledge-center/rds-db-storage-size
@@ -1226,3 +1240,4 @@ or write workloads and exceeds the instance type quotas.
 [Disabling AWS RDS backups when creating/updating instances?]: https://stackoverflow.com/questions/35709153/disabling-aws-rds-backups-when-creating-updating-instances#35730978
 [Kyle Kingsbury's Amazon RDS for PostgreSQL 17.4 analysis]: https://jepsen.io/analyses/amazon-rds-for-postgresql-17.4
 [Understanding AWS RDS Pricing]: https://www.bytebase.com/blog/understanding-aws-rds-pricing/
+[Working With Amazon RDS Snapshots: The Basics and a Quick Tutorial]: https://n2ws.com/blog/aws-cloud/rds-snapshot
