@@ -21,6 +21,7 @@ Both the `ccr` CLI and the server use the `~/.claude-code-router/config.json` co
 
 ```sh
 # Install.
+brew install 'claude-code-router'
 npm install -g '@musistudio/claude-code-router'
 
 # Open the Web UI for visual configuration.
