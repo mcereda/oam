@@ -44,19 +44,43 @@ docker run -d --gpus='all' … 'ollama/ollama'
 The maximum context for model execution can be set in the app.<br/>
 If so, using `OLLAMA_CONTEXT_LENGTH` in the CLI seems to have no effect. The app's setting is used regardless.
 
-Performance examples:
+<details style='padding: 0 0 1rem 0'>
+  <summary>Performance examples</summary>
 
-| Model                | Context (tokens) | Size in RAM | Executing host           | Average time to respond to `Hi!` |
-| -------------------- | ---------------- | ----------- | ------------------------ | -------------------------------- |
-| glm-4.7-flash:q4_K_M | 4096             | 19 GB       | M3 Pro MacBook Pro 36 GB | 59 s                             |
-| glm-4.7-flash:q4_K_M | 8192             | 19 GB       | M3 Pro MacBook Pro 36 GB | 19.28 s                          |
-| glm-4.7-flash:q4_K_M | 16384            | 20 GB       | M3 Pro MacBook Pro 36 GB | 9.13 s                           |
+Prompt: `Hi! Are you there?`.<br/>
+The model was run once right before the tests started to remove loading times.<br/>
+Requests have been sent in headless mode (`ollama run 'model' 'prompt'`).
+
+  <details style='padding: 0 0 0 1rem'>
+    <summary><code>glm-4.7-flash:q4_K_M</code> on an M3 Pro MacBook Pro 36 GB</summary>
+
+Model: `glm-4.7-flash:q4_K_M`.<br/>
+Host: M3 Pro MacBook Pro 36 GB.
+
+| Context | RAM Usage | Used swap    | Average response time | System remained responsive   |
+| ------: | --------: | ------------ | --------------------: | ---------------------------- |
+|    4096 |     19 GB | No           |                 9.27s | Yes                          |
+|    8192 |     19 GB | No           |                 8.28s | Yes                          |
+|   16384 |     20 GB | No           |                 9.13s | Yes                          |
+|   32768 |     22 GB | No           |                 9.05s | Yes                          |
+|   65536 |     25 GB | No? (unsure) |                10.07s | Meh (minor stutters)         |
+|  131072 |     33 GB | **Yes**      |                18.43s | **No** (noticeable stutters) |
+
+  </details>
+
+</details>
 
 The API are available after installation at <http://localhost:11434/api> as default.
 
 Cloud models are automatically offloaded to Ollama's cloud service.<br/>
 This allows to keep using one's local tools while running larger models that wouldn't fit on a personal computer.<br/>
 Those models are _usually_ tagged with the `cloud` suffix.
+
+Thinking is enabled by default in the CLI and API for models that support it.<br/>
+Some of those models (e.g. `gpt-oss`) also (or only) allow to set thinking levels.
+
+Vision models accept images alongside text.<br/>
+The model can describe, classify, and answer questions about what it sees.
 
 <details>
   <summary>Usage</summary>
@@ -67,6 +91,13 @@ curl 'http://localhost:11434/api/generate' -d '{
   "model": "gemma3",
   "prompt": "Why is the sky blue?"
 }'
+
+# Expose (bind) the server to specific IP addresses and/or with custom ports.
+# Default is 127.0.0.1 on port 11434.
+OLLAMA_HOST='some.fqdn:11435'
+
+# Start the interactive menu.
+ollama
 
 # Download models.
 ollama pull 'qwen2.5-coder:7b'
@@ -86,16 +117,22 @@ docker exec -it 'ollama' ollama run 'llama3.2'
 
 # Run headless.
 ollama run 'glm-4.7-flash:q4_K_M' 'Hi! Are you there?' --verbose
-OLLAMA_HOST='some.fqdn:11434' ollama run 'glm-4.7-flash:q4_K_M' …
+ollama run 'deepseek-r1' --think=false "Summarize this article"
+ollama run 'gemma3' --hidethinking "Is 9.9 bigger or 9.11?"
+ollama run 'gpt-oss' --think=low "Draft a headline"
+ollama run 'gemma3' './image.png' "what's in this image?"
 
 # Quickly set up a coding tool with Ollama models.
 ollama launch
 
 # Launch integrations.
+ollama launch 'opencode'
 ollama launch 'claude' --model 'glm-4.7-flash'
+ollama launch 'openclaw'
 
 # Only configure models used by integrations.
 # Do *not* launch them.
+ollama launch 'opencode' --config
 ollama launch 'claude' --config
 
 # Check usage.
