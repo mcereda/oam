@@ -27,7 +27,7 @@ open-source transparency, and want efficient resource utilization.
 
 Excellent for building applications that require seamless migration from OpenAI.
 
-<details>
+<details style='padding: 0 0 1rem 0'>
   <summary>Setup</summary>
 
 ```sh
@@ -40,6 +40,17 @@ docker run -d --gpus='all' … 'ollama/ollama'
 ```
 
 </details>
+
+The maximum context for model execution can be set in the app.<br/>
+If so, using `OLLAMA_CONTEXT_LENGTH` in the CLI seems to have no effect. The app's setting is used regardless.
+
+Performance examples:
+
+| Model                | Context (tokens) | Size in RAM | Executing host           | Average time to respond to `Hi!` |
+| -------------------- | ---------------- | ----------- | ------------------------ | -------------------------------- |
+| glm-4.7-flash:q4_K_M | 4096             | 19 GB       | M3 Pro MacBook Pro 36 GB | 59 s                             |
+| glm-4.7-flash:q4_K_M | 8192             | 19 GB       | M3 Pro MacBook Pro 36 GB | 19.28 s                          |
+| glm-4.7-flash:q4_K_M | 16384            | 20 GB       | M3 Pro MacBook Pro 36 GB | 9.13 s                           |
 
 The API are available after installation at <http://localhost:11434/api> as default.
 
@@ -69,9 +80,13 @@ ollama ls
 ollama serve
 OLLAMA_CONTEXT_LENGTH=64000 ollama serve
 
-# Run models.
+# Run models interactively.
 ollama run 'gemma3'
 docker exec -it 'ollama' ollama run 'llama3.2'
+
+# Run headless.
+ollama run 'glm-4.7-flash:q4_K_M' 'Hi! Are you there?' --verbose
+OLLAMA_HOST='some.fqdn:11434' ollama run 'glm-4.7-flash:q4_K_M' …
 
 # Quickly set up a coding tool with Ollama models.
 ollama launch
@@ -121,7 +136,8 @@ ollama signout
 
 ```sh
 # Run Claude Code on a model served locally by Ollama.
-ANTHROPIC_AUTH_TOKEN=ollama ANTHROPIC_BASE_URL=http://localhost:11434 ANTHROPIC_API_KEY="" claude --model 'lfm2.5-thinking:1.2b'
+ANTHROPIC_AUTH_TOKEN=ollama ANTHROPIC_BASE_URL=http://localhost:11434 ANTHROPIC_API_KEY="" \
+  claude --model 'lfm2.5-thinking:1.2b'
 ```
 
 </details>

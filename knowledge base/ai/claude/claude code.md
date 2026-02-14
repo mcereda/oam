@@ -9,6 +9,7 @@ Works in a terminal, IDE, browser, and as a desktop app.
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
+1. [Run on local models](#run-on-local-models)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -57,6 +58,15 @@ ANTHROPIC_AUTH_TOKEN=ollama ANTHROPIC_BASE_URL=http://localhost:11434 ANTHROPIC_
 ```
 
 </details>
+
+## Run on local models
+
+Performance examples:
+
+| Engine             | Model                | Context (tokens) | Size in RAM | Executing host           | Average time to respond to `Hi!` |
+| ------------------ | -------------------- | ---------------- | ----------- | ------------------------ | -------------------------------- |
+| llama.cpp (ollama) | glm-4.7-flash:q4_K_M | 4096             | 19 GB       | M3 Pro MacBook Pro 36 GB | 59 s                             |
+| llama.cpp (ollama) | glm-4.7-flash:q4_K_M | 8192             | 19 GB       | M3 Pro MacBook Pro 36 GB | 52 s                             |
 
 ## Further readings
 
