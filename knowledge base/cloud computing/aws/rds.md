@@ -9,11 +9,13 @@
    1. [Storage encryption](#storage-encryption)
 1. [Parameter Groups](#parameter-groups)
 1. [Option Groups](#option-groups)
-1. [Backup](#backup)
+1. [Backing up](#backing-up)
    1. [Automatic backups](#automatic-backups)
    1. [Manual backups](#manual-backups)
-   1. [Export snapshots to S3](#export-snapshots-to-s3)
-1. [Restore](#restore)
+   1. [Exporting snapshots to S3](#exporting-snapshots-to-s3)
+1. [Restoring data](#restoring-data)
+   1. [Point-in-Time](#point-in-time)
+   1. [Snapshots](#snapshots)
 1. [Multi-AZ instances](#multi-az-instances)
    1. [Converting instances between Multi-AZ and Single-AZ](#converting-instances-between-multi-az-and-single-az)
 1. [Operations](#operations)
@@ -313,7 +315,7 @@ aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' --
 
 Used to enable and configure additional features and functionalities in a DB.
 
-## Backup
+## Backing up
 
 RDS snapshot storage is calculated per Region.<br/>
 Both the automated backups and manual DB snapshots for that Region concur to the total value.<br/>
@@ -384,7 +386,7 @@ Manual snapshots **never** expire and are retained until explicitly deleted.
 
 One can store up to **100** manual snapshots per Region.
 
-### Export snapshots to S3
+### Exporting snapshots to S3
 
 One can export DB snapshot data to [S3] buckets.<br/>
 RDS spins up an instance from the snapshot, extracts data from it and stores the data in Apache Parquet format.<br/>
@@ -504,60 +506,71 @@ $ aws rds cancel-export-task --export-task-identifier 'my_export'
 
 </details>
 
-## Restore
+## Restoring data
 
 Since RDS does **not** allow physical access to its managed instances, one **cannot** restore physical backups.<br/>
 It **does allow** restoring _logical_ backups, though.
 
-> [!warning]
-> RDS does **not** _restore_ data in the strictest sense of the word, e.g. by rolling it back or replacing it in the
-> same RDS DB instance.<br/>
-> Instead, the service forces users to create a **new** RDS DB instance from the desired backup point.
-
-Should one want to replace the data in an existing RDS DB instance, they **will** need to (either-or):
+RDS does **not** _restore_ data in the strictest sense of the word, e.g. by rolling it back or replacing it in the
+same RDS DB instance. Instead, the service creates a **new** RDS DB instance from the desired backup point.<br/>
+This will **not** modify the original DB instance. Should one want to replace the data in an existing RDS DB instance,
+they **will** need to (either-or):
 
 - Restore a _logical_ backup via other means (e.g., `pg_restore`).
-- **Replace** the RDS DB instance with a new one from the desired backup.
+- Create a new instance with the desired data, then **replace** the original DB instance with the new one.
 
-If an RDS DB instance **has automated backups enabled**, one can use it as source to create a **new** RDS DB instance
-that has the _same_ attributes and data up to a specific point in time.<br/>
-This does **not** modify the source DB instance.
+When restoring from PITR or snapshots, the new instance will pass through the `creating` and
+`configuring-enhanced-monitoring` states.<br/>
+As of 2026-02-16, a `db.m8g.xlarge` instance takes about 14m to create, then about 2 more minutes to configure
+monitoring.
+
+> [!warning]
+> If the original DB instance has automatic backups enabled (or had at the time of the snapshot), the new DB instance
+> **will** have automatic backups enabled too, and **will** start to backup itself **right after creation** (hence
+> adding the `backing-up` state to the list of state changes).
+>
+> The backing-up part can be super slow. Depending on the instance size, it could take more than 30m for an instance
+> with 100 GB of storage.<br/>
+>
+> There is currently **no** way to prevent an instance from creating the backup upon restore.<br/>
+> That process is triggered automatically, and the feature can only be toggled on and off for _existing_ instances.<br/>
+> Refer [Disabling AWS RDS backups when creating/updating instances?].
+>
+> The `BackupRetentionPeriod` attribute is part of both instances and snapshot definitions, but can only be configured
+> for instances.<br/>
+> To create instances from snapshots with this attribute set to `0`, and thus have **no** backup automatically taken,
+> the source snapshot _must_ have this flag **already** set to `0`. This can only happen if the original instance was
+> configured that way when the snapshot was taken in the first place.
+
+### Point-in-Time
 
 Refer [Restoring a DB instance to a specified time for Amazon RDS].
 
-One can restore to any point in time within the source RDS DB instance's automatic backup retention period.
+DB instances that have **automated backups enabled** can use them for Point-in-Time restores.<br/>
+The process will create a new DB instance, with the data updated to the specified point in time. One can restore to any
+point in time **within** the source DB instance's automatic backup retention period.
 
-Restored DB instances are automatically associated with the **default** DB parameter and option groups, unless one
-specifies a custom parameter group and/or option group during the restore process.
-
-If the source DB instance has resource tags, RDS adds them by default to the restored DB instance.
-
-DB instances **can** be restored from DB snapshots.<br/>
-This requires the new instances to have **equal or more** allocated storage than what the original instance had
-allocated _at the time the snapshot was taken_.
+_Some_ of the new instance's attributes can be specified during creation (e.g. the DB parameter and option groups).
+The rest will be taken from the original instance (including, e.g., its tags).
 
 ```sh
-aws rds restore-db-instance-from-db-snapshot \
-  --db-instance-identifier 'myNewDbInstance' --db-snapshot-identifier 'myDbSnapshot'
-
 aws rds restore-db-instance-to-point-in-time \
   --target-db-instance-identifier 'myNewDbInstance' --source-db-instance-identifier 'oldDbInstance' \
   --use-latest-restorable-time
 ```
 
-Should snapshot one used as source be from an instance that had automatic backups enabled, the restored DB instance
-**will** have automatic backups enabled too, and **will** backup itself **right after creation**.<br/>
-Refer the [Backup] section for what this means.
+### Snapshots
 
-> There is currently **no** way to prevent the backup being generated at instance creation time.<br/>
-> That process is triggered automatically and the feature can only be toggled on and off for _existing_ instances.<br/>
-> Refer [Disabling AWS RDS backups when creating/updating instances?].
->
-> The `BackupRetentionPeriod` flag is part of both instances and snapshot definitions, but can only be configured for
-> instances.<br/>
-> To create instances with this flag set to `0` from snapshots, and thus have **no** backup automatically taken, the
-> source snapshot _must_ have this flag **already** set to `0`. This can only happen if the original instance was
-> configured that way when the snapshot was taken in the first place.
+Snapshots can be used as a base to create new DB instances. Their data will be the same as it was at the time the
+snapshot was taken.
+
+This process requires the new instances to have **equal or more** allocated storage than what the original instance had
+allocated _at the time the snapshot was taken_.
+
+```sh
+aws rds restore-db-instance-from-db-snapshot \
+  --db-instance-identifier 'myNewDbInstance' --db-snapshot-identifier 'myDbSnapshot'
+```
 
 ## Multi-AZ instances
 
@@ -1031,7 +1044,7 @@ Impacting factors (from most to least impactful):
 
    Backup storage _for automatic snapshots_ up to 100% of one's total database storage (per region) is free.<br/>
    Additional backup storage costs ~$0.095 per GB-month (`us-east-1`).<br/>
-   [Exporting snapshots to S3][export snapshots to s3] costs ~$0.10 per GB (`us-east-1`).
+   [Exporting snapshots to S3] costs ~$0.10 per GB (`us-east-1`).
 
 1. Multi-AZ deployments.
 
@@ -1188,8 +1201,7 @@ or write workloads and exceeds the instance type quotas.
   -->
 
 <!-- In-article sections -->
-[Backup]: #backup
-[Export snapshots to S3]: #export-snapshots-to-s3
+[Exporting snapshots to S3]: #exporting-snapshots-to-s3
 [Storage optimization]: #storage-optimization
 
 <!-- Knowledge base -->
