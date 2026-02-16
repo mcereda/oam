@@ -32,11 +32,25 @@ Excellent for building applications that require seamless migration from OpenAI.
 
 ```sh
 brew install --cask 'ollama-app'  # or just brew install 'ollama'
+curl -fsSL 'https://ollama.com/install.sh' | sh
 docker pull 'ollama/ollama'
 
 # Run in containers.
 docker run -d -v 'ollama:/root/.ollama' -p '11434:11434' --name 'ollama' 'ollama/ollama'
 docker run -d --gpus='all' … 'ollama/ollama'
+
+# Expose (bind) the server to specific IP addresses and/or with custom ports.
+# Default is 127.0.0.1 on port 11434.
+# Only valid for the *'serve'* command.
+OLLAMA_HOST='some.fqdn:11435' ollama serve
+
+# Use a custom context length.
+# Only valid for the *'serve'* command.
+OLLAMA_CONTEXT_LENGTH=64000 ollama serve
+
+# Use a remotely served model.
+# Valid for all commands *but* 'serve'.
+OLLAMA_HOST='some.fqdn:11435' ollama …
 ```
 
 </details>
@@ -86,18 +100,21 @@ The model can describe, classify, and answer questions about what it sees.
   <summary>Usage</summary>
 
 ```sh
+# Start the server.
+ollama serve
+
+# Verify the server is running.
+curl 'http://localhost:11434/'
+
 # Access the API via cURL.
 curl 'http://localhost:11434/api/generate' -d '{
   "model": "gemma3",
   "prompt": "Why is the sky blue?"
 }'
 
-# Expose (bind) the server to specific IP addresses and/or with custom ports.
-# Default is 127.0.0.1 on port 11434.
-OLLAMA_HOST='some.fqdn:11435'
-
 # Start the interactive menu.
 ollama
+ollama launch
 
 # Download models.
 ollama pull 'qwen2.5-coder:7b'
@@ -107,9 +124,8 @@ ollama pull 'glm-4.7:cloud'
 ollama list
 ollama ls
 
-# Start Ollama.
-ollama serve
-OLLAMA_CONTEXT_LENGTH=64000 ollama serve
+# Show models information.
+ollama show 'codellama:13b'
 
 # Run models interactively.
 ollama run 'gemma3'
@@ -120,10 +136,7 @@ ollama run 'glm-4.7-flash:q4_K_M' 'Hi! Are you there?' --verbose
 ollama run 'deepseek-r1' --think=false "Summarize this article"
 ollama run 'gemma3' --hidethinking "Is 9.9 bigger or 9.11?"
 ollama run 'gpt-oss' --think=low "Draft a headline"
-ollama run 'gemma3' './image.png' "what's in this image?"
-
-# Quickly set up a coding tool with Ollama models.
-ollama launch
+ollama run 'gemma3' './image.png' "what's in this image?" --temperature '0.8' --top-p '0.9'
 
 # Launch integrations.
 ollama launch 'opencode'
@@ -168,26 +181,27 @@ ollama signout
 
 </details>
 
+<!-- Uncomment if used
 <details>
   <summary>Real world use cases</summary>
 
 ```sh
-# Run Claude Code on a model served locally by Ollama.
-ANTHROPIC_AUTH_TOKEN=ollama ANTHROPIC_BASE_URL=http://localhost:11434 ANTHROPIC_API_KEY="" \
-  claude --model 'lfm2.5-thinking:1.2b'
 ```
 
 </details>
+-->
 
 ## Further readings
 
 - [Website]
 - [Codebase]
 - [Blog]
+- [Models library]
 
 ### Sources
 
 - [Documentation]
+- [The Complete Guide to Ollama: Run Large Language Models Locally]
 
 <!--
   Reference
@@ -203,6 +217,8 @@ ANTHROPIC_AUTH_TOKEN=ollama ANTHROPIC_BASE_URL=http://localhost:11434 ANTHROPIC_
 [Blog]: https://ollama.com/blog
 [Codebase]: https://github.com/ollama/ollama
 [Documentation]: https://docs.ollama.com/
+[Models library]: https://ollama.com/library
 [Website]: https://ollama.com/
 
 <!-- Others -->
+[The Complete Guide to Ollama: Run Large Language Models Locally]: https://dev.to/ajitkumar/the-complete-guide-to-ollama-run-large-language-models-locally-2mge

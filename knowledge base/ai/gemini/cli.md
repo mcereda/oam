@@ -16,7 +16,9 @@ Can read and edit files, execute shell commands, and search the web.
 
 ```sh
 # Install.
+brew install 'gemini-cli'
 npm install -g '@google/gemini-cli'
+port install 'gemini-cli'
 
 # Run without installation.
 docker run --rm -it 'us-docker.pkg.dev/gemini-code-dev/gemini-cli/sandbox:0.1.1'
@@ -32,6 +34,9 @@ export GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
   <summary>Usage</summary>
 
 ```sh
+# Show version.
+gemini --version
+
 # Start.
 gemini
 
