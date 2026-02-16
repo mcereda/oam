@@ -57,6 +57,9 @@ claude -c
 
 # Resume a previous conversation
 claude -r
+
+# Add MCPs
+claude mcp add --transport 'sse' 'linear-server' 'https://mcp.linear.app/sse'
 ```
 
 </details>
@@ -109,7 +112,7 @@ Claude Code version: `v2.1.41`.<br/>
 | llama.cpp (ollama) |   16384 |     20 GB | No           |                2m 16s | No                         |
 | llama.cpp (ollama) |   32768 |     22 GB | No           |                 7.12s | No                         |
 | llama.cpp (ollama) |   65536 |     25 GB | No? (unsure) |                10.25s | Meh (minor stutters)       |
-| llama.cpp (ollama) |  131072 |     33 GB | No           |                3m 42s | **No** (major stutters)    |
+| llama.cpp (ollama) |  131072 |     33 GB | **Yes**      |                3m 42s | **No** (major stutters)    |
 
   </details>
 
