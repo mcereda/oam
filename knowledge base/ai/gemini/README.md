@@ -64,7 +64,7 @@ Intro
 <!-- Knowledge base -->
 [Claude]: ../claude/README.md
 [CLI]: cli.md
-[Large Language Model]: ../large%20language%20model.md
+[Large Language Model]: ../llm.md
 
 <!-- Files -->
 <!-- Upstream -->

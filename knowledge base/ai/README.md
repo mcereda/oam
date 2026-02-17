@@ -18,6 +18,7 @@ TODO
 ## Further readings
 
 - [Large Language Model] (LLM)
+- [Model Context Protocol] (MCP)
 - [Useful AI]: tools, courses, and more, curated and reviewed by experts.
 
 ### Sources
@@ -29,7 +30,8 @@ TODO
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[Large Language Model]: large%20language%20model.md
+[Large Language Model]: llm.md
+[Model Context Protocol]: mcp.md
 
 <!-- Files -->
 <!-- Upstream -->

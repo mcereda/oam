@@ -127,7 +127,7 @@
 <!-- Knowledge base -->
 [Docker]: ../docker.md
 [Docker  Running LLMs locally]: ../docker.md#running-llms-locally
-[Large Language Model]: large%20language%20model.md
+[Large Language Model]: llm.md
 [Ollama]: ollama.md
 
 <!-- Files -->

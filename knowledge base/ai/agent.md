@@ -124,7 +124,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 <!-- Knowledge base -->
 [Claude Code]: claude/claude%20code.md
 [Gemini CLI]: gemini/cli.md
-[Large Language Model]: large%20language%20model.md
+[Large Language Model]: llm.md
 [OpenCode]: opencode.md
 
 <!-- Others -->
