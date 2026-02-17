@@ -521,26 +521,28 @@ they **will** need to (either-or):
 
 When restoring from PITR or snapshots, the new instance will pass through the `creating` and
 `configuring-enhanced-monitoring` states.<br/>
-As of 2026-02-16, a `db.m8g.xlarge` instance takes about 14m to create, then about 2 more minutes to configure
-monitoring.
+As of 2026-02-16, a `db.m8g.xlarge` instance takes about 14m to create from PITR and about 6 minutes to create from
+snapshot, then about 2 more minutes to configure monitoring.
 
 > [!warning]
 > If the original DB instance has automatic backups enabled (or had at the time of the snapshot), the new DB instance
 > **will** have automatic backups enabled too, and **will** start to backup itself **right after creation** (hence
 > adding the `backing-up` state to the list of state changes).
->
-> The backing-up part can be super slow. Depending on the instance size, it could take more than 30m for an instance
-> with 100 GB of storage.<br/>
->
+
+The backing-up part can be super slow, also depending on the instance size.<br/>
+It could take more than 30m for an instance with 100 GB of storage.
+
+> [!important]
 > There is currently **no** way to prevent an instance from creating the backup upon restore.<br/>
 > That process is triggered automatically, and the feature can only be toggled on and off for _existing_ instances.<br/>
 > Refer [Disabling AWS RDS backups when creating/updating instances?].
->
-> The `BackupRetentionPeriod` attribute is part of both instances and snapshot definitions, but can only be configured
-> for instances.<br/>
-> To create instances from snapshots with this attribute set to `0`, and thus have **no** backup automatically taken,
-> the source snapshot _must_ have this flag **already** set to `0`. This can only happen if the original instance was
-> configured that way when the snapshot was taken in the first place.
+
+The `BackupRetentionPeriod` attribute is part of both instances and snapshot definitions, but can **only** be configured
+for instances.
+
+To create instances from snapshots with this attribute set to `0`, and thus have them **not** taking an initial backup
+right after creation, the snapshot itself must have this flag **already** set to `0`.<br/>
+This can only happen if one configured the original instance was configured, and **then** took the snapshot.
 
 ### Point-in-Time
 
