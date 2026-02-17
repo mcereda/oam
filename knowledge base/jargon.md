@@ -5,10 +5,10 @@
 | Acronym | Expansion                                              | Summary                                                                                             |
 | ------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
 | ACK     | ACKnowledgement                                        |                                                                                                     |
-| ACL     | [Access Control List][acl]                             |                                                                                                     |
+| ACL     | [Access Control List]                                  |                                                                                                     |
 | ACME    | [Automatic Certificate Management Environment]         | Protocol to automate the issuance and renewal of certificates without human interaction             |
 | AD      | Active Directory                                       |                                                                                                     |
-| ADR     | [Architectural Decision Record][adr]                   |                                                                                                     |
+| ADR     | [Architectural Decision Record]                        |                                                                                                     |
 | API     | Application Programming Interface                      | A way for two or more computer programs or components to communicate with each other                |
 | APK     | Alpine Package Keeper                                  | Package manager used by Alpine Linux                                                                |
 | APT     | Advanced Package Tool                                  | Package manager used by Debian Linux                                                                |
@@ -32,7 +32,7 @@
 | CMS     | Content Management System                              |                                                                                                     |
 | CN      | Canonical Name                                         | In Active Directory, the full path of an object in a canonical format                               |
 | CN      | Common Name                                            | In Active Directory, the last element in an object's Distinguished Name (DN) hierarchy              |
-| CNI     | [Container Network Interface][cni]                     |                                                                                                     |
+| CNI     | [Container Network Interface]                          |                                                                                                     |
 | COTS    | Commercial Off-The-Shelf                               | Available _as-is_, not optimized for specific scopes or objectives                                  |
 | CSMA    | Carrier-Sense Multiple Access                          |                                                                                                     |
 | CSMA/CD | Carrier-Sense Multiple Access with Collision Detection |                                                                                                     |
@@ -92,6 +92,7 @@
 | LIFO    | Last In First Out                                      |                                                                                                     |
 | LLM     | [Large Language Model]                                 |                                                                                                     |
 | M2COTS  | Mass Market COTS                                       | Widely available COTS products                                                                      |
+| MCP     | [Model Context Protocol]                               |                                                                                                     |
 | MR      | Merge Request                                          | Prevalently used in GitLab                                                                          |
 | NACL    | Network ACL                                            |                                                                                                     |
 | NIST    | National Institute of Science and Technology           |                                                                                                     |
@@ -172,18 +173,19 @@
   -->
 
 <!-- Knowledge base -->
-[acl]: acl.md
-[adr]: adr.md
+[Access Control List]: acl.md
+[Architectural Decision Record]: adr.md
 [bash]: bash.md
-[cni]: cni.md
+[Container Network Interface]: cni.md
 [data warehouse]: data%20warehouse.md
 [depin]: depin.md
 [fhs]: filesystem%20hierarchy%20standard.md
 [fish]: fish.md
 [iac]: iac.md
 [kubernetes]: kubernetes/README.md
-[Large Language Model]: ai/large%20language%20model.md
+[Large Language Model]: ai/llm.md
 [lora]: lora.md
+[Model Context Protocol]: ai/mcp.md
 [siem]: siem.md
 [snowflake]: snowflake/README.md
 [ssh]: ssh.md

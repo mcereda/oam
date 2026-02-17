@@ -9,6 +9,8 @@ Works in a terminal, IDE, browser, and as a desktop app.
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
+1. [Grant access to tools](#grant-access-to-tools)
+1. [Using skills](#using-skills)
 1. [Run on local models](#run-on-local-models)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -25,7 +27,7 @@ When multiple scopes are active, the **more** specific ones take precedence.
 | Scope                   | Location                             | Area of effect                     | Shared                                    |
 | ----------------------- | ------------------------------------ | ---------------------------------- | ----------------------------------------- |
 | Managed (A.K.A. System) | System-level `managed-settings.json` | All users on the host              | Yes (usually deployed by IT)              |
-| User                    | `~/.claude/` directory               | Single user, across all projects   | No                                        |
+| User                    | `$HOME/.claude/` directory           | Single user, across all projects   | No                                        |
 | Project                 | `.claude/` directory in a repository | All collaborators, repository only | Yes (usually committed to the repository) |
 | Local                   | `.claude/*.local.*` files            | Single user, repository only       | No (usually gitignored)                   |
 
@@ -58,8 +60,24 @@ claude -c
 # Resume a previous conversation
 claude -r
 
-# Add MCPs
-claude mcp add --transport 'sse' 'linear-server' 'https://mcp.linear.app/sse'
+# Add MCP servers.
+# Defaults to the 'local' scope if not specified.
+claude mcp add --transport 'http' 'linear' 'https://mcp.linear.app/mcp' --scope 'user'
+
+# List configured MCP servers.
+claude mcp list
+
+# Show MCP servers' details
+claude mcp get 'github'
+
+# Remove MCP servers.
+claude mcp remove 'github'
+```
+
+From within Claude Code:
+
+```plaintext
+/mcp
 ```
 
 </details>
@@ -74,6 +92,126 @@ ANTHROPIC_AUTH_TOKEN='ollama' ANTHROPIC_BASE_URL='http://localhost:11434' ANTHRO
 ```
 
 </details>
+
+## Grant access to tools
+
+Add MCP servers to give Claude Code access to tools, databases, and APIs in general.
+
+> [!caution]
+> MCPs are **not** verified, nor otherwise checked for security issues.<br/>
+> Be especially careful when using MCP servers that cat fetch untrusted content, as they can fall victim of prompt
+> injections.
+
+Procedure:
+
+1. Add the desired MCP server.
+
+   <details style='padding: 0 0 1rem 1rem'>
+     <summary>Examples</summary>
+
+   ```sh
+   claude mcp add --transport 'http' 'linear' 'https://mcp.linear.app/mcp' --scope 'user'
+   ```
+
+1. From within Claude Code, run the `/mcp` command to configure it.
+
+<details>
+  <summary>AWS API MCP server</summary>
+
+Refer [AWS API MCP Server].
+
+Enables AI assistants to interact with AWS services and resources through AWS CLI commands.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Run as Docker container</summary>
+
+Manually add the MCP server definition to `$HOME/.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "aws-api": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "--interactive",
+        "--env",
+        "AWS_REGION=eu-west-1",
+        "--env",
+        "AWS_API_MCP_TELEMETRY=false",
+        "--env",
+        "REQUIRE_MUTATION_CONSENT=true",
+        "--env",
+        "READ_OPERATIONS_ONLY=true",
+        "--volume",
+        "/Users/yourUserHere/.aws:/app/.aws",
+        "public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest"
+      ]
+    }
+  }
+}
+```
+
+  </details>
+
+</details>
+
+<details>
+  <summary>AWS Cost Explorer MCP server</summary>
+
+Refer [Cost Explorer MCP Server].
+
+Enables AI assistants to analyze AWS costs and usage data through the AWS Cost Explorer API.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Run as Docker container</summary>
+
+FIXME: many of those environment variable are probably unnecessary here.
+
+Manually add the MCP server definition to `$HOME/.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "aws-cost-explorer": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "--interactive",
+        "--env",
+        "AWS_REGION=eu-west-1",
+        "--env",
+        "AWS_API_MCP_TELEMETRY=false",
+        "--env",
+        "REQUIRE_MUTATION_CONSENT=true",
+        "--env",
+        "READ_OPERATIONS_ONLY=true",
+        "--volume",
+        "/Users/yourUserHere/.aws:/app/.aws",
+        "public.ecr.aws/awslabs-mcp/awslabs/cost-explorer-mcp-server:latest"
+      ]
+    }
+  }
+}
+```
+
+  </details>
+
+</details>
+
+## Using skills
+
+Claude Code automatically discovers skills from:
+
+- The user's `$HOME/.claude/skills/` directory, and sets them up as user-level skills.
+- The project's `.claude/skills/` folder, and sets them up as project-level skills.
+
+User-level skills are available in all projects.<br/>
+Project-level skills are limited to the current project.
+
+Claude Code activates relevant skills automatically based on the request context.
 
 ## Run on local models
 
@@ -154,4 +292,6 @@ Claude Code version: `v2.1.41`.<br/>
 [Website]: https://claude.com/product/overview
 
 <!-- Others -->
+[AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
+[Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
 [pffigueiredo/claude-code-sheet.md]: https://gist.github.com/pffigueiredo/252bac8c731f7e8a2fc268c8a965a963
