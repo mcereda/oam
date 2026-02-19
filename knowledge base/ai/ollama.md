@@ -126,6 +126,7 @@ ollama ls
 
 # Show models information.
 ollama show 'codellama:13b'
+ollama show --verbose 'llama3.2'
 
 # Run models interactively.
 ollama run 'gemma3'

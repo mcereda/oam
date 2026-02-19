@@ -115,6 +115,10 @@ yq -e '(.backend.url|test("^file://")?)|not' 'Pulumi.yaml'
 # Apply formatting to the same file you read from
 yq -iY --explicit-start '.' 'external-snapshotter/crds.yml'
 
+# Get the digest of the biggest element, then replace ':' with '-'
+jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
+	"$HOME/.ollama/models/manifests/registry.ollama.ai/library/codellama/13b"
+
 # Sort
 # Refer <https://stackoverflow.com/questions/30331504/how-to-sort-a-json-file-by-keys-and-values-of-those-keys-in-jq>
 # by key
