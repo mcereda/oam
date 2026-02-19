@@ -65,6 +65,11 @@ aws ecs execute-command --cluster 'staging' --task '0123456789abcdefghijklmnopqr
 aws ecs list-tasks --cluster 'staging' --service-name 'prometheus' --query 'taskArns' --output 'text' \
 | xargs -I '%%' aws ecs execute-command --cluster 'staging' --task '%%' --container 'prometheus' \
 	--interactive --command 'nc -vz 127.0.0.1 9090'
+# Get a shell in a task given a cluster, a service, and a container name.
+# Use `-o` in xargs to reopen stdin as `/dev/tty` in the child process because `execute-command` is interactive.
+aws ecs list-tasks --cluster 'testCluster' --service-name 'testService' --query 'taskArns' --output 'text' \
+	| xargs -I '%%' -o aws ecs execute-command --cluster 'testCluster' --task '%%' --container 'testContainer' \
+	--interactive --command 'bash'
 
 # Stop tasks given a service name
 aws ecs list-tasks --cluster 'staging' --service-name 'mimir' --query 'taskArns' --output 'text' \

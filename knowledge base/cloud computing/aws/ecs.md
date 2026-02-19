@@ -44,6 +44,7 @@
 1. [Pricing](#pricing)
     1. [Cost-saving measures](#cost-saving-measures)
 1. [Troubleshooting](#troubleshooting)
+    1. [Cannot perform start session: EOF](#cannot-perform-start-session-eof)
     1. [Invalid 'cpu' setting for task](#invalid-cpu-setting-for-task)
     1. [Tasks in a service using a Load Balancer are being stopped even if healthy](#tasks-in-a-service-using-a-load-balancer-are-being-stopped-even-if-healthy)
 1. [Further readings](#further-readings)
@@ -166,6 +167,12 @@ while [[ $(aws ecs list-tasks --query 'taskArns' --output 'text' --cluster 'test
 # To mimic a blue-green deployment, scale the service up by doubling its tasks, then down again to the normal amount.
 aws ecs update-service --cluster 'someCluster' --service 'someService' --desired-count '0' --no-cli-pager \
 && aws ecs update-service --cluster 'someCluster' --service 'someService' --desired-count '1' --no-cli-pager
+
+# Get a shell in a task given a cluster, a service, and a container name.
+# Use `-o` in xargs to reopen stdin as `/dev/tty` in the child process because `execute-command` is interactive.
+aws ecs list-tasks --cluster 'testCluster' --service-name 'testService' --query 'taskArns' --output 'text' \
+  | xargs -I '%%' -o aws ecs execute-command --cluster 'testCluster' --task '%%' --container 'testService' \
+  --interactive --command 'bash'
 ```
 
 </details>
@@ -1630,13 +1637,14 @@ Procedure:
 
    </details>
 
-1. Execute the command.
+1. Execute the `aws ecs execute-command` command.<br/>
+   Refer the [command's reference][aws ecs execute-command reference] for its options.
 
    <details style='padding: 0 0 1rem 1rem'>
      <summary>Example</summary>
 
    ```sh
-   aws ecs execute-command --interactive --command 'df -h' \
+   aws ecs execute-command --non-interactive --command 'df -h' \
      --cluster 'devel' --task 'ef6260ed8aab49cf926667ab0c52c313' --container 'nginx'
    ```
 
@@ -1659,13 +1667,23 @@ Procedure:
 
    </details>
 
-Should one's command invoke a shell, one will gain interactive access to the container.<br/>
-In this case, **all commands and their outputs** inside the shell session **will** be logged to S3 and/or CloudWatch.
+Invoking a shell will grant **_interactive_** access to the container.<br/>
+In this case, **all commands and their outputs** inside the shell session **will be logged** to S3 and/or CloudWatch.
 The shell invocation command and the user that invoked it will be logged in CloudTrail for auditing purposes as part of
 the ECS ExecuteCommand API call.
 
-Should one's command invoke a single command, **only the output** of the command will be logged to S3 and/or CloudWatch.
-The command itself will still be logged in CloudTrail as part of the ECS ExecuteCommand API call.
+> [!important]
+> Interactive commands require the `aws ecs execute-command` to be invoked with the `--interactive` option **and** with
+> a TTY available (e.g. from an interactive shell or via `xargs -o`).<br/>
+> Not doing so will cause the command to execute, but then exit with the `Cannot perform start session: EOF` error.
+
+Should one's command invoke a non-interactive executable, **only the output** of the command will be logged to S3
+and/or CloudWatch.<br/>
+The command itself **will be logged** in CloudTrail as part of the ECS ExecuteCommand API call.
+
+> [!note]
+> Interactive mode is currently the only supported mode.<br/>
+> Invoking `aws ecs execute-command` with the `--non-interactive` option will fail.
 
 Logging options are configured at the ECS cluster level.<br/>
 The task's role **will** need to have IAM permissions to log the output to S3 and/or CloudWatch should the cluster be
@@ -2179,6 +2197,51 @@ Total: ~$0.08 per hour, ~$1.75 per day, ~$54.14 per 31d-month, ~$639.14 per 366d
 
 ## Troubleshooting
 
+### Cannot perform start session: EOF
+
+<details>
+  <summary>Context</summary>
+
+A task and its related resources have been configured to [execute commands in tasks' containers].<br/>
+When issuing the `aws ecs execute-command`, the command executes successfully, but then the session exits with the
+following error:
+
+> Cannot perform start session: EOF
+
+Shell sessions start and end immediately with the same error.
+
+</details>
+
+<details>
+  <summary>Cause</summary>
+
+The SSM session is started interactively, but **no** TTY is available to it.
+
+</details>
+
+<details>
+  <summary>Solution</summary>
+
+Make sure the SSM session has a TTY available.
+
+If using `xargs` to issue the command, remember to use the `-o` switch to to reopen stdin as `/dev/tty` in the child
+process:
+
+```sh
+aws ecs list-tasks --cluster 'testCluster' --service-name 'testService' --query 'taskArns' --output 'text' \
+  | xargs -I '%%' -o aws ecs execute-command --cluster 'testCluster' --task '%%' --container 'testService' \
+  --interactive --command 'bash'
+```
+
+If this happens using the direct command, try using `unbuffer` (packaged with the [`expect`][expect] utility).<br/>
+Refer [aws start-session end with **Cannot perform start session: EOF**].
+
+```sh
+unbuffer aws ecs execute-command …
+```
+
+</details>
+
 ### Invalid 'cpu' setting for task
 
 Refer [Troubleshoot Amazon ECS task definition invalid CPU or memory errors] and [Resource constraints].
@@ -2299,6 +2362,7 @@ ECS will eventually stop the Task, then launch a replacement to maintain the des
 - [Amazon Amazon ECS launch types and capacity providers]
 - [Effectively Using Spot Instances in AWS ECS for Production Workloads]
 - [Avoiding Common Pitfalls with ECS Capacity Providers and Auto Scaling]
+- [aws start-session end with **Cannot perform start session: EOF**]
 
 <!--
   Reference
@@ -2314,6 +2378,7 @@ ECS will eventually stop the Task, then launch a replacement to maintain the des
 [docker volumes]: #docker-volumes
 [ebs volumes]: #ebs-volumes
 [efs volumes]: #efs-volumes
+[execute commands in tasks' containers]: #execute-commands-in-tasks-containers
 [Inject Secrets Manager secrets as environment variables]: #inject-secrets-manager-secrets-as-environment-variables
 [Launch type]: #launch-type
 [Make a sidecar container write secrets to shared volumes]: #make-a-sidecar-container-write-secrets-to-shared-volumes
@@ -2328,6 +2393,7 @@ ECS will eventually stop the Task, then launch a replacement to maintain the des
 [cli]: cli.md
 [ebs]: ebs.md
 [efs]: efs.md
+[expect]: ../../expect.md
 
 <!-- Upstream -->
 [Amazon Amazon ECS launch types and capacity providers]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-launch-type-comparison.html
@@ -2346,6 +2412,7 @@ ECS will eventually stop the Task, then launch a replacement to maintain the des
 [Announcing AWS Graviton2 Support for AWS Fargate]: https://aws.amazon.com/blogs/aws/announcing-aws-graviton2-support-for-aws-fargate-get-up-to-40-better-price-performance-for-your-serverless-containers/
 [Automatically scale your Amazon ECS service]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
 [AWS Distro for OpenTelemetry]: https://aws-otel.github.io/
+[aws ecs execute-command reference]: https://docs.aws.amazon.com/cli/latest/reference/ecs/execute-command.html
 [AWS Fargate Pricing]: https://aws.amazon.com/fargate/pricing/
 [AWS Fargate Spot Now Generally Available]: https://aws.amazon.com/blogs/aws/aws-fargate-spot-now-generally-available/
 [Centralized Container Logging with Fluent Bit]: https://aws.amazon.com/blogs/opensource/centralized-container-logging-fluent-bit/
@@ -2389,6 +2456,7 @@ ECS will eventually stop the Task, then launch a replacement to maintain the des
 [attach ebs volume to aws ecs fargate]: https://medium.com/@shujaatsscripts/attach-ebs-volume-to-aws-ecs-fargate-e23fea7bb1a7
 [Avoiding Common Pitfalls with ECS Capacity Providers and Auto Scaling]: https://medium.com/@bounouh.fedi/avoiding-common-pitfalls-with-ecs-capacity-providers-and-auto-scaling-24899ab6fc25
 [AWS Fargate Pricing Explained]: https://www.vantage.sh/blog/fargate-pricing
+[aws start-session end with **Cannot perform start session: EOF**]: https://stackoverflow.com/questions/66066753/aws-start-session-end-with-cannot-perform-start-session-eof
 [aws-cloudmap-prometheus-sd]: https://github.com/awslabs/aws-cloudmap-prometheus-sd
 [Effective Logging Strategies with Amazon ECS and Fluentd]: https://reintech.io/blog/effective-logging-strategies-amazon-ecs-fluent
 [exposing multiple ports for an aws ecs service]: https://medium.com/@faisalsuhail1/exposing-multiple-ports-for-an-aws-ecs-service-64b9821c09e8
