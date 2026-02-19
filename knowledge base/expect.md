@@ -2,10 +2,7 @@
 
 > TODO
 
-Intro
-
-<!-- Remove this line to uncomment if used
-## Table of contents <!-- omit in toc -->
+Tool for automating and testing interactive applications.
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -13,15 +10,15 @@ Intro
 
 ## TL;DR
 
-<!-- Uncomment if used
 <details>
   <summary>Setup</summary>
 
 ```sh
+apt install 'expect'
+brew install 'expect'
 ```
 
 </details>
--->
 
 <!-- Uncomment if used
 <details>
@@ -63,6 +60,6 @@ Intro
 <!-- Upstream -->
 [codebase]: https://github.com/project/
 [documentation]: https://website/docs/
-[website]: https://website/
+[website]: https://core.tcl-lang.org/expect/
 
 <!-- Others -->
