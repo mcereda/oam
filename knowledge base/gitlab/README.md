@@ -76,6 +76,8 @@ curl -fsSL -H 'PRIVATE-TOKEN: glpat-something' 'https://gitlab.fqdn/api/v4/users
 GitLab uses [GitLab Flavored Markdown (GLFM)] to render Markdown files in its web UI.<br/>
 Since v17.10, one can use [Alerts][glfm alerts] to highlight or call attention to something in GitHub-like fashion.
 
+Users need to be added to groups at least as _Guests_ to be able to see those groups' wikis.
+
 ## Setup
 
 ### Package
