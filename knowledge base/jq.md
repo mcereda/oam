@@ -97,6 +97,9 @@ jq '.rules=([inputs.rules]|flatten)' 'starting-rule-set.json' 'parts'/*'.json'
 
 # Put specific keys on top.
 jq '.objects = [(.objects[] as $in | {type,name,id} + $in)]' 'prod/dataPipeline_deviceLocationConversion_prod.json'
+
+# Sort descending by property `age`, take the first 3 elements.
+jq -r 'sort_by(.age)|reverse|[limit(3;.[])]' 'file.json'
 ```
 
 </details>
@@ -139,6 +142,10 @@ helm template 'chartName' \
 
 # Check that the 'backend.url key' in a 'Pulumi.yaml' file is not 'file://' and fail otherwise.
 yq -e '(.backend.url|test("^file://")?)|not' 'Pulumi.yaml'
+
+# Get the digest of the biggest element, then replace ':' with '-'
+jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
+  "$HOME/.ollama/models/manifests/registry.ollama.ai/library/codellama/13b"
 ```
 
 </details>
@@ -162,6 +169,7 @@ yq -e '(.backend.url|test("^file://")?)|not' 'Pulumi.yaml'
 - [Remove all null values]
 - [jq: select where .attribute in list]
 - [An Introduction to JQ]
+- [How to sort a json file by keys and values of those keys in jq]
 
 <!--
   Reference
@@ -178,6 +186,7 @@ yq -e '(.backend.url|test("^file://")?)|not' 'Pulumi.yaml'
 [change multiple values at once]: https://stackoverflow.com/questions/47355901/jq-change-multiple-values#47357956
 [deleting multiple keys at once with jq]: https://stackoverflow.com/questions/36227245/deleting-multiple-keys-at-once-with-jq
 [filter objects list with regex]: https://til.hashrocket.com/posts/uv0bjiokwk-use-jq-to-filter-objects-list-with-regex
+[How to sort a json file by keys and values of those keys in jq]: https://stackoverflow.com/questions/30331504/how-to-sort-a-json-file-by-keys-and-values-of-those-keys-in-jq
 [jq select range]: https://stackoverflow.com/questions/45548604/jq-select-range
 [jq: select where .attribute in list]: https://stackoverflow.com/questions/50750688/jq-select-where-attribute-in-list
 [remove all null values]: https://stackoverflow.com/questions/39500608/remove-all-null-values
