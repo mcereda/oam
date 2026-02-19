@@ -203,15 +203,57 @@ Manually add the MCP server definition to `$HOME/.claude.json`:
 
 ## Using skills
 
+Refer [Skills][documentation/skills].
+
+See also [create custom skills].
+
+Skills superseded commands.<br/>
+Existing `.claude/commands/` files will currently still work, but skills with the same name will take precedence.
+
 Claude Code automatically discovers skills from:
 
 - The user's `$HOME/.claude/skills/` directory, and sets them up as user-level skills.
-- The project's `.claude/skills/` folder, and sets them up as project-level skills.
+- A project's `.claude/skills/` folder, and sets them up as project-level skills.
+- A plugin's `<plugin>/skills/` folder, if such plugin is enabled.
+
+Whatever the scope, skills must follow the `<scope-dir>/<skill-name>/SKILL.md` tree format, e.g.
+`$HOME/.claude/skills/aws-action/SKILL.md` for a user-level skill.
 
 User-level skills are available in all projects.<br/>
 Project-level skills are limited to the current project.
 
 Claude Code activates relevant skills automatically based on the request context.
+
+When working with files in subdirectories, Claude Code automatically discovers skills from nested `.claude/skills/`
+directories.
+
+When skills share the same name across different scopes, the **more** specific scope wins (enterprise > personal >
+project > subdirectory).<br/>
+Plugin skills use a `plugin-name:skill-name` namespace, so they cannot conflict with other levels.<br/>
+Files in `.claude/commands/` work the same way, but the skill will take precedence if a skill and a command share the
+same name.
+
+Each skill is a directory, with the `SKILL.md` file as the entrypoint:
+
+```plaintext
+some-skill/
+├── SKILL.md           # Main instructions (required)
+├── template.md        # Template for Claude to fill in
+├── examples/
+│   └── sample.md      # Example output, showing its expected format
+└── scripts/           # Scripts that Claude can execute
+    └── validate.sh
+```
+
+The `SKILL.md` files contains a description of the skill and the main, essentials instructions that teach Claude how to
+use it.<br/>
+This file is required. All other files are optional and are considered _supporting_ files.<br/>
+Optional files allow to specify more details and materials, like Large reference docs, API specifications, or example
+collections that do not need to be loaded into context every time the skill runs.<br/>
+Reference optional files in `SKILL.md` to instruct Claude of what they contain and when to load them.
+
+> [!tip]
+> Prefer keeping `SKILL.md` under 500 lines. Move detailed reference material to supporting files.
 
 ## Run on local models
 
@@ -280,6 +322,7 @@ Claude Code version: `v2.1.41`.<br/>
 <!-- Knowledge base -->
 [AI agent]: ../agent.md
 [Claude Code router]: claude%20code%20router.md
+[Create custom skills]: create%20custom%20skills.md
 [Gemini CLI]: ../gemini/cli.md
 [Ollama]: ../ollama.md
 [OpenCode]: ../opencode.md
@@ -289,6 +332,7 @@ Claude Code version: `v2.1.41`.<br/>
 [Blog]: https://claude.com/blog
 [Codebase]: https://github.com/anthropics/claude-code
 [Documentation]: https://code.claude.com/docs/en/overview
+[Documentation/Skills]: https://code.claude.com/docs/en/skills
 [Website]: https://claude.com/product/overview
 
 <!-- Others -->

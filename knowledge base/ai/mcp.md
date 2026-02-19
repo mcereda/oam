@@ -55,6 +55,11 @@ MCP servers of interest:
 | [AWS API][aws api mcp server]                     | Interact with all available AWS services and resources |
 | [AWS Cost Explorer][aws cost explorer mcp server] | Analyze AWS costs and usage data                       |
 
+> [!caution]
+> Verify MCP servers and the tools they offer before using them.<br/>
+> Using MCP servers without verifying tools and descriptions could lead to vulnerability to tool- and prompt- poisoning,
+> shadowing, or injection.
+
 ## Further readings
 
 - [Website]

@@ -12,9 +12,11 @@ They have superseded recurrent neural network-based models.
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
-1. [Reasoning](#reasoning)
 1. [Inference](#inference)
    1. [Speculative decoding](#speculative-decoding)
+1. [Reasoning](#reasoning)
+1. [Prompting](#prompting)
+1. [Function calling](#function-calling)
 1. [Concerns](#concerns)
 1. [Run LLMs Locally](#run-llms-locally)
 1. [Further readings](#further-readings)
@@ -32,6 +34,12 @@ They have superseded recurrent neural network-based models.
 | [Grok]    | X          |
 | [Llama]   | Meta       |
 | [Mistral] | Mistral AI |
+
+LLms are good at understanding human prompts in natural language.
+
+Many models now come pre-trained, and one can use the same model for classification, summarisation, answering questions,
+data extraction, generation, reasoning, planning, translation, coding, and more.<br/>
+They can be also be further trained on additional information specific to an industry niche or a particular business.
 
 <!-- Uncomment if used
 <details>
@@ -62,24 +70,6 @@ They have superseded recurrent neural network-based models.
 
 </details>
 -->
-
-## Reasoning
-
-Standard is just autocompletion. Models just try to infer or recall what the most probable next word would be.
-
-Chain of Thought tells models to _show their work_. It _feels_ like the model is calculating or thinking.<br/>
-What it really does is just increasing the chances that the answer is correct by breaking the user's questions in
-smaller, more manageable steps, and solving on each of them before giving back the final answer.<br/>
-The result is more accurate, but it costs more tokens and requires a bigger context window.
-
-At some point we gave models the ability to execute commands. This way the model can use (or even create) them to get
-or check the answer, instead of just infer or recall it.
-
-The ReAct loop (reason+act) came next, where the model loops on the things above. Breaks the request in smaller steps,
-acts on them using functions if necessary, checks the results, updates the chain of thoughts, repeat until the request
-is satisfied.
-
-Next step is [agentic AI][agent].
 
 ## Inference
 
@@ -132,6 +122,52 @@ The draft model must have:
 Usually, a distilled or simplified version of the target model works best.<br/>
 For domain-specific applications, consider fine-tuning a small model to mimic the target model's behavior.
 
+## Reasoning
+
+Standard models' behaviour is just autocompletion. Models just try to infer or recall what the most probable next word
+would be.
+
+_Chain of Thought_ techniques tell models to _show their work_.
+It _feels_ like a model is calculating or thinking, but what it is really just increasing the chances that the answer
+is correct by breaking questions in smaller, more manageable steps, and solving on each of them before giving back the
+final answer.<br/>
+The result is more accurate, but it costs more tokens and requires a bigger context window.
+
+The _ReAct loop_ (reason+act) forces models to loop over chain of thoughts.<br/>
+A model breaks the request in smaller steps, acts on those using [functions][function calling] if they deem it useful,
+checks the results, updates the chain of thoughts, and repeat until the request is satisfied.
+
+Next step is [agentic AI][agent].
+
+## Prompting
+
+_Good_ prompting is about designing predictable interactions with a model.<br/>
+In the context of LLM agent development, it is no different from interface design.
+
+## Function calling
+
+Refer [Function calling in LLMs].
+
+A.K.A _tool-calling_.<br/>
+Allows models to reliably connect and interact with external tools or APIs.
+
+One provides the LLM with a set of tools, and the model _decides_ during interaction which tool it wants to invoke for
+a specific prompt and/or to complete a given task.<br/>
+Models supporting function calling can use (or even create) tools to get or check an answer, instead of just infer or
+recall it.
+
+Function calling grants models real-time data access and information retrieval.<br/>
+This eliminates the fundamental problem of them giving responses based on stale training data, and reduces
+hallucination episodes that come from them not accepting they don't know something.
+
+Using tools increases the overall token count and hence costs, also reducing available context and adding latency.<br/>
+Deciding which tool to call, using that tool, and then using the results to generate a response is more intensive than
+just inferring the next token.
+
+> [!caution]
+> Allowing a LLM to call functions can have real-world consequences.<br/>
+> This includes financial loss, data corruption or exfiltration, and security breaches.
+
 ## Concerns
 
 - Lots of people currently thinks of LLMs as _real intelligence_, when it is not.
@@ -145,6 +181,7 @@ For domain-specific applications, consider fine-tuning a small model to mimic th
   what those are or how they work. This is causing lack of critical thinking and overreliance.
 - Model training and execution requires resources that are normally not available to the common person. This encourages
   people to depend from, and hence give power to, AI companies.
+- Models tend to **not** accept gracefully that they don't know something, and hallucinate as a result.
 
 ## Run LLMs Locally
 
@@ -164,6 +201,8 @@ Refer:
 - [Run LLMs Locally: 6 Simple Methods]
 - [OpenClaw: Who are you?]
 - [Local LLM Hosting: Complete 2026 Guide - Ollama, vLLM, LocalAI, Jan, LM Studio & More]
+- [LLM skills every AI engineer must know]
+- [Function calling in LLMs]
 
 <!--
   Reference
@@ -171,6 +210,8 @@ Refer:
   -->
 
 <!-- In-article sections -->
+[Function calling]: #function-calling
+
 <!-- Knowledge base -->
 [Agent]: agent.md
 [Claude]: claude/README.md
@@ -190,10 +231,12 @@ Refer:
 [Copilot]: https://copilot.microsoft.com/
 [Duck AI]: https://duck.ai/
 [Fast Inference from Transformers via Speculative Decoding]: https://arxiv.org/abs/2211.17192
+[Function calling in LLMs]: https://www.geeksforgeeks.org/artificial-intelligence/function-calling-in-llms/
 [Grok]: https://grok.com/
 [Jan]: https://www.jan.ai/
 [Llama]: https://www.llama.com/
 [Llamafile]: https://github.com/mozilla-ai/llamafile
+[LLM skills every AI engineer must know]: https://fiodar.substack.com/p/llm-skills-every-ai-engineer-must-know
 [Local LLM Hosting: Complete 2026 Guide - Ollama, vLLM, LocalAI, Jan, LM Studio & More]: https://www.glukhov.org/post/2025/11/hosting-llms-ollama-localai-jan-lmstudio-vllm-comparison/
 [Looking back at speculative decoding]: https://research.google/blog/looking-back-at-speculative-decoding/
 [Mistral]: https://mistral.ai/
