@@ -205,7 +205,7 @@ Manually add the MCP server definition to `$HOME/.claude.json`:
 
 Refer [Skills][documentation/skills].
 
-See also [create custom skills].
+See also [create custom skills] and [Prat011/awesome-llm-skills].
 
 Skills superseded commands.<br/>
 Existing `.claude/commands/` files will currently still work, but skills with the same name will take precedence.
@@ -307,6 +307,7 @@ Claude Code version: `v2.1.41`.<br/>
 - [Claude Code router]
 - [Gemini CLI]
 - [OpenCode]
+- [Prat011/awesome-llm-skills]
 
 ### Sources
 
@@ -339,3 +340,4 @@ Claude Code version: `v2.1.41`.<br/>
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
 [Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
 [pffigueiredo/claude-code-sheet.md]: https://gist.github.com/pffigueiredo/252bac8c731f7e8a2fc268c8a965a963
+[Prat011/awesome-llm-skills]: https://github.com/Prat011/awesome-llm-skills
