@@ -1,17 +1,12 @@
-# Large language model
+# Language models
 
-_Language models_ are computational model that can predict sequences in natural language.<br/>
-Useful for speech recognition, machine translation, natural language generation, optical character recognition, route
-optimization, handwriting recognition, grammar induction, information retrieval, and other tasks.
-
-_Large_ language models are predominantly based on transformers trained on large datasets, frequently including texts
-scraped from the Internet.<br/>
-They have superseded recurrent neural network-based models.
-
-<!-- Remove this line to uncomment if used
-## Table of contents <!-- omit in toc -->
+_Language models_ are **statistical** models designed to understand, generate, and predict sequences of words in natural
+language.<br/>
+They analyze the structure and use of language to perform tasks such as machine translation, text generation, and
+sentiment analysis.
 
 1. [TL;DR](#tldr)
+1. [Large Language Models](#large-language-models)
 1. [Inference](#inference)
    1. [Speculative decoding](#speculative-decoding)
 1. [Reasoning](#reasoning)
@@ -70,6 +65,18 @@ They can be also be further trained on additional information specific to an ind
 
 </details>
 -->
+
+## Large Language Models
+
+_Large_ language models are language models trained on massive datasets, frequently including texts scraped from the
+Internet.
+
+They are currently predominantly based on _transformers_, which have superseded recurrent neural networks as the most
+effective technology.
+
+LLMs are especially proficient in speech recognition, machine translation, natural language generation, optical
+character recognition, route optimization, handwriting recognition, grammar induction, information retrieval, and other
+tasks.
 
 ## Inference
 
@@ -216,6 +223,7 @@ Refer:
 - [LLM skills every AI engineer must know]
 - [Function calling in LLMs]
 - [What is chain of thought (CoT) prompting?]
+- [What are Language Models in NLP?]
 
 <!--
   Reference
@@ -258,4 +266,5 @@ Refer:
 [Run LLMs Locally: 6 Simple Methods]: https://www.datacamp.com/tutorial/run-llms-locally-tutorial
 [SEQUOIA: Serving exact Llama2-70B on an RTX4090 with half-second per token latency]: https://infini-ai-lab.github.io/Sequoia-Page/
 [Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training]: https://arxiv.org/abs/2401.05566
+[What are Language Models in NLP?]: https://www.geeksforgeeks.org/nlp/what-are-language-models-in-nlp/
 [What is chain of thought (CoT) prompting?]: https://www.ibm.com/think/topics/chain-of-thoughts

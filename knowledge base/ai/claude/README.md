@@ -47,7 +47,7 @@ AI platform built by Anthropic.
 
 - [Website]
 - [Blog]
-- [Large Language Model]
+- [Large Language Models]
 - [Gemini]
 
 ### Sources
@@ -62,7 +62,7 @@ AI platform built by Anthropic.
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [Gemini]: ../gemini/README.md
-[Large Language Model]: ../llm.md
+[Large Language Models]: ../lms.md#large-language-models
 
 <!-- Files -->
 <!-- Upstream -->

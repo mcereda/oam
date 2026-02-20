@@ -183,7 +183,7 @@
 [fish]: fish.md
 [iac]: iac.md
 [kubernetes]: kubernetes/README.md
-[Large Language Model]: ai/llm.md
+[Large Language Model]: ai/lms.md#large-language-models
 [lora]: lora.md
 [Model Context Protocol]: ai/mcp.md
 [siem]: siem.md

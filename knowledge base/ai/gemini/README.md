@@ -47,7 +47,7 @@ Intro
 
 - [Website]
 - [Codebase]
-- [Large Language Model]
+- [Large Language Models]
 - [Claude]
 - [CLI]
 
@@ -64,7 +64,7 @@ Intro
 <!-- Knowledge base -->
 [Claude]: ../claude/README.md
 [CLI]: cli.md
-[Large Language Model]: ../llm.md
+[Large Language Models]: ../lms.md#large-language-models
 
 <!-- Files -->
 <!-- Upstream -->

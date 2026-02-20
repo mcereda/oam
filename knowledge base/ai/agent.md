@@ -20,7 +20,7 @@ These functions include making decision, problem-solving, interacting with exter
 actions.
 
 Agents design their own workflow and utilize the tools that are made available to them.<br/>
-They use [LLMs][large language model] to comprehend user inputs, deconstruct and respond to requests step-by-step,
+They use [LLMs][large language models] to comprehend user inputs, deconstruct and respond to requests step-by-step,
 determine when to call on external tools to obtain up-to-date information, optimize workflows, and autonomously create
 subtasks to achieve complex goals.
 
@@ -146,7 +146,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 <!-- Knowledge base -->
 [Claude Code]: claude/claude%20code.md
 [Gemini CLI]: gemini/cli.md
-[Large Language Model]: llm.md
+[Large Language Models]: lms.md#large-language-models
 [OpenCode]: opencode.md
 
 <!-- Others -->

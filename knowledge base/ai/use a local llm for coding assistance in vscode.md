@@ -61,7 +61,7 @@
 
 1. Install Docker Desktop
 1. Enable Model Runner with TCP support and download the models you mean to use.<br/>
-   Refer [Running LLMs locally][docker  running llms locally].
+   Refer [Running LLMs locally][docker / running llms locally].
 
    <details style='padding: 0 0 1rem 1rem'>
 
@@ -108,7 +108,7 @@
 
 ## Further readings
 
-- [Large Language Model] (LLM)
+- [Large Language Models]
 - [Ollama]
 - [Docker]
 - [Continue VSCode extension]
@@ -126,8 +126,8 @@
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [Docker]: ../docker.md
-[Docker  Running LLMs locally]: ../docker.md#running-llms-locally
-[Large Language Model]: llm.md
+[Docker / Running LLMs locally]: ../docker.md#running-llms-locally
+[Large Language Models]: lms.md#large-language-models
 [Ollama]: ollama.md
 
 <!-- Files -->
