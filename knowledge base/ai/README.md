@@ -15,8 +15,8 @@ speech recognition, decision-making and language translation.
 ## Further readings
 
 - [Machine learning]
-- [Large Language Model] (LLM)
-- [Model Context Protocol] (MCP)
+- [Large Language Models]
+- [Model Context Protocol]
 - [Useful AI]: tools, courses, and more, curated and reviewed by experts.
 - geeksforgeeks.com's [Artificial Intelligence Tutorial][geeksforgeeks/artificial intelligence tutorial]
 
@@ -29,7 +29,7 @@ speech recognition, decision-making and language translation.
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[Large Language Model]: llm.md
+[Large Language Models]: lms.md#large-language-models
 [Machine learning]: ml.md
 [Model Context Protocol]: mcp.md
 
