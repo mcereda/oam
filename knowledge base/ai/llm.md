@@ -187,7 +187,11 @@ just inferring the next token.
   what those are or how they work. This is causing lack of critical thinking and overreliance.
 - Model training and execution requires resources that are normally not available to the common person. This encourages
   people to depend from, and hence give power to, AI companies.
-- Models tend to **not** accept gracefully that they don't know something, and hallucinate as a result.
+- Models tend to **not** accept gracefully that they don't know something, and hallucinate as a result.<br/>
+  More recent techniques are making models more efficient, but they just delay this problem.
+- Models can learn and exhibit deceptive behavior.<br/>
+  Standard techniques could fail to remove it, and instead empower it while creating a false impression of safety.<br/>
+  See [Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training].
 
 ## Run LLMs Locally
 
@@ -202,6 +206,7 @@ Refer:
 
 - [SEQUOIA: Serving exact Llama2-70B on an RTX4090 with half-second per token latency]
 - [Optimizing LLMs for Performance and Accuracy with Post-Training Quantization]
+- [Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training]
 
 ### Sources
 
@@ -252,4 +257,5 @@ Refer:
 [Optimizing LLMs for Performance and Accuracy with Post-Training Quantization]: https://developer.nvidia.com/blog/optimizing-llms-for-performance-and-accuracy-with-post-training-quantization/
 [Run LLMs Locally: 6 Simple Methods]: https://www.datacamp.com/tutorial/run-llms-locally-tutorial
 [SEQUOIA: Serving exact Llama2-70B on an RTX4090 with half-second per token latency]: https://infini-ai-lab.github.io/Sequoia-Page/
+[Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training]: https://arxiv.org/abs/2401.05566
 [What is chain of thought (CoT) prompting?]: https://www.ibm.com/think/topics/chain-of-thoughts

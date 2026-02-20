@@ -36,6 +36,10 @@ uv tool list
 uv tool run 'vllm'
 uvx 'vllm'          # alias for `uv tool run`
 
+# Create virtual environments.
+uv venv '.venv'
+uv venv '.venv' --allow-existing --python 'python3.12' --seed
+
 # Clear the cache.
 uv cache clean
 ```
