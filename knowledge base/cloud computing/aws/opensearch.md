@@ -165,7 +165,7 @@ POST _cold/migration/my-index/_cancel
 
 ## Index state management plugin
 
-Refer [OpenSearch's Index State Management plugin][opensearch  index state management] and
+Refer [OpenSearch's Index State Management plugin][opensearch / index state management] and
 [Index State Management in Amazon OpenSearch Service].
 
 Compared to [OpenSearch] and [ElasticSearch], ISM for Amazon's managed OpenSearch service has several differences:
@@ -206,7 +206,7 @@ Compared to [OpenSearch] and [ElasticSearch], ISM for Amazon's managed OpenSearc
 
 ## Snapshots
 
-Refer [Snapshots][opensearch  snapshots] and [Creating index snapshots in Amazon OpenSearch Service].
+Refer [Snapshots][opensearch / snapshots] and [Creating index snapshots in Amazon OpenSearch Service].
 
 AWS-managed OpenSearch Service snapshots come in the following forms:
 
@@ -446,8 +446,8 @@ can manage.
 [Hot-warm architecture]: ../../opensearch.md#hot-warm-architecture
 [ElasticSearch]: ../../elasticsearch.md
 [OpenSearch]: ../../opensearch.md
-[OpenSearch  index state management]: ../../opensearch.md#index-state-management-plugin
-[OpenSearch  snapshots]: ../../opensearch.md#snapshots
+[OpenSearch / index state management]: ../../opensearch.md#index-state-management-plugin
+[OpenSearch / snapshots]: ../../opensearch.md#snapshots
 [S3]: s3.md
 
 <!-- Files -->

@@ -273,7 +273,7 @@ spec:
         - name: rabbitmq-client
           image: tsuyoshiushio/rabbitmq-client:dev3
           imagePullPolicy: Always
-          command: ["receive",  "amqp://user:PASSWORD@rabbitmq.default.svc.cluster.local:5672", "job"]
+          command: ["receive", "amqp://user:PASSWORD@rabbitmq.default.svc.cluster.local:5672", "job"]
           envFrom:
             - secretRef:
                 name: rabbitmq-consumer

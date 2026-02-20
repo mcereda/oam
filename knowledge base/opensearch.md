@@ -447,7 +447,7 @@ lower storage states after they meet specific conditions.
 
 ## Index templates
 
-Refer [Index templates][documentation  index templates].
+Refer [Index templates][documentation / index templates].
 
 Index templates allow to initialize new indices with predefined mappings and settings.
 
@@ -905,7 +905,7 @@ They require data to be indexed before creation.
 
 Requires the cluster to use the [hot-warm architecture].
 
-Refer [Index State Management][documentation  index state management].
+Refer [Index State Management][documentation / index state management].
 
 ## Snapshots
 
@@ -1385,7 +1385,7 @@ DELETE _snapshot/repository-name/snapshot-name
 - [Stepping up for a truly open source Elasticsearch]
 - [Managing indices]
 - [Reindex data]
-- [Index templates][documentation  index templates]
+- [Index templates][documentation / index templates]
 - [OpenSearch Data Streams]
 - [OpenSearch Indices and Data streams]
 - [Snapshot Operations in OpenSearch]
@@ -1411,12 +1411,12 @@ DELETE _snapshot/repository-name/snapshot-name
 
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/opensearch-project
+[Codebase]: https://github.com/opensearch-project
 [creating a cluster]: https://opensearch.org/docs/latest/tuning-your-cluster/
 [data prepper]: https://opensearch.org/docs/latest/data-prepper/
-[Documentation  Index State Management]: https://docs.opensearch.org/docs/latest/im-plugin/ism/index/
-[documentation  index templates]: https://opensearch.org/docs/latest/im-plugin/index-templates/
-[documentation]: https://opensearch.org/docs/latest/
+[Documentation / Index State Management]: https://docs.opensearch.org/docs/latest/im-plugin/ism/index/
+[Documentation / index templates]: https://opensearch.org/docs/latest/im-plugin/index-templates/
+[Documentation]: https://opensearch.org/docs/latest/
 [index management]: https://opensearch.org/docs/latest/dashboards/im-dashboards/index-management/
 [index settings]: https://opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index-settings/
 [managing indices]: https://opensearch.org/docs/latest/im-plugin/

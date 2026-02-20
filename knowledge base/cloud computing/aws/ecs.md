@@ -425,7 +425,7 @@ deployments.
 
 ## Capacity providers
 
-Refer [Capacity providers][upstream  capacity providers].
+Refer [Capacity providers][documentation / capacity providers].
 
 Clusters can contain a mix of tasks that are hosted on Fargate, Amazon EC2 instances, or external instances.<br/>
 Tasks can run on Fargate or EC2 infrastructure, as defined by their [launch type] or a capacity provider strategy.<br/>
@@ -2416,6 +2416,7 @@ ECS will eventually stop the Task, then launch a replacement to maintain the des
 [AWS Fargate Pricing]: https://aws.amazon.com/fargate/pricing/
 [AWS Fargate Spot Now Generally Available]: https://aws.amazon.com/blogs/aws/aws-fargate-spot-now-generally-available/
 [Centralized Container Logging with Fluent Bit]: https://aws.amazon.com/blogs/opensource/centralized-container-logging-fluent-bit/
+[Documentation / capacity providers]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/clusters.html#capacity-providers
 [ecs execute-command proposal]: https://github.com/aws/containers-roadmap/issues/1050
 [Effectively Using Spot Instances in AWS ECS for Production Workloads]: https://medium.com/@ankur.ecb/effectively-using-spot-instances-in-aws-ecs-for-production-workloads-d46985d0ae2d
 [EventBridge Scheduler]: https://docs.aws.amazon.com/scheduler/latest/UserGuide/what-is-scheduler.html
@@ -2437,7 +2438,6 @@ ECS will eventually stop the Task, then launch a replacement to maintain the des
 [troubleshoot amazon ecs deployment issues]: https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ecs.html
 [troubleshoot amazon ecs task definition invalid cpu or memory errors]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 [Under the hood: FireLens for Amazon ECS Tasks]: https://aws.amazon.com/blogs/containers/under-the-hood-firelens-for-amazon-ecs-tasks/
-[upstream  capacity providers]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/clusters.html#capacity-providers
 [use amazon ebs volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html
 [use amazon efs volumes with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html
 [use bind mounts with amazon ecs]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/bind-mounts.html
