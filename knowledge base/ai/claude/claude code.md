@@ -203,9 +203,13 @@ Manually add the MCP server definition to `$HOME/.claude.json`:
 
 ## Using skills
 
-Refer [Skills][documentation/skills].
+Refer [Skills][documentation/skills].<br/>
+See also:
 
-See also [create custom skills] and [Prat011/awesome-llm-skills].
+- [Create custom skills].
+- [Prat011/awesome-llm-skills].
+
+Claude Skills follow and extend the [Agent Skills] standard format.
 
 Skills superseded commands.<br/>
 Existing `.claude/commands/` files will currently still work, but skills with the same name will take precedence.
@@ -308,6 +312,7 @@ Claude Code version: `v2.1.41`.<br/>
 - [Gemini CLI]
 - [OpenCode]
 - [Prat011/awesome-llm-skills]
+- [Claude Skills vs. MCP: A Technical Comparison for AI Workflows]
 
 ### Sources
 
@@ -337,7 +342,9 @@ Claude Code version: `v2.1.41`.<br/>
 [Website]: https://claude.com/product/overview
 
 <!-- Others -->
+[Agent Skills]: https://agentskills.io/
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
+[Claude Skills vs. MCP: A Technical Comparison for AI Workflows]: https://intuitionlabs.ai/articles/claude-skills-vs-mcp
 [Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
 [pffigueiredo/claude-code-sheet.md]: https://gist.github.com/pffigueiredo/252bac8c731f7e8a2fc268c8a965a963
 [Prat011/awesome-llm-skills]: https://github.com/Prat011/awesome-llm-skills

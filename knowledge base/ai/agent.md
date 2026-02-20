@@ -1,12 +1,10 @@
 # AI agent
 
-> [!caution]
-> TODO
-
-AI-enabled system or application capable of autonomously performing tasks of various complexity levels on their own,
-possibly **without** the need to stop to ask permission or consent to the user.
+AI-enabled system or application capable of _autonomously_ performing tasks of various complexity levels by designing
+workflows and using the tools made available to them.
 
 1. [TL;DR](#tldr)
+1. [Skills](#skills)
 1. [Concerns](#concerns)
    1. [How much context is too much?](#how-much-context-is-too-much)
    1. [Security](#security)
@@ -17,10 +15,14 @@ possibly **without** the need to stop to ask permission or consent to the user.
 
 ## TL;DR
 
-Agents design their workflow and utilize the tools that are made available to them.<br/>
-They use natural language processing techniques of [LLMs][large language model] to comprehend user inputs, respond to
-them step-by-step, and determine when to call on external tools to obtain up-to-date information, optimize workflows
-and create subtasks autonomously to achieve complex goals.
+AI agents can encompass a wide range of functions beyond natural language processing.<br/>
+These functions include making decision, problem-solving, interacting with external environments, and performing
+actions.
+
+Agents design their own workflow and utilize the tools that are made available to them.<br/>
+They use [LLMs][large language model] to comprehend user inputs, deconstruct and respond to requests step-by-step,
+determine when to call on external tools to obtain up-to-date information, optimize workflows, and autonomously create
+subtasks to achieve complex goals.
 
 Traditional software is _deterministic_, AI is _probabilistic_.
 
@@ -43,6 +45,13 @@ Enabling reasoning for the model _could™_ sometimes help avoiding attacks, sin
 them during the run.
 
 Prefer **requiring** consent by agents when running them.
+
+## Skills
+
+Skills extend AI agent capabilities with specialized knowledge and workflow definitions.
+
+[Agent Skills] is an open standard for skills. It defines them as folders of instructions, scripts, and resources that
+agents can discover and use to do things more accurately and efficiently.
 
 ## Concerns
 
@@ -143,6 +152,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 <!-- Others -->
 [39C3 - Agentic ProbLLMs: Exploiting AI Computer-Use and Coding Agents]: https://www.youtube.com/watch?v=8pbz5y7_WkM
 [39C3 - AI Agent, AI Spy]: https://www.youtube.com/watch?v=0ANECpNdt-4
+[Agent Skills]: https://agentskills.io/
 [Agentic ProbLLMs - The Month of AI Bugs]: https://monthofaibugs.com/
 [AI Doesn't Reduce Work — It Intensifies It]: https://hbr.org/2026/02/ai-doesnt-reduce-work-it-intensifies-it
 [An AI Agent Published a Hit Piece on Me]: https://theshamblog.com/an-ai-agent-published-a-hit-piece-on-me/
