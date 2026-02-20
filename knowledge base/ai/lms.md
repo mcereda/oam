@@ -1,9 +1,7 @@
 # Language models
 
-_Language models_ are **statistical** models designed to understand, generate, and predict sequences of words in natural
-language.<br/>
-They analyze the structure and use of language to perform tasks such as machine translation, text generation, and
-sentiment analysis.
+Statistical or machine learning models designed to understand, generate, and predict the next token in a sequence given
+the previous ones.
 
 1. [TL;DR](#tldr)
 1. [Large Language Models](#large-language-models)
@@ -19,7 +17,34 @@ sentiment analysis.
 
 ## TL;DR
 
-| FIXME     | Creator    |
+_Tokens_ can be words, subwords (one or more subsets of a word), or single characters.<br/>
+The full sequence of tokens can be an entire sentence, paragraph, or an entire essay.
+
+LMs are proficient at understanding human prompts in natural language.<br/>
+They analyze the structure and use of natural language, enabling machines to process and generate text that is
+contextually appropriate and coherent.
+
+Their primary purpose is to capture the **statistical** properties of natural language in mathematical notation.<br/>
+They can predict the **likelihood** that a given token will follow a sequence of other tokens by learning the
+probability distribution of patterns.<br/>
+This predictive capability is fundamental for tasks that require understanding the context and meaning of text, and it
+can be extended to more complex tasks.
+
+_Context_ is helpful information before or after a target token.<br/>
+It can help a language model make better predictions, like determining whether "orange" refers to a citrus fruit or a
+color.
+
+_Large_ LMs are language models trained on massive datasets, and encoding their acquired knowledge into up to trillions
+of parameters.
+
+_Parameters_ are internal weights and values that an LLM learns during training.<br/>
+They are used to capture patterns in language such as grammar, meaning, context and relationships between words.
+
+The more parameters a model has, the better it typically is to understand and generate complex output.<br/>
+An increased parameter count, on the other hand, demands more computational resources for training and inference, and
+make models more prone to overfitting, slower to respond, and harder to deploy efficiently.
+
+| Provider  | Creator    |
 | --------- | ---------- |
 | [ChatGPT] | OpenAI     |
 | [Claude]  | Anthropic  |
@@ -30,10 +55,9 @@ sentiment analysis.
 | [Llama]   | Meta       |
 | [Mistral] | Mistral AI |
 
-LLms are good at understanding human prompts in natural language.
-
-Many models now come pre-trained, and one can use the same model for classification, summarisation, answering questions,
-data extraction, generation, reasoning, planning, translation, coding, and more.<br/>
+Many models now come pre-trained, and one can use the same model for different language-related purposes like
+classification, summarisation, answering questions, data extraction, text generation, reasoning, planning, translation,
+coding, sentiment analysis, speech recognition, and more.<br/>
 They can be also be further trained on additional information specific to an industry niche or a particular business.
 
 <!-- Uncomment if used
@@ -71,12 +95,17 @@ They can be also be further trained on additional information specific to an ind
 _Large_ language models are language models trained on massive datasets, frequently including texts scraped from the
 Internet.
 
+LLMs have the ability to perform a wide range of tasks with minimal fine-tuning, and are especially proficient in speech
+recognition, machine translation, natural language generation, optical character recognition, route optimization,
+handwriting recognition, grammar induction, information retrieval, and other tasks.
+
 They are currently predominantly based on _transformers_, which have superseded recurrent neural networks as the most
 effective technology.
 
-LLMs are especially proficient in speech recognition, machine translation, natural language generation, optical
-character recognition, route optimization, handwriting recognition, grammar induction, information retrieval, and other
-tasks.
+Training LLMs involves feeding them vast amounts of data, and computing weights to optimize their parameters.<br/>
+The training process typically includes multiple stages, and requires substantial computational resources.<br/>
+Stages often use unsupervised pre-training followed by supervised fine-tuning on specific tasks. The models' size and
+complexity can make them difficult to interpret and control, leading to potential ethical and bias issues.
 
 ## Inference
 
@@ -183,6 +212,7 @@ just inferring the next token.
 
 ## Concerns
 
+- Training requires massive amounts of resource and hence consumes a vast amount of energy and cooling.
 - Lots of people currently thinks of LLMs as _real intelligence_, when it is not.
 - People currently gives too much credibility to LLM answers, and trust them more than they trust their teachers,
   accountants, lawyers or even doctors.
@@ -190,8 +220,8 @@ just inferring the next token.
   rewrite history in the mind of those who trust the LLMs.
 - Models can be vulnerable to specific attacks (e.g. prompt injection) that would change the LLM's behaviour, bias it,
   or hide malware in their tools.
-- People is using LLMs mindlessly too much, mostly due to the convenience they offer but also because they don't understand
-  what those are or how they work. This is causing lack of critical thinking and overreliance.
+- People is using LLMs mindlessly too much, mostly due to the convenience they offer but also because they don't
+  understand what those are or how they work. This is causing lack of critical thinking and overreliance.
 - Model training and execution requires resources that are normally not available to the common person. This encourages
   people to depend from, and hence give power to, AI companies.
 - Models tend to **not** accept gracefully that they don't know something, and hallucinate as a result.<br/>
@@ -224,6 +254,9 @@ Refer:
 - [Function calling in LLMs]
 - [What is chain of thought (CoT) prompting?]
 - [What are Language Models in NLP?]
+- [Introduction to Large Language Models]
+- GeeksForGeeks' [What are LLM parameters?][geeksforgeeks / what are llm parameters?]
+- IBM's [What are LLM parameters?][ibm / what are llm parameters?]
 
 <!--
   Reference
@@ -253,7 +286,10 @@ Refer:
 [Duck AI]: https://duck.ai/
 [Fast Inference from Transformers via Speculative Decoding]: https://arxiv.org/abs/2211.17192
 [Function calling in LLMs]: https://www.geeksforgeeks.org/artificial-intelligence/function-calling-in-llms/
+[GeeksForGeeks / What are LLM parameters?]: https://www.geeksforgeeks.org/artificial-intelligence/what-are-llm-parameters/
 [Grok]: https://grok.com/
+[IBM / What are LLM parameters?]: https://www.ibm.com/think/topics/llm-parameters
+[Introduction to Large Language Models]: https://developers.google.com/machine-learning/crash-course/llm
 [Jan]: https://www.jan.ai/
 [Llama]: https://www.llama.com/
 [Llamafile]: https://github.com/mozilla-ai/llamafile
