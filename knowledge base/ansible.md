@@ -208,9 +208,9 @@ ansible-playbook 'playbook.yaml' -DCvvv \
 
 Galaxy collections and roles worth a check:
 
-| ID                                             | Type       | Description           |
-| ---------------------------------------------- | ---------- | --------------------- |
-| [sivel.toiletwater][galaxy  sivel.toiletwater] | collection | Extra filters, mostly |
+| ID                                              | Type       | Description           |
+| ----------------------------------------------- | ---------- | --------------------- |
+| [sivel.toiletwater][galaxy / sivel.toiletwater] | collection | Extra filters, mostly |
 
 UIs:
 
@@ -523,7 +523,7 @@ All Jinja2's standard filters and tests can be used, with the addition of:
 
 All templating happens **on the Ansible controller**, **before** the task is sent and executed on the target machine.
 
-Updated [examples][examples  templating] are available.
+Updated [examples][examples / templating] are available.
 
 ```yaml
 # Remove empty or false values from a list piping it to 'select()'.
@@ -1774,7 +1774,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 - [Ansible Navigator documentation]
 - [Ansible Runner]
 - [Using variables]
-- [Galaxy Community User Guide][galaxy  community user guide]
+- [Galaxy Community User Guide][galaxy / community user guide]
 
 ### Sources
 
@@ -1845,7 +1845,7 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 
 <!-- Files -->
 [examples]: ../examples/ansible/
-[examples  templating]: ../examples/ansible/templating.yml
+[examples / templating]: ../examples/ansible/templating.yml
 
 <!-- Upstream -->
 [8 ways to speed up your Ansible playbooks]: https://www.redhat.com/sysadmin/faster-ansible-playbook-execution
@@ -1864,8 +1864,8 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [defining variables at runtime]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html#defining-variables-at-runtime
 [developing and testing ansible roles with molecule and podman - part 1]: https://www.ansible.com/blog/developing-and-testing-ansible-roles-with-molecule-and-podman-part-1/
 [Execution environment definition]: https://ansible.readthedocs.io/projects/builder/en/stable/definition/
-[Galaxy  Community User Guide]: https://docs.ansible.com/projects/galaxy-ng/en/latest/community/userguide.html
-[Galaxy  sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
+[Galaxy / Community User Guide]: https://docs.ansible.com/projects/galaxy-ng/en/latest/community/userguide.html
+[Galaxy / sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
 [Galaxy]: https://galaxy.ansible.com/
 [Getting started with Execution Environments]: https://docs.ansible.com/ansible/latest/getting_started_ee/index.html
 [Introduction to Ansible Builder]: https://www.ansible.com/blog/introduction-to-ansible-builder/

@@ -305,7 +305,7 @@ To solve this, use a different network mode and **explicitly publish** the ports
 
   Docker Desktop runs the Engine in a virtual machine, not natively; hence, ports are exposed on the VM and not of the
   host running Docker Desktop.<br/>
-  Refer [I cannot ping my containers][docker docs  i cannot ping my containers].
+  Refer [I cannot ping my containers][documentation / i cannot ping my containers].
 
   One can go around this limitation by:
 
@@ -676,7 +676,7 @@ Alternatively, keep the exec form but force invoking a shell in it:
 
 ## Further readings
 
-- [GitHub]
+- [Codebase]
 - [Podman]
 - [Dive]
 - [Testcontainers]
@@ -721,12 +721,12 @@ Alternatively, keep the exec form but force invoking a shell in it:
 
 <!-- Upstream -->
 [building multi-arch images for arm and x86 with docker desktop]: https://www.docker.com/blog/multi-arch-images/
+[Codebase]: https://github.com/docker
 [docker compose]: https://github.com/docker/compose
-[docker docs  I cannot ping my containers]: https://docs.docker.com/desktop/features/networking/#i-cannot-ping-my-containers
 [Docker Model Runner]: https://docs.docker.com/ai/model-runner/
 [dockerfile reference]: https://docs.docker.com/reference/dockerfile/
+[Documentation / I cannot ping my containers]: https://docs.docker.com/desktop/features/networking/#i-cannot-ping-my-containers
 [Exec form ENTRYPOINT example]: https://docs.docker.com/reference/dockerfile/#exec-form-entrypoint-example
-[github]: https://github.com/docker
 [Multi-stage builds]: https://docs.docker.com/build/building/multi-stage/
 [Run LLMs Locally with Docker: A Quickstart Guide to Model Runner]: https://www.docker.com/blog/run-llms-locally/
 

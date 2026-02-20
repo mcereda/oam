@@ -97,7 +97,7 @@ Configure one or more machines in that network to act as [subnet routers].
 
 ## Subnet routers
 
-Refer [Subnet routers][tailscale  subnet routers].
+Refer [Subnet routers][documentation / subnet routers].
 
 Subnet routers allow extending tailnets to include devices that don't or can't run the Tailscale client.<br/>
 They act as gateways between the tailnet and physical subnets, enabling access and relaying traffic to and from devices,
@@ -195,7 +195,7 @@ Subnet routers need to be configured to allow IP forwarding as follows:
 
 ## Exit nodes
 
-Refer [Exit nodes][tailscale  exit nodes].
+Refer [Exit nodes][documentation / exit nodes].
 
 Needed to route _outbound_ public Internet traffic.
 
@@ -280,8 +280,8 @@ setting up conditional forwarding on one's private DNS service, and only using t
 ### Sources
 
 - [Documentation]
-- [Subnet routers][tailscale  subnet routers]
-- [Exit nodes][tailscale  exit nodes]
+- [Subnet routers][documentation / subnet routers]
+- [Exit nodes][documentation / exit nodes]
 
 <!--
   Reference
@@ -299,11 +299,11 @@ setting up conditional forwarding on one's private DNS service, and only using t
 <!-- Files -->
 <!-- Upstream -->
 [Codebase]: https://github.com/tailscale/tailscale
+[Documentation / exit nodes]: https://tailscale.com/kb/1103/exit-nodes
+[Documentation / subnet routers]: https://tailscale.com/kb/1019/subnets
 [Documentation]: https://tailscale.com/kb
 [Mullvad exit nodes]: https://tailscale.com/kb/1258/mullvad-exit-nodes
 [Set up a subnet router]: https://tailscale.com/kb/1019/subnets#set-up-a-subnet-router
-[tailscale  exit nodes]: https://tailscale.com/kb/1103/exit-nodes
-[tailscale  subnet routers]: https://tailscale.com/kb/1019/subnets
 [Website]: https://tailscale.com/
 
 <!-- Others -->

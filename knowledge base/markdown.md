@@ -152,7 +152,7 @@ They are extensions that the most famous flavours introduced or adopted, each wi
 <details>
   <summary>GitHub formatting</summary>
 
-Refer [GitHub's alert formatting][github formatting  alerts].
+Refer [GitHub's alert formatting][github formatting / alerts].
 
 ```md
 > [!NOTE]
@@ -201,7 +201,7 @@ Refer [GitHub's alert formatting][github formatting  alerts].
 <details>
   <summary>GitLab formatting</summary>
 
-Refer [GitLab Flavored Markdown][gitlab flavored markdown  alerts].
+Refer [GitLab Flavored Markdown][gitlab flavored markdown / alerts].
 
 ```md
 > [!note]
@@ -290,7 +290,7 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 - Official [documentation]
 - [Extended syntax]
 - [Linguist supported language syntax list]
-- [Github's alert formatting][github formatting  alerts]
+- [Github's alert formatting][github formatting / alerts]
 - [Live editor]
 - [Mermaid.js]
 - [MyST] extension for technical, scientific communication and publication
@@ -326,8 +326,8 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 [bierner.markdown-mermaid]: https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid
 [escaping backtick in markdown]: https://www.growingwiththeweb.com/2015/06/escaping-backtick-in-markdown.html
 [escaping backticks]: https://www.markdownguide.org/basic-syntax/#escaping-backticks
-[github formatting  alerts]: https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
-[GitLab Flavored Markdown  alerts]: https://docs.gitlab.com/user/markdown/#alerts
+[github formatting / alerts]: https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
+[GitLab Flavored Markdown / alerts]: https://docs.gitlab.com/user/markdown/#alerts
 [GitLab Flavored Markdown]: https://docs.gitlab.com/user/markdown/
 [linguist supported language syntax list]: https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
 [live editor]: https://mermaid.live/edit

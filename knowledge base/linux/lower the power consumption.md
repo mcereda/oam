@@ -93,8 +93,8 @@ sudo powertop --auto-tune
 
 - [PowerTOP]
 - [Laptop Mode Tools: Extend Your Laptop Battery Life]
-- [`laptop-mode-tools` article in the Arch Wiki][arch wiki  laptop-mode-tools]
-- [Power management article in the Arch Wiki][arch wiki  power management]
+- [`laptop-mode-tools` article in the Arch Wiki][arch wiki / laptop-mode-tools]
+- [Power management article in the Arch Wiki][arch wiki / power management]
 
 <!--
   Reference
@@ -110,6 +110,6 @@ sudo powertop --auto-tune
 [PowerTOP]: ../powertop.md
 
 <!-- Others -->
+[arch wiki / laptop-mode-tools]: https://wiki.archlinux.org/title/Laptop_Mode_Tools
+[arch wiki / power management]: https://wiki.archlinux.org/title/Power_management
 [Laptop Mode Tools: Extend Your Laptop Battery Life]: https://www.unixmen.com/laptop-mode-tools-extend-laptop-battery-life/
-[arch wiki  laptop-mode-tools]: https://wiki.archlinux.org/title/Laptop_Mode_Tools
-[arch wiki  power management]: https://wiki.archlinux.org/title/Power_management

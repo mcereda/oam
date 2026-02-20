@@ -1142,7 +1142,7 @@ If one can, prefer just build the image from an EC2 instance.
 
 ### Sources
 
-- [Constraints for tags][constraints  tag]
+- [Constraints for tags][constraints / tag]
 - [What is Amazon VPC?]
 - [Subnets for your VPC]
 - [What is AWS Config?]
@@ -1188,6 +1188,7 @@ If one can, prefer just build the image from an EC2 instance.
 [config]: #config
 [detective]: #detective
 [direct connect]: #direct-connect
+[ElastiCache]: #elasticache
 [ELB]: #load-balancing
 [enterprise discount program]: #enterprise-discount-program
 [eventbridge]: #eventbridge
@@ -1237,7 +1238,7 @@ If one can, prefer just build the image from an EC2 instance.
 [boto3 resources]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/resources.html
 [boto3 sessions]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/session.html
 [connect to the internet using an internet gateway]: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
-[constraints  tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
+[constraints / tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
 [creating organization policies with aws organizations]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_policies_create.html
 [elastic ip addresses]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html
 [enable or disable aws regions in your account]: https://docs.aws.amazon.com/accounts/latest/reference/manage-acct-regions.html
