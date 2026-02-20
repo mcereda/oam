@@ -133,11 +133,17 @@ is correct by breaking questions in smaller, more manageable steps, and solving 
 final answer.<br/>
 The result is more accurate, but it costs more tokens and requires a bigger context window.
 
-The _ReAct loop_ (reason+act) forces models to loop over chain of thoughts.<br/>
-A model breaks the request in smaller steps, acts on those using [functions][function calling] if they deem it useful,
-checks the results, updates the chain of thoughts, and repeat until the request is satisfied.
+The _ReAct loop_ (Reason + Act) paradigm forces models to loop over chain-of-thoughts.<br/>
+A model breaks the request in smaller steps, plans the next action, acts on it using [functions][function calling]
+should it decide it needs to, checks the results, updates the chain of thoughts, and repeats this Think-Act-Observe loop
+to iteratively improve upon responses.
 
-Next step is [agentic AI][agent].
+The _ReWOO_ (Reasoning WithOut Observation) method eliminates the dependence on tool outputs for action planning.<br/>
+Models plan upfront, and avoid redundant usage of tools by anticipating which tools to use upon receiving the initial
+prompt from the user.<br/>
+Users can confirm the plan **before** the model executes it.
+
+[AI agents][agent] use these methods to act autonomously.
 
 ## Prompting
 
@@ -195,6 +201,7 @@ Refer:
 ## Further readings
 
 - [SEQUOIA: Serving exact Llama2-70B on an RTX4090 with half-second per token latency]
+- [Optimizing LLMs for Performance and Accuracy with Post-Training Quantization]
 
 ### Sources
 
@@ -203,6 +210,7 @@ Refer:
 - [Local LLM Hosting: Complete 2026 Guide - Ollama, vLLM, LocalAI, Jan, LM Studio & More]
 - [LLM skills every AI engineer must know]
 - [Function calling in LLMs]
+- [What is chain of thought (CoT) prompting?]
 
 <!--
   Reference
@@ -241,5 +249,7 @@ Refer:
 [Looking back at speculative decoding]: https://research.google/blog/looking-back-at-speculative-decoding/
 [Mistral]: https://mistral.ai/
 [OpenClaw: Who are you?]: https://www.youtube.com/watch?v=hoeEclqW8Gs
+[Optimizing LLMs for Performance and Accuracy with Post-Training Quantization]: https://developer.nvidia.com/blog/optimizing-llms-for-performance-and-accuracy-with-post-training-quantization/
 [Run LLMs Locally: 6 Simple Methods]: https://www.datacamp.com/tutorial/run-llms-locally-tutorial
 [SEQUOIA: Serving exact Llama2-70B on an RTX4090 with half-second per token latency]: https://infini-ai-lab.github.io/Sequoia-Page/
+[What is chain of thought (CoT) prompting?]: https://www.ibm.com/think/topics/chain-of-thoughts

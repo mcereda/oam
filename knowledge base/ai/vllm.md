@@ -34,6 +34,7 @@ capabilities, and enterprise-scale LLM serving.
 ```sh
 pip install 'vllm'
 pipx install 'vllm'
+uv tool install 'vllm'  # 'vllm-metal' on apple silicon
 ```
 
 </details>

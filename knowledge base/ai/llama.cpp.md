@@ -41,7 +41,7 @@ llama-cli -m 'path/to/target/model.gguf' -md 'path/to/draft/model.gguf'
 # Download and run models.
 llama-cli -mu 'https://example.org/some/model'  # URL
 llama-cli -hf 'ggml-org/gemma-3-1b-it-GGUF' -c '32.768'  # Hugging Face
-llama-cli -dr 'ai/qwen2.5-coder' --offline  # Docker Hub
+llama-cli -dr 'ai/qwen2.5' --offline  # Docker Hub
 
 # Launch the OpenAI-compatible API server.
 llama-server -m 'path/to/model.gguf'
