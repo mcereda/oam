@@ -11,6 +11,8 @@ Works in a terminal, IDE, browser, and as a desktop app.
 1. [TL;DR](#tldr)
 1. [Grant access to tools](#grant-access-to-tools)
 1. [Using skills](#using-skills)
+1. [Limit tool execution](#limit-tool-execution)
+1. [Memory](#memory)
 1. [Run on local models](#run-on-local-models)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -259,6 +261,44 @@ Reference optional files in `SKILL.md` to instruct Claude of what they contain a
 > [!tip]
 > Prefer keeping `SKILL.md` under 500 lines. Move detailed reference material to supporting files.
 
+## Limit tool execution
+
+Leverage [Sandboxing][documentation/sandboxing] to provide filesystem and network isolation for tool execution.<br/>
+The sandboxed bash tool uses OS-level primitives to enforce defined boundaries upfront, and controls network access
+through a proxy server running outside the sandbox.<br/>
+Attempts to access resources outside the sandbox trigger immediate notifications.
+
+> [!warning]
+> Effective sandboxing requires **both** filesystem and network isolation.<br/>
+> Without network isolation, compromised agents could exfiltrate sensitive files like SSH keys.<br/>
+> Without filesystem isolation, compromised agents could backdoor system resources to gain network access.<br/>
+> When configuring sandboxing, it is important to ensure that configured settings do not bypass these systems.
+
+The sandboxed tool:
+
+- Grants _default_ read and write access to the current working directory and its subdirectories.
+- Grants _default_ read access to the entire computer, except specific denied directories.
+- Blocks modifying files outside the current working directory without **explicit** permission.
+- Allows defining custom allowed and denied paths through settings.
+- Allows accessing only approved domains.
+- Prompts the user when tools request access to new domains.
+- Allows implementing custom rules on **outgoing** traffic.
+- Applies restrictions to all scripts, programs, and subprocesses spawned by commands.
+
+On Mac OS X, Claude Code uses the built-in Seatbelt framework. On Linux and WSL2, it requires installing
+[containers/bubblewrap] before activation.
+
+Sandboxes _can_ be configured to execute commands within the sandbox **without** requiring approval.<br/>
+Commands that cannot be sandboxed fall back to the regular permission flow.
+
+Customize sandbox behavior through the `settings.json` file.
+
+## Memory
+
+TODO
+
+Refer [Manage Claude's memory][documentation/manage claude's memory].
+
 ## Run on local models
 
 Claude _can_ use other models and engines by setting the `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_BASE_URL` and
@@ -338,6 +378,8 @@ Claude Code version: `v2.1.41`.<br/>
 [Blog]: https://claude.com/blog
 [Codebase]: https://github.com/anthropics/claude-code
 [Documentation]: https://code.claude.com/docs/en/overview
+[Documentation/Manage Claude's memory]: https://code.claude.com/docs/en/memory
+[Documentation/Sandboxing]: https://code.claude.com/docs/en/sandboxing
 [Documentation/Skills]: https://code.claude.com/docs/en/skills
 [Website]: https://claude.com/product/overview
 
@@ -345,6 +387,7 @@ Claude Code version: `v2.1.41`.<br/>
 [Agent Skills]: https://agentskills.io/
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
 [Claude Skills vs. MCP: A Technical Comparison for AI Workflows]: https://intuitionlabs.ai/articles/claude-skills-vs-mcp
+[containers/bubblewrap]: https://github.com/containers/bubblewrap
 [Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
 [pffigueiredo/claude-code-sheet.md]: https://gist.github.com/pffigueiredo/252bac8c731f7e8a2fc268c8a965a963
 [Prat011/awesome-llm-skills]: https://github.com/Prat011/awesome-llm-skills

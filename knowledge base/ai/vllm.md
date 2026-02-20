@@ -31,10 +31,13 @@ capabilities, and enterprise-scale LLM serving.
 <details>
   <summary>Setup</summary>
 
+Prefer using [vllm-project/vllm-metal] on Apple silicon.<br/>
+Install with `curl -fsSL 'https://raw.githubusercontent.com/vllm-project/vllm-metal/main/install.sh' | bash`
+
 ```sh
 pip install 'vllm'
 pipx install 'vllm'
-uv tool install 'vllm'  # 'vllm-metal' on apple silicon
+uv tool install 'vllm'
 ```
 
 </details>
@@ -43,8 +46,35 @@ uv tool install 'vllm'  # 'vllm-metal' on apple silicon
   <summary>Usage</summary>
 
 ```sh
-vllm serve 'meta-llama/Llama-2-7b-hf' --port '8000' --gpu-memory-utilization '0.9'
-vllm serve 'meta-llama/Llama-2-70b-hf' --tensor-parallel-size '2' --port '8000'
+# Get help.
+vllm --help
+
+# Start the vLLM OpenAI Compatible API server.
+vllm serve 'meta-llama/Llama-2-7b-hf'
+vllm serve … --port '8000' --gpu-memory-utilization '0.9'
+vllm serve … --tensor-parallel-size '2' --uds '/tmp/vllm.sock'
+
+# Chat.
+vllm chat
+vllm chat --url 'http://vllm.example.org:8000/v1'
+vllm chat --quick "hi"
+
+# Generate text completion.
+vllm complete
+vllm complete --url 'http://vllm.example.org:8000/v1'
+vllm complete --quick "The future of AI is"
+
+# Bench vLLM.
+vllm bench latency --model '…' --input-len '32' --output-len '1' --enforce-eager --load-format 'dummy'
+vllm bench serve --host 'localhost' --port '8000' --model '…' \
+  --random-input-len '32' --random-output-len '4' --num-prompts '5'
+vllm bench throughput --model '…' --input-len '32' --output-len '1' --enforce-eager --load-format 'dummy'
+
+# Run prompts in batch and save results to files.
+vllm run-batch --input-file 'offline_inference/openai_batch/openai_example_batch.jsonl' --output-file 'results.jsonl' \
+  --model 'meta-llama/Meta-Llama-3-8B-Instruct'
+vllm run-batch --model 'meta-llama/Meta-Llama-3-8B-Instruct' -o 'results.jsonl' \
+  -i 'https://raw.githubusercontent.com/vllm-project/vllm/main/examples/offline_inference/openai_batch/openai_example_batch.jsonl'
 ```
 
 </details>
@@ -79,8 +109,9 @@ vllm serve 'meta-llama/Llama-2-70b-hf' --tensor-parallel-size '2' --port '8000'
 <!-- Files -->
 <!-- Upstream -->
 [Blog]: https://blog.vllm.ai/
-[Codebase]: https://github.com/vllm-project/vllm
+[Codebase]: https://github.com/vllm-project/
 [Documentation]: https://docs.vllm.ai/en/
+[vllm-project/vllm-metal]: https://github.com/vllm-project/vllm-metal
 [Website]: https://vllm.ai/
 
 <!-- Others -->
