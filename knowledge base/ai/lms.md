@@ -63,6 +63,9 @@ They can be also be further trained on additional information specific to an ind
 The capabilities of transformer-based LLMs depend from the amount and the quality of their training data.<br/>
 LLMs appear to be hitting a performance wall, and will probably need the rise of a different architecture.
 
+LLMs find it difficult, if not impossible, to distinguishing data from instructions.<br/>
+As such, every part of the data could be used for prompt injection.
+
 <!-- Uncomment if used
 <details>
   <summary>Setup</summary>
