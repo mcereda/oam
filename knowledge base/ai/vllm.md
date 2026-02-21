@@ -31,8 +31,8 @@ capabilities, and enterprise-scale LLM serving.
 <details>
   <summary>Setup</summary>
 
-Prefer using [vllm-project/vllm-metal] on Apple silicon.<br/>
-Install with `curl -fsSL 'https://raw.githubusercontent.com/vllm-project/vllm-metal/main/install.sh' | bash`
+> [!tip]
+> Prefer using [vLLM-metal] on Apple silicon.
 
 ```sh
 pip install 'vllm'
@@ -51,6 +51,7 @@ vllm --help
 
 # Start the vLLM OpenAI Compatible API server.
 vllm serve 'meta-llama/Llama-2-7b-hf'
+vllm serve '/path/to/local/model'
 vllm serve … --port '8000' --gpu-memory-utilization '0.9'
 vllm serve … --tensor-parallel-size '2' --uds '/tmp/vllm.sock'
 
@@ -79,15 +80,23 @@ vllm run-batch --model 'meta-llama/Meta-Llama-3-8B-Instruct' -o 'results.jsonl' 
 
 </details>
 
-<!-- Uncomment if used
 <details>
   <summary>Real world use cases</summary>
 
 ```sh
+# Use models pulled with Ollama.
+# vLLM expects a Hugging Face model directory structure containing `config.json`, `tokenizer.json`, and other files, but
+# Ollama stores models as a single blob files in GGUF format.
+# vllm-metal (via MLX) cannot directly load a raw GGUF blob.
+# FIXME: not working.
+jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
+  "$HOME/.ollama/models/manifests/registry.ollama.ai/library/codellama/13b" \
+| xargs -pI '%%' \
+    vllm serve "$HOME/.ollama/models/blobs/%%" --served-model-name 'codellama-13b' \
+      --generation-config 'vllm' --tokenizer 'codellama/CodeLlama-13b-Instruct-hf' --load-format 'gguf'
 ```
 
 </details>
--->
 
 ## Further readings
 
@@ -111,7 +120,7 @@ vllm run-batch --model 'meta-llama/Meta-Llama-3-8B-Instruct' -o 'results.jsonl' 
 [Blog]: https://blog.vllm.ai/
 [Codebase]: https://github.com/vllm-project/
 [Documentation]: https://docs.vllm.ai/en/
-[vllm-project/vllm-metal]: https://github.com/vllm-project/vllm-metal
+[vLLM-metal]: vllm-metal.md
 [Website]: https://vllm.ai/
 
 <!-- Others -->
