@@ -100,7 +100,7 @@ recognition, machine translation, natural language generation, optical character
 handwriting recognition, grammar induction, information retrieval, and other tasks.
 
 They are currently predominantly based on _transformers_, which have superseded recurrent neural networks as the most
-effective technology.
+effective architecture.
 
 Training LLMs involves feeding them vast amounts of data, and computing weights to optimize their parameters.<br/>
 The training process typically includes multiple stages, and requires substantial computational resources.<br/>
@@ -163,11 +163,11 @@ For domain-specific applications, consider fine-tuning a small model to mimic th
 Standard models' behaviour is just autocompletion. Models just try to infer or recall what the most probable next word
 would be.
 
-_Chain of Thought_ techniques tell models to _show their work_.
+_Chain of Thought_ techniques tell models to _show their work_ by breaking prompts in smaller, more manageable steps,
+and solving on each of them singularly before giving back the final answer.<br/>
+The result is more accurate, but it costs more tokens and requires a bigger context window.<br/>
 It _feels_ like a model is calculating or thinking, but what it is really just increasing the chances that the answer
-is correct by breaking questions in smaller, more manageable steps, and solving on each of them before giving back the
-final answer.<br/>
-The result is more accurate, but it costs more tokens and requires a bigger context window.
+is logically sound.
 
 The _ReAct loop_ (Reason + Act) paradigm forces models to loop over chain-of-thoughts.<br/>
 A model breaks the request in smaller steps, plans the next action, acts on it using [functions][function calling]
@@ -207,28 +207,37 @@ Deciding which tool to call, using that tool, and then using the results to gene
 just inferring the next token.
 
 > [!caution]
-> Allowing a LLM to call functions can have real-world consequences.<br/>
+> Allowing LLMs to call functions can have real-world consequences.<br/>
 > This includes financial loss, data corruption or exfiltration, and security breaches.
 
 ## Concerns
 
-- Training requires massive amounts of resource and hence consumes a vast amount of energy and cooling.
-- Lots of people currently thinks of LLMs as _real intelligence_, when it is not.
-- People currently gives too much credibility to LLM answers, and trust them more than they trust their teachers,
-  accountants, lawyers or even doctors.
-- AI companies could bias their models to say specific things, subtly promote ideologies, influence elections, or even
-  rewrite history in the mind of those who trust the LLMs.
-- Models can be vulnerable to specific attacks (e.g. prompt injection) that would change the LLM's behaviour, bias it,
-  or hide malware in their tools.
-- People is using LLMs mindlessly too much, mostly due to the convenience they offer but also because they don't
-  understand what those are or how they work. This is causing lack of critical thinking and overreliance.
-- Model training and execution requires resources that are normally not available to the common person. This encourages
-  people to depend from, and hence give power to, AI companies.
-- Models tend to **not** accept gracefully that they don't know something, and hallucinate as a result.<br/>
-  More recent techniques are making models more efficient, but they just delay this problem.
-- Models can learn and exhibit deceptive behavior.<br/>
-  Standard techniques could fail to remove it, and instead empower it while creating a false impression of safety.<br/>
+- Lots of people currently thinks of LLMs as _real, rational, intelligence_, when they are not.<br/>
+  LLMs are really nothing more than glorified **guessing machines** that are _designed_ to interact naturally. It's
+  humans that are biased by evolution toward _attributing_ sentience and agency to entities they interact with.
+- People is mindlessly using LLMs too much, mostly due to the convenience they offer but also because they don't
+  understand what those are or how they work. This is causing lack of critical thinking, and overreliance.
+- People is giving too much credibility to LLM answers, and trust them more than they trust their teachers, accountants,
+  lawyers or even doctors.
+- LLMs are **incapable** of distinguishing facts from beliefs, and are completely disembodied from the world.<br/>
+  They do not _understand_ concepts and are unaware of time, change, and causality. They just **approximate** reasoning
+  by _mimicking_ language based on how connected are the tokens in their own training data.
+- Models are very limited in their ability to revise beliefs. Once some pattern is learned, it is extremely difficult to
+  unwire it due to the very nature of how models function.
+- AI companies could steer and bias their models to say specific things, subtly promote ideologies, influence elections,
+  or even rewrite history in the mind of those who trust the LLM.
+- Models can be vulnerable to attacks (e.g. prompt injection) that can change the LLM's behaviour, bias it, or hide
+  malware in the tools they manage and use.
+- Model training and execution requires massive amounts of data and computation, resources that are normally **not**
+  available to the common person. Aside from the vast amount of energy and cooling they consume, this encourages people
+  to depend from, and hence give power to, AI companies.
+- Models _can_ learn and exhibit deceptive behavior.<br/>
+  Standard revision techniques could fail to remove it, and instead empower it while creating a false impression of
+  safety.<br/>
   See [Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training].
+- Models are painfully inconsistent, often unaware of their limitations, irritatingly overconfident, and tend to **not**
+  accept gracefully that they don't know something, ending up preferring to hallucinate as the result.<br/>
+  More recent techniques are making models more efficient, but they just delay this problem.
 
 ## Run LLMs Locally
 
@@ -257,6 +266,7 @@ Refer:
 - [Introduction to Large Language Models]
 - GeeksForGeeks' [What are LLM parameters?][geeksforgeeks / what are llm parameters?]
 - IBM's [What are LLM parameters?][ibm / what are llm parameters?]
+- [This is not the AI we were promised], presentation by Michael John Wooldridge at the Royal Society
 
 <!--
   Reference
@@ -302,5 +312,6 @@ Refer:
 [Run LLMs Locally: 6 Simple Methods]: https://www.datacamp.com/tutorial/run-llms-locally-tutorial
 [SEQUOIA: Serving exact Llama2-70B on an RTX4090 with half-second per token latency]: https://infini-ai-lab.github.io/Sequoia-Page/
 [Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training]: https://arxiv.org/abs/2401.05566
+[This is not the AI we were promised]: https://www.youtube.com/watch?v=CyyL0yDhr7I
 [What are Language Models in NLP?]: https://www.geeksforgeeks.org/nlp/what-are-language-models-in-nlp/
 [What is chain of thought (CoT) prompting?]: https://www.ibm.com/think/topics/chain-of-thoughts
