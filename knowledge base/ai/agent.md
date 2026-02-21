@@ -58,7 +58,11 @@ agents can discover and use to do things more accurately and efficiently.
 Agents created by Anthropic and other companies have a history of not caring about agent abuse, and leave users on
 their own while hiding behind a disclaimer.
 
-Some human workers could be replaced for a fraction of the costs.
+For specific areas of expertise, some human workers could be replaced for a fraction of the costs.<br/>
+Many employers already proved they are willing to jump on this opportunity as soon as it will present itself, with
+complete disregard of the current employees enacting those functions (e.g. personal assistants, junior coders).<br/>
+Those layoffs, though could be short lived. As of February 2026 agents are failing more than 95% of the times. See
+[Remote Labor Index: Measuring AI Automation of Remote Work] on this.
 
 People is experiencing what seems to be a new form of FOMO on steroids.<br/>
 One of the promises of AI is that it can reduce workloads, allowing its users to focus on higher-value and/or more
@@ -161,6 +165,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [obra/superpowers]: https://github.com/obra/superpowers
 [OpenClaw: Who are you?]: https://www.youtube.com/watch?v=hoeEclqW8Gs
 [openclaw/openclaw]: https://github.com/openclaw/openclaw
+[Remote Labor Index: Measuring AI Automation of Remote Work]: https://arxiv.org/abs/2510.26787
 [Stealing everything you've ever typed or viewed on your own Windows PC is now possible with two lines of code — inside the Copilot+ Recall disaster.]: https://doublepulsar.com/recall-stealing-everything-youve-ever-typed-or-viewed-on-your-own-windows-pc-is-now-possible-da3e12e9465e
 [Superpowers: How I'm using coding agents in October 2025]: https://blog.fsck.com/2025/10/09/superpowers/
 [The 2026 Guide to AI Agents]: https://www.ibm.com/think/ai-agents

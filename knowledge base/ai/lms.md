@@ -60,6 +60,9 @@ classification, summarisation, answering questions, data extraction, text genera
 coding, sentiment analysis, speech recognition, and more.<br/>
 They can be also be further trained on additional information specific to an industry niche or a particular business.
 
+The capabilities of transformer-based LLMs depend from the amount and the quality of their training data.<br/>
+LLMs appear to be hitting a performance wall, and will probably need the rise of a different architecture.
+
 <!-- Uncomment if used
 <details>
   <summary>Setup</summary>
@@ -106,6 +109,16 @@ Training LLMs involves feeding them vast amounts of data, and computing weights 
 The training process typically includes multiple stages, and requires substantial computational resources.<br/>
 Stages often use unsupervised pre-training followed by supervised fine-tuning on specific tasks. The models' size and
 complexity can make them difficult to interpret and control, leading to potential ethical and bias issues.
+
+The capabilities of Transformer-based LLMs depend from the amount and the quality of their training data.<br/>
+Adding parameters only has a limited impact: given the same training data, models with a higher number of parameters
+perform usually better, but models with less parameters and better training data beat those with more parameters and
+less training.
+
+Transformer-based LLMs appear to be hitting a performance wall, and will probably need to switch to a different
+architecture.<br/>
+Scaling up the amount of training data did wonders up to ChatGPT 5. Once OpenAI got there, they found that enlarging
+the training data resulted in diminishing returns.
 
 ## Inference
 
