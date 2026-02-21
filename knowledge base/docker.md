@@ -37,7 +37,23 @@
 ```sh
 # Install.
 brew install --cask 'docker'
-sudo zypper install 'docker'
+zypper install 'docker'
+
+# Install on apt-based systems.
+sudo apt update \
+&& curl -fsSL 'https://download.docker.com/linux/debian/gpg' | sudo tee '/etc/apt/keyrings/docker.asc' \
+&& sudo tee '/etc/apt/sources.list.d/docker.sources' <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/debian
+Suites: $(source '/etc/os-release' && echo "$VERSION_CODENAME")
+Components: stable
+Signed-By /etc/apt/keyrings/docker.asc
+EOF \
+&& sudo apt update \
+&& sudo apt install 'docker-ce' 'docker-ce-cli' 'docker-buildx-plugin' 'docker-compose-plugin' \
+&& sudo systemctl enable --now 'docker.service' \
+&& sudo gpasswd -a "$USER" 'docker' \
+&& sudo reboot
 
 # Configure.
 vim '/etc/docker/daemon.json'
@@ -523,6 +539,10 @@ pacman -S 'docker-model-plugin'
 # Verify the installation.
 docker model --help
 docker model status
+
+# Install runners.
+docker model install-runner
+docker model install-runner --backend 'vllm' --gpu 'cuda' --do-not-track
 
 # Stop the current runner.
 docker model stop-runner
