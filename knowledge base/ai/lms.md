@@ -269,6 +269,7 @@ Refer:
 - [SEQUOIA: Serving exact Llama2-70B on an RTX4090 with half-second per token latency]
 - [Optimizing LLMs for Performance and Accuracy with Post-Training Quantization]
 - [Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training]
+- [When Copilot Becomes Autopilot: Generative AI's Critical Risk to Knowledge Work and a Critical Solution]
 
 ### Sources
 
@@ -331,3 +332,4 @@ Refer:
 [This is not the AI we were promised]: https://www.youtube.com/watch?v=CyyL0yDhr7I
 [What are Language Models in NLP?]: https://www.geeksforgeeks.org/nlp/what-are-language-models-in-nlp/
 [What is chain of thought (CoT) prompting?]: https://www.ibm.com/think/topics/chain-of-thoughts
+[When Copilot Becomes Autopilot: Generative AI's Critical Risk to Knowledge Work and a Critical Solution]: https://arxiv.org/abs/2412.15030
