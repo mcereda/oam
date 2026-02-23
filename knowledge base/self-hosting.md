@@ -14,9 +14,10 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 | [AWX]                 | Task runner                         | [CTFreak], [Rundeck], [Semaphore], [Zuul] |
 | [Baikal]              | CalDAV and CardDAV server           | [Radicale]                                |
 | [CTFreak]             | Task runner                         | [AWX], [Rundeck], [Semaphore], [Zuul]     |
-| [Gitea]               | Git server                          | [Gitlab], [Gogs]                          |
-| [Gitlab]              | Git server                          | [Gitea], [Gogs]                           |
-| [Gogs]                | Git server                          | [Gitea], [Gitlab]                         |
+| [Forgejo]             | Git server                          | [Gitea], [Gitlab], [Gogs]                 |
+| [Gitea]               | Git server                          | [Forgejo], [Gitlab], [Gogs]               |
+| [Gitlab]              | Git server                          | [Forgejo], [Gitea], [Gogs]                |
+| [Gogs]                | Git server                          | [Forgejo], [Gitea], [Gitlab]              |
 | [Home Assistant]      | Home automation platform            |                                           |
 | [Hoppscotch]          | API development environment         | [Yaade]                                   |
 | [Immich]              | Photo and video management solution | Google Photo, [PhotoPrism]                |
@@ -49,6 +50,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 <!-- Knowledge base -->
 [awx]: awx.md
 [baikal]: baikal.md
+[forgejo]: forgejo.md
 [gitea]: gitea.md
 [gitlab]: gitlab/README.md
 [hoppscotch]: hoppscotch.md
