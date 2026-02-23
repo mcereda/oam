@@ -10,6 +10,10 @@ instructions.
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
+1. [Approaches](#approaches)
+   1. [Deep learning](#deep-learning)
+1. [Architectures](#architectures)
+   1. [Mixture of Experts](#mixture-of-experts)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -70,12 +74,64 @@ ML is mainly divided into the following types:
   Especially useful when there is a lot of data, but only a small part of it is labelled or labelling the data would
   take a lot of time and effort.
 
-_Deep learning_ has emerged as the state-of-the-art AI model architecture across nearly every domain.<br/>
+_Deep learning_ has emerged as the state-of-the-art approach for AI models across nearly every domain.<br/>
 It relies on distributed _networks_ of mathematical operations providing the ability to learn intricate nuances of very
 complex data.<br/>
 It requires very large amounts of data and computational resources.
 
+## Approaches
+
+### Deep learning
+
+Approach in which multiple layers of nodes (a _deep_ neural network) can extract meaning, relationships, and other
+complex patterns from large volumes of raw (unstructured and unlabeled) data and make their own predictions about what
+the data represents.<br/>
+They were initially created with the idea of closely simulating the human brain.
+
+Deep neural networks include:
+
+- An input layer.
+- 3 or more (now usually hundreds) of hidden layers.
+- An output layer.
+
+The multiple layers enable **unsupervised** learning.
+
+Deep learning encompasses a range of neural network architectures, including multi-layer perceptrons (MLPs),
+convolutional neural networks (CNNs), recurrent neural networks (RNNs), graph networks, and transformers.<br/>
+Results are usually applied to domains like computer vision, natural language processing, and robotics.
+
+CNNs showed to be ideal for image and video recognition, including medical imaging.<br/>
+LSTMs and RNNs excel in sequence prediction, language translation, and speech recognition.
+Generative adversarial networks (GANs) enabled the generation of realistic images and AI-driven art.
+
+## Architectures
+
+### Mixture of Experts
+
+Divides a single model into multiple, specialized sub-networks (_experts_) along with a learned routing mechanism
+(_gate_ or _router_) that dynamically selects which experts to activate for any given input.<br/>
+Inference only leverages a small subset of experts at any time, typically 1 or 2 out of all of them.
+
+It allows to build models with a very large **total** number of parameters, but only activate a fraction of them per
+input.<br/>
+This makes them more efficient to pre-train and run.
+
+A small router network:
+
+1. Takes the input.
+1. Produces a probability distribution over the available experts.
+1. Selects the top-k experts.
+
+Training MoE models requires balancing to prevent the router from always routing to the same few experts, and possibly
+ensuring experts get roughly equal use instead.<br/>
+All expert weights still need to be stored and loaded in memory.
+
+MoE is used across many domains, including vision models, multimodal models, and speech recognition and recommendation
+systems.
+
 ## Further readings
+
+- [Mixtral of Experts]
 
 ### Sources
 
@@ -83,6 +139,9 @@ It requires very large amounts of data and computational resources.
 - IBM's [What is machine learning?][ibm / what is machine learning?]
 - Oracle's [What is machine learning?][oracle / what is machine learning?]
 - [Machine learning, explained]
+- IBM's [What is mixture of experts?][ibm / what is mixture of experts?]
+- [Adaptive Mixtures of Local Experts]
+- [IBM / What is artificial intelligence (AI)?]
 
 <!--
   Reference
@@ -94,9 +153,14 @@ It requires very large amounts of data and computational resources.
 [AI]: README.md
 
 <!-- Files -->
+[Adaptive Mixtures of Local Experts]: study%20material/JacobsJordanNowlanHinton_NeuralComputation_1991.pdf
+
 <!-- Upstream -->
 <!-- Others -->
 [geeksforgeeks / Machine Learning Tutorial]: https://www.geeksforgeeks.org/machine-learning/
+[IBM / What is artificial intelligence (AI)?]: https://www.ibm.com/think/topics/artificial-intelligence
 [IBM / What is machine learning?]: https://www.ibm.com/think/topics/machine-learning
-[Oracle / What is machine learning?]: https://www.oracle.com/artificial-intelligence/machine-learning/what-is-machine-learning/
+[IBM / What is mixture of experts?]: https://www.ibm.com/think/topics/mixture-of-experts
 [Machine learning, explained]: https://mitsloan.mit.edu/ideas-made-to-matter/machine-learning-explained
+[Mixtral of Experts]: https://arxiv.org/abs/2401.04088
+[Oracle / What is machine learning?]: https://www.oracle.com/artificial-intelligence/machine-learning/what-is-machine-learning/
