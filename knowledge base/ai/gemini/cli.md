@@ -66,7 +66,7 @@ echo "What is fine tuning?" | gemini
 - [Website]
 - [Codebase]
 - [Gemini]
-- [AI agent]
+- [AI agents][agents]
 
 ### Sources
 
@@ -79,7 +79,7 @@ echo "What is fine tuning?" | gemini
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[AI agent]: ../agent.md
+[Agents]: ../agents.md
 [Gemini]: README.md
 
 <!-- Files -->
