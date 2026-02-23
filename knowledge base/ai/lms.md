@@ -188,14 +188,15 @@ is logically sound.
 The _ReAct loop_ (Reason + Act) paradigm forces models to loop over chain-of-thoughts.<br/>
 A model breaks the request in smaller steps, plans the next action, acts on it using [functions][function calling]
 should it decide it needs to, checks the results, updates the chain of thoughts, and repeats this Think-Act-Observe loop
-to iteratively improve upon responses.
+to iteratively improve upon responses.<br/>
+See also [ReAct: Synergizing Reasoning and Acting in Language Models].
+
+The ReAct loop unlocked the [agentic loop][agents] for general-purpose tasks.
 
 The _ReWOO_ (Reasoning WithOut Observation) method eliminates the dependence on tool outputs for action planning.<br/>
 Models plan upfront, and avoid redundant usage of tools by anticipating which tools to use upon receiving the initial
 prompt from the user.<br/>
 Users can confirm the plan **before** the model executes it.
-
-[AI agents][agent] use these methods to act autonomously.
 
 ## Prompting
 
@@ -270,6 +271,7 @@ Refer:
 - [Optimizing LLMs for Performance and Accuracy with Post-Training Quantization]
 - [Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training]
 - [When Copilot Becomes Autopilot: Generative AI's Critical Risk to Knowledge Work and a Critical Solution]
+- [ReAct: Synergizing Reasoning and Acting in Language Models]
 
 ### Sources
 
@@ -294,7 +296,7 @@ Refer:
 [Function calling]: #function-calling
 
 <!-- Knowledge base -->
-[Agent]: agent.md
+[Agents]: agents.md
 [Claude]: claude/README.md
 [Docker model runner]: ../docker.md#running-llms-locally
 [Gemini]: gemini/README.md
@@ -326,6 +328,7 @@ Refer:
 [Mistral]: https://mistral.ai/
 [OpenClaw: Who are you?]: https://www.youtube.com/watch?v=hoeEclqW8Gs
 [Optimizing LLMs for Performance and Accuracy with Post-Training Quantization]: https://developer.nvidia.com/blog/optimizing-llms-for-performance-and-accuracy-with-post-training-quantization/
+[ReAct: Synergizing Reasoning and Acting in Language Models]: https://arxiv.org/abs/2210.03629
 [Run LLMs Locally: 6 Simple Methods]: https://www.datacamp.com/tutorial/run-llms-locally-tutorial
 [SEQUOIA: Serving exact Llama2-70B on an RTX4090 with half-second per token latency]: https://infini-ai-lab.github.io/Sequoia-Page/
 [Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training]: https://arxiv.org/abs/2401.05566

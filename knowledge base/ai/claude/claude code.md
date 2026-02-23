@@ -2,7 +2,7 @@
 
 > TODO
 
-[Agentic][ai agent] coding tool that reads and edits files, runs commands, and integrates with tools.<br/>
+[Agentic][agents] coding tool that reads and edits files, runs commands, and integrates with tools.<br/>
 Works in a terminal, IDE, browser, and as a desktop app.
 
 <!-- Remove this line to uncomment if used
@@ -347,7 +347,7 @@ Claude Code version: `v2.1.41`.<br/>
 - [Website]
 - [Codebase]
 - [Blog]
-- [AI agent]
+- [AI agents][agents]
 - [Claude Code router]
 - [Gemini CLI]
 - [OpenCode]
@@ -366,7 +366,7 @@ Claude Code version: `v2.1.41`.<br/>
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[AI agent]: ../agent.md
+[agents]: ../agents.md
 [Claude Code router]: claude%20code%20router.md
 [Create custom skills]: create%20custom%20skills.md
 [Gemini CLI]: ../gemini/cli.md
