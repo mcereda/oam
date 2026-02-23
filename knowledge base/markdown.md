@@ -276,7 +276,33 @@ More advanced control requires using HTML tags directly:
 
 Include a non-code formatted backtick by escaping it normally (with a `\`).
 
-Render it in an inline code block using double backticks instead of single backticks.
+Render it in an inline code block using _multiple_ backticks instead of single backticks.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+``` ``List`1`` ``` produces ``List`1``.
+
+Add a space on _**each**_ side to put one or more backticks at the beginning or the end of the code:
+
+``` `` foo` `` ``` produces `` foo` ``.<br/>
+``` `` `foo `` ``` produces `` `foo ``.<br/>
+``` `` ` `` ``` produces `` ` ``.
+
+Without the encapsulating spaces, or if only one is used, parsing breaks:
+
+```````` ``foo``` ```````` produces \`\`foo\`\`\`.<br/>
+```````` ```foo`` ```````` produces \`\`\`foo\`\`.<br/>
+`````` ````` `````` produces `````.<br/>
+`````` ``foo` `` `````` produces ``foo` ``.<br/>
+`````` `` `foo`` `````` produces  `foo``.
+
+Should the inline code contain longer sequences of backticks, _**enclose**_ it in a backtick sequence that is longer
+than anything in the code itself:
+
+```` ```foo``bar``` ```` produces ```foo``bar```.<br/>
+````` ````foo```bar```` ````` produces ````foo```bar````.
+
+</details>
 
 Alternatively, use a code block. This will wrap everything in a `<pre>` HTML tag.<br/>
 To do this, either indent 4 spaces to start a code block, or use fenced code blocks if supported.
@@ -294,6 +320,7 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 - [Live editor]
 - [Mermaid.js]
 - [MyST] extension for technical, scientific communication and publication
+- [Markdown: Syntax]
 
 ### Sources
 
@@ -306,6 +333,7 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 - [Syntax highlighting in Markdown]
 - [Writing on GitHub]
 - [GitLab Flavored Markdown]
+- [How do I escape a backtick \` within in-line code in Markdown?]
 
 <!--
   Reference
@@ -329,8 +357,10 @@ Install and enable [`bierner.markdown-mermaid`][bierner.markdown-mermaid]'s exte
 [github formatting / alerts]: https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
 [GitLab Flavored Markdown / alerts]: https://docs.gitlab.com/user/markdown/#alerts
 [GitLab Flavored Markdown]: https://docs.gitlab.com/user/markdown/
+[How do I escape a backtick \` within in-line code in Markdown?]: https://meta.stackexchange.com/a/82722
 [linguist supported language syntax list]: https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
 [live editor]: https://mermaid.live/edit
+[Markdown: Syntax]: https://daringfireball.net/projects/markdown/syntax
 [myst]: https://mystmd.org/
 [slaise/high-level-markdown]: https://github.com/slaise/High-level-Markdown
 [syntax highlighting in markdown]: https://support.codebasehq.com/articles/tips-tricks/syntax-highlighting-in-markdown
