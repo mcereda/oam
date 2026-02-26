@@ -1,18 +1,14 @@
 # Claude Code
 
-> TODO
-
-[Agentic][agents] coding tool that reads and edits files, runs commands, and integrates with tools.<br/>
+[Agentic][ai agents] coding tool that reads and edits files, runs commands, and integrates with tools.<br/>
 Works in a terminal, IDE, browser, and as a desktop app.
-
-<!-- Remove this line to uncomment if used
-## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
 1. [Grant access to tools](#grant-access-to-tools)
 1. [Using skills](#using-skills)
 1. [Limit tool execution](#limit-tool-execution)
 1. [Memory](#memory)
+1. [Using plugins](#using-plugins)
 1. [Run on local models](#run-on-local-models)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -113,6 +109,7 @@ Procedure:
 
    ```sh
    claude mcp add --transport 'http' 'linear' 'https://mcp.linear.app/mcp' --scope 'user'
+   claude mcp add --transport 'http' 'GitLab' 'https://some.local.gitlab.com/api/v4/mcp' --scope 'local'
    ```
 
 1. From within Claude Code, run the `/mcp` command to configure it.
@@ -169,7 +166,7 @@ Enables AI assistants to analyze AWS costs and usage data through the AWS Cost E
   <details style='padding: 0 0 1rem 1rem'>
     <summary>Run as Docker container</summary>
 
-FIXME: many of those environment variable are probably unnecessary here.
+FIXME: many of those environment variable are probably **not** necessary here.
 
 Manually add the MCP server definition to `$HOME/.claude.json`:
 
@@ -299,6 +296,28 @@ TODO
 
 Refer [Manage Claude's memory][documentation/manage claude's memory].
 
+## Using plugins
+
+Reusable packages that bundle [Skills][using skills], agents, hooks, MCP servers, and LSP configurations.<br/>
+They allow extending Claude Code's functionality, and sharing extensions across projects and teams.
+
+Can be installed at all different scopes.
+
+<details>
+  <summary>Commands</summary>
+
+```plaintext
+# Browse, install, enable/disable, or manage plugins
+/plugin
+```
+
+```sh
+# Load a local plugin.
+claude --plugin-dir './path/to/plugin'
+```
+
+</details>
+
 ## Run on local models
 
 Claude _can_ use other models and engines by setting the `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_BASE_URL` and
@@ -347,7 +366,7 @@ Claude Code version: `v2.1.41`.<br/>
 - [Website]
 - [Codebase]
 - [Blog]
-- [AI agents][agents]
+- [AI agents]
 - [Claude Code router]
 - [Gemini CLI]
 - [OpenCode]
@@ -365,8 +384,10 @@ Claude Code version: `v2.1.41`.<br/>
   -->
 
 <!-- In-article sections -->
+[Using Skills]: #using-skills
+
 <!-- Knowledge base -->
-[agents]: ../agents.md
+[AI agents]: ../agents.md
 [Claude Code router]: claude%20code%20router.md
 [Create custom skills]: create%20custom%20skills.md
 [Gemini CLI]: ../gemini/cli.md
