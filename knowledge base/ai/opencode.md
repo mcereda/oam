@@ -4,6 +4,8 @@
 
 Open source AI coding agent.
 
+Alternative to [Claude Code], [Gemini CLI] and [Pi].
+
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
 
@@ -125,6 +127,7 @@ opencode agent list
 <!-- Knowledge base -->
 [Claude Code]: claude/claude%20code.md
 [Gemini CLI]: gemini/cli.md
+[Pi]: pi.md
 
 <!-- Files -->
 <!-- Upstream -->
