@@ -1,7 +1,5 @@
 # OpenCode
 
-> TODO
-
 Open source AI coding agent.
 
 Alternative to [Claude Code], [Gemini CLI] and [Pi].
@@ -14,6 +12,12 @@ Alternative to [Claude Code], [Gemini CLI] and [Pi].
    1. [Sources](#sources)
 
 ## TL;DR
+
+Includes LSP integration and automatically configures language servers for the LLM.<br/>
+Supports running multiple parallel agents on the same project (_multi-session_), and sharing sessions via links.<br/>
+Stores **no** code or context data.<br/>
+Supports multiple model providers (Models.dev. Claude, GPT, Gemini, local servers).<br/>
+Includes free models by default.
 
 <details>
   <summary>Setup</summary>

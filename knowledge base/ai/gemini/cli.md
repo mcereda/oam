@@ -11,6 +11,16 @@ Can read and edit files, execute shell commands, and search the web.
 
 ## TL;DR
 
+Ships with a generous free tier, built-in Google Search capabilities, a 1M token context window.<br/>
+Supports conversation checkpointing.
+
+Only allows using Google's Gemini models (Flash and Pro).<br/>
+Model selection depends on authentication method.
+
+Free tier with Google account.<br/>
+Enterprise pricing through Vertex AI.<br/>
+Usage-based billing available via API key.
+
 <details>
   <summary>Setup</summary>
 
