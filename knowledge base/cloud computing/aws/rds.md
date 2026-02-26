@@ -27,6 +27,7 @@
     1. [Cancel pending modifications](#cancel-pending-modifications)
 1. [Pricing](#pricing)
     1. [Cost-saving measures](#cost-saving-measures)
+       1. [Reserved DB instances](#reserved-db-instances)
 1. [Troubleshooting](#troubleshooting)
     1. [ERROR: extension must be loaded via shared\_preload\_libraries](#error-extension-must-be-loaded-via-shared_preload_libraries)
     1. [ERROR: must be superuser to alter _X_ roles or change _X_ attribute](#error-must-be-superuser-to-alter-x-roles-or-change-x-attribute)
@@ -1074,20 +1075,92 @@ Impacting factors (from most to least impactful):
 
 - Choose _appropriate_ instance types and sizes.<br/>
   Consider changing them more appropriate ones (more recent, smaller, or Graviton-based) every few months.
-- Consider leveraging [reserved instances][rds reserved instances].
-
-  Prefer using _Standard_ RIs when sticking with one instance type and **not** needing changing it for the **entire**
-  duration of a reservation.<br/>
-  Otherwise, prefer _Convertible_ (A.K.A. _Size-flexible_) RIs for flexibility.
-
+- Consider leveraging [reserved DB instances].<br/>
   RDS does **not** support Savings Plans at the time of writing.
-
 - Optimize storage.
 - Set backup retention periods that balance recovery needs and storage costs.
 - Regularly delete unnecessary manual snapshots.
 - Prefer using Single-AZ deployments when high-availability is not necessary (e.g., for development or testing DBs).
 - Prefer disabling Extended support for an instance when not necessary (e.g., for development or testing DBs).<br/>
   Keep the DBs' engine versions updated to stay out of the Extended support otherwise.
+
+#### Reserved DB instances
+
+Refer [Reserved DB instances for Amazon RDS].
+
+DB instances can be reserved for one- or three-year terms.<br/>
+Reserved DB instances provide significant discount compared to on-demand DB instance pricing.<br/>
+Discounts for reserved DB instances are tied to instance type and AWS Region.
+
+Once one buys reservations, the discount applies to DB instances that have the same specifications as the reservation
+for **all** the following:
+
+- AWS Region.
+- DB engine (but not the DB engine's **version**).
+- DB instance type.
+- DB instance size (`RDS` for Db2, SQL Server, and Oracle License Included).
+- Edition (`RDS` for Db2, SQL Server, and Oracle).
+- License type (`license-included` or `bring-your-own-license`).
+
+DB instances **not** matching the reservations' specifics are billed at the on-demand rate.
+
+DB instances using reservations can be modified. Part of all of the discount is applied as long as those changes are
+within the reservations' specifications.<br/>
+Should the changes fall outside of the reservations's specifications, such as changing the instance class, the discount
+no longer applies.
+
+Reservations are available in three varieties:
+
+- _No Upfront_: bills a discounted hourly rate for every hour within the term, regardless of usage, and requiring no
+  upfront payment.<br/>Only available as one-year reservations.
+- _Partial Upfront_: part of the reserved DB instance is paid upfront; the remaining hours in the term are billed at a
+  discounted hourly rate, regardless of usage.
+- _All Upfront_: the full payment is made at the start of the term, with no other costs incurred for the remainder of
+  the term regardless of the number of hours used.
+
+> [!note]
+> Not all RDS instance classes support all Reserved DB Instance offering types.<br/>
+> Review the Reserved DB Instance offerings in the Management Console or using the
+> `describe-reserved-db-instances-offerings` CLI command to confirm availability.
+
+When using consolidated billing, all AWS accounts in the organization are treated as a single account.<br/>
+This means that **all** accounts in the organization can receive the hourly cost benefit of reserved DB instances that
+are purchased in any other account.
+
+When purchasing DB instance reservations, one of the specifications to give is the instance class.<br/>
+The discount is automatically applied to DB instances using **any size** of that class, meaning that the instance _can_
+be scaled up and down as long as the instance class remains the same.<br/>
+For example, a reservation for a `db.r6i.large` can apply to a `db.r6i.xlarge` because the instance class is the same
+(`db.r6i`), but not to a `db.r6id.large` or `db.r7g.large` because the class type would change.
+
+> [!warning]
+> Size-flexible reserved DB instances are only available for DB instances residing within the same AWS Region and using
+> the same database engine.
+
+Usage for different reserved DB instance sizes is calculated as _normalized units per hour_.<br/>
+For example, one unit of usage on 2x `db.r3.large` DB instances is equivalent to 8x normalized units per hour of usage
+on one `db.r3.small`.<br/>
+Refer the table on [Reserved DB instances for Amazon RDS] to get the number of normalized units per hour for each DB
+instance size.
+
+DB instance reservation benefits apply to both Multi-AZ and Single-AZ configurations as long as the DB instance class
+type remains the same.<br/>
+Multi-AZ configurations just consume normalized units per hour for each extra AZ.<br/>
+For example, one can move from a Single-AZ deployment running on one large DB instance to a Multi-AZ deployment running
+on a medium DB instance per AZ an consume the same amount of units per hour.
+
+Size flexibility does **not** apply to RDS for SQL Server and RDS for Oracle License Included.
+
+DB instance reservations do **not** provide discounts for the costs associated with storage, backups, and I/O.<br/>
+It does provide a discount only on the hourly, on-demand instance usage.
+
+The terms for a reserved DB instance involve a one-year or three-year commitment.<br/>
+One **cannot** cancel a reservation before the commitment ends. They are billed for the upfront costs regardless of
+whether they use the resources.
+
+Should one delete a DB instance that is covered by a reserved DB instance discount, they can launch another DB instance
+with compatible specifications. In this case, the discounted rate is automatically applied to the new instance during
+the reservation term.
 
 ## Troubleshooting
 
@@ -1204,6 +1277,7 @@ or write workloads and exceeds the instance type quotas.
 
 <!-- In-article sections -->
 [Exporting snapshots to S3]: #exporting-snapshots-to-s3
+[Reserved DB instances]: #reserved-db-instances
 [Storage optimization]: #storage-optimization
 
 <!-- Knowledge base -->
@@ -1230,9 +1304,9 @@ or write workloads and exceeds the instance type quotas.
 [Multi-AZ DB instance deployments for Amazon RDS]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html
 [pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
 [RDS pricing]: https://aws.amazon.com/rds/pricing/
-[RDS reserved instances]: https://aws.amazon.com/rds/reserved-instances/
 [Recommended alarms for RDS]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Best_Practice_Recommended_Alarms_AWS_Services.html#RDS
-[renaming a db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RenameInstance.html
+[Renaming a DB instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RenameInstance.html
+[Reserved DB instances for Amazon RDS]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithReservedDBInstances.html
 [Restoring a DB instance to a specified time for Amazon RDS]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIT.html
 [restoring from a db snapshot]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html
 [Stopping an Amazon RDS DB instance temporarily]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_StopInstance.html
