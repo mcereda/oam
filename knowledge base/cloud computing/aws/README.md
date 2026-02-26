@@ -237,6 +237,19 @@ graph LR
 
 [Direct Connect] creates a dedicated network connection between on-premises data centers or offices and AWS.
 
+To create peerings between VPCs:
+
+1. \[Origin account] Send a peering request from the origin VPC to the destination VPC.
+1. \[Destination account] Accept the peering request from the origin VPC.
+   It usually takes about 2-5 minutes for the request to appear after its creation.
+1. \[Origin account] Add egress rules to the origin's security group to allow the origin to reach the destination.
+1. \[Origin account] Add a route to the destination VPC's CIDR to the route tables of those subnets that need to reach
+   the destination.
+1. \[Destination account] Add a route to the origin VPC's CIDR to the route tables of those subnets that need to be
+   reached from the origin.
+1. \[Destination account] Add ingress rules to the destination's security group to accept traffic coming from the
+   origin's VPC's CIDR.
+
 ### Elastic IP addresses
 
 Refer [Elastic IP addresses].
