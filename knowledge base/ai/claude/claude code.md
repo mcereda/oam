@@ -15,12 +15,16 @@ Works in a terminal, IDE, browser, and as a desktop app.
 
 ## TL;DR
 
-> [!warning]
-> Normally requires an Anthropic account to be used.<br/>
+_Normally_:
+
+- Tied to Anthropic's Claude models (Sonnet and Opus).
+- Requires a Claude API key or Anthropic plan.<br/>
+  Usage is metered by the token.
+
+> [!tip]
 > One _can_ use [Claude Code router] or [Ollama] to run on a locally server or shared LLM instead.
 
-Uses a scope system to determine where configurations apply and who they're shared with.<br/>
-When multiple scopes are active, the **more** specific ones take precedence.
+Uses a **scope system** to determine where configurations apply and who they're shared with.
 
 | Scope                   | Location                             | Area of effect                     | Shared                                    |
 | ----------------------- | ------------------------------------ | ---------------------------------- | ----------------------------------------- |
@@ -28,6 +32,21 @@ When multiple scopes are active, the **more** specific ones take precedence.
 | User                    | `$HOME/.claude/` directory           | Single user, across all projects   | No                                        |
 | Project                 | `.claude/` directory in a repository | All collaborators, repository only | Yes (usually committed to the repository) |
 | Local                   | `.claude/*.local.*` files            | Single user, repository only       | No (usually gitignored)                   |
+
+The [settings' schema] is available on schemastore.org.<br/>
+[Config file example].
+
+When multiple scopes are active, settings are merged as follows:
+
+```mermaid
+flowchart LR
+  u("User") --> p("Project") --> l("Local") --> cli("CLI arguments") --> m("Managed")
+```
+
+Supports a plugin system for extending its capabilities.
+
+Sends Statsig telemetry data by default.<br/>
+Disable it by setting the `DISABLE_TELEMETRY` environment variable to `1`.
 
 <details>
   <summary>Setup</summary>
@@ -60,6 +79,7 @@ claude -r
 
 # Add MCP servers.
 # Defaults to the 'local' scope if not specified.
+claude mcp add --transport 'http' 'GitLab' 'https://some.local.gitlab.com/api/v4/mcp'
 claude mcp add --transport 'http' 'linear' 'https://mcp.linear.app/mcp' --scope 'user'
 
 # List configured MCP servers.
@@ -70,6 +90,30 @@ claude mcp get 'github'
 
 # Remove MCP servers.
 claude mcp remove 'github'
+
+# Load local plugins.
+claude --plugin-dir './path/to/plugin'
+
+# Install plugins.
+# Marketplace defaults to 'claude-plugins-official`.
+# Scope defaults to 'user'.
+claude plugin install 'gitlab'
+claude plugin i 'aws-cost-saver@aws-cost-saver-marketplace' --scope 'project'
+
+# List installed plugins only.
+claude plugin list
+
+# List all plugins.
+claude plugin list --available --json
+
+# Enable plugins.
+claude plugin enable 'gitlab@claude-plugins-official'
+
+# Disable plugins.
+claude plugin disable 'gitlab@claude-plugins-official'
+
+# Update plugins.
+claude plugin update 'gitlab@claude-plugins-official'
 ```
 
 From within Claude Code:
@@ -85,6 +129,7 @@ From within Claude Code:
 
 ```sh
 # Run Claude Code on a model served locally by Ollama.
+ollama launch claude --model 'lfm2.5-thinking:1.2b'
 ANTHROPIC_AUTH_TOKEN='ollama' ANTHROPIC_BASE_URL='http://localhost:11434' ANTHROPIC_API_KEY='' \
   claude --model 'lfm2.5-thinking:1.2b'
 ```
@@ -108,8 +153,9 @@ Procedure:
      <summary>Examples</summary>
 
    ```sh
+   # Defaults to the 'local' scope if not specified.
+   claude mcp add --transport 'http' 'GitLab' 'https://some.local.gitlab.com/api/v4/mcp'
    claude mcp add --transport 'http' 'linear' 'https://mcp.linear.app/mcp' --scope 'user'
-   claude mcp add --transport 'http' 'GitLab' 'https://some.local.gitlab.com/api/v4/mcp' --scope 'local'
    ```
 
 1. From within Claude Code, run the `/mcp` command to configure it.
@@ -292,9 +338,35 @@ Customize sandbox behavior through the `settings.json` file.
 
 ## Memory
 
-TODO
-
 Refer [Manage Claude's memory][documentation/manage claude's memory].
+
+Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in a later sessions.
+
+One can write and maintain `CLAUDE.md` Markdown files with instructions, rules, and preferences themselves (or ask
+Claude to do it on their behalf).<br/>
+When _auto memory_ is enabled, Claude automatically updates `~/.claude/projects/<project>/memory/MEMORY.md` files. The
+first 200 lines of those are loaded at the start of every session.
+
+Auto memory is enabled by default.<br/>
+It can be disabled via the `/memory` toggle, `settings.json`, or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`.
+
+Memory hierarchy (from broadest to most specific):
+
+| Type              | Location                                                    |
+| ----------------- | ----------------------------------------------------------- |
+| Managed policy    | `/Library/Application Support/ClaudeCode/CLAUDE.md` (macOS) |
+| Project memory    | `./CLAUDE.md` or `./.claude/CLAUDE.md`                      |
+| Project rules     | `./.claude/rules/*.md`                                      |
+| User memory       | `~/.claude/CLAUDE.md`                                       |
+| Project overrides | `./CLAUDE.local.md`                                         |
+| Auto memory       | `~/.claude/projects/<project>/memory/`                      |
+
+Key commands:
+
+| Command   | Summary                                              |
+| --------- | ---------------------------------------------------- |
+| `/memory` | View, edit, or toggle auto memory on/off             |
+| `/init`   | Bootstrap a `CLAUDE.md` file for the current project |
 
 ## Using plugins
 
@@ -312,8 +384,36 @@ Can be installed at all different scopes.
 ```
 
 ```sh
-# Load a local plugin.
+# Load local plugins.
 claude --plugin-dir './path/to/plugin'
+
+# Install plugin marketplaces.
+claude plugin marketplace add 'owner/repo'      # github
+claude plugin marketplace add 'path/to/plugin'  # local
+
+# Install plugins.
+# Marketplace defaults to 'claude-plugins-official`.
+# Scope defaults to 'user'.
+claude plugin install 'gitlab'
+claude plugin i 'aws-cost-saver@aws-cost-saver-marketplace' --scope 'project'
+
+# List installed plugins only.
+claude plugin list
+
+# List all plugins.
+claude plugin list --available --json
+
+# Enable plugins.
+claude plugin enable 'gitlab@claude-plugins-official'
+
+# Disable plugins.
+claude plugin disable 'gitlab@claude-plugins-official'
+
+# Update plugins.
+claude plugin update 'gitlab@claude-plugins-official'
+
+# Uninstall plugins.
+claude plugin uninstall 'gitlab@claude-plugins-official'
 ```
 
 </details>
@@ -367,9 +467,9 @@ Claude Code version: `v2.1.41`.<br/>
 - [Codebase]
 - [Blog]
 - [AI agents]
+- Alternatives: [Gemini CLI], [OpenCode], [Pi]
 - [Claude Code router]
-- [Gemini CLI]
-- [OpenCode]
+- [Settings][documentation/settings]
 - [Prat011/awesome-llm-skills]
 - [Claude Skills vs. MCP: A Technical Comparison for AI Workflows]
 
@@ -393,14 +493,18 @@ Claude Code version: `v2.1.41`.<br/>
 [Gemini CLI]: ../gemini/cli.md
 [Ollama]: ../ollama.md
 [OpenCode]: ../opencode.md
+[Pi]: ../pi.md
 
 <!-- Files -->
+[Config file example]: ../../../examples/claude/claude.json
+
 <!-- Upstream -->
 [Blog]: https://claude.com/blog
 [Codebase]: https://github.com/anthropics/claude-code
 [Documentation]: https://code.claude.com/docs/en/overview
 [Documentation/Manage Claude's memory]: https://code.claude.com/docs/en/memory
 [Documentation/Sandboxing]: https://code.claude.com/docs/en/sandboxing
+[Documentation/Settings]: https://code.claude.com/docs/en/settings
 [Documentation/Skills]: https://code.claude.com/docs/en/skills
 [Website]: https://claude.com/product/overview
 
@@ -412,3 +516,4 @@ Claude Code version: `v2.1.41`.<br/>
 [Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
 [pffigueiredo/claude-code-sheet.md]: https://gist.github.com/pffigueiredo/252bac8c731f7e8a2fc268c8a965a963
 [Prat011/awesome-llm-skills]: https://github.com/Prat011/awesome-llm-skills
+[Settings' schema]: https://www.schemastore.org/claude-code-settings.json

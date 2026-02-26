@@ -84,10 +84,11 @@ Agents created by Anthropic and other companies have a history of not caring abo
 their own while hiding behind a disclaimer.
 
 For specific areas of expertise, some human workers could be replaced for a fraction of the costs.<br/>
-Many employers already proved they are willing to jump on this opportunity as soon as it will present itself, with
+Many employers already proved they are willing to jump at this opportunity as soon as it will present itself, with
 complete disregard of the current employees enacting those functions (e.g. personal assistants, junior coders).<br/>
-Those layoffs, though could be short lived. As of February 2026 agents are failing more than 95% of the times. See
-[Remote Labor Index: Measuring AI Automation of Remote Work] on this.
+As of February 2026 agents are failing more than 95% of the times, so those layoffs could be short lived. Companies like
+Klarna and Duolingo, which laid off lots of their employees, received backlash and already started re-hiring humans.
+See also [Remote Labor Index: Measuring AI Automation of Remote Work] on this.
 
 People is experiencing what seems to be a new form of FOMO on steroids.<br/>
 One of the promises of AI is that it can reduce workloads, allowing its users to focus on higher-value and/or more
@@ -165,12 +166,11 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 - [Superpowers: How I'm using coding agents in October 2025], and [obra/superpowers] by extension
 - [OpenClaw][openclaw/openclaw], [OpenClaw: Who are you?] and [How a Single Email Turned My ClawdBot Into a Data Leak]
 - [nullclaw/nullclaw], [OpenClaw][openclaw/openclaw] alternative with a better security module
-- [Claude Code]
-- [Gemini CLI]
-- [OpenCode]
+- Coding agents: [Claude Code], [Gemini CLI], [OpenCode], [Pi].
 - [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh
 - [Token Anxiety] by Nikunj Kothari
 - [AI Doesn't Reduce Work — It Intensifies It] by Aruna Ranganathan and Xingqi Maggie Ye
+- [The 2026 Guide to Coding CLI Tools: 15 AI Agents Compared]
 
 ### Sources
 
@@ -194,6 +194,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [LMs / LLMs]: lms.md#large-language-models
 [LMs / Reasoning]: lms.md#reasoning
 [OpenCode]: opencode.md
+[Pi]: pi.md
 
 <!-- Others -->
 [39C3 - Agentic ProbLLMs: Exploiting AI Computer-Use and Coding Agents]: https://www.youtube.com/watch?v=8pbz5y7_WkM
@@ -219,3 +220,4 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [TotalRecall]: https://github.com/xaitax/TotalRecall
 [Trust No AI: Prompt Injection Along The CIA Security Triad]: https://arxiv.org/pdf/2412.06090
 [xAI engineer fired for leaking secret "Human Emulator" project]: https://www.youtube.com/watch?v=0hDMSS1p-UY
+[The 2026 Guide to Coding CLI Tools: 15 AI Agents Compared]: https://www.tembo.io/blog/coding-cli-tools-comparison

@@ -1,0 +1,110 @@
+{
+    "oauthAccount": {
+        "accountUuid": "abcdef01-2345-6789-abcd-ef0123456789",
+        "emailAddress": "someUser@example.org",
+        "organizationUuid": "01234567-89ab-cdef-0123-456789abcdef",
+        "hasExtraUsageEnabled": false,
+        "billingType": "stripe_subscription",
+        "accountCreatedAt": "2025-11-13T15:39:20.032032Z",
+        "subscriptionCreatedAt": "2026-01-16T12:14:21.863195Z",
+        "displayName": "Some User"
+    },
+    "sandbox": {
+        "enabled": true,
+        "autoAllowBashIfSandboxed": true,
+        "excludedCommands": [
+            "docker"
+        ],
+        "network": {
+            "allowedDomains": [
+                "github.com",
+                "*.npmjs.org",
+                "registry.yarnpkg.com"
+            ],
+            "allowUnixSockets": [
+                "/var/run/docker.sock"
+            ],
+            "allowLocalBinding": true
+        }
+    },
+    "env": {
+        "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+        "OTEL_METRICS_EXPORTER": "otlp"
+    },
+    "permissions": {
+        "allow": [
+            "Bash(npm run lint)",
+            "Bash(npm run test *)",
+            "Read(~/.zshrc)"
+        ],
+        "deny": [
+            "Bash(curl *)",
+            "Read(./.env)",
+            "Read(./.env.*)",
+            "Read(./secrets/**)"
+        ]
+    },
+    "mcpServers": {
+        "aws-api": {
+            "command": "docker",
+            "args": [
+                "run",
+                "--rm",
+                "--interactive",
+                "--env",
+                "AWS_REGION=eu-west-1",
+                "--env",
+                "AWS_API_MCP_TELEMETRY=false",
+                "--env",
+                "REQUIRE_MUTATION_CONSENT=true",
+                "--env",
+                "READ_OPERATIONS_ONLY=true",
+                "--volume",
+                "/Users/someUser/.aws:/app/.aws",
+                "public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest"
+            ]
+        },
+        "aws-cost-explorer": {
+            "command": "docker",
+            "args": [
+                "run",
+                "--rm",
+                "--interactive",
+                "--env",
+                "AWS_REGION=eu-west-1",
+                "--env",
+                "AWS_API_MCP_TELEMETRY=false",
+                "--env",
+                "REQUIRE_MUTATION_CONSENT=true",
+                "--env",
+                "READ_OPERATIONS_ONLY=true",
+                "--volume",
+                "/Users/someUser/.aws:/app/.aws",
+                "public.ecr.aws/awslabs-mcp/awslabs/cost-explorer-mcp-server:latest"
+            ]
+        },
+        "gitlab": {
+            "type": "http",
+            "url": "https://gitlab.example.org/api/v4/mcp"
+        },
+        "linear": {
+            "type": "http",
+            "url": "https://mcp.linear.app/mcp"
+        }
+    },
+    "projects": {
+        "/Users/someUser/repositories/some/repo": {
+            "allowedTools": [],
+            "mcpContextUris": [],
+            "mcpServers": {},
+            "enabledMcpjsonServers": [],
+            "disabledMcpjsonServers": [],
+            "hasTrustDialogAccepted": true,
+            "projectOnboardingSeenCount": 0,
+            "hasClaudeMdExternalIncludesApproved": false,
+            "hasClaudeMdExternalIncludesWarningShown": false,
+            "hasCompletedProjectOnboarding": true,
+            "disabledMcpServers": []
+        }
+    }
+}
