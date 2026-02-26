@@ -345,16 +345,23 @@ Cross-region snapshot copies also incur additional transfer and storage charges 
 Automatic backups are storage volume snapshots of **entire** DB instances.
 
 Automatic backups are **enabled** by default.<br/>
-Setting the backup retention period to 0 disables them, setting it to a nonzero value (re)enables them.
+Setting an instance's `BackupRetentionPeriod` to 0 disables them, setting it to a nonzero value (re)enables them.
 
-> Enabling automatic backups takes the affected instances offline to have a backup created **immediately**.<br/>
-> While the backup is created, the instance is kept in the _Modifying_ state. This **will** block actions on the
-> instance and _could_ cause outages.
+> [!warning]
+>
+> - _Enabling_ or _disabling_ automatic backups takes the affected instances **offline** for some time to make the
+>   required changes.<br/>
+>   This **will** cause some downtime.
+> - When enabling backups, RDS creates one **immediately**.<br/>
+>   This **cannot** be avoided.
+> - While the first backup is created, an instance is kept in the _Modifying_ state.<br/>
+>   This **will** block actions on the instance, and _could_ cause outages.
 
-Automatic backups occur **daily** during the instances' backup window, configured in 30 minute periods. Should backups
-require more time than allotted to the backup window, they will continue after the window ends and until they finish.
+Automatic backups occur **daily** during the instances' backup window, configured in 30 minute periods.<br/>
+Should they require more time than allotted to the backup window, they will continue after the window ends and until
+they finish.
 
-Backups are retained for up to 35 days (_backup retention period_).<br/>
+Backups are retained for up to 35 days (the maximum value of `BackupRetentionPeriod`).<br/>
 One can recover DB instances to **any** point in time that sits inside the backup retention period.
 
 The backup window **must not overlap** with the weekly maintenance window for DB instance or Multi-AZ DB cluster.<br/>
