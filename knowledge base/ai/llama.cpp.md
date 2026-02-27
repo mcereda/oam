@@ -1,7 +1,5 @@
 # llama.cpp
 
-> TODO
-
 LLM inference engine written in in C/C++.<br/>
 Vastly used as base for AI tools like [Ollama] and [Docker model runner].
 
@@ -61,6 +59,9 @@ The chat completion endpoint it at <http://localhost:8080/v1/chat/completions>.
   <summary>Real world use cases</summary>
 
 ```sh
+llama-cli -hf 'LiquidAI/LFM2-24B-A2B-GGUF'
+llama-bench -m "$HOME/Library/Caches/llama.cpp/LiquidAI_LFM2-24B-A2B-GGUF_LFM2-24B-A2B-Q4_K_M.gguf"
+
 # Use models pulled with Ollama.
 jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
   "$HOME/.ollama/models/manifests/registry.ollama.ai/library/codellama/13b" \
