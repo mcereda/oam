@@ -22,25 +22,78 @@ Cloud-based [data warehousing][data warehouse] platform.
 
 ## TL;DR
 
-Snowflake separates storage, compute and cloud services in different layers.
+Separates storage, compute and cloud services in different layers.
 
-It:
+Uses public cloud infrastructure (usually AWS or Azure) to host compute instances and persistent data storage.<br/>
+Snowflake Inc. manages all cloud resources. There is **no** self-managed version of the SaaS.
 
-- Runs completely on cloud infrastructure.
-- Handles semi-structured data like JSON and Parquet.
-- Stores persistent data in columnar format in cloud storage.<br/>
-  Customers cannot see nor access the data objects directly; they can only access them through SQL query operations.
-- Copies data as Copy-on-Write virtual clones.
-- Stores tables in memory in small chunks to enhance parallelization.
+Stores data in columnar format in a central data repository accessible from all compute nodes in the platform.<br/>
+Supports:
 
-Each virtual warehouse is a dedicated MPP compute clusters. Each member handles a different part of a query.<br/>
-Snowflake offers Virtual warehouses in different sizes at different prices (XS, S, M, L, XL, …, 6XL).
+- _Structured_ data following a strict _tabular_ schema, such as rows and columns in a table.
+- _Semi-structured_ data with a _flexible_ schema, such as a JSON or XML file and Parquet.
+- _Unstructured_ data with _no_ inherent schema, such as a document, image, or audio file.
 
-Billing depends on how long a warehouse runs continuously.<br/>
+Customers **cannot** see nor access the data objects _directly_, they can only access them through SQL query
+operations.
+
+Organizes the data in _databases_ and _schemas_.<br/>
+Databases are logical grouping of one or more schemas. Each database belongs to a single Snowflake account.<br/>
+Schemas are logical grouping of database objects (tables, views, etc.). Each schema belongs to a single database.
+
+There are no hard limits on the number of databases, schemas (within a database), or objects (within a schema) one can
+create.
+
+**One** database and **one** schema together comprise a _namespace_.<br/>
+When performing any operations on database objects in Snowflake, the namespace is inferred from the current
+database and schema in use for the session. If no database or schema are used for the session, the namespace must be
+explicitly specified when performing any operations on objects.
+
+_Shares_ specify a set of database objects (schemas, tables, and secure views) containing data one wishes to share with
+other Snowflake accounts.
+
+Processes queries using massively parallel processing (MPP) compute clusters, with each node in the cluster storing a
+portion of the entire data set locally.
+
+_Virtual warehouses_ are clusters of compute resources in Snowflake. They process SQL statements and run code in many
+programming languages. Each warehouse is its own **independent** cluster that does not share compute resources with
+other warehouses.<br/>
+Warehouses are required for queries, as well as all DML operations (including loading data into tables).<br/>
+They come in different sizes at different prices (`XS`, `S`, `M`, `L`, `XL`, …, `6XL`). They can be started, stopped and
+resized at any time.<br/>
+To perform operations, a warehouse must be running and in use for the session. While a warehouse is running, it consumes
+Snowflake credits.
+
+Warehouses are billed only for the credits they actually consume. Billing is per-second, with a 60-second minimum every
+time a warehouse starts.<br/>
+Credit usage also doubles as one increases to the next larger warehouse size, for each **full** hour that the warehouse
+runs.<br/>
+The total number of billable credits depends on how long a warehouse runs continuously.<br/>
 The total cost is the aggregate of the cost of using data transfer, storage, and compute resources.
 
 Snowflake's system analyzes queries and identifies patterns to optimize using historical data. The results of frequently
 executed queries is cached.
+
+Data loading performance is more influenced by the number of files being loaded and the size of each file, than by the
+size of the warehouse itself.
+
+One can configure warehouses to automatically resume or suspend, based on activity.<br/>
+By default, both auto-suspend and auto-resume are enabled. Snowflake will automatically suspend a warehouse when it is
+inactive for a specified period of time, and automatically resume it when the warehouse is the current warehouse for the
+session and any statement that requires a warehouse is submitted.
+
+When a session is initiated in Snowflake, it does **not**, by default, have a warehouse associated with it.<br/>
+Until a session has a warehouse associated with it, one **cannot** submit queries.<br/>
+Snowflake supports specifying a default warehouse for each individual user. Users that define a default warehouse will
+use that warehouse for all the sessions they initiate.
+
+When a user connects to Snowflake and starts a session, Snowflake determines the default warehouse for the session with
+the following priority (lower to higher):
+
+1. Default warehouse for the user.
+1. Default warehouse for the client utility used to connect to Snowflake
+1. Warehouse specified on the client command line or through the driver/connector parameters passed to Snowflake.
+1. Warehouse specified by executing the `USE WAREHOUSE` command within the session.
 
 Administrators use Role-Based Access Control (RBAC) to define and manage user roles and permissions.<br/>
 Users should **not** have permissions on their own. Permissions should instead be given to roles, that should then be
