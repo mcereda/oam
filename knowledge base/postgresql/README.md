@@ -2,6 +2,8 @@
 
 1. [TL;DR](#tldr)
 1. [Functions](#functions)
+1. [Write-Ahead Logging](#write-ahead-logging)
+1. [Replication slots](#replication-slots)
 1. [Backup](#backup)
 1. [Restore](#restore)
 1. [Extensions of interest](#extensions-of-interest)
@@ -175,6 +177,79 @@ AS $func$
 $func$;
 SELECT * FROM entries_in_column('vendors','vendor_id');
 ```
+
+## Write-Ahead Logging
+
+Refer [Write-Ahead Logging (WAL)][documentation / write-ahead logging (wal)].
+
+Standard method for ensuring data integrity.
+
+At all times, PostgreSQL maintains a _write ahead log_ in the `pg_wal/` subdirectory of the cluster's data directory.
+This log records every change made to the database's data files.<br/>
+Changes to data files (where tables and indexes reside) are written only after those changes have been logged. These
+logs occur as WAL records describing the changes have been flushed to permanent storage.<br/>
+If the system crashes, the database can be restored to consistency by "replaying" the log entries made since the last
+checkpoint.
+
+This method removes the need to flush data pages to disk on _every_ transaction commit.<br/>
+In the event of a crash, one will be able to recover the database using the log. Any change that have **not** been yet
+applied to the data pages can be redone from the WAL records.<br/>
+This is _roll-forward recovery_, also known as _REDO_.
+
+Because WAL restores database file contents after a crash, journaled file systems are not a necessity for reliable
+storage of the data files or WAL files anymore.<br/>
+In fact, journaling overhead could reduce performance, especially if journaling causes file system data to be flushed to
+disk. Data flushing during journaling can often be disabled with a file system mount option.<br/>
+Journaled file systems do improve boot speed after a crash.
+
+Only the WAL file needs to be flushed to disk to guarantee that a transaction is committed, rather than every data file
+changed in that transaction, resulting in a significantly reduced number of disk writes.<br/>
+The WAL file is written _sequentially_, making the cost of syncing the WAL much less than the cost of flushing the data
+pages to disk. This is especially true for servers handling many small transactions touching different parts of the data
+store. When the server is processing many small concurrent transactions, a single `fsync` of the WAL file is sufficient
+for committing multiple transactions.
+
+WAL allows supporting on-line backup and point-in-time recovery by reverting to any time instant covered by the
+available WAL data.<br/>
+The process is to install a prior physical backup of the database, then replay the WAL files just as far as the desired
+time to bring the system to a current state.<br/>
+Replaying the WAL for any period of time will also fix internal inconsistencies for that period.
+
+[Replication slots] use WAL at their core.
+
+## Replication slots
+
+Refer [Logical Decoding Concepts][documentation / logical decoding concepts].
+
+Slots represent a stream of changes that can be replayed to a client in the **exact** order they were made on the origin
+server.<br/>
+Each slot streams a sequence of changes from **a single** database, and has an identifier that is unique across all
+databases in a PostgreSQL cluster.
+
+Slots persist independently of the connection using them, and are crash-safe.<br/>
+The current position of each slot is persisted only at checkpoint. In case of a crash, the slot might return to an
+earlier LSN, which will then cause recent changes to be sent again when the server restarts.<br/>
+Logical decoding clients are those responsible for avoiding ill effects from handling the same message more than once.
+They _can_ request that decoding start from a specific LSN rather than letting the server determine the start point, if
+needed.
+
+Multiple independent slots may exist for a single database.<br/>
+Each slot will have its own state. For most applications, a separate slot is required for each consumer.
+
+A logical replication slot knows **nothing** about the state of their receiver.<br/>
+Multiple different receivers can use the same slot at different times; in this case, the active receiver will get the
+changes following on from when the last receiver stopped consuming them.<br/>
+Only one receiver may consume changes from a slot at any given time.
+
+> [!warning]
+> Make sure to drop slots that are no longer required.
+>
+> Replication slots will **prevent** removal of required resources even when there is no consumer using them.<br/>
+> VACUUM will **not** be able to remove specific WAL, nor specific rows from the system catalogs as long as they are
+> required by a replication slot, consuming storage space. In extreme cases, this could cause the database to shut down,
+> either to prevent transaction ID wraparound or due to the disk being full.
+
+Since PostgreSQL 17 (released September 2024), logical replication slots **can** also be created on hot standbys.
 
 ## Backup
 
@@ -358,7 +433,7 @@ See also [yugabyte/yugabyte-db].
 - [pgAdmin]
 - [How to Scale a Single-Server Database: A Guide to Distributed PostgreSQL]
 - [yugabyte/yugabyte-db]
-- [Logical Decoding Concepts]
+- [Logical Decoding Concepts][documentation / logical decoding concepts]
 - [dimitri/pgcopydb]
 
 ### Sources
@@ -385,6 +460,9 @@ See also [yugabyte/yugabyte-db].
   ═╬═Time══
   -->
 
+<!-- In-article sections -->
+[Replication slots]: #replication-slots
+
 <!-- Knowledge base -->
 [mysql]: ../mysql.md
 [Percona toolkit]: ../percona%20toolkit.md
@@ -400,18 +478,19 @@ See also [yugabyte/yugabyte-db].
 [create function]: https://www.postgresql.org/docs/current/sql-createfunction.html
 [database connection control functions]: https://www.postgresql.org/docs/current/libpq-connect.html
 [docker image]: https://github.com/docker-library/docs/blob/master/postgres/README.md
-[logical decoding concepts]: https://www.postgresql.org/docs/current/logicaldecoding-explanation.html
+[Documentation / Write-Ahead Logging (WAL)]: https://www.postgresql.org/docs/current/wal-intro.html
+[Documentation / Logical Decoding Concepts]: https://www.postgresql.org/docs/current/logicaldecoding-explanation.html
 [pg_settings]: https://www.postgresql.org/docs/current/view-pg-settings.html
 [psql]: https://www.postgresql.org/docs/current/app-psql.html
 [the password file]: https://www.postgresql.org/docs/current/libpq-pgpass.html
-[wiki]: https://wiki.postgresql.org/wiki/
 [wiki backup]: https://wiki.postgresql.org/wiki/Ecosystem:Backup
-[dimitri/pgcopydb]: https://github.com/dimitri/pgcopydb
+[wiki]: https://wiki.postgresql.org/wiki/
 
 <!-- Others -->
 [an in-depth guide to postgres data masking with anonymizer]: https://thelinuxcode.com/postgresql-anonymizer-data-masking/
 [bidirectional replication in postgresql using pglogical]: https://www.jamesarmes.com/2023/03/bidirectional-replication-postgresql-pglogical.html
 [connect to a postgresql database]: https://www.postgresqltutorial.com/connect-to-postgresql-database/
+[dimitri/pgcopydb]: https://github.com/dimitri/pgcopydb
 [dverite/postgresql-functions]: https://github.com/dverite/postgresql-functions
 [get count of records affected by insert or update in postgresql]: https://stackoverflow.com/questions/4038616/get-count-of-records-affected-by-insert-or-update-in-postgresql#78459743
 [hashing a string to a numeric value in postgresql]: https://stackoverflow.com/questions/9809381/hashing-a-string-to-a-numeric-value-in-postgresql#69650940
