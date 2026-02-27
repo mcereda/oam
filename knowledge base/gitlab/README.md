@@ -6,8 +6,9 @@
    1. [Kubernetes](#kubernetes)
       1. [Helm chart](#helm-chart)
       1. [Operator](#operator)
-1. [Create resources in GitLab using Pulumi](#create-resources-in-gitlab-using-pulumi)
-1. [Forking projects](#forking-projects)
+   1. [Create resources in GitLab using Pulumi](#create-resources-in-gitlab-using-pulumi)
+1. [Forking internal projects](#forking-internal-projects)
+1. [Mirroring external repositories](#mirroring-external-repositories)
 1. [Repository management](#repository-management)
    1. [Different owners for parts of the code base](#different-owners-for-parts-of-the-code-base)
    1. [Get the version of the helper image to use for a runner](#get-the-version-of-the-helper-image-to-use-for-a-runner)
@@ -588,7 +589,7 @@ or consider using the [minimal Minikube example values file] as reference, as st
 
 See the [operator guide] and the [operator code] for details.
 
-## Create resources in GitLab using Pulumi
+### Create resources in GitLab using Pulumi
 
 Refer Pulumi's [GitLab provider installation & configuration] and [GitLab provider's README].
 
@@ -611,9 +612,72 @@ Refer Pulumi's [GitLab provider installation & configuration] and [GitLab provid
   export GITLAB_TOKEN='glpat-m-Va…zy'
   ```
 
-## Forking projects
+## Forking internal projects
 
 Refer [Forks].
+
+Allows creating independent copies of _internal_ projects (but **not** external repositories) for development purposes.
+
+When forking a repository, one gets their own personal copy that they can freely modify.<br/>
+The fork starts identical to the original, just **without** original project contents like issues, merge requests, or
+wiki pages. It then diverges over time as one applies changes to it.
+
+GitLab tracks the relationship between fork and upstream to allow one to open merge requests and contribute changes
+back to the original repository.
+
+Unlike [mirrors][mirroring external repositories], forks are not automatically kept in sync. One has to manually fetch
+and merge upstream changes if they want them.
+
+Forks _can_ be configured as mirrors of the upstream projects if:
+
+- The GitLab instance's subscription tier is Premium or Ultimate.
+- One creates all the changes in branches (not the sources' default branch).
+- One does not work on merge requests that require changes to the sources' default branch.
+
+Repository mirroring keeps the fork synced with the original project.<br/>
+This method updates the fork once per hour, with no manual git pull required.
+
+With mirroring, before approving a merge request, one is asked to sync. Consider automating it.
+
+## Mirroring external repositories
+
+Refer to [Repository mirroring][documentation / repository mirroring].
+
+One can _mirror_ repositories to and from _external_ sources.<br/>
+Branches, tags, and commits in the source repository are synced automatically to the destination one.
+
+Mirror repositories allow to maintain a read-only copy of an upstream repository, internally, that stays up to date with
+the source.<br/>
+This is especially useful when:
+
+- Wanting to _backup_ external repositories, in case anything happens to them.
+- Wanting to have an _internal_ reference to external repositories, like for automation purposes.
+- Wanting to sync between git server instances.
+- The external repository's home service imposes limitations to users.
+
+When pulling changes from the source repository, mirrors _forcefully_ do that (`git pull --force`) that make any changes
+disappear
+One does **not** typically develop in a mirror, since pulls are usually forced pulls that make any changes
+disappear.<br/>
+To maintain private changes, one should:
+
+1. Mirror the repository.
+1. [_Fork_][forking internal projects] the mirror.
+1. Use the **fork** (and not the mirror) for active development.
+
+One _can_ also mirror repositories _bidirectionally_, but doing so usually ends up in lots of conflicts.
+
+> [!important]
+> GitLab does **not** support:
+>
+> - SCP-style URLs. See [issue 18993][issues / support scp-style urls in pull and push mirroring].
+> - Mirroring repositories from git servers using the [dumb HTTP protocol][git on the server - the protocols].
+
+Mirrors are scheduled to update automatically.<br/>
+One _can_ force an immediate update at anytime unless:
+
+- The mirror is already updating.
+- The interval limit for pull mirroring has not yet elapsed.
 
 ## Repository management
 
@@ -664,7 +728,7 @@ Gotchas:
 - ~~There is as of 2024-04-10 no way to assign ownership by using aliases for roles (like maintainers or developers); only
   groups or users are allowed.~~<br/>
   ~~This feature is being added, but it has been open for over 3y now. See
-  [Ability to reference Maintainers or Developers from CODEOWNERS].~~<br/>
+  [Ability to reference Maintainers or Developers from CODEOWNERS][issues / ability to reference maintainers or developers from codeowners].~~<br/>
   Solved in GitLab 17.8, see
   [GitLab 17.8 Release][gitlab 17.8 release - use roles to define project members as code owners].
 
@@ -999,7 +1063,7 @@ git clone "https://oauth2:${ACCESS_TOKEN}@somegitlab.com/vendor/package.git"
 
 ### GitLab keeps answering with code 502
 
-Refer [The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership].
+Refer [The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership][issues / the docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership].
 
 Error message example:
 
@@ -1060,7 +1124,7 @@ Refer [Invalid login or password].
 - [Autoscaling GitLab Runner on AWS EC2]
 - [How to restart GitLab]
 - [Code owners]
-- [Ability to reference Maintainers or Developers from CODEOWNERS]
+- [Ability to reference Maintainers or Developers from CODEOWNERS][issues / ability to reference maintainers or developers from codeowners]
 - [Merge request approval rules]
 - [Caching in CI/CD]
 - [Tutorial: Use Buildah in a rootless container with GitLab Runner Operator on OpenShift]
@@ -1074,7 +1138,7 @@ Refer [Invalid login or password].
 - [Restore GitLab]
 - [How to disable the Two-factor authentication in GitLab?]
 - [How to Upgrade Your Omnibus GitLab]
-- [The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership]
+- [The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership][issues / the docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership]
 - [GitLab HA Scaling Runner Vending Machine for AWS EC2 ASG]
 - [GitLab maintenance mode]
 - [Forks]
@@ -1088,7 +1152,9 @@ Refer [Invalid login or password].
   -->
 
 <!-- In-article sections -->
+[Forking internal projects]: #forking-internal-projects
 [Maintenance mode]: #maintenance-mode
+[Mirroring external repositories]: #mirroring-external-repositories
 [Reset user's passwords]: #reset-users-passwords
 
 <!-- Knowledge base -->
@@ -1101,7 +1167,6 @@ Refer [Invalid login or password].
 
 <!-- Files -->
 <!-- Upstream -->
-[ability to reference maintainers or developers from codeowners]: https://gitlab.com/gitlab-org/gitlab/-/issues/282438
 [adding and removing kubernetes clusters]: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
 [automate storage management]: https://docs.gitlab.com/ee/user/storage_management_automation.html
 [autoscaling gitlab runner on aws ec2]: https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/
@@ -1115,6 +1180,7 @@ Refer [Invalid login or password].
 [codeowners syntax]: https://docs.gitlab.com/ee/user/project/codeowners/reference.html
 [command-line options]: https://docs.gitlab.com/charts/installation/command-line-options.html
 [deployment]: https://docs.gitlab.com/charts/installation/deployment.html
+[Documentation / Repository mirroring]: https://docs.gitlab.com/user/project/repository/mirror/
 [elasticsearch]: https://docs.gitlab.com/ee/integration/advanced_search/elasticsearch.html
 [environment variables]: https://docs.gitlab.com/ee/administration/environment_variables.html
 [Environments]: https://docs.gitlab.com/ci/environments/
@@ -1132,6 +1198,9 @@ Refer [Invalid login or password].
 [install gitlab with the linux package]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/doc/installation/index.md
 [install self-managed gitlab]: https://about.gitlab.com/install
 [Invalid login or password]: https://support.gitlab.com/hc/en-us/articles/20488048257052-Invalid-login-or-password
+[Issues / ability to reference maintainers or developers from codeowners]: https://gitlab.com/gitlab-org/gitlab/-/issues/282438
+[Issues / Support scp-style URLs in pull and push mirroring]: https://gitlab.com/gitlab-org/gitlab/-/issues/18993
+[Issues / The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership]: https://gitlab.com/gitlab-org/gitlab/-/issues/349846#note_1516339762
 [merge request approval rules]: https://docs.gitlab.com/ee/user/project/merge_requests/approvals/rules.html
 [minimal minikube example values file]: https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/values-minikube-minimum.yaml
 [OmniAuth]: https://docs.gitlab.com/integration/omniauth/
@@ -1147,7 +1216,6 @@ Refer [Invalid login or password].
 [runners on kubernetes]: https://docs.gitlab.com/runner/install/kubernetes.html
 [sign-up restrictions]: https://docs.gitlab.com/ee/administration/settings/sign_up_restrictions.html
 [support object storage bucket prefixes]: https://gitlab.com/gitlab-org/charts/gitlab/-/issues/3376
-[the docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership]: https://gitlab.com/gitlab-org/gitlab/-/issues/349846#note_1516339762
 [the gitlab handbook]: https://handbook.gitlab.com/
 [tls]: https://docs.gitlab.com/charts/installation/tls.html
 [tutorial: use buildah in a rootless container with gitlab runner operator on openshift]: https://docs.gitlab.com/ee/ci/docker/buildah_rootless_tutorial.html
@@ -1159,6 +1227,7 @@ Refer [Invalid login or password].
 <!-- Others -->
 [chef infra]: https://www.chef.io/products/chef-infra
 [configuring private dns zones and upstream nameservers in kubernetes]: https://kubernetes.io/blog/2017/04/configuring-private-dns-zones-upstream-nameservers-kubernetes/
+[Git on the Server - The Protocols]: https://git-scm.com/book/en/v2/Git-on-the-Server-The-Protocols#_dumb_http
 [gitlab provider installation & configuration]: https://www.pulumi.com/registry/packages/gitlab/installation-configuration/
 [gitlab provider's readme]: https://github.com/pulumi/pulumi-gitlab/blob/master/README.md
 [how to disable the two-factor authentication in gitlab?]: https://stackoverflow.com/questions/31024771/how-to-disable-the-two-factor-authentication-in-gitlab
