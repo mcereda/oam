@@ -8,11 +8,12 @@ NAS solution based on [Debian Linux][debian].
 1. [Create users](#create-users)
 1. [Make users OpenMediaVault administrators](#make-users-openmediavault-administrators)
 1. [Disable the default `admin` user](#disable-the-default-admin-user)
-1. [Configuration backup](#configuration-backup)
+1. [Backup the configuration](#backup-the-configuration)
 1. [Wake On Lan](#wake-on-lan)
 1. [Power management](#power-management)
    1. [CPU governor](#cpu-governor)
    1. [Disk power options](#disk-power-options)
+   1. [Shut down automatically depending on usage](#shut-down-automatically-depending-on-usage)
 1. [OMV Extras](#omv-extras)
 1. [Antivirus](#antivirus)
 1. [UPS](#ups)
@@ -134,7 +135,7 @@ From the safest to the less safe option:
    deluser --remove-home 'admin'
    ```
 
-## Configuration backup
+## Backup the configuration
 
 OMV's whole configuration is saved in the `/etc/openmediavault/config.xml` file.<br/>
 Keep a backup of it somewhere **outside** the host running it.
@@ -165,7 +166,7 @@ governor is set to `ondemand`.
 
 ### Disk power options
 
-By default disks have no power management configured.
+By default disks have **no** power management configured.
 
 Editing a disk under _Storage_ > _Disks_ will allow to set these options for it:
 
@@ -200,6 +201,11 @@ When setting a spin down time, make sure the APM value is set lower than `128`. 
 The web framework does not narrow the APM options if the spin down time is set, nor it disables the spin down option
 when a value higher than 128 is selected for APM.
 
+### Shut down automatically depending on usage
+
+1. Install the `openmediavault-autoshutdown` plugin.
+1. Configure it via the _Services_ > _AutoShutdown_ tab.
+
 ## OMV Extras
 
 From the CLI, as the `root` user:
@@ -227,7 +233,7 @@ From the CLI, as the `root` user:
 
 ## ZFS
 
-Refer [ZFS Plugin For OMV7].
+Refer [ZFS Plugin For OMV8].
 
 1. [Install OMV-Extras][omv extras].
 1. Pick one:
@@ -290,7 +296,7 @@ Just enable that property in the pool or datasets.
 ### Sources
 
 - [How to lock or disable an user account]
-- [ZFS plugin for OMV7]
+- [ZFS plugin for OMV8]
 - [Software & Update Management]
 
 <!--
@@ -317,7 +323,7 @@ Just enable that property in the pool or datasets.
 [Plugins]: https://docs.openmediavault.org/en/stable/plugins.html
 [Software & Update Management]: https://docs.openmediavault.org/en/stable/various/apt.html
 [Website]: https://www.openmediavault.org/
-[ZFS Plugin For OMV7]: https://wiki.omv-extras.org/doku.php?id=omv7:omv7_plugins:zfs
+[ZFS Plugin For OMV8]: https://wiki.omv-extras.org/doku.php?id=omv8:omv8_plugins:zfs
 
 <!-- Others -->
 [hdparm]: https://linux.die.net/man/8/hdparm
