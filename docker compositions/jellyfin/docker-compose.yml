@@ -1,0 +1,20 @@
+---
+volumes:
+  cache:
+  config:
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:2026022305
+    container_name: jellyfin
+    devices:
+      - /dev/dri:/dev/dri
+    ports:
+      - 8096:8096/tcp
+      - 7359:7359/udp
+    volumes:
+      - config:/config
+      - cache:/cache
+      - type: bind
+        source: /tank/media
+        target: /media
+    restart: unless-stopped
