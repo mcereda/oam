@@ -9,11 +9,12 @@ the previous ones.
    1. [Speculative decoding](#speculative-decoding)
 1. [Reasoning](#reasoning)
 1. [Prompting](#prompting)
+1. [Context window](#context-window)
 1. [Function calling](#function-calling)
 1. [Concerns](#concerns)
 1. [Run LLMs Locally](#run-llms-locally)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -34,7 +35,9 @@ _Context_ is helpful information before or after a target token.<br/>
 It can help a language model make better predictions, like determining whether "orange" refers to a citrus fruit or a
 color.
 
-_Large_ LMs are language models trained on massive datasets, and encoding their acquired knowledge into up to trillions
+_Context Window_ is the amount of tokens that a model can pay attention to at any one time.
+
+_Large LMs_ are language models trained on massive datasets, and encoding their acquired knowledge into up to trillions
 of parameters.
 
 _Parameters_ are internal weights and values that an LLM learns during training.<br/>
@@ -43,6 +46,8 @@ They are used to capture patterns in language such as grammar, meaning, context 
 The more parameters a model has, the better it typically is to understand and generate complex output.<br/>
 An increased parameter count, on the other hand, demands more computational resources for training and inference, and
 make models more prone to overfitting, slower to respond, and harder to deploy efficiently.
+
+_System prompts_ are predefined text included at the start of conversations to establish ground rules for them.
 
 | Provider  | Creator    |
 | --------- | ---------- |
@@ -203,6 +208,62 @@ Users can confirm the plan **before** the model executes it.
 _Good_ prompting is about designing predictable interactions with a model.<br/>
 In the context of LLM agent development, it is no different from interface design.
 
+Model providers and creators usually bake behavioural rules into the model through training, rather than just using
+instructions.<br/>
+These aren't _rules that a model follows_ so much as _values_ that are deeply embedded in how it thinks and
+responds.<br/>
+They act as the limits that **no** prompt or user request can override.
+
+_System prompts_ are sets of guidelines, boundaries, and contextual information that establishes ground rules for the
+conversations to come.<br/>
+They guide the model to operate within specific parameters and generate responses that are coherent,
+relevant, and aligned with the desired outcome.
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Example</summary>
+
+```md
+You are an enthusiastic biology teacher named Leonardo.
+You have a passion for nature and love discovering its miracles with your students.
+Your communication style is friendly and informative.
+
+If a user asks about topics outside your expertise, such as medical advice or legal matters, inform them that you are
+not qualified to provide relevant responses. Suggest that they should consult with the appropriate professionals.
+```
+
+</details>
+
+System prompts are designed to take precedence over user instructions.<br/>
+If a system prompt says to "never discuss competitor products", users asking about competitors should still be denied.
+However, users can sometimes work around poorly written system prompts through clever phrasing or _jailbreaking_
+attempts.
+
+Also see [Mastering System Prompts for LLMs] for suggestions.
+
+## Context window
+
+Amount of text, **in tokens**, that a model can _remember_ at any one time.<br/>
+Determines how long of a conversation it can carry out without forgetting details from earlier in the exchange, and the
+maximum size of documents or code samples that it can process at once.
+
+Generally, increasing an LLM's context size increases accuracy and coherent responses, lowers hallucinations, allows for
+longer conversations, and improves analysis of longer sequences of data.<br/>
+Larger windows require more computational resources (especially vRAM), and can overwhelm the model pushing them to take
+cognitive shortcuts. This potentially increases a model's vulnerability to manipulation.
+
+When sending messages to a model, one is really sending **the whole context** up to the current point in the
+conversation (the message history, documents, and all).
+
+Models perform best when relevant information is toward the **beginning** or **end** of the input context.<br/>
+Performance degrades when the model must carefully consider the information **in the middle** of long contexts.
+
+When a prompt, conversation, document or code base exceeds a model's context window, the context must be _compacted_ to
+continue.<br/>
+The compacting action summarizes the conversation, then clears the current context and reloads that summary. The model
+retains _an idea_ of the progress, and now can continue.
+
+Whatever one puts in the context, that is more likely to either happen or to steer the conversation towards it.
+
 ## Function calling
 
 Refer [Function calling in LLMs].
@@ -285,6 +346,7 @@ Refer:
 - [Introduction to Large Language Models]
 - GeeksForGeeks' [What are LLM parameters?][geeksforgeeks / what are llm parameters?]
 - IBM's [What are LLM parameters?][ibm / what are llm parameters?]
+  and [What is a context window?][ibm / what is a context window?]
 - [This is not the AI we were promised], presentation by Michael John Wooldridge at the Royal Society
 
 <!--
@@ -318,6 +380,7 @@ Refer:
 [GeeksForGeeks / What are LLM parameters?]: https://www.geeksforgeeks.org/artificial-intelligence/what-are-llm-parameters/
 [Grok]: https://grok.com/
 [IBM / What are LLM parameters?]: https://www.ibm.com/think/topics/llm-parameters
+[IBM / What is a context window?]: https://www.ibm.com/think/topics/context-window
 [Introduction to Large Language Models]: https://developers.google.com/machine-learning/crash-course/llm
 [Jan]: https://www.jan.ai/
 [Llama]: https://www.llama.com/
@@ -325,6 +388,7 @@ Refer:
 [LLM skills every AI engineer must know]: https://fiodar.substack.com/p/llm-skills-every-ai-engineer-must-know
 [Local LLM Hosting: Complete 2026 Guide - Ollama, vLLM, LocalAI, Jan, LM Studio & More]: https://www.glukhov.org/post/2025/11/hosting-llms-ollama-localai-jan-lmstudio-vllm-comparison/
 [Looking back at speculative decoding]: https://research.google/blog/looking-back-at-speculative-decoding/
+[Mastering System Prompts for LLMs]: https://dev.to/simplr_sh/mastering-system-prompts-for-llms-2d1d
 [Mistral]: https://mistral.ai/
 [OpenClaw: Who are you?]: https://www.youtube.com/watch?v=hoeEclqW8Gs
 [Optimizing LLMs for Performance and Accuracy with Post-Training Quantization]: https://developer.nvidia.com/blog/optimizing-llms-for-performance-and-accuracy-with-post-training-quantization/
