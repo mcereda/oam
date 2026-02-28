@@ -1041,6 +1041,15 @@ exit
 
 Refer [Extend with GitLab].
 
+Most API calls require authentication.
+
+> [!tip]
+> Specifying a personal access token (PAT) in the `PRIVATE-TOKEN` header (`PRIVATE-TOKEN: glpat-…`) is the same as using
+> the `Authorization` header with bearer (`Authorization: bearer glpat-…`).
+
+_Deploy tokens_ do **not** expire.\
+Consider using them instead of PATs when accessing repositories from inside pipelines.
+
 The [Python SDK] also provides a CLI tool to operate with the API.
 
 <details>
