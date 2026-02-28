@@ -1,5 +1,8 @@
 ---
 # Refer https://github.com/syncthing/syncthing/blob/main/README-Docker.md
+volumes:
+  config:
+  data:
 services:
   syncthing:
     image: syncthing/syncthing:2.0.14
@@ -10,8 +13,8 @@ services:
       - PGID=0  # due to podman's rootless gid mapping
       - STGUIADDRESS=0.0.0.0:8384
     volumes:
-      - ${PWD}/config:/var/syncthing/config:z
-      - ${PWD}/data:/var/syncthing/data
+      - config:/var/syncthing/config:z
+      - data:/var/syncthing/data
       # - ${HOME}/media:/var/syncthing/media
     network_mode: host
     restart: unless-stopped

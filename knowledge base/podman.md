@@ -20,7 +20,7 @@ Intended to be a drop-in replacement for [Docker].
 
 ```sh
 # Install.
-apt install 'podman' 'podman-compose'
+apt install 'podman' 'podman-compose' 'uidmap'
 dnf install 'podman'
 pacman -S 'podman'
 zypper install 'podman'
