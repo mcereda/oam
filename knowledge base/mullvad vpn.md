@@ -13,9 +13,15 @@ Intro
 
 ## TL;DR
 
-One can use the same Mullvad VPN account on up to 5 different devices.<br/>
+One can use the same account on up to 5 different devices.<br/>
 When logging in with accounts that already have 5 devices associated with it, the application will show a list of
 devices and prompt to log out of at least one of them.
+
+Enable _local network sharing_ to access other devices on the same _local_ network (e.g. NAS).<br/>
+Use the IP address of the device when connecting to it in case the hostname is not resolved correctly.
+
+Use [split tunneling][Documentation / Split tunneling with the Mullvad app] to _exclude_ some apps from the VPN while it
+is active.
 
 <!-- Uncomment if used
 <details>
@@ -70,6 +76,7 @@ devices and prompt to log out of at least one of them.
 [Blog]: https://mullvad.net/en/blog
 [Codebase]: https://github.com/mullvad/
 [Documentation]: https://mullvad.net/en/help/
+[Documentation / Split tunneling with the Mullvad app]: https://mullvad.net/en/help/split-tunneling-with-the-mullvad-app
 [Documentation / Using the Mullvad VPN app]: https://mullvad.net/en/help/using-mullvad-vpn-app
 [Website]: https://mullvad.net/en/
 
