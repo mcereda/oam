@@ -15,6 +15,13 @@ Works in a terminal, IDE, browser, and as a desktop app.
 
 ## TL;DR
 
+Claude can run in multiple shell sessions.<br/>
+Prefer using git worktrees to isolate sessions in the same repository.
+
+Fully multimodal.<br/>
+Can access and understand images and other file types.<br/>
+Can use tools, and do it in parallel.
+
 _Normally_:
 
 - Tied to Anthropic's Claude models (Sonnet and Opus).
@@ -45,8 +52,60 @@ flowchart LR
 
 Supports a plugin system for extending its capabilities.
 
-Sends Statsig telemetry data by default.<br/>
+Sends Statsig telemetry data by default. Includes operational metrics (latency, reliability, usage patterns).<br/>
 Disable it by setting the `DISABLE_TELEMETRY` environment variable to `1`.
+
+Gives better results when asked to make a plan before writing code, and when tries multiple times (iterates).<br/>
+Common workflows:
+
+- Explore, plan, ask for confirmation, write code, commit.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example</summary>
+
+  > Figure out the root cause for issue \#43, then propose possible fixes.<br/>
+  > Let me choose an approach before you write code.<br/>
+  > Ultrathink.
+
+  </details>
+
+- Write tests, commit, write code, iterate, commit, push, create a PR.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example</summary>
+
+  > Write tests for @utils/markdown.ts to make sure links render properly.<br/>
+  > Note these tests will not pass yet since links are not yet implemented.<br/>
+  > Commit.<br/>
+  > Update the code to make the tests pass.<br/>
+  > Commit. Push. PR.
+
+  </details>
+
+- Write code, screenshot the result, track progress, iterate.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example</summary>
+
+  > Implement \[mock.png], then screenshot it with Puppeteer and iterate until it looks like the mock.<br/>
+  > Write down notes for yourself at every iteration. Think hard.
+
+  </details>
+
+Hit `esc` once to stop Claude.<br/>
+This action is usually safe. Claude will then resume or make things differently, but will have a context.
+
+Prefer using Sonnet for quicker, smaller tasks (e.g. as sub-agent, greenfield coding, app initialization).<br/>
+Consider using Opus for broader, longer, higher-level tasks (e.g. planning, refactoring, orchestrating sub-agents).
+
+Use memory and context files (`CLAUDE.md`) to instruct Claude Code on commands, style guidelines, and give it _key_
+context. Try to keep them small.
+
+Consider allowing specific tools to reduce interruption and avoid fatigue due to too many requests.<br/>
+Prefer using CLI tools over MCP servers.
+
+Make sure to use `/clear` or `/compact` regularly to allow Claude to maintain focus on the conversation.<br/>
+Or make it create notes to self and restart it once the context goes above a threshold (usually best at 60%).
 
 <details>
   <summary>Setup</summary>
@@ -69,7 +128,9 @@ claude "fix the build error"
 
 # Run a one-off task, then exit.
 claude -p 'Hi! Are you there?'
-claude -p "explain this function"
+claude -p "explain the function in @someFunction.ts"
+claude -p 'What did I do this week?' --allowedTools 'Bash(git log:*)' --output-format 'json'
+cat 'minutes.md' | claude -p "summarize this"
 
 # Resume the most recent conversation that happened in the current directory
 claude -c
@@ -119,12 +180,12 @@ claude plugin update 'gitlab@claude-plugins-official'
 From within Claude Code:
 
 ```plaintext
-/mcp
+/mcp  manage MCP servers
 ```
 
 </details>
 
-<details>
+<details style='padding: 0 0 1rem 0'>
   <summary>Real world use cases</summary>
 
 ```sh
@@ -477,6 +538,7 @@ Claude Code version: `v2.1.41`.<br/>
 
 - [Documentation]
 - [pffigueiredo/claude-code-sheet.md]
+- [Mastering Claude Code in 30 minutes] by Boris Cherny, Anthropic
 
 <!--
   Reference
@@ -507,6 +569,7 @@ Claude Code version: `v2.1.41`.<br/>
 [Documentation/Settings]: https://code.claude.com/docs/en/settings
 [Documentation/Skills]: https://code.claude.com/docs/en/skills
 [Website]: https://claude.com/product/overview
+[Mastering Claude Code in 30 minutes]: https://www.youtube.com/watch?v=6eBSHbLKuN0
 
 <!-- Others -->
 [Agent Skills]: https://agentskills.io/
