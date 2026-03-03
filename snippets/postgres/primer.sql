@@ -142,7 +142,7 @@ ALTER USER joel WITH NOSUPERUSER;
 ALTER USER mark CREATEDB REPLICATION;
 ALTER ROLE miriam CREATEROLE CREATEDB;
 
--- Change passwords
+-- Change (/reset) passwords
 ALTER USER mike WITH PASSWORD NULL;
 ALTER USER jonathan WITH PASSWORD 'seagull5-pantomime-Resting';
 ALTER ROLE samantha WITH PASSWORD 'Wing5+Trunks3+Relic2' VALID UNTIL 'August 4 12:00:00 2024 +1';
@@ -249,6 +249,28 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO bar;
 
 -- Get passwords
 SELECT rolpassword from pg_authid where rolname = 'admin';
+
+
+-- Check replication slots' state.
+SELECT slot_name, plugin, active, pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn)) AS retained_wal
+FROM pg_replication_slots;
+
+-- Get the size of the `pg_wal` directory.
+SELECT pg_size_pretty(sum(size)) FROM pg_ls_waldir();
+
+-- Drop replication slots.
+SELECT pg_drop_replication_slot('peerflow_slot_some_db_pg');
+
+
+-- Show existing publications.
+SELECT * FROM pg_publication;
+
+-- Create publications.
+CREATE PUBLICATION peerflow_slot_some_db_pg FOR ALL TABLES;
+CREATE PUBLICATION peerflow_slot_some_db_pg FOR TABLE public.reports;
+
+-- Drop publications.
+DROP PUBLICATION peerflow_slot_some_db_pg;
 
 
 -- Show available extensions

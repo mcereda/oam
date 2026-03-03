@@ -4,6 +4,7 @@
 1. [Functions](#functions)
 1. [Write-Ahead Logging](#write-ahead-logging)
 1. [Replication slots](#replication-slots)
+1. [Publications](#publications)
 1. [Backup](#backup)
 1. [Restore](#restore)
 1. [Extensions of interest](#extensions-of-interest)
@@ -11,7 +12,7 @@
    1. [`postgresql_anonymizer`](#postgresql_anonymizer)
 1. [Make it distributed](#make-it-distributed)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -251,6 +252,44 @@ Only one receiver may consume changes from a slot at any given time.
 
 Since PostgreSQL 17 (released September 2024), logical replication slots **can** also be created on hot standbys.
 
+```sql
+-- Check replication slots' state.
+SELECT slot_name, plugin, active, pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn)) AS retained_wal
+FROM pg_replication_slots;
+
+-- Get the size of the `pg_wal` directory.
+SELECT pg_size_pretty(sum(size)) FROM pg_ls_waldir();
+
+-- Drop replication slots.
+SELECT pg_drop_replication_slot('peerflow_slot_some_db_pg');
+```
+
+## Publications
+
+Logical replication objects that define which tables and operations (INSERT, UPDATE, DELETE, TRUNCATE) to
+replicate.<br/>
+They are essentially just metadata, and as such occupy virtually no disk space by themselves.<br/>
+Publications' metadata is stored in the `pg_publication` system catalog table.
+
+Subscribers create [replication slots] when they connect.
+
+> [!warning]
+> PostgreSQL must retain [WAL segments][write-ahead logging] until **all** subscribers have consumed them.<br/>
+> If any subscriber is slow or disconnected, WAL accumulate on disk making the `pg_wal` directory grow as unacknowledged
+> WAL piles up.
+
+```sql
+-- Show existing publications.
+SELECT * FROM pg_publication;
+
+-- Create publications.
+CREATE PUBLICATION peerflow_slot_some_db_pg FOR ALL TABLES;
+CREATE PUBLICATION peerflow_slot_some_db_pg FOR TABLE public.reports;
+
+-- Drop publications.
+DROP PUBLICATION peerflow_slot_some_db_pg;
+```
+
 ## Backup
 
 PostgreSQL offers the [`pg_dump`][pg_dump] and [`pg_dumpall`][pg_dumpall] native client utilities to dump databases to
@@ -462,6 +501,7 @@ See also [yugabyte/yugabyte-db].
 
 <!-- In-article sections -->
 [Replication slots]: #replication-slots
+[Write-Ahead Logging]: #write-ahead-logging
 
 <!-- Knowledge base -->
 [mysql]: ../mysql.md
