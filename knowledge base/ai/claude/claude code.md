@@ -9,6 +9,9 @@ Works in a terminal, IDE, browser, and as a desktop app.
 1. [Limit tool execution](#limit-tool-execution)
 1. [Memory](#memory)
 1. [Using plugins](#using-plugins)
+1. [Delegating work](#delegating-work)
+   1. [Sub agents](#sub-agents)
+   1. [Agent teams](#agent-teams)
 1. [Run on local models](#run-on-local-models)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -95,8 +98,10 @@ Common workflows:
 Hit `esc` once to stop Claude.<br/>
 This action is usually safe. Claude will then resume or make things differently, but will have a context.
 
-Prefer using Sonnet for quicker, smaller tasks (e.g. as sub-agent, greenfield coding, app initialization).<br/>
-Consider using Opus for broader, longer, higher-level tasks (e.g. planning, refactoring, orchestrating sub-agents).
+Prefer using **Sonnet** for quicker, smaller tasks (e.g. as sub-agent, greenfield coding, app initialization).<br/>
+Consider using **Opus** for broader, longer, higher-level tasks (e.g. planning, refactoring, orchestrating
+sub-agents).<br/>
+Consider using **Haiku** for quick responses.
 
 Use memory and context files (`CLAUDE.md`) to instruct Claude Code on commands, style guidelines, and give it _key_
 context. Try to keep them small.
@@ -309,7 +314,7 @@ Manually add the MCP server definition to `$HOME/.claude.json`:
 
 ## Using skills
 
-Refer [Skills][documentation/skills].<br/>
+Refer [Skills][documentation / skills].<br/>
 See also:
 
 - [Create custom skills].
@@ -367,7 +372,7 @@ Reference optional files in `SKILL.md` to instruct Claude of what they contain a
 
 ## Limit tool execution
 
-Leverage [Sandboxing][documentation/sandboxing] to provide filesystem and network isolation for tool execution.<br/>
+Leverage [Sandboxing][documentation / sandboxing] to provide filesystem and network isolation for tool execution.<br/>
 The sandboxed bash tool uses OS-level primitives to enforce defined boundaries upfront, and controls network access
 through a proxy server running outside the sandbox.<br/>
 Attempts to access resources outside the sandbox trigger immediate notifications.
@@ -399,7 +404,7 @@ Customize sandbox behavior through the `settings.json` file.
 
 ## Memory
 
-Refer [Manage Claude's memory][documentation/manage claude's memory].
+Refer [Manage Claude's memory][documentation / manage claude's memory].
 
 Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in a later sessions.
 
@@ -479,6 +484,136 @@ claude plugin uninstall 'gitlab@claude-plugins-official'
 
 </details>
 
+## Delegating work
+
+[Agent teams] generally perform parallel tasks in less time, but consume more tokens.<br/>
+[Sub agents] currently consistently produce better quality output than teams.
+
+### Sub agents
+
+Refer to [Create custom subagents][Documentation / Create custom subagents].
+
+**Specialized** AI assistants that handle **specific** types of tasks.<br/>
+Each runs in its own context window with a custom system prompt, specific tool access, and independent permissions.
+
+When Claude encounters a task that matches a subagent's description, it delegates the task to that subagent.<br/>
+It which works independently, and returns results once finished.
+
+Most effective for sequential tasks, same-file edits, or tasks with many dependencies.<br/>
+They only report results back to the main agent, and never talk to each other.
+
+Claude Code includes several built-in subagents like _Explore_, _Plan_, and _general-purpose_.<br/>
+One can create custom subagents to handle specific tasks.
+
+Subagents are defined in Markdown files with YAML frontmatter.<br/>
+Create them manually or use the `/agents` command.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```md
+---
+name: code-reviewer
+description: Reviews code for quality and best practices
+tools: Read, Glob, Grep
+model: sonnet
+---
+
+You are a code reviewer. When invoked, analyze the code and provide
+specific, actionable feedback on quality, security, and best practices.
+```
+
+</details>
+
+One can ask Claude to use subagents in sequence when dealing with multi-step workflows.<br/>
+Each subagent completes its task and returns its results to Claude, which then passes relevant context to the next
+subagent.
+
+### Agent teams
+
+> [!warning]
+> Experimental feature as of 2026-03-02.
+
+Refer to [Orchestrate teams of Claude Code sessions][documentation / orchestrate teams of claude code sessions].
+
+Multiple Claude Code instances can work together as a team.<br/>
+One session acts as the team lead and coordinates work, assigns tasks, and synthesizes results.<br/>
+Teammates work independently, have their own context window, and communicate directly with each other.
+
+One can interact with individual teammates directly, without going through the lead.
+
+Most effective when teammates can operate independently.<br/>
+They do exhibit coordination overhead, and use more tokens than a single session.
+
+Currently disabled by default.<br/>
+Enable them by setting the `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` environment variable to `1`, either in a shell
+environment or through `settings.json`.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+```
+
+</details>
+
+Tell Claude to create an agent team, describing the task and the desired team structure in natural language.<br/>
+Claude creates the team with a shared task list, spawns teammates for each task, coordinates work based on the prompt,
+and attempts to clean up the team when finished.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+> [!note]
+> The three roles are independent, so they can explore the problem without waiting on each other.
+
+```plaintext
+I'm designing a CLI tool that helps developers track TODO comments across their codebase.
+Create an agent team to explore this from different angles: one teammate on UX, one on technical architecture, and one
+playing devil's advocate.
+```
+
+```plaintext
+Users report the app exits after one message instead of staying connected.
+Spawn 5 agent teammates to investigate different hypotheses. Have them talk to each other to try to disprove each
+other's theories, like a scientific debate.
+Update the findings doc with whatever consensus emerges.
+```
+
+</details>
+
+One can specify conditions and requirements in the prompt, like the number of teammates and wether they need to ask the
+lead for approval before acting.
+
+When requiring approvals:
+
+- Teammates work in read-only mode until they need to act.
+- Once finished planning, teammates send a plan approval request to the lead.
+- The lead reviews the plan, and either approves it or rejects it with feedback.
+
+  > [!important]
+  > The lead makes approval decisions autonomously.<br/>
+  > Give the lead criteria in the prompt to influence its judgment.
+
+- If rejected, that teammate stays in plan mode, revises based on the feedback, and resubmits.
+- Once approved, that teammate exits plan mode and begins implementation.
+
+Gracefully end teammates' sessions by just asking the lead.<br/>
+The lead sends them shutdown requests that the teammates can approve, exiting gracefully, or reject with an explanation.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```plaintext
+Ask the researcher teammate to shut down
+```
+
+</details>
+
+Clean up the team **after termination** by just asking the lead to clean up.<br/>
+The lead will fails if any teammate is still running.
+
 ## Run on local models
 
 Claude _can_ use other models and engines by setting the `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_BASE_URL` and
@@ -530,7 +665,7 @@ Claude Code version: `v2.1.41`.<br/>
 - [AI agents]
 - Alternatives: [Gemini CLI], [OpenCode], [Pi]
 - [Claude Code router]
-- [Settings][documentation/settings]
+- [Settings][documentation / settings]
 - [Prat011/awesome-llm-skills]
 - [Claude Skills vs. MCP: A Technical Comparison for AI Workflows]
 
@@ -546,6 +681,8 @@ Claude Code version: `v2.1.41`.<br/>
   -->
 
 <!-- In-article sections -->
+[Agent teams]: #agent-teams
+[Sub agents]: #sub-agents
 [Using Skills]: #using-skills
 
 <!-- Knowledge base -->
@@ -563,13 +700,15 @@ Claude Code version: `v2.1.41`.<br/>
 <!-- Upstream -->
 [Blog]: https://claude.com/blog
 [Codebase]: https://github.com/anthropics/claude-code
+[Documentation / Create custom subagents]: https://code.claude.com/docs/en/sub-agents
+[Documentation / Manage Claude's memory]: https://code.claude.com/docs/en/memory
+[Documentation / Orchestrate teams of Claude Code sessions]: https://code.claude.com/docs/en/agent-teams
+[Documentation / Sandboxing]: https://code.claude.com/docs/en/sandboxing
+[Documentation / Settings]: https://code.claude.com/docs/en/settings
+[Documentation / Skills]: https://code.claude.com/docs/en/skills
 [Documentation]: https://code.claude.com/docs/en/overview
-[Documentation/Manage Claude's memory]: https://code.claude.com/docs/en/memory
-[Documentation/Sandboxing]: https://code.claude.com/docs/en/sandboxing
-[Documentation/Settings]: https://code.claude.com/docs/en/settings
-[Documentation/Skills]: https://code.claude.com/docs/en/skills
-[Website]: https://claude.com/product/overview
 [Mastering Claude Code in 30 minutes]: https://www.youtube.com/watch?v=6eBSHbLKuN0
+[Website]: https://claude.com/product/overview
 
 <!-- Others -->
 [Agent Skills]: https://agentskills.io/
