@@ -18,3 +18,9 @@ gopass templates cat 'path/to/dir'
 # Remove templates
 gopass templates remove 'path/to/dir'
 gopass templates rm 'path/to/dir'
+
+# Change passwords programmatically.
+gopass cat 'path/to/entry' | sed '1s/.*/newPassword123/' | gopass insert -f 'path/to/entry'
+
+# Show multiple entries.
+parallel -j1 -o gopass cat db/{1}/{2}/users/postgres ::: ch us gb ::: prd stg
