@@ -208,8 +208,16 @@ Users can confirm the plan **before** the model executes it.
 _Good_ prompting is about designing predictable interactions with a model.<br/>
 In the context of LLM agent development, it is no different from interface design.
 
-Model providers and creators usually bake behavioural rules into the model through training, rather than just using
-instructions.<br/>
+Models' behaviour and answers depend on _training_, the _system prompt_ used, and the _user request_, with the priority
+being as follows:
+
+```mermaid
+flowchart LR
+  t("Training") -- supersedes --> s("System Prompt") -- supersedes --> u("User Request")
+```
+
+Model providers and creators usually **bake** _behavioural_ rules into the model through training, rather than just
+using instructions.<br/>
 These aren't _rules that a model follows_ so much as _values_ that are deeply embedded in how it thinks and
 responds.<br/>
 They act as the limits that **no** prompt or user request can override.
