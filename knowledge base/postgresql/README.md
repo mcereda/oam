@@ -220,12 +220,15 @@ Replaying the WAL for any period of time will also fix internal inconsistencies 
 
 ## Replication slots
 
-Refer [Logical Decoding Concepts][documentation / logical decoding concepts].
+Refer [Logical Decoding Concepts][documentation / logical decoding concepts] and
+[Replication][Documentation / Replication].
 
 Slots represent a stream of changes that can be replayed to a client in the **exact** order they were made on the origin
 server.<br/>
 Each slot streams a sequence of changes from **a single** database, and has an identifier that is unique across all
 databases in a PostgreSQL cluster.
+
+PostgreSQL lists existing slots and their state in the `pg_replication_slots` view.
 
 Slots persist independently of the connection using them, and are crash-safe.<br/>
 The current position of each slot is persisted only at checkpoint. In case of a crash, the slot might return to an
@@ -251,6 +254,15 @@ Only one receiver may consume changes from a slot at any given time.
 > either to prevent transaction ID wraparound or due to the disk being full.
 
 Since PostgreSQL 17 (released September 2024), logical replication slots **can** also be created on hot standbys.
+
+Use the `max_slot_wal_keep_size` parameter to configure the maximum size of WAL files that replication slots are allowed
+to retain in the `pg_wal` directory at checkpoint time. If this value is specified without units, it is taken as
+MB.<br/>
+If it is -1 (the default), replication slots may retain an **unlimited** amount of WAL files. Otherwise, they will be
+removed when the `restart_lsn` value of a replication slot falls behind the current LSN by more than the configured max
+size.<br/>
+The removal of required WAL files may block a consumer from continuing replication.<br/>
+This parameter can only be set in the postgresql.conf file or on the server command line.
 
 ```sql
 -- Check replication slots' state.
@@ -518,8 +530,9 @@ See also [yugabyte/yugabyte-db].
 [create function]: https://www.postgresql.org/docs/current/sql-createfunction.html
 [database connection control functions]: https://www.postgresql.org/docs/current/libpq-connect.html
 [docker image]: https://github.com/docker-library/docs/blob/master/postgres/README.md
-[Documentation / Write-Ahead Logging (WAL)]: https://www.postgresql.org/docs/current/wal-intro.html
 [Documentation / Logical Decoding Concepts]: https://www.postgresql.org/docs/current/logicaldecoding-explanation.html
+[Documentation / Replication]: https://www.postgresql.org/docs/current/runtime-config-replication.html
+[Documentation / Write-Ahead Logging (WAL)]: https://www.postgresql.org/docs/current/wal-intro.html
 [pg_settings]: https://www.postgresql.org/docs/current/view-pg-settings.html
 [psql]: https://www.postgresql.org/docs/current/app-psql.html
 [the password file]: https://www.postgresql.org/docs/current/libpq-pgpass.html
