@@ -5,9 +5,11 @@
 ```plaintext
 # Search words *forwards* in the current document.
 :/keyword ↵
+:/keyword/i ↵
 
 # Search words *backwards* in the current document.
 :?keyword ↵
+:?keyword/i ↵
 
 # Toggle case sensitivity in searches.
 :-I ↵
