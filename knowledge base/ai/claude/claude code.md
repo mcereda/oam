@@ -211,6 +211,8 @@ Add MCP servers to give Claude Code access to tools, databases, and APIs in gene
 > Be especially careful when using MCP servers that cat fetch untrusted content, as they can fall victim of prompt
 > injections.
 
+MCP servers connect Claude Code to the data, [Skills][using skills] teach it what to do with it.
+
 Procedure:
 
 1. Add the desired MCP server.
@@ -337,7 +339,10 @@ Whatever the scope, skills must follow the `<scope-dir>/<skill-name>/SKILL.md` t
 User-level skills are available in all projects.<br/>
 Project-level skills are limited to the current project.
 
-Claude Code activates relevant skills automatically based on the request context.
+Claude Code loads only the name and description of all skills during startup, then automatically loads and activates
+only those skills that are relevant to the requests' context.<br/>
+If the loaded skills reference other files, those are preemptively loaded together with the skill (_when_ it loads that
+skill).
 
 When working with files in subdirectories, Claude Code automatically discovers skills from nested `.claude/skills/`
 directories.
@@ -493,8 +498,9 @@ claude plugin uninstall 'gitlab@claude-plugins-official'
 
 Refer to [Create custom subagents][Documentation / Create custom subagents].
 
-**Specialized** AI assistants that handle **specific** types of tasks.<br/>
-Each runs in its own context window with a custom system prompt, specific tool access, and independent permissions.
+**Specialized** AI assistants with fixed roles, handling **specific** types of tasks.<br/>
+Each runs in its own context window, with its own custom system prompt, specific access to tools, and independent
+permissions.
 
 When Claude encounters a task that matches a subagent's description, it delegates the task to that subagent.<br/>
 It which works independently, and returns results once finished.

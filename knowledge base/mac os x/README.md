@@ -190,6 +190,12 @@ xattr -dr 'com.apple.quarantine' '/path/to/directory'
 # Install Rosetta
 # Very difficult to remove, once installed
 softwareupdate --install-rosetta --agree-to-license
+
+
+# Specify the maximum amount of RAM to use in the GPU
+# Specifically meaningful since the introduction of the unified architecture in M1
+sysctl iogpu.wired_limit_mb       # get the current value. 0 is auto calculated to around 75%
+sysctl iogpu.wired_limit_mb=4096
 ```
 
 ## Taking screenshots
