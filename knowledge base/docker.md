@@ -77,7 +77,8 @@ docker search 'boinc'
 
 # Login to registries.
 docker login
-docker login -u 'username' -p 'password'
+docker login --username 'username' -p 'password'
+gopass show -c 'docker-hub' | docker login 'dhi.io' -u 'username' --password-stdin
 aws ecr get-login-password \
 | docker login --username 'AWS' --password-stdin '012345678901.dkr.ecr.eu-east-2.amazonaws.com'
 
