@@ -19,7 +19,7 @@ MCP consists of:
 
 MCP _hosts_ are AI applications users can interact with, and that coordinate and manage one or more MCP clients.<br/>
 MCP _clients_ are components that connect to a single MCP server to gather context from it for the host to use.<br/>
-MCP _servers_ are applications providing context data to one or more MCP clients.
+MCP _servers_ are applications providing data to one or more MCP clients to use for context.
 
 MCP hosts create one MCP client for each MCP server they use.<br/>
 Each client maintains a dedicated connection with its corresponding server.
@@ -50,10 +50,11 @@ connections when they cannot find a version compatible with the server.
 
 MCP servers of interest:
 
-| MCP server                                        | Summary                                                |
-| ------------------------------------------------- | ------------------------------------------------------ |
-| [AWS API][aws api mcp server]                     | Interact with all available AWS services and resources |
-| [AWS Cost Explorer][aws cost explorer mcp server] | Analyze AWS costs and usage data                       |
+| MCP server                                        | Summary                                                  |
+| ------------------------------------------------- | -------------------------------------------------------- |
+| [AWS API][aws api mcp server]                     | Interact with all AWS services and resources via AWS CLI |
+| [AWS Cost Explorer][aws cost explorer mcp server] | Analyze AWS costs and usage data                         |
+| [Grafana MCP Server]                              | Interact with [Grafana] dashboards and services          |
 
 > [!caution]
 > Verify MCP servers and the tools they offer before using them.<br/>
@@ -77,6 +78,8 @@ MCP servers of interest:
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[Grafana]: ../grafana.md
+
 <!-- Files -->
 <!-- Upstream -->
 [Blog]: https://blog.modelcontextprotocol.io/
@@ -87,3 +90,4 @@ MCP servers of interest:
 <!-- Others -->
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
 [AWS Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
+[Grafana MCP Server]: https://github.com/grafana/mcp-grafana

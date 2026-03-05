@@ -4,7 +4,8 @@
 Works in a terminal, IDE, browser, and as a desktop app.
 
 1. [TL;DR](#tldr)
-1. [Grant access to tools](#grant-access-to-tools)
+1. [Using tools](#using-tools)
+   1. [Managing MCP servers](#managing-mcp-servers)
 1. [Using skills](#using-skills)
 1. [Limit tool execution](#limit-tool-execution)
 1. [Memory](#memory)
@@ -27,12 +28,12 @@ Can use tools, and do it in parallel.
 
 _Normally_:
 
-- Tied to Anthropic's Claude models (Sonnet and Opus).
+- Tied to Anthropic's Claude models (Haiku, Sonnet and Opus).
 - Requires a Claude API key or Anthropic plan.<br/>
   Usage is metered by the token.
 
 > [!tip]
-> One _can_ use [Claude Code router] or [Ollama] to run on a locally server or shared LLM instead.
+> One _can_ use [Claude Code router] or [Ollama] to run on a local server or shared LLM instead.
 
 Uses a **scope system** to determine where configurations apply and who they're shared with.
 
@@ -148,7 +149,7 @@ claude -r
 claude mcp add --transport 'http' 'GitLab' 'https://some.local.gitlab.com/api/v4/mcp'
 claude mcp add --transport 'http' 'linear' 'https://mcp.linear.app/mcp' --scope 'user'
 
-# List configured MCP servers.
+# List installed MCP servers.
 claude mcp list
 
 # Show MCP servers' details
@@ -202,63 +203,117 @@ ANTHROPIC_AUTH_TOKEN='ollama' ANTHROPIC_BASE_URL='http://localhost:11434' ANTHRO
 
 </details>
 
-## Grant access to tools
+## Using tools
 
-Add MCP servers to give Claude Code access to tools, databases, and APIs in general.
+Claude Code comes with built-in tools (e.g. run shell commands, read and write files, search the web).<br/>
+It can be extended to other tools by means of MCP servers and [skills][using skills].
+
+MCP servers connect Claude Code to the data and gives it tools to act on it, skills teach it what to do with them.
 
 > [!caution]
 > MCPs are **not** verified, nor otherwise checked for security issues.<br/>
-> Be especially careful when using MCP servers that cat fetch untrusted content, as they can fall victim of prompt
+> Be especially careful when using MCP servers that can fetch untrusted content, as they can fall victim of prompt
 > injections.
-
-MCP servers connect Claude Code to the data, [Skills][using skills] teach it what to do with it.
 
 Procedure:
 
-1. Add the desired MCP server.
+1. Add the desired MCP servers.
+1. From within Claude Code, run the `/mcp` command to configure them.
 
-   <details style='padding: 0 0 1rem 1rem'>
-     <summary>Examples</summary>
+### Managing MCP servers
 
-   ```sh
-   # Defaults to the 'local' scope if not specified.
-   claude mcp add --transport 'http' 'GitLab' 'https://some.local.gitlab.com/api/v4/mcp'
-   claude mcp add --transport 'http' 'linear' 'https://mcp.linear.app/mcp' --scope 'user'
-   ```
+Prefer managing MCP servers via the `claude mcp` subcommands.
 
-1. From within Claude Code, run the `/mcp` command to configure it.
+```sh
+# Add MCP servers.
+# Defaults to the 'local' scope if not specified.
+claude mcp add --transport 'http' 'GitLab' 'https://gitlab.example.org/api/v4/mcp'
+claude mcp add --transport 'http' 'linear' 'https://mcp.linear.app/mcp' --scope 'user'
+claude mcp add 'aws-cost-explorer' --scope 'project' \
+  --env 'AWS_REGION=eu-west-1' --env 'AWS_API_MCP_TELEMETRY=false' \
+  -- \
+  docker run --rm --interactive --volume "$HOME/.aws:/app/.aws" \
+    --env 'AWS_REGION' --env 'AWS_API_MCP_TELEMETRY' \
+    'public.ecr.aws/awslabs-mcp/awslabs/cost-explorer-mcp-server:latest'
 
-<details>
-  <summary>AWS API MCP server</summary>
+# List installed MCP servers.
+claude mcp list
 
-Refer [AWS API MCP Server].
+# Show MCP servers' details
+claude mcp get 'linear'
 
-Enables AI assistants to interact with AWS services and resources through AWS CLI commands.
+# Remove MCP servers.
+claude mcp remove 'github'
+```
 
-  <details style='padding: 0 0 1rem 1rem'>
-    <summary>Run as Docker container</summary>
+Alternatively, directly edit `$HOME/.claude.json`.
 
-Manually add the MCP server definition to `$HOME/.claude.json`:
+<details style='padding: 0 0 1rem 1rem'>
+
+```sh
+# Add MCP servers.
+jq '.mcpServers."grafana-aws" |= {
+  "command": "docker",
+  "args": [
+    "run",
+    "--rm",
+    "--interactive",
+    "--env", "GRAFANA_URL",
+    "--env", "GRAFANA_SERVICE_ACCOUNT_TOKEN",
+    "grafana/mcp-grafana:latest",
+    "-t", "stdio"
+  ],
+  "env": {
+    "GRAFANA_URL": "https://g-abcdef0123.grafana-workspace.eu-west-1.amazonaws.com",
+    "GRAFANA_SERVICE_ACCOUNT_TOKEN": "glsa_abc…def",
+  }
+}' "$HOME/.claude.json" \
+| sponge "$HOME/.claude.json"
+```
+
+</details>
+
+Configuration examples:
+
+<details style='padding: 0 0 0 1rem'>
+  <summary>AWS API</summary>
+
+Refer to [AWS API MCP Server].
+
+Enables interacting with AWS services and resources through AWS CLI commands.
 
 ```json
 {
   "mcpServers": {
-    "aws-api": {
+    "aws-api-ro": {
       "command": "docker",
       "args": [
         "run",
         "--rm",
         "--interactive",
-        "--env",
-        "AWS_REGION=eu-west-1",
-        "--env",
-        "AWS_API_MCP_TELEMETRY=false",
-        "--env",
-        "REQUIRE_MUTATION_CONSENT=true",
-        "--env",
-        "READ_OPERATIONS_ONLY=true",
-        "--volume",
-        "/Users/yourUserHere/.aws:/app/.aws",
+        "--env", "AWS_API_MCP_TELEMETRY",
+        "--env", "AWS_REGION",
+        "--env", "READ_OPERATIONS_ONLY",
+        "--volume", "/home/path/.aws:/app/.aws",
+        "public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest"
+      ],
+      "env": {
+        "AWS_API_MCP_TELEMETRY": "false",
+        "AWS_REGION": "eu-west-1",
+        "READ_OPERATIONS_ONLY": "true"
+      }
+    },
+    "aws-api-rw": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "--interactive",
+        "--env", "AWS_API_MCP_TELEMETRY=false",
+        "--env", "AWS_API_MCP_PROFILE_NAME=operator",
+        "--env", "AWS_REGION=eu-west-1",
+        "--env", "REQUIRE_MUTATION_CONSENT=true",
+        "--volume", "/home/path/.aws:/app/.aws",
         "public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest"
       ]
     }
@@ -266,23 +321,14 @@ Manually add the MCP server definition to `$HOME/.claude.json`:
 }
 ```
 
-  </details>
-
 </details>
 
-<details>
-  <summary>AWS Cost Explorer MCP server</summary>
+<details style='padding: 0 0 0 1rem'>
+  <summary>AWS Cost Explorer</summary>
 
-Refer [Cost Explorer MCP Server].
+Refer to [AWS Cost Explorer MCP Server].
 
-Enables AI assistants to analyze AWS costs and usage data through the AWS Cost Explorer API.
-
-  <details style='padding: 0 0 1rem 1rem'>
-    <summary>Run as Docker container</summary>
-
-FIXME: many of those environment variable are probably **not** necessary here.
-
-Manually add the MCP server definition to `$HOME/.claude.json`:
+Enables analyzing AWS costs and usage data through the AWS Cost Explorer API.
 
 ```json
 {
@@ -293,16 +339,9 @@ Manually add the MCP server definition to `$HOME/.claude.json`:
         "run",
         "--rm",
         "--interactive",
-        "--env",
-        "AWS_REGION=eu-west-1",
-        "--env",
-        "AWS_API_MCP_TELEMETRY=false",
-        "--env",
-        "REQUIRE_MUTATION_CONSENT=true",
-        "--env",
-        "READ_OPERATIONS_ONLY=true",
-        "--volume",
-        "/Users/yourUserHere/.aws:/app/.aws",
+        "--env", "AWS_API_MCP_TELEMETRY",
+        "--env", "AWS_REGION",
+        "--volume", "/home/path/.aws:/app/.aws",
         "public.ecr.aws/awslabs-mcp/awslabs/cost-explorer-mcp-server:latest"
       ]
     }
@@ -310,7 +349,91 @@ Manually add the MCP server definition to `$HOME/.claude.json`:
 }
 ```
 
-  </details>
+</details>
+
+<details style='padding: 0 0 0 1rem'>
+  <summary>GitLab</summary>
+
+Enables interacting with GitLab instances through the GitLab API.
+
+```json
+{
+  "mcpServers": {
+    "gitlab": {
+      "type": "http",
+      "url": "https://gitlab.example.org/api/v4/mcp"
+    }
+  }
+}
+```
+
+</details>
+
+<details style='padding: 0 0 0 1rem'>
+  <summary>Grafana</summary>
+
+Refer to [Grafana MCP Server].
+
+```json
+{
+  "mcpServers": {
+    "grafana-aws": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "--interactive",
+        "--env", "GRAFANA_URL",
+        "--env", "GRAFANA_SERVICE_ACCOUNT_TOKEN",
+        "grafana/mcp-grafana:latest",
+        "-t", "stdio",
+        "--disable-write",
+        "--disable-admin"
+      ],
+      "env": {
+        "GRAFANA_URL": "https://g-abcdef0123.grafana-workspace.eu-west-1.amazonaws.com",
+        "GRAFANA_SERVICE_ACCOUNT_TOKEN": "glsa_abc…def"
+      }
+    },
+    "grafana-local": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "--interactive",
+        "--env", "GRAFANA_URL",
+        "--env", "GRAFANA_USERNAME",
+        "--env", "GRAFANA_PASSWORD",
+        "--env", "GRAFANA_ORG_ID",
+        "grafana/mcp-grafana:latest",
+        "-t", "stdio"
+      ],
+      "env": {
+        "GRAFANA_URL": "https://g-abcdef0123.grafana-workspace.eu-west-1.amazonaws.com",
+        "GRAFANA_USERNAME": "some-user",
+        "GRAFANA_PASSWORD": "some-password",
+        "GRAFANA_ORG_ID": "1"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Linear</summary>
+
+```json
+{
+  "mcpServers": {
+    "linear": {
+      "type": "http",
+      "url": "https://mcp.linear.app/mcp"
+    },
+  }
+}
+```
 
 </details>
 
@@ -508,8 +631,8 @@ Refer to [Create custom subagents][Documentation / Create custom subagents].
 Each runs in its own context window, with its own custom system prompt, specific access to tools, and independent
 permissions.
 
-When Claude encounters a task that matches a subagent's description, it delegates the task to that subagent.<br/>
-It which works independently, and returns results once finished.
+When Claude encounters a task that matches a subagent's description, it delegates the task to that sub agent.<br/>
+The sub agent works independently, and returns results once finished.
 
 Most effective for sequential tasks, same-file edits, or tasks with many dependencies.<br/>
 They only report results back to the main agent, and never talk to each other.
@@ -596,7 +719,7 @@ Update the findings doc with whatever consensus emerges.
 
 </details>
 
-One can specify conditions and requirements in the prompt, like the number of teammates and wether they need to ask the
+One can specify conditions and requirements in the prompt, like the number of teammates and whether they need to ask the
 lead for approval before acting.
 
 When requiring approvals:
@@ -624,7 +747,7 @@ Ask the researcher teammate to shut down
 </details>
 
 Clean up the team **after termination** by just asking the lead to clean up.<br/>
-The lead will fails if any teammate is still running.
+The lead will fail if any teammate is still running.
 
 ## Run on local models
 
@@ -674,6 +797,7 @@ Claude Code version: `v2.1.41`.<br/>
 - [Website]
 - [Codebase]
 - [Blog]
+- [How Claude Code works]
 - [AI agents]
 - Alternatives: [Gemini CLI], [OpenCode], [Pi]
 - [Claude Code router]
@@ -720,6 +844,7 @@ Claude Code version: `v2.1.41`.<br/>
 [Documentation / Settings]: https://code.claude.com/docs/en/settings
 [Documentation / Skills]: https://code.claude.com/docs/en/skills
 [Documentation]: https://code.claude.com/docs/en/overview
+[How Claude Code works]: https://code.claude.com/docs/en/how-claude-code-works
 [How to create custom Skills]: https://support.claude.com/en/articles/12512198-how-to-create-custom-skills
 [Improving skill-creator: Test, measure, and refine Agent Skills]: https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
 [Mastering Claude Code in 30 minutes]: https://www.youtube.com/watch?v=6eBSHbLKuN0
@@ -729,9 +854,10 @@ Claude Code version: `v2.1.41`.<br/>
 <!-- Others -->
 [Agent Skills]: https://agentskills.io/
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
+[AWS Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
 [Claude Skills vs. MCP: A Technical Comparison for AI Workflows]: https://intuitionlabs.ai/articles/claude-skills-vs-mcp
 [containers/bubblewrap]: https://github.com/containers/bubblewrap
-[Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
+[Grafana MCP Server]: https://github.com/grafana/mcp-grafana
 [pffigueiredo/claude-code-sheet.md]: https://gist.github.com/pffigueiredo/252bac8c731f7e8a2fc268c8a965a963
 [Prat011/awesome-llm-skills]: https://github.com/Prat011/awesome-llm-skills
 [Settings' schema]: https://www.schemastore.org/claude-code-settings.json
