@@ -319,6 +319,8 @@ Manually add the MCP server definition to `$HOME/.claude.json`:
 Refer [Skills][documentation / skills].<br/>
 See also:
 
+- [How to create custom Skills].
+- [Improving skill-creator: Test, measure, and refine Agent Skills].
 - [Create custom skills].
 - [Prat011/awesome-llm-skills].
 
@@ -373,7 +375,11 @@ collections that do not need to be loaded into context every time the skill runs
 Reference optional files in `SKILL.md` to instruct Claude of what they contain and when to load them.
 
 > [!tip]
-> Prefer keeping `SKILL.md` under 500 lines. Move detailed reference material to supporting files.
+> Prefer keeping `SKILL.md` under 500 lines.<br/>
+> Move detailed reference material to supporting files.
+
+Consider installing and using Claude's [_Skill Creator_ skill][skills / skill creator] when creating new skills.<br/>
+It also allows for testing.
 
 ## Limit tool execution
 
@@ -674,6 +680,7 @@ Claude Code version: `v2.1.41`.<br/>
 - [Settings][documentation / settings]
 - [Prat011/awesome-llm-skills]
 - [Claude Skills vs. MCP: A Technical Comparison for AI Workflows]
+- [Improving skill-creator: Test, measure, and refine Agent Skills]
 
 ### Sources
 
@@ -713,7 +720,10 @@ Claude Code version: `v2.1.41`.<br/>
 [Documentation / Settings]: https://code.claude.com/docs/en/settings
 [Documentation / Skills]: https://code.claude.com/docs/en/skills
 [Documentation]: https://code.claude.com/docs/en/overview
+[How to create custom Skills]: https://support.claude.com/en/articles/12512198-how-to-create-custom-skills
+[Improving skill-creator: Test, measure, and refine Agent Skills]: https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
 [Mastering Claude Code in 30 minutes]: https://www.youtube.com/watch?v=6eBSHbLKuN0
+[Skills / Skill Creator]: https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md
 [Website]: https://claude.com/product/overview
 
 <!-- Others -->
