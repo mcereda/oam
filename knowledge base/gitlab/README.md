@@ -79,6 +79,9 @@ Since v17.10, one can use [Alerts][glfm alerts] to highlight or call attention t
 
 Users need to be added to groups at least as _Guests_ to be able to see those groups' wikis.
 
+Users or access tokens need at least the _Developer_ role to be able to push code to a repository.<br/>
+A token also needs at least the `write_repository` scope.
+
 ## Setup
 
 ### Package
