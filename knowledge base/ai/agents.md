@@ -4,6 +4,7 @@ AI-enabled systems or applications capable of _autonomously_ performing tasks of
 workflows and using the tools made available to them.
 
 1. [TL;DR](#tldr)
+1. [Memory](#memory)
 1. [Skills](#skills)
 1. [Concerns](#concerns)
    1. [How much context is too much?](#how-much-context-is-too-much)
@@ -74,6 +75,45 @@ Best practices:
   Too much context ends up hurting the conversation. Including a lot of "don't do this or that" mostly poisons the
   context instead of helping.
   If an information is in the codebase, it probably does not need to be in the context file.
+
+## Memory
+
+Refer to:
+
+- [agentsmd/agents.md].
+- [The Complete Guide to AI Agent Memory Files (CLAUDE.md, AGENTS.md, and Beyond)].
+
+Agents have normally no memory of their execution, and as such they are doomed to repeat their mistakes over and
+over again.
+
+To have a resemblance of memory, they can write notes down and load them in later sessions.<br/>
+Agents use these _memory files_  to save learnings, patterns, and insights gained during active sessions.
+
+When loading them, agents add their content to the context, and do not consider them enforced configuration.<br/>
+Since every line in a memory file competes for attention with the actual work, the more specific and concise the
+instructions in the file's content are, the more consistently agents follow them.
+
+One can write and maintain Markdown memory files with instructions, rules, and preferences themselves (or ask the agent
+to do it on their behalf).
+
+Agent frameworks are currently using similar format and content, but each of them wants it in a different location
+(`CLAUDE.md`, `.cursorrules` or `.cursor/rules/`, `.github/copilot-instructions.md`).<br/>
+A collaboration of AI vendors is now trying to reduce this fragmentation by setting a new standard.
+
+All frameworks shall use just one `AGENTS.md` file, and it shall be located in a project's root.<br/>
+It shall be standard Markdown, with no special schema, nor YAML frontmatter required.<br/>
+The closest AGENTS.md to the file being edited shall take precedence, and explicit user prompts shall override previous
+instructions.
+
+README files shall be directed to humans, `AGENTS.md` shall be the universal agent briefing document, and `CLAUDE.md`
+and the rest of the vendor-specific files shall add vendor-specific instructions on top of them.
+
+> [!tip]
+> Consider triggering agents to update their briefs manually or automatically at the end of every _productive_ session
+> to persist learnings.
+>
+> Also ask agents to periodically review and optimize memory files.<br/>
+> Quick cleanups keep things sharp. Remove from it everything that is not _needed_.
 
 ## Skills
 
@@ -188,6 +228,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 - [moltbot security situation is insane]
 - [Forget the Hype: Agents are Loops]
 - [The Agentic Loop, Explained: What Every PM Should Know About How AI Agents Actually Work]
+- [The Complete Guide to AI Agent Memory Files (CLAUDE.md, AGENTS.md, and Beyond)]
 
 <!--
   Reference
@@ -208,6 +249,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [39C3 - AI Agent, AI Spy]: https://www.youtube.com/watch?v=0ANECpNdt-4
 [Agent Skills]: https://agentskills.io/
 [Agentic ProbLLMs - The Month of AI Bugs]: https://monthofaibugs.com/
+[agentsmd/agents.md]: https://github.com/agentsmd/agents.md
 [AI Doesn't Reduce Work — It Intensifies It]: https://hbr.org/2026/02/ai-doesnt-reduce-work-it-intensifies-it
 [AI mistakes you're probably making]: https://www.youtube.com/watch?v=Jcuig8vhmx4
 [An AI Agent Published a Hit Piece on Me]: https://theshamblog.com/an-ai-agent-published-a-hit-piece-on-me/
@@ -228,6 +270,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [The 2026 Guide to AI Agents]: https://www.ibm.com/think/ai-agents
 [The 2026 Guide to Coding CLI Tools: 15 AI Agents Compared]: https://www.tembo.io/blog/coding-cli-tools-comparison
 [The Agentic Loop, Explained: What Every PM Should Know About How AI Agents Actually Work]: https://www.ikangai.com/the-agentic-loop-explained-what-every-pm-should-know-about-how-ai-agents-actually-work/
+[The Complete Guide to AI Agent Memory Files (CLAUDE.md, AGENTS.md, and Beyond)]: https://medium.com/data-science-collective/the-complete-guide-to-ai-agent-memory-files-claude-md-agents-md-and-beyond-49ea0df5c5a9
 [Token Anxiety]: https://writing.nikunjk.com/p/token-anxiety
 [TotalRecall]: https://github.com/xaitax/TotalRecall
 [Trust No AI: Prompt Injection Along The CIA Security Triad]: https://arxiv.org/pdf/2412.06090
