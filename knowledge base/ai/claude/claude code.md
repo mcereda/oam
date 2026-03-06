@@ -7,9 +7,9 @@ Works in a terminal, IDE, browser, and as a desktop app.
 1. [TL;DR](#tldr)
 1. [Using tools](#using-tools)
    1. [Managing MCP servers](#managing-mcp-servers)
-1. [Using skills](#using-skills)
 1. [Limit tool execution](#limit-tool-execution)
 1. [Memory](#memory)
+1. [Using skills](#using-skills)
 1. [Using plugins](#using-plugins)
 1. [Delegating work](#delegating-work)
    1. [Sub agents](#sub-agents)
@@ -443,6 +443,73 @@ Refer to [Grafana MCP Server].
 
 </details>
 
+## Limit tool execution
+
+Leverage [Sandboxing][documentation / sandboxing] to provide filesystem and network isolation for tool execution.<br/>
+The sandboxed bash tool uses OS-level primitives to enforce defined boundaries upfront, and controls network access
+through a proxy server running outside the sandbox.<br/>
+Attempts to access resources outside the sandbox trigger immediate notifications.
+
+> [!warning]
+> Effective sandboxing requires **both** filesystem and network isolation.<br/>
+> Without network isolation, compromised agents could exfiltrate sensitive files like SSH keys.<br/>
+> Without filesystem isolation, compromised agents could backdoor system resources to gain network access.<br/>
+> When configuring sandboxing, it is important to ensure that configured settings do not bypass these systems.
+
+The sandboxed tool:
+
+- Grants _default_ read and write access to the current working directory and its subdirectories.
+- Grants _default_ read access to the entire computer, except specific denied directories.
+- Blocks modifying files outside the current working directory without **explicit** permission.
+- Allows defining custom allowed and denied paths through settings.
+- Allows accessing only approved domains.
+- Prompts the user when tools request access to new domains.
+- Allows implementing custom rules on **outgoing** traffic.
+- Applies restrictions to all scripts, programs, and subprocesses spawned by commands.
+
+On Mac OS X, Claude Code uses the built-in Seatbelt framework. On Linux and WSL2, it requires installing
+[containers/bubblewrap] before activation.
+
+Sandboxes _can_ be configured to execute commands within the sandbox **without** requiring approval.<br/>
+Commands that cannot be sandboxed fall back to the regular permission flow.
+
+Customize sandbox behavior through the `settings.json` file.
+
+## Memory
+
+Refer to:
+
+- [AI agents memory][ai agents / memory]
+- [Manage Claude's memory][documentation / manage claude's memory].
+
+Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in a later sessions.
+
+One can write and maintain `CLAUDE.md` Markdown files with instructions, rules, and preferences themselves (or ask
+Claude to do it on their behalf).<br/>
+When _auto memory_ is enabled, Claude automatically updates `~/.claude/projects/<project>/memory/MEMORY.md` files. The
+first 200 lines of those are loaded at the start of every session.
+
+Auto memory is enabled by default.<br/>
+It can be disabled via the `/memory` toggle, `settings.json`, or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`.
+
+Memory hierarchy (from broadest to most specific):
+
+| Type              | Location                                                    |
+| ----------------- | ----------------------------------------------------------- |
+| Managed policy    | `/Library/Application Support/ClaudeCode/CLAUDE.md` (macOS) |
+| Project memory    | `./CLAUDE.md` or `./.claude/CLAUDE.md`                      |
+| Project rules     | `./.claude/rules/*.md`                                      |
+| User memory       | `~/.claude/CLAUDE.md`                                       |
+| Project overrides | `./CLAUDE.local.md`                                         |
+| Auto memory       | `~/.claude/projects/<project>/memory/`                      |
+
+Key commands:
+
+| Command   | Summary                                              |
+| --------- | ---------------------------------------------------- |
+| `/memory` | View, edit, or toggle auto memory on/off             |
+| `/init`   | Bootstrap a `CLAUDE.md` file for the current project |
+
 ## Using skills
 
 Refer [Skills][documentation / skills].<br/>
@@ -510,70 +577,6 @@ Reference optional files in `SKILL.md` to instruct Claude of what they contain a
 Consider installing and using Claude's [_Skill Creator_ plugin][anthropics/skills/skill-creator] to create custom
 skills.<br/>
 It also allows for testing.
-
-## Limit tool execution
-
-Leverage [Sandboxing][documentation / sandboxing] to provide filesystem and network isolation for tool execution.<br/>
-The sandboxed bash tool uses OS-level primitives to enforce defined boundaries upfront, and controls network access
-through a proxy server running outside the sandbox.<br/>
-Attempts to access resources outside the sandbox trigger immediate notifications.
-
-> [!warning]
-> Effective sandboxing requires **both** filesystem and network isolation.<br/>
-> Without network isolation, compromised agents could exfiltrate sensitive files like SSH keys.<br/>
-> Without filesystem isolation, compromised agents could backdoor system resources to gain network access.<br/>
-> When configuring sandboxing, it is important to ensure that configured settings do not bypass these systems.
-
-The sandboxed tool:
-
-- Grants _default_ read and write access to the current working directory and its subdirectories.
-- Grants _default_ read access to the entire computer, except specific denied directories.
-- Blocks modifying files outside the current working directory without **explicit** permission.
-- Allows defining custom allowed and denied paths through settings.
-- Allows accessing only approved domains.
-- Prompts the user when tools request access to new domains.
-- Allows implementing custom rules on **outgoing** traffic.
-- Applies restrictions to all scripts, programs, and subprocesses spawned by commands.
-
-On Mac OS X, Claude Code uses the built-in Seatbelt framework. On Linux and WSL2, it requires installing
-[containers/bubblewrap] before activation.
-
-Sandboxes _can_ be configured to execute commands within the sandbox **without** requiring approval.<br/>
-Commands that cannot be sandboxed fall back to the regular permission flow.
-
-Customize sandbox behavior through the `settings.json` file.
-
-## Memory
-
-Refer [Manage Claude's memory][documentation / manage claude's memory].
-
-Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in a later sessions.
-
-One can write and maintain `CLAUDE.md` Markdown files with instructions, rules, and preferences themselves (or ask
-Claude to do it on their behalf).<br/>
-When _auto memory_ is enabled, Claude automatically updates `~/.claude/projects/<project>/memory/MEMORY.md` files. The
-first 200 lines of those are loaded at the start of every session.
-
-Auto memory is enabled by default.<br/>
-It can be disabled via the `/memory` toggle, `settings.json`, or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`.
-
-Memory hierarchy (from broadest to most specific):
-
-| Type              | Location                                                    |
-| ----------------- | ----------------------------------------------------------- |
-| Managed policy    | `/Library/Application Support/ClaudeCode/CLAUDE.md` (macOS) |
-| Project memory    | `./CLAUDE.md` or `./.claude/CLAUDE.md`                      |
-| Project rules     | `./.claude/rules/*.md`                                      |
-| User memory       | `~/.claude/CLAUDE.md`                                       |
-| Project overrides | `./CLAUDE.local.md`                                         |
-| Auto memory       | `~/.claude/projects/<project>/memory/`                      |
-
-Key commands:
-
-| Command   | Summary                                              |
-| --------- | ---------------------------------------------------- |
-| `/memory` | View, edit, or toggle auto memory on/off             |
-| `/init`   | Bootstrap a `CLAUDE.md` file for the current project |
 
 ## Using plugins
 
@@ -832,6 +835,7 @@ Claude Code version: `v2.1.41`.<br/>
 
 <!-- Knowledge base -->
 [AI agents]: ../agents.md
+[AI agents / Memory]: ../agents.md#memory
 [Claude Code router]: claude%20code%20router.md
 [Claude]: README.md
 [Gemini CLI]: ../gemini/cli.md
