@@ -178,6 +178,7 @@ ALTER ROLE manager RENAME TO boss;
 
 -- Assign roles to users or other roles
 GRANT rds_superuser TO mike;
+GRANT rds_replication TO some_service;
 
 -- Assume roles for the current session
 SET ROLE 'admin';
