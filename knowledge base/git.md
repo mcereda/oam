@@ -9,15 +9,16 @@
       1. [Push to multiple git remotes with the one command](#push-to-multiple-git-remotes-with-the-one-command)
    1. [Aliases](#aliases)
 1. [Manage changes](#manage-changes)
-   1. [Create a patch](#create-a-patch)
-   1. [Apply a patch](#apply-a-patch)
+   1. [Create patches](#create-patches)
+   1. [Apply patches](#apply-patches)
 1. [The stash stack](#the-stash-stack)
 1. [Branches](#branches)
-   1. [Checkout an existing remote branch](#checkout-an-existing-remote-branch)
-   1. [Delete a branch](#delete-a-branch)
+   1. [Checkout existing remote branches](#checkout-existing-remote-branches)
+   1. [Delete branches](#delete-branches)
    1. [Delete branches which have been merged or are otherwise absent from a remote](#delete-branches-which-have-been-merged-or-are-otherwise-absent-from-a-remote)
    1. [Merge the master branch into a feature branch](#merge-the-master-branch-into-a-feature-branch)
    1. [Rebase a branch on top of another](#rebase-a-branch-on-top-of-another)
+   1. [Worktrees](#worktrees)
 1. [Tags](#tags)
 1. [Convert a normal repository to a bare one](#convert-a-normal-repository-to-a-bare-one)
 1. [Prepare the git server](#prepare-the-git-server)
@@ -616,7 +617,7 @@ Better word-aware diff:
     pager = diff-highlight | less
   ```
 
-### Create a patch
+### Create patches
 
 Just save the output from `git diff` to get a patch file:
 
@@ -648,7 +649,7 @@ git add . && git commit -m 'uncommitted' \
   && git format-patch 'HEAD~1' && git reset 'HEAD~1'
 ```
 
-### Apply a patch
+### Apply patches
 
 Use `git apply` to apply a patch file to the current index:
 
@@ -690,7 +691,7 @@ git stash apply stash@{6}
 
 ## Branches
 
-### Checkout an existing remote branch
+### Checkout existing remote branches
 
 This creates a local branch tracking an existing remote branch.
 
@@ -700,7 +701,7 @@ Branch 'local-branch' set up to track remote branch 'existing-branch' from 'remo
 Switched to a new branch 'local-branch'
 ```
 
-### Delete a branch
+### Delete branches
 
 ```sh
 # Delete local branches.
@@ -762,6 +763,12 @@ git rebase 'remote/upstream-branch' 'local-branch'
 # Rebase the current branch onto the *upstream* 'master' branch.
 git pull --rebase='interactive' 'origin' 'master'
 ```
+
+### Worktrees
+
+Refer to [git-worktree].
+
+Allows checking out more than one branch at a time in the same repository.
 
 ## Tags
 
@@ -1022,7 +1029,7 @@ export GPG_TTY=$(tty)
 
 ## Further readings
 
-- Git [docs]
+- Official [documentation]
 - [Tagging]
 - The official [LFS website]
 - [Getting git on a server]
@@ -1076,9 +1083,10 @@ export GPG_TTY=$(tty)
 [gitconfig example]: ../examples/dotfiles/.config/git/config
 
 <!-- Upstream -->
-[docs]: https://git-scm.com/docs/git
+[Documentation]: https://git-scm.com/docs/git
 [getting git on a server]: https://git-scm.com/book/en/v2/Git-on-the-Server-Getting-Git-on-a-Server
 [git-config reference]: https://git-scm.com/docs/git-config
+[git-worktree]: https://git-scm.com/docs/git-worktree
 [gitignore]: https://git-scm.com/docs/gitignore
 [hooks]: https://git-scm.com/book/fa/v2/Customizing-Git-Git-Hooks
 [setting up the server]: https://git-scm.com/book/en/v2/Git-on-the-Server-Setting-Up-the-Server

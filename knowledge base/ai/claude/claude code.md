@@ -1,6 +1,7 @@
 # Claude Code
 
-[Agentic][ai agents] coding tool that reads and edits files, runs commands, and integrates with tools.<br/>
+[Agentic][ai agents] harness around [Claude] providing it with tools, context management, and execution
+environment.<br/>
 Works in a terminal, IDE, browser, and as a desktop app.
 
 1. [TL;DR](#tldr)
@@ -19,12 +20,12 @@ Works in a terminal, IDE, browser, and as a desktop app.
 
 ## TL;DR
 
-Claude can run in multiple shell sessions.<br/>
-Prefer using git worktrees to isolate sessions in the same repository.
+Can run in multiple isolated shell sessions.<br/>
+Prefer using [git worktrees] to isolate sessions running in the same repository.
 
 Fully multimodal.<br/>
 Can access and understand images and other file types.<br/>
-Can use tools, and do it in parallel.
+Can use read and edit files, run commands and tools, and do it in parallel.
 
 _Normally_:
 
@@ -273,6 +274,11 @@ jq '.mcpServers."grafana-aws" |= {
 
 </details>
 
+> [!important]
+> Values for environment variables **must be strings**.<br/>
+> Giving other types will violate the schema Claude Code uses to validate the configuration file. The app will complain
+> about it and **not** load the MCP server.
+
 Configuration examples:
 
 <details style='padding: 0 0 0 1rem'>
@@ -444,7 +450,7 @@ See also:
 
 - [How to create custom Skills].
 - [Improving skill-creator: Test, measure, and refine Agent Skills].
-- [Create custom skills].
+- [Anthropic's own source-available skills][anthropics/skills]
 - [Prat011/awesome-llm-skills].
 
 Claude Skills follow and extend the [Agent Skills] standard format.
@@ -501,7 +507,8 @@ Reference optional files in `SKILL.md` to instruct Claude of what they contain a
 > Prefer keeping `SKILL.md` under 500 lines.<br/>
 > Move detailed reference material to supporting files.
 
-Consider installing and using Claude's [_Skill Creator_ skill][skills / skill creator] when creating new skills.<br/>
+Consider installing and using Claude's [_Skill Creator_ plugin][anthropics/skills/skill-creator] to create custom
+skills.<br/>
 It also allows for testing.
 
 ## Limit tool execution
@@ -604,6 +611,7 @@ claude plugin list
 claude plugin list --available --json
 
 # Enable plugins.
+claude plugin enable 'skill-creator@claude-plugins-official'
 claude plugin enable 'gitlab@claude-plugins-official'
 
 # Disable plugins.
@@ -825,8 +833,9 @@ Claude Code version: `v2.1.41`.<br/>
 <!-- Knowledge base -->
 [AI agents]: ../agents.md
 [Claude Code router]: claude%20code%20router.md
-[Create custom skills]: create%20custom%20skills.md
+[Claude]: README.md
 [Gemini CLI]: ../gemini/cli.md
+[git worktrees]: ../../git.md#worktrees
 [Ollama]: ../ollama.md
 [OpenCode]: ../opencode.md
 [Pi]: ../pi.md
@@ -835,6 +844,8 @@ Claude Code version: `v2.1.41`.<br/>
 [Config file example]: ../../../examples/claude/claude.json
 
 <!-- Upstream -->
+[anthropics/skills]: https://github.com/anthropics/skills
+[anthropics/skills/skill-creator]: https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md
 [Blog]: https://claude.com/blog
 [Codebase]: https://github.com/anthropics/claude-code
 [Documentation / Create custom subagents]: https://code.claude.com/docs/en/sub-agents
@@ -848,7 +859,6 @@ Claude Code version: `v2.1.41`.<br/>
 [How to create custom Skills]: https://support.claude.com/en/articles/12512198-how-to-create-custom-skills
 [Improving skill-creator: Test, measure, and refine Agent Skills]: https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
 [Mastering Claude Code in 30 minutes]: https://www.youtube.com/watch?v=6eBSHbLKuN0
-[Skills / Skill Creator]: https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md
 [Website]: https://claude.com/product/overview
 
 <!-- Others -->
