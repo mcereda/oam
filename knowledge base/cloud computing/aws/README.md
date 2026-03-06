@@ -11,6 +11,7 @@
    1. [Direct Connect](#direct-connect)
    1. [ElastiCache](#elasticache)
    1. [Global Accelerator](#global-accelerator)
+   1. [Grafana](#grafana)
    1. [GuardDuty](#guardduty)
    1. [EventBridge](#eventbridge)
    1. [Inspector](#inspector)
@@ -491,6 +492,11 @@ It selects a new endpoint, if needed, only when a new connection starts or after
 
 Refer [How AWS Global Accelerator works] for more and updated details.<br/>
 Also see [Using Amazon CloudWatch with AWS Global Accelerator].
+
+### Grafana
+
+Use service accounts for authenticating to the API.<br/>
+Refer to [Use service accounts to authenticate with the Grafana HTTP APIs].
 
 ### GuardDuty
 
@@ -1275,6 +1281,7 @@ If one can, prefer just build the image from an EC2 instance.
 [tools to build on aws]: https://aws.amazon.com/developer/tools/
 [understanding data transfer charges]: https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html
 [Understanding how Savings Plans apply to your usage]: https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-applying.html
+[Use service accounts to authenticate with the Grafana HTTP APIs]: https://docs.aws.amazon.com/grafana/latest/userguide/service-accounts.html
 [using amazon cloudwatch with aws global accelerator]: https://docs.aws.amazon.com/global-accelerator/latest/dg/cloudwatch-monitoring.html
 [What are tags?]: https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/what-are-tags.html
 [what is amazon vpc?]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
