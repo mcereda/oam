@@ -71,36 +71,6 @@ LLMs appear to be hitting a performance wall, and will probably need the rise of
 LLMs find it difficult, if not impossible, to distinguishing data from instructions.<br/>
 As such, every part of the data could be used for prompt injection.
 
-<!-- Uncomment if used
-<details>
-  <summary>Setup</summary>
-
-```sh
-```
-
-</details>
--->
-
-<!-- Uncomment if used
-<details>
-  <summary>Usage</summary>
-
-```sh
-```
-
-</details>
--->
-
-<!-- Uncomment if used
-<details>
-  <summary>Real world use cases</summary>
-
-```sh
-```
-
-</details>
--->
-
 ## Large Language Models
 
 _Large_ language models are language models trained on massive datasets, frequently including texts scraped from the
@@ -307,9 +277,10 @@ just inferring the next token.
   lawyers or even doctors.
 - LLMs are **incapable** of distinguishing facts from beliefs, and are completely disembodied from the world.<br/>
   They do not _understand_ concepts and are unaware of time, change, and causality. They just **approximate** reasoning
-  by _mimicking_ language based on how connected are the tokens in their own training data.
-- Models are very limited in their ability to revise beliefs. Once some pattern is learned, it is extremely difficult to
-  unwire it due to the very nature of how models function.
+  by _mimicking_ language based on how connected are the tokens in their own training data.<br/>
+  See also [The Dangerous Illusion of AI Coding?] ([transcript][the dangerous illusion of ai coding? / transcript]).
+- Models are very limited in their ability to revise their own beliefs. Once some pattern is learned, it is extremely
+  difficult to unwire it due to the very nature of how models function.
 - AI companies could steer and bias their models to say specific things, subtly promote ideologies, influence elections,
   or even rewrite history in the mind of those who trust the LLM.
 - Models can be vulnerable to attacks (e.g. prompt injection) that can change the LLM's behaviour, bias it, or hide
@@ -341,6 +312,7 @@ Refer:
 - [Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training]
 - [When Copilot Becomes Autopilot: Generative AI's Critical Risk to Knowledge Work and a Critical Solution]
 - [ReAct: Synergizing Reasoning and Acting in Language Models]
+- [The Dangerous Illusion of AI Coding?] ([transcript][the dangerous illusion of ai coding? / transcript])
 
 ### Sources
 
@@ -404,6 +376,8 @@ Refer:
 [Run LLMs Locally: 6 Simple Methods]: https://www.datacamp.com/tutorial/run-llms-locally-tutorial
 [SEQUOIA: Serving exact Llama2-70B on an RTX4090 with half-second per token latency]: https://infini-ai-lab.github.io/Sequoia-Page/
 [Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training]: https://arxiv.org/abs/2401.05566
+[The Dangerous Illusion of AI Coding?]: https://www.youtube.com/watch?v=dHBEQ-Ryo24
+[The Dangerous Illusion of AI Coding? / transcript]: study%20material/jeremy-howard-ulmfit-fine-tuning-and-intuition-in-ml-final-rev-f76e2cc7.pdf
 [This is not the AI we were promised]: https://www.youtube.com/watch?v=CyyL0yDhr7I
 [What are Language Models in NLP?]: https://www.geeksforgeeks.org/nlp/what-are-language-models-in-nlp/
 [What is chain of thought (CoT) prompting?]: https://www.ibm.com/think/topics/chain-of-thoughts
