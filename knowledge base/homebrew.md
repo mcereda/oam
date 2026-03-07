@@ -2,8 +2,6 @@
 
 1. [TL;DR](#tldr)
 1. [Downgrade an application to a non-managed version](#downgrade-an-application-to-a-non-managed-version)
-   1. [The easy way](#the-easy-way)
-   1. [The hard way](#the-hard-way)
 1. [Download packages preemptively](#download-packages-preemptively)
 1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
@@ -12,7 +10,7 @@
 ## TL;DR
 
 <details>
-  <summary>Installation</summary>
+  <summary>Setup</summary>
 
 ```sh
 # Install.
@@ -21,10 +19,6 @@
 # Uninstall.
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
 ```
-
-</details>
-<details>
-  <summary>Configuration</summary>
 
 ```sh
 # Require SHA check for casks.
@@ -55,6 +49,7 @@ export SUDO_ASKPASS=1
 ```
 
 </details>
+
 <details>
   <summary>Usage</summary>
 
@@ -126,7 +121,8 @@ brew bundle dump
 
 ## Downgrade an application to a non-managed version
 
-### The easy way
+<details>
+  <summary>The easy way</summary>
 
 ```sh
 brew unlink kubernetes-helm
@@ -134,9 +130,12 @@ brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/ed9dcb2cb4
 brew switch kubernetes-helm 2.13.0
 ```
 
-### The hard way
+</details>
 
-[source](https://stackoverflow.com/questions/3987683/homebrew-install-specific-version-of-formula)
+<details>
+  <summary>The hard way</summary>
+
+[source](https://stackoverflow.com/questions/3987683/homebrew-install-specific-version-of-formula) |
 [alternative source](https://www.fernandomc.com/posts/brew-install-legacy-hugo-site-generator/)
 
 ```sh
@@ -154,6 +153,8 @@ HOMEBREW_NO_AUTO_UPDATE=1 brew install ${formula_name}
 git checkout master
 git branch -d ${formula_name}-${formula_version}
 ```
+
+</details>
 
 ## Download packages preemptively
 
@@ -200,14 +201,17 @@ See also [How to manually download brew package for installation?].
 
 ## Further readings
 
-- [manpage]
-- Homebrew [bundle]
+- [Website]
+- [Codebase]
+- [Homebrew Bundle, brew bundle and Brewfile]
 - [Mas]
 - [Whalebrew]
 - [Tips and Tricks]
 
 ## Sources
 
+- [Documentation]
+- [manpage]
 - [How to stop homebrew from upgrading itself on every run]
 - [macOS migrations with Brewfile]
 - [How to manually download brew package for installation?]
@@ -224,9 +228,12 @@ See also [How to manually download brew package for installation?].
 
 <!-- Files -->
 <!-- Upstream -->
-[bundle]: https://github.com/Homebrew/homebrew-bundle
-[manpage]: https://docs.brew.sh/Manpage
-[tips and tricks]: https://docs.brew.sh/Tips-N'-Tricks
+[Codebase]: https://github.com/Homebrew/brew
+[Documentation]: https://docs.brew.sh/
+[Homebrew Bundle, brew bundle and Brewfile]: https://docs.brew.sh/Brew-Bundle-and-Brewfile
+[Manpage]: https://docs.brew.sh/Manpage
+[Tips and tricks]: https://docs.brew.sh/Tips-N'-Tricks
+[Website]: https://brew.sh/
 
 <!-- Others -->
 [how to manually download brew package for installation?]: https://stackoverflow.com/questions/53551665/how-to-manually-download-brew-package-for-installation#53579448
