@@ -60,7 +60,7 @@ Supports a plugin system for extending its capabilities.
 Sends Statsig telemetry data by default. Includes operational metrics (latency, reliability, usage patterns).<br/>
 Disable it by setting the `DISABLE_TELEMETRY` environment variable to `1`.
 
-Gives better results when asked to make a plan before writing code, and when tries multiple times (iterates).<br/>
+Gives better results when it makes a plan before writing code, and when it tries multiple times (iterates).<br/>
 Common workflows:
 
 - Explore, plan, ask for confirmation, write code, commit.
@@ -70,7 +70,7 @@ Common workflows:
 
   > Figure out the root cause for issue \#43, then propose possible fixes.<br/>
   > Let me choose an approach before you write code.<br/>
-  > Ultrathink.
+  > Think fast.
 
   </details>
 
@@ -98,7 +98,7 @@ Common workflows:
   </details>
 
 Hit `esc` once to stop Claude.<br/>
-This action is usually safe. Claude will then resume or make things differently, but will retain context about the
+This action is usually safe. Claude will then resume or try a different approach, but will retain context about the
 request.
 
 Prefer using **Sonnet** for quicker, smaller tasks (e.g. as sub-agent, greenfield coding, app initialization).<br/>
@@ -496,16 +496,25 @@ It is enabled by default. Disable it via the `/memory` toggle, `settings.json`, 
 
 Also see [thedotmack/claude-mem] for an automatic memory management system.
 
-Memory hierarchy (from broadest to most specific):
+Memory files' loading order:
 
-| Type              | Location                                                    |
-| ----------------- | ----------------------------------------------------------- |
-| Managed policy    | `/Library/Application Support/ClaudeCode/CLAUDE.md` (macOS) |
-| Project memory    | `./CLAUDE.md` or `./.claude/CLAUDE.md`                      |
-| Project rules     | `./.claude/rules/*.md`                                      |
-| User memory       | `~/.claude/CLAUDE.md`                                       |
-| Project overrides | `./CLAUDE.local.md`                                         |
-| Auto memory       | `~/.claude/projects/<project>/memory/`                      |
+| Scope          | Type                | Location                                                                                                | Notes                                                 |
+| -------------- | ------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Managed        | Enterprise policy   | `/etc/claude-code/CLAUDE.md` (Linux)<br/>`/Library/Application Support/ClaudeCode/CLAUDE.md` (Mac OS X) | Loaded in full at launch                              |
+| User           | Context file        | `~/.claude/CLAUDE.md`                                                                                   | Loaded in full at launch                              |
+| Project        | Shared context file | `./CLAUDE.md` or `./.claude/CLAUDE.md`                                                                  | Loaded in full at launch                              |
+| Project        | Rules               | `./.claude/rules/*.md`                                                                                  | Loaded in full at launch                              |
+| Project        | Local context file  | `./CLAUDE.local.md`                                                                                     | Loaded in full at launch                              |
+| Subdirectory   | Memory              | `<project>/some-subdir/CLAUDE.md`                                                                       | Loaded on demand when reading files in this directory |
+| Active session | Auto memory         | `~/.claude/projects/<project>/memory/`                                                                  | Complement the context without overriding             |
+
+More specific files override broader ones on conflicting instructions, but they **merge** together and do **not**
+replace each other.<br/>
+Managed policy files **cannot** be excluded. Organization-wide rules **always apply regardless**.
+
+Files at the same scope level should **not** conflict with each other, only define instructions for specific
+domains.<br/>
+Combine conflicting rules into a single file, or leverage the hierarchy to handle precedence.
 
 Key commands:
 
