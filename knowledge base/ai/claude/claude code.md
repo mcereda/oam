@@ -25,7 +25,7 @@ Prefer using [git worktrees] to isolate sessions running in the same repository.
 
 Fully multimodal.<br/>
 Can access and understand images and other file types.<br/>
-Can use read and edit files, run commands and tools, and do it in parallel.
+Can read and edit files, run commands and tools, and do it in parallel.
 
 _Normally_:
 
@@ -98,7 +98,8 @@ Common workflows:
   </details>
 
 Hit `esc` once to stop Claude.<br/>
-This action is usually safe. Claude will then resume or make things differently, but will have a context.
+This action is usually safe. Claude will then resume or make things differently, but will retain context about the
+request.
 
 Prefer using **Sonnet** for quicker, smaller tasks (e.g. as sub-agent, greenfield coding, app initialization).<br/>
 Consider using **Opus** for broader, longer, higher-level tasks (e.g. planning, refactoring, orchestrating
@@ -493,6 +494,8 @@ The first 200 lines of those files are loaded at the start of every session.
 When _auto memory_ is enabled, Claude Code _should™_ automatically update memory files.<br/>
 It is enabled by default. Disable it via the `/memory` toggle, `settings.json`, or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`.
 
+Also see [thedotmack/claude-mem] for an automatic memory management system.
+
 Memory hierarchy (from broadest to most specific):
 
 | Type              | Location                                                    |
@@ -510,8 +513,6 @@ Key commands:
 | --------- | ---------------------------------------------------- |
 | `/memory` | View, edit, or toggle auto memory on/off             |
 | `/init`   | Bootstrap a `CLAUDE.md` file for the current project |
-
-Also see [thedotmack/claude-mem] for an automatic memory management system.
 
 ## Using skills
 
