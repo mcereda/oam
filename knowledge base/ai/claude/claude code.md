@@ -482,15 +482,16 @@ Refer to:
 - [AI agents memory][ai agents / memory]
 - [Manage Claude's memory][documentation / manage claude's memory].
 
-Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in a later sessions.
+Claude Code uses `CLAUDE.md` as its context file to apply _procedural memories_ at the start of sessions.<br/>
+It should only contain instructions, rules, and preferences, and **no** memories related to other sessions.<br/>
+One can write and maintain that file themselves or ask Claude to do it on their behalf.
 
-One can write and maintain `CLAUDE.md` Markdown files with instructions, rules, and preferences themselves (or ask
-Claude to do it on their behalf).<br/>
-When _auto memory_ is enabled, Claude automatically updates `~/.claude/projects/<project>/memory/MEMORY.md` files. The
-first 200 lines of those are loaded at the start of every session.
+Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in later sessions
+by maintaining `~/.claude/projects/<project>/memory/MEMORY.md` files.<br/>
+The first 200 lines of those files are loaded at the start of every session.
 
-Auto memory is enabled by default.<br/>
-It can be disabled via the `/memory` toggle, `settings.json`, or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`.
+When _auto memory_ is enabled, Claude Code _should™_ automatically update memory files.<br/>
+It is enabled by default. Disable it via the `/memory` toggle, `settings.json`, or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`.
 
 Memory hierarchy (from broadest to most specific):
 
@@ -509,6 +510,8 @@ Key commands:
 | --------- | ---------------------------------------------------- |
 | `/memory` | View, edit, or toggle auto memory on/off             |
 | `/init`   | Bootstrap a `CLAUDE.md` file for the current project |
+
+Also see [thedotmack/claude-mem] for an automatic memory management system.
 
 ## Using skills
 
@@ -875,3 +878,4 @@ Claude Code version: `v2.1.41`.<br/>
 [pffigueiredo/claude-code-sheet.md]: https://gist.github.com/pffigueiredo/252bac8c731f7e8a2fc268c8a965a963
 [Prat011/awesome-llm-skills]: https://github.com/Prat011/awesome-llm-skills
 [Settings' schema]: https://www.schemastore.org/claude-code-settings.json
+[thedotmack/claude-mem]: https://github.com/thedotmack/claude-mem
