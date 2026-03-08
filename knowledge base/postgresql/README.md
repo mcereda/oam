@@ -264,6 +264,10 @@ size.<br/>
 The removal of required WAL files may block a consumer from continuing replication.<br/>
 This parameter can only be set in the postgresql.conf file or on the server command line.
 
+> [!important]
+> Replication slots' creation must be **its own** transaction.<br/>
+> Creation **will** fail if another operation made **any** change in the same transaction.
+
 ```sql
 -- Check replication slots' state.
 SELECT slot_name, plugin, active, pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn)) AS retained_wal
@@ -271,6 +275,19 @@ FROM pg_replication_slots;
 
 -- Get the size of the `pg_wal` directory.
 SELECT pg_size_pretty(sum(size)) FROM pg_ls_waldir();
+
+-- Create replication slots
+pg_create_logical_replication_slot('some_slot', 'pgoutput')
+-- PostgreSQL does not currently offer `IF NOT EXISTS` for replication slots.
+-- Consider wrapping the operation.
+DO $$
+BEGIN
+  PERFORM pg_create_logical_replication_slot('some_slot', 'pgoutput');
+EXCEPTION
+  WHEN duplicate_object THEN
+    NULL; -- slot already exists, ignore
+END
+$$;
 
 -- Drop replication slots.
 SELECT pg_drop_replication_slot('peerflow_slot_some_db_pg');
