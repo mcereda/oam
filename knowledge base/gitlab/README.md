@@ -22,6 +22,7 @@
 1. [Environments](#environments)
 1. [Login via Google, Github or other services](#login-via-google-github-or-other-services)
 1. [Reset user's passwords](#reset-users-passwords)
+1. [Renew a license](#renew-a-license)
 1. [API](#api)
 1. [Troubleshooting](#troubleshooting)
     1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
@@ -1039,6 +1040,16 @@ exit
 ```
 
 </details>
+
+## Renew a license
+
+1. Renew the license, and save the new key somewhere safe.
+1. Go to the _Admin_ > _Subscription_ area (`/admin/subscription`).
+1. Under the _Subscription_ section, in the _Subscription details_ tab, click on _Add activation code_.
+1. Insert the new key in the pop-up, and click the _Activate_ button.
+1. Force a sync using the button on the side of the _Last sync_ entry in the _Subscription details_ tab.
+1. Wait for the instance to realize it has a new key.<br/>
+   It should appear as the first entry in the list under the _Subscription History_ section.
 
 ## API
 
