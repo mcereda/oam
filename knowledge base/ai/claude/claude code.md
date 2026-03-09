@@ -487,6 +487,9 @@ Claude Code uses `CLAUDE.md` as its context file to apply _procedural memories_ 
 It should only contain instructions, rules, and preferences, and **no** memories related to other sessions.<br/>
 One can write and maintain that file themselves or ask Claude to do it on their behalf.
 
+Claude is instructed in the system prompt to **intentionally** ignore `CLAUDE.md` content it deems irrelevant to the
+current task.
+
 Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in later sessions
 by maintaining `~/.claude/projects/<project>/memory/MEMORY.md` files.<br/>
 The first 200 lines of those files are loaded at the start of every session.
@@ -829,12 +832,16 @@ Claude Code version: `v2.1.41`.<br/>
 - [Prat011/awesome-llm-skills]
 - [Claude Skills vs. MCP: A Technical Comparison for AI Workflows]
 - [Improving skill-creator: Test, measure, and refine Agent Skills]
+- The blog posts by Sergei Rastrigin about Claude Code's inner workings:
+  1. [What Claude Code Actually Sends to the Cloud][claude analysis / what claude code actually sends to the cloud]
+  1. [The System Prompt][claude analysis / the system prompt]
 
 ### Sources
 
 - [Documentation]
 - [pffigueiredo/claude-code-sheet.md]
 - [Mastering Claude Code in 30 minutes] by Boris Cherny, Anthropic
+- [Writing a good CLAUDE.md]
 
 <!--
   Reference
@@ -882,6 +889,8 @@ Claude Code version: `v2.1.41`.<br/>
 [Agent Skills]: https://agentskills.io/
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
 [AWS Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
+[Claude analysis / The System Prompt]: https://rastrigin.systems/blog/claude-code-part-2-system-prompt/
+[Claude analysis / What Claude Code Actually Sends to the Cloud]: https://rastrigin.systems/blog/claude-code-part-1-requests/
 [Claude Skills vs. MCP: A Technical Comparison for AI Workflows]: https://intuitionlabs.ai/articles/claude-skills-vs-mcp
 [containers/bubblewrap]: https://github.com/containers/bubblewrap
 [Grafana MCP Server]: https://github.com/grafana/mcp-grafana
@@ -889,3 +898,4 @@ Claude Code version: `v2.1.41`.<br/>
 [Prat011/awesome-llm-skills]: https://github.com/Prat011/awesome-llm-skills
 [Settings' schema]: https://www.schemastore.org/claude-code-settings.json
 [thedotmack/claude-mem]: https://github.com/thedotmack/claude-mem
+[Writing a good CLAUDE.md]: https://www.humanlayer.dev/blog/writing-a-good-claude-md
