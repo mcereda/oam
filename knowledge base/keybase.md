@@ -1,7 +1,5 @@
 # Keybase
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Service execution](#service-execution)
 1. [Import an existing repository in Keybase](#import-an-existing-repository-in-keybase)
@@ -9,6 +7,7 @@
 1. [Temporary devices](#temporary-devices)
 1. [Troubleshooting](#troubleshooting)
    1. [`git: 'remote-keybase' is not a git command`](#git-remote-keybase-is-not-a-git-command)
+   1. [Gatekeeper blocks the execution of `kbfuse.fs`](#gatekeeper-blocks-the-execution-of-kbfusefs)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -106,13 +105,21 @@ Use the import form in [Keybase launches encrypted git], or:
 ## Run as root
 
 Keybase shouldn't be run as the `root`, and by default it will fail with a message explaining it.<br/>
-Under some circumnstances (like Docker or other containers) `root` can be the best or only option; run commands in concert with the `KEYBASE_ALLOW_ROOT=1` environment variable to force the execution.
+Under some circumstances (like Docker or other containers) `root` can be the best or only option; run commands in
+concert with the `KEYBASE_ALLOW_ROOT=1` environment variable to force the execution.
 
 ## Temporary devices
 
-Use `keybase oneshot` to establish a temporary device. The resulting process won't write credential information on the local storage disk nor it will make any changes to the user's sigchain; rather, it will hold the given paperkey in memory for as long as the corresponding `keybase service` process is running or until `keybase logout` is called; when this happens, it will disappear.
+Use `keybase oneshot` to establish a temporary device.
 
-`keybase oneshot` needs a username and a paperkey to work, either passed in via standard input, command-line flags, or environment variables:
+The resulting process will **only**  hold the given paperkey in memory for as long as the corresponding
+`keybase service` process is running, or until `keybase logout` is called. Once any of the two happens, the paperkey
+will disappear.
+
+`keybase oneshot` needs a username and a paperkey to work, either passed in via standard input, command-line flags, or
+environment variables.
+
+<details style='padding: 0 0 1rem 1rem'>
 
 ```sh
 # Provide login information on the standard input.
@@ -125,8 +132,14 @@ keybase oneshot --username user --paperkey 'paper key'
 KEYBASE_PAPERKEY='paper key' KEYBASE_USERNAME='user' keybase oneshot
 ```
 
-Exploding messages work in oneshot mode with the caveat that you cannot run multiple instances of such with the same paperkey at the same time as each instance will try to create ephemeral keys, but require a distinct paperkey to uniquely identify itself as a separate device.<br/>
-In addition, ephemeral keys are **purged entirely** when closing the oneshot session, and you will not be able to access any old ephemeral content when starting keybase up again.
+</details>
+
+_Exploding messages_ works in oneshot mode, with the caveat that one **cannot** run multiple instances of such with the
+same paperkey at the same time.<br/>
+Each instance will try to create ephemeral keys, but require a distinct paperkey to uniquely identify itself as a
+separate device.<br/>
+In addition, ephemeral keys are **purged entirely** when closing the oneshot session, and one will **not** be able to
+access any old ephemeral content when starting keybase up again.
 
 ## Troubleshooting
 
@@ -140,13 +153,19 @@ export PATH="${PATH}:$(
 )"
 ```
 
+### Gatekeeper blocks the execution of `kbfuse.fs`
+
+Refer to [KBFS: broken integration with Finder on macOS].
+
+```sh
+sudo xattr -dr 'com.apple.quarantine' '/Library/Filesystems/kbfuse.fs'
+```
+
 ## Further readings
 
 - [Website]
 - [Linux guide]
-
-[linux guide]: https://book.keybase.io/guides/linux
-[website]: https://keybase.io/
+- [KBFS: broken integration with Finder on macOS]
 
 ### Sources
 
@@ -155,15 +174,17 @@ export PATH="${PATH}:$(
 - [How to use Keybase to encrypt files on Linux]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
+<!-- In-article sections -->
 <!-- Upstream -->
+[KBFS: broken integration with Finder on macOS]: https://github.com/keybase/client/issues/25830
 [keybase launches encrypted git]: https://keybase.io/blog/encrypted-git-for-everyone
 [keybase lfs support]: https://github.com/keybase/client/issues/8936
-
-<!-- In-article sections -->
-[further readings]: #further-readings
+[Website]: https://keybase.io/
 
 <!-- Others -->
 [how to use keybase to encrypt files on linux]: https://www.addictivetips.com/ubuntu-linux-tips/keybase-encrypt-files-linux/
+[linux guide]: https://book.keybase.io/guides/linux
