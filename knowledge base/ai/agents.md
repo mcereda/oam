@@ -255,6 +255,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 - [The Agentic Loop, Explained: What Every PM Should Know About How AI Agents Actually Work]
 - [The Complete Guide to AI Agent Memory Files (CLAUDE.md, AGENTS.md, and Beyond)]
 - [Comparing File Systems and Databases for Effective AI Agent Memory Management]
+- [Writing a good CLAUDE.md]
 
 <!--
   Reference
@@ -301,4 +302,5 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [Token Anxiety]: https://writing.nikunjk.com/p/token-anxiety
 [TotalRecall]: https://github.com/xaitax/TotalRecall
 [Trust No AI: Prompt Injection Along The CIA Security Triad]: https://arxiv.org/pdf/2412.06090
+[Writing a good CLAUDE.md]: https://www.humanlayer.dev/blog/writing-a-good-claude-md
 [xAI engineer fired for leaking secret "Human Emulator" project]: https://www.youtube.com/watch?v=0hDMSS1p-UY
