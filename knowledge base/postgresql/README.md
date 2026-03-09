@@ -1,7 +1,8 @@
 # PostgreSQL
 
 1. [TL;DR](#tldr)
-1. [Functions](#functions)
+1. [Code blocks](#code-blocks)
+   1. [Functions](#functions)
 1. [Write-Ahead Logging](#write-ahead-logging)
 1. [Replication slots](#replication-slots)
 1. [Publications](#publications)
@@ -135,13 +136,93 @@ scram-sha-256 'mySecretPassword'
 -- They must be already installed on the instance
 ALTER SYSTEM SET shared_preload_libraries = 'anon';
 ALTER DATABASE postgres SET session_preload_libraries = 'anon';
+
+-- Execute code blocks
+DO $$
+  BEGIN
+    PERFORM 1 FROM orders WHERE status = 'pending';
+    IF FOUND THEN
+      RAISE NOTICE 'Orders do exist in the pending state';
+    END IF;
+  END;
+$$;
 ```
 
 </details>
 
 Also see [yugabyte/yugabyte-db] for a distributed, PostgreSQL-like DBMS.
 
-## Functions
+## Code blocks
+
+Code blocks' syntax and features differ depending on the context they exist in.
+
+Use `START TRANSACTION` or `BEGIN` **in plain SQL** to _start_ transactions.
+Use `COMMIT` or `ROLLBACK` to end that transaction.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```sql
+BEGIN;
+  -- some statements here
+COMMIT;
+```
+
+</details>
+
+Create intermediate checkpoints within a transaction using `SAVEPOINT`.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```sql
+BEGIN;
+  INSERT INTO orders VALUES (1, 'item_a');
+  SAVEPOINT sp1;
+  INSERT INTO orders VALUES (2, 'item_b');
+  ROLLBACK TO sp1;  -- undoes only the second insert
+COMMIT;             -- commits only the first insert
+```
+
+</details>
+
+Plain SQL statements (`SELECT`, `INSERT`, etc.) have no exception-handling syntax at all. Errors propagate immediately
+to the caller.<br/>
+Catching and handling exceptions require using a PL/pgSQL context (within code blocks or [functions]).
+
+Use `DO $$ … $$` to wrap **PL/pgSQL code** in anonymous blocks.<br/>
+It tells PostgreSQL to execute the code inside it _as a procedural language block_ with specific constraints.
+
+> [!note]
+> There is no command to explicitly start a new transaction within PL/pgSQL procedures and anonymous blocks.<br/>
+> Refer to [Transaction Management][documentation / transaction management].
+
+Using `COMMIT` and `ROLLBACK` inside `DO` blocks terminate a transaction and start a new one.<br/>
+They will **not** work when the `DO` block is already inside an explicit transaction block. Instead, they will raise an
+error.
+
+Use `BEGIN … [EXCEPTION …] END` _**within procedural language blocks**_ to group statements and enable error/exception
+handling.<br/>
+Every block **using the `EXCEPTION` clause** creates an _implicit_ savepoint. Only the block is rolled back on error,
+not the whole transaction.<br/>
+Refer to [Trapping Errors][documentation / trapping errors].
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```sql
+DO $$
+  BEGIN
+    INSERT INTO accounts (id, balance) VALUES (1, 100);
+    INSERT INTO accounts (id, balance) VALUES (2, -50); -- might fail a constraint
+  EXCEPTION
+    WHEN check_violation THEN
+      RAISE NOTICE 'Constraint violated, rolling back block';
+      -- the block is rolled back automatically; the outer transaction can continue
+  END;
+$$;
+```
+
+</details>
+
+### Functions
 
 Refer [CREATE FUNCTION].
 
@@ -255,14 +336,17 @@ Only one receiver may consume changes from a slot at any given time.
 
 Since PostgreSQL 17 (released September 2024), logical replication slots **can** also be created on hot standbys.
 
-Use the `max_slot_wal_keep_size` parameter to configure the maximum size of WAL files that replication slots are allowed
-to retain in the `pg_wal` directory at checkpoint time. If this value is specified without units, it is taken as
-MB.<br/>
+Use the `max_slot_wal_keep_size` parameter to configure a quota for WAL files for replication slots the `pg_wal`
+directory at checkpoint time.<br/>
+This value applies to the **global disk space** used by **all** the replication slots. There's currently **no** setting
+for per-slot size limits.
+If this value is specified without units, it is taken as MB.<br/>
 If it is -1 (the default), replication slots may retain an **unlimited** amount of WAL files. Otherwise, they will be
 removed when the `restart_lsn` value of a replication slot falls behind the current LSN by more than the configured max
 size.<br/>
 The removal of required WAL files may block a consumer from continuing replication.<br/>
-This parameter can only be set in the postgresql.conf file or on the server command line.
+This parameter can only be set in the `postgresql.conf` file or on the server command line. If set in the configuration
+file, use a `SIGHUP` to apply it.
 
 > [!important]
 > Replication slots' creation must be **its own** transaction.<br/>
@@ -503,6 +587,7 @@ See also [yugabyte/yugabyte-db].
 - [yugabyte/yugabyte-db]
 - [Logical Decoding Concepts][documentation / logical decoding concepts]
 - [dimitri/pgcopydb]
+- [Executing SQL Commands][documentation / executing sql commands]
 
 ### Sources
 
@@ -529,6 +614,7 @@ See also [yugabyte/yugabyte-db].
   -->
 
 <!-- In-article sections -->
+[Functions]: #functions
 [Replication slots]: #replication-slots
 [Write-Ahead Logging]: #write-ahead-logging
 
@@ -547,8 +633,11 @@ See also [yugabyte/yugabyte-db].
 [create function]: https://www.postgresql.org/docs/current/sql-createfunction.html
 [database connection control functions]: https://www.postgresql.org/docs/current/libpq-connect.html
 [docker image]: https://github.com/docker-library/docs/blob/master/postgres/README.md
+[Documentation / Executing SQL Commands]: https://www.postgresql.org/docs/current/plpgsql-statements.html#PLPGSQL-STATEMENTS-GENERAL-SQL
 [Documentation / Logical Decoding Concepts]: https://www.postgresql.org/docs/current/logicaldecoding-explanation.html
 [Documentation / Replication]: https://www.postgresql.org/docs/current/runtime-config-replication.html
+[Documentation / Transaction Management]: https://www.postgresql.org/docs/current/plpgsql-transactions.html
+[Documentation / Trapping Errors]: https://www.postgresql.org/docs/current/plpgsql-control-structures.html#PLPGSQL-ERROR-TRAPPING
 [Documentation / Write-Ahead Logging (WAL)]: https://www.postgresql.org/docs/current/wal-intro.html
 [pg_settings]: https://www.postgresql.org/docs/current/view-pg-settings.html
 [psql]: https://www.postgresql.org/docs/current/app-psql.html

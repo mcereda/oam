@@ -525,5 +525,18 @@ WHERE
 ORDER BY 1, 2, 3;
 
 
--- Empty tables of their data
+-- Empty tables of all their data
 TRUNCATE TABLE sales;
+
+
+-- Evaluate an expression (or SELECT query) but discard the result
+-- Useful when calling a function that has side-effects but no useful result value
+PERFORM pg_create_logical_replication_slot('fs_slot', 'pgoutput');
+DO $$
+  BEGIN
+    PERFORM 1 FROM orders WHERE status = 'pending';
+    IF FOUND THEN
+      RAISE NOTICE 'Orders do exist in the pending state';
+    END IF;
+  END;
+$$;
