@@ -11,6 +11,7 @@ the previous ones.
 1. [Prompting](#prompting)
 1. [Context window](#context-window)
 1. [Function calling](#function-calling)
+1. [Scaffolding](#scaffolding)
 1. [Concerns](#concerns)
 1. [Run LLMs Locally](#run-llms-locally)
 1. [Further readings](#further-readings)
@@ -265,6 +266,10 @@ just inferring the next token.
 > [!caution]
 > Allowing LLMs to call functions can have real-world consequences.<br/>
 > This includes financial loss, data corruption or exfiltration, and security breaches.
+
+## Scaffolding
+
+TODO
 
 ## Concerns
 
