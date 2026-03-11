@@ -1,0 +1,7 @@
+---
+version: 3
+
+includes:
+  cli: aws/cli.yml
+  ecr: aws/ecr.yml
+  ecs: aws/ecs.yml
