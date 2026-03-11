@@ -540,3 +540,7 @@ DO $$
     END IF;
   END;
 $$;
+
+
+-- Show running queries
+SELECT * from pg_stat_activity where usename = 'monica';
