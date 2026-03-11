@@ -132,6 +132,9 @@ scram-sha-256 'mySecretPassword'
 ```
 
 ```sql
+-- Show running queries
+SELECT * from pg_stat_activity where usename = 'monica';
+
 -- Load extensions from the underlying operating system
 -- They must be already installed on the instance
 ALTER SYSTEM SET shared_preload_libraries = 'anon';
