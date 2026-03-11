@@ -1,6 +1,9 @@
 ---
 version: '3'
 
+includes:
+  python: taskfiles/python.yml
+
 vars:
   REQUIREMENTS_FILE: '{{ .ROOT_DIR }}/requirements.txt'
   VENV_DIR: '{{ .ROOT_DIR }}/.venv'
@@ -16,34 +19,3 @@ tasks:
     cmds:
       - task: python:update-venv
       - npm update --save
-
-  python:create-venv:
-    requires:
-      vars:
-        - PYTHON_VERSION
-        - REQUIREMENTS_FILE
-        - VENV_DIR
-    vars:
-      PYTHON_VERSION: 3.12
-    cmds:
-      - python{{.PYTHON_VERSION}} -m 'venv' '{{.VENV_DIR}}'
-      - "{{.VENV_DIR}}/bin/pip --require-virtualenv install -r '{{.REQUIREMENTS_FILE}}'"
-
-  python:recreate-venv:
-    requires:
-      vars:
-        - VENV_DIR
-    cmds:
-      - "rm -rf '{{.VENV_DIR}}'"
-      - task: python:create-venv
-
-  python:update-venv:
-    requires:
-      vars:
-        - REQUIREMENTS_FILE
-        - VENV_DIR
-    cmds:
-      - >-
-          {{.VENV_DIR}}/bin/pip freeze --local --require-virtualenv | sed 's/==/>=/'
-          | xargs {{.VENV_DIR}}/bin/pip --require-virtualenv install --upgrade
-      - pip list --require-virtualenv --local --not-required --format freeze > '{{ .REQUIREMENTS_FILE }}'

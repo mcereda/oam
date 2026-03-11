@@ -1,0 +1,22 @@
+---
+version: 3
+
+tasks:
+
+  session-manager-plugin:install:darwin:arm:
+    desc: install the session manager plugin for the aws cli on arm-based mac os x systems
+    summary: |-
+      Install the session manager plugin for the AWS CLI on ARM-based Mac OS X systems.
+    platforms:
+      - darwin/arm64
+    interactive: true
+    cmds:
+      - >-
+          curl --continue-at '-'
+          --url 'https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac_arm64/session-manager-plugin.pkg'
+          --output 'session-manager-plugin.pkg'
+      - sudo installer -pkg 'session-manager-plugin.pkg' -target '/'
+      - sudo ln -fs '/usr/local/sessionmanagerplugin/bin/session-manager-plugin' '/usr/local/bin/session-manager-plugin'
+    status:
+      - test -r '/usr/local/sessionmanagerplugin/bin/session-manager-plugin'
+      - test -r '/usr/local/bin/session-manager-plugin'

@@ -1,0 +1,39 @@
+---
+version: 3
+
+tasks:
+
+  venv:create:
+    aliases:
+      - create-venv
+    requires:
+      vars:
+        - PYTHON_VERSION
+        - REQUIREMENTS_FILE
+        - VENV_DIR
+    vars:
+      PYTHON_VERSION: 3.12
+    cmds:
+      - python{{.PYTHON_VERSION}} -m 'venv' '{{.VENV_DIR}}'
+      - "{{.VENV_DIR}}/bin/pip --require-virtualenv install -r '{{.REQUIREMENTS_FILE}}'"
+  venv:recreate:
+    aliases:
+      - recreate-venv
+    requires:
+      vars:
+        - VENV_DIR
+    cmds:
+      - "rm -rf '{{.VENV_DIR}}'"
+      - task: create-venv
+  venv:update:
+    aliases:
+      - update-venv
+    requires:
+      vars:
+        - REQUIREMENTS_FILE
+        - VENV_DIR
+    cmds:
+      - >-
+          {{.VENV_DIR}}/bin/pip freeze --local --require-virtualenv | sed 's/==/>=/'
+          | xargs {{.VENV_DIR}}/bin/pip --require-virtualenv install --upgrade
+      - pip list --require-virtualenv --local --not-required --format freeze > '{{ .REQUIREMENTS_FILE }}'

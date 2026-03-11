@@ -1,0 +1,27 @@
+---
+version: 3
+
+vars:
+  AWS_EXECUTABLE:
+    sh: which 'aws'
+  DOCKER_EXECUTABLE:
+    sh: which 'docker'
+
+tasks:
+
+  login:docker:
+    desc: login to an ecr using docker
+    summary: |-
+      Login to an ECR using Docker.
+
+      Enables pulling and pushing images to an ECR using Docker, as long as the AWS identity has sufficient permissions.
+    aliases:
+      - login
+    requires:
+      vars:
+        - AWS_EXECUTABLE
+        - DOCKER_EXECUTABLE
+        - ECR_URL
+    cmd: >-
+      {{.AWS_EXECUTABLE}} ecr get-login-password
+      | {{.DOCKER_EXECUTABLE}} login --username 'AWS' --password-stdin '{{.ECR_URL}}'
