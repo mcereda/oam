@@ -483,12 +483,49 @@ Refer to:
 - [AI agents memory][ai agents / memory]
 - [Manage Claude's memory][documentation / manage claude's memory].
 
-Claude Code uses `CLAUDE.md` as its context file to apply _procedural memories_ at the start of sessions.<br/>
+Every session begins with a fresh context window.
+
+Claude Code uses `CLAUDE.md` as its context file to apply _procedural memories_ and other persistent context at the
+start of sessions.<br/>
 It should only contain instructions, rules, and preferences, and **no** memories related to other sessions.<br/>
 One can write and maintain that file themselves or ask Claude to do it on their behalf.
 
 Claude is instructed in the system prompt to **intentionally** ignore `CLAUDE.md` content it deems irrelevant to the
 current task.
+
+`CLAUDE.md` files can _import_ additional files using the `@path/to/import` syntax. This is currently an exclusive
+feature of Claude Code.<br/>
+Imported files are expanded and loaded into context at launch alongside the `CLAUDE.md` file referencing them.<br/>
+Both relative and absolute paths are allowed. Relative paths resolve **relative to the file** containing the import, not
+the current working directory.<br/>
+Imported files _can_ recursively import other files, with a maximum depth of five hops.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+Pull in a README, package.json, or workflow guide by referencing them with the `@` syntax anywhere in a `CLAUDE.md`
+file:
+
+```md
+See @README for project overview, and @package.json for available npm commands for this project.
+
+## Additional Instructions
+
+- git workflow: @docs/git-instructions.md
+
+## Individual Preferences
+
+- @~/.claude/my-project-instructions.md
+```
+
+</details>
+
+The first time Claude Code encounters external imports in a project, it shows an approval dialog listing the files. If
+declined, the imports stay disabled and the dialog does **not** appear again.
+
+Claude Code reads `CLAUDE.md` files by walking **up** the directory tree from the current working directory.<br/>
+E.g., if Claude Code is running in `foo/bar/`, it loads instructions from both `foo/bar/CLAUDE.md` and `foo/CLAUDE.md`.
+
+Use _rules_ for a more structured approach to organizing instructions.
 
 Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in later sessions
 by maintaining `~/.claude/projects/<project>/memory/MEMORY.md` files.<br/>

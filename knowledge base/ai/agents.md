@@ -1,7 +1,7 @@
 # AI agents
 
-AI-enabled systems or applications capable of _autonomously_ performing tasks of various complexity levels by designing
-workflows and using the tools made available to them.
+[AI]-enabled systems or applications capable of _autonomously_ performing tasks of various complexity levels by
+designing workflows and using the tools made available to them.
 
 1. [TL;DR](#tldr)
 1. [Memory](#memory)
@@ -17,7 +17,7 @@ workflows and using the tools made available to them.
 
 ## TL;DR
 
-AI agents run [LLMs][lms / llms] _**in [ReAct loops][lms / reasoning]**_ to:
+[AI] agents run [LLMs][lms / llms] _**in [ReAct loops][lms / reasoning]**_ to:
 
 1. _Perceive_: comprehend inputs (user prompts or other inputs).
 1. _Reason_: design their own workflow accordingly.
@@ -263,6 +263,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
   -->
 
 <!-- Knowledge base -->
+[AI]: README.md
 [Claude Code]: claude/claude%20code.md
 [Gemini CLI]: gemini/cli.md
 [LMs / Concerns]: lms.md#concerns
