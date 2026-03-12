@@ -1,12 +1,8 @@
 ---
-version: '3'
+version: 3
 
 includes:
   python: taskfiles/python.yml
-
-vars:
-  REQUIREMENTS_FILE: '{{ .ROOT_DIR }}/requirements.txt'
-  VENV_DIR: '{{ .ROOT_DIR }}/.venv'
 
 tasks:
 
@@ -19,3 +15,9 @@ tasks:
     cmds:
       - task: python:update-venv
       - npm update --save
+
+  show-platform:
+    silent: true
+    cmds:
+      - 'echo "OS: {{OS}}"'
+      - 'echo "ARCH: {{ARCH}}"'

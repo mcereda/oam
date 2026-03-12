@@ -68,6 +68,7 @@ export PATH="${PATH}:/home/user/bin"
 export PATH="/home/user/bin:${PATH}"
 
 # Show the path of executables in $PATH.
+command -v 'redis-cli'  # preferred (POSIX standard)
 which 'redis-cli'
 
 # Show the path, man pages, source code, etc of executables in $PATH.
@@ -290,15 +291,18 @@ A _Here document_ (_heredoc_) is a type of redirection that allows you to pass m
 DELIMITER
 ```
 
-- the first line must start with an **optional command** followed by the special redirection operator `<<` and the **delimiting identifier**
-- one can use **any string** as a delimiting identifier, the most commonly used being `EOF` or `END`
-- if the delimiting identifier is **unquoted**, the shell will substitute all variables, commands and special characters before passing the here-document lines to the command
-- appending a **minus sign** to the redirection operator (`<<-`), will cause all leading tab characters to be **ignored**<br/>
-  this allows one to use indentation when writing here-documents in shell scripts<br/>
-  leading whitespace characters are not allowed, only tabs are
-- the here-document block can contain strings, variables, commands and any other type of input
-- the last line must end with the delimiting identifier<br/>
-  white space in front of the delimiter is not allowed
+- The first line must start with an **optional command** followed by the special redirection operator `<<` and the
+  **delimiting identifier**.
+- One can use **any string** as a delimiting identifier, the most commonly used being `EOF` or `END`.
+- If the delimiting identifier is **unquoted**, the shell will substitute all variables, commands and special characters
+  before passing the here-document lines to the command.
+- Appending a **minus sign** to the redirection operator (`<<-`), will cause all leading tab characters to be
+  **ignored**<br/>
+  This allows one to use indentation when writing here-documents in shell scripts<br/>
+  Leading whitespace characters are not allowed, only tabs are.
+- The here-document block can contain strings, variables, commands and any other type of input.
+- The last line must end with the delimiting identifier<br/>
+  White space in front of the delimiter is not allowed.
 
 ```sh
 $ cat << EOF
@@ -397,7 +401,7 @@ All the references in the [further readings] section, plus the following:
 [the essential bash cheat sheet]: https://betterprogramming.pub/the-essential-bash-cheat-sheet-e1c3df06560
 [upper- or lower-casing strings]: https://scriptingosx.com/2019/12/upper-or-lower-casing-strings-in-bash-and-zsh/
 
-<!-- FIXME -->
+<!-- FIXME
 
 [add directory to $path if it's not already there]: https://superuser.com/questions/39751/add-directory-to-path-if-its-not-already-there
 [append elements to an array]: https://linuxhint.com/bash_append_array/
@@ -424,3 +428,4 @@ All the references in the [further readings] section, plus the following:
 [unix.stackexchange.com]: https://unix.stackexchange.com
 
 [bash prompt generator]: https://robotmoon.com/bash-prompt-generator/
+-->
