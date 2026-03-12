@@ -563,6 +563,31 @@ Key commands:
 | `/memory` | View, edit, or toggle auto memory on/off             |
 | `/init`   | Bootstrap a `CLAUDE.md` file for the current project |
 
+Prompt examples:
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Improve the <code>CONTRIBUTING.md</code> file.</summary>
+
+Creating a good `CONTRIBUTING.md` file and asking Claude Code to read it when making changes goes a long way for both
+humans and agents.
+
+It seems Claude works better when treated as part of the team.\
+And as part of the team, it is right for it to have a chance to contribute to processes.
+
+Iterate on this for at least a couple of times and a couple of different sessions for the best results:
+
+> Please check the `CONTRIBUTING.md` file is helpful to _you_, and eventually suggest improvements to allow you to
+> contribute better.\
+> The goal is to give you all the information you need about the workflow, without needing to put extra information
+> in the `CLAUDE.md` file.
+
+Consider also using notes from the session to keep it up to date:
+
+> I changed the structure to make it adhere more to the standards we shoot for. Please check my changes and take notes
+> for yourself. Also please share those takeaways in the `CONTRIBUTING.md` file.
+
+</details>
+
 ## Using skills
 
 Refer [Skills][documentation / skills].<br/>
