@@ -9,11 +9,14 @@
 | ACME    | [Automatic Certificate Management Environment]         | Protocol to automate the issuance and renewal of certificates without human interaction             |
 | AD      | Active Directory                                       |                                                                                                     |
 | ADR     | [Architectural Decision Record]                        |                                                                                                     |
+| AGI     | Artificial General Intelligence                        |                                                                                                     |
 | AI      | [Artificial Intelligence]                              |                                                                                                     |
+| ANI     | Artificial Narrow Intelligence                         |                                                                                                     |
 | API     | Application Programming Interface                      | A way for two or more computer programs or components to communicate with each other                |
 | APK     | Alpine Package Keeper                                  | Package manager used by Alpine Linux                                                                |
 | APT     | Advanced Package Tool                                  | Package manager used by Debian Linux                                                                |
 | ASCII   | American Standard Code for Information Interchange     |                                                                                                     |
+| ASI     | Artificial Super Intelligence                          |                                                                                                     |
 | AV      | AntiVirus                                              |                                                                                                     |
 | AVR     | Audio/Video Receiver                                   |                                                                                                     |
 | AWS     | Amazon Web Services                                    |                                                                                                     |
