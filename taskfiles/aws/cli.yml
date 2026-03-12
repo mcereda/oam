@@ -25,6 +25,29 @@ tasks:
         cmd: >-
           {{.CURL_EXECUTABLE}} --continue-at '-' --output '{{.OUTPUT_FILE}}'
           --url 'https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac_arm64/session-manager-plugin.pkg'
+    generates:
+      - '{{.OUTPUT_FILE}}'
+  session-manager-plugin:link:
+    desc: link the session manager plugin for the aws cli
+    summary: |-
+      Link the session manager plugin for the AWS CLI.
+    cmd:
+      platforms:
+        - darwin
+      task: session-manager-plugin:link:darwin
+  session-manager-plugin:link:darwin:
+    desc: link the session manager plugin for the aws cli on mac os x systems
+    summary: |-
+      Link the session manager plugin for the AWS CLI on Mac OS X systems.
+    platforms:
+      - darwin
+    deps:
+      - session-manager-plugin:install:darwin
+    interactive: true
+    cmd: >-
+      sudo ln -fs '/usr/local/sessionmanagerplugin/bin/session-manager-plugin' '/usr/local/bin/session-manager-plugin'
+    status:
+      - test -L '/usr/local/bin/session-manager-plugin'
   session-manager-plugin:install:
     desc: install the session manager plugin for the aws cli
     summary: |-
@@ -33,22 +56,56 @@ tasks:
       - platforms:
           - darwin
         task: session-manager-plugin:install:darwin
+      - task: session-manager-plugin:verify
+    status:
+      - session-manager-plugin
   session-manager-plugin:install:darwin:
     desc: install the session manager plugin for the aws cli on mac os x systems
     summary: |-
       Install the session manager plugin for the AWS CLI on Mac OS X systems.
     platforms:
       - darwin
-    interactive: true
-    vars:
-      INSTALLER: /tmp/session-manager-plugin.pkg
-    cmds:
+    deps:
       - task: session-manager-plugin:download
         vars:
           OUTPUT_FILE:
             ref: .INSTALLER
-      - sudo installer -pkg '/tmp/session-manager-plugin.pkg' -target '/'
-      - sudo ln -fs '/usr/local/sessionmanagerplugin/bin/session-manager-plugin' '/usr/local/bin/session-manager-plugin'
+    interactive: true
+    vars:
+      INSTALLER: /tmp/session-manager-plugin.pkg
+    cmd: sudo installer -pkg '/tmp/session-manager-plugin.pkg' -target '/'
     status:
       - test -r '/usr/local/sessionmanagerplugin/bin/session-manager-plugin'
-      - test -r '/usr/local/bin/session-manager-plugin'
+      - test -x '/usr/local/sessionmanagerplugin/bin/session-manager-plugin'
+  session-manager-plugin:verify:
+    cmd: session-manager-plugin
+  session-manager-plugin:uninstall:
+    desc: uninstall the session manager plugin for the aws cli
+    summary: |-
+      Uninstall the session manager plugin for the AWS CLI.
+    cmd:
+      platforms:
+        - darwin
+      task: session-manager-plugin:uninstall:darwin
+  session-manager-plugin:uninstall:darwin:
+    deps:
+      - session-manager-plugin:unlink:darwin
+    interactive: true
+    cmd: sudo rm -rf '/usr/local/sessionmanagerplugin'
+    status:
+      - >-
+          ! test -e '/usr/local/sessionmanagerplugin'
+  session-manager-plugin:unlink:
+    desc: unlink the session manager plugin for the aws cli
+    summary: |-
+      Unlink the session manager plugin for the AWS CLI.
+    cmd:
+      platforms:
+        - darwin
+      task: session-manager-plugin:unlink:darwin
+  session-manager-plugin:unlink:darwin:
+    interactive: true
+    cmd: sudo unlink '/usr/local/bin/session-manager-plugin'
+    status:
+      - >-
+          ! test -e '/usr/local/sessionmanagerplugin/bin/session-manager-plugin'
