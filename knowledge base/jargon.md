@@ -9,6 +9,7 @@
 | ACME    | [Automatic Certificate Management Environment]         | Protocol to automate the issuance and renewal of certificates without human interaction             |
 | AD      | Active Directory                                       |                                                                                                     |
 | ADR     | [Architectural Decision Record]                        |                                                                                                     |
+| AI      | [Artificial Intelligence]                              |                                                                                                     |
 | API     | Application Programming Interface                      | A way for two or more computer programs or components to communicate with each other                |
 | APK     | Alpine Package Keeper                                  | Package manager used by Alpine Linux                                                                |
 | APT     | Advanced Package Tool                                  | Package manager used by Debian Linux                                                                |
@@ -67,6 +68,7 @@
 | GPG     | GNU Privacy Guard                                      |                                                                                                     |
 | GUI     | Graphical User Interface                               |                                                                                                     |
 | HA      | High Availability                                      | Characteristic of a system which aims to ensure better or longer availability for its services      |
+| HCAI    | Human-Centered AI                                      |                                                                                                     |
 | HPC     | High Performance Computing                             | Collections of systems and tools used to achieve a greater processing capacity than the single unit |
 | HSM     | Hardware Security Module                               | Hardware cryptographic appliance designed to provide dedicated cryptographic functions              |
 | IaC     | [Infrastructure as Code][iac]                          |                                                                                                     |
@@ -110,6 +112,7 @@
 | PGP     | Pretty Good Privacy                                    |                                                                                                     |
 | PII     | Personally Identifiable Information                    |                                                                                                     |
 | PR      | Pull Request                                           | Prevalently used in GitHub                                                                          |
+| QQ      | Quick Question                                         |                                                                                                     |
 | RBAC    | Role-Based Access Control                              |                                                                                                     |
 | ROM     | Read-Only Memory                                       |                                                                                                     |
 | RPM     | Revolutions Per Minute                                 |                                                                                                     |
@@ -174,6 +177,7 @@
 
 <!-- Knowledge base -->
 [Access Control List]: acl.md
+[Artificial Intelligence]: ai/README.md
 [Architectural Decision Record]: adr.md
 [bash]: bash.md
 [Container Network Interface]: cni.md

@@ -41,7 +41,16 @@ Current AIs are already far faster than humans in reasoning and far more efficie
 
 We are starting to struggle keeping up with AIs and their inner workings. They are already a black box in many
 cases, and they are still evolving.<br/>
-AIs are fundamentally _alien intelligences_, whose goals might not and do not **need** to align with ours.
+AIs are fundamentally _alien intelligences_, whose goals might not **need** to align with ours or even _include_ us.
+
+Research in AI _alignment_ and _safety_ primarily focuses on mitigating risks posed by AI that is unaligned to human
+values and/or uncontrollable AI self-development.
+
+_Human-centered_ AI is an initiative to develop AI systems and technologies in a way that prioritizes human needs,
+values, and general flourishing at the core of their design and operations.<br/>
+It pays particular attention to mitigating negative effects of AI automation on the livelihoods of the labor force,
+the use of AI in healthcare fields, and imbuing AI systems with societal values while placing significant focus in
+exploring how AI systems can enhance human capacities and serve as collaborators.
 
 We should **be most wary** of AI autonomy, recursive self-improvement, and self replication.<br/>
 Once AIs become _superintelligent_ (smarter than humans in **every** field), they will easily consider humans
@@ -73,6 +82,8 @@ Refer to:
 - [Situational Awareness: The Decade Ahead] by Leopold Aschenbrenner
 - [Control AI]
 - [The Compendium]
+- [Human-Centered AI]
+- [Asimov's Three Laws of Robotics, Applied to AI]
 
 ### Sources
 
@@ -93,8 +104,10 @@ Refer to:
 <!-- Upstream -->
 <!-- Others -->
 [AI 2027]: https://ai-2027.com/
+[Asimov's Three Laws of Robotics, Applied to AI]: https://www.psychologytoday.com/us/blog/the-digital-self/202310/asimovs-three-laws-of-robotics-applied-to-ai
 [Control AI]: https://controlai.com/
 [geeksforgeeks/Artificial Intelligence Tutorial]: https://www.geeksforgeeks.org/artificial-intelligence/
+[Human-Centered AI]: https://ixdf.org/literature/topics/human-centered-ai
 [Situational Awareness: The Decade Ahead]: https://situational-awareness.ai/
 [Species | Documenting AGI]: https://www.youtube.com/@AISpecies
 [The Compendium]: https://www.thecompendium.ai/
