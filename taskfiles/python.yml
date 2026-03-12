@@ -1,6 +1,16 @@
 ---
 version: 3
 
+vars:
+  PYTHON_VERSION: 3.14
+  REQUIREMENTS_FILE: >-
+    {{ .ROOT_DIR }}/requirements.txt
+  VENV_DIR: >-
+    {{ .ROOT_DIR }}/.venv
+  # --
+  PYTHON_EXECUTABLE:
+    sh: which 'python{{.PYTHON_VERSION}}'
+
 tasks:
 
   venv:create:
@@ -8,14 +18,15 @@ tasks:
       - create-venv
     requires:
       vars:
+        - PYTHON_EXECUTABLE
         - PYTHON_VERSION
         - REQUIREMENTS_FILE
         - VENV_DIR
-    vars:
-      PYTHON_VERSION: 3.12
     cmds:
-      - python{{.PYTHON_VERSION}} -m 'venv' '{{.VENV_DIR}}'
-      - "{{.VENV_DIR}}/bin/pip --require-virtualenv install -r '{{.REQUIREMENTS_FILE}}'"
+      - >-
+          {{.PYTHON_EXECUTABLE}} -m 'venv' '{{.VENV_DIR}}'
+      - >-
+          {{.VENV_DIR}}/bin/pip --require-virtualenv install -r '{{.REQUIREMENTS_FILE}}'
   venv:recreate:
     aliases:
       - recreate-venv
@@ -23,7 +34,8 @@ tasks:
       vars:
         - VENV_DIR
     cmds:
-      - "rm -rf '{{.VENV_DIR}}'"
+      - >-
+          rm -rf '{{.VENV_DIR}}'
       - task: create-venv
   venv:update:
     aliases:
@@ -34,6 +46,9 @@ tasks:
         - VENV_DIR
     cmds:
       - >-
-          {{.VENV_DIR}}/bin/pip freeze --local --require-virtualenv | sed 's/==/>=/'
+          {{.VENV_DIR}}/bin/pip freeze --local --require-virtualenv
+          | sed 's/==/>=/'
           | xargs {{.VENV_DIR}}/bin/pip --require-virtualenv install --upgrade
-      - pip list --require-virtualenv --local --not-required --format freeze > '{{ .REQUIREMENTS_FILE }}'
+      - >-
+          {{.VENV_DIR}}/bin/pip list --require-virtualenv --local --not-required --format freeze
+          > '{{ .REQUIREMENTS_FILE }}'

@@ -32,9 +32,6 @@ tasks:
     summary: |-
       Refresh the resources in a Pulumi stack.
     interactive: true
-    requires:
-      vars:
-        - AWS_PROFILE
     cmd: pulumi refresh
 
   stack:init:

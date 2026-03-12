@@ -5,10 +5,12 @@ Task runner aiming to be simpler and easier to use than [GNU Make].
 1. [TL;DR](#tldr)
 1. [Usage](#usage)
 1. [Variables](#variables)
+   1. [Dynamic variables](#dynamic-variables)
 1. [Call other tasks](#call-other-tasks)
    1. [Call root tasks from non-flattened included files](#call-root-tasks-from-non-flattened-included-files)
 1. [Run tasks in a specific order](#run-tasks-in-a-specific-order)
 1. [Run tasks concurrently](#run-tasks-concurrently)
+1. [Limit tasks and commands to specific platforms](#limit-tasks-and-commands-to-specific-platforms)
 1. [Troubleshooting](#troubleshooting)
    1. [Dry run does not print the commands that would be executed](#dry-run-does-not-print-the-commands-that-would-be-executed)
 1. [Further readings](#further-readings)
@@ -208,6 +210,53 @@ graph LR
   tc["`task.cmd.'task'`"] --- te["`task.env`"]
 ```
 
+Go's runtime values are available as built-in template variables:
+
+<details style="padding: 0 0 1em 1em;">
+
+```yml
+tasks:
+  show-platform:
+    silent: true
+    cmds:
+      - 'echo "OS: {{OS}}"'
+      - 'echo "ARCH: {{ARCH}}"'
+```
+
+```sh
+$ task show-platform
+OS: darwin
+ARCH: arm64
+```
+
+</details>
+
+### Dynamic variables
+
+Refer to [Dynamic variables].
+
+Use `sh:` when defining a variable to execute a shell command and save its output.<br/>
+If there are one or more trailing newlines, the **last** newline is trimmed.
+
+```yml
+vars:
+  AWS_EXECUTABLE:
+    sh: command -v 'aws'
+
+tasks:
+  some-task:
+    vars:
+      DOCKER_EXECUTABLE:
+        sh: |-
+          if [[ -n "${DOCKER_EXECUTABLE:=$(command -v 'docker')}" ]]
+          then
+            echo "$DOCKER_EXECUTABLE"
+          else
+            echo "docker not found" >&2
+            false
+          fi
+```
+
 ## Call other tasks
 
 Use `task:` followed by the call**ed** task name as the command in the call**ing** task.
@@ -276,6 +325,32 @@ Tasks' dependencies run concurrently by default.<br/>
 Naming other tasks in tasks' `deps` key ensures that all of them are executed **before** the one calling them starts,
 but does **not** guarantee their order other than the dependencies they define themselves.
 
+## Limit tasks and commands to specific platforms
+
+Refer to [Platform-specific tasks and commands].
+
+Execution of entire tasks or single commands can be limited to specific operating systems and architectures by
+specifying them in the `platforms[]` key.
+
+Platforms' values must be valid GOOS and GOARCH values as
+[defined by the Go language][golang/go/src/internal/syslist/syslist.go], e.g. `windows`, `linux/arm64`.
+
+```yml
+tasks:
+
+  install-linux:
+    platforms: [linux]
+    cmds:
+      - echo Installing for Linux
+
+  install-macos:
+    cmds:
+      - cmd: echo Installing for macOS on Apple Silicon
+        platforms: [darwin/arm64]
+      - cmd: echo Installing for macOS on Intel
+        platforms: [darwin/amd64]
+```
+
 ## Troubleshooting
 
 ### Dry run does not print the commands that would be executed
@@ -297,11 +372,11 @@ Force the print using `-v, --verbose` when `silent` is set to `true`, or set it 
 ## Further readings
 
 - [Website]
-- [Github]
+- [Codebase]
 
 ### Sources
 
-- [Usage]
+- [Guide]
 - [Stop Using Makefile (Use Taskfile Instead)]
 - [Demystification of taskfile variables]
 - [KarChunT's notes]
@@ -313,18 +388,21 @@ Force the print using `-v, --verbose` when `silent` is set to `true`, or set it 
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[azure devops]: cloud%20computing/azure/devops.md
-[gitlab]: gitlab/README.md
-[gnu make]: gnu%20userland/make.md
+[Azure DevOps]: cloud%20computing/azure/devops.md
+[Gitlab]: gitlab/README.md
+[GNU Make]: gnu%20userland/make.md
 
 <!-- Files -->
 <!-- Upstream -->
-[github]: https://github.com/go-task/task
-[usage]: https://taskfile.dev/usage/
-[website]: https://taskfile.dev/
+[Codebase]: https://github.com/go-task/task
+[Dynamic variables]: https://taskfile.dev/docs/guide#dynamic-variables
+[Guide]: https://taskfile.dev/docs/guide
+[Platform-specific tasks and commands]: https://taskfile.dev/docs/guide#platform-specific-tasks-and-commands
+[Website]: https://taskfile.dev/
 
 <!-- Others -->
 [demystification of taskfile variables]: https://medium.com/@TianchenW/demystification-of-taskfile-variables-29b751950393
+[golang/go/src/internal/syslist/syslist.go]: https://github.com/golang/go/blob/master/src/internal/syslist/syslist.go
 [KarChunT's notes]: https://karchunt.com/docs/taskfile/
 [slim-sprig]: https://github.com/go-task/slim-sprig
 [stop using makefile (use taskfile instead)]: https://dev.to/calvinmclean/stop-using-makefile-use-taskfile-instead-4hm9

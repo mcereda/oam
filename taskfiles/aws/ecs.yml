@@ -4,6 +4,10 @@ version: 3
 includes:
   cli: cli.yml
 
+vars:
+  AWS_EXECUTABLE:
+    sh: command -v 'aws'
+
 tasks:
 
   service:check:can-execute:
@@ -13,14 +17,15 @@ tasks:
     internal: true
     requires:
       vars:
-        - AWS_PROFILE
         - CLUSTER
         - SERVICE_NAME
     vars:
       CLUSTER: '{{.CLUSTER}}'
     cmd: >-
-      aws ecs list-tasks --cluster '{{.CLUSTER}}' --service-name '{{.SERVICE_NAME}}' --query 'taskArns' --output 'text'
-      | xargs aws ecs describe-tasks --cluster '{{.CLUSTER}}' --output 'yaml'
+      {{.AWS_EXECUTABLE}} ecs list-tasks
+      --cluster '{{.CLUSTER}}' --service-name '{{.SERVICE_NAME}}'
+      --query 'taskArns' --output 'text'
+      | xargs {{.AWS_EXECUTABLE}} ecs describe-tasks --cluster '{{.CLUSTER}}' --output 'yaml'
       --query 'tasks[0] | {
         "managedAgents": containers[].managedAgents[?@.name==`ExecuteCommandAgent`][],
         "enableExecuteCommand": enableExecuteCommand
@@ -36,7 +41,6 @@ tasks:
       - cli:session-manager-plugin:install
     requires:
       vars:
-        - AWS_PROFILE
         - CLUSTER
         - CONTAINER_NAME
         - SERVICE_NAME
@@ -44,8 +48,12 @@ tasks:
     vars:
       CLUSTER: '{{.CLUSTER}}'
     cmd: >-
-      aws ecs list-tasks --cluster '{{.CLUSTER}}' --service-name '{{.SERVICE_NAME}}' --query 'taskArns[0]' --output 'text'
-      | xargs -o -I '%%' aws ecs execute-command --interactive --command '{{.COMMAND}}' --cluster '{{.CLUSTER}}' --container '{{.CONTAINER_NAME}}' --task '%%'
+      {{.AWS_EXECUTABLE}} ecs list-tasks
+      --cluster '{{.CLUSTER}}' --service-name '{{.SERVICE_NAME}}'
+      --query 'taskArns[0]' --output 'text'
+      | xargs -o -I '%%'
+      {{.AWS_EXECUTABLE}} ecs execute-command --interactive
+      --command '{{.COMMAND}}' --cluster '{{.CLUSTER}}' --container '{{.CONTAINER_NAME}}' --task '%%'
   service:get-shell:
     desc: get a shell in an ecs service's task
     summary: |-
@@ -65,30 +73,40 @@ tasks:
     internal: true
     requires:
       vars:
-        - AWS_PROFILE
         - CLUSTER
         - SERVICE_NAME
     vars:
       CLUSTER: '{{.CLUSTER}}'
     cmd: >-
-      aws ecs list-tasks --cluster '{{.CLUSTER}}' --service-name '{{.SERVICE_NAME}}' --query 'taskArns[0]' --output 'text'
-      | xargs -I '%%' aws ecs describe-tasks --cluster '{{.CLUSTER}}' --tasks '%%' --query "tasks[].attachments[].details[?(@.name=='privateIPv4Address')].value" --output 'text'
+      {{.AWS_EXECUTABLE}} ecs list-tasks
+      --cluster '{{.CLUSTER}}' --service-name '{{.SERVICE_NAME}}'
+      --query 'taskArns[0]' --output 'text'
+      | xargs -I '%%'
+      {{.AWS_EXECUTABLE}} ecs describe-tasks
+      --cluster '{{.CLUSTER}}' --tasks '%%'
+      --query "tasks[].attachments[].details[?(@.name=='privateIPv4Address')].value" --output 'text'
   service:restart:
     desc: restart an ecs service's tasks
     summary: |-
       Restart an ECS service's tasks.
     requires:
       vars:
-        - AWS_PROFILE
         - AWS_USER
         - CLUSTER
         - SERVICE_NAME
         - REASON
     vars:
       AWS_USER:
-        sh: aws sts get-caller-identity --output 'json' | jq -r '.Arn'
-      CLUSTER: '{{.CLUSTER | default "Staging"}}'
+        sh: >-
+          {{.AWS_EXECUTABLE}} sts get-caller-identity --output 'json'
+          | jq -r '.Arn'
+      CLUSTER: '{{.CLUSTER | default "staging"}}'
       REASON: 'Entity {{.AWS_USER}} requested manual restart'
     cmd: >-
-      aws ecs list-tasks --cluster '{{.CLUSTER}}' --service-name '{{.SERVICE_NAME}}' --query 'taskArns' --output 'text'
-      | xargs -n '1' aws ecs stop-task --cluster '{{.CLUSTER}}' --output 'text' --query 'task.lastStatus' --reason '{{.REASON}}' --task
+      {{.AWS_EXECUTABLE}} ecs list-tasks
+      --cluster '{{.CLUSTER}}' --service-name '{{.SERVICE_NAME}}'
+      --query 'taskArns' --output 'text'
+      | xargs -n '1'
+      {{.AWS_EXECUTABLE}} ecs stop-task
+      --output 'text' --query 'task.lastStatus'
+      --cluster '{{.CLUSTER}}' --reason '{{.REASON}}' --task

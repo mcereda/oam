@@ -3,9 +3,7 @@ version: 3
 
 vars:
   AWS_EXECUTABLE:
-    sh: which 'aws'
-  DOCKER_EXECUTABLE:
-    sh: which 'docker'
+    sh: command -v 'aws'
 
 tasks:
 
@@ -22,6 +20,16 @@ tasks:
         - AWS_EXECUTABLE
         - DOCKER_EXECUTABLE
         - ECR_URL
+    vars:
+      DOCKER_EXECUTABLE:
+        sh: |-
+          if [[ -n "${DOCKER_EXECUTABLE:=$(command -v 'docker')}" ]]
+          then
+            echo "$DOCKER_EXECUTABLE"
+          else
+            echo "docker not found" >&2
+            false
+          fi
     cmd: >-
       {{.AWS_EXECUTABLE}} ecr get-login-password
       | {{.DOCKER_EXECUTABLE}} login --username 'AWS' --password-stdin '{{.ECR_URL}}'
