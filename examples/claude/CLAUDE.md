@@ -1,13 +1,14 @@
 # CLAUDE.md
 
-> [!important] Claude Code self-reminders — MANDATORY, follow before every change
+> [!important] Claude Code self-reminders — MANDATORY, follow for every change
 >
-> 1. **Read `CONTRIBUTING.md` at the start of each task** (especially after a git pull), before making any changes.
-> 1. **Follow the workflow in `CONTRIBUTING.md § Submitting changes`** (feature branch → run tests → MR → CI → merge).
->    Never apply changes directly; always run tests first and fix all errors.
-> 1. **Ask to update `CONTRIBUTING.md`** when the code ends up differing from the instructions it holds.
-> 1. **Ask to update this file** (`CLAUDE.md`) before finishing if you discover a new gotcha or convention during the
->    session.
+> 1. **Before making or suggesting any changes, read `CONTRIBUTING.md`**. Pay extra attention to the code organization
+>    and conventions.
+> 1. **Follow closely the workflow in `CONTRIBUTING.md § Submitting changes`**.
+> 1. **Review and offer to update `CONTRIBUTING.md`** to share _relevant_ notes and findings with the team. Insist on
+>    this if you make changes.
+> 1. **Review and offer to update `CLAUDE.md`** with relevant information _for you_ that would not duplicate the content
+>    of `CONTRIBUTING.md`.
 
 ## Overview
 
