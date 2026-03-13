@@ -129,6 +129,7 @@ Refer to:
 ### Sources
 
 - [When machines feel too real: the dangers of anthropomorphizing AI]
+- YouTube channels: [AI_In_Context], [Species | Documenting AGI]
 
 <!--
   Reference
@@ -145,6 +146,7 @@ Refer to:
 <!-- Upstream -->
 <!-- Others -->
 [AI 2027]: https://ai-2027.com/
+[AI_In_Context]: https://www.youtube.com/@AI_In_Context
 [Asimov's Three Laws of Robotics, Applied to AI]: https://www.psychologytoday.com/us/blog/the-digital-self/202310/asimovs-three-laws-of-robotics-applied-to-ai
 [Control AI]: https://controlai.com/
 [geeksforgeeks/Artificial Intelligence Tutorial]: https://www.geeksforgeeks.org/artificial-intelligence/
