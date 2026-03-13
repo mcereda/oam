@@ -57,7 +57,7 @@ Main concerns:
   Results will vary given the same input.
 - [Concerns regarding LLMs][lms / concerns], since those are at the wheel for all the agents' decisions.
 
-Errors accumulate fast, bringing down the probability of success for each step an agent needs to take.<br/>
+Errors compound fast, bringing down the probability of success for each step an agent needs to take.<br/>
 E.g., consider an agent that is 95% accurate per step; any 30-steps tasks it does is going to be successful only about
 21% of the times (0.95^30).
 
