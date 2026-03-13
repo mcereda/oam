@@ -88,6 +88,8 @@ tasks:
         - darwin
       task: session-manager-plugin:uninstall:darwin
   session-manager-plugin:uninstall:darwin:
+    platforms:
+      - darwin
     deps:
       - session-manager-plugin:unlink:darwin
     interactive: true
@@ -104,6 +106,8 @@ tasks:
         - darwin
       task: session-manager-plugin:unlink:darwin
   session-manager-plugin:unlink:darwin:
+    platforms:
+      - darwin
     interactive: true
     cmd: sudo unlink '/usr/local/bin/session-manager-plugin'
     status:

@@ -4,6 +4,7 @@ Task runner aiming to be simpler and easier to use than [GNU Make].
 
 1. [TL;DR](#tldr)
 1. [Usage](#usage)
+   1. [Pass CLI arguments through](#pass-cli-arguments-through)
 1. [Variables](#variables)
    1. [Dynamic variables](#dynamic-variables)
 1. [Call other tasks](#call-other-tasks)
@@ -102,6 +103,26 @@ task --dry --verbose 'lint' 'validate:ansible'
    ```
 
    If task names are omitted, Task will try and execute a task named `default`.
+
+### Pass CLI arguments through
+
+CLI arguments can pass through if:
+
+- Tasks use `{{.CLI_ARGS}}` in their commands, and
+- One gives those arguments to `task` after `--`, e.g. `task pulumi:up -- --diff --suppress-outputs`.
+
+> [!warning]
+> If a task depends on, or calls, a task that uses `{{.CLI_ARGS}}` itself, the CLI arguments pass to the inner task too.
+
+This causes issues when the inner task should **not** use CLI arguments.<br/>
+Consider:
+
+- Configuring the inner task to accept _extra options_ in a variable defaulting to `{{.CLI_ARGS}}`.
+
+  <details style='padding: 0 0 1rem 1rem'>
+  </details>
+
+- Configuring the outer task to set that variable to an empty string on call.
 
 ## Variables
 
