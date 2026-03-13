@@ -563,28 +563,44 @@ Key commands:
 | `/memory` | View, edit, or toggle auto memory on/off             |
 | `/init`   | Bootstrap a `CLAUDE.md` file for the current project |
 
-Prompt examples:
+Creating a good `CONTRIBUTING.md` file, and mandating Claude Code to read it before making changes, seems to go a long
+way for **both** humans and agents.
 
-<details style='padding: 0 0 1rem 1rem'>
-  <summary>Improve the <code>CONTRIBUTING.md</code> file.</summary>
+It appears Claude works better when treated as part of the team.\
+And as part of the team, it is right for it to have a chance to contribute to processes
 
-Creating a good `CONTRIBUTING.md` file and asking Claude Code to read it when making changes goes a long way for both
-humans and agents.
-
-It seems Claude works better when treated as part of the team.\
-And as part of the team, it is right for it to have a chance to contribute to processes.
-
-Iterate on this for at least a couple of times and a couple of different sessions for the best results:
-
-> Please check the `CONTRIBUTING.md` file is helpful to _you_, and eventually suggest improvements to allow you to
+> Please check the `CONTRIBUTING.md` file is helpful to _you_, and eventually suggest improvements to allow _you_ to
 > contribute better.\
-> The goal is to give you all the information you need about the workflow, without needing to put extra information
+> The goal is to give _you_ all the information _you_ need about the workflow, without needing to put extra information
 > in the `CLAUDE.md` file.
 
-Consider also using notes from the session to keep it up to date:
+> [!tip]
+> Iterate on this for at least a couple of times and a couple of different sessions for the best results.
 
-> I changed the structure to make it adhere more to the standards we shoot for. Please check my changes and take notes
-> for yourself. Also please share those takeaways in the `CONTRIBUTING.md` file.
+Consider also asking it to keep the files up to date using notes and findings from the session:
+
+> I changed the file structure to make it adhere more to the standards we shoot for. Please check my changes and take
+> notes for yourself. Also please share those takeaways in the `CONTRIBUTING.md` file.
+
+<details>
+  <summary>Example of CLAUDE.md file implementing the suggestions</summary>
+
+```md
+# CLAUDE.md
+
+> [!important] Claude Code self-reminders — MANDATORY, follow for every change
+>
+> 1. **Before making or suggesting any changes, read `CONTRIBUTING.md`**. Pay extra attention to the code organization
+>    and conventions.
+> 1. **Follow closely the workflow in `CONTRIBUTING.md § Submitting changes`**.
+> 1. **Review and offer to update `CONTRIBUTING.md`** to share _relevant_ notes and findings with the team. Insist on
+>    this if you make changes.
+> 1. **Review and offer to update `CLAUDE.md`** with relevant information _for you_ that would not duplicate the content
+>    of `CONTRIBUTING.md`.
+
+## Overview
+…
+```
 
 </details>
 
