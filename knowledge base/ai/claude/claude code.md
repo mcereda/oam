@@ -5,7 +5,7 @@ environment.<br/>
 Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 
 1. [TL;DR](#tldr)
-1. [Memory](#memory)
+1. [Context and memory](#context-and-memory)
 1. [Using tools](#using-tools)
    1. [Managing MCP servers](#managing-mcp-servers)
    1. [Limit tool execution](#limit-tool-execution)
@@ -267,7 +267,7 @@ ANTHROPIC_AUTH_TOKEN='ollama' ANTHROPIC_BASE_URL='http://localhost:11434' ANTHRO
 
 </details>
 
-## Memory
+## Context and memory
 
 Refer to:
 
@@ -689,6 +689,20 @@ Customize sandbox behavior through the `settings.json` file.
 > - Sandboxing was purposefully enabled manually in the session preceding the test one, both times.
 > - Claude Code was purposefully set to ask for **all** actions, both times.
 > - No automatic permission was configured for both Claude Code and in the repository, both times.
+>
+> <details>
+>   <summary>Project's <code>.claude/settings.json</code> file</summary>
+>
+> ```json
+> {
+>   "sandbox": {
+>     "enabled": true,
+>     "autoAllowBashIfSandboxed": false
+>   }
+> }
+> ```
+>
+> </details>
 
 ## Using skills
 
@@ -834,6 +848,16 @@ deterministic rules.
 When an event fires, all _matching_ hooks run in parallel.<br/>
 Identical hook commands are automatically **deduplicated**.
 
+`TaskCompleted` hooks fire when a task created via the Task tool for background/parallel work finishes.<br/>
+Exiting the REPL does **not** trigger `TaskCompleted` hooks. It will **only** fire when a subagent task completes.
+
+Run commands at the end **of each response or session** by leveraging the `Stop` hook event.<br/>
+It fires **on every turn**, after Claude finishes responding, which could be noisy depending on the action.
+
+> [!note]
+> There's currently no hook event that allows prompt or agent hooks just before exiting the REPL.<br/>
+> `SessionEnd` prompt or agent hooks are not yet supported **outside** of the REPL. The closest alternative is `Stop`.
+
 Create hooks by adding a `hooks` block to a settings file.
 
 <details style='padding: 0 0 1rem 1rem'>
@@ -848,6 +872,17 @@ Create hooks by adding a `hooks` block to a settings file.
           {
             "type": "command",
             "command": "osascript -e 'display notification \"Claude Code needs your attention\" with title \"Claude Code\"'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "Offer to update CONTRIBUTING.md to share any finding, insight or new convention with the team. Also offer to update CLAUDE.md with what is not already covered by CONTRIBUTING.md."
           }
         ]
       }
@@ -871,7 +906,7 @@ HTTP hooks only communicate through the response body.
 
 ### Prompt-based hooks
 
-Prefer using these for decisions that require _judgment_ rather than deterministic rules.<br/>
+Prefer using these for **decisions** (and not _actions_) that require _judgment_ rather than deterministic rules.<br/>
 Specifically, when the hook input data alone is enough to make a decision.
 
 Prompt-based hooks make a **single** LLM call. Claude Code sends the prompt and the hook's input data to Claude to make
@@ -1090,6 +1125,7 @@ Claude Code version: `v2.1.41`.<br/>
 - The blog posts by Sergei Rastrigin about Claude Code's inner workings:
   1. [What Claude Code Actually Sends to the Cloud][claude analysis / what claude code actually sends to the cloud]
   1. [The System Prompt][claude analysis / the system prompt]
+- [The Claude Skills I Actually Use for DevOps]
 
 ### Sources
 
@@ -1162,5 +1198,6 @@ Claude Code version: `v2.1.41`.<br/>
 [pffigueiredo/claude-code-sheet.md]: https://gist.github.com/pffigueiredo/252bac8c731f7e8a2fc268c8a965a963
 [Prat011/awesome-llm-skills]: https://github.com/Prat011/awesome-llm-skills
 [Settings' schema]: https://www.schemastore.org/claude-code-settings.json
+[The Claude Skills I Actually Use for DevOps]: https://www.pulumi.com/blog/top-8-claude-skills-devops-2026/
 [thedotmack/claude-mem]: https://github.com/thedotmack/claude-mem
 [Writing a good CLAUDE.md]: https://www.humanlayer.dev/blog/writing-a-good-claude-md
