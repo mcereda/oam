@@ -2,15 +2,19 @@
 
 [Agentic][ai agents] harness around [Claude] providing it with tools, context management, and execution
 environment.<br/>
-Works in a terminal, IDE, browser, and as a desktop app.
+Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 
 1. [TL;DR](#tldr)
+1. [Memory](#memory)
 1. [Using tools](#using-tools)
    1. [Managing MCP servers](#managing-mcp-servers)
-1. [Limit tool execution](#limit-tool-execution)
-1. [Memory](#memory)
+   1. [Limit tool execution](#limit-tool-execution)
 1. [Using skills](#using-skills)
 1. [Using plugins](#using-plugins)
+1. [Using hooks](#using-hooks)
+   1. [Prompt-based hooks](#prompt-based-hooks)
+   1. [Agent-based hooks](#agent-based-hooks)
+   1. [HTTP hooks](#http-hooks)
 1. [Delegating work](#delegating-work)
    1. [Sub agents](#sub-agents)
    1. [Agent teams](#agent-teams)
@@ -21,11 +25,10 @@ Works in a terminal, IDE, browser, and as a desktop app.
 ## TL;DR
 
 Can run in multiple isolated shell sessions.<br/>
-Prefer using [git worktrees] to isolate sessions running in the same repository.
+Prefer using [git worktrees] to isolate sessions running within the same repository.
 
-Fully multimodal.<br/>
-Can access and understand images and other file types.<br/>
-Can read and edit files, run commands and tools, and do it in parallel.
+Can access and understand images and other file types, read and edit files, run commands and tools, and do all of that
+in parallel.
 
 _Normally_:
 
@@ -34,9 +37,10 @@ _Normally_:
   Usage is metered by the token.
 
 > [!tip]
-> One _can_ use [Claude Code router] or [Ollama] to run on a local server or shared LLM instead.
+> One _can_ use [Claude Code router] or [Ollama] to route requests to other services instead.<br/>
+> Performances do take a _major_ hit, though.
 
-Uses a **scope system** to determine where configurations apply and who they're shared with.
+Uses a **scope system** to determine where configuration files apply, and who they're shared with:
 
 | Scope                   | Location                             | Area of effect                     | Shared                                    |
 | ----------------------- | ------------------------------------ | ---------------------------------- | ----------------------------------------- |
@@ -48,7 +52,7 @@ Uses a **scope system** to determine where configurations apply and who they're 
 The [settings' schema] is available on schemastore.org.<br/>
 [Config file example].
 
-When multiple scopes are active, settings are merged as follows:
+When multiple scopes are active, settings are **merged** as follows:
 
 ```mermaid
 flowchart LR
@@ -60,7 +64,9 @@ Supports a plugin system for extending its capabilities.
 Sends Statsig telemetry data by default. Includes operational metrics (latency, reliability, usage patterns).<br/>
 Disable it by setting the `DISABLE_TELEMETRY` environment variable to `1`.
 
-Gives better results when it makes a plan before writing code, and when it tries multiple times (iterates).<br/>
+> [!tip]
+> Gives better results when asked to _plan_ before writing code, and then _iterates_ on it.
+
 Common workflows:
 
 - Explore, plan, ask for confirmation, write code, commit.
@@ -97,9 +103,9 @@ Common workflows:
 
   </details>
 
-Hit `esc` once to stop Claude.<br/>
-This action is usually safe. Claude will then resume or try a different approach, but will retain context about the
-request.
+Hit `esc` **once** to stop Claude.<br/>
+This action is _usually_ safe. Claude will then resume or try a different approach, while retaining context about the
+previous request.
 
 Prefer using **Sonnet** for quicker, smaller tasks (e.g. as sub-agent, greenfield coding, app initialization).<br/>
 Consider using **Opus** for broader, longer, higher-level tasks (e.g. planning, refactoring, orchestrating
@@ -113,13 +119,32 @@ Consider allowing specific tools to reduce interruption and avoid fatigue due to
 Prefer using CLI tools over MCP servers.
 
 Make sure to use `/clear` or `/compact` regularly to allow Claude to maintain focus on the conversation.<br/>
-Or make it create notes to self and restart it once the context goes above a threshold (usually best at 60%).
+Or ask it to create notes to self and restart it once the context goes above a threshold (usually best at 60%).
 
 <details>
   <summary>Setup</summary>
 
+See also [Environment variables][documentation / environment variables].
+
 ```sh
+# Install.
 brew install --cask 'claude-code'
+curl -fsSL https://claude.ai/install.sh | bash
+curl -fsSL https://claude.ai/install.sh | bash -s 'stable'
+curl -fsSL https://claude.ai/install.sh | bash -s '2.1.74'
+npm install -g '@anthropic-ai/claude-code'  # deprecated, prefer others
+
+# Check installation and configuration.
+claude --version
+claude doctor
+
+# Uninstall.
+brew uninstall --zap 'claude-code'
+npm uninstall -g '@anthropic-ai/claude-code'
+rm -rf "$HOME/.local/bin/claude" "$HOME/.local/share/claude"
+
+# Cleanup settings.
+rm -rf "$HOME/.claude" "$HOME/.claude.json" ".claude" ".mcp.json"
 ```
 
 </details>
@@ -127,8 +152,11 @@ brew install --cask 'claude-code'
 <details>
   <summary>Usage</summary>
 
+Refer to [CLI reference][documentation / cli reference].
+
 ```sh
 # Start in interactive mode.
+# Best to start from a repository.
 claude
 
 # Run a one-time task.
@@ -164,7 +192,7 @@ claude mcp remove 'github'
 claude --plugin-dir './path/to/plugin'
 
 # Install plugins.
-# Marketplace defaults to 'claude-plugins-official`.
+# Marketplace defaults to 'claude-plugins-official'.
 # Scope defaults to 'user'.
 claude plugin install 'gitlab'
 claude plugin i 'aws-cost-saver@aws-cost-saver-marketplace' --scope 'project'
@@ -185,10 +213,44 @@ claude plugin disable 'gitlab@claude-plugins-official'
 claude plugin update 'gitlab@claude-plugins-official'
 ```
 
-From within Claude Code:
+_Relevant_ commands from within Claude Code (version 2.1.76).<br/>
+Refer to [Built-in commands][documentation / built-in commands] for the complete list.
 
 ```plaintext
-/mcp  manage MCP servers
+/agents             Manage agent configurations
+/batch              Research and plan a large-scale change, then execute it in parallel across 5 to 30 isolated worktree agents that each open a PR.
+/clear              Clear conversation history and free up context
+/compact            Clear conversation history but keep a summary in context.
+/config             Open config panel
+/context            Visualize current context usage as a colored grid
+/copy               Copy Claude's last response or a code block to clipboard
+/debug              Enable debug logging for this session and help diagnose issues
+/diff               View uncommitted changes and per-turn diffs
+/effort             Set effort level for model usage
+/exit               Exit the REPL
+/export             Export the current conversation to a file or clipboard
+/fork               Create a fork of the current conversation at this point
+/help               Show help and available commands
+/hooks              Manage hook configurations for tool events
+/init               Initialize a new CLAUDE.md file with codebase documentation
+/login              Sign in with your Anthropic account
+/logout             Sign out from your Anthropic account
+/loop               Run a prompt or slash command on a recurring interval (e.g. /loop 5m /foo, defaults to 10m)
+/mcp                Manage MCP servers
+/memory             Edit Claude memory files
+/model              Set the AI model for Claude Code
+/permissions        Manage allow & deny tool permission rules
+/plan               Enable plan mode or view the current session plan
+/plugin             Manage Claude Code plugins
+/reload-plugins     Activate pending plugin changes in the current session
+/rename             Rename the current conversation
+/resume             Resume a previous conversation
+/rewind             Restore the code and/or conversation to a previous point
+/security-review    Complete a security review of the pending changes on the current branch
+/simplify           Review changed code for reuse, quality, and efficiency, then fix any issues found.
+/skills             List available skills
+/tasks              List and manage background tasks
+/usage              Show plan usage limits
 ```
 
 </details>
@@ -205,12 +267,146 @@ ANTHROPIC_AUTH_TOKEN='ollama' ANTHROPIC_BASE_URL='http://localhost:11434' ANTHRO
 
 </details>
 
+## Memory
+
+Refer to:
+
+- [AI agents memory][ai agents / memory]
+- [Manage Claude's memory][documentation / manage claude's memory].
+
+Every session begins with a fresh context window.
+
+Claude Code uses `CLAUDE.md` as its context file to apply _procedural memories_ and other persistent context at the
+start of sessions.<br/>
+It should only contain instructions, rules, and preferences, and **no** memories related to other sessions.<br/>
+One can write and maintain that file themselves or ask Claude to do it on their behalf.
+
+Claude is instructed in the system prompt to **intentionally** ignore `CLAUDE.md` content it deems irrelevant to the
+current task.
+
+`CLAUDE.md` files can _import_ additional files using the `@path/to/import` syntax. This is currently an exclusive
+feature of Claude Code.<br/>
+Imported files are expanded and loaded into context at launch alongside the `CLAUDE.md` file referencing them.<br/>
+Both relative and absolute paths are allowed. Relative paths resolve **relative to the file** containing the import, not
+the current working directory.<br/>
+Imported files _can_ recursively import other files, with a maximum depth of five hops.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+Pull in a README, package.json, or workflow guide by referencing them with the `@` syntax anywhere in a `CLAUDE.md`
+file:
+
+```md
+See @README for project overview, and @package.json for available npm commands for this project.
+
+## Additional Instructions
+
+- git workflow: @docs/git-instructions.md
+
+## Individual Preferences
+
+- @~/.claude/my-project-instructions.md
+```
+
+</details>
+
+The first time Claude Code encounters external imports in a project, it shows an approval dialog listing the files. If
+declined, the imports stay disabled and the dialog does **not** appear again.
+
+Claude Code reads `CLAUDE.md` files by walking **up** the directory tree from the current working directory.<br/>
+E.g., if Claude Code is running in `foo/bar/`, it loads instructions from both `foo/bar/CLAUDE.md` and `foo/CLAUDE.md`.
+
+Use _rules_ for a more structured approach to organizing instructions.
+
+Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in later sessions
+by maintaining `~/.claude/projects/<project>/memory/MEMORY.md` files.<br/>
+The first 200 lines of those files are loaded at the start of every session.
+
+When _auto memory_ is enabled, Claude Code _should™_ automatically update memory files.<br/>
+It is enabled by default. Disable it via the `/memory` toggle, `settings.json`, or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`.
+
+Also see [thedotmack/claude-mem] for an automatic memory management system.
+
+Memory files' loading order:
+
+| Scope          | Type                | Location                                                                                                | Notes                                                 |
+| -------------- | ------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Managed        | Enterprise policy   | `/etc/claude-code/CLAUDE.md` (Linux)<br/>`/Library/Application Support/ClaudeCode/CLAUDE.md` (Mac OS X) | Loaded in full at launch                              |
+| User           | Context file        | `~/.claude/CLAUDE.md`                                                                                   | Loaded in full at launch                              |
+| Project        | Shared context file | `./CLAUDE.md` or `./.claude/CLAUDE.md`                                                                  | Loaded in full at launch                              |
+| Project        | Rules               | `./.claude/rules/*.md`                                                                                  | Loaded in full at launch                              |
+| Project        | Local context file  | `./CLAUDE.local.md`                                                                                     | Loaded in full at launch                              |
+| Subdirectory   | Context file        | `<project>/some-subdir/CLAUDE.md`                                                                       | Loaded on demand when reading files in this directory |
+| Active session | Auto memory         | `~/.claude/projects/<project>/memory/`                                                                  | Complement the context without overriding             |
+
+More specific files override broader ones on conflicting instructions, but they **merge** together and do **not**
+replace each other.<br/>
+Managed policy files **cannot** be excluded. Organization-wide rules **always apply regardless**.
+
+Files at the same scope level should **not** conflict with each other, only define instructions for specific
+domains.<br/>
+Combine conflicting rules into a single file, or leverage the hierarchy to handle precedence.
+
+Key commands:
+
+| Command   | Summary                                              |
+| --------- | ---------------------------------------------------- |
+| `/memory` | View, edit, or toggle auto memory on/off             |
+| `/init`   | Bootstrap a `CLAUDE.md` file for the current project |
+
+Creating a good `CONTRIBUTING.md` file, and mandating Claude Code to read it before making changes, seems to go a long
+way for **both** humans and agents.
+
+It appears Claude works better when treated as part of the team.\
+And as part of the team, it is right for it to have a chance to contribute to processes.
+
+> Please check the `CONTRIBUTING.md` file is helpful to _you_, and eventually suggest improvements to allow _you_ to
+> contribute better.\
+> The goal is to give _you_ all the information _you_ need about the workflow, without needing to put extra information
+> in the `CLAUDE.md` file.
+
+> [!tip]
+> Iterate on this for at least a couple of times and a couple of different sessions for the best results.
+
+Consider also asking it to keep the files up to date using notes and findings from the session:
+
+> I changed the file structure to make it adhere more to the standards we shoot for. Please check my changes and take
+> notes for yourself. Also please share those takeaways in the `CONTRIBUTING.md` file.
+
+<details>
+  <summary>Example of CLAUDE.md file implementing the suggestions</summary>
+
+> [!tip]
+> Consider using [hooks][using hooks] if specific actions **need** to happen, and should not rely on Claude _deciding_
+> to take them.
+
+```md
+# CLAUDE.md
+
+> [!important] Claude Code self-reminders — MANDATORY, follow for every change
+>
+> 1. **Before making or suggesting any changes, read `CONTRIBUTING.md`**. Pay extra attention to the code organization
+>    and conventions.
+> 1. **Follow closely the workflow in `CONTRIBUTING.md § Submitting changes`**.
+> 1. **Review and offer to update `CONTRIBUTING.md`** to share _relevant_ notes and findings with the team. Insist on
+>    this if you make changes.
+> 1. **Review and offer to update `CLAUDE.md`** with relevant information _for you_ that would not duplicate the content
+>    of `CONTRIBUTING.md`.
+
+## Overview
+…
+```
+
+</details>
+
 ## Using tools
+
+Refer to [Tools reference].
 
 Claude Code comes with built-in tools (e.g. run shell commands, read and write files, search the web).<br/>
 It can be extended to other tools by means of MCP servers and [skills][using skills].
 
-MCP servers connect Claude Code to the data and gives it tools to act on it, skills teach it what to do with them.
+MCP servers connect Claude Code to the data and give it tools to act on it, skills teach it what to do with them.
 
 > [!caution]
 > MCPs are **not** verified, nor otherwise checked for security issues.<br/>
@@ -267,7 +463,7 @@ jq '.mcpServers."grafana-aws" |= {
   ],
   "env": {
     "GRAFANA_URL": "https://g-abcdef0123.grafana-workspace.eu-west-1.amazonaws.com",
-    "GRAFANA_SERVICE_ACCOUNT_TOKEN": "glsa_abc…def",
+    "GRAFANA_SERVICE_ACCOUNT_TOKEN": "glsa_abc…def"
   }
 }' "$HOME/.claude.json" \
 | sponge "$HOME/.claude.json"
@@ -437,14 +633,14 @@ Refer to [Grafana MCP Server].
     "linear": {
       "type": "http",
       "url": "https://mcp.linear.app/mcp"
-    },
+    }
   }
 }
 ```
 
 </details>
 
-## Limit tool execution
+### Limit tool execution
 
 Leverage [Sandboxing][documentation / sandboxing] to provide filesystem and network isolation for tool execution.<br/>
 The sandboxed bash tool uses OS-level primitives to enforce defined boundaries upfront, and controls network access
@@ -476,137 +672,9 @@ Commands that cannot be sandboxed fall back to the regular permission flow.
 
 Customize sandbox behavior through the `settings.json` file.
 
-## Memory
-
-Refer to:
-
-- [AI agents memory][ai agents / memory]
-- [Manage Claude's memory][documentation / manage claude's memory].
-
-Every session begins with a fresh context window.
-
-Claude Code uses `CLAUDE.md` as its context file to apply _procedural memories_ and other persistent context at the
-start of sessions.<br/>
-It should only contain instructions, rules, and preferences, and **no** memories related to other sessions.<br/>
-One can write and maintain that file themselves or ask Claude to do it on their behalf.
-
-Claude is instructed in the system prompt to **intentionally** ignore `CLAUDE.md` content it deems irrelevant to the
-current task.
-
-`CLAUDE.md` files can _import_ additional files using the `@path/to/import` syntax. This is currently an exclusive
-feature of Claude Code.<br/>
-Imported files are expanded and loaded into context at launch alongside the `CLAUDE.md` file referencing them.<br/>
-Both relative and absolute paths are allowed. Relative paths resolve **relative to the file** containing the import, not
-the current working directory.<br/>
-Imported files _can_ recursively import other files, with a maximum depth of five hops.
-
-<details style='padding: 0 0 1rem 1rem'>
-
-Pull in a README, package.json, or workflow guide by referencing them with the `@` syntax anywhere in a `CLAUDE.md`
-file:
-
-```md
-See @README for project overview, and @package.json for available npm commands for this project.
-
-## Additional Instructions
-
-- git workflow: @docs/git-instructions.md
-
-## Individual Preferences
-
-- @~/.claude/my-project-instructions.md
-```
-
-</details>
-
-The first time Claude Code encounters external imports in a project, it shows an approval dialog listing the files. If
-declined, the imports stay disabled and the dialog does **not** appear again.
-
-Claude Code reads `CLAUDE.md` files by walking **up** the directory tree from the current working directory.<br/>
-E.g., if Claude Code is running in `foo/bar/`, it loads instructions from both `foo/bar/CLAUDE.md` and `foo/CLAUDE.md`.
-
-Use _rules_ for a more structured approach to organizing instructions.
-
-Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in later sessions
-by maintaining `~/.claude/projects/<project>/memory/MEMORY.md` files.<br/>
-The first 200 lines of those files are loaded at the start of every session.
-
-When _auto memory_ is enabled, Claude Code _should™_ automatically update memory files.<br/>
-It is enabled by default. Disable it via the `/memory` toggle, `settings.json`, or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`.
-
-Also see [thedotmack/claude-mem] for an automatic memory management system.
-
-Memory files' loading order:
-
-| Scope          | Type                | Location                                                                                                | Notes                                                 |
-| -------------- | ------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Managed        | Enterprise policy   | `/etc/claude-code/CLAUDE.md` (Linux)<br/>`/Library/Application Support/ClaudeCode/CLAUDE.md` (Mac OS X) | Loaded in full at launch                              |
-| User           | Context file        | `~/.claude/CLAUDE.md`                                                                                   | Loaded in full at launch                              |
-| Project        | Shared context file | `./CLAUDE.md` or `./.claude/CLAUDE.md`                                                                  | Loaded in full at launch                              |
-| Project        | Rules               | `./.claude/rules/*.md`                                                                                  | Loaded in full at launch                              |
-| Project        | Local context file  | `./CLAUDE.local.md`                                                                                     | Loaded in full at launch                              |
-| Subdirectory   | Memory              | `<project>/some-subdir/CLAUDE.md`                                                                       | Loaded on demand when reading files in this directory |
-| Active session | Auto memory         | `~/.claude/projects/<project>/memory/`                                                                  | Complement the context without overriding             |
-
-More specific files override broader ones on conflicting instructions, but they **merge** together and do **not**
-replace each other.<br/>
-Managed policy files **cannot** be excluded. Organization-wide rules **always apply regardless**.
-
-Files at the same scope level should **not** conflict with each other, only define instructions for specific
-domains.<br/>
-Combine conflicting rules into a single file, or leverage the hierarchy to handle precedence.
-
-Key commands:
-
-| Command   | Summary                                              |
-| --------- | ---------------------------------------------------- |
-| `/memory` | View, edit, or toggle auto memory on/off             |
-| `/init`   | Bootstrap a `CLAUDE.md` file for the current project |
-
-Creating a good `CONTRIBUTING.md` file, and mandating Claude Code to read it before making changes, seems to go a long
-way for **both** humans and agents.
-
-It appears Claude works better when treated as part of the team.\
-And as part of the team, it is right for it to have a chance to contribute to processes
-
-> Please check the `CONTRIBUTING.md` file is helpful to _you_, and eventually suggest improvements to allow _you_ to
-> contribute better.\
-> The goal is to give _you_ all the information _you_ need about the workflow, without needing to put extra information
-> in the `CLAUDE.md` file.
-
-> [!tip]
-> Iterate on this for at least a couple of times and a couple of different sessions for the best results.
-
-Consider also asking it to keep the files up to date using notes and findings from the session:
-
-> I changed the file structure to make it adhere more to the standards we shoot for. Please check my changes and take
-> notes for yourself. Also please share those takeaways in the `CONTRIBUTING.md` file.
-
-<details>
-  <summary>Example of CLAUDE.md file implementing the suggestions</summary>
-
-```md
-# CLAUDE.md
-
-> [!important] Claude Code self-reminders — MANDATORY, follow for every change
->
-> 1. **Before making or suggesting any changes, read `CONTRIBUTING.md`**. Pay extra attention to the code organization
->    and conventions.
-> 1. **Follow closely the workflow in `CONTRIBUTING.md § Submitting changes`**.
-> 1. **Review and offer to update `CONTRIBUTING.md`** to share _relevant_ notes and findings with the team. Insist on
->    this if you make changes.
-> 1. **Review and offer to update `CLAUDE.md`** with relevant information _for you_ that would not duplicate the content
->    of `CONTRIBUTING.md`.
-
-## Overview
-…
-```
-
-</details>
-
 ## Using skills
 
-Refer [Skills][documentation / skills].<br/>
+Refer to [Skills][documentation / skills].<br/>
 See also:
 
 - [How to create custom Skills].
@@ -639,8 +707,14 @@ skill).
 When working with files in subdirectories, Claude Code automatically discovers skills from nested `.claude/skills/`
 directories.
 
-When skills share the same name across different scopes, the **more** specific scope wins (enterprise > personal >
-project > subdirectory).<br/>
+Skills sharing the same name across different scopes replace one another with the most specific scope winning on the
+broadest, and managed skills winning over everything:
+
+```mermaid
+flowchart LR
+  m("Managed") --shadows--> s("Subdirectory") --shadows--> p("Project") --shadows--> u("User")
+```
+
 Plugin skills use a `plugin-name:skill-name` namespace, so they cannot conflict with other levels.<br/>
 Files in `.claude/commands/` work the same way, but the skill will take precedence if a skill and a command share the
 same name.
@@ -657,10 +731,10 @@ some-skill/
     └── validate.sh
 ```
 
-The `SKILL.md` files contains a description of the skill and the main, essentials instructions that teach Claude how to
+The `SKILL.md` files contain a description of the skill and the main, essential instructions that teach Claude how to
 use it.<br/>
 This file is required. All other files are optional and are considered _supporting_ files.<br/>
-Optional files allow to specify more details and materials, like Large reference docs, API specifications, or example
+Optional files allow specifying further details and materials, like large reference docs, API specifications, or example
 collections that do not need to be loaded into context every time the skill runs.<br/>
 Reference optional files in `SKILL.md` to instruct Claude of what they contain and when to load them.
 
@@ -674,8 +748,10 @@ It also allows for testing.
 
 ## Using plugins
 
-Reusable packages that bundle [Skills][using skills], agents, hooks, MCP servers, and LSP configurations.<br/>
-They allow extending Claude Code's functionality, and sharing extensions across projects and teams.
+Refer to [Plugins reference][documentation / plugins reference].
+
+Reusable packages that bundle [Skills][using skills], agents, hooks, MCP servers, and LSP servers.<br/>
+They extend Claude Code's functionality, and sharing extensions across projects and teams.
 
 Can be installed at all different scopes.
 
@@ -696,7 +772,7 @@ claude plugin marketplace add 'owner/repo'      # github
 claude plugin marketplace add 'path/to/plugin'  # local
 
 # Install plugins.
-# Marketplace defaults to 'claude-plugins-official`.
+# Marketplace defaults to 'claude-plugins-official'.
 # Scope defaults to 'user'.
 claude plugin install 'gitlab'
 claude plugin i 'aws-cost-saver@aws-cost-saver-marketplace' --scope 'project'
@@ -722,6 +798,89 @@ claude plugin uninstall 'gitlab@claude-plugins-official'
 ```
 
 </details>
+
+## Using hooks
+
+Refer to [Automate workflows with hooks] and [Hooks reference][documentation / hooks reference].
+
+Hooks force running user-defined shell commands automatically at specific points in Claude Code's lifecycle, e.g. when
+it edits files, finishes tasks, or needs input.
+
+They provide _**deterministic**_ control over Claude Code's behavior, ensuring certain actions **always** happen rather
+than relying on the LLM to _choose_ to run them.<br/>
+
+Use hooks to **enforce** project rules, automate repetitive tasks, and integrate Claude Code with existing tools.<br/>
+Consider using [prompt-based hooks] or [agent-based hooks] for decisions that require **judgment** rather than
+deterministic rules.
+
+When an event fires, all _matching_ hooks run in parallel.<br/>
+Identical hook commands are automatically **deduplicated**.
+
+Create hooks by adding a `hooks` block to a settings file.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Claude Code needs your attention\" with title \"Claude Code\"'"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+</details>
+
+Validate Claude Code accepted the hook by using the `/hooks` command.
+
+Test the hook by asking Claude to do something that should trigger it.
+
+> [!important]
+> Scripts used in hooks must be executable.
+
+Command hooks communicate only through stdout, stderr, and exit codes. They **cannot** trigger commands or tool calls
+directly.<br/>
+HTTP hooks only communicate through the response body.
+
+### Prompt-based hooks
+
+Prefer using these for decisions that require _judgment_ rather than deterministic rules.<br/>
+Specifically, when the hook input data alone is enough to make a decision.
+
+Prompt-based hooks make a **single** LLM call. Claude Code sends the prompt and the hook's input data to Claude to make
+the defined decision.<br/>
+It defaults to using Haiku. One can specify a different model by using the `model` field.
+
+The model's **only** job is to return a yes/no decision as JSON.<br/>
+If it returns `{ok: true}`, the action proceeds. If it returns `false`, the action is blocked and the `reason` field is
+fed back to Claude so it can adjust.
+
+### Agent-based hooks
+
+Prefer using these when verification requires inspecting files or running commands.<br/>
+Specifically, when in need to verify something against the actual state of the codebase.
+
+Agent-based hooks spawn a subagent that can read files, search code, and use other tools to verify conditions locally
+before returning a decision.<br/>
+They use the same `ok`/`reason` response format as prompt hooks, but have a default timeout of 60 seconds and up to 50
+tool-use turns.
+
+### HTTP hooks
+
+Prefer using these to `POST` event data to an `HTTP` endpoint instead of running a shell command.<br/>
+Specifically, when wanting a web server, cloud function, or external service to handle hook logic
+
+Claude Code sends the same `JSON` that a command hook would receive on stdin, and the endpoint must return results in
+the HTTP response body using the same JSON format.
 
 ## Delegating work
 
@@ -928,8 +1087,11 @@ Claude Code version: `v2.1.41`.<br/>
 
 <!-- In-article sections -->
 [Agent teams]: #agent-teams
+[Agent-based hooks]: #agent-based-hooks
+[Prompt-based hooks]: #prompt-based-hooks
 [Sub agents]: #sub-agents
-[Using Skills]: #using-skills
+[Using hooks]: #using-hooks
+[Using skills]: #using-skills
 
 <!-- Knowledge base -->
 [AI agents]: ../agents.md
@@ -948,11 +1110,17 @@ Claude Code version: `v2.1.41`.<br/>
 <!-- Upstream -->
 [anthropics/skills]: https://github.com/anthropics/skills
 [anthropics/skills/skill-creator]: https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md
+[Automate workflows with hooks]: https://code.claude.com/docs/en/hooks-guide
 [Blog]: https://claude.com/blog
 [Codebase]: https://github.com/anthropics/claude-code
+[Documentation / Built-in commands]: https://code.claude.com/docs/en/commands
+[Documentation / CLI reference]: https://code.claude.com/docs/en/cli-reference
 [Documentation / Create custom subagents]: https://code.claude.com/docs/en/sub-agents
+[Documentation / Environment variables]: https://code.claude.com/docs/en/env-vars
+[Documentation / Hooks reference]: https://code.claude.com/docs/en/hooks
 [Documentation / Manage Claude's memory]: https://code.claude.com/docs/en/memory
 [Documentation / Orchestrate teams of Claude Code sessions]: https://code.claude.com/docs/en/agent-teams
+[Documentation / Plugins reference]: https://code.claude.com/docs/en/plugins-reference
 [Documentation / Sandboxing]: https://code.claude.com/docs/en/sandboxing
 [Documentation / Settings]: https://code.claude.com/docs/en/settings
 [Documentation / Skills]: https://code.claude.com/docs/en/skills
@@ -961,6 +1129,7 @@ Claude Code version: `v2.1.41`.<br/>
 [How to create custom Skills]: https://support.claude.com/en/articles/12512198-how-to-create-custom-skills
 [Improving skill-creator: Test, measure, and refine Agent Skills]: https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
 [Mastering Claude Code in 30 minutes]: https://www.youtube.com/watch?v=6eBSHbLKuN0
+[Tools reference]: https://code.claude.com/docs/en/tools-reference
 [Website]: https://claude.com/product/overview
 
 <!-- Others -->
