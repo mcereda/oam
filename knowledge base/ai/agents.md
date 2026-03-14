@@ -4,7 +4,7 @@
 designing workflows and using the tools made available to them.
 
 1. [TL;DR](#tldr)
-1. [Memory](#memory)
+1. [Context and memory](#context-and-memory)
    1. [AGENTS.md](#agentsmd)
 1. [Skills](#skills)
 1. [Concerns](#concerns)
@@ -83,7 +83,7 @@ Best practices:
   context instead of helping.
   If an information is in the codebase, it probably does not need to be in the context file.
 
-## Memory
+## Context and memory
 
 Refer to:
 
@@ -145,6 +145,16 @@ Skills extend AI agent capabilities with specialized knowledge and workflow defi
 
 [Agent Skills] is an open standard for skills. It defines them as folders of instructions, scripts, and resources that
 agents can discover and use to do things more accurately and efficiently.
+
+One can import skills via `npx skills`:
+
+```sh
+npx skills add 'https://github.com/pulumi/agent-skills' --skill 'pulumi-best-practices'
+npx skills add 'https://github.com/pulumi/agent-skills' --skill 'pulumi-component'
+```
+
+Prefer avoiding symlinks for now when importing them in a repository. Git does not seem to manage them correctly.\
+Choose the `Copy to all agents` option instead to create files for all used agents.
 
 ## Concerns
 
@@ -256,6 +266,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 - [The Complete Guide to AI Agent Memory Files (CLAUDE.md, AGENTS.md, and Beyond)]
 - [Comparing File Systems and Databases for Effective AI Agent Memory Management]
 - [Writing a good CLAUDE.md]
+- [The Claude Skills I Actually Use for DevOps]
 
 <!--
   Reference
@@ -299,6 +310,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [The 2026 Guide to AI Agents]: https://www.ibm.com/think/ai-agents
 [The 2026 Guide to Coding CLI Tools: 15 AI Agents Compared]: https://www.tembo.io/blog/coding-cli-tools-comparison
 [The Agentic Loop, Explained: What Every PM Should Know About How AI Agents Actually Work]: https://www.ikangai.com/the-agentic-loop-explained-what-every-pm-should-know-about-how-ai-agents-actually-work/
+[The Claude Skills I Actually Use for DevOps]: https://www.pulumi.com/blog/top-8-claude-skills-devops-2026/
 [The Complete Guide to AI Agent Memory Files (CLAUDE.md, AGENTS.md, and Beyond)]: https://medium.com/data-science-collective/the-complete-guide-to-ai-agent-memory-files-claude-md-agents-md-and-beyond-49ea0df5c5a9
 [Token Anxiety]: https://writing.nikunjk.com/p/token-anxiety
 [TotalRecall]: https://github.com/xaitax/TotalRecall

@@ -271,8 +271,8 @@ ANTHROPIC_AUTH_TOKEN='ollama' ANTHROPIC_BASE_URL='http://localhost:11434' ANTHRO
 
 Refer to:
 
-- [AI agents memory][ai agents / memory]
-- [Manage Claude's memory][documentation / manage claude's memory].
+- [AI agents context and memory][ai agents / context and memory]
+- [Manage Claude's memory].
 
 > [!important]
 > Every session begins with a fresh context window.
@@ -706,7 +706,7 @@ Customize sandbox behavior through the `settings.json` file.
 
 ## Using skills
 
-Refer to [Skills][documentation / skills].<br/>
+Refer to [Skills][documentation / skills] and [AI agents skills][ai agents / skills].<br/>
 See also:
 
 - [How to create custom Skills].
@@ -1149,7 +1149,8 @@ Claude Code version: `v2.1.41`.<br/>
 
 <!-- Knowledge base -->
 [AI agents]: ../agents.md
-[AI agents / Memory]: ../agents.md#memory
+[AI agents / Context and memory]: ../agents.md#context-and-memory
+[AI agents / Skills]: ../agents.md#skills
 [Claude Code router]: claude%20code%20router.md
 [Claude]: README.md
 [Gemini CLI]: ../gemini/cli.md
@@ -1170,7 +1171,6 @@ Claude Code version: `v2.1.41`.<br/>
 [CLI reference]: https://code.claude.com/docs/en/cli-reference
 [Codebase]: https://github.com/anthropics/claude-code
 [Create custom subagents]: https://code.claude.com/docs/en/sub-agents
-[Documentation / Manage Claude's memory]: https://code.claude.com/docs/en/memory
 [Documentation / Sandboxing]: https://code.claude.com/docs/en/sandboxing
 [Documentation / Settings]: https://code.claude.com/docs/en/settings
 [Documentation / Skills]: https://code.claude.com/docs/en/skills
@@ -1180,6 +1180,7 @@ Claude Code version: `v2.1.41`.<br/>
 [How Claude Code works]: https://code.claude.com/docs/en/how-claude-code-works
 [How to create custom Skills]: https://support.claude.com/en/articles/12512198-how-to-create-custom-skills
 [Improving skill-creator: Test, measure, and refine Agent Skills]: https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
+[Manage Claude's memory]: https://code.claude.com/docs/en/memory
 [Mastering Claude Code in 30 minutes]: https://www.youtube.com/watch?v=6eBSHbLKuN0
 [Orchestrate teams of Claude Code sessions]: https://code.claude.com/docs/en/agent-teams
 [Plugins reference]: https://code.claude.com/docs/en/plugins-reference
