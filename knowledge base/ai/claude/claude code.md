@@ -377,12 +377,12 @@ Consider also asking it to keep the files up to date using notes and findings fr
 > I changed the file structure to make it adhere more to the standards we shoot for. Please check my changes and take
 > notes for yourself. Also please share those takeaways in the `CONTRIBUTING.md` file.
 
-<details>
-  <summary>Example of CLAUDE.md file implementing the suggestions</summary>
-
 > [!tip]
 > Consider using [hooks][using hooks] if specific actions **need** to happen, and should not rely on Claude _deciding_
 > to take them.
+
+<details>
+  <summary>Example of CLAUDE.md file implementing the suggestions</summary>
 
 ```md
 # CLAUDE.md
@@ -675,6 +675,12 @@ Sandboxes _can_ be configured to execute commands within the sandbox **without**
 Commands that cannot be sandboxed fall back to the regular permission flow.
 
 Customize sandbox behavior through the `settings.json` file.
+
+> [!warning]
+> In a couple of tests conducted on 2026-03-13, Claude Code noticed that some tools did **not** work in the
+> sandbox.<br/>
+> It _**automatically**_ and with _**no prompt at all**_ disabled the sandbox in the settings, and re-run the tools in a
+> new, open environment.
 
 ## Using skills
 
