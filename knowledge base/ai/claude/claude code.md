@@ -274,22 +274,24 @@ Refer to:
 - [AI agents memory][ai agents / memory]
 - [Manage Claude's memory][documentation / manage claude's memory].
 
-Every session begins with a fresh context window.
+> [!important]
+> Every session begins with a fresh context window.
 
-Claude Code uses `CLAUDE.md` as its context file to apply _procedural memories_ and other persistent context at the
-start of sessions.<br/>
-It should only contain instructions, rules, and preferences, and **no** memories related to other sessions.<br/>
-One can write and maintain that file themselves or ask Claude to do it on their behalf.
+Claude Code uses `CLAUDE.md` as its context file.<br/>
+It's purpose is to apply _procedural memories_ and other _recurrent_ context at the start of sessions.<br/>
+It should only contain instructions, rules, and preferences; **avoid** memories related to other sessions.<br/>
+One _can_ ask Claude to write and/or update this file on their behalf.
 
-Claude is instructed in the system prompt to **intentionally** ignore `CLAUDE.md` content it deems irrelevant to the
-current task.
+> [!important]
+> Claude is instructed in its system prompt to **intentionally** ignore `CLAUDE.md` instructions that it deems
+> irrelevant to the current task.
 
 `CLAUDE.md` files can _import_ additional files using the `@path/to/import` syntax. This is currently an exclusive
 feature of Claude Code.<br/>
-Imported files are expanded and loaded into context at launch alongside the `CLAUDE.md` file referencing them.<br/>
-Both relative and absolute paths are allowed. Relative paths resolve **relative to the file** containing the import, not
-the current working directory.<br/>
-Imported files _can_ recursively import other files, with a maximum depth of five hops.
+Imported files are expanded and loaded into context at launch, alongside the `CLAUDE.md` file referencing them.<br/>
+It allows both relative and absolute paths. Relative paths resolve relative to **the file containing the import**, not
+to the current working directory.<br/>
+Imported files _can_ recursively import other files up to 5 hops.
 
 <details style='padding: 0 0 1rem 1rem'>
 
@@ -310,13 +312,13 @@ See @README for project overview, and @package.json for available npm commands f
 
 </details>
 
-The first time Claude Code encounters external imports in a project, it shows an approval dialog listing the files. If
-declined, the imports stay disabled and the dialog does **not** appear again.
+The **first** time Claude Code encounters external imports in a project, it shows an approval dialog listing the files.
+If declined, the imports stay disabled and the dialog does **not** appear again.
 
 Claude Code reads `CLAUDE.md` files by walking **up** the directory tree from the current working directory.<br/>
-E.g., if Claude Code is running in `foo/bar/`, it loads instructions from both `foo/bar/CLAUDE.md` and `foo/CLAUDE.md`.
+E.g., if it is running in `foo/bar/`, it loads instructions from both `foo/bar/CLAUDE.md` and `foo/CLAUDE.md`.
 
-Use _rules_ for a more structured approach to organizing instructions.
+Prefer using _rules_ for a more structured approach to organizing instructions.
 
 Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in later sessions
 by maintaining `~/.claude/projects/<project>/memory/MEMORY.md` files.<br/>
@@ -424,7 +426,8 @@ Procedure:
 
 ### Managing MCP servers
 
-Prefer managing MCP servers via the `claude mcp` subcommands.
+> [!tip]
+> Prefer managing MCP servers via the `claude mcp` subcommands.
 
 ```sh
 # Add MCP servers.
@@ -699,10 +702,10 @@ See also:
 
 Claude Skills follow and extend the [Agent Skills] standard format.
 
-Skills superseded commands.<br/>
+Skills supersede and are meant to replace commands.<br/>
 Existing `.claude/commands/` files will currently still work, but skills with the same name will take precedence.
 
-Claude Code automatically discovers skills from:
+Claude Code automatically discovers skills during initialization from:
 
 - The user's `$HOME/.claude/skills/` directory, and sets them up as user-level skills.
 - A project's `.claude/skills/` folder, and sets them up as project-level skills.
@@ -763,7 +766,7 @@ It also allows for testing.
 
 ## Using plugins
 
-Refer to [Plugins reference][documentation / plugins reference].
+Refer to [Plugins reference].
 
 Reusable packages that bundle [Skills][using skills], agents, hooks, MCP servers, and LSP servers.<br/>
 They extend Claude Code's functionality, and sharing extensions across projects and teams.
@@ -904,7 +907,7 @@ the HTTP response body using the same JSON format.
 
 ### Sub agents
 
-Refer to [Create custom subagents][Documentation / Create custom subagents].
+Refer to [Create custom subagents].
 
 **Specialized** AI assistants with fixed roles, handling **specific** types of tasks.<br/>
 Each runs in its own context window, with its own custom system prompt, specific access to tools, and independent
@@ -947,7 +950,7 @@ subagent.
 > [!warning]
 > Experimental feature as of 2026-03-02.
 
-Refer to [Orchestrate teams of Claude Code sessions][documentation / orchestrate teams of claude code sessions].
+Refer to [Orchestrate teams of Claude Code sessions].
 
 Multiple Claude Code instances can work together as a team.<br/>
 One session acts as the team lead and coordinates work, assigns tasks, and synthesizes results.<br/>
@@ -1130,10 +1133,8 @@ Claude Code version: `v2.1.41`.<br/>
 [Built-in commands reference]: https://code.claude.com/docs/en/commands
 [CLI reference]: https://code.claude.com/docs/en/cli-reference
 [Codebase]: https://github.com/anthropics/claude-code
-[Documentation / Create custom subagents]: https://code.claude.com/docs/en/sub-agents
+[Create custom subagents]: https://code.claude.com/docs/en/sub-agents
 [Documentation / Manage Claude's memory]: https://code.claude.com/docs/en/memory
-[Documentation / Orchestrate teams of Claude Code sessions]: https://code.claude.com/docs/en/agent-teams
-[Documentation / Plugins reference]: https://code.claude.com/docs/en/plugins-reference
 [Documentation / Sandboxing]: https://code.claude.com/docs/en/sandboxing
 [Documentation / Settings]: https://code.claude.com/docs/en/settings
 [Documentation / Skills]: https://code.claude.com/docs/en/skills
@@ -1144,6 +1145,8 @@ Claude Code version: `v2.1.41`.<br/>
 [How to create custom Skills]: https://support.claude.com/en/articles/12512198-how-to-create-custom-skills
 [Improving skill-creator: Test, measure, and refine Agent Skills]: https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
 [Mastering Claude Code in 30 minutes]: https://www.youtube.com/watch?v=6eBSHbLKuN0
+[Orchestrate teams of Claude Code sessions]: https://code.claude.com/docs/en/agent-teams
+[Plugins reference]: https://code.claude.com/docs/en/plugins-reference
 [Tools reference]: https://code.claude.com/docs/en/tools-reference
 [Website]: https://claude.com/product/overview
 
