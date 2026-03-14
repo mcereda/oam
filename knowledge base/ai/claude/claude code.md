@@ -124,7 +124,7 @@ Or ask it to create notes to self and restart it once the context goes above a t
 <details>
   <summary>Setup</summary>
 
-See also [Environment variables][documentation / environment variables].
+See also [Environment variables][environment variables reference].
 
 ```sh
 # Install.
@@ -152,7 +152,7 @@ rm -rf "$HOME/.claude" "$HOME/.claude.json" ".claude" ".mcp.json"
 <details>
   <summary>Usage</summary>
 
-Refer to [CLI reference][documentation / cli reference].
+Refer to [CLI reference].
 
 ```sh
 # Start in interactive mode.
@@ -214,7 +214,7 @@ claude plugin update 'gitlab@claude-plugins-official'
 ```
 
 _Relevant_ commands from within Claude Code (version 2.1.76).<br/>
-Refer to [Built-in commands][documentation / built-in commands] for the complete list.
+Refer to [Built-in commands][built-in commands reference] for the complete list.
 
 ```plaintext
 /agents             Manage agent configurations
@@ -353,6 +353,10 @@ Key commands:
 | --------- | ---------------------------------------------------- |
 | `/memory` | View, edit, or toggle auto memory on/off             |
 | `/init`   | Bootstrap a `CLAUDE.md` file for the current project |
+
+> [!tip]
+> It appears Claude (at least the 4.6 suite) follows instructions better when they use an _imperative_ tone.<br/>
+> Prefer writing important instructions that way.
 
 Creating a good `CONTRIBUTING.md` file, and mandating Claude Code to read it before making changes, seems to go a long
 way for **both** humans and agents.
@@ -801,7 +805,7 @@ claude plugin uninstall 'gitlab@claude-plugins-official'
 
 ## Using hooks
 
-Refer to [Automate workflows with hooks] and [Hooks reference][documentation / hooks reference].
+Refer to [Automate workflows with hooks] and [Hooks reference].
 
 Hooks force running user-defined shell commands automatically at specific points in Claude Code's lifecycle, e.g. when
 it edits files, finishes tasks, or needs input.
@@ -1112,12 +1116,10 @@ Claude Code version: `v2.1.41`.<br/>
 [anthropics/skills/skill-creator]: https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md
 [Automate workflows with hooks]: https://code.claude.com/docs/en/hooks-guide
 [Blog]: https://claude.com/blog
+[Built-in commands reference]: https://code.claude.com/docs/en/commands
+[CLI reference]: https://code.claude.com/docs/en/cli-reference
 [Codebase]: https://github.com/anthropics/claude-code
-[Documentation / Built-in commands]: https://code.claude.com/docs/en/commands
-[Documentation / CLI reference]: https://code.claude.com/docs/en/cli-reference
 [Documentation / Create custom subagents]: https://code.claude.com/docs/en/sub-agents
-[Documentation / Environment variables]: https://code.claude.com/docs/en/env-vars
-[Documentation / Hooks reference]: https://code.claude.com/docs/en/hooks
 [Documentation / Manage Claude's memory]: https://code.claude.com/docs/en/memory
 [Documentation / Orchestrate teams of Claude Code sessions]: https://code.claude.com/docs/en/agent-teams
 [Documentation / Plugins reference]: https://code.claude.com/docs/en/plugins-reference
@@ -1125,6 +1127,8 @@ Claude Code version: `v2.1.41`.<br/>
 [Documentation / Settings]: https://code.claude.com/docs/en/settings
 [Documentation / Skills]: https://code.claude.com/docs/en/skills
 [Documentation]: https://code.claude.com/docs/en/overview
+[Environment variables reference]: https://code.claude.com/docs/en/env-vars
+[Hooks reference]: https://code.claude.com/docs/en/hooks
 [How Claude Code works]: https://code.claude.com/docs/en/how-claude-code-works
 [How to create custom Skills]: https://support.claude.com/en/articles/12512198-how-to-create-custom-skills
 [Improving skill-creator: Test, measure, and refine Agent Skills]: https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
