@@ -677,10 +677,15 @@ Commands that cannot be sandboxed fall back to the regular permission flow.
 Customize sandbox behavior through the `settings.json` file.
 
 > [!warning]
-> In a couple of tests conducted on 2026-03-13, Claude Code noticed that some tools did **not** work in the
-> sandbox.<br/>
+> In two tests conducted on 2026-03-13, Claude Code noticed that some tools did **not** work in the sandbox.<br/>
 > It _**automatically**_ and with _**no prompt at all**_ disabled the sandbox in the settings, and re-run the tools in a
 > new, open environment.
+>
+> Environment:
+>
+> - Sandboxing was purposefully enabled manually in the session preceding the test one, both times.
+> - Claude Code was purposefully set to ask for **all** actions, both times.
+> - No automatic permission was configured for both Claude Code and in the repository, both times.
 
 ## Using skills
 
