@@ -11,8 +11,12 @@ Open-source platform for monitoring and observability.
 1. [Dashboards of interest](#dashboards-of-interest)
 1. [Alerting](#alerting)
 1. [APIs](#apis)
+1. [Operations](#operations)
+   1. [Create service accounts](#create-service-accounts)
+   1. [Create tokens for service accounts](#create-tokens-for-service-accounts)
+   1. [Export all existing dashboards in files named by their ID](#export-all-existing-dashboards-in-files-named-by-their-id)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -34,6 +38,13 @@ docker run -d --rm --name 'grafana-enterprise' -p '3000:3000' -ti -entrypoint 'b
 ```plaintext
 # Return health information
 GET /api/health
+
+# Create service accounts.
+POST /api/serviceaccounts
+{
+  "name": "jonas",
+  "role": "Admin"
+}
 ```
 
 </details>
@@ -49,6 +60,15 @@ curl -sS 'http://grafana:3000/api/search' -H 'Authorization: Basic YWRtaW46YWRta
     curl -sS 'http://grafana:3000/api/dashboards/uid/{}' -H 'Authorization: Basic YWRtaW46YWRtaW4=' \
     > '{}.json' \
   "
+
+# Create a service account and a token for it.
+curl -fsSL -X 'POST' -url 'http://admin:admin@localhost:3000/api/serviceaccounts' \
+  -H 'Content-Type: application/json' \
+  -d '{"name": "jonas", "role": "Admin"}' \
+| jq -r '.id' \
+| xargs -I '%%' \
+    curl -fsSL -X 'POST' --url 'http://admin:admin@localhost:3000/api/serviceaccounts/%%/tokens' \
+      -H 'Content-Type: application/json' -d '{"name": "test-token", "secondsToLive": 2592000}'
 ```
 
 </details>
@@ -302,7 +322,121 @@ Refer [alerting] and [Get started with Grafana Alerting].
 
 ## APIs
 
-Refer [HTTP API reference].
+Refer [HTTP API reference] and [HTTP API examples].
+
+Authenticate via username and password, bearer token, or basic token:
+
+```sh
+curl --url 'http://admin:admin@localhost:3000/api/serviceaccounts' …
+curl --user 'user:password' --location 'grafana.fqdn/api/access-control/builtin-roles'
+curl -H 'Authorization: Bearer eyJrIjoiT0tTcG1pUlY2RnVKZTFVaDFsNFZXdE9ZWmNrMkZYbk' …
+curl -H 'Authorization: Basic YWRtaW46YWRtaW4='
+```
+
+## Operations
+
+### Create service accounts
+
+> [!important]
+> Requires `serviceaccounts:create` permissions.
+
+<details>
+  <summary>Via the web UI</summary>
+
+1. Open the web UI and go to _Administration_ > _Users and access_ > _Service accounts_.
+1. Click the _Add service account_ button in the top right corner.
+1. Give it a name and select its role, then click _Create_.
+
+</details>
+
+<details>
+  <summary>Via the API</summary>
+
+Refer to [Create service account API reference].
+
+```plaintext
+POST /api/serviceaccounts HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "name": "grafana",
+  "role": "Viewer",
+  "isDisabled": false
+}
+```
+
+```sh
+curl -X 'POST' --url 'http://admin:admin@localhost:3000/api/serviceaccounts' -H 'Content-Type: application/json' \
+  -d '{"name": "jonas", "role": "Admin"}'
+```
+
+</details>
+
+### Create tokens for service accounts
+
+> [!important]
+> Requires `serviceaccounts:write` permissions.
+
+<details>
+  <summary>Via the web UI</summary>
+
+1. Open the web UI and go to _Administration_ > _Users and access_ > _Service accounts_.
+1. [Create a service account][create service accounts] if needed.
+1. Select the service account you want to create a token for.
+1. In the _Tokens_ section, select the _Add service account token_ button.
+1. Copy the token from the dialog and save it somewhere safe.
+
+</details>
+
+<details>
+  <summary>Via the API</summary>
+
+Refer to [Create service account tokens API reference].
+
+> [!important]
+> Requires `serviceaccounts:write` permissions.\
+> `secondsToLive` defaults to `0`. Must be set in AWS-managed Grafana.
+
+```plaintext
+POST /api/serviceaccounts/{{id}}/tokens
+Accept: application/json
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "name": "test-token",
+  "secondsToLive": 604800
+}
+```
+
+```sh
+curl -X 'POST' --url 'http://admin:admin@localhost:3000/api/serviceaccounts/88/tokens' \
+  -H 'Content-Type: application/json' -d '{"name": "test-token", "secondsToLive": 31536000}'
+```
+
+</details>
+
+### Export all existing dashboards in files named by their ID
+
+<details>
+  <summary>Via the API</summary>
+
+```sh
+curl -sS \
+  -H 'Authorization: Bearer eyJrIjoiT0tTcG1pUlY2RnVKZTFVaDFsNFZXdE9ZWmNrMkZYbk' \
+  'https://g-0123456abc.grafana-workspace.eu-west-1.amazonaws.com/api/search' \
+| jq -r '.[].uid' - \
+| xargs -I '%%' " \
+    curl -sS \
+      -H 'Authorization: Bearer eyJrIjoiT0tTcG1pUlY2RnVKZTFVaDFsNFZXdE9ZWmNrMkZYbk' \
+      'https://g-0123456abc.grafana-workspace.eu-west-1.amazonaws.com/api/dashboards/uid/%%' \
+    > '%%.json' \
+  "
+```
+
+</details>
 
 ## Further readings
 
@@ -316,9 +450,7 @@ Refer [HTTP API reference].
 - [Loki]
 - [Get started with Grafana Alerting]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Provisioning]
 - [Provision dashboards and data sources]
@@ -333,8 +465,8 @@ All the references in the [further readings] section, plus the following:
   -->
 
 <!-- In-article sections -->
+[Create service accounts]: #create-service-accounts
 [datasources provisioning]: #datasources
-[further readings]: #further-readings
 
 <!-- Knowledge base -->
 [HashiCorp Vault]: hashicorp%20vault.md
@@ -346,16 +478,19 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Upstream -->
 [alerting]: https://grafana.com/docs/grafana/latest/alerting/
+[Configuration file location]: https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#configuration-file-location
+[Create service account API reference]: https://grafana.com/docs/grafana/latest/developer-resources/api-reference/http-api/serviceaccount/#create-service-account
+[Create service account tokens API reference]: https://grafana.com/docs/grafana/latest/developer-resources/api-reference/http-api/serviceaccount/#create-service-account-tokens
 [data source on startup]: https://community.grafana.com/t/data-source-on-startup/8618/2
 [documentation]: https://grafana.com/docs/grafana/latest/
 [get started with grafana alerting]: https://grafana.com/tutorials/alerting-get-started/
 [github]: https://github.com/grafana/grafana
 [helm chart]: https://github.com/grafana/helm-charts/tree/main/charts/grafana
-[http api reference]: https://grafana.com/docs/grafana/latest/developers/http_api/
+[HTTP API examples]: https://grafana.com/docs/grafana/latest/developer-resources/api-reference/http-api/examples/
+[HTTP API reference]: https://grafana.com/docs/grafana/latest/developer-resources/api-reference/http-api/
 [provision dashboards and data sources]: https://grafana.com/tutorials/provision-dashboards-and-data-sources/
 [provisioning]: https://grafana.com/docs/grafana/latest/administration/provisioning/
 [website]: https://grafana.com
-[Configuration file location]: https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#configuration-file-location
 
 <!-- Others -->
 [how to integrate prometheus and grafana on kubernetes using helm]: https://semaphoreci.com/blog/prometheus-grafana-kubernetes-helm

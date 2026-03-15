@@ -498,6 +498,9 @@ Also see [Using Amazon CloudWatch with AWS Global Accelerator].
 Use service accounts for authenticating to the API.<br/>
 Refer to [Use service accounts to authenticate with the Grafana HTTP APIs].
 
+> [!important]
+> AWS requires service account tokens to have an expiration set during creation.
+
 ### GuardDuty
 
 Threat detection service.
