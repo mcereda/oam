@@ -40,6 +40,8 @@ _Context Window_ is the amount of tokens that a model can pay attention to at an
 
 _Large LMs_ are language models trained on massive datasets, and encoding their acquired knowledge into up to trillions
 of parameters.
+_Small LMs_ are language models that are small enough to be able to run on _reduced_ resources, like the CPU of
+smartphones or devices at the edge of cloud providers. They are usually LLMs retrained, fine-tuned, and then quantized.
 
 _Parameters_ are internal weights and values that an LLM learns during training.<br/>
 They are used to capture patterns in language such as grammar, meaning, context and relationships between words.
@@ -318,6 +320,7 @@ Refer:
 - [When Copilot Becomes Autopilot: Generative AI's Critical Risk to Knowledge Work and a Critical Solution]
 - [ReAct: Synergizing Reasoning and Acting in Language Models]
 - [The Dangerous Illusion of AI Coding?] ([transcript][the dangerous illusion of ai coding? / transcript])
+- [karpathy/autoresearch] and its forks ([miolini/autoresearch-macos], [trevin-creator/autoresearch-mlx], …)
 
 ### Sources
 
@@ -333,6 +336,7 @@ Refer:
 - IBM's [What are LLM parameters?][ibm / what are llm parameters?]
   and [What is a context window?][ibm / what is a context window?]
 - [This is not the AI we were promised], presentation by Michael John Wooldridge at the Royal Society
+- [Small Language Models (SLMs) Are the Future: Fine-Tuning AI That Runs on Your iPhone] by Daniel Bourke
 
 <!--
   Reference
@@ -368,12 +372,14 @@ Refer:
 [IBM / What is a context window?]: https://www.ibm.com/think/topics/context-window
 [Introduction to Large Language Models]: https://developers.google.com/machine-learning/crash-course/llm
 [Jan]: https://www.jan.ai/
+[karpathy/autoresearch]: https://github.com/karpathy/autoresearch
 [Llama]: https://www.llama.com/
 [Llamafile]: https://github.com/mozilla-ai/llamafile
 [LLM skills every AI engineer must know]: https://fiodar.substack.com/p/llm-skills-every-ai-engineer-must-know
 [Local LLM Hosting: Complete 2026 Guide - Ollama, vLLM, LocalAI, Jan, LM Studio & More]: https://www.glukhov.org/post/2025/11/hosting-llms-ollama-localai-jan-lmstudio-vllm-comparison/
 [Looking back at speculative decoding]: https://research.google/blog/looking-back-at-speculative-decoding/
 [Mastering System Prompts for LLMs]: https://dev.to/simplr_sh/mastering-system-prompts-for-llms-2d1d
+[miolini/autoresearch-macos]: https://github.com/miolini/autoresearch-macos
 [Mistral]: https://mistral.ai/
 [OpenClaw: Who are you?]: https://www.youtube.com/watch?v=hoeEclqW8Gs
 [Optimizing LLMs for Performance and Accuracy with Post-Training Quantization]: https://developer.nvidia.com/blog/optimizing-llms-for-performance-and-accuracy-with-post-training-quantization/
@@ -381,9 +387,11 @@ Refer:
 [Run LLMs Locally: 6 Simple Methods]: https://www.datacamp.com/tutorial/run-llms-locally-tutorial
 [SEQUOIA: Serving exact Llama2-70B on an RTX4090 with half-second per token latency]: https://infini-ai-lab.github.io/Sequoia-Page/
 [Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training]: https://arxiv.org/abs/2401.05566
-[The Dangerous Illusion of AI Coding?]: https://www.youtube.com/watch?v=dHBEQ-Ryo24
+[Small Language Models (SLMs) Are the Future: Fine-Tuning AI That Runs on Your iPhone]: https://www.youtube.com/watch?v=EXB8HokGVMI
 [The Dangerous Illusion of AI Coding? / transcript]: study%20material/jeremy-howard-ulmfit-fine-tuning-and-intuition-in-ml-final-rev-f76e2cc7.pdf
+[The Dangerous Illusion of AI Coding?]: https://www.youtube.com/watch?v=dHBEQ-Ryo24
 [This is not the AI we were promised]: https://www.youtube.com/watch?v=CyyL0yDhr7I
+[trevin-creator/autoresearch-mlx]: https://github.com/trevin-creator/autoresearch-mlx
 [What are Language Models in NLP?]: https://www.geeksforgeeks.org/nlp/what-are-language-models-in-nlp/
 [What is chain of thought (CoT) prompting?]: https://www.ibm.com/think/topics/chain-of-thoughts
 [When Copilot Becomes Autopilot: Generative AI's Critical Risk to Knowledge Work and a Critical Solution]: https://arxiv.org/abs/2412.15030
