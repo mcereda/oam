@@ -18,9 +18,10 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 1. [Delegating work](#delegating-work)
    1. [Sub agents](#sub-agents)
    1. [Agent teams](#agent-teams)
+1. [Tools of interest](#tools-of-interest)
 1. [Run on local models](#run-on-local-models)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -404,6 +405,9 @@ Consider also asking it to keep the files up to date using notes and findings fr
 ```
 
 </details>
+
+TODO: success instructing Claude to be responsible for the tools it creates and uses, then asking it to check and update
+the files to correct its own behaviour.
 
 ## Using tools
 
@@ -846,6 +850,8 @@ Consider using [prompt-based hooks] or [agent-based hooks] for decisions that re
 deterministic rules.
 
 When an event fires, all _matching_ hooks run in parallel.<br/>
+Hooks defining an empty or no matcher will match **all** events of a specific type.
+
 Identical hook commands are automatically **deduplicated**.
 
 `TaskCompleted` hooks fire when a task created via the Task tool for background/parallel work finishes.<br/>
@@ -857,6 +863,7 @@ It fires **on every turn**, after Claude finishes responding, which could be noi
 Both prompt-based and agent-based hooks work **as gatekeepers** on `Stop` events, **not** as conversation
 injectors.<br/>
 They only return `{"ok": true/false, "reason": "..."}`, and only decide whether Claude should be allowed to stop.
+
 Beware of prompts that can start loops. Ask Claude to refine them.
 
 > [!note]
@@ -891,6 +898,16 @@ Create hooks by adding a `hooks` block to a settings file.
             "prompt": "Review the proposed Bash command. Block it if it would: delete files outside the working directory, force-push, run pulumi up/destroy without the non-interactive task wrapper, or modify .env files. Allow everything else."
           }
         ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "A new file is being created. Block this if the file is a .env file, a secret, or contains hardcoded credentials. Allow everything else. $ARGUMENTS",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -900,6 +917,20 @@ Create hooks by adding a `hooks` block to a settings file.
           {
             "type": "command",
             "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://localhost:8080/hooks/post-tool-use",
+            "timeout": 10000,
+            "headers": {
+              "Authorization": "Bearer $MY_TOKEN"
+            },
+            "allowedEnvVars": ["MY_TOKEN"]
           }
         ]
       }
@@ -941,9 +972,11 @@ the defined decision.<br/>
 They default to using Haiku. One can specify a different model by using the `model` field, but since it is just used to
 decide whether to take action or not, it is usually not worth changing the model.
 
-The model's **only** job is to return a yes/no decision as JSON. It has no access to tools.<br/>
+The model's **only** job is to return a yes/no decision as JSON. It has **no** access to tools.<br/>
 If it returns `{ok: true}`, the action proceeds. If it returns `false`, the action is blocked and the `reason` field is
 fed back to Claude so it can adjust.
+
+One can use `$ARGUMENTS` as a placeholder in the prompt to receive the hook's input data.
 
 ### Agent-based hooks
 
@@ -956,7 +989,7 @@ decide whether to take action or not, it is usually not worth changing the model
 Spawned agents will inherit context from the main session through a transcript file, but they will access it **only** if
 instructed to.
 
-<details>
+<details style='padding: 0 0 1rem 1rem'>
   <summary>Input to sub-agents during <code>Stop</code> hooks</summary>
 
 | Field                    | Description                                                                   |
@@ -975,7 +1008,7 @@ before returning a decision.<br/>
 They use an `ok`/`reason`-like response format as prompt hooks, but have a default timeout of 60 seconds and up to 50
 tool-use turns.
 
-<details>
+<details style='padding: 0 0 1rem 1rem'>
   <summary>Example: keep <code>CONTRIBUTING.md</code> and <code>CLAUDE.md</code> updated</summary>
 
 One wants to update the contents of `CONTRIBUTING.md` with findings from the current session.<br/>
@@ -1021,6 +1054,11 @@ Specifically, when wanting a web server, cloud function, or external service to 
 
 Claude Code sends the same `JSON` that a command hook would receive on stdin, and the endpoint must return results in
 the HTTP response body using the same JSON format.
+
+HTTP hooks support the `headers` field, and `allowedEnvVars` for passing environment variables.
+
+Hook execution **continues** on non-`2xx` responses and connection failures.<br/>
+An empty `2xx` body counts as success.
 
 ## Delegating work
 
@@ -1152,6 +1190,12 @@ Ask the researcher teammate to shut down
 
 Clean up the team **after termination** by just asking the lead to clean up.<br/>
 The lead will fail if any teammate is still running.
+
+## Tools of interest
+
+| Tool         | Summary                                                                          |
+| ------------ | -------------------------------------------------------------------------------- |
+| [rtk-ai/rtk] | Summarize CLI commands output. Avoids context pollution and reduces token usage. |
 
 ## Run on local models
 
@@ -1289,3 +1333,4 @@ Claude Code version: `v2.1.41`.<br/>
 [The Claude Skills I Actually Use for DevOps]: https://www.pulumi.com/blog/top-8-claude-skills-devops-2026/
 [thedotmack/claude-mem]: https://github.com/thedotmack/claude-mem
 [Writing a good CLAUDE.md]: https://www.humanlayer.dev/blog/writing-a-good-claude-md
+[rtk-ai/rtk]: https://github.com/rtk-ai/rtk
