@@ -217,40 +217,40 @@ _Relevant_ commands from within Claude Code (version 2.1.76).<br/>
 Refer to [Built-in commands][built-in commands reference] for the complete list.
 
 ```plaintext
-/agents             Manage agent configurations
-/batch              Research and plan a large-scale change, then execute it in parallel across 5 to 30 isolated worktree agents that each open a PR.
-/clear              Clear conversation history and free up context
-/compact            Clear conversation history but keep a summary in context.
-/config             Open config panel
-/context            Visualize current context usage as a colored grid
-/copy               Copy Claude's last response or a code block to clipboard
-/debug              Enable debug logging for this session and help diagnose issues
-/diff               View uncommitted changes and per-turn diffs
-/effort             Set effort level for model usage
-/exit               Exit the REPL
-/export             Export the current conversation to a file or clipboard
-/fork               Create a fork of the current conversation at this point
-/help               Show help and available commands
-/hooks              Manage hook configurations for tool events
-/init               Initialize a new CLAUDE.md file with codebase documentation
-/login              Sign in with your Anthropic account
-/logout             Sign out from your Anthropic account
-/loop               Run a prompt or slash command on a recurring interval (e.g. /loop 5m /foo, defaults to 10m)
-/mcp                Manage MCP servers
-/memory             Edit Claude memory files
-/model              Set the AI model for Claude Code
-/permissions        Manage allow & deny tool permission rules
-/plan               Enable plan mode or view the current session plan
-/plugin             Manage Claude Code plugins
-/reload-plugins     Activate pending plugin changes in the current session
-/rename             Rename the current conversation
-/resume             Resume a previous conversation
-/rewind             Restore the code and/or conversation to a previous point
-/security-review    Complete a security review of the pending changes on the current branch
-/simplify           Review changed code for reuse, quality, and efficiency, then fix any issues found.
-/skills             List available skills
-/tasks              List and manage background tasks
-/usage              Show plan usage limits
+/agents                              Manage agent configurations
+/batch                               Research and plan a large-scale change, then execute it in parallel across 5 to 30 isolated worktree agents that each open a PR.
+/clear                               Clear conversation history and free up context
+/compact                             Clear conversation history but keep a summary in context.
+/config                              Open config panel
+/context                             Visualize current context usage as a colored grid
+/copy                                Copy Claude's last response or a code block to clipboard
+/debug                               Enable debug logging for this session and help diagnose issues
+/diff                                View uncommitted changes and per-turn diffs
+/effort [low|medium|high|max|auto]   Set effort level for model usage
+/exit                                Exit the REPL
+/export                              Export the current conversation to a file or clipboard
+/fork                                Create a fork of the current conversation at this point
+/help                                Show help and available commands
+/hooks                               Manage hook configurations for tool events
+/init                                Initialize a new CLAUDE.md file with codebase documentation
+/login                               Sign in with your Anthropic account
+/logout                              Sign out from your Anthropic account
+/loop                                Run a prompt or slash command on a recurring interval (e.g. /loop 5m /foo, defaults to 10m)
+/mcp [enable|disable [name]]         Manage MCP servers
+/memory                              Edit Claude memory files
+/model [model]                       Set the AI model for Claude Code
+/permissions                         Manage allow & deny tool permission rules
+/plan                                Enable plan mode or view the current session plan
+/plugin                              Manage Claude Code plugins
+/reload-plugins                      Activate pending plugin changes in the current session
+/rename                              Rename the current conversation
+/resume                              Resume a previous conversation
+/rewind                              Restore the code and/or conversation to a previous point
+/security-review                     Complete a security review of the pending changes on the current branch
+/simplify                            Review changed code for reuse, quality, and efficiency, then fix any issues found.
+/skills                              List available skills
+/tasks                               List and manage background tasks
+/usage                               Show plan usage limits
 ```
 
 </details>
@@ -278,7 +278,7 @@ Refer to:
 > Every session begins with a fresh context window.
 
 Claude Code uses `CLAUDE.md` as its context file.<br/>
-It's purpose is to apply _procedural memories_ and other _recurrent_ context at the start of sessions.<br/>
+Its purpose is to apply _procedural memories_ and other _recurrent_ context at the start of sessions.<br/>
 It should only contain instructions, rules, and preferences; **avoid** memories related to other sessions.<br/>
 One _can_ ask Claude to write and/or update this file on their behalf.
 
@@ -783,7 +783,7 @@ It also allows for testing.
 Refer to [Plugins reference].
 
 Reusable packages that bundle [Skills][using skills], agents, hooks, MCP servers, and LSP servers.<br/>
-They extend Claude Code's functionality, and sharing extensions across projects and teams.
+They extend Claude Code's functionality, and allow sharing extensions across projects and teams.
 
 Can be installed at all different scopes.
 
@@ -842,7 +842,7 @@ They provide _**deterministic**_ control over Claude Code's behavior, ensuring c
 than relying on the LLM to _choose_ to run them.<br/>
 
 Use hooks to **enforce** project rules, automate repetitive tasks, and integrate Claude Code with existing tools.<br/>
-Consider using [prompt-based hooks] or [agent-based hooks] for decisions that require **judgment** rather than
+Consider using [prompt-based hooks] or [agent-based hooks] for decisions that require **judgment**, rather than
 deterministic rules.
 
 When an event fires, all _matching_ hooks run in parallel.<br/>
@@ -854,9 +854,15 @@ Exiting the REPL does **not** trigger `TaskCompleted` hooks. It will **only** fi
 Run commands at the end **of each response or session** by leveraging the `Stop` hook event.<br/>
 It fires **on every turn**, after Claude finishes responding, which could be noisy depending on the action.
 
+Both prompt-based and agent-based hooks work **as gatekeepers** on `Stop` events, **not** as conversation
+injectors.<br/>
+They only return `{"ok": true/false, "reason": "..."}`, and only decide whether Claude should be allowed to stop.
+
 > [!note]
-> There's currently no hook event that allows prompt or agent hooks just before exiting the REPL.<br/>
-> `SessionEnd` prompt or agent hooks are not yet supported **outside** of the REPL. The closest alternative is `Stop`.
+> There's currently no hook event that allows prompt or agent hooks just before exiting the REPL. `Ctrl+C` and `/exit`
+> terminate the session **immediately**, without triggering any hook at all.<br/>
+> `SessionEnd` prompt or agent hooks are not yet supported **outside** of the REPL. The closest alternative is using
+> `Stop`, even if it generates noise.
 
 Create hooks by adding a `hooks` block to a settings file.
 
@@ -867,7 +873,6 @@ Create hooks by adding a `hooks` block to a settings file.
   "hooks": {
     "Notification": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
@@ -876,13 +881,34 @@ Create hooks by adding a `hooks` block to a settings file.
         ]
       }
     ],
-    "Stop": [
+    "PreToolUse": [
       {
-        "matcher": "",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "agent",
-            "prompt": "Offer to update CONTRIBUTING.md to share any finding, insight or new convention with the team. Also offer to update CLAUDE.md with what is not already covered by CONTRIBUTING.md."
+            "prompt": "Review the proposed Bash command. Block it if it would: delete files outside the working directory, force-push, run pulumi up/destroy without the non-interactive task wrapper, or modify .env files. Allow everything else."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "Offer to update CONTRIBUTING.md to share any finding, insight or new convention with the team. Also offer to update the existing CLAUDE.md with what is not already covered by CONTRIBUTING.md."
           }
         ]
       }
@@ -911,9 +937,10 @@ Specifically, when the hook input data alone is enough to make a decision.
 
 Prompt-based hooks make a **single** LLM call. Claude Code sends the prompt and the hook's input data to Claude to make
 the defined decision.<br/>
-It defaults to using Haiku. One can specify a different model by using the `model` field.
+They default to using Haiku. One can specify a different model by using the `model` field, but since it is just used to
+decide whether to take action or not, it is usually not worth changing the model.
 
-The model's **only** job is to return a yes/no decision as JSON.<br/>
+The model's **only** job is to return a yes/no decision as JSON. It has no access to tools.<br/>
 If it returns `{ok: true}`, the action proceeds. If it returns `false`, the action is blocked and the `reason` field is
 fed back to Claude so it can adjust.
 
@@ -922,15 +949,76 @@ fed back to Claude so it can adjust.
 Prefer using these when verification requires inspecting files or running commands.<br/>
 Specifically, when in need to verify something against the actual state of the codebase.
 
+They default to using Haiku. One can specify a different model by using the `model` field, but since it is just used to
+decide whether to take action or not, it is usually not worth changing the model.
+
+Spawned agents will inherit context from the main session through a transcript file, but they will access it **only** if
+instructed to.
+
+<details>
+  <summary>Input to sub-agents during <code>Stop</code> hooks</summary>
+
+| Field                    | Description                                                                   |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `last_assistant_message` | Full text of Claude's final response                                          |
+| `stop_hook_active`       | true if Claude is already continuing from a prior stop hook (loop prevention) |
+| `transcript_path`        | Path to the full conversation transcript (JSONL file)                         |
+| `session_id`             | Current session ID                                                            |
+| `cwd`                    | Working directory                                                             |
+| `permission_mode`        | Current permission mode                                                       |
+
+</details>
+
 Agent-based hooks spawn a subagent that can read files, search code, and use other tools to verify conditions locally
 before returning a decision.<br/>
-They use the same `ok`/`reason` response format as prompt hooks, but have a default timeout of 60 seconds and up to 50
+They use an `ok`/`reason`-like response format as prompt hooks, but have a default timeout of 60 seconds and up to 50
 tool-use turns.
+
+<details>
+  <summary>Example: keep <code>CONTRIBUTING.md</code> and <code>CLAUDE.md</code> updated</summary>
+
+One wants to update the contents of `CONTRIBUTING.md` with findings from the current session.<br/>
+The `Stop` hook is the closest to this goal (see note above).
+
+Consider the following hook definition.<br/>
+It should be a single string, here is capped for readability.
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "Review the last_assistant_message, and the transcript if needed, to determine whether the task
+              produced clearly reusable insights (new gotchas, troubleshooting patterns, conventions, corrections to
+              existing docs, or architectural decisions) that would prevent future mistakes or save significant time.
+              Be conservative and avoid routine changes. Read the current contents of CONTRIBUTING.md and CLAUDE.md to
+              verify proposed additions are not already covered and check whether existing content needs correction. If
+              there is something worth documenting, block the stop and explain what should be added or corrected.
+              Include the section where the change belongs: CONTRIBUTING.md for team-shared content (e.g. conventions,
+              troubleshooting, workflow) or CLAUDE.md only for Claude-specific context that cannot be inferred from
+              CONTRIBUTING.md alone (e.g. naming patterns, tool preferences). Do not suggest additions to auto memory
+              files. If there is nothing worth documenting, allow the stop."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+After each task, the sub-agent inspects what was done.<br/>
+In case the agent returned `{"decision": "block", "reason": "CONTRIBUTING.md should be updated with ..."}`, Claude is
+forced to continue and address the reason. Otherwise, it can stop as usual.
+
+</details>
 
 ### HTTP hooks
 
 Prefer using these to `POST` event data to an `HTTP` endpoint instead of running a shell command.<br/>
-Specifically, when wanting a web server, cloud function, or external service to handle hook logic
+Specifically, when wanting a web server, cloud function, or external service to handle hook logic.
 
 Claude Code sends the same `JSON` that a command hook would receive on stdin, and the endpoint must return results in
 the HTTP response body using the same JSON format.
