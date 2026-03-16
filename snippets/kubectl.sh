@@ -88,6 +88,5 @@ POD_NAME='gitlab-runner-6ddd58fcb6-c9swk' POD_NAMESPACE='gitlab' \
 | jq --arg 'podName' "$POD_NAME" '.pods[] | select(.podRef.name == $podName)."ephemeral-storage"'
 
 # Show changes from the live version against a would-be applied version
-kubectl kustomize 'https://github.com/kubernetes-csi/external-snapshotter/deploy/kubernetes/snapshot-controller' \
-| kubectl diff -f -
-kubectl diff -k 'external-snapshotter'
+kubectl diff -k 'https://github.com/kubernetes-csi/external-snapshotter/deploy/kubernetes/snapshot-controller'
+kubectl kustomize 'external-snapshotter/' | kubectl diff -f -

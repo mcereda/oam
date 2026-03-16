@@ -705,9 +705,10 @@ analytics:
 
 ## Queries
 
-Loki uses LogQL for queries.
+Loki uses LogQL for queries.<br/>
+It can also be queried using [LogCLI].
 
-Refer [Querying Logs with LogQL].
+Refer [Querying Logs with LogQL] and [LogCLI].
 
 LogQL expressions consist of two main parts:
 
@@ -897,6 +898,7 @@ storage_config:
 [grafana loki store log data on s3 bucket on aws fargate]: https://community.grafana.com/t/grafana-loki-store-log-data-on-s3-bucket-on-aws-fargate/112861
 [how to install loki on (aws) eks using terraform with s3]: https://community.grafana.com/t/how-to-install-loki-on-aws-eks-using-terraform-with-s3/136489
 [http api reference]: https://grafana.com/docs/loki/latest/reference/loki-http-api/
+[LogCLI]: https://grafana.com/docs/loki/latest/query/logcli/
 [logstash plugin]: https://grafana.com/docs/loki/latest/send-data/logstash/
 [loki-distributed]: https://github.com/grafana/helm-charts/tree/main/charts/loki-distributed
 [Open source log monitoring: The concise guide to Grafana Loki]: https://grafana.com/blog/2023/12/11/open-source-log-monitoring-the-concise-guide-to-grafana-loki/?pg=blog&plcmt=body-txt

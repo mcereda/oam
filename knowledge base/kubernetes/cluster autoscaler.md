@@ -18,10 +18,15 @@ The autoscaler acts when one of the following conditions is true:
 - Pods failed to run in the cluster due to insufficient resources.<br/>
   This triggers a scale-**up** event, where it will try to **add** a new node.
 - Nodes in the cluster have been consistently underutilized for a significant amount of time, and their pods can be
-  moved on other existing nodes.<br/>
+  moved to other existing nodes.<br/>
   This triggers a scale-**down** event, where it will try to **remove** an existing node.
 
 The time required for node provisioning depends on the cloud provider and other Kubernetes components.
+
+> [!warning]
+> Each Cluster Autoscaler minor version is tested and supported against the specific 1:1 Kubernetes minor version.<br/>
+> Cluster Autoscaler v1.X is meant to run on Kubernetes v1.X. Running different versions is unsupported, and may cause
+> issues with API changes or deprecated features.
 
 <details>
   <summary>Setup</summary>
@@ -64,7 +69,7 @@ aws eks --region 'eu-west-1' update-kubeconfig --name 'custom-eks-cluster' \
 ## Best practices
 
 - Do **not** modify nodes belonging to autoscaled node groups directly.
-  Changes will be soon lost as the modified nodes might be deleted at any time.
+  Changes will soon be lost as the modified nodes might be deleted at any time.
 - All nodes within the same autoscaled node group should have the same capacity, labels and system pods running on them.
 - Specify resource requests for all the pods one can, so that nodes can be scaled more reliably.
 - Should one need to prevent pods from being deleted too abruptly, consider using PodDisruptionBudgets.
@@ -92,7 +97,7 @@ It seems to be some sort of issue with cache.
 
 ## Further readings
 
-- [Main repository]
+- [Codebase]
 
 ### Sources
 
@@ -105,6 +110,6 @@ It seems to be some sort of issue with cache.
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[main repository]: https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler
+[Codebase]: https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler
 
 <!-- Others -->
