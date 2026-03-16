@@ -646,7 +646,74 @@ Read [Assigning tags by default on AWS with Pulumi] first to get an idea of pros
 
 ### Outputs
 
-TODO
+Pulumi offers functions that deal with `Output` resources, like `pulumi.interpolate` and `pulumi.concat`.<br/>
+Prefer using those functions throughout the code. they are just _that_ much better when dealing with Outputs.
+
+One cannot use dot-notation to access nested properties on `Output<T>`.<br/>
+Use `.apply()` to unwrap them first.
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Example: EC2 instance tags</summary>
+
+`ec2Instance.tags` is `Output<{...} | undefined>`. `ec2Instance.tags.Name` will not compile.<br/>
+Use `ec2Instance.tags.apply(t => t?.Name)` instead.
+
+</details>
+
+Use `pulumi.interpolate` for template literals.<br/>
+It lifts included outputs, but still returns `Output<string>` values, not a plain string.
+
+Use `pulumi.concat` to concatenate strings.<br/>
+Using `+` to concatenate `Output<string>` objects calls `.toString()`, which silently produces `[object Object]` at
+runtime.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```ts
+// BAD: yields "[object Object]..." since '+' calls .toString() on the Output
+pulumi.interpolate`https://${host}` + pulumi.interpolate`/api/${ver}`
+"prefix-" + pulumi.interpolate`${name}`   // same problem with plain string + Output
+
+// GOOD: single template (preferred when everything fits on one line)
+pulumi.interpolate`https://${host}/api/${ver}`
+
+// GOOD: use pulumi.concat for multi-part or multi-line readability
+pulumi.concat("https://", host, pulumi.interpolate`/api/${ver}/endpoint`)
+
+// GOOD: use .apply when needing conditional logic or transformations
+pulumi.all([host, ver]).apply(([h, v]) => `https://${h}/api/${v}`)
+```
+
+</details>
+
+Use `pulumi.jsonStringify()` in place of `JSON.stringify()`.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```diff
+  new aws.iam.Policy('whatever', {
+      …
+-    policy: iamRole.arn.apply(
+-        (iamRoleArn: string) => JSON.stringify({
+-            Version: '2012-10-17',
+-            Statement: [{
+-                Effect: 'Allow',
+-                Action: 'sts:AssumeRole',
+-                Resource: iamRoleArn,
+-            }],
+-        }),
+-    ),
++    policy: pulumi.jsonStringify({
++        Version: '2012-10-17',
++        Statement: [{
++            Effect: 'Allow',
++            Action: 'sts:AssumeRole',
++            Resource: iamRole.arn,
++        }],
++    }),
+```
+
+</details>
 
 ### Policy enforcement
 
