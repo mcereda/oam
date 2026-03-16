@@ -857,6 +857,7 @@ It fires **on every turn**, after Claude finishes responding, which could be noi
 Both prompt-based and agent-based hooks work **as gatekeepers** on `Stop` events, **not** as conversation
 injectors.<br/>
 They only return `{"ok": true/false, "reason": "..."}`, and only decide whether Claude should be allowed to stop.
+Beware of prompts that can start loops. Ask Claude to refine them.
 
 > [!note]
 > There's currently no hook event that allows prompt or agent hooks just before exiting the REPL. `Ctrl+C` and `/exit`
@@ -908,7 +909,7 @@ Create hooks by adding a `hooks` block to a settings file.
         "hooks": [
           {
             "type": "agent",
-            "prompt": "Offer to update CONTRIBUTING.md to share any finding, insight or new convention with the team. Also offer to update the existing CLAUDE.md with what is not already covered by CONTRIBUTING.md."
+            "prompt": "If a documentation update was already suggested in this conversation, respond with only: LGTM. If the task was a routine code change that followed existing conventions, respond with only: LGTM. Otherwise, skim CONTRIBUTING.md and .claude/CLAUDE.md to check whether the task revealed a gotcha, pattern, convention, or decision not already covered. If so, state which file may need updating and ask the user if they would like to update it. Otherwise, respond with only: LGTM."
           }
         ]
       }
@@ -980,8 +981,7 @@ tool-use turns.
 One wants to update the contents of `CONTRIBUTING.md` with findings from the current session.<br/>
 The `Stop` hook is the closest to this goal (see note above).
 
-Consider the following hook definition.<br/>
-It should be a single string, here is capped for readability.
+Consider the following hook definition:
 
 ```json
 {
@@ -991,16 +991,7 @@ It should be a single string, here is capped for readability.
         "hooks": [
           {
             "type": "agent",
-            "prompt": "Review the last_assistant_message, and the transcript if needed, to determine whether the task
-              produced clearly reusable insights (new gotchas, troubleshooting patterns, conventions, corrections to
-              existing docs, or architectural decisions) that would prevent future mistakes or save significant time.
-              Be conservative and avoid routine changes. Read the current contents of CONTRIBUTING.md and CLAUDE.md to
-              verify proposed additions are not already covered and check whether existing content needs correction. If
-              there is something worth documenting, block the stop and explain what should be added or corrected.
-              Include the section where the change belongs: CONTRIBUTING.md for team-shared content (e.g. conventions,
-              troubleshooting, workflow) or CLAUDE.md only for Claude-specific context that cannot be inferred from
-              CONTRIBUTING.md alone (e.g. naming patterns, tool preferences). Do not suggest additions to auto memory
-              files. If there is nothing worth documenting, allow the stop."
+            "prompt": "If a documentation update was already suggested in this conversation, respond with only: LGTM. If the task was a routine code change that followed existing conventions, respond with only: LGTM. Otherwise, skim CONTRIBUTING.md and .claude/CLAUDE.md to check whether the task revealed a gotcha, pattern, convention, or decision not already covered. If so, state which file may need updating and ask the user if they would like to update it. Otherwise, respond with only: LGTM."
           }
         ]
       }
@@ -1009,9 +1000,17 @@ It should be a single string, here is capped for readability.
 }
 ```
 
-After each task, the sub-agent inspects what was done.<br/>
-In case the agent returned `{"decision": "block", "reason": "CONTRIBUTING.md should be updated with ..."}`, Claude is
-forced to continue and address the reason. Otherwise, it can stop as usual.
+Claude itself refined it multiple times.<br/>
+The prompt needs to:
+
+- _Clearly_ define the action the sub-agent needs to take.
+- Avoid loops.<br/>
+  E.g., make changes - revise - make more changes - revise again - and so on.
+- Make the main agent _offer_ the user to make changes, not just go and make them.
+
+After each task, the sub-agent inspects what was done and decides what the main agent should do.<br/>
+In case the agent returned `{"decision": "block", "reason": "CONTRIBUTING.md should be updated. Ask the user …"}`,
+the main agent is forced to continue and address the reason. Otherwise, it can stop as it would normally do.
 
 </details>
 
