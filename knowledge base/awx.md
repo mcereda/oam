@@ -169,6 +169,7 @@ awx-operator-controller-manager-75b667b745-g9g9c   2/2     Running     0        
 $ mkdir -p '/tmp/awx'
 $ cd '/tmp/awx'
 
+# The namespace must already exist
 /tmp/awx$ cat <<EOF > 'namespace.yaml'
 ---
 apiVersion: v1
@@ -176,6 +177,8 @@ kind: Namespace
 metadata:
   name: awx
 EOF
+
+# Vanilla
 /tmp/awx$ cat <<EOF > 'kustomization.yaml'
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -187,6 +190,50 @@ helmCharts:
     version: 2.19.0
     releaseName: awx-operator
     includeCRDs: true  # Important. Not namespaced. Watch out upon removal.
+resources:
+  - namespace.yaml
+EOF
+
+# Custom, using values
+/tmp/awx$ cat <<EOF > 'kustomization.custom-values.yaml'
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: awx
+labels:
+  - includeSelectors: true
+    pairs:
+      example.org/managed-by: kustomize
+      example.org/part-of: awx
+helmCharts:
+  - name: awx-operator
+    repo: https://ansible-community.github.io/awx-operator-helm/
+    version: 3.2.0
+    releaseName: awx-operator
+    includeCRDs: true  # Important. Not namespaced. Watch out upon removal.
+    valuesInline:
+      operator-controller-containers:
+        kube-rbac-proxy:
+          image: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/brancz/kube-rbac-proxy:v0.15.0
+        awx-manager:
+          image: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/ansible/awx-operator:2.19.1
+      operator-controller:
+        spec:
+          template:
+            spec:
+              tolerations:
+                - key: CriticalAddonsOnly
+                  operator: Exists
+              affinity:
+                nodeAffinity:
+                  preferredDuringSchedulingIgnoredDuringExecution:
+                    - weight: 1
+                      preference:
+                        matchExpressions:
+                          - key: eks.amazonaws.com/capacityType
+                            operator: In
+                            values:
+                              - ON_DEMAND
 resources:
   - namespace.yaml
 EOF
@@ -206,7 +253,7 @@ awx-operator-controller-manager-8b7dfcb58-k7jt8   2/2     Running   0          1
 
 Once the operator is installed, AWX instances can be created by leveraging the `AWX` CRD.
 
-<details style='padding-left: 1rem'>
+<details style='padding: 0 0 0 1rem'>
 <summary>Basic definition for a quick testing instance</summary>
 
 ```yaml
@@ -224,7 +271,7 @@ spec:
 
 </details>
 
-<details style='padding: 0 0 1rem 1rem'>
+<details style='padding: 0 0 0 1rem'>
 <summary>Definition for an instance on AWS' EKS</summary>
 
 ```yaml
@@ -243,6 +290,93 @@ spec:
   ingress_type: ingress
   ingress_annotations: |
     kubernetes.io/ingress.class: alb
+```
+
+</details>
+
+<details style='padding: 0 0 1rem 1rem'>
+<summary>Definition for an instance on AWS' EKS with custom images, resources, and affinities</summary>
+
+```yaml
+---
+apiVersion: awx.ansible.com/v1beta1
+kind: AWX
+metadata:
+  name: awx
+spec:
+  no_log: false
+  admin_email: infra@example.org
+  postgres_configuration_secret: awx-postgres-configuration
+  node_selector: |
+    kubernetes.io/arch: amd64
+  service_type: LoadBalancer
+  ingress_type: ingress
+  ingress_annotations: |
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/load-balancer-name: awx
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-1:012345678901:certificate/abcdef01-2345-6789-abcd-ef0123456789
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-2016-08
+  task_resource_requirements:requests:
+    cpu: 30m
+    memory: 1800Mi
+  task_tolerations: |
+    - key: "example.org/reservation.app"
+      operator: "Equal"
+      value: "awx"
+      effect: "NoSchedule"
+    - key: "awx.example.org/reservation.component"
+      operator: "Equal"
+      value: "service"
+      effect: "NoSchedule"
+  task_affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: example.org/reservation.app
+                operator: In
+                values:
+                  - awx
+              - key: awx.example.org/reservation.component
+                operator: In
+                values:
+                  - service
+  web_tolerations: |
+    - key: "example.org/reservation.app"
+      operator: "Equal"
+      value: "awx"
+      effect: "NoSchedule"
+    - key: "awx.example.org/reservation.component"
+      operator: "Equal"
+      value: "service"
+      effect: "NoSchedule"
+  web_affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: example.org/reservation.app
+                operator: In
+                values:
+                  - awx
+              - key: awx.example.org/reservation.component
+                operator: In
+                values:
+                  - service
+  web_resource_requirements:
+    requests:
+      cpu: 50m
+      memory: 1.2Gi
+  image: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/ansible/awx
+  image_version: "24.6.1"
+  control_plane_ee_image: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/ansible/awx-ee:24.6.1
+  init_container_image: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/ansible/awx-ee
+  init_container_image_version: "24.6.1"
+  redis_image: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/cache/docker-hub/library/redis
+  redis_image_version: "7"
+  init_projects_container_image: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/centos/centos:stream9
+
 ```
 
 </details>
