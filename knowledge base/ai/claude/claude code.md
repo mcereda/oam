@@ -75,7 +75,7 @@ Common workflows:
   <details style='padding: 0 0 1rem 1rem'>
     <summary>Example</summary>
 
-  > Figure out the root cause for issue \#43, then propose possible fixes.<br/>
+  > Figure out the root cause for issue #43, then propose possible fixes.<br/>
   > Let me choose an approach before you write code.<br/>
   > Think fast.
 
@@ -358,17 +358,17 @@ Key commands:
 | `/init`   | Bootstrap a `CLAUDE.md` file for the current project |
 
 > [!tip]
-> It appears Claude (at least the 4.6 suite) follows instructions better when they use an _imperative_ tone.<br/>
+> It appears Claude (at least the 4.6 suite) follows instructions better when given with an _imperative_ tone.<br/>
 > Prefer writing important instructions that way.
 
 Creating a good `CONTRIBUTING.md` file, and mandating Claude Code to read it before making changes, seems to go a long
 way for **both** humans and agents.
 
-It appears Claude works better when treated as part of the team.\
+It appears Claude works better when treated as part of the team.<br/>
 And as part of the team, it is right for it to have a chance to contribute to processes.
 
 > Please check the `CONTRIBUTING.md` file is helpful to _you_, and eventually suggest improvements to allow _you_ to
-> contribute better.\
+> contribute better.<br/>
 > The goal is to give _you_ all the information _you_ need about the workflow, without needing to put extra information
 > in the `CLAUDE.md` file.
 
@@ -1236,7 +1236,7 @@ Requests have been sent in headless mode (`claude -p 'prompt'`).
 
 Model: `glm-4.7-flash:q4_K_M`.<br/>
 Host: M3 Pro MacBook Pro 36 GB.<br/>
-Claude Code version: `v2.1.41`.<br/>
+Claude Code version: `v2.1.41`.
 
 | Engine             | Context | RAM usage | Used swap    | Average response time | System remained responsive |
 | ------------------ | ------: | --------: | ------------ | --------------------: | -------------------------- |
