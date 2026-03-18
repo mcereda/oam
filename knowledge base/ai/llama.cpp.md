@@ -12,6 +12,23 @@ Vastly used as base for AI tools like [Ollama] and [Docker model runner].
 
 ## TL;DR
 
+Enables _local execution_ of [Language Models].
+
+Uses models in the GGUF format.<br/>
+It includes all the necessary metadata, tokenizer information and model weights in a single, portable file that allows
+for quick swapping of models.
+
+Supports different _SIMD instructions_ and _GPU kernels_.<br/>
+Automatically detects one's hardware, selects the best kernels for the host, determines how many layers to offload to
+the GPU if available, and configures memory mapping.
+
+The system:
+
+- Maintains a key-value cache to improve multi-turn conversations.
+- Streams tokens as they are generated for responsiveness.
+- Applies one's chosen sampling parameters to control the output's quality.
+- Can be tuned on the go.
+
 <details>
   <summary>Setup</summary>
 
@@ -75,6 +92,7 @@ jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
 - [Website]
 - [Codebase]
 - [ik_llama.cpp]
+- Alternatives: [vLLM]
 
 ### Sources
 
@@ -86,7 +104,9 @@ jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [Docker model runner]: ../docker.md#running-llms-locally
+[Language Models]: lms.md
 [Ollama]: ollama.md
+[vLLM]: vllm.md
 
 <!-- Files -->
 <!-- Upstream -->

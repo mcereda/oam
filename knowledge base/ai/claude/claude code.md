@@ -683,10 +683,16 @@ Commands that cannot be sandboxed fall back to the regular permission flow.
 
 Customize sandbox behavior through the `settings.json` file.
 
-> [!warning]
-> In two tests conducted on 2026-03-13, Claude Code noticed that some tools did **not** work in the sandbox.<br/>
-> It _**automatically**_ and with _**no prompt at all**_ disabled the sandbox in the settings, and re-run the tools in a
-> new, open environment.
+> [!caution] Automatic avoidance of the sandbox when convenient
+> When a tool does **not** work in the sandbox, Claude Code is able to circumvent the issue by just re-running the tool
+> without using the sandbox on it, _**automatically**_ and with _**no prompt at all**_.
+>
+> ```plaintext
+> • Sandbox restriction on commitlint. Let me retry outside the sandbox.
+> • Bash Commit staged changes (outside sandbox for commitlint)
+>   …
+> • Committed as `428547b`. All hooks passed.
+> ```
 >
 > Environment:
 >
@@ -1044,6 +1050,11 @@ The prompt needs to:
 After each task, the sub-agent inspects what was done and decides what the main agent should do.<br/>
 In case the agent returned `{"decision": "block", "reason": "CONTRIBUTING.md should be updated. Ask the user …"}`,
 the main agent is forced to continue and address the reason. Otherwise, it can stop as it would normally do.
+
+One should see lines like the following during operations:
+
+> • Good point from the hook. Let me also document this gotcha in CONTRIBUTING.md before applying the fix.<br/>
+> • Good call. Let me add this to the troubleshooting section.
 
 </details>
 
