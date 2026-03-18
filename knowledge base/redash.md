@@ -8,6 +8,8 @@ Dashboard visualization tool.
    1. [Google OAuth](#google-oauth)
    1. [LDAP or Active Directory](#ldap-or-active-directory)
 1. [API](#api)
+1. [Troubleshooting](#troubleshooting)
+   1. [Restored or reused DBs fail the migration check](#restored-or-reused-dbs-fail-the-migration-check)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -18,17 +20,26 @@ Allows querying multiple _data sources_ at once.
 Settings are read by `redash.settings` from environment variables.<br/>
 Most installations set them in `/opt/redash/.env`. Official container images require that `.env` file in the root
 directory.<br/>
-Reference available variables from [Environment Variables Settings].
+Reference available variables from [Environment Variables Settings].<br/>
+Check the [getredash/setup] repository for more robust configuration examples meant for production deployments.
 
-<!-- Uncomment if used
+Uses [Redis] for caching, session management, and job queuing
+
 <details>
   <summary>Setup</summary>
 
-```sh
-```
+At minimum, one must set:
+
+- `REDASH_DATABASE_URL`: PostgreSQL connection string for the database.<br/>
+  E.g., `postgresql://postgres@postgres/postgres`.
+- `REDASH_REDIS_URL`: Redis connection string.<br/>
+  E.g., `redis://redis:6379/0`.
+- `REDASH_COOKIE_SECRET`: Security key for sessions.
+
+Redash creates automatically the database tables it needs on the first run.<br/>
+The `create_tables` command handles this by checking if the database is empty, and then creating the necessary tables.
 
 </details>
--->
 
 <details>
   <summary>Usage</summary>
@@ -191,7 +202,7 @@ Refer [API].
 
 Prefer acting on them using [getredash/redash-toolbelt].
 
-<details style='padding: 0 0 1rem 1rem'>
+<details style='padding: 0 0 0 1rem'>
   <summary>Configuration</summary>
 
 The `/api/config` endpoint does **not** require authentication.<br/>
@@ -209,7 +220,7 @@ curl --url 'https://redash.example.org/api/session' --header 'Authorization: Key
 
 </details>
 
-<details style='padding: 0 0 1rem 1rem'>
+<details style='padding: 0 0 0 1rem'>
   <summary>Data sources</summary>
 
 ```plaintext
@@ -289,6 +300,34 @@ curl --request 'POST' --url 'https://redash.example.org/api/settings/organizatio
 
 </details>
 
+## Troubleshooting
+
+### Restored or reused DBs fail the migration check
+
+When restoring or reusing existing DBs, the `alembic_version` table may be missing or empty.<br/>
+This usually happens when the DB was set up before Alembic migration tracking was introduced.
+
+<details>
+  <summary>Root cause</summary>
+
+On startup, Redash checks for pending migrations. Alembic sees no recorded version, tries to run the first migration
+(which fails because the tables already exist), poisons the PostgreSQL transaction, and all subsequent queries fail with
+`InFailedSqlTransaction`.<br/>
+Gunicorn workers crash with exit code 23, and surviving workers return 500 on every request that touches the DB.
+
+</details>
+
+<details>
+  <summary>Solution</summary>
+
+Stamp the DB as current, **without** running migrations:
+
+```sh
+redash manage db stamp head
+```
+
+</details>
+
 ## Further readings
 
 - [Website]
@@ -314,10 +353,11 @@ curl --request 'POST' --url 'https://redash.example.org/api/settings/organizatio
 <!-- Upstream -->
 [API]: https://redash.io/help/user-guide/integrations-and-api/api/
 [Authentication Settings]: https://redash.io/help/user-guide/users/authentication-options/
-[Codebase]: https://github.com/getredash/redash
+[Codebase]: https://github.com/getredash
 [Documentation]: https://redash.io/help/
 [Environment Variables Settings]: https://redash.io/help/open-source/admin-guide/env-vars-settings/
 [getredash/redash-toolbelt]: https://github.com/getredash/redash-toolbelt
+[getredash/setup]: https://github.com/getredash/setup
 [How to Upgrade]: https://redash.io/help/open-source/admin-guide/how-to-upgrade/
 [LDAP/AD Authentication]: https://redash.io/help/open-source/admin-guide/ldap-authentication/
 [Setting up a Redash Instance]: https://redash.io/help/open-source/setup/
@@ -325,3 +365,4 @@ curl --request 'POST' --url 'https://redash.example.org/api/settings/organizatio
 
 <!-- Others -->
 [Ask Devin]: https://deepwiki.com/getredash/redash
+[Redis]: https://redis.io/
