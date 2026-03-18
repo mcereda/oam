@@ -591,7 +591,7 @@ TODO.
 
 ### Load balancing
 
-_External_ load balancer should reside in **public** subnets and have **public** IP addresses.\
+_External_ load balancer should reside in **public** subnets and have **public** IP addresses.<br/>
 _Internal_ load balancer should reside in **private** subnets and have **private** IP addresses.
 
 #### Application Load Balancers
