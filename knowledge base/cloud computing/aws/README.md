@@ -6,6 +6,7 @@
    1. [Proxying connections](#proxying-connections)
 1. [Services](#services)
    1. [Billing and Cost Management](#billing-and-cost-management)
+   1. [Certificate Manager](#certificate-manager)
    1. [Config](#config)
    1. [Detective](#detective)
    1. [Direct Connect](#direct-connect)
@@ -65,7 +66,7 @@ Regions enabled by default **cannot be enabled or disabled**.
 Disabling Regions disables IAM access to resources in those Region. It will **not** delete resources in the disabled
 region, and they **will** continue to be charged at the standard rate.
 
-Disabling a Region can takes a few minutes to several hours to take effect. Services and Console will be visible until
+Disabling a Region can take a few minutes to several hours to take effect. Services and Console will be visible until
 the region is completely disabled.
 
 Enabling Regions takes a few minutes to several hours. They **cannot** be used until the preparation process is
@@ -78,8 +79,7 @@ subsequent requests that API receives.
 AWS has some pretty _**inconsistent**_ rules regarding what is allowed in its resources' identifiers.<br/>
 What most seems to work is to keep those identifiers boring, short, simple, and try avoiding super rigid formats.
 
-To avoid multiple formats where possible, all identifiers should should comply to the most restrictive
-requirements.
+To avoid multiple formats where possible, all identifiers should comply to the **most** restrictive requirements.
 
 <details style='padding: 0 0 1rem 1rem'>
 
@@ -290,7 +290,7 @@ Options:
 
    <details style='padding: 0 0 1rem 1rem'>
 
-   Network Firewalls can re-route traffic based on its URL instead of based on its CIRDs.<br/>
+   Network Firewalls can re-route traffic based on its URL instead of based on its CIDRs.<br/>
    This solves the issue requires Route Tables to use CIDRs, but requires all traffic in a Subnet to go through the
    Firewall's endpoint for its AZ.
 
@@ -322,6 +322,7 @@ Options:
 | Service                       | Summary                                       |
 | ----------------------------- | --------------------------------------------- |
 | [Billing and Cost Management] | Cost management                               |
+| [Certificate Manager]         | SSL certificates                              |
 | [CloudFront]                  | Content delivery                              |
 | [CloudWatch]                  | Observability (logging, monitoring, alerting) |
 | [Config]                      | Compliance                                    |
@@ -362,6 +363,10 @@ at <https://ip-ranges.amazonaws.com/ip-ranges.json>.
 Costs can be grouped by Tags applied on resources.<br/>
 Tags to use for this kind of grouping need to be activated in the _Cost allocation tags_ section.<br/>
 New tags might take 24 or 48 hours to appear there.
+
+### Certificate Manager
+
+TODO
 
 ### Config
 
@@ -405,7 +410,7 @@ the physical Direct Connect connection.<br/>
 Virtual interfaces can be configured with specific routing details, virtual private gateway associations, and bandwidth
 settings.
 
-Direct Connect uses link layer encryption over the connection to secure the traffic.
+Direct Connect can use link layer encryption over the connection to secure the traffic.
 
 ### ElastiCache
 
@@ -584,29 +589,25 @@ TODO.
 
 ### Load balancing
 
+_External_ load balancer should reside in **public** subnets and have **public** IP addresses.\
+_Internal_ load balancer should reside in **private** subnets and have **private** IP addresses.
+
 #### Application Load Balancers
 
-Application load balancers can use rules to forward traffic to different targets depending on the requests' data (e.g.
-its `path`).
+Application Load Balancers (ALBs) integrate with [Certificate Manager]. Load balancers can reference a certificate in
+ACM to use it to secure connections.
 
-> [!warning]
-> ALBs **cannot** rewrite requests' `host` header or path.<br/>
-> Use [CloudFront] or other solutions like custom forwarder or [Lambda functions] instead.
->
-> FIXME: since 2025-10-15, it looks like they can by using Rule Transforms.<br/>
-> Check the [news post](https://aws.amazon.com/about-aws/whats-new/2025/10/application-load-balancer-url-header-rewrite),
-> the [blog post](https://aws.amazon.com/blogs/networking-and-content-delivery/introducing-url-and-host-header-rewrite-with-aws-application-load-balancers/),
-> and [Rule Transforms](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/rule-transforms.html).
+ALBs can use **rules** to forward traffic to different targets depending on the requests' data (e.g. its `path`).
 
-The service charges per Load Balancer, per hour it exists. Every _partial_ hour is billed as a full hour.<br/>
+The service charges per Load Balancer, per hour it exists. Every _partial_ hour is billed as a _full_ hour.<br/>
 It also charges for the number of Load Balancer Capacity Units (LCU) used per minute. When using Load Balancer Capacity
 Unit Reservation, any additional number of LCUs used per minute _beyond_ one's reserved LCUs per hour is added to the
 bill.
 
 > [!tip]
-> To save money, prefer using less ALBs with more than one rule each.
+> To save money, prefer using **less** ALBs with **multiple** rules each.
 
-Using rules in AWS application load balancers to redirect by path **keeps the path** in the forwarded request.<br/>
+Using rules in ALBs to redirect by path **keeps the path** in the forwarded request.<br/>
 Applications that serve their files using _relative_ paths will not be able to find the resources, as the path will not
 be available in the app's folder (and hence in the browser).
 
@@ -615,8 +616,10 @@ E.g.: given an ALB with a rule forwarding requests for paths matching `/some-app
 `/some-app` folder _in the application_.
 
 > [!important]
-> This does **not** happen for targets that are tasks to ECS.<br/>
-> Those are treated differently by the ALB (insert quotation here), and the requests' path is replaced with `/`.
+> FIXME: verify.
+>
+> This does **not** seem to happen for targets that are tasks to ECS.<br/>
+> Those seem to be treated differently by the ALB, where the requests' path seem to be stripped (replaced with `/`).
 
 Solutions for this include:
 
@@ -624,6 +627,16 @@ Solutions for this include:
 - Using an ECS-backed target.
 - Using an ALB dedicated for the host (e.g. `some-app.example.com`) to forward requests **directly** using only the
   default rule (`path = /*`).
+
+ALBs **can** rewrite requests' `host` header or path since 2025-10-15, if needed, by using
+**[Transforms for listener rules]**.<br/>
+See also the [news post][aws application load balancer launches url and host header rewrite] and the
+[blog post][introducing url and host header rewrite with aws application load balancers].
+
+The alternatives to this were to employ [CloudFront], [Lambda functions], reverse proxy layers/sidecars like NGINX and
+Envoy **after** the ALB, or manage the request in-application.
+
+Transforms change requests **before** the load balancer forwards them to the destination target group.
 
 ### PrivateLink
 
@@ -676,7 +689,7 @@ Aggregator of findings for security auditing.
 
 > Uses [Config] to check resources' configuration by leveraging compliancy rules.
 
-Security standards are offered as ret of rules for [Config].
+Security standards are offered as set of rules for [Config].
 
 Data can be aggregated from different regions.<br/>
 If the integration is enabled, findings from AWS services ([GuardDuty]) are used too within 5 minutes on average, while
@@ -868,8 +881,10 @@ Also check [Branko Petric's X posts] for further suggestions.
 ### Free Tier
 
 **New** AWS customers get **1 year** of free tier access to **selected** services only.
+This level of free tier only allows for **limited monthly usage**, e.g. up to 750 hours of t2.micro EC2, 5GB S3 per
+month, and might not be available in some Regions.
 
-Only allows for **limited monthly usage** (E.G., up to 750 hours of t2.micro EC2, 5GB S3 per month).
+**A small amount** of various resource usage is always free
 
 Free tier is only available in specific regions.<br/>
 Usage in multiple regions counts as a whole.  _FIXME: check_
@@ -1030,7 +1045,7 @@ Suggested tags from AWS:
 creation of non-compliant resources.
 
 > [!note]
-> Once created, tags cannot be deleted.
+> Once created, tags can be removed from resources, but Cost Explorer will still have them available for filtering.
 
 If unused for some time, they will **not** show up in services like Cost Explorer.<br/>
 Deletion aside, one can manage tags in the Tag Editor.
@@ -1060,8 +1075,8 @@ Exposes Python-fashioned method names (e.g. ListBuckets API => list_buckets meth
 Typically yields primitive, non-marshalled AWS data.<br/>
 E.g. DynamoDB attributes are dictionaries representing primitive DynamoDB values.
 
-Limited to listing at most 1000 objects, requiring the developer to deal with result pagination in code.<br/>
-Use a [paginator][boto3 paginators] or implement one's own loop.
+`ListObjectsV2` limits listing to up to 1000 objects, requiring users to deal with result pagination in code.<br/>
+Use [paginators][boto3 paginators] or implement one's own loop.
 
   <details style="padding: 0 0 1em 1em;">
     <summary>Example</summary>
@@ -1207,6 +1222,7 @@ If one can, prefer just build the image from an EC2 instance.
 
 <!-- In-article sections -->
 [billing and cost management]: #billing-and-cost-management
+[Certificate Manager]: #certificate-manager
 [config]: #config
 [detective]: #detective
 [direct connect]: #direct-connect
@@ -1250,6 +1266,7 @@ If one can, prefer just build the image from an EC2 instance.
 
 <!-- Upstream -->
 [Access AWS services through AWS PrivateLink]: https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-access-aws-services.html
+[AWS Application Load Balancer launches URL and Host Header Rewrite]: https://aws.amazon.com/about-aws/whats-new/2025/10/application-load-balancer-url-header-rewrite
 [aws icons]: https://aws-icons.com/
 [AWS PrivateLink pricing]: https://aws.amazon.com/privatelink/pricing/
 [aws public ip address ranges now available in json form]: https://aws.amazon.com/blogs/aws/aws-ip-ranges-json/
@@ -1270,6 +1287,7 @@ If one can, prefer just build the image from an EC2 instance.
 [how aws global accelerator works]: https://docs.aws.amazon.com/global-accelerator/latest/dg/introduction-how-it-works.html
 [how can i use aws kms asymmetric keys to encrypt a file using openssl?]: https://repost.aws/knowledge-center/kms-openssl-encrypt-key
 [i'm trying to export a snapshot from amazon rds mysql to amazon s3, but i'm receiving an error. why is this happening?]: https://repost.aws/knowledge-center/rds-mysql-export-snapshot
+[Introducing URL and host header rewrite with AWS Application Load Balancers]: https://aws.amazon.com/blogs/networking-and-content-delivery/introducing-url-and-host-header-rewrite-with-aws-application-load-balancers/
 [more info about resource deprecation?]: https://github.com/boto/boto3/discussions/3563
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [Pulling the Amazon Linux container image]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/amazon_linux_container_image.html
@@ -1282,6 +1300,7 @@ If one can, prefer just build the image from an EC2 instance.
 [Tagging best practices and strategies]: https://docs.aws.amazon.com/tag-editor/latest/userguide/best-practices-and-strats.html
 [test your roles' access policies using the aws identity and access management policy simulator]: https://aws.amazon.com/blogs/security/test-your-roles-access-policies-using-the-aws-identity-and-access-management-policy-simulator/
 [tools to build on aws]: https://aws.amazon.com/developer/tools/
+[Transforms for listener rules]: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/rule-transforms.html
 [understanding data transfer charges]: https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html
 [Understanding how Savings Plans apply to your usage]: https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-applying.html
 [Use service accounts to authenticate with the Grafana HTTP APIs]: https://docs.aws.amazon.com/grafana/latest/userguide/service-accounts.html
