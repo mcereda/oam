@@ -1,5 +1,7 @@
 # Let's Encrypt
 
+Certificate Authority providing free TLS certificates.
+
 1. [Challenges](#challenges)
    1. [DNS-01 challenge](#dns-01-challenge)
 1. [Limits](#limits)
@@ -70,6 +72,7 @@ certificates for the `[example.com]` and `[login.example.com]` sets will succeed
 ## Further readings
 
 - [Website]
+- [SSL certificate]
 - [ACME]
 
 ### Sources
@@ -87,7 +90,8 @@ certificates for the `[example.com]` and `[login.example.com]` sets will succeed
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[acme]: acme.md
+[ACME]: acme.md
+[SSL certificate]: ssl%20certificate.md
 
 <!-- Files -->
 <!-- Upstream -->

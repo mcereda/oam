@@ -368,6 +368,8 @@ New tags might take 24 or 48 hours to appear there.
 
 TODO
 
+Manages [SSL certificate]s.
+
 ### Config
 
 Compliance service for assessing and auditing AWS resources.
@@ -594,8 +596,8 @@ _Internal_ load balancer should reside in **private** subnets and have **private
 
 #### Application Load Balancers
 
-Application Load Balancers (ALBs) integrate with [Certificate Manager]. Load balancers can reference a certificate in
-ACM to use it to secure connections.
+Application Load Balancers (ALBs) integrate with [Certificate Manager].<br/>
+Load balancers can reference SSL certificates in ACM to use them to secure connections.
 
 ALBs can use **rules** to forward traffic to different targets depending on the requests' data (e.g. its `path`).
 
@@ -1245,24 +1247,25 @@ If one can, prefer just build the image from an EC2 instance.
 [tiered pricing]: #tiered-pricing
 
 <!-- Knowledge base -->
-[cli]: cli.md
-[cloudfront]: cloudfront.md
-[cloudwatch]: cloudwatch.md
-[ec2]: ec2.md
-[ecr]: ecr.md
-[ecs]: ecs.md
-[efs]: ecs.md
-[eks]: eks.md
-[iam]: iam.md
-[image builder]: image%20builder.md
-[opensearch]: opensearch.md
-[rds]: rds.md
-[route53]: route53.md
-[s3]: s3.md
-[sagemaker]: sagemaker.md
-[secrets manager]: secrets%20manager.md
-[sns]: sns.md
-[sqs]: sqs.md
+[CLI]: cli.md
+[CloudFront]: cloudfront.md
+[CloudWatch]: cloudwatch.md
+[EC2]: ec2.md
+[ECR]: ecr.md
+[ECS]: ecs.md
+[EFS]: ecs.md
+[EKS]: eks.md
+[IAM]: iam.md
+[Image builder]: image%20builder.md
+[OpenSearch]: opensearch.md
+[RDS]: rds.md
+[Route53]: route53.md
+[S3]: s3.md
+[Sagemaker]: sagemaker.md
+[Secrets Manager]: secrets%20manager.md
+[SNS]: sns.md
+[SQS]: sqs.md
+[SSL certificate]: ../../ssl%20certificate.md
 
 <!-- Upstream -->
 [Access AWS services through AWS PrivateLink]: https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-access-aws-services.html

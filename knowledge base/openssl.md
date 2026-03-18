@@ -209,6 +209,7 @@ See [code 20](#code-20-unable-to-get-local-issuer-certificate).
 
 ## Further readings
 
+- [SSL certificate]
 - [OpenSSL commands to check and verify your SSL certificate, key and CSR]
 - [The most common OpenSSL commands]
 - [Create a self signed certificate]
@@ -228,6 +229,9 @@ See [code 20](#code-20-unable-to-get-local-issuer-certificate).
   Reference
   ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[SSL certificate]: ssl%20certificate.md
 
 <!-- Others -->
 [check ssl certificate chain with openssl examples]: https://www.howtouselinux.com/post/certificate-chain
