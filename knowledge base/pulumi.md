@@ -650,13 +650,28 @@ Pulumi offers functions that deal with `Output` resources, like `pulumi.interpol
 Prefer using those functions throughout the code. they are just _that_ much better when dealing with Outputs.
 
 One cannot use dot-notation to access nested properties on `Output<T>`.<br/>
-Use `.apply()` to unwrap them first.
+`??` and `||` on `Output<T>` check whether the **Output object** itself is nullish or falsy respectively, not what the
+resolved value is. The Output object is **never** nullish.<br/>
+Use `.apply()` to unwrap the property or value first.
 
-<details style='padding: 0 0 1rem 1rem'>
+<details style='padding: 0 0 0 1rem'>
   <summary>Example: EC2 instance tags</summary>
 
 `ec2Instance.tags` is `Output<{...} | undefined>`. `ec2Instance.tags.Name` will not compile.<br/>
 Use `ec2Instance.tags.apply(t => t?.Name)` instead.
+
+</details>
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Example: RDS instances values</summary>
+
+```ts
+  // ?? checks the Output object, which is never nullish
+  rdsInstance.dbName ?? "postgres"
+
+  // `.apply()` unwraps the value, `||` handles empty strings and undefined
+  rdsInstance.dbName.apply(n => n || "postgres")
+```
 
 </details>
 
