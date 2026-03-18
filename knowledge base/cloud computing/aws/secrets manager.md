@@ -58,6 +58,14 @@ _Managed_ secrets are created and managed by the AWS service that created them.<
 The managing service might also restrict users from updating secrets, or deleting them without a recovery period.<br/>
 Managed secrets use a naming convention that includes the ID of the service managing them.
 
+Secrets Manager automatically assigns the `INITIAL` version stage to the first version of a secret.<br/>
+This label **cannot** be moved or reassigned to subsequent versions.
+
+> [!tip]
+> **Avoid** including the `INITIAL` label when creating secrets versions in infrastructure as code. It will probably
+> cause errors on subsequent updates.<br/>
+> Prefer only using `AWSCURRENT` instead.
+
 ## Further readings
 
 - [Secrets management]
