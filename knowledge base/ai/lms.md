@@ -12,6 +12,7 @@ the previous ones.
 1. [Context window](#context-window)
 1. [Function calling](#function-calling)
 1. [Scaffolding](#scaffolding)
+1. [Compression](#compression)
 1. [Concerns](#concerns)
 1. [Run LLMs Locally](#run-llms-locally)
 1. [Further readings](#further-readings)
@@ -73,6 +74,10 @@ LLMs appear to be hitting a performance wall, and will probably need the rise of
 
 LLMs find it difficult, if not impossible, to distinguishing data from instructions.<br/>
 As such, every part of the data could be used for prompt injection.
+
+Models are typically released at a 32 or 16 bit precision. This format has high accuracy but requires a lot of
+memory.<br/>
+To compensate, and reduce the memory footprint, one can [compress][compression] in multiple ways.
 
 ## Large Language Models
 
@@ -273,6 +278,13 @@ just inferring the next token.
 
 TODO
 
+## Compression
+
+TODO
+
+_Quantization_ lowers the number of bits (and hence precision) at which a model is stored.<br/>
+Reduces memory footprint and speeds up inference at the cost of quality.
+
 ## Concerns
 
 - Lots of people currently thinks of LLMs as _real, rational, intelligence_, when they are not.<br/>
@@ -344,6 +356,7 @@ Refer:
   -->
 
 <!-- In-article sections -->
+[Compression]: #compression
 [Function calling]: #function-calling
 
 <!-- Knowledge base -->

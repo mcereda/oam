@@ -13,6 +13,8 @@ Open source library for LLM inference and serving.
 
 Engineered specifically for high-performance, production-grade LLM inference.
 
+Enables _local execution_ of [Language Models].
+
 Offers production-ready, highly mature OpenAI-compatible API.<br/>
 Has full support for streaming, embeddings, tool/function calling with parallel invocation capability, vision-language
 model support, rate limiting, and token-based authentication. Optimized for high-throughput and batch requests.
@@ -103,6 +105,7 @@ jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
 - [Website]
 - [Codebase]
 - [Blog]
+- Alternatives: [llama.cpp]
 
 ### Sources
 
@@ -115,6 +118,9 @@ jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[Language Models]: lms.md
+[llama.cpp]: llama.cpp.md
+
 <!-- Files -->
 <!-- Upstream -->
 [Blog]: https://blog.vllm.ai/
