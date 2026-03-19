@@ -19,8 +19,6 @@
    1. [Kinesis](#kinesis)
    1. [KMS](#kms)
    1. [Lambda functions](#lambda-functions)
-   1. [Load balancing](#load-balancing)
-       1. [Application Load Balancers](#application-load-balancers)
    1. [PrivateLink](#privatelink)
    1. [Security Hub](#security-hub)
    1. [Step Functions](#step-functions)
@@ -588,57 +586,6 @@ Each key counts as one when calculating key resource quotas, regardless of the n
 ### Lambda functions
 
 TODO.
-
-### Load balancing
-
-_External_ load balancer should reside in **public** subnets and have **public** IP addresses.<br/>
-_Internal_ load balancer should reside in **private** subnets and have **private** IP addresses.
-
-#### Application Load Balancers
-
-Application Load Balancers (ALBs) integrate with [Certificate Manager].<br/>
-Load balancers can reference SSL certificates in ACM to use them to secure connections.
-
-ALBs can use **rules** to forward traffic to different targets depending on the requests' data (e.g. its `path`).
-
-The service charges per Load Balancer, per hour it exists. Every _partial_ hour is billed as a _full_ hour.<br/>
-It also charges for the number of Load Balancer Capacity Units (LCU) used per minute. When using Load Balancer Capacity
-Unit Reservation, any additional number of LCUs used per minute _beyond_ one's reserved LCUs per hour is added to the
-bill.
-
-> [!tip]
-> To save money, prefer using **less** ALBs with **multiple** rules each.
-
-Using rules in ALBs to redirect by path **keeps the path** in the forwarded request.<br/>
-Applications that serve their files using _relative_ paths will not be able to find the resources, as the path will not
-be available in the app's folder (and hence in the browser).
-
-E.g.: given an ALB with a rule forwarding requests for paths matching `/some-app`, requests for
-`https://example.com/some-app/static/js/index.js` will be forwarded _as-is_ and try fetching content from the
-`/some-app` folder _in the application_.
-
-> [!important]
-> FIXME: verify.
->
-> This does **not** seem to happen for targets that are tasks to ECS.<br/>
-> Those seem to be treated differently by the ALB, where the requests' path seem to be stripped (replaced with `/`).
-
-Solutions for this include:
-
-- Rewriting the requests' path to `/` before forwarding them.
-- Using an ECS-backed target.
-- Using an ALB dedicated for the host (e.g. `some-app.example.com`) to forward requests **directly** using only the
-  default rule (`path = /*`).
-
-ALBs **can** rewrite requests' `host` header or path since 2025-10-15, if needed, by using
-**[Transforms for listener rules]**.<br/>
-See also the [news post][aws application load balancer launches url and host header rewrite] and the
-[blog post][introducing url and host header rewrite with aws application load balancers].
-
-The alternatives to this were to employ [CloudFront], [Lambda functions], reverse proxy layers/sidecars like NGINX and
-Envoy **after** the ALB, or manage the request in-application.
-
-Transforms change requests **before** the load balancer forwards them to the destination target group.
 
 ### PrivateLink
 
@@ -1229,7 +1176,6 @@ If one can, prefer just build the image from an EC2 instance.
 [detective]: #detective
 [direct connect]: #direct-connect
 [ElastiCache]: #elasticache
-[ELB]: #load-balancing
 [enterprise discount program]: #enterprise-discount-program
 [eventbridge]: #eventbridge
 [free tier]: #free-tier
@@ -1237,7 +1183,6 @@ If one can, prefer just build the image from an EC2 instance.
 [inspector]: #inspector
 [kinesis]: #kinesis
 [kms]: #kms
-[Lambda functions]: #lambda-functions
 [privatelink]: #privatelink
 [reserved instances]: #reserved-instances
 [savings plans]: #savings-plans
@@ -1255,6 +1200,7 @@ If one can, prefer just build the image from an EC2 instance.
 [ECS]: ecs.md
 [EFS]: ecs.md
 [EKS]: eks.md
+[ELB]: elb.md
 [IAM]: iam.md
 [Image builder]: image%20builder.md
 [OpenSearch]: opensearch.md
@@ -1269,7 +1215,6 @@ If one can, prefer just build the image from an EC2 instance.
 
 <!-- Upstream -->
 [Access AWS services through AWS PrivateLink]: https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-access-aws-services.html
-[AWS Application Load Balancer launches URL and Host Header Rewrite]: https://aws.amazon.com/about-aws/whats-new/2025/10/application-load-balancer-url-header-rewrite
 [aws icons]: https://aws-icons.com/
 [AWS PrivateLink pricing]: https://aws.amazon.com/privatelink/pricing/
 [aws public ip address ranges now available in json form]: https://aws.amazon.com/blogs/aws/aws-ip-ranges-json/
@@ -1290,7 +1235,6 @@ If one can, prefer just build the image from an EC2 instance.
 [how aws global accelerator works]: https://docs.aws.amazon.com/global-accelerator/latest/dg/introduction-how-it-works.html
 [how can i use aws kms asymmetric keys to encrypt a file using openssl?]: https://repost.aws/knowledge-center/kms-openssl-encrypt-key
 [i'm trying to export a snapshot from amazon rds mysql to amazon s3, but i'm receiving an error. why is this happening?]: https://repost.aws/knowledge-center/rds-mysql-export-snapshot
-[Introducing URL and host header rewrite with AWS Application Load Balancers]: https://aws.amazon.com/blogs/networking-and-content-delivery/introducing-url-and-host-header-rewrite-with-aws-application-load-balancers/
 [more info about resource deprecation?]: https://github.com/boto/boto3/discussions/3563
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [Pulling the Amazon Linux container image]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/amazon_linux_container_image.html
@@ -1303,7 +1247,6 @@ If one can, prefer just build the image from an EC2 instance.
 [Tagging best practices and strategies]: https://docs.aws.amazon.com/tag-editor/latest/userguide/best-practices-and-strats.html
 [test your roles' access policies using the aws identity and access management policy simulator]: https://aws.amazon.com/blogs/security/test-your-roles-access-policies-using-the-aws-identity-and-access-management-policy-simulator/
 [tools to build on aws]: https://aws.amazon.com/developer/tools/
-[Transforms for listener rules]: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/rule-transforms.html
 [understanding data transfer charges]: https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html
 [Understanding how Savings Plans apply to your usage]: https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-applying.html
 [Use service accounts to authenticate with the Grafana HTTP APIs]: https://docs.aws.amazon.com/grafana/latest/userguide/service-accounts.html
