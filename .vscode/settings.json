@@ -4,6 +4,8 @@
     "editor.rulers": [
         120
     ],
+
+    "json.schemaDownload.enable": true,
     "json.schemas": [
         {
             "fileMatch": [
@@ -15,8 +17,7 @@
             "fileMatch": [
                 ".markdownlint.js",
                 ".markdownlint.json",
-                ".markdownlint.jsonc",
-                ".markdownlint.y*ml"
+                ".markdownlint.jsonc"
             ],
             "url": "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json"
         },
@@ -54,6 +55,7 @@
             "url": "https://www.schemastore.org/claude-code-settings.json"
         }
     ],
+    "yaml.schemaStore.enable": true,
     "yaml.schemas": {
         "https://json.schemastore.org/lefthook.json": ".lefthook.y*ml",
         "https://json.schemastore.org/pre-commit-config.json": ".pre-commit-config.y*ml",
