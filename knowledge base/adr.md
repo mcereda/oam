@@ -1,12 +1,12 @@
 # Architectural decision records
 
-Architectural Decisions (ADs) are justified design choices, addressing functional or non-functional requirements that
+_Architectural Decisions_ (ADs) are justified design choices, addressing functional or non-functional requirements that
 are architecturally significant.
 
-Architecturally Significant Requirements (ASRs) are requirements that has a measurable effect on the architecture, and
+_Architecturally Significant Requirements_ (ASRs) are requirements that has a measurable effect on the architecture, and
 quality of a software and/or hardware system.
 
-Architectural Decision Records (ADRs) capture a single AD and its rationale.<br/>
+_Architectural Decision Records_ (ADRs) capture a single AD and its rationale.<br/>
 ADR are meant to help one understand the reasons for a chosen architectural decision, along with its trade-offs and
 consequences.
 
