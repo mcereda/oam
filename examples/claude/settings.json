@@ -1,14 +1,121 @@
 {
     "outputStyle": "Explanatory",
+    "autoUpdatesChannel": "stable",
+    "minimumVersion": "2.1.76",
+    "prefersReducedMotion": true,
+    "voiceEnabled": true,
 
     "model": "opusplan",
     "effortLevel": "medium",
     "alwaysThinkingEnabled": true,
 
-    "permissions": {
-        "defaultMode": "default"
+    "env": {
+        "DISABLE_TELEMETRY": "1"
     },
 
+    "permissions": {
+        "defaultMode": "plan",
+        "allow": [
+            "Bash(npm run lint)",
+            "Bash(npm run test *)",
+            "Read(~/.zshrc)"
+        ],
+        "deny": [
+            "Bash(curl *)",
+            "Read(./.env)",
+            "Read(./.env.*)"
+        ]
+    },
+    "sandbox": {
+        "enabled": true,
+        "autoAllowBashIfSandboxed": true,
+        "excludedCommands": [
+            "docker"
+        ],
+        "network": {
+            "allowedDomains": [
+                "github.com",
+                "*.npmjs.org",
+                "registry.yarnpkg.com"
+            ],
+            "allowUnixSockets": [
+                "/var/run/docker.sock"
+            ],
+            "allowLocalBinding": true
+        }
+    },
+
+    "enabledPlugins": {
+        "skill-creator@claude-plugins-official": true,
+        "gitlab@claude-plugins-official": true
+    },
+    "mcpServers": {
+        "aws-cli": {
+            "env": {
+                "AWS_API_MCP_TELEMETRY": "false",
+                "AWS_REGION": "eu-west-1",
+                "READ_OPERATIONS_ONLY": "true"
+            },
+            "command": "docker",
+            "args": [
+                "run",
+                "--rm",
+                "--interactive",
+                "--env",
+                "AWS_REGION",
+                "--env",
+                "AWS_API_MCP_TELEMETRY",
+                "--env",
+                "READ_OPERATIONS_ONLY",
+                "--volume",
+                "/Users/someUser/.aws:/app/.aws:ro",
+                "public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest"
+            ]
+        },
+        "aws-cost-explorer": {
+            "command": "docker",
+            "args": [
+                "run",
+                "--rm",
+                "--interactive",
+                "--env",
+                "AWS_API_MCP_TELEMETRY=false",
+                "--volume",
+                "/Users/someUser/.aws:/app/.aws:ro",
+                "public.ecr.aws/awslabs-mcp/awslabs/cost-explorer-mcp-server:latest"
+            ]
+        },
+        "grafana": {
+            "env": {
+                "GRAFANA_URL": "https://g-0123456789.grafana-workspace.eu-west-1.amazonaws.com",
+                "GRAFANA_SERVICE_ACCOUNT_TOKEN": "glsa_abc…def"
+            },
+            "command": "docker",
+            "args": [
+                "run",
+                "--rm",
+                "--interactive",
+                "--env",
+                "GRAFANA_URL",
+                "--env",
+                "GRAFANA_SERVICE_ACCOUNT_TOKEN",
+                "grafana/mcp-grafana:latest",
+                "-t",
+                "stdio"
+            ]
+        },
+        "linear": {
+            "type": "http",
+            "url": "https://mcp.linear.app/mcp"
+        },
+        "plugin:gitlab:gitlab": {
+            "type": "http",
+            "url": "https://gitlab.example.org/api/v4/mcp"
+        }
+    },
+    "disabledMcpServers": [
+        "claude-in-chrome"
+    ],
     "hooks": {
         "PreToolUse": [
             {
@@ -21,10 +128,5 @@
                 ]
             }
         ]
-    },
-
-    "enabledPlugins": {
-        "skill-creator@claude-plugins-official": true,
-        "gitlab@claude-plugins-official": true
     }
 }

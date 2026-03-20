@@ -50,12 +50,13 @@ Uses a **scope system** to determine where configuration files apply, and who th
 | Project                 | `.claude/` directory in a repository | All collaborators, repository only | Yes (usually committed to the repository) |
 | Local                   | `.claude/*.local.*` files            | Single user, repository only       | No (usually gitignored)                   |
 
-Settings reside in `settings.json` (and `settings.local.json`) files at any of the scopes.<br/>
+Settings should reside in `settings.json` (and `settings.local.json`) files at any of the scopes.<br/>
 The [settings' schema] is available on schemastore.org.<br/>
 [Config file example].
 
-The `~/.claude.json` file contains one's _preferences_.<br/>
-It's **not** part of the `settings.json` hierarchy as much as a runtime state file that Claude Code manages internally.
+`~/.claude.json` stores Claude Code's _internal state_ and _sessions' data_, including caches and metrics.<br/>
+It's meant to be managed _autonomously_ by Claude Code.<br/>
+It's **not** part of the `settings.json` hierarchy as much as a runtime state file.
 
 When multiple scopes are active, settings are **merged** as follows:
 
@@ -1313,6 +1314,7 @@ Claude Code version: `v2.1.41`.
   1. [What Claude Code Actually Sends to the Cloud][claude analysis / what claude code actually sends to the cloud]
   1. [The System Prompt][claude analysis / the system prompt]
 - [The Claude Skills I Actually Use for DevOps]
+- [Output styles]
 
 ### Sources
 
@@ -1370,6 +1372,7 @@ Claude Code version: `v2.1.41`.
 [Manage Claude's memory]: https://code.claude.com/docs/en/memory
 [Mastering Claude Code in 30 minutes]: https://www.youtube.com/watch?v=6eBSHbLKuN0
 [Orchestrate teams of Claude Code sessions]: https://code.claude.com/docs/en/agent-teams
+[Output styles]: https://code.claude.com/docs/en/output-styles
 [Plugins reference]: https://code.claude.com/docs/en/plugins-reference
 [Tools reference]: https://code.claude.com/docs/en/tools-reference
 [Website]: https://claude.com/product/overview
@@ -1385,8 +1388,8 @@ Claude Code version: `v2.1.41`.
 [Grafana MCP Server]: https://github.com/grafana/mcp-grafana
 [pffigueiredo/claude-code-sheet.md]: https://gist.github.com/pffigueiredo/252bac8c731f7e8a2fc268c8a965a963
 [Prat011/awesome-llm-skills]: https://github.com/Prat011/awesome-llm-skills
+[rtk-ai/rtk]: https://github.com/rtk-ai/rtk
 [Settings' schema]: https://www.schemastore.org/claude-code-settings.json
 [The Claude Skills I Actually Use for DevOps]: https://www.pulumi.com/blog/top-8-claude-skills-devops-2026/
 [thedotmack/claude-mem]: https://github.com/thedotmack/claude-mem
 [Writing a good CLAUDE.md]: https://www.humanlayer.dev/blog/writing-a-good-claude-md
-[rtk-ai/rtk]: https://github.com/rtk-ai/rtk
