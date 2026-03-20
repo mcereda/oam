@@ -117,6 +117,11 @@ pulumi new 'kubernetes-yaml' --generate-only
 pulumi new 'oci-java' --secrets-provider 'hashivault://myKey'
 
 
+# Install project dependencies.
+pulumi install
+pulumi install --reinstall
+
+
 # Operate entirely from the local machine (local-only mode).
 # Stores the state under the '.pulumi' folder in the given directory.
 pulumi login --local
@@ -130,13 +135,22 @@ pulumi login 'azblob://state-bucket'
 pulumi login 'gs://state-bucket'
 pulumi login 's3://state-bucket/prefix'
 
+# Store the state in other storage backends.
+pulumi login 'postgres://username:password@host.fqdn:5432/database'
+
+# Use a self-managed Pulumi Cloud instance.
+pulumi login --interactive 'https://api.pulumi.acmecorp.com'
+
 # Display the current logged in user.
-# The '-v' option shows the current backend too.
+# The '-v' and '--json' options also show the current backend.
 pulumi whoami
 pulumi whoami -v
+pulumi whoami --json
 
 # Log out of the current backend.
 pulumi logout
+pulumi logout --local
+pulumi logout --all
 
 
 # Print information about the project and stack.
@@ -149,10 +163,14 @@ pulumi config set 'varName' 'value'
 pulumi config set 'namespace:varName' 'value'
 pulumi config set --secret 'secretName' 'secretValue'
 pulumi config set --secret 'namespace:secretName' 'secretValue'
+pulumi config set --path 'outer.inner' 'value'
+pulumi config set --path 'list[1]' 'value'
 
 # Read configuration values.
 # Secrets get unencrypted.
 pulumi config get 'dbPassword'
+pulumi config get --path 'outer.inner'
+pulumi config get --path 'list[1]'
 
 # Copy the configuration over to other stacks.
 pulumi config cp -d 'local'
@@ -161,10 +179,11 @@ pulumi config cp -s 'prod' -d 'dev'
 
 # Get a summary of what would be deployed.
 pulumi preview
+pulumi pre --cwd 'observability' --diff
 pulumi pre --diff -p '10' -m 'message' -s 'stack'
 pulumi pre --expect-no-changes --parallel '10' --show-reads
 pulumi pre -t 'targetResourceUrn' --target-dependents -v '2'
-pulumi pre --suppress-outputs --except 'targetResource1Urn' --except 'targetResourceNUrn' --except-dependents
+pulumi pre --suppress-outputs --exclude 'targetResource1Urn' --exclude 'targetResourceNUrn' --exclude-dependents
 
 # Save any resource creation seen during the preview into an import file to use
 # with the `import` subcommand.
@@ -193,6 +212,10 @@ pulumi import -f 'resources.to.import.json' --generate-code=false -y
 pulumi destroy
 pulumi down -t 'targetResourceUrn'
 pulumi dn -s 'stack' --exclude-protected
+
+# Refresh the state against the actual cloud resources.
+pulumi refresh
+pulumi refresh --suppress-outputs --diff
 
 
 # View the selected stack
@@ -258,6 +281,15 @@ pulumi state delete --force --target-dependents \
 # Unprotect resources that are protected in states.
 pulumi state unprotect 'resourceUrn'
 pulumi state unprotect 'resourceUrn1' … 'resourceUrnN'
+
+# Edit states interactively.
+pulumi state edit
+EDITOR='vim' pulumi state edit
+
+# Move resources between stacks.
+pulumi state move --source 'organization/utils/dev' --dest 'organization/iam/dev' \
+  'urn:pulumi:dev::utils::aws:iam/role:Role::rdsToS3Exporter' \
+  'urn:pulumi:dev::utils::aws:iam/rolePolicy:RolePolicy::rdsToS3Exporter-allowExportingSnapshotsToS3'
 
 
 # Rename projects.
@@ -385,6 +417,19 @@ pulumi import \
   'ecr-pullthroughcache/docker-hub' \
   'arn:aws:secretsmanager:eu-west-1:000011112222:secret:ecr-pullthroughcache/docker-hub-|fb4caa30-55ca-4351-2bc9-5c866ddde3f4'
 
+# Get the URN (or other stuff) of resources that would be deleted.
+pulumi preview --json | jq -r '.steps[]|select(.op=="delete").urn' -
+pulumi preview --json | jq -r '.steps[]|select(.op=="delete").oldState.id' -
+
+# Remove from the state all resources that would be deleted.
+pulumi preview --json | jq -r '.steps[]|select(.op=="delete").urn' - | xargs -n1 pulumi state delete --force
+
+# Limit the update run to only execute the 'delete' operations.
+pulumi pre --suppress-outputs --json \
+| jq -r '.steps[]|select(.op=="delete").urn' - \
+| sed 's/^/-t /g' \
+| xargs -o pulumi update --suppress-outputs
+
 # Check resources up.
 pulumi stack export | yq -y '.deployment.resources[]' -
 pulumi stack export | jq -r '.deployment.resources[]|select(.id=="myBucket").urn' -
@@ -423,6 +468,37 @@ yq -iy '. += {"backend": {"url": "s3://myBucket/prefix"}}' 'Pulumi.yaml'
 # Diff the two states
 # TODO
 
+
+# Install dependencies and run operations across multiple projects.
+find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + \
+| xargs -pn '1' pulumi install --cwd
+find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + \
+| xargs -pn '1' pulumi preview --parallel "$(nproc)" --suppress-outputs --cwd
+
+# Avoid permission errors when deleting clusters with charts and stuff.
+PULUMI_K8S_DELETE_UNREACHABLE='true' pulumi destroy
+
+# Enable patch force for target resources (k8s-helm only).
+PULUMI_K8S_ENABLE_PATCH_FORCE='true' \
+pulumi up --target 'urn:pulumi:someStack::someProj::kubernetes:helm.sh/v4:Chart$kubernetes:apiextensions.k8s.io/v1:CustomResourceDefinition::someResource'
+
+# Show providers used by the project's resources.
+pulumi stack export | jq -r '.deployment.resources[]|{"urn":.urn,"provider":.provider}'
+
+# Check all resource providers are using a specific version.
+pulumi stack export | jq -r '.deployment.resources[].provider' | grep -v 'aws::default_6_50_0'
+
+# Upgrade providers' versions in projects' definition files.
+jq '.dependencies."@pulumi/aws" |= "6.66.2"' 'package.json' | sponge 'package.json' \
+&& pulumi install && pulumi update --suppress-outputs
+
+# Update only resources with a specific provider version.
+pulumi update --suppress-output ( \
+  pulumi stack export \
+  | jq -r '.deployment.resources[]|select(.provider)|select(.provider|test("6.80.0")).urn' \
+  | sed 's/^/-t /g' \
+  | xargs \
+)
 
 # Get the AWS secret access key of an aws.iam.AccessKey resource
 pulumi stack output 'someAccessKey' | jq -r '.encryptedSecret' - | base64 -d | gpg --decrypt
@@ -527,7 +603,7 @@ Commands comparison:
 | `pulumi stack`                  | `terraform workspace show`                      |
 | `pulumi stack ls`               | `terraform workspace list`                      |
 | `pulumi stack rm`               | `terraform workspace delete …`                  |
-| `pulumi state export`           | `terraform state list`                          |
+| `pulumi stack export`           | `terraform state pull`                          |
 | `pulumi state delete …`         | `terraform state rm …`                          |
 
 <br/>
@@ -565,7 +641,7 @@ pulumi new 'oci-java'
 
 ## Programs
 
-Programs are the the files containing the resources' definitions.<br/>
+Programs are the files containing the resources' definitions.<br/>
 They are deployed into [stacks].
 
 ### Ignore changes
@@ -573,7 +649,7 @@ They are deployed into [stacks].
 Add the [`ignoreChanges` option][ignorechanges] to the resource.
 
 ```ts
-const resource = new.aws.s3.Bucket("bucket", {
+const resource = new aws.s3.Bucket("bucket", {
   …
 }, {
   ignoreChanges: [
@@ -646,7 +722,7 @@ Read [Assigning tags by default on AWS with Pulumi] first to get an idea of pros
 
 ### Outputs
 
-Pulumi offers functions that deal with `Output` resources, like `pulumi.interpolate` and `pulumi.concat`.<br/>
+Pulumi offers functions that deal with `Output` values, like `pulumi.interpolate` and `pulumi.concat`.<br/>
 Prefer using those functions throughout the code. they are just _that_ much better when dealing with Outputs.
 
 One cannot use dot-notation to access nested properties on `Output<T>`.<br/>
@@ -865,8 +941,8 @@ Change it by:
 - [Enforcing the new backend in the project's `Pulumi.yaml` file][enforce specific backends for projects].
 
 The Pulumi Cloud backend records every checkpoint to allow to recover from exotic failure scenarios.<br/>
-Self-managed backends may have more trouble recovering from these situations, as they typically store a single state
-file instead.
+Self-managed backends also store backups and history, but may have more trouble recovering from exotic failure scenarios
+compared to Pulumi Cloud.
 
 Backends store the states of one or more [stacks], divided by [project][projects].
 Everything **but** the credentials for the backend (`~/.pulumi/credentials.json`) is stored in the backend's root
@@ -1075,10 +1151,10 @@ Refer [Pulumi Crosswalk for AWS] or [Google Cloud Static Website] as examples.
            this.internetGateway = new aws.ec2.InternetGateway(
              `${name}`,
              {
-               vpcId: vpc.id,
+               vpcId: this.vpc.id,
                …
              },
-             { parent: vpc },
+             { parent: this.vpc },
            );
        };
    };
@@ -1597,8 +1673,6 @@ Root cause: something is wrong in the stack's configuration; most likely, the co
 because it is missing in the file.
 
 Solution: add all required missing keys to the stack's configuration file.
-
-</details>
 
 ### Stack init fails because the stack supposedly already exists
 
