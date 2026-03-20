@@ -544,3 +544,4 @@ $$;
 
 -- Show running queries
 SELECT * from pg_stat_activity where usename = 'monica';
+SELECT pid,usename,client_addr,query_start,query from pg_stat_activity where usename = 'john';
