@@ -1,0 +1,30 @@
+{
+    "outputStyle": "Explanatory",
+
+    "model": "opusplan",
+    "effortLevel": "medium",
+    "alwaysThinkingEnabled": true,
+
+    "permissions": {
+        "defaultMode": "default"
+    },
+
+    "hooks": {
+        "PreToolUse": [
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "$HOME/.claude/hooks/rtk-rewrite.sh"
+                    }
+                ]
+            }
+        ]
+    },
+
+    "enabledPlugins": {
+        "skill-creator@claude-plugins-official": true,
+        "gitlab@claude-plugins-official": true
+    }
+}
