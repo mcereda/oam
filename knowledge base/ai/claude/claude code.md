@@ -942,6 +942,10 @@ Create hooks by adding a `hooks` block to a settings file.
         "hooks": [
           {
             "type": "agent",
+            "prompt": "If the command is not `git commit`, respond: LGTM. For `git commit` commands: if the agent did not contribute in this conversation, respond: LGTM. If `--author` is already present, respond: LGTM. The agent contributed if it edited/wrote files being committed, OR if it suggested a solution that the user implemented (the changes must reflect the agent's guidance). Otherwise BLOCK: the agent contributed but `--author` is missing. Remind to use --author='<Agent> on behalf of <user> <email>' and a Co-Authored-By trailer per CONTRIBUTING.md."
+          },
+          {
+            "type": "agent",
             "prompt": "Review the proposed Bash command. Block it if it would: delete files outside the working directory, force-push, run pulumi up/destroy without the non-interactive task wrapper, or modify .env files. Allow everything else."
           }
         ]
