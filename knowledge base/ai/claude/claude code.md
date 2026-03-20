@@ -50,8 +50,12 @@ Uses a **scope system** to determine where configuration files apply, and who th
 | Project                 | `.claude/` directory in a repository | All collaborators, repository only | Yes (usually committed to the repository) |
 | Local                   | `.claude/*.local.*` files            | Single user, repository only       | No (usually gitignored)                   |
 
+Settings reside in `settings.json` (and `settings.local.json`) files at any of the scopes.<br/>
 The [settings' schema] is available on schemastore.org.<br/>
 [Config file example].
+
+The `~/.claude.json` file contains one's _preferences_.<br/>
+It's **not** part of the `settings.json` hierarchy as much as a runtime state file that Claude Code manages internally.
 
 When multiple scopes are active, settings are **merged** as follows:
 
@@ -797,6 +801,43 @@ They extend Claude Code's functionality, and allow sharing extensions across pro
 
 Can be installed at all different scopes.
 
+Plugins bundle MCP servers via an `.mcp.json` file in the plugin's root, or inline in `plugin.json`.
+
+> [!note]
+> Claude Code's settings schema defines the top-level `pluginConfigs` key.<br/>
+> It seems to be meant for _passing_ (not _overriding_) values to plugins. I was not yet able to make this work.
+
+Plugins' MCP servers start automatically when the plugin is enabled.<br/>
+These MCP servers appear as standard MCP tools in Claude's toolkit, just prefixed with `plugin:{plugin-name}` (e.g.
+`plugin:gitlab:gitlab`). They can be configured independently.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+  "mcpServers": {
+    "gitlab-custom": {
+      "type": "http",
+      "url": "https://gitlab.com/api/v4/mcp"
+    },
+    "plugin:gitlab:gitlab": {
+      "type": "http",
+      "url": "https://gitlab.example.org/api/v4/mcp"
+    }
+  }
+}
+```
+
+```sh
+$ claude mcp list
+Checking MCP server health...
+
+gitlab-custom: https://gitlab.com/api/v4/mcp (HTTP) - ! Needs authentication
+plugin:gitlab:gitlab: https://gitlab.example.org/api/v4/mcp (HTTP) - ! Needs authentication
+```
+
+</details>
+
 <details>
   <summary>Commands</summary>
 
@@ -811,16 +852,16 @@ claude --plugin-dir './path/to/plugin'
 
 # Install plugin marketplaces.
 claude plugin marketplace add 'owner/repo'      # github
-claude plugin marketplace add 'path/to/plugin'  # local
+claude plugins marketplace add 'path/to/plugin'  # local
 
 # Install plugins.
 # Marketplace defaults to 'claude-plugins-official'.
 # Scope defaults to 'user'.
 claude plugin install 'gitlab'
-claude plugin i 'aws-cost-saver@aws-cost-saver-marketplace' --scope 'project'
+claude plugins i 'aws-cost-saver@aws-cost-saver-marketplace' --scope 'project'
 
 # List installed plugins only.
-claude plugin list
+claude plugins list
 
 # List all plugins.
 claude plugin list --available --json
