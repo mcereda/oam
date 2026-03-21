@@ -6,6 +6,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
+   1. [Credentials](#credentials)
 1. [Context and memory](#context-and-memory)
 1. [Using tools](#using-tools)
    1. [Managing MCP servers](#managing-mcp-servers)
@@ -331,6 +332,25 @@ Claude Code. Prefer **not** editing this file manually.<br/>
 > Run `/status` from inside Claude Code to see which settings sources are active and where they come from.
 
 See also [Configuration] and [Environment variables][environment variables reference].
+
+### Credentials
+
+Depending on one's OS and authentication method:
+
+- **OAuth credentials** (e.g., GitHub, remote MCP servers) are stored in the system keychain on Mac OS X, or in a
+  credentials file on other platforms.
+- General **authentication tokens and credentials file** are stored in the system keychain on Mac OS X and in
+  `~/.claude/.credentials.json` on Linux and Windows.
+- **API keys** should be passed as environment variables to MCPs (e.g. `--env API_KEY=...` when adding one via
+  `claude mcp add`) or saved manually in `~/.claude.json`.
+
+| Platform | Credential Location                                             |
+| -------- | --------------------------------------------------------------- |
+| Mac OS X | System Keychain (`Keychain Access.app → login → "Claude Code"`) |
+| Linux    | `~/.claude/.credentials.json`                                   |
+| Windows  | `%USERPROFILE%\.claude\.credentials.json`                       |
+
+[`~/.claude/credentials.json` file example][~/.claude/credentials.json file example].
 
 ## Context and memory
 
@@ -1434,6 +1454,7 @@ Claude Code version: `v2.1.41`.
 
 <!-- Files -->
 [.mcp.json file example]: ../../../examples/claude/dotmcp.json
+[~/.claude/credentials.json file example]: ../../../examples/claude/credentials.json
 [settings.json file example]: ../../../examples/claude/settings.json
 
 <!-- Upstream -->
