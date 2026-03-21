@@ -51,7 +51,7 @@
                 "--env",
                 "READ_OPERATIONS_ONLY",
                 "--volume",
-                "/Users/someUser/.aws:/app/.aws:ro",
+                "/Users/someUser/.aws:/app/.aws:rw",
                 "public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest"
             ]
         },
@@ -64,7 +64,7 @@
                 "--env",
                 "AWS_API_MCP_TELEMETRY=false",
                 "--volume",
-                "/Users/someUser/.aws:/app/.aws:ro",
+                "/Users/someUser/.aws:/app/.aws:rw",
                 "public.ecr.aws/awslabs-mcp/awslabs/cost-explorer-mcp-server:latest"
             ]
         }
