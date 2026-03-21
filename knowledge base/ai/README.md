@@ -92,7 +92,11 @@ It pays particular attention to mitigating negative effects of AI automation on 
 the use of AI in healthcare fields, and imbuing AI systems with societal values while placing significant focus on
 exploring how AI systems can enhance human capacities and serve as collaborators.
 
-We should **be most wary** of AI autonomy, recursive self-improvement, and self-replication.<br/>
+We should **be most wary** of giving AI _autonomy_, _recursive self-improvement_, and _self-replication_.<br/>
+Given enough time, their combination would easily empower AI enough to escape our every control.<br/>
+Yet, we are already giving it the first with [agentic features][ai agents], and the second by using models to train
+their successors (see [autoresearch][karpathy/autoresearch]).
+
 Once AIs become _superintelligent_, they might consider humans irrelevant or even hindrances.<br/>
 They will have **no** effective reason to help us, and might try to take control. Humans never had to deal with more
 intelligent beings, but we have many painful examples of what humans did to animals.
@@ -138,6 +142,7 @@ Refer to:
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[AI agents]: agents.md
 [Large Language Models]: lms.md#large-language-models
 [Machine learning]: ml.md
 [Model Context Protocol]: mcp.md
@@ -151,6 +156,7 @@ Refer to:
 [Control AI]: https://controlai.com/
 [geeksforgeeks/Artificial Intelligence Tutorial]: https://www.geeksforgeeks.org/artificial-intelligence/
 [Human-Centered AI]: https://ixdf.org/literature/topics/human-centered-ai
+[karpathy/autoresearch]: https://github.com/karpathy/autoresearch
 [Situational Awareness: The Decade Ahead]: https://situational-awareness.ai/
 [Species | Documenting AGI]: https://www.youtube.com/@AISpecies
 [The Compendium]: https://www.thecompendium.ai/
