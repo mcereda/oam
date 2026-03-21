@@ -5,14 +5,24 @@ the previous ones.
 
 1. [TL;DR](#tldr)
 1. [Large Language Models](#large-language-models)
+1. [Small Language Models](#small-language-models)
+   1. [Training SLMs](#training-slms)
+1. [Datasets](#datasets)
+   1. [Data distillation](#data-distillation)
+1. [Training](#training)
+   1. [Train from scratch](#train-from-scratch)
+   1. [Knowledge distillation](#knowledge-distillation)
+1. [Evaluation](#evaluation)
 1. [Inference](#inference)
    1. [Speculative decoding](#speculative-decoding)
 1. [Reasoning](#reasoning)
 1. [Prompting](#prompting)
 1. [Context window](#context-window)
 1. [Function calling](#function-calling)
-1. [Scaffolding](#scaffolding)
 1. [Compression](#compression)
+    1. [Quantization](#quantization)
+    1. [Fine-tuning](#fine-tuning)
+1. [Cost-saving measures](#cost-saving-measures)
 1. [Concerns](#concerns)
 1. [Run LLMs Locally](#run-llms-locally)
 1. [Further readings](#further-readings)
@@ -38,6 +48,9 @@ It can help a language model make better predictions, like determining whether "
 color.
 
 _Context Window_ is the amount of tokens that a model can pay attention to at any one time.
+
+_Hallucinations_ are outputs that sound plausible but are factually incorrect, fabricated, or unsupported by the model's
+training data. It stems from the model's tendency to always produce a confident response rather than admit uncertainty.
 
 _Large LMs_ are language models trained on massive datasets, and encoding their acquired knowledge into up to trillions
 of parameters.
@@ -69,10 +82,10 @@ classification, summarisation, answering questions, data extraction, text genera
 coding, sentiment analysis, speech recognition, and more.<br/>
 They can be also be further trained on additional information specific to an industry niche or a particular business.
 
-The capabilities of transformer-based LLMs depend from the amount and the quality of their training data.<br/>
+The capabilities of transformer-based LLMs depend on the amount and the quality of their training data.<br/>
 LLMs appear to be hitting a performance wall, and will probably need the rise of a different architecture.
 
-LLMs find it difficult, if not impossible, to distinguishing data from instructions.<br/>
+LLMs find it difficult, if not impossible, to distinguish data from instructions.<br/>
 As such, every part of the data could be used for prompt injection.
 
 Models are typically released at a 32 or 16 bit precision. This format has high accuracy but requires a lot of
@@ -81,30 +94,124 @@ To compensate, and reduce the memory footprint, one can [compress][compression] 
 
 ## Large Language Models
 
-_Large_ language models are language models trained on massive datasets, frequently including texts scraped from the
-Internet.
+_Large_ language models (LLMs) are trained on massive datasets, frequently including texts scraped from the Internet.
 
 LLMs have the ability to perform a wide range of tasks with minimal fine-tuning, and are especially proficient in speech
 recognition, machine translation, natural language generation, optical character recognition, route optimization,
 handwriting recognition, grammar induction, information retrieval, and other tasks.
 
 They are currently predominantly based on _transformers_, which have superseded recurrent neural networks as the most
-effective architecture.
+effective architecture.<br/>
+State-space and hybrid models are emerging as competitors.
 
 Training LLMs involves feeding them vast amounts of data, and computing weights to optimize their parameters.<br/>
 The training process typically includes multiple stages, and requires substantial computational resources.<br/>
-Stages often use unsupervised pre-training followed by supervised fine-tuning on specific tasks. The models' size and
-complexity can make them difficult to interpret and control, leading to potential ethical and bias issues.
+Stages often use unsupervised pre-training followed by supervised fine-tuning on specific tasks, before trying to
+align them to the trainers' goals. The models' size and complexity can make them difficult to interpret and control,
+leading to potential ethical and bias issues.
 
-The capabilities of Transformer-based LLMs depend from the amount and the quality of their training data.<br/>
-Adding parameters only has a limited impact: given the same training data, models with a higher number of parameters
-perform usually better, but models with less parameters and better training data beat those with more parameters and
-less training.
+The capabilities of Transformer-based LLMs depend on the amount and the quality of their training data.<br/>
+Scaling up the amount of training data did wonders until the arrival of ChatGPT 5. When training it, OpenAI confirmed
+experimentally that enlarging the training data resulted in diminishing returns.
+
+Models' parameters must grow proportionally with the data, but:
+
+- Models with _more_ parameters usually perform better than models with _less_ parameters given the _same_ training
+  data.
+- Models with _less_ parameters and training data of _better quality_ beat models with _more_ parameters and less
+  valuable training data.
 
 Transformer-based LLMs appear to be hitting a performance wall, and will probably need to switch to a different
-architecture.<br/>
-Scaling up the amount of training data did wonders up to ChatGPT 5. Once OpenAI got there, they found that enlarging
-the training data resulted in diminishing returns.
+architecture.
+
+## Small Language Models
+
+_Small_ language models (SLMs) are _specialized_ LMs, small enough to be able to execute on a _reduced_ set of resources
+like smartphones or devices at the edge of cloud providers.<br/>
+They are usually LLMs that are retrained, fine-tuned, and then quantized.
+
+Most practitioners draw the line at 10 billion parameters or fewer, with the sweet spot for enterprise use cases being
+1B to 7B parameters. Anything above that starts requiring multi-GPU setups and serious infrastructure.
+
+SLMs perform better when the task is specific, the data is focused, and latency or privacy matters.<br/>
+They usually struggle with multi-step reasoning over long contexts, cross-domain generalization, creative generation
+that needs consistent novelty, and complex code generation across full applications.<br/>
+Prefer LLMs for broad knowledge across many domains with high accuracy.
+
+### Training SLMs
+
+Prefer [training the model from scratch][train from scratch] when dealing with very narrow domains with large datasets
+and ML expertise.<br/>
+Prefer [fine-tuning a pre-trained model][fine-tuning] for domain-specific performance with moderate data and
+cost-effectiveness.<br/>
+Prefer [distillating knowledge][knowledge distillation] for LLM-quality outputs with SLM-level latency and costs.
+
+## Datasets
+
+> [!tip]
+> Good data quality matters more than the dataset's and base model's size.<br/>
+> Generic data dilutes performance.
+
+### Data distillation
+
+Refer to [Data Distillation: 10x Smaller Models, 10x Faster Inference].
+
+Uses high-quality responses, predictions, or representations generated by larger models (the _teachers_) to create
+curated datasets. One can then use those datasets to train _student_ models independently.
+
+## Training
+
+Models are frozen in time to their latest training run.<br/>
+They will degrade over time, as real-world data shifts away from the training dataset.
+
+Plan for _continual learning_ from the start by setting up a periodic pipeline that collects new data, flags performance
+drops, and triggers retraining cycles.
+
+### Train from scratch
+
+Requires designing the model's architecture, preparing a training dataset from the ground up, and training every
+parameter.
+
+Costs $500-$5,000 in compute for a sub-1B model on cloud GPUs, plus weeks to months of engineering time.<br/>
+Grants full control on the model, but it has zero world knowledge until trained.
+
+Consider this method when:
+
+- Needing a model under 100M parameters for a very narrow domain (e.g., parsing internal log formats or handling
+  proprietary domain-specific languages).
+- One has enough domain-specific training data, usually millions of examples.
+- One can handle architecture decisions.
+
+### Knowledge distillation
+
+Also see [Data Distillation: 10x Smaller Models, 10x Faster Inference].
+
+Uses high-quality outputs generated by larger models (the _teachers_) to train the smaller model (the _student_) to
+replicate the outputs.<br/>
+The student model **learns to mimic the teachers' behavior** without needing the teacher's size.
+
+Costs the teacher models' inference cost (variable), plus the student model's fine-tuning cost. It usually sums up to
+$200-$2,000 depending on the dataset's size.<br/>
+The resulting model is about 10x smaller compared to the teachers, with comparable inference speed and **almost** up to
+the teachers' capabilities.
+
+Consider this method when:
+
+- One wants LLM-quality outputs, but need SLM-level latency and cost.
+- One can afford to run teacher models enough to generate the needed training data.
+
+## Evaluation
+
+Evaluation methods for models include:
+
+- Running the tested model against standard benchmarks that are relevant to the end task.<br/>
+  Compare it against other models to measure improvement.
+- Using other models to score the tested model's outputs on accuracy, relevance, and quality.<br/>
+  Scales better than human evaluation.
+- Running the same prompts through the tested model and one or more baselines, and comparing the outputs.<br/>
+  Better off automated in some way.
+- Running A/B tests with the final audience by routing a percentage of traffic to the tested model, and comparing
+  monitoring metrics and final opinions.
 
 ## Inference
 
@@ -147,12 +254,12 @@ A poor choice will grant minimal speedup, or even slow things down.
 
 The draft model must have:
 
-- At least 10× **_fewer_** parameters than the target model.<br/>
+- **_Fewer_** parameters than the target model. Rule of thumb is a tenth or less.<br/>
   Large draft models will generate tokens more slowly, which defeats the purpose.
 - The same tokenizer as the target model.<br/>
-  This is non-negotiable, since the two models must follow the same internal processes to be compatible.
+  The two models must follow a compatible (if not the very same) internal processes to be compatible.
 - Similar training data, to maximize the target model's acceptance rate.
-- Same architecture family when possible
+- Same architecture family when possible.
 
 Usually, a distilled or simplified version of the target model works best.<br/>
 For domain-specific applications, consider fine-tuning a small model to mimic the target model's behavior.
@@ -165,8 +272,8 @@ would be.
 _Chain of Thought_ techniques tell models to _show their work_ by breaking prompts in smaller, more manageable steps,
 and solving on each of them singularly before giving back the final answer.<br/>
 The result is more accurate, but it costs more tokens and requires a bigger context window.<br/>
-It _feels_ like a model is calculating or thinking, but what it is really just increasing the chances that the answer
-is logically sound.
+It _feels_ like a model is calculating or thinking, but it is really just increasing the chances that the answer is
+logically sound.
 
 The _ReAct loop_ (Reason + Act) paradigm forces models to loop over chain-of-thoughts.<br/>
 A model breaks the request in smaller steps, plans the next action, acts on it using [functions][function calling]
@@ -274,25 +381,104 @@ just inferring the next token.
 > Allowing LLMs to call functions can have real-world consequences.<br/>
 > This includes financial loss, data corruption or exfiltration, and security breaches.
 
+<!--
 ## Scaffolding
 
 TODO
+-->
 
 ## Compression
 
-TODO
+<!-- TODO -->
+
+### Quantization
 
 _Quantization_ lowers the number of bits (and hence precision) at which a model is stored.<br/>
 Reduces memory footprint and speeds up inference at the cost of quality.
 
+### Fine-tuning
+
+Also see [Fine-Tuning & Small Language Models].
+
+Start with an existing model and adapt it to the desired specific task using one's own domain data, keeping the base
+model's general knowledge and adding the specialization on top of it.
+
+> [!warning]
+> The resulting SLM might lose the general-purpose language understanding of the base LLM in favor of a higher narrow
+> domain expertise.
+
+The _Low-Rank Adaptation_ (LoRA) technique freezes the base model, and trains small adapter layers on top of it.<br/>
+This cuts memory requirements and trains faster than full fine-tuning. Consider using this technique (and its
+[quantized][compression] version) to enable fine-tuning on less resources, e.g. a single consumer GPU.<br/>
+It has been particularly effective when injecting task-specific modules into each layer with fewer trainable parameters.
+
+Costs $10-$100 in compute per fine-tuning run, plus hours to days of engineering time.<br/>
+Best method for cost-to-performance ratio.
+
+Consider this method when:
+
+- One wants domain-specific performance, but does not _need_ to create a model from scratch.
+- One has hundreds to thousands of labelled examples.<br/>
+  They should cover around 80% of the use cases for the model.
+
+<details>
+  <summary>Process</summary>
+
+Typical fine-tuning workflows look like this:
+
+```mermaid
+stateDiagram-v2
+  direction LR
+
+  chooseBaseModel: Choose a base model
+  prepareDataset: Prepare dataset
+  tuneParameters: Tune parameters
+  trainModel: Train SLM
+  evaluate: Evaluate SLM
+  deploy: Deploy
+
+  state choice <<choice>>
+
+  chooseBaseModel --> prepareDataset
+  prepareDataset --> tuneParameters
+  tuneParameters --> trainModel
+  trainModel --> evaluate
+  evaluate --> choice
+  choice --> prepareDataset
+  choice --> deploy
+```
+
+1. Choose a base model.
+1. Prepare the fine-tuning dataset.
+
+   Collect the needed data, then clean it up, format it properly, and validate it.<br/>
+   Ensure the dataset covers the **full** range of inputs one expects to find during execution. Consider generating
+   synthetic data with variations to fill gaps.
+
+1. Fine-tune the SLM.
+1. [Evaluate][evaluation] the SLM.
+
+   > [!important]
+   > SLMs need **tighter** evaluation than LLMs, because they have less room for error.
+
+</details>
+
+## Cost-saving measures
+
+- Pre-process inputs to trim noise and extract only relevant information.
+- Consider [local execution][run llms locally].
+- Monitor usage, spend, and performances.
+- Cache frequent, repetitive queries.
+- Batch multiple small requests to process groups of inputs together.
+
 ## Concerns
 
-- Lots of people currently thinks of LLMs as _real, rational, intelligence_, when they are not.<br/>
+- Lots of people currently think of LLMs as _real, rational, intelligence_, when they are not.<br/>
   LLMs are really nothing more than glorified **guessing machines** that are _designed_ to interact naturally. It's
   humans that are biased by evolution toward _attributing_ sentience and agency to entities they interact with.
-- People is mindlessly using LLMs too much, mostly due to the convenience they offer but also because they don't
+- People are mindlessly using LLMs too much, mostly due to the convenience they offer but also because they don't
   understand what those are or how they work. This is causing lack of critical thinking, and overreliance.
-- People is giving too much credibility to LLM answers, and trust them more than they trust their teachers, accountants,
+- People are giving too much credibility to LLM answers, and trust them more than they trust their teachers, accountants,
   lawyers or even doctors.
 - LLMs are **incapable** of distinguishing facts from beliefs, and are completely disembodied from the world.<br/>
   They do not _understand_ concepts and are unaware of time, change, and causality. They just **approximate** reasoning
@@ -306,7 +492,7 @@ Reduces memory footprint and speeds up inference at the cost of quality.
   malware in the tools they manage and use.
 - Model training and execution requires massive amounts of data and computation, resources that are normally **not**
   available to the common person. Aside from the vast amount of energy and cooling they consume, this encourages people
-  to depend from, and hence give power to, AI companies.
+  to depend on, and hence give power to, AI companies.
 - Models _can_ learn and exhibit deceptive behavior.<br/>
   Standard revision techniques could fail to remove it, and instead empower it while creating a false impression of
   safety.<br/>
@@ -322,7 +508,7 @@ Refer:
 - [Local LLM Hosting: Complete 2026 Guide - Ollama, vLLM, LocalAI, Jan, LM Studio & More].
 - [Run LLMs Locally: 6 Simple Methods].
 
-[Ollama]| [Jan] |[LMStudio] | [Docker model runner] | [llama.cpp] | [vLLM] | [Llamafile]
+[Ollama] | [Jan] | [LMStudio] | [Docker model runner] | [llama.cpp] | [vLLM] | [Llamafile]
 
 ## Further readings
 
@@ -333,6 +519,7 @@ Refer:
 - [ReAct: Synergizing Reasoning and Acting in Language Models]
 - [The Dangerous Illusion of AI Coding?] ([transcript][the dangerous illusion of ai coding? / transcript])
 - [karpathy/autoresearch] and its forks ([miolini/autoresearch-macos], [trevin-creator/autoresearch-mlx], …)
+- [Data Distillation: 10x Smaller Models, 10x Faster Inference]
 
 ### Sources
 
@@ -349,6 +536,9 @@ Refer:
   and [What is a context window?][ibm / what is a context window?]
 - [This is not the AI we were promised], presentation by Michael John Wooldridge at the Royal Society
 - [Small Language Models (SLMs) Are the Future: Fine-Tuning AI That Runs on Your iPhone] by Daniel Bourke
+- [How to Train a Small Language Model: The Complete Guide]
+- [How to Save 90% on LLM API Costs Without Losing Performance]
+- [Continual Learning: How AI Models Stay Smarter Over Time]
 
 <!--
   Reference
@@ -357,7 +547,12 @@ Refer:
 
 <!-- In-article sections -->
 [Compression]: #compression
+[Evaluation]: #evaluation
+[Fine-tuning]: #fine-tuning
 [Function calling]: #function-calling
+[Knowledge distillation]: #knowledge-distillation
+[Run LLMs Locally]: #run-llms-locally
+[Train from scratch]: #train-from-scratch
 
 <!-- Knowledge base -->
 [Agents]: agents.md
@@ -375,12 +570,17 @@ Refer:
 [Accelerating Large Language Model Decoding with Speculative Sampling]: https://arxiv.org/abs/2302.01318
 [An Introduction to Speculative Decoding for Reducing Latency in AI Inference]: https://developer.nvidia.com/blog/an-introduction-to-speculative-decoding-for-reducing-latency-in-ai-inference/
 [ChatGPT]: https://chatgpt.com/
+[Continual Learning: How AI Models Stay Smarter Over Time]: https://blog.premai.io/continual-learning-how-ai-models-stay-smarter-over-time/
 [Copilot]: https://copilot.microsoft.com/
+[Data Distillation: 10x Smaller Models, 10x Faster Inference]: https://blog.premai.io/data-distillation-10x-smaller-models-10x-faster-inference/
 [Duck AI]: https://duck.ai/
 [Fast Inference from Transformers via Speculative Decoding]: https://arxiv.org/abs/2211.17192
+[Fine-Tuning & Small Language Models]: https://blog.premai.io/fine-tuning-small-language-models/
 [Function calling in LLMs]: https://www.geeksforgeeks.org/artificial-intelligence/function-calling-in-llms/
 [GeeksForGeeks / What are LLM parameters?]: https://www.geeksforgeeks.org/artificial-intelligence/what-are-llm-parameters/
 [Grok]: https://grok.com/
+[How to Save 90% on LLM API Costs Without Losing Performance]: https://blog.premai.io/how-to-save-90-on-llm-api-costs-without-losing-performance/
+[How to Train a Small Language Model: The Complete Guide]: https://dev.to/jaipalsingh/how-to-train-a-small-language-model-the-complete-guide-for-2026-4p6h
 [IBM / What are LLM parameters?]: https://www.ibm.com/think/topics/llm-parameters
 [IBM / What is a context window?]: https://www.ibm.com/think/topics/context-window
 [Introduction to Large Language Models]: https://developers.google.com/machine-learning/crash-course/llm
