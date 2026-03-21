@@ -24,6 +24,7 @@
 1. [Prepare the git server](#prepare-the-git-server)
 1. [LFS extension](#lfs-extension)
 1. [Submodules](#submodules)
+1. [Trailers](#trailers)
 1. [Remove a file from a commit](#remove-a-file-from-a-commit)
 1. [Remove a file from the repository](#remove-a-file-from-the-repository)
 1. [Troubleshooting](#troubleshooting)
@@ -933,6 +934,36 @@ To delete a submodule the procedure is more complicated:
 
 1. Commit the changes.
 
+## Trailers
+
+Refer to [Git Trailers].
+
+Git trailers are a source of key:value pairs-based metadata parsed by the `git interpret-trailers` command.<br/>
+They can be applied to commits and tags.
+
+Trailers go at the **end** of a commit message (after the body, per Git specification).<br/>
+They should never be used in the commit subject or body.
+
+```sh
+git commit --message "Fixed log format" --trailer 'Milestone: patch'
+git commit --message "fix: log format" \
+  --trailer 'Co-authored-by: Lucas Lee <llee@example.org>' \
+  --trailer 'Signed-of-by: Scott Pilgrim <spilgrim@example.org>'
+  --trailer "Format: asciidoc" \
+  --trailer "Issue: 123"
+```
+
+```plaintext
+fix: log format
+
+Some commit description
+
+Co-authored-by: Lucas Lee <llee@example.org>
+Signed-of-by: Scott Pilgrim <spilgrim@example.org>
+Format: asciidoc
+Issue: 123
+```
+
 ## Remove a file from a commit
 
 See [remove files from git commit].
@@ -1038,6 +1069,7 @@ export GPG_TTY=$(tty)
 - [Hooks]
 - [Gitignore]
 - [Git-extras]
+- [Git Trailers]
 
 ### Sources
 
@@ -1106,6 +1138,7 @@ export GPG_TTY=$(tty)
 [git config | setup git environment]: https://initialcommit.com/blog/git-config
 [git global config for specific repositories?]: https://stackoverflow.com/questions/61983894/git-global-config-for-specific-repositories#71096731
 [git submodules: adding, using, removing, updating]: https://chrisjean.com/git-submodules-adding-using-removing-and-updating/
+[Git Trailers]: https://www.alchemists.io/articles/git_trailers
 [git-extras]: https://github.com/tj/git-extras/
 [gpg failed to sign the data fatal: failed to write commit object]: https://stackoverflow.com/questions/39494631/gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object-git-2-10-0
 [How do I change the author and committer name/email for multiple commits?]: https://stackoverflow.com/questions/750172/how-do-i-change-the-author-and-committer-name-email-for-multiple-commits#1320317
