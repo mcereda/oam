@@ -491,8 +491,9 @@ Consider also asking it to keep the files up to date using notes and findings fr
 </details>
 
 People is showing success _delegating_ this work to Claude at the start of a project.<br/>
-They instruct Claude to be responsible for all the tools and documentation it creates **and** uses, and asks it to check
-and update those files iteratively to correct its own behaviour.
+Consider delegating ownership of tools and documentation to Claude early in a project, making it responsible for the
+tools and documents it creates _and_ uses. Also include in the request to periodically to check and update those files
+to correct its own behavior across sessions.
 
 ## Using tools
 
