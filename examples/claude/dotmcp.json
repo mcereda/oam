@@ -1,6 +1,6 @@
 {
     "mcpServers": {
-        "gitlab": {
+        "plugin:gitlab:gitlab": {
             "type": "http",
             "url": "https://gitlab.example.org/api/v4/mcp"
         },
@@ -16,25 +16,57 @@
             }
         },
         "grafana": {
+            "env": {
+                "GRAFANA_URL": "https://g-abcdef0123.grafana-workspace.eu-west-1.amazonaws.com",
+                "GRAFANA_SERVICE_ACCOUNT_TOKEN": "glsa_abc…def"
+            },
+            "command": "docker",
+            "args": [
+                "run",
+                "--rm",
+                "--interactive",
+                "--env", "GRAFANA_URL",
+                "--env", "GRAFANA_SERVICE_ACCOUNT_TOKEN",
+                "grafana/mcp-grafana:latest",
+                "-t", "stdio",
+                "--disable-write",
+                "--disable-admin"
+            ]
+        },
+        "aws-cli": {
+            "env": {
+                "AWS_API_MCP_TELEMETRY": "false",
+                "AWS_REGION": "eu-west-1",
+                "READ_OPERATIONS_ONLY": "true"
+            },
             "command": "docker",
             "args": [
                 "run",
                 "--rm",
                 "--interactive",
                 "--env",
-                "GRAFANA_URL",
+                "AWS_REGION",
                 "--env",
-                "GRAFANA_SERVICE_ACCOUNT_TOKEN",
-                "grafana/mcp-grafana:latest",
-                "-t",
-                "stdio",
-                "--disable-write",
-                "--disable-admin"
-            ],
-            "env": {
-                "GRAFANA_URL": "https://g-abcdef0123.grafana-workspace.eu-west-1.amazonaws.com",
-                "GRAFANA_SERVICE_ACCOUNT_TOKEN": "glsa_abc…def"
-            }
+                "AWS_API_MCP_TELEMETRY",
+                "--env",
+                "READ_OPERATIONS_ONLY",
+                "--volume",
+                "/Users/someUser/.aws:/app/.aws:ro",
+                "public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest"
+            ]
+        },
+        "aws-cost-explorer": {
+            "command": "docker",
+            "args": [
+                "run",
+                "--rm",
+                "--interactive",
+                "--env",
+                "AWS_API_MCP_TELEMETRY=false",
+                "--volume",
+                "/Users/someUser/.aws:/app/.aws:ro",
+                "public.ecr.aws/awslabs-mcp/awslabs/cost-explorer-mcp-server:latest"
+            ]
         }
     }
 }
