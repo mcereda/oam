@@ -561,6 +561,10 @@ Refer to [AWS API MCP Server].
 
 Enables interacting with AWS services and resources through AWS CLI commands.
 
+> [!important]
+> The container's `/app/.aws` folder must be **writable** (no `:ro` in the volume specification).<br/>
+> The volume's path is **not** expanded in the shell. Use plain strings with **no** variables.
+
 ```json
 {
   "mcpServers": {
@@ -573,7 +577,7 @@ Enables interacting with AWS services and resources through AWS CLI commands.
         "--env", "AWS_API_MCP_TELEMETRY",
         "--env", "AWS_REGION",
         "--env", "READ_OPERATIONS_ONLY",
-        "--volume", "/home/path/.aws:/app/.aws",
+        "--volume", "/home/path/.aws:/app/.aws:rw",
         "public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest"
       ],
       "env": {
@@ -592,7 +596,7 @@ Enables interacting with AWS services and resources through AWS CLI commands.
         "--env", "AWS_API_MCP_PROFILE_NAME=operator",
         "--env", "AWS_REGION=eu-west-1",
         "--env", "REQUIRE_MUTATION_CONSENT=true",
-        "--volume", "/home/path/.aws:/app/.aws",
+        "--volume", "/home/path/.aws:/app/.aws:rw",
         "public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest"
       ]
     }
@@ -609,6 +613,10 @@ Refer to [AWS Cost Explorer MCP Server].
 
 Enables analyzing AWS costs and usage data through the AWS Cost Explorer API.
 
+> [!important]
+> The container's `/app/.aws` folder must be **writable** (no `:ro` in the volume specification).<br/>
+> The volume's path is **not** expanded in the shell. Use plain strings with **no** variables.
+
 ```json
 {
   "mcpServers": {
@@ -620,7 +628,7 @@ Enables analyzing AWS costs and usage data through the AWS Cost Explorer API.
         "--interactive",
         "--env", "AWS_API_MCP_TELEMETRY",
         "--env", "AWS_REGION",
-        "--volume", "/home/path/.aws:/app/.aws",
+        "--volume", "/home/path/.aws:/app/.aws:rw",
         "public.ecr.aws/awslabs-mcp/awslabs/cost-explorer-mcp-server:latest"
       ]
     }
