@@ -3,11 +3,8 @@
 Branch of [AI] focusing on developing models and algorithms that can learn patterns from data without being explicitly
 programmed for every task, and subsequently make accurate inferences about new data.
 
-It is a pattern recognition ability that enables models to make decisions or predictions without explicit, hard-coded
-instructions.
-
-<!-- Remove this line to uncomment if used
-## Table of contents <!-- omit in toc -->
+Models acquire a pattern recognition ability that enables them to make decisions or predictions without explicit,
+hard-coded instructions.
 
 1. [TL;DR](#tldr)
 1. [Approaches](#approaches)
@@ -23,6 +20,10 @@ All machine learning is AI, but not all AI is machine learning.
 
 Rules-based models become increasingly brittle the more data is added to them.<br/>
 They require accurate, universal criteria to define the results they need to achieve. This is not scalable.
+
+Data quality matters more than quantity.<br/>
+Microsoft proved this with Phi-3, training the model on _textbook-quality_ data (both from the Internet and synthetic)
+and getting a 3.8B model that competes with larger models.
 
 ML models operate by a logic that is learned through experience, and not explicitly programmed into them.<br/>
 They train by analyzing data and predicting the next result; prediction errors are calculated, and the algorithm is
@@ -68,7 +69,7 @@ ML is mainly divided into the following types:
 
 - _Self-supervised_ learning.
 
-  Subset of unsupervised learning.<br/>
+  Considered by some a subset of unsupervised learning.<br/>
   Models train using data that does not have any labels or answers provided. Instead of needing people to label the
   data, the models themselves find patterns and create their own labels from the data automatically.<br/>
   Especially useful when there is a lot of data, but only a small part of it is labelled or labelling the data would
@@ -90,19 +91,33 @@ They were initially created with the idea of closely simulating the human brain.
 
 Deep neural networks include:
 
-- An input layer.
-- 3 or more (now usually hundreds) of hidden layers.
-- An output layer.
+- An _input_ layer.
+- 2 or more _hidden_ layers.
+- An _output_ layer.
 
-The multiple layers enable **unsupervised** learning.
+The multiple layers allow the network to learn increasingly abstract representations of the input data.<br/>
+This was key to making **unsupervised** learning practical at scale.
 
 Deep learning encompasses a range of neural network architectures, including multi-layer perceptrons (MLPs),
-convolutional neural networks (CNNs), recurrent neural networks (RNNs), graph networks, and transformers.<br/>
+convolutional neural networks (CNNs), recurrent neural networks (RNNs), graph networks, transformers, autoencoders, and
+diffusion models.<br/>
 Results are usually applied to domains like computer vision, natural language processing, and robotics.
 
-CNNs showed to be ideal for image and video recognition, including medical imaging.<br/>
-LSTMs and RNNs excel in sequence prediction, language translation, and speech recognition.
-Generative adversarial networks (GANs) enabled the generation of realistic images and AI-driven art.
+CNNs were historically the go-to for image and video recognition, including medical imaging, but vision transformers
+(ViT) and hybrid architectures have surpassed them in many benchmarks.<br/>
+LSTMs and RNNs were dominant for sequence prediction, language translation, and speech recognition before transformers
+largely displaced them.<br/>
+Generative adversarial networks (GANs) pioneered realistic image generation and AI-driven art. Diffusion models (Stable
+Diffusion, DALL-E, Midjourney) have since replaced them.
+
+The models' _attention mechanism_ allows them to assign weights to different parts of the input when producing each part
+of the output, rather than treating all input equally.<br/>
+It is the key innovation behind transformers, and what gave them advantage over prior architectures.
+
+_Transfer learning_ reuses a model trained on one task as the starting point for a different but related task.<br/>
+Instead of training a model from scratch, one takes a pre-trained base model and adapts it to new data.<br/>
+This saves them resources and training data while often achieving better results.<br/>
+It is the foundation behind [fine-tuning][fine-tuning LMs].
 
 ## Architectures
 
@@ -110,7 +125,7 @@ Generative adversarial networks (GANs) enabled the generation of realistic image
 
 Divides a single model into multiple, specialized sub-networks (_experts_) along with a learned routing mechanism
 (_gate_ or _router_) that dynamically selects which experts to activate for any given input.<br/>
-Inference only leverages a small subset of experts at any time, typically 1 or 2 out of all of them.
+Inference only leverages _a small subset_ of experts at any time. Newer, fine-grained architectures activate more.
 
 It allows to build models with a very large **total** number of parameters, but only activate a fraction of them per
 input.<br/>
@@ -151,6 +166,7 @@ systems.
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [AI]: README.md
+[Fine-tuning LMs]: lms.md#fine-tuning
 
 <!-- Files -->
 [Adaptive Mixtures of Local Experts]: study%20material/JacobsJordanNowlanHinton_NeuralComputation_1991.pdf
