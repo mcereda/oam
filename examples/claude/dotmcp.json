@@ -1,0 +1,40 @@
+{
+    "mcpServers": {
+        "gitlab": {
+            "type": "http",
+            "url": "https://gitlab.example.org/api/v4/mcp"
+        },
+        "linear": {
+            "type": "http",
+            "url": "https://mcp.linear.app/mcp"
+        },
+        "api-server": {
+            "type": "http",
+            "url": "${API_BASE_URL:-https://api.example.com}/mcp",
+            "headers": {
+                "Authorization": "Bearer ${API_KEY:-changeMe}"
+            }
+        },
+        "grafana": {
+            "command": "docker",
+            "args": [
+                "run",
+                "--rm",
+                "--interactive",
+                "--env",
+                "GRAFANA_URL",
+                "--env",
+                "GRAFANA_SERVICE_ACCOUNT_TOKEN",
+                "grafana/mcp-grafana:latest",
+                "-t",
+                "stdio",
+                "--disable-write",
+                "--disable-admin"
+            ],
+            "env": {
+                "GRAFANA_URL": "https://g-abcdef0123.grafana-workspace.eu-west-1.amazonaws.com",
+                "GRAFANA_SERVICE_ACCOUNT_TOKEN": "glsa_abc…def"
+            }
+        }
+    }
+}

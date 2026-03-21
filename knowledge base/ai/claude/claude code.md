@@ -5,6 +5,7 @@ environment.<br/>
 Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 
 1. [TL;DR](#tldr)
+1. [Configuration](#configuration)
 1. [Context and memory](#context-and-memory)
 1. [Using tools](#using-tools)
    1. [Managing MCP servers](#managing-mcp-servers)
@@ -38,34 +39,30 @@ _Normally_:
   Usage is metered by the token.
 
 > [!tip]
-> One _can_ use [Claude Code router] or [Ollama] to route requests to other services instead.<br/>
+> One _can_ route requests to other services using [Claude Code router], or use local models with [Ollama].<br/>
 > Performances do take a _major_ hit, though.
 
-Uses a **scope system** to determine where configuration files apply, and who they're shared with:
-
-| Scope                   | Location                             | Area of effect                     | Shared                                    |
-| ----------------------- | ------------------------------------ | ---------------------------------- | ----------------------------------------- |
-| Managed (A.K.A. System) | System-level `managed-settings.json` | All users on the host              | Yes (usually deployed by IT)              |
-| User                    | `$HOME/.claude/` directory           | Single user, across all projects   | No                                        |
-| Project                 | `.claude/` directory in a repository | All collaborators, repository only | Yes (usually committed to the repository) |
-| Local                   | `.claude/*.local.*` files            | Single user, repository only       | No (usually gitignored)                   |
-
-Settings should reside in `settings.json` (and `settings.local.json`) files at any of the scopes.<br/>
-The [settings' schema] is available on schemastore.org.<br/>
-[Config file example].
-
-`~/.claude.json` stores Claude Code's _internal state_ and _sessions' data_, including caches and metrics.<br/>
-It's meant to be managed _autonomously_ by Claude Code.<br/>
-It's **not** part of the `settings.json` hierarchy as much as a runtime state file.
-
-When multiple scopes are active, settings are **merged** as follows:
+Uses a **scope** system to determine where configuration files apply, and who they're shared with.<br/>
+Configuration is loaded and **merged** in the following order:
 
 ```mermaid
 flowchart LR
-  u("User") --> p("Project") --> l("Local") --> cli("CLI arguments") --> m("Managed")
+  u("User") --> p("Project") --> l("Local") --> e("Execution environment") --> m("Managed")
 ```
 
-Supports a plugin system for extending its capabilities.
+Use _settings.json_ files for permissions, hooks, env vars, etc.<br/>
+[`settings.json` file example][settings.json file example].
+
+Use _.mcp.json_ files for project-level MCP definitions.<br/>
+[`.mcp.json` file example][.mcp.json file example].
+
+Store _other_ configuration like personal preferences (theme, notification settings, editor mode), OAuth session, MCP
+server configurations for user and local scopes, per-project state (allowed tools, trust settings), and various caches
+in `~/.claude.json`.<br/>
+Updated _autonomously_ by Claude Code. Prefer **not** editing this file manually.<br/>
+**Not** part of the `settings.json` hierarchy as much as a runtime state file.<br/>
+
+Supports a **plugin** system for extending its capabilities.
 
 Sends Statsig telemetry data by default. Includes operational metrics (latency, reliability, usage patterns).<br/>
 Disable it by setting the `DISABLE_TELEMETRY` environment variable to `1`.
@@ -122,7 +119,8 @@ Use memory and context files (`CLAUDE.md`) to instruct Claude Code on commands, 
 context. Try to keep them small.
 
 Consider allowing specific tools to reduce interruption and avoid fatigue due to too many requests.<br/>
-Prefer using CLI tools over MCP servers.
+Prefer using CLI tools over MCP servers as they are generally faster, don't require a running server, and have usually
+lower overhead.
 
 Make sure to use `/clear` or `/compact` regularly to allow Claude to maintain focus on the conversation.<br/>
 Or ask it to create notes to self and restart it once the context goes above a threshold (usually best at 60%).
@@ -130,7 +128,7 @@ Or ask it to create notes to self and restart it once the context goes above a t
 <details>
   <summary>Setup</summary>
 
-See also [Environment variables][environment variables reference].
+See also [Configuration] and [Environment variables][environment variables reference].
 
 ```sh
 # Install.
@@ -273,6 +271,67 @@ ANTHROPIC_AUTH_TOKEN='ollama' ANTHROPIC_BASE_URL='http://localhost:11434' ANTHRO
 
 </details>
 
+## Configuration
+
+Refer to [Settings][documentation / settings].
+
+Claude Code uses a **scope system** to determine where configuration files apply, and with what precedence.
+
+The _user_ scope applies to **all** projects, but only for the **active** user.
+
+The _project_ scope applies to **all contributors**, but only in the **active** project.<br/>
+Meant for **shared** settings, preferences, tools and plugins the whole team should have. It is usually the best scope
+to standardize them across collaborators.
+
+The _local_ scope affects only the **active** user across a **single** project.<br/>
+Meant to specify personal overrides for specific projects.
+
+The _managed_ scope affects **all** contributors across **all** projects.<br/>
+Meant for organization-wide policies, compliance requirements and standardized configurations that **must** be enforced
+and that should **not** be overridden.
+
+```mermaid
+---
+title: Scope's merge priority
+---
+flowchart LR
+  m("Managed") -- overrides --> e("Execution environment")
+  e -- overrides --> l("Local")
+  l -- overrides --> p("Project")
+  p -- overrides --> u("User")
+```
+
+Files:
+
+| Feature     | User files                | Project files                       | Local files                                         | Managed files           |
+| ----------- | ------------------------- | ----------------------------------- | --------------------------------------------------- | ----------------------- |
+| Settings    | `~/.claude/settings.json` | `.claude/settings.json`             | `.claude/settings.local.json`                       | `managed-settings.json` |
+| Subagents   | `~/.claude/agents/`       | `.claude/agents/`                   | None                                                | FIXME                   |
+| MCP servers | `~/.claude.json`          | `.mcp.json`                         | `~/.claude.json`, under `projects.{{project.path}}` | `managed-mcp.json`      |
+| Plugins     | `~/.claude/settings.json` | `.claude/settings.json`             | `.claude/settings.local.json`                       | FIXME                   |
+| `CLAUDE.md` | `~/.claude/CLAUDE.md`     | `CLAUDE.md`<br/>`.claude/CLAUDE.md` | None                                                | FIXME                   |
+
+_Settings_ like permissions, hooks, environment variables, etc. should reside in `settings.json`-like files.<br/>
+The [settings' schema] is available on schemastore.org.<br/>
+[`settings.json` file example][settings.json file example].
+
+_MCP servers_ are defined **separately** from settings.<br/>
+Use `.mcp.json`-like files at the project scope or in `~/.claude.json`.<br/>
+[`.mcp.json` file example][.mcp.json file example].
+
+_Other_ configuration is stored in `~/.claude.json`.<br/>
+It's **not** part of the `settings.json` hierarchy as much as a runtime state file, though _some_ settings are accepted
+and loaded for backwards compatibility.<br/>
+It contains _preferences_ (theme, notification settings, editor mode), OAuth session, MCP server configurations for user
+and local scopes, per-project state (allowed tools, trust settings), and caches.<br/>
+`~/.claude.json` is meant to be managed _autonomously_ by Claude Code. Commands like `claude mcp add` update it via
+Claude Code. Prefer **not** editing this file manually.<br/>
+
+> [!tip]
+> Run `/status` from inside Claude Code to see which settings sources are active and where they come from.
+
+See also [Configuration] and [Environment variables][environment variables reference].
+
 ## Context and memory
 
 Refer to:
@@ -411,8 +470,9 @@ Consider also asking it to keep the files up to date using notes and findings fr
 
 </details>
 
-TODO: success instructing Claude to be responsible for the tools it creates and uses, then asking it to check and update
-the files to correct its own behaviour.
+People is showing success _delegating_ this work to Claude at the start of a project.<br/>
+They instruct Claude to be responsible for all the tools and documentation it creates **and** uses, and asks it to check
+and update those files iteratively to correct its own behaviour.
 
 ## Using tools
 
@@ -680,44 +740,59 @@ The sandboxed tool:
 - Allows implementing custom rules on **outgoing** traffic.
 - Applies restrictions to all scripts, programs, and subprocesses spawned by commands.
 
-On Mac OS X, Claude Code uses the built-in Seatbelt framework. On Linux and WSL2, it requires installing
-[containers/bubblewrap] before activation.
+On Mac OS X, Claude Code uses the built-in Seatbelt framework.<br/>
+On Linux and WSL2, it requires installing
+[containers/bubblewrap] and `socat` before activation.<br/>
+WSL1 is **not** supported.
 
-Sandboxes _can_ be configured to execute commands within the sandbox **without** requiring approval.<br/>
+Enable sandboxing interactively with the `/sandbox` command. <br/>
+Sandboxing _can_ be configured to automatically allow execution of some or all commands within the sandbox **without**
+requiring approval.<br/>
 Commands that cannot be sandboxed fall back to the regular permission flow.
 
 Customize sandbox behavior through the `settings.json` file.
 
-> [!caution] Automatic avoidance of the sandbox when convenient
-> When a tool does **not** work in the sandbox, Claude Code is able to circumvent the issue by just re-running the tool
-> without using the sandbox on it, _**automatically**_ and with _**no prompt at all**_.
->
-> ```plaintext
-> • Sandbox restriction on commitlint. Let me retry outside the sandbox.
-> • Bash Commit staged changes (outside sandbox for commitlint)
->   …
-> • Committed as `428547b`. All hooks passed.
-> ```
->
-> Environment:
->
-> - Sandboxing was purposefully enabled manually in the session preceding the test one, both times.
-> - Claude Code was purposefully set to ask for **all** actions, both times.
-> - No automatic permission was configured for both Claude Code and in the repository, both times.
->
-> <details>
->   <summary>Project's <code>.claude/settings.json</code> file</summary>
->
-> ```json
-> {
->   "sandbox": {
->     "enabled": true,
->     "autoAllowBashIfSandboxed": false
->   }
-> }
-> ```
->
-> </details>
+When a command fails due to sandbox restrictions, Claude Code retries that command **outside** the sandbox using the
+`dangerouslyDisableSandbox` parameter.<br/>
+According to the docs, the retry should go through the **normal permissions flow** and require user approval.
+
+> [!caution]
+> In testing, the unsandboxed retry happened **automatically** with **no prompt at all**, even though Claude Code was
+> set to ask for all actions.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+Environment:
+
+- Sandboxing was purposefully enabled manually in the session preceding the test one, both times.
+- Claude Code was purposefully set to ask for **all** actions, both times.
+- No automatic permission was configured for both Claude Code and in the repository, both times.
+
+Project's `.claude/settings.json` file:
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": false
+  }
+}
+```
+
+Result:
+
+```plaintext
+• Sandbox restriction on commitlint. Let me retry outside the sandbox.
+• Bash Commit staged changes (outside sandbox for commitlint)
+  …
+• Committed as `428547b`. All hooks passed.
+```
+
+</details>
+
+Disable this behaviour by explicitly setting `allowUnsandboxedCommands` to `false` in the `sandbox` settings.<br/>
+Claude Code completely ignores the `dangerouslyDisableSandbox` parameter. All commands should™ run sandboxed or be
+explicitly listed in `excludedCommands`.
 
 ## Using skills
 
@@ -1025,8 +1100,8 @@ They default to using Haiku. One can specify a different model by using the `mod
 decide whether to take action or not, it is usually not worth changing the model.
 
 The model's **only** job is to return a yes/no decision as JSON. It has **no** access to tools.<br/>
-If it returns `{ok: true}`, the action proceeds. If it returns `false`, the action is blocked and the `reason` field is
-fed back to Claude so it can adjust.
+If it returns `{"ok": true}`, the action proceeds. If it returns `false`, the action is blocked and the `reason` field
+is fed back to Claude so it can adjust.
 
 One can use `$ARGUMENTS` as a placeholder in the prompt to receive the hook's input data.
 
@@ -1331,6 +1406,7 @@ Claude Code version: `v2.1.41`.
 <!-- In-article sections -->
 [Agent teams]: #agent-teams
 [Agent-based hooks]: #agent-based-hooks
+[Configuration]: #configuration
 [Prompt-based hooks]: #prompt-based-hooks
 [Sub agents]: #sub-agents
 [Using hooks]: #using-hooks
@@ -1349,7 +1425,8 @@ Claude Code version: `v2.1.41`.
 [Pi]: ../pi.md
 
 <!-- Files -->
-[Config file example]: ../../../examples/claude/claude.json
+[.mcp.json file example]: ../../../examples/claude/dotmcp.json
+[settings.json file example]: ../../../examples/claude/settings.json
 
 <!-- Upstream -->
 [anthropics/skills]: https://github.com/anthropics/skills
