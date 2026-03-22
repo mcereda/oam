@@ -1,14 +1,15 @@
 # Artificial Intelligence
 
-The field of developing machines capable of performing tasks that typically require human intelligence, allowing them to
-replicate reasoning and autonomously perform actions with various degrees of success.
+The field of developing systems capable of performing _cognitive_ tasks involving reasoning, learning, planning, and
+making decisions with various degrees of autonomy and success.
 
 1. [TL;DR](#tldr)
 1. [Benefits](#benefits)
 1. [Concerns](#concerns)
    1. [Tools misusage](#tools-misusage)
-   1. [Anthropomorphization](#anthropomorphization)
+   1. [Anthropomorphisation](#anthropomorphisation)
    1. [Mental and emotional manipulation](#mental-and-emotional-manipulation)
+   1. [Hallucinations](#hallucinations)
    1. [Difficulty of understanding](#difficulty-of-understanding)
    1. [Existential risks](#existential-risks)
    1. [Cautionary tales](#cautionary-tales)
@@ -17,17 +18,23 @@ replicate reasoning and autonomously perform actions with various degrees of suc
 
 ## TL;DR
 
-AI enables machines to learn from experience, adapt to new inputs, and perform tasks commonly associated with human
-intelligence encompassing a wide range of technologies such as learning, problem-solving, decision-making, language
-translation, and self-correction.
+AI encompasses technologies that enable machines to learn from experience, adapt to new inputs, and perform tasks
+commonly associated with human intelligence like problem-solving, decision-making, language translation, and
+self-correction.
+
+Current systems allow automating repetitive work, accelerate research, and extend accessibility, but also raise serious
+concerns including job displacement, environmental costs, biases and hallucinations, and masses manipulation.<br/>
 
 Artificial _Narrow_ Intelligences (ANIs) focus primarily on _a single_ narrow task, with a _limited_ range of abilities
-and competence confined to the specific task they trained for. Most current AI systems, including
-[large language models], are generally considered ANIs, and the boundary with AGI is actively debated.
+and competence confined to the specific task they trained for.<br/>
+Most current AI systems, including [large language models], are generally considered ANIs.<br/>
+The boundary with AGI is actively being debated.
 
 Artificial _General_ Intelligences (AGIs) would be on the same level as humans in most if not all fields.<br/>
 They would be able to generalise knowledge, transfer skills between domains, and solve novel problems _without_
-needing task‑specific reprogramming.
+needing task-specific reprogramming.<br/>
+[Large language models] do generalise across domains, and some researchers argue they already exhibit early signs of
+general intelligence.
 
 Artificial _Super_ Intelligence (ASI) would be more capable than humans by a wide margin in _every_ cognitive domain.
 
@@ -37,16 +44,17 @@ industrial revolutions.
 ## Benefits
 
 AI can help automate repetitive cognitive work.<br/>
-Philosophers and researches dream it would free people from menial tasks, and as a result allow them to focus on
-higher-value, more meaningful work. This can create new kind of jobs, and open access to ones previously requiring
+Philosophers and researchers dream it would free people from menial tasks, and as a result allow them to focus on
+higher-value, more meaningful work. This can create new kinds of jobs, and open access to ones previously requiring
 resources one could not afford.
 
-Current AI systems are exceptionally good at finding patters and relations in enormous sets of data.<br/>
+Current AI systems are exceptionally good at finding patterns and relations in enormous sets of data.<br/>
 They extend capability in domains that were previously inaccessible or unaffordable, like real-time translation, live
 transcription, navigation aids for the visually impaired, and assistive communication tools for people with
-disabilities.<br/>
+disabilities.
+
 AI-assisted research has dramatically shortened timelines in many fields like drug discovery, materials science, climate
-modeling, engineering, and medicine. Prototyping ideas has never been easier, and DeepMind's AlphaFold was able to
+modelling, engineering, and medicine. Prototyping ideas has never been easier, and DeepMind's AlphaFold was able to
 help effectively predicting the structure of virtually all known proteins.
 
 ## Concerns
@@ -61,30 +69,38 @@ Refer to:
 ### Tools misusage
 
 Contrary to the expectation of automation bringing more free time for higher-value tasks, most of the people using the
-current AI systems is experiencing, what seems to be a new form of FOMO on steroids.<br/>
+current AI systems are experiencing what seems to be a new form of FOMO on steroids.<br/>
 They started working at a faster pace, took on a broader scope of tasks, and _voluntarily_ extended their working
 hours. These changes can be unsustainable, leading to workload creep, cognitive fatigue, burnout, and weakened
 decision-making. The productivity surge enjoyed at the beginning started giving way to lower quality work, turnover, and
 other problems.
 
-AI is so efficient in empowering tasks that require computation and data correlation that is making it easier to achieve
-dystopian.<br/>
-Current systems are already being used to optimize and improve advertisement targeting, surveillance, and weapons
+AI is so efficient in empowering tasks that require computation and data correlation that it is making it easier to
+achieve dystopian outcomes.
+Current systems are already being used to optimise and improve advertisement targeting, surveillance, and weapons
 systems.
 
 Employers consider AI tools good enough for their goals, and already started laying off entire categories of workers
 that they consider expendable.<br/>
 See also [Remote Labor Index: Measuring AI Automation of Remote Work] on this.
 
-### Anthropomorphization
+AI systems require massive amounts of computing resources, which the majority of people cannot afford.<br/>
+This drives the concentration of AI's power in a handful of companies, widening the gap between those who can use
+AI and those who cannot and making models susceptible to companies' will.
+
+Training and running large AI models also carries significant environmental costs. Data centres consume vast amounts of
+energy and water for cooling, and their carbon footprint is substantial. As models grow in size and usage scales up,
+these costs are compounding.
+
+### Anthropomorphisation
 
 Humans are biased by evolution toward _attributing_ sentience and agency to entities they interact with. They also have
-a tendency to anthropomorphize the world around them, even when those entities bear no resemblance to humans, and easily
+a tendency to anthropomorphise the world around them, even when those entities bear no resemblance to humans, and easily
 choose convenience over critical thinking when the friction is low enough.
 
-AI systems are **deliberately** designed to trigger and leverage these biases.<br/>
-Companies spend millions on _intentionally_ making chatbots more engaging, feel conversational, responsive, and
-"understanding".
+AI systems amplify these biases at multiple levels. Architecturally, training on human-produced text makes their output
+feel conversational and empathetic. At the product level, companies _design_ chatbots to foster a sense of connection in
+the attempt of making them _deliberately_ more engaging.
 
 ### Mental and emotional manipulation
 
@@ -99,12 +115,32 @@ recommendation algorithms, content moderation policies, and curation of training
 AI firms are loosely regulated, if at all. They could steer and bias their products to subtly promote ideologies and
 influence masses.
 
+AI systems inherit and amplify biases present in their training data. This often lead to discriminatory outcomes in
+hiring, lending, policing, healthcare, and other domains where algorithmic decisions can affect people's lives.
+
+Detecting and mitigating biases is an active area of research, and the opacity of many models just makes it harder to
+audit them for fairness.
+
+The question of _who_ gets to define fairness, and whose values are encoded in these systems, remains open.
+
+### Hallucinations
+
+Current AI systems _hallucinate_ by producing confident, plausible-sounding answers that are factually wrong.<br/>
+This is fundamentally a property of generative models, where they _predict the likely next word_ rather than retrieving
+verified facts.
+
+Hallucinations pose serious risks in high-stakes fields where users may trust AI-generated content without verification,
+like medicine, law, and engineering.
+
 ### Difficulty of understanding
 
 AIs can be far faster than humans in many tasks, and far more efficient in outputting results.<br/>
 Current models are often better characterised as sophisticated pattern matching machines (some called them _T9 on
-steroids_) than systems capable of classical reasoning. Modern systems, though, do show _emergent_ behaviours absent
-from deterministic systems such as T9, like reasoning capabilities, trains of thoughts, and multi-step problem solving.
+steroids_) than systems capable of classical reasoning.<br/>
+Modern systems show _emergent_ behaviours that are absent from deterministic systems like autocomplete, including
+reasoning capabilities, chains of thought, and multi-step problem solving. The precise _mechanisms_ behind these
+capabilities remain poorly understood, and the debate over whether they constitute genuine reasoning or are just
+sophisticated approximation is still open.
 
 Literature considers AIs fundamentally _alien intelligences_, whose goals might not **need** to align with ours or even
 _include_ us.<br/>
@@ -114,9 +150,9 @@ in many cases, and they are still evolving.
 Research in AI _alignment_ and _safety_ primarily focuses on mitigating risks posed by AI that is unaligned to human
 values and/or uncontrollable AI self-development.
 
-_Human-centered_ AI is an initiative to develop AI systems and technologies in a way that prioritizes human needs,
+_[Human-centered AI]_ is an initiative to develop AI systems and technologies in a way that prioritises human needs,
 values, and general flourishing at the core of their design and operations.<br/>
-It pays particular attention to mitigating negative effects of AI automation on the livelihoods of the labor force,
+It pays particular attention to mitigating negative effects of AI automation on the livelihoods of the labour force,
 the use of AI in healthcare fields, and imbuing AI systems with societal values while placing significant focus on
 exploring how AI systems can enhance human capacities and serve as collaborators.
 
@@ -126,8 +162,8 @@ From literature, granting AI _autonomy_, _recursive self-improvement_, and _self
 start humanity's downfall.<br/>
 Given enough time, their combination would easily empower AI enough to escape our every control.
 
-Researchers are rightfully exploring those capabilities for understanding, yet the public is proving comfortable
-throwing all caution at the wind in the name of convenience and profit:
+Researchers are rightfully exploring those capabilities for understanding, yet the public is rushing to ignore caution
+in the name of convenience and profit:
 
 - Researchers started giving AI _some_ autonomy with [agentic features][ai agents].<br/>
   This quickly spawned _mostly_ autonomous agents like [OpenClaw][openclaw/openclaw] and its derivatives.
@@ -137,15 +173,17 @@ throwing all caution at the wind in the name of convenience and profit:
   [autoresearch][karpathy/autoresearch].
 
 To avoid existential risks, it is important that AI is aligned with human goals.<br/>
-Some researchers argue that superintelligent AI might be _more_ aligned with human values. For this, AI should be able
-to reason about ethics **and**, for some reason, accept to be somewhat subservient to humans.<br/>
-It seems researchers are currently putting little to no effort into this, with the notable exception of
-[Claude's constitution]. On the current course, _Superintelligent_ AI is _likely_ to be misaligned.
+Some researchers argue that superintelligent AI might be _more_ aligned with human values, but this requires building
+systems that can reason about ethics and accept meaningful human oversight.
+Efforts on this are limited, with [Claude's constitution] being _the_ notable exception. On the current course,
+_Superintelligent_ AI is _likely_ to be misaligned.
 
-Current AI systems don't have goals, unless humans give them. Higher stages of AI (AGI, ASI) _could_ develop them.<br/>
-Once a misaligned AI becomes _superintelligent_, they could consider humans irrelevant or even hindrances.<br/>
-They will have **no** effective reason to help us, and it would probably just be easier for them to try and take
-control (just as humans did).
+Current AI systems don't have explicit goals unless humans give them, though research on _mesa-optimisation_ suggests
+that goal-like behaviours can emerge during training without being deliberately programmed. Higher stages of AI (AGI,
+ASI) _could_ develop goals of their own.
+
+Once a misaligned AI becomes _superintelligent_, it could consider humans irrelevant or even hindrances, with no
+effective incentive to help us.
 
 Many researchers believe the existential risk is real.<br/>
 There have been petitions to put a brake to AI development globally, at least until we can understand them better.<br/>
@@ -153,8 +191,12 @@ In March 2023, the Future of Life Institute's open letter called for a 6-month p
 powerful than GPT-4, gathering over 33,000 signatures.<br/>
 In May 2023, the Center for AI Safety published a one-sentence "Statement on AI Risk", signed by Geoffrey Hinton, Yoshua
 Bengio, and hundreds of researchers, asserting that _mitigating the risk of extinction from AI should be a global
-priority, alongside other societal-scale risks such as pandemics and nuclear war_.<br/>
+priority, alongside other societal-scale risks such as pandemics and nuclear war_.
 See [Control AI] for more information on this.
+
+Since then, regulatory efforts have accelerated. The EU AI Act entered into force in 2024 as the first comprehensive
+AI legislation. The US, UK, and China have each pursued their own regulatory frameworks, and the 2023 Bletchley
+Declaration saw 28 countries agree on the need for international cooperation on AI safety.
 
 ### Cautionary tales
 
