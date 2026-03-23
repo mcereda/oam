@@ -12,17 +12,18 @@
 1. [Repository management](#repository-management)
    1. [Different owners for parts of the code base](#different-owners-for-parts-of-the-code-base)
    1. [Get the version of the helper image to use for a runner](#get-the-version-of-the-helper-image-to-use-for-a-runner)
-1. [Manage kubernetes clusters](#manage-kubernetes-clusters)
 1. [Maintenance mode](#maintenance-mode)
 1. [Runners](#runners)
 1. [CI/CD pipelines](#cicd-pipelines)
 1. [Artifacts](#artifacts)
-    1. [Default artifacts expiration](#default-artifacts-expiration)
-    1. [Keep the latest artifacts for all jobs in the latest successful pipelines](#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines)
+   1. [Default artifacts expiration](#default-artifacts-expiration)
+   1. [Keep the latest artifacts for all jobs in the latest successful pipelines](#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines)
 1. [Environments](#environments)
 1. [Login via Google, Github or other services](#login-via-google-github-or-other-services)
 1. [Reset user's passwords](#reset-users-passwords)
 1. [Renew a license](#renew-a-license)
+1. [Package registries](#package-registries)
+1. [Virtual registries](#virtual-registries)
 1. [API](#api)
 1. [Troubleshooting](#troubleshooting)
     1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
@@ -37,25 +38,25 @@ _Projects_ contain a code repository, collaborative tools, project management fe
 They can be set to be available _publicly_, _internally_, or _privately_.<br/>
 GitLab does **not** limit the number of private projects one can create.
 
-_Personal Access Tokens_ (PATs) are **an user**'s alternative to OAuth2 to authenticate:
+_Personal Access Tokens_ (PATs) are **a user**'s alternative to OAuth2 to authenticate:
 
 - With GitLab's API.
 - With Git, using HTTP Basic Authentication.
 
 One authenticates with a PAT in place of one's password.<br/>
 Usernames are _required_, but **not** evaluated when authenticating with PATs.<br/>
-Refer [Personal access tokens].
+Refer to [Personal access tokens].
 
 _Project access tokens_ are similar to PATs, but they limit access to **their project's** resources, are granted a
 limited role, and require an expiration date.<br/>
-Refer [Project access tokens].
+Refer to [Project access tokens].
 
 _Group access tokens_ are similar to PATs and project access tokens, but they relate to **a group** instead.<br/>
 They **cannot** be used to create other group, project, or personal access tokens.<br/>
-Refer [Group access tokens].
+Refer to [Group access tokens].
 
 _Deploy tokens_ allow accessing resources **without** tying permissions to individual user accounts, and do **not**
-expire.<br/>
+expire by default (but can be set to).<br/>
 Consider using those in place of PATs for git-related operations, container registries, package registries, and
 repositories from pipelines.
 
@@ -94,7 +95,7 @@ Default backup location: `/var/opt/gitlab/backups`.
 <details>
   <summary>Installation</summary>
 
-Refer [Install self-managed GitLab].
+Refer to [Install self-managed GitLab].
 
 ```sh
 sudo dnf install 'gitlab-ee-16.11.6'
@@ -143,7 +144,7 @@ sudo gitlab-ctl check-config -v '16.11.0'
 sudo gitlab-ctl reconfigure
 ```
 
-Backup settings for AWS buckets.</br>
+Backup settings for AWS buckets.<br/>
 See [Back up GitLab using Amazon S3]:
 
 ```rb
@@ -168,7 +169,7 @@ gitlab_rails['backup_keep_time'] = 604800
 ```
 
 The package's included nginx generates keys and a **self-signed** certificate for the external URL upon start if the
-given URL's schema is HTTPS.<br/>
+given URL's scheme is HTTPS.<br/>
 The Let's Encrypt account key is in OpenSSL format, while the certificate's key is in OpenSSH format. Both are **not**
 password protected.
 
@@ -288,7 +289,7 @@ Upgrade procedure:
 <details>
   <summary>Removal</summary>
 
-Refer [Uninstall the Linux Package (Omnibus)].
+Refer to [Uninstall the Linux Package (Omnibus)].
 
 ```sh
 # Remove all users and groups created by the package.
@@ -308,7 +309,7 @@ sudo dnf remove 'gitlab-ee'
 
 #### Helm chart
 
-GitLab offers an official helm chart to to allow for deployments on kubernetes clusters.
+GitLab offers an official helm chart to allow for deployments on kubernetes clusters.
 
 Follow the [deployment] guide for details and updated information.
 
@@ -381,7 +382,7 @@ Follow the [deployment] guide for details and updated information.
    export URL="https://$(kubectl get ingresses --namespace 'gitlab' | grep 'webservice' | awk '{print $2}')"
 
    xdg-open "${URL}"   # on linux
-   open "${URL}"       # on mac os x
+   open "${URL}"       # on macOS
    ```
 
 1. Have fun!
@@ -466,7 +467,7 @@ Be sure to give your cluster enough resources:
 # on linux
 minikube start --kubernetes-version "${K8S_VERSION}" --cpus '4' --memory '12GiB'
 
-# on mac os x
+# on macOS
 minikube start --kubernetes-version "${K8S_VERSION}" --cpus '8' --memory '12GiB'       # docker-desktop (no Ingresses)
 minikube start --kubernetes-version "${K8S_VERSION}" --cpus '8' --memory '12GiB' --vm  # hyperkit vm (to be able to use Ingresses)
 ```
@@ -595,7 +596,7 @@ See the [operator guide] and the [operator code] for details.
 
 ### Create resources in GitLab using Pulumi
 
-Refer Pulumi's [GitLab provider installation & configuration] and [GitLab provider's README].
+Refer to Pulumi's [GitLab provider installation & configuration] and [GitLab provider's README].
 
 **Before** it can be used to create resources, Pulumi's GitLab provider **requires**:
 
@@ -618,7 +619,7 @@ Refer Pulumi's [GitLab provider installation & configuration] and [GitLab provid
 
 ## Forking internal projects
 
-Refer [Forks].
+Refer to [Forks].
 
 Allows creating independent copies of _internal_ projects (but **not** external repositories) for development purposes.
 
@@ -629,8 +630,8 @@ wiki pages. It then diverges over time as one applies changes to it.
 GitLab tracks the relationship between fork and upstream to allow one to open merge requests and contribute changes
 back to the original repository.
 
-Unlike [mirrors][mirroring external repositories], forks are not automatically kept in sync. One has to manually fetch
-and merge upstream changes if they want them.
+Unlike [mirrors][mirroring external repositories], forks are **not** automatically kept in sync. One has to manually
+fetch and merge upstream changes if they want them.
 
 Forks _can_ be configured as mirrors of the upstream projects if:
 
@@ -650,7 +651,7 @@ Refer to [Repository mirroring][documentation / repository mirroring].
 One can _mirror_ repositories to and from _external_ sources.<br/>
 Branches, tags, and commits in the source repository are synced automatically to the destination one.
 
-Mirror repositories allow to maintain a read-only copy of an upstream repository, internally, that stays up to date with
+Mirror repositories allow maintaining a read-only copy of an upstream repository, internally, that stays up to date with
 the source.<br/>
 This is especially useful when:
 
@@ -659,10 +660,10 @@ This is especially useful when:
 - Wanting to sync between git server instances.
 - The external repository's home service imposes limitations to users.
 
-When pulling changes from the source repository, mirrors _forcefully_ do that (`git pull --force`) that make any changes
-disappear
-One does **not** typically develop in a mirror, since pulls are usually forced pulls that make any changes
-disappear.<br/>
+One should **not** make changes to a mirror.<br/>
+Divergence prevents the mirror from successfully pulling updates from the upstream.<br/>
+Mirrors can be set to _forcefully_ pull updates. In this case, any change done to the mirror will disappear.
+
 To maintain private changes, one should:
 
 1. Mirror the repository.
@@ -767,15 +768,9 @@ Status: Downloaded newer image for gitlab/gitlab-runner-helper:x86_64-8fa89735
 docker.io/gitlab/gitlab-runner-helper:x86_64-8fa89735
 ```
 
-## Manage kubernetes clusters
-
-See [adding and removing kubernetes clusters] for more information.
-
-For now the GitLab instance can manage only kubernetes clusters external to the one it is running into.
-
 ## Maintenance mode
 
-Refer [GitLab maintenance mode].
+Refer to [GitLab maintenance mode].
 
 Allows administrators to reduce write operations to a minimum while maintenance tasks are performed.<br/>
 The main goal is to block all external actions that change the internal state, specially the PostgreSQL database, files,
@@ -833,7 +828,7 @@ See [pipelines](pipeline.md).
 
 ## Artifacts
 
-GitLab allows to configure a **instance-wide** default expiration for artifacts.<br/>
+GitLab allows configuring an **instance-wide** default expiration for artifacts.<br/>
 There is currently **no way** to set up artifacts expiration group-wise or project-wise.
 
 All latest jobs' artifacts are kept by default.<br/>
@@ -869,7 +864,7 @@ Syntax: [`artifacts:expire_in`](https://docs.gitlab.com/ee/ci/yaml/index.html#ar
 
 This setting is set per-job and can be overridden in pipelines.
 
-> Any changes to this setting applies to **new** artifacts only.<br/>
+> Any changes to this setting apply to **new** artifacts only.<br/>
 > The expiration time is **not** updated retroactively (for artifacts created **before** this setting was changed).
 
 ### Keep the latest artifacts for all jobs in the latest successful pipelines
@@ -894,7 +889,7 @@ A new pipeline must run before the latest artifacts can expire and be deleted.
 
 ## Environments
 
-Refer [Environments].
+Refer to [Environments].
 
 Specific deployment targets, e.g. `development`, `staging`, or `production`.<br/>
 They manage different configurations and code.
@@ -915,7 +910,7 @@ Dynamic environments:
 - Are usually created in a CI/CD pipeline.
 - Are usually used only for a single deployment, then are stopped or deleted.
 
-Environment have one of three states, depending on whether its _on stop job_ has run:
+Environments have one of three states, depending on whether its _on stop job_ has run:
 
 - _available_: the environment exists; there might be a deployment.
 - _stopping_: the _on stop job_ has started.<br/>
@@ -929,7 +924,7 @@ This behavior persists even if no explicit `on_stop` CI/CD job is defined.
 
 When using the merge request pipelines configuration, the `stop` trigger is automatically enabled for pipelines.
 
-Environment can be configured to stop automatically after a certain time period by specifying the jobs'
+Environments can be configured to stop automatically after a certain time period by specifying the jobs'
 `environment.auto_stop_in` keyword.<br/>
 When this is the case, the `environment.action` keyword can be used to reset the time that an environment is scheduled
 to stop.
@@ -947,7 +942,7 @@ Protected environments are ignored.
 
 ## Login via Google, Github or other services
 
-Refer [OmniAuth].<br/>
+Refer to [OmniAuth].<br/>
 See also [Password authentication enabled] to disable authentication via local user.
 
 Users can sign in a GitLab server by using their credentials from Google, GitHub, and other popular services.
@@ -991,7 +986,7 @@ gitlab_rails['omniauth_providers'] = [{
 
 ## Reset user's passwords
 
-Refer [Reset a user's password].
+Refer to [Reset a user's password].
 
 Users can reset their own password by selecting "Forgot your password?" on the sign-in page.
 
@@ -1051,9 +1046,54 @@ exit
 1. Wait for the instance to realize it has a new key.<br/>
    It should appear as the first entry in the list under the _Subscription History_ section.
 
+## Package registries
+
+Refer to [Package registry].
+
+GitLab offers built-in package registries that support most major package formats (`.deb`, `.rpm`, `.py`, …).
+
+GitLab scopes registries to projects or groups.<br/>
+Each project _can_ have its own registry endpoint. Good for storing dedicated artifact.<br/>
+Group-level registries use a single endpoint, but allow any project under the same group to use it.
+
+One accesses registries using tokens.<br/>
+One _can_ consume packages from a registry in a **different** group or project as long as one authenticates with a token
+that has _read_ access to that registry (like a PAT, or Deploy Token scoped to the group or project offering the
+registry).
+
+`CI_JOB_TOKEN`s are the preferred approach when needing to access registries from the CI, since they are both
+automatically injected as environment variable, and scoped to the current job only.<br/>
+They are only trusted by default by **their own** projects. One can explicitly allow other projects using job tokens via
+the project's _Settings_ → _CI/CD_ → _Job token permissions_ → _CI/CD job token allowlist_.
+
+Package registries can be configured to forward requests for packages they are missing to public upstream registries
+(e.g. PyPI, npm, Maven Central, …).<br/>
+Enable this behaviour via the group or package _Packages and registries_ → _Package Forwarding_ setting.<br/>
+GitLab's NPM and PyPI registries forward requests by default. Maven registries support it, but require explicit opt-in.
+All other formats (NuGet, Helm, Conan, Debian, Go, Ruby Gems, Terraform, Composer, Generic) do not support forwarding at
+all.
+
+## Virtual registries
+
+Refer to [Virtual registry].
+
+> [!caution]
+> In beta as of GitLab 18.10.
+
+Virtual registries work like expanded Package registries by proxying and caching packages from multiple upstream
+registries and serving packages from single, well-known URL.<br/>
+They link to up to 20 upstreams (public or private external registries).
+
+Credentials for private upstream registries are stored in the upstream config.
+
+Virtual Registry must be configured at a top-level group by a Maintainer or Owner.<br/>
+The feature does **not** currently support projects and subgroups.
+
+Currently supports only Maven packages and container images.
+
 ## API
 
-Refer [Extend with GitLab].
+Refer to [Extend with GitLab].
 
 Most API calls require authentication.
 
@@ -1061,7 +1101,7 @@ Most API calls require authentication.
 > Specifying a personal access token (PAT) in the `PRIVATE-TOKEN` header (`PRIVATE-TOKEN: glpat-…`) is the same as using
 > the `Authorization` header with bearer (`Authorization: bearer glpat-…`).
 
-_Deploy tokens_ do **not** expire.\
+_Deploy tokens_ do **not** expire by default, but _can_ be created with an expiration date so that they do.<br/>
 Consider using them instead of PATs when accessing repositories from inside pipelines.
 
 The [Python SDK] also provides a CLI tool to operate with the API.
@@ -1086,7 +1126,7 @@ git clone "https://oauth2:${ACCESS_TOKEN}@somegitlab.com/vendor/package.git"
 
 ### GitLab keeps answering with code 502
 
-Refer [The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership][issues / the docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership].
+Refer to [The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership][issues / the docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership].
 
 Error message example:
 
@@ -1104,7 +1144,7 @@ Solution: set the correct ownership with
 
 ### A user is unable to login
 
-Refer [Invalid login or password].
+Refer to [Invalid login or password].
 
 1. Check:
 
@@ -1123,7 +1163,6 @@ Refer [Invalid login or password].
 - [Deployment] guide
 - Install [runners on kubernetes]
 - [TLS] configuration
-- [Adding and removing Kubernetes clusters]
 - GitLab's [operator code] and relative [guide][operator guide]
 - [Buildah]
 - [Kaniko]
@@ -1190,7 +1229,6 @@ Refer [Invalid login or password].
 
 <!-- Files -->
 <!-- Upstream -->
-[adding and removing kubernetes clusters]: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
 [automate storage management]: https://docs.gitlab.com/ee/user/storage_management_automation.html
 [autoscaling gitlab runner on aws ec2]: https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/
 [back up gitlab excluding specific data from the backup]: https://docs.gitlab.com/ee/administration/backup_restore/backup_gitlab.html#excluding-specific-data-from-the-backup
@@ -1230,6 +1268,7 @@ Refer [Invalid login or password].
 [operator code]: https://gitlab.com/gitlab-org/cloud-native/gitlab-operator
 [operator guide]: https://docs.gitlab.com/operator/
 [package configuration file template]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/raw/master/files/gitlab-config-template/gitlab.rb.template
+[Package registry]: https://docs.gitlab.com/user/packages/package_registry/
 [Password authentication enabled]: https://gitlab.com/help/administration/settings/sign_in_restrictions.md#password-authentication-enabled
 [Personal access tokens]: https://docs.gitlab.com/user/profile/personal_access_tokens/
 [Project access tokens]: https://docs.gitlab.com/user/project/settings/project_access_tokens/
@@ -1246,6 +1285,7 @@ Refer [Invalid login or password].
 [upgrade packaged postgresql server]: https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server
 [upgrade path tool]: https://gitlab-com.gitlab.io/support/toolbox/upgrade-path/
 [use kaniko to build docker images]: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
+[Virtual registry]: https://docs.gitlab.com/user/packages/virtual_registry/
 
 <!-- Others -->
 [chef infra]: https://www.chef.io/products/chef-infra
