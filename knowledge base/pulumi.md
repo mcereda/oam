@@ -195,10 +195,14 @@ pulumi up -ry --show-config --replace 'targetResourceUrn'
 pulumi up --target 'targetResourceUrn'
 pulumi update --refresh --yes -f --secrets-provider 'hashivault'
 
+# List outputs.
+pulumi stack output --json | jq '.|keys'
+
 # Access outputs.
 pulumi stack output 'vpcId'
 pulumi stack output 'subnetName' --show-secrets -s 'stack'
 pulumi stack output 'serviceAccount' | jq -r '.accessKey.encryptedSecret' - | base64 -d | gpg -d
+pulumi stack output --json 'redis' | jq -r '.replicationGroup | "redis://\(.primaryEndpointAddress):\(.port)"'
 
 # Import existing resources.
 pulumi import 'aws:ecr/pullThroughCacheRule:PullThroughCacheRule' 'resourceName' 'prefix'

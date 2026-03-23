@@ -202,9 +202,13 @@ pulumi import \
 #  3. pulumi import --file 'import.json'
 
 
+# List outputs.
+pulumi stack output --json | jq '.|keys'
+
 # Access outputs.
 pulumi stack output 'vpcId'
 pulumi stack output 'subnetName' --show-secrets -s 'stack'
+pulumi stack output --json 'redis' | jq -r '.replicationGroup | "redis://\(.primaryEndpointAddress):\(.port)"'
 
 # Apply changes.
 pulumi up --suppress-outputs --show-secrets
