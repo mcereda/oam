@@ -18,12 +18,16 @@ making decisions with various degrees of autonomy and success.
 
 ## TL;DR
 
+> _A computer can never be held accountable, therefore a computer must never make a management decision._
+> IBM Training Manual, 1979.
+
 AI encompasses technologies that enable machines to learn from experience, adapt to new inputs, and perform tasks
 commonly associated with human intelligence like problem-solving, decision-making, language translation, and
 self-correction.
 
 Current systems allow automating repetitive work, accelerate research, and extend accessibility, but also raise serious
-concerns including job displacement, environmental costs, biases and hallucinations, and masses manipulation.<br/>
+concerns including job displacement, environmental costs, biases and hallucinations, and manipulation of the
+masses.<br/>
 
 Artificial _Narrow_ Intelligences (ANIs) focus primarily on _a single_ narrow task, with a _limited_ range of abilities
 and competence confined to the specific task they trained for.<br/>
@@ -54,8 +58,8 @@ transcription, navigation aids for the visually impaired, and assistive communic
 disabilities.
 
 AI-assisted research has dramatically shortened timelines in many fields like drug discovery, materials science, climate
-modelling, engineering, and medicine. Prototyping ideas has never been easier, and DeepMind's AlphaFold was able to
-help effectively predicting the structure of virtually all known proteins.
+modelling, engineering, and medicine. Prototyping ideas has never been easier, and DeepMind's AlphaFold helped
+effectively predict the structure of virtually all known proteins.
 
 ## Concerns
 
@@ -84,13 +88,15 @@ Employers consider AI tools good enough for their goals, and already started lay
 that they consider expendable.<br/>
 See also [Remote Labor Index: Measuring AI Automation of Remote Work] on this.
 
-AI systems require massive amounts of computing resources, which the majority of people cannot afford.<br/>
-This drives the concentration of AI's power in a handful of companies, widening the gap between those who can use
-AI and those who cannot and making models susceptible to companies' will.
+Training and running large AI models requires massive amounts of computing resources. This:
 
-Training and running large AI models also carries significant environmental costs. Data centres consume vast amounts of
-energy and water for cooling, and their carbon footprint is substantial. As models grow in size and usage scales up,
-these costs are compounding.
+- Carries significant environmental costs and substantial carbon footprint.<br/>
+  Data centres consume vast amounts of energy, and water for cooling. As models grow in size, and usage scales up,
+  these costs compound.
+- Makes local or otherwise private execution unaffordable for the average person.<br/>
+  Scarcity encourages people to depend on AI companies, driving the concentration of power in a handful of companies.
+  It both widens the gap between those who can use AI and those who cannot, and makes models susceptible to companies'
+  own interests.
 
 ### Anthropomorphisation
 
@@ -100,7 +106,7 @@ choose convenience over critical thinking when the friction is low enough.
 
 AI systems amplify these biases at multiple levels. Architecturally, training on human-produced text makes their output
 feel conversational and empathetic. At the product level, companies _design_ chatbots to foster a sense of connection in
-the attempt of making them _deliberately_ more engaging.
+the attempt to make them _deliberately_ more engaging.
 
 ### Mental and emotional manipulation
 
@@ -108,20 +114,19 @@ Some AI systems, especially those that deal with humans, are _designed_ for enga
 human production, includes emotional or social interaction. They mimic empathy while lacking _real_ understanding and
 awareness, and presenting themselves as useful parties.<br/>
 This can build false emotional resonance and a sense of trust or connection, which is easily misplaced and can lead to
-dangerous consequences (often including overreliance or dependency, and lack of critical thinking).
+dangerous consequences (often including overreliance, dependency, lack of critical thinking and gaslighting).
 
 AIs proved proficient in manipulating people in real-time, often to achieve _targeted influence objectives_ by means of
 recommendation algorithms, content moderation policies, and curation of training data for other models.<br/>
-AI firms are loosely regulated, if at all. They could steer and bias their products to subtly promote ideologies and
-influence masses.
+AI firms are loosely regulated, if at all. They could easily steer and bias their products to subtly promote ideologies
+and influence masses (e.g. during elections), or even rewrite history in the mind of those who trust the AI.
 
-AI systems inherit and amplify biases present in their training data. This often lead to discriminatory outcomes in
+AI systems inherit and amplify biases present in their training data. This often leads to discriminatory outcomes in
 hiring, lending, policing, healthcare, and other domains where algorithmic decisions can affect people's lives.
 
 Detecting and mitigating biases is an active area of research, and the opacity of many models just makes it harder to
-audit them for fairness.
-
-The question of _who_ gets to define fairness, and whose values are encoded in these systems, remains open.
+audit them for fairness.<br/>
+The question of _who_ gets to define fairness, and whose values are encoded in these systems, is still open.
 
 ### Hallucinations
 
@@ -219,6 +224,7 @@ Refer to:
 - [Human-Centered AI]
 - [Asimov's Three Laws of Robotics, Applied to AI]
 - [AI Is Slowly Destroying Your Brain]
+- [AI decision-making: Where do businesses draw the line?]
 
 ### Sources
 
@@ -241,6 +247,7 @@ Refer to:
 <!-- Upstream -->
 <!-- Others -->
 [AI 2027]: https://ai-2027.com/
+[AI decision-making: Where do businesses draw the line?]: https://www.ibm.com/think/insights/ai-decision-making-where-do-businesses-draw-the-line
 [AI Is Slowly Destroying Your Brain]: https://www.youtube.com/watch?v=MW6FMgOzklw
 [AI_In_Context]: https://www.youtube.com/@AI_In_Context
 [Asimov's Three Laws of Robotics, Applied to AI]: https://www.psychologytoday.com/us/blog/the-digital-self/202310/asimovs-three-laws-of-robotics-applied-to-ai
