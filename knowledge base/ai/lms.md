@@ -30,39 +30,48 @@ the previous ones.
 
 ## TL;DR
 
-_Tokens_ can be words, subwords (one or more subsets of a word), or single characters.<br/>
-The full sequence of tokens can be an entire sentence, paragraph, or an entire essay.
+Language is a kind of universal modelling tool. Words approximately define features, context gives them exact
+connotation.<br/>
+Predicting the next word well requires some level of _understanding_ of what is said. One cannot just store sentences
+or rely on shallow statistical correlations.<br/>
+Understanding is thought of as the process to take the words in the context, and convert each of them into a set of
+linked features. The meanings of those sets interact with each other in the surrounding context to predict the features
+of the next word, and that relation allows taking a good guess about what the next word is.
 
-LMs are proficient at understanding human prompts in natural language.<br/>
-They analyze the structure and use of natural language, enabling machines to process and generate text that is
-contextually appropriate and coherent.
+Language Models use _tokens_ instead of words. Tokens can be full words, subwords (one or more subsets of a word), or
+single characters. The full sequence of tokens can be a sentence, paragraph, or an entire essay.
 
-Their primary purpose is to capture the **statistical** properties of natural language in mathematical notation.<br/>
-They can predict the **likelihood** that a given token will follow a sequence of other tokens by learning the
-probability distribution of patterns.<br/>
-This predictive capability is fundamental for tasks that require understanding the context and meaning of text, and it
-can be extended to more complex tasks.
+LMs primarily capture the **statistical** properties of natural language in mathematical notation. They learn _weights_
+encoding the probability distribution of patterns in the language.<br/>
+This allows LMs to predict the **likelihood** that a given token will follow _a sequence_ of other tokens. Such
+capability is fundamental for tasks that require understanding the context and meaning of text, enabling them to
+generate more text that is contextually appropriate and coherent. This capability can be extended to more complex
+tasks.<br/>
+The above mechanism is fundamentally the same for all models in history, whether the model had few weights (like the
+first ones in 1985) or trillions of them (as modern LLMs do). Only the depth and richness of the learned representations
+change.
 
-_Context_ is helpful information before or after a target token.<br/>
-It can help a language model make better predictions, like determining whether "orange" refers to a citrus fruit or a
-color.
+Current Language Models leverage _transformers_ to fit tokens together across layers, progressively translating
+ambiguous natural language into increasingly precise internal representations.
+
+_Context_ is helpful information before or after a target token. It can help LMs make better predictions, like
+determining whether "orange" refers to the citrus fruit or a color.
 
 _Context Window_ is the amount of tokens that a model can pay attention to at any one time.
 
 _Hallucinations_ are outputs that sound plausible but are factually incorrect, fabricated, or unsupported by the model's
 training data. They stem from the model's tendency to always produce a confident response rather than admit uncertainty.
 
+_Parameters_ are internal weights and values that an LLM learns during training. They are used to capture patterns in
+language such as grammar, meaning, context and relationships between words.<br/>
+The more parameters a model has, the better it typically is at understanding and generating complex output. Increased
+parameter counts demand more computational resources for training and inference, and make models more prone to
+overfitting, slower to respond, and harder to deploy efficiently.
+
 _Large LMs_ are language models trained on massive datasets, and encoding their acquired knowledge into up to trillions
-of parameters.
+of parameters.<br/>
 _Small LMs_ are language models that are small enough to be able to run on _reduced_ resources, like the CPU of
 smartphones or devices at the edge of cloud providers. They are usually LLMs retrained, fine-tuned, and then quantized.
-
-_Parameters_ are internal weights and values that an LLM learns during training.<br/>
-They are used to capture patterns in language such as grammar, meaning, context and relationships between words.
-
-The more parameters a model has, the better it typically is at understanding and generating complex output.<br/>
-An increased parameter count, on the other hand, demands more computational resources for training and inference, and
-makes models more prone to overfitting, slower to respond, and harder to deploy efficiently.
 
 _System prompts_ are predefined text included at the start of conversations to establish ground rules for them.
 
@@ -86,12 +95,11 @@ The capabilities of transformer-based LLMs depend on the amount and the quality 
 LLMs appear to be approaching diminishing returns from training data scaling alone, and researchers are actively
 exploring alternative architectures.
 
-LLMs find it difficult, if not impossible, to distinguish data from instructions.<br/>
-As such, every part of the data could be used for prompt injection.
+LLMs find it difficult, if not impossible, to distinguish data from instructions. As such, _every_ part of the data
+could be used for injecting further instructions in the context (_prompt injection_).
 
 Models are typically released at 16 bit precision. This format has high accuracy, but requires a lot of memory during
-inference.<br/>
-To compensate, and reduce the memory footprint, one can [compress][compression] in multiple ways.
+inference. To compensate, and reduce the memory footprint, one can [compress][compression] in multiple ways.
 
 ## Large Language Models
 

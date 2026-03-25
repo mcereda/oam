@@ -12,10 +12,11 @@
 Choose authorship based on contribution weight:
 
 1. **You wrote most or all changes**, including implementing my suggestions: use
-   `--author="Claude Code (<model>) on behalf of <git name> <noreply@anthropic.com>"` with a
-   `Co-Authored-By: <git name> <git email>` trailer.
-2. **I wrote most changes, you assisted** (reviews, minor fixes): use my normal authorship with a
+   `--author="Claude Code (<model>) on behalf of <user.name> <noreply@anthropic.com>"` with a
+   `Co-Authored-By: <user.name> <user.email>` trailer. Always resolve `<user.name>` and `<user.email>` using
+   `git config`. Never guess.
+2. **I wrote most changes, you assisted** (reviews, minor fixes): don't override authorship, but add a
    `Co-Authored-By: Claude Code (<model>) <noreply@anthropic.com>` trailer.
-3. **I wrote everything, no assistance**: Use my normal authorship, no Co-Authored-By.
+3. **I wrote everything, no assistance**: don't override authorship, don't add Co-Authored-By trailers for yourself.
 
 When in doubt, ask.
