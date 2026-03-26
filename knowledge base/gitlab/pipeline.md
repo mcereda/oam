@@ -6,6 +6,7 @@ Also check [Use CI/CD configuration from other files] and [Use extends to reuse 
 1. [Specify when to run jobs](#specify-when-to-run-jobs)
 1. [Specify when to run entire pipelines](#specify-when-to-run-entire-pipelines)
 1. [External secrets](#external-secrets)
+   1. [AWS Secrets Manager](#aws-secrets-manager)
 1. [API](#api)
 1. [Git options](#git-options)
 1. [Troubleshooting](#troubleshooting)
@@ -15,7 +16,7 @@ Also check [Use CI/CD configuration from other files] and [Use extends to reuse 
 
 ## Specify when to run jobs
 
-Refer [Specify when jobs run with `rules`][specify when jobs run with rules] and the
+Refer to [Specify when jobs run with `rules`][specify when jobs run with rules] and the
 [`rules` syntax reference](https://docs.gitlab.com/ee/ci/yaml/#rules).
 
 Use the `rules` key and specify the conditions the job needs.
@@ -140,7 +141,7 @@ docker-run:
     - schedule
 ```
 
-Refer [Using GitLab scheduled pipelines simplified 101] to configure and activate schedules.<br/>
+Refer to [Using GitLab scheduled pipelines simplified 101] to configure and activate schedules.<br/>
 Manually trigger scheduled pipelines from the UI or using the API:
 
 ```plaintext
@@ -211,15 +212,55 @@ workflow:
 
 ## External secrets
 
-Refer [Using external secrets in CI].
+Refer to [Using external secrets in CI].
+
+### AWS Secrets Manager
+
+Refer to [Use AWS Secrets Manager secrets in GitLab CI/CD].
+
+Jobs support the `secrets.aws_secrets_manager` keyword to inject secrets from AWS Secrets Manager into CI/CD jobs as
+environment variables or as files.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```yml
+some_job:
+  variables:
+    AWS_REGION:
+      # REQUIRED: jobs will error out with "Secrets provider can not be found" if missing
+      # can be here or at the pipeline level
+      # setting AWS_DEFAULT_REGION does *not* work, the integration requires AWS_REGION
+      eu-west-1
+  secrets:
+    SOME_SECRET_VAR:
+      aws_secrets_manager:
+        secret_id: "some-secret-name"   # the secret name or ARN in Secrets Manager
+        field: "some_field"             # optional: extract a specific key from a JSON secret
+      file: false                       # false = env var, true = file (default: true)
+  script:
+    - echo "Secret is available as $SOME_SECRET_VAR"
+```
+
+</details>
+
+Runners using the Docker autoscaler executor can authenticate by assuming an IAM role, or via OIDC tokens or static
+credentials.<br/>
+Runners using the Kubernetes executor can authenticate via EKS Pod Identity an IAM role, OIDC tokens, or static
+credentials.
+
+If using IAM roles, the runners' role must have `secretsmanager:GetSecretValue` on the secrets' ARNs.
+
+By default, GitLab writes secrets to a file, and sets the variable to that file's path. If `file: false`, it injects the
+secret's value directly as an environment variable.
+JSON-formatted secrets allow using fields to extract specific keys. Omit `field` to get the entire secret value.
 
 ## API
 
-Refer [Pipeline schedules API].
+Refer to [Pipeline schedules API].
 
 ## Git options
 
-Refer [Push options].
+Refer to [Push options].
 
 ```sh
 # Skip *branch* pipelines for the latest push.
@@ -281,17 +322,18 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 <!-- Files -->
 <!-- Upstream -->
 [ci/cd pipeline templates]: https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates
-[ci/cd pipelines]: https://docs.gitlab.com/ee/ci/pipelines/
-[customize pipeline configuration]: https://docs.gitlab.com/ee/ci/pipelines/settings.html
-[debugging ci/cd pipelines]: https://docs.gitlab.com/ee/ci/debugging.html
-[pipeline schedules api]: https://docs.gitlab.com/ee/api/pipeline_schedules.html
+[ci/cd pipelines]: https://docs.gitlab.com/ci/pipelines/
+[customize pipeline configuration]: https://docs.gitlab.com/ci/pipelines/settings.html
+[debugging ci/cd pipelines]: https://docs.gitlab.com/ci/debugging.html
+[pipeline schedules api]: https://docs.gitlab.com/api/pipeline_schedules.html
 [Predefined CI/CD variables reference]: https://docs.gitlab.com/ci/variables/predefined_variables/
-[push options]: https://docs.gitlab.com/ee/user/project/push_options.html
-[specify when jobs run with rules]: https://docs.gitlab.com/ee/ci/jobs/job_rules.html
-[use ci/cd configuration from other files]: https://docs.gitlab.com/ee/ci/yaml/includes.html
-[use extends to reuse configuration sections]: https://docs.gitlab.com/ee/ci/yaml/yaml_optimization.html#use-extends-to-reuse-configuration-sections
-[using external secrets in ci]: https://docs.gitlab.com/ee/ci/secrets/index.html
-[validate gitlab ci/cd configuration]: https://docs.gitlab.com/ee/ci/lint.html
+[push options]: https://docs.gitlab.com/user/project/push_options.html
+[specify when jobs run with rules]: https://docs.gitlab.com/ci/jobs/job_rules.html
+[Use AWS Secrets Manager secrets in GitLab CI/CD]: https://docs.gitlab.com/ci/secrets/aws_secrets_manager/
+[use ci/cd configuration from other files]: https://docs.gitlab.com/ci/yaml/includes.html
+[use extends to reuse configuration sections]: https://docs.gitlab.com/ci/yaml/yaml_optimization.html#use-extends-to-reuse-configuration-sections
+[using external secrets in ci]: https://docs.gitlab.com/ci/secrets/index.html
+[validate gitlab ci/cd configuration]: https://docs.gitlab.com/ci/lint.html
 
 <!-- Others -->
 [using gitlab scheduled pipelines simplified 101]: https://hevodata.com/learn/gitlab-scheduled-pipeline/

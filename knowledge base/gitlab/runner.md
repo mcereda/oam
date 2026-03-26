@@ -1,4 +1,4 @@
-# Gitlab runner
+# GitLab runner
 
 1. [TL;DR](#tldr)
 1. [Pull images from private AWS ECR registries](#pull-images-from-private-aws-ecr-registries)
@@ -6,6 +6,7 @@
    1. [Docker Autoscaler executor](#docker-autoscaler-executor)
    1. [Docker Machine executor](#docker-machine-executor)
    1. [Instance executor](#instance-executor)
+   1. [Kubernetes executor](#kubernetes-executor)
 1. [Autoscaling](#autoscaling)
    1. [Docker Machine](#docker-machine)
    1. [GitLab Runner Autoscaler](#gitlab-runner-autoscaler)
@@ -34,7 +35,7 @@ helm --namespace 'gitlab' upgrade --install --create-namespace --version '0.64.1
 ```sh
 docker run --rm --name 'runner' 'gitlab/gitlab-runner:alpine-v13.6.0' --version
 
-# `gitlab-runner exec` is deprecated and has been removed in 17.0. ┌П┐(ಠ_ಠ) Gitlab.
+# `gitlab-runner exec` is deprecated and has been removed in 17.0. ┌П┐(ಠ_ಠ) GitLab.
 # See https://docs.gitlab.com/16.11/runner/commands/#gitlab-runner-exec-deprecated.
 gitlab-runner exec docker 'job-name'
 gitlab-runner exec docker \
@@ -108,7 +109,7 @@ FIXME
 1. Create and InstanceProfile using the above IAM Role.
 1. Create an EC2 Instance.<br/>
    Make it use the above InstanceProfile.
-1. Install the Docker Engine and the [Gitlab runner][install gitlab runner] on the EC2 Instance.
+1. Install the Docker Engine and the [GitLab runner][install gitlab runner] on the EC2 Instance.
 1. Install the [Amazon ECR Docker Credential Helper].
 1. Configure an AWS Region in `/root/.aws/config`:
 
@@ -159,7 +160,7 @@ Now your GitLab runner should automatically authenticate to one's private ECR re
 
 ### Docker Autoscaler executor
 
-Refer [Docker Autoscaler executor].
+Refer to [Docker Autoscaler executor].
 
 Autoscale-enabled wrap for the `docker` executor. Supports all `docker` executor's options and features.<br/>
 Creates instances on-demand to accommodate jobs processed by the runner leveraging it, which acts as manager.<br/>
@@ -455,12 +456,12 @@ concurrent = 40
       "amazonec2-subnet-id=subnet-0123456789abcdef0",  # subnet-id in the specified az
       "amazonec2-use-private-address=true",
       "amazonec2-private-address-only=true",
-      "amazonec2-security-group=GitlabRunners",
+      "amazonec2-security-group=GitLabRunners",
 
       "amazonec2-instance-type=m6i.large",
       "amazonec2-root-size=50",
-      "amazonec2-iam-instance-profile=GitlabRunnerEc2",
-      "amazonec2-tags=Team,Infrastructure,Application,Gitlab Runner,SpotInstance,False",
+      "amazonec2-iam-instance-profile=GitLabRunnerEc2",
+      "amazonec2-tags=Team,Infrastructure,Application,GitLab Runner,SpotInstance,False",
     ]
 
 [[runners]]
@@ -498,12 +499,12 @@ concurrent = 40
       "amazonec2-subnet-id=subnet-abcdef0123456789a",  # subnet-id in the specified az
       "amazonec2-use-private-address=true",
       "amazonec2-private-address-only=true",
-      "amazonec2-security-group=GitlabRunners",
+      "amazonec2-security-group=GitLabRunners",
 
       "amazonec2-instance-type=r7a.large",
       "amazonec2-root-size=25",
-      "amazonec2-iam-instance-profile=GitlabRunnerEc2",
-      "amazonec2-tags=Team,Infrastructure,Application,Gitlab Runner,SpotInstance,True",
+      "amazonec2-iam-instance-profile=GitLabRunnerEc2",
+      "amazonec2-tags=Team,Infrastructure,Application,GitLab Runner,SpotInstance,True",
 
       "amazonec2-request-spot-instance=true",
       "amazonec2-spot-price=0.3",
@@ -536,7 +537,7 @@ concurrent = 40
 
 ### Instance executor
 
-Refer [Instance executor](#instance-executor).
+Refer to [Instance executor].
 
 Autoscale-enabled executor that creates instances on-demand to accommodate the expected volume of jobs processed by the
 runner manager.
@@ -544,220 +545,38 @@ runner manager.
 Useful when jobs need full access to the host instance, operating system, and attached devices.<br/>
 Can be configured to accommodate single and multi-tenant jobs with various levels of isolation and security.
 
-## Autoscaling
+### Kubernetes executor
 
-Refer [GitLab Runner Autoscaling].
+Refer to [Kubernetes executor].
 
-GitLab Runner can automatically scale using public cloud instances when configured to use an autoscaler.
+- Play nice and make sure to leave some space for the host's other workloads by allowing for resource request and limit
+  override only up to a point.
 
-Autoscaling options are available for public cloud instances and the following orchestration solutions:
+  <details style="padding: 0 0 1rem 1rem">
 
-- OpenShift.
-- Kubernetes.
-- Amazon ECS clusters using Fargate.
+  ```toml
+  [[runners]]
+    [runners.kubernetes]
+      cpu_limit_overwrite_max_allowed = "15"
+      cpu_request_overwrite_max_allowed = "15"
+      memory_limit_overwrite_max_allowed = "62Gi"
+      memory_request_overwrite_max_allowed = "62Gi"
+      ephemeral_storage_limit_overwrite_max_allowed = "49Gi"
+      ephemeral_storage_request_overwrite_max_allowed = "49Gi"
 
-### Docker Machine
+      helper_cpu_limit_overwrite_max_allowed = "0.9"
+      helper_cpu_request_overwrite_max_allowed = "0.9"
+      helper_memory_limit_overwrite_max_allowed = "1Gi"
+      helper_memory_request_overwrite_max_allowed = "1Gi"
+      helper_ephemeral_storage_limit_overwrite_max_allowed = "1Gi"
+      helper_ephemeral_storage_request_overwrite_max_allowed = "1Gi"
 
-Refer [Autoscaling GitLab Runner on AWS EC2].
-
-One or more runners must act as managers, and be configured to use the
-[Docker Machine executor](#docker-machine-executor).<br/>
-Managers interact with the cloud infrastructure to create multiple runner instances to execute jobs.<br/>
-Cloud instances acting as managers shall **not** be spot instances.
-
-### GitLab Runner Autoscaler
-
-Refer [GitLab Runner Autoscaler].
-
-Successor to the [Docker Machine](#docker-machine).
-
-Composed of:
-
-- **Taskscaler**: manages autoscaling logic, bookkeeping, and fleets creations.
-- **Fleeting**: abstraction for cloud-provided virtual machines.
-- **Cloud provider plugin**: handles the API calls to the target cloud platform.
-
-One or more runners must act as managers.<br/>
-Managers interact with the cloud infrastructure to create multiple runner instances to execute jobs.<br/>
-Cloud instances acting as managers shall **not** be spot instances.
-
-Managers must be configured to use one or more of the specific executors for autoscaling:
-
-- [Instance executor](#instance-executor).
-- [Docker Autoscaling executor](#docker-autoscaler-executor).
-
-### Kubernetes
-
-[Store tokens in secrets][store registration tokens or runner tokens in secrets] instead of putting the token in the
-chart's values.
-
-Requirements:
-
-- A running and configured Gitlab instance.
-- A running Kubernetes cluster.
-
-<details>
-  <summary>Installation procedure</summary>
-
-1. \[best practice] Create a dedicated namespace:
-
-   ```sh
-   kubectl create namespace 'gitlab'
-   ```
-
-1. Create a runner in gitlab:
-
-   <details>
-     <summary>Web UI</summary>
-
-   1. Go to one's Gitlab instance's `/admin/runners` page.
-   1. Click on the _New instance runner_ button.
-   1. Keep _Linux_ as runner type.
-   1. Click on the _Create runner_ button.
-   1. Copy the runner's token.
-
-   </details>
-
-   <details style="padding-bottom: 1em;">
-     <summary>API</summary>
-
-   ```sh
-   curl -X 'POST' 'https://gitlab.example.org/api/v4/user/runners' -H 'PRIVATE-TOKEN: glpat-m-…' \
-     -d 'runner_type=instance_type' -d 'tag_list=small,instance' -d 'run_untagged=false' -d 'a runner'
-   ```
-
-   </details>
-
-1. (Re-)Create the runners' Kubernetes secret with the runners' token from the previous step:
-
-   ```sh
-   kubectl --namespace 'gitlab' delete secret 'gitlab-runner-token' --ignore-not-found
-   kubectl --namespace 'gitlab' create secret generic 'gitlab-runner-token' \
-     --from-literal='runner-registration-token=""' --from-literal='runner-token=glrt-…'
-   ```
-
-1. \[best practice] Be sure to match the runner version with the Gitlab server's:
-
-   ```sh
-   helm search repo --versions 'gitlab/gitlab-runner'
-   ```
-
-1. Install the helm chart.
-
-   > The secret's name **must** be matched in the helm chart's values file.
-
-   ```sh
-   helm --namespace 'gitlab' upgrade --install 'gitlab-runner-manager' \
-     --repo 'https://charts.gitlab.io' 'gitlab-runner' --version '0.69.0' \
-     --values 'values.yaml' --set 'runners.secret=gitlab-runner-token'
-   ```
-
-</details>
-
-<details style="padding-bottom: 1em;">
-  <summary>Example helm chart values</summary>
-
-```yaml
-gitlabUrl: https://gitlab.example.org/
-unregisterRunners: true
-concurrent: 20
-checkInterval: 3
-rbac:
-  create: true
-metrics:
-  enabled: true
-runners:
-  name: "runner-on-k8s"
-  secret: gitlab-runner-token
-  config: |
-    [[runners]]
-
-      [runners.cache]
-        Shared = true
-
-      [runners.kubernetes]
-        namespace = "{{.Release.Namespace}}"
-        image = "alpine"
-        pull_policy = [
-          "if-not-present",
-          "always"
-        ]
-        allowed_pull_policies = [
-          "if-not-present",
-          "always",
-          "never"
-        ]
-
-        [runners.kubernetes.affinity]
-          [runners.kubernetes.affinity.node_affinity]
-            [runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution]
-              [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms]]
-                [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
-                  key = "org.example.reservation/app"
-                  operator = "In"
-                  values = [ "gitlab" ]
-                [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
-                  key = "org.example.reservation/component"
-                  operator = "In"
-                  values = [ "runner" ]
-            [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution]]
-              weight = 1
-              [runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference]
-                [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference.match_expressions]]
-                  key = "eks.amazonaws.com/capacityType"
-                  operator = "In"
-                  values = [ "ON_DEMAND" ]
-        [runners.kubernetes.node_tolerations]
-          "reservation/app=gitlab" = "NoSchedule"
-          "reservation/component=runner" = "NoSchedule"
-
-affinity:
-  nodeAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 1
-        preference:
-          matchExpressions:
-            - key: eks.amazonaws.com/capacityType
-              operator: In
-              values:
-                - ON_DEMAND
-tolerations:
-  - key: app
-    operator: Equal
-    value: gitlab
-  - key: component
-    operator: Equal
-    value: runner
-podLabels:
-  team: engineering
-```
-
-</details>
-
-Gotchas:
-
-- The _build_, _helper_ and multiple _service_ containers will all reside in a single pod.<br/>
-  If **the sum** of the resources request by **all** of them is too high, it will **not** be scheduled and the pipeline
-  will hang and fail.
-- If any pod is killed due to OOM, the pipeline that spawned it will hang until it times out.
-
-Improvements:
-
-- Keep the manager pod on stable nodes.
-
-  <details style="padding-bottom: 1em;">
-
-  ```yaml
-  affinity:
-    nodeAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 1
-          preference:
-            matchExpressions:
-              - key: eks.amazonaws.com/capacityType
-                operator: In
-                values:
-                  - ON_DEMAND
+      service_cpu_limit_overwrite_max_allowed = "3.9"
+      service_cpu_request_overwrite_max_allowed = "3.9"
+      service_memory_limit_overwrite_max_allowed = "15.5Gi"
+      service_memory_request_overwrite_max_allowed = "15.5Gi"
+      service_ephemeral_storage_limit_overwrite_max_allowed = "15Gi"
+      service_ephemeral_storage_request_overwrite_max_allowed = "15Gi"
   ```
 
   </details>
@@ -765,7 +584,7 @@ Improvements:
 - Dedicate specific nodes to runner executors.<br/>
   Taint dedicated nodes and add tolerations and affinities to the runner's configuration.
 
-  <details style="padding-bottom: 1em;">
+  <details style="padding: 0 0 1rem 1rem">
 
   ```toml
   [[runners]]
@@ -809,7 +628,7 @@ Improvements:
 
 - Avoid massive resource consumption by defaulting to (very?) strict resource limits and `0` request.
 
-  <details style="padding-bottom: 1em;">
+  <details style="padding: 0 0 1rem 1rem">
 
   ```toml
   [[runners]]
@@ -836,51 +655,318 @@ Improvements:
 
   </details>
 
-- Play nice and make sure to leave some space for the host's other workloads by allowing for resource request and limit
-  override only up to a point.
+- Maintain cluster capacity leveraging no-op pods.<br/>
+  Refer to [Pre-warm cluster capacity with pause pods].
 
-  <details style="padding-bottom: 1em;">
+- Specify resources requests and limits for jobs' pods.<br/>
+  Refer to [Allow k8s runner to define Pod Level Resources for build pod].
 
-  ```toml
-  [[runners]]
-    [runners.kubernetes]
-      cpu_limit_overwrite_max_allowed = "15"
-      cpu_request_overwrite_max_allowed = "15"
-      memory_limit_overwrite_max_allowed = "62Gi"
-      memory_request_overwrite_max_allowed = "62Gi"
-      ephemeral_storage_limit_overwrite_max_allowed = "49Gi"
-      ephemeral_storage_request_overwrite_max_allowed = "49Gi"
+  > [!important]
+  > Available since runners **v18.10**.
 
-      helper_cpu_limit_overwrite_max_allowed = "0.9"
-      helper_cpu_request_overwrite_max_allowed = "0.9"
-      helper_memory_limit_overwrite_max_allowed = "1Gi"
-      helper_memory_request_overwrite_max_allowed = "1Gi"
-      helper_ephemeral_storage_limit_overwrite_max_allowed = "1Gi"
-      helper_ephemeral_storage_request_overwrite_max_allowed = "1Gi"
+## Autoscaling
 
-      service_cpu_limit_overwrite_max_allowed = "3.9"
-      service_cpu_request_overwrite_max_allowed = "3.9"
-      service_memory_limit_overwrite_max_allowed = "15.5Gi"
-      service_memory_request_overwrite_max_allowed = "15.5Gi"
-      service_ephemeral_storage_limit_overwrite_max_allowed = "15Gi"
-      service_ephemeral_storage_request_overwrite_max_allowed = "15Gi"
+Refer to [GitLab Runner Autoscaling].
+
+GitLab Runner can automatically scale using public cloud instances when configured to use an autoscaler.
+
+Autoscaling options are available for public cloud instances and the following orchestration solutions:
+
+- OpenShift.
+- Kubernetes.
+- Amazon ECS clusters using Fargate.
+
+### Docker Machine
+
+Refer to [Autoscaling GitLab Runner on AWS EC2].
+
+One or more runners must act as managers, and be configured to use the
+[Docker Machine executor](#docker-machine-executor).<br/>
+Managers interact with the cloud infrastructure to create multiple runner instances to execute jobs.<br/>
+Cloud instances acting as managers shall **not** be spot instances.
+
+### GitLab Runner Autoscaler
+
+Refer to [GitLab Runner Autoscaler].
+
+Successor to the [Docker Machine](#docker-machine).
+
+Composed of:
+
+- **Taskscaler**: manages autoscaling logic, bookkeeping, and fleets creations.
+- **Fleeting**: abstraction for cloud-provided virtual machines.
+- **Cloud provider plugin**: handles the API calls to the target cloud platform.
+
+One or more runners must act as managers.<br/>
+Managers interact with the cloud infrastructure to create multiple runner instances to execute jobs.<br/>
+Cloud instances acting as managers shall **not** be spot instances.
+
+Managers must be configured to use one or more of the specific executors for autoscaling:
+
+- [Instance executor](#instance-executor).
+- [Docker Autoscaling executor](#docker-autoscaler-executor).
+
+### Kubernetes
+
+Refer to [Kubernetes executor].
+
+[Store tokens in secrets][store registration tokens or runner tokens in secrets] instead of putting the token in the
+chart's values.
+
+Requirements:
+
+- A running and configured GitLab instance.
+- A running Kubernetes cluster.
+
+<details>
+  <summary>Installation procedure</summary>
+
+1. \[best practice] Create a dedicated namespace:
+
+   ```sh
+   kubectl create namespace 'gitlab'
+   ```
+
+1. Create a runner in gitlab:
+
+   <details>
+     <summary>Web UI</summary>
+
+   1. Go to one's GitLab instance's `/admin/runners` page.
+   1. Click on the _New instance runner_ button.
+   1. Keep _Linux_ as runner type.
+   1. Click on the _Create runner_ button.
+   1. Copy the runner's token.
+
+   </details>
+
+   <details style="padding-bottom: 1em;">
+     <summary>API</summary>
+
+   ```sh
+   curl -X 'POST' 'https://gitlab.example.org/api/v4/user/runners' -H 'PRIVATE-TOKEN: glpat-m-…' \
+     -d 'runner_type=instance_type' -d 'tag_list=small,instance' -d 'run_untagged=false' -d 'a runner'
+   ```
+
+   </details>
+
+1. (Re-)Create the runners' Kubernetes secret with the runners' token from the previous step:
+
+   ```sh
+   kubectl --namespace 'gitlab' delete secret 'gitlab-runner-token' --ignore-not-found
+   kubectl --namespace 'gitlab' create secret generic 'gitlab-runner-token' \
+     --from-literal='runner-registration-token=""' --from-literal='runner-token=glrt-…'
+   ```
+
+1. \[best practice] Be sure to match the runner version with the GitLab server's:
+
+   ```sh
+   helm search repo --versions 'gitlab/gitlab-runner'
+   ```
+
+1. Install the helm chart.
+
+   > The secret's name **must** be matched in the helm chart's values file.
+
+   ```sh
+   helm --namespace 'gitlab' upgrade --install 'gitlab-runner-manager' \
+     --repo 'https://charts.gitlab.io' 'gitlab-runner' --version '0.69.0' \
+     --values 'values.yaml' --set 'runners.secret=gitlab-runner-token'
+   ```
+
+</details>
+
+<details style="padding-bottom: 1em;">
+  <summary>Example helm chart values</summary>
+
+```yaml
+gitlabUrl: https://gitlab.example.org/
+unregisterRunners: true
+
+concurrent: 20
+checkInterval: 3
+
+rbac:
+  create: true
+metrics:
+  enabled: true
+
+runners:
+  name: k8s-runner-autoscaler
+  secret: gitlab-runner-token
+  config: |
+    [[runners]]
+
+      [runners.cache]
+        Shared = true
+
+      [runners.kubernetes]
+        namespace = "{{.Release.Namespace}}"
+
+        image = "alpine"
+        pull_policy = [
+          "if-not-present",
+          "always"
+        ]
+        allowed_pull_policies = [
+          "if-not-present",
+          "always",
+          "never"
+        ]
+
+        [runners.kubernetes.affinity]
+          [runners.kubernetes.affinity.node_affinity]
+            [runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution]
+              [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms]]
+                [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
+                  key = "org.example.reservation/app"
+                  operator = "In"
+                  values = [ "gitlab" ]
+                [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
+                  key = "org.example.reservation/component"
+                  operator = "In"
+                  values = [ "runner" ]
+            [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution]]
+              weight = 1
+              [runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference]
+                [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference.match_expressions]]
+                  key = "eks.amazonaws.com/capacityType"
+                  operator = "In"
+                  values = [ "ON_DEMAND" ]
+        [runners.kubernetes.node_tolerations]
+          "org.example.reservation/app=gitlab" = "NoSchedule"
+          "org.example.reservation/component=runner" = "NoSchedule"
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+deploymentLabels:
+  team: engineering
+podLabels:
+  team: engineering
+```
+
+</details>
+
+Gotchas:
+
+- The _build_, _helper_ and multiple _service_ containers will all reside in a single pod.<br/>
+  If **the sum** of the resources request by **all** of them is too high, it will **not** be scheduled and the pipeline
+  will hang and fail.
+
+  Update: this _might™_ be resolvable since version 18.10. Refer to
+  [Allow k8s runner to define Pod Level Resources for build pod].
+
+- If any job's pod is killed due to OOM, the pipeline that spawned it will hang until it times out.
+
+Improvements:
+
+- Keep **the manager pod** on stable nodes by configuring affinity and tolerations in the helm chart's values.
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  ```diff
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 2
+          preference:
+            matchExpressions:
+              - key: eks.amazonaws.com/capacityType
+                operator: In
+                values:
+                  - ON_DEMAND
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: org.example.reservation/app
+                operator: In
+                values:
+                  - gitlab
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - gitlab-runner
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+    - key: org.example.reservation/app
+      operator: Equal
+      value: gitlab
+    - key: org.example.reservation/component
+      operator: Equal
+      value: runner
+  ```
+
+  </details>
+
+- Avoid evicting **job pods** during node drains and cluster upgrades.
+
+  Refer to [Protect job pods from eviction].
+
+  > [!important]
+  > Available since runners **v18.11**.
+
+  <details style="padding: 0 0 1rem 1rem">
+    <summary>Helm chart's values</summary>
+
+  ```diff
+   rbac:
+     create: true
+  +  rules:
+  +    - # default set if rules was not customized
+  +      apiGroups: [""]
+  +      resources: ["*"]
+  +      verbs: ["*"]
+  +    - # protect job pods from eviction during node drains and cluster upgrades
+  +      apiGroups: ["policy"]
+  +      resources: ["poddisruptionbudgets"]
+  +      verbs: ["create", "delete", "get"]
+   serviceAccount:
+     create: true
+   …
+   runners:
+     config: |
+       [[runners]]
+         [runners.kubernetes]
+           namespace = "{{.Release.Namespace}}"
+  +        pod_disruption_budget = true  # protect job pods from eviction during node drains and cluster upgrades
+  ```
+
+  Confirm the Role/ClusterRole created by the Helm chart is actually bound in the namespace where job pods run:
+
+  ```sh
+  kubectl auth can-i create poddisruptionbudgets.policy --namespace 'gitlab' \
+    --as='system:serviceaccount:gitlab:gitlab-runner'
   ```
 
   </details>
 
 ## Further readings
 
-- [Gitlab]
+- [GitLab]
 - [Amazon ECR Docker Credential Helper]
-- Gitlab's [docker machine] fork
-- Gitlab's [gitlab-runner-operator] for OpenShift and Kubernetes
+- GitLab's [docker machine] fork
+- GitLab's [gitlab-runner-operator] for OpenShift and Kubernetes
 - [Docker Machine Executor autoscale configuration]
 - [Fleeting]
 - [Using AL2023 based Amazon ECS AMIs to host containerized workloads]
 
 ### Sources
 
-- [Install Gitlab runner]
+- [Install GitLab runner]
 - [Docker executor]
 - [Authenticating your GitLab CI runner to an AWS ECR registry using Amazon ECR Docker Credential Helper]
 - [Install and register GitLab Runner for autoscaling with Docker Machine]
@@ -891,6 +977,7 @@ Improvements:
 - [Instance executor]
 - [Docker Autoscaler executor]
 - [Signals]
+- [Kubernetes executor]
 
 <!--
   Reference
@@ -899,27 +986,31 @@ Improvements:
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[gitlab]: README.md
+[GitLab]: README.md
 
 <!-- Files -->
 <!-- Upstream -->
 [autoscaling gitlab runner on aws ec2]: https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/
-[docker autoscaler executor]: https://docs.gitlab.com/runner/executors/docker_autoscaler.html
-[docker executor]: https://docs.gitlab.com/runner/executors/docker.html
-[docker machine executor autoscale configuration]: https://docs.gitlab.com/runner/configuration/autoscale.html
+[docker autoscaler executor]: https://docs.gitlab.com/runner/executors/docker_autoscaler/
+[docker executor]: https://docs.gitlab.com/runner/executors/docker/
+[docker machine executor autoscale configuration]: https://docs.gitlab.com/runner/configuration/autoscale/
 [docker machine's aws driver's options]: https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/blob/main/docs/drivers/aws.md#options
-[docker machine's supported cloud providers]: https://docs.gitlab.com/runner/configuration/autoscale.html#supported-cloud-providers
+[docker machine's supported cloud providers]: https://docs.gitlab.com/runner/configuration/autoscale/#supported-cloud-providers
 [docker machine]: https://gitlab.com/gitlab-org/ci-cd/docker-machine
 [fleeting]: https://gitlab.com/gitlab-org/fleeting/fleeting
-[gitlab runner autoscaler]: https://docs.gitlab.com/runner/runner_autoscale/index.html#gitlab-runner-autoscaler
+[gitlab runner autoscaler]: https://docs.gitlab.com/runner/runner_autoscale/#gitlab-runner-autoscaler
 [gitlab runner autoscaling]: https://docs.gitlab.com/runner/runner_autoscale/
-[gitlab runner helm chart]: https://docs.gitlab.com/runner/install/kubernetes.html
+[gitlab runner helm chart]: https://docs.gitlab.com/runner/install/kubernetes/
 [gitlab-runner-operator]: https://gitlab.com/gitlab-org/gl-openshift/gitlab-runner-operator
-[install and register gitlab runner for autoscaling with docker machine]: https://docs.gitlab.com/runner/executors/docker_machine.html
+[install and register gitlab runner for autoscaling with docker machine]: https://docs.gitlab.com/runner/executors/docker_machine/
 [install gitlab runner]: https://docs.gitlab.com/runner/install/
-[instance executor]: https://docs.gitlab.com/runner/executors/instance.html
+[instance executor]: https://docs.gitlab.com/runner/executors/instance/
+[Kubernetes executor]: https://docs.gitlab.com/runner/executors/kubernetes/
+[Pre-warm cluster capacity with pause pods]: https://docs.gitlab.com/runner/executors/kubernetes/#pre-warm-cluster-capacity-with-pause-pods
+[Protect job pods from eviction]: https://docs.gitlab.com/runner/executors/kubernetes/#protect-job-pods-from-eviction
 [signals]: https://docs.gitlab.com/runner/commands/#signals
-[store registration tokens or runner tokens in secrets]: https://docs.gitlab.com/runner/install/kubernetes.html#store-registration-tokens-or-runner-tokens-in-secrets
+[store registration tokens or runner tokens in secrets]: https://docs.gitlab.com/runner/install/kubernetes/#store-registration-tokens-or-runner-tokens-in-secrets
+[Allow k8s runner to define Pod Level Resources for build pod]: https://gitlab.com/gitlab-org/gitlab-runner/-/work_items/39085
 
 <!-- Others -->
 [authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb

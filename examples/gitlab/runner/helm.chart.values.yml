@@ -1,0 +1,169 @@
+---
+# <https://gitlab.com/gitlab-org/charts/gitlab-runner/blob/main/values.yaml>
+# helm show values --repo 'https://charts.gitlab.io' 'gitlab-runner'
+# last tested with runners v18.9.0
+
+image:
+  registry: 012345678901.dkr.ecr.eu-west-1.amazonaws.com/cache/docker-hub
+  image: gitlab/gitlab-runner
+
+replicas: 2
+
+gitlabUrl: https://gitlab.example.org/
+concurrent: 30
+
+rbac:
+  create: true
+serviceAccount:
+  create: true
+
+runners:
+  name: k8s-runner-autoscaler
+  secret: gitlab-runner-token
+  config: |
+    [[runners]]
+
+      [runners.cache]
+        Type = "s3"
+        Path = "cache/"
+        Shared = true
+        MaxUploadedArchiveSize = 0
+
+        [runners.cache.s3]
+          ServerAddress = "s3.amazonaws.com"
+          BucketName = "example-org-gitlab"
+          BucketLocation = "eu-west-1"
+
+      [runners.kubernetes]
+        namespace = "{{.Release.Namespace}}"
+        pod_disruption_budget = true  # v18.11+; protect job pods from eviction during node drains and cluster upgrades
+
+        # m*.xlarge -> 3920m vCPU, 14618Mi memory, 17339Mi storage
+        # reserve some CPU (100m) for the host itself -> max - 100m = 3.82 (3820m)
+        # reserve some memory (128Mi) for the host itself -> max - 128Mi = 14.15Gi (14490Mi)
+        # reserve some disk (1Gi) for the host itself -> max - 1024Mi = 91.06Gi (93252180Mi)
+        cpu_request = "1m"
+        cpu_request_overwrite_max_allowed = "3820m"
+        cpu_limit = "1"
+        cpu_limit_overwrite_max_allowed = "3820m"
+        memory_request = "1Mi"
+        memory_request_overwrite_max_allowed = "14490Mi"
+        memory_limit = "512Mi"
+        memory_limit_overwrite_max_allowed = "14490Mi"
+        ephemeral_storage_request = "1Mi"
+        ephemeral_storage_request_overwrite_max_allowed = "93252180Mi"
+        ephemeral_storage_limit = "512Mi"
+        ephemeral_storage_limit_overwrite_max_allowed = "93252180Mi"
+        helper_cpu_request = "1m"
+        helper_cpu_request_overwrite_max_allowed = "3820m"
+        helper_cpu_limit = "1"
+        helper_cpu_limit_overwrite_max_allowed = "3820m"
+        helper_memory_request = "1Mi"
+        helper_memory_request_overwrite_max_allowed = "14490Mi"
+        helper_memory_limit = "512Mi"
+        helper_memory_limit_overwrite_max_allowed = "14490Mi"
+        helper_ephemeral_storage_request = "1Mi"
+        helper_ephemeral_storage_request_overwrite_max_allowed = "93252180Mi"
+        helper_ephemeral_storage_limit = "512Mi"
+        helper_ephemeral_storage_limit_overwrite_max_allowed = "93252180Mi"
+        service_cpu_request = "1m"
+        service_cpu_request_overwrite_max_allowed = "3820m"
+        service_cpu_limit = "1"
+        service_cpu_limit_overwrite_max_allowed = "3820m"
+        service_memory_request = "1Mi"
+        service_memory_request_overwrite_max_allowed = "14490Mi"
+        service_memory_limit = "512Mi"
+        service_memory_limit_overwrite_max_allowed = "14490Mi"
+        service_ephemeral_storage_request = "1Mi"
+        service_ephemeral_storage_request_overwrite_max_allowed = "93252180Mi"
+        service_ephemeral_storage_limit = "512Mi"
+        service_ephemeral_storage_limit_overwrite_max_allowed = "93252180Mi"
+
+        image = "012345678901.dkr.ecr.eu-west-1.amazonaws.com/cache/docker-hub/library/alpine"
+        pull_policy = [
+          "if-not-present",
+          "always"
+        ]
+        allowed_pull_policies = [
+          "if-not-present",
+          "always",
+          "never"
+        ]
+
+        [runners.kubernetes.affinity]
+          [runners.kubernetes.affinity.node_affinity]
+            [runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution]
+              [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms]]
+                [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
+                  key = "org.example.reservation/app"
+                  operator = "In"
+                  values = [ "gitlab" ]
+                [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
+                  key = "org.example.reservation/component"
+                  operator = "In"
+                  values = [ "runner" ]
+            [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution]]
+              weight = 1
+              [runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference]
+                [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference.match_expressions]]
+                  key = "eks.amazonaws.com/capacityType"
+                  operator = "In"
+                  values = [ "ON_DEMAND" ]
+        [runners.kubernetes.node_tolerations]
+          "org.example.reservation/app=gitlab" = "NoSchedule"
+          "org.example.reservation/component=runner" = "NoSchedule"
+
+      [runners.secrets]
+        [runners.secrets.aws_secrets_manager]
+          region = "eu-west-1"
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+tolerations:
+  - key: CriticalAddonsOnly
+    operator: Exists
+  - key: org.example.reservation/app
+    operator: Equal
+    value: gitlab
+  - key: org.example.reservation/component
+    operator: Equal
+    value: runner
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 2
+        preference:
+          matchExpressions:
+            - key: eks.amazonaws.com/capacityType
+              operator: In
+              values:
+                - ON_DEMAND
+      - weight: 1
+        preference:
+          matchExpressions:
+            - key: org.example.reservation/app
+              operator: In
+              values:
+                - gitlab
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - gitlab-runner
+
+deploymentLabels:
+  team: engineering
+podLabels:
+  team: engineering
