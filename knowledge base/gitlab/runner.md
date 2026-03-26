@@ -17,7 +17,7 @@
 ## TL;DR
 
 <details>
-  <summary>Installation</summary>
+  <summary>Setup</summary>
 
 ```sh
 brew install 'gitlab-runner'
@@ -26,6 +26,14 @@ docker pull 'gitlab/gitlab-runner'
 helm --namespace 'gitlab' upgrade --install --create-namespace --version '0.64.1' --repo 'https://charts.gitlab.io' \
   'gitlab-runner' -f 'values.gitlab-runner.yml' 'gitlab-runner'
 ```
+
+Configure runners using `config.toml`.<br/>
+This file is located in:
+
+- `/etc/gitlab-runner/` on *nix systems when GitLab Runner is executed as `root`.<br/>
+  This directory is also the path for service configuration.
+- `~/.gitlab-runner/` on *nix systems when GitLab Runner is executed as **non**-`root`.
+- `./` on other systems and containers.
 
 </details>
 
@@ -53,7 +61,9 @@ sudo pkill -HUP 'gitlab-runner'
 
 Each _Worker_ is assigned a single task at a time by default.
 
-Runners require the Server to provide the full certificate chain upon connection.
+Runners require the Server to provide the **full** certificate chain upon connection.
+
+Refer to [Advanced configuration] for details.
 
 The `runners.autoscaler.policy.periods` setting appears to be a full blown cron job, not just a time frame.
 
@@ -82,6 +92,9 @@ Instead, the Runner will:
 Meaning it will reapply policy 1 at the 31st minute of every hour in the period defined by policy 2.
 
 </details>
+
+Set `runners.autoscaler.policy.preemptive_mode` to `true` to force runners to request jobs only when an instance is
+_confirmed_ to be available.
 
 One can use system signals to interact with Runners.
 
@@ -990,6 +1003,8 @@ Improvements:
 
 <!-- Files -->
 <!-- Upstream -->
+[Advanced configuration]: https://docs.gitlab.com/runner/configuration/advanced-configuration/
+[Allow k8s runner to define Pod Level Resources for build pod]: https://gitlab.com/gitlab-org/gitlab-runner/-/work_items/39085
 [autoscaling gitlab runner on aws ec2]: https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/
 [docker autoscaler executor]: https://docs.gitlab.com/runner/executors/docker_autoscaler/
 [docker executor]: https://docs.gitlab.com/runner/executors/docker/
@@ -1010,7 +1025,6 @@ Improvements:
 [Protect job pods from eviction]: https://docs.gitlab.com/runner/executors/kubernetes/#protect-job-pods-from-eviction
 [signals]: https://docs.gitlab.com/runner/commands/#signals
 [store registration tokens or runner tokens in secrets]: https://docs.gitlab.com/runner/install/kubernetes/#store-registration-tokens-or-runner-tokens-in-secrets
-[Allow k8s runner to define Pod Level Resources for build pod]: https://gitlab.com/gitlab-org/gitlab-runner/-/work_items/39085
 
 <!-- Others -->
 [authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb
