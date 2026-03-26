@@ -36,7 +36,6 @@ runners:
 
       [runners.kubernetes]
         namespace = "{{.Release.Namespace}}"
-        pod_disruption_budget = true  # v18.11+; protect job pods from eviction during node drains and cluster upgrades
 
         # m*.xlarge -> 3920m vCPU, 14618Mi memory, 17339Mi storage
         # reserve some CPU (100m) for the host itself -> max - 100m = 3.82 (3820m)
