@@ -1,0 +1,56 @@
+###
+# Gitlab runner configuration file
+# --------------------------------------
+# Default locations:
+# - /etc/gitlab-runner/config.toml
+# - $HOME/.gitlab-runner/config.toml
+#
+# Refer 'https://docs.gitlab.com/runner/configuration/advanced-configuration.html'
+###
+
+concurrent = 32  # global through *all* runners
+listen_address = "0.0.0.0:9100"
+
+[[runners]]
+  name = "docker autoscaler on AWS"
+
+  # instances using docker-autoscaler executor
+  # ----------------
+  # up to 10 instances at a time, min 1 idle during working hours
+  # use each instance for up to 250 jobs
+  # 1 job per instance at a time
+
+  url = "https://gitlab.example.org"
+  token = "glrt-abc…"
+
+  environment = [ "AWS_REGION=eu-west-1" ]
+  executor = "docker-autoscaler"
+
+  [runners.docker]
+    privileged = false
+
+    image = "busybox:latest"
+    pull_policy = [
+      "if-not-present",
+      "always"
+    ]
+    allowed_pull_policies = [
+      "if-not-present",
+      "always",
+      "never"
+    ]
+
+  [runners.autoscaler]
+    plugin = "aws"
+    max_instances = 10
+    max_use_count = 250
+    capacity_per_instance = 1
+
+    [runners.autoscaler.plugin_config]
+      name = "GitlabRunners"  # autoscaling group name
+
+    [[runners.autoscaler.policy]]
+      periods = [ "* 7-19 * * mon-fri" ]
+      timezone = "Europe/Amsterdam"
+      idle_count = 1
+      idle_time = "20m0s"
