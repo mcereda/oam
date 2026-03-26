@@ -544,6 +544,7 @@ Refer:
 - [How to Train a Small Language Model: The Complete Guide]
 - [How to Save 90% on LLM API Costs Without Losing Performance]
 - [Continual Learning: How AI Models Stay Smarter Over Time]
+- [Geoffrey Hinton doesn't hold back on the future of AI]
 
 <!--
   Reference
@@ -585,6 +586,7 @@ Refer:
 [Fine-Tuning & Small Language Models]: https://blog.premai.io/fine-tuning-small-language-models/
 [Function calling in LLMs]: https://www.geeksforgeeks.org/artificial-intelligence/function-calling-in-llms/
 [GeeksForGeeks / What are LLM parameters?]: https://www.geeksforgeeks.org/artificial-intelligence/what-are-llm-parameters/
+[Geoffrey Hinton doesn't hold back on the future of AI]: https://www.youtube.com/watch?v=9OQoIHrgPbs
 [Grok]: https://grok.com/
 [How to Save 90% on LLM API Costs Without Losing Performance]: https://blog.premai.io/how-to-save-90-on-llm-api-costs-without-losing-performance/
 [How to Train a Small Language Model: The Complete Guide]: https://dev.to/jaipalsingh/how-to-train-a-small-language-model-the-complete-guide-for-2026-4p6h
