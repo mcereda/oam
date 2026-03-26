@@ -1,26 +1,202 @@
 #!/usr/bin/env fish
 
-# Link secrets
-gopass ln 'stackexchange.com/me@example.org' 'stackoverflow.com/me@example.org'
+# Installation.
+brew install 'gopass'
+go install 'github.com/gopasspw/gopass@latest'
+go install 'github.com/gopasspw/gopass@v1.15.11'
 
-# List templates
-gopass templates
+# Install shell completions.
+gopass completion 'fish' > "$HOME/.config/fish/completions/gopass.fish"
+source $(gopass completion 'zsh')
 
-# Create templates
-gopass templates edit 'path/to/dir'
-gopass templates create 'path/to/dir'
-gopass templates new 'path/to/dir'
 
-# Show templates
-gopass templates show 'path/to/dir'
-gopass templates cat 'path/to/dir'
+# Setup new stores.
+# If no options are given, defaults are used.
+gopass setup
 
-# Remove templates
-gopass templates remove 'path/to/dir'
-gopass templates rm 'path/to/dir'
+
+# Show all configuration values.
+gopass config
+gopass config --store 'family'
+
+# Show specific configuration values only.
+gopass config 'core.autoclip'
+gopass config --store='foo' 'core.autopush'
+
+# Update specific configuration values.
+gopass config 'core.autopush' false
+gopass config --store 'bar' 'generate.generator' 'xkcd'
+
+
+# Initialize the *root* store.
+gopass init
+gopass init -p 'path/to/root/store' 'key-id'
+
+
+# Generate and show passwords in output.
+gopass pwgen
+gopass pwgen -1 24
+gopass pwgen -x --xc --xl 'en' --xn --xs '-' 3
+
+
+# List entries.
+gopass list
+
+
+# Interactively create secrets.
+gopass create
+gopass new
+
+
+# Insert new entries.
+gopass insert 'path/to/entry'
+gopass insert -m …
+
+
+# Create new entries with generated passwords.
+gopass generate 'path/to/entry'
+gopass generate -g 'xkcd' --lang 'en' 'path/to/entry'
+
+
+# Copy secrets' password to the clipboard.
+# Do *not* print secrets out.
+gopass show -c 'path/to/entry'
+
+# Use passwords programmatically.
+set -x 'GITLAB_PRIVATE_TOKEN' "$(gopass show --password 'gitlab/pat')"
 
 # Change passwords programmatically.
 gopass cat 'path/to/entry' | sed '1s/.*/newPassword123/' | gopass insert -f 'path/to/entry'
 
 # Show multiple entries.
 parallel -j1 -o gopass cat db/{1}/{2}/users/postgres ::: ch us gb ::: prd stg
+
+
+# Edit new or existing secrets.
+gopass edit 'path/to/entry'
+gopass set …
+
+
+# Delete entries.
+gopass delete 'path/to/entry'
+gopass remove -r …
+gopass rm …
+
+
+# Copy entries.
+gopass copy 'from' 'to'
+gopass cp …
+
+# Move entries.
+gopass move 'path/to/old/entry' 'path/to/new/entry'
+gopass mv …
+
+# Link entries.
+gopass link 'path/to/linked/entry' 'path/to/linking/entry'
+gopass ln 'stackexchange.com/me@example.org' 'stackoverflow.com/me@example.org'
+
+
+# Copy files.
+gopass fscopy '/path/to.file' 'path/to/entry'
+gopass fscopy 'path/to/entry' '/path/to.file'
+
+# Copy files and remove the source.
+gopass fsmove '/path/to.file' 'path/to/entry'
+gopass fsmove 'path/to/entry' '/path/to.file'
+
+
+# Get sha256sum of secrets.
+gopass sum 'path/to/entry'
+gopass sha …
+gopass sha265 …
+
+
+# Find entries matching the search string.
+gopass find 'github'
+gopass find --regex 'sentry-.*'
+gopass search …
+
+# Find secrets containing the search string when decrypted.
+gopass grep 'search-string'
+
+
+# List mounted stores.
+gopass mounts
+
+# Add (a.k.a mount) existing stores in multi store mode.
+# Default command for 'mounts' if missing.
+gopass mounts 'internal/path/to/store' 'external/path/to/store'
+gopass mounts add …
+gopass mounts mount …
+
+# Create and mount stores.
+gopass mounts add -c 'internal/path/to/store' 'external/path/to/store'
+gopass init -s 'store' -p 'path/to/store'
+
+# Remove (a.k.a unmount) stores.
+gopass mounts remove 'internal/path/to/store-1' … 'store-N'
+gopass mounts rm …
+gopass mounts unmount …
+gopass mounts umount …
+
+
+# List templates.
+gopass templates
+gopass templates 'path/to/folder'
+
+# Show templates.
+gopass templates show 'path/to/folder'
+gopass templates cat …
+
+# Create templates.
+gopass templates edit 'path/to/folder'
+gopass templates create …
+gopass templates new …
+
+# Use templates to create new secrets.
+gopass edit -c 'path/to/folder/with/template'/'entry'
+
+# Move templates.
+mv 'path/to/gopass/repo/path/to/folder/with/template/.pass-template' 'path/to/gopass/repo/path/to/destination'
+
+# Remove templates.
+gopass templates remove 'path/to/folder'
+gopass templates rm …
+
+
+# List all recipients.
+gopass recipients
+
+# Get the key ID in the format used by gopass.
+gpg --list-keys --keyid-format '0xlong'
+
+# Add recipients.
+gopass recipients add 'key-id-in-0xlong-format'
+gopass recipients add --store 'store' …
+
+# Remove recipients.
+gopass recipients remove
+gopass recipients remove '0xB5B44266A3683834'
+gopass recipients remove --store 'store' …
+
+
+# Check the stores integrity, clean up artifacts and re-encrypt secrets if
+# recipients are missing or changed.
+gopass fsck
+gopass fsck --decrypt
+
+
+# Sync with remotes.
+gopass sync
+gopass sync -s 'store-1' … 'store-N'
+
+# Manage git operations manually.
+gopass git pull
+gopass git push --store='foo' 'origin' 'main'
+
+
+# Reset gopass' configuration.
+rm "${HOME}/.config/gopass/config"
+
+# Remove gopass' default root store.
+rm -r "${HOME}/.local/share/gopass/stores/root"

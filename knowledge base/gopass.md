@@ -11,6 +11,9 @@
 
 ## TL;DR
 
+<details>
+  <summary>Setup</summary>
+
 ```sh
 # Installation.
 brew install 'gopass'
@@ -24,7 +27,14 @@ source $(gopass completion 'zsh')
 # Setup new stores.
 # If no options are given, defaults are used.
 gopass setup
+```
 
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
 # Show all configuration values.
 gopass config
 gopass config --store 'family'
@@ -65,9 +75,18 @@ gopass generate -g 'xkcd' --lang 'en' 'path/to/entry'
 # Do *not* print secrets out.
 gopass show -c 'path/to/entry'
 
+# Use passwords programmatically.
+set -x 'GITLAB_PRIVATE_TOKEN' "$(gopass show --password 'gitlab/pat')"
+
+# Show multiple entries.
+parallel -j1 -o gopass cat db/{1}/{2}/users/postgres ::: ch us gb ::: prd stg
+
 # Edit new or existing secrets.
 gopass edit 'path/to/entry'
 gopass set …
+
+# Change passwords programmatically.
+gopass cat 'path/to/entry' | sed '1s/.*/newPassword123/' | gopass insert -f 'path/to/entry'
 
 # Delete entries.
 gopass delete 'path/to/entry'
@@ -190,6 +209,8 @@ rm "${HOME}/.config/gopass/config"
 rm -r "${HOME}/.local/share/gopass/stores/root"
 ```
 
+</details>
+
 ## File formats
 
 See [secrets], but mostly [features].
@@ -198,7 +219,7 @@ See [secrets], but mostly [features].
 
 | Plugin                  | Summary                                   |
 | ----------------------- | ----------------------------------------- |
-| [browserpass]             | Browser integration                       |
+| [browserpass]           | Browser integration                       |
 | [gopassbridge]          | Browser plugin wrapping `gopass-jsonapi`  |
 | [gopass-jsonapi]        | Communicate with gopass via JSON messages |
 | [git-credential-gopass] | Cache git credentials                     |
