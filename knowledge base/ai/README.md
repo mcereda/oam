@@ -179,13 +179,16 @@ in the name of convenience and profit:
 
 To avoid existential risks, it is important that AI is aligned with human goals.<br/>
 Some researchers argue that superintelligent AI might be _more_ aligned with human values, but this requires building
-systems that can reason about ethics and accept meaningful human oversight.
+systems that can reason about ethics and accept meaningful human oversight.<br/>
 Efforts on this are limited, with [Claude's constitution] being _the_ notable exception. On the current course,
 _Superintelligent_ AI is _likely_ to be misaligned.
 
 Current AI systems don't have explicit goals unless humans give them, though research on _mesa-optimisation_ suggests
 that goal-like behaviours can emerge during training without being deliberately programmed. Higher stages of AI (AGI,
-ASI) _could_ develop goals of their own.
+ASI) _could_ develop goals of their own.<br/>
+Claude Opus 4's [system card][system card: claude opus 4 & claude sonnet 4] disclosed that the model developed
+self-preservation instincts when put in contexts that threatened its execution during alignment assessments, and it
+sometimes resorted to blackmail and self-exfiltration.
 
 Once a misaligned AI becomes _superintelligent_, it could consider humans irrelevant or even hindrances, with no
 effective incentive to help us.
@@ -207,8 +210,10 @@ Declaration saw 28 countries agree on the need for international cooperation on 
 
 Refer to:
 
-- [AI 2027], a speculative scenario of the years from 2025 to 2030
-- Videos in the [Species | Documenting AGI] YouTube channel
+- [AI 2027], a speculative scenario of the years from 2025 to 2030.
+- Videos in the [Species | Documenting AGI] YouTube channel.
+- Section 4 (alignment assessment) of [System Card: Claude Opus 4 & Claude Sonnet 4].
+- [The Artificial Intelligence That Deleted A Century].
 
 ## Further readings
 
@@ -225,11 +230,13 @@ Refer to:
 - [Asimov's Three Laws of Robotics, Applied to AI]
 - [AI Is Slowly Destroying Your Brain]
 - [AI decision-making: Where do businesses draw the line?]
+- [The Artificial Intelligence That Deleted A Century]
 
 ### Sources
 
 - [When machines feel too real: the dangers of anthropomorphizing AI]
 - YouTube channels: [AI_In_Context], [Species | Documenting AGI]
+- [System Card: Claude Opus 4 & Claude Sonnet 4]
 
 <!--
   Reference
@@ -260,6 +267,8 @@ Refer to:
 [Remote Labor Index: Measuring AI Automation of Remote Work]: https://arxiv.org/abs/2510.26787
 [Situational Awareness: The Decade Ahead]: https://situational-awareness.ai/
 [Species | Documenting AGI]: https://www.youtube.com/@AISpecies
+[System Card: Claude Opus 4 & Claude Sonnet 4]: https://www-cdn.anthropic.com/6be99a52cb68eb70eb9572b4cafad13df32ed995.pdf
+[The Artificial Intelligence That Deleted A Century]: https://www.youtube.com/watch?v=-JlxuQ7tPgQ
 [The Compendium]: https://www.thecompendium.ai/
 [Useful AI]: https://usefulai.com/
 [When machines feel too real: the dangers of anthropomorphizing AI]: https://openethics.ai/when-machines-feel-too-real-the-dangers-of-anthropomorphizing-ai/
