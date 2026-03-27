@@ -232,13 +232,27 @@ some_job:
       # setting AWS_DEFAULT_REGION does *not* work, the integration requires AWS_REGION
       eu-west-1
   secrets:
-    SOME_SECRET_VAR:
+    SOME_SECRET_VAR:                    # environment variable that will contain the value
       aws_secrets_manager:
         secret_id: "some-secret-name"   # the secret name or ARN in Secrets Manager
         field: "some_field"             # optional: extract a specific key from a JSON secret
-      file: false                       # false = env var, true = file (default: true)
+      file:
+        # false to store the value in the environment variable directly
+        # true to store the value as file (default); the environment variable stores the path to the file
+        false
+    SOME_OTHER_SECRET_VAR:
+      aws_secrets_manager:
+        secret_id: "some-other-secret-name"                 # the secret name or ARN in Secrets Manager
+        version_id: '01234567-89ab-cdef-0123-456789abcdef'  # specific secret's version by ID
+    SOME_OTHER_OTHER_SECRET_VAR:
+      aws_secrets_manager:
+        secret_id: "some/other/other/secret/name"  # the secret name or ARN in Secrets Manager
+        version_stage: 'AWSCURRENT'                # specific secret's version by AWS label
+        file: true                                 # explicitly save the value as file and the path as env var
   script:
-    - echo "Secret is available as $SOME_SECRET_VAR"
+    - echo "Some secret is '$SOME_SECRET_VAR'"
+    - echo "Some other secret is '$SOME_OTHER_SECRET_VAR'"
+    - echo "Some other other secret is '$SOME_OTHER_OTHER_SECRET_VAR'"
 ```
 
 </details>
