@@ -11,6 +11,7 @@
    1. [Docker Machine](#docker-machine)
    1. [GitLab Runner Autoscaler](#gitlab-runner-autoscaler)
    1. [Kubernetes](#kubernetes)
+1. [Integrate with secret managers](#integrate-with-secret-managers)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -391,6 +392,7 @@ Procedure:
        [[runners.autoscaler.policy]]
          idle_count = 5
          idle_time = "20m0s"
+         preemptive_mode = true  # wait for instances to confirm availability before sending jobs
    ```
 
    </details>
@@ -967,6 +969,37 @@ Improvements:
 
   </details>
 
+## Integrate with secret managers
+
+GitLab offers its own (currently _**experimental**_) internal secrets manager for securely storing secrets and
+credentials that CI jobs need to use.<br/>
+Refer to [GitLab Secrets Manager].
+
+It also integrates with external secrets managers like [AWS Secrets Manager], Azure Key Vault, and HashiCorp Vault (or
+OpenBao).<br/>
+Refer to [Use external secrets in CI/CD].
+
+> [!important]
+> Runners require:
+>
+> - Having all the permissions they need to reach and view secrets (e.g. [AWS IAM roles]).
+> - Setting up integration with secrets managers in their configuration file.
+>
+>   <details style='padding: 0 0 1rem 1rem'>
+>     <summary>Example: AWS Secrets Manager</summary>
+>
+>   ```toml
+>   [[runners]]
+>     [runners.secrets]
+>       [runners.secrets.aws_secrets_manager]
+>         region = "eu-west-1"
+>   ```
+>
+>   </details>
+
+Pipelines **must** use the integration's specific ways of getting the secrets.<br/>
+Refer to [External secrets in pipelines].
+
 ## Further readings
 
 - [GitLab]
@@ -999,6 +1032,9 @@ Improvements:
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[AWS IAM roles]: ../cloud%20computing/aws/iam.md#roles
+[AWS Secrets Manager]: ../cloud%20computing/aws/secrets%20manager.md
+[External secrets in pipelines]: pipeline.md#external-secrets
 [GitLab]: README.md
 
 <!-- Files -->
@@ -1016,6 +1052,7 @@ Improvements:
 [gitlab runner autoscaler]: https://docs.gitlab.com/runner/runner_autoscale/#gitlab-runner-autoscaler
 [gitlab runner autoscaling]: https://docs.gitlab.com/runner/runner_autoscale/
 [gitlab runner helm chart]: https://docs.gitlab.com/runner/install/kubernetes/
+[GitLab Secrets Manager]: https://docs.gitlab.com/ci/secrets/secrets_manager/
 [gitlab-runner-operator]: https://gitlab.com/gitlab-org/gl-openshift/gitlab-runner-operator
 [install and register gitlab runner for autoscaling with docker machine]: https://docs.gitlab.com/runner/executors/docker_machine/
 [install gitlab runner]: https://docs.gitlab.com/runner/install/
@@ -1025,6 +1062,7 @@ Improvements:
 [Protect job pods from eviction]: https://docs.gitlab.com/runner/executors/kubernetes/#protect-job-pods-from-eviction
 [signals]: https://docs.gitlab.com/runner/commands/#signals
 [store registration tokens or runner tokens in secrets]: https://docs.gitlab.com/runner/install/kubernetes/#store-registration-tokens-or-runner-tokens-in-secrets
+[Use external secrets in CI/CD]: https://docs.gitlab.com/ci/secrets/
 
 <!-- Others -->
 [authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb
