@@ -242,13 +242,16 @@ some_job:
         false
     SOME_OTHER_SECRET_VAR:
       aws_secrets_manager:
-        secret_id: "some-other-secret-name"                 # the secret name or ARN in Secrets Manager
+        secret_id: "arn:aws:secretsmanager:us-east-1:012345678901:secret:shared-api-keys-AbCdEf'"
         version_id: '01234567-89ab-cdef-0123-456789abcdef'  # specific secret's version by ID
     SOME_OTHER_OTHER_SECRET_VAR:
       aws_secrets_manager:
-        secret_id: "some/other/other/secret/name"  # the secret name or ARN in Secrets Manager
-        version_stage: 'AWSCURRENT'                # specific secret's version by AWS label
-        file: true                                 # explicitly save the value as file and the path as env var
+        secret_id: "some/other/other/secret/name"                      # the secret name or ARN in Secrets Manager
+        version_stage: 'AWSCURRENT'                                    # specific secret's version by AWS label
+        file: true                                                     # explicitly save the value as file
+        region: 'eu-west-1'
+        role_arn: 'arn:aws:iam::123456789012:role/eu-deployment-role'  # role to assume
+        role_session_name: 'gitlab-eu-deployment'                      # name for the assume role session
   script:
     - echo "Some secret is '$SOME_SECRET_VAR'"
     - echo "Some other secret is '$SOME_OTHER_SECRET_VAR'"
