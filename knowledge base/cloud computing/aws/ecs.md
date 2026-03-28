@@ -987,6 +987,15 @@ Tasks running on Fargate receive a minimum of 20 GiB of ephemeral storage for bi
 This can be increased up to a maximum of 200 GiB by specifying the `ephemeralStorage` parameter in the task's
 definition.
 
+Check the ephemeral storage usage by:
+
+- Running `df -h` from _inside_ a container using it.
+- Checking the `EphemeralStorageUtilized` and `EphemeralStorageReserved` metrics in CloudWatch (if Container Insights
+  are enabled for the cluster).
+- Configuring a sidecar container or the task's application to emit custom CloudWatch metrics with disk usage data.<br/>
+  The ECS agent updates the task's `EphemeralStorageUtilized` and `EphemeralStorageReserved` metrics in CloudWatch, and
+  they will show up as task-level metrics.
+
 ## Networking
 
 The networking behavior of tasks that are hosted on EC2 instances is dependent on the network mode that one defined in
