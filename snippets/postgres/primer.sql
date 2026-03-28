@@ -190,9 +190,11 @@ SELECT SESSION_USER, CURRENT_USER; SET SESSION AUTHORIZATION 'thomas'; SELECT SE
 REVOKE engineers FROM mike;
 
 
--- List permissions
+-- List permissions (privileges)
+\dp
 
 -- on tables
+\dp public.tasks
 SELECT *
 FROM information_schema.role_table_grants
 WHERE grantee = 'darwin';
@@ -203,6 +205,7 @@ FROM pg_tables
 WHERE tableowner = 'darwin';
 
 -- on schemas
+\dp public
 SELECT
   r.usename AS grantor,
   e.usename AS grantee,
