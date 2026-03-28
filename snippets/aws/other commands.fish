@@ -22,7 +22,9 @@ aws autoscaling describe-instance-refreshes \
 	--auto-scaling-group-name 'ProductionServers' --instance-refresh-ids '01234567-89ab-cdef-0123-456789abcdef'
 aws autoscaling cancel-instance-refresh --auto-scaling-group-name 'ProductionServers'
 aws autoscaling rollback-instance-refresh --auto-scaling-group-name 'ProductionServers'
-
+aws autoscaling set-desired-capacity --auto-scaling-group-name 'ProductionServers' --desired-capacity '3'
+aws autoscaling update-auto-scaling-group --auto-scaling-group-name 'ProductionServers' \
+	--min-size '0' --max-size '0' --desired-capacity '0'
 
 ###
 # CloudFront

@@ -30,6 +30,9 @@ aws rds modify-db-instance --db-instance-identifier 'my-db-instance' --engine-ve
 aws rds modify-db-instance --db-instance-identifier 'my-db-instance' \
 	--engine-version '14.15' --allow-major-version-upgrade --no-apply-immediately
 
+# Change instance class.
+aws rds modify-db-instance --db-instance-identifier 'redash' --db-instance-class 'db.t4g.medium' --apply-immediately
+
 # Max 5 running at any given time, RDS cannot queue
 echo {1..5} | xargs -p -n '1' -I '{}' aws rds start-export-task …
 
@@ -90,3 +93,7 @@ aws rds describe-db-instances --db-instance-identifier 'some-db-instance' --outp
 			DBName || `postgres`
         ])
     '
+
+# Wait for instances to become available
+aws rds wait db-instance-available --db-instance-identifier 'production-db'
+aws rds wait db-instance-available --filters 'Name=db-instance-id,Values=prod-db,prod-db-rr-eng,prod-db-rr-others'
