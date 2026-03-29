@@ -30,7 +30,8 @@
         "enabled": true,
         "autoAllowBashIfSandboxed": true,
         "excludedCommands": [
-            "docker"
+            "docker",
+            "git"
         ],
         "network": {
             "allowedDomains": [
@@ -53,6 +54,16 @@
         "claude-in-chrome"
     ],
     "hooks": {
+        "Notification": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "osascript -e 'display notification \"Claude Code needs your attention\" with title \"Claude Code\"'"
+                    }
+                ]
+            }
+        ],
         "PreToolUse": [
             {
                 "matcher": "Bash",
@@ -60,6 +71,16 @@
                     {
                         "type": "command",
                         "command": "$HOME/.claude/hooks/rtk-rewrite.sh"
+                    },
+                    {
+                        "type": "command",
+                        "if": "Bash(git commit*)",
+                        "command": "default=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||') && [[ -n \"$default\" && \"$(git branch --show-current)\" == \"$default\" ]] && echo \"BLOCKED: on '$default', create a feature branch first.\" && exit 2; exit 0"
+                    },
+                    {
+                        "type": "agent",
+                        "prompt": "Review the proposed Bash command. Block it if it would: delete files outside the working directory, force-push, run pulumi up/destroy without the non-interactive task wrapper, or modify .env files. Allow everything else.",
+                        "timeout": 5
                     }
                 ]
             }

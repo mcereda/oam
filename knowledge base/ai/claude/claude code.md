@@ -1115,12 +1115,7 @@ runs only for `git` commands and `"Edit(*.ts)"` runs only for TypeScript files.
           {
             "type": "command",
             "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
+          },
           {
             "type": "http",
             "url": "http://localhost:8080/hooks/post-tool-use",
