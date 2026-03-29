@@ -224,6 +224,7 @@ Refer to [Built-in commands][built-in commands reference] for the complete list.
 ```plaintext
 /agents                              Manage agent configurations
 /batch                               Research and plan a large-scale change, then execute it in parallel across 5 to 30 isolated worktree agents that each open a PR.
+/branch                              Create a branch of the current conversation at this point (alias of /fork)
 /clear                               Clear conversation history and free up context
 /compact                             Clear conversation history but keep a summary in context.
 /config                              Open config panel
@@ -234,7 +235,6 @@ Refer to [Built-in commands][built-in commands reference] for the complete list.
 /effort [low|medium|high|max|auto]   Set effort level for model usage
 /exit                                Exit the REPL
 /export                              Export the current conversation to a file or clipboard
-/fork                                Create a fork of the current conversation at this point
 /help                                Show help and available commands
 /hooks                               Manage hook configurations for tool events
 /init                                Initialize a new CLAUDE.md file with codebase documentation
@@ -403,14 +403,57 @@ If declined, the imports stay disabled and the dialog does **not** appear again.
 Claude Code reads `CLAUDE.md` files by walking **up** the directory tree from the current working directory.<br/>
 E.g., if it is running in `foo/bar/`, it loads instructions from both `foo/bar/CLAUDE.md` and `foo/CLAUDE.md`.
 
-Prefer using _rules_ for a more structured approach to organizing instructions.
+Block-level HTML comments (`<!-- … -->`) in `CLAUDE.md` files are **stripped** before injection into context. Use them to
+leave notes for human maintainers without spending context tokens. Comments inside code blocks are preserved.
+
+The `--add-dir` flag gives Claude access to additional directories outside the main working directory.<br/>
+By default, `CLAUDE.md` files from those directories are **not** loaded. Set `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1`
+to also load them.
+
+Prefer using _rules_ for a more structured approach to organizing instructions.<br/>
+Rules live in `.claude/rules/*.md` and are discovered _recursively_.
+
+Rules **without** a `paths` frontmatter field are
+loaded _unconditionally_ at launch.<br/>
+Rules **with** a `paths` field _only_ load when Claude reads files matching the specified glob patterns:
+
+<details style='padding 0 0 1rem 1rem'>
+
+```yml
+---
+paths:
+  - "src/api/**/*.ts"
+---
+```
+
+</details>
+
+Skip irrelevant `CLAUDE.md` files by using the `claudeMdExcludes` setting.
+
+<details style='padding 0 0 1rem 1rem'>
+
+```json
+{
+  "claudeMdExcludes": [
+    "**/some-repo/CLAUDE.md",
+    "/home/user/some-repo/some-section/.claude/rules/**"
+  ]
+}
+```
+
+</details>
 
 Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in later sessions
 by maintaining `~/.claude/projects/<project>/memory/MEMORY.md` files.<br/>
-The first 200 lines of those files are loaded at the start of every session.
+The first 200 lines or 25 KB (whichever comes first) of those files are loaded at the start of every session.
 
 When _auto memory_ is enabled, Claude Code _should™_ automatically update memory files.<br/>
-It is enabled by default. Disable it via the `/memory` toggle, `settings.json`, or `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`.
+It is enabled by default. Disable it via the `/memory` toggle, `settings.json`, or
+`CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`.<br/>
+Store auto memory in custom locations by setting `autoMemoryDirectory` in user or local-level settings. Avoid doing
+this in project-level settings to prevent redirecting memory writes to sensitive locations.
+
+Subagents can maintain their own auto memory. Refer to [subagent memory configuration].
 
 Also see [thedotmack/claude-mem] for an automatic memory management system.
 
@@ -422,7 +465,6 @@ Memory files' loading order:
 | User           | Context file        | `~/.claude/CLAUDE.md`                                                                                   | Loaded in full at launch                              |
 | Project        | Shared context file | `./CLAUDE.md` or `./.claude/CLAUDE.md`                                                                  | Loaded in full at launch                              |
 | Project        | Rules               | `./.claude/rules/*.md`                                                                                  | Loaded in full at launch                              |
-| Project        | Local context file  | `./CLAUDE.local.md`                                                                                     | Loaded in full at launch                              |
 | Subdirectory   | Context file        | `<project>/some-subdir/CLAUDE.md`                                                                       | Loaded on demand when reading files in this directory |
 | Active session | Auto memory         | `~/.claude/projects/<project>/memory/`                                                                  | Complement the context without overriding             |
 
@@ -440,6 +482,10 @@ Key commands:
 | --------- | ---------------------------------------------------- |
 | `/memory` | View, edit, or toggle auto memory on/off             |
 | `/init`   | Bootstrap a `CLAUDE.md` file for the current project |
+
+Use the [`InstructionsLoaded` hook][instructionsloaded hook] to log exactly which instruction files are loaded, when
+they load, and why.<br/>
+Useful for debugging path-specific rules or lazy-loaded files in subdirectories.
 
 > [!tip]
 > It appears Claude (at least the 4.6 suite) follows instructions better when given with an _imperative_ tone.<br/>
@@ -490,7 +536,7 @@ Consider also asking it to keep the files up to date using notes and findings fr
 
 </details>
 
-People is showing success _delegating_ this work to Claude at the start of a project.<br/>
+People are showing success _delegating_ this work to Claude at the start of a project.<br/>
 Consider delegating ownership of tools and documentation to Claude early in a project, making it responsible for the
 tools and documents it creates _and_ uses. Also include in the request to periodically to check and update those files
 to correct its own behavior across sessions.
@@ -1001,32 +1047,22 @@ Use hooks to **enforce** project rules, automate repetitive tasks, and integrate
 Consider using [prompt-based hooks] or [agent-based hooks] for decisions that require **judgment**, rather than
 deterministic rules.
 
-When an event fires, all _matching_ hooks run in parallel.<br/>
-Hooks defining an empty or no matcher will match **all** events of a specific type.
+When an event fires, all _matching_ hooks run **in parallel**.<br/>
+Hooks defining a catch-all (`*`) matcher, an empty one (`""`), or no matcher at all, will match **all** events of their
+specific type.
 
-Identical hook commands are automatically **deduplicated**.
-
-`TaskCompleted` hooks fire when a task created via the Task tool for background/parallel work finishes.<br/>
-Exiting the REPL does **not** trigger `TaskCompleted` hooks. It will **only** fire when a subagent task completes.
-
-Run commands at the end **of each response or session** by leveraging the `Stop` hook event.<br/>
-It fires **on every turn**, after Claude finishes responding, which could be noisy depending on the action.
-
-Both prompt-based and agent-based hooks work **as gatekeepers** on `Stop` events, **not** as conversation
-injectors.<br/>
-They only return `{"ok": true/false, "reason": "..."}`, and only decide whether Claude should be allowed to stop.
-
-Beware of prompts that can start loops. Ask Claude to refine them.
-
-> [!note]
-> There's currently no hook event that allows prompt or agent hooks just before exiting the REPL. `Ctrl+C` and `/exit`
-> terminate the session **immediately**, without triggering any hook at all.<br/>
-> `SessionEnd` prompt or agent hooks are not yet supported **outside** of the REPL. The closest alternative is using
-> `Stop`, even if it generates noise.
+Identical hook commands are automatically **deduplicated**.<br/>
+To make cheap checks short-circuit expensive ones, they would need to reside in a **single** hook that runs **both**
+checks sequentially.
 
 Create hooks by adding a `hooks` block to a settings file.
 
+One can filter tool events further by setting the `if` field on individual hook handlers.<br/>
+The `if` field uses permission rule syntax to match against the tool name and arguments together, e.g. `"Bash(git *)"`
+runs only for `git` commands and `"Edit(*.ts)"` runs only for TypeScript files.
+
 <details style='padding: 0 0 1rem 1rem'>
+  <summary>Examples</summary>
 
 ```json
 {
@@ -1047,7 +1083,13 @@ Create hooks by adding a `hooks` block to a settings file.
         "hooks": [
           {
             "type": "agent",
-            "prompt": "If the command is not `git commit`, respond: LGTM. For `git commit` commands: if the agent did not contribute in this conversation, respond: LGTM. If `--author` is already present, respond: LGTM. The agent contributed if it edited/wrote files being committed, OR if it suggested a solution that the user implemented (the changes must reflect the agent's guidance). Otherwise BLOCK: the agent contributed but `--author` is missing. Remind to use --author='<Agent> on behalf of <user> <email>' and a Co-Authored-By trailer per CONTRIBUTING.md."
+            "if": "Bash(git commit*)",
+            "prompt": "If the agent did not contribute in this conversation, respond: LGTM. If `--author` is already present, respond: LGTM. The agent contributed if it edited/wrote files being committed, OR if it suggested a solution that the user implemented (the changes must reflect the agent's guidance). Otherwise BLOCK: the agent contributed but `--author` is missing. Attribute the commit to the agent using --author='<agent.name> <optional model.name> <optional model.version> on behalf of $(git config user.name) <agent.email>', and add a Co-Authored-By trailer for the user using their git configuration information."
+          },
+          {
+            "type": "command",
+            "if": "Bash(git commit*)",
+            "command": "default=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||') && [[ -n \"$default\" && \"$(git branch --show-current)\" == \"$default\" ]] && echo \"BLOCKED: on '$default', create a feature branch first.\" && exit 2; exit 0"
           },
           {
             "type": "agent",
@@ -1096,7 +1138,7 @@ Create hooks by adding a `hooks` block to a settings file.
         "hooks": [
           {
             "type": "agent",
-            "prompt": "If a documentation update was already suggested in this conversation, respond with only: LGTM. If the task was a routine code change that followed existing conventions, respond with only: LGTM. Otherwise, skim CONTRIBUTING.md and .claude/CLAUDE.md to check whether the task revealed a gotcha, pattern, convention, or decision not already covered. If so, state which file may need updating and ask the user if they would like to update it. Otherwise, respond with only: LGTM."
+            "prompt": "Respond LGTM unless the conversation revealed a new gotcha, pattern, or convention. If so, remind to check whether the documentation should be updated."
           }
         ]
       }
@@ -1107,6 +1149,24 @@ Create hooks by adding a `hooks` block to a settings file.
 
 </details>
 
+`TaskCompleted` hooks fire when a task created via the Task tool for background/parallel work finishes.<br/>
+Exiting the REPL does **not** trigger `TaskCompleted` hooks. It will **only** fire when a subagent task completes.
+
+Run commands at the end **of each response or session** by leveraging the `Stop` hook event.<br/>
+It fires **on every turn**, after Claude finishes responding, which could be noisy depending on the action.
+
+Both prompt-based and agent-based hooks work **as gatekeepers** on `Stop` events, **not** as conversation
+injectors.<br/>
+They only return `{"ok": true/false, "reason": "..."}`, and only decide whether Claude should be allowed to stop.
+
+> [!note]
+> There's currently no hook event that allows prompt or agent hooks just before exiting the REPL. `Ctrl+C` and `/exit`
+> terminate the session **immediately**, without triggering any hook at all.<br/>
+> `SessionEnd` prompt or agent hooks are not yet supported **outside** of the REPL. The closest alternative is using
+> `Stop`, even if it generates noise.
+
+Beware of prompts that can start loops. Consider asking Claude to refine them.
+
 Validate Claude Code accepted the hook by using the `/hooks` command.
 
 Test the hook by asking Claude to do something that should trigger it.
@@ -1114,8 +1174,8 @@ Test the hook by asking Claude to do something that should trigger it.
 > [!important]
 > Scripts used in hooks must be executable.
 
-Command hooks communicate only through stdout, stderr, and exit codes. They **cannot** trigger commands or tool calls
-directly.<br/>
+Command hooks communicate only through `stdout`, `stderr`, and exit codes. They **cannot** trigger commands or tool
+calls directly.<br/>
 HTTP hooks only communicate through the response body.
 
 ### Prompt-based hooks
@@ -1161,8 +1221,7 @@ instructed to.
 
 Agent-based hooks spawn a subagent that can read files, search code, and use other tools to verify conditions locally
 before returning a decision.<br/>
-They use an `ok`/`reason`-like response format as prompt hooks, but have a default timeout of 60 seconds and up to 50
-tool-use turns.
+They use an `ok`/`reason`-like response format as prompt hooks, but have a default timeout of 60 seconds.
 
 <details style='padding: 0 0 1rem 1rem'>
   <summary>Example: keep <code>CONTRIBUTING.md</code> and <code>CLAUDE.md</code> updated</summary>
@@ -1476,11 +1535,13 @@ Claude Code version: `v2.1.41`.
 [How Claude Code works]: https://code.claude.com/docs/en/how-claude-code-works
 [How to create custom Skills]: https://support.claude.com/en/articles/12512198-how-to-create-custom-skills
 [Improving skill-creator: Test, measure, and refine Agent Skills]: https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
+[InstructionsLoaded hook]: https://code.claude.com/docs/en/hooks#instructionsloaded
 [Manage Claude's memory]: https://code.claude.com/docs/en/memory
 [Mastering Claude Code in 30 minutes]: https://www.youtube.com/watch?v=6eBSHbLKuN0
 [Orchestrate teams of Claude Code sessions]: https://code.claude.com/docs/en/agent-teams
 [Output styles]: https://code.claude.com/docs/en/output-styles
 [Plugins reference]: https://code.claude.com/docs/en/plugins-reference
+[Subagent memory configuration]: https://code.claude.com/docs/en/sub-agents#enable-persistent-memory
 [Tools reference]: https://code.claude.com/docs/en/tools-reference
 [Website]: https://claude.com/product/overview
 
