@@ -1057,7 +1057,7 @@ checks sequentially.
 
 Create hooks by adding a `hooks` block to a settings file.
 
-One can filter tool events further by setting the `if` field on individual hook handlers.<br/>
+Filter tool events further by setting the `if` field on individual hook handlers.<br/>
 The `if` field uses permission rule syntax to match against the tool name and arguments together, e.g. `"Bash(git *)"`
 runs only for `git` commands and `"Edit(*.ts)"` runs only for TypeScript files.
 
@@ -1149,11 +1149,15 @@ runs only for `git` commands and `"Edit(*.ts)"` runs only for TypeScript files.
 
 </details>
 
+`PreToolUse` hooks fire once per **every** tool call.<br/>
+Consider these for action-specific gates like commits or deployments, and scoping them further using the `if` field.
+
 `TaskCompleted` hooks fire when a task created via the Task tool for background/parallel work finishes.<br/>
 Exiting the REPL does **not** trigger `TaskCompleted` hooks. It will **only** fire when a subagent task completes.
 
 Run commands at the end **of each response or session** by leveraging the `Stop` hook event.<br/>
-It fires **on every turn**, after Claude finishes responding, which could be noisy depending on the action.
+It fires **on every turn**, after Claude finishes responding, which could be noisy depending on the action.<br/>
+Use `Stop` hooks for broad post-work checks. It does catch brainstorming and research conversations.
 
 Both prompt-based and agent-based hooks work **as gatekeepers** on `Stop` events, **not** as conversation
 injectors.<br/>
@@ -1165,9 +1169,12 @@ They only return `{"ok": true/false, "reason": "..."}`, and only decide whether 
 > `SessionEnd` prompt or agent hooks are not yet supported **outside** of the REPL. The closest alternative is using
 > `Stop`, even if it generates noise.
 
-Beware of prompts that can start loops. Consider asking Claude to refine them.
+`UserPromptSubmit` hooks fire **before** new work starts.
 
 Validate Claude Code accepted the hook by using the `/hooks` command.
+
+> [!caution]
+> Beware of prompts that can start loops. Consider asking Claude to detect and refine them.
 
 Test the hook by asking Claude to do something that should trigger it.
 
@@ -1201,6 +1208,10 @@ Specifically, when in need to verify something against the actual state of the c
 
 They default to using Haiku. One can specify a different model by using the `model` field, but since it is just used to
 decide whether to take action or not, it is usually not worth changing the model.
+
+Agents hooks are **fresh** invocations with limited context.<br/>
+Avoid asking hooks to detect prior conversation state (e.g. "was this already suggested?"), as they'll miss prior state
+and may cause false positives or loops. Keep conditions based on the current exchange, not history.
 
 Spawned agents will inherit context from the main session through a transcript file, but they will access it **only** if
 instructed to.
