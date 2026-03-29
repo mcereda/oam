@@ -110,6 +110,9 @@ The `recommendations[]` key shall contain the recommended extensions' identifier
 ],
 ```
 
+VSCode caches JSON schemas the first time it uses them, but they are not reloaded later.<br/>
+Force a refresh by clearing the cache using the `JSON: Clear Schema Cache` command (available since v1.64).
+
 ## Use YAML schemas
 
 ```json
