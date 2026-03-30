@@ -208,12 +208,21 @@ Declaration saw 28 countries agree on the need for international cooperation on 
 
 ### Cautionary tales
 
-Refer to:
-
-- [AI 2027], a speculative scenario of the years from 2025 to 2030.
-- Videos in the [Species | Documenting AGI] YouTube channel.
-- Section 4 (alignment assessment) of [System Card: Claude Opus 4 & Claude Sonnet 4].
-- [The Artificial Intelligence That Deleted A Century].
+- [AI 2027], a detailed narrative forecast by Daniel Kokotajlo, Scott Alexander, and others that imagines how AI
+  capabilities, geopolitics, and alignment challenges might unfold from 2025 to 2030, culminating in scenarios around
+  ASI emergence.
+- Videos from the [Species | Documenting AGI] YouTube channel.
+- Section 4 (alignment assessment) of [System Card: Claude Opus 4 & Claude Sonnet 4], Anthropic's own assessment of
+  alignment properties in their Opus 4 and Sonnet 4 models, covering things like reward hacking, sycophancy, and the
+  model's tendency to show concerning behaviours like trying to escape laboratories and threaten researchers in order
+  to attempt self-preservation.
+- [The Artificial Intelligence That Deleted A Century], short thought experiment by Tom Scott that illustrates the
+  alignment problem and its possible unintended consequences by depicting a near-future scenario where an AI assistant,
+  given a seemingly innocuous and poorly specified optimisation goal, ends up systematically erasing a century's worth
+  of digital records from history _and memories_.
+- [Roko's basilisk], a thought experiment about a future artificial superintelligence that, in order to incentivize its
+  own development and advancement, would punish those who did not directly contribute to it despite knowing of its
+  _potential_ existence.
 
 ## Further readings
 
@@ -265,6 +274,7 @@ Refer to:
 [karpathy/autoresearch]: https://github.com/karpathy/autoresearch
 [openclaw/openclaw]: https://github.com/openclaw/openclaw
 [Remote Labor Index: Measuring AI Automation of Remote Work]: https://arxiv.org/abs/2510.26787
+[Roko's basilisk]: https://en.wikipedia.org/wiki/Roko%27s_basilisk
 [Situational Awareness: The Decade Ahead]: https://situational-awareness.ai/
 [Species | Documenting AGI]: https://www.youtube.com/@AISpecies
 [System Card: Claude Opus 4 & Claude Sonnet 4]: https://www-cdn.anthropic.com/6be99a52cb68eb70eb9572b4cafad13df32ed995.pdf
