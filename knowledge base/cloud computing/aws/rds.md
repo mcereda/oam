@@ -41,7 +41,11 @@
 RDS _Instances_ are managed database environments.<br/>
 Instances _can_ be part of a _cluster_, or _standalone_ deployments.<br/>
 
-RDS _Clusters_ are collections of RDS Instances built on the Aurora engine.<br/>
+RDS _Clusters_ come in two types:
+
+- _Aurora DB clusters_: built on the Aurora engine.
+- _Multi-AZ DB clusters_: non-Aurora, for MySQL and PostgreSQL; one writer + two readable readers.
+
 Cluster-specific resources (snapshots, etc) are prefixed by _Cluster_ in the APIs, e.g. `create-db-cluster-snapshot`,
 `DBClusterIdentifier` and `DBClusterSnapshotIdentifier`.
 
@@ -70,9 +74,9 @@ Turning Performance Insights on and off does **not** cause downtime, a reboot, o
 One can choose any of the following retention periods for instances' Performance Insights data:
 
 - 7 days (default, free tier).
-- _n_ months, where _n_ is a number from 1 to 24.<br/>
+- _n_ months, where _n_ is a number from 1 to 23.<br/>
   This **must** be _n*31_ for API calls (including the CLI).
-- 731 days.
+- 731 days, likely 365 × 2 + 1 (two years accounting for one leap day).
 
 Each and every DB instance has a 30-minutes weekly maintenance window defining when modifications and software patching
 occur. Should it not be defined during creation, one will be assigned automatically at random from the default time
@@ -245,8 +249,9 @@ Use one of the following methods:
   This **should** require **minimal** downtime.
 
 RDS instances using GP2 storage can convert their volumes to GP3 just by modifying the DB instance.<br/>
-This operation does cause downtime, but performances **will** be impacted until the process ends and the change **will**
-trigger [storage optimization] for the instance.<br/>
+This operation does **not** cause downtime as the instance stays reachable throughout the process. The change, though,
+**will** trigger [storage optimization] for the instance. EBS will rebalance the data across volumes in the background,
+resulting in degraded I/O performances.<br/>
 Refer [Changing RDS storage from gp2 to gp3].
 
 ### Storage optimization
@@ -395,7 +400,8 @@ One can copy both automatic and manual DB snapshots, but only share manual DB sn
 
 Manual snapshots **never** expire and are retained until explicitly deleted.
 
-One can store up to **100** manual snapshots per Region.
+One can store up to **100** manual snapshots per Region by default. This limit is adjustable via a service quota
+increase request.
 
 ### Exporting snapshots to S3
 
@@ -612,9 +618,10 @@ Microsoft SQL Server DB instances use SQL Server Database Mirroring or Always On
 
 If an infrastructure defect results in any outage of a Multi-AZ DB instance, RDS automatically switches to the standby
 replica.<br/>
-The failover typically takes 60 to 120 seconds, but it depends on the database activity and other conditions at the time
-the primary DB instance became unavailable. Large transactions or a lengthy recovery process can increase failover
-time.<br/>
+For Multi-AZ DB _instance_ deployments (single standby), failover typically takes 60 to 120 seconds, but it depends on
+the database activity and other conditions at the time the primary DB instance became unavailable.<br/>
+For Multi-AZ DB _cluster_ deployments (two readable standbys), failover is typically under 35 seconds. Large
+transactions or a lengthy recovery process can increase failover time.<br/>
 When the failover is complete, it can take additional time for the RDS console to reflect the new AZ.
 
 For a Multi-AZ deployment, RDS creates DB snapshots and automated backups **from the secondary instance** during the
@@ -1079,7 +1086,7 @@ Impacting factors (from most to least impactful):
 1. Networking.
 
    Public IPv4 addresses associated with resources launched in a VPC are charged at standard rates.<br/>
-   This rate is $0.005/h as of 20126-02-13, and is charged in 1s increments for a minimum of 60s.
+   This rate is $0.005/h as of 2026-02-13, and is charged in 1s increments for a minimum of 60s.
 
 ### Cost-saving measures
 
@@ -1184,13 +1191,40 @@ Refer [How can I resolve the "ERROR: <module/extension> must be loaded via share
 
 ### ERROR: must be superuser to alter _X_ roles or change _X_ attribute
 
-Error message examples:
+<details>
+  <summary>Error message examples</summary>
 
 > ERROR: must be superuser to alter superuser roles or change superuser attribute<br/>
 > ERROR: must be superuser to alter replication roles or change replication attribute
 
+</details>
+
+<details>
+  <summary>Root cause</summary>
+
 RDS does **not** grant _full_ SuperUser permissions even to instances' master users.<br/>
-Actions involving altering protected roles or changing protected attributes are practically blocked on RDS.
+They instead get the `rds_superuser` role, which doesn't have permission to set the `REPLICATION` attribute directly.
+
+Actions involving altering _protected_ roles or changing _protected_ attributes are practically blocked on RDS.<br/>
+The same pattern applies to a few other RDS-specific roles like `rds_password` (for managing passwords) and `rds_iam`
+(for IAM authentication). Anywhere vanilla PostgreSQL would require a true superuser attribute, RDS typically has a
+grantable role as the alternative.
+
+</details>
+
+<details>
+  <summary>Solution</summary>
+
+Instead of `ALTER USER ... WITH REPLICATION`, use the RDS equivalent of granting the `rds_replication` role:
+
+```sql
+GRANT rds_replication TO some_role;
+```
+
+This gives that user the replication privileges without needing actual superuser access.<br/>
+Run it as member of the `rds_superuser` role (most likely, as the instance's master user).
+
+</details>
 
 ### Transport fails asking for the remote user must have superuser, but it already does
 
