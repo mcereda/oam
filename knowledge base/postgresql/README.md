@@ -1,6 +1,8 @@
 # PostgreSQL
 
 1. [TL;DR](#tldr)
+1. [Roles](#roles)
+   1. [Changing the role identifier for the session](#changing-the-role-identifier-for-the-session)
 1. [Code blocks](#code-blocks)
    1. [Functions](#functions)
 1. [Write-Ahead Logging](#write-ahead-logging)
@@ -33,9 +35,9 @@ postgres.lan:5643:postgres:postgres:BananaORama
 
 </details>
 
-Database roles represent **both** users and groups.<br/>
-Roles are **distinct** from the OS' users and groups, and are global across the whole installation (there are **no**
-DB-specific roles).
+Database _roles_ represent **both** users and groups.<br/>
+PostgreSQL roles are **distinct** from the OS' users and groups, and are global across the whole installation (there
+are **no** DB-specific roles).
 
 Extensions in PostgreSQL are managed **per database**.
 
@@ -81,7 +83,7 @@ EOF
 ```sh
 # Connect to servers via CLI client.
 # If not given:
-# - the hostname defaults to 'localhost';
+# - the hostname defaults to a local unix socket, or 'localhost' if the socket is not available;
 # - the port defaults to '5432';
 # - the username defaults to the current user;
 # - the 'sslmode' parameter defaults to 'prefer'.
@@ -108,7 +110,7 @@ pgbench -i 'test-db' -h 'hostname' -p '5555' -U 'user'
 # Create full backups of databases.
 pg_dump -U 'postgres' -d 'sales' -F 'custom' -f 'sales.bak'
 pg_dump --host 'host.fqnd' --port '5432' --username 'postgres' --dbname 'postgres' --password --schema-only
-pg_dump … -T 'customers,orders' -t 'salespeople,performances'
+pg_dump … -T 'customers' -T 'orders' -t 'salespeople' -t 'performances'
 pg_dump … -s --format 'custom'
 
 # Dump users and groups to file
@@ -135,8 +137,8 @@ scram-sha-256 'mySecretPassword'
 -- Show running queries
 SELECT * from pg_stat_activity where usename = 'monica';
 
--- Load extensions from the underlying operating system
--- They must be already installed on the instance
+-- Preload shared libraries required by some extensions (e.g. before CREATE EXTENSION anon)
+-- The library must already be installed on the instance; ALTER SYSTEM requires a server restart
 ALTER SYSTEM SET shared_preload_libraries = 'anon';
 ALTER DATABASE postgres SET session_preload_libraries = 'anon';
 
@@ -153,7 +155,127 @@ $$;
 
 </details>
 
+`ALTER SYSTEM SET shared_preload_libraries` affects **all** databases and **requires a server restart** to take
+effect.<br/>
+`ALTER DATABASE … SET session_preload_libraries` only affects the **target** database; new sessions pick it up
+**without a restart**.<br/>
+Some extensions (like `anon`), need **both** the library preloaded globally **and** the session-level load scoped to
+the target database.
+
 Also see [yugabyte/yugabyte-db] for a distributed, PostgreSQL-like DBMS.
+
+## Roles
+
+PostgreSQL uses _roles_ for **both** users-like and group-like accounts.<br/>
+They are **distinct** from the OS-defined users and groups, and are global across the whole installation (there are
+**no** DB-specific roles, only server-wide ones).
+
+### Changing the role identifier for the session
+
+One can change their current user identifier to **temporarily** _act_ as any different role they are member of.<br/>
+This is also known as _assuming_ a different role.
+
+> [!important]
+> The user _assuming_ a role must be a member of that role.<br/>
+> Grant that membership using the _superuser_ account, if needed.
+>
+> <details style='padding: 0 0 1rem 1rem'>
+>
+> ```sql
+> postgres=> \conninfo
+> You are connected to database "postgres" as user "postgres" on host "db.example.org" (address "172.31.15.15") at port "5432".
+> SSL connection (protocol: TLSv1.2, cipher: ECDHE-RSA-AES256-GCM-SHA384, compression: off)
+> postgres=> GRANT some_role TO giovanni;
+> GRANT
+> ```
+>
+> Use `WITH ADMIN OPTION` to also allow granting that role to others:
+>
+> ```sql
+> postgres=> GRANT some_role TO giovanni WITH ADMIN OPTION;
+> GRANT
+> ```
+>
+> </details>
+
+After the membership grant is in place, connect as the user and execute `SET ROLE some_role;` to assume the role.<br/>
+The **current** user drops the privileges assigned directly to them, and acquire the privileges available to the named
+role they are assuming instead. This does **not** process configuration parameters and variables applied **during
+login**.<br/>
+`SET ROLE` changes only the value of `CURRENT_USER`. `SESSION_USER` stays the same, reflecting the role one _originally_
+authenticated as.
+
+Drop the acquired privileges and go back to the normal current user's by using `RESET ROLE;` when done.<br/>
+`RESET ROLE` reverts `CURRENT_USER` back to `SESSION_USER`.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```sql
+postgres=> SELECT SESSION_USER, CURRENT_USER;
+ session_user | current_user
+--------------+--------------
+ giovanni     | giovanni
+(1 row)
+
+postgres=> SET ROLE some_role;
+SET
+postgres=> SELECT SESSION_USER, CURRENT_USER;
+ session_user | current_user
+--------------+--------------
+ giovanni     | some_role
+(1 row)
+
+postgres=> RESET ROLE;
+RESET
+postgres=> SELECT SESSION_USER, CURRENT_USER;
+ session_user | current_user
+--------------+--------------
+ giovanni     | giovanni
+(1 row)
+```
+
+</details>
+
+**Superusers** can also change both their `SESSION_USER` and `CURRENT_USER` to temporarily _become_ any other role by
+using `SET SESSION AUTHORIZATION` in place of `SET ROLE`.<br/>
+It essentially **rewrites** who the session thinks logged in.
+
+Go back to the previous session user by using `RESET SESSION AUTHORIZATION;` when done.<br/>
+`RESET SESSION AUTHORIZATION` reverts both `CURRENT_USER` and `SESSION_USER` back to the previous ones.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```sql
+postgres=> SELECT SESSION_USER, CURRENT_USER;
+ session_user | current_user
+--------------+--------------
+ giovanni     | giovanni
+(1 row)
+
+postgres=> SET SESSION AUTHORIZATION 'thomas';
+SET
+postgres=> SELECT SESSION_USER, CURRENT_USER;
+ session_user | current_user
+--------------+--------------
+ thomas       | thomas
+(1 row)
+
+postgres=> RESET SESSION AUTHORIZATION;
+RESET
+postgres=> SELECT SESSION_USER, CURRENT_USER;
+ session_user | current_user
+--------------+--------------
+ giovanni     | giovanni
+(1 row)
+```
+
+</details>
+
+`SET ROLE` requires membership in the target role, is available to any user, and only affects permission checks via
+`CURRENT_USER`. Use this to work under a different role.<br/>
+`SET SESSION AUTHORIZATION` requires superuser privileges, changes your entire identity for the session, and affects
+everything that checks either `SESSION_USER` or `CURRENT_USER`, like object ownership on newly created objects, default
+privileges, etc. Use this to impersonate a different role from a superuser session.
 
 ## Code blocks
 
@@ -256,7 +378,7 @@ LANGUAGE plpgsql
 AS $func$
   DECLARE result INTEGER;
   BEGIN
-    EXECUTE format('SELECT count(%s) FROM %s LIMIT 2', column_name, table_name) INTO result;
+    EXECUTE format('SELECT count(%I) FROM %I LIMIT 2', column_name, table_name) INTO result; -- use %I, not %s, to safely quote identifiers and prevent SQL injection
     RETURN result;
   END;
 $func$;
@@ -337,7 +459,7 @@ Only one receiver may consume changes from a slot at any given time.
 > required by a replication slot, consuming storage space. In extreme cases, this could cause the database to shut down,
 > either to prevent transaction ID wraparound or due to the disk being full.
 
-Since PostgreSQL 17 (released September 2024), logical replication slots **can** also be created on hot standbys.
+Since PostgreSQL 16 (released September 2023), logical replication slots **can** also be created on hot standbys.
 
 Use the `max_slot_wal_keep_size` parameter to configure a quota for WAL files for replication slots the `pg_wal`
 directory at checkpoint time.<br/>
@@ -364,7 +486,7 @@ FROM pg_replication_slots;
 SELECT pg_size_pretty(sum(size)) FROM pg_ls_waldir();
 
 -- Create replication slots
-pg_create_logical_replication_slot('some_slot', 'pgoutput')
+SELECT pg_create_logical_replication_slot('some_slot', 'pgoutput');
 -- PostgreSQL does not currently offer `IF NOT EXISTS` for replication slots.
 -- Consider wrapping the operation.
 DO $$
@@ -441,7 +563,7 @@ The directory format is the only format that supports parallel dumps.
 pg_dump --host 'host.fqnd' --port '5432' --username 'postgres' --dbname 'postgres' --password
 pg_dump -h 'host.fqnd' -p '5432' -U 'admin' -d 'postgres' -W
 pg_dump -U 'postgres' -d 'sales' -F 'custom' -f 'sales.bak' --schema-only
-pg_dump … -T 'customers,orders' -t 'salespeople,performances'
+pg_dump … -T 'customers' -T 'orders' -t 'salespeople' -t 'performances'
 pg_dump … -s --format 'custom'
 pg_dump … -bF'd' --jobs '3'
 
@@ -482,16 +604,14 @@ For the _limited_™ experience accrued until now, the TL;DR is:
 
 PostgreSQL offers the `pg_restore` native client utility for restoration of databases from **logical** dumps.
 
-Feed script dumps to `psql` to execute the commands in them and restore the data.
+Give archives created with `pg_dump` in one of the non-plain-text formats in input to `pg_restore`. The application will
+issue the necessary commands to reconstruct the database to the state it was in, at the time it was saved.<br/>
+Archive files allow `pg_restore` to be _somewhat_ selective about what it restores, or reorder the items prior to
+being restored.<br/>
+Archive files are also designed to be portable across architectures.
 
-One can give archives created with `pg_dump` or `pg_dumpall` in one of the non-plain-text formats in input to
-`pg_restore`. It issues the commands necessary to reconstruct the database to the state it was in at the time it was
-saved.
-
-The archive files allow `pg_restore` to be _somewhat_ selective about what it restores, or reorder the items prior to
-being restored.
-
-The archive files are designed to be portable across architectures.
+`pg_dumpall` only produces **plain-text** SQL output. It has no `--format` option and cannot produce custom, directory,
+or tar archives. Its output must be fed to `psql`, and not to `pg_restore`.
 
 > [!important]
 > Executing a restore on an online database will probably introduce conflicts of some kind.
@@ -503,7 +623,7 @@ pg_restore … --dbname 'sales' 'sales.dump'
 pg_restore … -d 'sales' -Oxj '8' 'sales.dump'
 pg_restore … -d 'sales' --clean --if-exists 'sales.dump'
 
-# Skip materialized views during a restore
+# Skip views during a restore
 pg_dump 'database' -Fc 'backup.dump'
 pg_restore --list 'backup.dump' | sed -E '/[[:digit:]]+ VIEW/,+1d' > 'no-views.lst'
 pg_restore -d 'database' --use-list 'no-views.lst' 'backup.dump'
@@ -514,7 +634,8 @@ pg_restore -d 'database' --use-list 'only-views.lst' 'backup.dump'
 
 For the _limited_™ experience accrued until now, the TL;DR is:
 
-- Prefer [pg_restore], and eventually [psql], for restoring **logical** dumps.<br/>
+- Prefer [pg_restore], and eventually [psql], for restoring **logical** dumps.
+- Feed script-type dumps (plain-text) to `psql` to execute the commands in them and restore the data.
 - Use the restore feature of the external tool used for the backup.
 
 ## Extensions of interest

@@ -181,8 +181,14 @@ GRANT rds_superuser TO mike;
 GRANT rds_replication TO some_service;
 
 -- Assume roles for the current session
+-- Allows temporarily acting as another role
+-- The current role must be member of the destination account (see 'Assign roles to users or other roles')
 SET ROLE 'admin';
 SELECT SESSION_USER, CURRENT_USER; SET ROLE 'lucas'; SELECT SESSION_USER, CURRENT_USER; RESET ROLE;
+
+-- Rewrite the session for a user
+-- Effectively changes who logged in
+-- Only available to superusers for impersonation
 SET SESSION AUTHORIZATION 'sandra';
 SELECT SESSION_USER, CURRENT_USER; SET SESSION AUTHORIZATION 'thomas'; SELECT SESSION_USER, CURRENT_USER; RESET SESSION AUTHORIZATION;
 
