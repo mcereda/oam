@@ -528,18 +528,33 @@ $ aws rds cancel-export-task --export-task-identifier 'my_export'
 Since RDS does **not** allow physical access to its managed instances, one **cannot** restore physical backups.<br/>
 It **does allow** restoring _logical_ backups, though.
 
-RDS does **not** _restore_ data in the strictest sense of the word, e.g. by rolling it back or replacing it in the
-same RDS DB instance. Instead, the service creates a **new** RDS DB instance from the desired backup point.<br/>
-This will **not** modify the original DB instance. Should one want to replace the data in an existing RDS DB instance,
-they **will** need to (either-or):
+> [!important]
+> RDS does **not** _restore data_ in the strictest sense of the word, e.g. by rolling it back or replacing it in the
+> same RDS DB instance. Instead, the service creates a **new** RDS DB instance from the desired backup point.<br/>
+> This will **not** modify the original DB instance.
+
+Should one want to _replace_ the data in an existing RDS DB instance, they **will** need to (either-or):
 
 - Restore a _logical_ backup via other means (e.g., `pg_restore`).
 - Create a new instance with the desired data, then **replace** the original DB instance with the new one.
+
+If an RDS DB instance **has automated backups enabled**, one can use it as source to create a **new** RDS DB instance
+that has the _same_ attributes and data up to a specific point in time.\
+This does **not** modify the source DB instance.
+
+Refer [Restoring a DB instance to a specified time for Amazon RDS].
+
+One can restore to any point in time within the source RDS DB instance's automatic backup retention period.
 
 When restoring from PITR or snapshots, the new instance will pass through the `creating` and
 `configuring-enhanced-monitoring` states.<br/>
 As of 2026-02-16, a `db.m8g.xlarge` instance takes about 14m to create from PITR and about 6 minutes to create from
 snapshot, then about 2 more minutes to configure monitoring.
+
+Restored DB instances are automatically associated with the **default** DB parameter and option groups, unless one
+specifies a custom parameter group and/or option group during the restore process.
+
+If the source DB instance has resource tags, RDS copies them over by default to the restored DB instance.
 
 > [!warning]
 > If the original DB instance has automatic backups enabled (or had at the time of the snapshot), the new DB instance
@@ -583,8 +598,9 @@ aws rds restore-db-instance-to-point-in-time \
 Snapshots can be used as a base to create new DB instances. Their data will be the same as it was at the time the
 snapshot was taken.
 
-This process requires the new instances to have **equal or more** allocated storage than what the original instance had
-allocated _at the time the snapshot was taken_.
+> [!important]
+> This process requires the new instances to have **equal or more** allocated storage than what the original instance
+> had allocated _at the time the snapshot was taken_.
 
 ```sh
 aws rds restore-db-instance-from-db-snapshot \
