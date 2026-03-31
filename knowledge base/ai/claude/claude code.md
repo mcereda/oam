@@ -793,6 +793,69 @@ Refer to [Grafana MCP Server].
 
 ### Limit tool execution
 
+Use the `permissions` field in a settings file to always _allow_, require Claude Code to _ask_, or _deny_ the use of
+specific tools.<br/>
+`deny` takes precedence over `ask`, which takes precedence over `allow`. The first matching rule **by category** wins.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+  "permissions": {
+    "deny": [
+      "Read(~/.env)",
+      "Read(~/.env.*)"
+    ],
+    "ask": [
+      "Bash(git branch *)",
+      "Bash(git commit *)",
+      "mcp__aws_api__call_aws"
+    ],
+    "allow": [
+      "Agent(Explore)",
+      "Bash(git checkout *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git remote get-url *)",
+      "Bash(git switch *)",
+      "Edit(/**)",
+      "Glob(/**)",
+      "Grep(/**)",
+      "Read(/**)",
+      "TodoWrite",
+      "Write(/**)"
+    ]
+  },
+}
+```
+
+</details>
+
+> [!tip]
+> Refine permissions using `PreToolUse` [hooks][using hooks].
+>
+> <details style='padding: 0 0 1rem 1rem'>
+>
+> ```json
+> {
+>   "hooks": {
+>     "PreToolUse": [
+>       {
+>         "matcher": "mcp__aws-cli__call_aws",
+>         "hooks": [
+>           {
+>             "type": "command",
+>             "command": "cmd=$(cat | jq -r 'if .cli_command | type == \"array\" then .cli_command[0] else .cli_command end'); [[ \"$cmd\" =~ ^aws[[:space:]]+[a-z-]+[[:space:]]+describe- ]] || { echo \"BLOCKED: only describe-* commands allowed\"; exit 2; }"
+>           }
+>         ]
+>       }
+>     ]
+>   }
+> }
+> ```
+>
+> </details>
+
 Leverage [Sandboxing][documentation / sandboxing] to provide filesystem and network isolation for tool execution.<br/>
 The sandboxed bash tool uses OS-level primitives to enforce defined boundaries upfront, and controls network access
 through a proxy server running outside the sandbox.<br/>
