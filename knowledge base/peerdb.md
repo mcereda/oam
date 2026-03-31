@@ -587,7 +587,7 @@ Refer [RDS Postgres Source Setup Guide].
   for easy updates (e.g. the peers and mirrors data is encoded).<br/>
   The data for peers and mirrors is encoded in ways that are **not** disclosed in the [documentation].
 
-- Newly created mirrors will start replication right away.<br/>
+- Newly created mirrors will start replication **right away**.<br/>
   Unless explicitly specified in their definition, this usually means taking an initial snapshot of the mapped tables
   from the source peer.
 
@@ -599,6 +599,9 @@ Refer [RDS Postgres Source Setup Guide].
 
 - When creating alerts through the APIs, the alert's ID in the request's data must be `-1`.<br/>
   This **will** create duplicates.
+
+- There is currently no proper feature to resync single tables.<br/>
+  A workaround is to remove the table from the mirror, then add it again.
 
 ## Further readings
 
