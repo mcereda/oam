@@ -26,9 +26,10 @@
 1. [Virtual registries](#virtual-registries)
 1. [API](#api)
 1. [Troubleshooting](#troubleshooting)
-    1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
-    1. [GitLab keeps answering with code 502](#gitlab-keeps-answering-with-code-502)
     1. [A user is unable to login](#a-user-is-unable-to-login)
+    1. [Error updating the repository for GitLab omnibus](#error-updating-the-repository-for-gitlab-omnibus)
+    1. [GitLab keeps answering with code 502](#gitlab-keeps-answering-with-code-502)
+    1. [Use access tokens to clone projects](#use-access-tokens-to-clone-projects)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -1118,11 +1119,76 @@ gitlab --order-by 'name' user list --get-all --per-page '100'
 
 ## Troubleshooting
 
-### Use access tokens to clone projects
+### A user is unable to login
 
-```sh
-git clone "https://oauth2:${ACCESS_TOKEN}@somegitlab.com/vendor/package.git"
-```
+Refer to [Invalid login or password].
+
+1. Check:
+
+   1. The user exists.
+   1. The user is entering the correct credentials.
+   1. The user is not blocked, deactivated, or banned.
+
+1. [Reset their password][reset user's passwords].
+
+### Error updating the repository for GitLab omnibus
+
+Refer to [Package repository metadata signing key].
+
+GitLab's APT and YUM repositories use a GPG key to sign their metadata.<br/>
+This key is automatically installed by the repository setup script, but might be expired and need to be updated.
+
+To update the GPG key:
+
+1. Remove all GitLab's currently installed keys:
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   ```sh
+   rpm -q 'gpg-pubkey' --qf '%{NAME}-%{VERSION}-%{RELEASE}\t%{SUMMARY}\n' \
+   | grep -i 'gitlab' \
+   | xargs sudo rpm -e
+   ```
+
+   </details>
+
+1. Purge the package manager's cache.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   ```sh
+   sudo rm -rf '/var/cache/apt'
+   sudo rm -rf '/var/cache/dnf'
+   ```
+
+   </details>
+
+1. Reimport the key.<br/>
+   Some package managers do this automatically when updating their cache.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   ```sh
+   sudo mkdir -p '/etc/apt/keyrings' \
+   && sudo curl --fail --silent --show-error \
+     --output '/etc/apt/keyrings/gitlab-keyring.asc' \
+     --url 'https://packages.gitlab.com/gpg.key'
+
+   rpm --import 'https://packages.gitlab.com/gitlab/gitlab-ee/gpgkey/gitlab-gitlab-ee-CB947AD886C8E8FD.pub.gpg'
+   ```
+
+   </details>
+
+1. Rebuild the package manager's cache.
+
+   <details style='padding: 0 0 1rem 1rem'>
+
+   ```sh
+   sudo apt update
+   sudo dnf makecache
+   ```
+
+   </details>
 
 ### GitLab keeps answering with code 502
 
@@ -1142,17 +1208,11 @@ Root cause: the socket's permissions are mapped incorrectly.
 Solution: set the correct ownership with
 `docker exec 'gitlab' chown 'gitlab-www:git' '/var/opt/gitlab/gitlab-workhorse/sockets/socket'`.
 
-### A user is unable to login
+### Use access tokens to clone projects
 
-Refer to [Invalid login or password].
-
-1. Check:
-
-   1. The user exists.
-   1. The user is entering the correct credentials.
-   1. The user is not blocked, deactivated, or banned.
-
-1. [Reset their password][reset user's passwords].
+```sh
+git clone "https://oauth2:${ACCESS_TOKEN}@somegitlab.com/vendor/package.git"
+```
 
 ## Further readings
 
@@ -1269,6 +1329,7 @@ Refer to [Invalid login or password].
 [operator guide]: https://docs.gitlab.com/operator/
 [package configuration file template]: https://gitlab.com/gitlab-org/omnibus-gitlab/-/raw/master/files/gitlab-config-template/gitlab.rb.template
 [Package registry]: https://docs.gitlab.com/user/packages/package_registry/
+[Package repository metadata signing key]: https://docs.gitlab.com/omnibus/update/package_signatures/#package-repository-metadata-signing-key
 [Password authentication enabled]: https://gitlab.com/help/administration/settings/sign_in_restrictions.md#password-authentication-enabled
 [Personal access tokens]: https://docs.gitlab.com/user/profile/personal_access_tokens/
 [Project access tokens]: https://docs.gitlab.com/user/project/settings/project_access_tokens/
