@@ -26,13 +26,20 @@ kubectl get events -n 'monitoring' --sort-by '.metadata.creationTimestamp'
 kubectl top nodes
 kubectl top pods
 
-# Create containers
+# Create pods
 kubectl run --image 'busybox' 'busybox' --dry-run='server' --output 'yaml'
 kubectl run --rm -it --image 'alpine' 'alpine' --command -- sh
 kubectl run --rm -it --image 'amazon/aws-cli:2.17.16' 'awscli' -- autoscaling describe-auto-scaling-groups
 kubectl -n 'kube-system' run --rm -it 'awscli' --overrides '{"spec":{"serviceAccountName":"cluster-autoscaler-aws"}}' \
 	--image '012345678901.dkr.ecr.eu-west-1.amazonaws.com/cache/amazon/aws-cli:2.17.16' \
 	autoscaling describe-auto-scaling-groups
+
+# List pods
+kubectl get pods
+kubectl get pods --namespace 'kube-system'
+
+# Get pods' information
+kubectl get pods --namespace 'gitlab' 'gitlab-runner' --output jsonpath-as-json='{.spec.resources[]}'
 
 # Execute commands in running containers
 kubectl exec 'some-pod' -- env
