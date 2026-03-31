@@ -564,8 +564,74 @@ Can be configured to accommodate single and multi-tenant jobs with various level
 
 Refer to [Kubernetes executor].
 
-- Play nice and make sure to leave some space for the host's other workloads by allowing for resource request and limit
-  override only up to a point.
+- Define resources requests and limits for jobs' pods to prevent unregulated resource consumption.<br/>
+  _**Container**_-level boundaries are available since around runners **v12.9.0**.
+
+  > [!important]
+  > _**Pod**_-level boundaries are **not** yet available as of runners **v18.10.0**.<br/>
+  > They will require K8S **v1.34** or higher (or v1.32/v1.33 with the `PodLevelResources` feature gate enabled).
+
+  **Pod**-level boundaries will possibly be enforced at the pod ceiling, and **should not** be surpassed.<br/>
+  It would create a _shared_ pool that all containers within that Pod could _dynamically_ use, improving management of
+  the container-level boundaries.<br/>
+  Refer to [Work Item 39085: Allow k8s runner to define Pod Level Resources for build pod] and the related
+  [MR 5922: Teach runner how to set pod-level resources for build pods].
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  > [!warning]
+  > Not yet available. This is nothing more than a speculative example.
+
+  ```toml
+  [[runners]]
+    executor = "kubernetes"
+
+    [runners.kubernetes]
+      pod_cpu_request = "1"
+      pod_cpu_limit = "4"
+      pod_memory_request = "1Gi"
+      pod_memory_limit = "8Gi"
+  ```
+
+  Confirm with `kubectl get pods --namespace <namespace> <pod-name> --output jsonpath-as-json='{.spec.resources[]}'`.
+
+  </details>
+
+  **Before** pod-level boundaries, one could avoid massive resource consumption by setting default boundaries for jobs'
+  pods' _**containers**_ (but **not** the jobs' pods themselves) to strict resource limits and requests.
+
+  <details style="padding: 0 0 1rem 1rem">
+
+  ```toml
+  [[runners]]
+    executor = "kubernetes"
+
+    [runners.kubernetes]
+      cpu_request = "0"
+      cpu_limit = "2"
+      memory_request = "0"
+      memory_limit = "2Gi"
+      ephemeral_storage_request = "0"
+      ephemeral_storage_limit = "512Mi"
+
+      helper_cpu_request = "0"
+      helper_cpu_limit = "0.5"
+      helper_memory_request = "0"
+      helper_memory_limit = "128Mi"
+      helper_ephemeral_storage_request = "0"
+      helper_ephemeral_storage_limit = "64Mi"
+
+      service_cpu_request = "0"
+      service_cpu_limit = "1"
+      service_memory_request = "0"
+      service_memory_limit = "0.5Gi"
+  ```
+
+  </details>
+
+- Makes sure to leave some space for the host's other workloads by allowing for resource request and limit override
+  only up to a point.<br/>
+  Available since runners v13.4.0, _possibly_ being superseded by pod-level boundaries in runners v18.11.0.
 
   <details style="padding: 0 0 1rem 1rem">
 
@@ -641,43 +707,8 @@ Refer to [Kubernetes executor].
 
   </details>
 
-- Avoid massive resource consumption by defaulting to (very?) strict resource limits and `0` request.
-
-  <details style="padding: 0 0 1rem 1rem">
-
-  ```toml
-  [[runners]]
-    [runners.kubernetes]
-      cpu_request = "0"
-      cpu_limit = "2"
-      memory_request = "0"
-      memory_limit = "2Gi"
-      ephemeral_storage_request = "0"
-      ephemeral_storage_limit = "512Mi"
-
-      helper_cpu_request = "0"
-      helper_cpu_limit = "0.5"
-      helper_memory_request = "0"
-      helper_memory_limit = "128Mi"
-      helper_ephemeral_storage_request = "0"
-      helper_ephemeral_storage_limit = "64Mi"
-
-      service_cpu_request = "0"
-      service_cpu_limit = "1"
-      service_memory_request = "0"
-      service_memory_limit = "0.5Gi"
-  ```
-
-  </details>
-
 - Maintain cluster capacity leveraging no-op pods.<br/>
   Refer to [Pre-warm cluster capacity with pause pods].
-
-- Specify resources requests and limits for jobs' pods.<br/>
-  Refer to [Allow k8s runner to define Pod Level Resources for build pod].
-
-  > [!important]
-  > Available since runners **v18.10**.
 
 ## Autoscaling
 
@@ -1040,7 +1071,6 @@ Refer to [External secrets in pipelines].
 <!-- Files -->
 <!-- Upstream -->
 [Advanced configuration]: https://docs.gitlab.com/runner/configuration/advanced-configuration/
-[Allow k8s runner to define Pod Level Resources for build pod]: https://gitlab.com/gitlab-org/gitlab-runner/-/work_items/39085
 [autoscaling gitlab runner on aws ec2]: https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/
 [docker autoscaler executor]: https://docs.gitlab.com/runner/executors/docker_autoscaler/
 [docker executor]: https://docs.gitlab.com/runner/executors/docker/
@@ -1058,11 +1088,13 @@ Refer to [External secrets in pipelines].
 [install gitlab runner]: https://docs.gitlab.com/runner/install/
 [instance executor]: https://docs.gitlab.com/runner/executors/instance/
 [Kubernetes executor]: https://docs.gitlab.com/runner/executors/kubernetes/
+[MR 5922: Teach runner how to set pod-level resources for build pods]: https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/5922
 [Pre-warm cluster capacity with pause pods]: https://docs.gitlab.com/runner/executors/kubernetes/#pre-warm-cluster-capacity-with-pause-pods
 [Protect job pods from eviction]: https://docs.gitlab.com/runner/executors/kubernetes/#protect-job-pods-from-eviction
 [signals]: https://docs.gitlab.com/runner/commands/#signals
 [store registration tokens or runner tokens in secrets]: https://docs.gitlab.com/runner/install/kubernetes/#store-registration-tokens-or-runner-tokens-in-secrets
 [Use external secrets in CI/CD]: https://docs.gitlab.com/ci/secrets/
+[Work Item 39085: Allow k8s runner to define Pod Level Resources for build pod]: https://gitlab.com/gitlab-org/gitlab-runner/-/work_items/39085
 
 <!-- Others -->
 [authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb
