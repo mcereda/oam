@@ -1,5 +1,7 @@
 # GitLab runner
 
+CI/CD job execution agent that picks up jobs from a GitLab instance and runs them in configurable environments.
+
 1. [TL;DR](#tldr)
 1. [Pull images from private AWS ECR registries](#pull-images-from-private-aws-ecr-registries)
 1. [Executors](#executors)
@@ -7,10 +9,15 @@
    1. [Docker Machine executor](#docker-machine-executor)
    1. [Instance executor](#instance-executor)
    1. [Kubernetes executor](#kubernetes-executor)
+      1. [Gotchas](#gotchas)
+      1. [Define resource limits and requests for jobs' pods](#define-resource-limits-and-requests-for-jobs-pods)
+      1. [Force runner managers onto specific nodes](#force-runner-managers-onto-specific-nodes)
+      1. [Force jobs' pods onto specific nodes](#force-jobs-pods-onto-specific-nodes)
+      1. [Maintain cluster capacity leveraging no-op pods](#maintain-cluster-capacity-leveraging-no-op-pods)
+      1. [Prevent the cluster from evicting jobs' pods during _voluntary_ disruptions](#prevent-the-cluster-from-evicting-jobs-pods-during-voluntary-disruptions)
 1. [Autoscaling](#autoscaling)
    1. [Docker Machine](#docker-machine)
    1. [GitLab Runner Autoscaler](#gitlab-runner-autoscaler)
-   1. [Kubernetes](#kubernetes)
 1. [Integrate with secret managers](#integrate-with-secret-managers)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -66,7 +73,7 @@ Runners require the Server to provide the **full** certificate chain upon connec
 
 Refer to [Advanced configuration] for details.
 
-The `runners.autoscaler.policy.periods` setting appears to be a full blown cron job, not just a time frame.
+The `runners.autoscaler.policy.periods` setting appears to be a full-blown cron job, not just a time frame.
 
 <details style="margin-top: -1em; padding: 0 0 1em 1em;">
 
@@ -116,11 +123,9 @@ One can use system signals to interact with Runners.
 
 ## Pull images from private AWS ECR registries
 
-FIXME
-
-1. Create an IAM Role in one's AWS account and attach it the
+1. Create an IAM Role in one's AWS account and attach to it the
    `arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly` IAM policy.
-1. Create and InstanceProfile using the above IAM Role.
+1. Create an InstanceProfile using the above IAM Role.
 1. Create an EC2 Instance.<br/>
    Make it use the above InstanceProfile.
 1. Install the Docker Engine and the [GitLab runner][install gitlab runner] on the EC2 Instance.
@@ -168,7 +173,7 @@ FIXME
        - php ./vendor/bin/phpunit --coverage-text --colors=never
    ```
 
-Now your GitLab runner should automatically authenticate to one's private ECR registry.
+The GitLab runner should now automatically authenticate to one's private ECR registry.
 
 ## Executors
 
@@ -197,7 +202,7 @@ The container images are pulled by the Autoscaler, which then feeds them to the 
 - Workers do **not** need direct image access.
 - **Both** the Autoscaler **and** the Workers require the Docker Engine to be installed.
 
-Multiple Autoscaler do **not** play well managing the same resources.<br/>
+Multiple Autoscalers do **not** play well managing the same resources.<br/>
 They end up competing for resources, and will try to delete each other's Workers.
 
 <details>
@@ -332,19 +337,19 @@ Requirements:
     "Version": "2012-10-17",
     "Statement": [
       {
-          Sid: "AllowAuthenticatingWithEcr",
-          Effect: "Allow",
-          Action: "ecr:GetAuthorizationToken",
-          Resource: "*",
+        "Sid": "AllowAuthenticatingWithEcr",
+        "Effect": "Allow",
+        "Action": "ecr:GetAuthorizationToken",
+        "Resource": "*"
       },
       {
-          Sid: "AllowPullingImagesFromEcr",
-          Effect: "Allow",
-          Action: [
-              "ecr:BatchGetImage",
-              "ecr:GetDownloadUrlForLayer",
-          ],
-          Resource: "012345678901.dkr.ecr.eu-west-1.amazonaws.com/some-repo/busybox",
+        "Sid": "AllowPullingImagesFromEcr",
+        "Effect": "Allow",
+        "Action": [
+          "ecr:BatchGetImage",
+          "ecr:GetDownloadUrlForLayer"
+        ],
+        "Resource": "012345678901.dkr.ecr.eu-west-1.amazonaws.com/some-repo/busybox"
       }
     ]
   }
@@ -365,7 +370,7 @@ Procedure:
 
    </details>
 
-1. Install GitLab Runner on the **Autoscaling** instance.
+1. Install GitLab Runner on the **Autoscaler** instance.
 1. Configure the Runner to use the `docker-autoscaler` executor.
 
    <details style="margin-top: -1em; padding-bottom: 1em;">
@@ -564,200 +569,10 @@ Can be configured to accommodate single and multi-tenant jobs with various level
 
 Refer to [Kubernetes executor].
 
-- Define resources requests and limits for jobs' pods to prevent unregulated resource consumption.<br/>
-  _**Container**_-level boundaries are available since around runners **v12.9.0**.
-
-  > [!important]
-  > _**Pod**_-level boundaries are **not** yet available as of runners **v18.10.0**.<br/>
-  > They will require K8S **v1.34** or higher (or v1.32/v1.33 with the `PodLevelResources` feature gate enabled).
-
-  **Pod**-level boundaries will possibly be enforced at the pod ceiling, and **should not** be surpassed.<br/>
-  It would create a _shared_ pool that all containers within that Pod could _dynamically_ use, improving management of
-  the container-level boundaries.<br/>
-  Refer to [Work Item 39085: Allow k8s runner to define Pod Level Resources for build pod] and the related
-  [MR 5922: Teach runner how to set pod-level resources for build pods].
-
-  <details style="padding: 0 0 1rem 1rem">
-
-  > [!warning]
-  > Not yet available. This is nothing more than a speculative example.
-
-  ```toml
-  [[runners]]
-    executor = "kubernetes"
-
-    [runners.kubernetes]
-      pod_cpu_request = "1"
-      pod_cpu_limit = "4"
-      pod_memory_request = "1Gi"
-      pod_memory_limit = "8Gi"
-  ```
-
-  Confirm with `kubectl get pods --namespace <namespace> <pod-name> --output jsonpath-as-json='{.spec.resources[]}'`.
-
-  </details>
-
-  **Before** pod-level boundaries, one could avoid massive resource consumption by setting default boundaries for jobs'
-  pods' _**containers**_ (but **not** the jobs' pods themselves) to strict resource limits and requests.
-
-  <details style="padding: 0 0 1rem 1rem">
-
-  ```toml
-  [[runners]]
-    executor = "kubernetes"
-
-    [runners.kubernetes]
-      cpu_request = "0"
-      cpu_limit = "2"
-      memory_request = "0"
-      memory_limit = "2Gi"
-      ephemeral_storage_request = "0"
-      ephemeral_storage_limit = "512Mi"
-
-      helper_cpu_request = "0"
-      helper_cpu_limit = "0.5"
-      helper_memory_request = "0"
-      helper_memory_limit = "128Mi"
-      helper_ephemeral_storage_request = "0"
-      helper_ephemeral_storage_limit = "64Mi"
-
-      service_cpu_request = "0"
-      service_cpu_limit = "1"
-      service_memory_request = "0"
-      service_memory_limit = "0.5Gi"
-  ```
-
-  </details>
-
-- Makes sure to leave some space for the host's other workloads by allowing for resource request and limit override
-  only up to a point.<br/>
-  Available since runners v13.4.0, _possibly_ being superseded by pod-level boundaries in runners v18.11.0.
-
-  <details style="padding: 0 0 1rem 1rem">
-
-  ```toml
-  [[runners]]
-    [runners.kubernetes]
-      cpu_limit_overwrite_max_allowed = "15"
-      cpu_request_overwrite_max_allowed = "15"
-      memory_limit_overwrite_max_allowed = "62Gi"
-      memory_request_overwrite_max_allowed = "62Gi"
-      ephemeral_storage_limit_overwrite_max_allowed = "49Gi"
-      ephemeral_storage_request_overwrite_max_allowed = "49Gi"
-
-      helper_cpu_limit_overwrite_max_allowed = "0.9"
-      helper_cpu_request_overwrite_max_allowed = "0.9"
-      helper_memory_limit_overwrite_max_allowed = "1Gi"
-      helper_memory_request_overwrite_max_allowed = "1Gi"
-      helper_ephemeral_storage_limit_overwrite_max_allowed = "1Gi"
-      helper_ephemeral_storage_request_overwrite_max_allowed = "1Gi"
-
-      service_cpu_limit_overwrite_max_allowed = "3.9"
-      service_cpu_request_overwrite_max_allowed = "3.9"
-      service_memory_limit_overwrite_max_allowed = "15.5Gi"
-      service_memory_request_overwrite_max_allowed = "15.5Gi"
-      service_ephemeral_storage_limit_overwrite_max_allowed = "15Gi"
-      service_ephemeral_storage_request_overwrite_max_allowed = "15Gi"
-  ```
-
-  </details>
-
-- Dedicate specific nodes to runner executors.<br/>
-  Taint dedicated nodes and add tolerations and affinities to the runner's configuration.
-
-  <details style="padding: 0 0 1rem 1rem">
-
-  ```toml
-  [[runners]]
-    [runners.kubernetes]
-
-    [runners.kubernetes.node_selector]
-      gitlab = "true"
-      "kubernetes.io/arch" = "amd64"
-
-      [runners.kubernetes.affinity]
-        [runners.kubernetes.affinity.node_affinity]
-          [runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution]
-            [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms]]
-              [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
-                key = "app"
-                operator = "In"
-                values = [ "gitlab-runner" ]
-              [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
-                key = "customLabel"
-                operator = "In"
-                values = [ "customValue" ]
-
-            [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution]]
-              weight = 1
-
-              [runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference]
-                [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference.match_expressions]]
-                  key = "eks.amazonaws.com/capacityType"
-                  operator = "In"
-                  values = [ "ON_DEMAND" ]
-
-      [runners.kubernetes.node_tolerations]
-        "app=gitlab-runner" = "NoSchedule"
-        "node-role.kubernetes.io/master" = "NoSchedule"
-        "custom.toleration=value" = "NoSchedule"
-        "empty.value=" = "PreferNoSchedule"
-        onlyKey = ""
-  ```
-
-  </details>
-
-- Maintain cluster capacity leveraging no-op pods.<br/>
-  Refer to [Pre-warm cluster capacity with pause pods].
-
-## Autoscaling
-
-Refer to [GitLab Runner Autoscaling].
-
-GitLab Runner can automatically scale using public cloud instances when configured to use an autoscaler.
-
-Autoscaling options are available for public cloud instances and the following orchestration solutions:
-
-- OpenShift.
-- Kubernetes.
-- Amazon ECS clusters using Fargate.
-
-### Docker Machine
-
-Refer to [Autoscaling GitLab Runner on AWS EC2].
-
-One or more runners must act as managers, and be configured to use the
-[Docker Machine executor](#docker-machine-executor).<br/>
-Managers interact with the cloud infrastructure to create multiple runner instances to execute jobs.<br/>
-Cloud instances acting as managers shall **not** be spot instances.
-
-### GitLab Runner Autoscaler
-
-Refer to [GitLab Runner Autoscaler].
-
-Successor to the [Docker Machine](#docker-machine).
-
-Composed of:
-
-- **Taskscaler**: manages autoscaling logic, bookkeeping, and fleets creations.
-- **Fleeting**: abstraction for cloud-provided virtual machines.
-- **Cloud provider plugin**: handles the API calls to the target cloud platform.
-
-One or more runners must act as managers.<br/>
-Managers interact with the cloud infrastructure to create multiple runner instances to execute jobs.<br/>
-Cloud instances acting as managers shall **not** be spot instances.
-
-Managers must be configured to use one or more of the specific executors for autoscaling:
-
-- [Instance executor](#instance-executor).
-- [Docker Autoscaling executor](#docker-autoscaler-executor).
-
-### Kubernetes
-
-Refer to [Kubernetes executor].
-
-[Store tokens in secrets][store registration tokens or runner tokens in secrets] instead of putting the token in the
-chart's values.
+> [!tip]
+> [Store tokens in secrets][store registration tokens or runner tokens in secrets] instead of putting the token in the
+> chart's values.<br/>
+> Consider using the `extraObjects` key there.
 
 Requirements:
 
@@ -773,7 +588,7 @@ Requirements:
    kubectl create namespace 'gitlab'
    ```
 
-1. Create a runner in gitlab:
+1. Create a runner in GitLab:
 
    <details>
      <summary>Web UI</summary>
@@ -820,6 +635,13 @@ Requirements:
      --values 'values.yaml' --set 'runners.secret=gitlab-runner-token'
    ```
 
+1. Check that the runner's configuration has been merged
+
+   ```sh
+   kubectl exec -it --namespace 'gitlab' 'gitlab-runner-6cf8c56bd9-cfvf7' \
+     -- cat '/home/gitlab-runner/.gitlab-runner/config.toml'
+   ```
+
 </details>
 
 <details style="padding-bottom: 1em;">
@@ -836,6 +658,19 @@ rbac:
   create: true
 metrics:
   enabled: true
+
+resources:   # these apply to the runners' manager, not to jobs' pods
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+deploymentLabels:
+  team: engineering
+podLabels:
+  team: engineering
 
 runners:
   name: k8s-runner-autoscaler
@@ -860,145 +695,374 @@ runners:
           "never"
         ]
 
-        [runners.kubernetes.affinity]
-          [runners.kubernetes.affinity.node_affinity]
-            [runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution]
-              [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms]]
-                [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
-                  key = "org.example.reservation/app"
-                  operator = "In"
-                  values = [ "gitlab" ]
-                [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
-                  key = "org.example.reservation/component"
-                  operator = "In"
-                  values = [ "runner" ]
-            [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution]]
-              weight = 1
-              [runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference]
-                [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference.match_expressions]]
-                  key = "eks.amazonaws.com/capacityType"
-                  operator = "In"
-                  values = [ "ON_DEMAND" ]
-        [runners.kubernetes.node_tolerations]
-          "org.example.reservation/app=gitlab" = "NoSchedule"
-          "org.example.reservation/component=runner" = "NoSchedule"
-
-resources:
-  requests:
-    cpu: 50m
-    memory: 64Mi
-  limits:
-    cpu: 100m
-    memory: 128Mi
-
-deploymentLabels:
-  team: engineering
-podLabels:
-  team: engineering
+        [runners.kubernetes.pod_annotations]
+          "cluster-autoscaler.kubernetes.io/safe-to-evict" = "false"
 ```
 
 </details>
 
-Gotchas:
+#### Gotchas
 
 - The _build_, _helper_ and multiple _service_ containers will all reside in a single pod.<br/>
   If **the sum** of the resources request by **all** of them is too high, it will **not** be scheduled and the pipeline
   will hang and fail.
 
-  Update: this _might™_ be resolvable since version 18.10. Refer to
-  [Allow k8s runner to define Pod Level Resources for build pod].
+  Update: this _might™_ be resolvable starting runners v18.11. Refer to
+  [Work Item 39085: Allow k8s runner to define Pod Level Resources for build pod].
 
 - If any job's pod is killed due to OOM, the pipeline that spawned it will hang until it times out.
 
-Improvements:
+#### Define resource limits and requests for jobs' pods
 
-- Keep **the manager pod** on stable nodes by configuring affinity and tolerations in the helm chart's values.
+Define resources requests and limits for jobs' pods to prevent unregulated resource consumption.<br/>
+_**Container**_-level boundaries are available since around runners **v12.9.0**.
 
-  <details style="padding: 0 0 1rem 1rem">
+> [!important]
+> _**Pod**_-level boundaries are **not** yet available as of runners **v18.10.0**.<br/>
+> They will require K8S **v1.34** or higher (or v1.32/v1.33 with the `PodLevelResources` feature gate enabled).
 
-  ```diff
-  affinity:
-    nodeAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 2
-          preference:
+**Pod**-level boundaries will possibly be enforced at the pod ceiling, and **should not** be surpassed.<br/>
+It would create a _shared_ pool that all containers within that Pod could _dynamically_ use, improving management of
+the container-level boundaries.<br/>
+Refer to [Work Item 39085: Allow k8s runner to define Pod Level Resources for build pod] and the related
+[MR 5922: Teach runner how to set pod-level resources for build pods].
+
+<details style="padding: 0 0 1rem 1rem">
+
+> [!warning]
+> Not yet available. This is nothing more than a speculative example.
+
+```toml
+[[runners]]
+  executor = "kubernetes"
+
+  [runners.kubernetes]
+    pod_cpu_request = "1"
+    pod_cpu_limit = "4"
+    pod_memory_request = "1Gi"
+    pod_memory_limit = "8Gi"
+```
+
+Confirm jobs' pods receive resource specifications with the following command:
+
+```sh
+kubectl get pods --namespace '<namespace>' '<pod-name>' --output jsonpath-as-json='{.spec.resources[]}'
+```
+
+</details>
+
+**Before** pod-level boundaries, one could avoid massive resource consumption by setting default boundaries for jobs'
+pods' _**containers**_ (but **not** the jobs' pods themselves) to strict resource limits and requests.
+
+<details style="padding: 0 0 1rem 1rem">
+
+```toml
+[[runners]]
+  executor = "kubernetes"
+
+  [runners.kubernetes]
+    cpu_request = "0"
+    cpu_limit = "2"
+    memory_request = "0"
+    memory_limit = "2Gi"
+    ephemeral_storage_request = "0"
+    ephemeral_storage_limit = "512Mi"
+
+    helper_cpu_request = "0"
+    helper_cpu_limit = "0.5"
+    helper_memory_request = "0"
+    helper_memory_limit = "128Mi"
+    helper_ephemeral_storage_request = "0"
+    helper_ephemeral_storage_limit = "64Mi"
+
+    service_cpu_request = "0"
+    service_cpu_limit = "1"
+    service_memory_request = "0"
+    service_memory_limit = "0.5Gi"
+```
+
+</details>
+
+Make sure to leave some space for the host's other workloads by allowing for resource request and limit override
+only up to a point.<br/>
+Available since runners v13.4.0, _possibly_ being superseded by pod-level boundaries in runners v18.11.0.
+
+<details style="padding: 0 0 1rem 1rem">
+
+```toml
+[[runners]]
+  [runners.kubernetes]
+    cpu_limit_overwrite_max_allowed = "15"
+    cpu_request_overwrite_max_allowed = "15"
+    memory_limit_overwrite_max_allowed = "62Gi"
+    memory_request_overwrite_max_allowed = "62Gi"
+    ephemeral_storage_limit_overwrite_max_allowed = "49Gi"
+    ephemeral_storage_request_overwrite_max_allowed = "49Gi"
+
+    helper_cpu_limit_overwrite_max_allowed = "0.9"
+    helper_cpu_request_overwrite_max_allowed = "0.9"
+    helper_memory_limit_overwrite_max_allowed = "1Gi"
+    helper_memory_request_overwrite_max_allowed = "1Gi"
+    helper_ephemeral_storage_limit_overwrite_max_allowed = "1Gi"
+    helper_ephemeral_storage_request_overwrite_max_allowed = "1Gi"
+
+    service_cpu_limit_overwrite_max_allowed = "3.9"
+    service_cpu_request_overwrite_max_allowed = "3.9"
+    service_memory_limit_overwrite_max_allowed = "15.5Gi"
+    service_memory_request_overwrite_max_allowed = "15.5Gi"
+    service_ephemeral_storage_limit_overwrite_max_allowed = "15Gi"
+    service_ephemeral_storage_request_overwrite_max_allowed = "15Gi"
+```
+
+</details>
+
+#### Force runner managers onto specific nodes
+
+Keep **the manager pod** on stable nodes by configuring affinity and tolerations in the helm chart's **values**.
+
+<details style="padding: 0 0 1rem 1rem">
+
+```yaml
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 2
+        preference:
+          matchExpressions:
+            - key: eks.amazonaws.com/capacityType
+              operator: In
+              values:
+                - ON_DEMAND
+      - weight: 1
+        preference:
+          matchExpressions:
+            - key: org.example.reservation/app
+              operator: In
+              values:
+                - gitlab
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
             matchExpressions:
-              - key: eks.amazonaws.com/capacityType
+              - key: app
                 operator: In
                 values:
-                  - ON_DEMAND
-        - weight: 1
-          preference:
-            matchExpressions:
-              - key: org.example.reservation/app
-                operator: In
-                values:
-                  - gitlab
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 1
-          podAffinityTerm:
-            topologyKey: kubernetes.io/hostname
-            labelSelector:
-              matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                    - gitlab-runner
-  tolerations:
-    - key: CriticalAddonsOnly
-      operator: Exists
-    - key: org.example.reservation/app
-      operator: Equal
-      value: gitlab
-    - key: org.example.reservation/component
-      operator: Equal
-      value: runner
-  ```
+                  - gitlab-runner
+tolerations:
+  - key: CriticalAddonsOnly
+    operator: Exists
+  - key: org.example.reservation/app
+    operator: Equal
+    value: gitlab
+  - key: org.example.reservation/component
+    operator: Equal
+    value: runner
+```
 
-  </details>
+</details>
 
-- Avoid evicting **job pods** during node drains and cluster upgrades.
+#### Force jobs' pods onto specific nodes
 
-  Refer to [Protect job pods from eviction].
+Settings must be added to the runners' **configuration**.
 
-  > [!important]
-  > Available since runners **v18.11**.
+Leverage node selectors.<br/>
+Otherwise (or both), taint the nodes and add tolerations and affinities.
 
-  <details style="padding: 0 0 1rem 1rem">
-    <summary>Helm chart's values</summary>
+<details style="padding: 0 0 1rem 1rem">
 
-  ```diff
-   rbac:
-     create: true
-  +  rules:
-  +    - # default set if rules was not customized
-  +      apiGroups: [""]
-  +      resources: ["*"]
-  +      verbs: ["*"]
-  +    - # protect job pods from eviction during node drains and cluster upgrades
-  +      apiGroups: ["policy"]
-  +      resources: ["poddisruptionbudgets"]
-  +      verbs: ["create", "delete", "get"]
-   serviceAccount:
-     create: true
-   …
-   runners:
-     config: |
-       [[runners]]
-         [runners.kubernetes]
-           namespace = "{{.Release.Namespace}}"
-  +        pod_disruption_budget = true  # protect job pods from eviction during node drains and cluster upgrades
-  ```
+```toml
+[[runners]]
+  [runners.kubernetes]
 
-  Confirm the Role/ClusterRole created by the Helm chart is actually bound in the namespace where job pods run:
+    # using node selectors
+    [runners.kubernetes.node_selector]
+      gitlab = "true"
+      "kubernetes.io/arch" = "amd64"
 
-  ```sh
-  kubectl auth can-i create poddisruptionbudgets.policy --namespace 'gitlab' \
-    --as='system:serviceaccount:gitlab:gitlab-runner'
-  ```
+    [runners.kubernetes.affinity]
+      [runners.kubernetes.affinity.node_affinity]
+        [runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution]
+          [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms]]
+            [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
+              key = "org.example.reservation/app"
+              operator = "In"
+              values = [ "gitlab" ]
+            [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
+              key = "org.example.reservation/component"
+              operator = "In"
+              values = [ "runner" ]
+        [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution]]
+          weight = 1
+          [runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference]
+            [[runners.kubernetes.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference.match_expressions]]
+              key = "eks.amazonaws.com/capacityType"
+              operator = "In"
+              values = [ "ON_DEMAND" ]
+    [runners.kubernetes.node_tolerations]
+      "org.example.reservation/app=gitlab" = "NoSchedule"
+      "org.example.reservation/component=runner" = "NoSchedule"
+      "node-role.kubernetes.io/master" = "NoSchedule"
+      "custom.toleration=value" = "NoSchedule"
+      "empty.value=" = "PreferNoSchedule"
+      onlyKey = ""
+```
 
-  </details>
+</details>
+
+#### Maintain cluster capacity leveraging no-op pods
+
+Refer to [Pre-warm cluster capacity with pause pods].
+
+#### Prevent the cluster from evicting jobs' pods during _voluntary_ disruptions
+
+Refer to [Protect job pods from eviction].
+
+> [!important]
+> **Not** yet available as of runners **v18.10.0**, even if the documentation says otherwise.<br/>
+> If using an autoscaler for the cluster, consider using pod annotations like `karpenter.sh/do-not-disrupt: "true"` or
+> `cluster-autoscaler.kubernetes.io/safe-to-evict: "false"` instead to give the jobs' pods _similar_ protection without
+> needing the runner to cooperate.
+>
+> <details style='padding: 0 0 1rem 1rem'>
+>
+> ```toml
+> [[runners]]
+>   [runners.kubernetes]
+>     [runners.kubernetes.pod_annotations]
+>       "cluster-autoscaler.kubernetes.io/safe-to-evict" = "false"
+>       "karpenter.sh/do-not-disrupt" = "true"
+> ```
+>
+> </details>
+
+Enable the `pod_disruption_budget` runner executor configuration option to protect job pods from eviction during
+_voluntary_ interruptions like node drains and cluster upgrades.<br/>
+This does **not** protect against _involuntary_ disruptions like node failures or out-of-memory kills.
+
+The runner manager creates a `PodDisruptionBudget` for each job pod, with `minAvailable: 1`. Running jobs will
+_**block**_ any `kubectl drain` on their nodes until the jobs finish or time out.<br/>
+The PodDisruptionBudget resource is then automatically deleted together with its own job's pod when it ends.
+
+May cause node drains to hang if a job is running. Ensure the cluster upgrade strategy accounts for potential node
+drain delays, or use job timeouts to limit how long a job can run.
+
+> [!important]
+> Requires a service account with `poddisruptionbudgets` permissions.
+>
+> <details style="padding: 0 0 0 1rem">
+>   <summary>Direct definition in Helm chart's values</summary>
+>
+> ```yml
+> rbac:
+>   create: true
+>   rules:
+>     # defaults (granted when `rules: []`)
+>     - apiGroups: [""]
+>       resources: ["*"]
+>       verbs: ["*"]
+>     # PDB addition
+>     - apiGroups: ["policy"]
+>       resources: ["poddisruptionbudgets"]
+>       verbs: ["create", "get"]
+> ```
+>
+> </details>
+>
+> <details style="padding: 0 0 1rem 1rem">
+>   <summary>Create a supplementary Role and RoleBinding</summary>
+>
+> ```yml
+> apiVersion: rbac.authorization.k8s.io/v1
+> kind: Role
+> metadata:
+>   name: gitlab-runner-pdb
+>   namespace: gitlab-runner                # same as runners' service account's
+> rules:
+>   - apiGroups: ["policy"]
+>     resources: ["poddisruptionbudgets"]
+>     verbs: ["create", "get"]
+> ---
+> apiVersion: rbac.authorization.k8s.io/v1
+> kind: RoleBinding
+> metadata:
+>   name: gitlab-runner-pdb
+>   namespace: gitlab-runner                # same as runners' service account's
+> roleRef:
+>   apiGroup: rbac.authorization.k8s.io
+>   kind: Role
+>   name: gitlab-runner-pdb
+> subjects:
+>   - kind: ServiceAccount
+>     name: gitlab-runner-service-account   # runners' service account name
+>     namespace: gitlab-runner              # same as runners' service account's
+> ```
+>
+> </details>
+>
+> Confirm the Role/ClusterRole created by the Helm chart is actually bound in the namespace where job pods run:
+>
+> ```sh
+> kubectl auth can-i create poddisruptionbudgets.policy --namespace 'gitlab' \
+>   --as='system:serviceaccount:gitlab:gitlab-runner'
+> ```
+
+<details style="padding: 0 0 1rem 0">
+  <summary>Runners' configuration snippet</summary>
+
+```toml
+[[runners]]
+  executor = "kubernetes"
+
+  [runners.kubernetes]
+    pod_disruption_budget = true
+```
+
+</details>
+
+## Autoscaling
+
+Refer to [GitLab Runner Autoscaling].
+
+GitLab Runner can automatically scale using public cloud instances when configured to use an autoscaler.
+
+Autoscaling options are available for public cloud instances and the following orchestration solutions:
+
+- OpenShift.
+- Kubernetes.
+- Amazon ECS clusters using Fargate.
+
+### Docker Machine
+
+Refer to [Autoscaling GitLab Runner on AWS EC2].
+
+One or more runners must act as managers, and be configured to use the
+[Docker Machine executor](#docker-machine-executor).<br/>
+Managers interact with the cloud infrastructure to create multiple runner instances to execute jobs.<br/>
+Cloud instances acting as managers shall **not** be spot instances.
+
+### GitLab Runner Autoscaler
+
+Refer to [GitLab Runner Autoscaler].
+
+Successor to the [Docker Machine](#docker-machine).
+
+Composed of:
+
+- **Taskscaler**: manages autoscaling logic, bookkeeping, and fleets creations.
+- **Fleeting**: abstraction for cloud-provided virtual machines.
+- **Cloud provider plugin**: handles the API calls to the target cloud platform.
+
+One or more runners must act as managers.<br/>
+Managers interact with the cloud infrastructure to create multiple runner instances to execute jobs.<br/>
+Cloud instances acting as managers shall **not** be spot instances.
+
+Managers must be configured to use one or more of the specific executors for autoscaling:
+
+- [Instance executor](#instance-executor).
+- [Docker Autoscaling executor](#docker-autoscaler-executor).
 
 ## Integrate with secret managers
 
