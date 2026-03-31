@@ -1,17 +1,26 @@
 {
-    "outputStyle": "Explanatory",
+    "minimumVersion": "2.1.81",
     "autoUpdatesChannel": "stable",
-    "minimumVersion": "2.1.76",
+
+    "outputStyle": "Explanatory",
+    "autoDreamEnabled": true,
     "prefersReducedMotion": true,
     "voiceEnabled": true,
 
     "model": "opusplan",
-    "effortLevel": "medium",
     "alwaysThinkingEnabled": true,
+    "effortLevel": "medium",
 
     "env": {
         "DISABLE_TELEMETRY": "1"
     },
+    "enabledPlugins": {
+        "skill-creator@claude-plugins-official": true,
+        "gitlab@claude-plugins-official": true
+    },
+    "disabledMcpServers": [
+        "claude-in-chrome"
+    ],
 
     "permissions": {
         "defaultMode": "plan",
@@ -20,10 +29,14 @@
             "Bash(npm run test *)",
             "Read(~/.zshrc)"
         ],
+        "ask": [
+            "Read(.env)",
+            "Read(.env.*)"
+        ],
         "deny": [
             "Bash(curl *)",
-            "Read(./.env)",
-            "Read(./.env.*)"
+            "Read(~/.env)",
+            "Read(~/.env.*)"
         ]
     },
     "sandbox": {
@@ -31,7 +44,7 @@
         "autoAllowBashIfSandboxed": true,
         "excludedCommands": [
             "docker",
-            "git"
+            "lefthook"
         ],
         "network": {
             "allowedDomains": [
@@ -46,13 +59,6 @@
         }
     },
 
-    "enabledPlugins": {
-        "skill-creator@claude-plugins-official": true,
-        "gitlab@claude-plugins-official": true
-    },
-    "disabledMcpServers": [
-        "claude-in-chrome"
-    ],
     "hooks": {
         "Notification": [
             {
