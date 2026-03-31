@@ -1,5 +1,8 @@
 # MinIO
 
+> [!warning]
+> Unmaintained since December 3rd, 2025. Check out [RustFS], [SeaweedFS], and [Garage] instead.
+
 High-performance, S3 compatible object storage.
 
 1. [TL;DR](#tldr)
@@ -102,3 +105,6 @@ GET /minio/health/live
 
 <!-- Others -->
 [Ask Devin]: https://deepwiki.com/minio/minio
+[Garage]: https://git.deuxfleurs.fr/Deuxfleurs/garage
+[RustFS]: https://github.com/RustFS/RustFS
+[SeaweedFS]: https://github.com/seaweedfs/seaweedfs
