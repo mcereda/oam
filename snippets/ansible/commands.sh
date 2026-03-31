@@ -92,6 +92,8 @@ ansible -i 'hosts.yml' -m 'ping' 'all'
 ansible -i 'host-1,host-n,' 'hostRegex' -m 'ansible.builtin.shell' -a 'echo $TERM'
 ansible -i 'localhost,' -c 'local' 'localhost' -m 'ansible.builtin.copy' -a 'src=/tmp/src dest=/tmp/dest'
 ansible -i 'localhost,' -c 'local' -m 'debug' -a 'msg="{{ (60 / 2) | int }}"' 'localhost'
+ansible -i 'localhost,' -c 'local' -m amazon.aws.sts_assume_role \
+	-a 'role_arn=arn:aws:iam::012345678901:role/infra-ops role_session_name=test duration_seconds=900' localhost
 venv/bin/ansible -i 'localhost ansible_python_interpreter=venv/bin/python,' -c 'local' 'localhost' \
 	-m 'community.postgresql.postgresql_query' \
 	-a 'login_host=host.fqdn login_user=postgres login_password=password login_db=postgres query="SELECT 1;"'

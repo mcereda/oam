@@ -32,6 +32,7 @@
     1. [Hiding sensitive values in verbose runs](#hiding-sensitive-values-in-verbose-runs)
     1. [Ansible Vault](#ansible-vault)
 1. [Best practices](#best-practices)
+    1. [AWS-specific best practices](#aws-specific-best-practices)
 1. [Troubleshooting](#troubleshooting)
     1. [ERROR: Ansible could not initialize the preferred locale: unsupported locale setting](#error-ansible-could-not-initialize-the-preferred-locale-unsupported-locale-setting)
     1. [Print all known variables](#print-all-known-variables)
@@ -1432,6 +1433,78 @@ Or even edit their content with `ansible-vault edit 'path/to/file'`.
   original.
 - If using other systems to maintain a canonical list of systems in one's infrastructure, consider using dynamic
   inventories.
+
+### AWS-specific best practices
+
+- Prefer not relying on AWS modules' `wait` parameters for long-running operations.<br/>
+  Use `wait: false` on the mutating call and poll with the corresponding `_info` module instead.
+
+  <details style='padding: 0 0 0 1rem'>
+
+  - Some modules just plain do **not** feature waiting for their action to fully realize.
+  - Of those modules that **do** wait, some **hardcode** their waiter' timeout (e.g. `amazon.aws.rds_instance` caps at
+    30 minutes with no `wait_timeout` parameter).
+  - Some modules hold STS credentials internally, **preventing** credentials refresh mid-wait.
+
+  </details>
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example</summary>
+
+  ```yml
+  - name: Delete the RDS instance
+    block:
+      - name: Assume the IAM role
+        amazon.aws.sts_assume_role:
+          role_arn: "{{ iam_assume_role__role_arn }}"
+          role_session_name: AWX-as-ExampleOrgRDSManager
+          duration_seconds: 900
+        register: assumed_iam_role
+      - name: Delete RDS instance {{ db_instance_identifier }}
+        environment:
+          AWS_DEFAULT_REGION: "{{ aws_region | default('eu-west-1') }}"
+        amazon.aws.rds_instance:
+          access_key: "{{ assumed_iam_role.sts_creds.access_key | default(omit) }}"
+          secret_key: "{{ assumed_iam_role.sts_creds.secret_key | default(omit) }}"
+          session_token: "{{ assumed_iam_role.sts_creds.session_token | default(omit) }}"
+          profile: "{{ None if assumed_iam_role.sts_creds.session_token is defined else omit }}"
+          region: "{{ aws_region | default(omit) }}"
+          db_instance_identifier: "{{ db_instance_identifier }}"
+          state: absent
+          skip_final_snapshot: true
+          wait: false  # fire-and-forget
+
+  - name: Wait for the RDS instance to be deleted
+    block:
+      - # Use a fresh, longer IAM session for polling
+        name: Re-assume IAM role
+          role_arn: "{{ iam_assume_role__role_arn }}"
+          role_session_name: AWX-as-ExampleOrgRDSManager
+          duration_seconds: 3600
+        register: assumed_iam_role
+      - name: Wait for the RDS instance to be deleted
+        environment:
+          AWS_DEFAULT_REGION: "{{ aws_region | default('eu-west-1') }}"
+        amazon.aws.rds_instance_info:
+          access_key: "{{ assumed_iam_role.sts_creds.access_key | default(omit) }}"
+          secret_key: "{{ assumed_iam_role.sts_creds.secret_key | default(omit) }}"
+          session_token: "{{ assumed_iam_role.sts_creds.session_token | default(omit) }}"
+          profile: "{{ None if assumed_iam_role.sts_creds.session_token is defined else omit }}"
+          region: "{{ aws_region | default(omit) }}"
+          db_instance_identifier: "{{ db_instance_identifier }}"
+        register: poll_result
+        until: poll_result.instances | length == 0
+        retries: 60
+        delay: 60
+        failed_when: >-
+          poll_result is failed or
+          (
+            poll_result.instances | length > 0 and
+            poll_result.instances[0].db_instance_status not in ['deleting']
+          )
+  ```
+
+  </details>
 
 ## Troubleshooting
 
