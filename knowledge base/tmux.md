@@ -131,6 +131,7 @@ tmux kill-session -t 'session-name'
 - [devhints.io]
 - [hamvocke/dotfiles]
 - [Default Tmux config]
+- [tmux: The Complete Guide to Terminal Multiplexing on Linux]
 
 <!--
   Reference
@@ -153,3 +154,4 @@ tmux kill-session -t 'session-name'
 [sending simulated keystrokes in bash]: https://superuser.com/questions/585398/sending-simulated-keystrokes-in-bash#1606615
 [tmux cheat sheet & quick reference]: https://tmuxcheatsheet.com/
 [tmux has forever changed the way i write code]: https://www.youtube.com/watch?v=DzNmUNvnB04
+[tmux: The Complete Guide to Terminal Multiplexing on Linux]: https://linuxblog.io/tmux-the-complete-guide-to-terminal-multiplexing-on-linux/
