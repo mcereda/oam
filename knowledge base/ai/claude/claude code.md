@@ -1547,6 +1547,7 @@ Claude Code version: `v2.1.41`.
   1. [The System Prompt][claude analysis / the system prompt]
 - [The Claude Skills I Actually Use for DevOps]
 - [Output styles]
+- [Claude Code Unpacked]
 
 ### Sources
 
@@ -1620,6 +1621,7 @@ Claude Code version: `v2.1.41`.
 [AWS Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
 [Claude analysis / The System Prompt]: https://rastrigin.systems/blog/claude-code-part-2-system-prompt/
 [Claude analysis / What Claude Code Actually Sends to the Cloud]: https://rastrigin.systems/blog/claude-code-part-1-requests/
+[Claude Code Unpacked]: https://ccunpacked.dev/
 [Claude Skills vs. MCP: A Technical Comparison for AI Workflows]: https://intuitionlabs.ai/articles/claude-skills-vs-mcp
 [containers/bubblewrap]: https://github.com/containers/bubblewrap
 [Grafana MCP Server]: https://github.com/grafana/mcp-grafana
