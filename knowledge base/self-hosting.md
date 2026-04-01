@@ -52,7 +52,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 [baikal]: baikal.md
 [forgejo]: forgejo.md
 [gitea]: gitea.md
-[gitlab]: gitlab/README.md
+[GitLab]: gitlab.md
 [hoppscotch]: hoppscotch.md
 [immich]: immich.md
 [nextcloud]: nextcloud.md

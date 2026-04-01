@@ -102,6 +102,7 @@ Solution: make sure the certificate is still valid, and renew it if not.
 
 ## Further reading
 
+- [GitLab]
 - [GitLab integration]
 - [GitLab service accounts]
 
@@ -110,8 +111,11 @@ Solution: make sure the certificate is still valid, and renew it if not.
   ═╬═Time══
   -->
 
-<!-- Upstream -->
+<!-- In-article sections -->
+<!-- Knowledge base -->
+[GitLab]: ../gitlab.md
 
+<!-- Upstream -->
 [GitLab integration]: https://linear.app/docs/gitlab
 [GitLab personal access tokens]: https://docs.gitlab.com/user/profile/personal_access_tokens/
 [GitLab project access tokens]: https://docs.gitlab.com/user/project/settings/project_access_tokens/

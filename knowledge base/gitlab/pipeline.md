@@ -334,7 +334,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
   -->
 
 <!-- Knowledge base -->
-[gitlab]: README.md
+[GitLab]: ../gitlab.md
 
 <!-- Files -->
 <!-- Upstream -->
