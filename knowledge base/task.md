@@ -40,7 +40,7 @@ Pros:
 Cons:
 
 - Taskfiles are written in YAML. ≈(・ཀ・≈)<br/>
-  That makes them very much similar to \[[Gitlab] and [Azure Devops]]'s pipelines, with all the pain that comes with it.
+  That makes them very much similar to \[[GitLab] and [Azure Devops]]'s pipelines, with all the pain that comes with it.
 
 Uses Go's [text/template] and [slim-sprig] packages to interpolate values.
 
@@ -410,7 +410,7 @@ Force the print using `-v, --verbose` when `silent` is set to `true`, or set it 
 <!-- In-article sections -->
 <!-- Knowledge base -->
 [Azure DevOps]: cloud%20computing/azure/devops.md
-[Gitlab]: gitlab/README.md
+[GitLab]: gitlab.md
 [GNU Make]: gnu%20userland/make.md
 
 <!-- Files -->

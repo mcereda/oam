@@ -299,7 +299,7 @@ Alternatives:
 <!-- Knowledge base -->
 [self-hosting]: self-hosting.md
 [git]: git.md
-[gitlab]: gitlab/README.md
+[GitLab]: gitlab.md
 
 <!-- Files -->
 [compose file]: /docker%20compositions/gitea/docker-compose.yml

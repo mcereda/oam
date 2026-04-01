@@ -80,8 +80,10 @@ glab mr list --repo 'someGroup/someNamespace/someRepo'
 
 ## Further readings
 
+- [GitLab]
 - [Codebase]
 - [Documentation]
+- [python-gitlab], an alternative.
 
 <!--
   Reference
@@ -90,6 +92,9 @@ glab mr list --repo 'someGroup/someNamespace/someRepo'
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[GitLab]: ../gitlab.md
+[python-gitlab]: python-gitlab.md
+
 <!-- Files -->
 <!-- Upstream -->
 [Codebase]: https://gitlab.com/gitlab-org/cli

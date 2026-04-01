@@ -69,6 +69,7 @@ gitlab group list --search 'infra'
 
 ## Further readings
 
+- [GitLab]
 - [Website]
 - [Codebase]
 
@@ -83,6 +84,8 @@ gitlab group list --search 'infra'
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[GitLab]: ../gitlab.md
+
 <!-- Files -->
 <!-- Upstream -->
 [Codebase]: https://github.com/python-gitlab/python-gitlab

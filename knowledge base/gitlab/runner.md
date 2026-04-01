@@ -1130,7 +1130,7 @@ Refer to [External secrets in pipelines].
 [AWS IAM roles]: ../cloud%20computing/aws/iam.md#roles
 [AWS Secrets Manager]: ../cloud%20computing/aws/secrets%20manager.md
 [External secrets in pipelines]: pipeline.md#external-secrets
-[GitLab]: README.md
+[GitLab]: ../gitlab.md
 
 <!-- Files -->
 <!-- Upstream -->
