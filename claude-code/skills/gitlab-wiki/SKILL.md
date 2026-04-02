@@ -1,26 +1,19 @@
 ---
 name: gitlab-wiki
 description: >-
-  Search, read, and browse GitLab wiki pages — group wikis and project wikis on
-  any GitLab instance (SaaS or self-hosted). This skill knows how to find wiki
-  content via GitLab MCP search (wiki_blobs scope), the python-gitlab CLI, and
-  local wiki checkouts, with automatic fallback between these methods.
-
-  Use this skill whenever the user mentions wiki, knowledge base, runbook, ADR,
-  or documented standards on GitLab. Trigger on phrases like "check the wiki",
-  "search the wiki", "look up the wiki page", "what does the wiki say", "find
-  the runbook", "look up ADR", "list wiki pages", "browse the group wiki", or
-  any request to read documentation stored in a GitLab wiki. Also trigger when
-  the user asks about team conventions, standards, or architecture decisions
-  that may be documented in a GitLab wiki.
-
-  Use this skill PROACTIVELY — even if the user did not mention the wiki — when
-  the user is about to create infrastructure, write Terraform/IaC, configure
-  services, set up alerting or monitoring, define CI/CD pipelines, or make
-  architectural decisions in a project with a GitLab remote. Prompt the user
-  that the project's wiki may have relevant standards or guides before they
-  proceed. When in doubt, suggest a quick wiki check — the cost is low; the cost
-  of ignoring a documented standard is high.
+  Propose searching GitLab wikis, runbooks, and ADRs when the answer likely
+  lives in internal documentation rather than in code. ALWAYS use this skill
+  when the user asks "why" something is done a particular way — why a technology
+  was chosen, why a config value is set to a specific number, why an
+  architectural pattern is used, or what reasoning drove a design decision.
+  These "why" questions about design intent are almost always answered in wikis
+  and ADRs, not in code comments. Make sure to also use this skill for
+  company-specific "how do I" questions about internal processes (deploying to
+  production, onboarding new services, following team conventions), and whenever
+  the user explicitly mentions wikis, runbooks, ADRs, or knowledge bases. This
+  skill proposes a wiki search to the user rather than searching automatically.
+  Do not use for debugging runtime errors, CI failures, code-level questions,
+  or general open-source tool usage.
 argument-hint: 'what to look up, e.g. "search for deploy guide in project wiki"'
 ---
 
@@ -113,6 +106,28 @@ appending `.md` — e.g. `Guides/Deploy-Process` becomes
 `Guides/Deploy-Process.md`.
 
 ## Workflow
+
+### Is this an implicit trigger? Decide first, then suggest
+
+Three types of questions warrant a wiki check even without an explicit mention:
+
+1. **"Why" questions about design intent** — "why does X use Y", "why is this
+   configured this way". The code shows _what_ exists; the documentation and/or
+   the wiki explain _why_ it was chosen.
+2. **Company-specific "how do I" questions** — "how do I add a service to our
+   cluster", "what's our process for deploying". The discriminator: does the
+   question need _our_ answer (company context → wiki) or a general answer
+   (vendor docs → internet)? Qualifiers like "in our setup", "our process",
+   "in our environment" signal company context.
+3. **Explicit wiki/runbook/ADR requests** — proceed directly without suggesting.
+
+For types 1 and 2: **do not search automatically**. Prompt the user first:
+
+> "This might be documented in the wiki — want me to check?"
+
+Wait for confirmation before running any queries. This keeps interactions
+lightweight when the user may already have the context or just wants a quick
+answer.
 
 ### Step 1: Find the page
 
