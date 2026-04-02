@@ -941,6 +941,7 @@ See also:
 - [Improving skill-creator: Test, measure, and refine Agent Skills].
 - [Anthropic's own source-available skills][anthropics/skills]
 - [Prat011/awesome-llm-skills].
+- This repository's [skills][claude-code/skills] and [skill examples][examples/claude-code/skills].
 
 Claude Skills follow and extend the [Agent Skills] standard format.
 
@@ -1571,9 +1572,9 @@ Claude Code version: `v2.1.41`.
 [Using skills]: #using-skills
 
 <!-- Knowledge base -->
-[AI agents]: ../agents.md
 [AI agents / Context and memory]: ../agents.md#context-and-memory
 [AI agents / Skills]: ../agents.md#skills
+[AI agents]: ../agents.md
 [Claude Code router]: claude%20code%20router.md
 [Claude]: README.md
 [Gemini CLI]: ../gemini/cli.md
@@ -1585,6 +1586,8 @@ Claude Code version: `v2.1.41`.
 <!-- Files -->
 [.mcp.json file example]: ../../../examples/claude/dotmcp.json
 [~/.claude/credentials.json file example]: ../../../examples/claude/credentials.json
+[claude-code/skills]: ../../../claude-code/skills
+[examples/claude-code/skills]: ../../../examples/claude/skills
 [settings.json file example]: ../../../examples/claude/settings.json
 
 <!-- Upstream -->
