@@ -522,6 +522,7 @@ xcode-select --install
 | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | [BlueSnooze](https://github.com/odlp/bluesnooze)                                                              | Prevents your sleeping computer from connecting to Bluetooth accessories |
 | [Clocker](https://apps.apple.com/en/app/clocker/id1056643111)                                                 | Menu bar timezone tracker and compact calendar                           |
+| [Ghostmoon](https://www.mgrunwald.com/ghostmoon/)                                                             | Gives access to system functionalities from the menu bar                 |
 | [iBar - menubar icon control tool](https://apps.apple.com/en/app/ibar-menubar-icon-control-tool/id6443843900) | Hide and show menu bar icons                                             |
 | [Itsycal](https://www.mowglii.com/itsycal/)                                                                   | Menu bar calendar                                                        |
 | [KeepingYouAwake](https://keepingyouawake.app/)                                                               | Prevent the mac from sleeping                                            |
