@@ -123,7 +123,7 @@ const containerDefinitions = [
                 name: "COMPOSITE_SECRET",
                 valueFrom: pulumiInterpolate`${composite_secret.arn}:someField::`,
             },
-        ],
+        ].sort((a, b) => (a.name < b.name ? -1 : 1)),  // avoids replacements caused by the reordering of items
 
         healthCheck: {
             command: [

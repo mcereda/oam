@@ -40,6 +40,7 @@
     1. [Inject Secrets Manager secrets as environment variables](#inject-secrets-manager-secrets-as-environment-variables)
     1. [Mount Secrets Manager secrets as files in containers](#mount-secrets-manager-secrets-as-files-in-containers)
     1. [Make a sidecar container write secrets to shared volumes](#make-a-sidecar-container-write-secrets-to-shared-volumes)
+1. [Gotchas](#gotchas)
 1. [Best practices](#best-practices)
 1. [Pricing](#pricing)
     1. [Cost-saving measures](#cost-saving-measures)
@@ -2098,6 +2099,36 @@ Useful when wanting multiple containers to access the same secret, or just clean
 
 </details>
 
+## Gotchas
+
+- Task definitions' `containerDefinitions` attribute expects a string in input.
+
+  When creating infrastructure as code (e.g. in [Pulumi], [Terraform]/[OpenTofu] or CDK), the order of items in that
+  list or nested lists (like a container' `environment` or `secrets`) matters. If changed, the resulting string
+  **as a whole** changes, triggering a replacement of the whole task definition.
+
+  Consider sorting them before application, e.g.:
+
+  ```ts
+  const taskDefinition: TaskDefinition = new aws.ecs.TaskDefinition(
+    …,
+    containerDefinitions: pulumiJsonStringify(
+      [
+        {
+          name: 'mainApp',
+          …
+          environment: [
+            …
+          ].sort((a, b) => (a.name < b.name ? -1 : 1)),  // prevent replacements caused by the reordering of items
+          secrets: [
+            …
+          ].sort((a, b) => (a.name < b.name ? -1 : 1)),  // prevent replacements caused by the reordering of items
+        },
+      ].sort((a, b) => (a.name < b.name ? -1 : 1)),  // prevent replacements caused by the reordering of items
+    ),
+  );
+  ```
+
 ## Best practices
 
 - Consider configuring [resource constraints].
@@ -2398,11 +2429,14 @@ ECS will eventually stop the Task, then launch a replacement to maintain the des
 [standalone tasks]: #standalone-tasks
 
 <!-- Knowledge base -->
-[amazon web services]: README.md
-[cli]: cli.md
-[ebs]: ebs.md
-[efs]: efs.md
+[Amazon Web Services]: README.md
+[CLI]: cli.md
+[EBS]: ebs.md
+[EFS]: efs.md
 [expect]: ../../expect.md
+[OpenTofu]: ../../opentofu.md
+[Pulumi]: ../../pulumi.md
+[Terraform]: ../../terraform.md
 
 <!-- Upstream -->
 [Amazon Amazon ECS launch types and capacity providers]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-launch-type-comparison.html

@@ -139,7 +139,7 @@ const containerDefinitions: unknown = [
             { name: 'POSTGRES_PASSWORD', value: dbPassword },
             // needed by the health check
             { name: 'PGPORT', value: dbPort.toString() },
-        ],
+        ].sort((a, b) => (a.name < b.name ? -1 : 1)),  // avoids replacements caused by the reordering of items
         portMappings: [{
             protocol: 'tcp',
             appProtocol: 'http',
@@ -181,7 +181,7 @@ const containerDefinitions: unknown = [
             { name: 'PGPORT', value: dbPort.toString() },
             { name: 'PGDATABASE', value: dbName },
             { name: 'PGUSER', value: dbUser },
-        ],
+        ].sort((a, b) => (a.name < b.name ? -1 : 1)),  // avoids replacements caused by the reordering of items
         secrets: [
             { name: 'PGPASSWORD', valueFrom: dbPassword_secret.arn },
         ],
@@ -213,7 +213,7 @@ const containerDefinitions: unknown = [
             { name: 'PGPORT', value: dbPort.toString() },
             { name: 'PGDATABASE', value: dbName },
             { name: 'PGUSER', value: dbUser },
-        ],
+        ].sort((a, b) => (a.name < b.name ? -1 : 1)),  // avoids replacements caused by the reordering of items
         secrets: [
             { name: 'PGPASSWORD', valueFrom: dbPassword_secret.arn },
         ],
