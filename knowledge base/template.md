@@ -1,4 +1,4 @@
-# Title
+# FIXME
 
 > TODO
 
@@ -47,6 +47,7 @@ Intro
 
 - [Website]
 - [Codebase]
+- [Blog]
 
 ### Sources
 
@@ -61,8 +62,9 @@ Intro
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[Codebase]: https://github.com/project/
-[Documentation]: https://website/docs/
-[Website]: https://website/
+[Blog]: https://FIXME.fqdn/blog/
+[Codebase]: https://github.com/FIXME
+[Documentation]: https://FIXME.fqdn/docs/
+[Website]: https://FIXME.fqdn/
 
 <!-- Others -->
