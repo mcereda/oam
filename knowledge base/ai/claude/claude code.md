@@ -1148,12 +1148,12 @@ runs only for `git` commands and `"Edit(*.ts)"` runs only for TypeScript files.
           {
             "type": "agent",
             "if": "Bash(git commit*)",
-            "prompt": "If the agent did not contribute in this conversation, respond: LGTM. If `--author` is already present, respond: LGTM. The agent contributed if it edited/wrote files being committed, OR if it suggested a solution that the user implemented (the changes must reflect the agent's guidance). Otherwise BLOCK: the agent contributed but `--author` is missing. Attribute the commit to the agent using --author='<agent.name> <optional model.name> <optional model.version> on behalf of $(git config user.name) <agent.email>', and add a Co-Authored-By trailer for the user using their git configuration information."
+            "prompt": "Was Edit, Write, or NotebookEdit used in this conversation?\n  No  → \"LGTM\"\n  Yes → does the pending git commit mention \"Claude Code\" (in --author or Co-Authored-By)?\n    Yes → \"LGTM\"\n    No  → \"BLOCK: Commit has no Claude attribution. Reconsider your contribution:\n- Wrote most or all code: --author='Claude Code (<model>) on behalf of <user.name> <noreply@anthropic.com>' + 'Co-Authored-By: <user.name> <user.email>'\n- Minor fixes or review only: 'Co-Authored-By: Claude Code (<model>) <noreply@anthropic.com>'\nResolve user.name and user.email via git config. Never guess.\""
           },
           {
             "type": "command",
             "if": "Bash(git commit*)",
-            "command": "default=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||') && [[ -n \"$default\" && \"$(git branch --show-current)\" == \"$default\" ]] && echo \"BLOCKED: on '$default', create a feature branch first.\" && exit 2; exit 0"
+            "command": "current=$(git branch --show-current 2>/dev/null); default=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'); if [[ -z \"$default\" ]]; then default=$(git remote show origin 2>/dev/null | awk '/HEAD branch/{print $NF}'); fi; [[ -z \"$default\" ]] && default=\"master\"; if [[ \"$current\" == \"$default\" ]]; then echo \"BLOCKED: direct commits to '$default' are not allowed — create a feature branch first.\"; exit 2; fi; exit 0"
           },
           {
             "type": "agent",
@@ -1197,7 +1197,7 @@ runs only for `git` commands and `"Edit(*.ts)"` runs only for TypeScript files.
         "hooks": [
           {
             "type": "agent",
-            "prompt": "Respond LGTM unless the conversation revealed a new gotcha, pattern, or convention. If so, remind to check whether the documentation should be updated."
+            "prompt": "Decision tree — answer each step in order, stop at the first LGTM.\n\n1. Did this conversation reveal an insight specific to this repository — not general Ansible/YAML/AWS/Python knowledge — such as a gotcha, convention, structural decision, or non-obvious behavior, whether through writing code or through investigation/discussion? No → respond 'LGTM'\n2. Were CLAUDE.md, CONTRIBUTING.md, or README.md modified via Edit or Write tool calls during this conversation to capture it? Yes → respond 'LGTM'\n3. Respond: 'Before wrapping up, update <filename> to document: <one-sentence description of the insight>'\n\nFile selection for step 3:\n- CONTRIBUTING.md — team conventions, workflow gotchas, naming patterns, development rules\n- README.md — repo usage, setup instructions, how to run things\n- CLAUDE.md — Claude-specific guidance, architecture context for the AI assistant"
           }
         ]
       }
@@ -1226,7 +1226,7 @@ They only return `{"ok": true/false, "reason": "..."}`, and only decide whether 
 > There's currently no hook event that allows prompt or agent hooks just before exiting the REPL. `Ctrl+C` and `/exit`
 > terminate the session **immediately**, without triggering any hook at all.<br/>
 > `SessionEnd` prompt or agent hooks are not yet supported **outside** of the REPL. The closest alternative is using
-> `Stop`, even if it generates noise.
+> `Stop`, even though this generates noise and ends up eating lots of tokens.
 
 `UserPromptSubmit` hooks fire **before** new work starts.
 
@@ -1262,11 +1262,24 @@ One can use `$ARGUMENTS` as a placeholder in the prompt to receive the hook's in
 
 ### Agent-based hooks
 
-Prefer using these when verification requires inspecting files or running commands.<br/>
-Specifically, when in need to verify something against the actual state of the codebase.
+Prefer using these when verification requires inspecting files or running commands. Specifically, when in need to verify
+something against the actual state of the codebase.
 
-They default to using Haiku. One can specify a different model by using the `model` field, but since it is just used to
-decide whether to take action or not, it is usually not worth changing the model.
+The harness spawns a sub-agent _per hook_ to execute the defined checks. Its goal should be only to _decide **whether**
+to take action **or not**_, not to make changes themselves. Prefer configuring them to quickly return `block` with a
+reason to the main agent instead.<br/>
+Sub-agents default to using _fast_ models (currently Haiku). One _can_ specify a different model by using the `model`
+field.
+
+Prefer using clear, structured decision trees instead of narrative, and provide explicit conditions and required
+outcomes.<br/>
+Prose rules are slower to parse, and more prone to misinterpretation by fast models.
+
+Scope the scan as precisely as possible. Ambiguous scope causes agents to look in the wrong place.<br/>
+E.g., prefer writing something like "scan this conversation's tool call list" rather than "check tool use history".
+
+Specify _exact_ output string if possible, e.g. `Output exactly 'LGTM' or 'BLOCK:' followed by one bullet per missing
+item`.
 
 Agents hooks are **fresh** invocations with limited context.<br/>
 Avoid asking hooks to detect prior conversation state (e.g. "was this already suggested?"), as they'll miss prior state
