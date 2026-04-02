@@ -108,6 +108,9 @@ be to understand at a glance what the resource is and does.
 Shortening fields as much as possible might be needed to deal with identifier that must be limited to just a few
 characters in length, while yet cramming as much information as they can.
 
+If using OpenTelemetry **and** wanting to have metrics, traces, or logs in CloudWatch, consider also using the
+[AWS Distro for OpenTelemetry Collector] in applications.
+
 ## Networking
 
 VPCs define isolated virtual networking environments.<br/>
@@ -1261,6 +1264,7 @@ If one can, prefer just build the image from an EC2 instance.
 [a guide to tagging resources in aws]: https://medium.com/@staxmarketing/a-guide-to-tagging-resources-in-aws-8f4311afeb46
 [automating dns-challenge based letsencrypt certificates with aws route 53]: https://johnrix.medium.com/automating-dns-challenge-based-letsencrypt-certificates-with-aws-route-53-8ba799dd207b
 [aws config tutorial by stephane maarek]: https://www.youtube.com/watch?v=qHdFoYSrUvk
+[AWS Distro for OpenTelemetry Collector]: https://github.com/aws-observability/aws-otel-collector
 [AWS Fundamentals Blog]: https://awsfundamentals.com/blog
 [aws savings plans vs. reserved instances: when to use each]: https://www.cloudzero.com/blog/savings-plans-vs-reserved-instances/
 [Branko Petric's X posts]: https://x.com/brankopetric00
