@@ -1,27 +1,52 @@
 ---
-name: gitlab-wiki
+name: gitlab-wiki-lookup
 description: >-
-  Propose searching GitLab wikis, runbooks, and ADRs when the answer likely
-  lives in internal documentation rather than in code. ALWAYS use this skill
-  when the user asks "why" something is done a particular way — why a technology
-  was chosen, why a config value is set to a specific number, why an
-  architectural pattern is used, or what reasoning drove a design decision.
-  These "why" questions about design intent are almost always answered in wikis
-  and ADRs, not in code comments. Make sure to also use this skill for
-  company-specific "how do I" questions about internal processes (deploying to
-  production, onboarding new services, following team conventions), and whenever
-  the user explicitly mentions wikis, runbooks, ADRs, or knowledge bases. This
-  skill proposes a wiki search to the user rather than searching automatically.
-  Do not use for debugging runtime errors, CI failures, code-level questions,
-  or general open-source tool usage.
+  Search GitLab wikis, runbooks, and ADRs for organizational knowledge. Invoke
+  this skill in two situations: (1) when the user asks questions that likely
+  have a company-specific answer — deployment processes, architecture decisions,
+  service ownership, team conventions, environment setup, secrets management,
+  database migration procedures, coding standards, release processes, onboarding
+  steps, incident response; and (2) before the user takes action that could have
+  company conventions — creating new services or projects, modifying shared
+  configurations, changing database schemas, setting up environments, adding
+  integrations, or provisioning cloud resources. The wiki often has naming
+  conventions, required steps, approval processes, or guardrails not found in
+  code. Also trigger for "why" questions about design choices, "how do I/we"
+  questions about internal processes, and phrases like "in our setup", "what
+  should I know before", or "anything I need to mind". Even when code is present
+  in the repo, company-wide conventions often live in the wiki, not in the
+  codebase. If the user explicitly mentions wikis, runbooks, or ADRs, always
+  invoke.
 argument-hint: 'what to look up, e.g. "search for deploy guide in project wiki"'
 ---
 
-# GitLab Wiki Reader
+# GitLab Wiki Lookup
 
 Read wiki pages from a GitLab instance using whichever tools are available.
 
 **Request:** $ARGUMENTS
+
+## Step 0: Check tool availability
+
+Before doing anything, verify that at least one wiki-access method exists in
+this session. Check in order:
+
+1. **GitLab MCP tools** — look for any tool prefixed with `mcp__` that relates
+   to GitLab and supports a `search` operation with `scope: "wiki_blobs"`.
+2. **`gitlab` CLI** — run `which gitlab` to check if python-gitlab is installed.
+3. **Local wiki checkout** — check if the current directory (or a sibling) is a
+   `.wiki.git` clone, or use Glob to look for wiki-style `.md` files.
+
+If **none** of these are available and nothing in the environment points to
+GitLab (no GitLab remote in `git remote -v`, no MCP tools), stop early and tell
+the user:
+
+> "I don't have a way to access GitLab wikis in this session. If your team uses
+> GitLab wikis, you can set up access by adding the GitLab MCP server,
+> installing the `gitlab` CLI, or cloning the wiki repo locally."
+
+Then read and share the relevant parts of `setup.md` from this skill's
+directory.
 
 ## Detecting the current context
 
@@ -42,7 +67,8 @@ Parse the first GitLab remote URL. Common formats:
 
 From the project path, derive:
 
-- **Group path**: drop the last segment (e.g. `group/subgroup/project` → `group/subgroup`)
+- **Group path**: drop the last segment (e.g. `group/subgroup/project` ->
+  `group/subgroup`)
 - **GitLab host**: extract from the URL (useful for CLI config context)
 
 **Edge cases:**
@@ -93,8 +119,8 @@ page fetch.
 
 The `gitlab` CLI (python-gitlab) works everywhere but requires a configuration
 file with connection details and a personal access token. If you encounter
-`No config file found` or `permission denied`, read `references/setup.md` in
-this skill's directory for setup instructions and walk the user through it.
+`No config file found` or `permission denied`, read `setup.md` in this skill's
+directory for setup instructions and walk the user through it.
 
 ### Local checkout (last resort, but fast)
 
@@ -107,27 +133,27 @@ appending `.md` — e.g. `Guides/Deploy-Process` becomes
 
 ## Workflow
 
-### Is this an implicit trigger? Decide first, then suggest
+### When to search automatically vs. ask first
 
-Three types of questions warrant a wiki check even without an explicit mention:
+**Search automatically** when:
 
-1. **"Why" questions about design intent** — "why does X use Y", "why is this
-   configured this way". The code shows _what_ exists; the documentation and/or
-   the wiki explain _why_ it was chosen.
-2. **Company-specific "how do I" questions** — "how do I add a service to our
-   cluster", "what's our process for deploying". The discriminator: does the
-   question need _our_ answer (company context → wiki) or a general answer
-   (vendor docs → internet)? Qualifiers like "in our setup", "our process",
-   "in our environment" signal company context.
-3. **Explicit wiki/runbook/ADR requests** — proceed directly without suggesting.
+- The user explicitly asked to check the wiki, a runbook, or an ADR.
+- The question is clearly about an internal process, convention, or
+  architectural decision and you have at least one working tool to access the
+  wiki.
 
-For types 1 and 2: **do not search automatically**. Prompt the user first:
+**Ask first** ("This might be documented in the wiki — want me to check?") when:
 
-> "This might be documented in the wiki — want me to check?"
+- The question could be answered either by vendor docs or by internal docs and
+  you are not sure which the user needs.
+- You have wiki access but the topic is borderline (e.g. "how do I set up Redis"
+  — could be a general question or could be asking about the team's specific
+  Redis setup).
 
-Wait for confirmation before running any queries. This keeps interactions
-lightweight when the user may already have the context or just wants a quick
-answer.
+The goal is to minimize wasted round-trips while avoiding unnecessary searches.
+When in doubt and tools are available, lean toward searching — a quick search
+that finds nothing costs little, but missing a relevant runbook can cost the
+user significant time.
 
 ### Step 1: Find the page
 
@@ -138,6 +164,13 @@ topic search, or an enumeration of what exists.
 2.
 
 **Searching by keyword or topic:**
+
+Start with 1-2 broad searches. If they return promising results, refine with a
+narrower query. If 2-3 different search angles all return nothing relevant, the
+topic is likely not documented in the wiki — say so and move on rather than
+exhaustively trying variations. Fetching a full page via CLI is worthwhile when
+MCP snippets look relevant but incomplete; skip it when the snippets already
+answer the question.
 
 1. Try MCP search first (if available):
 
@@ -185,8 +218,9 @@ gitlab -o 'json' project-wiki get --project-id '<numeric-id>' --slug '<slug>'
 ```
 
 Pass the slug as-is (e.g. `Guides/Deploy-Process`) — python-gitlab handles URL
-encoding. The response is a JSON object; extract the `content` field for the
-Markdown body.
+encoding.
+The response is a JSON object; extract the `content` field for the Markdown
+body.
 
 **Via local checkout:** Read the file directly — the slug plus `.md` is the file
 path.
@@ -198,6 +232,31 @@ path.
 - **Full page request**: render the Markdown.
 - **Always mention linked wiki pages** so the user knows they can ask for
   follow-ups.
+
+### Step 4: Suggest making this knowledge discoverable
+
+After a successful lookup that answered the user's question, check whether the
+project already has a pointer to this wiki content in its documentation. If it
+doesn't, suggest adding one — this helps future sessions (and other team
+members) find the information without needing to invoke the wiki skill:
+
+- **CONTRIBUTING.md** — for team-shareable knowledge: processes, conventions,
+  links to relevant wiki pages, onboarding pointers. This is the right place for
+  anything another contributor would benefit from knowing. Example:
+
+  > "Want me to add a link to this runbook in CONTRIBUTING.md so contributors
+  > can find it easily?"
+
+- **CLAUDE.md** (or project-level agent configuration) — only for
+  Claude-specific instructions, such as "always check the wiki before modifying
+  infrastructure" or "consult the ADR wiki before proposing architectural
+  changes." Example:
+
+  > "Want me to add a note to CLAUDE.md so I check the wiki automatically for
+  > infrastructure changes in this project?"
+
+Keep the suggestion brief and only offer it once per topic. If the user
+declines, move on.
 
 ## Looking up group or project IDs
 
@@ -227,7 +286,7 @@ meant.
 
 | Error                                        | Likely cause                  | Fix                                              |
 | -------------------------------------------- | ----------------------------- | ------------------------------------------------ |
-| `No config file found` / `permission denied` | Missing or unreachable config | Read `references/setup.md`                       |
+| `No config file found` / `permission denied` | Missing or unreachable config | Read `setup.md`                                  |
 | 404 on page fetch                            | Wrong slug                    | Re-search or list pages to find the correct slug |
 | 403                                          | PAT missing `read_api` scope  | Regenerate token with the `read_api` scope       |
 | `gitlab: command not found`                  | CLI not installed             | `pipx install python-gitlab`                     |
