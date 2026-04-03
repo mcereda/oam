@@ -98,6 +98,11 @@ gantt
     Working time  :active,   2024-01-01 16:00, 2024-01-01 18:00
 ```
 
+Create a recurring job:
+
+> Send "ping" to Haiku using `claude -p` every working day at 6 AM local time, or as soon as I wake up my laptop after
+> that time. Discard its answer.
+
 </details>
 
 ## Further readings

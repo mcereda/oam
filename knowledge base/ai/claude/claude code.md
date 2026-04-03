@@ -20,6 +20,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 1. [Delegating work](#delegating-work)
    1. [Sub agents](#sub-agents)
    1. [Agent teams](#agent-teams)
+1. [Scheduling tasks](#scheduling-tasks)
 1. [Tools of interest](#tools-of-interest)
 1. [Run on local models](#run-on-local-models)
 1. [Further readings](#further-readings)
@@ -1494,6 +1495,46 @@ Ask the researcher teammate to shut down
 Clean up the team **after termination** by just asking the lead to clean up.<br/>
 The lead will fail if any teammate is still running.
 
+## Scheduling tasks
+
+Refer to [Run prompts on a schedule] and [Schedule tasks on the web].
+
+Schedule **one-shot** reminders and actions by describing the goal in natural language.<br/>
+Claude pins the fire time to a specific minute and hour using a cron expression, schedules it, and confirms when it will
+fire. The task will then delete itself after running.<br/>
+E.g.:
+
+- "Remind me at 3pm to push the release branch".
+- "In 45 minutes, check whether the integration tests passed"
+
+Schedule **recurring** work:
+
+- In Anthropic's cloud service.
+- In the desktop app.
+- Using the `/loop` bundled skill in Claude Code.
+
+  It sets up a cron job that fires in the background. If no interval is given, it defaults to 10 minutes.<br/>
+  This skill **only runs while the current session stays open**.
+
+- By just asking Claude in natural language to do it, e.g.:
+
+  > Send "ping" to Haiku using `claude -p` every working day at 7 AM local time, or as soon as I wake up my laptop after
+  > that time. Discard its answer.
+
+  Claude will:
+
+  1. Create a script for the action.
+  1. Use the `CronCreate` tool to set up a system-level cron job that is **not** tied to Claude Code being open.
+
+  If the local machine could be sleeping or shut down, prefer explicitly asking Claude to work around it.<br/>
+  On macOS, ask to use `launchd` with `StartCalendarInterval` instead to fire the job as soon as the machine next wakes
+  up. On Linux, ask to use a `systemd` timer or `anacron`.
+
+Use cloud tasks for jobs that should run reliably **without** a local session.<br/>
+Use Desktop tasks when in need to access local files and tools.<br/>
+Use `/loop` for quick polling during an active session.<br/>
+Describe the goal in natural language otherwise.
+
 ## Tools of interest
 
 | Tool         | Summary                                                                          |
@@ -1627,6 +1668,8 @@ Claude Code version: `v2.1.41`.
 [Orchestrate teams of Claude Code sessions]: https://code.claude.com/docs/en/agent-teams
 [Output styles]: https://code.claude.com/docs/en/output-styles
 [Plugins reference]: https://code.claude.com/docs/en/plugins-reference
+[Run prompts on a schedule]: https://code.claude.com/docs/en/scheduled-tasks
+[Schedule tasks on the web]: https://code.claude.com/docs/en/web-scheduled-tasks
 [Subagent memory configuration]: https://code.claude.com/docs/en/sub-agents#enable-persistent-memory
 [Tools reference]: https://code.claude.com/docs/en/tools-reference
 [Website]: https://claude.com/product/overview
