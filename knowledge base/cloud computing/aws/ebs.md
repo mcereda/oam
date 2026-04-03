@@ -87,15 +87,18 @@ Refer [Amazon EBS volume types] and [Amazon EBS General Purpose SSD volumes].
 | ------------------- | ------------------------------------------------ | -------------- | ----------------- | ----------------- | ---------------- | ---------------- |
 | Class               | SSD                                              | SSD            | SSD               | SSD               | HDD              | HDD              |
 | Annual failure rate | 0.1% - 0.2%                                      | 0.1% - 0.2%    | 0.001%            | 0.1% - 0.2%       | 0.1% - 0.2%      | 0.1% - 0.2%      |
-| Size                | 1 GiB - 16 TiB                                   | 1 GiB - 16 TiB | 4 GiB - 64 TiB    | 4 GiB - 16 TiB    | 125 GiB - 16 TiB | 125 GiB - 16 TiB |
+| Size                | 1 GiB - 64 TiB                                   | 1 GiB - 16 TiB | 4 GiB - 64 TiB    | 4 GiB - 16 TiB    | 125 GiB - 16 TiB | 125 GiB - 16 TiB |
 | Baseline IOPS       | 3000                                             | 100            | 4,000             | 100               | N/A              | N/A              |
-| Max IOPS            | 16,000                                           | 16,000         | 256,000           | 64,000            | 500              | 250              |
-| Baseline throughput | 125 MiB/s                                        | 128 MiB/s      | 1,000 MiB/s       | 1 MiB/s           | 5 MiB/s          | 1.5 MiB/s        |
-| Max throughput      | 1,000 MiB/s                                      | 250 MiB/s      | 4,000 MiB/s       | 1,000 MiB/s       | 500 MiB/s        | 250 MiB/s        |
+| Max IOPS            | 80,000                                           | 16,000         | 256,000           | 64,000            | 500              | 250              |
+| Baseline throughput | 125 MiB/s                                        | 128 MiB/s      | 1,000 MiB/s       | 1 MiB/s           | 40 MiB/s per TiB | 12 MiB/s per TiB |
+| Max throughput      | 2,000 MiB/s                                      | 250 MiB/s      | 4,000 MiB/s       | 1,000 MiB/s       | 500 MiB/s        | 250 MiB/s        |
 | Multi-attach        | No                                               | No             | Yes               | Yes               | No               | No               |
 | NVMe reservations   | No                                               | No             | Yes               | No                | No               | No               |
 | Bootable            | Yes                                              | Yes            | Yes               | Yes               | No               | No               |
 | Pricing             | Per-GB + Per-IOPS over 3,000 + Per-MB/s over 125 | Per-GB         | Per-GB + Per-IOPS | Per-GB + Per-IOPS | Per-GB           | Per-GB           |
+
+`st1` and `sc1` baseline throughput scales linearly with volume size (also true downwards, e.g., a minimal 125 GiB `sc1`
+volume only gets ~1.5 MiB/s, while a 2 TiB `st1` volume gets 80 MiB/s).
 
 Billing is per-second increments, with a 60-seconds minimum period.
 
@@ -157,10 +160,13 @@ Incremental snapshots are stored in EBS' standard tier.
 Snapshots can be unbearably slow depending on the amount of data needing to be copied.<br/>
 For comparison, the first snapshot of a standard 200 GiB `gp3` volume took about 2h to complete.
 
+Fortunately, snapshots are **non**-blocking. One _can_ make changes to instances using volumes after firing a snapshot.
+
 Snapshots can be [archived][archive amazon ebs snapshots] to save money should they **not** need frequent nor fast
 retrieval.<br/>
 When archived, incremental snapshots are converted to **full snapshots** and moved to EBS' archive tier.
 
+> [!caution]
 > The **minimum** archival period is **90 days**.<br/>
 > Archived snapshots deleted or permanently restored before the end of the minimum archival period are billed for the
 > whole period.
@@ -290,8 +296,8 @@ restart the EC2 instance. This allows to continue using the EC2 instance while t
    sudo resize2fs '/dev/xvda1'      # ext4 on xen
    ```
 
-After modifying a volume, one must wait at least **six hours** and ensure that the volume is in the `in-use` or
-`available` states before one can modify the same volume.
+After modifying a volume, one can apply up to **four modifications per rolling 24-hour period**, as long as the volume
+is in the `in-use` or `available` states and all previous modifications for that volume are `completed`.
 
 Modifying the volume can take from a few minutes to a few hours, depending on the changes being applied, and it does
 **not** always scale linearly.<br/>
@@ -348,6 +354,7 @@ performance, whichever is higher.
 - [`delete-volume`][delete-volume]
 - [Modify an Amazon EBS volume using Elastic Volumes operations]
 - [How do I increase or decrease the size of my EBS volume?]
+- [Amazon EBS HDD volumes]
 - [How Amazon EBS encryption works]
 - [Improving application performance and reducing costs with Amazon EBS-Optimized Instance burst capability]
 
@@ -366,6 +373,7 @@ performance, whichever is higher.
 
 <!-- Upstream -->
 [Amazon EBS General Purpose SSD volumes]: https://docs.aws.amazon.com/ebs/latest/userguide/general-purpose.html
+[amazon ebs hdd volumes]: https://docs.aws.amazon.com/ebs/latest/userguide/hdd-vols.html
 [amazon ebs pricing]: https://aws.amazon.com/ebs/pricing/
 [amazon ebs volume types]: https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html
 [amazon ebs-optimized instance types]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html
