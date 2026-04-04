@@ -20,7 +20,7 @@
 | AV      | AntiVirus                                              |                                                                                                     |
 | AVR     | Audio/Video Receiver                                   |                                                                                                     |
 | AWS     | Amazon Web Services                                    |                                                                                                     |
-| BASH    | [Bourne Again SHell][bash]                             |                                                                                                     |
+| BASH    | [Bourne Again SHell]                                   |                                                                                                     |
 | BIOS    | Basic Input/Output System                              |                                                                                                     |
 | BOINC   | Berkeley Open Infrastructure for Network Computing     |                                                                                                     |
 | BSoD    | Blue Screen of Death                                   |                                                                                                     |
@@ -48,7 +48,7 @@
 | DB      | Data Base                                              |                                                                                                     |
 | DBMS    | DB Management System                                   |                                                                                                     |
 | DDL     | Data Definition Language                               |                                                                                                     |
-| DePIN   | [Decentralized Physical Infrastructure Network][depin] |                                                                                                     |
+| DePIN   | [Decentralized Physical Infrastructure Network]        |                                                                                                     |
 | DKIM    | DomainKeys Identified Mail                             |                                                                                                     |
 | DML     | Data Manipulation Language                             |                                                                                                     |
 | EA      | Extended Attributes                                    |                                                                                                     |
@@ -59,11 +59,11 @@
 | ESSID   | Extended Service Set IDentifier                        | The wireless network name shared in an ESS                                                          |
 | ETL     | Extract, Transform and Load                            | The process of transforming data from multiple sources before combining it into a [data warehouse]  |
 | FDW     | Foreign Data Wrapper                                   | Standardized way of handling access to remote objects from SQL databases                            |
-| FHS     | [Filesystem Hierarchy Standard][fhs]                   |                                                                                                     |
+| FHS     | [Filesystem Hierarchy Standard]                        |                                                                                                     |
 | FIFO    | First In First Out                                     |                                                                                                     |
 | FILO    | First In Last Out                                      |                                                                                                     |
 | FIPS    | Federal Information Protection Standard                | Security standard created by NIST to protect US government data                                     |
-| FISH    | [Friendly Interactive SHell][fish]                     |                                                                                                     |
+| FISH    | [Friendly Interactive SHell]                           |                                                                                                     |
 | FQDN    | Fully Qualified Domain Name                            |                                                                                                     |
 | FS      | FileSystem                                             |                                                                                                     |
 | FW      | FireWall                                               |                                                                                                     |
@@ -74,11 +74,12 @@
 | HCAI    | Human-Centered AI                                      |                                                                                                     |
 | HPC     | High Performance Computing                             | Collections of systems and tools used to achieve a greater processing capacity than the single unit |
 | HSM     | Hardware Security Module                               | Hardware cryptographic appliance designed to provide dedicated cryptographic functions              |
-| IaC     | [Infrastructure as Code][iac]                          |                                                                                                     |
+| IaC     | [Infrastructure as Code]                               |                                                                                                     |
 | IC      | Integrated Circuit                                     |                                                                                                     |
+| IdP     | Identity Provider                                      |                                                                                                     |
 | IDP     | Internal Developer Platform                            |                                                                                                     |
 | IIRC    | If I Remember/Recall Correctly                         |                                                                                                     |
-| IoT     | Internet of Things                                     | Also see [LoRa]                                                                                     |
+| IoT     | Internet of Things                                     | Also see LoRa                                                                                       |
 | IP      | Internet Protocol                                      |                                                                                                     |
 | IPvX    | Internet Protocol version X                            |                                                                                                     |
 | ISP     | Internet Service Provider                              |                                                                                                     |
@@ -96,8 +97,11 @@
 | LED     | Light Emitting Diode                                   |                                                                                                     |
 | LIFO    | Last In First Out                                      |                                                                                                     |
 | LLM     | [Large Language Model]                                 |                                                                                                     |
+| LoRa    | [Long Range]                                           |                                                                                                     |
+| LoRA    | Low-Rank Adaption                                      | Technique to adapt ML models to new contexts                                                        |
 | M2COTS  | Mass Market COTS                                       | Widely available COTS products                                                                      |
 | MCP     | [Model Context Protocol]                               |                                                                                                     |
+| ML      | [Machine Learning]                                     |                                                                                                     |
 | MR      | Merge Request                                          | Prevalently used in GitLab                                                                          |
 | NACL    | Network ACL                                            |                                                                                                     |
 | NIST    | National Institute of Science and Technology           |                                                                                                     |
@@ -123,17 +127,18 @@
 | SaaSS   | [Service as a Software Substitute]                     | Using a service as a substitute for running a copy of a program.                                    |
 | SAFE    | Scaled Agile FramEwork                                 |                                                                                                     |
 | SBOM    | Software Bill Of Materials                             | See [SBOM at a Glance]                                                                              |
-| SIEM    | [Security Information and Event Management][siem]      |                                                                                                     |
+| SIEM    | [Security Information and Event Management]            |                                                                                                     |
 | SLA     | Service-Level Agreement                                |                                                                                                     |
 | SLI     | Service-Level Indicator                                |                                                                                                     |
+| SLM     | [Small Language Model]                                 |                                                                                                     |
 | SLO     | Service-Level Objective                                |                                                                                                     |
 | SOPS    | Secrets OPerationS                                     |                                                                                                     |
 | SPIFFE  | Secure Production Identity Framework for Everyone      |                                                                                                     |
 | SQL     | Structured Query Language                              |                                                                                                     |
 | SRE     | Site Reliability Engineer                              |                                                                                                     |
-| SSH     | [Secure SHell][ssh]                                    |                                                                                                     |
+| SSH     | [Secure SHell]                                         |                                                                                                     |
 | SSID    | Service Set IDentifier                                 | Wireless network name                                                                               |
-| SSSD    | [System Security Services Daemon][sssd]                |                                                                                                     |
+| SSSD    | [System Security Services Daemon]                      |                                                                                                     |
 | TCP     | Transport Control Protocol                             |                                                                                                     |
 | TFE     | [TerraForm Enterprise]                                 |                                                                                                     |
 | TIL     | Today I Learned                                        |                                                                                                     |
@@ -149,7 +154,7 @@
 | USB     | Universal Serial Bus                                   |                                                                                                     |
 | UT      | Unit Test                                              |                                                                                                     |
 | UX      | User eXperience                                        |                                                                                                     |
-| VIM     | [VI iMproved][vim]                                     |                                                                                                     |
+| VIM     | [VI iMproved]                                          |                                                                                                     |
 | WAN     | Wide Area Network                                      |                                                                                                     |
 | WAP     | Wireless Access Point                                  |                                                                                                     |
 | WiMAX   | Worldwide interoperability for Microwave Access        |                                                                                                     |
@@ -157,10 +162,10 @@
 | XML     | eXtensible Markup Language                             |                                                                                                     |
 | XSS     | Cross-Site Scripting                                   |                                                                                                     |
 | YAGNI   | You Ain't Gonna Need It                                |                                                                                                     |
-| YAML    | [YAML Ain't Markup Language][yaml]                     |                                                                                                     |
-| ZFS     | [Zettabyte FileSystem][zfs]                            |                                                                                                     |
-| ZSH     | [Z SHell][zsh]                                         |                                                                                                     |
-| ZSTD    | [ZSTandarD][zstd]                                      |                                                                                                     |
+| YAML    | [YAML Ain't Markup Language]                           |                                                                                                     |
+| ZFS     | [Zettabyte FileSystem]                                 |                                                                                                     |
+| ZSH     | [Z SHell]                                              |                                                                                                     |
+| ZSTD    | [ZSTandarD]                                            |                                                                                                     |
 
 ## Sources
 
@@ -180,40 +185,42 @@
 
 <!-- Knowledge base -->
 [Access Control List]: acl.md
-[Artificial Intelligence]: ai/README.md
 [Architectural Decision Record]: adr.md
-[bash]: bash.md
+[Artificial Intelligence]: ai/README.md
+[Bourne Again shell]: bash.md
 [Container Network Interface]: cni.md
-[data warehouse]: data%20warehouse.md
-[depin]: depin.md
-[fhs]: filesystem%20hierarchy%20standard.md
-[fish]: fish.md
-[iac]: iac.md
-[kubernetes]: kubernetes/README.md
-[Large Language Model]: ai/lms.md#large-language-models
-[lora]: lora.md
+[Data warehouse]: data%20warehouse.md
+[Decentralized Physical Infrastructure Network]: depin.md
+[Filesystem Hierarchy Standard]: filesystem%20hierarchy%20standard.md
+[Friendly Interactive SHell]: fish.md
+[Infrastructure as Code]: iac.md
+[Kubernetes]: kubernetes/README.md
+[Large language model]: ai/lms.md#large-language-models
+[Long Range]: lora.md
+[Machine Learning]: ai/ml.md
 [Model Context Protocol]: ai/mcp.md
-[siem]: siem.md
-[snowflake]: snowflake/README.md
-[ssh]: ssh.md
-[sssd]: sssd.md
-[terraform enterprise]: terraform%20enterprise.md
-[uri vs url vs urn]: uri%20vs%20url%20vs%20urn.webp
-[vim]: vim.md
-[yaml]: yaml.md
-[zfs]: zfs.md
-[zsh]: zsh.md
-[zstd]: zstd.md
+[Secure shell]: ssh.md
+[Security Information and Event Management]: siem.md
+[Small language model]: ai/lms.md#small-language-models
+[Snowflake]: snowflake/README.md
+[System Security Services Daemon]: sssd.md
+[Terraform Enterprise]: terraform%20enterprise.md
+[URI vs URL vs URN]: uri%20vs%20url%20vs%20urn.webp
+[VI improved]: vim.md
+[YAML Ain't Markup Language]: yaml.md
+[Z shell]: zsh.md
+[Zettabyte filesystem]: zfs.md
+[Zstandard]: zstd.md
 
 <!-- Others -->
-[automatic certificate management environment]: https://en.wikipedia.org/wiki/Automatic_Certificate_Management_Environment
-[cn (canonicalName vs commonName) in active directory explained]: https://www.itechguides.com/what-is-cn-in-active-directory/
-[continuous delivery]: https://en.wikipedia.org/wiki/Continuous_delivery
-[kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
-[open application model]: https://oam.dev/
+[Automatic Certificate Management Environment]: https://en.wikipedia.org/wiki/Automatic_Certificate_Management_Environment
+[CN (canonicalName vs commonName) in active directory explained]: https://www.itechguides.com/what-is-cn-in-active-directory/
+[Continuous Delivery]: https://en.wikipedia.org/wiki/Continuous_delivery
+[KISS principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
+[Open Application Model]: https://oam.dev/
 [sbom at a glance]: https://www.ntia.gov/sites/default/files/publications/sbom_at_a_glance_apr2021_0.pdf
-[service as a software substitute]: https://www.gnu.org/philosophy/who-does-that-server-really-serve.html
-[sre fundamentals: slis, slas and slos]: https://cloud.google.com/blog/products/devops-sre/sre-fundamentals-slis-slas-and-slos
-[url, uri, urn: what's the difference?]: https://auth0.com/blog/url-uri-urn-differences/
-[what are okrs? a guide to objectives and key results]: https://asana.com/resources/okr-meaning
-[what is openid connect]: https://openid.net/developers/how-connect-works/
+[Service as a Software Substitute]: https://www.gnu.org/philosophy/who-does-that-server-really-serve.html
+[SRE fundamentals: slis, slas and slos]: https://cloud.google.com/blog/products/devops-sre/sre-fundamentals-slis-slas-and-slos
+[URL, URI, URN: what's the difference?]: https://auth0.com/blog/url-uri-urn-differences/
+[What are OKRs? a guide to objectives and key results]: https://asana.com/resources/okr-meaning
+[What is OpenID connect]: https://openid.net/developers/how-connect-works/
