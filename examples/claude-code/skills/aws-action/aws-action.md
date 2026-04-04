@@ -1,8 +1,8 @@
-<!-- put in $HOME/.claude/skills/aws-action/SKILL.md -->
-
 ---
 name: aws-action
-description: Take actions on AWS resources using the AWS API. Use when the user asks to manage, modify, inspect, or operate on AWS infrastructure such as EC2 instances, S3 buckets, Lambda functions, RDS databases, IAM roles, and other AWS services.
+description: >-
+  Take actions on AWS resources using the AWS API. Use when the user asks to manage, modify, inspect, or operate on AWS
+  infrastructure such as EC2 instances, S3 buckets, Lambda functions, RDS databases, IAM roles, and other AWS services.
 argument-hint: [action description]
 disable-model-invocation: true
 ---
