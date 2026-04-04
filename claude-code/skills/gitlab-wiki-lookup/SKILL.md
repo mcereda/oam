@@ -99,12 +99,8 @@ faster, avoids sandbox configuration, and can search content server-side.
 
 ### GitLab MCP tools (preferred)
 
-Look through your available tools for any GitLab-related MCP server. The tool
-prefix varies by configuration — it might be `mcp__plugin_gitlab_gitlab__`,
-`mcp__gitlab__`, or something else. What matters is finding a **search** tool
-that accepts a `scope` parameter supporting `wiki_blobs`.
-
-To search wiki content via MCP:
+Find the GitLab MCP `search` tool (prefix varies: `mcp__plugin_gitlab_gitlab__`,
+`mcp__gitlab__`, etc.) and call it with:
 
 - `scope`: `"wiki_blobs"`
 - `search`: the query string
@@ -135,25 +131,16 @@ appending `.md` — e.g. `Guides/Deploy-Process` becomes
 
 ### When to search automatically vs. ask first
 
-**Search automatically** when:
+Minimize wasted round-trips while avoiding unnecessary searches.
 
-- The user explicitly asked to check the wiki, a runbook, or an ADR.
-- The question is clearly about an internal process, convention, or
-  architectural decision and you have at least one working tool to access the
-  wiki.
+**Default: search.** A quick search that finds nothing costs little; missing a
+runbook costs real time. Only ask first when the topic is genuinely ambiguous.
 
-**Ask first** ("This might be documented in the wiki — want me to check?") when:
-
-- The question could be answered either by vendor docs or by internal docs and
-  you are not sure which the user needs.
-- You have wiki access but the topic is borderline (e.g. "how do I set up Redis"
-  — could be a general question or could be asking about the team's specific
-  Redis setup).
-
-The goal is to minimize wasted round-trips while avoiding unnecessary searches.
-When in doubt and tools are available, lean toward searching — a quick search
-that finds nothing costs little, but missing a relevant runbook can cost the
-user significant time.
+- **Search automatically**: explicit wiki/runbook/ADR request, or clearly about
+  an internal process, convention, or architectural decision.
+- **Ask first** ("Might be in the wiki — want me to check?"): could be answered
+  by vendor docs *or* internal docs and you can't tell which (e.g. "how do I set
+  up Redis" — generic setup vs. the team's specific Redis conventions).
 
 ### Step 1: Find the page
 
@@ -172,30 +159,23 @@ exhaustively trying variations. Fetching a full page via CLI is worthwhile when
 MCP snippets look relevant but incomplete; skip it when the snippets already
 answer the question.
 
-1. Try MCP search first (if available):
+Follow the fallback chain from **Choosing your tools** (MCP → CLI → local). Key
+notes:
 
-   ```plaintext
-   search(scope="wiki_blobs", search="<query>", group_id="<detected-group-path>")
-   ```
+- **MCP:** if snippets already answer the question, skip Step 2 and go to Step
+  3.
+- **CLI list:** always pass `--per-page 100` — the default of 20 truncates most
+  wikis:
 
-   Examine the results. If the content snippets already answer the user's
-   question, skip Step 2 and go to Step 3.
+  ```bash
+  gitlab -o 'json' group-wiki list --group-id '<numeric-id>' --per-page '100'
+  gitlab -o 'json' project-wiki list --project-id '<numeric-id>' --per-page '100'
+  ```
 
-2. If MCP is unavailable or returns nothing useful, try the CLI — list all pages
-   and match locally:
+  Each entry has `slug` and `title`. Match loosely against the user's query.
 
-   ```bash
-   # Default page limit is 20, which truncates most wikis — always use --per-page
-   gitlab -o 'json' group-wiki list --group-id '<numeric-id>' --per-page '100'
-   # or for project wikis:
-   gitlab -o 'json' project-wiki list --project-id '<numeric-id>' --per-page '100'
-   ```
-
-   Each entry has `slug` and `title`. Match loosely against the user's query.
-
-3. If the CLI also fails (sandbox, missing config), check whether the wiki is
-   cloned locally. Use Glob to find pages (e.g. `**/*keyword*` or `**/*.md`) and
-   Grep to search content. Read matching files directly.
+- **Local:** Glob for `**/*keyword*` or `**/*.md`, Grep content, Read matching
+  files.
 
 **Browsing / enumeration** (user wants to see what exists): list pages via CLI
 or Glob the local checkout, then present a concise numbered summary of titles so
@@ -233,30 +213,37 @@ path.
 - **Always mention linked wiki pages** so the user knows they can ask for
   follow-ups.
 
-### Step 4: Suggest making this knowledge discoverable
+### Step 4: Anchor this knowledge so future sessions don't miss it
 
-After a successful lookup that answered the user's question, check whether the
-project already has a pointer to this wiki content in its documentation. If it
-doesn't, suggest adding one — this helps future sessions (and other team
-members) find the information without needing to invoke the wiki skill:
+After any lookup — successful or partial — check whether the project's CLAUDE.md
+already points to this wiki content. If it doesn't, draft a concrete addition
+and offer it.
 
-- **CONTRIBUTING.md** — for team-shareable knowledge: processes, conventions,
-  links to relevant wiki pages, onboarding pointers. This is the right place for
-  anything another contributor would benefit from knowing. Example:
+**Why this matters:** agents naturally gravitate toward local code. Without an
+explicit instruction in CLAUDE.md, future sessions will likely skip the wiki on
+the same topic. A one-line note fixes this permanently.
 
-  > "Want me to add a link to this runbook in CONTRIBUTING.md so contributors
-  > can find it easily?"
+**Draft the addition first, then ask.** Don't ask abstractly — show exactly what
+would be added:
 
-- **CLAUDE.md** (or project-level agent configuration) — only for
-  Claude-specific instructions, such as "always check the wiki before modifying
-  infrastructure" or "consult the ADR wiki before proposing architectural
-  changes." Example:
+> This wasn't obvious from the code — I found it in the wiki. Want me to add
+> this to CLAUDE.md so future sessions check there automatically?
+>
+> ```markdown
+> # Conventions
+>
+> Before modifying <topic>, check the wiki first (use gitlab-wiki-lookup).
+> Relevant page: <slug>
+> ```
 
-  > "Want me to add a note to CLAUDE.md so I check the wiki automatically for
-  > infrastructure changes in this project?"
+Tailor the instruction to the topic: deployment steps, schema migrations, naming
+conventions, and similar process-heavy areas are the strongest candidates.
 
-Keep the suggestion brief and only offer it once per topic. If the user
-declines, move on.
+**Also suggest CONTRIBUTING.md** when the wiki content is useful to human
+contributors (not just to AI agents) — link the relevant page so teammates can
+find it directly.
+
+Only offer each suggestion once. If the user declines, move on.
 
 ## Looking up group or project IDs
 
