@@ -118,9 +118,10 @@ tmux kill-session -t 'session-name'
 
 ## Further readings
 
-- [Github]
+- [Website]
+- [Codebase]
 - [Documentation]
-- [Tmux Plugin Manager]
+- [Plugin Manager]
 
 ### Sources
 
@@ -142,9 +143,10 @@ tmux kill-session -t 'session-name'
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[documentation]: https://github.com/tmux/tmux/wiki/
-[github]: https://github.com/tmux/tmux
-[tmux plugin manager]: https://github.com/tmux-plugins/tpm
+[Codebase]: https://github.com/tmux/tmux
+[Documentation]: https://github.com/tmux/tmux/wiki/
+[Plugin manager]: https://github.com/tmux-plugins/tpm
+[Website]: https://tmux.info/
 
 <!-- Others -->
 [default tmux config]: https://unix.stackexchange.com/questions/175421/default-tmux-config#342975
