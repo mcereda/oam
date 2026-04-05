@@ -8,7 +8,7 @@ pip install -U --require-virtualenv -r 'requirements.txt' --no-cache-dir
 # Upgrade packages
 pip install -U 'pip'
 
-# Upgrade the included `pip` executable on Mac OS X
+# Upgrade the included `pip` executable on macOS
 ~/Library/Python/3.8/bin/pip3 install --user --upgrade 'pip'
 
 # Upgrade all currently installed packages

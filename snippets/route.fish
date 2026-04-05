@@ -32,7 +32,7 @@ route del 'default'
 
 
 ###
-# Mac OS X
+# macOS
 # ------------------
 ###
 

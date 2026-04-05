@@ -1,12 +1,12 @@
 # Pkgutil
 
-Query and manipulate Mac OS X Installer packages and receipts.
+Query and manipulate macOS Installer packages and receipts.
 
-`pkgutil` reads and manipulates Mac OS X Installer flat packages, and provides access to the "receipt" database used by the Installer.
+`pkgutil` reads and manipulates macOS Installer flat packages, and provides access to the "receipt" database used by the
+Installer.
 
-Options are processed first, and affect the operation of all commands. Multiple commands are performed sequentially in the given order.
-
-## Table of contents <!-- omit in toc -->
+Options are processed first, and affect the operation of all commands. Multiple commands are performed sequentially in
+the given order.
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -36,7 +36,8 @@ pkgutil --file-info Bitwarden.app/Contents/MacOS/Bitwarden
 - [cheat.sh]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Others -->

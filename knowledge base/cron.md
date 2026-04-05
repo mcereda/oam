@@ -11,8 +11,8 @@ systemd timers).
 
 ## TL;DR
 
-`cron` searches its spool area (`/var/spool/cron/crontabs` on Linux systems, `/usr/lib/cron/tabs` on Mac OS X) for
-crontab files named after accounts in `/etc/passwd`, and loads those it founds into memory.
+`cron` searches its spool area (`/var/spool/cron/crontabs` on Linux systems, `/usr/lib/cron/tabs` on macOS) for crontab
+files named after accounts in `/etc/passwd`, and loads those it founds into memory.
 
 > [!note]
 > Crontabs in the spool directory should **not** be accessed directly.<br/>

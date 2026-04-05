@@ -59,7 +59,7 @@ shutdown -r now
   </details>
 
   <details style='padding: 0 0 0 1rem'>
-    <summary>Mac OS X</summary>
+    <summary>macOS</summary>
 
 > [!important]
 > On M1 and later devices, this requires system extensions to be enabled in the Startup Security Utility.
@@ -339,7 +339,7 @@ sudo zpool create -f \
   'volume_name' \
   '/dev/sdb'
 
-# Create Linux-compatible pools on Mac OS X.
+# Create Linux-compatible pools on macOS.
 sudo zpool create -f \
   -o comment='USB-C disk 4T' \
   -o version=28 \

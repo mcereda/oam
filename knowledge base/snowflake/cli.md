@@ -100,7 +100,7 @@ curl --continue-at '-' --location --fail --show-error --remote-name \
   --url 'https://sfc-repo.snowflakecomputing.com/snowflake-cli/linux_aarch64/3.7.2/snowflake-cli-3.7.2.aarch64.rpm' \
 && sudo rpm -i 'snowflake-cli-3.7.2.rpm'
 
-# Mac OS X
+# macOS
 # Via Homebrew
 brew install 'snowflake-cli'
 # Via the [Snowflake CLI repository]
@@ -124,7 +124,7 @@ The CLI looks for:
 
   - Linux: `$XDG_CONFIG_HOME/snowflake/config.toml`.
   - Windows: `%USERPROFILE%\AppData\Local\snowflake\config.toml`
-  - Mac OS X: `~/Library/Application Support/snowflake/config.toml`
+  - macOS: `~/Library/Application Support/snowflake/config.toml`
 
 If the global configuration file does not exist, running any `snow` command for the first time automatically creates an
 empty `config.toml` file that one can then populate with the desired connections.

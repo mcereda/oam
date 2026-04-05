@@ -1722,7 +1722,7 @@ Use the `ansible.builtin.copy` instead of `ansible.builtin.template`:
 
 Root Cause:
 
-> Mac OS High Sierra and later versions have restricted multithreading for improved security.<br/>
+> macOS High Sierra and later versions have restricted multithreading for improved security.<br/>
 > Apple has defined some rules on what is allowed and not is not after forking processes, and have also added
 > `async-signal-safety` to a limited number of APIs.
 

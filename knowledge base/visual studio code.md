@@ -12,7 +12,7 @@
 1. [Troubleshooting](#troubleshooting)
    1. [Blank window upon launch](#blank-window-upon-launch)
    1. [_No extensions found_ when running from source](#no-extensions-found-when-running-from-source)
-   1. [_Type the name and password of a user in the 'Developer Tools' group to allow Developer Tools Access to make changes_ on Mac OS X](#type-the-name-and-password-of-a-user-in-the-developer-tools-group-to-allow-developer-tools-access-to-make-changes-on-mac-os-x)
+   1. [_Type the name and password of a user in the 'Developer Tools' group to allow Developer Tools Access to make changes_ on macOS](#type-the-name-and-password-of-a-user-in-the-developer-tools-group-to-allow-developer-tools-access-to-make-changes-on-macos)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -170,7 +170,7 @@ jq '.extensionsGallery' /usr/lib/code/product.json
 
 and if not, change them.
 
-### _Type the name and password of a user in the 'Developer Tools' group to allow Developer Tools Access to make changes_ on Mac OS X
+### _Type the name and password of a user in the 'Developer Tools' group to allow Developer Tools Access to make changes_ on macOS
 
 One needs to add one's user name to the `_developer` group:
 

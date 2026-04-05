@@ -134,7 +134,7 @@ find '/var/www/html' -iname "*" -print0 | xargs -I {} -0 chattr +i {}
 chattr -i '/path/to/file.php'
 ```
 
-FreeBSD, Mac OS X and other BSD unix user need to use the `chflags` command:
+FreeBSD, macOS and other BSD unix user need to use the `chflags` command:
 
 ```sh
 # Make files read-only.

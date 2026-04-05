@@ -5,7 +5,7 @@
 1. [Configuration](#configuration)
 1. [Session Manager integration](#session-manager-integration)
 1. [Troubleshooting](#troubleshooting)
-   1. [Installation with `pip` on Mac OS X errors out with message about the version of `six`](#installation-with-pip-on-mac-os-x-errors-out-with-message-about-the-version-of-six)
+   1. [Installation with `pip` on macOS errors out with message about the version of `six`](#installation-with-pip-on-macos-errors-out-with-message-about-the-version-of-six)
    1. [YubiKeys can only be used as hardware TOTP devices to assume Roles in the CLI, and not as UF2 passkeys](#yubikeys-can-only-be-used-as-hardware-totp-devices-to-assume-roles-in-the-cli-and-not-as-uf2-passkeys)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -279,9 +279,9 @@ aws ssm start-session --target 'i-0123456789abcdef0'
 
 ## Troubleshooting
 
-### Installation with `pip` on Mac OS X errors out with message about the version of `six`
+### Installation with `pip` on macOS errors out with message about the version of `six`
 
-Context: on Mac OS X, during installation using `pip`
+Context: on macOS, during installation using `pip`
 
 Error message example: FIXME error regarding the version of six that came with `distutils` in El Capitan.
 

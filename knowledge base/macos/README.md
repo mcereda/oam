@@ -1,4 +1,4 @@
-# Mac OS X
+# macOS
 
 1. [TL;DR](#tldr)
 1. [Taking screenshots](#taking-screenshots)

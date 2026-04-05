@@ -51,7 +51,7 @@ docker volume create --driver 'local' --opt 'type=tmpfs' --opt 'device=tmpfs' --
 docker volume create --driver 'local' --opt 'type=btrfs' --opt 'device=/dev/sda2'
 docker volume create --driver 'convoy' --opt 'size=100m' 'test'
 
-# Use temporary, size-limited volumes in Mac OS X
+# Use temporary, size-limited volumes in macOS
 # The example uses a 2GB RAM disk
 hdiutil attach -nomount 'ram://4194304' | xargs diskutil erasevolume HFS+ 'ramdisk' \
 && docker run --rm --name 'alpine' -v "/Volumes/ramdisk/:/ramdisk" -it 'alpine' sh

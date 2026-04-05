@@ -15,7 +15,7 @@
         name: "{{ (ansible_pkg_mgr in ['pacman']) | ternary(omit, '*') }}"
         state: "{{ (ansible_pkg_mgr in ['zypper']) | ternary('dist-upgrade', 'latest') }}"
         upgrade: "{{ (ansible_pkg_mgr in ['pacman']) | ternary(true, omit) }}"
-    - name: Upgrade Mac OS X
+    - name: Upgrade macOS
       tags:
         - darwin
         - mac

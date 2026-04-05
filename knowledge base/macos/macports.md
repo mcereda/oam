@@ -155,7 +155,7 @@ port work 'popt'
 - [Codebase]
 - Official user [guide]
 - Public [ports] database
-- [Mac OS X]
+- [macOS]
 
 ### Sources
 
@@ -169,7 +169,7 @@ port work 'popt'
   -->
 
 <!-- Knowledge base -->
-[mac os x]: README.md
+[macOS]: README.md
 
 <!-- Upstream -->
 [codebase]: https://github.com/macports/macports-base

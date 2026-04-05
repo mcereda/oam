@@ -38,7 +38,7 @@ snow sql
 ###
 
 # Install
-# Mac OS X
+# macOS
 curl -C '-' -LfSO --url 'https://github.com/Snowflake-Labs/roleout/releases/download/v2.0.1/Roleout-2.0.1-arm64.dmg' \
 && sudo installer -pkg 'Roleout-2.0.1-arm64.dmg' -target '/' \
 && sudo xattr -r -d 'com.apple.quarantine' '/Applications/Roleout.app' \

@@ -1,6 +1,6 @@
 ---
 
-- name: Install Xcode CLI tools on Mac OS X
+- name: Install Xcode CLI tools on macOS
   tags:
     - macosx
     - darwin

@@ -338,16 +338,16 @@ See also [Configuration] and [Environment variables][environment variables refer
 
 Depending on one's OS and authentication method:
 
-- **OAuth credentials** (e.g., GitHub, remote MCP servers) are stored in the system keychain on Mac OS X, or in a
+- **OAuth credentials** (e.g., GitHub, remote MCP servers) are stored in the system keychain on macOS, or in a
   credentials file on other platforms.
-- General **authentication tokens and credentials file** are stored in the system keychain on Mac OS X and in
+- General **authentication tokens and credentials file** are stored in the system keychain on macOS and in
   `~/.claude/.credentials.json` on Linux and Windows.
 - **API keys** should be passed as environment variables to MCPs (e.g. `--env API_KEY=...` when adding one via
   `claude mcp add`) or saved manually in `~/.claude.json`.
 
 | Platform | Credential Location                                             |
 | -------- | --------------------------------------------------------------- |
-| Mac OS X | System Keychain (`Keychain Access.app → login → "Claude Code"`) |
+| macOS    | System Keychain (`Keychain Access.app → login → "Claude Code"`) |
 | Linux    | `~/.claude/.credentials.json`                                   |
 | Windows  | `%USERPROFILE%\.claude\.credentials.json`                       |
 
@@ -460,14 +460,14 @@ Also see [thedotmack/claude-mem] for an automatic memory management system.
 
 Memory files' loading order:
 
-| Scope          | Type                | Location                                                                                                | Notes                                                 |
-| -------------- | ------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Managed        | Enterprise policy   | `/etc/claude-code/CLAUDE.md` (Linux)<br/>`/Library/Application Support/ClaudeCode/CLAUDE.md` (Mac OS X) | Loaded in full at launch                              |
-| User           | Context file        | `~/.claude/CLAUDE.md`                                                                                   | Loaded in full at launch                              |
-| Project        | Shared context file | `./CLAUDE.md` or `./.claude/CLAUDE.md`                                                                  | Loaded in full at launch                              |
-| Project        | Rules               | `./.claude/rules/*.md`                                                                                  | Loaded in full at launch                              |
-| Subdirectory   | Context file        | `<project>/some-subdir/CLAUDE.md`                                                                       | Loaded on demand when reading files in this directory |
-| Active session | Auto memory         | `~/.claude/projects/<project>/memory/`                                                                  | Complement the context without overriding             |
+| Scope          | Type                | Location                                                                                             | Notes                                                 |
+| -------------- | ------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Managed        | Enterprise policy   | `/etc/claude-code/CLAUDE.md` (Linux)<br/>`/Library/Application Support/ClaudeCode/CLAUDE.md` (macOS) | Loaded in full at launch                              |
+| User           | Context file        | `~/.claude/CLAUDE.md`                                                                                | Loaded in full at launch                              |
+| Project        | Shared context file | `./CLAUDE.md` or `./.claude/CLAUDE.md`                                                               | Loaded in full at launch                              |
+| Project        | Rules               | `./.claude/rules/*.md`                                                                               | Loaded in full at launch                              |
+| Subdirectory   | Context file        | `<project>/some-subdir/CLAUDE.md`                                                                    | Loaded on demand when reading files in this directory |
+| Active session | Auto memory         | `~/.claude/projects/<project>/memory/`                                                               | Complement the context without overriding             |
 
 More specific files override broader ones on conflicting instructions, but they **merge** together and do **not**
 replace each other.<br/>
@@ -879,9 +879,8 @@ The sandboxed tool:
 - Allows implementing custom rules on **outgoing** traffic.
 - Applies restrictions to all scripts, programs, and subprocesses spawned by commands.
 
-On Mac OS X, Claude Code uses the built-in Seatbelt framework.<br/>
-On Linux and WSL2, it requires installing
-[containers/bubblewrap] and `socat` before activation.<br/>
+On macOS, Claude Code uses the built-in Seatbelt framework.<br/>
+On Linux and WSL2, it requires installing [containers/bubblewrap] and `socat` before activation.<br/>
 WSL1 is **not** supported.
 
 Enable sandboxing interactively with the `/sandbox` command. <br/>

@@ -108,7 +108,7 @@ parallel -q \
 | `--checksum`            | `-c`         | skip files basing on checksum instead of modify time and size                                       |
 | `--chown=USER:GROUP`    |              | simple username/groupname mapping                                                                   |
 | `--compress`            | `-z`         | compress file data during the transfer                                                              |
-| `--crtimes`             |              | **only available on Mac OS X**                                                                      |
+| `--crtimes`             |              | **only available on macOS**                                                                         |
 | `--delete-during`       | `--del`      | set the **receiver** to delete files during the transfer                                            |
 | `--delete`              |              | delete items **at the destination** that **don't** exist in the source                              |
 | `--dry-run`             | `-n`         | perform a trial run with no changes made                                                            |
@@ -142,7 +142,8 @@ parallel -q \
 
 ### Filter file
 
-Set up a `.rsync-filter` file in any directory. If `rsync` is called with the `-F` option, the filtering rules in that file will be applied from that directory to all its subfolders.
+Set up a `.rsync-filter` file in any directory. If `rsync` is called with the `-F` option, the filtering rules in that
+file will be applied from that directory to all its subfolders.
 
 ```sh
 $ cat '.rsync-filter'

@@ -1,17 +1,21 @@
 # Defaults
 
-Allows users to read, write, and delete Mac OS X user defaults from a command-line shell.
+Allows users to read, write, and delete macOS user defaults from a command-line shell.
 
-Mac OS X applications and other programs use the defaults system to record user preferences and other information that must be maintained when the applications aren't running (such as default font for new documents, or the position of an Info panel).<br/>
-Much of this information is accessible through an application's Preferences panel, but some of it can only be accessed using `defaults`.
+macOS applications and other programs use the defaults system to record user preferences and other information that must
+be maintained when the applications aren't running (such as default font for new documents, or the position of an Info
+panel).<br/>
+Much of this information is accessible through an application's Preferences panel, but some of it can only be accessed
+using `defaults`.
 
 User defaults belong to **domains**, which typically correspond to individual applications.<br/>
-Each domain has a dictionary of keys and values representing its defaults. Keys are always strings, but values can be complex data structures comprising arrays, dictionaries, strings, and binary data. These data structures are stored as XML Property Lists.
+Each domain has a dictionary of keys and values representing its defaults. Keys are always strings, but values can be
+complex data structures comprising arrays, dictionaries, strings, and binary data. These data structures are stored as
+XML Property Lists.
 
 The `NSGlobalDomain` domain is a special global domain shared by all applications, system services.<br/>
-If a default isn't specified in the application's domain but is specified in NSGlobalDomain, then the application falls back to the value in NSGlobalDomain.
-
-## Table of contents <!-- omit in toc -->
+If a default isn't specified in the application's domain but is specified in NSGlobalDomain, then the application falls
+back to the value in NSGlobalDomain.
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
@@ -79,16 +83,17 @@ defaults delete 'com.oliverpeate.Bluesnooze' 'hideIcon' && killall 'Bluesnooze'
 ## Further readings
 
 - [`man` page][man page]
-- [Mac OS X]
-- [Mac OS defaults list]
+- [macOS]
+- [macOS defaults list]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
-[mac os x]: README.md
+[macos]: README.md
 
 <!-- Others -->
-[mac os defaults list]: https://macos-defaults.com/
+[macos defaults list]: https://macos-defaults.com/
 [man page]: https://ss64.com/osx/defaults.html
