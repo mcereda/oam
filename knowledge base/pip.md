@@ -11,7 +11,7 @@ Package installer for Python.
 Stores the cache in:
 
 - `$XDG_CACHE_HOME` (default: `~/.cache/pip`) on Linux.
-- `~/Library/Caches/pip` on Mac OS X.
+- `~/Library/Caches/pip` on macOS.
 - `%LocalAppData%\pip\Cache` on Windows.
 
 pip will also respect XDG_CACHE_HOME.
@@ -36,7 +36,7 @@ pip install -U --require-virtualenv -r 'requirements.txt' --no-cache-dir
 # Upgrade packages.
 pip install -U 'pip'
 
-# Upgrade the included `pip` executable on Mac OS X.
+# Upgrade the included `pip` executable on macOS.
 ~/Library/Python/3.8/bin/pip3 install --user --upgrade 'pip'
 
 # Upgrade all currently installed packages.

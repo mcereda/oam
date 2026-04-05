@@ -2,7 +2,7 @@
 
 Open source application for secure messaging.
 
-Available for [Android][android app], [iOS][iOS app], Linux, Mac OS X, and Windows.
+Available for [Android][android app], [iOS][iOS app], Linux, macOS, and Windows.
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)

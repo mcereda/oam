@@ -1,13 +1,13 @@
 # Tag
 
-Command line tool to manipulate tags on Mac OS X files (10.9 Mavericks and above) and to query for files with those tags.<br/>
-It leverages the file system's built-in metadata search functionality to quickly find all files that have been tagged with a given set of tags.
-
-## Table of contents <!-- omit in toc -->
+Command line tool to manipulate tags on macOS files (10.9 Mavericks and above) and to query for files with those
+tags.<br/>
+It leverages the file system's built-in metadata search functionality to quickly find all files that have been tagged
+with a given set of tags.
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -66,26 +66,23 @@ tag --find ''
 ## Further readings
 
 - [Github]
-- [Mac OS X]
+- [macOS]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Tagging files from the macOS command line]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Upstream -->
 [github]: https://github.com/jdberry/tag
 
 <!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Knowledge base -->
-[mac os x]: README.md
+[macOS]: README.md
 
 <!-- Others -->
 [tagging files from the macos command line]: https://brettterpstra.com/2017/08/22/tagging-files-from-the-command-line/

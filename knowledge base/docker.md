@@ -26,13 +26,13 @@
 <details>
   <summary>Setup</summary>
 
-| OS       | Setup type       | Engine configuration file                                                  | Settings                                                          | Data directory          |
-| -------- | ---------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------- |
-| Linux    | Engine, regular  | `/etc/docker/daemon.json`                                                  |                                                                   | `/var/lib/docker`       |
-| Linux    | Engine, rootless | `${XDG_CONFIG_HOME}/docker/daemon.json`<br/>`~/.config/docker/daemon.json` |                                                                   |                         |
-| Linux    | Docker Desktop   | `${HOME}/.docker/daemon.json`                                              | `${HOME}/.docker/desktop/settings.json`                           |                         |
-| Mac OS X | Docker Desktop   | `${HOME}/.docker/daemon.json`                                              | `${HOME}/Library/Group Containers/group.com.docker/settings.json` |                         |
-| Windows  | Docker Desktop   | `C:\ProgramData\docker\config\daemon.json`                                 | `C:\Users\UserName\AppData\Roaming\Docker\settings.json`          | `C:\ProgramData\docker` |
+| OS      | Setup type       | Engine configuration file                                                  | Settings                                                          | Data directory          |
+| ------- | ---------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------- |
+| Linux   | Engine, regular  | `/etc/docker/daemon.json`                                                  |                                                                   | `/var/lib/docker`       |
+| Linux   | Engine, rootless | `${XDG_CONFIG_HOME}/docker/daemon.json`<br/>`~/.config/docker/daemon.json` |                                                                   |                         |
+| Linux   | Docker Desktop   | `${HOME}/.docker/daemon.json`                                              | `${HOME}/.docker/desktop/settings.json`                           |                         |
+| macOS   | Docker Desktop   | `${HOME}/.docker/daemon.json`                                              | `${HOME}/Library/Group Containers/group.com.docker/settings.json` |                         |
+| Windows | Docker Desktop   | `C:\ProgramData\docker\config\daemon.json`                                 | `C:\Users\UserName\AppData\Roaming\Docker\settings.json`          | `C:\ProgramData\docker` |
 
 ```sh
 # Install.
@@ -274,7 +274,7 @@ docker save 'local/image:latest' | ssh -C 'user@remote.host' docker load
 
 The Docker engine leverages specific Linux capabilities.
 
-On Windows and Mac OS X the engine runs in Linux VMs.<br/>
+On Windows and macOS the engine runs in Linux VMs.<br/>
 Docker's `host` network mode will use the VM's network, and **not** the host's one. Using that mode on those OSes will
 result in the containers being **silently unable** to receive traffic from outside the host.<br/>
 To solve this, use a different network mode and **explicitly publish** the ports used.

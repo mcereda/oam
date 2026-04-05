@@ -17,7 +17,7 @@
 
 Default directories path:
 
-| Directory | Linux                  | Mac OS X                                       | Windows                                  |
+| Directory | Linux                  | macOS                                          | Windows                                  |
 | --------- | ---------------------- | ---------------------------------------------- | ---------------------------------------- |
 | Binaries  | `/usr/bin`             | `/Applications/Thunderbird.app/Contents/MacOS` | `C:\Program Files\Mozilla Thunderbird`   |
 | Data      | `${HOME}/.thunderbird` | `${HOME}/Library/Thunderbird`                  | `%APPDATA%\Roaming\Thunderbird`          |
@@ -64,7 +64,8 @@ ${THUNDERBIRD_BIN_DIR}/thunderbird-bin -P
 ### Restoring profiles from backups
 
 1. Close Thunderbird if it is open.
-1. If the existing profile folder and the profile backup folder have the same name, replace the existing profile folder with the profile backup folder:
+1. If the existing profile folder and the profile backup folder have the same name, replace the existing profile folder
+   with the profile backup folder:
 
    ```sh
    rm -fr "${THUNDERBIRD_PROFILES_DIR}/we12yhij.default"
@@ -102,7 +103,8 @@ ${THUNDERBIRD_BIN_DIR}/thunderbird-bin -P
 1. In the _Incoming Server_ configuration, ensure to set it to `POP3` and not `IMAP`.
    You can safely ignore the rest of the server configuration as it is not needed.
 1. Hit _Advanced config_ and confirm to create the new dummy account.
-1. In the dummy account settings, under _Server Settings_, disable the automatic check for, and download of, new messages on the server.
+1. In the dummy account settings, under _Server Settings_, disable the automatic check for, and download of, new
+   messages on the server.
 
 ### Convert an account's message store type from one file per folder (_mbox_) to one file per message (_maildir_)
 
@@ -127,7 +129,8 @@ Reasons for rebuilding the Global Database include:
 - The Global Database file becomes fragmented, which reduces index performance.
 
 Rebuilding the database will **not** automatically reduce the size of the index.<br/>
-It will only shrink if there are fewer messages to index since it was last updated, which can be accomplished by deleting messages or disabling message sync for an account or folder.
+It will only shrink if there are fewer messages to index since it was last updated, which can be accomplished by
+deleting messages or disabling message sync for an account or folder.
 
 Steps to rebuild the Global Database:
 
@@ -141,7 +144,8 @@ Steps to rebuild the Global Database:
 1. Start Thunderbird.
 
 The re-indexing process will start automatically.<br/>
-Depending on the number of messages, it might take some time for the indexing to complete; performance might be affected, and the search will return only partial results or even no results until the indexing is complete.
+Depending on the number of messages, it might take some time for the indexing to complete; performance might be
+affected, and the search will return only partial results or even no results until the indexing is complete.
 
 The indexing progress can be monitored through _Tools_ > _Activity Manager_.
 

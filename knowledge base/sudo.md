@@ -17,11 +17,11 @@
 
 Defaults:
 
-| Path                     | Type               | OS       |
-| ------------------------ | ------------------ | -------- |
-| `/etc/sudoers`           | file               | All      |
-| `/etc/sudoers.d`         | included directory | Linux    |
-| `/private/etc/sudoers.d` | included directory | Mac OS X |
+| Path                     | Type               | OS    |
+| ------------------------ | ------------------ | ----- |
+| `/etc/sudoers`           | file               | All   |
+| `/etc/sudoers.d`         | included directory | Linux |
+| `/private/etc/sudoers.d` | included directory | macOS |
 
 Sudoers files use the Extended Backus-Naur Form (EBNF) grammar.
 

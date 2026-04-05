@@ -503,7 +503,7 @@ kubectl delete ns 'awx'
 
   <details style="margin-left: 1em;">
   <summary>
-    1. ARM, Mac OS X, <code>minikube</code>, <code>kustomize</code>: failed: ARM images for AWX not available
+    1. ARM, macOS, <code>minikube</code>, <code>kustomize</code>: failed: ARM images for AWX not available
   </summary>
 
 ```sh
@@ -789,7 +789,7 @@ $ minikube kubectl -- delete -f <(minikube kubectl -- kustomize --enable-helm)
   </details>
 
   <details style="margin-left: 1em">
-  <summary>1. AMD64, Mac OS X, EKS</summary>
+  <summary>1. AMD64, macOS, EKS</summary>
 
 ```sh
 $ mkdir -p '/tmp/awx'

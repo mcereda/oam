@@ -26,7 +26,7 @@ find "$(brew --prefix)/etc" -type 'f' -name 'cert.pem' -path '*/openssl*' -exec 
 
 - [Github]
 - [Homebrew]
-- [Mac OS X]
+- [macOS]
 
 <!--
   References
@@ -37,4 +37,4 @@ find "$(brew --prefix)/etc" -type 'f' -name 'cert.pem' -path '*/openssl*' -exec 
 
 <!-- Knowledge base -->
 [homebrew]: ../homebrew.md
-[mac os x]: README.md
+[macOS]: README.md

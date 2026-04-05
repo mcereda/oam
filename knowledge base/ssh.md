@@ -401,8 +401,8 @@ Notable options:
 - `auto_cache` enables caching based on modification times;
 - `reconnect` reconnects to the server;
 - `defer_permissions` works around the issue where certain shares may mount properly, but cause _permissions denied_
-  errors when accessed (caused by how Mac OS X's Finder translates and interprets permissions;
-- `noappledouble` prevents Mac OS X to write `.DS_Store` files on the remote file system;
+  errors when accessed (caused by how macOS's Finder translates and interprets permissions;
+- `noappledouble` prevents macOS to write `.DS_Store` files on the remote file system;
 - `volname` defines the name to use for the volume.
 
 Usage:
@@ -417,7 +417,7 @@ sshfs \
 ### Installation
 
 ```sh
-# Mac OS X requires `macports`, since `brew` does not offer 'sshfs' anymore
+# macOS requires `macports`, since `brew` does not offer 'sshfs' anymore
 sudo port install 'sshfs'
 ```
 

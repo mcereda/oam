@@ -7,7 +7,7 @@
 ## TL;DR
 
 ```sh
-# Works on Linux and Mac OS X.
+# Works on Linux and macOS.
 # Tested with BASH, CSH, DASH, FISH, KSH, TCSH and ZSH.
 finger "$USER" | grep 'Shell:' | awk '{print $NF}'
 
@@ -17,13 +17,13 @@ getent passwd "$USER" | awk -F ':' '{print $NF}'
 getent passwd "$USER" | cut -d ':' -f '7'
 
 # Works on Linux.
-# Does *not* work on Mac OS X because it uses Apple's OpenDirectory and only
+# Does *not* work on macOS because it uses Apple's OpenDirectory and only
 # refers to '/etc/passwd' or '/private/etc/passwd' when in single user mode.
 # Tested with BASH.
 grep "$USER" '/etc/passwd' | awk -F ':' '{print $NF}'
 grep "$USER" '/etc/passwd' | cut -d ':' -f '7'
 
-# Works on Mac OS X.
+# Works on macOS.
 # Does *not* work on systems without OpenDirectory.
 # Tested with BASH, CSH, DASH, FISH, KSH, TCSH and ZSH.
 dscl '.' -read "/Users/$USER" 'UserShell' | awk '{print $NF}'

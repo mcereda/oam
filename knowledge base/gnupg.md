@@ -25,7 +25,7 @@
 ## TL;DR
 
 ```sh
-# Install on Mac OS X.
+# Install on macOS.
 # Choose one.
 brew install --cask 'gpg-suite-no-mail'
 brew install 'gnupg' 'pinentry-mac'

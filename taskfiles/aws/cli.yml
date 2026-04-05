@@ -36,9 +36,9 @@ tasks:
         - darwin
       task: session-manager-plugin:link:darwin
   session-manager-plugin:link:darwin:
-    desc: link the session manager plugin for the aws cli on mac os x systems
+    desc: link the session manager plugin for the aws cli on macos systems
     summary: |-
-      Link the session manager plugin for the AWS CLI on Mac OS X systems.
+      Link the session manager plugin for the AWS CLI on macOS systems.
     platforms:
       - darwin
     deps:
@@ -60,9 +60,9 @@ tasks:
     status:
       - session-manager-plugin
   session-manager-plugin:install:darwin:
-    desc: install the session manager plugin for the aws cli on mac os x systems
+    desc: install the session manager plugin for the aws cli on macos systems
     summary: |-
-      Install the session manager plugin for the AWS CLI on Mac OS X systems.
+      Install the session manager plugin for the AWS CLI on macOS systems.
     platforms:
       - darwin
     deps:

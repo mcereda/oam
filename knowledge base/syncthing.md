@@ -16,11 +16,11 @@ Synchronizes files continuously between two or more computers.
 
 Configuration files:
 
-| OS       | Path                                                           |
-| -------- | -------------------------------------------------------------- |
-| Linux    | `$XDG_STATE_HOME/syncthing`<br/>`$HOME/.local/state/syncthing` |
-| Mac OS X | `$HOME/Library/Application Support/Syncthing`                  |
-| Windows  | `%LOCALAPPDATA%\Syncthing`                                     |
+| OS      | Path                                                           |
+| ------- | -------------------------------------------------------------- |
+| Linux   | `$XDG_STATE_HOME/syncthing`<br/>`$HOME/.local/state/syncthing` |
+| macOS   | `$HOME/Library/Application Support/Syncthing`                  |
+| Windows | `%LOCALAPPDATA%\Syncthing`                                     |
 
 ```sh
 # Installation.

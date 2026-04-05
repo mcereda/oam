@@ -12,7 +12,7 @@ On systems with GNU userland:
 
 1. Pass files with [`shred`][gnu shred].
 
-On Mac OS X:
+On macOS:
 
 1. Enable trim enforcement if it is using a SSD:
 
@@ -28,15 +28,16 @@ On Mac OS X:
 
 All the references in the [further readings] section, plus the following:
 
-- [Mac OS X]
+- [macOS]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
 [further readings]: #further-readings
 
 <!-- Knowledge base -->
-[gnu shred]: gnu%20userland/shred.md
-[mac os x]: mac%20os%20x/README.md
+[GNU shred]: gnu%20userland/shred.md
+[macOS]: macos/README.md

@@ -8,7 +8,7 @@
 ## GNU time
 
 ```sh
-# On Mac OS X.
+# On macOS.
 brew install 'gnu-time'
 gtime -v pulumi preview
 ```

@@ -1,7 +1,5 @@
 # Time Machine
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Follow logs](#follow-logs)
 1. [Further readings](#further-readings)
@@ -26,11 +24,12 @@ sudo tmutil setdestination
 
 ## Further readings
 
-- [Mac OS X]
+- [macOS]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Knowledge base -->
-[mac os x]: README.md
+[macOS]: README.md

@@ -48,7 +48,7 @@ Refer [Supported operating systems] for the updated table.
 | Amazon Linux                       | 2, 2023                                        |
 | CentOS                             | 7, 8                                           |
 | CentOS Stream                      | 8                                              |
-| Mac OS X                           | 12.x (Monterey), 13.x (Ventura), 14.x (Sonoma) |
+| macOS                              | 12.x (Monterey), 13.x (Ventura), 14.x (Sonoma) |
 | Red Hat Enterprise Linux (RHEL)    | 7, 8, 9                                        |
 | SUSE Linux Enterprise Server (SLE) | 12, 15                                         |
 | Ubuntu                             | 18.04 LTS, 20.04 LTS, 22.04 LTS, 24.04 LTS     |
