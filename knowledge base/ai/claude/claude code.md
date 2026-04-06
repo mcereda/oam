@@ -22,6 +22,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
    1. [Agent teams](#agent-teams)
 1. [Scheduling tasks](#scheduling-tasks)
 1. [Tools of interest](#tools-of-interest)
+1. [Best practices](#best-practices)
 1. [Run on local models](#run-on-local-models)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
@@ -1540,6 +1541,49 @@ Describe the goal in natural language otherwise.
 | ------------ | -------------------------------------------------------------------------------- |
 | [rtk-ai/rtk] | Summarize CLI commands output. Avoids context pollution and reduces token usage. |
 
+## Best practices
+
+Document projects upfront (e.g. using [ADRs][adr], and [CONTRIBUTING.md] and README.md files).<br/>
+Possibly consider including instructions specific to AI agents in those files instead of including them only in
+`CLAUDE.md`.
+
+Be explicit about constraints and non-negotiables. **Clearly** state in `CLAUDE.md` files what Claude should **never**
+do, e.g. delete specific files, modify configurations, break tests, etc.<br/>
+Provide **explicit**, **clear** examples of what it need to do and how. Set expectations about when to ask for help.
+
+Keep the `CLAUDE.md` files as small as possible.<br/>
+If possible, prefer splitting it up per subfolder, with each only containing instructions related to the their own
+directory. Subfolder files are **only** loaded if Claude Code actively works in those directories.
+
+Have Claude read and understand the project layout, documentation, key files, and architecture **before** allowing it to
+make changes. Reference those files in `CLAUDE.md` to make sure it loads them when needed.
+
+**Avoid** using Claude without human oversight for tasks that require deep domain knowledge or judgment calls, like
+architectural decisions and security reviews. Prefer giving it easy, repeatable tasks like exploring the code,
+refactoring, generating tests or boilerplate, and documentation.
+
+Abuse version control checkpoints. Commit frequently to keep safe fallback points and isolate what Claude changed,
+should something go wrong.<br/>
+Review and test changes incrementally, especially when involving critical files.
+
+Run `/insights` to get feedback, tips and suggestions on how one could improve their Claude Code usage.<br/>
+Claude bases those tips on one's history and session analysis.
+
+Prefer CLI utilities over MCP servers. They're lighter, faster, independent, work offline (unless they require
+connecting to a server), and do not hog the session's context just by existing.<br/>
+Prefer MCP servers over CLI tools when requiring persistent states across sessions or bidirectional communication, or
+when using different operating systems and requiring standardized interfaces.
+
+Optimize model usage to avoid burning through credits:
+
+- Use **different** sessions for unrelated tasks instead of a single, continuous session.<br/>
+  Existing context is always sent in its entirety for every message.
+- Start by _planning_ the approach to one's goals, refine it, break large tasks into smaller, reviewable ones, and
+  **then** act.
+- Start by using **Sonnet**, switch to Opus in case Sonnet proves not capable enough, and prefer Sonnet or even Haiku
+  for actions.
+- Track session usage to identify what tasks are expensive to delegate, and review and adjust one's patterns.
+
 ## Run on local models
 
 Claude _can_ use other models and engines by setting the `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_BASE_URL` and
@@ -1625,11 +1669,13 @@ Claude Code version: `v2.1.41`.
 [Using skills]: #using-skills
 
 <!-- Knowledge base -->
+[ADR]: ../../adr.md
 [AI agents / Context and memory]: ../agents.md#context-and-memory
 [AI agents / Skills]: ../agents.md#skills
 [AI agents]: ../agents.md
 [Claude Code router]: claude%20code%20router.md
 [Claude]: README.md
+[CONTRIBUTING.md]: ../../contributingmd.md
 [Gemini CLI]: ../gemini/cli.md
 [git worktrees]: ../../git.md#worktrees
 [Ollama]: ../ollama.md
