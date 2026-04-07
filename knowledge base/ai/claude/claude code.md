@@ -176,7 +176,7 @@ claude "fix the build error"
 # Run a one-off task, then exit.
 claude -p 'Hi! Are you there?'
 claude -p "explain the function in @someFunction.ts"
-claude -p 'What did I do this week?' --allowedTools 'Bash(git log:*)' --output-format 'json'
+claude -p 'What did I do this week?' --allowedTools 'Bash(git log*)' --output-format 'json'
 cat 'minutes.md' | claude -p "summarize this"
 
 # Resume the most recent conversation that happened in the current directory
@@ -804,6 +804,17 @@ Use the `permissions` field in a settings file to always _allow_, require Claude
 specific tools.<br/>
 `deny` takes precedence over `ask`, which takes precedence over `allow`. The first matching rule **by category** wins.
 
+> [!important]
+> MCP-related permission rule wildcards operate at the segment level (delimited by `__`), not character-by-character.
+> Expressions like `mcp__*gitlab*__search` will **not** match any MCP server.
+>
+> The correct patterns for MCP-related permission are:
+>
+> - **Exact** matches for a **single** tool from the MCP server (e.g., `mcp__gitlab__search` for just the search tool).
+> - **All tools** from an exact MCP server (e.g., `mcp__plugin_gitlab_gitlab__*`).
+> - **Any single** tool from **any** MCP server (e.g., `mcp__*__search`).
+> - **All tools** from **any** MCP server (e.g., `mcp__*`).
+
 <details style='padding: 0 0 1rem 1rem'>
 
 ```json
@@ -814,17 +825,17 @@ specific tools.<br/>
       "Read(~/.env.*)"
     ],
     "ask": [
-      "Bash(git branch *)",
-      "Bash(git commit *)",
+      "Bash(git branch*)",
+      "Bash(git commit*)",
       "mcp__aws_api__call_aws"
     ],
     "allow": [
       "Agent(Explore)",
-      "Bash(git checkout *)",
-      "Bash(git diff *)",
-      "Bash(git log *)",
-      "Bash(git remote get-url *)",
-      "Bash(git switch *)",
+      "Bash(git checkout*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git remote get-url*)",
+      "Bash(git switch*)",
       "Edit(/**)",
       "Glob(/**)",
       "Grep(/**)",
