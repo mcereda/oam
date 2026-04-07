@@ -7,6 +7,8 @@ designing workflows and using the tools made available to them.
 1. [Context and memory](#context-and-memory)
    1. [AGENTS.md](#agentsmd)
 1. [Skills](#skills)
+1. [Gotchas](#gotchas)
+   1. [MCP servers and sub-agents](#mcp-servers-and-sub-agents)
 1. [Concerns](#concerns)
    1. [How much context is too much?](#how-much-context-is-too-much)
    1. [Security](#security)
@@ -81,7 +83,7 @@ Best practices:
 - Prefer including **only minimal requirements** in context files (AGENTS.md).<br/>
   Too much context ends up hurting the conversation. Including a lot of "don't do this or that" mostly poisons the
   context instead of helping.
-  If an information is in the codebase, it probably does not need to be in the context file.
+  If specific information is in the codebase, it probably does not need to be in the context file.
 
 ## Context and memory
 
@@ -156,6 +158,60 @@ npx skills add 'https://github.com/pulumi/agent-skills' --skill 'pulumi-componen
 Prefer avoiding symlinks for now when importing them in a repository. Git does not seem to manage them correctly.\
 Choose the `Copy to all agents` option instead to create files for all used agents.
 
+## Gotchas
+
+### MCP servers and sub-agents
+
+When agent harnesses like [Claude Code] spawn sub-agents, they inherit **all** configured [MCP] servers by default,
+including their (often token-expensive) tool definitions in the context window.<br/>
+This both broadens the attack surface and consumes context window space in _every_ sub-agent, regardless of the
+sub-agents using the servers.
+
+When MCP servers run as containers using stdio transport, **each** sub-agent spawns its **own** container instance,
+multiplying resource usage. Mitigate this by:
+
+- Defining MCP servers **inline** in [sub-agent configurations][create custom subagents], instead of session-wide,
+  to limit their lifespan and context to the sub-agent.
+- Running containerized servers **independently**, and configuring them to use network transport (streamable HTTP or
+  SSE). Multiple sub-agents may then connect to a single container running outside of their context.<br/>
+  Server configured session-wide, though, will still make every sub-agent load their tool definitions. Combine this with
+  the inline definition method to achieve the complete effect.
+
+<details style='padding: 0 0 1rem 0'>
+  <summary>Inline MCP server definition example</summary>
+
+Define containerized MCP servers in a sub-agent's frontmatter to scope them exclusively to that sub-agent:
+
+```yaml
+---
+name: aws-researcher
+description: Investigates AWS resources and costs
+mcpServers:
+  - aws-api:             # Inline stdio definition: single container, scoped to this sub-agent only.
+      env:
+        AWS_REGION: eu-west-1
+      command: docker
+      args:
+        - run
+        - --rm
+        - --interactive
+        - --env
+        - AWS_REGION
+        - --volume
+        - /home/path/.aws:/app/.aws:rw
+        - public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest
+  - aws-cost-explorer:   # Alternative: point to a shared container running on a network transport.
+      type: http
+      url: http://localhost:8000/mcp
+---
+
+Investigate AWS resources and costs using the available MCP tools.
+```
+
+The sub-agent gets the tools; the parent agent does not.
+
+</details>
+
 ## Concerns
 
 Agents created by Anthropic and other companies have a history of not caring about agent abuse, and leave users on
@@ -166,7 +222,7 @@ Many employers already proved they are willing to jump at this opportunity as so
 complete disregard of the current employees enacting those functions (e.g. personal assistants, junior coders).<br/>
 As of February 2026, agents did not achieve expected results more than 95% of the times. Layoffs backfired. Companies
 like Klarna and Duolingo, which laid off lots of their employees, received backlash and already started re-hiring
-humans. <br/>
+humans.<br/>
 See also [Remote Labor Index: Measuring AI Automation of Remote Work] on this.
 
 People are experiencing what seems to be a new form of FOMO on steroids.<br/>
@@ -253,6 +309,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 - [Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?]
 - [SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks]
 - [AI mistakes you're probably making]
+- [Create custom subagents]
 
 ### Sources
 
@@ -267,6 +324,9 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 - [Comparing File Systems and Databases for Effective AI Agent Memory Management]
 - [Writing a good CLAUDE.md]
 - [The Claude Skills I Actually Use for DevOps]
+- [Allow MCP tools to be available only to subagent]
+- [Enable specific MCP servers for sub-agents]
+- [Why MCP Deprecated SSE and Went with Streamable HTTP]
 
 <!--
   Reference
@@ -276,6 +336,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 <!-- Knowledge base -->
 [AI]: README.md
 [Claude Code]: claude/claude%20code.md
+[MCP]: mcp.md
 [Gemini CLI]: gemini/cli.md
 [LMs / Concerns]: lms.md#concerns
 [LMs / LLMs]: lms.md#large-language-models
@@ -284,6 +345,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [Pi]: pi.md
 
 <!-- Others -->
+[Allow MCP tools to be available only to subagent]: https://github.com/anthropics/claude-code/issues/6915
 [39C3 - Agentic ProbLLMs: Exploiting AI Computer-Use and Coding Agents]: https://www.youtube.com/watch?v=8pbz5y7_WkM
 [39C3 - AI Agent, AI Spy]: https://www.youtube.com/watch?v=0ANECpNdt-4
 [Agent Skills]: https://agentskills.io/
@@ -294,6 +356,8 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [An AI Agent Published a Hit Piece on Me]: https://theshamblog.com/an-ai-agent-published-a-hit-piece-on-me/
 [ASCII Smuggler Tool: Crafting Invisible Text and Decoding Hidden Codes]: https://embracethered.com/blog/posts/2024/hiding-and-finding-text-with-unicode-tags/
 [Comparing File Systems and Databases for Effective AI Agent Memory Management]: https://blogs.oracle.com/developers/comparing-file-systems-and-databases-for-effective-ai-agent-memory-management
+[Create custom subagents]: https://code.claude.com/docs/en/sub-agents
+[Enable specific MCP servers for sub-agents]: https://github.com/anthropics/claude-code/issues/16177
 [Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?]: https://arxiv.org/abs/2602.11988
 [Forget the Hype: Agents are Loops]: https://dev.to/cloudx/forget-the-hype-agents-are-loops-1n3i
 [How a Single Email Turned My ClawdBot Into a Data Leak]: https://medium.com/@peltomakiw/how-a-single-email-turned-my-clawdbot-into-a-data-leak-1058792e783a
@@ -315,5 +379,6 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [Token Anxiety]: https://writing.nikunjk.com/p/token-anxiety
 [TotalRecall]: https://github.com/xaitax/TotalRecall
 [Trust No AI: Prompt Injection Along The CIA Security Triad]: https://arxiv.org/pdf/2412.06090
+[Why MCP Deprecated SSE and Went with Streamable HTTP]: https://blog.fka.dev/blog/2025-06-06-why-mcp-deprecated-sse-and-go-with-streamable-http/
 [Writing a good CLAUDE.md]: https://www.humanlayer.dev/blog/writing-a-good-claude-md
 [xAI engineer fired for leaking secret "Human Emulator" project]: https://www.youtube.com/watch?v=0hDMSS1p-UY
