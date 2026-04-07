@@ -20,6 +20,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 1. [Delegating work](#delegating-work)
    1. [Sub agents](#sub-agents)
    1. [Agent teams](#agent-teams)
+   1. [MCP servers in sub-agents](#mcp-servers-in-sub-agents)
 1. [Scheduling tasks](#scheduling-tasks)
 1. [Tools of interest](#tools-of-interest)
 1. [Best practices](#best-practices)
@@ -1511,6 +1512,60 @@ Ask the researcher teammate to shut down
 Clean up the team **after termination** by just asking the lead to clean up.<br/>
 The lead will fail if any teammate is still running.
 
+### MCP servers in sub-agents
+
+Refer to [Allow MCP tools to be available only to subagent] and [Enable specific MCP servers for sub-agents].
+
+Sub-agents inherit **all** configured [MCP] servers by default, including their (often token-expensive) tool
+definitions in the context window.<br/>
+This both broadens the attack surface and consumes context window space in _every_ sub-agent, regardless of whether
+the sub-agents use those servers.
+
+When MCP servers run as containers using stdio transport, **each** sub-agent spawns its **own** container instance,
+multiplying resource usage. Mitigate this by:
+
+- Defining MCP servers **inline** in [sub-agent configurations][create custom subagents], instead of session-wide,
+  to limit their lifespan and context to the sub-agent.
+- Running containerized servers **independently**, and configuring them to use network transport (streamable HTTP or
+  SSE). Multiple sub-agents may then connect to a single container running outside of their context.<br/>
+  Servers configured session-wide, though, will still make every sub-agent load their tool definitions. Combine this
+  with the inline definition method to achieve the complete effect.
+
+<details style='padding: 0 0 1rem 0'>
+  <summary>Inline MCP server definition example</summary>
+
+Define containerized MCP servers in a sub-agent's frontmatter to scope them exclusively to that sub-agent:
+
+```yaml
+---
+name: aws-researcher
+description: Investigates AWS resources and costs
+mcpServers:
+  - aws-api:             # Inline stdio definition: single container, scoped to this sub-agent only.
+      env:
+        AWS_REGION: eu-west-1
+      command: docker
+      args:
+        - run
+        - --rm
+        - --interactive
+        - --env
+        - AWS_REGION
+        - --volume
+        - /home/path/.aws:/app/.aws:rw
+        - public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest
+  - aws-cost-explorer:   # Alternative: point to a shared container running on a network transport.
+      type: http
+      url: http://localhost:8000/mcp
+---
+
+Investigate AWS resources and costs using the available MCP tools.
+```
+
+The sub-agent gets the tools; the parent agent does not.
+
+</details>
+
 ## Scheduling tasks
 
 Refer to [Run prompts on a schedule] and [Schedule tasks on the web].
@@ -1699,17 +1754,18 @@ Claude Code version: `v2.1.41`.
 [Claude]: README.md
 [CONTRIBUTING.md]: ../../contributingmd.md
 [Gemini CLI]: ../gemini/cli.md
+[MCP]: ../mcp.md
 [git worktrees]: ../../git.md#worktrees
 [Ollama]: ../ollama.md
 [OpenCode]: ../opencode.md
 [Pi]: ../pi.md
 
 <!-- Files -->
-[.mcp.json file example]: ../../../examples/claude/dotmcp.json
-[~/.claude/credentials.json file example]: ../../../examples/claude/credentials.json
+[.mcp.json file example]: ../../../examples/claude-code/dotmcp.json
+[~/.claude/credentials.json file example]: ../../../examples/claude-code/credentials.json
 [claude-code/skills]: ../../../claude-code/skills
-[examples/claude-code/skills]: ../../../examples/claude/skills
-[settings.json file example]: ../../../examples/claude/settings.json
+[examples/claude-code/skills]: ../../../examples/claude-code/skills
+[settings.json file example]: ../../../examples/claude-code/settings.json
 
 <!-- Upstream -->
 [anthropics/skills]: https://github.com/anthropics/skills
@@ -1743,6 +1799,8 @@ Claude Code version: `v2.1.41`.
 
 <!-- Others -->
 [Agent Skills]: https://agentskills.io/
+[Allow MCP tools to be available only to subagent]: https://github.com/anthropics/claude-code/issues/6915
+[Enable specific MCP servers for sub-agents]: https://github.com/anthropics/claude-code/issues/16177
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
 [AWS Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
 [Claude analysis / The System Prompt]: https://rastrigin.systems/blog/claude-code-part-2-system-prompt/

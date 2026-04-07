@@ -162,55 +162,9 @@ Choose the `Copy to all agents` option instead to create files for all used agen
 
 ### MCP servers and sub-agents
 
-When agent harnesses like [Claude Code] spawn sub-agents, they inherit **all** configured [MCP] servers by default,
-including their (often token-expensive) tool definitions in the context window.<br/>
-This both broadens the attack surface and consumes context window space in _every_ sub-agent, regardless of the
-sub-agents using the servers.
-
-When MCP servers run as containers using stdio transport, **each** sub-agent spawns its **own** container instance,
-multiplying resource usage. Mitigate this by:
-
-- Defining MCP servers **inline** in [sub-agent configurations][create custom subagents], instead of session-wide,
-  to limit their lifespan and context to the sub-agent.
-- Running containerized servers **independently**, and configuring them to use network transport (streamable HTTP or
-  SSE). Multiple sub-agents may then connect to a single container running outside of their context.<br/>
-  Server configured session-wide, though, will still make every sub-agent load their tool definitions. Combine this with
-  the inline definition method to achieve the complete effect.
-
-<details style='padding: 0 0 1rem 0'>
-  <summary>Inline MCP server definition example</summary>
-
-Define containerized MCP servers in a sub-agent's frontmatter to scope them exclusively to that sub-agent:
-
-```yaml
----
-name: aws-researcher
-description: Investigates AWS resources and costs
-mcpServers:
-  - aws-api:             # Inline stdio definition: single container, scoped to this sub-agent only.
-      env:
-        AWS_REGION: eu-west-1
-      command: docker
-      args:
-        - run
-        - --rm
-        - --interactive
-        - --env
-        - AWS_REGION
-        - --volume
-        - /home/path/.aws:/app/.aws:rw
-        - public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest
-  - aws-cost-explorer:   # Alternative: point to a shared container running on a network transport.
-      type: http
-      url: http://localhost:8000/mcp
----
-
-Investigate AWS resources and costs using the available MCP tools.
-```
-
-The sub-agent gets the tools; the parent agent does not.
-
-</details>
+When agent harnesses spawn sub-agents, they may inherit configured [MCP] servers by default, broadening the attack
+surface and wasting context window and computing resources.<br/>
+This is currently a [confirmed issue only in Claude Code][claude code / mcp servers in sub-agents].
 
 ## Concerns
 
@@ -324,8 +278,6 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 - [Comparing File Systems and Databases for Effective AI Agent Memory Management]
 - [Writing a good CLAUDE.md]
 - [The Claude Skills I Actually Use for DevOps]
-- [Allow MCP tools to be available only to subagent]
-- [Enable specific MCP servers for sub-agents]
 - [Why MCP Deprecated SSE and Went with Streamable HTTP]
 
 <!--
@@ -336,6 +288,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 <!-- Knowledge base -->
 [AI]: README.md
 [Claude Code]: claude/claude%20code.md
+[Claude Code / MCP servers in sub-agents]: claude/claude%20code.md#mcp-servers-in-sub-agents
 [MCP]: mcp.md
 [Gemini CLI]: gemini/cli.md
 [LMs / Concerns]: lms.md#concerns
@@ -345,7 +298,6 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [Pi]: pi.md
 
 <!-- Others -->
-[Allow MCP tools to be available only to subagent]: https://github.com/anthropics/claude-code/issues/6915
 [39C3 - Agentic ProbLLMs: Exploiting AI Computer-Use and Coding Agents]: https://www.youtube.com/watch?v=8pbz5y7_WkM
 [39C3 - AI Agent, AI Spy]: https://www.youtube.com/watch?v=0ANECpNdt-4
 [Agent Skills]: https://agentskills.io/
@@ -357,7 +309,6 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [ASCII Smuggler Tool: Crafting Invisible Text and Decoding Hidden Codes]: https://embracethered.com/blog/posts/2024/hiding-and-finding-text-with-unicode-tags/
 [Comparing File Systems and Databases for Effective AI Agent Memory Management]: https://blogs.oracle.com/developers/comparing-file-systems-and-databases-for-effective-ai-agent-memory-management
 [Create custom subagents]: https://code.claude.com/docs/en/sub-agents
-[Enable specific MCP servers for sub-agents]: https://github.com/anthropics/claude-code/issues/16177
 [Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?]: https://arxiv.org/abs/2602.11988
 [Forget the Hype: Agents are Loops]: https://dev.to/cloudx/forget-the-hype-agents-are-loops-1n3i
 [How a Single Email Turned My ClawdBot Into a Data Leak]: https://medium.com/@peltomakiw/how-a-single-email-turned-my-clawdbot-into-a-data-leak-1058792e783a

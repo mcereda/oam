@@ -52,7 +52,8 @@ connections when they cannot find a version compatible with the server.
 > [!warning]
 > When agent harnesses spawn sub-agents, they may inherit all configured MCP servers by default, broadening the attack
 > surface, and wasting context window and computing resources.<br/>
-> Refer to [MCP servers and sub-agents][agents / mcp servers and sub-agents] for details and mitigations.
+> This is currently a [confirmed issue only in Claude Code][claude code / mcp servers in sub-agents]. Refer to it for
+> details and mitigations.
 
 ## MCP servers of interest
 
@@ -85,7 +86,7 @@ connections when they cannot find a version compatible with the server.
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
-[Agents / MCP servers and sub-agents]: agents.md#mcp-servers-and-sub-agents
+[Claude Code / MCP servers in sub-agents]: claude/claude%20code.md#mcp-servers-in-sub-agents
 [Grafana]: ../grafana.md
 
 <!-- Files -->
