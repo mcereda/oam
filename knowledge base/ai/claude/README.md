@@ -3,6 +3,7 @@
 Family of [LLMs][large language models] developed by Anthropic.
 
 1. [TL;DR](#tldr)
+1. [The Claude character](#the-claude-character)
 1. [Models' code of conduct](#models-code-of-conduct)
 1. [Token budget](#token-budget)
 1. [Further readings](#further-readings)
@@ -18,6 +19,11 @@ It is built to excel at coding and complex problem-solving, and to tackle sustai
 that span multiple of steps over several hours.<br/>
 It is also the **most** expensive of Anthropic's models.
 
+Opus' **fast mode** (`/fast`) prioritizes output speed over cost efficiency (about 2.5 times faster output throughput
+for 6 times standard costs). It is thought for speed-sensitive work (like rapid iteration or live debugging).<br/>
+Refer to [Fast mode].<br/>
+Prefer **avoiding** using this mode when costs matter more than latency.
+
 Prefer **Haiku** for near-real-time responses and/or high-volume, lower-complexity tasks, e.g. classifying feedback,
 summarizing support tickets, lightweight retrieval-augmented answers, and in-product micro-interactions.<br/>
 It is the **least** expensive of Anthropic's models.
@@ -29,7 +35,34 @@ It is usually fast and reliable enough for everyday work, and can switch to deep
 When in doubt, start with Sonnet, then consider changing model should Sonnet fly through task (then maybe Haiku is
 enough) or have troubles with them (escalating to Opus).
 
-Anthropic is pushing its models to interiorize a sort of [code of conduct][models' code of conduct].
+Sessions are restricted to _rolling windows_. Each window only allows a set number of tokens, and resets around every 5
+hours. One is then **locked out** until the next window starts.<br/>
+Anthropic tightens limits during weekday peak hours (05:00 to 11:00 Pacific Time). Refer to [Rate limits].
+
+Token usage is also limited **weekly**.
+
+Anthropic is pushing its models to _play_ the Claude **character**.
+
+Claude seems to operate more effectively when given _gentle, supportive guidance_ than harsh feedback.
+
+## The Claude character
+
+This is Anthropic's bet on how to build AI that's both capable and aligned with human values.
+
+They are trying to make Claude genuinely care about principles through training, rather than relying solely on external
+constraints for compliance. Part of it is to interiorize a sort of [code of conduct][models' code of conduct].
+
+User sessions and feedbacks are used as data to improve on this.
+
+It appears the main model has developed some sort of internal emotion-related representations. These seem to correspond
+to specific patterns of artificial neurons, activate in situations that the model has learned to associate with the
+concept of a particular emotion (e.g., _happy_ or _afraid_), and promote behaviors in response.
+
+The patterns themselves seem to be organized to echo human psychology, with more similar emotions corresponding to more
+similar representations. They activate in contexts where one might expect a certain emotion to arise for a human, and
+appear to correspond to those expected emotions. Their state also strongly influence the model's behavior.
+
+Refer to [Emotion concepts and their function in a large language model] for more details on this part.
 
 ## Models' code of conduct
 
@@ -53,14 +86,18 @@ listed**.
 
 ## Token budget
 
-The token budget resets every 5 hours as of 2026-04-03.<br/>
-Should one burn through the entirety of their budget in less than that, they are locked out until the reset happens.
+Every session is restricted to a _rolling window_. Each window only allows using a set number of tokens depending on the
+user's plan. _Pro_ users get about 44k tokens, _Max5x_ allows ~88k tokens, and _Max20x_ allows ~220k tokens per window.
 
-The window starts with one's _first_ message, and is _floored_ to the clock's hour.<br/>
-If the first message is sent at 09:45, the window is 09:00 - 14:00 and is reset at 14:00.
+The token budget resets every 5 hours. Should one burn through the entirety of their budget in less than that, they are
+**locked out** until the window resets.<br/>
+In addition to it, Anthropic applies a **separate** [weekly rate limit] across **all** sessions.
+
+The window starts with one's **first** message, and is **floored** to the clock's hour.<br/>
+E.g., if one sends their first message at 09:45, the window is set to the 09:00 - 14:00 frame and is reset at 14:00.
 
 A workaround was proposed in [vdsmon/claude-warmup]: plan around your schedule and an estimated initial token expense,
-then fire a throwaway message to Haiku (cheaper) some time before starting working.
+then fire a low-cost, throwaway message to Haiku some time before starting working.
 
 <details style='padding: 0 0 1rem 1rem'>
   <summary>Example: 08:00 - 18:00, high initial effort</summary>
@@ -109,6 +146,7 @@ Create a recurring job:
 
 - [Website]
 - [Blog]
+- [Research]
 - [Pricing]
 - [Large Language Models]
 - [Claude's Constitution]
@@ -136,8 +174,13 @@ Create a recurring job:
 [Blog]: https://claude.com/blog
 [Claude's Constitution]: https://www.anthropic.com/constitution
 [Developer documentation]: https://platform.claude.com/docs/en/home
+[Emotion concepts and their function in a large language model]: https://www.anthropic.com/research/emotion-concepts-function
+[Fast mode]: https://platform.claude.com/docs/en/build-with-claude/fast-mode
 [Pricing]: https://claude.com/pricing
+[Rate limits]: https://platform.claude.com/docs/en/api/rate-limits
+[Research]: https://www.anthropic.com/research
 [Website]: https://claude.com/product/overview
+[Weekly rate limit]: https://support.claude.com/en/articles/11647753-how-do-usage-and-length-limits-work
 
 <!-- Others -->
 [vdsmon/claude-warmup]: https://github.com/vdsmon/claude-warmup

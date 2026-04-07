@@ -113,10 +113,14 @@ Hit `esc` **once** to stop Claude.<br/>
 This action is _usually_ safe. Claude will then resume or try a different approach, while retaining context about the
 previous request.
 
+Refer to [Claude] for details on models and usage.
+
 Prefer using **Sonnet** for quicker, smaller tasks (e.g. as sub-agent, greenfield coding, app initialization).<br/>
 Consider using **Opus** for broader, longer, higher-level tasks (e.g. planning, refactoring, orchestrating
 sub-agents).<br/>
 Consider using **Haiku** for quick responses.
+
+The `opusplan` mode allows using Opus during planning, then automatically switches to Sonnet for implementation.
 
 Use memory and context files (`CLAUDE.md`) to instruct Claude Code on commands, style guidelines, and give it _key_
 context. Try to keep them small.
@@ -447,7 +451,8 @@ Skip irrelevant `CLAUDE.md` files by using the `claudeMdExcludes` setting.
 
 Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in later sessions
 by maintaining `~/.claude/projects/<project>/memory/MEMORY.md` files.<br/>
-The first 200 lines or 25 KB (whichever comes first) of those files are loaded at the start of every session.
+The first 200 lines or 25 KB (whichever comes first) of those files are loaded at the start of every session. Consider
+using `MEMORY.md` as an index, and move detailed notes into topic-specific files for Claude Code to load on demand.
 
 When _auto memory_ is enabled, Claude Code _should™_ automatically update memory files.<br/>
 It is enabled by default. Disable it via the `/memory` toggle, `settings.json`, or
@@ -1544,7 +1549,7 @@ Describe the goal in natural language otherwise.
 ## Best practices
 
 Document projects upfront (e.g. using [ADRs][adr], and [CONTRIBUTING.md] and README.md files).<br/>
-Possibly consider including instructions specific to AI agents in those files instead of including them only in
+Possibly consider including instructions specific to AI agents in those files, instead of including them only in
 `CLAUDE.md`.
 
 Be explicit about constraints and non-negotiables. **Clearly** state in `CLAUDE.md` files what Claude should **never**
@@ -1558,13 +1563,17 @@ directory. Subfolder files are **only** loaded if Claude Code actively works in 
 Have Claude read and understand the project layout, documentation, key files, and architecture **before** allowing it to
 make changes. Reference those files in `CLAUDE.md` to make sure it loads them when needed.
 
+Consider _delegating ownership_ of tools and documentation to Claude early in a project, making it responsible for
+maintaining all the files it **uses** (not just those it creates).<br/>
+**Periodically** ask it to check and update them. This might be an instruction in `CLAUDE.md` or `CONTRIBUTING.md`.
+
 **Avoid** using Claude without human oversight for tasks that require deep domain knowledge or judgment calls, like
 architectural decisions and security reviews. Prefer giving it easy, repeatable tasks like exploring the code,
 refactoring, generating tests or boilerplate, and documentation.
 
 Abuse version control checkpoints. Commit frequently to keep safe fallback points and isolate what Claude changed,
 should something go wrong.<br/>
-Review and test changes incrementally, especially when involving critical files.
+Review and test changes **incrementally**, especially when involving critical files.
 
 Run `/insights` to get feedback, tips and suggestions on how one could improve their Claude Code usage.<br/>
 Claude bases those tips on one's history and session analysis.
@@ -1581,7 +1590,9 @@ Optimize model usage to avoid burning through credits:
 - Start by _planning_ the approach to one's goals, refine it, break large tasks into smaller, reviewable ones, and
   **then** act.
 - Start by using **Sonnet**, switch to Opus in case Sonnet proves not capable enough, and prefer Sonnet or even Haiku
-  for actions.
+  for actions.<br/>
+  Leverage the `opusplan` mode to use Opus during the design or planning phase (`/plan`), then automatically switch to
+  Sonnet for implementation.
 - Track session usage to identify what tasks are expensive to delegate, and review and adjust one's patterns.
 
 ## Run on local models
