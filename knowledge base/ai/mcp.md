@@ -4,6 +4,7 @@ Open protocol enabling seamless integration between AI applications and external
 a standardized way to enable LLMs to access key information and perform tasks.
 
 1. [TL;DR](#tldr)
+1. [MCP servers of interest](#mcp-servers-of-interest)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -48,7 +49,12 @@ version to use for the session.<br/>
 The protocol provides error handling if version negotiation fails, which allows clients to gracefully terminate
 connections when they cannot find a version compatible with the server.
 
-MCP servers of interest:
+> [!warning]
+> When agent harnesses spawn sub-agents, they may inherit all configured MCP servers by default, broadening the attack
+> surface, and wasting context window and computing resources.<br/>
+> Refer to [MCP servers and sub-agents][agents / mcp servers and sub-agents] for details and mitigations.
+
+## MCP servers of interest
 
 | MCP server                                        | Summary                                                  |
 | ------------------------------------------------- | -------------------------------------------------------- |
@@ -70,6 +76,7 @@ MCP servers of interest:
 ### Sources
 
 - [Documentation]
+- [Transports specification]
 
 <!--
   Reference
@@ -78,6 +85,7 @@ MCP servers of interest:
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[Agents / MCP servers and sub-agents]: agents.md#mcp-servers-and-sub-agents
 [Grafana]: ../grafana.md
 
 <!-- Files -->
@@ -91,3 +99,4 @@ MCP servers of interest:
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
 [AWS Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
 [Grafana MCP Server]: https://github.com/grafana/mcp-grafana
+[Transports specification]: https://modelcontextprotocol.io/specification/2025-03-26/basic/transports
