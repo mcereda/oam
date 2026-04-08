@@ -112,16 +112,21 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA cache REVOKE select ON TABLES FROM sales;
 ALTER DEFAULT PRIVILEGES FOR ROLE juan IN SCHEMA cache REVOKE all ON TABLES FROM sales;
 
 
--- List users with respective roles
+-- List users with respective roles (permissions)
 \du
 \du+ mark
--- List users only
+-- Only list users
 SELECT usename FROM pg_catalog.pg_user;
--- List roles only
+-- Only list roles
 SELECT rolname FROM pg_catalog.pg_roles;
 
 -- Check the current user has SuperUser privileges
 SHOW is_superuser;
+
+-- Show roles with replication permission
+SELECT rolname FROM pg_roles WHERE rolreplication = true;
+-- Check a role has replication permissions
+SELECT rolname, rolreplication FROM pg_roles WHERE rolname = 'kevin';
 
 -- Create roles
 -- Roles *are* users *and* groups since PostgreSQL vFIXME
