@@ -359,7 +359,7 @@ To solve this, use a different network mode and **explicitly publish** the ports
 
   Docker Desktop runs the Engine in a virtual machine, not natively; hence, ports are exposed on the VM and not of the
   host running Docker Desktop.<br/>
-  Refer [I cannot ping my containers][documentation / i cannot ping my containers].
+  Refer to [I cannot ping my containers][documentation / i cannot ping my containers].
 
   One can go around this limitation by:
 
@@ -414,7 +414,7 @@ Also see [Advanced build with `buildx`](#advanced-build-with-buildx).
 
 Leverage a `.dockerignore` file.
 
-Refer [How to Use a .dockerignore File: A Comprehensive Guide with Examples]
+Refer to [How to Use a .dockerignore File: A Comprehensive Guide with Examples]
 
 ### Only include what the final image needs
 
@@ -513,7 +513,7 @@ docker load …
 
 ## Compose
 
-Refer [Docker compose].
+Refer to [Docker compose].
 
 <details>
   <summary>Setup</summary>
@@ -567,10 +567,10 @@ dnf install 'https://download.docker.com/linux/fedora/41/aarch64/stable/Packages
 
 ## Running LLMs locally
 
-Refer [Run LLMs Locally with Docker: A Quickstart Guide to Model Runner] and [Docker Model Runner].
+Refer to [Run LLMs Locally with Docker: A Quickstart Guide to Model Runner] and [Docker Model Runner].
 
 Docker introduced Model Runner in version 4.40.<br/>
-It makes it easy to pull, run, and experiment with LLMs on local machines.
+It eases pulling, running, and experimenting with LLMs on local machines.
 
 ```sh
 # Enable in Docker Desktop.
@@ -720,7 +720,7 @@ Docker Model Runner supports the [llama.cpp], [vLLM], and [Diffusers] inference 
 
 ### Use environment variables in the ENTRYPOINT
 
-Refer [Exec form ENTRYPOINT example].
+Refer to [Exec form ENTRYPOINT example].
 
 <details>
   <summary>Root cause</summary>
