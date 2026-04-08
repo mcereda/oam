@@ -69,8 +69,14 @@ sudo setsebool container_use_devices=1
   <summary>Usage</summary>
 
 ```sh
+# Show system-wide information.
+docker info
+docker info -f 'json'
+docker system info --format '{{range .Plugins.Volume}}{{println .}}{{end}}'
+
 # Show locally available images.
 docker images -a
+docker images --digests
 
 # Search for images.
 docker search 'boinc'
@@ -81,6 +87,7 @@ docker login --username 'username' -p 'password'
 gopass show -c 'docker-hub' | docker login 'dhi.io' -u 'username' --password-stdin
 aws ecr get-login-password \
 | docker login --username 'AWS' --password-stdin '012345678901.dkr.ecr.eu-east-2.amazonaws.com'
+docker login -u 'username' -p 'glpat-abc123' 'gitlab.example.org:5050'
 
 # Pull images.
 docker pull 'alpine:3.14'
@@ -224,6 +231,7 @@ docker buildx create --node 'builder_name'
 # '--load' currently only works for builds for a single platform.
 docker buildx build -t 'image:tag' --load '.'
 docker buildx build … -t 'image:tag' --load --platform 'linux/amd64' '.'
+docker buildx build … -t 'image:tag' --platform 'linux/amd64' --progress='plain' --no-cache '.'
 docker buildx build … --push \
   --cache-to 'mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=012345678901.dkr.ecr.eu-west-2.amazonaws.com/buildkit-test:cache \
   --cache-from type=registry,ref=012345678901.dkr.ecr.eu-west-2.amazonaws.com/buildkit-test:cache \
@@ -249,6 +257,7 @@ docker compose exec 'service-name' 'ls' '-Al'
 # Get logs.
 docker compose logs
 docker compose logs -f --index='3' 'service-name'
+docker compose -f 'prod.docker-compose.yml' logs --since '30m' --follow 'service-name'
 
 # End compositions.
 docker compose down
@@ -259,15 +268,43 @@ docker compose down
   <summary>Real world use cases</summary>
 
 ```sh
-# Get the SHAsum of images.
-docker inspect --format='{{index .RepoDigests 0}}' 'node:18-buster'
-
 # Act upon files in volumes.
 sudo ls "$(docker volume inspect --format '{{.Mountpoint}}' 'baikal_config')"
 sudo vim "$(docker volume inspect --format '{{.Mountpoint}}' 'gitea_config')/app.ini"
 
+# Inspect different resource types (images, networks, containers).
+docker inspect 'ghcr.io/jqlang/jq:latest'
+docker inspect 'host'
+docker inspect 'prometheus-1'
+
+# Get image digests *without* pulling them.
+docker buildx imagetools inspect 'pulumi/pulumi-nodejs' --format '{{ json .Manifest.Digest }}'
+
+# Run containers with env-files, DNS overrides, and read-only volume mounts.
+docker run -d --name 'some-nginx' -v '/some/content:/usr/share/nginx/html:ro' 'nginx'
+docker run --rm --platform 'linux/amd64' --dns '172.31.0.2' \
+  --env 'REDASH_DATABASE_URL' --env 'REDASH_REDIS_URL' \
+  "$REDASH_IMAGE" manage db upgrade
+docker run --rm --name 'pulumi' \
+  --env 'AWS_DEFAULT_REGION' --env 'AWS_ACCESS_KEY_ID' --env 'AWS_SECRET_ACCESS_KEY' \
+  --env-file '.env' --env-file '.env.local' \
+  -v "${PWD}:/pulumi/projects" -v "${HOME}/.aws:/root/.aws:ro" \
+  'pulumi/pulumi-nodejs:3.148.0@sha256:2463…' \
+  pulumi preview --suppress-outputs --stack 'dev'
+
 # Send images to other nodes with Docker.
 docker save 'local/image:latest' | ssh -C 'user@remote.host' docker load
+
+# Create non-standard volumes.
+docker volume create --driver 'local' --opt 'type=tmpfs' --opt 'device=tmpfs' --opt 'o=size=100m,uid=1000' 'foo'
+docker volume create --driver 'local' --opt 'type=btrfs' --opt 'device=/dev/sda2'
+
+# Use a temporary RAM disk as a volume on macOS.
+hdiutil attach -nomount 'ram://4194304' | xargs diskutil erasevolume HFS+ 'ramdisk' \
+&& docker run --rm -v '/Volumes/ramdisk/:/ramdisk' -it 'alpine' sh
+
+# Remove *all* containers.
+docker ps -aq | xargs docker container rm
 ```
 
 </details>
@@ -424,7 +461,6 @@ HEALTHCHECK --interval=5m --timeout=3s --start-period=10s --retries=4 \
 <details><summary>Docker-compose file</summary>
 
 ```yaml
-version: '3.6'
 services:
   web-server:
     healthcheck:
@@ -518,6 +554,15 @@ mkdir -p '/usr/local/lib/docker/cli-plugins' \
 
   </details>
 
+  <details style="padding-left: 1em;">
+    <summary>Via package manager</summary>
+
+```sh
+dnf install 'https://download.docker.com/linux/fedora/41/aarch64/stable/Packages/docker-compose-plugin-2.32.1-1.fc41.aarch64.rpm'
+```
+
+  </details>
+
 </details>
 
 ## Running LLMs locally
@@ -563,6 +608,9 @@ Tags for models distributed by Docker follow the `{model}:{parameters}-{quantiza
 Alternatively, they can be downloaded from Hugging Face.
 
 ```sh
+# Print system information.
+docker model status
+
 # Search for model variants.
 docker search ai/llama2
 
@@ -571,6 +619,26 @@ docker model pull 'ai/qwen2.5'
 docker model pull 'ai/qwen3-coder:30B'
 docker model pull 'ai/smollm2:360M-Q4_K_M' 'ai/llama2:7b-q4'
 docker model pull 'some.registry.com/models/mistral:latest'
+
+# List downloaded models.
+docker model list
+docker model ls --json
+docker model ls --openai
+docker model ls -q
+
+# View models' layers.
+docker model history 'ai/llama2'
+
+# Show models' configuration.
+docker model inspect 'ai/qwen2.5-coder'
+
+# Configure models.
+docker model configure --context-size '8192' 'ai/qwen2.5-coder'
+docker model configure --speculative-draft-model='lfm/lfm2.5:1.2b' 'lfm/lfm2:24b'
+
+# Reset model configuration.
+docker model configure --context-size '-1' 'ai/qwen2.5-coder'
+docker model configure --speculative-draft-model='' 'lfm/lfm2:24b'
 
 # Run models.
 docker model run 'ai/smollm2:360M-Q4_K_M' 'Give me a fact about whales'
@@ -586,11 +654,36 @@ docker model run -p '8080:8080' -p '9090:9090' …
 # Distribute models across GPUs.
 docker model run --gpus 'all' --tensor-parallel '2' 'ai/llama2-70b'
 
+# List running models.
+docker model ps
+
 # View models' logs.
 docker model logs
 docker model logs llm | grep -i gpu
 docker model logs -f llm
 docker model logs --tail 100 -t llm
+
+# Remove models.
+docker model rm 'ai/llama2'
+docker model rm -f 'ai/llama2'
+docker model rm $(docker model ls -q)
+
+# Package models.
+docker model package --gguf "$(pwd)/model.gguf" 'myorg/my-model:v1'  # also imports downloaded GGUF models
+docker model package --gguf "$(pwd)/model.gguf" --push 'registry.example.com/ai/custom-llm:v1'
+
+# Import downloaded GGUF models from ollama.
+# `docker model package` relies on the file extension to detect the format; use a link with the extension in the name.
+jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
+  "$HOME/.ollama/models/manifests/registry.ollama.ai/library/lfm2/24b" \
+| xargs -I '%%' ln -s "$HOME/.ollama/models/blobs/%%" "/tmp/lfm2-24b.gguf" \
+&& docker model package --gguf '/tmp/lfm2-24b.gguf' 'lfm/lfm2:24b'
+
+# Print disk usage.
+docker model df
+
+# Full cleanup (remove all models)
+docker model purge
 ```
 
 Model Runner exposes an OpenAI endpoint under <http://model-runner.docker.internal/engines/v1> for containers, and
@@ -615,45 +708,8 @@ processes or from within containers.
 Docker Model Runner supports the [llama.cpp], [vLLM], and [Diffusers] inference engines.<br/>
 [llama.cpp] is the default one.
 
-```sh
-# List downloaded models.
-docker model list
-docker model ls --json
-docker model ls --openai
-docker model ls -q
-
-# List running models.
-docker model ps
-
-# Show models' configuration.
-docker model inspect 'ai/qwen2.5-coder'
-
-# View models' layers.
-docker model history 'ai/llama2'
-
-# Configure models.
-docker model configure --context-size '8192' 'ai/qwen2.5-coder'
-
-# Reset model configuration.
-docker model configure --context-size '-1' 'ai/qwen2.5-coder'
-
-# Remove models.
-docker model rm 'ai/llama2'
-docker model rm -f 'ai/llama2'
-docker model rm $(docker model ls -q)
-
-# Print system information.
-docker model status
-
-# Print disk usage.
-docker model df
-
-# Full cleanup (remove all models)
-docker model purge
-```
-
-Model Runner collects user data.<br/>
-Data collection is controlled by the Send usage statistics setting.
+> [!note] Model Runner collects user data
+> Data collection is controlled by the _General_ > _Send usage statistics_ setting.
 
 ## Best practices
 
@@ -726,6 +782,7 @@ Alternatively, keep the exec form but force invoking a shell in it:
 - [How to Connect to Localhost Within a Docker Container]
 - [Run LLMs Locally with Docker: A Quickstart Guide to Model Runner]
 - [Docker Model Runner Cheatsheet: Commands & Examples]
+- [Local models with Docker Model Runner]
 
 <!--
   Reference
@@ -741,13 +798,14 @@ Alternatively, keep the exec form but force invoking a shell in it:
 [vLLM]: ai/vllm.md
 
 <!-- Upstream -->
-[building multi-arch images for arm and x86 with docker desktop]: https://www.docker.com/blog/multi-arch-images/
+[Building Multi-Arch Images for Arm and x86 with Docker Desktop]: https://www.docker.com/blog/multi-arch-images/
 [Codebase]: https://github.com/docker
-[docker compose]: https://github.com/docker/compose
+[Docker Compose]: https://github.com/docker/compose
 [Docker Model Runner]: https://docs.docker.com/ai/model-runner/
-[dockerfile reference]: https://docs.docker.com/reference/dockerfile/
+[Dockerfile reference]: https://docs.docker.com/reference/dockerfile/
 [Documentation / I cannot ping my containers]: https://docs.docker.com/desktop/features/networking/#i-cannot-ping-my-containers
 [Exec form ENTRYPOINT example]: https://docs.docker.com/reference/dockerfile/#exec-form-entrypoint-example
+[Local models with Docker Model Runner]: https://docs.docker.com/ai/docker-agent/local-models/
 [Multi-stage builds]: https://docs.docker.com/build/building/multi-stage/
 [Run LLMs Locally with Docker: A Quickstart Guide to Model Runner]: https://www.docker.com/blog/run-llms-locally/
 

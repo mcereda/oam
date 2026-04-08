@@ -56,6 +56,9 @@ docker volume create --driver 'convoy' --opt 'size=100m' 'test'
 hdiutil attach -nomount 'ram://4194304' | xargs diskutil erasevolume HFS+ 'ramdisk' \
 && docker run --rm --name 'alpine' -v "/Volumes/ramdisk/:/ramdisk" -it 'alpine' sh
 
+# List containers with specific metadata values
+docker ps -f 'name=pihole' -f 'status=running' -f 'health=healthy' -q
+
 # Remove containers
 docker ps -aq | xargs docker container rm
 
@@ -68,6 +71,134 @@ docker buildx build '.' -t 'someTag' --platform 'linux/amd64' --progress=plain -
 docker buildx prune
 docker buildx prune -a
 
+# Cleanup
+docker image prune -a
+docker system prune -a
+
+# Display a summary of the vulnerabilities in images
+docker scout qv
+docker scout quickview 'debian:unstable-slim'
+
+# Display vulnerabilities in images
+docker scout cves
+docker scout cves 'alpine'
+docker scout cves --format 'only-packages' --only-package-type 'golang' --only-vuln-packages 'fs://.'
+
+# Display base image update recommendations
+docker scout recommendations 'golang:1.19.4'
+
 # Check logs
 docker compose logs
 docker compose --file 'prod.docker-compose.yml' logs --since '30m' --follow 'some-service'
+
+###
+# Model runner
+################
+
+# Enable in Docker Desktop.
+docker desktop enable model-runner
+docker desktop enable model-runner --tcp='12434'  # enable TCP interaction from host processes
+
+# Install as plugin.
+apt install 'docker-model-plugin'
+dnf install 'docker-model-plugin'
+pacman -S 'docker-model-plugin'
+
+# Verify the installation.
+docker model --help
+docker model status
+
+# Install runners.
+docker model install-runner
+docker model install-runner --backend 'vllm' --gpu 'cuda' --do-not-track
+
+# Stop the current runner.
+docker model stop-runner
+
+# Reinstall runners with CUDA GPU support.
+docker model reinstall-runner --gpu 'cuda'
+
+# Check the Model Runner container can access the GPU.
+docker exec docker-model-runner nvidia-smi
+
+# Disable in Docker Desktop.
+docker desktop disable model-runner
+
+# Search for model variants
+docker search ai/llama2
+
+# Pull models
+docker model pull 'ai/qwen2.5'
+docker model pull 'ai/qwen3-coder:30B'
+docker model pull 'ai/smollm2:360M-Q4_K_M' 'ai/llama2:7b-q4'
+docker model pull 'some.registry.com/models/mistral:latest'
+
+# Run models
+docker model run 'ai/smollm2:360M-Q4_K_M' 'Give me a fact about whales'
+docker model run -d 'ai/qwen3-coder:30B'
+docker model run -e 'MODEL_API_KEY=my-secret-key' --gpus 'all' …
+docker model run --gpus '0' --gpu-memory '8g' -e 'MODEL_GPU_LAYERS=40' …
+docker model run --gpus '0,1,2' --memory '16g' --memory-swap '16g' …
+docker model run --no-gpu --cpus '4' …
+docker model run -p '3000:8080' …
+docker model run -p '127.0.0.1:8080:8080' …
+docker model run -p '8080:8080' -p '9090:9090' …
+
+# Package models
+docker model package --gguf "$(pwd)/model.gguf" 'myorg/my-model:v1'  # also imports downloaded GGUF models
+docker model package --gguf "$(pwd)/model.gguf" --push 'registry.example.com/ai/custom-llm:v1'
+
+# Import downloaded GGUF models from ollama
+# `docker model package` relies on the file extension to detect the format; use a link with the extension in the name
+jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
+	"$HOME/.ollama/models/manifests/registry.ollama.ai/library/lfm2/24b" \
+| xargs -I '%%' ln -s "$HOME/.ollama/models/blobs/%%" "/tmp/lfm2-24b.gguf" \
+&& docker model package --gguf '/tmp/lfm2-24b.gguf' 'lfm/lfm2:24b'
+
+# Use speculative decoding
+docker model configure --speculative-draft-model='lfm/lfm2.5:1.2b' 'lfm/lfm2:24b' \
+&& docker model run 'lfm/lfm2:24b' "Hello, tell me about yourself"
+
+# Stop using speculative decoding
+docker model configure --speculative-draft-model='' 'lfm/lfm2:24b'
+
+# List downloaded models.
+docker model list
+docker model ls --json
+docker model ls --openai
+docker model ls -q
+
+# List running models.
+docker model ps
+
+# View models' logs.
+docker model logs
+docker model logs llm | grep -i gpu
+docker model logs -f llm
+docker model logs --tail 100 -t llm
+
+# Distribute models across GPUs.
+docker model run --gpus 'all' --tensor-parallel '2' 'ai/llama2-70b'
+
+# Show models' configuration.
+docker model inspect 'ai/qwen2.5-coder'
+
+# View models' layers.
+docker model history 'ai/llama2'
+
+# Configure models.
+docker model configure --context-size '8192' 'ai/qwen2.5-coder'
+
+# Reset model configuration.
+docker model configure --context-size '-1' 'ai/qwen2.5-coder'
+
+# Remove models.
+docker model rm 'ai/llama2'
+docker model rm -f 'ai/llama2'
+docker model rm $(docker model ls -q)
+
+# Print disk usage.
+docker model df
+
+# Full cleanup (remove all models)
+docker model purge
