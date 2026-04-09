@@ -23,9 +23,11 @@
     "permissions": {
         "defaultMode": "plan",
         "ask": [
+            "Bash(find *)",
             "Bash(git branch*)",
             "Bash(git checkout*)",
             "Bash(git commit*)",
+            "Bash(git mv *)",
             "Edit(/**)",
             "Write(/**)"
         ],
@@ -34,7 +36,10 @@
             "Bash(git diff*)",
             "Bash(git log*)",
             "Bash(git remote get-url*)",
-            "Bash(git switch*)",
+            "Bash(git switch -c *)",
+            "Bash(head *)",
+            "Bash(ls *)",
+            "Bash(tail *)",
             "Glob(/**)",
             "Grep(/**)",
             "Read(/**)",
