@@ -10,7 +10,7 @@ designing workflows and using the tools made available to them.
 1. [Gotchas](#gotchas)
    1. [MCP servers and sub-agents](#mcp-servers-and-sub-agents)
 1. [Concerns](#concerns)
-   1. [How much context is too much?](#how-much-context-is-too-much)
+   1. [How much integration is too much?](#how-much-integration-is-too-much)
    1. [Security](#security)
    1. [Prompt injection](#prompt-injection)
    1. [Going awry](#going-awry)
@@ -102,12 +102,15 @@ This memory is volatile. Once a session ends, or its conversation thread ends or
 that acquired data fades out.
 
 To have a _resemblance_ of long-term memory, they can write notes down and load them in later sessions.<br/>
-Agents might save learnings, patterns, and insights gained during active sessions in _memory files_ or other storage
-means like databases and vector stores.
+Agents might save learnings, patterns, and insights gained during active sessions in local files (like _memory files_ or
+wikis), or other storage means like databases and vector stores.<br/>
+The concept has been explored in projects like [MemGPT] (self-editing tiered memory) and crystallized in write-ups like
+[karpathy/llm-wiki.md], but the pattern itself emerged from practitioners who were already putting agents in charge of
+their own project docs, memory files, and tool configurations.
 
 Filesystem-based approaches are currently winning as an _interface_ because models already know how to list directories,
 grep for patterns, read ranges, and write artifacts.<br/>
-Databases are winning as a _substrate_ because they provide database-like guarantees that allows a memory to be shared,
+Databases are winning as a _substrate_ because they provide database-like guarantees that allow a memory to be shared,
 audited, queried, and made reliable under concurrency.
 
 Notes are usually loaded **when needed** using tools to retrieve them.<br/>
@@ -116,16 +119,15 @@ When loading notes, agents add their content to the context, and do **not** cons
 Every line in a note competes for attention with the actual work because the context window is limited.<br/>
 The more specific and concise the instructions are, the more consistently agents follow them.
 
-Agent harnesses started using _context_ files (A.K.A. _rules files_) to apply only _procedural memories_ at the start of
-sessions. These Markdown files should only contain instructions, rules, and preferences, and **no** session
-memories.
-
 > [!tip]
 > Consider triggering agents to update their briefs manually or automatically at the end of every _productive_ session
 > to persist learnings.
 >
 > Also ask agents to periodically review and optimize memory files.<br/>
 > Quick cleanups keep things sharp. Remove from it everything that is not _needed_.
+
+Agent harnesses started using _context_ files (A.K.A. _rules files_) to apply only _procedural memories_ at the start of
+sessions. These Markdown files should only contain instructions, rules, and preferences, and **no** session memories.
 
 Agent frameworks are currently using similar format and content at least for context files, but each wants them in a
 different location (`CLAUDE.md`, `.cursorrules` or `.cursor/rules/`, `.github/copilot-instructions.md`).<br/>
@@ -168,8 +170,8 @@ This is currently a [confirmed issue only in Claude Code][claude code / mcp serv
 
 ## Concerns
 
-Agents created by Anthropic and other companies have a history of not caring about agent abuse, and leave users on
-their own while hiding behind a disclaimer.
+Agent vendors have been slow to address abuse vectors (or took no action at all), often hiding behind disclaimers rather
+than technical safeguards and leaving users to fend for themselves.
 
 For specific areas of expertise, some human workers could be replaced for a fraction of the costs.<br/>
 Many employers already proved they are willing to jump at this opportunity as soon as it will present itself, with
@@ -190,7 +192,7 @@ Refer:
 - [Token Anxiety] by Nikunj Kothari.
 - [AI Doesn't Reduce Work — It Intensifies It] by Aruna Ranganathan and Xingqi Maggie Ye
 
-### How much context is too much?
+### How much integration is too much?
 
 Integrating agents directly into operating systems and applications transforms them from relatively neutral resource
 managers into active, goal-oriented infrastructure that is ultimately controlled by the companies that develop these
@@ -312,6 +314,8 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?]: https://arxiv.org/abs/2602.11988
 [Forget the Hype: Agents are Loops]: https://dev.to/cloudx/forget-the-hype-agents-are-loops-1n3i
 [How a Single Email Turned My ClawdBot Into a Data Leak]: https://medium.com/@peltomakiw/how-a-single-email-turned-my-clawdbot-into-a-data-leak-1058792e783a
+[karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
+[MemGPT]: https://arxiv.org/abs/2310.08560
 [moltbot security situation is insane]: https://www.youtube.com/watch?v=kSno1-xOjwI
 [nullclaw/nullclaw]: https://github.com/nullclaw/nullclaw
 [obra/superpowers]: https://github.com/obra/superpowers
