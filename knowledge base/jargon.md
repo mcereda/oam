@@ -145,6 +145,7 @@
 | TL;DR   | Too Long; Didn't Read                                  |                                                                                                     |
 | TL;DW   | Too Long; Didn't Watch                                 | TL;DR, but for videos                                                                               |
 | TLD     | Top Level Domain                                       |                                                                                                     |
+| TYL     | Today You Learned                                      | Like TIL, but for when somebody else messes up                                                      |
 | UART    | Universal Asynchronous Receiver and Transmitter        |                                                                                                     |
 | UDP     | User Datagram Protocol                                 |                                                                                                     |
 | UFW     | Uncomplicated FireWall                                 |                                                                                                     |
