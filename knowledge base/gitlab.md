@@ -58,8 +58,8 @@ _Group access tokens_ are similar to PATs and project access tokens, but they re
 They **cannot** be used to create other group, project, or personal access tokens.<br/>
 Refer to [Group access tokens].
 
-_Deploy tokens_ allow accessing resources **without** tying permissions to individual user accounts, and do **not**
-expire by default (but can be set to).<br/>
+_Deploy tokens_ allow accessing resources **without** tying permissions to individual user accounts, and **do not
+expire by default** (but can be set to).<br/>
 Consider using those in place of PATs for git-related operations, container registries, package registries, and
 repositories from pipelines.
 
@@ -672,8 +672,9 @@ This is especially useful when:
 - The external repository's home service imposes limitations to users.
 
 One should **not** make changes to a mirror.<br/>
-Divergence prevents the mirror from successfully pulling updates from the upstream.<br/>
-Mirrors can be set to _forcefully_ pull updates. In this case, any change done to the mirror will disappear.
+Divergence **prevents** the mirror from successfully pulling updates from the upstream.<br/>
+Mirrors _can_ be set to _forcefully_ pull updates. In this case, any change done to the mirror will **disappear** with
+with the next pull.
 
 To maintain private changes, one should:
 
