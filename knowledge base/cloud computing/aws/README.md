@@ -74,9 +74,17 @@ The API for _some_ AWS services (e.g. EC2) are **_eventually_ consistent**.<br/>
 This means that the result of an API request that affects resources _might_ **not** be immediately visible to the
 subsequent requests that API receives.
 
-AWS has some pretty _**inconsistent**_ rules regarding what is allowed in its resources' identifiers.<br/>
-What most seems to work is to keep those identifiers boring, short, simple, and try avoiding super rigid formats.
+AWS has some pretty _**inconsistent**_ rules and **length limits** regarding its resources' identifiers, e.g.:
 
+| Service               | Rule examples                                            | Max length | Reference              |
+| --------------------- | -------------------------------------------------------- | ---------- | ---------------------- |
+| S3 bucket names       | No underscores, periods allowed, no reserved prefixes    | 63         | [S3 bucket naming]     |
+| RDS identifiers       | Only lowercase, numbers, and hyphens                     | 63         | [CreateDBInstance API] |
+| IAM role names        | Allows paths, must match `[\w+=,.@-]+`                   | 64         | [CreateRole API]       |
+| Lambda function names | Allows uppercase letters and underscores, case-sensitive | 64         | [CreateFunction API]   |
+| SQS queue names       | FIFO queues need to add the `.fifo` suffix               | 80         | [CreateQueue API]      |
+
+What most seems to work is to keep those identifiers boring, short, simple, and try avoiding super rigid formats.<br/>
 To avoid multiple formats where possible, all identifiers should comply to the **most** restrictive requirements.
 
 <details style='padding: 0 0 1rem 1rem'>
@@ -1229,6 +1237,10 @@ If one can, prefer just build the image from an EC2 instance.
 [boto3 sessions]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/session.html
 [connect to the internet using an internet gateway]: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
 [constraints / tag]: https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
+[CreateDBInstance API]: https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html
+[CreateFunction API]: https://docs.aws.amazon.com/lambda/latest/api/API_CreateFunction.html
+[CreateQueue API]: https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_CreateQueue.html
+[CreateRole API]: https://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateRole.html
 [creating organization policies with aws organizations]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_policies_create.html
 [elastic ip addresses]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html
 [enable or disable aws regions in your account]: https://docs.aws.amazon.com/accounts/latest/reference/manage-acct-regions.html
@@ -1242,6 +1254,7 @@ If one can, prefer just build the image from an EC2 instance.
 [nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [Pulling the Amazon Linux container image]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/amazon_linux_container_image.html
 [rotating aws kms keys]: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
+[S3 bucket naming]: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html
 [savings plans user guide]: https://docs.aws.amazon.com/savingsplans/latest/userguide/
 [Services that support the Resource Groups Tagging API]: https://docs.aws.amazon.com/resourcegroupstagging/latest/APIReference/supported-services.html
 [Start a new AWS Step Functions state machine from a running execution]: https://docs.aws.amazon.com/step-functions/latest/dg/connect-stepfunctions.html
