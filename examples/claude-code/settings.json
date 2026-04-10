@@ -24,14 +24,40 @@
 
     "permissions": {
         "defaultMode": "plan",
+        "deny": [
+            "Bash(curl *)",
+            "Bash(find *-exec*)",
+            "Bash(find *-ok*)",
+            "Read(~/.env)",
+            "Read(~/.env.*)"
+        ],
+        "ask": [
+            "Read(.env)",
+            "Read(.env.*)",
+            "Bash(find *)",
+            "Bash(git branch*)",
+            "Bash(git checkout*)",
+            "Bash(git commit*)",
+            "Bash(git mv *)",
+            "Edit(/**)",
+            "Write(/**)"
+        ],
         "allow": [
             "Agent(Explore)",
             "Bash(git diff*)",
             "Bash(git log*)",
             "Bash(git remote get-url*)",
-            "Bash(git switch*)",
+            "Bash(git switch -c *)",
+            "Bash(head *)",
+            "Bash(ls *)",
             "Bash(npm run lint)",
             "Bash(npm run test *)",
+            "Bash(rtk git diff*)",
+            "Bash(rtk git log*)",
+            "Bash(rtk head *)",
+            "Bash(rtk ls *)",
+            "Bash(rtk tail *)",
+            "Bash(tail *)",
             "Glob(/**)",
             "Grep(/**)",
             "Read(/**)",
@@ -41,20 +67,6 @@
             "mcp__plugin_gitlab_gitlab__get_merge_request_diffs",
             "mcp__plugin_gitlab_gitlab__get_workitem_notes",
             "mcp__linear__get_issue"
-        ],
-        "ask": [
-            "Read(.env)",
-            "Read(.env.*)",
-            "Bash(git branch*)",
-            "Bash(git checkout*)",
-            "Bash(git commit*)",
-            "Edit(/**)",
-            "Write(/**)"
-        ],
-        "deny": [
-            "Bash(curl *)",
-            "Read(~/.env)",
-            "Read(~/.env.*)"
         ]
     },
     "sandbox": {
@@ -64,6 +76,11 @@
             "docker",
             "lefthook"
         ],
+        "filesystem": {
+            "allowWrite": [
+                "/path/to/claude/own/kb"
+            ]
+        },
         "network": {
             "allowedDomains": [
                 "github.com",
