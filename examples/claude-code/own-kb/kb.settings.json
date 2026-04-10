@@ -1,0 +1,15 @@
+{
+    "permissions": {
+        "defaultMode": "acceptEdits",
+        "allow": [
+            "Agent",
+            "Bash",
+            "Edit(/**)",
+            "Read(/**)",
+            "Write(/**)"
+        ]
+    },
+    "sandbox": {
+        "enabled": false
+    }
+}

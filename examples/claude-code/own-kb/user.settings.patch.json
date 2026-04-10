@@ -1,0 +1,27 @@
+[
+    {
+        "op": "add",
+        "path": "/permissions/allow/-",
+        "value": "Edit(~/path/to/claude-kb)"
+    },
+    {
+        "op": "add",
+        "path": "/permissions/allow/-",
+        "value": "Read(~/path/to/claude-kb)"
+    },
+    {
+        "op": "add",
+        "path": "/permissions/allow/-",
+        "value": "Write(~/path/to/claude-kb)"
+    },
+    {
+        "op": "add",
+        "path": "/hooks/Stop",
+        "value": [{
+            "hooks": [{
+                "type": "command",
+                "command": "echo 'Remember to update your KB (~/…/claude-kb) if anything from this session is worth documenting.'"
+            }]
+        }]
+    }
+]
