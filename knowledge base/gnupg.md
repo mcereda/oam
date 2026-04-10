@@ -24,12 +24,22 @@
 
 ## TL;DR
 
+<details>
+  <summary>Setup</summary>
+
 ```sh
 # Install on macOS.
 # Choose one.
 brew install --cask 'gpg-suite-no-mail'
 brew install 'gnupg' 'pinentry-mac'
+```
 
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
 # Launch components.
 gpgconf --launch
 gpgconf --launch 'gpg-agent'
@@ -42,7 +52,8 @@ gpgconf --reload 'gpg-agent'
 gpgconf -K 'all'
 gpgconf --kill 'gpg-agent'
 
-# FIXME
+# Update the agent's knowledge of the current terminal.
+# Needed after switching terminals or when Pinentry can't find the TTY.
 gpg-connect-agent updatestartuptty /bye
 gpg-connect-agent reloadagent '/bye'
 
@@ -94,11 +105,15 @@ gpg --quick-set-expire 'key_fingerprint' '2085-11-24'
 gpg --quick-set-expire 'key_fingerprint' '20241101T203012' 'subkey_fingerprint'
 gpg --quick-set-expire 'key_fingerprint' '1y' '*'
 
-# Generate revoking certificates.
+# Generate revocation certificates.
 # To actually revoke the key, merge it with the certificate using '--import'.
 # Use the '--edit' command to only revoke a subkey or a key signature.
 gpg --gen-revoke
 gpg --generate-revocation -ao 'revoke.cert' 'fingerprint'
+
+# Save auto-generated revocation certificates.
+# GnuPG auto-generates revocation certificates in 'openpgp-revocs.d/'.
+cp "$HOME/.gnupg/openpgp-revocs.d/key_fingerprint.rev" 'revocation-cert.rev'
 
 # Change keys' passphrase.
 # Use '--dry-run' to just check the current password is correct.
@@ -135,8 +150,19 @@ gpgtar -d 'dir.tar.gpg'
 gpgtar -o 'dir' -d 'dir.tar.gpg'
 
 
-# Get the short ID of the signing key only for a user.
+# Sign data.
+gpg --detach-sign 'file'
+gpg -a --default-key 'key_identifier' --detach-sign 'file'
+echo 'token' | gpg -a --default-key 'key_identifier' --detach-sign
+
+
+# Get the short ID of a key for a user.
+# The simple version works when the user has a single key.
+# The second filters for keys with the [S]igning capability, for when one has multiple keys with different capabilities.
 # Primarily usable for git's signingKey configuration.
+gpg --list-keys --keyid-format 'short' 'recipient' \
+| grep --extended-regexp '^pub' \
+| awk -F '/' '{print $2}' | awk '{print $1}'
 gpg --list-keys --keyid-format 'short' 'recipient' \
 | grep --extended-regexp '^pub[[:blank:]]+[[:alnum:]]+/[[:alnum:]]+[[:blank:]].*\[[[:upper:]]*S[[:upper:]]*\]' \
 | awk '{print $2}' \
@@ -162,6 +188,26 @@ export GPG_TTY="$(tty)"
 # -e '/^$/d' removes empty lines
 gpg --armor --export 'someone@example.org' | sed -e '/^-----/d' -e '/^=/d' -e '/^$/d'
 ```
+
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
+# Sign a token to prove ownership of a GPG key.
+# Used by services like Gitea to verify key association.
+echo '1d64…9920' | gpg -a --default-key 'E455…50AB' --detach-sign
+
+# Decrypt an encrypted key backup and import it.
+gpg --decrypt --output - 'keys.asc.gpg' | gpg --import
+
+# Encrypt specific files found by pattern.
+find . -type 'f' -name 'secret.txt' \
+  -exec gpg --batch --yes --encrypt-files --recipient 'recipient' {} ';'
+```
+
+</details>
 
 ## Encryption
 
