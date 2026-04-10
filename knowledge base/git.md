@@ -25,13 +25,13 @@
 1. [LFS extension](#lfs-extension)
 1. [Submodules](#submodules)
 1. [Trailers](#trailers)
-1. [Remove a file from a commit](#remove-a-file-from-a-commit)
-1. [Remove a file from the repository](#remove-a-file-from-the-repository)
 1. [Troubleshooting](#troubleshooting)
     1. [Debug](#debug)
     1. [Change author information for multiple commits](#change-author-information-for-multiple-commits)
     1. [Git does not accept self-signed certificates](#git-does-not-accept-self-signed-certificates)
     1. [GPG cannot sign a commit](#gpg-cannot-sign-a-commit)
+    1. [Remove a file from a commit](#remove-a-file-from-a-commit)
+    1. [Remove a file from the repository](#remove-a-file-from-the-repository)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -39,14 +39,30 @@
 
 [Gitconfig example]
 
+<details>
+  <summary>Setup</summary>
+
 ```sh
-# Set your identity.
-git config 'user.name' 'User Name'
-git config --global 'user.email' 'user@email.com'
+# Install.
+apt install 'git' 'git-lfs'
+```
+
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
+# Set one's identity.
+git config 'user.name' 'John Doe'
+git config --global 'user.email' 'john@example.org'
 
 # Avoid issues when collaborating from different platforms.
 git config --local 'core.autocrlf' 'input'
 git config --local 'core.autocrlf' 'true'
+
+# Set the default pull strategy.
+git config --local 'pull.rebase' false
 
 # Create aliases.
 git config --local 'alias.co' 'checkout'
@@ -66,6 +82,9 @@ git config --list \
 # Get a default value if the requested key has none.
 # Does not work on sections alone.
 git config --get --default 'not-set' 'filter.lfs.cleaned'
+
+# Read a configuration from a specific repository.
+git config -C '/path/to/repo' --get 'init.defaultBranch'
 
 # Create or reinitialize repositories.
 git init
@@ -159,6 +178,12 @@ git revert 'commit_hash'
 # Interactively rebase the last 7 commits.
 git rebase -i '@~7'
 
+# Rebase from the very first commit.
+git rebase --root
+
+# Run a command after each replayed commit.
+git rebase --exec 'git commit --amend --no-edit -S'
+
 # List remotes.
 git remote --verbose
 
@@ -177,6 +202,9 @@ git push 'git@github.com:user/repo.git'
 git push --set-upstream github --all
 git push --all --force
 
+# Push to all remotes at once.
+git remote | xargs -n 1 git push
+
 # Show repositories' history.
 git reflog
 git log -p
@@ -184,8 +212,9 @@ git log -p
 # Visualize repositories' history.
 git log --graph --full-history --all --color --decorate --oneline
 
-# Show and verify signatures.
+# Show signatures.
 git log --show-signature -1
+git log --show-signature --format="  %h %s%n  Author: %an <%ae>"
 
 # Remove staged and working directory changes.
 git reset --hard
@@ -212,12 +241,15 @@ git diff --output 'file.patch' --cached
 git format-patch -5 'commit_hash'
 git format-patch 'HEAD~3' -o 'dir'
 git format-patch 'HEAD~2' --stdout > 'single/file.patch'
+git format-patch -1 'commit_hash'
+git format-patch -n HEAD^
 
 # Create a full patch of the unstaged changes.
 git add . && git commit -m 'uncommitted' \
 && git format-patch 'HEAD~1' && git reset 'HEAD~1'
 
 # Apply patches to the current index.
+git apply --check 'file.patch'
 git apply 'file.patch'
 
 # Apply commits from a patch.
@@ -225,7 +257,7 @@ git am 'file.patch'
 
 # Stash changes locally.
 git stash
-git stash push 'message'
+git stash push -m 'message'
 
 # List all the stashed changes.
 git stash list
@@ -258,6 +290,7 @@ git checkout --orphan 'branch_name'
 
 # List branches.
 git branch -a
+git branch --list --remote 'origin/*' | cut -d'/' -f'2'
 
 # Rename branches.
 git branch --move 'old_name' 'new_name'
@@ -329,16 +362,18 @@ git fetch --prune-tags
 
 # Rebase a branch on top of another.
 git rebase 'branch_name'
-git rebase 'remote_name/upstream_branch_name' 'local-branch_name'
+git rebase 'remote_name/upstream_branch_name' 'local_branch_name'
+git rebase --onto 'destination_branch' 'starting_point_branch' 'ending_point_branch'
 git pull --rebase='interactive' 'remote_name' 'branch_name'
 
 # Change the date of existing commits.
-git filter-branch --env-filter \
-  'if [ $GIT_COMMIT = 119f9ecf58069b265ab22f1f97d2b648faf932e0 ]
+git filter-branch --env-filter '
+  if [ $GIT_COMMIT = 119f9ecf58069b265ab22f1f97d2b648faf932e0 ]
    then
      export GIT_AUTHOR_DATE="Fri Jan 2 21:38:53 2009 -0800"
      export GIT_COMMITTER_DATE="Sat May 19 01:01:01 2007 -0700"
-   fi'
+   fi
+'
 
 # Sign all commits from now on.
 git config --global 'user.signingKey' 'KEY_ID_IN_SHORT_FORMAT'
@@ -357,17 +392,52 @@ git submodule update --init --recursive
 # Show the first commit that has the string "cool" in its message body.
 git show :/cool
 
+# Download LFS objects.
+git lfs pull
+
 # Skip commit hooks.
 # Most useful with a broken `pre-commit` or `lefthook` executable or config.
 git commit --no-verify …
+```
 
-# Reset fork to upstream's state
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
+# Reset fork to upstream's state.
 git remote add 'upstream' '/url/to/original/repo'
 git fetch 'upstream'
 git checkout 'master'
 git reset --hard 'upstream/master'
 git push 'origin' 'master' --force
+
+# Remove files from the latest commit.
+git reset --soft HEAD~1
+git restore --staged 'file_to_remove'
+git commit -c ORIG_HEAD
+
+# Change the default branch from 'master' to 'main'.
+git branch --move 'master' 'main'
+git push --set-upstream 'origin' 'main'
+git symbolic-ref 'refs/remotes/origin/HEAD' 'refs/remotes/origin/main'
+git push origin --delete 'master'
+
+# Force-pull without merge or rebase.
+git fetch --all
+git branch 'backup-branch'         # optional safety net
+git reset --hard 'origin/branch'
+
+# Re-sign all commits (e.g. after a key rotation).
+# Only works cleanly with no remote to diverge from.
+git commit --allow-empty -m "test: verify new signing key"
+git log --oneline --show-signature -1
+git rebase --root --exec "git commit --amend --no-edit --reset-author -S"
+git log --show-signature --format="  %h %s%n  Author: %an <%ae>"
 ```
+
+</details>
 
 ## Authentication
 
@@ -898,6 +968,19 @@ git clone 'git@fqdn:/srv/git/project.git'
    git commit -m "lfs configured"
    ```
 
+1. Operate on traced files:
+
+   ```sh
+   git lfs status
+   git lfs pull
+   git lfs push
+   git lfs track
+   git lfs dedup
+   git lfs prune
+
+   # etc
+   ```
+
 ## Submodules
 
 See [Git Submodules: Adding, Using, Removing, Updating] for more information.
@@ -964,38 +1047,6 @@ Format: asciidoc
 Issue: 123
 ```
 
-## Remove a file from a commit
-
-See [remove files from git commit].
-
-## Remove a file from the repository
-
-1. **Unstage** the file using `git reset`; specify HEAD as the source:
-
-   ```sh
-   git reset HEAD 'secret-file'
-   ```
-
-1. **Remove** the file from the repository's index:
-
-   ```sh
-   git rm --cached 'secret-file'
-   ```
-
-1. Check the file is no longer in the index:
-
-   ```sh
-   $ git ls-files | grep 'secret-file'
-   $
-   ```
-
-1. Add the file to `.gitignore` or remove it from the working directory.
-1. Amend the most recent commit from your repository:
-
-   ```sh
-   git commit --amend
-   ```
-
 ## Troubleshooting
 
 ### Debug
@@ -1058,6 +1109,48 @@ If `gnupg2` and `gpg-agent` 2.x are used, be sure to set the environment variabl
 export GPG_TTY=$(tty)
 ```
 
+### Remove a file from a commit
+
+Refer to [remove files from git commit].
+
+Using `git gui`: Commit → Amend Last Commit → uncheck the files → Commit.
+
+From the command line:
+
+```sh
+git reset --soft HEAD~1
+git restore --staged 'file_to_remove'       # or: git reset HEAD 'file_to_remove'
+git commit -c ORIG_HEAD
+```
+
+### Remove a file from the repository
+
+1. **Unstage** the file using `git reset`; specify HEAD as the source:
+
+   ```sh
+   git reset HEAD 'secret-file'
+   ```
+
+1. **Remove** the file from the repository's index:
+
+   ```sh
+   git rm --cached 'secret-file'
+   ```
+
+1. Check the file is no longer in the index:
+
+   ```sh
+   $ git ls-files | grep 'secret-file'
+   $
+   ```
+
+1. Add the file to `.gitignore` or remove it from the working directory.
+1. Amend the most recent commit from your repository:
+
+   ```sh
+   git commit --amend
+   ```
+
 ## Further readings
 
 - Official [documentation]
@@ -1105,6 +1198,7 @@ export GPG_TTY=$(tty)
 - [Git global config for specific repositories?]
 - [cheat.sh]
 - [Clean up a fork and restart it from the upstream]
+- [5 steps to change GitHub default branch from master to main][change default branch source]
 
 <!--
   Reference
@@ -1129,6 +1223,7 @@ export GPG_TTY=$(tty)
 [10 git tips we can't live without]: https://opensource.com/article/22/4/git-tips
 [able to push to all git remotes with the one command?]: https://stackoverflow.com/questions/5785549/able-to-push-to-all-git-remotes-with-the-one-command
 [cannot clone git from azure devops using pat]: https://stackoverflow.com/questions/53106546/cannot-clone-git-from-azure-devops-using-pat#53182981
+[change default branch source]: https://stevenmortimer.com/5-steps-to-change-github-default-branch-from-master-to-main/
 [cheat.sh]: https://cheat.sh/git
 [clean up a fork and restart it from the upstream]: https://stackoverflow.com/questions/9646167/clean-up-a-fork-and-restart-it-from-the-upstream#9646323
 [coloring white space in git-diff's output]: https://stackoverflow.com/questions/5257553/coloring-white-space-in-git-diffs-output#5259137
