@@ -123,6 +123,11 @@ Consider using **Haiku** for quick responses.
 
 The `opusplan` mode allows using Opus during planning, then automatically switches to Sonnet for implementation.
 
+Change how Claude responds (without affecting its capabilities) by configuring an [output style][output styles].<br/>
+The builtin `explanatory` style adds educational insights between tasks; `learning` shares insights _and_ asks the user
+to contribute to changes.<br/>
+Custom styles can be created as Markdown files in the `~/.claude/output-styles/` and `.claude/output-styles/` folders.
+
 Use memory and context files (`CLAUDE.md`) to instruct Claude Code on commands, style guidelines, and give it _key_
 context. Try to keep them small.
 
@@ -225,44 +230,51 @@ claude plugin disable 'gitlab@claude-plugins-official'
 claude plugin update 'gitlab@claude-plugins-official'
 ```
 
-_Relevant_ commands from within Claude Code (version 2.1.76).<br/>
+_Relevant_ commands from within Claude Code (version 2.1.89).<br/>
 Refer to [Built-in commands][built-in commands reference] for the complete list.
 
 ```plaintext
 /agents                              Manage agent configurations
-/batch                               Research and plan a large-scale change, then execute it in parallel across 5 to 30 isolated worktree agents that each open a PR.
-/branch                              Create a branch of the current conversation at this point (alias of /fork)
-/clear                               Clear conversation history and free up context
-/compact                             Clear conversation history but keep a summary in context.
-/config                              Open config panel
+/batch <instruction>                 Research and plan a large-scale change, then execute it in parallel across 5 to 30 isolated worktree agents that each open a PR
+/branch [name]                       Create a branch of the current conversation at this point (alias of /fork)
+/btw <question>                      Ask a quick side question without adding to the conversation
+/clear                               Clear conversation history and free up context (alias of /reset and /new)
+/compact [instructions]              Compact the conversation; allows optional focus instructions
+/config                              Open config panel (alias of /settings)
 /context                             Visualize current context usage as a colored grid
-/copy                                Copy Claude's last response or a code block to clipboard
-/debug                               Enable debug logging for this session and help diagnose issues
+/copy [N]                            Copy Claude's last response or a code block to clipboard
+/cost                                Show token usage statistics
+/debug [description]                 Enable debug logging for this session and help diagnose issues
 /diff                                View uncommitted changes and per-turn diffs
 /effort [low|medium|high|max|auto]   Set effort level for model usage
-/exit                                Exit the REPL
-/export                              Export the current conversation to a file or clipboard
+/exit                                Exit the REPL (alias of /quit)
+/export [filename]                   Export the current conversation to a file or clipboard
+/fast [on|off]                       Toggle fast mode (Opus only)
 /help                                Show help and available commands
 /hooks                               Manage hook configurations for tool events
 /init                                Initialize a new CLAUDE.md file with codebase documentation
+/insights                            Generate a report analyzing Claude Code sessions
 /login                               Sign in with your Anthropic account
 /logout                              Sign out from your Anthropic account
-/loop                                Run a prompt or slash command on a recurring interval (e.g. /loop 5m /foo, defaults to 10m)
-/mcp [enable|disable [name]]         Manage MCP servers
+/loop [interval] <prompt>            Run a prompt or slash command on a recurring interval (e.g. /loop 5m /foo, defaults to 10m)
+/mcp                                 Manage MCP servers
 /memory                              Edit Claude memory files
 /model [model]                       Set the AI model for Claude Code
-/permissions                         Manage allow & deny tool permission rules
-/plan                                Enable plan mode or view the current session plan
+/permissions                         Manage allow, ask, and deny tool permission rules (alias of /allowed-tools)
+/plan [description]                  Enable plan mode or view the current session plan
 /plugin                              Manage Claude Code plugins
 /reload-plugins                      Activate pending plugin changes in the current session
-/rename                              Rename the current conversation
-/resume                              Resume a previous conversation
-/rewind                              Restore the code and/or conversation to a previous point
+/rename [name]                       Rename the current conversation
+/resume [session]                    Resume a previous conversation (alias of /continue)
+/rewind                              Restore the code and/or conversation to a previous point (alias of /checkpoint)
+/sandbox                             Toggle sandbox mode
 /security-review                     Complete a security review of the pending changes on the current branch
-/simplify                            Review changed code for reuse, quality, and efficiency, then fix any issues found.
+/simplify [focus]                    Review changed code for reuse, quality, and efficiency, then fix any issues found
 /skills                              List available skills
-/tasks                               List and manage background tasks
+/status                              Show version, model, account, and connectivity status
+/tasks                               List and manage background tasks (alias of /bashes)
 /usage                               Show plan usage limits
+/voice                               Toggle push-to-talk voice dictation
 ```
 
 </details>
