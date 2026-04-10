@@ -23,6 +23,9 @@ Use the IP address of the device when connecting to it in case the hostname is n
 Use [split tunneling][Documentation / Split tunneling with the Mullvad app] to _exclude_ some apps from the VPN while it
 is active.
 
+Consider using [Mullvad's public encrypted DNS service][Documentation / DNS over HTTPS and DNS over TLS] as upstream for
+DNS forwarders (like [Pi-hole]), or when not connected to Mullvad's VPN service.
+
 <!-- Uncomment if used
 <details>
   <summary>Setup</summary>
@@ -63,6 +66,7 @@ is active.
 ### Sources
 
 - [Documentation / Using the Mullvad VPN app]
+- [Documentation / DNS over HTTPS and DNS over TLS]
 
 <!--
   Reference
@@ -71,13 +75,16 @@ is active.
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[Pi-hole]: pi-hole.md
+
 <!-- Files -->
 <!-- Upstream -->
 [Blog]: https://mullvad.net/en/blog
 [Codebase]: https://github.com/mullvad/
-[Documentation]: https://mullvad.net/en/help/
+[Documentation / DNS over HTTPS and DNS over TLS]: https://mullvad.net/en/help/dns-over-https-and-dns-over-tls
 [Documentation / Split tunneling with the Mullvad app]: https://mullvad.net/en/help/split-tunneling-with-the-mullvad-app
 [Documentation / Using the Mullvad VPN app]: https://mullvad.net/en/help/using-mullvad-vpn-app
+[Documentation]: https://mullvad.net/en/help/
 [Website]: https://mullvad.net/en/
 
 <!-- Others -->
