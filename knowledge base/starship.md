@@ -9,7 +9,7 @@ Fast and customizable prompt for most shells.
 ## TL;DR
 
 <details>
-  <summary>Installation and configuration</summary>
+  <summary>Setup</summary>
 
 ```sh
 # Installation.
@@ -17,13 +17,17 @@ apt install 'starship'
 brew install 'starship'
 zypper in 'starship'
 
+# Initialize starship configuration.
+mkdir -p ~'/.config' && touch ~'/.config/starship.toml'
+
 # Start when the shell starts.
 eval "$(starship init bash)" | tee -a ~'/.bashrc'
 eval "$(starship init zsh)" | tee -a ~'/.zshrc'
-mkdir -p ~'/.config/fish' && echo 'starship init fish | source' | tee -a ~'/.config/fish/config.fish'
-
-# Initialize starship configuration.
-mkdir -p ~'/.config' && touch ~'/.config/starship.toml'
+mkdir -p ~'/.config/fish' && cat <<EOF | tee -a ~'/.config/fish/conf.d/zzz_starship.fish'
+if status is-interactive
+  starship init fish | source
+end
+EOF
 
 # Change configuration.
 starship config
@@ -35,6 +39,7 @@ cat ~'/.config/starship.toml'
 ```
 
 </details>
+
 <details>
   <summary>Usage</summary>
 
@@ -74,11 +79,9 @@ error_symbol = '[\$](bold red)'
 ## Further readings
 
 - [Website]
-- [Github]
+- [Codebase]
+- Shells: [Bash], [Fish], [Zsh]
 - [Nerd fonts]
-- [Bash]
-- [Zsh]
-- [Fish]
 
 <!--
   Reference
@@ -93,5 +96,5 @@ error_symbol = '[\$](bold red)'
 
 <!-- Files -->
 <!-- Upstream -->
-[github]: https://github.com/starship/starship
-[website]: https://starship.rs/
+[Codebase]: https://github.com/starship/starship
+[Website]: https://starship.rs/
