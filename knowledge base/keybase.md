@@ -13,6 +13,28 @@
 
 ## TL;DR
 
+<details>
+  <summary>Setup</summary>
+
+```sh
+# Install.
+brew install --cask keybase \
+&& sudo xattr -dr 'com.apple.quarantine' \
+  '/Applications/Keybase.app' '/Library/Filesystems/kbfuse.fs'
+dnf install 'https://prerelease.keybase.io/keybase_amd64.rpm'
+pacman -Sy 'keybase-gui'
+zypper install 'https://prerelease.keybase.io/keybase_amd64.rpm'
+
+# Use container images.
+docker pull 'keybaseio/client:stable'
+podman pull 'keybaseio/client:stable'
+```
+
+</details>
+
+<details>
+  <summary>Usage</summary>
+
 ```sh
 # Start the services.
 run_keybase
@@ -64,6 +86,8 @@ podman exec \
   keybase \
     keybase whoami
 ```
+
+</details>
 
 ## Service execution
 
@@ -172,6 +196,7 @@ sudo xattr -dr 'com.apple.quarantine' '/Library/Filesystems/kbfuse.fs'
 - [Keybase LFS support]
 - [Keybase launches encrypted git]
 - [How to use Keybase to encrypt files on Linux]
+- [MacOS Sonoma kbfs finder integration]
 
 <!--
   Reference
@@ -188,3 +213,4 @@ sudo xattr -dr 'com.apple.quarantine' '/Library/Filesystems/kbfuse.fs'
 <!-- Others -->
 [how to use keybase to encrypt files on linux]: https://www.addictivetips.com/ubuntu-linux-tips/keybase-encrypt-files-linux/
 [linux guide]: https://book.keybase.io/guides/linux
+[MacOS Sonoma kbfs finder integration]: https://github.com/keybase/client/issues/25951#issuecomment-1922297406
