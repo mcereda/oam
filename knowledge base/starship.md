@@ -13,13 +13,14 @@ Fast and customizable prompt for most shells.
 
 ```sh
 # Installation.
+apt install 'starship'
 brew install 'starship'
 zypper in 'starship'
 
 # Start when the shell starts.
 eval "$(starship init bash)" | tee -a ~'/.bashrc'
 eval "$(starship init zsh)" | tee -a ~'/.zshrc'
-echo 'starship init fish | source' | tee -a ~'/.config/fish/config.fish'
+mkdir -p ~'/.config/fish' && echo 'starship init fish | source' | tee -a ~'/.config/fish/config.fish'
 
 # Initialize starship configuration.
 mkdir -p ~'/.config' && touch ~'/.config/starship.toml'

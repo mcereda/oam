@@ -2,33 +2,29 @@
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
 
 ## TL;DR
 
 ```sh
 # Installation.
-brew install --cask 'font-roboto-mono-nerd-font'
-brew install --cask 'font-hack-nerd-font'
+# No single collection, look them up and add each one.
+apt install 'fonts-jetbrains-mono' 'fonts-hack'
+brew install --cask 'font-roboto-mono-nerd-font' 'font-hack-nerd-font'
 ```
 
 ## Further readings
 
 - [Website]
-
-## Sources
-
-All the references in the [further readings] section, plus the following:
-
-- [Github]
+- [Codebase]
+- [Downloads]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
-[further readings]: #further-readings
-
 <!-- Upstream -->
-[github]: https://github.com/ryanoasis/nerd-fonts
-[website]: https://www.nerdfonts.com/
+[Codebase]: https://github.com/ryanoasis/nerd-fonts
+[Downloads]: https://www.nerdfonts.com/font-downloads
+[Website]: https://www.nerdfonts.com/
