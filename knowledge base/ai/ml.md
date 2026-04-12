@@ -25,14 +25,19 @@ Data quality matters more than quantity.<br/>
 Microsoft proved this with Phi-3, training the model on _textbook-quality_ data (both from the Internet and synthetic)
 and getting a 3.8B model that competes with larger models.
 
-ML models operate by a logic that is learned through experience, and not explicitly programmed into them.<br/>
+ML models operate by a logic that is learned through experience, and **not** _explicitly_ programmed into them.<br/>
 They train by analyzing data and predicting the next result; prediction errors are calculated, and the algorithm is
 adjusted to reduce the possibility of errors.<br/>
-The training process is repeated until the model is accurate.
+The training process is repeated until the model is accurate _enough_.
 
-ML works through mathematical logic. Relevant characteristics (A.K.A. _features_) of each data point **must** be
+ML works through _mathematical_ logic. Relevant characteristics (A.K.A. _features_) of each data point **must** be
 expressed numerically, so that the data can be fed into the mathematical algorithm that will _learn_ to map a given
 input to the desired output.
+
+While traditional software is _deterministic_, AI is _probabilistic_ (A.K.A. _**non**-deterministic_).<br/>
+AI is mostly _context and prompt dependent_, _unpredictable_, and gives _different_ results for the same input.
+Reliably testing such results is much harder and requires _broad evaluation_ that is often automated using AI. This
+easily becomes a doom loop.
 
 ML is mainly divided into the following types:
 
@@ -147,6 +152,7 @@ systems.
 ## Further readings
 
 - [Mixtral of Experts]
+- [What is AI Technical Debt? Key Risks for Machine Learning Projects | IBM Technology]
 
 ### Sources
 
@@ -180,3 +186,4 @@ systems.
 [Machine learning, explained]: https://mitsloan.mit.edu/ideas-made-to-matter/machine-learning-explained
 [Mixtral of Experts]: https://arxiv.org/abs/2401.04088
 [Oracle / What is machine learning?]: https://www.oracle.com/artificial-intelligence/machine-learning/what-is-machine-learning/
+[What is AI Technical Debt? Key Risks for Machine Learning Projects | IBM Technology]: https://www.youtube.com/watch?v=DgXV8QSlI4U
