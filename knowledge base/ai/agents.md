@@ -55,9 +55,9 @@ Main concerns:
 
 - LLMs find it difficult, if not impossible, to distinguish data from instructions.<br/>
   Every part of the data could be used for prompt injection, and lead the agent astray.
-- Traditional software is _deterministic_, AI is _probabilistic_.<br/>
-  Results will vary given the same input.
-- [Concerns regarding LLMs][lms / concerns], since those are at the wheel for all the agents' decisions.
+- [Machine learning] models (and hence LLMs) are _probabilistic_ (_non_-deterministic), with the _context dependency_
+  and the _unpredictability_ that come with it.
+- All the other [concerns coming from LLMs][lms / concerns], since those are at the wheel for all the agents' decisions.
 
 Errors compound fast, bringing down the probability of success for each step an agent needs to take.<br/>
 E.g., consider an agent that is 95% accurate per step; any 30-steps tasks it does is going to be successful only about
@@ -289,13 +289,14 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 
 <!-- Knowledge base -->
 [AI]: README.md
-[Claude Code]: claude/claude%20code.md
 [Claude Code / MCP servers in sub-agents]: claude/claude%20code.md#mcp-servers-in-sub-agents
-[MCP]: mcp.md
+[Claude Code]: claude/claude%20code.md
 [Gemini CLI]: gemini/cli.md
 [LMs / Concerns]: lms.md#concerns
 [LMs / LLMs]: lms.md#large-language-models
 [LMs / Reasoning]: lms.md#reasoning
+[Machine learning]: ml.md
+[MCP]: mcp.md
 [OpenCode]: opencode.md
 [Pi]: pi.md
 
