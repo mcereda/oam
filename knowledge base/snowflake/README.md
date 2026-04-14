@@ -515,7 +515,7 @@ Procedure:
    openssl rsa -inform 'PEM' -in "$HOME/.ssh/snowflake.pem" -pubout -outform 'PEM' -out "$HOME/.ssh/snowflake.pub"
    ```
 
-1. Make sure the private key uses the PKCS#8 format.
+1. Make sure the **private** key uses the PKCS#8 format.
 
    ```sh
    # unencrypted
@@ -527,17 +527,31 @@ Procedure:
      -topk8 -v2 'aes-256-cbc'
    ```
 
-1. Assign the key to one's Snowflake user.
+1. Configure the **public** key for the Snowflake user that needs it.
+
+   > [!important]
+   > Snowflake expects raw base64 SPKI content. Strip the PEM headers from the key.
+   >
+   > <details style='padding: 0 0 1rem 1rem'>
+   >
+   > ```sh
+   > sed -E '/^\-+.* PUBLIC KEY-+/d' "$HOME/.ssh/snowflake.pub" \
+   > | tr -d '\n' \
+   > | pbcopy
+   > ```
+   >
+   > </details>
 
    ```sql
    ALTER USER jsmith SET RSA_PUBLIC_KEY='MIIBIjANBgkqh...';
    ```
 
-1. Configure tools to use the key.
+1. Configure tools to use the **private** key.
 
    ```sh
    export SNOWFLAKE_PRIVATE_KEY="$(cat ~/.ssh/snowflake.p8)"
-   export SNOWFLAKE_PRIVATE_KEY_PATH="$HOME/.ssh/snowflake.pem" SNOWFLAKE_PRIVATE_KEY_PASSPHRASE='somePassword'
+   # alternatively:
+   # export SNOWFLAKE_PRIVATE_KEY_PATH="$HOME/.ssh/snowflake.pem" SNOWFLAKE_PRIVATE_KEY_PASSPHRASE='somePassword'
    snow connection add -n 'jwt' --authenticator 'SNOWFLAKE_JWT' --private-key-file "$HOME/.ssh/snowflake.p8"
    snow connection test -x --account 'xy12345' --username 'MY_SERVICE_USER' \
      --authenticator 'SNOWFLAKE_JWT' --private-key-file "$HOME/.ssh/snowflake.p8"
