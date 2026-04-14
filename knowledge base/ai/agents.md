@@ -1,9 +1,10 @@
 # AI agents
 
-[AI]-enabled systems or applications capable of _autonomously_ performing tasks of various complexity levels by
-designing workflows and using the tools made available to them.
+[AI]-enabled systems capable of _autonomously_ performing tasks of various complexity levels by designing workflows and
+using the tools made available to them.
 
 1. [TL;DR](#tldr)
+1. [Harnesses](#harnesses)
 1. [Context and memory](#context-and-memory)
    1. [AGENTS.md](#agentsmd)
 1. [Skills](#skills)
@@ -19,12 +20,13 @@ designing workflows and using the tools made available to them.
 
 ## TL;DR
 
-[AI] agents run [LLMs][lms / llms] _**in [ReAct loops][lms / reasoning]**_ to:
+[AI] agents are composed by an [LLM][lms / llms] and an [_harness_][harnesses].<br/>
+They use the LLM _**in [ReAct loops][lms / reasoning]**_ to:
 
-1. _Perceive_: comprehend inputs (user prompts or other inputs).
+1. _Perceive_: comprehend inputs (user prompts, or other inputs provided by the harness).
 1. _Reason_: design their own workflow accordingly.
-1. _Act_: utilize the tools available to them to execute tasks from the design.
-1. \[eventually] _Observe_: analyze results.
+1. _Act_: leverage the tools available to them, to execute tasks from the workflow.
+1. _Observe_: analyze results.
 
 ```mermaid
 stateDiagram-v2
@@ -44,7 +46,8 @@ stateDiagram-v2
   ifState --> [*]: outcome achieved
 ```
 
-Agent _harnesses_ are the runtime and rules surrounding agents that make the loop reliable.<br/>
+Agent _harnesses_ provide the LLM with a runtime environment, and try to enforce rules to make the looped
+execution more reliable.<br/>
 They define how one wires tools, where one writes artifacts, how one logs/traces behavior, how one manages memory, and
 how one prevents the agent from drowning in context.
 
@@ -85,10 +88,40 @@ Best practices:
   context instead of helping.
   If specific information is in the codebase, it probably does not need to be in the context file.
 
+## Harnesses
+
+Refer to:
+
+- [Harness engineering for coding agent users].
+- [How to Build an Agent].
+- [The Emperor Has No Clothes: How to Code Claude Code in 200 Lines of Code].
+
+Also see [How does Claude Code _actually_ work? | Theo - t3.gg].
+
+Agent harnesses give an [LLM][LMs / LLMs] the tools it needs to build its own context, to identify where problems
+are or what needs to be done, and to make the required changes.
+
+Mechanically, a harness:
+
+1. Initializes the session with a system prompt. This lists available tools, permissions, and context files (e.g.
+   `AGENTS.md` and memory files).
+1. Sends the assembled context and user prompt to the LLM.
+1. Parses the LLM response for tool invocations.
+1. Executes tools (file reads, shell commands, API calls, etc.) when requested by the LLM.
+1. Appends the tool execution results back to the conversation and asks the LLM to continue.
+1. Loops back to point 2 until a task is complete, or the LLM produces no further tool calls.
+
+When a decision requires authorization (e.g. before calling a tool), the harness pauses and prompts the user for consent
+before proceeding.
+
+Good harnesses also handle context budget management by summarizing or compacting older turns before the conversation
+hits the context limit and emitting structured traces for observability.
+
 ## Context and memory
 
 Refer to:
 
+- Notes about [LMs' context window][lms / context window].
 - [agentsmd/agents.md].
 - [The Complete Guide to AI Agent Memory Files (CLAUDE.md, AGENTS.md, and Beyond)].
 - [Comparing File Systems and Databases for Effective AI Agent Memory Management].
@@ -99,7 +132,9 @@ This prevents them from learning from interactions, and dooms them to repeat mis
 They do have _short-term memory_ in the form of a session's context window, available to the model while it generates
 responses.<br/>
 This memory is volatile. Once a session ends, or its conversation thread ends or exceeds the model's context window,
-that acquired data fades out.
+that acquired data fades out.<br/>
+The larger the context grows, the more the LLM's attention degrades. Information gets lost in the middle, and recall
+quality drops. Frontier models reduce this issue by training specifically for long contexts.
 
 To have a _resemblance_ of long-term memory, they can write notes down and load them in later sessions.<br/>
 Agents might save learnings, patterns, and insights gained during active sessions in local files (like _memory files_ or
@@ -135,13 +170,13 @@ A collaboration of AI vendors is now trying to reduce this fragmentation by usin
 
 ### AGENTS.md
 
-All frameworks shall use just one `AGENTS.md` file, and it shall be located in a project's root.<br/>
-It shall be standard Markdown, with no special schema, nor YAML frontmatter required.<br/>
-The closest `AGENTS.md` to the file being edited shall take precedence, and explicit user prompts shall override
-previous instructions.
+`AGENTS.md` files are standard Markdown, with no special schema or YAML frontmatter required.<br/>
+Each directory can have its own `AGENTS.md`, in a gitignore-like hierarchical fashion. The closest one to the file
+being edited takes precedence. Explicit user prompts override any file instructions.
 
-README files shall be directed to humans, `AGENTS.md` shall be the universal agent briefing document, and `CLAUDE.md`
-and the rest of the vendor-specific files shall only add vendor-specific instructions on top of them.
+README files shall be directed to humans, and `AGENTS.md` shall be the universal agent briefing document.<br/>
+Vendor-specific files, like `CLAUDE.md`, may layer additional, agent-specific instructions on top. This is a harness'
+convention, not part of the AGENTS.md specification.
 
 ## Skills
 
@@ -176,9 +211,9 @@ than technical safeguards and leaving users to fend for themselves.
 For specific areas of expertise, some human workers could be replaced for a fraction of the costs.<br/>
 Many employers already proved they are willing to jump at this opportunity as soon as it will present itself, with
 complete disregard of the current employees enacting those functions (e.g. personal assistants, junior coders).<br/>
-As of February 2026, agents did not achieve expected results more than 95% of the times. Layoffs backfired. Companies
-like Klarna and Duolingo, which laid off lots of their employees, received backlash and already started re-hiring
-humans.<br/>
+As of February 2026, ~95% of enterprise AI pilots failed to deliver expected ROI, and 76% of agentic deployments were
+considered a failure generally. Layoffs backfired. Klarna replaced ~700 customer service workers with AI, saw customer
+satisfaction drop and began re-hiring humans. Duolingo shed contractors and has not reversed course.<br/>
 See also [Remote Labor Index: Measuring AI Automation of Remote Work] on this.
 
 People are experiencing what seems to be a new form of FOMO on steroids.<br/>
@@ -281,11 +316,17 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 - [Writing a good CLAUDE.md]
 - [The Claude Skills I Actually Use for DevOps]
 - [Why MCP Deprecated SSE and Went with Streamable HTTP]
+- [Harness engineering for coding agent users]
+- [How to Build an Agent]
+- [The Emperor Has No Clothes: How to Code Claude Code in 200 Lines of Code]
 
 <!--
   Reference
   ═╬═Time══
   -->
+
+<!-- In-article sections -->
+[Harnesses]: #harnesses
 
 <!-- Knowledge base -->
 [AI]: README.md
@@ -293,6 +334,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [Claude Code]: claude/claude%20code.md
 [Gemini CLI]: gemini/cli.md
 [LMs / Concerns]: lms.md#concerns
+[LMs / Context window]: lms.md#context-window
 [LMs / LLMs]: lms.md#large-language-models
 [LMs / Reasoning]: lms.md#reasoning
 [Machine learning]: ml.md
@@ -314,7 +356,10 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [Create custom subagents]: https://code.claude.com/docs/en/sub-agents
 [Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?]: https://arxiv.org/abs/2602.11988
 [Forget the Hype: Agents are Loops]: https://dev.to/cloudx/forget-the-hype-agents-are-loops-1n3i
+[Harness engineering for coding agent users]: https://martinfowler.com/articles/harness-engineering.html
 [How a Single Email Turned My ClawdBot Into a Data Leak]: https://medium.com/@peltomakiw/how-a-single-email-turned-my-clawdbot-into-a-data-leak-1058792e783a
+[How does Claude Code _actually_ work? | Theo - t3.gg]: https://www.youtube.com/watch?v=I82j7AzMU80
+[How to Build an Agent]: https://ampcode.com/notes/how-to-build-an-agent
 [karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
 [MemGPT]: https://arxiv.org/abs/2310.08560
 [moltbot security situation is insane]: https://www.youtube.com/watch?v=kSno1-xOjwI
@@ -332,6 +377,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [The Agentic Loop, Explained: What Every PM Should Know About How AI Agents Actually Work]: https://www.ikangai.com/the-agentic-loop-explained-what-every-pm-should-know-about-how-ai-agents-actually-work/
 [The Claude Skills I Actually Use for DevOps]: https://www.pulumi.com/blog/top-8-claude-skills-devops-2026/
 [The Complete Guide to AI Agent Memory Files (CLAUDE.md, AGENTS.md, and Beyond)]: https://medium.com/data-science-collective/the-complete-guide-to-ai-agent-memory-files-claude-md-agents-md-and-beyond-49ea0df5c5a9
+[The Emperor Has No Clothes: How to Code Claude Code in 200 Lines of Code]: https://www.mihaileric.com/The-Emperor-Has-No-Clothes/
 [Token Anxiety]: https://writing.nikunjk.com/p/token-anxiety
 [TotalRecall]: https://github.com/xaitax/TotalRecall
 [Trust No AI: Prompt Injection Along The CIA Security Triad]: https://arxiv.org/pdf/2412.06090

@@ -47,9 +47,9 @@ This allows LMs to predict the **likelihood** that a given token will follow _a 
 capability is fundamental for tasks that require understanding the context and meaning of text, enabling them to
 generate more text that is contextually appropriate and coherent. This capability can be extended to more complex
 tasks.<br/>
-The above mechanism is fundamentally the same for all models in history, whether the model had few weights (like the
-first ones in 1985) or trillions of them (as modern LLMs do). Only the depth and richness of the learned representations
-change.
+The above objective is fundamentally the same for all models in history, whether the model had few weights (like early
+recurrent networks from the late 1980s) or trillions of them (as modern LLMs do). Only the depth and richness of the
+learned representations change.
 
 Current Language Models leverage _transformers_ to fit tokens together across layers, progressively translating
 ambiguous natural language into increasingly precise internal representations.
@@ -415,8 +415,9 @@ maximum size of documents or code samples that it can process at once.
 
 Generally, increasing an LLM's context size increases accuracy and coherent responses, lowers hallucinations, allows for
 longer conversations, and improves analysis of longer sequences of data.<br/>
-Larger windows require more computational resources (especially vRAM), and can overwhelm the model pushing it to take
-cognitive shortcuts. This potentially increases a model's vulnerability to manipulation.
+Larger windows require more computational resources (especially vRAM), slow down inference, and can **overwhelm** the
+model, pushing it to take cognitive shortcuts. This potentially increases a model's vulnerability to manipulation.<br/>
+Refer to [Context Rot: How Increasing Input Tokens Impacts LLM Performance] on this.
 
 When sending messages to a model, one is really sending **the whole context** up to the current point in the
 conversation (the message history, documents, and all).
@@ -578,6 +579,7 @@ Refer:
 [Accelerating Large Language Model Decoding with Speculative Sampling]: https://arxiv.org/abs/2302.01318
 [An Introduction to Speculative Decoding for Reducing Latency in AI Inference]: https://developer.nvidia.com/blog/an-introduction-to-speculative-decoding-for-reducing-latency-in-ai-inference/
 [ChatGPT]: https://chatgpt.com/
+[Context Rot: How Increasing Input Tokens Impacts LLM Performance]: https://www.trychroma.com/research/context-rot
 [Continual Learning: How AI Models Stay Smarter Over Time]: https://blog.premai.io/continual-learning-how-ai-models-stay-smarter-over-time/
 [Copilot]: https://copilot.microsoft.com/
 [Data Distillation: 10x Smaller Models, 10x Faster Inference]: https://blog.premai.io/data-distillation-10x-smaller-models-10x-faster-inference/
