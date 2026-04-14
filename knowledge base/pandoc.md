@@ -68,6 +68,7 @@ pandoc -r 'html' -w 'markdown' 'https://www.fsf.org'
 pandoc --from 'markdown' --write 'docx' 'input.md'
 pandoc --read 'markdown' --to 'rtf' 'input.md'
 pandoc -o 'output.tex' 'input.txt'
+pandoc 'adr-012.md' -o 'adr-012.docx'
 
 # By default, pandoc produces document fragments.
 # Use the '-s', '--standalone' option to produce a standalone document.
