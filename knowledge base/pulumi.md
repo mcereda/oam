@@ -753,6 +753,27 @@ Use `ec2Instance.tags.apply(t => t?.Name)` instead.
 
 </details>
 
+`Output.apply()` callbacks inside a `ComponentResource` constructor must guard against `undefined` inputs.<br/>
+Pulumi runs **every** constructor on every `pulumi up`, even for resources **outside** of the targeted scope. Resources
+that do exist in code, but are absent from state (or excluded by `-t`) resolve their outputs to `undefined` at
+runtime. A callback that blindly calls `.replace()` or similar on `undefined` throws a `TypeError`, which propagates
+through Pulumi's resource graph and causes a `RangeError: Invalid string length` in the error formatter, ending up
+masking the real error.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+Always guard callbacks defensively:
+
+```ts
+// BAD: crashes with TypeError when pem resolves to undefined (e.g. during a targeted pulumi up)
+pem.apply((k: string) => k.replace('-----BEGIN PUBLIC KEY-----\n', ''))
+
+// GOOD: return the value as-is when unknown
+pem.apply((k: string) => k ? k.replace('-----BEGIN PUBLIC KEY-----\n', '') : k)
+```
+
+</details>
+
 Use `pulumi.interpolate` for template literals.<br/>
 It lifts included outputs, but still returns `Output<string>` values, not a plain string.
 
