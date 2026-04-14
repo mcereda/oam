@@ -815,7 +815,18 @@ Refer to [Grafana MCP Server].
 
 Use the `permissions` field in a settings file to always _allow_, require Claude Code to _ask_, or _deny_ the use of
 specific tools.<br/>
-`deny` takes precedence over `ask`, which takes precedence over `allow`. The first matching rule **by category** wins.
+`deny` takes precedence over `ask`, which in turn takes precedence over `allow`. The first matching rule **by category**
+wins.
+
+Spaces matter. `Bash(ls *)` matches `ls -la` or `ls` _followed by a space_ and then anything, but will **not** match
+`ls` by itself, `lsof`, or other tools starting with it; `Bash(ls*)` matches **all** of them.<br/>
+Use multiple patterns to achieve exact matches, e.g. `Bash(ls)` and `Bash(ls *)` for `ls` and its options but **not**
+other tools which name matches partially.
+
+Paths are considered in `gitignore` fashion: `/Users/alice/file` is _relative to the project's root_, **not** absolute.
+Use `//` for the absolute root directory.<br/>
+The tilde character at the start of paths is expanded automatically to the user's home directory in gitignore fashion.
+This is confirmed as of 2026-04-14 for `Read`, `Edit`, `Write`, and `Bash` path patterns.
 
 > [!important]
 > MCP-related permission rule wildcards operate at the segment level (delimited by `__`), not character-by-character.
@@ -862,30 +873,30 @@ specific tools.<br/>
 
 </details>
 
-> [!tip]
-> Refine permissions using `PreToolUse` [hooks][using hooks].
->
-> <details style='padding: 0 0 1rem 1rem'>
->
-> ```json
-> {
->   "hooks": {
->     "PreToolUse": [
->       {
->         "matcher": "mcp__aws-cli__call_aws",
->         "hooks": [
->           {
->             "type": "command",
->             "command": "cmd=$(cat | jq -r 'if .cli_command | type == \"array\" then .cli_command[0] else .cli_command end'); [[ \"$cmd\" =~ ^aws[[:space:]]+[a-z-]+[[:space:]]+describe- ]] || { echo \"BLOCKED: only describe-* commands allowed\"; exit 2; }"
->           }
->         ]
->       }
->     ]
->   }
-> }
-> ```
->
-> </details>
+Refine permissions using `PreToolUse` [hooks][using hooks].<br/>
+`deny` and `ask` rules are **still** evaluated **after** a hook returns _allow_.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__aws-cli__call_aws",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=$(cat | jq -r 'if .cli_command | type == \"array\" then .cli_command[0] else .cli_command end'); [[ \"$cmd\" =~ ^aws[[:space:]]+[a-z-]+[[:space:]]+describe- ]] || { echo \"BLOCKED: only describe-* commands allowed\"; exit 2; }"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+</details>
 
 Leverage [Sandboxing][documentation / sandboxing] to provide filesystem and network isolation for tool execution.<br/>
 The sandboxed bash tool uses OS-level primitives to enforce defined boundaries upfront, and controls network access
@@ -1248,9 +1259,16 @@ Run commands at the end **of each response or session** by leveraging the `Stop`
 It fires **on every turn**, after Claude finishes responding, which could be noisy depending on the action.<br/>
 Use `Stop` hooks for broad post-work checks. It does catch brainstorming and research conversations.
 
+> [!important]
+> `Stop`'s `stdout` goes to debugging logs, not transcripts. Only `UserPromptSubmit` and `SessionStart` surface `stdout`
+> as context for the agent.
+
 Both prompt-based and agent-based hooks work **as gatekeepers** on `Stop` events, **not** as conversation
 injectors.<br/>
 They only return `{"ok": true/false, "reason": "..."}`, and only decide whether Claude should be allowed to stop.
+
+`SessionEnd` has matchers for why a session ended (e.g., `clear`, `resume`, `logout`, `prompt_input_exit`,
+`bypass_permissions_disabled`, others), but ends the REPL **before** the agent has the chance to act.
 
 > [!note]
 > There's currently no hook event that allows prompt or agent hooks just before exiting the REPL. `Ctrl+C` and `/exit`

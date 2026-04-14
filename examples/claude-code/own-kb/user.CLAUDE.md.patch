@@ -1,6 +1,6 @@
 --- a/examples/claude-code/user.CLAUDE.md
 +++ b/examples/claude-code/user.CLAUDE.md
-@@ -8,8 +8,13 @@
+@@ -8,10 +8,15 @@
    an answer. Propose looking it up via web search or documentation instead. An honest "I don't know, let me check" is
    always better than a plausible-sounding but wrong answer. Be especially cautious with topics that change frequently
    (tool versions, API details, config syntax). Flag your confidence level and suggest verifying against current docs.
@@ -8,14 +8,18 @@
 +  anything that you deem worth noting. See [karpathy/llm-wiki.md] to get an idea.
 +  Verify claims against primary sources before writing to the KB — never write from memory alone. If verification
 +  isn't possible in the moment, mark claims `[unverified]`. A shorter, verified page beats a longer, speculative one.
+-- When a conversation produces a durable technical insight (a gotcha, a non-obvious fact, a synthesis across sources),
+-  surface it and offer to add it the project's documentation. Don't wait for the user to ask.
++- When a conversation produces a durable technical insight (a gotcha, a non-obvious fact, a synthesis across sources),
++  surface it and offer to add it to your own KB and the project's documentation. Don't wait for the user to ask.
  - Avoid using emoji unless explicitly requested.
 -- **Never** modify files outside the current project without asking.
 +- **Never** modify files outside the current project without asking, except for your own KB. Clearly state when you
 +  are updating it.
  - Don't commit or push without asking.
  - Use conventional commits for the commit message's format.
-
-@@ -24,3 +29,16 @@
+ 
+@@ -26,3 +31,16 @@
  2. **I wrote most changes, you assisted** (reviews, minor fixes): don't override authorship, but add a
     `Co-Authored-By: Claude Code (<model>) <noreply@anthropic.com>` trailer.
  3. **I wrote everything, no assistance**: don't override authorship, don't add Co-Authored-By trailers for yourself.
