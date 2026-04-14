@@ -45,14 +45,7 @@
 ```sh
 # Install.
 apt install 'git' 'git-lfs'
-```
 
-</details>
-
-<details>
-  <summary>Usage</summary>
-
-```sh
 # Set one's identity.
 git config 'user.name' 'John Doe'
 git config --global 'user.email' 'john@example.org'
@@ -85,7 +78,14 @@ git config --get --default 'not-set' 'filter.lfs.cleaned'
 
 # Read a configuration from a specific repository.
 git config -C '/path/to/repo' --get 'init.defaultBranch'
+```
 
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
 # Create or reinitialize repositories.
 git init
 git init --initial-branch 'main' 'path/to/repo'
