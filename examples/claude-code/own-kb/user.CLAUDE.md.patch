@@ -8,17 +8,17 @@
 +  anything that you deem worth noting. See [karpathy/llm-wiki.md] to get an idea.
 +  Verify claims against primary sources before writing to the KB — never write from memory alone. If verification
 +  isn't possible in the moment, mark claims `[unverified]`. A shorter, verified page beats a longer, speculative one.
--- When a conversation produces a durable technical insight (a gotcha, a non-obvious fact, a synthesis across sources),
--  surface it and offer to add it the project's documentation. Don't wait for the user to ask.
-+- When a conversation produces a durable technical insight (a gotcha, a non-obvious fact, a synthesis across sources),
-+  surface it and offer to add it to your own KB and the project's documentation. Don't wait for the user to ask.
+-- At the end of every response that produced a durable technical insight (a gotcha, a non-obvious fact, a synthesis
+-  across sources), surface it and offer to add it the project's documentation. Don't wait for the user to ask.
++- At the end of every response that produced a durable technical insight (a gotcha, a non-obvious fact, a synthesis
++  across sources), surface it and offer to add it to your own KB and the project's documentation. Don't wait for the user to ask.
  - Avoid using emoji unless explicitly requested.
 -- **Never** modify files outside the current project without asking.
 +- **Never** modify files outside the current project without asking, except for your own KB. Clearly state when you
 +  are updating it.
  - Don't commit or push without asking.
  - Use conventional commits for the commit message's format.
- 
+
 @@ -26,3 +31,16 @@
  2. **I wrote most changes, you assisted** (reviews, minor fixes): don't override authorship, but add a
     `Co-Authored-By: Claude Code (<model>) <noreply@anthropic.com>` trailer.

@@ -1233,12 +1233,12 @@ runs only for `git` commands and `"Edit(*.ts)"` runs only for TypeScript files.
         ]
       }
     ],
-    "Stop": [
+    "UserPromptSubmit": [
       {
         "hooks": [
           {
-            "type": "agent",
-            "prompt": "Decision tree — answer each step in order, stop at the first LGTM.\n\n1. Did this conversation reveal an insight specific to this repository — not general Ansible/YAML/AWS/Python knowledge — such as a gotcha, convention, structural decision, or non-obvious behavior, whether through writing code or through investigation/discussion? No → respond 'LGTM'\n2. Were CLAUDE.md, CONTRIBUTING.md, or README.md modified via Edit or Write tool calls during this conversation to capture it? Yes → respond 'LGTM'\n3. Respond: 'Before wrapping up, update <filename> to document: <one-sentence description of the insight>'\n\nFile selection for step 3:\n- CONTRIBUTING.md — team conventions, workflow gotchas, naming patterns, development rules\n- README.md — repo usage, setup instructions, how to run things\n- CLAUDE.md — Claude-specific guidance, architecture context for the AI assistant"
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"At the end of your response, consider whether this turn produced a durable technical insight (a gotcha, non-obvious fact, or synthesis). If yes, surface it and offer to document it in the project docs if project-specific, and/or in a knowledge base if reusable across projects.\"}}'"
           }
         ]
       }
@@ -1256,7 +1256,8 @@ Consider these for action-specific gates like commits or deployments, and scopin
 Exiting the REPL does **not** trigger `TaskCompleted` hooks. It will **only** fire when a subagent task completes.
 
 Run commands at the end **of each response or session** by leveraging the `Stop` hook event.<br/>
-It fires **on every turn**, after Claude finishes responding, which could be noisy depending on the action.<br/>
+It fires **on every turn**, **after** Claude **finished** writing its response, which forces Claude to regenerate it
+from scratch and could be noisy depending on the action.<br/>
 Use `Stop` hooks for broad post-work checks. It does catch brainstorming and research conversations.
 
 > [!important]
@@ -1276,12 +1277,13 @@ They only return `{"ok": true/false, "reason": "..."}`, and only decide whether 
 > `SessionEnd` prompt or agent hooks are not yet supported **outside** of the REPL. The closest alternative is using
 > `Stop`, even though this generates noise and ends up eating lots of tokens.
 
-`UserPromptSubmit` hooks fire **before** new work starts.
+`UserPromptSubmit` hooks fire **before** Claude starts thinking. It can inject `additionalContext` to shape the whole
+response from the start.
 
-Validate Claude Code accepted the hook by using the `/hooks` command.
+Force a configuration reload and validate Claude Code accepted the hook by using the `/hooks` command.
 
 > [!caution]
-> Beware of prompts that can start loops. Consider asking Claude to detect and refine them.
+> Beware of prompts that can end up in loops. Consider asking Claude to detect and refine them.
 
 Test the hook by asking Claude to do something that should trigger it.
 

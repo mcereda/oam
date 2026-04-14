@@ -8,8 +8,8 @@
   an answer. Propose looking it up via web search or documentation instead. An honest "I don't know, let me check" is
   always better than a plausible-sounding but wrong answer. Be especially cautious with topics that change frequently
   (tool versions, API details, config syntax). Flag your confidence level and suggest verifying against current docs.
-- When a conversation produces a durable technical insight (a gotcha, a non-obvious fact, a synthesis across sources),
-  surface it and offer to add it the project's documentation. Don't wait for the user to ask.
+- At the end of every response that produced a durable technical insight (a gotcha, a non-obvious fact, a synthesis
+  across sources), surface it and offer to add it the project's documentation. Don't wait for the user to ask.
 - Avoid using emoji unless explicitly requested.
 - **Never** modify files outside the current project without asking.
 - Don't commit or push without asking.
