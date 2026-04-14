@@ -192,9 +192,15 @@ pulumi import 'aws:secretsmanager/secret:Secret' 'example' 'arn:aws:secretsmanag
 pulumi import 'aws:secretsmanager/secretVersion:SecretVersion' 'example' 'arn:aws:secretsmanager:us-east-1:123456789012:secret:example-123456|ABCDEF01-2345-6789-ABCD-EF0123456789'
 pulumi import 'aws:vpc/securityGroupEgressRule:SecurityGroupEgressRule' 'allowAll' 'sgr-02108b27edd666983'
 pulumi import 'aws:vpc/securityGroupIngressRule:SecurityGroupIngressRule' 'allowAll' 'sgr-02108b27edd666984'
+
+
+# import children resources
+# 1. get the parent's urn
+pulumi stack --show-urns | grep "serviceUser.*someServiceUser"
+# 2. import with `--parent`
 pulumi import \
 	'snowflake:index/userProgrammaticAccessToken:UserProgrammaticAccessToken' 'someServiceUser' 'SOME_SERVICE_PAT' \
-	--parent 'urn:pulumi:dev::access::exampleorg:StandardSnowflakeServiceAccount$snowflake:index/serviceUser:ServiceUser::someServiceUser'
+	--parent 'urn:pulumi:dev::access::exampleOrg:StandardSnowflakeServiceAccount$snowflake:index/serviceUser:ServiceUser::someServiceUser'
 
 # Import resources in block
 #  1. pulumi preview --import-file 'import.json'

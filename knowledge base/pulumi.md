@@ -383,7 +383,7 @@ new aws.iam.Role(
 
 </details>
 
-<details>
+<details style='padding: 0 0 1rem 0'>
   <summary>Real world use cases</summary>
 
 ```sh
@@ -593,7 +593,6 @@ pulumi.all([
 ```
 
 </details>
-<br/>
 
 Commands comparison:
 
@@ -610,7 +609,6 @@ Commands comparison:
 | `pulumi stack export`           | `terraform state pull`                          |
 | `pulumi state delete …`         | `terraform state rm …`                          |
 
-<br/>
 Learning resources:
 
 - [Blog]
@@ -781,7 +779,10 @@ pulumi.all([host, ver]).apply(([h, v]) => `https://${h}/api/${v}`)
 
 </details>
 
-Use `pulumi.jsonStringify()` in place of `JSON.stringify()`.
+Use `pulumi.jsonStringify()` in place of `JSON.stringify()`.<br/>
+It accepts `Output<T>` values directly, avoiding the need of using the `.apply()` wrapper, and **propagates secret
+marking automatically** (if any input of type `Output` was marked as secret, the resulting `Output<string>` is too).
+Using `.apply(JSON.stringify)` on a non-secret `Output` does **not** propagate secret marking and reveals the value.
 
 <details style='padding: 0 0 1rem 1rem'>
 
