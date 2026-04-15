@@ -559,3 +559,16 @@ $$;
 -- Show running queries
 SELECT * from pg_stat_activity where usename = 'monica';
 SELECT pid,usename,client_addr,query_start,query from pg_stat_activity where usename = 'john';
+
+
+-- Rename a DB
+-- One cannot rename the same DB they are connected to
+-- Only that DB's owner or a superuser can rename it; non-superuser owners must also have the `CREATEDB` privilege
+-- 1. Connect to a different database (e.g., `postgres`)
+-- 2. Terminate all active connections to the target database
+SELECT pg_terminate_backend(pg_stat_activity.pid)
+FROM pg_stat_activity
+WHERE datname = 'old_db_name'
+  AND pid <> pg_backend_pid();
+-- 3. Rename the target DB
+ALTER DATABASE old_db_name RENAME TO new_db_name;
