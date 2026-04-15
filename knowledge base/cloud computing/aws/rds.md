@@ -112,28 +112,110 @@ Maintenance windows are paused when their DB instances are stopped.
   <summary>CLI commands</summary>
 
 ```sh
-# Show details of RDS instances.
+# Inspect instances.
 aws rds describe-db-instances
-aws rds describe-db-instances --output 'json' --query "DBInstances[?(DBInstanceIdentifier=='master-prod')]"
-aws rds describe-db-instances --db-instance-identifier 'some-db-instance' \
-  --query 'DBInstances[0].InstanceCreateTime' --output 'text'
-aws rds describe-db-instances --db-instance-identifier 'some-db-instance' --output 'text' \
-  --query 'DBInstances[0]|join(``,[`postgresql://`,MasterUsername,`@`,Endpoint.Address,to_string(Endpoint.Port),`/`,DBname||`postgres`])'
+aws rds describe-db-instances --db-instance-identifier 'some-db-instance'
+aws rds describe-db-instances --output 'json' --query "DBInstances[?(DBInstanceIdentifier=='some-db-instance')]"
+aws rds describe-db-instances --db-instance-identifier 'some-db-instance' --output 'yaml' \
+  --query 'DBInstances[].{"DBInstanceStatus":DBInstanceStatus,"PendingModifiedValues":PendingModifiedValues}'
+aws rds describe-db-instances … --query 'DBInstances[0].InstanceCreateTime' --output 'text'
+aws rds describe-db-instances … --query 'DBInstances[0].Endpoint|join(`:`,[Address,to_string(Port)])' --output 'text'
+aws rds describe-db-instances … --output 'text' \
+  --query '
+    DBInstances[0]
+    | join(``, [
+        `postgresql://`,
+        MasterUsername, `:`, `SOME-PASSWORD`,
+        `@`, Endpoint.Address, `:`, to_string(Endpoint.Port),
+        `/`, DBName || `postgres`
+      ])
+  '
+
+# Wait for instances to become available.
+aws rds wait db-instance-available --db-instance-identifier 'some-db-instance'
+aws rds wait db-instance-available \
+  --filters 'Name=db-instance-id,Values=some-instance,some-other-instance'
+
 
 # Enable Performance Insights.
-aws rds modify-db-cluster --db-cluster-identifier 'staging-cluster' \
+aws rds modify-db-cluster --db-cluster-identifier 'some-cluster' \
   --enable-performance-insights --performance-insights-retention-period '93' \
   --database-insights-mode 'standard'
 
 
-# Show Parameter Groups.
+# Inspect Parameter Groups.
 aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15'
+aws rds describe-db-parameters … --query "Parameters[?ParameterName=='shared_preload_libraries']" --output 'table'
+aws rds describe-db-parameters … --output 'json' --query "Parameters[?ApplyType!='dynamic']"
 
 # Create Parameter Groups.
-aws rds create-db-parameter-group --db-parameter-group-name 'pg15-source-transport-group' \
-  --db-parameter-group-family 'postgres15' --description 'Parameter group with transport parameters enabled'
+aws rds create-db-parameter-group --db-parameter-group-name 'some-parameter-group' \
+  --db-parameter-group-family 'postgres15' --description 'Some description'
 
 # Modify Parameter Groups.
+aws rds modify-db-parameter-group --db-parameter-group-name 'some-parameter-group' --parameters \
+    'ParameterName=shared_preload_libraries,ParameterValue="pg_stat_statements",ApplyMethod=pending-reboot'
+
+
+# Create snapshots.
+aws rds create-db-snapshot \
+  --db-instance-identifier 'some-db-instance' --db-snapshot-identifier 'some-db-snapshot'
+
+# Export snapshots to S3.
+aws rds start-export-task \
+  --export-task-identifier 'some-export-task' \
+  --source-arn 'arn:aws:rds:eu-west-1:012345678901:snapshot:some-db-snapshot' \
+  --s3-bucket-name 'some-bucket' --s3-prefix 'rds' \
+  --iam-role-arn 'arn:aws:iam::012345678901:role/SomeRdsS3Exporter' \
+  --kms-key-id 'arn:aws:kms:eu-west-1:012345678901:key/some-key-id'
+aws rds describe-export-tasks
+aws rds describe-export-tasks --export-task-identifier 'some-export-task'
+aws rds describe-export-tasks --query 'ExportTasks[].WarningMessage' --output 'json'
+aws rds cancel-export-task --export-task-identifier 'some-export-task'
+
+
+# Show available upgrade targets for a given DB engine version.
+aws rds describe-db-engine-versions --engine 'postgres' --engine-version '13' \
+  --query 'DBEngineVersions[*].ValidUpgradeTarget[*]'
+aws rds describe-db-engine-versions --engine 'postgres' --engine-version '13.12' \
+  --query 'DBEngineVersions[*].ValidUpgradeTarget[*].{AutoUpgrade:AutoUpgrade,EngineVersion:EngineVersion}[?AutoUpgrade==`true`][]'
+
+
+# Restore instances from snapshots.
+aws rds restore-db-instance-from-db-snapshot \
+  --db-instance-identifier 'some-new-db-instance' --db-snapshot-identifier 'some-db-snapshot'
+
+# Restore instances to a point in time.
+aws rds restore-db-instance-to-point-in-time \
+  --source-db-instance-identifier 'some-db-instance' \
+  --target-db-instance-identifier 'some-new-db-instance' \
+  --use-latest-restorable-time
+aws rds restore-db-instance-to-point-in-time \
+  --source-db-instance-identifier 'some-db-instance' \
+  --target-db-instance-identifier 'some-new-db-instance' \
+  --restore-time 'YYYY-MM-DDTHH:MM:SS+00:00'
+
+# Modify instances.
+aws rds modify-db-instance --db-instance-identifier 'some-db-instance' --storage-type 'gp3'
+aws rds modify-db-instance … --db-instance-class 'db.t4g.medium' --engine-version '14.20' --apply-immediately
+aws rds modify-db-instance … --engine-version '14.0' --allow-major-version-upgrade --no-apply-immediately
+aws rds modify-db-instance … --master-user-password 'new-password' ---backup-retention-period '0'
+aws rds modify-db-instance … --db-instance-identifier 'some-instance-id' --new-db-instance-identifier 'new-instance-id'
+
+# Delete instances.
+aws rds delete-db-instance --db-instance-identifier 'some-db-instance' \
+  --skip-final-snapshot --delete-automated-backups --no-cli-pager
+```
+
+</details>
+
+<details>
+  <summary>Real-world use cases</summary>
+
+```sh
+# Create and configure a parameter group for pg_transport.
+aws rds create-db-parameter-group --db-parameter-group-name 'pg15-source-transport-group' \
+  --db-parameter-group-family 'postgres15' --description 'Parameter group with transport parameters enabled'
 aws rds modify-db-parameter-group --db-parameter-group-name 'pg15-source-transport-group' \
   --parameters \
     'ParameterName=pg_transport.num_workers,ParameterValue=4,ApplyMethod=pending-reboot' \
@@ -142,48 +224,53 @@ aws rds modify-db-parameter-group --db-parameter-group-name 'pg15-source-transpo
     'ParameterName=shared_preload_libraries,ParameterValue="pg_stat_statements,pg_transport",ApplyMethod=pending-reboot' \
     'ParameterName=max_worker_processes,ParameterValue=24,ApplyMethod=pending-reboot'
 
-
-# Restore instances from snapshots.
-aws rds restore-db-instance-from-db-snapshot \
-  --db-instance-identifier 'myNewDbInstance' --db-snapshot-identifier 'myDbSnapshot'
-
-# Restore instances to point in time.
-aws rds restore-db-instance-to-point-in-time \
-  --target-db-instance-identifier 'myNewDbInstance' --source-db-instance-identifier 'oldDbInstance' \
-  --use-latest-restorable-time
-
-# Start export tasks.
-aws rds start-export-task \
-  --export-task-identifier 'db-finalSnapshot-2024' \
-  --source-arn 'arn:aws:rds:eu-west-1:012345678901:snapshot:db-prod-final-2024' \
-  --s3-bucket-name 'backups' \
-  --iam-role-arn 'arn:aws:iam::012345678901:role/CustomRdsS3Exporter' \
-  --kms-key-id 'arn:aws:kms:eu-west-1:012345678901:key/abcdef01-2345-6789-abcd-ef0123456789'
-
-# Get export tasks' status.
-aws rds describe-export-tasks
-aws rds describe-export-tasks --export-task-identifier 'my-snapshot-export'
-
-# Cancel export tasks.
-aws rds cancel-export-task --export-task-identifier 'my_export'
-
-
-# Change the storage type.
-aws rds modify-db-instance --db-instance-identifier 'instance-name' --storage-type 'gp3' --apply-immediately
-
-
-# Show available upgrade target versions for a given DB engine version.
-aws rds describe-db-engine-versions --engine 'postgres' --engine-version '13' \
-  --query 'DBEngineVersions[*].ValidUpgradeTarget[*]'
-aws rds describe-db-engine-versions --engine 'postgres' --engine-version '13.12' \
-  --query 'DBEngineVersions[*].ValidUpgradeTarget[*].{AutoUpgrade:AutoUpgrade,EngineVersion:EngineVersion}[?AutoUpgrade==`true`][]'
-
-# Start upgrading.
-# Requires downtime.
-aws rds modify-db-instance --db-instance-identifier 'my-db-instance' \
+# Upgrade engine version (minor).
+aws rds modify-db-instance --db-instance-identifier 'prod' --engine-version '14.20' --apply-immediately
+# Upgrade engine version (major). Requires downtime.
+aws rds modify-db-instance --db-instance-identifier 'stag' \
   --engine-version '14.15' --allow-major-version-upgrade --no-apply-immediately
-aws rds modify-db-instance --db-instance-identifier 'my-db-instance' \
-  --engine-version '14.20' --apply-immediately
+
+# Reset credentials.
+aws rds modify-db-instance --db-instance-identifier 'production-db' \
+  --master-user-password 'new-password' --apply-immediately
+
+# Rename an instance.
+aws rds modify-db-instance --apply-immediately \
+  --db-instance-identifier 'current-instance-id' \
+  --new-db-instance-identifier 'desired-instance-id'
+
+# Disable backups.
+aws rds modify-db-instance --db-instance-identifier 'awx-pitred' \
+  --backup-retention-period 0 --apply-immediately
+
+
+# Restore to a specific point in time.
+aws rds restore-db-instance-to-point-in-time \
+  --source-db-instance-identifier 'awx' --target-db-instance-identifier 'awx-pitred' \
+  --restore-time '2024-07-31T09:29:40+00:00'
+# … with explicit instance configuration.
+aws rds restore-db-instance-to-point-in-time \
+  --source-db-instance-identifier 'awx' --target-db-instance-identifier 'awx-pitred' \
+  --use-latest-restorable-time \
+  --db-instance-class 'db.m8g.xlarge' \
+  --no-multi-az --availability-zone 'eu-west-1a' \
+  --db-subnet-group-name 'default' --no-publicly-accessible \
+  --db-parameter-group-name 'postgresql14' --option-group-name 'default:postgres-14' \
+  --storage-type 'gp3' \
+  --no-dedicated-log-volume \
+  --no-auto-minor-version-upgrade \
+  --backup-retention-period '0' \
+  --no-deletion-protection
+
+# Restore from a snapshot.
+aws rds restore-db-instance-from-db-snapshot \
+  --db-instance-identifier 'awx-pitr-snapshot' \
+  --db-snapshot-identifier 'rds:awx-2024-07-30-14-15'
+
+
+# Delete a temporary instance without final snapshot.
+aws rds delete-db-instance --db-instance-identifier 'awx-pitred' \
+  --skip-final-snapshot --delete-automated-backups --no-cli-pager
 ```
 
 </details>
