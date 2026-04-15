@@ -3,6 +3,7 @@
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
+1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -50,7 +51,56 @@ aws ec2 describe-images … --query 'Images[1:4]'    # elements from 2nd to 5th
 aws ec2 describe-images … --query 'Images[5:9:2]'  # odd elements from 5th to 9th
 aws ec2 describe-images … --query 'Images[-3:]'    # the last 3 elements
 aws ec2 describe-images … --query 'Images[::-1]'   # all elements in reverse order
+
+# Build a string from multiple fields using join().
+# to_string() converts non-string values (e.g. port numbers) to strings.
+# `||` falls back to a default when a field is null.
+aws rds describe-db-instances --db-instance-identifier 'some-db-instance' --output 'text' \
+  --query '
+    DBInstances[0]
+    | join(``, [
+        `postgresql://`,
+        MasterUsername,
+        `@`,
+        Endpoint.Address,
+        `:`,
+        to_string(Endpoint.Port),
+        `/`,
+        DBName || `postgres`
+      ])
+  '
 ```
+
+## Gotchas
+
+Field names lookups are case-sensitive, exact matches.<br/>
+When a query silently returns `null`, check the exact casing of the field names against the raw `json` output first.
+
+`||` returns the right operand only when the left evaluates to `false` or `null`.<br/>
+Empty strings (`""`), empty arrays (`[]`), empty objects (`{}`), and zero (`0`) are **truthy** in JMESPath.
+
+String literals require **backticks**. Single and double quotes are not valid for literal values. They will produce a
+syntax error, or have unexpected behavior.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```sh
+aws … --query "[?DBInstanceStatus == \`available\`]"   # correct
+aws … --query "[?DBInstanceStatus == 'available']"     # wrong — syntax error
+```
+
+</details>
+
+The `join(delimiter, array)` expects **every** element to be a **string**.<br/>
+Wrap non-string values with `to_string()` explicitly.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```sh
+aws … --query 'join(`:`, [Endpoint.Address, to_string(Endpoint.Port)])'
+```
+
+</details>
 
 ## Further readings
 
