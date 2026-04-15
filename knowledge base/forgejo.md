@@ -39,7 +39,7 @@ FORGEJO____APP_NAME=Frogejo 🐸
 FORGEJO__repository__ENABLE_PUSH_CREATE_USER=true
 ```
 
-is equivalent to adding the following to the `app.ini` configuration file:
+Has the same result as adding the following to the `app.ini` configuration file:
 
 ```ini
 APP_NAME=Frogejo 🐸
@@ -58,15 +58,33 @@ Existing configuration values must be _**removed**_ by editing the configuration
 
 </details>
 
-<!-- Uncomment if used
 <details>
   <summary>Usage</summary>
 
 ```sh
+# Get help.
+forgejo help
+
+# Check the installation.
+forgejo doctor check --all --log-file '/tmp/doctor.log'
+
+# Flush queues.
+forgejo manager flush-queues
+
+# Gracefully restart.
+forgejo manager restart
+
+# Gracefully shut down.
+forgejo manager shutdown
+
+# Backup everything into a single zip file.
+# Only when everything is on a single file system and the instance is not busy.
+# Contains a copy of the database, though open bugs may introduce problems when re-injecting the SQL dump in a new
+# database.
+forgejo dump
 ```
 
 </details>
--->
 
 <!-- Uncomment if used
 <details>
