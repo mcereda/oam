@@ -252,6 +252,9 @@ git add . && git commit -m 'uncommitted' \
 git apply --check 'file.patch'
 git apply 'file.patch'
 
+# Preview the patched result to stdout without modifying files.
+patch -o - 'path/to/file' < 'file.patch'
+
 # Apply commits from a patch.
 git am 'file.patch'
 
@@ -728,7 +731,16 @@ Use `git apply` to apply a patch file to the current index:
 git apply 'file.patch'
 ```
 
-The changes from the patch are unstaged and no commits are created.<br/>
+The changes from the patch are unstaged and no commits are created.
+
+`git apply` has no stdout mode. Preview how a file would change after the patch without modifying it by using
+`patch -o -`:
+
+```sh
+# Works on both GNU and BSD versions of `patch`.
+patch -o - 'path/to/file' < 'file.patch'
+```
+
 To apply all commits from a patch, use `git am` on a patch created with `git format-patch`:
 
 ```sh
