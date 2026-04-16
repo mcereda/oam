@@ -79,14 +79,15 @@ They struggle with slow, ambiguous loops where feedback is delayed or political.
 
 Best practices:
 
-- Prefer employing **local** agents, possibly hooked up to **local** LLMs to keep the data private.
-- Consider limiting agent execution to containers or otherwise isolated environments, with only (limited) access to
-  what they _absolutely_ need.
-- Prefer **requiring** consent by agents when running them.
-- Prefer including **only minimal requirements** in context files (AGENTS.md).<br/>
+- Employ **local** agents, possibly hooked up to **local** LLMs to keep the data private.
+- Limit agent execution to containers or otherwise isolated environments, with only (limited) access to **exactly** what
+  they _absolutely_ need.
+- **Require** consent by agents when running them.
+- Include **only minimal requirements** in context files (AGENTS.md).<br/>
   Too much context ends up hurting the conversation. Including a lot of "don't do this or that" mostly poisons the
-  context instead of helping.
-  If specific information is in the codebase, it probably does not need to be in the context file.
+  context instead of helping.<br/>
+  If specific information is already in the codebase, it probably does **not** need to be in the context file and can
+  just be referenced or hinted at.
 
 ## Harnesses
 
@@ -141,7 +142,8 @@ Agents might save learnings, patterns, and insights gained during active session
 wikis), or other storage means like databases and vector stores.<br/>
 The concept has been explored in projects like [MemGPT] (self-editing tiered memory) and crystallized in write-ups like
 [karpathy/llm-wiki.md], but the pattern itself emerged from practitioners who were already putting agents in charge of
-their own project docs, memory files, and tool configurations.
+their own project docs, memory files, and tool configurations.<br/>
+See [Giving Claude its own knowledge base] for an example.
 
 Filesystem-based approaches are currently winning as an _interface_ because models already know how to list directories,
 grep for patterns, read ranges, and write artifacts.<br/>
@@ -301,6 +303,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 - [SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks]
 - [AI mistakes you're probably making]
 - [Create custom subagents]
+- [nousresearch/hermes-agent], [OpenClaw][openclaw/openclaw] alternative with built-in self-improving loop
 
 ### Sources
 
@@ -333,6 +336,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [Claude Code / MCP servers in sub-agents]: claude/claude%20code.md#mcp-servers-in-sub-agents
 [Claude Code]: claude/claude%20code.md
 [Gemini CLI]: gemini/cli.md
+[Giving Claude its own knowledge base]: claude/claude%20code.md#giving-claude-its-own-knowledge-base
 [LMs / Concerns]: lms.md#concerns
 [LMs / Context window]: lms.md#context-window
 [LMs / LLMs]: lms.md#large-language-models
@@ -363,6 +367,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
 [MemGPT]: https://arxiv.org/abs/2310.08560
 [moltbot security situation is insane]: https://www.youtube.com/watch?v=kSno1-xOjwI
+[nousresearch/hermes-agent]: https://github.com/nousresearch/hermes-agent
 [nullclaw/nullclaw]: https://github.com/nullclaw/nullclaw
 [obra/superpowers]: https://github.com/obra/superpowers
 [OpenClaw: Who are you?]: https://www.youtube.com/watch?v=hoeEclqW8Gs
