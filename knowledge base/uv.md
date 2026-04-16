@@ -26,15 +26,20 @@ pipx install 'uv'
 ```sh
 # Install applications.
 # Similar to `pipx install`.
-uv tool install 'ansible'
+uv tool install 'python-gitlab'
+uv tool install 'awxkit' --python '3.11' --managed-python
 
 # List installed applications.
 uv tool list
 
 # Run applications.
 # Similar to `pipx run`.
+# `uvx` is an alias for `uv tool run`
 uv tool run 'vllm'
-uvx 'vllm'          # alias for `uv tool run`
+uvx 'vllm'
+
+# Uninstall applications.
+uv tool uninstall 'python-gitlab'
 
 # Create virtual environments.
 uv venv '.venv'
