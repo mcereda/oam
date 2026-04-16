@@ -8,6 +8,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 1. [Configuration](#configuration)
    1. [Credentials](#credentials)
 1. [Context and memory](#context-and-memory)
+   1. [Giving Claude its own knowledge base](#giving-claude-its-own-knowledge-base)
 1. [Using tools](#using-tools)
    1. [Managing MCP servers](#managing-mcp-servers)
    1. [Limit tool execution](#limit-tool-execution)
@@ -560,6 +561,49 @@ People are showing success _delegating_ this work to Claude at the start of a pr
 Consider delegating ownership of tools and documentation to Claude early in a project, making it responsible for the
 tools and documents it creates _and_ uses. Also include in the request to periodically to check and update those files
 to correct its own behavior across sessions.
+
+### Giving Claude its own knowledge base
+
+It works better when:
+
+- Claude Code does **not** need to ask for permissions when operating on it.
+
+  Project-level permission setting like `Bash` and `Edit(/**)` scope allowances to the KB's specific project when making
+  changes from inside of it. Configuring `defaultMode` to `auto` or `dontAsk` avoids approval requests for those
+  actions.<br/>
+  User-level setting like `Bash(git -C ~/Repositories/claude/kb *)` and `Edit(~/Repositories/claude/kb/**)` scope
+  allowances to the KB's specific directory when making changes from other projects.<br/>
+
+  > [!tip]
+  > Remember to add `rtk`-related permissions if using [rtk-ai/rtk], e.g. `Bash(rtk git -C ~/Repositories/claude/kb *)`.
+
+- Claude Code is _consistently_ remembered to update it.<br/>
+  A `command` type `UserPromptSubmit` hook seems to be currently the best option.
+- The KB is its own **local** git repository.<br/>
+  It does kinda work using a GitLab or confluence wiki _directly_, but the process to update pages in it via API is
+  expensive and slow. Git repositories are local, better for agents to manage, and just a `git push` away from online
+  backup.
+
+> [!note]
+> Procedure modelled after [karpathy/llm-wiki.md], because leveraging ready-to-use instructions just makes things
+> easier.
+
+1. Create a git repository for Claude's knowledge base:
+
+   ```sh
+   git init "$HOME/path/to/claude/kb"
+   ```
+
+1. Configure **the KB** to allow common operations in it without needing to ask for permissions.<br/>
+   See [settings.json file example for own KB].
+1. Configure **user-level** settings to allow common operations **in the KB** from other projects without needing to ask
+   for permissions.<br/>
+   See [User-level settings.json patch example for own KB].
+1. Add instructions in the **user-level** `CLAUDE.md` file.<br/>
+   See [User-level CLAUDE.md patch example for own KB].
+1. Ask Claude to initialize it (in a new session):
+
+   > Hey! I have prepared your knowledge base repository for you. Please finish initializing it to your likings.
 
 ## Using tools
 
@@ -1797,7 +1841,10 @@ Claude Code version: `v2.1.41`.
 [~/.claude/credentials.json file example]: ../../../examples/claude-code/credentials.json
 [claude-code/skills]: ../../../claude-code/skills
 [examples/claude-code/skills]: ../../../examples/claude-code/skills
+[settings.json file example for own KB]: ../../../examples/claude-code/own-kb/kb.settings.json
 [settings.json file example]: ../../../examples/claude-code/settings.json
+[User-level CLAUDE.md patch example for own KB]: ../../../examples/claude-code/own-kb/user.CLAUDE.md.patch
+[User-level settings.json patch example for own KB]: ../../../examples/claude-code/own-kb/user.settings.json.patch
 
 <!-- Upstream -->
 [anthropics/skills]: https://github.com/anthropics/skills
@@ -1832,7 +1879,6 @@ Claude Code version: `v2.1.41`.
 <!-- Others -->
 [Agent Skills]: https://agentskills.io/
 [Allow MCP tools to be available only to subagent]: https://github.com/anthropics/claude-code/issues/6915
-[Enable specific MCP servers for sub-agents]: https://github.com/anthropics/claude-code/issues/16177
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
 [AWS Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
 [Claude analysis / The System Prompt]: https://rastrigin.systems/blog/claude-code-part-2-system-prompt/
@@ -1840,7 +1886,9 @@ Claude Code version: `v2.1.41`.
 [Claude Code Unpacked]: https://ccunpacked.dev/
 [Claude Skills vs. MCP: A Technical Comparison for AI Workflows]: https://intuitionlabs.ai/articles/claude-skills-vs-mcp
 [containers/bubblewrap]: https://github.com/containers/bubblewrap
+[Enable specific MCP servers for sub-agents]: https://github.com/anthropics/claude-code/issues/16177
 [Grafana MCP Server]: https://github.com/grafana/mcp-grafana
+[karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
 [pffigueiredo/claude-code-sheet.md]: https://gist.github.com/pffigueiredo/252bac8c731f7e8a2fc268c8a965a963
 [Prat011/awesome-llm-skills]: https://github.com/Prat011/awesome-llm-skills
 [rtk-ai/rtk]: https://github.com/rtk-ai/rtk
