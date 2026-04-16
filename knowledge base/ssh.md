@@ -61,6 +61,10 @@ ssh-keyscan 'host.fqdn' >> "${HOME}/.ssh/known_hosts"
 # Connect to a directly unreachable host by tunnelling sessions.
 ssh -t 'bastion-host' ssh 'unreachable-host'
 
+# Print the configuration after evaluating Host and Match blocks.
+ssh -G 'some-host'
+ssh -G 'nas' | grep -E '^(user|port|identityfile)'
+
 # Mount remote folders.
 sshfs 'nas.lan:/mnt/data' 'Data' \
   -o 'auto_cache,reconnect,defer_permissions,noappledouble,volname=Data'
