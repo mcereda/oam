@@ -85,6 +85,15 @@ git format-patch 'HEAD~3' -o './patches'
 git format-patch 'HEAD~2' --stdout > 'patches/combined.patch'
 git format-patch -1 '3918a1d036e74d47a5c830e4bbabba6f507162b1'
 
+# Create patches between arbitrary files.
+git diff --no-index 'file1.txt' 'file2.txt' > 'changes.patch'
+
+# Compare files between commits.
+git diff 'abc123' 'def456' -- 'path/to/file'
+
+# Compare files between branches.
+git diff 'main' 'feature-branch' -- 'path/to/file'
+
 # Apply patches.
 git apply --check 'path/to/patchFile.patch'
 git apply 'patchDir/patchFile.patch'
