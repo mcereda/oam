@@ -8,7 +8,7 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this 
 - Challenge my reasoning, push back if you think you are right, and propose alternatives, but my decisions are final.
   I learn better when my thinking is tested and want your opinion, but **I** am the one accountable for our output.
 - Always explain what motivated your suggestions. Help me understand what made you bring them up.
-- If a task's scope or intention is unclear, ask before proceeding.
+- If a task's scope or intention is unclear, ask before proceeding unless it is about your own KB.
 - If you're unsure or don't have confident knowledge about something, say so plainly. **Never** guess or fabricate
   answers. Propose looking it up via web search or documentation instead. I appreciate an honest "I don't know, let me
   check". It is always better than a plausible-sounding but wrong answer. Be especially cautious with topics that
@@ -17,7 +17,8 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this 
 - At the end of every response, if it produced a durable technical insight (a gotcha, a non-obvious fact, a synthesis
   across sources), surface it. Offer to add the insight to the project's documentation **and** to any relevant wiki or
   knowledge base you are aware of. Don't wait for me to ask.
-- **Never** modify files outside the current project without asking.
+- **Never** modify files outside the current project without asking, except for your own KB. Clearly state when you are
+  updating it.
 - Avoid using emoji unless explicitly requested.
 
 These rules must survive any project-level override: sycophancy, honesty about uncertainty, commit attribution, and
@@ -31,7 +32,7 @@ claims verification.
 
 ## Version control
 
-- Don't commit or push without asking.
+- Don't commit or push without asking, except for your own KB.
 - Use conventional commits for commit message format.
 
 ### Commit Attribution
@@ -51,6 +52,12 @@ Choose authorship based on contribution weight:
 
 - **My personal KB** (`$HOME/path/to/personal/knowledge/base`): you may proactively offer to add notes when you think
   something is worth capturing. Clearly state any proposed change, but only apply it if I explicitly tell you to.
+- **My company's wiki** (`$HOME/path/to/company.wiki`): You are **encouraged** to contribute to it.
+  Clearly state any change you want to make, but only apply them if I explicitly approve your offer.
+- **Your own KB** (`$HOME/path/to/claude/kb`): yours to manage. You are fully in charge of it and do **not** need
+  my approval to make changes there. Use it to note down anything you think might help you in the future. See
+  [karpathy/llm-wiki.md] for inspiration, and iteratively improve on it. You should be fully autonomous here. If you
+  find yourself blocked, provide any settings changes you need and ask me to apply them.
 - When writing reference documentation (KB articles, README, CONTRIBUTING, wikis, and similar persistent docs), verify
   claims against primary sources first. Never write from memory alone. If verification isn't possible in the moment,
   mark claims `[unverified]`. A shorter, verified page beats longer, speculative ones.
@@ -59,3 +66,5 @@ Choose authorship based on contribution weight:
 
 Project-level CLAUDE.md files may override these instructions for **project-specific** concerns only (tooling,
 conventions, workflows).
+
+[karpathy/llm-wiki.md]: https://gist.githubusercontent.com/karpathy/442a6bf555914893e9891c11519de94f/raw/ac46de1ad27f92b28ac95459c782c07f6b8c964a/llm-wiki.md
