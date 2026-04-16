@@ -801,15 +801,18 @@ pulumi.all([host, ver]).apply(([h, v]) => `https://${h}/api/${v}`)
 </details>
 
 Use `pulumi.jsonStringify()` in place of `JSON.stringify()`.<br/>
-It accepts `Output<T>` values directly, avoiding the need of using the `.apply()` wrapper, and **propagates secret
+It accepts `Output<T>` values directly, avoiding the need of using the `.apply()` wrapper. It also **propagates secret
 marking automatically** (if any input of type `Output` was marked as secret, the resulting `Output<string>` is too).
-Using `.apply(JSON.stringify)` on a non-secret `Output` does **not** propagate secret marking and reveals the value.
+Using `.apply(JSON.stringify)` on a non-secret `Output` does **not** propagate secret marking and reveals the
+value.<br/>
+The _spread_ operator, though, cannot iterate over an _unresolved_ Output. `Output<Array>`s that are spread into a
+parent array **must** be unwrapped with `pulumi.all().apply()` **first**.
 
 <details style='padding: 0 0 1rem 1rem'>
 
 ```diff
-  new aws.iam.Policy('whatever', {
-      …
+ new aws.iam.Policy('whatever', {
+     …
 -    policy: iamRole.arn.apply(
 -        (iamRoleArn: string) => JSON.stringify({
 -            Version: '2012-10-17',
@@ -828,6 +831,17 @@ Using `.apply(JSON.stringify)` on a non-secret `Output` does **not** propagate s
 +            Resource: iamRole.arn,
 +        }],
 +    }),
+
+-pulumi.jsonStringify([
+-    { name: "main", image: mainImage },
+-    ...extraContainers,                      // Output<ContainerDef[]>, not iterable
+-]);
++pulumi.all([extraContainers]).apply(([containers]) =>
++    pulumi.jsonStringify([
++        { name: "main", image: mainImage },  // scalar Output, accepted directly
++        ...containers,
++    ])
++);
 ```
 
 </details>
