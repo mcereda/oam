@@ -34,6 +34,7 @@
 1. [Best practices](#best-practices)
     1. [AWS-specific best practices](#aws-specific-best-practices)
 1. [Troubleshooting](#troubleshooting)
+    1. [ERROR: "Failed to set permissions on temp files" when becoming a non-root user](#error-failed-to-set-permissions-on-temp-files-when-becoming-a-non-root-user)
     1. [ERROR: Ansible could not initialize the preferred locale: unsupported locale setting](#error-ansible-could-not-initialize-the-preferred-locale-unsupported-locale-setting)
     1. [Print all known variables](#print-all-known-variables)
     1. [Force notified handlers to run at a specific point](#force-notified-handlers-to-run-at-a-specific-point)
@@ -1508,6 +1509,48 @@ Or even edit their content with `ansible-vault edit 'path/to/file'`.
 
 ## Troubleshooting
 
+### ERROR: "Failed to set permissions on temp files" when becoming a non-root user
+
+Error message example:
+
+> Failed to set permissions on the temporary files Ansible needs to create when becoming an unprivileged user (rc: 1,
+> err: chmod: invalid mode: 'A+user:postgres:rx:allow')
+
+<details>
+  <summary>Root cause</summary>
+
+By default, Ansible writes modules' code to temporary files on the remote host. When Ansible becomes a **non-root**
+user, it needs to grant that user read access to those files. It tries `setfacl` first; if the `acl` package is not
+available, it falls back to `chmod` with BSD-style ACL syntax (`A+user:postgres:rx:allow`), which `chmod` on Linux does
+**not** understand.
+
+</details>
+
+<details>
+  <summary>Solution: enable pipelining (preferred)</summary>
+
+Streams modules' code over the existing SSH connection instead of writing it to the temporary file.<br/>
+This bypasses the problem entirely. Also speeds up playbook runs significantly.
+
+```ini
+# ansible.cfg
+[ssh_connection]
+pipelining = true
+```
+
+> [!important]
+> `requiretty` must **not** be set in `/etc/sudoers` on target hosts.<br/>
+> Most modern distros (Debian, Ubuntu, RHEL 8+) do **not** set it already.
+
+</details>
+
+<details>
+  <summary>Solution: Install <code>acl</code></summary>
+
+The [`acl`][acl] utility gives Ansible `setfacl`, which works correctly on Linux.
+
+</details>
+
 ### ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
 
 `ansible-core` requires the locale to have `UTF-8` encoding [since 2.14.0][ansible v2.14 CHANGELOG]:
@@ -1911,8 +1954,9 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [navigator configuration files]: #navigator-configuration-files
 
 <!-- Knowledge base -->
-[awx]: awx.md
-[integrate with aws ssm]: cloud%20computing/aws/ssm.md#integrate-with-ansible
+[ACL]: acl.md
+[AWX]: awx.md
+[Integrate with AWS SSM]: cloud%20computing/aws/ssm.md#integrate-with-ansible
 [Rundeck]: rundeck.md
 [Semaphore UI]: semaphoreui.md
 
