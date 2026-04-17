@@ -917,6 +917,22 @@ This is confirmed as of 2026-04-14 for `Read`, `Edit`, `Write`, and `Bash` path 
 
 </details>
 
+The official documentation talks explicitly about the `~/` expansion for `Read`, `Edit` and `Write` rules, but says
+nothing about its use in `Bash()` rules. `Bash()` rules employ pure string matching.<br/>
+The shell variable expansion results invisible to the permission layer. Claude Code inspects the command string
+**before** handing it to the shell subprocess (where variables like `$HOME` would expand).
+
+<details style='padding: 0 0 1rem 1rem'>
+
+Commands using `$HOME/…` as double-quoted variable are **not** expanded until the shell subprocess runs.<br/>
+The shell subprocess runs **after** permission checks. If a rule has `~/…`, it is either treated as a literal `~` or
+expanded to the current user's home path, but it doesn't match the literal string `$HOME` in the command.
+
+</details>
+
+Rules in `settings.json` files should use absolute paths, e.g. `"Bash(git -C /home/some-user/path/to/whatever *)"`, or
+Claude needs to know to use `~/` **unquoted** in KB commands instead of `$HOME/`.
+
 Refine permissions using `PreToolUse` [hooks][using hooks].<br/>
 `deny` and `ask` rules are **still** evaluated **after** a hook returns _allow_.
 
