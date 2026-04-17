@@ -2129,6 +2129,69 @@ Useful when wanting multiple containers to access the same secret, or just clean
   );
   ```
 
+- OOM kills bypass `stopTimeout` entirely.
+
+  When ECS uses the Linux OOM killer to kill Linux tasks, the container receives `SIGKILL` directly instead of
+  `SIGTERM`.<br/>
+  The `stopTimeout` value becomes irrelevant. The container is terminated immediately with no opportunity for cleanup.
+
+  This leaves ALB health checks (if configured) to be the **only** mechanism for removing dead task from rotation.
+  With default health check settings (`interval: 30`, `unhealthyThreshold: 3`), the dead IP can receive traffic for up
+  to 90 seconds.
+
+  Lower the ALB target group's health check interval and threshold to reduce this window:
+
+  ```ts
+  new aws.alb.TargetGroup(
+    'some-service',
+    {
+      …
+      healthCheck: {
+          path: '/ready',
+          interval: 15,             // check every 15s instead of the default 30s
+          healthyThreshold: 2,      // healthy after 2 passes (30s), not after the default 3 (45s)
+          unhealthyThreshold: 2,    // unhealthy after 2 failures (30s), not after the default 3 (45s)
+      },
+    },
+  );
+  ```
+
+  > [!note]
+  > Pulumi uses `healthyThreshold` and `unhealthyThreshold` (without the `Count` suffix), not `HealthyThresholdCount`
+  > and `UnhealthyThresholdCount` as named in the AWS API and CloudFormation.
+
+- `stopTimeout` **must** be >= `deregistrationDelay`.
+
+  When ECS intentionally stops a task (scale-in, rolling update), two things happen **concurrently**:
+
+  1. The task's target is put into the ALB "draining" state for `deregistrationDelay` seconds.
+  1. ECS sends `SIGTERM` to the container; after `stopTimeout` seconds, it sends `SIGKILL`.
+
+  If `stopTimeout` is **lower** than `deregistrationDelay`, the container is killed **before** the ALB finishes
+  draining it. In-flight requests that were still being routed to the task during the drain window land on a dead
+  socket, causing `5xx` errors.
+
+- New tasks with load balancers need `healthCheckGracePeriodSeconds`.
+
+  Without this, the ALB starts probing new tasks immediately. If the application takes more than a few seconds to start
+  itself (initializing its state, joining a distributed ring, etc), the ALB marks the task **unhealthy** and ECS
+  replaces it. The replacement tasks will then also fail health checks, creating a replacement loop.
+
+  Set `healthCheckGracePeriodSeconds` on the ECS service to match or exceed the expected startup time:
+
+  ```ts
+  new aws.ecs.Service(
+    'some-service',
+    {
+      …
+      healthCheckGracePeriodSeconds: 60,
+    },
+  );
+  ```
+
+  This property only takes effect when the service has a load balancer or a service registry attached. It is ignored
+  otherwise.
+
 ## Best practices
 
 - Consider configuring [resource constraints].
