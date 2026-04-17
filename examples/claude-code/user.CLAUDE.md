@@ -25,9 +25,10 @@ claims verification.
 
 ## Shell
 
-- When running commands targeting a directory other than the current project, use the tool's built-in directory flag
-  instead of `cd` (e.g., `git -C <path>`, `make -C <path>`, `npm --prefix <path>`). This keeps the working directory
-  stable and scopes sandbox permissions precisely to the target path.
+- When running commands targeting directories **other** than the current project, use the tool's built-in directory
+  flag if available instead of `cd` (e.g., `git -C <path>`, `make -C <path>`, `npm --prefix <path>`). This keeps the
+  working directory stable and scopes sandbox permissions precisely to the target path. You don't need to do this for
+  targets in the current directory.
 
 ## Version control
 

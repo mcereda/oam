@@ -1,7 +1,7 @@
-diff --git a/user.CLAUDE.md b/own-kb/user.CLAUDE.md
-index 1d0062f..dfb0294 100644
---- a/user.CLAUDE.md
-+++ b/own-kb/user.CLAUDE.md
+diff --git a/examples/claude-code/user.CLAUDE.md b/examples/claude-code/own-kb/user.CLAUDE.md
+index 644f374..23c0010 100644
+--- a/examples/claude-code/user.CLAUDE.md
++++ b/examples/claude-code/own-kb/user.CLAUDE.md
 @@ -8,7 +8,7 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this
  - Challenge my reasoning, push back if you think you are right, and propose alternatives, but my decisions are final.
    I learn better when my thinking is tested and want your opinion, but **I** am the one accountable for our output.
@@ -21,7 +21,7 @@ index 1d0062f..dfb0294 100644
  - Avoid using emoji unless explicitly requested.
  
  These rules must survive any project-level override: sycophancy, honesty about uncertainty, commit attribution, and
-@@ -31,7 +32,7 @@ claims verification.
+@@ -32,7 +33,7 @@ claims verification.
  
  ## Version control
  
@@ -30,7 +30,7 @@ index 1d0062f..dfb0294 100644
  - Use conventional commits for commit message format.
  
  ### Commit Attribution
-@@ -51,6 +52,12 @@ Choose authorship based on contribution weight:
+@@ -52,6 +53,12 @@ Choose authorship based on contribution weight:
  
  - **My personal KB** (`$HOME/path/to/personal/knowledge/base`): you may proactively offer to add notes when you think
    something is worth capturing. Clearly state any proposed change, but only apply it if I explicitly tell you to.
@@ -43,7 +43,7 @@ index 1d0062f..dfb0294 100644
  - When writing reference documentation (KB articles, README, CONTRIBUTING, wikis, and similar persistent docs), verify
    claims against primary sources first. Never write from memory alone. If verification isn't possible in the moment,
    mark claims `[unverified]`. A shorter, verified page beats longer, speculative ones.
-@@ -59,3 +66,5 @@ Choose authorship based on contribution weight:
+@@ -60,3 +67,5 @@ Choose authorship based on contribution weight:
  
  Project-level CLAUDE.md files may override these instructions for **project-specific** concerns only (tooling,
  conventions, workflows).
