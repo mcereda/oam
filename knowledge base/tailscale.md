@@ -10,6 +10,7 @@ Mesh VPN solution based on [WireGuard].
 1. [Exit nodes](#exit-nodes)
 1. [Specify search domains](#specify-search-domains)
 1. [Override DNS servers](#override-dns-servers)
+1. [Split DNS (A.K.A. restricted nameservers)](#split-dns-aka-restricted-nameservers)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -269,6 +270,29 @@ For example, operating systems might:
 
 Should one need nameservers to be in a specific order, one is probably better off using the split DNS feature or
 setting up conditional forwarding on one's private DNS service, and only using that resolver in their settings.
+
+## Split DNS (A.K.A. restricted nameservers)
+
+Tailscale's _split DNS_ feature (called _Restricted nameservers_ in the admin console) routes queries for specific
+domains to specified nameserver, while all other queries continue to use the default resolver.
+
+This is more reliable than OS-level per-domain resolver files (e.g. macOS `/etc/resolver/`) when Tailscale is running.
+Tailscale's MagicDNS intercepts DNS queries **before** the OS resolver files are consulted for some domains, causing
+timeouts rather than resolution failures.
+
+Commonly used to resolve AWS internal load balancer hostnames from a developer machine over Tailscale.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+Internal ELB DNS names (e.g. `internal-*.eu-west-1.elb.amazonaws.com`) are **publicly** resolvable, but return
+**private** VPC IP addresses. To resolve them via the VPC DNS resolver (`172.31.0.2`) through the subnet router:
+
+1. In Tailscale's admin console, go to _DNS_ > _Nameservers_ > _Add nameserver_ > _Custom_.
+1. Enter `172.31.0.2` as the nameserver.
+1. Enable _Restrict to domain_, and enter `elb.amazonaws.com`.
+1. Save.
+
+Tailscale will route `*.elb.amazonaws.com` queries through the subnet router to the VPC DNS resolver.
 
 ## Further readings
 

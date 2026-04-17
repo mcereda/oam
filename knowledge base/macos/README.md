@@ -413,22 +413,50 @@ One can either:
 
 Refer [macOS: Using Custom DNS Resolvers].
 
-Avoid adding custom DNS servers to `/etc/resolv.conf` as it often gets overwritten or otherwise edited by VPN clients
-and such.
+> [!important] Tailscale caveat
+> When using [Tailscale], its MagicDNS intercepts DNS **before** `/etc/resolver/` files are consulted for some domains.
+> If queries time out, instead of resolving, try using Tailscale's **[split DNS][tailscale / split DNS]** (A.K.A.
+> restricted nameservers) feature in the admin console instead. It routes domain-specific queries through the subnet
+> router at the Tailscale level, which is more reliable than OS-level resolver files.
 
-Instead:
+Avoid adding custom DNS servers to `/etc/resolv.conf`. It often gets overwritten or otherwise edited by VPN clients
+and such. Instead:
 
 1. Create the `/etc/resolver/` folder.
-1. Inside that folder, create new files with the name of the domains one wants custom DNS settings for<br/>
-   In this example, `lab.local`.
-1. Edit those files by adding one's custom domain, search path and nameservers:
+1. Inside that folder, create new files with the name of the domains one wants custom DNS settings for.<br/>
+   The filename itself defines the domain scope.
 
-   ```plaintext
+   <details style='padding: 0 0 1rem 1rem'>
+     <summary>Examples</summary>
+
+   ```sh
+   /etc/resolver/
+   ├── lab.local
+   └── elb.amazonaws.com
+   ```
+
+   </details>
+
+1. Edit those files by adding one's custom domain, search path and nameservers:.
+
+   > [!note]
+   > `domain` and `search` are redundant with the filename. A file containing only `nameserver <ip>` is sufficient.
+
+   <details style='padding: 0 0 1rem 1rem'>
+     <summary>Examples</summary>
+
+   ```sh
+   $ cat '/etc/resolver/lab.local'
    domain lab.local
    search lab.local
    nameserver 192.168.1.254
    nameserver 192.168.1.1
+
+   $ cat '/etc/resolver/elb.amazonaws.com'
+   nameserver 172.31.0.2
    ```
+
+   </details>
 
 1. Force a DNS refresh:
 
@@ -439,15 +467,27 @@ Instead:
 1. Verify the new DNS settings are in place:
 
    ```sh
-   scutil --dns | grep -C '3' '192.168.1.254'
+   scutil --dns | grep -C '3' -e '192.168.1.254' -e '172.31.0.2'
    ```
 
 1. Check that name resolution works:
 
+   <details style='padding: 0 0 1rem 1rem'>
+     <summary>Examples</summary>
+
    ```sh
    dscacheutil -q 'host' -a 'name' '192.168.1.35'
    dscacheutil -q 'host' -a 'name' 'gitlab.lan'
+   dscacheutil -q 'host' -a 'name' 'internal-some-app-0123456789.eu-west-1.elb.amazonaws.com'
    ```
+
+   </details>
+
+   > [!warning]
+   > Do **not** use `nslookup` or `dig` (without an explicit `@server`) to verify per-domain resolvers. They use
+   > `libresolv` directly, which reads `/etc/resolv.conf` but ignores `/etc/resolver/` entirely. Only tools
+   > that call `getaddrinfo()` (e.g., `dscacheutil`, `ping`, and `curl`) go through mDNSResponder and respect
+   > per-domain resolver configurations.
 
 ## Remap the Home and End keys
 
@@ -614,6 +654,8 @@ your Mac, or after your Mac begins to restart. Keep holding until the described 
 [openssl-osx-ca]: openssl-osx-ca.md
 [sips]: sips.md
 [tag]: tag.md
+[Tailscale / split DNS]: ../tailscale.md#split-dns-aka-restricted-nameservers
+[Tailscale]: ../tailscale.md
 [time machine]: time%20machine.md
 [xattr]: xattr.md
 

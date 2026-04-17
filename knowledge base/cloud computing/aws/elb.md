@@ -3,6 +3,7 @@
 Distributes network traffic.
 
 1. [TL;DR](#tldr)
+1. [Naming scheme](#naming-scheme)
 1. [Target groups](#target-groups)
 1. [Listeners](#listeners)
 1. [Application Load Balancers](#application-load-balancers)
@@ -76,6 +77,34 @@ aws engineer elbv2 create-rule \
 
 </details>
 -->
+
+## Naming scheme
+
+An ELB's _scheme_ determines whether it is internet-facing or internal.<br/>
+Internet-facing (_external_) LB nodes are given **public** IP addresses, and the DNS resolves to those public IPs.<br/>
+_Internal_ LB nodes are assigned only **private** IP addresses. The DNS still resolves **publicly**, but returns
+**private** IP addresses (the hostname is **globally** resolvable, but the IPs are only reachable from within the VPC,
+a peered network, VPN, or Direct Connect).
+
+The `internal-` prefix is reserved by AWS, and does not allow load balancer names to start with it
+([source][create an application load balancer]).<br/>
+AWS automatically prepends `internal-` to the DNS name of every internal load balancer:
+
+<details style='padding: 0 0 1rem 1rem'>
+
+Example: _some-app_.
+
+| LB type                    | DNS example                                                |
+| -------------------------- | ---------------------------------------------------------- |
+| Internet-facing (external) | `some-app-1234567890.eu-west-1.elb.amazonaws.com`          |
+| Internal                   | `internal-some-app-1234567890.eu-west-1.elb.amazonaws.com` |
+
+</details>
+
+> [!tip]
+> When forwarding traffic to an internal LB from a host **inside** the same VPC, use the internal DNS name over the
+> external one. Traffic stays within the VPC, avoiding unnecessary round-trips on the Internet and the associated
+> data-transfer costs.
 
 ## Target groups
 
@@ -200,3 +229,4 @@ Transforms change requests **before** the load balancer forwards them to the des
 [Transforms for listener rules]: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/rule-transforms.html
 
 <!-- Others -->
+[Create an Application Load Balancer]: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-application-load-balancer.html
