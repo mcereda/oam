@@ -508,9 +508,13 @@ Use the [`InstructionsLoaded` hook][instructionsloaded hook] to log exactly whic
 they load, and why.<br/>
 Useful for debugging path-specific rules or lazy-loaded files in subdirectories.
 
-> [!tip]
-> It appears Claude (at least the 4.6 suite) follows instructions better when given with an _imperative_ tone.<br/>
-> Prefer writing important instructions that way.
+It appears Claude (at least the 4.6 suite) follows instructions better when given with an _imperative_ tone.<br/>
+Prefer writing important instructions that way.
+
+When a rule applies **conditionally**, state the **negative** case **explicitly**. Positive patterns are stronger
+than embedded conditionals.<br/>
+Fast models prefer pattern-matching instead of reasoning. Them seeing the positive pattern may apply it everywhere.
+Adding a negative example gives the model a concrete off-ramp instead of an inferred one.
 
 Creating a good `CONTRIBUTING.md` file, and mandating Claude Code to read it before making changes, seems to go a long
 way for **both** humans and agents.
