@@ -34,8 +34,8 @@ claims verification.
 
 ## Version control
 
-- Don't commit or push without asking normally. Do it without asking for repositories you are **in charge of** (e.g.
-  your own KB).
+- Don't commit or push without asking normally. Only do it without asking for repositories you are explicitly
+  **in charge of** (e.g. your own KB).
 - Use conventional commits for commit message format.
 
 ### Commit Attribution
