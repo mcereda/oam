@@ -225,6 +225,32 @@ Policy examples:
 Specific type of resource-based policy for IAM roles.<br/>
 Used to allow Principals and other AWS Services to assume Roles.
 
+A single IAM role can trust multiple service principals by listing them in the trust policy.<br/>
+This enables reusing existing roles across different contexts (e.g., EC2 instances and EKS pods).
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [{
+        "Effect": "Allow",
+        "Principal": {
+            "Service": [
+                "ec2.amazonaws.com",
+                "pods.eks.amazonaws.com"
+            ]
+        },
+        "Action": [
+            "sts:AssumeRole",
+            "sts:TagSession"
+        ]
+    }]
+}
+```
+
+Some services require actions that others ignore. E.g., `sts:TagSession` is needed by EKS [Pod Identity] but is ignored
+by EC2. Including them in a shared trust policy is safe.<br/>
+Refer [IAM JSON policy elements: Principal].
+
 ### Trust Relationships
 
 [Trust Policies] used by AWS services to assume Roles in one's account to be able to manage resources on behalf of
@@ -446,10 +472,11 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
   -->
 
 <!-- In-article sections -->
-[trust policies]: #trust-policies
+[Trust policies]: #trust-policies
 
 <!-- Knowledge base -->
-[amazon web services]: README.md
+[Amazon Web Services]: README.md
+[Pod identity]: eks.md#pod-identity
 
 <!-- Files -->
 <!-- Upstream -->
