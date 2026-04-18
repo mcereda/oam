@@ -11,6 +11,9 @@ Automatically detects the authenticated hostname from the remotes available in o
 
 ## TL;DR
 
+> [!note]
+> `glab` does **not** currently support group wikis.
+
 <details>
   <summary>Setup</summary>
 
