@@ -127,3 +127,10 @@ aws rds restore-db-instance-from-db-snapshot \
 aws rds delete-db-instance --db-instance-identifier 'awx'
 aws rds delete-db-instance --db-instance-identifier 'awx-with-backups' \
 	--skip-final-snapshot --delete-automated-backups --no-cli-pager
+
+
+# Check available RI offerings for an instance family.
+aws rds describe-reserved-db-instances-offerings \
+	--db-instance-class 'db.m8g.xlarge' --product-description 'postgresql' \
+	--query 'ReservedDBInstancesOfferings[].{Duration:Duration,Offering:OfferingType,Price:FixedPrice}' \
+	--output 'table'

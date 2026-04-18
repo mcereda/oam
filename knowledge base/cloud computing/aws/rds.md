@@ -1245,8 +1245,19 @@ Reservations are available in three varieties:
 
 > [!note]
 > Not all RDS instance classes support all Reserved DB Instance offering types.<br/>
-> Review the Reserved DB Instance offerings in the Management Console or using the
-> `describe-reserved-db-instances-offerings` CLI command to confirm availability.
+> Newer instance families may initially launch with only 1-year offerings, with 3-year options being added later.<br/>
+> Always verify availability per family, engine, and region before planning RI purchases.
+>
+> <details style='padding: 0 0 1rem 1rem'>
+>
+> ```sh
+> aws rds describe-reserved-db-instances-offerings \
+>   --db-instance-class 'db.m8g.xlarge' --product-description 'postgresql' \
+>   --query 'ReservedDBInstancesOfferings[].{Duration:Duration,Offering:OfferingType}' \
+>   --output 'table'
+> ```
+>
+> </details>
 
 When using consolidated billing, all AWS accounts in the organization are treated as a single account.<br/>
 This means that **all** accounts in the organization can receive the hourly cost benefit of reserved DB instances that
