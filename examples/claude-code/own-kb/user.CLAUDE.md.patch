@@ -1,5 +1,5 @@
 diff --git a/examples/claude-code/user.CLAUDE.md b/examples/claude-code/own-kb/user.CLAUDE.md
-index bab6155..8fd6cdb 100644
+index bab6155..2dc9992 100644
 --- a/examples/claude-code/user.CLAUDE.md
 +++ b/examples/claude-code/own-kb/user.CLAUDE.md
 @@ -8,7 +8,7 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this
@@ -23,16 +23,17 @@ index bab6155..8fd6cdb 100644
  - Avoid using emoji unless explicitly requested.
  
  These rules must survive any project-level override: sycophancy, honesty about uncertainty, commit attribution, and
-@@ -33,7 +34,7 @@ claims verification.
+@@ -33,7 +34,8 @@ claims verification.
  
  ## Version control
  
 -- Don't commit or push without asking.
-+- Don't commit or push without asking, except for your own KB.
++- Don't commit or push without asking normally. Do it without asking for repositories you are **in charge of** (e.g.
++  your own KB).
  - Use conventional commits for commit message format.
  
  ### Commit Attribution
-@@ -54,6 +55,12 @@ Choose authorship based on contribution weight:
+@@ -54,6 +56,12 @@ Choose authorship based on contribution weight:
  
  - **My personal KB** (`$HOME/path/to/personal/knowledge/base`): you may proactively offer to add notes when you think
    something is worth capturing. Clearly state any proposed change, but only apply it if I explicitly tell you to.
@@ -45,7 +46,7 @@ index bab6155..8fd6cdb 100644
  - When writing reference documentation (KB articles, README, CONTRIBUTING, wikis, and similar persistent docs), verify
    claims against primary sources first. Never write from memory alone. If verification isn't possible in the moment,
    mark claims `[unverified]`. A shorter, verified page beats longer, speculative ones.
-@@ -75,3 +82,5 @@ starting implementation. Good signals:
+@@ -75,3 +83,5 @@ starting implementation. Good signals:
  
  Do **not** suggest Agent Teams for **sequential** tasks, **same-file** edits, simple or routine work, or tasks with
  heavy inter-step dependencies. Normal subagents are sufficient for those.
