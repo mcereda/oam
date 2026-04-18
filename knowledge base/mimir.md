@@ -18,13 +18,14 @@ and set up alerting rules across multiple tenants to leverage tenant federation.
 1. [Authentication and authorization](#authentication-and-authorization)
 1. [Migrate to Mimir](#migrate-to-mimir)
 1. [Ingest Out-Of-Order samples](#ingest-out-of-order-samples)
-1. [Deduplication of data from multiple Prometheus scrapers](#deduplication-of-data-from-multiple-prometheus-scrapers)
+1. [Deduplicate data from multiple Prometheus scrapers](#deduplicate-data-from-multiple-prometheus-scrapers)
    1. [Configure Prometheus for deduplication](#configure-prometheus-for-deduplication)
    1. [Configure Mimir for deduplication](#configure-mimir-for-deduplication)
+1. [Gotchas](#gotchas)
 1. [APIs](#apis)
 1. [Troubleshooting](#troubleshooting)
-   1. [HTTP status 401 Unauthorized: no org id](#http-status-401-unauthorized-no-org-id)
-   1. [HTTP status 500 Internal Server Error: send data to ingesters: at least 2 live replicas required, could only find 1](#http-status-500-internal-server-error-send-data-to-ingesters-at-least-2-live-replicas-required-could-only-find-1)
+    1. [HTTP status 401 Unauthorized: no org id](#http-status-401-unauthorized-no-org-id)
+    1. [HTTP status 500 Internal Server Error: send data to ingesters: at least 2 live replicas required, could only find 1](#http-status-500-internal-server-error-send-data-to-ingesters-at-least-2-live-replicas-required-could-only-find-1)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -341,6 +342,16 @@ Things to consider:
 
   </details>
 
+- On [AWS ECS], OOM-killed tasks receive `SIGKILL` directly, which **bypasses** `stopTimeout` entirely.<br/>
+  The task disappears **immediately**, but any associated ALB will keep routing to its dead IP until its health checks
+  fail. With default ALB health check settings (30s interval, 3 failures), this window can be up to 90 seconds.
+
+  Reduce the time window by setting shorter health check intervals (e.g. 15s) and lower thresholds (e.g. 2) on the
+  target group, and set `healthCheckGracePeriodSeconds` on the ECS service to prevent cycling slow-starting tasks.
+
+  When autoscaling, target a memory value limit **lower** than the CPU's (e.g. 60% vs 75%) to give headroom before OOM.
+  The idea is to target issues on cluster-wide averages, not per-task peaks.
+
 ## Storage
 
 Mimir supports the `s3`, `gcs`, `azure`, `swift`, and `filesystem` backends.<br/>
@@ -353,7 +364,7 @@ Refer [Configure Grafana Mimir object storage backend].
 Blocks storage must be located under a **different** prefix or bucket than both the ruler's and AlertManager's stores.
 Mimir **will** fail to start if that is the case.
 
-To avoid that, it is suggested to override the `bucket_name` setting in the specific configurations.
+To avoid that, prefer overriding the `bucket_name` setting in the specific configurations.
 
 <details style="padding: 0 0 0 1rem">
   <summary>Different buckets</summary>
@@ -411,6 +422,20 @@ Metrics data is uploaded to the object storage every 2 hours, typically when a b
 head.<br/>
 After the metrics data block is uploaded, its related WAL is truncated too.
 
+When using AWS S3 for block storage, one can **safely** leverage the
+[Intelligent-Tiering storage class][aws s3 storage classes] since all its tiers remain real-time readable.<br/>
+If Mimir is configured to clean up its data after a short amount of time, though, it might not be worth the increased
+trouble and costs. Make sure to retain at least 180d worth of data to make sense of this tier.
+
+**Glacier** tiers are **not** safe, because their retrieval latency is minutes to hours. This breaks queries for data
+in those tiers.<br/>
+Prefer using `-compactor.blocks-retention-period` to delete old blocks instead of transitioning them to Glacier-class
+storage. Blocks are first **marked** for deletion, then hard-deleted after the amount of time defined by
+`-compactor.deletion-delay` (which defaults to 12h).
+
+Also consider setting an S3 lifecycle rule to abort incomplete multipart uploads after 1 day. Mimir can leave orphaned
+uploads if interrupted.
+
 ## Authentication and authorization
 
 Refer [Grafana Mimir authentication and authorization].
@@ -428,7 +453,7 @@ limits:
   out_of_order_time_window: 5m  # Allow up to 5 minutes since the latest received sample for the series.
 ```
 
-## Deduplication of data from multiple Prometheus scrapers
+## Deduplicate data from multiple Prometheus scrapers
 
 Refer [Configure Grafana Mimir high-availability deduplication].
 
@@ -498,7 +523,7 @@ The **minimal** configuration requires the following:
 
 1. Configure the HA tracker's KV store.
 
-   `memberlist` support is currently experimental.<br/>
+   Starting from Mimir 3.0, `memberlist` is the recommended and default KV store backend for the HA tracker.<br/>
    See also [In-Depth Comparison of Distributed Coordination Tools: Consul, etcd, ZooKeeper, and Nacos].
 
    <details style="padding: 0 0 1rem 1rem">
@@ -519,6 +544,32 @@ The **minimal** configuration requires the following:
 
 1. Configure the expected label names for each cluster and its replica.<br/>
    Only needed when using different labels than the default ones.
+
+## Gotchas
+
+- When running multiple **distributor** replicas, distributors must agree on their HA leader. To allow for this, the HA
+  tracker store **must** be shared across them (e.g., using `memberlist`).<br/>
+  The `inmemory` store keeps a per-distributor state, preventing the replicas from agreeing on the HA leader and
+  resulting in duplicate or dropped samples depending on routing.<br/>
+  `memberlist` is the default since Mimir 3.0 and piggybacks on the ring, so it does not require additional
+  infrastructure.<br/>
+  Refer [Configure Grafana Mimir high-availability deduplication].
+
+- Go's `GOMAXPROCS` defaults to the **host's** vCPU count, not containers' CPU allocation.<br/>
+  A container with 0.25 vCPU on a 4-vCPU host starts with `GOMAXPROCS=4`, causing throttling and burning CPU credits (if
+  relevant, e.g. for EC2 instances).<br/>
+  Set `GOMAXPROCS` **explicitly** to match the containers' allocation, or use [uber-go/automaxprocs] to set it
+  automatically.<br/>
+  This applies to **any** Go binary in containers.
+
+- Mimir uses Go's [`time.ParseDuration`][go time parseduration] syntax. There is **no** unit for _months_ or _years_.
+  `m` means minutes. Prefer using `h` (hours) and multiply the value accordingly (e.g. `8760h` for ~1 year, `2160h` for
+  ~90 days).
+
+- Mimir seems to use substantially more RAM during initialization than during normal execution.<br/>
+  When using tight memory limits, the initial spike can push containers to OOM before they finish starting up, even if
+  steady-state usage is well under the limit.<br/>
+  Consider setting containers' memory limit at least 50% above the observed steady-state value.
 
 ## APIs
 
@@ -645,14 +696,15 @@ Alternatives:
 [Monolithic mode]: #monolithic-mode
 
 <!-- Knowledge base -->
-[aws ecs]: cloud%20computing/aws/ecs.md
-[aws efs]: cloud%20computing/aws/efs.md
-[cortex]: cortex.md
-[ecs service connect]: cloud%20computing/aws/ecs.md#ecs-service-connect
-[ecs service discovery]: cloud%20computing/aws/ecs.md#ecs-service-discovery
-[grafana]: grafana.md
-[prometheus]: prometheus/README.md
-[thanos]: thanos.md
+[AWS ECS]: cloud%20computing/aws/ecs.md
+[AWS EFS]: cloud%20computing/aws/efs.md
+[AWS S3 storage classes]: cloud%20computing/aws/s3.md#storage-classes
+[Cortex]: cortex.md
+[ECS service connect]: cloud%20computing/aws/ecs.md#ecs-service-connect
+[ECS service discovery]: cloud%20computing/aws/ecs.md#ecs-service-discovery
+[Grafana]: grafana.md
+[Prometheus]: prometheus/README.md
+[Thanos]: thanos.md
 
 <!-- Files -->
 <!-- Upstream -->
@@ -674,9 +726,11 @@ Alternatives:
 
 <!-- Others -->
 [Ceiling Function]: https://www.geeksforgeeks.org/ceiling-function/
+[go time parseduration]: https://pkg.go.dev/time#ParseDuration
 [Configuring Alerts and Rules in Grafana Mimir]: https://freedium.cfd/https://learning.sepich.dev/configuring-alerts-and-rules-in-grafana-mimir-cd9565dae397
 [Gossip Protocol Explained]: https://highscalability.com/gossip-protocol-explained/
 [Gossip protocol]: https://en.wikipedia.org/wiki/Gossip_protocol
 [hashicorp/memberlist]: https://github.com/hashicorp/memberlist
 [In-Depth Comparison of Distributed Coordination Tools: Consul, etcd, ZooKeeper, and Nacos]: https://medium.com/@karim.albakry/in-depth-comparison-of-distributed-coordination-tools-consul-etcd-zookeeper-and-nacos-a6f8e5d612a6
 [Mimir on AWS ECS Fargate]: https://github.com/grafana/mimir/discussions/3807#discussioncomment-4602413
+[uber-go/automaxprocs]: https://github.com/uber-go/automaxprocs
