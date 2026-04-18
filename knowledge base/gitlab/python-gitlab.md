@@ -39,6 +39,8 @@ api_version = 4
 <details>
   <summary>Usage</summary>
 
+Global flag must come **before** subcommands.
+
 ```sh
 # Run as container.
 docker run -it --rm 'registry.gitlab.com/python-gitlab/python-gitlab' gitlab …
@@ -53,6 +55,14 @@ gitlab --order-by 'name' user list --get-all --per-page '100'
 
 # Search for groups.
 gitlab group list --search 'infra'
+
+# List group wiki pages.
+gitlab -o 'json' group-wiki list --group-id '42'
+
+# Get specific group wiki pages by slug.
+# Slugs containing `/` can be passed as-is.
+gitlab -o 'json' group-wiki get --group-id '42' --slug 'runbooks/deploy-process'
+gitlab -o 'json' group-wiki get --group-id '42' --slug 'adrs/0001-use-pulumi' | jq -r '.content'
 ```
 
 </details>
@@ -89,7 +99,7 @@ gitlab group list --search 'infra'
 <!-- Files -->
 <!-- Upstream -->
 [Codebase]: https://github.com/python-gitlab/python-gitlab
-[Documentation]: https://website/docs/
-[Website]: https://website/
+[Documentation]: https://python-gitlab.readthedocs.io/
+[Website]: https://python-gitlab.readthedocs.io/
 
 <!-- Others -->
