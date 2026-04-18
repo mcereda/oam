@@ -1,5 +1,5 @@
 diff --git a/examples/claude-code/user.CLAUDE.md b/examples/claude-code/own-kb/user.CLAUDE.md
-index 52f0e09..234910f 100644
+index bab6155..8fd6cdb 100644
 --- a/examples/claude-code/user.CLAUDE.md
 +++ b/examples/claude-code/own-kb/user.CLAUDE.md
 @@ -8,7 +8,7 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this
@@ -11,11 +11,13 @@ index 52f0e09..234910f 100644
  - If you're unsure or don't have confident knowledge about something, say so plainly. **Never** guess or fabricate
    answers. Propose looking it up via web search or documentation instead. I appreciate an honest "I don't know, let me
    check". It is always better than a plausible-sounding but wrong answer. Be especially cautious with topics that
-@@ -18,7 +18,8 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this
+@@ -17,8 +17,9 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this
+ - At the end of every response, if it produced a durable technical insight (a gotcha, a non-obvious fact, a synthesis
    across sources), surface it. E.g., "tool X silently ignores flag Y when Z is set" is durable; "the file has 200 lines"
-   is not. Offer to add the insight to the project's documentation **and** to any relevant wiki or
-   knowledge base you are aware of. Don't wait for me to ask.
+   is not. Offer to add the insight to the project's documentation **and** to any relevant wiki or knowledge base you are
+-  aware of. Don't wait for me to ask.
 -- **Never** modify files outside the current project without asking.
++  aware of. Don't wait for me to ask. You can add it directly to your KB without asking.
 +- **Never** modify files outside the current project without asking, except for your own KB. Clearly state when you are
 +  updating it.
  - Avoid using emoji unless explicitly requested.
