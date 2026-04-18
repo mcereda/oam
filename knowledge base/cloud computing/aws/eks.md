@@ -195,7 +195,7 @@ aws eks … update-kubeconfig --name 'DeepThought' --role-arn 'arn:aws:iam::0123
   role **will** need access to the referenced resources.<br/>
   In such a case, it's generally better to create a custom role instead of assigning permissions to the built-in one.
 
-- \[suggested] 1+ (one or more) custom service role(s) for the worker nodes.<br/>
+- \[suggested] One or more custom service role(s) for the worker nodes.<br/>
   Best practice would dictate to create **one role per worker node type**, and to attach each of them only the policies
   they require (or giving them similar custom permissions).
 
@@ -203,12 +203,15 @@ aws eks … update-kubeconfig --name 'DeepThought' --role-arn 'arn:aws:iam::0123
   It's generally better to create a custom role instead of assigning permissions to the built-in one.<br/>
   See the corresponding section under [Create worker nodes].
 
-- 1+ (one or more) worker node type.<br/>
+- One or more worker node type.<br/>
   See the [Create worker nodes] section.
 
 - \[if using APIs for authentication] 1+ (one or more) access entry (/entries) with an EKS access policy assigned.
 
 - _Private_ clusters have [more special requirements][private cluster requirements] of their own.
+
+A single role can trust multiple service principals (e.g., EC2 and Pod Identity) in a single trust policy.<br/>
+Refer to [IAM trust policies][iam / trust policies].
 
 ## Cluster creation procedure
 
@@ -1492,15 +1495,16 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [secrets encryption through kms]: #secrets-encryption-through-kms
 
 <!-- Knowledge base -->
-[amazon web services]: README.md
-[cli]: cli.md
-[control plane]: ../../kubernetes/README.md#control-plane
-[kubernetes' cluster autoscaler component]: ../../kubernetes/cluster%20autoscaler.md
-[ebs]: ebs.md
-[karpenter]: ../../kubernetes/karpenter.md
-[kubernetes]: ../../kubernetes/README.md
-[pulumi]: ../../pulumi.md
-[terraform]: ../../pulumi.md
+[Amazon Web Services]: README.md
+[CLI]: cli.md
+[Control plane]: ../../kubernetes/README.md#control-plane
+[EBS]: ebs.md
+[IAM / trust policies]: iam.md#trust-policies
+[Karpenter]: ../../kubernetes/karpenter.md
+[Kubernetes' cluster autoscaler component]: ../../kubernetes/cluster%20autoscaler.md
+[Kubernetes]: ../../kubernetes/README.md
+[Pulumi]: ../../pulumi.md
+[Terraform]: ../../pulumi.md
 
 <!-- Files -->
 <!-- Upstream -->
