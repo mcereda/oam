@@ -19,7 +19,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
    1. [Agent-based hooks](#agent-based-hooks)
    1. [HTTP hooks](#http-hooks)
 1. [Delegating work](#delegating-work)
-   1. [Sub agents](#sub-agents)
+   1. [Subagents](#subagents)
    1. [Agent teams](#agent-teams)
    1. [MCP servers in sub-agents](#mcp-servers-in-sub-agents)
 1. [Scheduling tasks](#scheduling-tasks)
@@ -1479,10 +1479,19 @@ An empty `2xx` body counts as success.
 
 ## Delegating work
 
-[Agent teams] generally perform parallel tasks in less time, but consume more tokens.<br/>
-[Sub agents] currently consistently produce better quality output than teams.
+[Agent teams] generally perform parallel tasks in less time, but consume more tokens (about N times, for N agents).<br/>
+[Subagents] currently consistently produce better quality output than teams.
 
-### Sub agents
+| /              | Subagents                              | Agent teams                                                                               |
+| -------------- | -------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Model          | Hierarchical: spawn, work, report back | Peer-to-peer: independent sessions communicate via mailbox                                |
+| Context        | Share parent's context window          | Own context window; load `CLAUDE.md` and MCP servers, but **not** the lead's conversation |
+| Communication  | Only back to caller                    | Any teammate can message any other                                                        |
+| File isolation | None (same working tree)               | [Git worktrees]: each agent edits independently, merges back                              |
+| Coordination   | Caller manages                         | Shared task list that teammates can claim                                                 |
+| Cost           | Moderate (still one session)           | Scales with team size                                                                     |
+
+### Subagents
 
 Refer to [Create custom subagents].
 
@@ -1525,18 +1534,33 @@ subagent.
 ### Agent teams
 
 > [!warning]
-> Experimental feature as of 2026-03-02.
+> Experimental feature as of 2026-04-18. Requires Claude Code v2.1.32+.
 
 Refer to [Orchestrate teams of Claude Code sessions].
 
 Multiple Claude Code instances can work together as a team.<br/>
 One session acts as the team lead and coordinates work, assigns tasks, and synthesizes results.<br/>
-Teammates work independently, have their own context window, and communicate directly with each other.
+Teammates work independently, have their **own** context window, and communicate **directly** with each other via a
+mailbox system and a shared task list.
+
+Each teammate operates in its own [git worktree][git worktrees] to allow concurrent edits to different files without
+conflicts. Changes merge back when tasks complete.
+
+Each teammate loads `CLAUDE.md` files and MCP servers, but do **not** inherit the lead's conversation history. They
+start fresh.
 
 One can interact with individual teammates directly, without going through the lead.
 
 Most effective when teammates can operate independently.<br/>
 They do exhibit coordination overhead, and use more tokens than a single session.
+
+Progress is displayed in two modes:
+
+- **In-process** (default), where all teammates run in the main terminal.<br/>
+  `Shift+Down` cycles through them, and allows messaging them directly. Works everywhere.
+- **Split-pane**, where each teammate gets its own pane.<br/>
+  Requires [tmux], or iTerm2 with the `it2` CLI.<br/>
+  Not supported in VS Code's integrated terminal or Windows Terminal.
 
 Currently disabled by default.<br/>
 Enable them by setting the `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` environment variable to `1`, either in a shell
@@ -1607,6 +1631,13 @@ Ask the researcher teammate to shut down
 
 Clean up the team **after termination** by just asking the lead to clean up.<br/>
 The lead will fail if any teammate is still running.
+
+Known current limitations:
+
+- Sessions cannot be resumed in in-process mode. `/resume` and `/rewind` do **not** restore teammates.
+- Teammates sometimes fail to mark tasks as complete, blocking dependent work.
+- Uses only **one** team per session. A teammate **cannot** spawn its own nested team.
+- Teammates finish their current request before stopping.
 
 ### MCP servers in sub-agents
 
@@ -1837,7 +1868,7 @@ Claude Code version: `v2.1.41`.
 [Agent-based hooks]: #agent-based-hooks
 [Configuration]: #configuration
 [Prompt-based hooks]: #prompt-based-hooks
-[Sub agents]: #sub-agents
+[Subagents]: #subagents
 [Using hooks]: #using-hooks
 [Using skills]: #using-skills
 
@@ -1850,11 +1881,12 @@ Claude Code version: `v2.1.41`.
 [Claude]: README.md
 [CONTRIBUTING.md]: ../../contributingmd.md
 [Gemini CLI]: ../gemini/cli.md
-[MCP]: ../mcp.md
 [git worktrees]: ../../git.md#worktrees
+[MCP]: ../mcp.md
 [Ollama]: ../ollama.md
 [OpenCode]: ../opencode.md
 [Pi]: ../pi.md
+[tmux]: ../../tmux.md
 
 <!-- Files -->
 [.mcp.json file example]: ../../../examples/claude-code/dotmcp.json
@@ -1864,7 +1896,7 @@ Claude Code version: `v2.1.41`.
 [settings.json file example for own KB]: ../../../examples/claude-code/own-kb/kb.settings.json
 [settings.json file example]: ../../../examples/claude-code/settings.json
 [User-level CLAUDE.md patch example for own KB]: ../../../examples/claude-code/own-kb/user.CLAUDE.md.patch
-[User-level settings.json patch example for own KB]: ../../../examples/claude-code/own-kb/user.settings.json.patch
+[User-level settings.json patch example for own KB]: ../../../examples/claude-code/own-kb/user.settings.patch.json
 
 <!-- Upstream -->
 [anthropics/skills]: https://github.com/anthropics/skills

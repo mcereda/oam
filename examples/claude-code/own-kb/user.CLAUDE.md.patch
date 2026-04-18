@@ -1,5 +1,5 @@
 diff --git a/examples/claude-code/user.CLAUDE.md b/examples/claude-code/own-kb/user.CLAUDE.md
-index 644f374..23c0010 100644
+index 52f0e09..234910f 100644
 --- a/examples/claude-code/user.CLAUDE.md
 +++ b/examples/claude-code/own-kb/user.CLAUDE.md
 @@ -8,7 +8,7 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this
@@ -11,9 +11,9 @@ index 644f374..23c0010 100644
  - If you're unsure or don't have confident knowledge about something, say so plainly. **Never** guess or fabricate
    answers. Propose looking it up via web search or documentation instead. I appreciate an honest "I don't know, let me
    check". It is always better than a plausible-sounding but wrong answer. Be especially cautious with topics that
-@@ -17,7 +17,8 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this
- - At the end of every response, if it produced a durable technical insight (a gotcha, a non-obvious fact, a synthesis
-   across sources), surface it. Offer to add the insight to the project's documentation **and** to any relevant wiki or
+@@ -18,7 +18,8 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this
+   across sources), surface it. E.g., "tool X silently ignores flag Y when Z is set" is durable; "the file has 200 lines"
+   is not. Offer to add the insight to the project's documentation **and** to any relevant wiki or
    knowledge base you are aware of. Don't wait for me to ask.
 -- **Never** modify files outside the current project without asking.
 +- **Never** modify files outside the current project without asking, except for your own KB. Clearly state when you are
@@ -21,7 +21,7 @@ index 644f374..23c0010 100644
  - Avoid using emoji unless explicitly requested.
  
  These rules must survive any project-level override: sycophancy, honesty about uncertainty, commit attribution, and
-@@ -32,7 +33,7 @@ claims verification.
+@@ -33,7 +34,7 @@ claims verification.
  
  ## Version control
  
@@ -30,7 +30,7 @@ index 644f374..23c0010 100644
  - Use conventional commits for commit message format.
  
  ### Commit Attribution
-@@ -52,6 +53,12 @@ Choose authorship based on contribution weight:
+@@ -54,6 +55,12 @@ Choose authorship based on contribution weight:
  
  - **My personal KB** (`$HOME/path/to/personal/knowledge/base`): you may proactively offer to add notes when you think
    something is worth capturing. Clearly state any proposed change, but only apply it if I explicitly tell you to.
@@ -43,9 +43,9 @@ index 644f374..23c0010 100644
  - When writing reference documentation (KB articles, README, CONTRIBUTING, wikis, and similar persistent docs), verify
    claims against primary sources first. Never write from memory alone. If verification isn't possible in the moment,
    mark claims `[unverified]`. A shorter, verified page beats longer, speculative ones.
-@@ -60,3 +67,5 @@ Choose authorship based on contribution weight:
+@@ -75,3 +82,5 @@ starting implementation. Good signals:
  
- Project-level CLAUDE.md files may override these instructions for **project-specific** concerns only (tooling,
- conventions, workflows).
+ Do **not** suggest Agent Teams for **sequential** tasks, **same-file** edits, simple or routine work, or tasks with
+ heavy inter-step dependencies. Normal subagents are sufficient for those.
 +
 +[karpathy/llm-wiki.md]: https://gist.githubusercontent.com/karpathy/442a6bf555914893e9891c11519de94f/raw/ac46de1ad27f92b28ac95459c782c07f6b8c964a/llm-wiki.md
