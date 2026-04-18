@@ -11,6 +11,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
    1. [Giving Claude its own knowledge base](#giving-claude-its-own-knowledge-base)
 1. [Using tools](#using-tools)
    1. [Managing MCP servers](#managing-mcp-servers)
+      1. [MCP servers of interest](#mcp-servers-of-interest)
    1. [Limit tool execution](#limit-tool-execution)
 1. [Using skills](#using-skills)
 1. [Using plugins](#using-plugins)
@@ -19,7 +20,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
    1. [Agent-based hooks](#agent-based-hooks)
    1. [HTTP hooks](#http-hooks)
 1. [Delegating work](#delegating-work)
-   1. [Subagents](#subagents)
+   1. [Sub-agents](#sub-agents)
    1. [Agent teams](#agent-teams)
    1. [MCP servers in sub-agents](#mcp-servers-in-sub-agents)
 1. [Scheduling tasks](#scheduling-tasks)
@@ -327,7 +328,7 @@ Files:
 | Feature     | User files                | Project files                       | Local files                                         | Managed files           |
 | ----------- | ------------------------- | ----------------------------------- | --------------------------------------------------- | ----------------------- |
 | Settings    | `~/.claude/settings.json` | `.claude/settings.json`             | `.claude/settings.local.json`                       | `managed-settings.json` |
-| Subagents   | `~/.claude/agents/`       | `.claude/agents/`                   | None                                                | FIXME                   |
+| Sub-agents  | `~/.claude/agents/`       | `.claude/agents/`                   | None                                                | FIXME                   |
 | MCP servers | `~/.claude.json`          | `.mcp.json`                         | `~/.claude.json`, under `projects.{{project.path}}` | `managed-mcp.json`      |
 | Plugins     | `~/.claude/settings.json` | `.claude/settings.json`             | `.claude/settings.local.json`                       | FIXME                   |
 | `CLAUDE.md` | `~/.claude/CLAUDE.md`     | `CLAUDE.md`<br/>`.claude/CLAUDE.md` | None                                                | FIXME                   |
@@ -474,7 +475,7 @@ It is enabled by default. Disable it via the `/memory` toggle, `settings.json`, 
 Store auto memory in custom locations by setting `autoMemoryDirectory` in user or local-level settings. Avoid doing
 this in project-level settings to prevent redirecting memory writes to sensitive locations.
 
-Subagents can maintain their own auto memory. Refer to [subagent memory configuration].
+Sub-agents can maintain their own auto memory. Refer to [sub-agent memory configuration].
 
 Also see [thedotmack/claude-mem] for an automatic memory management system.
 
@@ -716,7 +717,7 @@ jq '.mcpServers."grafana-aws" |= {
 > Giving other types will violate the schema Claude Code uses to validate the configuration file. The app will complain
 > about it and **not** load the MCP server.
 
-Configuration examples:
+#### MCP servers of interest
 
 <details style='padding: 0 0 0 1rem'>
   <summary>AWS API</summary>
@@ -725,14 +726,77 @@ Refer to [AWS API MCP Server].
 
 Enables interacting with AWS services and resources through AWS CLI commands.
 
+> [!warning] Gotcha
+> Host header validation errors are swallowed into a generic JSON-RPC `-32602` response. Check the logs for _Host header
+> validation failed_.
+
+`AWS_API_MCP_HOST` defines the listen address.<br/>
+`AWS_API_MCP_ALLOWED_HOSTS` defines the host header validation whitelist for requests.<br/>
+These are **separate** environment variables, but `ALLOWED_HOSTS` defaults to `HOST` when unset.<br/>
+When running in Docker with port mapping, set **both** of them.
+
+`ALLOWED_HOSTS` supports comma-separated values, and `*` to disable header validation.
+
 > [!important]
-> The container's `/app/.aws` folder must be **writable** (no `:ro` in the volume specification).<br/>
-> The volume's path is **not** expanded in the shell. Use plain strings with **no** variables.
+> When running in containers, the container's `/app/.aws` folder must be **writable** (do **not** use `:ro` in the
+> volume specification).<br/>
+
+  <details style='padding: 0 0 0 1rem'>
+    <summary>Docker container, HTTP transport</summary>
+
+Docker compose file:
+
+```yml
+---
+services:
+  aws_api_mcp_ro:
+    image: public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest
+    container_name: aws-cli-mcp-server
+    environment:
+      AUTH_TYPE: no-auth
+      AWS_API_MCP_ALLOWED_HOSTS: 127.0.0.1,localhost  # accept '127.0.0.1' and 'localhost' from clients
+      AWS_API_MCP_HOST: 0.0.0.0                       # listen on all container interfaces
+      AWS_API_MCP_PORT: 60080
+      AWS_API_MCP_TELEMETRY: false
+      AWS_API_MCP_TRANSPORT: streamable-http
+      AWS_REGION: eu-west-1
+      READ_OPERATIONS_ONLY: true
+    volumes:
+      - $HOME/.aws:/app/.aws
+    ports:
+      - # on macOS only '127.0.0.1' is available on loopback by default
+        # linux routes all addresses in the '127.0.0.0/8' class to loopback instead
+        "127.0.0.1:60080:60080"
+```
+
+`claude.json` configuration:
 
 ```json
 {
   "mcpServers": {
-    "aws-api-ro": {
+    "aws-api-docker-stdio-ro": {
+      "type": "http",
+      "url": "http://localhost:60080/mcp",
+      "timeout": 60
+    }
+  }
+}
+```
+
+  </details>
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Docker container, stdio transport</summary>
+
+> [!important]
+> The volume's path is **not** expanded in the shell. Use plain strings with **no** variables.
+
+`claude.json` configuration:
+
+```json
+{
+  "mcpServers": {
+    "aws-api-docker-stdio-ro": {
       "command": "docker",
       "args": [
         "run",
@@ -750,7 +814,7 @@ Enables interacting with AWS services and resources through AWS CLI commands.
         "READ_OPERATIONS_ONLY": "true"
       }
     },
-    "aws-api-rw": {
+    "aws-api-docker-stdio-rw": {
       "command": "docker",
       "args": [
         "run",
@@ -768,37 +832,7 @@ Enables interacting with AWS services and resources through AWS CLI commands.
 }
 ```
 
-</details>
-
-<details style='padding: 0 0 0 1rem'>
-  <summary>AWS Cost Explorer</summary>
-
-Refer to [AWS Cost Explorer MCP Server].
-
-Enables analyzing AWS costs and usage data through the AWS Cost Explorer API.
-
-> [!important]
-> The container's `/app/.aws` folder must be **writable** (no `:ro` in the volume specification).<br/>
-> The volume's path is **not** expanded in the shell. Use plain strings with **no** variables.
-
-```json
-{
-  "mcpServers": {
-    "aws-cost-explorer": {
-      "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "--interactive",
-        "--env", "AWS_API_MCP_TELEMETRY",
-        "--env", "AWS_REGION",
-        "--volume", "/home/path/.aws:/app/.aws:rw",
-        "public.ecr.aws/awslabs-mcp/awslabs/cost-explorer-mcp-server:latest"
-      ]
-    }
-  }
-}
-```
+  </details>
 
 </details>
 
@@ -824,6 +858,51 @@ Enables interacting with GitLab instances through the GitLab API.
   <summary>Grafana</summary>
 
 Refer to [Grafana MCP Server].
+
+  <details style='padding: 0 0 0 1rem'>
+    <summary>Docker container, HTTP transport</summary>
+Docker compose file:
+
+```yml
+---
+services:
+  grafana_aws_ro:
+    image: grafana/mcp-grafana:latest
+    container_name: grafana-mcp-server
+    environment:
+      GRAFANA_URL: "https://g-abcdef0123.grafana-workspace.eu-west-1.amazonaws.com"
+      GRAFANA_SERVICE_ACCOUNT_TOKEN: "glsa_abc…def"
+    ports:
+      - # on macOS only '127.0.0.1' is available on loopback by default
+        # linux routes all addresses in the '127.0.0.0/8' class to loopback instead
+        "127.0.0.1:60180:60180"
+    command:
+      - -t
+      - streamable-http
+      - --disable-admin
+      - --disable-write
+```
+
+`claude.json` configuration:
+
+```json
+{
+  "mcpServers": {
+    "grafana-aws-ro": {
+      "type": "http",
+      "url": "http://localhost:60180/mcp",
+      "timeout": 60
+    }
+  }
+}
+```
+
+  </details>
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Docker container, stdio transport</summary>
+
+`claude.json` configuration:
 
 ```json
 {
@@ -869,6 +948,8 @@ Refer to [Grafana MCP Server].
   }
 }
 ```
+
+  </details>
 
 </details>
 
@@ -990,6 +1071,18 @@ Refine permissions using `PreToolUse` [hooks][using hooks].<br/>
 ```
 
 </details>
+
+> [!caution]
+> The `/config` command exposes a _Use auto mode during plan_ toggle that defaults to **enabled**. When enabled, the
+> auto-mode safety classifier evaluates tool calls autonomously **even while plan mode**, **bypassing** plan mode's
+> read-only constraint.
+>
+> Commands like `docker ps` (read-only, but not in the `allow` list) will be deemed safe from the classifier and run
+> **without** prompting because of that. This happens even though plan mode is supposed to restrict all non-read tool
+> calls.
+>
+> This toggle is **session-level** and does **not** persist in `settings.json`. Disable it via `/config` to restore plan
+> mode's strict read-only enforcement.
 
 Leverage [Sandboxing][documentation / sandboxing] to provide filesystem and network isolation for tool execution.<br/>
 The sandboxed bash tool uses OS-level primitives to enforce defined boundaries upfront, and controls network access
@@ -1346,7 +1439,7 @@ runs only for `git` commands and `"Edit(*.ts)"` runs only for TypeScript files.
 Consider these for action-specific gates like commits or deployments, and scoping them further using the `if` field.
 
 `TaskCompleted` hooks fire when a task created via the Task tool for background/parallel work finishes.<br/>
-Exiting the REPL does **not** trigger `TaskCompleted` hooks. It will **only** fire when a subagent task completes.
+Exiting the REPL does **not** trigger `TaskCompleted` hooks. It will **only** fire when a sub-agent task completes.
 
 Run commands at the end **of each response or session** by leveraging the `Stop` hook event.<br/>
 It fires **on every turn**, **after** Claude **finished** writing its response, which forces Claude to regenerate it
@@ -1445,7 +1538,7 @@ instructed to.
 
 </details>
 
-Agent-based hooks spawn a subagent that can read files, search code, and use other tools to verify conditions locally
+Agent-based hooks spawn a sub-agent that can read files, search code, and use other tools to verify conditions locally
 before returning a decision.<br/>
 They use an `ok`/`reason`-like response format as prompt hooks, but have a default timeout of 60 seconds.
 
@@ -1509,9 +1602,9 @@ An empty `2xx` body counts as success.
 ## Delegating work
 
 [Agent teams] generally perform parallel tasks in less time, but consume more tokens (about N times, for N agents).<br/>
-[Subagents] currently consistently produce better quality output than teams.
+[Sub-agents] currently consistently produce better quality output than teams.
 
-| /              | Subagents                              | Agent teams                                                                               |
+| /              | Sub-agents                             | Agent teams                                                                               |
 | -------------- | -------------------------------------- | ----------------------------------------------------------------------------------------- |
 | Model          | Hierarchical: spawn, work, report back | Peer-to-peer: independent sessions communicate via mailbox                                |
 | Context        | Share parent's context window          | Own context window; load `CLAUDE.md` and MCP servers, but **not** the lead's conversation |
@@ -1520,24 +1613,24 @@ An empty `2xx` body counts as success.
 | Coordination   | Caller manages                         | Shared task list that teammates can claim                                                 |
 | Cost           | Moderate (still one session)           | Scales with team size                                                                     |
 
-### Subagents
+### Sub-agents
 
-Refer to [Create custom subagents].
+Refer to [Create custom sub-agents].
 
 **Specialized** AI assistants with fixed roles, handling **specific** types of tasks.<br/>
 Each runs in its own context window, with its own custom system prompt, specific access to tools, and independent
 permissions.
 
-When Claude encounters a task that matches a subagent's description, it delegates the task to that sub agent.<br/>
+When Claude encounters a task that matches a sub-agent's description, it delegates the task to that sub agent.<br/>
 The sub agent works independently, and returns results once finished.
 
 Most effective for sequential tasks, same-file edits, or tasks with many dependencies.<br/>
 They only report results back to the main agent, and never talk to each other.
 
-Claude Code includes several built-in subagents like _Explore_, _Plan_, and _general-purpose_.<br/>
-One can create custom subagents to handle specific tasks.
+Claude Code includes several built-in sub-agents like _Explore_, _Plan_, and _general-purpose_.<br/>
+One can create custom sub-agents to handle specific tasks.
 
-Subagents are defined in Markdown files with YAML frontmatter.<br/>
+Sub-agents are defined in Markdown files with YAML frontmatter.<br/>
 Create them manually or use the `/agents` command.
 
 <details style='padding: 0 0 1rem 1rem'>
@@ -1556,9 +1649,9 @@ specific, actionable feedback on quality, security, and best practices.
 
 </details>
 
-One can ask Claude to use subagents in sequence when dealing with multi-step workflows.<br/>
-Each subagent completes its task and returns its results to Claude, which then passes relevant context to the next
-subagent.
+One can ask Claude to use sub-agents in sequence when dealing with multi-step workflows.<br/>
+Each sub-agent completes its task and returns its results to Claude, which then passes relevant context to the next
+sub-agent.
 
 ### Agent teams
 
@@ -1680,7 +1773,7 @@ the sub-agents use those servers.
 When MCP servers run as containers using stdio transport, **each** sub-agent spawns its **own** container instance,
 multiplying resource usage. Mitigate this by:
 
-- Defining MCP servers **inline** in [sub-agent configurations][create custom subagents], instead of session-wide,
+- Defining MCP servers **inline** in [sub-agent configurations][create custom sub-agents], instead of session-wide,
   to limit their lifespan and context to the sub-agent.
 - Running containerized servers **independently**, and configuring them to use network transport (streamable HTTP or
   SSE). Multiple sub-agents may then connect to a single container running outside of their context.<br/>
@@ -1897,7 +1990,7 @@ Claude Code version: `v2.1.41`.
 [Agent-based hooks]: #agent-based-hooks
 [Configuration]: #configuration
 [Prompt-based hooks]: #prompt-based-hooks
-[Subagents]: #subagents
+[Sub-agents]: #sub-agents
 [Using hooks]: #using-hooks
 [Using skills]: #using-skills
 
@@ -1936,7 +2029,7 @@ Claude Code version: `v2.1.41`.
 [Built-in commands reference]: https://code.claude.com/docs/en/commands
 [CLI reference]: https://code.claude.com/docs/en/cli-reference
 [Codebase]: https://github.com/anthropics/claude-code
-[Create custom subagents]: https://code.claude.com/docs/en/sub-agents
+[Create custom sub-agents]: https://code.claude.com/docs/en/sub-agents
 [Documentation / Sandboxing]: https://code.claude.com/docs/en/sandboxing
 [Documentation / Settings]: https://code.claude.com/docs/en/settings
 [Documentation / Skills]: https://code.claude.com/docs/en/skills
@@ -1954,7 +2047,7 @@ Claude Code version: `v2.1.41`.
 [Plugins reference]: https://code.claude.com/docs/en/plugins-reference
 [Run prompts on a schedule]: https://code.claude.com/docs/en/scheduled-tasks
 [Schedule tasks on the web]: https://code.claude.com/docs/en/web-scheduled-tasks
-[Subagent memory configuration]: https://code.claude.com/docs/en/sub-agents#enable-persistent-memory
+[Sub-agent memory configuration]: https://code.claude.com/docs/en/sub-agents#enable-persistent-memory
 [Tools reference]: https://code.claude.com/docs/en/tools-reference
 [Website]: https://claude.com/product/overview
 
@@ -1962,7 +2055,6 @@ Claude Code version: `v2.1.41`.
 [Agent Skills]: https://agentskills.io/
 [Allow MCP tools to be available only to subagent]: https://github.com/anthropics/claude-code/issues/6915
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
-[AWS Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
 [Claude analysis / The System Prompt]: https://rastrigin.systems/blog/claude-code-part-2-system-prompt/
 [Claude analysis / What Claude Code Actually Sends to the Cloud]: https://rastrigin.systems/blog/claude-code-part-1-requests/
 [Claude Code Unpacked]: https://ccunpacked.dev/

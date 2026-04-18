@@ -1,0 +1,22 @@
+---
+services:
+  aws_cli:
+    container_name: aws-cli-mcp-server-rw
+    image: public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest
+    environment:
+      AUTH_TYPE: no-auth
+      AWS_API_MCP_ALLOWED_HOSTS: 127.0.0.1,localhost  # accept '127.0.0.1' and 'localhost' from clients
+      AWS_API_MCP_HOST: 0.0.0.0                       # listen on all container interfaces
+      AWS_API_MCP_PORT: 60080
+      AWS_API_MCP_PROFILE_NAME: some-operator
+      AWS_API_MCP_TELEMETRY: false
+      AWS_API_MCP_TRANSPORT: streamable-http
+      AWS_REGION: eu-west-1
+      READ_OPERATIONS_ONLY: false
+      REQUIRE_MUTATION_CONSENT: true  # safety net
+    volumes:
+      - $HOME/.aws:/app/.aws
+    ports:
+      - # on macOS only '127.0.0.1' is available on loopback by default
+        # linux routes all addresses in the '127.0.0.0/8' class to loopback instead
+        "127.0.0.1:60080:60080"
