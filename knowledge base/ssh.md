@@ -225,6 +225,39 @@ Host *
     SetEnv MYENV=itsvalue
 ```
 
+> [!note]
+> `Host` matches the name given in the command-line, not the resolved `HostName` value.<br/>
+> Consider:
+>
+> - Including all alias patterns in the settings block alongside the IPs.
+>
+>   <details style='padding: 0 0 1rem 1rem'>
+>
+>   ```ssh-config
+>   Host  pbx 10.7.0.4
+>       User  kevin
+>       Port  54321
+>       IdentityFile  ~/.ssh/tunnel.key
+>   ```
+>
+>   </details>
+>
+> - Using `Match host` to add specific settings later.<br/>
+>   It matches **after** `HostName` substitution.
+>
+>   <details style='padding: 0 0 1rem 1rem'>
+>
+>   ```ssh-config
+>   Host  pbx
+>       HostName  10.7.0.4
+>   Match host  10.7.0.4,10.7.0.5
+>       User  kevin
+>       Port  54321
+>       IdentityFile  ~/.ssh/tunnel.key
+>   ```
+>
+>   </details>
+
 ### Append domains to a hostname before attempting to check if they exist
 
 ```ssh-config
