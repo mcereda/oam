@@ -7,6 +7,10 @@ Also check [Use CI/CD configuration from other files] and [Use extends to reuse 
 1. [Specify when to run entire pipelines](#specify-when-to-run-entire-pipelines)
 1. [External secrets](#external-secrets)
    1. [AWS Secrets Manager](#aws-secrets-manager)
+1. [Cross-project pipelines](#cross-project-pipelines)
+1. [Serializing jobs](#serializing-jobs)
+   1. [Resource groups](#resource-groups)
+   1. [Merge trains](#merge-trains)
 1. [API](#api)
 1. [Git options](#git-options)
 1. [Troubleshooting](#troubleshooting)
@@ -271,6 +275,89 @@ By default, GitLab writes secrets to a file, and sets the variable to that file'
 secret's value directly as an environment variable.
 JSON-formatted secrets allow using fields to extract specific keys. Omit `field` to get the entire secret value.
 
+> [!note]
+> On self-managed GitLab, the `ci_aws_secrets_manager` feature flag _may_ need to be **explicitly** enabled even if GA:
+>
+> ```sh
+> curl -fsX 'PUT' 'https://gitlab.example.org/api/v4/features/ci_aws_secrets_manager' \
+>   -H 'PRIVATE-TOKEN: glpat-…' -d 'value=true'
+> ```
+>
+> This is an instance-wide admin operation.
+
+## Cross-project pipelines
+
+Refer to [Downstream pipelines].
+
+A pipeline in one project (Project A) can _trigger_ a pipeline in another project (Project B) using the `trigger:`
+keyword in a job:
+
+```yaml
+deploy_to_shared_infra:
+  stage: deploy
+  variables:  # override variables using the same name in the target job
+    IMAGE_TAG: $CI_COMMIT_SHA
+  trigger:
+    project: shared-infra/deploy
+    branch: main
+    strategy: depend  # reflect the outcome of the targeted job
+```
+
+CI/CD variables defined in the GUI for Project A are **not** passed automatically to the targeted job. One needs to
+re-declare them in `variables:` if needed.<br/>
+One can also pass artifacts via dotenv reports (`needs:project`), usually a good way to pass structured variable
+cross-project.
+
+Cross-project triggers do **not** support `script:`, and hence cannot _modify_ targeted jobs.
+
+> [!important]
+> The user (or token) starting the job must have `pipeline-start` permissions on the downstream project.
+
+## Serializing jobs
+
+Both [resource groups] and [merge trains] serialize job runs, but at different layers:
+
+- Merge trains serialize at the _merge_ layer by allowing only one **MR** to merge to the main branch at a time.
+- Resource groups serialize at the _job_ layer by allowing only one **job** in the group to run at a time.
+
+> [!tip]
+> IaC pipelines are one of the best use cases for which consider enabling merge trains on the repository **and** using
+> resource groups on deploy jobs.
+
+### Resource groups
+
+Refer to [Resource group].
+
+`resource_group` prevents two jobs with the same group name from running simultaneously, no matter how many pipelines
+are in flight.<br/>
+This  is the most direct way to serialize deploys against shared targets (e.g., Pulumi stacks, databases, environments).
+
+```yaml
+deploy_prd:
+  resource_group: pulumi/myapp/prd
+  script: pulumi --cwd 'infra' up --stack 'prd'
+```
+
+If a second pipeline tries to run a job with the same `resource_group` while the first is running, it waits in the queue
+instead of failing or trampling the first.
+
+Useful patterns:
+
+- **Per-stack/per-environment** (`resource_group: pulumi/<project>/<stack>`): prevents two `pulumi up` runs from
+  racing.
+- **Per-shared-database** (`resource_group: db-migrations/<env>`): prevents two migration jobs from competing.
+
+> [!tip]
+> Combine this with `interruptible: false` on jobs that, if interrupted, would leave a corrupted state behind.
+
+### Merge trains
+
+Refer to [Merge trains documentation].
+
+When multiple MRs land on `main` near-simultaneously, each one's pipeline runs against a different main commit, which
+can cause race conditions.<br/>
+Use merge trains to serialize them and make each MR rebase onto the latest main _before_ its pipeline runs.
+
 ## API
 
 Refer to [Pipeline schedules API].
@@ -333,6 +420,10 @@ Solution: give that user _developer_ access or have somebody else with enough pr
   ═╬═Time══
   -->
 
+<!-- In-article sections -->
+[Merge trains]: #merge-trains
+[Resource groups]: #resource-groups
+
 <!-- Knowledge base -->
 [GitLab]: ../gitlab.md
 
@@ -342,9 +433,12 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 [ci/cd pipelines]: https://docs.gitlab.com/ci/pipelines/
 [customize pipeline configuration]: https://docs.gitlab.com/ci/pipelines/settings.html
 [debugging ci/cd pipelines]: https://docs.gitlab.com/ci/debugging.html
+[Downstream pipelines]: https://docs.gitlab.com/ci/pipelines/downstream_pipelines/
+[Merge trains documentation]: https://docs.gitlab.com/ee/ci/pipelines/merge_trains.html
 [pipeline schedules api]: https://docs.gitlab.com/api/pipeline_schedules.html
 [Predefined CI/CD variables reference]: https://docs.gitlab.com/ci/variables/predefined_variables/
 [push options]: https://docs.gitlab.com/user/project/push_options.html
+[Resource group]: https://docs.gitlab.com/ee/ci/yaml/#resource_group
 [specify when jobs run with rules]: https://docs.gitlab.com/ci/jobs/job_rules.html
 [Use AWS Secrets Manager secrets in GitLab CI/CD]: https://docs.gitlab.com/ci/secrets/aws_secrets_manager/
 [use ci/cd configuration from other files]: https://docs.gitlab.com/ci/yaml/includes.html
