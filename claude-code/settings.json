@@ -28,7 +28,10 @@
             "Bash(git checkout*)",
             "Bash(git commit*)",
             "Bash(git mv *)",
+            "Bash(git switch *)",
             "Edit(/**)",
+            "Read(.env)",
+            "Read(.env.*)",
             "Write(/**)"
         ],
         "allow": [
