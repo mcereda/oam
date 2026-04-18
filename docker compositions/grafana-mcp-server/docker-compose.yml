@@ -1,0 +1,26 @@
+---
+services:
+  grafana_mcp:
+    container_name: grafana-mcp-server
+    image: grafana/mcp-grafana:latest
+    environment:
+      # If Grafana runs on the host rather than in a container, use:
+      #   macOS/Windows: http://host.docker.internal:3000
+      #   Linux:         http://172.17.0.1:3000  (or your host gateway IP)
+      GRAFANA_URL: http://localhost:3000
+      GRAFANA_SERVICE_ACCOUNT_TOKEN: # your service account token
+    volumes:
+      - /path/to/certs:/certs:ro
+    ports:
+      - # on macOS only '127.0.0.1' is available on loopback by default
+        # linux routes all addresses in the '127.0.0.0/8' class to loopback instead
+        "127.0.0.1:8443:8443"
+    command:
+      - -t
+      - streamable-http
+      - -addr
+      - :8443
+      - --server.tls-cert-file
+      - /certs/server.crt
+      - --server.tls-key-file
+      - /certs/server.key
