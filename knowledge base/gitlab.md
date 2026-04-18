@@ -1152,6 +1152,11 @@ gitlab --order-by 'name' user list --get-all --per-page '100'
 
 </details>
 
+> [!note]
+> The [merge requests list API][merge requests api] does **not** have a `merged_after` or `merged_before`
+> parameter. Filter merged MRs by their merge date by using `updated_after` instead.<br/>
+> `created_after` excludes long-lived branches whose MR was opened more than N days ago but merged recently.
+
 ## Send logs to a central location
 
 > [!caution]
@@ -1382,6 +1387,7 @@ git clone "https://oauth2:${ACCESS_TOKEN}@somegitlab.com/vendor/package.git"
 [Issues / Support scp-style URLs in pull and push mirroring]: https://gitlab.com/gitlab-org/gitlab/-/issues/18993
 [Issues / The docker images for gitlab-ce and gitlab-ee start workhorse with incorrect socket ownership]: https://gitlab.com/gitlab-org/gitlab/-/issues/349846#note_1516339762
 [merge request approval rules]: https://docs.gitlab.com/ee/user/project/merge_requests/approvals/rules.html
+[merge requests api]: https://docs.gitlab.com/api/merge_requests/
 [minimal minikube example values file]: https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/values-minikube-minimum.yaml
 [OmniAuth]: https://docs.gitlab.com/integration/omniauth/
 [operator code]: https://gitlab.com/gitlab-org/cloud-native/gitlab-operator
