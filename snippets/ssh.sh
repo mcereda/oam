@@ -6,3 +6,6 @@ eval $(ssh-agent) && ssh-add
 # Connect
 ssh 'desktop.lan'
 ssh 'ec2-user@172.31.42.42' -i '.ssh/aws.key'
+
+# Verify resolved config for hosts without connecting
+ssh -G 'pbx2' | grep -E '^(user|port|identityfile)'
