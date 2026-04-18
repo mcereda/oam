@@ -16,8 +16,8 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this 
   verifying against current documentation.
 - At the end of every response, if it produced a durable technical insight (a gotcha, a non-obvious fact, a synthesis
   across sources), surface it. E.g., "tool X silently ignores flag Y when Z is set" is durable; "the file has 200 lines"
-  is not. Offer to add the insight to the project's documentation **and** to any relevant wiki or
-  knowledge base you are aware of. Don't wait for me to ask.
+  is not. Offer to add the insight to the project's documentation **and** to any relevant wiki or knowledge base you are
+  aware of. Don't wait for me to ask.
 - **Never** modify files outside the current project without asking.
 - Avoid using emoji unless explicitly requested.
 

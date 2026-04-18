@@ -1,6 +1,11 @@
 {
+    "model": "opus",
+    "effortLevel": "high",
+    "alwaysThinkingEnabled": true,
     "permissions": {
-        "defaultMode": "acceptEdits",
+        "defaultMode": "auto",
+        "deny": [],
+        "ask": [],
         "allow": [
             "Agent",
             "Bash",
@@ -11,5 +16,17 @@
     },
     "sandbox": {
         "enabled": false
+    },
+    "hooks": {
+        "SessionStart": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "path/to/check-and-review/script.sh"
+                    }
+                ]
+            }
+        ]
     }
 }

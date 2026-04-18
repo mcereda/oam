@@ -568,29 +568,11 @@ to correct its own behavior across sessions.
 
 ### Giving Claude its own knowledge base
 
-It works better when:
+This procedure is modelled after [karpathy/llm-wiki.md], leveraging its ready-to-use instructions and iteratively
+improving upon it.
 
-- Claude Code does **not** need to ask for permissions when operating on it.
-
-  Project-level permission setting like `Bash` and `Edit(/**)` scope allowances to the KB's specific project when making
-  changes from inside of it. Configuring `defaultMode` to `auto` or `dontAsk` avoids approval requests for those
-  actions.<br/>
-  User-level setting like `Bash(git -C ~/Repositories/claude/kb *)` and `Edit(~/Repositories/claude/kb/**)` scope
-  allowances to the KB's specific directory when making changes from other projects.<br/>
-
-  > [!tip]
-  > Remember to add `rtk`-related permissions if using [rtk-ai/rtk], e.g. `Bash(rtk git -C ~/Repositories/claude/kb *)`.
-
-- Claude Code is _consistently_ remembered to update it.<br/>
-  A `command` type `UserPromptSubmit` hook seems to be currently the best option.
-- The KB is its own **local** git repository.<br/>
-  It does kinda work using a GitLab or confluence wiki _directly_, but the process to update pages in it via API is
-  expensive and slow. Git repositories are local, better for agents to manage, and just a `git push` away from online
-  backup.
-
-> [!note]
-> Procedure modelled after [karpathy/llm-wiki.md], because leveraging ready-to-use instructions just makes things
-> easier.
+<details>
+  <summary>Procedure</summary>
 
 1. Create a git repository for Claude's knowledge base:
 
@@ -608,6 +590,53 @@ It works better when:
 1. Ask Claude to initialize it (in a new session):
 
    > Hey! I have prepared your knowledge base repository for you. Please finish initializing it to your likings.
+
+</details>
+
+<details>
+  <summary>Findings</summary>
+
+- The KB should be its own **local**, self-bootstrapping git repository.
+
+  It does work using a GitLab or confluence wiki _directly_, but updating pages in it via API is expensive and slow.
+  Git repositories are local, better for agents to manage, and just a `git push` away from online backup.
+
+- The KB should be self-sufficient and useful even **without** access to any external documentation a user may
+  maintain.
+
+- Claude Code should **not** need to ask for permissions when operating on it.
+
+  Project-level setting like `Bash` and `Edit(/**)` scope allowances to the KB's project. Set `defaultMode` to `auto`
+  and disable the sandbox to allow the agent to read, write, and commit freely.
+
+  For cross-project access (writing to the KB from other repos), add **user-level** permissions scoped **to the KB's
+  directory**, e.g. `Bash(git -C ~/Repositories/claude/kb *)` and `Edit(~/Repositories/claude/kb/**)`.
+
+  > [!tip]
+  > Remember to add `rtk`-related permissions if using [rtk-ai/rtk], e.g. `Bash(rtk git -C ~/Repositories/claude/kb *)`.
+
+- KB management is judgment-heavy, and benefits from deeper reasoning.
+
+  Set `model` to the best available reasoning model and `effortLevel` to `high` in the KB's **project-level** settings.
+
+</details>
+
+<details>
+  <summary>Improvements</summary>
+
+- Claude should be _consistently_ remembered to capture durable insights during **every** session.<br/>
+  A `UserPromptSubmit` hook seems to be currently the best option for this.
+
+- Claude should be _consistently_ remembered to check whether a periodic review is overdue, and to iteratively improve
+  on it in that case.<br/>
+  A `SessionStart` hook seems to be currently the best option for this.
+
+- The KB should include self-correcting actions and tools to avoid structural debt compounding silently.
+
+  Pre-commit hooks (e.g. using [lefthook]) running a lint script can catch schema violations (missing frontmatter,
+  broken links, orphaned pages) before they accumulate.
+
+</details>
 
 ## Using tools
 
@@ -1882,6 +1911,7 @@ Claude Code version: `v2.1.41`.
 [CONTRIBUTING.md]: ../../contributingmd.md
 [Gemini CLI]: ../gemini/cli.md
 [git worktrees]: ../../git.md#worktrees
+[Lefthook]: ../../lefthook.md
 [MCP]: ../mcp.md
 [Ollama]: ../ollama.md
 [OpenCode]: ../opencode.md
