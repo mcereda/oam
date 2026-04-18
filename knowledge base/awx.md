@@ -67,6 +67,16 @@ Part of the upstream projects for the [Red Hat Ansible Automation Platform].
   Consider avoiding using `vars_prompt` in playbooks that need to be run by AWX, or ensuring that those variables are
   provided ahead of time.
 
+- On operator versions in the 2.x range, the `init_container_image` and `init_container_image_version` fields in the
+  `AWX` custom resource's specifications are consumed by **both** the `init-database` and `init-receptor`
+  containers. `init-database` needs the `awx` image for Django management commands, and `init-receptor` needs the
+  `awx-ee` execution environment image for the receptor binary.<br/>
+  These two containers need **different** images, but share the same config field. Setting `init_container_image` to
+  the EE image fixes `init-receptor`, but breaks `init-database` because `awx-manage` does not exist in the EE
+  image.<br/>
+  If `init-receptor` is failing despite having the correct configuration, the root cause is easily an operator version
+  bug. Pin or upgrade the operator rather than changing `init_container_image` to work around it.<br/>
+
 ## Setup
 
 ### Deployment
