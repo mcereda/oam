@@ -6,6 +6,8 @@ Family of [LLMs][large language models] developed by Anthropic.
 1. [The Claude character](#the-claude-character)
 1. [Models' code of conduct](#models-code-of-conduct)
 1. [Token budget](#token-budget)
+1. [Observations](#observations)
+   1. [Procedural instructions degrade to declarative hints](#procedural-instructions-degrade-to-declarative-hints)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -141,6 +143,18 @@ Create a recurring job:
 > that time. Discard its answer.
 
 </details>
+
+## Observations
+
+### Procedural instructions degrade to declarative hints
+
+When Claude encounters a procedural instruction (e.g. "run `git config user.name` to get the author's name") it's
+tempted to treat it as a declarative **hint** (e.g., "an author name is needed here") and satisfy it from context
+instead of executing the procedure.
+
+Claude _knows_ the answer, skips the lookup, and confidently produces something wrong.<br/>
+Negative constraints (e.g. _do not infer_) seems to be key. Without it, Claude's default behavior of pattern-matching
+and filling from context could silently override the procedure.
 
 ## Further readings
 

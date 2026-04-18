@@ -14,6 +14,7 @@
             "Write(/**)"
         ]
     },
+    "skipAutoPermissionPrompt": true,
     "sandbox": {
         "enabled": false
     },
