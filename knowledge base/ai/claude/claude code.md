@@ -14,6 +14,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
       1. [MCP servers of interest](#mcp-servers-of-interest)
    1. [Limit tool execution](#limit-tool-execution)
 1. [Using skills](#using-skills)
+   1. [Findings about skill creation](#findings-about-skill-creation)
 1. [Using plugins](#using-plugins)
 1. [Using hooks](#using-hooks)
    1. [Prompt-based hooks](#prompt-based-hooks)
@@ -1200,7 +1201,7 @@ User-level skills are available in all projects.<br/>
 Project-level skills are limited to the current project.
 
 Claude Code loads only the name and description of all skills during startup, then automatically loads and activates
-only those skills that are relevant to the requests' context.<br/>
+only those skills that are relevant to the requests' context even without the user typing the slash command.<br/>
 If the loaded skills reference other files, those are preemptively loaded together with the skill (_when_ it loads that
 skill).
 
@@ -1244,7 +1245,30 @@ Reference optional files in `SKILL.md` to instruct Claude of what they contain a
 
 Consider installing and using Claude's [_Skill Creator_ plugin][anthropics/skills/skill-creator] to create custom
 skills.<br/>
-It also allows for testing.
+It also allows for testing loops.
+
+### Findings about skill creation
+
+- Side effect: temporary evaluation files appear in the parent session's skill list
+
+  The `run_eval.py` loop creates temporary command files in `~/.claude/commands/` (or the project's
+  `.claude/commands/`). When running evaluations from inside an active Claude Code session, these files appear in that
+  session's available skills list immediately as `aws-skill-{uuid8}` entries.<br/>
+  They are deleted after each run, but during parallel evaluation batches (8-10 concurrent workers) one may see many of
+  them simultaneously. This is cosmetic noise and harmless, but it does mean the parent session's context sees skills
+  that don't exist a moment later. It also confirms the testing mechanism is working correctly without reading any log
+  files.
+
+- The `skill-creator` description evaluation focuses measuring whether the model will invoke the skill when it can
+  answer directly, not whether the description is well-written.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  The model has always a fallback answer (explaining what it would do) when evaluating **routing** skills (e.g.,
+  infrastructure access, external APIs). The trigger rate stays near 0 regardless of the description quality.<br/>
+  The evaluation is only discriminatory for **capability** skills, where the model is genuinely stuck without the tool.
+
+  </details>
 
 ## Using plugins
 
@@ -1255,7 +1279,11 @@ They extend Claude Code's functionality, and allow sharing extensions across pro
 
 Can be installed at all different scopes.
 
-Plugins bundle MCP servers via an `.mcp.json` file in the plugin's root, or inline in `plugin.json`.
+Plugins **must** bundle MCP servers via an `.mcp.json` file in the plugin's root, or inline in `plugin.json`.
+
+Agents in plugins **cannot** define `mcpServers`, `hooks`, or `permissionMode` in their frontmatter.<br/>
+This, together with the MCP servers forced location in the plugin's root, makes [Offloading MCP servers to sub-agents]
+incompatible with the plugin system.
 
 > [!note]
 > Claude Code's settings schema defines the top-level `pluginConfigs` key.<br/>
@@ -1667,6 +1695,9 @@ specific, actionable feedback on quality, security, and best practices.
 ```
 
 </details>
+
+The description optimization loop (`run_loop.py`) can be used to tune an agent's descriptions against real
+trigger/no-trigger tests, the same way it is normally used to tune [skills][using skills]' descriptions.
 
 One can ask Claude to use sub-agents in sequence when dealing with multi-step workflows.<br/>
 Each sub-agent completes its task and returns its results to Claude, which then passes relevant context to the next
