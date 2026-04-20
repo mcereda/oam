@@ -17,6 +17,9 @@ services:
     volumes:
       - $HOME/.aws:/app/.aws
     ports:
-      - # on macOS only '127.0.0.1' is available on loopback by default
+      - # macOS often resolves `localhost` to IPv6 loopback *first*
+        # connections to `localhost` might fail if it is not accepted
+        '::1:60080:60080'
+      - # on macOS only '127.0.0.1' is available on IPv4 loopback by default
         # linux routes all addresses in the '127.0.0.0/8' class to loopback instead
-        "127.0.0.1:60080:60080"
+        '127.0.0.1:60080:60080'
