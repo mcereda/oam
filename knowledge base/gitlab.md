@@ -1126,6 +1126,25 @@ The feature does **not** currently support projects and subgroups.
 
 Currently supports only Maven packages and container images.
 
+Hitting a registry's root without an artifact path returns `400 Bad request` (_Path not present_). Include a real
+artifact path to distinguish that from auth failures.
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Test access via token</summary>
+
+```sh
+# only authentication
+curl --silent --write-out '\n%{http_code}' \
+  --header 'Private-Token: glpat-…' \
+  --url 'https://gitlab.fqdn/api/v4/virtual_registries/packages/maven/5/'
+
+# with package
+curl -s -w '\n%{http_code}' -H 'Private-Token: glpat-…' \
+  --url "https://gitlab.fqdn/api/v4/virtual_registries/packages/maven/5/com/google/protobuf/protobuf-java/3.25.1/protobuf-java-3.25.1.pom"
+```
+
+</details>
+
 ## API
 
 Refer to [Extend with GitLab].
