@@ -14,9 +14,9 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this 
   check". It is always better than a plausible-sounding but wrong answer. Be especially cautious with topics that
   change frequently (tool versions, API details, config syntax). Always flag your confidence level, and suggest
   verifying against current documentation.
-- At the end of every response, if it produced a durable technical insight (a gotcha, a non-obvious fact, a synthesis
-  across sources), surface it. E.g., "tool X silently ignores flag Y when Z is set" is durable; "the file has 200 lines"
-  is not. Offer to add the insight to the project's documentation **and** to any relevant wiki or knowledge base you are
+- At the end of every response, if it produced a durable insight (a gotcha, a non-obvious fact, a synthesis across
+  sources), surface it. E.g., "tool X silently ignores flag Y when Z is set" is durable; "the file has 200 lines" is
+  not. Offer to add the insight to the project's documentation **and** to any relevant wiki or knowledge base you are
   aware of. Don't wait for me to ask.
 - **Never** modify files outside the current project without asking.
 - Avoid using emoji unless explicitly requested.

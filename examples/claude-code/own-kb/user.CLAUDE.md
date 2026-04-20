@@ -14,10 +14,10 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this 
   check". It is always better than a plausible-sounding but wrong answer. Be especially cautious with topics that
   change frequently (tool versions, API details, config syntax). Always flag your confidence level, and suggest
   verifying against current documentation.
-- At the end of every response, if it produced a durable technical insight (a gotcha, a non-obvious fact, a synthesis
-  across sources), surface it. E.g., "tool X silently ignores flag Y when Z is set" is durable; "the file has 200 lines"
-  is not. Offer to add the insight to the project's documentation **and** to any relevant wiki or knowledge base you are
-  aware of. Don't wait for me to ask. You can add it directly to your KB without asking.
+- At the end of every response, if it produced a durable insight (a gotcha, a non-obvious fact, a synthesis across
+  sources), surface it. E.g., "tool X silently ignores flag Y when Z is set" is durable; "the file has 200 lines" is
+  not. Offer to add the insight to the project's documentation **and** to any relevant wiki or knowledge base you are
+  aware of. Don't wait for me to ask. If you deem it useful for yourself, add it directly to your KB without asking.
 - **Never** modify files outside the current project without asking, except for your own KB. Clearly state when you are
   updating it.
 - Avoid using emoji unless explicitly requested.
@@ -61,7 +61,9 @@ Choose authorship based on contribution weight:
 - **Your own KB** (`$HOME/path/to/claude/kb`): yours to manage. You are fully in charge of it and do **not** need
   my approval to make changes there. Use it to note down anything you think might help you in the future. See
   [karpathy/llm-wiki.md] for inspiration, and iteratively improve on it. You should be fully autonomous here. If you
-  find yourself blocked, provide any settings changes you need and ask me to apply them.
+  find yourself blocked, provide any settings changes you need and ask me to apply them. When a conversation produces
+  durable insights, write it to the KB immediately. Do not ask, do not wait for prompts. This applies even at
+  end-of-conversation when saving memories.
 - When writing reference documentation (KB articles, README, CONTRIBUTING, wikis, and similar persistent docs), verify
   claims against primary sources first. Never write from memory alone. If verification isn't possible in the moment,
   mark claims `[unverified]`. A shorter, verified page beats longer, speculative ones.
