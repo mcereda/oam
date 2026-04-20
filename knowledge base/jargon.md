@@ -51,6 +51,8 @@
 | DePIN   | [Decentralized Physical Infrastructure Network]        |                                                                                                     |
 | DKIM    | DomainKeys Identified Mail                             |                                                                                                     |
 | DML     | Data Manipulation Language                             |                                                                                                     |
+| DoH     | DNS over HTTPS                                         |                                                                                                     |
+| DoT     | DNS over TLS                                           |                                                                                                     |
 | EA      | Extended Attributes                                    |                                                                                                     |
 | EEPROM  | Electronically Erasable Programmable Read-Only Memory  |                                                                                                     |
 | ELI5    | Explain Like I'm 5                                     |                                                                                                     |
