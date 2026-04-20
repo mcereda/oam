@@ -26,6 +26,15 @@
 
 ## TL;DR
 
+Often resolves `localhost` to `::1` (the IPv6 loopback interface) **first**.<br/>
+macOS' `/etc/hosts` file typically maps `localhost` to both `127.0.0.1` and `::1`, but the resolution order depends on
+the resolver. Node.js notably changed its `localhost` resolution behavior across versions.<br/>
+Any HTTP client that resolves localhost to `::1` first might fail against a server listening only on IPv4 (bound to
+`0.0.0.0` or `127.0.0.1`).
+
+<details>
+  <summary>Usage</summary>
+
 ```sh
 # Install Xcode CLI tools.
 xcode-select --install
@@ -60,6 +69,7 @@ networkquality -sv
 netstat
 netstat -n -p 'tcp'
 lsof -n -i ':443'
+lsof -nP -iTCP:60080 -sTCP:LISTEN
 sudo lsof -n -i 'TCP' -s 'TCP:LISTEN'
 
 # Get the PID of processes using specific ports.
@@ -197,6 +207,8 @@ softwareupdate --install-rosetta --agree-to-license
 sysctl iogpu.wired_limit_mb       # get the current value. 0 is auto calculated to around 75%
 sysctl iogpu.wired_limit_mb=4096
 ```
+
+</details>
 
 ## Taking screenshots
 
