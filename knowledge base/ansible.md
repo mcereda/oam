@@ -341,6 +341,16 @@ Suggestions:
     pipelining = True
     ```
 
+    > [!warning]
+    > With pipelining enabled, Ansible streams modules over `stdin` instead of writing them to a temporary file via a
+    > login shell. This produces a _restricted_ environment where the remote user's `profile` files are **not** sourced.
+    > The `PATH` environment variable will **not** include directories like `/usr/local/{,s}bin`. Modules and module
+    > parameters that create a shell to execute a binary (e.g. `validate`, `command`, `shell`). might fail with
+    > `[Errno 2] No such file or directory` and empty `stderr`. It is really a Python-level `FileNotFoundError` in
+    > `subprocess.Popen`.
+    >
+    > Always use **absolute** paths in those modules and module parameters as a workaround.
+
   - Consider using multiplexing:
 
     ```ini
