@@ -23,6 +23,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
    1. [Sub-agents](#sub-agents)
    1. [Agent teams](#agent-teams)
    1. [MCP servers in sub-agents](#mcp-servers-in-sub-agents)
+   1. [Offloading MCP servers to sub-agents](#offloading-mcp-servers-to-sub-agents)
 1. [Scheduling tasks](#scheduling-tasks)
 1. [Tools of interest](#tools-of-interest)
 1. [Best practices](#best-practices)
@@ -139,6 +140,14 @@ lower overhead.
 
 Make sure to use `/clear` or `/compact` regularly to allow Claude to maintain focus on the conversation.<br/>
 Or ask it to create notes to self and restart it once the context goes above a threshold (usually best at 60%).
+
+The `Agent` tool routes to built-in agent types **and** user-level custom agents (`~/.claude/agents/`).<br/>
+
+[Offloading MCP servers to sub-agents] **does** allow achieving a setup where:
+
+- The main session has **no** MCP server configured at session level.
+- The main session delegates automatically to dedicated sub-agents.
+- Each sub-agent has only the MCP servers it needs, defined inline in its frontmatter.
 
 <details>
   <summary>Setup</summary>
@@ -325,13 +334,16 @@ flowchart LR
 
 Files:
 
-| Feature     | User files                | Project files                       | Local files                                         | Managed files           |
-| ----------- | ------------------------- | ----------------------------------- | --------------------------------------------------- | ----------------------- |
-| Settings    | `~/.claude/settings.json` | `.claude/settings.json`             | `.claude/settings.local.json`                       | `managed-settings.json` |
-| Sub-agents  | `~/.claude/agents/`       | `.claude/agents/`                   | None                                                | FIXME                   |
-| MCP servers | `~/.claude.json`          | `.mcp.json`                         | `~/.claude.json`, under `projects.{{project.path}}` | `managed-mcp.json`      |
-| Plugins     | `~/.claude/settings.json` | `.claude/settings.json`             | `.claude/settings.local.json`                       | FIXME                   |
-| `CLAUDE.md` | `~/.claude/CLAUDE.md`     | `CLAUDE.md`<br/>`.claude/CLAUDE.md` | None                                                | FIXME                   |
+| Feature     | User files                | Project files                       | Local files                                         | Managed files                   |
+| ----------- | ------------------------- | ----------------------------------- | --------------------------------------------------- | ------------------------------- |
+| Settings    | `~/.claude/settings.json` | `.claude/settings.json`             | `.claude/settings.local.json`                       | `managed-settings.json`         |
+| Sub-agents  | `~/.claude/agents/`       | `.claude/agents/`                   | None                                                | `<managed-dir>/.claude/agents/` |
+| MCP servers | `~/.claude.json`          | `.mcp.json`                         | `~/.claude.json`, under `projects.{{project.path}}` | `managed-mcp.json`              |
+| Plugins     | `~/.claude/settings.json` | `.claude/settings.json`             | `.claude/settings.local.json`                       | `managed-settings.json`         |
+| `CLAUDE.md` | `~/.claude/CLAUDE.md`     | `CLAUDE.md`<br/>`.claude/CLAUDE.md` | None                                                | `<managed-dir>/CLAUDE.md`       |
+
+`<managed-dir>` is `/Library/Application Support/ClaudeCode/` on macOS, `/etc/claude-code/` on Linux and WSL,
+and `C:\Program Files\ClaudeCode\` on Windows.
 
 _Settings_ like permissions, hooks, environment variables, etc. should reside in `settings.json`-like files.<br/>
 The [settings' schema] is available on schemastore.org.<br/>
@@ -1633,6 +1645,13 @@ One can create custom sub-agents to handle specific tasks.
 Sub-agents are defined in Markdown files with YAML frontmatter.<br/>
 Create them manually or use the `/agents` command.
 
+Sub-agents' description affects how reliably they are called.<br/>
+_Directive_ phrasing (e.g., _Always use this agent for X, never do X directly_) delegates more consistently than
+_conditional_ phrasing (e.g., _Use this agent when you need X_), especially in faster or smaller models.<br/>
+Enumerating examples can also backfire by allowing models to skip delegation if a needed item isn't explicitly in the
+list. Prefer something like _all X, including Y and Z_ over a bare list to signal the enumeration is illustrative, and
+not exhaustive.
+
 <details style='padding: 0 0 1rem 1rem'>
 
 ```md
@@ -1815,6 +1834,109 @@ The sub-agent gets the tools; the parent agent does not.
 
 </details>
 
+### Offloading MCP servers to sub-agents
+
+Session-level MCP servers load tool definitions, show raw responses, and allow follow-up queries, but consume context
+in every session. Sub-agents inherit all session-level MCP servers, forcing them too to load tool definitions they might
+never use.
+
+Define less-used MCP servers inside sub-agents **rather** than on the main session to give the main session a capability
+without loading tool definitions into its context.
+
+The MCP server must be declared in the sub-agent's frontmatter, **fully** defined (`command`, `args`, `env`, etc).<br/>
+The server connects when the sub-agent starts, and disconnects when it finishes. Requires **no** session-level
+configuration. The sub-agent gets all the tools; the parent conversation does not.
+
+Both the normal and the autonomous sub-agent approaches use the `Agent` tool for invocation when dispatching agents for
+a task. The difference is in how much the main session sees of its sub-agents' work:
+
+| Aspect               | Normal approach                                                     | Autonomous sub-agent                                                    |
+| -------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| MCP servers location | In configuration (`claude.json`, `.mcp.json`)                       | Inline in sub-agents                                                    |
+| Tool definitions     | Loaded in the main session **and** by every sub-agent spawned       | Never loaded in the main session, only loaded by the specific sub-agent |
+| Raw MCP responses    | Visible to the main session (via shared context)                    | Only available to the sub-agent; returns a summary of the results       |
+| Follow-up queries    | Yes in the main session, not to sub-agents (they complete and exit) | Possible via `SendMessage` to agent ID                                  |
+| Token cost at rest   | The main session loads the full tool definitions in context         | Close to 0: the main session only knows the agent name                  |
+
+Offloading MCP servers does come with tradeoffs:
+
+- Calling sub-agents **adds latency** in the form of extra round-trips.<br/>
+  It could take ~20-30s for simple queries.
+- The main session only sees what a sub-agent **chose** to report. Drill-downs require a follow-up message or a new,
+  more specific spawn.
+- The main agent can decide to spawn these agents **autonomously**, **without** the user mentioning `@agent-name`.
+- Agents can **silently hallucinate** tool responses when MCP calls return empty results.<br/>
+  Instead of surfacing a failure, some models will **choose** to fabricate **plausible**-looking data (e.g., valid ARN
+  formats, realistic yet incorrect resource names, account IDs or values). Mismatched values in the results is a
+  reliable signal to distrust them. Verify critical outputs by cross-checking them against a known-good reference.
+
+This method is most effective for rarely used MCP servers (e.g. AWS, Grafana, incident tools), where the summarized
+result is sufficient and tool-definition token cost outweighs the latency penalty.
+
+> [!warning]
+> The `stdio` MCP transport protocol uses one-process-per-connection by design. Spawning many agents in parallel against
+> an inline `stdio` server spawns **one full process per agent**, multiplying resource usage and potentially saturating
+> the server with empty responses (which increases hallucinations, see tradeoffs above).<br/>
+> Mitigate this by switching the MCP server to **network transport** (`sse`, `http`). All parallel sub-agent invocations
+> will share a **single** running process.
+
+Consider leveraging a `SubagentStart`/`SubagentStop` hook pair to start and stop an MCP server on demand.
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Example</summary>
+
+> [!warning]
+> Unverified. Needs testing.
+
+One could do this by:
+
+- Using a `SubagentStart`/`SubagentStop` hook pair, scoped to an agent's name:
+
+  ```json
+  {
+    "hooks": {
+      "SubagentStart": [{
+        "matcher": "aws-cli-ro",
+        "hooks": [{
+          "type": "command",
+          "command": "docker start 'aws-cli-ro' 2>'/dev/null' || docker run --rm -d --name 'aws-cli-ro' … && sleep 5s"
+        }]
+      }],
+      "SubagentStop": [{
+        "matcher": "aws-cli-ro",
+        "hooks": [{
+          "type": "command",
+          "command": "docker stop aws-cli-ro"
+        }]
+      }]
+    }
+  }
+  ```
+
+- Pointing the sub-agent frontmatter to use network transport at that port:
+
+  ```yml
+  mcpServers:
+    - aws-cli-ro:
+        type: sse
+        url: http://localhost:3000
+  ```
+
+This gives one the best of both worlds:
+
+- The MCP server's process starts only when the named agent is dispatched the first time.
+- `docker start ... || docker run -d` is idempotent. If parallel dispatches race, the first wins and the rest reuse the
+  already-running container.
+- Leveraging network transport means that all parallel invocations share the one MCP server instance.
+- The MCP server stops cleanly when the agent exits.
+
+> [!important] Gotcha
+> The sub-agents start making calls to the MCP server **immediately**. When the hook runs, it needs a readiness check
+> or a stopper in the hook's command (`sleep`). Otherwise, `docker start` can silently succeed before the server is
+> actually accepting connections.
+
+</details>
+
 ## Scheduling tasks
 
 Refer to [Run prompts on a schedule] and [Schedule tasks on the web].
@@ -1886,7 +2008,7 @@ maintaining all the files it **uses** (not just those it creates).<br/>
 architectural decisions and security reviews. Prefer giving it easy, repeatable tasks like exploring the code,
 refactoring, generating tests or boilerplate, and documentation.
 
-Abuse version control checkpoints. Commit frequently to keep safe fallback points and isolate what Claude changed,
+**Abuse** version control checkpoints. Commit frequently to keep safe fallback points and isolate what Claude changed,
 should something go wrong.<br/>
 Review and test changes **incrementally**, especially when involving critical files.
 
@@ -1909,6 +2031,11 @@ Optimize model usage to avoid burning through credits:
   Leverage the `opusplan` mode to use Opus during the design or planning phase (`/plan`), then automatically switch to
   Sonnet for implementation.
 - Track session usage to identify what tasks are expensive to delegate, and review and adjust one's patterns.
+
+Prefer using network transport over `stdio` when an MCP server can be used by multiple sessions to avoid spawning one
+dedicated process per session or per parallel sub-agent invocation.
+
+Consider [Offloading MCP servers to sub-agents] when they are **rarely** used in the main session.
 
 ## Run on local models
 
@@ -1976,6 +2103,7 @@ Claude Code version: `v2.1.41`.
 ### Sources
 
 - [Documentation]
+- [Create custom sub-agents]
 - [pffigueiredo/claude-code-sheet.md]
 - [Mastering Claude Code in 30 minutes] by Boris Cherny, Anthropic
 - [Writing a good CLAUDE.md]
@@ -1989,6 +2117,7 @@ Claude Code version: `v2.1.41`.
 [Agent teams]: #agent-teams
 [Agent-based hooks]: #agent-based-hooks
 [Configuration]: #configuration
+[Offloading MCP servers to sub-agents]: #offloading-mcp-servers-to-sub-agents
 [Prompt-based hooks]: #prompt-based-hooks
 [Sub-agents]: #sub-agents
 [Using hooks]: #using-hooks
