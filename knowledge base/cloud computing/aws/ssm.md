@@ -228,15 +228,42 @@ compose:
   ansible_aws_ssm_timeout: "'300'"
 ```
 
-Pitfalls:
+The SSM connection plugin (`amazon.aws.aws_ssm`):
 
-- One **shall not use the `remote_user` connection option**, as it is not supported by the plugin.<br/>
+- Ships module files to the target via an S3 bucket (not using `stdin` over a shell).<br/>
+  It **requires** an S3 bucket for every task (including modules like `shell` or `command`).
+- Does **not** support using the `remote_user` connection option.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
   From the [plugin notes][aws_ssm connection plugin notes]:
 
   > The `community.aws.aws_ssm` connection plugin does not support using the `remote_user` and `ansible_user`
   > variables to configure the remote user. The `become_user` parameter should be used to configure which user to run
   > commands as. Remote commands will often default to running as the `ssm-agent` user, however this will also depend
   > on how SSM has been configured.
+
+  </details>
+
+- Does **not** support pipelining.<br/>
+  Ansible's core will **skip** the pipelining optimization when this plugin is in use, **regardless** of what's set in
+  `ansible.cfg`.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  This is done at the plugin level.<br/>
+  The `Connection` class sets `has_pipelining = False`. Ansible's execution engine checks this attribute before
+  attempting to pipe module sources over `stdin`, and won't apply to hosts using the SSM connection.
+
+  When the target shell family is `PowerShell`, the plugin sets `always_pipeline_modules = True`. That's a separate
+  Windows-specific exception, not the standard SSH-style pipelining.
+
+  </details>
+
+  Community guides recommend setting `pipelining = false` in `ansible.cfg` when using SSM hosts. The plugin enforces it
+  either way, this is more of a clarity/hygiene thing.
+
+Pitfalls:
 
 - SSM sessions' duration is limited by SSM's _idle session timeout_ setting.<br/>
   That might impact tasks that need to run for more than said duration.
