@@ -2,6 +2,9 @@
 
 Tool to build container images from a Dockerfile with**out** the need of the Docker engine.
 
+> [!caution] DEPRECATED
+> The [codebase] has been archived on 2025-06-03.
+
 1. [TL;DR](#tldr)
 1. [Create local images using local cache](#create-local-images-using-local-cache)
 1. [Usage in GitLab pipelines](#usage-in-gitlab-pipelines)
