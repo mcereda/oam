@@ -1506,6 +1506,22 @@ They only return `{"ok": true/false, "reason": "..."}`, and only decide whether 
 `UserPromptSubmit` hooks fire **before** Claude starts thinking. It can inject `additionalContext` to shape the whole
 response from the start.
 
+> [!important]
+> In long tasks, accumulated tool calls push that content toward the middle of the context window. That position is the
+> **weakest** retention zone (refer to [Lost in the Middle] by Liu et al. 2024), causing models to tend to neglect the
+> injected reminder even after acknowledging it.
+>
+> Keep side-tasks alive through long agentic runs by stacking multiple hooks and techniques:
+>
+> - Use a `SessionStart` with `compact` matcher to re-inject the additional content into a fresh context **after
+>   compaction**. This is most reliable for long sessions.
+> - Use a `Stop` hook to fire reminders at **end-of-context** (another high-attention position) to re-engage the model
+>   leveraging exit code 2. Check `stop_hook_active` in the hook input to avoid infinite loops.
+> - Use `TodoWrite` at the start to convert the reminder into an explicitly tracked task in **generated** (and not
+>   _injected_) context, which carries more weight.
+> - Use better conditional-completeness framing, e.g. _BEFORE marking this task complete, do X_. It makes it harder for
+>   the model to skip than something like _remember to do X_.
+
 Force a configuration reload and validate Claude Code accepted the hook by using the `/hooks` command.
 
 > [!caution]
@@ -2223,6 +2239,7 @@ Claude Code version: `v2.1.41`.
 [Enable specific MCP servers for sub-agents]: https://github.com/anthropics/claude-code/issues/16177
 [Grafana MCP Server]: https://github.com/grafana/mcp-grafana
 [karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
+[Lost in the middle]: https://arxiv.org/abs/2307.03172
 [pffigueiredo/claude-code-sheet.md]: https://gist.github.com/pffigueiredo/252bac8c731f7e8a2fc268c8a965a963
 [Prat011/awesome-llm-skills]: https://github.com/Prat011/awesome-llm-skills
 [rtk-ai/rtk]: https://github.com/rtk-ai/rtk

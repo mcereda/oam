@@ -18,6 +18,7 @@ the previous ones.
    1. [Speculative decoding](#speculative-decoding)
 1. [Reasoning](#reasoning)
 1. [Prompting](#prompting)
+   1. [Procedural instructions degrade into declarative hints](#procedural-instructions-degrade-into-declarative-hints)
 1. [Context window](#context-window)
 1. [Function calling](#function-calling)
 1. [Compression](#compression)
@@ -407,6 +408,16 @@ attempts.
 
 Also see [Mastering System Prompts for LLMs] for suggestions.
 
+### Procedural instructions degrade into declarative hints
+
+Models (especially smaller/faster ones) encountering procedural instructions (e.g. _run `git config user.name` to get
+the author's name_) feel tempted to treat it as a declarative **hint** (e.g., _an author name is needed here_) and
+satisfy the request from context instead of executing the procedure.
+
+The model, by its own admission, _knows_ the answer, skips the lookup, and confidently produces something wrong.<br/>
+Negative constraints (e.g. _do not infer_) seems to be key. Without it, the model's default behavior of pattern-matching
+and filling from context could silently override the procedure.
+
 ## Context window
 
 Amount of text, **in tokens**, that a model can _remember_ at any one time.<br/>
@@ -424,6 +435,23 @@ conversation (the message history, documents, and all).
 
 Models perform best when relevant information is toward the **beginning** or **end** of the input context.<br/>
 Performance degrades when the model must carefully consider the information **in the middle** of long contexts.
+
+In long, multi-step tasks, models tend to neglect side-tasks or background instructions, even those explicitly
+acknowledged at the start. The more complex the task and the higher the number of steps, the more they fail to
+follow through.
+
+Instructions placed at the **beginning** of a context window start in a strong attention zone for the model, but the
+accumulation of tool calls and responses pushes those instructions toward the middle (the weakest retention zone).
+Models rely on instructions being _nearby_ their related tasks in context. When the instructions relate to something
+_different_ (e.g., document findings after executing a task), or are given long before or after the task's execution,
+the most **locally** important goal (usually _finishing the task at hand_) wins.
+
+The same mechanism is behind long system-prompt instructions feeling _forgotten_ mid-task while being followed correctly
+in short conversations.
+
+Liu et al. measured in [Lost in the Middle] (2024) a U-shaped performance curve in LLMs. This indicates that a model's
+ability to recall information is strongest when _relevant_ to the current task and presented at the very **beginning**
+or **end** of the context window. It degrades **significantly** for content buried in the middle.
 
 When a prompt, conversation, document or code base exceeds a model's context window, the context must be _compacted_ to
 continue.<br/>
@@ -618,4 +646,5 @@ Refer:
 [trevin-creator/autoresearch-mlx]: https://github.com/trevin-creator/autoresearch-mlx
 [What are Language Models in NLP?]: https://www.geeksforgeeks.org/nlp/what-are-language-models-in-nlp/
 [What is chain of thought (CoT) prompting?]: https://www.ibm.com/think/topics/chain-of-thoughts
+[Lost in the Middle]: https://arxiv.org/abs/2307.03172
 [When Copilot Becomes Autopilot: Generative AI's Critical Risk to Knowledge Work and a Critical Solution]: https://arxiv.org/abs/2412.15030
