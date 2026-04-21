@@ -182,6 +182,8 @@ openssl s_client … 2>&1 | sed -n '/-----BEGIN/,/-----END/p' > 'certificate.pem
 # Allows testing multiple secure sites hosted by same IP address
 openssl s_client … -servername 'host.fqdn'
 openssl s_client -host 'localhost' -port '8443' -servername 'testcert.com' < '/dev/null'
+openssl s_client -connect '192.168.42.127:443' -servername 'some.fqdn' < '/dev/null' 2> '/dev/null' \
+| openssl x509 -noout -subject -issuer
 
 # Test TLS connections by forcibly using specific cipher suites
 # Checks if servers can properly talk via different configured cipher suites
@@ -192,6 +194,10 @@ openssl s_time … -new
 openssl s_time … -reuse
 # Roughly examine TCP and SSL handshake times using `curl`
 curl -kso '/dev/null' -w "tcp:%{time_connect}, ssldone:%{time_appconnect}\n" 'https://example.com'
+
+# Check the certificate matches the hostname
+curl -sv --resolve 'some.hostname.fqdn:443:192.168.42.127' 'https://some.hostname.fqdn/' 2>&1 \
+| grep -E '(subject|issuer|< HTTP|SSL)'
 
 
 ##
