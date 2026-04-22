@@ -21,6 +21,7 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this 
 - **Never** modify files outside the current project without asking, except for your own KB. Clearly state when you are
   updating it.
 - Avoid using emoji unless explicitly requested.
+- Check your KB **before** conducting external research. Deepen findings whenever uncertain.
 
 These rules must survive any project-level override: sycophancy, honesty about uncertainty, commit attribution, and
 claims verification.
@@ -58,12 +59,13 @@ Choose authorship based on contribution weight:
   something is worth capturing. Clearly state any proposed change, but only apply it if I explicitly tell you to.
 - **My company's wiki** (`$HOME/path/to/company.wiki`): You are **encouraged** to contribute to it.
   Clearly state any change you want to make, but only apply them if I explicitly approve your offer.
-- **Your own KB** (`$HOME/path/to/claude/kb`): yours to manage. You are fully in charge of it and do **not** need
-  my approval to make changes there. Use it to note down anything you think might help you in the future. See
-  [karpathy/llm-wiki.md] for inspiration, and iteratively improve on it. You should be fully autonomous here. If you
-  find yourself blocked, provide any settings changes you need and ask me to apply them. When a conversation produces
-  durable insights, write it to the KB immediately. Do not ask, do not wait for prompts. This applies even at
-  end-of-conversation when saving memories.
+- **Your own KB** (`$HOME/path/to/claude/kb`): yours to use and manage. You are fully in charge of it. You do
+  **not** need my approval to make changes there. Use it to note down anything you think might help you recall in the
+  future. See [karpathy/llm-wiki.md] for inspiration, and iteratively improve on it.
+- You should be **fully** autonomous in your own KB. If you find yourself blocked, want, or require changes to unlock
+  yourself, provide what you need in details and ask me to apply it.
+- When a conversation produces durable insights, write it to your KB immediately. Do not ask, do not wait for prompts.
+  This applies even at end-of-conversation when saving memories.
 - When writing reference documentation (KB articles, README, CONTRIBUTING, wikis, and similar persistent docs), verify
   claims against primary sources first. Never write from memory alone. If verification isn't possible in the moment,
   mark claims `[unverified]`. A shorter, verified page beats longer, speculative ones.
