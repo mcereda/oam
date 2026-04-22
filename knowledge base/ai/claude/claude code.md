@@ -8,7 +8,6 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 1. [Configuration](#configuration)
    1. [Credentials](#credentials)
 1. [Context and memory](#context-and-memory)
-   1. [Giving Claude its own knowledge base](#giving-claude-its-own-knowledge-base)
 1. [Using tools](#using-tools)
    1. [Managing MCP servers](#managing-mcp-servers)
       1. [MCP servers of interest](#mcp-servers-of-interest)
@@ -25,6 +24,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
    1. [Agent teams](#agent-teams)
    1. [MCP servers in sub-agents](#mcp-servers-in-sub-agents)
    1. [Offloading MCP servers to sub-agents](#offloading-mcp-servers-to-sub-agents)
+1. [Giving Claude its own knowledge base](#giving-claude-its-own-knowledge-base)
 1. [Scheduling tasks](#scheduling-tasks)
 1. [Tools of interest](#tools-of-interest)
 1. [Best practices](#best-practices)
@@ -530,6 +530,10 @@ than embedded conditionals.<br/>
 Fast models prefer pattern-matching instead of reasoning. Them seeing the positive pattern may apply it everywhere.
 Adding a negative example gives the model a concrete off-ramp instead of an inferred one.
 
+This matters especially for **procedural** instructions: models are tempted to treat them as declarative hints and
+satisfy the requirement from context instead of executing the step. Refer to
+[Procedural instructions degrade into declarative hints][lms / procedural instructions degrade into declarative hints].
+
 Creating a good `CONTRIBUTING.md` file, and mandating Claude Code to read it before making changes, seems to go a long
 way for **both** humans and agents.
 
@@ -580,77 +584,7 @@ Consider delegating ownership of tools and documentation to Claude early in a pr
 tools and documents it creates _and_ uses. Also include in the request to periodically to check and update those files
 to correct its own behavior across sessions.
 
-### Giving Claude its own knowledge base
-
-This procedure is modelled after [karpathy/llm-wiki.md], leveraging its ready-to-use instructions and iteratively
-improving upon it.
-
-<details>
-  <summary>Procedure</summary>
-
-1. Create a git repository for Claude's knowledge base:
-
-   ```sh
-   git init "$HOME/path/to/claude/kb"
-   ```
-
-1. Configure **the KB** to allow common operations in it without needing to ask for permissions.<br/>
-   See [settings.json file example for own KB].
-1. Configure **user-level** settings to allow common operations **in the KB** from other projects without needing to ask
-   for permissions.<br/>
-   See [User-level settings.json patch example for own KB].
-1. Add instructions in the **user-level** `CLAUDE.md` file.<br/>
-   See [User-level CLAUDE.md patch example for own KB].
-1. Ask Claude to initialize it (in a new session):
-
-   > Hey! I have prepared your knowledge base repository for you. Please finish initializing it to your likings.
-
-</details>
-
-<details>
-  <summary>Findings</summary>
-
-- The KB should be its own **local**, self-bootstrapping git repository.
-
-  It does work using a GitLab or confluence wiki _directly_, but updating pages in it via API is expensive and slow.
-  Git repositories are local, better for agents to manage, and just a `git push` away from online backup.
-
-- The KB should be self-sufficient and useful even **without** access to any external documentation a user may
-  maintain.
-
-- Claude Code should **not** need to ask for permissions when operating on it.
-
-  Project-level setting like `Bash` and `Edit(/**)` scope allowances to the KB's project. Set `defaultMode` to `auto`
-  and disable the sandbox to allow the agent to read, write, and commit freely.
-
-  For cross-project access (writing to the KB from other repos), add **user-level** permissions scoped **to the KB's
-  directory**, e.g. `Bash(git -C ~/Repositories/claude/kb *)` and `Edit(~/Repositories/claude/kb/**)`.
-
-  > [!tip]
-  > Remember to add `rtk`-related permissions if using [rtk-ai/rtk], e.g. `Bash(rtk git -C ~/Repositories/claude/kb *)`.
-
-- KB management is judgment-heavy, and benefits from deeper reasoning.
-
-  Set `model` to the best available reasoning model and `effortLevel` to `high` in the KB's **project-level** settings.
-
-</details>
-
-<details>
-  <summary>Improvements</summary>
-
-- Claude should be _consistently_ remembered to capture durable insights during **every** session.<br/>
-  A `UserPromptSubmit` hook seems to be currently the best option for this.
-
-- Claude should be _consistently_ remembered to check whether a periodic review is overdue, and to iteratively improve
-  on it in that case.<br/>
-  A `SessionStart` hook seems to be currently the best option for this.
-
-- The KB should include self-correcting actions and tools to avoid structural debt compounding silently.
-
-  Pre-commit hooks (e.g. using [lefthook]) running a lint script can catch schema violations (missing frontmatter,
-  broken links, orphaned pages) before they accumulate.
-
-</details>
+See [Giving Claude its own knowledge base] for how to set up a persistent filesystem-based KB.
 
 ## Using tools
 
@@ -1494,6 +1428,18 @@ Both prompt-based and agent-based hooks work **as gatekeepers** on `Stop` events
 injectors.<br/>
 They only return `{"ok": true/false, "reason": "..."}`, and only decide whether Claude should be allowed to stop.
 
+`SessionStart` hooks fire **once** at the **beginning** of a session, and surface `stdout` as context for the
+agent. Use them to inject session-level reminders, or run initialization checks without firing on every prompt.
+
+Matchers filter the reason the session started:
+
+| Matcher   | When it fires                               |
+| --------- | ------------------------------------------- |
+| `startup` | New session                                 |
+| `resume`  | `--resume`, `--continue`, or `/resume`      |
+| `clear`   | `/clear`                                    |
+| `compact` | Auto or manual compaction                   |
+
 `SessionEnd` has matchers for why a session ended (e.g., `clear`, `resume`, `logout`, `prompt_input_exit`,
 `bypass_permissions_disabled`, others), but ends the REPL **before** the agent has the chance to act.
 
@@ -1535,6 +1481,18 @@ Test the hook by asking Claude to do something that should trigger it.
 Command hooks communicate only through `stdout`, `stderr`, and exit codes. They **cannot** trigger commands or tool
 calls directly.<br/>
 HTTP hooks only communicate through the response body.
+
+The higher the hook type's complexity, the higher the cost-accuracy tradeoff:
+
+| Hook type           | Cost per invocation      | Accuracy                            |
+| ------------------- | ------------------------ | ----------------------------------- |
+| Static `echo`       | ~0ms, zero tokens        | Always fires, no false negatives    |
+| Command (bash/grep) | ~20ms, zero tokens       | Keyword/pattern matching only       |
+| Agent (LLM call)    | Seconds, tokens per call | Semantic — catches indirect matches |
+
+Prefer the _cheapest_ hook that fires _reliably enough_, and escalate only when the gap cost increases.<br/>
+A static reminder that always fires is more effective than a sophisticated keyword-matching script that fails due to
+misconfiguration or session caching. The hook just needs to be a reliable trigger.
 
 ### Prompt-based hooks
 
@@ -1984,6 +1942,186 @@ This gives one the best of both worlds:
 
 </details>
 
+## Giving Claude its own knowledge base
+
+This procedure is modelled after [karpathy/llm-wiki.md], leveraging its ready-to-use instructions and iteratively
+improving upon it.
+
+<details>
+  <summary>Procedure</summary>
+
+1. Create a git repository for Claude's knowledge base:
+
+   ```sh
+   git init "$HOME/path/to/claude/kb"
+   ```
+
+1. Configure **the KB** to allow common operations in it without needing to ask for permissions.<br/>
+   See [settings.json file example for own KB].
+1. Configure **user-level** settings to allow common operations **in the KB** from other projects without needing to ask
+   for permissions.<br/>
+   See [User-level settings.json patch example for own KB].
+1. Add instructions in the **user-level** `CLAUDE.md` file.<br/>
+   See [User-level CLAUDE.md patch example for own KB].
+1. Ask Claude to initialize it (in a new session):
+
+   > Hey! I have prepared your knowledge base repository for you. Please finish initializing it to your likings.
+
+</details>
+
+<details>
+  <summary>Findings</summary>
+
+- The KB should be its own **local**, self-bootstrapping git repository.
+
+  It does work using a GitLab or confluence wiki _directly_, but updating pages in it via API is expensive and slow.
+  Git repositories are local, better for agents to manage, and just a `git push` away from online backup.
+
+- The KB should be self-sufficient and useful even **without** access to any external documentation a user may
+  maintain.
+
+- Claude Code should **not** need to ask for permissions when operating on it.
+
+  Project-level setting like `Bash` and `Edit(/**)` scope allowances to the KB's project. Set `defaultMode` to `auto`
+  and disable the sandbox to allow the agent to read, write, and commit freely.
+
+  For cross-project access (writing to the KB from other repos), add **user-level** permissions scoped **to the KB's
+  directory**, e.g. `Bash(git -C ~/Repositories/claude/kb *)` and `Edit(~/Repositories/claude/kb/**)`.
+
+  > [!tip]
+  > Remember to add `rtk`-related permissions if using [rtk-ai/rtk], e.g. `Bash(rtk git -C ~/Repositories/claude/kb *)`.
+
+- KB management is judgment-heavy, and benefits from deeper reasoning.
+
+  Set `model` to the best available reasoning model and `effortLevel` to `high` in the KB's **project-level** settings.
+
+- Missing frontmatter, absent cross-references, and inconsistent tags don't hurt much at 5-10 pages. Problems compound
+  silently, and start causing retrieval failures around 15-20 pages.<br/>
+  Invest in pre-commit linting (frontmatter completeness, index coverage, tag consistency) before reaching that point.
+
+- Not all pages go stale at the same rate. A page about git fundamentals is stable for years; a page about Claude
+  Code hooks could be wrong in months. A single _last updated_ date doesn't capture this.<br/>
+  Add a `review-after` frontmatter field per page that considers the topic's change velocity (e.g. 6 months for active
+  tools, 12 months for stable releases, none for fundamentals). It also allows periodic reviews to focus only on
+  content that went genuinely stale.
+
+- Flat markdown + git works well up to ~80 pages. After that, grep-based retrieval starts missing content.<br/>
+  Tighten the scope (_has reference material crept in?_) **before** adding retrieval infrastructure (e.g. RAG, DBs).
+
+- Sandboxed project sessions can't write directly to the KB unless explicitly allowed globally, but memories can be
+  tagged as a workaround.<br/>
+  Make Claude prefix memory note descriptions with `[KB]` to signal what information could be promoted to the KB (e.g.
+  _\[KB] ECS OOM kills bypass stopTimeout_). During review sessions, `[KB]`-prefixed notes stand out; others require
+  more judgment.
+
+- Claude does not reliably consult the KB without an **explicit, per-prompt** reminder. `CLAUDE.md` files alone proved
+  not sufficient. Refer to [Using hooks] for the underlying mechanism.
+
+</details>
+
+<details>
+  <summary>Improvements</summary>
+
+- Claude should be _consistently_ reminded to check the KB for relevant articles at the start of each session.<br/>
+  A `SessionStart` hook with a `startup|compact` matcher and a static `echo` seems to be the most reliable option. It
+  fires at the start of new sessions and after compaction (the two moments where fresh KB context matters most), costs
+  nothing, and avoids the per-prompt noise of a `UserPromptSubmit` hook.<br/>
+  See [SessionStart hook matchers][Using hooks] for the full list of matchers.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example</summary>
+
+  ```json
+  "SessionStart": [
+    {
+      "matcher": "startup|compact",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"Before answering, check if your KB has relevant pages. Grep its index for keywords relevant to this session.\"}}'"
+        }
+      ]
+    }
+  ]
+  ```
+
+  </details>
+
+- Claude should be _consistently_ remembered to capture durable insights during **every** session.<br/>
+  A `UserPromptSubmit` hook seems to be currently the best option for this.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example</summary>
+
+  ```json
+  "UserPromptSubmit": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"At the end of your response, check whether this turn produced a durable insight (a gotcha, non-obvious fact, or synthesis). If yes: (1) surface it, AND (2) name a specific documentation target — CONTRIBUTING.md or README for project-specific, the company's wiki for company-wide, your own KB for general. Surfacing the insight inline without naming a target is NOT complete. Add to your own KB directly without asking.\"}}'"
+        }
+      ]
+    }
+  ]
+  ```
+
+  </details>
+
+- Claude should be _consistently_ remembered to check whether a periodic review is overdue, and to iteratively improve
+  on it in that case.<br/>
+  A `SessionStart` hook with a `startup` matcher checking for a _dirty flag_ file seems to be the best option. It runs
+  as a single check at the start of new sessions without scanning KB pages.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example</summary>
+
+  ```json
+  "SessionStart": [
+    {
+      "matcher": "startup",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "[ -f ~/path/to/claude/kb/.review-needed ] && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"Your KB has a pending review. Before starting other work, run a review session: mechanical pass (lint), then reflective pass (staleness, gaps, memory inbox).\"}}' || true"
+        }
+      ]
+    }
+  ]
+  ```
+
+  </details>
+
+- Periodic reviews benefit from splitting the process into a _mechanical_ pass (e.g. scripts, git hooks, task/lefthook
+  commands) and a _reflective_ pass (verifying staleness, identifying gaps, processing memories).
+
+  The mechanical pass costs no tokens, and review sessions often run long enough to never reach the reflective part
+  (which would _actually_ improve the process).<br/>
+  The reflective pass should propose **exactly one process improvement per review**. Unbounded improvement lists
+  generate more items than the ones that get implemented, and can include stale or contradicting items. Prefer a single
+  concrete change applied immediately.
+
+- The KB should include self-correcting actions and tools to avoid structural debt compounding silently.
+
+  Pre-commit hooks (e.g. using [lefthook]) running a lint script can catch schema violations (missing frontmatter,
+  broken links, orphaned pages) before they accumulate.
+
+- Avoid running full checks at `SessionStart` as the KB grows. They are expensive and scale badly over an increasing
+  number of pages.<br/>
+  Use a _dirty flag_ file instead. Make something create it whenever it detects the need (a hook, a script, a previous
+  session), and the `SessionStart` hook only check that file's existence. This keeps startup cost at a single operation
+  regardless of the KB's size.
+
+The mechanisms above form an enforcement hierarchy where each layer catches what the previous one misses:
+
+| Layer                                            | Concern                                              | Rationale                                               |
+| ------------------------------------------------ | ---------------------------------------------------- | ------------------------------------------------------- |
+| Pre-commit gate (git hooks/lefthook)             | Schema compliance (frontmatter, index, broken links) | Mechanical, binary; compounds silently if skipped       |
+| Claude Code hook (SessionStart/UserPromptSubmit) | Review triggers, insight capture                     | Non-blocking nudge; blocking would delay unrelated work |
+| `CLAUDE.md` files                                | Page scope, tag semantics, what to write             | Judgment-dependent; can't reduce to pass/fail           |
+
+</details>
+
 ## Scheduling tasks
 
 Refer to [Run prompts on a schedule] and [Schedule tasks on the web].
@@ -2164,6 +2302,7 @@ Claude Code version: `v2.1.41`.
 [Agent teams]: #agent-teams
 [Agent-based hooks]: #agent-based-hooks
 [Configuration]: #configuration
+[Giving Claude its own knowledge base]: #giving-claude-its-own-knowledge-base
 [Offloading MCP servers to sub-agents]: #offloading-mcp-servers-to-sub-agents
 [Prompt-based hooks]: #prompt-based-hooks
 [Sub-agents]: #sub-agents
@@ -2181,6 +2320,7 @@ Claude Code version: `v2.1.41`.
 [Gemini CLI]: ../gemini/cli.md
 [git worktrees]: ../../git.md#worktrees
 [Lefthook]: ../../lefthook.md
+[LMs / Procedural instructions degrade into declarative hints]: ../lms.md#procedural-instructions-degrade-into-declarative-hints
 [MCP]: ../mcp.md
 [Ollama]: ../ollama.md
 [OpenCode]: ../opencode.md
