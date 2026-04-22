@@ -2026,7 +2026,7 @@ improving upon it.
   A `SessionStart` hook with a `startup|compact` matcher and a static `echo` seems to be the most reliable option. It
   fires at the start of new sessions and after compaction (the two moments where fresh KB context matters most), costs
   nothing, and avoids the per-prompt noise of a `UserPromptSubmit` hook.<br/>
-  See [SessionStart hook matchers][Using hooks] for the full list of matchers.
+  Could be useful to expand to more matchers. See [SessionStart hook matchers][using hooks] for their full list.
 
   <details style='padding: 0 0 1rem 1rem'>
     <summary>Example</summary>

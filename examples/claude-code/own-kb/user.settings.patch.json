@@ -21,11 +21,22 @@
     },
     {
         "op": "add",
+        "path": "/hooks/SessionStart",
+        "value": [{
+            "matcher": "startup|compact",
+            "hooks": [{
+                "type": "command",
+                "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"Before answering, check if your KB has relevant pages. Grep its index for keywords relevant to this session.\"}}'"
+            }]
+        }]
+    },
+    {
+        "op": "add",
         "path": "/hooks/UserPromptSubmit",
         "value": [{
             "hooks": [{
                 "type": "command",
-                "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"At the end of your response, consider whether this turn produced a durable insight (a gotcha, non-obvious fact, or synthesis). If yes, surface it and offer to document it in the project docs if project-specific, and/or in a knowledge base if reusable across projects. Add it directly to your KB without asking if you deem it useful.\"}}'"
+                "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"At the end of your response, check whether this turn produced a durable insight (a gotcha, non-obvious fact, or synthesis). If yes: (1) surface it, AND (2) name a specific documentation target — CONTRIBUTING.md or README for project-specific, the company's wiki for company-wide, your own KB for general. Surfacing the insight inline without naming a target is NOT complete. Add to your own KB directly without asking.\"}}'"
             }]
         }]
     }
