@@ -30,6 +30,7 @@
     1. [Change author information for multiple commits](#change-author-information-for-multiple-commits)
     1. [Git does not accept self-signed certificates](#git-does-not-accept-self-signed-certificates)
     1. [GPG cannot sign a commit](#gpg-cannot-sign-a-commit)
+    1. [Rebasing a branch after a squash-merge](#rebasing-a-branch-after-a-squash-merge)
     1. [Remove a file from a commit](#remove-a-file-from-a-commit)
     1. [Remove a file from the repository](#remove-a-file-from-the-repository)
 1. [Further readings](#further-readings)
@@ -1120,6 +1121,46 @@ If `gnupg2` and `gpg-agent` 2.x are used, be sure to set the environment variabl
 ```sh
 export GPG_TTY=$(tty)
 ```
+
+### Rebasing a branch after a squash-merge
+
+When a GitLab/GitHub MR is merged **with squash**, the resulting commit on the target branch has a different SHA than
+any of the original branch's commits. Plain `git rebase origin/main` commands cannot detect that overlap, and will try
+**and fail** to re-apply the already-merged commits due to conflicts.
+
+Squash-merge collapses N commits into a single one with a new SHA. Git's patch-identity detection (`--fork-point`) only
+works when the commits share ancestry, which squash destroys.
+
+<details>
+  <summary>Solution</summary>
+
+1. Identify which commits are **not** present in the squash.
+
+   ```sh
+   git log --oneline 'origin/main'..'HEAD'
+   ```
+
+1. Reset the branch to `origin/main`.<br/>
+   This is a destructive operation. Local commits must already be pushed or noted.
+
+   ```sh
+   git reset --hard 'origin/main'
+   ```
+
+1. Cherry-pick (in order) only the commits that were **not** present in the squash.
+
+   ```sh
+   git cherry-pick '<sha1>' '<sha2>' … '<shaN>'
+   ```
+
+1. **Force**-push.<br/>
+   Use `--force-with-lease` to avoid overwriting concurrent pushes.
+
+   ```sh
+   git push --force-with-lease 'origin' '<branch>'
+   ```
+
+</details>
 
 ### Remove a file from a commit
 
