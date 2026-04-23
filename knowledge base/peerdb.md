@@ -281,6 +281,11 @@ GET /api/v1/alerts/config
 
 ## PostgreSQL peers
 
+> [!important]
+> Source PostgreSQL databases must be **version 12 or above**.<br/>
+> PeerDB enforces this at peer validation time. Peer creation will fail with the
+> `postgres must be of PG12 or above. Current version: <server_version_num>` error.
+
 > [!caution]
 > Specific implementations of PostgreSQL (e.g., AWS RDS) should be configured in their specific way.<br/>
 > Refer the specific section or upstream documentation.
