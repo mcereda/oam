@@ -18,6 +18,7 @@
 1. [Composing resources](#composing-resources)
 1. [Importing resources](#importing-resources)
    1. [Import components and their children](#import-components-and-their-children)
+   1. [Moving resources from a top-level URN to `ComponentResource` child](#moving-resources-from-a-top-level-urn-to-componentresource-child)
 1. [Pulumi Cloud](#pulumi-cloud)
    1. [ESC](#esc)
    1. [IDP](#idp)
@@ -26,6 +27,7 @@
    1. [Assume role with MFA enabled but AssumeRoleTokenProvider session option not set](#assume-role-with-mfa-enabled-but-assumeroletokenprovider-session-option-not-set)
    1. [Attempting to deploy or update resources with pending operations from previous deployment](#attempting-to-deploy-or-update-resources-with-pending-operations-from-previous-deployment)
    1. [Change your program back to the original providers](#change-your-program-back-to-the-original-providers)
+   1. [ECS task definitions keep being replaced](#ecs-task-definitions-keep-being-replaced)
    1. [RangeError: Invalid string length](#rangeerror-invalid-string-length)
    1. [Stack init fails because the stack supposedly already exists](#stack-init-fails-because-the-stack-supposedly-already-exists)
    1. [Stack init fails due to missing scheme](#stack-init-fails-due-to-missing-scheme)
@@ -1436,6 +1438,9 @@ One can import existing resources:
 - In code, with the `import` resource option.<br/>
   One needs to supply it as a property on a resource declaration that one writes into one's program oneself.
 
+  > [!important] `ResourceOptions.import` only accepts **plain** `string` values, not Pulumi Outputs
+  > The import ID must be a **static literal**, known at program-write time.
+
 The two approaches work in slightly different ways, and are suited to slightly different use cases.
 
 ### Import components and their children
@@ -1571,6 +1576,21 @@ $ pulumi preview
 
 </details>
 
+### Moving resources from a top-level URN to `ComponentResource` child
+
+When both the old and new URN target the same physical resource, Pulumi plans a create (new URN) **and** a delete (old
+URN) operations. The delete runs **after** the create, and destroys the just-created resource.
+
+Remove the old URN from the state **before** running `pulumi up`:
+
+```sh
+pulumi state delete '<old-urn>'           # fails if the resource has dependents
+pulumi state delete --force '<old-urn>'   # skips dependent check — use with care
+```
+
+`pulumi up` only sees the create operation on the next run. Verify that dependents will re-adopt the resource naturally
+(e.g. by referencing the new component's output).
+
 ## Pulumi Cloud
 
 ### ESC
@@ -1686,6 +1706,41 @@ Solution:
 1. Fix the provider's version to the one wanted by the resource.
 1. Run `pulumi install` to gather the required version.
 1. Try the action again now.
+
+### ECS task definitions keep being replaced
+
+Two independent AWS ECS behaviours cause Pulumi to plan task definition replacements on every run even when nothing
+really changed:
+
+- The `DescribeTaskDefinition` API returns containers **in alphabetical order by name**, regardless of their
+  registration order. If Pulumi's desired state has a different order, it sees a permanent difference in that array.
+
+  Sort all containers alphabetically by name **before** serialising the container definitions:
+
+  ```ts
+  containerDefinitions: pulumi.jsonStringify(
+      allContainers.sort((a, b) => a.name.localeCompare(b.name)),
+  ),
+  ```
+
+  Startup ordering is **not** affected. ECS uses `dependsOn` and FireLens auto-detection, not array position. Same-order
+  containers are started in parallel.
+
+- Several container fields are **always** populated `DescribeTaskDefinition` results, even when they are **not** set at
+  creation time. Omitting them in the Pulumi definition causes a permanent desired `undefined` value against the actual
+  empty array value difference. Known fields as of 2026-04-23 are:
+
+  | Field            | Default returned by ECS |
+  | ---------------- | ----------------------- |
+  | `portMappings`   | `[]`                    |
+  | `mountPoints`    | `[]`                    |
+  | `volumesFrom`    | `[]`                    |
+  | `systemControls` | `[]`                    |
+  | `environment`    | `[]`                    |
+  | `user`           | `"0"`                   |
+
+  Explicitly set all of these on **every container** (including sidecars). Run a preview after any task definition
+  change to catch new surprises.
 
 ### RangeError: Invalid string length
 
