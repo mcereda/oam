@@ -495,8 +495,13 @@ Labels are intended to store **low-cardinality** values with the goal to describ
 If frequently searching high-cardinality data in logs, one should use
 [_structured metadata_][what is structured metadata] instead.
 
-Loki has a default limit of 15 index labels.<br/>
-I can't seem to find ways to set this value as of 2025-01-21.
+There is a default limit of 15 index labels per series. This value was **lowered** from 30 in Loki v3.0.0.
+It can be overridden _globally_ in `limits_config.max_label_names_per_series`
+(refer to [`limits_config`][Configuration / limits_config])) or _per-tenant_ via the `overrides` block.<br/>
+Loki auto-adds labels like `detected_level` based on a log's content. These labels **do** count toward the budget.
+
+Grafana Labs **strongly discourages** raising the limit for index labels. Higher limits inflate the index and degrade
+query performance.
 
 When Loki performs searches, it:
 
@@ -632,12 +637,12 @@ Only recommended for very large Loki clusters, or when needing more precise cont
 
 ## Object storage
 
-Refer [Storage] and [Loki S3 Storage: A Guide for Efficient Log Management].
+Refer [Storage][Configuration / Storage] and [Loki S3 Storage: A Guide for Efficient Log Management].
 
 <details>
   <summary>AWS example</summary>
 
-Refer also [AWS deployment (S3 Single Store)].
+Refer also [AWS deployment (S3 Single Store)][Configuration / AWS deployment (S3 single store)].
 
   <details style="padding-left: 1em;">
     <summary>Permissions</summary>
@@ -863,7 +868,7 @@ storage_config:
 - [HTTP API reference]
 - [How to Set Up Grafana, Loki, and Prometheus Locally with Docker Compose: Part 1 of 3]
 - [Deploying Grafana, Loki, and Prometheus on AWS ECS with EFS and Cloud Formation (Part 3 of 3)]
-- [AWS deployment (S3 Single Store)]
+- [AWS deployment (S3 Single Store)][Configuration / AWS deployment (S3 single store)]
 - [Zero to Hero: Loki] video playlist
 
 <!--
@@ -890,9 +895,11 @@ storage_config:
 
 <!-- Files -->
 <!-- Upstream -->
-[aws deployment (s3 single store)]: https://grafana.com/docs/loki/latest/configure/storage/#aws-deployment-s3-single-store
 [Cardinality]: https://grafana.com/docs/loki/latest/get-started/labels/cardinality/
-[codebase]: https://github.com/grafana/loki
+[Codebase]: https://github.com/grafana/loki
+[Configuration / AWS deployment (S3 single store)]: https://grafana.com/docs/loki/latest/configure/storage/#aws-deployment-s3-single-store
+[Configuration / limits_config]: https://grafana.com/docs/loki/latest/configure/#limits_config
+[Configuration / Storage]: https://grafana.com/docs/loki/latest/configure/storage/
 [deploy the loki helm chart on aws]: https://grafana.com/docs/loki/latest/setup/install/helm/deployment-guides/aws/
 [documentation]: https://grafana.com/docs/loki/latest/
 [grafana loki store log data on s3 bucket on aws fargate]: https://community.grafana.com/t/grafana-loki-store-log-data-on-s3-bucket-on-aws-fargate/112861
@@ -903,11 +910,10 @@ storage_config:
 [loki-distributed]: https://github.com/grafana/helm-charts/tree/main/charts/loki-distributed
 [Open source log monitoring: The concise guide to Grafana Loki]: https://grafana.com/blog/2023/12/11/open-source-log-monitoring-the-concise-guide-to-grafana-loki/?pg=blog&plcmt=body-txt
 [send log data to loki]: https://grafana.com/docs/loki/latest/send-data/
-[storage]: https://grafana.com/docs/loki/latest/configure/storage/
 [The concise guide to Grafana Loki: Everything you need to know about labels]: https://grafana.com/blog/2023/12/20/the-concise-guide-to-grafana-loki-everything-you-need-to-know-about-labels/
 [The concise guide to Loki: How to get the most out of your query performance]: https://grafana.com/blog/2023/12/28/the-concise-guide-to-loki-how-to-get-the-most-out-of-your-query-performance/
 [Understand labels]: https://grafana.com/docs/loki/latest/get-started/labels/
-[website]: https://grafana.com/oss/loki/
+[Website]: https://grafana.com/oss/loki/
 [What is structured metadata]: https://grafana.com/docs/loki/latest/get-started/labels/structured-metadata/
 [Zero to Hero: Loki]: https://www.youtube.com/playlist?list=PLDGkOdUX1Ujr9QOsM--ogwJAYu6JD48W7
 
