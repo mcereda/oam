@@ -134,6 +134,10 @@ scram-sha-256 'mySecretPassword'
 ```
 
 ```sql
+-- Get server version
+-- e.g. 110011 = PG 11.11
+SELECT current_setting('server_version_num');
+
 -- Show running queries
 SELECT * from pg_stat_activity where usename = 'monica';
 
