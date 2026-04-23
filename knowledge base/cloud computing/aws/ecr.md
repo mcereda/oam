@@ -96,7 +96,10 @@ Constraints:
 > interactive shell session worked flawlessly.
 
 The user or role pulling the image must be granted the `ecr:BatchImportUpstreamImage` permission for the feature to
-work as expected.
+work as expected. This is needed on **every** pull **and** applies also when the tag is already cached locally in the
+ECR.<br/>
+The service intercepts the pull request to check the upstream. Without this permission, ECR returns _not found_ (and
+not _access denied_) intentionally.
 
 Refer [Troubleshooting pull through cache issues in Amazon ECR].
 
