@@ -1390,7 +1390,10 @@ See also [What is Amazon VPC Lattice?] and its [Amazon VPC Lattice pricing].
 
 ## Container dependencies
 
-Containers can depend on other containers **from the same task**.<br/>
+By default, ECS starts all containers in a task in parallel.
+
+Containers _can_ depend on other containers **from the same task**. Giving them a dependency also forces an
+initialization order.<br/>
 On startup, ECS evaluates all container dependency conditions and starts the containers only when the required
 conditions are met.<br/>
 During shutdown, the dependency order is reversed and containers that depend on others will stop **after** the ones
@@ -1753,12 +1756,13 @@ Allows containers in ECS tasks to send logs to multiple destinations. Those can 
 and OpenSearch), AWS partners (E.G. Splunk and Datadog), or any service supporting Fluent* output.
 
 It uses Fluent Bit or Fluentd under the hood.<br/>
-One can tweak their behaviour using according custom Fluent Bit or Fluentd configuration files from S3 or the container
-image.
+One can tweak their behaviour using custom Fluent Bit or Fluentd configuration files from S3, or including them in a
+custom container image.
 
-Requires a FireLens sidecar container to run alongside the main application's containers in order to process and forward
-logs from them.<br/>
-This log router sidecar container should be marked as `essential` in order to prevent silent log loss should it crash.
+Requires configuring a sidecar `log_router` container to run alongside the main application. The log router processes
+and forwards logs from the main application's containers. Labels and other options can be set as
+`logConfiguration.options` in the **main application's** containers'.<br/>
+This sidecar container should be marked as `essential` to prevent silent log loss in the event it crashes.
 
 The log router's container image **can** be `amazon/aws-for-fluent-bit` if one wants to send data to an AWS service or
 Partner.<br/>
@@ -1868,6 +1872,11 @@ It **must** be a custom image equipped with the required output plugins if not.
 ```
 
 </details>
+
+ECS enforces FireLens startup ordering automatically: when a container in a task declares
+`logConfiguration.logDriver="awsfirelens"`, ECS ensures the mandatory `log_router` container is running first.<br/>
+Making the application container **explicitly dependent** on the `log_router` container is more readable and defensive,
+but not a requirement.
 
 ### Fluent Bit or Fluentd
 
