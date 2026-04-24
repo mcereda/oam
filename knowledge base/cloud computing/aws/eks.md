@@ -16,6 +16,8 @@
 1. [Add-ons](#add-ons)
    1. [Metrics server](#metrics-server)
    1. [Pod identity](#pod-identity)
+      1. [IRSA vs Pod Identity credential precedence](#irsa-vs-pod-identity-credential-precedence)
+      1. [Migrating from IRSA to Pod Identity](#migrating-from-irsa-to-pod-identity)
    1. [Cluster autoscaler](#cluster-autoscaler)
    1. [AWS Load Balancer Controller](#aws-load-balancer-controller)
    1. [EBS CSI driver](#ebs-csi-driver)
@@ -865,9 +867,6 @@ Limitations:
 
 - Pod Identity Agents are DaemonSets.<br/>
   This means they **cannot** run on Fargate hosts and **will** require EC2 nodes.
-- Does **not** work with **Amazon-provided EKS add-ons** that need IAM credentials.<br/>
-  These controllers, drivers and plugins support EKS Pod Identities should they be installed as **self-managed** add-ons
-  instead.
 
 Requirements:
 
@@ -960,6 +959,57 @@ Procedure:
    </details>
 
 1. Configure pods to use those service accounts.
+
+#### IRSA vs Pod Identity credential precedence
+
+When **both** IRSA and Pod Identity are configured for the **same** service account, what authentication method takes
+precedence depends on the workload's type:
+
+- With **regular workloads**, IRSA takes precedence at the AWS SDK credential chain level.
+
+  The SDK finds the IRSA web identity token **before** Pod Identity's container credential provider. Pod Identity is
+  **silently ignored**.<br/>
+  Refer to [How EKS Pod Identity works].
+
+- With **EKS managed addons** (EBS CSI, VPC CNI, etc.), the Pod Identity takes precedence.
+
+  When both `serviceAccountRoleArn` (IRSA) and `podIdentityAssociations` are specified on the addon's resource and the
+  `eks-pod-identity-agent` addon is installed, the addon API **ignores** `serviceAccountRoleArn` and uses Pod Identity.
+  It falls back to IRSA only if the Pod Identity's agent is missing.<br/>
+  Refer to [Add-ons IAM].
+
+#### Migrating from IRSA to Pod Identity
+
+<details>
+  <summary>Regular workloads (safe, zero-downtime)</summary>
+
+1. Create the `PodIdentityAssociation`.
+1. IRSA continues to be used (earlier in the credential chain). No disruption.
+1. Validate the Pod Identity role and policy are correct.
+1. Remove the IRSA annotation from the service account, and clean up the IRSA trust policy.
+1. Pod Identity activates.
+
+</details>
+
+<details>
+  <summary>EKS managed addons</summary>
+
+1. Ensure `eks-pod-identity-agent` addon is installed on the cluster.
+1. Update the addon to include `podIdentityAssociations` (via addon update API or IaC).
+1. The addon API ignores `serviceAccountRoleArn` once Pod Identity is configured.
+1. Remove `serviceAccountRoleArn` from the addon configuration.
+
+> [!caution] Association ownership
+> Pod Identity associations created through the addon API are **owned by the addon**.
+>
+> The addon **cannot** adopt standalone `PodIdentityAssociation` resources created independently (e.g. in Pulumi or
+> Terraform). Delete the standalone association first, and let the addon recreate it via an update operation.<br/>
+> Refer to [Add-ons IAM].
+
+> [!caution] Deletion cascades by default
+> Deleting the addon **also** deletes all the Pod Identity association it owns, unless the `preserve` option is used.
+
+</details>
 
 ### Cluster autoscaler
 
@@ -1508,6 +1558,7 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 
 <!-- Files -->
 <!-- Upstream -->
+[Add-ons IAM]: https://docs.aws.amazon.com/eks/latest/userguide/add-ons-iam.html
 [allowing iam roles or users access to kubernetes objects on your amazon eks cluster]: https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html
 [amazon eks add-ons]: https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html
 [amazon eks cluster iam role]: https://docs.aws.amazon.com/eks/latest/userguide/service_IAM_role.html
@@ -1540,6 +1591,7 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [how can i get my worker nodes to join my amazon eks cluster?]: https://repost.aws/knowledge-center/eks-worker-nodes-cluster
 [how do i resolve the error "you must be logged in to the server (unauthorized)" when i connect to the amazon eks api server?]: https://repost.aws/knowledge-center/eks-api-server-unauthorized-error
 [how do i use persistent storage in amazon eks?]: https://repost.aws/knowledge-center/eks-persistent-storage
+[How EKS Pod Identity works]: https://docs.aws.amazon.com/eks/latest/userguide/pod-id-how-it-works.html
 [identity and access management]: https://aws.github.io/aws-eks-best-practices/security/docs/iam/
 [install the aws load balancer controller using helm]: https://docs.aws.amazon.com/eks/latest/userguide/lbc-helm.html
 [learn how eks pod identity grants pods access to aws services]: https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html
