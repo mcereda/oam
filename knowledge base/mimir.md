@@ -422,16 +422,23 @@ Metrics data is uploaded to the object storage every 2 hours, typically when a b
 head.<br/>
 After the metrics data block is uploaded, its related WAL is truncated too.
 
-When using AWS S3 for block storage, one can **safely** leverage the
-[Intelligent-Tiering storage class][aws s3 storage classes] since all its tiers remain real-time readable.<br/>
-If Mimir is configured to clean up its data after a short amount of time, though, it might not be worth the increased
-trouble and costs. Make sure to retain at least 180d worth of data to make sense of this tier.
+When using AWS S3 for block storage, one can **safely** leverage the **default tiers** of the
+[Intelligent-Tiering storage class][aws s3 storage classes] (Frequent Access, Infrequent Access, Archive Instant
+Access). They remain readable real-time with millisecond latency. Mimir's block read path fetches data on demand as
+queries require it, so the data **must** be available synchronously.<br/>
+If Mimir is configured to clean up its data after a short amount of time, though, it might **not** be worth the
+increased trouble and costs. Make sure to retain at least 90d worth of data to make sense of this storage class.
 
 **Glacier** tiers are **not** safe, because their retrieval latency is minutes to hours. This breaks queries for data
 in those tiers.<br/>
 Prefer using `-compactor.blocks-retention-period` to delete old blocks instead of transitioning them to Glacier-class
 storage. Blocks are first **marked** for deletion, then hard-deleted after the amount of time defined by
 `-compactor.deletion-delay` (which defaults to 12h).
+
+> [!warning]
+> Intelligent-Tiering has two **opt-in** tiers: _Archive Access_ (90+ days) and _Deep Archive Access_ (180+ days).<br/>
+> Those behave like Glacier, with retrieval times in minutes to hours. Do **not** enable these on Mimir's block buckets.
+> They are off by default, but _can_ be activated per-bucket. Only the default tiers are safe for real-time queries.
 
 Also consider setting an S3 lifecycle rule to abort incomplete multipart uploads after 1 day. Mimir can leave orphaned
 uploads if interrupted.

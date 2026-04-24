@@ -25,6 +25,7 @@ Designed to be cost-effective and easy to operate.
    1. [Simple scalable mode](#simple-scalable-mode)
    1. [Microservices mode](#microservices-mode)
 1. [Object storage](#object-storage)
+   1. [S3 storage classes](#s3-storage-classes)
 1. [Analytics](#analytics)
 1. [Queries](#queries)
 1. [Troubleshooting](#troubleshooting)
@@ -698,6 +699,26 @@ ruler:
   </details>
 </details>
 
+### S3 storage classes
+
+When using AWS S3 for chunk storage, one can **safely** leverage the **default tiers** of the
+[Intelligent-Tiering storage class][aws s3 storage classes] (Frequent Access, Infrequent Access, Archive Instant
+Access). The remain readable real-time with millisecond latency. Loki's chunk read path fetches data on demand as
+queries require it, so the data **must** be available synchronously.<br/>
+If Loki is configured to clean up its data after a short amount of time, though, it might **not** be worth the
+increased trouble and costs. Make sure to retain at least 90d worth of data to make sense of this storage class.
+
+**Glacier** and **Glacier Deep Archive** storage classes are **not** safe for Loki buckets. Their retrieval latency
+(minutes to hours) will break or heavily delay LogQL queries for data stored in those tiers.
+
+> [!warning]
+> Intelligent-Tiering has two **opt-in** tiers: _Archive Access_ (90+ days) and _Deep Archive Access_ (180+ days).<br/>
+> Those behave like Glacier, with retrieval times in minutes to hours. Do **not** enable these on Loki's chunk buckets.
+> They are off by default, but _can_ be activated per-bucket. Only the default tiers are safe for real-time queries.
+
+Also consider setting an S3 lifecycle rule to abort incomplete multipart uploads after 1 day. Loki can leave orphaned
+uploads if interrupted.
+
 ## Analytics
 
 By default, Loki will send anonymous but uniquely-identifiable usage and configuration analytics to Grafana Labs.<br/>
@@ -889,9 +910,10 @@ storage_config:
 [simple scalable mode]: #simple-scalable-mode
 
 <!-- Knowledge base -->
-[grafana]: grafana.md
-[nginx]: nginx.md
-[promtail]: promtail.md
+[AWS S3 storage classes]: cloud%20computing/aws/s3.md#storage-classes
+[Grafana]: grafana.md
+[Nginx]: nginx.md
+[Promtail]: promtail.md
 
 <!-- Files -->
 <!-- Upstream -->
