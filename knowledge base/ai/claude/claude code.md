@@ -447,9 +447,8 @@ to also load them.
 Prefer using _rules_ for a more structured approach to organizing instructions.<br/>
 Rules live in `.claude/rules/*.md` and are discovered _recursively_.
 
-Rules **without** a `paths` frontmatter field are
-loaded _unconditionally_ at launch.<br/>
-Rules **with** a `paths` field _only_ load when Claude reads files matching the specified glob patterns:
+Rules **without** a `paths` frontmatter field are loaded _unconditionally_ at launch.<br/>
+Rules **with** a `paths` field _only_ load when Claude Code reads files matching the specified glob patterns:
 
 <details style='padding 0 0 1rem 1rem'>
 
@@ -461,6 +460,13 @@ paths:
 ```
 
 </details>
+
+> [!warning] Known bugs as of 2026-04-24
+> Path-scoped rules have multiple open issues:
+>
+> - They _may_ load **globally** at session start **despite** the `paths:` frontmatter ([#16299]).
+> - They are **ignored** in user-level rules (`~/.claude/rules/`, [#21858]) and in git worktrees ([#23569])
+> - They **only** trigger on `Read` actions, not on `Write` or `Edit` ([#23478]).
 
 Skip irrelevant `CLAUDE.md` files by using the `claudeMdExcludes` setting.
 
@@ -606,6 +612,12 @@ Procedure:
 1. From within Claude Code, run the `/mcp` command to configure them.
 
 ### Managing MCP servers
+
+Claude Code loads only MCP tool **names** at session start by default, only fetching their full definitions on demand.
+This avoids significant token overhead when many servers (or servers with many tools) are configured, with the overhead
+approaching 0 until each tool is first called.<br/>
+Requires Sonnet 4 or Opus 4 and later; Haiku models do **not** support deferred loading.<br/>
+Set `ENABLE_TOOL_SEARCH=false` if using a proxy that does not forward `tool_reference` blocks.
 
 > [!tip]
 > Prefer managing MCP servers via the `claude mcp` subcommands.
@@ -1325,6 +1337,11 @@ Create hooks by adding a `hooks` block to a settings file.
 Filter tool events further by setting the `if` field on individual hook handlers.<br/>
 The `if` field uses permission rule syntax to match against the tool name and arguments together, e.g. `"Bash(git *)"`
 runs only for `git` commands and `"Edit(*.ts)"` runs only for TypeScript files.
+
+> [!important]
+> Only `PreToolUse`, `PostToolUse`, and `PermissionRequest` support `matcher`.<br/>
+> `Stop`, `UserPromptSubmit`, `TaskCompleted`, and several other events **silently ignore** any `matcher` field set
+> on them.
 
 <details style='padding: 0 0 1rem 1rem'>
   <summary>Examples</summary>
@@ -2338,6 +2355,10 @@ Claude Code version: `v2.1.41`.
 [User-level settings.json patch example for own KB]: ../../../examples/claude-code/own-kb/user.settings.patch.json
 
 <!-- Upstream -->
+[#16299]: https://github.com/anthropics/claude-code/issues/16299
+[#21858]: https://github.com/anthropics/claude-code/issues/21858
+[#23478]: https://github.com/anthropics/claude-code/issues/23478
+[#23569]: https://github.com/anthropics/claude-code/issues/23569
 [anthropics/skills]: https://github.com/anthropics/skills
 [anthropics/skills/skill-creator]: https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md
 [Automate workflows with hooks]: https://code.claude.com/docs/en/hooks-guide
