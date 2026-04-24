@@ -242,51 +242,61 @@ claude plugin disable 'gitlab@claude-plugins-official'
 claude plugin update 'gitlab@claude-plugins-official'
 ```
 
-_Relevant_ commands from within Claude Code (version 2.1.89).<br/>
+_Relevant_ commands from within Claude Code (version 2.1.109).<br/>
 Refer to [Built-in commands][built-in commands reference] for the complete list.
 
 ```plaintext
-/agents                              Manage agent configurations
-/batch <instruction>                 Research and plan a large-scale change, then execute it in parallel across 5 to 30 isolated worktree agents that each open a PR
-/branch [name]                       Create a branch of the current conversation at this point (alias of /fork)
-/btw <question>                      Ask a quick side question without adding to the conversation
-/clear                               Clear conversation history and free up context (alias of /reset and /new)
-/compact [instructions]              Compact the conversation; allows optional focus instructions
-/config                              Open config panel (alias of /settings)
-/context                             Visualize current context usage as a colored grid
-/copy [N]                            Copy Claude's last response or a code block to clipboard
-/cost                                Show token usage statistics
-/debug [description]                 Enable debug logging for this session and help diagnose issues
-/diff                                View uncommitted changes and per-turn diffs
-/effort [low|medium|high|max|auto]   Set effort level for model usage
-/exit                                Exit the REPL (alias of /quit)
-/export [filename]                   Export the current conversation to a file or clipboard
-/fast [on|off]                       Toggle fast mode (Opus only)
-/help                                Show help and available commands
-/hooks                               Manage hook configurations for tool events
-/init                                Initialize a new CLAUDE.md file with codebase documentation
-/insights                            Generate a report analyzing Claude Code sessions
-/login                               Sign in with your Anthropic account
-/logout                              Sign out from your Anthropic account
-/loop [interval] <prompt>            Run a prompt or slash command on a recurring interval (e.g. /loop 5m /foo, defaults to 10m)
-/mcp                                 Manage MCP servers
-/memory                              Edit Claude memory files
-/model [model]                       Set the AI model for Claude Code
-/permissions                         Manage allow, ask, and deny tool permission rules (alias of /allowed-tools)
-/plan [description]                  Enable plan mode or view the current session plan
-/plugin                              Manage Claude Code plugins
-/reload-plugins                      Activate pending plugin changes in the current session
-/rename [name]                       Rename the current conversation
-/resume [session]                    Resume a previous conversation (alias of /continue)
-/rewind                              Restore the code and/or conversation to a previous point (alias of /checkpoint)
-/sandbox                             Toggle sandbox mode
-/security-review                     Complete a security review of the pending changes on the current branch
-/simplify [focus]                    Review changed code for reuse, quality, and efficiency, then fix any issues found
-/skills                              List available skills
-/status                              Show version, model, account, and connectivity status
-/tasks                               List and manage background tasks (alias of /bashes)
-/usage                               Show plan usage limits
-/voice                               Toggle push-to-talk voice dictation
+/add-dir <path>                            Add a working directory for the current session
+/agents                                    Manage agent configurations
+/batch <instruction>                       Research and plan a large-scale change, then execute it in parallel across 5 to 30 isolated worktree agents that each open a PR
+/branch [name]                             Create a branch of the current conversation at this point (alias of /fork)
+/btw <question>                            Ask a quick side question without adding to the conversation
+/clear                                     Clear conversation history and free up context (alias of /reset and /new)
+/compact [instructions]                    Summarize and free up context; accepts optional focus instructions
+/config                                    Open the settings panel (alias of /settings)
+/context                                   Visualize current context usage as a colored grid
+/copy [N]                                  Copy Claude's Nth-latest response to clipboard (default: last)
+/cost                                      Show session cost and activity stats (alias of /usage and /stats)
+/debug [description]                       Enable debug logging for this session and help diagnose issues
+/diff                                      Interactively view uncommitted changes and per-turn diffs
+/doctor                                    Diagnose and verify installation and settings
+/effort [low|medium|high|xhigh|max|auto]   Set the model's effort level
+/exit                                      Exit the REPL (alias of /quit)
+/export [filename]                         Export the current conversation as plain text to a file or clipboard
+/fast [on|off]                             Toggle fast mode; increases performance and costs
+/fewer-permission-prompts                  Scan transcripts and add an allowlist to project settings
+/focus                                     Toggle focus view (last prompt + tool summary + response only)
+/help                                      Show help and available commands
+/hooks                                     Manage hook configurations for tool events
+/init                                      Initialize a new CLAUDE.md file with codebase documentation, or update the existing one
+/insights                                  Generate a report analyzing Claude Code sessions
+/login                                     Sign in with your Anthropic account
+/logout                                    Sign out from your Anthropic account
+/loop [interval] [prompt]                  Run a prompt on a recurring interval (alias of /proactive)
+/mcp                                       Manage MCP servers' connection and authentication
+/memory                                    Edit memory files, enable/disable auto-memory
+/model [model]                             Select the AI model to use during the conversation
+/permissions                               Manage allow, ask, and deny tool permission rules (alias of /allowed-tools)
+/plan [description]                        Enable plan mode or view the current session plan
+/plugin                                    Manage Claude Code plugins
+/release-notes                             View Claude Code's changelog in an interactive version picker
+/reload-plugins                            Reload all active plugins without restarting
+/remote-control                            Make the current session available for remote control from claude.ai (alias of /rc)
+/rename [name]                             Rename the current session (auto-generates if no name given)
+/resume [session]                          Resume a previous conversation by ID or name (alias of /continue)
+/rewind                                    Rewind conversation and/or code to a previous point (alias of /checkpoint, /undo)
+/sandbox                                   Toggle sandbox mode
+/schedule [description]                    Create, update, list, or run routines (alias of /routines)
+/security-review                           Analyze pending changes for security vulnerabilities
+/simplify [focus]                          Review changed code for reuse, quality, and efficiency, then fix any issues found
+/skills                                    List available skills
+/status                                    Show version, model, account, and connectivity status
+/tasks                                     List and manage background tasks (alias of /bashes)
+/teleport                                  Pull a Claude Code web session into this terminal (alias of /tp)
+/tui [default|fullscreen]                  Set terminal UI renderer (fullscreen = flicker-free alt-screen)
+/ultraplan <prompt>                        Draft a plan in the cloud, review in browser, execute remotely or locally
+/ultrareview [PR]                          Deep multi-agent code review in a cloud sandbox
+/voice [hold|tap|off]                      Toggle or configure voice dictation mode
 ```
 
 </details>
