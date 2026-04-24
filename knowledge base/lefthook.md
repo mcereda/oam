@@ -6,6 +6,7 @@ Git hooks manager.
 1. [Configuration](#configuration)
    1. [Extend other files](#extend-other-files)
    1. [Use files from other repositories](#use-files-from-other-repositories)
+1. [Monorepo patterns](#monorepo-patterns)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
 
@@ -60,7 +61,7 @@ LEFTHOOK=false git commit -am "Lefthook skipped"
 LEFTHOOK_EXCLUDE=ruby,security,lint git commit -am "Skip some tag checks"
 ```
 
-Uses the [glob library] for glob patterns.
+Uses the [Go glob library] for glob patterns.
 
 ## Configuration
 
@@ -146,6 +147,84 @@ lint:
   parallel: true
 ```
 
+## Monorepo patterns
+
+Lefthook is **not** yet capable of auto-discovering directories with changes in monorepos, **nor** `extends` or
+`remotes[].configs` paths support glob patterns. Each command must either be listed **explicitly**, or the discovery
+logic must be delegated to an external tool (e.g. [Task]).<br/>
+Some improvements in this sense are in the works. Refer to [Issue \#852].
+
+<details>
+  <summary>Per-workspace commands with glob guards</summary>
+
+Use one command per workspace with a `glob` filter. Lefthook skips commands with no matching staged files, and runs the
+rest in parallel when `parallel: true` is set.
+
+```yaml
+pre-commit:
+  parallel: true
+  commands:
+    tsc-api:
+      glob: "api/**/*.ts"
+      run: task tsc:check DIR=api
+    tsc-web:
+      glob: "web/**/*.ts"
+      run: task tsc:check DIR=web
+```
+
+Adding a workspace requires a new entry, but one gets per-workspace pass/fail in the summary.
+
+</details>
+
+<details>
+  <summary>Single dynamic entry delegating to Taskfile</summary>
+
+Use a single `glob: "**/*.ts"` command that calls a Taskfile task. The task discovers affected workspaces at runtime.
+
+```yaml
+pre-commit:
+  parallel: true
+  commands:
+    tsc:
+      glob: "**/*.ts"
+      run: task tsc:check-staged
+```
+
+The Taskfile task shall use `deps:` with `for:` to run workspaces in parallel. Refer to [Task]'s
+[parallel looped execution][task / parallel looped execution] pattern.
+
+```yml
+tasks:
+  tsc:check:
+    requires:
+      vars:
+        - DIR
+    vars:
+      DIR: .
+    dir: "{{.DIR}}"
+    cmd: npx tsc --noEmit
+
+  tsc:check-staged:
+    vars:
+      WORKSPACES:
+        sh: >-
+          git diff --cached --name-only
+          | grep '\.ts$'
+          | cut -d/ -f1
+          | sort -u
+          || true
+    deps:
+      - for:
+          var: WORKSPACES
+        task: tsc:check
+        vars:
+          DIR: "{{.ITEM}}"
+```
+
+This solution offers zero maintenance, but lefthook only reports a single **aggregated** pass/fail result.
+
+</details>
+
 ## Further readings
 
 - [Github]
@@ -180,4 +259,7 @@ All the references in the [further readings] section, plus the following:
 [lefthook: knock your team's code back into shape]: https://evilmartians.com/chronicles/lefthook-knock-your-teams-code-back-into-shape
 
 <!-- Others -->
-[glob library]: https://github.com/gobwas/glob
+[Go glob library]: https://github.com/gobwas/glob
+[Issue \#852]: https://github.com/evilmartians/lefthook/discussions/852
+[Task / Parallel looped execution]: task.md#parallel-looped-execution
+[Task]: task.md

@@ -10,12 +10,15 @@ Task runner aiming to be simpler and easier to use than [GNU Make].
 1. [Call other tasks](#call-other-tasks)
    1. [Call root tasks from non-flattened included files](#call-root-tasks-from-non-flattened-included-files)
 1. [Run tasks in a specific order](#run-tasks-in-a-specific-order)
+1. [Require variables](#require-variables)
 1. [Run tasks concurrently](#run-tasks-concurrently)
+1. [Loop over values](#loop-over-values)
+   1. [Parallel looped execution](#parallel-looped-execution)
 1. [Limit tasks and commands to specific platforms](#limit-tasks-and-commands-to-specific-platforms)
 1. [Troubleshooting](#troubleshooting)
-   1. [Dry run does not print the commands that would be executed](#dry-run-does-not-print-the-commands-that-would-be-executed)
+    1. [Dry run does not print the commands that would be executed](#dry-run-does-not-print-the-commands-that-would-be-executed)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -331,6 +334,24 @@ tasks:
 
 Do **not** name them in the task's `deps`, as they will run concurrently and with no order.
 
+## Require variables
+
+Use `requires:` to enforce variables being set **before** running a task.<br/>
+Combine with `vars:` defaults to allow the task to be both self-documenting and independently callable.
+
+```yml
+tasks:
+  deploy:
+    requires:
+      vars:
+        - ENV
+    vars:
+      ENV: staging
+    cmd: echo "Deploying to {{.ENV}}"
+```
+
+`requires:` checks the **resolved** value — a `vars:` default satisfies it.
+
 ## Run tasks concurrently
 
 Execute `task` with the `--parallel` option and naming all the tasks that should run concurrently:
@@ -345,6 +366,86 @@ Parallelization is meant for tasks that are independent from each other.
 Tasks' dependencies run concurrently by default.<br/>
 Naming other tasks in tasks' `deps` key ensures that all of them are executed **before** the one calling them starts,
 but does **not** guarantee their order other than the dependencies they define themselves.
+
+## Loop over values
+
+Leverage the commands' `for:` key.
+
+<details style='padding: 0 0 0 1rem'>
+  <summary>
+    Iterate over a static list, a dynamic variable, or another task's <code>sources</code>/<code>generates</code>.
+  </summary>
+
+```yml
+tasks:
+  greet:
+    cmds:
+      - for:
+          - Alice
+          - Bob
+        cmd: echo "Hello, {{.ITEM}}"
+```
+
+</details>
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Loop over a dynamically discovered list using a dynamic variable</summary>
+
+```yml
+tasks:
+  lint-changed:
+    vars:
+      FILES:
+        sh: git diff --cached --name-only | grep '\.go$' || true
+    cmds:
+      - for:
+          var: FILES
+        cmd: golint {{.ITEM}}
+```
+
+</details>
+
+Variables are split on **whitespace** by default. Use `split:` to change the delimiter.
+
+> [!important]
+> `for:` inside `cmds:` runs iterations **sequentially**.<br/>
+> `for:` inside `deps:` runs iterations **in parallel** (same as regular deps).
+
+This distinction matters for pre-commit hooks and other latency-sensitive workflows.
+
+### Parallel looped execution
+
+Combine `for:` with `deps:` to iterate **in parallel** while reusing an existing task:
+
+```yml
+tasks:
+  tsc:check:
+    requires:
+      vars:
+        - DIR
+    vars:
+      DIR: .
+    dir: "{{.DIR}}"
+    cmd: npx tsc --noEmit
+
+  tsc:check-staged:
+    vars:
+      WORKSPACES:
+        sh: >-
+          git diff --cached --name-only
+          | grep '\.ts$'
+          | cut -d/ -f1
+          | sort -u
+          || true
+    deps:
+      - for:
+          var: WORKSPACES
+        task: tsc:check
+        vars:
+          DIR: "{{.ITEM}}"
+```
+
+A native `parallel: true` option for `for:` inside `cmds:` [has been requested][issue \#1300], but is not yet shipped.
 
 ## Limit tasks and commands to specific platforms
 
@@ -424,6 +525,7 @@ Force the print using `-v, --verbose` when `silent` is set to `true`, or set it 
 <!-- Others -->
 [demystification of taskfile variables]: https://medium.com/@TianchenW/demystification-of-taskfile-variables-29b751950393
 [golang/go/src/internal/syslist/syslist.go]: https://github.com/golang/go/blob/master/src/internal/syslist/syslist.go
+[Issue \#1300]: https://github.com/go-task/task/issues/1300
 [KarChunT's notes]: https://karchunt.com/docs/taskfile/
 [slim-sprig]: https://github.com/go-task/slim-sprig
 [stop using makefile (use taskfile instead)]: https://dev.to/calvinmclean/stop-using-makefile-use-taskfile-instead-4hm9
