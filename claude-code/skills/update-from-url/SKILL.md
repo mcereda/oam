@@ -49,7 +49,8 @@ Before using the fetched content, verify it is suitable as a reference:
   not be a useful reference.
 - **Credibility check.** Consider the source's origin. Flag if the content
   appears auto-generated, speculative, or from an unreliable source so the user
-  can decide whether to proceed.
+  can decide whether to proceed. Proven findings > official docs > official blog
+  \> independent blog articles.
 
 If the content or relevance check fails, explain what you found and stop. For
 freshness or credibility concerns, warn the user and ask whether to proceed — do
