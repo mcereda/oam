@@ -160,6 +160,8 @@ pulumi pre --import-file 'resources.to.import.json'
 pulumi pre --save-plan 'plan.json'
 find '.' -type f -name 'Pulumi.yaml' -not -path "*/node_modules/*" -exec dirname {} + \
 | xargs -pn '1' pulumi preview --parallel "$(nproc)" --suppress-outputs --cwd
+# With json summary (single JSON object, `| jq '.changeSummary' -`) for robotic usage
+pulumi pre … --json --suppress-progress
 
 # Show the URN (or other stuff) of resources that would be deleted
 pulumi preview --json | jq -r '.steps[]|select(.op=="delete").urn' -
@@ -220,6 +222,8 @@ pulumi stack output --json 'redis' | jq -r '.replicationGroup | "redis://\(.prim
 pulumi up --suppress-outputs --show-secrets
 pulumi up --exclude 'urn:pulumi:…'
 pulumi up --plan 'plan.json'
+# With json summary (NDJSON stream, `| jq -s '[.[] | select(.type == "summary") -`) for robotic usage
+pulumi up … --json --suppress-progress
 
 # Limit the application run to only execute the 'delete' operations.
 pulumi pre --suppress-outputs --json \

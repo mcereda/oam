@@ -20,10 +20,7 @@ tasks:
     interactive: true
     deps:
       - install
-    requires:
-      vars:
-        - AWS_PROFILE
-    cmd: pulumi pre
+    cmd: pulumi preview {{.CLI_ARGS}}
 
   refresh:
     deps:
@@ -32,7 +29,7 @@ tasks:
     summary: |-
       Refresh the resources in a Pulumi stack.
     interactive: true
-    cmd: pulumi refresh
+    cmd: pulumi refresh {{.CLI_ARGS}}
 
   stack:init:
     desc: create an empty pulumi stack with the given name
@@ -41,10 +38,7 @@ tasks:
     interactive: true
     deps:
       - install
-    requires:
-      vars:
-        - AWS_PROFILE
-    cmd: pulumi stack init dev
+    cmd: pulumi stack init dev {{.CLI_ARGS}}
 
   up:
     desc: create or update the resources in a pulumi stack
@@ -55,7 +49,4 @@ tasks:
     interactive: true
     deps:
       - install
-    requires:
-      vars:
-        - AWS_PROFILE
-    cmd: pulumi up
+    cmd: pulumi up {{.CLI_ARGS}}
