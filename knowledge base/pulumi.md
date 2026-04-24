@@ -186,6 +186,8 @@ pulumi pre --diff -p '10' -m 'message' -s 'stack'
 pulumi pre --expect-no-changes --parallel '10' --show-reads
 pulumi pre -t 'targetResourceUrn' --target-dependents -v '2'
 pulumi pre --suppress-outputs --exclude 'targetResource1Urn' --exclude 'targetResourceNUrn' --exclude-dependents
+# With json summary (single JSON object, `| jq '.changeSummary' -`) for robotic usage
+pulumi pre … --json --suppress-progress
 
 # Save any resource creation seen during the preview into an import file to use
 # with the `import` subcommand.
@@ -196,6 +198,8 @@ pulumi up
 pulumi up -ry --show-config --replace 'targetResourceUrn'
 pulumi up --target 'targetResourceUrn'
 pulumi update --refresh --yes -f --secrets-provider 'hashivault'
+# With json summary (NDJSON stream, `| jq -s '[.[] | select(.type == "summary") -`) for robotic usage
+pulumi up … --json --suppress-progress
 
 # List outputs.
 pulumi stack output --json | jq '.|keys'
