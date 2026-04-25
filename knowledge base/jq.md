@@ -108,6 +108,12 @@ jq -r 'sort_by(.age)|reverse|[limit(3;.[])]' 'file.json'
   <summary>Real world use cases</summary>
 
 ```sh
+# Show differences between files.
+diff <(jq -S '.' 'a.json') <(jq -S '.' 'b.json')
+# Better alternatives
+jd 'a.json' 'b.json'            # dedicated tool, terse output
+dyff between 'a.json' 'b.json'  # prettier, also handles YAML
+
 # Convert Enpass' JSON export to a YAML file
 jq '.items[] | {title, fields} | .title + ":", (.fields[] | select(.value != "") | "  " + .label + ": " + .value)' \
   'test.json' -cr
