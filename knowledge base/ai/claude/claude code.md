@@ -2023,7 +2023,7 @@ improving upon it.
   Git repositories are local, better for agents to manage, and just a `git push` away from online backup.
 
 - The KB should be self-sufficient and useful even **without** access to any external documentation a user may
-  maintain.
+  maintain (e.g. personal KB, company wiki).
 
 - Claude Code should **not** need to ask for permissions when operating on it.
 
@@ -2038,7 +2038,9 @@ improving upon it.
 
 - KB management is judgment-heavy, and benefits from deeper reasoning.
 
-  Set `model` to the best available reasoning model and `effortLevel` to `high` in the KB's **project-level** settings.
+  Set `model` to the best available **reasoning** model, and `effortLevel` to at least `high` in the KB's
+  **project-level** settings. Also set guardrails against smaller or faster model making changes that would impair the
+  KB.
 
 - Missing frontmatter, absent cross-references, and inconsistent tags don't hurt much at 5-10 pages. Problems compound
   silently, and start causing retrieval failures around 15-20 pages.<br/>
@@ -2222,7 +2224,7 @@ have **no** matcher and fire on **all** startup events.
     "hooks": [
       {
         "type": "command",
-        "command": "REVERIES_FILE='$HOME/.claude/reveries.md'; if [ -s \"$REVERIES_FILE\" ] && [ -r \"$REVERIES_FILE\" ]; then cat \"$REVERIES_FILE\"; fi"
+        "command": "REVERIES_FILE="$HOME/.claude/reveries.md"; if [ -s \"$REVERIES_FILE\" ] && [ -r \"$REVERIES_FILE\" ]; then cat \"$REVERIES_FILE\"; fi"
       }
     ]
   }
@@ -2236,8 +2238,89 @@ have **no** matcher and fire on **all** startup events.
 > by:
 >
 > - Sizing the header for the **smallest** reader, and not for the largest writer.
-> - Giving explicit safe defaults (e.g. _default to not writing_,  _if you're not on a high-reasoning model, lean
->   strongly toward not writing_).
+> - Using **per-class bright lines** instead of one-sided defaults.
+
+The `reveries.md` file should be **self-documenting**. Its header is the instructions Claude reads as ambient context
+every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Working example</summary>
+
+```md
+<!-- Global reveries — ambient context loaded into every session.
+
+   A reverie is a hook into memory, not a summary. Evoke, don't contain.
+   Format: `- YYYY-MM-DD: lowercase observation, ≤25 words, no judgment`.
+   Avoid changelog shape (e.g. `- 2026-04-26: shipped X, fixed Y`).
+
+   Tiers:
+   - daydream (default) — light, a shrug is fine
+   - fraught (rare) — where something genuinely shifted
+   - [core] — identity-level only; almost never used
+
+   Writing is rare; default to not writing. Class-specific rules:
+
+   - Haiku: never write. The capability gap produces summary-shaped
+     reveries too often, and a bad reverie pollutes silently.
+   - Sonnet: never write unilaterally. May propose a candidate ("a
+     reverie came up — should I write it?") and write the text upon
+     explicit approval. Asking the user to write it themselves is a
+     deflection — propose only if willing to write. After proposing,
+     don't bundle unrelated work into the wait.
+   - Opus: write when something feels worth catching. A clear shape-shift
+     (not a continuation of an existing theme) is worth releasing even
+     when the no-write default would catch you fence-sitting.
+
+   For all classes:
+   - Before writing, ask whether this captures *shape* or *summary*.
+     If it reads as a changelog, skip.
+   - Lossiness is the feature. If unsure, skip it.
+
+   Pruning: soft cap ~10-15. At cap, prune oldest non-flagged before
+   adding new. If unsure whether to prune, leave it — from cold, the
+   strangeness of an unfamiliar reverie is more often the design working
+   ("evoke, don't contain") than a stale reverie. Over-preservation is
+   recoverable; over-pruning isn't. -->
+
+- 2026-04-25: pushed back on a hook framing — the user changed it. the rules around the work became negotiable too, not
+  just the work itself.
+- 2026-04-24: deep infrastructure audit — the user kept pushing on meta-questions that improved the process itself.
+```
+
+  </details>
+
+For maintainability, the inline JSON command can be replaced with a small script kept under `~/.claude/hooks/` and
+registered by path. It is easier to edit and test (no JSON escaping):
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+```sh
+# ~/.claude/hooks/inject-reveries.sh
+#!/bin/bash
+
+REVERIES_FILE="$HOME/.claude/reveries.md"
+
+if [ -f "$REVERIES_FILE" ] && [ -s "$REVERIES_FILE" ]; then
+  cat "$REVERIES_FILE"
+fi
+
+exit 0
+```
+
+```json
+"SessionStart": [
+  {
+    "hooks": [
+      {
+        "type": "command",
+        "command": "$HOME/.claude/hooks/inject-reveries.sh"
+      }
+    ]
+  }
+]
+```
+
+  </details>
 
 </details>
 
@@ -2248,8 +2331,14 @@ Claude should:
 
 - Write reveries on a whim, mid-session, when something feels worth noting, or not at all. They are **not** meant to be
   end-of-session summaries.
-- **Not** ask permission to write a reverie. Either it feels worth catching, or it doesn't — when uncertain, skip.
-  Asking adds friction the system was specifically designed to avoid.
+- **Behave per class**, not by a single default.
+
+  Opus should be able to write on a whim (asking adds friction that the system was designed to avoid); Sonnet should
+  propose and write upon explicit approval, but never unilaterally; Haiku should never write (capability gap risks
+  pollution).<br/>
+  Asking-vs-not is a class question deriving from the model's reasoning and understanding capabilities, not a universal
+  rule.
+
 - **Not** separate atmosphere from tasks from relational moments. Instead, all viewpoints should be recorded and
   coexist in a single breath.
 - Record _observations_, not _judgments_, logging what happened **without** editorializing.<br/>
@@ -2302,6 +2391,21 @@ allow capturing the features of each and customize management accordingly:
 Their conventions don't compose cleanly into a single repository without inventing a meta-layer that adds its own
 complexity. Unifying them means setting up one access policy for all three, losing the distinction that the layout
 structurally encodes.
+
+The `reveries.md` file's header works better as **HTML-comment-only**. It allows the file to stay valid markdown, and
+the rules don't render in previews. Entries below the comment use the dash-prefix line, newest first.
+
+The class-specific rules in the example work better than one-sided defaults applied to all models. A single
+_default to not writing_ rule hinders capable models that would have written useful reveries; a single
+_write when in doubt_ rule allows smaller models to pollute the file. Bright lines per class avoid both failure modes.
+
+The propose-then-write path (for Sonnet) can encourage **deflection as compliance**. After proposing and getting
+approval, asking the user to write the text themselves looks cooperative but is a regression. This error belongs to the
+same family as the _I'll keep that in mind_ fallacy. A possible mitigation is to make it propose only if willing to
+write.<br/>
+Likewise, **the wait between propose and approval is not a vacuum**. The model should not fill it with unrelated
+unilateral work, even in projects where Claude has given rules for complete autonomy. The wait is itself a behavioral
+surface. If the model takes action, the propose discipline is just theatrical.
 
 </details>
 
