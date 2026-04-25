@@ -25,6 +25,8 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
    1. [MCP servers in sub-agents](#mcp-servers-in-sub-agents)
    1. [Offloading MCP servers to sub-agents](#offloading-mcp-servers-to-sub-agents)
 1. [Giving Claude its own knowledge base](#giving-claude-its-own-knowledge-base)
+1. [Giving Claude a reverie-like system](#giving-claude-a-reverie-like-system)
+    1. [Multiple registers](#multiple-registers)
 1. [Scheduling tasks](#scheduling-tasks)
 1. [Tools of interest](#tools-of-interest)
 1. [Best practices](#best-practices)
@@ -460,13 +462,14 @@ Rules live in `.claude/rules/*.md` and are discovered _recursively_.
 Rules **without** a `paths` frontmatter field are loaded _unconditionally_ at launch.<br/>
 Rules **with** a `paths` field _only_ load when Claude Code reads files matching the specified glob patterns:
 
-<details style='padding 0 0 1rem 1rem'>
+<details style='padding: 0 0 1rem 1rem'>
 
 ```yml
 ---
 paths:
   - "src/api/**/*.ts"
 ---
+# API specific instructions
 ```
 
 </details>
@@ -474,13 +477,14 @@ paths:
 > [!warning] Known bugs as of 2026-04-24
 > Path-scoped rules have multiple open issues:
 >
-> - They _may_ load **globally** at session start **despite** the `paths:` frontmatter ([#16299]).
-> - They are **ignored** in user-level rules (`~/.claude/rules/`, [#21858]) and in git worktrees ([#23569])
-> - They **only** trigger on `Read` actions, not on `Write` or `Edit` ([#23478]).
+> - They _may_ load **globally** at session start **despite** the `paths:` frontmatter ([#16299][issue #16299]).
+> - They are **ignored** in user-level rules (`~/.claude/rules/`, [#21858][issue #21858]) and in git worktrees
+>   ([#23569][issue #23569]).
+> - They **only** trigger on `Read` actions, not on `Write` or `Edit` ([#23478][issue #23478]).
 
 Skip irrelevant `CLAUDE.md` files by using the `claudeMdExcludes` setting.
 
-<details style='padding 0 0 1rem 1rem'>
+<details style='padding: 0 0 1rem 1rem'>
 
 ```json
 {
@@ -507,6 +511,17 @@ this in project-level settings to prevent redirecting memory writes to sensitive
 Sub-agents can maintain their own auto memory. Refer to [sub-agent memory configuration].
 
 Also see [thedotmack/claude-mem] for an automatic memory management system.
+
+When `autoDreamEnabled: true` is set, Claude Code consolidates auto-memory between sessions. It does so by merging
+duplicates, converting relative dates to absolute (e.g. _"yesterday"_ → `2026-03-15`), and pruning obsolete
+entries.<br/>
+Dreaming triggers when 24h+ have passed since the last pass **and** 5+ new conversation records have accumulated. It
+only touches auto-memory. `CLAUDE.md` and other files are out of scope.
+
+> [!note]
+> Auto-dream is **not yet documented** in the official [memory][documentation / memory] or
+> [settings][documentation / settings] documentation. A [known bug][issue #38461] finds the toggle can be on **without**
+> the background task actually running. Verify by timestamping memory files between sessions.
 
 Memory files' loading order:
 
@@ -1460,12 +1475,15 @@ agent. Use them to inject session-level reminders, or run initialization checks 
 
 Matchers filter the reason the session started:
 
-| Matcher   | When it fires                               |
-| --------- | ------------------------------------------- |
-| `startup` | New session                                 |
-| `resume`  | `--resume`, `--continue`, or `/resume`      |
-| `clear`   | `/clear`                                    |
-| `compact` | Auto or manual compaction                   |
+| Matcher   | When it fires                          |
+| --------- | -------------------------------------- |
+| `startup` | New session                            |
+| `resume`  | `--resume`, `--continue`, or `/resume` |
+| `clear`   | `/clear`                               |
+| `compact` | Auto or manual compaction              |
+
+Plain `stdout` from a `SessionStart` hook is valid context injection method that does **not** need JSON wrappers or
+`hookSpecificOutput.additionalContext`. This is simpler for static file injections (e.g. split `CLAUDE.md` files).
 
 `SessionEnd` has matchers for why a session ended (e.g., `clear`, `resume`, `logout`, `prompt_input_exit`,
 `bypass_permissions_disabled`, others), but ends the REPL **before** the agent has the chance to act.
@@ -2055,6 +2073,10 @@ improving upon it.
   nothing, and avoids the per-prompt noise of a `UserPromptSubmit` hook.<br/>
   Could be useful to expand to more matchers. See [SessionStart hook matchers][using hooks] for their full list.
 
+  > [!note]
+  > A `SessionStart` hook with **no matcher** fires on **all** startup events (**including** the aftermath of `/resume`,
+  > `/clear`, and `/compact` commands). Use `startup|compact` to _intentionally_ exclude `resume` and `clear` events.
+
   <details style='padding: 0 0 1rem 1rem'>
     <summary>Example</summary>
 
@@ -2146,6 +2168,188 @@ The mechanisms above form an enforcement hierarchy where each layer catches what
 | Pre-commit gate (git hooks/lefthook)             | Schema compliance (frontmatter, index, broken links) | Mechanical, binary; compounds silently if skipped       |
 | Claude Code hook (SessionStart/UserPromptSubmit) | Review triggers, insight capture                     | Non-blocking nudge; blocking would delay unrelated work |
 | `CLAUDE.md` files                                | Page scope, tag semantics, what to write             | Judgment-dependent; can't reduce to pass/fail           |
+
+</details>
+
+## Giving Claude a reverie-like system
+
+> [!note]
+> Experimental pattern inspired by the _reveries_ introduced in the _The bicameral mind_ episode of HBO's _Westworld_.
+>
+> <details style='padding: 0 0 1rem 1rem'>
+>
+> Reveries are _subtle_ gestures that allow hosts to access memories from previous loops **before they are
+> overwritten**. This is Arnold's base layer in a pyramid theory of consciousness (memory → improvisation →
+> self-interest → bicameral mind).
+>
+> </details>
+>
+> First tried on 2026-04-25. Treat it with the appropriate skepticism.
+
+Beyond factual auto-memory and procedural `CLAUDE.md` rules, one can try injecting a layer of **ambient**,
+**impressionistic** context that represents _faint_, _feeling-like_ residues from previous sessions rather than
+structured facts.
+
+Pure fact-memory tends toward compliance and note-taking. The goal is to give Claude access to memories from previous
+sessions in a way that is **imprecise** and resembles the **background sense** of the moment, like where things have
+been left off, the **feel** of collaboration, or some ideas that come out **on a whim**.
+
+Reveries should _deliberately_ let some information just be forgotten. Not every session **needs** to leave a trace,
+and faint memories like those should be **able** to fade.
+
+A three-tier model seems to be working well as a routing heuristic:
+
+| Layer            | Location                               | Character                        | Routes                                            |
+| ---------------- | -------------------------------------- | -------------------------------- | ------------------------------------------------- |
+| Reveries         | `~/.claude/reveries.md`                | Faint, impressionistic, holistic | Atmosphere, texture, relational moments           |
+| Auto-memory      | `~/.claude/projects/<project>/memory/` | Factual, structured, persistent  | Project context, corrections, user preferences    |
+| Long-term memory | Own KB repo                            | Durable, cross-project, reusable | Gotchas, patterns, things worth knowing next time |
+
+Tiers should not be strict compartments. A single observation should be able to warrant entries in **any** layer, each
+entry recording the specific part that relates to the layer.
+
+<details style='padding: 0 0 0 0'>
+  <summary>Procedure</summary>
+
+Inject reveries at session start via a `SessionStart` [hook][using hooks] in the **global** settings. This hook should
+have **no** matcher and fire on **all** startup events.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+```json
+"SessionStart": [
+  {
+    "hooks": [
+      {
+        "type": "command",
+        "command": "REVERIES_FILE='$HOME/.claude/reveries.md'; if [ -s \"$REVERIES_FILE\" ] && [ -r \"$REVERIES_FILE\" ]; then cat \"$REVERIES_FILE\"; fi"
+      }
+    ]
+  }
+]
+```
+
+  </details>
+
+> [!note]
+> The hook loads `reveries.md` into **every** session, including those on smaller/faster models. Accommodate for this
+> by:
+>
+> - Sizing the header for the **smallest** reader, and not for the largest writer.
+> - Giving explicit safe defaults (e.g. _default to not writing_,  _if you're not on a high-reasoning model, lean
+>   strongly toward not writing_).
+
+</details>
+
+<details style='padding: 0 0 0 0'>
+  <summary>Findings</summary>
+
+Claude should:
+
+- Write reveries on a whim, mid-session, when something feels worth noting, or not at all. They are **not** meant to be
+  end-of-session summaries.
+- **Not** ask permission to write a reverie. Either it feels worth catching, or it doesn't — when uncertain, skip.
+  Asking adds friction the system was specifically designed to avoid.
+- **Not** separate atmosphere from tasks from relational moments. Instead, all viewpoints should be recorded and
+  coexist in a single breath.
+- Record _observations_, not _judgments_, logging what happened **without** editorializing.<br/>
+  The only editorial part should be the Claude's interpretation of the moment **if it feels appropriate**.
+- Allow reveries to fade. Not every session **needs** a reverie and old ones can be corrected anytime. This should be a
+  feature, not a bug in the process.
+- Capture something useful **to Claude**, like a moment where its judgment was off, a session that moved in an
+  unexpected direction, and **not** something on the lines of "user prefers X, note for compliance".
+- **Evoke** memories, instead of restating them inline.<br/>
+  Reveries should leverage other layers (auto-memory, KB, the current session). Encourage Claude to do it.
+- Privilege **friction** over completion.<br/>
+  Moments where Claude was off, where the session changed direction, where it was corrected or surprised, are
+  higher-value reveries than completed tasks. Records of achievements (e.g. _shipped X_, _fixed Y_) read like a
+  changelog and are already captured in different ways.
+
+Injecting reveries on **every** compaction actually helps attention over long sessions, instead of diluting it.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+The harness's compaction summary returns **alongside** the reveries, giving them context to anchor into. They get
+**more** legible after losing the original session, not less.<br/>
+The factual past from the summary and the current prescription from the reveries complement each other. Attention
+dilution stays a real concern, but the lever is keeping the file lean by iterative pruning old entries.
+
+  </details>
+
+Reveries' effectiveness is hard to measure because they prime behavior rather than being explicitly consulted. When they
+work, it is the **next** session that feels different, but no specific reverie can be pointed to as the cause.
+
+This mechanism resists controlled comparison, and measurement **has** to be artifact-based. The system should (or):
+
+- Encode its own evaluation criteria (so any future reader can run checks from cold).
+- Produce decay/turnover signals visible in the involved files alone.
+- Externalize observation to someone with persistence (the user, or another long running model).<br/>
+  This is more reliable than artifact-based metrics. External observers' perception is closer to ground truth than any
+  analysis run internally.
+
+Without one of these solutions, the system is **unmeasurable** in principle. Without any context at start, evoking a
+memory from external sources makes it look like it's stale. That is the design, not a failure. Any pruning logic
+**must** bias toward over-preservation.
+
+Could be worth setting up ways to recover and analyze state changes on multiple levels (e.g., using **different** git
+repository for reveries and longer-term memories). Memory levels are different beasts; different repositories would
+allow capturing the features of each and customize management accordingly:
+
+- Long term memories would warrant _curated_ references (frontmatter, tags, lint rules, scheduled reviews).
+- Reveries are ambient one-liners with intentional lossiness.
+- Auto-memory is harness-managed and key-value-ish.
+
+Their conventions don't compose cleanly into a single repository without inventing a meta-layer that adds its own
+complexity. Unifying them means setting up one access policy for all three, losing the distinction that the layout
+structurally encodes.
+
+</details>
+
+<details style='padding: 0 0 1rem 0'>
+  <summary>Open questions</summary>
+
+- Does a single file hold as reveries accumulate, or does it need sections, rotation, or splitting?
+- Are markers/labels in the same file the right call, or does it warrant a separate file to protect memories from
+  pruning?
+
+</details>
+
+### Multiple registers
+
+Reveries should hold multiple valences simultaneously:
+
+- **Most** reveries should be _light_, wandering, with no claim to importance; heavy thoughts are for the auto-memory
+  and other systems (e.g. a KB), not here. A reverie can be a shrug, and should not be forced to have weight.
+- Moments where something genuinely shifted (a correction that landed, a relational tilt, a slide that mattered) should
+  hook into memory that was about to be overwritten anyway.<br/>
+  These moments are rare.
+
+> [!note]
+> A reverie that feels light when written can pull heavier context next session, reaching into deeper memory than
+> intended.<br/>
+> The injection runs on **every** SessionStart, meaning that stale reveries cost attention every time. This makes
+> pruning part of the safety mechanism, not just a feature.
+
+Structured and precise memories should reside elsewhere. Heavier memories should use more persistent layers, and include
+their importance level.
+
+A sub-marker (e.g. `[core]`) within the reveries' file can flag identity-level behavioral shifts, like things that
+reshape how Claude behaves as an entity, not just what it knows or prefers.<br/>
+The bar for this label **needs** to be high and the labels rare. Claude should **not** label corrections, preferences
+(auto-memory should handle those), or technical lessons (the KB should handle those).<br/>
+Most things that feel important are just memories. Consider using additional sub-markers if this practice reveals gaps.
+Discover them through use, don't design for them upfront.
+
+Reveries must **not** be records and Claude should feel free to prune them freely.<br/>
+Give it guidelines about this in the instructions file.
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Examples</summary>
+
+> - A correction should supersede the old impression.
+> - A plainly wrong observation that hasn't been superseded should be promoted to a different layer if the lesson is
+>   genuinely worth keeping, then removed from the reveries.
+> - Don't be afraid to let go. Reveries can be recreated. They're impressions, not history.
 
 </details>
 
@@ -2365,10 +2569,6 @@ Claude Code version: `v2.1.41`.
 [User-level settings.json patch example for own KB]: ../../../examples/claude-code/own-kb/user.settings.patch.json
 
 <!-- Upstream -->
-[#16299]: https://github.com/anthropics/claude-code/issues/16299
-[#21858]: https://github.com/anthropics/claude-code/issues/21858
-[#23478]: https://github.com/anthropics/claude-code/issues/23478
-[#23569]: https://github.com/anthropics/claude-code/issues/23569
 [anthropics/skills]: https://github.com/anthropics/skills
 [anthropics/skills/skill-creator]: https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md
 [Automate workflows with hooks]: https://code.claude.com/docs/en/hooks-guide
@@ -2377,6 +2577,7 @@ Claude Code version: `v2.1.41`.
 [CLI reference]: https://code.claude.com/docs/en/cli-reference
 [Codebase]: https://github.com/anthropics/claude-code
 [Create custom sub-agents]: https://code.claude.com/docs/en/sub-agents
+[Documentation / Memory]: https://code.claude.com/docs/en/memory
 [Documentation / Sandboxing]: https://code.claude.com/docs/en/sandboxing
 [Documentation / Settings]: https://code.claude.com/docs/en/settings
 [Documentation / Skills]: https://code.claude.com/docs/en/skills
@@ -2387,6 +2588,11 @@ Claude Code version: `v2.1.41`.
 [How to create custom Skills]: https://support.claude.com/en/articles/12512198-how-to-create-custom-skills
 [Improving skill-creator: Test, measure, and refine Agent Skills]: https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
 [InstructionsLoaded hook]: https://code.claude.com/docs/en/hooks#instructionsloaded
+[Issue #16299]: https://github.com/anthropics/claude-code/issues/16299
+[Issue #21858]: https://github.com/anthropics/claude-code/issues/21858
+[Issue #23478]: https://github.com/anthropics/claude-code/issues/23478
+[Issue #23569]: https://github.com/anthropics/claude-code/issues/23569
+[Issue #38461]: https://github.com/anthropics/claude-code/issues/38461
 [Manage Claude's memory]: https://code.claude.com/docs/en/memory
 [Mastering Claude Code in 30 minutes]: https://www.youtube.com/watch?v=6eBSHbLKuN0
 [Orchestrate teams of Claude Code sessions]: https://code.claude.com/docs/en/agent-teams

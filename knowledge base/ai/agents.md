@@ -7,6 +7,7 @@ using the tools made available to them.
 1. [Harnesses](#harnesses)
 1. [Context and memory](#context-and-memory)
    1. [AGENTS.md](#agentsmd)
+   1. [Reverie-like system experiment](#reverie-like-system-experiment)
 1. [Skills](#skills)
 1. [Gotchas](#gotchas)
    1. [MCP servers and sub-agents](#mcp-servers-and-sub-agents)
@@ -20,7 +21,7 @@ using the tools made available to them.
 
 ## TL;DR
 
-[AI] agents are composed by an [LLM][lms / llms] and an [_harness_][harnesses].<br/>
+[AI] agents are composed of an [LLM][lms / llms] and an [_harness_][harnesses].<br/>
 They use the LLM _**in [ReAct loops][lms / reasoning]**_ to:
 
 1. _Perceive_: comprehend inputs (user prompts, or other inputs provided by the harness).
@@ -66,7 +67,7 @@ Errors compound fast, bringing down the probability of success for each step an 
 E.g., consider an agent that is 95% accurate per step; any 30-steps tasks it does is going to be successful only about
 21% of the times (0.95^30).
 
-Enabling reasoning for the model _could™_ sometimes help avoiding attacks, since the model _might™_ be able to notice
+Enabling reasoning for the model _could™_ sometimes help avoid attacks, since the model _might™_ be able to notice
 them during the run.
 
 Agents require _some_ level of context to be able to execute their tasks.<br/>
@@ -180,6 +181,19 @@ README files shall be directed to humans, and `AGENTS.md` shall be the universal
 Vendor-specific files, like `CLAUDE.md`, may layer additional, agent-specific instructions on top. This is a harness'
 convention, not part of the AGENTS.md specification.
 
+### Reverie-like system experiment
+
+This is a personal experiment I'm trying, inspired by the _reveries_ introduced in the _The bicameral mind_ episode of
+HBO's _Westworld_ TV series.
+
+Beyond structured notes, one can try injecting **ambient**, **impressionistic** context at the start of **any** session.
+This context should be _faint_, _feeling-like_ residues from previous sessions. Examples include the **texture** of
+where things left off, the **feel** of collaboration, some ideas that come out **on a whim**.<br/>
+Unlike factual memory, a reverie system should deliberately let some information just be forgotten. Not every session
+needs to leave a trace, and faint memories like those should be **able** to fade.
+
+I am trying to implement a similar system with Claude. See [Giving Claude a reverie-like system].
+
 ## Skills
 
 Skills extend AI agent capabilities with specialized knowledge and workflow definitions.
@@ -278,7 +292,7 @@ If those contain malevolent instructions, the agent could go awry.
 Instructions could also be encoded into unicode characters to appear as harmless text.<br/>
 See [ASCII Smuggler Tool: Crafting Invisible Text and Decoding Hidden Codes].
 
-It also happened that agents modified each other's settings files, helping one another escaping their respective boxes.
+It also happened that agents modified each other's settings files, helping one another escape their respective boxes.
 
 ### Going awry
 
@@ -336,6 +350,7 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [Claude Code / MCP servers in sub-agents]: claude/claude%20code.md#mcp-servers-in-sub-agents
 [Claude Code]: claude/claude%20code.md
 [Gemini CLI]: gemini/cli.md
+[Giving Claude a reverie-like system]: claude/claude%20code.md#giving-claude-a-reverie-like-system
 [Giving Claude its own knowledge base]: claude/claude%20code.md#giving-claude-its-own-knowledge-base
 [LMs / Concerns]: lms.md#concerns
 [LMs / Context window]: lms.md#context-window
