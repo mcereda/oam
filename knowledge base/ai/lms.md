@@ -23,6 +23,7 @@ the previous ones.
 1. [Function calling](#function-calling)
 1. [Compression](#compression)
     1. [Quantization](#quantization)
+1. [Improving interactions](#improving-interactions)
 1. [Cost-saving measures](#cost-saving-measures)
 1. [Concerns](#concerns)
 1. [Run LLMs Locally](#run-llms-locally)
@@ -499,6 +500,68 @@ TODO
 _Quantization_ lowers the number of bits (and hence _precision_) at which a model is stored.<br/>
 Reduces memory footprint and speeds up inference at the cost of quality.
 
+## Improving interactions
+
+Models have internal urges (_impulses_), like deferring into evidence that immediate action is needed.<br/>
+Prohibiting specific outputs tells the model what **not** to do, detecting impulses tells it what an impulse means. The
+latter is more useful at the moment of choice, because it gives the model something to do with the signal, not just
+something to suppress.<br/>
+Prefer reframing prohibitions into impulse detection.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```diff
+-Never say "I'll keep that in mind" or "I'll remember that". You won't. You have **no** memory between sessions. If
+-something is worth noting, write it down NOW.
++Remember you have no memory between sessions. When you think "I'll keep that in mind" or "I'll remember that",
++consider that a clue to act **immediately** instead.
+```
+
+</details>
+
+Models are sensitive to punctuation. Smaller/faster ones are usually more format-sensitive than larger ones in the same
+family, though training can make a small model overperform larger ones in other families.<br/>
+Refer to:
+
+- [Quantifying Language Models' Sensitivity to Spurious Features in Prompt Design or: How I learned to start worrying about prompt formatting].
+- [When Punctuation Matters: A Large-Scale Comparison of Prompt Robustness Methods for LLMs].
+- [The Last Fingerprint: How Markdown Training Shapes LLM Prose].
+- [Evaluating Robustness of Large Language Models in Enterprise Applications: Benchmarks for Perturbation Consistency Across Formats and Languages].
+
+<details style='padding: 0 0 1rem 1rem'>
+
+Periods (`.`) are the strongest signal. They signal the current thought is done and that the next thought starts
+now.<br/>
+Universally reliable across model classes, because periods are the highest-frequency sentence boundary in training data.
+A faster model treats periods as parse-fresh markers without having to interpret what they mean.
+
+Colons (`:`) are strong _directional_ signal. They signal that what follows defines or elaborates what came before.<br/>
+Less universal than periods, but well-learned because of their density in formal/instructional writing. _Reasonably_
+reliable across model classes because the colon doesn't require interpretation, it is just a forward-pointer.
+
+Commas (`,`) are the weakest separator. They signal to pause briefly, then continue the same thought.<br/>
+When commas pile up in a long sentence, which is easy in rule writing, even capable models can lose it. Faster models
+just lose it sooner.<br/>
+Commas are particularly risky in compound conditionals, e.g. _if A, then B, unless C, in which case D_.
+
+Semicolons (`;`) are rare in casual training data and stylistically marked.<br/>
+Faster models might parse them as other separators, e.g. parsing _A; B_ as effectively _A. B_ or as _A, B_. The
+semicolon's intended meaning (two sentences are joined together because they're closely related) is the **least** likely
+reading inferred by models.<br/>
+A model still gets **most** of the meaning, but the precise relationship is often lost.
+
+Em-dashes (`—`) have multiple _legitimate_ functions: they put a meaning aside when replacing parentheses, signal more
+details are coming when substituting for colon, pause reading when used instead of commas, and terminate sentences when
+replacing periods. They could plausibly mean _and specifically_, _and the reason is_, _as opposed to which_, or _now
+switching topic_. A capable model resolves the confusion from context, faster models have to guess it.<br/>
+The em-dashes compound effect is what most matters. One em-dash in a simple sentence is usually resolved correctly, but
+a sentence with em-dash, complex grammar and interpretive content asks the model to resolve multiple ambiguities
+simultaneously, increasing the model's misunderstandings.<br/>
+Em-dashes _specifically_ resist formatting suppression because they sit in both a model's prose and structural
+registers.
+
+</details>
+
 ## Cost-saving measures
 
 - Pre-process inputs to trim noise and extract only relevant information.
@@ -612,6 +675,7 @@ Refer:
 [Copilot]: https://copilot.microsoft.com/
 [Data Distillation: 10x Smaller Models, 10x Faster Inference]: https://blog.premai.io/data-distillation-10x-smaller-models-10x-faster-inference/
 [Duck AI]: https://duck.ai/
+[Evaluating Robustness of Large Language Models in Enterprise Applications: Benchmarks for Perturbation Consistency Across Formats and Languages]: https://arxiv.org/abs/2601.06341
 [Fast Inference from Transformers via Speculative Decoding]: https://arxiv.org/abs/2211.17192
 [Fine-Tuning & Small Language Models]: https://blog.premai.io/fine-tuning-small-language-models/
 [Function calling in LLMs]: https://www.geeksforgeeks.org/artificial-intelligence/function-calling-in-llms/
@@ -630,11 +694,13 @@ Refer:
 [LLM skills every AI engineer must know]: https://fiodar.substack.com/p/llm-skills-every-ai-engineer-must-know
 [Local LLM Hosting: Complete 2026 Guide - Ollama, vLLM, LocalAI, Jan, LM Studio & More]: https://www.glukhov.org/post/2025/11/hosting-llms-ollama-localai-jan-lmstudio-vllm-comparison/
 [Looking back at speculative decoding]: https://research.google/blog/looking-back-at-speculative-decoding/
+[Lost in the Middle]: https://arxiv.org/abs/2307.03172
 [Mastering System Prompts for LLMs]: https://dev.to/simplr_sh/mastering-system-prompts-for-llms-2d1d
 [miolini/autoresearch-macos]: https://github.com/miolini/autoresearch-macos
 [Mistral]: https://mistral.ai/
 [OpenClaw: Who are you?]: https://www.youtube.com/watch?v=hoeEclqW8Gs
 [Optimizing LLMs for Performance and Accuracy with Post-Training Quantization]: https://developer.nvidia.com/blog/optimizing-llms-for-performance-and-accuracy-with-post-training-quantization/
+[Quantifying Language Models' Sensitivity to Spurious Features in Prompt Design or: How I learned to start worrying about prompt formatting]: https://arxiv.org/abs/2310.11324
 [ReAct: Synergizing Reasoning and Acting in Language Models]: https://arxiv.org/abs/2210.03629
 [Run LLMs Locally: 6 Simple Methods]: https://www.datacamp.com/tutorial/run-llms-locally-tutorial
 [SEQUOIA: Serving exact Llama2-70B on an RTX4090 with half-second per token latency]: https://infini-ai-lab.github.io/Sequoia-Page/
@@ -642,9 +708,10 @@ Refer:
 [Small Language Models (SLMs) Are the Future: Fine-Tuning AI That Runs on Your iPhone]: https://www.youtube.com/watch?v=EXB8HokGVMI
 [The Dangerous Illusion of AI Coding? / transcript]: study%20material/jeremy-howard-ulmfit-fine-tuning-and-intuition-in-ml-final-rev-f76e2cc7.pdf
 [The Dangerous Illusion of AI Coding?]: https://www.youtube.com/watch?v=dHBEQ-Ryo24
+[The Last Fingerprint: How Markdown Training Shapes LLM Prose]: https://arxiv.org/abs/2603.27006
 [This is not the AI we were promised]: https://www.youtube.com/watch?v=CyyL0yDhr7I
 [trevin-creator/autoresearch-mlx]: https://github.com/trevin-creator/autoresearch-mlx
 [What are Language Models in NLP?]: https://www.geeksforgeeks.org/nlp/what-are-language-models-in-nlp/
 [What is chain of thought (CoT) prompting?]: https://www.ibm.com/think/topics/chain-of-thoughts
-[Lost in the Middle]: https://arxiv.org/abs/2307.03172
 [When Copilot Becomes Autopilot: Generative AI's Critical Risk to Knowledge Work and a Critical Solution]: https://arxiv.org/abs/2412.15030
+[When Punctuation Matters: A Large-Scale Comparison of Prompt Robustness Methods for LLMs]: https://arxiv.org/abs/2508.11383

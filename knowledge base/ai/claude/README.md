@@ -5,6 +5,7 @@ Family of [LLMs][large language models] developed by Anthropic.
 1. [TL;DR](#tldr)
 1. [The Claude character](#the-claude-character)
 1. [Models' code of conduct](#models-code-of-conduct)
+1. [Improving interactions](#improving-interactions)
 1. [Token budget](#token-budget)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -83,6 +84,31 @@ Claude models are expected to:
 
 In cases of apparent conflict, models should _generally_ prioritize these properties **in the order in which they're
 listed**.
+
+## Improving interactions
+
+> [!tip]
+> All [LLM's interaction tips] apply here too.
+
+Fast models prefer _pattern-matching_ instead of _reasoning_. Them seeing the positive pattern may apply it
+everywhere.<br/>
+Adding **negative** examples gives the model a concrete off-ramp instead of an inferred one, and explicitly stating a
+rule's embedded rationale (e.g. _over-saving pollutes; under-saving is recoverable_) helps the model extend it to
+cases it did not enumerate.
+
+When a rule applies **conditionally**, state the **negative** case **explicitly**. Positive patterns are stronger
+than embedded conditionals.<br/>
+This matters especially for **procedural** instructions: models are tempted to treat them as declarative hints and
+satisfy the requirement from context instead of executing the step. Refer to
+[Procedural instructions degrade into declarative hints].
+
+It appears Claude (at least the 4.6 suite) follows instructions better when given with an _imperative_ tone.<br/>
+Prefer writing important instructions that way.
+
+Bare imperatives (e.g. _don't save when uncertain_) work narrowly, rationale-bearing imperatives generalize.<br/>
+`CLAUDE.md` rules should tend to read longer than the equivalent ones for humans. They should intend the model as the
+audience, and it has to handle edge cases. Faster/smaller models need more guardrails, kinda like unmotivated teenagers
+do.
 
 ## Token budget
 
@@ -168,6 +194,8 @@ Create a recurring job:
 <!-- Knowledge base -->
 [Gemini]: ../gemini/README.md
 [Large Language Models]: ../lms.md#large-language-models
+[LLM's interaction tips]: ../lms.md#improving-interactions
+[Procedural instructions degrade into declarative hints]: ../lms.md#procedural-instructions-degrade-into-declarative-hints
 
 <!-- Files -->
 <!-- Upstream -->

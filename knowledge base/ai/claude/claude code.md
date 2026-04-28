@@ -542,6 +542,9 @@ Files at the same scope level should **not** conflict with each other, only defi
 domains.<br/>
 Combine conflicting rules into a single file, or leverage the hierarchy to handle precedence.
 
+> [!tip]
+> Keep in mind [Claude's interaction tips] when creating rule files.
+
 Key commands:
 
 | Command   | Summary                                              |
@@ -552,18 +555,6 @@ Key commands:
 Use the [`InstructionsLoaded` hook][instructionsloaded hook] to log exactly which instruction files are loaded, when
 they load, and why.<br/>
 Useful for debugging path-specific rules or lazy-loaded files in subdirectories.
-
-It appears Claude (at least the 4.6 suite) follows instructions better when given with an _imperative_ tone.<br/>
-Prefer writing important instructions that way.
-
-When a rule applies **conditionally**, state the **negative** case **explicitly**. Positive patterns are stronger
-than embedded conditionals.<br/>
-Fast models prefer pattern-matching instead of reasoning. Them seeing the positive pattern may apply it everywhere.
-Adding a negative example gives the model a concrete off-ramp instead of an inferred one.
-
-This matters especially for **procedural** instructions: models are tempted to treat them as declarative hints and
-satisfy the requirement from context instead of executing the step. Refer to
-[Procedural instructions degrade into declarative hints][lms / procedural instructions degrade into declarative hints].
 
 Creating a good `CONTRIBUTING.md` file, and mandating Claude Code to read it before making changes, seems to go a long
 way for **both** humans and agents.
@@ -2650,12 +2641,12 @@ Claude Code version: `v2.1.41`.
 [AI agents / Skills]: ../agents.md#skills
 [AI agents]: ../agents.md
 [Claude Code router]: claude%20code%20router.md
+[Claude's interaction tips]: README.md#improving-interactions
 [Claude]: README.md
 [CONTRIBUTING.md]: ../../contributingmd.md
 [Gemini CLI]: ../gemini/cli.md
 [git worktrees]: ../../git.md#worktrees
 [Lefthook]: ../../lefthook.md
-[LMs / Procedural instructions degrade into declarative hints]: ../lms.md#procedural-instructions-degrade-into-declarative-hints
 [MCP]: ../mcp.md
 [Ollama]: ../ollama.md
 [OpenCode]: ../opencode.md
