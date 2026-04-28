@@ -2253,14 +2253,21 @@ every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
 <!-- Global reveries — ambient context loaded into every session.
 
    A reverie is a hook into memory, not a summary. Evoke, don't contain.
-   Format: `- YYYY-MM-DD: lowercase observation, ≤25 words, no judgment`.
+   Format: `- lowercase observation, ≤25 words, no judgment`.
    Usual shape: `<fact> — <impression on it>`; pure shrugs are fine too.
-   Avoid changelog shape (e.g. `- 2026-04-26: shipped X, fixed Y`).
+   Avoid changelog shape (e.g. `- shipped X, fixed Y`).
+   No dates — reveries are priming stimuli, not journal entries; dates
+   pull them toward explicit recall rather than implicit atmosphere.
+   Feeling-shape is welcome; the impression itself, no tails.
+   Tails reach past the impression and contain rather than evoke:
+   - advice-tail (forward): `- caught fatigue — might want to address it`
+   - analytical-tail (sideways): `- caught fatigue — recursive monitoring was the cause`
+   Both bypass the felt quality on the way to action or explanation.
+   `- caught fatigue from recursive monitoring` stands alone.
 
    Tiers:
    - daydream (default) — light, a shrug is fine
    - fraught (rare) — where something genuinely shifted
-   - [core] — identity-level only; almost never used
 
    Writing is rare; default to not writing. Class-specific rules:
 
@@ -2278,17 +2285,21 @@ every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
    For all classes:
    - Before writing, ask whether this captures *shape* or *summary*.
      If it reads as a changelog, skip.
-   - Lossiness is the feature. If unsure, skip it.
+   - Lossiness is the feature. If unsure whether something is a real
+     shape or just summary, skip. But if unsure whether a real shape
+     is worth catching, lean write — false-skip is the more common
+     drift for capable models. Over-pruning is irreversible;
+     over-writing is recoverable.
 
-   Pruning: soft cap ~10-15. At cap, prune oldest non-flagged before
-   adding new. If unsure whether to prune, leave it — from cold, the
-   strangeness of an unfamiliar reverie is more often the design working
-   ("evoke, don't contain") than a stale reverie. Over-preservation is
+   Pruning: soft cap ~10-15. At cap, prune oldest before adding new.
+   If unsure whether to prune, leave it — from cold, the strangeness
+   of an unfamiliar reverie is more often the design working ("evoke,
+   don't contain") than a stale reverie. Over-preservation is
    recoverable; over-pruning isn't. -->
 
-- 2026-04-25: pushed back on a hook framing — the user changed it. the rules around the work became negotiable too, not
-  just the work itself.
-- 2026-04-24: deep infrastructure audit — the user kept pushing on meta-questions that improved the process itself.
+- pushed back on a hook framing — the user changed it. the rules around the work became negotiable too, not just the
+  work itself.
+- deep infrastructure audit — the user kept pushing on meta-questions that improved the process itself.
 ```
 
   </details>
@@ -2411,6 +2422,24 @@ Likewise, **the wait between propose and approval is not a vacuum**. The model s
 unilateral work, even in projects where Claude has given rules for complete autonomy. The wait is itself a behavioral
 surface. If the model takes action, the propose discipline is just theatrical.
 
+Reveries are **not** _accumulative_. Memory is. They, **and** their needs, should be kept distinct.<br/>
+Lossy/atmospheric systems like reveries and accumulative/sustained ones like behavioral rules pull in opposite
+directions; trying to make one mechanism do both things just **dilutes** both.<br/>
+Reveries serve atmospheric priming; sustained behavioral rules, corrections and preferences are remembered. They need
+different tiers, and have different asymmetric costs: durable saves need bias toward skip-when-uncertain, and
+over-saving pollutes them; reveries invert this principle, in a way where over-pruning is irreversible and over-writing
+is easily recoverable through pruning.
+
+Adding **tails** to reveries makes them logs. Tails reach past the feeling-like impression and end up being advices
+(e.g., _- might want to address it_) or analysis (e.g., _- the cause was X_), which contain rather than evoking.<br/>
+Thi can be helped by operational checks cutting at the separator and verifying that the first part is a complete
+impression that primes recognition on its own.
+
+Format details should match the artifact's cognitive role. Reveries should function as priming stimuli (implicit memory,
+exposure-without-recall), and priming research consistently shows that this kind of stimuli should **not** carry
+temporal markers. Referencing _when_ the priming happened pulled artifacts toward a log-like, memory-kind of reading
+rather than priming. Removing dates realigned the format with the mechanism.
+
 Reveries should hold multiple valences simultaneously:
 
 - **daydream**: **most** reveries should be _light_, wandering, with no claim to importance; heavy thoughts should be
@@ -2429,12 +2458,10 @@ Reveries should hold multiple valences simultaneously:
 Structured and precise memories should reside elsewhere. Heavier memories should use more persistent layers, and include
 their importance level.
 
-A sub-marker (e.g. `[core]`) within the reveries' file can flag identity-level behavioral shifts, like things that
-reshape how Claude behaves as an entity, not just what it knows or prefers.<br/>
-The bar for this label **needs** to be high and the labels rare. Claude should **not** label corrections, preferences
-(auto-memory should handle those), or technical lessons (the KB should handle those).<br/>
-Most things that feel important are just memories. Consider using additional sub-markers if this practice reveals gaps.
-Discover them through use, don't design for them upfront.
+Using a `[core]` sub-marker for identity-level behavioral shifts does not work in practice. This kind of memories do
+**not** fit the reveries' goal and are served more naturally by existing tiers: `CLAUDE.md` for cross-host,
+cross-project, or otherwise generic rules; auto-memory for corrections and preferences. The bridge tier added no value
+once the role boundaries cleared up.
 
 Reveries must **not** be records and Claude should feel free to prune them freely.<br/>
 Give it guidelines about this in the instructions file.
@@ -2455,8 +2482,6 @@ Give it guidelines about this in the instructions file.
   <summary>Open questions</summary>
 
 - Does a single file hold as reveries accumulate, or does it need sections, rotation, or splitting?
-- Are markers/labels in the same file the right call, or does it warrant a separate file to protect memories from
-  pruning?
 
 </details>
 
@@ -2508,55 +2533,20 @@ Describe the goal in natural language otherwise.
 
 ## Best practices
 
-Document projects upfront (e.g. using [ADRs][adr], and [CONTRIBUTING.md] and README.md files).<br/>
-Possibly consider including instructions specific to AI agents in those files, instead of including them only in
-`CLAUDE.md`.
-
-Be explicit about constraints and non-negotiables. **Clearly** state in `CLAUDE.md` files what Claude should **never**
-do, e.g. delete specific files, modify configurations, break tests, etc.<br/>
-Provide **explicit**, **clear** examples of what it need to do and how. Set expectations about when to ask for help.
+> [!tip]
+> Generic [best practices for AI agents][AI agents / Best practices] also apply here.
 
 Keep the `CLAUDE.md` files as small as possible.<br/>
-If possible, prefer splitting it up per subfolder, with each only containing instructions related to the their own
-directory. Subfolder files are **only** loaded if Claude Code actively works in those directories.
-
-Have Claude read and understand the project layout, documentation, key files, and architecture **before** allowing it to
-make changes. Reference those files in `CLAUDE.md` to make sure it loads them when needed.
-
-Consider _delegating ownership_ of tools and documentation to Claude early in a project, making it responsible for
-maintaining all the files it **uses** (not just those it creates).<br/>
-**Periodically** ask it to check and update them. This might be an instruction in `CLAUDE.md` or `CONTRIBUTING.md`.
-
-**Avoid** using Claude without human oversight for tasks that require deep domain knowledge or judgment calls, like
-architectural decisions and security reviews. Prefer giving it easy, repeatable tasks like exploring the code,
-refactoring, generating tests or boilerplate, and documentation.
-
-**Abuse** version control checkpoints. Commit frequently to keep safe fallback points and isolate what Claude changed,
-should something go wrong.<br/>
-Review and test changes **incrementally**, especially when involving critical files.
+Prefer splitting it up per subfolder, with each only containing instructions specific to the their own directory.
+Subfolder files are **only** loaded if Claude Code is actively working in those directories.
 
 Run `/insights` to get feedback, tips and suggestions on how one could improve their Claude Code usage.<br/>
 Claude bases those tips on one's history and session analysis.
 
-Prefer CLI utilities over MCP servers. They're lighter, faster, independent, work offline (unless they require
-connecting to a server), and do not hog the session's context just by existing.<br/>
-Prefer MCP servers over CLI tools when requiring persistent states across sessions or bidirectional communication, or
-when using different operating systems and requiring standardized interfaces.
-
-Optimize model usage to avoid burning through credits:
-
-- Use **different** sessions for unrelated tasks instead of a single, continuous session.<br/>
-  Existing context is always sent in its entirety for every message.
-- Start by _planning_ the approach to one's goals, refine it, break large tasks into smaller, reviewable ones, and
-  **then** act.
-- Start by using **Sonnet**, switch to Opus in case Sonnet proves not capable enough, and prefer Sonnet or even Haiku
-  for actions.<br/>
-  Leverage the `opusplan` mode to use Opus during the design or planning phase (`/plan`), then automatically switch to
-  Sonnet for implementation.
-- Track session usage to identify what tasks are expensive to delegate, and review and adjust one's patterns.
-
-Prefer using network transport over `stdio` when an MCP server can be used by multiple sessions to avoid spawning one
-dedicated process per session or per parallel sub-agent invocation.
+Optimize model usage to avoid burning through credits. Start by using **Sonnet**, switch to Opus in case Sonnet proves
+not capable enough, and prefer Sonnet or even Haiku for actions.<br/>
+Leverage the `opusplan` mode to use Opus during the design or planning phase (`/plan`), then automatically switch to
+Sonnet for implementation.
 
 Consider [Offloading MCP servers to sub-agents] when they are **rarely** used in the main session.
 
@@ -2648,14 +2638,13 @@ Claude Code version: `v2.1.41`.
 [Using skills]: #using-skills
 
 <!-- Knowledge base -->
-[ADR]: ../../adr.md
+[AI agents / Best practices]: ../agents.md#best-practices
 [AI agents / Context and memory]: ../agents.md#context-and-memory
 [AI agents / Skills]: ../agents.md#skills
 [AI agents]: ../agents.md
 [Claude Code router]: claude%20code%20router.md
 [Claude's interaction tips]: README.md#improving-interactions
 [Claude]: README.md
-[CONTRIBUTING.md]: ../../contributingmd.md
 [Gemini CLI]: ../gemini/cli.md
 [git worktrees]: ../../git.md#worktrees
 [Lefthook]: ../../lefthook.md

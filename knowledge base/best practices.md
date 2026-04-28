@@ -27,14 +27,21 @@ What really worked for me personally, or in my experience.
 - Review every decision after some time. Check they are still relevant, or if there is some improvement you can
   implement.<br/>
   Things change constantly: new technologies are given birth often, and processes improve. Also, now you know better
-  then before.
+  than before.
+- Retire a speculative design as soon as its specified use case reduces to what existing infrastructure or tools can
+  already provide.<br/>
+  Clear reasoning about mechanisms' roles can resolve speculative slots sooner. Don't wait for empty practice as the
+  only signal for retirement.
+- Match format details to the artifact's cognitive role rather than to inherited convention.<br/>
+  Logs, journals, and changelog formats can silently pull artifacts toward their source-domain's purpose, even when the
+  new use case calls for something different.
 - Gain the hard skills required to solve complex problems, but only deploy complex solutions when they are actually,
   _really_, needed.
 - Focus on the **real** problem at hand.<br/>
   Beware the [the XY problem].
 - When making a **business** decision, it's generally good to pick the simplest, fastest, and cheapest option.<br/>
   When making a **career** decision, it pays to be an expert in hard things.
-- Do not make things more complicated than they **need** to be.
+- Do not make things more complicated than they **need** to be.<br/>
   Also read [Death by a thousand microservices].
 - Keep things simple (KISS approach) **with respect of your ultimate goal** and not only for the sake of
   simplicity.<br/>
@@ -64,7 +71,7 @@ What really worked for me personally, or in my experience.
   Stop designing systems that _should work for everybody at all times_. Prefer safe defaults instead.
 - Choose tools based on **how helpful** they are **to you** to achieve your goals.<br/>
   Do **not** adapt your work to specific tools.
-- Keep track of tools' EOL and keep them updated accordingly.
+- Keep track of tools' EOL and keep them updated accordingly.<br/>
   Trackers like [endoflife.date] could help in this.
 - Backup your data, especially when you are about to make changes to something managing or storing it.<br/>
   [Murphy's law] is lurking. Consider [the 3-2-1 backup strategy].
@@ -84,8 +91,8 @@ What really worked for me personally, or in my experience.
   Just **don't default** to it nor use it mindlessly.
 - Be aware of [corporate bullshit][from inboxing to thought showers: how business bullshit took over].
 - _DevOps_, _GitOps_ and other similar terms are sets of practices, suggestions, or approaches.<br/>
-  They should **not** roles or job titles.<br/>
-  They should **not** to be taken literally.<br/>
+  They should **not** be roles or job titles.<br/>
+  They should **not** be taken literally.<br/>
   They **need** to be adapted to the workplace, not the other way around.
 - [Amazon's leadership principles] are generally good practices, but also double-edge swords.<br/>
   They still create a lot of discontent even inside Amazon when used _against_ anybody.
@@ -94,6 +101,10 @@ What really worked for me personally, or in my experience.
 - Always have a plan B.
 - When managing permissions, consider [break glass][break glass explained: why you need it for privileged accounts]
   procedures and/or tools.
+- Bare imperatives and implicit conditionals work narrowly; rationale and explicit negatives generalize.<br/>
+  When writing rules that need to extend to unanticipated cases, or when directed to an audience with _limited
+  interpretative capabilities_ (fast/small LLMs or just stupid users), pair them with their rationale and state
+  negative cases explicitly.
 
 ## Teamwork
 
@@ -138,7 +149,7 @@ What really worked for me personally, or in my experience.
   There **cannot** be a single pipeline for everything, the same way as the _one-size-fits-all_ concept never really
   works.
 - Try and strike a balance between what **needs** to be done centrally (e.g. from a repository's `origin` remote) and
-  what can be done locally from one's machine **before** the code reaches repositories' remotes.<br/>.
+  what can be done locally from one's machine **before** the code reaches repositories' remotes.<br/>
   Tools like [`pre-commit`][pre-commit] or [`lefthook`][lefthook] are a doozy for this, but can disrupt the development
   experience and encourage the use of the `--no-verify` switch. Actions that need to be enforced (e.g. automatic
   formatting) are usually worth done only when changes reach the central remote anyways.
@@ -155,7 +166,7 @@ Consider what follows for _infrastructure_ and _platform engineering_ as well.
   If users are not happy with one's tool they'll try moving away from it, bringing the discussion back to the previous
   point in this list.
 - Avoid creating _effectively useless_ abstractions, like templates that use variables for _all_ their attributes.<br/>
-  Prefer providing one, or at most a few, simplified solution that use different
+  Prefer providing one, or at most a few, simplified solution that uses different
   [adapters or interfaces][what does it mean to program to interfaces?] in the background instead.<br/>
   E.g., check out how [Crossplane], [Radius] and [KRO] work.
 - Offer **clear** error messages and **immediate** access to them.<br/>
