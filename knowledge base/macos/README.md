@@ -33,6 +33,18 @@ Any HTTP client that resolves localhost to `::1` first might fail against a serv
 `0.0.0.0` or `127.0.0.1`).
 
 <details>
+  <summary>Setup</summary>
+
+```sh
+# Enable the scheduling daemon for `at`.
+sudo launchctl load -w '/System/Library/LaunchDaemons/com.apple.atrun.plist'
+# Disable the scheduling daemon for `at`.
+sudo launchctl unload -w '/System/Library/LaunchDaemons/com.apple.atrun.plist'
+```
+
+</details>
+
+<details>
   <summary>Usage</summary>
 
 ```sh
