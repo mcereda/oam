@@ -53,6 +53,11 @@ Anthropic blocked Claude for Chrome from using websites from certain high-risk c
 adult content, and pirated content.<br/>
 For Teams/Enterprise plans, admins can set site allowlists and blocklists.
 
+Anthropic's [own research][piloting claude in chrome] (Nov 2025) measured prompt-injection success rates against the
+extension. With safety mitigations enabled, adaptive Best-of-N attacks succeeded **11.2%** of the time. Without
+mitigations, **23.6%**. Both rates are non-trivial.<br/>
+Avoid using Claude for Chrome on sites involving financial, legal, medical, or otherwise sensitive data.
+
 ## Further readings
 
 - [Claude Code]
