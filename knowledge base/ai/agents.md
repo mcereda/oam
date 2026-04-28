@@ -16,6 +16,7 @@ using the tools made available to them.
    1. [Security](#security)
    1. [Prompt injection](#prompt-injection)
    1. [Going awry](#going-awry)
+1. [Best practices](#best-practices)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -78,17 +79,19 @@ Opt-**in** should be the default.
 Agents are good at running fast, tight iterations on **well-defined** tasks with **clear** feedback signals.<br/>
 They struggle with slow, ambiguous loops where feedback is delayed or political.
 
-Best practices:
+Sub-agents are _usually_ **specialized** AI assistants with fixed roles, handling **specific** types of tasks.<br/>
+Each runs in its own context window, with its own custom system prompt, specific access to tools, and independent
+permissions.
 
-- Employ **local** agents, possibly hooked up to **local** LLMs to keep the data private.
-- Limit agent execution to containers or otherwise isolated environments, with only (limited) access to **exactly** what
-  they _absolutely_ need.
-- **Require** consent by agents when running them.
-- Include **only minimal requirements** in context files (AGENTS.md).<br/>
-  Too much context ends up hurting the conversation. Including a lot of "don't do this or that" mostly poisons the
-  context instead of helping.<br/>
-  If specific information is already in the codebase, it probably does **not** need to be in the context file and can
-  just be referenced or hinted at.
+Multiple agents can work together as a _team_.<br/>
+One agent (usually the main session) acts as the team's lead, coordinating work, assigning tasks, and synthesizing
+results.<br/>
+Teammates work independently, each with their **own** context window, and communicate **directly** with each other via a
+mailbox system and a shared task list.
+
+_Lone_ sub-agents currently consistently produce better quality output than agent _teams_.
+Sub-agent teams (when supported by a harness) generally perform parallel tasks in less time, but consume more tokens
+(about N times, for N agents).
 
 ## Harnesses
 
@@ -298,6 +301,69 @@ It also happened that agents modified each other's settings files, helping one a
 
 See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 
+## Best practices
+
+Employ preferably **local** agents, possibly hooked up to **local** LLMs to keep the data private.
+
+Limit agent execution to containers or otherwise isolated environments, with only (limited) access to **exactly** what
+they _absolutely_ need.
+
+**Require** consent by agents when running them, at least until absolutely sure of what they are doing.
+
+Include **only minimal requirements** in context files (AGENTS.md).<br/>
+Too much context ends up hurting the conversation. Including a lot of "don't do this or that" mostly poisons the
+context instead of helping.<br/>
+If specific information is already in the codebase, it probably does **not** need to be in the context file and can
+just be referenced or hinted at.
+
+Document projects upfront (e.g. using [ADRs][adr], and [CONTRIBUTING.md] and README.md files).<br/>
+Possibly consider including instructions specific to AI agents in those files, instead of including them only in
+instruction/rule files like `AGENTS.md` (or harness-specific files like `CLAUDE.md`).
+
+Be explicit about constraints and non-negotiables. **Clearly** state in instruction/rule files what an agent should
+**never** do, e.g. delete specific files, modify configurations, break tests, etc.<br/>
+Provide **explicit**, **clear** examples of what it need to do and how. Set expectations about when to ask for help.
+
+Keep the instruction/rule files as small as possible.<br/>
+If the agent's harness allows for layered files (e.g., Claude Code), prefer splitting it up per subfolder if reasonable.
+Each sub-file should only contain instructions specific to the their own directory, and the harness should allow
+loading them **only** if it is actively working in those directories.
+
+Have the agent read and understand the project layout, documentation, key files, and architecture **before** allowing
+it to make changes. Reference those files in the instruction/rule files to make sure it loads them only when needed.
+
+Consider _delegating ownership_ of tools and documentation to the agent early in a project, making it responsible for
+maintaining all the files it **uses** (not just those it creates).<br/>
+**Periodically** ask it to check and update them. This might be an instruction/rule or defined in `CONTRIBUTING.md`.
+
+**Avoid** using agents without human oversight at least for tasks that require deep domain knowledge or judgment calls,
+like architectural decisions and security reviews. Prefer giving it easy, repeatable tasks like exploring the code,
+refactoring, generating tests or boilerplate, and documentation.
+
+**Abuse** version control checkpoints. Commit frequently to keep safe fallback points and isolate what the agent
+changed, should something go wrong in the process.<br/>
+Review and test changes **incrementally**, especially when involving critical files.
+
+Prefer CLI utilities over MCP servers. They're lighter, faster, independent, work offline (unless they require
+connecting to a server), and do not hog the session's context just by existing.<br/>
+Prefer MCP servers over CLI tools when requiring persistent states across sessions or bidirectional communication, or
+when using different operating systems and requiring standardized interfaces.
+
+Use **different** sessions for unrelated tasks instead of a single, continuous session.<br/>
+Existing context is always sent in its entirety for every message, and LLMs start getting lost when their context
+window contains too much information.
+
+Start by _planning_ the approach to one's goals, refine it, break large tasks into smaller, reviewable ones, and only
+**then** act.
+
+Track session usage to identify what tasks are expensive to delegate, and review and adjust one's patterns.
+
+Prefer using network transport over `stdio` when an MCP server can be used by multiple sessions to avoid spawning one
+dedicated process per session or per parallel sub-agent invocation.
+
+Consider Offloading MCP servers to sub-agents when they are **rarely** used in the main session.<br/>
+See an example of this in [Claude Code's article][Claude Code / MCP servers in sub-agents].
+
 ## Further readings
 
 - [TotalRecall]
@@ -346,9 +412,11 @@ See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 [Harnesses]: #harnesses
 
 <!-- Knowledge base -->
+[ADR]: ../adr.md
 [AI]: README.md
 [Claude Code / MCP servers in sub-agents]: claude/claude%20code.md#mcp-servers-in-sub-agents
 [Claude Code]: claude/claude%20code.md
+[CONTRIBUTING.md]: ../contributingmd.md
 [Gemini CLI]: gemini/cli.md
 [Giving Claude a reverie-like system]: claude/claude%20code.md#giving-claude-a-reverie-like-system
 [Giving Claude its own knowledge base]: claude/claude%20code.md#giving-claude-its-own-knowledge-base
