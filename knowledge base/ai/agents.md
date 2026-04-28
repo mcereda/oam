@@ -364,6 +364,19 @@ dedicated process per session or per parallel sub-agent invocation.
 Consider Offloading MCP servers to sub-agents when they are **rarely** used in the main session.<br/>
 See an example of this in [Claude Code's article][Claude Code / MCP servers in sub-agents].
 
+When a class of operations **must always** route through a specific sub-agent rather than being handled in the main
+session, use multiple layers rather than the agent's description alone:
+
+1. Use _imperative_ language in the agent's description.<br/>
+   Directive phrasing routes intent.
+1. _Isolate_ tools by declaring them inside the **agent**'s definition (e.g. give it its own MCP server).<br/>
+   Tools declared in there do **not** exist in the parent's scope, preventing the parent to call them even if it tried.
+1. Restrict the agent's tool list to prevent shell-based bypasses by defining an _empty fallback_.<br/>
+   An agent with shell access can sidestep its own MCP server by running raw CLI commands.
+
+Behavioral instructions alone often degrade under context pressure or ambiguity.<br/>
+Each layer addresses a distinct failure mode (intent routing, capability enforcement, workaround prevention).
+
 ## Further readings
 
 - [TotalRecall]

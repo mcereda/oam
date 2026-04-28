@@ -5,6 +5,10 @@ a standardized way to enable LLMs to access key information and perform tasks.
 
 1. [TL;DR](#tldr)
 1. [MCP servers of interest](#mcp-servers-of-interest)
+1. [Troubleshooting](#troubleshooting)
+   1. [Cloudflare WAF blocks Linear comments with code blocks](#cloudflare-waf-blocks-linear-comments-with-code-blocks)
+   1. [Google Drive `create_file` only auto-converts plain text](#google-drive-create_file-only-auto-converts-plain-text)
+   1. [Docker-based MCP host header validation differs from listen address](#docker-based-mcp-host-header-validation-differs-from-listen-address)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -67,6 +71,39 @@ connections when they cannot find a version compatible with the server.
 > Verify MCP servers and the tools they offer before using them.<br/>
 > Using MCP servers without verifying tools and descriptions could lead to vulnerability to tool- and prompt- poisoning,
 > shadowing, or injection.
+
+## Troubleshooting
+
+### Cloudflare WAF blocks Linear comments with code blocks
+
+Linear's official MCP routes through Cloudflare-protected endpoints. Cloudflare's WAF inspects payloads and blocks
+comments containing fenced code blocks (specifically triple backticks) when their content matches security-related
+patterns ike SSL/TLS configuration, HAProxy directives, certificate paths, `curl` flags.<br/>
+The error returned is a Cloudflare HTML 403 page titled _Sorry, you have been blocked_.
+
+> [!tip]
+> Use prose descriptions instead. Inline backticks are fine — only triple-backtick fenced blocks trigger the WAF.
+
+### Google Drive `create_file` only auto-converts plain text
+
+The Google Drive MCP `create_file` tool auto-converts `text/plain` to Google Docs and `text/csv` to Google Sheets.
+Other source MIME types (including `text/html`) upload as-is, and stay in their original format.<br/>
+Rich-formatted Docs _can_ be converted (though results' quality may vary) by uploading HTML first, then converting the
+uploaded document through Drive's UI (right-click → _Open with → Google Docs_). The resulting Doc gets a **new** file
+ID, distinct from the source one.
+
+### Docker-based MCP host header validation differs from listen address
+
+When running an MCP server in Docker with HTTP/streamable-http transport, the listen address (`0.0.0.0` for port
+forwarding to work) and the `Host` header whitelist (matching what the client connects with, e.g. `127.0.0.1`) might be
+distinct, with many servers exposing them as separate environment variables.<br/>
+With `awslabs/aws-api-mcp-server`, set `AWS_API_MCP_HOST=0.0.0.0` for the bind and `AWS_API_MCP_ALLOWED_HOSTS=127.0.0.1`
+(comma-separated, supports `*` wildcard) for the whitelist. Both variables must be set, or requests will be rejected
+with a generic JSON-RPC `-32602` error and the real reason hidden in container logs.
+
+> [!tip]
+> Always use `127.0.0.1` rather than `localhost` in MCP client URLs. `localhost` may resolve to `::1` first (especially
+> in macOS), or fail to fall back to IPv4 on systems where the server only binds the IPv4 stack.
 
 ## Further readings
 

@@ -1487,6 +1487,17 @@ Plain `stdout` from a `SessionStart` hook is valid context injection method that
 `UserPromptSubmit` hooks fire **before** Claude starts thinking. It can inject `additionalContext` to shape the whole
 response from the start.
 
+> [!warning]
+> `UserPromptSubmit` hooks fire on **every** submit event, **including** blank `Enter` keypresses. Hooks running
+> expensive operations, or that produce side-effects (logs, notifications, API calls) trigger on each empty submit
+> too.<br/>
+> The framework provides no built-in guard for this. Add an explicit empty-prompt check at the start of the hook's
+> command or script like so:
+>
+> ```sh
+> [[ -z "${CLAUDE_USER_PROMPT// }" ]] && exit 0
+> ```
+
 > [!important]
 > In long tasks, accumulated tool calls push that content toward the middle of the context window. That position is the
 > **weakest** retention zone (refer to [Lost in the Middle] by Liu et al. 2024), causing models to tend to neglect the
@@ -1688,6 +1699,14 @@ _conditional_ phrasing (e.g., _Use this agent when you need X_), especially in f
 Enumerating examples can also backfire by allowing models to skip delegation if a needed item isn't explicitly in the
 list. Prefer something like _all X, including Y and Z_ over a bare list to signal the enumeration is illustrative, and
 not exhaustive.
+
+The first ~10 words of the description are the most impactful with regards to routing, especially when smaller models
+orchestrate delegation.<br/>
+Lead with the **discriminating** verb (e.g. _AWS read…_ vs _AWS write…_) before any shared text. Sibling agents that
+open with the same words risk arbitrary selection by faster models.
+
+One can leverage YAML's innate folding (`>-`) to render the description a single paragraph regardless of how it is
+wrapped in the file.
 
 <details style='padding: 0 0 1rem 1rem'>
 
