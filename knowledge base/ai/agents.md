@@ -383,7 +383,7 @@ See an example of this in [Claude Code's article][Claude Code / MCP servers in s
 - [SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks]
 - [AI mistakes you're probably making]
 - [Create custom subagents]
-- [nousresearch/hermes-agent], [OpenClaw][openclaw/openclaw] alternative with built-in self-improving loop
+- [Hermes agent], [OpenClaw][openclaw/openclaw] alternative with built-in self-improving loop
 
 ### Sources
 
@@ -444,13 +444,13 @@ See an example of this in [Claude Code's article][Claude Code / MCP servers in s
 [Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?]: https://arxiv.org/abs/2602.11988
 [Forget the Hype: Agents are Loops]: https://dev.to/cloudx/forget-the-hype-agents-are-loops-1n3i
 [Harness engineering for coding agent users]: https://martinfowler.com/articles/harness-engineering.html
+[Hermes agent]: hermes%20agent.md
 [How a Single Email Turned My ClawdBot Into a Data Leak]: https://medium.com/@peltomakiw/how-a-single-email-turned-my-clawdbot-into-a-data-leak-1058792e783a
 [How does Claude Code _actually_ work? | Theo - t3.gg]: https://www.youtube.com/watch?v=I82j7AzMU80
 [How to Build an Agent]: https://ampcode.com/notes/how-to-build-an-agent
 [karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
 [MemGPT]: https://arxiv.org/abs/2310.08560
 [moltbot security situation is insane]: https://www.youtube.com/watch?v=kSno1-xOjwI
-[nousresearch/hermes-agent]: https://github.com/nousresearch/hermes-agent
 [nullclaw/nullclaw]: https://github.com/nullclaw/nullclaw
 [obra/superpowers]: https://github.com/obra/superpowers
 [OpenClaw: Who are you?]: https://www.youtube.com/watch?v=hoeEclqW8Gs
