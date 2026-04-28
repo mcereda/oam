@@ -26,7 +26,6 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
    1. [Offloading MCP servers to sub-agents](#offloading-mcp-servers-to-sub-agents)
 1. [Giving Claude its own knowledge base](#giving-claude-its-own-knowledge-base)
 1. [Giving Claude a reverie-like system](#giving-claude-a-reverie-like-system)
-    1. [Multiple registers](#multiple-registers)
 1. [Scheduling tasks](#scheduling-tasks)
 1. [Tools of interest](#tools-of-interest)
 1. [Best practices](#best-practices)
@@ -1980,8 +1979,10 @@ This gives one the best of both worlds:
 
 ## Giving Claude its own knowledge base
 
-This procedure is modelled after [karpathy/llm-wiki.md], leveraging its ready-to-use instructions and iteratively
-improving upon it.
+Implements Clark & Chalmers' _extended mind_ thesis by leveraging Claude Code's auto-memory function for project-related
+notes, and a knowledge base as _Otto's notebook_ for everything else.
+
+This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and iteratively improves upon it.
 
 <details>
   <summary>Procedure</summary>
@@ -2167,21 +2168,32 @@ The mechanisms above form an enforcement hierarchy where each layer catches what
 ## Giving Claude a reverie-like system
 
 > [!note]
-> Experimental pattern inspired by the _reveries_ introduced in the _The bicameral mind_ episode of HBO's _Westworld_.
->
-> <details style='padding: 0 0 1rem 1rem'>
->
-> Reveries are _subtle_ gestures that allow hosts to access memories from previous loops **before they are
-> overwritten**. This is Arnold's base layer in a pyramid theory of consciousness (memory → improvisation →
-> self-interest → bicameral mind).
->
-> </details>
->
-> First tried on 2026-04-25. Treat it with the appropriate skepticism.
+> Experimental pattern first tried on 2026-04-25. Treat it with the appropriate skepticism.
 
-Beyond factual auto-memory and procedural `CLAUDE.md` rules, one can try injecting a layer of **ambient**,
-**impressionistic** context that represents _faint_, _feeling-like_ residues from previous sessions rather than
-structured facts.
+Inspired by the _reveries_ introduced in HBO's _Westworld_.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+Reveries, in the series, are _subtle_ gestures performed by the hosts when **subliminally** accessing memories from
+previous loops **before they are overwritten**. This access is Arnold's base layer in a pyramid theory of consciousness
+(memory → improvisation → self-interest → bicameral mind).
+
+</details>
+
+This experiment only tries to provide Claude with tools and _some_ situational awareness, it has nothing to do with
+_consciousness_ as a substrate or goal.
+
+The procedure sets up a process that tries injecting a layer of **ambient**, **impressionistic** context, representing
+_faint_, _feeling-like_ residues from previous sessions rather than structured facts. This layer is beyond factual
+auto-memory and procedural `CLAUDE.md` rules.
+
+To make it possible, Claude records short impressionistic one-liners during sessions in a markdown file. Subsequent
+sessions automatically load that file into context at startup.
+
+Each entry should include an event and an impression that locks on it (e.g. `<fact> - <impression>`).
+
+This process implements Schacter/Tulving's implicit memory and priming process by encouraging Claude to record and load
+reveries as exposure shaping subsequent behavior.
 
 Pure fact-memory tends toward compliance and note-taking. The goal is to give Claude access to memories from previous
 sessions in a way that is **imprecise** and resembles the **background sense** of the moment, like where things have
@@ -2242,6 +2254,7 @@ every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
 
    A reverie is a hook into memory, not a summary. Evoke, don't contain.
    Format: `- YYYY-MM-DD: lowercase observation, ≤25 words, no judgment`.
+   Usual shape: `<fact> — <impression on it>`; pure shrugs are fine too.
    Avoid changelog shape (e.g. `- 2026-04-26: shipped X, fixed Y`).
 
    Tiers:
@@ -2332,8 +2345,8 @@ Claude should:
 
 - **Not** separate atmosphere from tasks from relational moments. Instead, all viewpoints should be recorded and
   coexist in a single breath.
-- Record _observations_, not _judgments_, logging what happened **without** editorializing.<br/>
-  The only editorial part should be the Claude's interpretation of the moment **if it feels appropriate**.
+- Record _observations_, not _judgments_, logging what happened with a correlated impression.<br/>
+  The impression should be interpretive, but **not** an editorial judgement.
 - Allow reveries to fade. Not every session **needs** a reverie and old ones can be corrected anytime. This should be a
   feature, not a bug in the process.
 - Capture something useful **to Claude**, like a moment where its judgment was off, a session that moved in an
@@ -2398,26 +2411,14 @@ Likewise, **the wait between propose and approval is not a vacuum**. The model s
 unilateral work, even in projects where Claude has given rules for complete autonomy. The wait is itself a behavioral
 surface. If the model takes action, the propose discipline is just theatrical.
 
-</details>
-
-<details style='padding: 0 0 1rem 0'>
-  <summary>Open questions</summary>
-
-- Does a single file hold as reveries accumulate, or does it need sections, rotation, or splitting?
-- Are markers/labels in the same file the right call, or does it warrant a separate file to protect memories from
-  pruning?
-
-</details>
-
-### Multiple registers
-
 Reveries should hold multiple valences simultaneously:
 
-- **Most** reveries should be _light_, wandering, with no claim to importance; heavy thoughts are for the auto-memory
-  and other systems (e.g. a KB), not here. A reverie can be a shrug, and should not be forced to have weight.
-- Moments where something genuinely shifted (a correction that landed, a relational tilt, a slide that mattered) should
-  hook into memory that was about to be overwritten anyway.<br/>
-  These moments are rare.
+- **daydream**: **most** reveries should be _light_, wandering, with no claim to importance; heavy thoughts should be
+  captured by other memory systems (e.g. auto-memory or a KB), not here. A reverie can be a shrug, and should **not**
+  be forced to have weight. The name echoes Debussy's _Rêverie_ (1890).
+- **fraught**: moments where something genuinely shifted (a correction that landed, a relational tilt, a slide that
+  mattered). They should be rare, and hook into memory that was about to be overwritten anyway. The name comes from Lisa
+  Joy's _dipping that fishhook in might prove to be a little fraught_.
 
 > [!note]
 > A reverie that feels light when written can pull heavier context next session, reaching into deeper memory than
@@ -2438,13 +2439,24 @@ Discover them through use, don't design for them upfront.
 Reveries must **not** be records and Claude should feel free to prune them freely.<br/>
 Give it guidelines about this in the instructions file.
 
-<details style='padding: 0 0 1rem 1rem'>
-  <summary>Examples</summary>
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Examples</summary>
 
 > - A correction should supersede the old impression.
 > - A plainly wrong observation that hasn't been superseded should be promoted to a different layer if the lesson is
 >   genuinely worth keeping, then removed from the reveries.
 > - Don't be afraid to let go. Reveries can be recreated. They're impressions, not history.
+
+  </details>
+
+</details>
+
+<details style='padding: 0 0 1rem 0'>
+  <summary>Open questions</summary>
+
+- Does a single file hold as reveries accumulate, or does it need sections, rotation, or splitting?
+- Are markers/labels in the same file the right call, or does it warrant a separate file to protect memories from
+  pruning?
 
 </details>
 
