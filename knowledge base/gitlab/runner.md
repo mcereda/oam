@@ -177,33 +177,101 @@ The GitLab runner should now automatically authenticate to one's private ECR reg
 
 ## Executors
 
+The GitLab runner application implements different _executors_. Each one runs builds differently, and is suited for a
+different environment.
+
 ### Docker Autoscaler executor
 
-Refer to [Docker Autoscaler executor].
+Refer to [Docker Autoscaler executor][Documentation / Docker Autoscaler executor].
 
-Autoscale-enabled wrap for the `docker` executor. Supports all `docker` executor's options and features.<br/>
-Creates instances on-demand to accommodate jobs processed by the runner leveraging it, which acts as manager.<br/>
-The runner itself will **not** execute jobs, just delegate them.
+**Wrapper** for the `docker` executor that leverages autoscaling in cloud providers.<br/>
+Supports all `docker` executor's options and features.
 
-A Runner registers to the Server and acts as Runner Autoscaler.<br/>
-The Autoscaler shall be configured to use `docker-autoscaler` as the executor, and shall be granted permissions to
-discover and scale the resources it uses to scale automatically.
+The runner acts as _manager_. It registers to the GitLab instance and retrieves jobs to process as normal. It then
+creates \[AWS EC2, Azure VM, GCP compute] instances _on-demand_ to accommodate the jobs.<br/>
+The manager itself will **not** execute jobs, just delegate them to the _workers_.
 
-Leverages [fleeting] plugins to scale automatically.<br/>
+Leverages [fleeting] plugins to scale the worker instances automatically.<br/>
 This is an abstraction for a group of automatically scaled instances, and uses plugins supporting cloud providers.
 
-The Autoscaler connects to the Workers through SSH (if Linux-based) and executes Docker commands.<br/>
-The user it connects with **must** be able to execute Docker commands with**out** a password (most likely by being part
-of the `docker` group on the Worker).
+The manager connects to its workers using SSH (if Linux-based), and executes Docker commands on them.
 
-Jobs are executed in containers.<br/>
-The container images are pulled by the Autoscaler, which then feeds them to the Workers. As such:
+> [!important]
+> The user the manager connects with **must** be able to execute Docker commands with**out** a password.<br/>
+> Usually, it is enough to make that user member of the `docker` group on the worker.
 
-- Workers do **not** need direct image access.
-- **Both** the Autoscaler **and** the Workers require the Docker Engine to be installed.
+The **manager** must:
 
-Multiple Autoscalers do **not** play well managing the same resources.<br/>
-They end up competing for resources, and will try to delete each other's Workers.
+- Be configured to use `docker-autoscaler` as the executor.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  ```toml
+  [[runners]]
+    executor = "docker-autoscaler"
+  ```
+
+  </details>
+
+- Be granted the necessary permissions to _discover_ and _change_ all the resources it needs to scale its workers
+  automatically.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example: AWS</summary>
+
+  IAM policy (manager):
+
+  ```json
+  {
+    "Sid": "AllowScalingGitlabRunners",
+    "Effect": "Allow",
+    "Action": [
+      "autoscaling:DescribeAutoScalingGroups",
+      "autoscaling:SetDesiredCapacity",
+      "autoscaling:TerminateInstanceInAutoScalingGroup"
+      "ec2:DescribeInstances"
+    ],
+    "Resource": [ … ]
+  }
+  ```
+
+  </details>
+
+- Be able to SSH into its workers automatically.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example: AWS</summary>
+
+  The NACLs and SGs must allow the traffic from manager to workers.
+
+  IAM policy (manager):
+
+  ```json
+  {
+    "Sid": "AllowAccessingGitlabRunnersViaSSH",
+    "Effect": "Allow",
+    "Action": [
+      "ec2-instance-connect:SendSSHPublicKey",
+      "ec2:GetPasswordData"
+    ],
+    "Resource": [ … ]
+  }
+  ```
+
+  > [!note]
+  > `ec2:GetPasswordData` is only needed for Windows runners, `ec2-instance-connect:SendSSHPublicKey` for Linux runners.
+
+  </details>
+
+The workers execute jobs in containers. They (not the manager) need to be able to pull the container images necessary
+for **each** job. This is usually achieved using the worker's local credentials. As such:
+
+- Workers **require** _direct_ image access (e.g. via ECR pull permissions on their instance profile).
+- The manager does **not** _need_ access to the images **nor** the Docker Engine.<br/>
+  It only dispatches `docker` commands over SSH against each worker's Docker daemon.
+
+Multiple Autoscalers do **not** play well managing the same resources (e.g., HA setups).<br/>
+They end up competing for resources, and will try to **delete** each other's worker instances.
 
 <details>
   <summary>Setup</summary>
@@ -252,8 +320,8 @@ Idle instances stay available for at least 20 minutes.
 
 Requirements:
 
-- An EC2 instance with Docker Engine to act as manager.
-- A Launch Template referencing an AMI equipped with Docker Engine for the runners to use.<br/>
+- An EC2 instance to act as manager.
+- A Launch Template for the workers referencing an AMI equipped with Docker Engine.<br/>
   Suggested to use [AL2023 based Amazon ECS AMIs][using al2023 based amazon ecs amis to host containerized workloads] or
   custom ones.
 
@@ -416,9 +484,8 @@ Procedure:
 
 ### Docker Machine executor
 
-> **Deprecated** in GitLab 17.5.<br/>
-> If using this executor with EC2 instances, Azure Compute, or GCE, migrate to the
-> [GitLab Runner Autoscaler](#gitlab-runner-autoscaler).
+> [!warning] **Deprecated** in GitLab 17.5
+> If using this executor with EC2 instances, Azure VMs, or GCE, consider migrating to the [GitLab Runner Autoscaler].
 
 <details style="padding: 0 0 0 1em">
 
@@ -1024,7 +1091,7 @@ drain delays, or use job timeouts to limit how long a job can run.
 
 ## Autoscaling
 
-Refer to [GitLab Runner Autoscaling].
+Refer to [GitLab Runner Autoscaling][Documentation / GitLab Runner Autoscaling].
 
 GitLab Runner can automatically scale using public cloud instances when configured to use an autoscaler.
 
@@ -1113,10 +1180,10 @@ Refer to [External secrets in pipelines].
 - [Install and register GitLab Runner for autoscaling with Docker Machine]
 - [AWS driver does not support multiple non default subnets]
 - [GitLab Runner Helm Chart]
-- [GitLab Runner Autoscaling]
+- [GitLab Runner Autoscaling][Documentation / GitLab Runner Autoscaling]
 - [Autoscaling GitLab Runner on AWS EC2]
 - [Instance executor]
-- [Docker Autoscaler executor]
+- [Docker Autoscaler executor][Documentation / Docker Autoscaler executor]
 - [Signals]
 - [Kubernetes executor]
 
@@ -1126,6 +1193,8 @@ Refer to [External secrets in pipelines].
   -->
 
 <!-- In-article sections -->
+[GitLab Runner Autoscaler]: #gitlab-runner-autoscaler
+
 <!-- Knowledge base -->
 [AWS IAM roles]: ../cloud%20computing/aws/iam.md#roles
 [AWS Secrets Manager]: ../cloud%20computing/aws/secrets%20manager.md
@@ -1136,15 +1205,14 @@ Refer to [External secrets in pipelines].
 <!-- Upstream -->
 [Advanced configuration]: https://docs.gitlab.com/runner/configuration/advanced-configuration/
 [autoscaling gitlab runner on aws ec2]: https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/
-[docker autoscaler executor]: https://docs.gitlab.com/runner/executors/docker_autoscaler/
 [docker executor]: https://docs.gitlab.com/runner/executors/docker/
 [docker machine executor autoscale configuration]: https://docs.gitlab.com/runner/configuration/autoscale/
 [docker machine's aws driver's options]: https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/blob/main/docs/drivers/aws.md#options
 [docker machine's supported cloud providers]: https://docs.gitlab.com/runner/configuration/autoscale/#supported-cloud-providers
 [docker machine]: https://gitlab.com/gitlab-org/ci-cd/docker-machine
+[Documentation / Docker Autoscaler executor]: https://docs.gitlab.com/runner/executors/docker_autoscaler/
+[Documentation / GitLab Runner Autoscaling]: https://docs.gitlab.com/runner/runner_autoscale/
 [fleeting]: https://gitlab.com/gitlab-org/fleeting/fleeting
-[gitlab runner autoscaler]: https://docs.gitlab.com/runner/runner_autoscale/#gitlab-runner-autoscaler
-[gitlab runner autoscaling]: https://docs.gitlab.com/runner/runner_autoscale/
 [gitlab runner helm chart]: https://docs.gitlab.com/runner/install/kubernetes/
 [GitLab Secrets Manager]: https://docs.gitlab.com/ci/secrets/secrets_manager/
 [gitlab-runner-operator]: https://gitlab.com/gitlab-org/gl-openshift/gitlab-runner-operator
