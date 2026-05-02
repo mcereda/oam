@@ -103,3 +103,6 @@ echo '1d64…9920' | gpg -a --default-key 'E455…50AB' --detach-sign
 # -e '/^=/d' removes the base64 checksum at the bottom
 # -e '/^$/d' removes empty lines
 gpg --armor --export 'jd@example.org' | sed -e '/^-----/d' -e '/^=/d' -e '/^$/d'
+
+# List SSH keys.
+gpg-connect-agent 'keyinfo --ssh-list' '/bye' 2>'/dev/null'

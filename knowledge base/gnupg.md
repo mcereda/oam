@@ -205,6 +205,9 @@ gpg --decrypt --output - 'keys.asc.gpg' | gpg --import
 # Encrypt specific files found by pattern.
 find . -type 'f' -name 'secret.txt' \
   -exec gpg --batch --yes --encrypt-files --recipient 'recipient' {} ';'
+
+# List SSH keys.
+gpg-connect-agent 'keyinfo --ssh-list' '/bye' 2>'/dev/null'
 ```
 
 </details>
