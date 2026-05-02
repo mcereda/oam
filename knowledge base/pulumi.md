@@ -13,6 +13,7 @@
    1. [States](#states)
    1. [Configurations](#configurations)
 1. [Backends](#backends)
+   1. [Using project-scoped stacks in DIY backends](#using-project-scoped-stacks-in-diy-backends)
    1. [Enforce specific backends for projects](#enforce-specific-backends-for-projects)
    1. [Migrate to different backends](#migrate-to-different-backends)
 1. [Composing resources](#composing-resources)
@@ -684,7 +685,10 @@ const cluster = new aws.eks.Cluster("cluster", {
 });
 ```
 
-If a resource is assigned a static name, the `deleteBeforeReplace` option _should_ be enabled implicitly.
+When a resource is assigned a _static_ name, some providers enable the `deleteBeforeReplace` resource option implicitly.
+Two resources with the same physical name are not allowed to coexist in this case.<br/>
+The behavior is **not** consistent across providers. Set the option explicitly when correctness matters.<br/>
+Refer [pulumi/pulumi#11259] for a case where it is missed even when set explicitly.
 
 ### Assign tags to resources by default
 
@@ -1049,6 +1053,23 @@ $ aws s3 ls --recursive s3://organization-backend/prefix/
 2024-03-15 13:52:55    2584430 prefix/.pulumi/stacks/test/dev.json
 2024-03-19 17:21:28    2584430 prefix/.pulumi/stacks/test/dev.json.bak
 ```
+
+### Using project-scoped stacks in DIY backends
+
+DIY backends (`s3://`, `file://`, …) have no real concept of _organizations_. Pulumi uses a fixed, virtual one literally
+named `organization`. This forces [stack references] from one project to another to include it when referencing
+resources (e.g., `organization/<project>/<stack>`).
+
+This _project-scoped stacks_ layout was introduced in Pulumi v3.61.0. Before then, all stacks shared a global namespace
+per backend, and two projects could **not** both have a `dev` stack without colliding.
+
+Backends created on v3.60 and earlier stay on the old global-namespace layout until explicitly upgraded with
+`pulumi state upgrade`.
+
+Upgraded stacks become **inaccessible** to older Pulumi versions. Coordinate the upgrade across the team and CI before
+running it.
+
+Refer [Aligning Projects between Service and Self-Managed Backends] and [pulumi/pulumi#12173].
 
 ### Enforce specific backends for projects
 
@@ -1582,9 +1603,42 @@ $ pulumi preview
 
 ### Moving resources from a top-level URN to `ComponentResource` child
 
-When both the old and new URN target the same physical resource, Pulumi plans a create (new URN) **and** a delete (old
-URN) operations. The delete runs **after** the create, and destroys the just-created resource.
+When a resource _moves_ from a top-level URN (which parent is the Stack itself) to a `ComponentResource` child, Pulumi
+plans a _create_ action (using the new URN) **and** a _delete_ action (using the old URN). The delete action runs
+**after** the create, and destroys the just-created resource.
 
+The best practice is to use _aliases_ for these cases.<br/>
+They cause the resource to be adopted by its new parent _in-place_, without requiring a revision of the resource itself.
+Leverage the `aliases` resource option on the specific resource, inside the component. The wrapper has no real resource
+identity.
+
+```ts
+this.myResource: aws.ecs.TaskDefinition = new aws.ecs.TaskDefinition(
+  name,
+  args,
+  {
+    parent: this,
+    aliases: [{
+      name: "old-pulumi-resource-name",
+      parent: pulumi.rootStackResource,
+    }],
+  },
+);
+```
+
+`parent: pulumi.rootStackResource` tells Pulumi that the resource's old parent was the implicit Stack root. Without it,
+Pulumi looks for a child of some other component with the same name, and fails to match the old URN.
+
+> [!note]
+> `{ parent: undefined }` is **not** equivalent to `parent: pulumi.rootStackResource`. The documentation warns it may
+> look like a no-op, and could be silently removed. `rootStackResource` is a named constant, exported from
+> the `@pulumi/pulumi` module specifically for this use case.<br/>
+
+Pulumi rewrites the resource's URN in the state on the next successful `pulumi up`. The replacement happens _in place_,
+updating both the resource's parent and name.<br/>
+The alias is inert from that point on. Its definition it can be removed in a follow-up, or left as a permanent backstop.
+
+The fallback is to use `pulumi state delete`. This creates a new AWS revision, and rolls dependents.<br/>
 Remove the old URN from the state **before** running `pulumi up`:
 
 ```sh
@@ -1592,8 +1646,10 @@ pulumi state delete '<old-urn>'           # fails if the resource has dependents
 pulumi state delete --force '<old-urn>'   # skips dependent check — use with care
 ```
 
-`pulumi up` only sees the create operation on the next run. Verify that dependents will re-adopt the resource naturally
-(e.g. by referencing the new component's output).
+On the next run, `pulumi up` will only see the _create_ operation. Check that all dependents re-adopt the resource
+correctly (e.g. by referencing the new component's output).
+
+This approach registers a new AWS resource revision, and orphans the old one.
 
 ## Pulumi Cloud
 
@@ -1895,6 +1951,8 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 [pulumi troubleshooting]: https://www.pulumi.com/docs/support/troubleshooting/
 [pulumi up --plan without error message (exit code 255)]: https://github.com/pulumi/pulumi/issues/11303#issuecomment-1311365793
 [pulumi-aws/issues/1366]: https://github.com/pulumi/pulumi-aws/issues/1366
+[pulumi/pulumi#11259]: https://github.com/pulumi/pulumi/issues/11259
+[pulumi/pulumi#12173]: https://github.com/pulumi/pulumi/issues/12173
 [resources reference]: https://www.pulumi.com/resources
 [secrets]: https://www.pulumi.com/docs/concepts/secrets/
 [stack references]: https://www.pulumi.com/docs/concepts/stack/#stackreferences
