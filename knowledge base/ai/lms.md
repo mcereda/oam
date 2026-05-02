@@ -617,6 +617,7 @@ Refer:
 - [The Dangerous Illusion of AI Coding?] ([transcript][the dangerous illusion of ai coding? / transcript])
 - [karpathy/autoresearch] and its forks ([miolini/autoresearch-macos], [trevin-creator/autoresearch-mlx], …)
 - [Data Distillation: 10x Smaller Models, 10x Faster Inference]
+- [Using evolutionary algorithms with LLMs]
 
 ### Sources
 
@@ -662,6 +663,7 @@ Refer:
 [llama.cpp]: llama.cpp.md
 [LMStudio]: lmstudio.md
 [Ollama]: ollama.md
+[Using evolutionary algorithms with LLMs]: using%20evolutionary%20algorithms%20with%20LLMs.md
 [vLLM]: vllm.md
 
 <!-- Files -->
