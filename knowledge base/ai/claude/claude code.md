@@ -316,7 +316,7 @@ ANTHROPIC_AUTH_TOKEN='ollama' ANTHROPIC_BASE_URL='http://localhost:11434' ANTHRO
 
 ## Configuration
 
-Refer to [Settings][documentation / settings].
+Refer to [Settings][documentation / settings] and [Model configuration][Documentation / Model configuration].
 
 Claude Code uses a **scope system** to determine where configuration files apply, and with what precedence.
 
@@ -2693,6 +2693,7 @@ Claude Code version: `v2.1.41`.
 [Codebase]: https://github.com/anthropics/claude-code
 [Create custom sub-agents]: https://code.claude.com/docs/en/sub-agents
 [Documentation / Memory]: https://code.claude.com/docs/en/memory
+[Documentation / Model configuration]: https://code.claude.com/docs/en/model-config
 [Documentation / Sandboxing]: https://code.claude.com/docs/en/sandboxing
 [Documentation / Settings]: https://code.claude.com/docs/en/settings
 [Documentation / Skills]: https://code.claude.com/docs/en/skills
