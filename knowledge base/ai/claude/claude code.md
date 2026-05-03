@@ -7,7 +7,10 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
    1. [Credentials](#credentials)
-1. [Context and memory](#context-and-memory)
+1. [Context](#context)
+1. [Memory](#memory)
+   1. [Auto memory](#auto-memory)
+   1. [Auto-dream](#auto-dream)
 1. [Using tools](#using-tools)
    1. [Managing MCP servers](#managing-mcp-servers)
       1. [MCP servers of interest](#mcp-servers-of-interest)
@@ -24,8 +27,11 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
    1. [Agent teams](#agent-teams)
    1. [MCP servers in sub-agents](#mcp-servers-in-sub-agents)
    1. [Offloading MCP servers to sub-agents](#offloading-mcp-servers-to-sub-agents)
-1. [Giving Claude its own knowledge base](#giving-claude-its-own-knowledge-base)
-1. [Giving Claude a reverie-like system](#giving-claude-a-reverie-like-system)
+1. [Personal experiments](#personal-experiments)
+    1. [Memory tiers](#memory-tiers)
+       1. [Giving Claude global memory](#giving-claude-global-memory)
+       1. [Giving Claude its own knowledge base](#giving-claude-its-own-knowledge-base)
+       1. [Giving Claude a reverie-like system](#giving-claude-a-reverie-like-system)
 1. [Scheduling tasks](#scheduling-tasks)
 1. [Tools of interest](#tools-of-interest)
 1. [Best practices](#best-practices)
@@ -243,7 +249,7 @@ claude plugin disable 'gitlab@claude-plugins-official'
 claude plugin update 'gitlab@claude-plugins-official'
 ```
 
-_Relevant_ commands from within Claude Code (version 2.1.109).<br/>
+_Relevant_ commands from within Claude Code (version 2.1.118).<br/>
 Refer to [Built-in commands][built-in commands reference] for the complete list.
 
 ```plaintext
@@ -253,24 +259,30 @@ Refer to [Built-in commands][built-in commands reference] for the complete list.
 /branch [name]                             Create a branch of the current conversation at this point (alias of /fork)
 /btw <question>                            Ask a quick side question without adding to the conversation
 /clear                                     Clear conversation history and free up context (alias of /reset and /new)
+/color [color|default]                     Set the prompt bar color for the current session
 /compact [instructions]                    Summarize and free up context; accepts optional focus instructions
 /config                                    Open the settings panel (alias of /settings)
 /context                                   Visualize current context usage as a colored grid
 /copy [N]                                  Copy Claude's Nth-latest response to clipboard (default: last)
 /cost                                      Show session cost and activity stats (alias of /usage and /stats)
 /debug [description]                       Enable debug logging for this session and help diagnose issues
+/desktop                                   Continue session in Claude Code Desktop app (alias of /app)
 /diff                                      Interactively view uncommitted changes and per-turn diffs
 /doctor                                    Diagnose and verify installation and settings
-/effort [low|medium|high|xhigh|max|auto]   Set the model's effort level
+/effort [low|medium|high|xhigh|max|auto]   Set the model's effort level for the session
 /exit                                      Exit the REPL (alias of /quit)
 /export [filename]                         Export the current conversation as plain text to a file or clipboard
+/extra-usage                               Configure extra usage to keep working when rate limits are hit
 /fast [on|off]                             Toggle fast mode; increases performance and costs
+/feedback [report]                         Submit feedback about Claude Code (alias of /bug)
 /fewer-permission-prompts                  Scan transcripts and add an allowlist to project settings
 /focus                                     Toggle focus view (last prompt + tool summary + response only)
 /help                                      Show help and available commands
 /hooks                                     Manage hook configurations for tool events
+/ide                                       Manage IDE integrations and show status
 /init                                      Initialize a new CLAUDE.md file with codebase documentation, or update the existing one
 /insights                                  Generate a report analyzing Claude Code sessions
+/keybindings                               Open or create keybindings configuration file
 /login                                     Sign in with your Anthropic account
 /logout                                    Sign out from your Anthropic account
 /loop [interval] [prompt]                  Run a prompt on a recurring interval (alias of /proactive)
@@ -280,11 +292,16 @@ Refer to [Built-in commands][built-in commands reference] for the complete list.
 /permissions                               Manage allow, ask, and deny tool permission rules (alias of /allowed-tools)
 /plan [description]                        Enable plan mode or view the current session plan
 /plugin                                    Manage Claude Code plugins
+/powerup                                   Discover Claude Code features through quick interactive lessons
+/privacy-settings                          View and update privacy settings
+/recap                                     Generate a one-line summary of the current session
 /release-notes                             View Claude Code's changelog in an interactive version picker
 /reload-plugins                            Reload all active plugins without restarting
 /remote-control                            Make the current session available for remote control from claude.ai (alias of /rc)
+/remote-env                                Configure the default remote environment for web sessions
 /rename [name]                             Rename the current session (auto-generates if no name given)
 /resume [session]                          Resume a previous conversation by ID or name (alias of /continue)
+/review [PR]                               Review a pull request locally in the current session
 /rewind                                    Rewind conversation and/or code to a previous point (alias of /checkpoint, /undo)
 /sandbox                                   Toggle sandbox mode
 /schedule [description]                    Create, update, list, or run routines (alias of /routines)
@@ -292,8 +309,11 @@ Refer to [Built-in commands][built-in commands reference] for the complete list.
 /simplify [focus]                          Review changed code for reuse, quality, and efficiency, then fix any issues found
 /skills                                    List available skills
 /status                                    Show version, model, account, and connectivity status
+/statusline                                Configure the status line display
 /tasks                                     List and manage background tasks (alias of /bashes)
 /teleport                                  Pull a Claude Code web session into this terminal (alias of /tp)
+/terminal-setup                            Configure terminal keybindings for Shift+Enter and other shortcuts
+/theme                                     Change color theme
 /tui [default|fullscreen]                  Set terminal UI renderer (fullscreen = flicker-free alt-screen)
 /ultraplan <prompt>                        Draft a plan in the cloud, review in browser, execute remotely or locally
 /ultrareview [PR]                          Deep multi-agent code review in a cloud sandbox
@@ -378,6 +398,30 @@ Claude Code. Prefer **not** editing this file manually.<br/>
 
 See also [Configuration] and [Environment variables][environment variables reference].
 
+The `effortLevel` key in `settings.json` files accepts `low`, `medium`, `high`, and `xhigh` values, and, if not
+configured, it defaults to `xhigh` for Opus 4.7 and `high` for Opus and Sonnet 4.6 as of v2.1.117.<br/>
+Models support _subsets_ of the effort level: Opus and Sonnet 4.6 do not support `xhigh`, and Haiku does not support
+effort levels at all.
+
+Opus has access to the `max` effort level, but this value is _intentionally_ scoped to only the current session. To
+persist it across sessions, set the `CLAUDE_CODE_EFFORT_LEVEL` environment variable.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EFFORT_LEVEL": "max"
+  }
+}
+```
+
+</details>
+
+One can limit allowed models using the `availableModels` key. It restricts **all** model usage, not just user selection
+via `/model`.<br/>
+`opusplan` needs both (a version of) Opus and Sonnet to be listed in `availableModels`, if set. It will break otherwise.
+
 ### Credentials
 
 Depending on one's OS and authentication method:
@@ -397,15 +441,12 @@ Depending on one's OS and authentication method:
 
 [`~/.claude/credentials.json` file example][~/.claude/credentials.json file example].
 
-## Context and memory
+## Context
 
-Refer to:
-
-- [AI agents context and memory][ai agents / context and memory]
-- [Manage Claude's memory].
+Refer to [AI agents context and memory][ai agents / context and memory].
 
 > [!important]
-> Every session begins with a fresh context window.
+> Every **new** session begins with a **fresh** context window.
 
 Claude Code uses `CLAUDE.md` as its context file.<br/>
 Its purpose is to apply _procedural memories_ and other _recurrent_ context at the start of sessions.<br/>
@@ -425,8 +466,8 @@ Imported files _can_ recursively import other files up to 5 hops.
 
 <details style='padding: 0 0 1rem 1rem'>
 
-Pull in a README, package.json, or workflow guide by referencing them with the `@` syntax anywhere in a `CLAUDE.md`
-file:
+Pull in other files (a `README.md`, `package.json`, or workflow guide) by referencing them with the `@` syntax anywhere
+in a `CLAUDE.md` file:
 
 ```md
 See @README for project overview, and @package.json for available npm commands for this project.
@@ -448,12 +489,12 @@ If declined, the imports stay disabled and the dialog does **not** appear again.
 Claude Code reads `CLAUDE.md` files by walking **up** the directory tree from the current working directory.<br/>
 E.g., if it is running in `foo/bar/`, it loads instructions from both `foo/bar/CLAUDE.md` and `foo/CLAUDE.md`.
 
-Block-level HTML comments (`<!-- … -->`) in `CLAUDE.md` files are **stripped** before injection into context. Use them to
-leave notes for human maintainers without spending context tokens. Comments inside code blocks are preserved.
+Block-level HTML comments (`<!-- … -->`) in `CLAUDE.md` files are **stripped** before injection into context. Leverage
+them to leave notes for human maintainers without spending context tokens. Comments inside code blocks are preserved.
 
 The `--add-dir` flag gives Claude access to additional directories outside the main working directory.<br/>
-By default, `CLAUDE.md` files from those directories are **not** loaded. Set `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1`
-to also load them.
+By default, `CLAUDE.md` files from those directories are **not** loaded. Set
+`CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` to load them too.
 
 Prefer using _rules_ for a more structured approach to organizing instructions.<br/>
 Rules live in `.claude/rules/*.md` and are discovered _recursively_.
@@ -496,42 +537,15 @@ Skip irrelevant `CLAUDE.md` files by using the `claudeMdExcludes` setting.
 
 </details>
 
-Claude Code can save learnings, patterns, and insights gained during active sessions, and load them in later sessions
-by maintaining `~/.claude/projects/<project>/memory/MEMORY.md` files.<br/>
-The first 200 lines or 25 KB (whichever comes first) of those files are loaded at the start of every session. Consider
-using `MEMORY.md` as an index, and move detailed notes into topic-specific files for Claude Code to load on demand.
+Context files' loading order:
 
-When _auto memory_ is enabled, Claude Code _should™_ automatically update memory files.<br/>
-It is enabled by default. Disable it via the `/memory` toggle, `settings.json`, or
-`CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`.<br/>
-Store auto memory in custom locations by setting `autoMemoryDirectory` in user or local-level settings. Avoid doing
-this in project-level settings to prevent redirecting memory writes to sensitive locations.
-
-Sub-agents can maintain their own auto memory. Refer to [sub-agent memory configuration].
-
-Also see [thedotmack/claude-mem] for an automatic memory management system.
-
-When `autoDreamEnabled: true` is set, Claude Code consolidates auto-memory between sessions. It does so by merging
-duplicates, converting relative dates to absolute (e.g. _"yesterday"_ → `2026-03-15`), and pruning obsolete
-entries.<br/>
-Dreaming triggers when 24h+ have passed since the last pass **and** 5+ new conversation records have accumulated. It
-only touches auto-memory. `CLAUDE.md` and other files are out of scope.
-
-> [!note]
-> Auto-dream is **not yet documented** in the official [memory][documentation / memory] or
-> [settings][documentation / settings] documentation. A [known bug][issue #38461] finds the toggle can be on **without**
-> the background task actually running. Verify by timestamping memory files between sessions.
-
-Memory files' loading order:
-
-| Scope          | Type                | Location                                                                                             | Notes                                                 |
-| -------------- | ------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Managed        | Enterprise policy   | `/etc/claude-code/CLAUDE.md` (Linux)<br/>`/Library/Application Support/ClaudeCode/CLAUDE.md` (macOS) | Loaded in full at launch                              |
-| User           | Context file        | `~/.claude/CLAUDE.md`                                                                                | Loaded in full at launch                              |
-| Project        | Shared context file | `./CLAUDE.md` or `./.claude/CLAUDE.md`                                                               | Loaded in full at launch                              |
-| Project        | Rules               | `./.claude/rules/*.md`                                                                               | Loaded in full at launch                              |
-| Subdirectory   | Context file        | `<project>/some-subdir/CLAUDE.md`                                                                    | Loaded on demand when reading files in this directory |
-| Active session | Auto memory         | `~/.claude/projects/<project>/memory/`                                                               | Complement the context without overriding             |
+| Scope        | Type                | Location                                                                                             | Notes                                                 |
+| ------------ | ------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Managed      | Enterprise policy   | `/etc/claude-code/CLAUDE.md` (Linux)<br/>`/Library/Application Support/ClaudeCode/CLAUDE.md` (macOS) | Loaded in full at launch                              |
+| User         | Context file        | `~/.claude/CLAUDE.md`                                                                                | Loaded in full at launch                              |
+| Project      | Shared context file | `./CLAUDE.md` or `./.claude/CLAUDE.md`                                                               | Loaded in full at launch                              |
+| Project      | Rules               | `./.claude/rules/*.md`                                                                               | Loaded in full at launch                              |
+| Subdirectory | Context file        | `<project>/some-subdir/CLAUDE.md`                                                                    | Loaded on demand when reading files in this directory |
 
 More specific files override broader ones on conflicting instructions, but they **merge** together and do **not**
 replace each other.<br/>
@@ -546,10 +560,9 @@ Combine conflicting rules into a single file, or leverage the hierarchy to handl
 
 Key commands:
 
-| Command   | Summary                                              |
-| --------- | ---------------------------------------------------- |
-| `/memory` | View, edit, or toggle auto memory on/off             |
-| `/init`   | Bootstrap a `CLAUDE.md` file for the current project |
+| Command | Summary                                              |
+| ------- | ---------------------------------------------------- |
+| `/init` | Bootstrap a `CLAUDE.md` file for the current project |
 
 Use the [`InstructionsLoaded` hook][instructionsloaded hook] to log exactly which instruction files are loaded, when
 they load, and why.<br/>
@@ -606,6 +619,56 @@ tools and documents it creates _and_ uses. Also include in the request to period
 to correct its own behavior across sessions.
 
 See [Giving Claude its own knowledge base] for how to set up a persistent filesystem-based KB.
+
+## Memory
+
+Refer to [Manage Claude's memory] and [AI agents memory tiers][ai agents / memory tiers] for the generic concept.
+
+> [!important]
+> Memory is **not** context. Context files (`CLAUDE.md`, rules) are **human**-curated and carry instructions Claude
+> should **not** diverge from. Memory should be Claude-writable, accumulate over sessions, and carry **learnings**.
+
+### Auto memory
+
+When the  _auto memory_ feature is enabled, Claude Code can **automatically** save learnings, patterns, and insights
+gained during active sessions and load them in successive sessions.<br/>
+The feature stores the findings **per-project** at `~/.claude/projects/<project>/memory/MEMORY.md`. Claude Code
+automatically loads the first 200 lines or 25 KB (whichever comes first) at the start of every new session.
+
+> [!tip]
+> Instruct Claude to:
+>
+> - _Actively_ use this feature with a rule in `CLAUDE.md` files.
+> - Use the specific `MEMORY.md` file as an _index_, and move _detailed_ notes into topic-specific files for Claude
+>   Code to load **on demand**.
+
+This feature is **enabled** by default. Disable it via the `/memory` toggle, the `autoMemoryEnabled` key in
+`settings.json` files, or by setting `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` as environment variable.
+
+Define custom locations for memory files by setting `autoMemoryDirectory` in **user** or **local**-level settings.<br/>
+Avoid doing this in **project**-level settings to prevent redirecting memory writes to sensitive locations.
+
+Sub-agents can maintain their **own** auto memory. Refer to [sub-agent memory configuration].
+
+### Auto-dream
+
+When `autoDreamEnabled: true` is set, Claude Code _consolidates_ [auto memory] files between sessions. It does so by
+merging duplicates, converting relative dates to absolute (e.g. _"yesterday"_ → `2026-03-15`), and pruning obsolete
+entries.<br/>
+Dreaming triggers when 24h+ have passed since the last pass **and** 5+ new conversation records have accumulated. It
+only touches auto-memory. `CLAUDE.md` and other files are out of scope.
+
+> [!note]
+> Auto-dream is **not yet documented** in the official [memory][documentation / memory] or
+> [settings][documentation / settings] documentation. A [known bug][issue #38461] finds the toggle can be on **without**
+> the background task actually running. Verify this feature works as intended by instructing Claude to timestamp memory
+> files between sessions.
+
+Key commands:
+
+| Command   | Summary                                  |
+| --------- | ---------------------------------------- |
+| `/memory` | View, edit, or toggle auto memory on/off |
 
 ## Using tools
 
@@ -1996,7 +2059,46 @@ This gives one the best of both worlds:
 
 </details>
 
-## Giving Claude its own knowledge base
+## Personal experiments
+
+### Memory tiers
+
+Claude Code ships with **project-scoped** memory only ([auto memory]). Additional tiers can be built on top of the
+primitives Claude already uses for it:
+
+| Tier           | Location                            | Loading                                                                  | What belongs here                      | Source       |
+| -------------- | ----------------------------------- | ------------------------------------------------------------------------ | -------------------------------------- | ------------ |
+| Project memory | `~/.claude/projects/<repo>/memory/` | First 200 lines or 25 KB of `MEMORY.md` at launch; topic files on demand | Project state, decisions, corrections  | Built-in     |
+| Global memory  | `~/.claude/memory/`                 | Via `@`-import in `~/.claude/CLAUDE.md`; same 200-line/25 KB cap         | Cross-project preferences and identity | Experimental |
+| Knowledge base | Own git repo                        | On demand (grep/read)                                                    | Reusable patterns, gotchas, reference  | Experimental |
+| Reveries       | `~/.claude/reveries.md`             | Injected every session via hook                                          | Session texture, atmosphere            | Experimental |
+
+The experimental tiers leverage Claude Code's `@`-import mechanism and `SessionStart` hooks to extend memory beyond what
+the product provides. See [Giving Claude its own knowledge base] and [Giving Claude a reverie-like system] for setup.
+
+Also see [thedotmack/claude-mem] for an automatic, plugin-based memory management system.
+
+Routing:
+
+- Route by **shape**, not by topic (see [AI agents memory tiers][ai agents / memory tiers]).
+- Use **project memory** for project-specific context, **global memory** for cross-project preferences and insights, the
+  **KB** for durable, reusable knowledge, and **reveries** for session texture.
+- When unsure, write to project memory. Promotion is easier than demotion.
+
+#### Giving Claude global memory
+
+Custom setup that mirrors Claude-Code's built-in project-only memory pattern at user scope using the `@`-import
+mechanism.
+
+Without a global tier, cross-project facts (user identity, collaboration preferences, recurring feedback) end up
+scattered across whichever project's auto-memory Claude happens to be in when learning them.
+
+Global memory lives at `~/.claude/memory/`, and mirrors the same index + topic file pattern as project memory.
+
+It being a custom feature, it does **not** load automatically. The feature requires an `@~/.claude/memory/MEMORY.md`
+import in `~/.claude/CLAUDE.md`.
+
+#### Giving Claude its own knowledge base
 
 Implements Clark & Chalmers' _extended mind_ thesis by leveraging Claude Code's auto-memory function for project-related
 notes, and a knowledge base as _Otto's notebook_ for everything else.
@@ -2184,7 +2286,7 @@ The mechanisms above form an enforcement hierarchy where each layer catches what
 
 </details>
 
-## Giving Claude a reverie-like system
+#### Giving Claude a reverie-like system
 
 > [!note]
 > Experimental pattern first tried on 2026-04-25. Treat it with the appropriate skepticism.
@@ -2648,7 +2750,9 @@ Claude Code version: `v2.1.41`.
 <!-- In-article sections -->
 [Agent teams]: #agent-teams
 [Agent-based hooks]: #agent-based-hooks
+[Auto memory]: #auto-memory
 [Configuration]: #configuration
+[Giving Claude a reverie-like system]: #giving-claude-a-reverie-like-system
 [Giving Claude its own knowledge base]: #giving-claude-its-own-knowledge-base
 [Offloading MCP servers to sub-agents]: #offloading-mcp-servers-to-sub-agents
 [Prompt-based hooks]: #prompt-based-hooks
@@ -2659,6 +2763,7 @@ Claude Code version: `v2.1.41`.
 <!-- Knowledge base -->
 [AI agents / Best practices]: ../agents.md#best-practices
 [AI agents / Context and memory]: ../agents.md#context-and-memory
+[AI agents / Memory tiers]: ../agents.md#memory-tiers
 [AI agents / Skills]: ../agents.md#skills
 [AI agents]: ../agents.md
 [Claude Code router]: claude%20code%20router.md

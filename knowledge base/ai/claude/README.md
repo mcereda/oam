@@ -177,6 +177,7 @@ Create a recurring job:
 - [Large Language Models]
 - [Claude's Constitution]
 - [Gemini]
+- [Everything that went/is wrong with Claude]
 
 ### Sources
 
@@ -211,4 +212,5 @@ Create a recurring job:
 [Weekly rate limit]: https://support.claude.com/en/articles/11647753-how-do-usage-and-length-limits-work
 
 <!-- Others -->
+[Everything that went/is wrong with Claude]: https://clawd.rip/
 [vdsmon/claude-warmup]: https://github.com/vdsmon/claude-warmup

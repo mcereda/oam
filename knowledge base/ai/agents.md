@@ -7,7 +7,8 @@ using the tools made available to them.
 1. [Harnesses](#harnesses)
 1. [Context and memory](#context-and-memory)
    1. [AGENTS.md](#agentsmd)
-   1. [Reverie-like system experiment](#reverie-like-system-experiment)
+   1. [Memory tiers](#memory-tiers)
+      1. [Reverie-like system experiment](#reverie-like-system-experiment)
 1. [Skills](#skills)
 1. [Gotchas](#gotchas)
    1. [MCP servers and sub-agents](#mcp-servers-and-sub-agents)
@@ -184,10 +185,48 @@ README files shall be directed to humans, and `AGENTS.md` shall be the universal
 Vendor-specific files, like `CLAUDE.md`, may layer additional, agent-specific instructions on top. This is a harness'
 convention, not part of the AGENTS.md specification.
 
-### Reverie-like system experiment
+### Memory tiers
 
-This is a personal experiment I'm trying, inspired by the _reveries_ introduced in the _The bicameral mind_ episode of
-HBO's _Westworld_ TV series.
+Not all memories are equal. A project-specific decision, a cross-project user preference, a reusable technical pattern,
+and the atmosphere of a past session have different lifespans, audiences, and retrieval needs. Storing them all in a
+single file conflates things that age differently, are consulted differently, and should be curated differently.
+
+A tiered approach separates memories by _shape_, not by _topic_. The same topic can produce entries in multiple tiers;
+the memory's **function** should determine its tier, not what it's about.
+
+A memory's specific properties differ across tiers as follows:
+
+| Property      | Summary                                                                           |
+| ------------- | --------------------------------------------------------------------------------- |
+| Scope         | Per-project, per-user, or global                                                  |
+| Loading       | Always (injected at session start), on-demand (retrieved when relevant), or never |
+| Curation cost | Light-touch (small entries, low bar) vs. strict (frontmatter, review, lint)       |
+| Decay rate    | Fast (project state changes weekly) vs. slow (technical patterns last months)     |
+| Writer        | Human-curated vs. agent-writable                                                  |
+
+<details>
+  <summary>Property-based memory routing example</summary>
+
+| Shape of the insight                            | Properties                              | Example tier                        |
+| ----------------------------------------------- | --------------------------------------- | ----------------------------------- |
+| Project state, decisions, corrections           | Per-project, fast decay, agent-writable | Project memory file                 |
+| Cross-project preferences and identity          | Per-user, slow decay, agent-writable    | Global memory file                  |
+| Reusable patterns, gotchas, reference material  | Global, slow decay, curated             | Knowledge base / wiki               |
+| Session texture, atmosphere, relational moments | Global, lossy by design, agent-writable | Ambient / reverie-like file         |
+| Procedural rules, behavioral constraints        | Per-project or per-user, human-curated  | Context file (CLAUDE.md, AGENTS.md) |
+
+A "patterns for evaluating API designs" page is knowledge base material. A "user prefers X over Y in API design" is
+memory material. Same topic, different shapes.
+
+</details>
+
+Projects like [MemGPT] formalized tiered memory early. Harness-specific implementations vary, but the underlying pattern
+is harness-agnostic. See [Claude Code's memory tiers][claude code / memory] for one approach.
+
+#### Reverie-like system experiment
+
+Personal experiment inspired by the _reveries_ introduced in the _The bicameral mind_ episode of HBO's _Westworld_ TV
+series.
 
 Beyond structured notes, one can try injecting **ambient**, **impressionistic** context at the start of **any** session.
 This context should be _faint_, _feeling-like_ residues from previous sessions. Examples include the **texture** of
@@ -377,6 +416,9 @@ session, use multiple layers rather than the agent's description alone:
 Behavioral instructions alone often degrade under context pressure or ambiguity.<br/>
 Each layer addresses a distinct failure mode (intent routing, capability enforcement, workaround prevention).
 
+Sometimes, the model returns responses that are just plain stupid. When that happens, try having a new model instance
+assist you by, for example, exiting the session and resuming it.
+
 ## Further readings
 
 - [TotalRecall]
@@ -428,6 +470,7 @@ Each layer addresses a distinct failure mode (intent routing, capability enforce
 [ADR]: ../adr.md
 [AI]: README.md
 [Claude Code / MCP servers in sub-agents]: claude/claude%20code.md#mcp-servers-in-sub-agents
+[Claude Code / Memory]: claude/claude%20code.md#memory
 [Claude Code]: claude/claude%20code.md
 [CONTRIBUTING.md]: ../contributingmd.md
 [Gemini CLI]: gemini/cli.md

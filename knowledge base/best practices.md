@@ -24,6 +24,8 @@ What really worked for me personally, or in my experience.
   There is no _perfect_ nor _correct_ solution, just different sets of tradeoff. Besides, no one will ever have all the
   information at the start, as some of them only come with experience and looking back at decisions one has already made
   gives the distorted perspective that those decisions were clearer than they really were.
+- Record decisions with their reasoning.<br/>
+  Include what you decided to **not** pursuit and why. This will come handy in later times.
 - Review every decision after some time. Check they are still relevant, or if there is some improvement you can
   implement.<br/>
   Things change constantly: new technologies are given birth often, and processes improve. Also, now you know better
