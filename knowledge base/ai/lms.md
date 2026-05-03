@@ -407,7 +407,8 @@ If a system prompt says to "never discuss competitor products", users asking abo
 However, users can sometimes work around poorly written system prompts through clever phrasing or _jailbreaking_
 attempts.
 
-Also see [Mastering System Prompts for LLMs] for suggestions.
+Also see [Mastering System Prompts for LLMs] for suggestions. [Claude-specific guidance][Prompting best practices] can
+apply to other models too.
 
 ### Procedural instructions degrade into declarative hints
 
@@ -452,7 +453,9 @@ in short conversations.
 
 Liu et al. measured in [Lost in the Middle] (2024) a U-shaped performance curve in LLMs. This indicates that a model's
 ability to recall information is strongest when _relevant_ to the current task and presented at the very **beginning**
-or **end** of the context window. It degrades **significantly** for content buried in the middle.
+or **end** of the context window. It degrades **significantly** for content buried in the middle.<br/>
+When using document-heavy prompts (20k+ tokens), consider placing long documents and input data **near the top**, above
+instructions and examples, and then put queries or tasks **at the end** of it.
 
 When a prompt, conversation, document or code base exceeds a model's context window, the context must be _compacted_ to
 continue.<br/>
@@ -702,6 +705,7 @@ Refer:
 [Mistral]: https://mistral.ai/
 [OpenClaw: Who are you?]: https://www.youtube.com/watch?v=hoeEclqW8Gs
 [Optimizing LLMs for Performance and Accuracy with Post-Training Quantization]: https://developer.nvidia.com/blog/optimizing-llms-for-performance-and-accuracy-with-post-training-quantization/
+[Prompting best practices]: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
 [Quantifying Language Models' Sensitivity to Spurious Features in Prompt Design or: How I learned to start worrying about prompt formatting]: https://arxiv.org/abs/2310.11324
 [ReAct: Synergizing Reasoning and Acting in Language Models]: https://arxiv.org/abs/2210.03629
 [Run LLMs Locally: 6 Simple Methods]: https://www.datacamp.com/tutorial/run-llms-locally-tutorial

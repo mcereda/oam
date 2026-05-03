@@ -6,6 +6,7 @@ Family of [LLMs][large language models] developed by Anthropic.
 1. [The Claude character](#the-claude-character)
 1. [Models' code of conduct](#models-code-of-conduct)
 1. [Improving interactions](#improving-interactions)
+   1. [Model-specific behaviours](#model-specific-behaviours)
 1. [Token budget](#token-budget)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -90,25 +91,52 @@ listed**.
 > [!tip]
 > All [LLM's interaction tips] apply here too.
 
-Fast models prefer _pattern-matching_ instead of _reasoning_. Them seeing the positive pattern may apply it
-everywhere.<br/>
-Adding **negative** examples gives the model a concrete off-ramp instead of an inferred one, and explicitly stating a
-rule's embedded rationale (e.g. _over-saving pollutes; under-saving is recoverable_) helps the model extend it to
-cases it did not enumerate.
-
-When a rule applies **conditionally**, state the **negative** case **explicitly**. Positive patterns are stronger
-than embedded conditionals.<br/>
-This matters especially for **procedural** instructions: models are tempted to treat them as declarative hints and
-satisfy the requirement from context instead of executing the step. Refer to
-[Procedural instructions degrade into declarative hints].
-
-It appears Claude (at least the 4.6 suite) follows instructions better when given with an _imperative_ tone.<br/>
+Claude follows rules better when given to models using an _imperative_ tone.<br/>
 Prefer writing important instructions that way.
 
-Bare imperatives (e.g. _don't save when uncertain_) work narrowly, rationale-bearing imperatives generalize.<br/>
+_Bare_ imperatives work narrowly. Providing _rationale_ for rules generalizes them, and grounds them in the model's
+behaviour for the session.<br/>
 `CLAUDE.md` rules should tend to read longer than the equivalent ones for humans. They should intend the model as the
-audience, and it has to handle edge cases. Faster/smaller models need more guardrails, kinda like unmotivated teenagers
-do.
+audience, and it has to handle edge cases. That said, being overly verbose or specific causes rules buried in the middle
+to be silently ignored. Prune rules the model already follows to avoid pollution.
+
+_Explicit_ statements (rationale, conditional, examples, patterns, etc.) win over _embedded/inferred_ ones.<br/>
+Explicitly stating a rule's embedded rationale (e.g. "over-saving pollutes; under-saving is recoverable") helps the
+model extend that rule to cases it did **not** enumerate.
+
+_Negative_ patterns interact with _positive_ ones **depending on the context**:
+
+- Negative _constraints_ ("do not infer", "do not skip this step") are the stronger tool for **procedural compliance**
+  and **preventing over-generalization**.<br/>
+  Without them, the model might silently override the step. This is especially true for smaller/faster models.
+- Positive examples and instructions tend to outperform negative ones for **style**, **format**, and **verbosity**.
+  E.g., "Write flowing prose" beats "never use bullet points".
+
+When a rule applies conditionally, stating positive cases helps; explicitly adding negative examples gives the model a
+concrete off-ramp, instead of an inferred one.
+
+_XML tags_ help separate mixed content (instructions, context, examples, variables) and reduce ambiguity.<br/>
+Wrapping each type in its own tag (e.g. `<instructions>`, `<context>`, `<example>`) cuts misinterpretation, especially
+in long or complex prompts.
+
+_Few-shot examples_ (3 to 5 input/output pairs inside `<example>` tags) are one of the most reliable ways to steer
+output format, tone, and structure. The examples should be diverse enough to cover edge cases and prevent the model
+picking up unintended patterns.
+
+The above concepts matter especially for **procedural** instructions: models are tempted to treat them as declarative
+_hints_, and tend to satisfy the requirement from context instead of executing the step. Refer to
+[Procedural instructions degrade into declarative hints].
+
+### Model-specific behaviours
+
+Faster/smaller models need more guardrails, kinda like unmotivated teenagers do.
+
+Fast models prefer _pattern-matching_, not _reasoning_, and default to it much more often and sooner than bigger models.
+When they see even a single positive pattern, they may try to apply it everywhere. Add negative examples to give the
+model more constraints.<br/>
+Larger models can exhibit the opposite when employed with **lower effort levels**: they might tend to be _too_ literal
+and refuse to generalize an instruction beyond the specific item it was given for. Explicitly state the scope when the
+rule needs to be applied broadly (e.g. "apply this formatting to every section, not just the first one").
 
 ## Token budget
 
@@ -182,6 +210,8 @@ Create a recurring job:
 ### Sources
 
 - [Developer documentation]
+- [Prompting best practices]
+- [Use examples (multishot prompting)]
 - [vdsmon/claude-warmup]
 
 <!--
@@ -206,8 +236,10 @@ Create a recurring job:
 [Emotion concepts and their function in a large language model]: https://www.anthropic.com/research/emotion-concepts-function
 [Fast mode]: https://platform.claude.com/docs/en/build-with-claude/fast-mode
 [Pricing]: https://claude.com/pricing
+[Prompting best practices]: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
 [Rate limits]: https://platform.claude.com/docs/en/api/rate-limits
 [Research]: https://www.anthropic.com/research
+[Use examples (multishot prompting)]: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/multishot-prompting
 [Website]: https://claude.com/product/overview
 [Weekly rate limit]: https://support.claude.com/en/articles/11647753-how-do-usage-and-length-limits-work
 
