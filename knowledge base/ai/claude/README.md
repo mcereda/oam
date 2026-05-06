@@ -13,7 +13,10 @@ Family of [LLMs][large language models] developed by Anthropic.
 
 ## TL;DR
 
-As of 2026-03-02, all models support text and image input, text output, multilingual capabilities, and vision.
+As of 2026-05, the model family is **Claude 4.X**. All models support text and image input, text output, multilingual
+capabilities, and vision.<br/>
+Current model IDs: Opus 4.7 (`claude-opus-4-7`), Opus 4.6 (`claude-opus-4-6`), Sonnet 4.6 (`claude-sonnet-4-6`),
+Haiku 4.5 (`claude-haiku-4-5-20251001`).
 
 Prefer **Opus** for the most _demanding_ tasks or when in need for deep reasoning, e.g. large-scale code refactoring,
 complex architectural decisions, multi-step research and analysis, or advanced agentic workflows.<br/>

@@ -1008,6 +1008,49 @@ services:
 
 ### Limit tool execution
 
+The `permissions.defaultMode` field in settings files controls the overall permission behaviour. The modes are:
+
+| Mode                | Behaviour                                                                                                  |
+| ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `default`           | Standard, interactive: prompts on first use, remembers for session                                         |
+| `plan`              | Read-only analysis: can read but not modify, run commands, or fetch (unless auto mode is enabled for this) |
+| `acceptEdits`       | Auto-approves file edits/writes, still prompts for tools like `Bash` and `WebFetch`                        |
+| `auto`              | A safety classifier model reviews each action, approves _safe_ ones autonomously                           |
+| `dontAsk`           | Auto-**denies** all tools, unless explicitly listed in `allow`                                             |
+| `bypassPermissions` | Auto-approves everything: no prompts, no checks                                                            |
+
+> [!warning] Known issues
+> As of 2026-04, `dontAsk` has been reported to [activate unexpectedly][issue #17360],
+> [override the `ask` list][issue #16555], and [spontaneously switch modes mid-session][issue #36473].
+
+Setting `defaultMode: "auto"` normally shows a confirmation prompt at session start. To suppress it, set
+`skipAutoPermissionPrompt: true` as a **top-level** key (sibling of `permissions`, not nested inside it) in the
+**same** settings file.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+`skipAutoPermissionPrompt` must exist in **both** global and project-level settings:
+
+- At **project** level, it must co-locate with `defaultMode: "auto"` to suppress the prompt for the project only.
+- Claude Code writes this key at **global** level when the user accepts the auto mode prompt. If removed from global
+  settings, the prompt reappears even if the project-level setting is present.
+
+Project-level alone is not sufficient. Global alone is not sufficient. Both are needed.
+
+> [!note]
+> `skipAutoPermissionPrompt` is **not** documented yet. At least one
+> [GitHub issue](https://github.com/anthropics/claude-code/issues/33587) calls it "non-official." The only officially
+> documented prompt-suppression setting is `skipDangerousModePermissionPrompt` (for `bypassPermissions` mode).
+
+```json
+{
+  "permissions": { "defaultMode": "auto", "allow": ["..."] },
+  "skipAutoPermissionPrompt": true
+}
+```
+
+</details>
+
 Use the `permissions` field in a settings file to always _allow_, require Claude Code to _ask_, or _deny_ the use of
 specific tools.<br/>
 `deny` takes precedence over `ask`, which in turn takes precedence over `allow`. The first matching rule **by category**
@@ -2907,9 +2950,12 @@ Claude Code version: `v2.1.41`.
 [Improving skill-creator: Test, measure, and refine Agent Skills]: https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
 [InstructionsLoaded hook]: https://code.claude.com/docs/en/hooks#instructionsloaded
 [Issue #16299]: https://github.com/anthropics/claude-code/issues/16299
+[Issue #16555]: https://github.com/anthropics/claude-code/issues/16555
+[Issue #17360]: https://github.com/anthropics/claude-code/issues/17360
 [Issue #21858]: https://github.com/anthropics/claude-code/issues/21858
 [Issue #23478]: https://github.com/anthropics/claude-code/issues/23478
 [Issue #23569]: https://github.com/anthropics/claude-code/issues/23569
+[Issue #36473]: https://github.com/anthropics/claude-code/issues/36473
 [Issue #38461]: https://github.com/anthropics/claude-code/issues/38461
 [Manage Claude's memory]: https://code.claude.com/docs/en/memory
 [Mastering Claude Code in 30 minutes]: https://www.youtube.com/watch?v=6eBSHbLKuN0
