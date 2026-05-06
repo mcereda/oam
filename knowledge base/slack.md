@@ -6,6 +6,10 @@
 1. [Use incoming webhooks for notifications](#use-incoming-webhooks-for-notifications)
 1. [Use bots for notifications](#use-bots-for-notifications)
 1. [Create apps](#create-apps)
+1. [Create slash commands](#create-slash-commands)
+   1. [Verifying the signing secret](#verifying-the-signing-secret)
+   1. [3-second ack + async pattern](#3-second-ack--async-pattern)
+1. [Update an existing app's manifest](#update-an-existing-apps-manifest)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -64,6 +68,16 @@ curl --request 'POST' --url 'https://hooks.slack.com/services/THAFYGVV2/BFR45678
 
 </details>
 -->
+
+Slash commands are workspace-wide. Once an app with a slash command is installed to a workspace, the command is
+immediately available in **every** channel, no per-channel opt-in needed.<br/>
+Channel membership for bots only matters for `chat.postMessage` (unprompted bot messages), not for slash command
+response flows using `response_url`.
+
+Slack's App Management UI can inject fields (`pkce_enabled`, `is_mcp_enabled`) into a stored manifest, but their own
+manifest validator does **not** recognize them as valid schema fields. SHould one ever see a manifest validation error
+one did not introduce, the stored manifest may have been silently mutated. The fix is to re-paste the canonical source,
+save it, and reinstall the app.
 
 ## Add custom emoji
 
@@ -124,11 +138,107 @@ Refer [Automating Slack Notifications: Sending Messages as a Bot with Python].
 
 [Direct link](https://api.slack.com/apps?new_app=1).
 
+## Create slash commands
+
+1. Go to [api.slack.com/apps] → _Create New App_ → _From an app manifest_.
+1. Select the workspace.
+1. Paste the app manifest's YAML, then click _Create_.
+
+   <details style='padding: 0 0 1rem 1rem'>
+     <summary>Example using an AWS Lambda</summary>
+
+   ```yml
+   ---
+   display_information:
+     name: AWS EC2 lister
+     description: List EC2 instances
+     background_color: "#66ff00"
+
+   features:
+     bot_user:
+       display_name: AWS EC2 lister
+       always_online: false
+     slash_commands:
+       - command: /ec2-list-running
+         url: https://abcd0123.execute-api.eu-west-1.amazonaws.com/prod/slack/ec2/running
+         description: List running EC2 instances
+         usage_hint: >-
+           env:<environment-name> | name:<name-tag>
+         should_escape: true
+
+   oauth_config:
+     scopes:
+       bot:
+         - commands
+
+   settings:
+     org_deploy_enabled: false
+     socket_mode_enabled: false
+     token_rotation_enabled: false
+   ```
+
+   </details>
+
+   `features.bot_user` must be present whenever `features.slash_commands` is defined: the manifest validator rejects it
+   otherwise.<br/>
+   `always_online: false` is correct for HTTP-only apps (no WebSocket/RTM connection).
+
+1. Install the app to the Workspace → _Allow_.<br/>
+   Reinstall the app after approval until an OAuth token appears. It will exist in a Schrodinger state until then.
+1. Add all needed collaborators to the App.<br/>
+   They will **not** be able to access it otherwise.
+
+### Verifying the signing secret
+
+Slack signs every slash command request with HMAC-SHA256. Find the signing secret at:
+App details → **Basic Information** → **App Credentials** → **Signing Secret**.
+
+Verify it before trusting the payload:
+
+```python
+import hashlib, hmac, time
+
+def verify_slack_signature(signing_secret: str, headers: dict, raw_body: str) -> bool:
+    timestamp = headers['X-Slack-Request-Timestamp']
+    if abs(time.time() - int(timestamp)) > 300:
+        return False  # reject replays older than 5 minutes
+    base = f'v0:{timestamp}:{raw_body}'.encode()
+    expected = 'v0=' + hmac.new(signing_secret.encode(), base, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, headers['X-Slack-Signature'])
+```
+
+- The body must be the **raw**, **unencoded** request body (before `parse_qs` or JSON decode).
+- Use `hmac.compare_digest` (and not `==`) to avoid timing attacks.
+- For AWS API Gateway + Lambda proxy: without `binaryMediaTypes` configured, `isBase64Encoded` is `False` and the body
+  arrives as a plain string; no decoding is needed before HMAC. If binary media types are set, and `isBase64Encoded`
+  is `True`, base64-decode first; verification always fails otherwise.
+
+### 3-second ack + async pattern
+
+Slack requires a HTTP response within 3 seconds. When an operation could take longer, consider this pattern:
+
+1. Verify the signature, parse the command, enqueue or self-invoke the actual work asynchronously.
+1. Return HTTP 200 immediately with an **ephemeral** ack.
+1. Post the result to `response_url` once work completes.
+
+_Ephemeral_ responses `{"response_type": "ephemeral", "text": "…"}` are only visible to the caller.<br/>
+_In-channel_ responses `{"response_type": "in_channel", "text": "…"}` are visible to everyone in the channel.
+
+Validate the `response_url` starts with `https://hooks.slack.com/` before posting to it: Slack always sends URLs in this
+form, and skipping the check lets a channel member craft a slash command with an arbitrary URL.
+
+## Update an existing app's manifest
+
+1. Go to the App's details → _Features_ → _App Manifest_.
+1. Make the changes, then save.
+1. Reinstall the App.
+
 ## Further readings
 
 - [Website]
 - [Sending messages using incoming webhooks]
 - [Posting messages using curl]
+- [Verifying requests from Slack]
 - [CLI]
 
 ### Sources
@@ -150,11 +260,13 @@ Refer [Automating Slack Notifications: Sending Messages as a Bot with Python].
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
+[api.slack.com/apps]: https://api.slack.com/apps
 [cli]: https://tools.slack.dev/slack-cli/
+[how to quickly get and use a slack api bot token]: https://api.slack.com/tutorials/tracks/getting-a-token
 [posting messages using curl]: https://api.slack.com/tutorials/tracks/posting-messages-with-curl
 [sending messages using incoming webhooks]: https://api.slack.com/messaging/webhooks
+[verifying requests from slack]: https://docs.slack.dev/authentication/verifying-requests-from-slack
 [website]: https://slack.com/
-[how to quickly get and use a slack api bot token]: https://api.slack.com/tutorials/tracks/getting-a-token
 
 <!-- Others -->
 [automating slack notifications: sending messages as a bot with python]: https://medium.com/@sid2631/automating-slack-notifications-sending-messages-as-a-bot-with-python-2beb6c16cd8c
