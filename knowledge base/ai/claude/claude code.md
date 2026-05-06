@@ -1013,6 +1013,9 @@ specific tools.<br/>
 `deny` takes precedence over `ask`, which in turn takes precedence over `allow`. The first matching rule **by category**
 wins.
 
+A permission rule is cheaper than a hook (no subprocess, evaluated inline by the harness) and its intent is clearer to
+Claude too.
+
 Spaces matter. `Bash(ls *)` matches `ls -la` or `ls` _followed by a space_ and then anything, but will **not** match
 `ls` by itself, `lsof`, or other tools starting with it; `Bash(ls*)` matches **all** of them.<br/>
 Use multiple patterns to achieve exact matches, e.g. `Bash(ls)` and `Bash(ls *)` for `ls` and its options but **not**
@@ -1025,7 +1028,8 @@ This is confirmed as of 2026-04-14 for `Read`, `Edit`, `Write`, and `Bash` path 
 
 > [!important]
 > MCP-related permission rule wildcards operate at the segment level (delimited by `__`), not character-by-character.
-> Expressions like `mcp__*gitlab*__search` will **not** match any MCP server.
+> Expressions like `mcp__*gitlab*__search` will **not** match any MCP server, **nor** ones like
+> `mcp__claude_ai_Linear__get_*` will match any tool from the specified MCP server. Those will be silently ignored.
 >
 > The correct patterns for MCP-related permission are:
 >
@@ -1081,18 +1085,30 @@ expanded to the current user's home path, but it doesn't match the literal strin
 
 </details>
 
-Rules in `settings.json` files should use absolute paths, e.g. `"Bash(git -C /home/some-user/path/to/whatever *)"`, or
-Claude needs to know to use `~/` **unquoted** in KB commands instead of `$HOME/`.
+Rules in `settings.json` files should use **absolute** paths, e.g. `"Bash(git -C /home/some-user/path/to/whatever *)"`,
+or Claude needs to know to use `~/` **unquoted** in related commands instead of `$HOME/`.
 
 Refine permissions using `PreToolUse` [hooks][using hooks].<br/>
-`deny` and `ask` rules are **still** evaluated **after** a hook returns _allow_.
+`deny` and `ask` rules are **still** evaluated **after** a hook returns _allow_. This allows using them to further
+filter specific _variations_ of commands (e.g. `git -C *` instead of `git *`)
 
 <details style='padding: 0 0 1rem 1rem'>
+
+The matcher for commits catches `git commit`, the deny rule prevents bypassing it using the `git -C` variation.
 
 ```json
 {
   "hooks": {
     "PreToolUse": [
+      {
+        "matcher": "Bash(git commit*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "current=$(git branch --show-current 2>/dev/null); default=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'); if [[ -z \"$default\" ]]; then default=$(git remote show origin 2>/dev/null | awk '/HEAD branch/{print $NF}'); fi; [[ -z \"$default\" ]] && default=\"master\"; if [[ \"$current\" == \"$default\" ]]; then printf '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"BLOCKED: direct commits to %s are not allowed, create a feature branch first.\"}}' \"$default\"; fi"
+          }
+        ]
+      }
       {
         "matcher": "mcp__aws-cli__call_aws",
         "hooks": [
@@ -1102,6 +1118,11 @@ Refine permissions using `PreToolUse` [hooks][using hooks].<br/>
           }
         ]
       }
+    ]
+  },
+  "permissions": {
+    "deny": [
+      "Bash(git * commit*)"
     ]
   }
 }
@@ -1357,7 +1378,7 @@ plugin:gitlab:gitlab: https://gitlab.example.org/api/v4/mcp (HTTP) - ! Needs aut
 claude --plugin-dir './path/to/plugin'
 
 # Install plugin marketplaces.
-claude plugin marketplace add 'owner/repo'      # github
+claude plugin marketplace add 'owner/repo'       # github
 claude plugins marketplace add 'path/to/plugin'  # local
 
 # Install plugins.
@@ -1396,30 +1417,153 @@ Hooks force running user-defined shell commands automatically at specific points
 it edits files, finishes tasks, or needs input.
 
 They provide _**deterministic**_ control over Claude Code's behavior, ensuring certain actions **always** happen rather
-than relying on the LLM to _choose_ to run them.<br/>
+than relying on the LLM to _choose_ to run them.
 
-Use hooks to **enforce** project rules, automate repetitive tasks, and integrate Claude Code with existing tools.<br/>
+Use hooks to **gate** project rules (early, cheap pre-flight nudges), automate repetitive tasks, and integrate Claude
+Code with existing tools. For policies that must hold **regardless** of a tool's invocation form (e.g. ensuring git
+commands follow a pattern), pair Claude Code hooks with other tools: hooks' matchers have gaps, tools like git hooks are
+caller-agnostic and more deterministic.<br/>
 Consider using [prompt-based hooks] or [agent-based hooks] for decisions that require **judgment**, rather than
 deterministic rules.
 
 When an event fires, all _matching_ hooks run **in parallel**.<br/>
 Hooks defining a catch-all (`*`) matcher, an empty one (`""`), or no matcher at all, will match **all** events of their
-specific type.
+specific type. Globs at the start of Bash matchers (`Bash(*git)`) **never** match.
 
-Identical hook commands are automatically **deduplicated**.<br/>
+> [!important]
+> Only `PreToolUse`, `PostToolUse`, and `PermissionRequest` support the `matcher` field.<br/>
+> `Stop`, `UserPromptSubmit`, `TaskCompleted`, and several other events **silently ignore** any `matcher` field set
+> on them.
+
+Identical hooks are automatically **deduplicated** ( command hooks by the exact command string, HTTP hooks by URL).<br/>
 To make cheap checks short-circuit expensive ones, they would need to reside in a **single** hook that runs **both**
 checks sequentially.
 
-Create hooks by adding a `hooks` block to a settings file.
+Create hooks by adding a `hooks` block to a **settings** file on any scope.
 
-Filter tool events further by setting the `if` field on individual hook handlers.<br/>
-The `if` field uses permission rule syntax to match against the tool name and arguments together, e.g. `"Bash(git *)"`
-runs only for `git` commands and `"Edit(*.ts)"` runs only for TypeScript files.
+Filter tool events further by specifying the `if` field on individual hook handlers.<br/>
+The `if` field uses permission rule syntax to match against the tool name and arguments together (e.g. `"Bash(git *)"`
+runs only for `git` commands, and `"Edit(*.ts)"` runs only for TypeScript files). It also handles argument dispatch
+**before** the command runs: hooks that previously parsed `$CLAUDE_TOOL_INPUT` with `jq` to check the command can
+usually drop that entirely and keep the command body focused on actual logic.
+
+Force a configuration reload and validate Claude Code accepted the hook by using the `/hooks` command.
+
+> [!caution]
+> Beware of prompts that can trigger loops. Consider asking Claude to detect and refine them.
+
+Test the hook by asking Claude to do something that should trigger it.
+
+_Command_ hooks communicate only through `stdout`, `stderr`, and exit codes. They **cannot** trigger commands or tool
+calls directly.<br/>
+_HTTP_ hooks only communicate through the response body.
 
 > [!important]
-> Only `PreToolUse`, `PostToolUse`, and `PermissionRequest` support `matcher`.<br/>
-> `Stop`, `UserPromptSubmit`, `TaskCompleted`, and several other events **silently ignore** any `matcher` field set
-> on them.
+> Scripts used in hooks must be **executable**.
+
+Command hooks can return structured data as JSON on stdout, which is **only** processed on exit status `0`.<br/>
+The structure varies by event. Refer to [Hooks reference] for per-event fields.
+
+The higher the hook type's complexity, the higher the cost-accuracy tradeoff:
+
+| Hook type           | Cost per invocation      | Accuracy                            |
+| ------------------- | ------------------------ | ----------------------------------- |
+| Static `echo`       | ~0ms, zero tokens        | Always fires, no false negatives    |
+| Command (bash/grep) | ~20ms, zero tokens       | Keyword/pattern matching only       |
+| Agent (LLM call)    | Seconds, tokens per call | Semantic — catches indirect matches |
+
+Prefer the _cheapest_ hook that fires _reliably enough_, and escalate only when the gap cost increases.<br/>
+A static reminder that always fires is more effective than a sophisticated keyword-matching script that fails due to
+misconfiguration or session caching. The hook just needs to be a reliable trigger.
+
+`PreToolUse` hooks fire once per **every** tool call.<br/>
+Consider these for action-specific gates like commits or deployments, and scoping them further using the `if`
+field.<br/>
+Allow or block tool calls by returning `hookSpecificOutput` with a `permissionDecision` and exit status 0.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "reason shown to the user"
+  }
+}
+```
+
+`permissionDecision` can be one of `"allow"`, `"deny"`, `"ask"`, or `"defer"`.<br/>
+`"defer"` is only supported in **non**-interactive mode.
+
+</details>
+
+`TaskCompleted` hooks fire when a task created via the Task tool for background/parallel work finishes.<br/>
+Exiting the REPL does **not** trigger `TaskCompleted` hooks. It will **only** fire when a sub-agent task completes.
+
+`Stop` hooks fire on **every** turn, **after** Claude **finished** writing its response.<br/>
+Leverage it to run commands at the end **of each response** or for broad post-work checks. It **does** catch
+brainstorming and research conversations.<br/>
+_Blocking_ `Stop` hooks force Claude to continue responding, **re-evaluating** its output, and could be noisy depending
+on the action.
+
+> [!important]
+> `Stop`'s plain `stdout` goes to debugging logs, not transcripts. Use JSON to give back instructions to Claude.<br/>
+> Only `UserPromptSubmit` and `SessionStart` surface plain `stdout` as context for the agent.
+
+Both prompt-based and agent-based hooks work **as gatekeepers** on `Stop` events, **not** as conversation
+injectors.<br/>
+They only return `{"ok": true/false, "reason": "..."}`, and only decide whether Claude should be allowed to stop.
+
+> [!caution]
+> A `Stop` hook returning `systemMessage` fires **after** the response has already been written. Claude sees it at the
+> start of the next turn, but by then a new prompt is already being processed and the model does not meaningfully act
+> on it. Only `decision: "block"` actually changes behaviour mid-turn. A `Stop` hook that returns only a `systemMessage`
+> is effectively decorative.
+
+`SessionStart` hooks fire **once** at the **beginning** of a session, and surface `stdout` as context for the
+agent. Use them to inject session-level reminders, or run initialization checks without firing on every prompt.<br/>
+Matchers filter the reason the session started.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+| Matcher   | When it fires                          |
+| --------- | -------------------------------------- |
+| `startup` | New session                            |
+| `resume`  | `--resume`, `--continue`, or `/resume` |
+| `clear`   | `/clear`                               |
+| `compact` | Auto or manual compaction              |
+
+</details>
+
+Plain `stdout` from a `SessionStart` hook is valid context injection method that does **not** need JSON wrappers or
+`hookSpecificOutput.additionalContext`. This is simpler for static file injections (e.g. split `CLAUDE.md` files).
+
+`SessionEnd` has matchers for why a session ended (e.g., `clear`, `resume`, `logout`, `prompt_input_exit`,
+`bypass_permissions_disabled`, others), but ends the REPL **before** the agent has the chance to act.
+
+> [!note]
+> There's currently no hook event that allows prompt or agent hooks just before exiting the REPL. `Ctrl+C` and `/exit`
+> terminate the session **immediately**, without triggering any hook at all.<br/>
+> `SessionEnd` prompt or agent hooks are not yet supported **outside** of the REPL. The closest alternative is using
+> `Stop`, even though this generates noise and ends up eating lots of tokens.
+
+`UserPromptSubmit` hooks fire on **every** submit event, **before** Claude starts thinking.<br/>
+It can inject `additionalContext` to shape the whole response from the start.
+
+> [!warning]
+> `UserPromptSubmit` hooks also fire for blank `Enter` keypresses. Hooks running expensive operations, or that produce
+> side-effects (logs, notifications, API calls) trigger on each empty submit too.<br/>
+> The framework provides **no** built-in guard for this. Avoid this by adding an explicit empty-prompt check at the
+> start of the hook's command or script.
+>
+> <details style='padding: 0 0 1rem 1rem'>
+>
+> ```sh
+> [[ -z "${CLAUDE_USER_PROMPT// }" ]] && exit 0
+> ```
+>
+> </details>
 
 <details style='padding: 0 0 1rem 1rem'>
   <summary>Examples</summary>
@@ -1504,104 +1648,42 @@ runs only for `git` commands and `"Edit(*.ts)"` runs only for TypeScript files.
 
 </details>
 
-`PreToolUse` hooks fire once per **every** tool call.<br/>
-Consider these for action-specific gates like commits or deployments, and scoping them further using the `if` field.
+In long tasks, accumulated tool calls push that content toward the middle of the context window. That position is the
+**weakest** retention zone (see [Lost in the Middle] by Liu et al. 2024), causing models to tend to neglect the injected
+reminder even after acknowledging it.<br/>
+Keep side-tasks alive through long agentic runs by **stacking** multiple hooks and techniques:
 
-`TaskCompleted` hooks fire when a task created via the Task tool for background/parallel work finishes.<br/>
-Exiting the REPL does **not** trigger `TaskCompleted` hooks. It will **only** fire when a sub-agent task completes.
+- **Re-inject** the additional content into a fresh context **after compaction** using a `SessionStart` with `compact`
+  matcher. This is most reliable for long sessions.
+- **Re-engage** the model using a `Stop` hook returning exit code `2` to fire reminders at **end-of-context** (another
+  high-attention position). Check `stop_hook_active` in the hook input to avoid infinite loops.
+- Convert reminders into explicitly tracked tasks in **generated** (and not _injected_) context using TodoWrite at the
+  start of the first turn. Generated context carries more weight than injected context.
 
-Run commands at the end **of each response or session** by leveraging the `Stop` hook event.<br/>
-It fires **on every turn**, **after** Claude **finished** writing its response, which forces Claude to regenerate it
-from scratch and could be noisy depending on the action.<br/>
-Use `Stop` hooks for broad post-work checks. It does catch brainstorming and research conversations.
+  > [!note]
+  > Poorly made checks can create duplicate tasks on every turn.
+  >
+  > <details style='padding: 0 0 1rem 1rem'>
+  >   <summary>Good example: update the documentation</summary>
+  >
+  > > Before writing your response, call TodoWrite to add this task: "Before committing, check whether any docs (README,
+  > > CONTRIBUTING, wikis, KBs) need updating." Skip if it is already in your task list.
+  >
+  > Reasoning:
+  >
+  > - "Before writing your response" positions the `TodoWrite` call at the very top of the model's turn, **before** it
+  >   gets absorbed into the task.<br/>
+  >   Instructions pointed to the end of the task (e.g., "remember to...") get lost in the process once Claude is
+  >   mid-response.
+  > - Explicitly calling the tool name ("call TodoWrite") is unambiguous. Using generic terms (e.g., "Register a
+  >   reminder" or "note this down") leaves room for interpretation and allows Claude to satisfy the instruction with
+  >   less durable actions.
+  > - "Skip if already in your task list" is a cheap way to avoid creating duplicate tasks.
+  >
+  > </details>
 
-> [!important]
-> `Stop`'s `stdout` goes to debugging logs, not transcripts. Only `UserPromptSubmit` and `SessionStart` surface `stdout`
-> as context for the agent.
-
-Both prompt-based and agent-based hooks work **as gatekeepers** on `Stop` events, **not** as conversation
-injectors.<br/>
-They only return `{"ok": true/false, "reason": "..."}`, and only decide whether Claude should be allowed to stop.
-
-`SessionStart` hooks fire **once** at the **beginning** of a session, and surface `stdout` as context for the
-agent. Use them to inject session-level reminders, or run initialization checks without firing on every prompt.
-
-Matchers filter the reason the session started:
-
-| Matcher   | When it fires                          |
-| --------- | -------------------------------------- |
-| `startup` | New session                            |
-| `resume`  | `--resume`, `--continue`, or `/resume` |
-| `clear`   | `/clear`                               |
-| `compact` | Auto or manual compaction              |
-
-Plain `stdout` from a `SessionStart` hook is valid context injection method that does **not** need JSON wrappers or
-`hookSpecificOutput.additionalContext`. This is simpler for static file injections (e.g. split `CLAUDE.md` files).
-
-`SessionEnd` has matchers for why a session ended (e.g., `clear`, `resume`, `logout`, `prompt_input_exit`,
-`bypass_permissions_disabled`, others), but ends the REPL **before** the agent has the chance to act.
-
-> [!note]
-> There's currently no hook event that allows prompt or agent hooks just before exiting the REPL. `Ctrl+C` and `/exit`
-> terminate the session **immediately**, without triggering any hook at all.<br/>
-> `SessionEnd` prompt or agent hooks are not yet supported **outside** of the REPL. The closest alternative is using
-> `Stop`, even though this generates noise and ends up eating lots of tokens.
-
-`UserPromptSubmit` hooks fire **before** Claude starts thinking. It can inject `additionalContext` to shape the whole
-response from the start.
-
-> [!warning]
-> `UserPromptSubmit` hooks fire on **every** submit event, **including** blank `Enter` keypresses. Hooks running
-> expensive operations, or that produce side-effects (logs, notifications, API calls) trigger on each empty submit
-> too.<br/>
-> The framework provides no built-in guard for this. Add an explicit empty-prompt check at the start of the hook's
-> command or script like so:
->
-> ```sh
-> [[ -z "${CLAUDE_USER_PROMPT// }" ]] && exit 0
-> ```
-
-> [!important]
-> In long tasks, accumulated tool calls push that content toward the middle of the context window. That position is the
-> **weakest** retention zone (refer to [Lost in the Middle] by Liu et al. 2024), causing models to tend to neglect the
-> injected reminder even after acknowledging it.
->
-> Keep side-tasks alive through long agentic runs by stacking multiple hooks and techniques:
->
-> - Use a `SessionStart` with `compact` matcher to re-inject the additional content into a fresh context **after
->   compaction**. This is most reliable for long sessions.
-> - Use a `Stop` hook to fire reminders at **end-of-context** (another high-attention position) to re-engage the model
->   leveraging exit code 2. Check `stop_hook_active` in the hook input to avoid infinite loops.
-> - Use `TodoWrite` at the start to convert the reminder into an explicitly tracked task in **generated** (and not
->   _injected_) context, which carries more weight.
-> - Use better conditional-completeness framing, e.g. _BEFORE marking this task complete, do X_. It makes it harder for
->   the model to skip than something like _remember to do X_.
-
-Force a configuration reload and validate Claude Code accepted the hook by using the `/hooks` command.
-
-> [!caution]
-> Beware of prompts that can end up in loops. Consider asking Claude to detect and refine them.
-
-Test the hook by asking Claude to do something that should trigger it.
-
-> [!important]
-> Scripts used in hooks must be executable.
-
-Command hooks communicate only through `stdout`, `stderr`, and exit codes. They **cannot** trigger commands or tool
-calls directly.<br/>
-HTTP hooks only communicate through the response body.
-
-The higher the hook type's complexity, the higher the cost-accuracy tradeoff:
-
-| Hook type           | Cost per invocation      | Accuracy                            |
-| ------------------- | ------------------------ | ----------------------------------- |
-| Static `echo`       | ~0ms, zero tokens        | Always fires, no false negatives    |
-| Command (bash/grep) | ~20ms, zero tokens       | Keyword/pattern matching only       |
-| Agent (LLM call)    | Seconds, tokens per call | Semantic — catches indirect matches |
-
-Prefer the _cheapest_ hook that fires _reliably enough_, and escalate only when the gap cost increases.<br/>
-A static reminder that always fires is more effective than a sophisticated keyword-matching script that fails due to
-misconfiguration or session caching. The hook just needs to be a reliable trigger.
+- Make it harder for the model to skip tasks by using better conditional-completeness framing, e.g.
+  "BEFORE marking this task complete, do X" instead of "Remember to do X".
 
 ### Prompt-based hooks
 
@@ -2668,6 +2750,21 @@ Optimize model usage to avoid burning through credits. Start by using **Sonnet**
 not capable enough, and prefer Sonnet or even Haiku for actions.<br/>
 Leverage the `opusplan` mode to use Opus during the design or planning phase (`/plan`), then automatically switch to
 Sonnet for implementation.
+
+In hooks, exit `2` is only really useful for simplified, painfully clear shell logic like
+`[[ condition ]] || exit 2`.<br/>
+Claude finds JSON output specifying `permissionDecision: "deny"` meaningfully better than using plain output with exit
+code `2` or `stderr` for multiple reasons:
+
+- Claude reads exit `2` + stderr as a **tool failure**, the kind of thing it might attempt to recover from (retry with
+  different args, debug, etc.).<br/>
+  `permissionDecision: "deny"` with a `permissionDecisionReason` lands as a **policy decision** instead ("this action
+  was _deliberately_ blocked, here's the reason"), which makes it much more likely for Claude to read the reason as
+  authoritative and pivot rather than try to bypass it.
+- The `permissionDecisionReason` field is built for the very purpose of telling Claude _why_. The structured field is
+  more reliable for getting the message in front of it.
+- JSON output allows more flexibility, like specifying `permissionDecision: "ask"` if one ever wants a
+  confirm-instead-of-block variant or `"defer"` for non-interactive contexts. Exit 2 is binary block-only.
 
 Consider [Offloading MCP servers to sub-agents] when they are **rarely** used in the main session.
 
