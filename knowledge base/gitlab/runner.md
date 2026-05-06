@@ -263,12 +263,52 @@ The **manager** must:
 
   </details>
 
-The workers execute jobs in containers. They (not the manager) need to be able to pull the container images necessary
-for **each** job. This is usually achieved using the worker's local credentials. As such:
+The workers execute jobs in containers. They (and **not** the manager) **require** _direct_ image access (e.g. via ECR
+pull permissions on their instance profile) to all the container images necessary for **each** job.
 
-- Workers **require** _direct_ image access (e.g. via ECR pull permissions on their instance profile).
-- The manager does **not** _need_ access to the images **nor** the Docker Engine.<br/>
-  It only dispatches `docker` commands over SSH against each worker's Docker daemon.
+Workers **usually** authenticate to the registry using **local** credentials.<br/>
+The workers _might_ need specific credentials **helpers** to authenticate to container registries (e.g.,
+`docker-credential-ecr-login` for AWS' ECRs):
+
+- If the worker **does** have the credential helper installed and configured properly, it will authenticate by itself.
+
+  The manager will only dispatch `docker` commands over SSH against each worker's Docker daemon. It will **not** _need_
+  access to the registry **at all**, **nor** the Docker Engine on-board.
+
+- If the worker does **not** have the credential helper available, or if it doesn't work, it is the **manager** the one
+  that obtains authentication tokens using its own credentials. It will then **forward** them to each worker's Docker
+  daemon via SSH.
+
+  The manager must have the required permissions to obtain the token **and** resolve image layers; without them, workers
+  will fail with "no basic auth credentials" errors both in CI and locally.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example: AWS ECR</summary>
+
+  ```json
+  {
+    "Sid": "AllowAuthenticatingToECRs",
+    "Effect": "Allow",
+    "Action": "ecr:GetAuthorizationToken",
+    "Resource": "*"
+  },
+  {
+    "Sid": "AllowPullingImagesFromECRs",
+    "Effect": "Allow",
+    "Action": [
+      "ecr:BatchGetImage",
+      "ecr:BatchImportUpstreamImage",
+      "ecr:GetDownloadUrlForLayer"
+    ],
+    "Resource": "arn:aws:ecr:eu-west-1:012345678901:repository/*"
+  }
+  ```
+
+  > [!note]
+  > The IAM policy simulator might mislead in this case: it correctly passes for the workers' role (which must have ECR
+  > permissions), but the authentication path runs through the manager, which is invisible to it.
+
+  </details>
 
 Multiple Autoscalers do **not** play well managing the same resources (e.g., HA setups).<br/>
 They end up competing for resources, and will try to **delete** each other's worker instances.
