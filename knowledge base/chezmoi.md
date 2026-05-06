@@ -79,7 +79,9 @@ $
 
 ## Gotchas
 
-- templating uses the [Go text/template] library
+- Templating uses the [Go text/template] library and [Sprig].
+- [Sprig]'s `toPrettyJson` sorts keys alphabetically. This is due to Go's `json.MarshalIndent` behaviour and is **not**
+  configurable.
 - ~~Due to a feature of a library used by chezmoi, all custom variable names in the configuration file are converted to
   lowercase; see the [custom data fields appear as all lowercase strings] GitHub issue for more information.~~
 
