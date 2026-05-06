@@ -1603,12 +1603,13 @@ $ pulumi preview
 
 ### Moving resources from a top-level URN to `ComponentResource` child
 
-When a resource _moves_ from a top-level URN (which parent is the Stack itself) to a `ComponentResource` child, Pulumi
-plans a _create_ action (using the new URN) **and** a _delete_ action (using the old URN). The delete action runs
-**after** the create, and destroys the just-created resource.
+When _moving_ a resource from a top-level URN (which parent is the Stack itself) to a `ComponentResource`'s child,
+Pulumi plans a _create_ action (using the new URN) **and** a _delete_ action (using the old URN) for that resource. The
+deletion runs **after** the creation per Pulumi's defaults, and the run creates the new resource version just to
+destroy it right after.
 
-The best practice is to use _aliases_ for these cases.<br/>
-They cause the resource to be adopted by its new parent _in-place_, without requiring a revision of the resource itself.
+The **best practice** is to use _aliases_ for these cases. They cause the resource to be adopted _in-place_ by its new
+parent, **without** requiring a revision of the resource itself.<br/>
 Leverage the `aliases` resource option on the specific resource, inside the component. The wrapper has no real resource
 identity.
 
@@ -1638,7 +1639,7 @@ Pulumi rewrites the resource's URN in the state on the next successful `pulumi u
 updating both the resource's parent and name.<br/>
 The alias is inert from that point on. Its definition it can be removed in a follow-up, or left as a permanent backstop.
 
-The fallback is to use `pulumi state delete`. This creates a new AWS revision, and rolls dependents.<br/>
+The **fallback** is to use `pulumi state delete`. This creates a new AWS revision, and rolls dependents.<br/>
 Remove the old URN from the state **before** running `pulumi up`:
 
 ```sh

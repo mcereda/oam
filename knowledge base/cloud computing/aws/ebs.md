@@ -160,7 +160,8 @@ Incremental snapshots are stored in EBS' standard tier.
 Snapshots can be unbearably slow depending on the amount of data needing to be copied.<br/>
 For comparison, the first snapshot of a standard 200 GiB `gp3` volume took about 2h to complete.
 
-Snapshots are **non**-blocking. One _can_ make changes to instances using volumes **after** firing a snapshot.<br/>
+EBS volume's snapshots are **non**-blocking (asynchronous). One doesn't _need_ to wait for it to finish, and _can_ make
+changes immediately to the instance using that volume **right after** firing a snapshot.<br/>
 They captures the state of the volume at the moment one initiates them, and their data is uploaded to S3 in the
 background. Any write happening after the starting moment will **not** be included in the snapshot.
 
