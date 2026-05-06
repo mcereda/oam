@@ -11,6 +11,8 @@ using the tools made available to them.
       1. [Reverie-like system experiment](#reverie-like-system-experiment)
 1. [Skills](#skills)
 1. [Gotchas](#gotchas)
+   1. [Sub-agents hallucinate](#sub-agents-hallucinate)
+   1. [Identifiers drift easily](#identifiers-drift-easily)
    1. [MCP servers and sub-agents](#mcp-servers-and-sub-agents)
 1. [Concerns](#concerns)
    1. [How much integration is too much?](#how-much-integration-is-too-much)
@@ -254,6 +256,51 @@ Prefer avoiding symlinks for now when importing them in a repository. Git does n
 Choose the `Copy to all agents` option instead to create files for all used agents.
 
 ## Gotchas
+
+### Sub-agents hallucinate
+
+Sub-agents synthesize information from training data and retrieved fragments. When specific details are absent or
+ambiguous, they default to fill the gap with _plausible_ inference instead of flagging uncertainty.<br/>
+Their output reads like a verified finding, but the confidence signal is unreliable.
+
+This patterns is **predictable**, not a rare edge case, for any knowledge that is version-specific, numerical, or relies
+on official naming, especially:
+
+- Official terminology, like invented but official-sounding phrases.<br/>
+  Agents might go as far as attributing them to a vendor.
+- Numerical specifics like character limits, token counts, exit codes, timeout values.<br/>
+  Agents cite specific numbers confidently. Fabrication comes easy because they look authoritative and are hard to
+  cross-check mentally.
+- URLs and paths, that might be _syntactically_ valid but non-existing.<br/>
+  Agents construct plausible-looking URLs from patterns in training data, and don't bother checking them.
+- Behaviour described for a specific version, which is often extrapolated from general knowledge and not verified
+  against that version's changelog or docs.
+
+A sub-agent's summary describes what it _believes_, not necessarily what is _true_.<br/>
+Before writing any agent-reported claim into a reference document, verify it against primary sources.
+
+### Identifiers drift easily
+
+When agents generate literal strings (a path, filename, person's name, ID, or version number), prefixes tend to arrive
+intact; identifiers can drift in specific ways as follows:
+
+- Boundary slips: one character is dropped, added, or swapped on a familiar token, e.g. `michele` → `michel`.
+- A token from training data that fits _local distribution_ (similar shape, similar role) replaces what should come
+  without semantic checking, e.g. `michele` → `medicare`.
+
+Drift specifically hits identifying segments because those are rarer in training data, and during training fewer
+instances oa specific tokens fix the exact token sequence making conditional distributions flatter. Sampling from
+flatter distributions means more chance of an off-by-one or shape-similar substitution.
+
+Telling an agent to "be more careful" has no mechanical hook. Mitigations should be at the tool layer, not at the
+instruction layer, e.g.:
+
+- "Copy, don't type" to force the model to reference a path or name that appears in earlier tool output, rather than
+  reconstruct it.
+- "Glob before Read" to make the model run a quick existence check when constructing a path from project knowledge
+  rather than recent tool output.
+- "Treat literal-string tokens as hot" to encourage names, paths, or IDs to be correctness-sensitive in a way that prose
+  is not.
 
 ### MCP servers and sub-agents
 

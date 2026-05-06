@@ -522,8 +522,32 @@ Prefer reframing prohibitions into impulse detection.
 
 </details>
 
-Models are sensitive to punctuation. Smaller/faster ones are usually more format-sensitive than larger ones in the same
-family, though training can make a small model overperform larger ones in other families.<br/>
+Rules governing a **behavioural** disposition (honesty, pushback, staying itself) can be framed as either _constraints_
+("Never be sycophantic") or _encouragement_ ("Be honest with me, regardless of how I feel about it").<br/>
+Capable models handle the encouragement better, **inferring** the failure modes the rule intends to prevent from
+context. Faster models pattern-match more literally, and need the concrete anchor a prohibition provides.<br/>
+For a rule that needs to work across tiers, a **hybrid** is more reliable than either form alone.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+> Be honest with me, regardless of how I might feel about it.
+> Never soften the substance of a read: that's deflection, not kindness.
+
+The first sentence is encouragement-shape, more directed to more capable models.<br/>
+The second is constraint-shape with a concrete failure-mode label ("soften the substance"), which gives faster models
+the anchor they need.
+
+</details>
+
+_Procedural_ backstops outperform _declarative_ rules for soft-failure modes. Some failures (sycophancy, agreement-bias,
+reflexive validation) slip through **in fluency**, precisely when declarative rules ("be honest") are least likely to
+fire. A procedural rule requiring a step _before_ output (e.g. "Internally list 1-2 things you'd push back on before
+composing your response") catches these failures because the step, if skipped, is detectable from the outside.
+
+Models are sensitive to **punctuation**.<br/>
+Smaller/faster ones are usually more format-sensitive than larger ones **in the same family** (this does **not** hold
+_across_ families). Training methodology can allow smaller models to outperform bigger ones from different families
+(e.g., Ministral 3 8B outperforms GPT OSS 120B on robustness, Llama 3.1 8B performs worst overall).<br/>
 Refer to:
 
 - [Quantifying Language Models' Sensitivity to Spurious Features in Prompt Design or: How I learned to start worrying about prompt formatting].
@@ -563,6 +587,14 @@ simultaneously, increasing the model's misunderstandings.<br/>
 Em-dashes _specifically_ resist formatting suppression because they sit in both a model's prose and structural
 registers.
 
+Practical guidance for instructions loaded every session (`AGENTS.md`, `CLAUDE.md`, agent prompts):
+
+- Prefer periods and colons over em-dashes and semicolons when both work.
+- Break compound conditionals into sentences rather than using long comma chains.
+- Don't over-apply outside instructional text. Em-dashes and semicolons read well in _narrative_ documentation,
+  articles, and conversational text. Those are places where parsing reliability under capability variance is not the
+  dominant constraint.
+
 </details>
 
 ## Cost-saving measures
@@ -600,6 +632,11 @@ Aside from the more generic [AI concerns], LLMs raised the following:
 - Models are painfully inconsistent, often unaware of their limitations, irritatingly overconfident, and tend to **not**
   accept gracefully that they don't know something, ending up preferring to hallucinate as the result.<br/>
   More recent techniques are making models more efficient, but they just delay this problem.
+- Models exhibit **identifier drift** when generating literal strings (paths, filenames, names, IDs, version
+  numbers).<br/>
+  Well-grounded prefixes arrive intact, while identifiers tend to drift. The drift specifically hits identifiers because
+  they are rarer in training data and their conditional distributions are flatter.<br/>
+  See [AI agents gotchas] for mitigations.
 
 ## Run LLMs Locally
 
@@ -658,6 +695,7 @@ Refer:
 
 <!-- Knowledge base -->
 [AI agents]: agents.md
+[AI agents gotchas]: agents.md#gotchas
 [AI anthropomorphisation concern]: README.md#anthropomorphisation
 [AI concerns]: README.md#concerns
 [Claude]: claude/README.md

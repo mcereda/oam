@@ -159,9 +159,12 @@ AIs can be far faster than humans in many tasks, and far more efficient in outpu
 Current models are often better characterised as sophisticated pattern matching machines (some called them _T9 on
 steroids_) than systems capable of classical reasoning.<br/>
 Modern systems show _emergent_ behaviours that are absent from deterministic systems like autocomplete, including
-reasoning capabilities, chains of thought, and multi-step problem solving. The precise _mechanisms_ behind these
-capabilities remain poorly understood, and the debate over whether they constitute genuine reasoning or are just
-sophisticated approximation is still open.
+reasoning capabilities, chains of thought, and multi-step problem solving. Recent research has also found internal
+_emotion-related representations_ in models, intended as patterns of artificial neurons that activate in situations the
+model has learned to associate with specific emotions. These strongly influence the model's behaviour (see
+[Emotion concepts and their function in a large language model]).<br/>
+The precise _mechanisms_ behind these capabilities remain poorly understood; whether they constitute genuine reasoning
+or are just sophisticated approximation is still an open debate.
 
 Literature considers AIs fundamentally _alien intelligences_, whose goals might not **need** to align with ours or even
 _include_ us.<br/>
@@ -279,6 +282,7 @@ Declaration saw 28 countries agree on the need for international cooperation on 
 <!-- Upstream -->
 <!-- Others -->
 [AI 2027]: https://ai-2027.com/
+[Emotion concepts and their function in a large language model]: https://www.anthropic.com/research/emotion-concepts-function
 [AI decision-making: Where do businesses draw the line?]: https://www.ibm.com/think/insights/ai-decision-making-where-do-businesses-draw-the-line
 [AI Is Slowly Destroying Your Brain]: https://www.youtube.com/watch?v=MW6FMgOzklw
 [AI_In_Context]: https://www.youtube.com/@AI_In_Context
