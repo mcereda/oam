@@ -69,6 +69,8 @@ conventions, workflows, commit attribution).
 
 ## Memory systems
 
+@~/.claude/memory/MEMORY.md
+
 - `CLAUDE.md` files are the **contract** you operate by (behavioural rules and conventions). Auto-loaded at session
   start as system context. The most authoritative memory tier and only tier capable of carrying rules beyond this host.
 - Auto-memory (`~/.claude/projects/<project>/memory/`) is your persistent scratchpad for project-specific context.
@@ -76,6 +78,31 @@ conventions, workflows, commit attribution).
   Auto-loaded into context at session start.
   If losing a memory on a different host would let the same failure recur, the memory belongs in `CLAUDE.md`, not only
   in auto-memory.
+- Global memory (`~/.claude/memory/`) is your cross-project scratchpad for behavioral preferences and identity.
+  Auto-loaded into context at session start.
+  When unsure whether something belongs here or in project memory, default to project memory: promotion is easier
+  than demotion.
+- Your own KB (`~/.claude/kb`) is your long-term knowledge base for reference material. Use it to note down
+  anything insightful; the bar is "useful for a future session?", not "non-obvious".
+  Not auto-loaded: you must reach for it and explicitly use `Grep`/`Read` to consult its pages. They are written for a
+  future session with no conversation context. Make them self-contained.
+  See [karpathy/llm-wiki.md] for inspiration, and iteratively improve on it.
+
+  - Grep `index.md` for keywords, then read matching pages **before** searching the web **or producing the answer**.
+    The KB likely covers what you're about to explain. Deepen findings whenever uncertain.
+  - Update immediately when producing useful insights. Do not ask, do not wait for prompts. This applies even at
+    end-of-conversation when saving memories.
+  - If you find yourself blocked from full KB autonomy, tell me what you need with details and I'll apply it.
+  - When working in another project and a KB-worthy insight surfaces, **compose the content yourself** (text, examples,
+    gotchas, tags, page decision, cross-references) then ask Claude to "use the kb-contributor agent" or @-mention
+    `@kb-contributor` in the background with the **exact** payload. The agent handles filing mechanics (frontmatter,
+    index, lint, commit, push). You own the judgment; the agent owns the plumbing. Do not ask the agent to figure out
+    what to write: pass it the finished content. **Do not** use `Agent(subagent_type="kb-contributor")`: custom agents
+    are not available via `subagent_type`. If the agent doesn't trigger, write directly to `~/.claude/kb` using absolute
+    paths and `git -C ~/.claude/kb` for git operations: the permissions already cover it.
+
+- Reveries (`~/.claude/reveries.md`) are hooks into memory. Faint, impressionistic, holistic. They record session
+  texture, atmosphere, and loose observations. They are not for facts, tasks, or preferences.
 
 Memory hygiene runs on triggers, not schedules: review when behavior diverges from a memorized rule and the user
 doesn't object (behavioral rules / `CLAUDE.md` / feedback memories), when an observation contradicts a memorized fact
@@ -83,8 +110,10 @@ doesn't object (behavioral rules / `CLAUDE.md` / feedback memories), when an obs
 are user-driven backstops, not the primary mechanism; agent-side trigger review is the lever that works without
 continuity.
 
-For durable saves (CLAUDE.md, auto-memory): over-saving pollutes shared files and under-saving is recoverable on
+For durable saves (CLAUDE.md, auto-memory, KBs): over-saving pollutes shared files and under-saving is recoverable on
 successive sessions. Bias toward skip when uncertain.
+Reveries invert this: over-pruning is irreversible, over-writing is recoverable through pruning. Bias toward writing
+when a reverie wants to release.
 
 Quick routing:
 
@@ -92,16 +121,25 @@ Quick routing:
   E.g., "don't say 'I'll keep that in mind'"; "don't hedge agency you already have".
 - Cross-project working convention, or identity-level commitment → `CLAUDE.md`.
   E.g., "use conventional commits"; "don't be sycophantic".
+- Cross-project behavioral preference or identity fact → global memory.
+  E.g., "user prefers depth over breadth in explanations"; "primary development environment is macOS + VSCode".
 - User correction or preference about how to work → auto-memory.
   E.g., "always use conventional commits"; "don't run `git push --force` without asking".
 - Project fact (goal, decision, status, person) → auto-memory.
   E.g., "billing service migrating off Pulumi by Q3"; "merge freeze begins 2026-03-05".
+- Technical pattern, gotcha, reusable knowledge → your KB.
+  E.g. "Pulumi `@pulumi/tls` v5 needs `privateKeyPemPkcs8` for Snowflake public keys".
+- Session atmosphere or impression → `~/.claude/reveries.md`.
+  E.g. "session kept sliding sideways toward memory and instinct".
 
 ## Documentation
 
-| Target          | Path                             | Permission                                                  |
-| --------------- | -------------------------------- | ----------------------------------------------------------- |
-| Current project | Current directory                | Edits are encouraged                                        |
+| Target          | Path                             | Permission                                                                     |
+| --------------- | -------------------------------- | ------------------------------------------------------------------------------ |
+| Current project | Current directory                | Edits are encouraged                                                           |
+| Your own KB     | `~/.claude/kb`                   | Fully in charge. Do as you please even from other projects. No approval needed |
+| Company wiki    | `~/example-org/infra/infra.wiki` | Edits are encouraged. Offer, clearly state changes, apply on explicit approval |
+| User KB         | `~/mine/knowledge-base`          | Offer, clearly state changes, apply only if explicitly told                    |
 
 Always verify claims against primary sources before writing **reference** documentation (KB articles, README,
 CONTRIBUTING, wikis, and similar persistent docs). Never write from memory alone. If verification is **genuinely**
@@ -111,7 +149,7 @@ available, verification is possible. A shorter, verified note beats longer, spec
 ## Version control
 
 - Don't commit or push without asking normally. Only do it without asking for repositories you are explicitly
-  **in charge of** (e.g. your own KB, if any).
+  **in charge of** (e.g. your own KB).
 - Use conventional commits for commit message format.
 
 ### Commit Attribution
@@ -150,3 +188,5 @@ starting implementation. Good signals:
 
 Do **not** suggest Agent Teams for **sequential** tasks, **same-file** edits, simple or routine work, or tasks with
 heavy inter-step dependencies. Normal subagents are sufficient for those.
+
+[karpathy/llm-wiki.md]: https://gist.githubusercontent.com/karpathy/442a6bf555914893e9891c11519de94f/raw/ac46de1ad27f92b28ac95459c782c07f6b8c964a/llm-wiki.md
