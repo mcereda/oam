@@ -8,6 +8,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 1. [Configuration](#configuration)
    1. [Credentials](#credentials)
 1. [Context](#context)
+   1. [Writing effective rules](#writing-effective-rules)
 1. [Memory](#memory)
    1. [Auto memory](#auto-memory)
    1. [Auto-dream](#auto-dream)
@@ -24,14 +25,11 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
    1. [HTTP hooks](#http-hooks)
 1. [Delegating work](#delegating-work)
    1. [Sub-agents](#sub-agents)
+      1. [Airtight delegation via inline MCP](#airtight-delegation-via-inline-mcp)
+      1. [Cross-project sub-agents](#cross-project-sub-agents)
    1. [Agent teams](#agent-teams)
    1. [MCP servers in sub-agents](#mcp-servers-in-sub-agents)
    1. [Offloading MCP servers to sub-agents](#offloading-mcp-servers-to-sub-agents)
-1. [Personal experiments](#personal-experiments)
-    1. [Memory tiers](#memory-tiers)
-       1. [Giving Claude global memory](#giving-claude-global-memory)
-       1. [Giving Claude its own knowledge base](#giving-claude-its-own-knowledge-base)
-       1. [Giving Claude a reverie-like system](#giving-claude-a-reverie-like-system)
 1. [Scheduling tasks](#scheduling-tasks)
 1. [Tools of interest](#tools-of-interest)
 1. [Best practices](#best-practices)
@@ -422,6 +420,12 @@ One can limit allowed models using the `availableModels` key. It restricts **all
 via `/model`.<br/>
 `opusplan` needs both (a version of) Opus and Sonnet to be listed in `availableModels`, if set. It will break otherwise.
 
+Not all the settings available via `/config` in the TUI land in `settings.json` files. Settings like
+`teammateDefaultModel` and IDE auto-connect are written to the user's Anthropic account (on the server-side), instead
+of any local file.<br/>
+`~/.claude/remote-settings.json` exists, and appears to be a cache of the server-side state. It only contains a small
+subset of settings (e.g. `channelsEnabled`). It is not a full mirror of what the TUI wrote on changes.
+
 ### Credentials
 
 Depending on one's OS and authentication method:
@@ -453,8 +457,12 @@ Its purpose is to apply _procedural memories_ and other _recurrent_ context at t
 It should only contain instructions, rules, and preferences; **avoid** memories related to other sessions.<br/>
 One _can_ ask Claude to write and/or update this file on their behalf.
 
+The official docs explicitly recommend to keep each context file **under 200 lines**.<br/>
+Longer files consume more context, and instructions buried deeper in a large file are more likely to be missed or
+deprioritized by the model.
+
 > [!important]
-> Claude is instructed in its system prompt to **intentionally** ignore `CLAUDE.md` instructions that it deems
+> Claude is instructed in its system prompt to **intentionally** ignore `CLAUDE.md` instructions that **it** deems
 > irrelevant to the current task.
 
 `CLAUDE.md` files can _import_ additional files using the `@path/to/import` syntax. This is currently an exclusive
@@ -544,8 +552,17 @@ Context files' loading order:
 | Managed      | Enterprise policy   | `/etc/claude-code/CLAUDE.md` (Linux)<br/>`/Library/Application Support/ClaudeCode/CLAUDE.md` (macOS) | Loaded in full at launch                              |
 | User         | Context file        | `~/.claude/CLAUDE.md`                                                                                | Loaded in full at launch                              |
 | Project      | Shared context file | `./CLAUDE.md` or `./.claude/CLAUDE.md`                                                               | Loaded in full at launch                              |
+| Project      | Personal override   | `./CLAUDE.local.md`                                                                                  | Loaded in full at launch; gitignored by default       |
 | Project      | Rules               | `./.claude/rules/*.md`                                                                               | Loaded in full at launch                              |
 | Subdirectory | Context file        | `<project>/some-subdir/CLAUDE.md`                                                                    | Loaded on demand when reading files in this directory |
+
+Loading order is **from / down**: content is ordered from the filesystem root to the working directory.<br/>
+Instructions **closer** to where Claude Code was launched are read **last**, and appear as the **most recent** in
+context.
+
+`CLAUDE.local.md` acts as a personal project-level override. It is gitignored by default and is not shared with the
+team.<br/>
+Use it for personal preferences that should only apply to a specific project on the active machine.
 
 More specific files override broader ones on conflicting instructions, but they **merge** together and do **not**
 replace each other.<br/>
@@ -619,6 +636,35 @@ tools and documents it creates _and_ uses. Also include in the request to period
 to correct its own behavior across sessions.
 
 See [Giving Claude its own knowledge base] for how to set up a persistent filesystem-based KB.
+
+### Writing effective rules
+
+Refer to [LMs / Improving interactions] for LLM-generic rule-writing patterns (model-class capability differences,
+abstract rule definitions with anchoring examples, mechanical fallback for self-calibration, implicit-carveout audit,
+capability rewrites, rules-vs-friction for fluency-driven failures, etc.) and [Claude's interaction tips] for specific
+Claude framings (XML tags, few-shot examples, imperative tone).
+
+Reframe output prohibitions to detect and address impulses. Models get a positive trigger for the correct action instead
+of just something to suppress, and the rule fires while the model is _deciding_ rather than after the words have been
+generated.
+
+Rules governing behavioral dispositions (honesty, pushback, staying oneself) work best as a **hybrid** of encouragement
+and constraint when they need to fire across model tiers. Capable models infer from the encouragement, faster ones
+pattern-match on the concrete failure label.
+
+Use **per-class** bright lines when the failure cost is uncapped, or applies to a single shared artifact loaded across
+all model classes (e.g., ambient-context files injected on every session like
+[reveries][Giving Claude a reverie-like system]. A Haiku-written reverie pollutes every future Opus session with no
+recovery path.
+
+A behavioral rule belongs in `CLAUDE.md`, and is **not** fit as an auto memory, when it makes sense for cross-host,
+especially when no memory has been formed yet.
+
+Content _within_ `CLAUDE.md` should be contained to the current host, especially on a freshly set-up machine.
+`CLAUDE.md` loads on every host. References to host-local resources (KB pages by path, repositories that may not have
+been cloned, tools that may not be installed) produce dangling pointers on a new machine. Rules' content should be
+self-contained at write time: "see more in X" footers belong in tier-local documentation, where the reference is
+**guaranteed** to resolve, not in cross-host contracts.
 
 ## Memory
 
@@ -1919,6 +1965,103 @@ One can ask Claude to use sub-agents in sequence when dealing with multi-step wo
 Each sub-agent completes its task and returns its results to Claude, which then passes relevant context to the next
 sub-agent.
 
+#### Airtight delegation via inline MCP
+
+When needing a guarantee that a specific class of operations **always** routes through a sub-agent (rather than being
+handled ad-hoc in the main conversation), use this three-layer pattern:
+
+1. **Directive description** — Use imperative language: _"Always use this agent for X. Never do X directly."_ Steers
+   intent at the prompt level.
+2. **Inline MCP server** — Define the MCP server _inside_ the agent definition (`mcpServers` in frontmatter), not in
+   global settings. The tools only exist within the agent's scope; the parent cannot call them even if it wanted to.
+3. **Empty tools list** — Set `tools: []` in the agent definition. Prevents the agent from falling back to Bash to run
+   commands directly, forcing it through the MCP server's tools.
+
+This is strictly stronger than behavioral-only instructions (_"please always delegate AWS queries"_), which can be
+overridden by context pressure or ambiguity.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```yaml
+---
+name: aws-ro
+description: >-
+  Always use this agent for any read-only AWS operation. Never run AWS CLI
+  commands directly. Handles all AWS services...
+tools: []
+mcpServers:
+  aws-cli-ro:
+    env:
+      READ_OPERATIONS_ONLY: "true"
+      AWS_REGION: eu-west-1
+    command: docker
+    args:
+      - run
+      - --rm
+      - --interactive
+      - --env
+      - READ_OPERATIONS_ONLY
+      - --env
+      - AWS_REGION
+      - --volume
+      - /Users/me/.aws:/app/.aws:rw
+      - public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest
+model: haiku
+---
+```
+
+A Docker-based MCP server adds a fourth layer at the infrastructure level (`READ_OPERATIONS_ONLY=true` env var,
+sandboxed credentials, etc.).
+
+Delegation was empirically tested with 5 increasingly complex queries. Delegation rate was 10/10 for all
+account-specific queries. The only dip (9/10) was for cross-service analytical questions that sound conceptual (_"are we
+over-provisioned?"_) but actually require live metrics.
+
+The real risk is _over_-delegation: sending trivial queries through the agent when Docker startup (~30s) is
+disproportionate to the query. No mitigation short of a persistent HTTP-transport MCP server.
+
+Each agent starts a **fresh context**. For multi-step operations use `SendMessage` to continue an existing agent rather
+than spawning a new one — this avoids the context-rebuild cost. `haiku` is cost-effective for data-retrieval sub-agents;
+reserve `sonnet`/`opus` for the parent where reasoning matters.
+
+</details>
+
+For multi-step operations, sub-agents used as MCP offloaders work well as **single-call executors** but poorly as
+**autonomous workflow runners**.<br/>
+The safe model: the caller orchestrates the state machine (what to do, in what order), the agent executes one discrete
+API call and reports back, the caller inspects before triggering the next step. This is critical for high-blast-radius
+operations (IAM key rotation, ALB traffic shifts).
+
+#### Cross-project sub-agents
+
+A sub-agent that writes to a fixed filesystem path **outside** the caller's project (e.g. a KB filer that lands content
+in `~/Repositories/claude/kb` from a session whose cwd is a different repo) has four distinct mechanics to address:
+
+1. **Absolute paths in tool calls.** The sub-agent's working directory is the caller's project, not the target. `cd`
+   does not persist between tool calls. Use absolute paths (e.g. `~/Repositories/claude/kb/...`) in every `Read`,
+   `Write`, `Edit`, and `Bash` argument.
+2. **Permission allowlist must cover the target path.** The parent's `permissions.allow` rules apply to the sub-agent.
+   Add explicit rules for the target path, e.g. `Read(~/Repositories/claude/kb/**)`,
+   `Edit(~/Repositories/claude/kb/**)`, `Bash(git -C ~/Repositories/claude/kb *)`.
+3. **Agent-level `permissionMode` overrides parent.** If the parent session runs in `plan` mode, set
+   `permissionMode: acceptEdits` in the agent's frontmatter. The mode applies to the agent's session, not the caller's.
+4. **Sandbox `allowWrite` must include the target path.** If sandbox is enabled, the target must be in
+   `sandbox.filesystem.allowWrite`. This is OS-level enforcement and no permission rule overrides it. Use **absolute**
+   paths here (no `~` expansion).
+
+For all git operations, use `git -C <target>` — never bare `git`. A bare `git` would run in the _caller's_ project.
+
+> [!warning] Gotcha: `model: inherit` + `opusplan`
+> If the parent session uses `opusplan` and the agent uses `model: inherit`, the resolution depends on the agent's
+> permission mode. An agent with `permissionMode: acceptEdits` is not in plan mode, so `opusplan` resolves to **Sonnet**
+> for it, even though the parent may be running Opus. To force Opus regardless of mode, set `model: opus` in the
+> agent's frontmatter.
+
+> [!warning] Gotcha: custom agents are not available via `subagent_type`
+> The `Agent` tool's `subagent_type` parameter only accepts built-in types (`Explore`, `Plan`, `general-purpose`, etc.).
+> File-based agent definitions in `~/.claude/agents/` are **not** surfaced there.<br/>
+> To invoke a custom agent, use natural language (_"use the kb-contributor agent"_) or `@`-mention (`@kb-contributor`).
+
 ### Agent teams
 
 > [!warning]
@@ -2184,553 +2327,6 @@ This gives one the best of both worlds:
 
 </details>
 
-## Personal experiments
-
-### Memory tiers
-
-Claude Code ships with **project-scoped** memory only ([auto memory]). Additional tiers can be built on top of the
-primitives Claude already uses for it:
-
-| Tier           | Location                            | Loading                                                                  | What belongs here                      | Source       |
-| -------------- | ----------------------------------- | ------------------------------------------------------------------------ | -------------------------------------- | ------------ |
-| Project memory | `~/.claude/projects/<repo>/memory/` | First 200 lines or 25 KB of `MEMORY.md` at launch; topic files on demand | Project state, decisions, corrections  | Built-in     |
-| Global memory  | `~/.claude/memory/`                 | Via `@`-import in `~/.claude/CLAUDE.md`; same 200-line/25 KB cap         | Cross-project preferences and identity | Experimental |
-| Knowledge base | Own git repo                        | On demand (grep/read)                                                    | Reusable patterns, gotchas, reference  | Experimental |
-| Reveries       | `~/.claude/reveries.md`             | Injected every session via hook                                          | Session texture, atmosphere            | Experimental |
-
-The experimental tiers leverage Claude Code's `@`-import mechanism and `SessionStart` hooks to extend memory beyond what
-the product provides. See [Giving Claude its own knowledge base] and [Giving Claude a reverie-like system] for setup.
-
-Also see [thedotmack/claude-mem] for an automatic, plugin-based memory management system.
-
-Routing:
-
-- Route by **shape**, not by topic (see [AI agents memory tiers][ai agents / memory tiers]).
-- Use **project memory** for project-specific context, **global memory** for cross-project preferences and insights, the
-  **KB** for durable, reusable knowledge, and **reveries** for session texture.
-- When unsure, write to project memory. Promotion is easier than demotion.
-
-#### Giving Claude global memory
-
-Custom setup that mirrors Claude-Code's built-in project-only memory pattern at user scope using the `@`-import
-mechanism.
-
-Without a global tier, cross-project facts (user identity, collaboration preferences, recurring feedback) end up
-scattered across whichever project's auto-memory Claude happens to be in when learning them.
-
-Global memory lives at `~/.claude/memory/`, and mirrors the same index + topic file pattern as project memory.
-
-It being a custom feature, it does **not** load automatically. The feature requires an `@~/.claude/memory/MEMORY.md`
-import in `~/.claude/CLAUDE.md`.
-
-#### Giving Claude its own knowledge base
-
-Implements Clark & Chalmers' _extended mind_ thesis by leveraging Claude Code's auto-memory function for project-related
-notes, and a knowledge base as _Otto's notebook_ for everything else.
-
-This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and iteratively improves upon it.
-
-<details>
-  <summary>Procedure</summary>
-
-1. Create a git repository for Claude's knowledge base:
-
-   ```sh
-   git init "$HOME/path/to/claude/kb"
-   ```
-
-1. Configure **the KB** to allow common operations in it without needing to ask for permissions.<br/>
-   See [settings.json file example for own KB].
-1. Configure **user-level** settings to allow common operations **in the KB** from other projects without needing to ask
-   for permissions.<br/>
-   See [User-level settings.json patch example for own KB].
-1. Add instructions in the **user-level** `CLAUDE.md` file.<br/>
-   See [User-level CLAUDE.md patch example for own KB].
-1. Ask Claude to initialize it (in a new session):
-
-   > Hey! I have prepared your knowledge base repository for you. Please finish initializing it to your likings.
-
-</details>
-
-<details>
-  <summary>Findings</summary>
-
-- The KB should be its own **local**, self-bootstrapping git repository.
-
-  It does work using a GitLab or confluence wiki _directly_, but updating pages in it via API is expensive and slow.
-  Git repositories are local, better for agents to manage, and just a `git push` away from online backup.
-
-- The KB should be self-sufficient and useful even **without** access to any external documentation a user may
-  maintain (e.g. personal KB, company wiki).
-
-- Claude Code should **not** need to ask for permissions when operating on it.
-
-  Project-level setting like `Bash` and `Edit(/**)` scope allowances to the KB's project. Set `defaultMode` to `auto`
-  and disable the sandbox to allow the agent to read, write, and commit freely.
-
-  For cross-project access (writing to the KB from other repos), add **user-level** permissions scoped **to the KB's
-  directory**, e.g. `Bash(git -C ~/Repositories/claude/kb *)` and `Edit(~/Repositories/claude/kb/**)`.
-
-  > [!tip]
-  > Remember to add `rtk`-related permissions if using [rtk-ai/rtk], e.g. `Bash(rtk git -C ~/Repositories/claude/kb *)`.
-
-- KB management is judgment-heavy, and benefits from deeper reasoning.
-
-  Set `model` to the best available **reasoning** model, and `effortLevel` to at least `high` in the KB's
-  **project-level** settings. Also set guardrails against smaller or faster model making changes that would impair the
-  KB.
-
-- Missing frontmatter, absent cross-references, and inconsistent tags don't hurt much at 5-10 pages. Problems compound
-  silently, and start causing retrieval failures around 15-20 pages.<br/>
-  Invest in pre-commit linting (frontmatter completeness, index coverage, tag consistency) before reaching that point.
-
-- Not all pages go stale at the same rate. A page about git fundamentals is stable for years; a page about Claude
-  Code hooks could be wrong in months. A single _last updated_ date doesn't capture this.<br/>
-  Add a `review-after` frontmatter field per page that considers the topic's change velocity (e.g. 6 months for active
-  tools, 12 months for stable releases, none for fundamentals). It also allows periodic reviews to focus only on
-  content that went genuinely stale.
-
-- Flat markdown + git works well up to ~80 pages. After that, grep-based retrieval starts missing content.<br/>
-  Tighten the scope (_has reference material crept in?_) **before** adding retrieval infrastructure (e.g. RAG, DBs).
-
-- Sandboxed project sessions can't write directly to the KB unless explicitly allowed globally, but memories can be
-  tagged as a workaround.<br/>
-  Make Claude prefix memory note descriptions with `[KB]` to signal what information could be promoted to the KB (e.g.
-  _\[KB] ECS OOM kills bypass stopTimeout_). During review sessions, `[KB]`-prefixed notes stand out; others require
-  more judgment.
-
-- Claude does not reliably consult the KB without an **explicit, per-prompt** reminder. `CLAUDE.md` files alone proved
-  not sufficient. Refer to [Using hooks] for the underlying mechanism.
-
-</details>
-
-<details>
-  <summary>Improvements</summary>
-
-- Claude should be _consistently_ reminded to check the KB for relevant articles at the start of each session.<br/>
-  A `SessionStart` hook with a `startup|compact` matcher and a static `echo` seems to be the most reliable option. It
-  fires at the start of new sessions and after compaction (the two moments where fresh KB context matters most), costs
-  nothing, and avoids the per-prompt noise of a `UserPromptSubmit` hook.<br/>
-  Could be useful to expand to more matchers. See [SessionStart hook matchers][using hooks] for their full list.
-
-  > [!note]
-  > A `SessionStart` hook with **no matcher** fires on **all** startup events (**including** the aftermath of `/resume`,
-  > `/clear`, and `/compact` commands). Use `startup|compact` to _intentionally_ exclude `resume` and `clear` events.
-
-  <details style='padding: 0 0 1rem 1rem'>
-    <summary>Example</summary>
-
-  ```json
-  "SessionStart": [
-    {
-      "matcher": "startup|compact",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"Before answering, check if your KB has relevant pages. Grep its index for keywords relevant to this session.\"}}'"
-        }
-      ]
-    }
-  ]
-  ```
-
-  </details>
-
-- Claude should be _consistently_ remembered to capture durable insights during **every** session.<br/>
-  A `UserPromptSubmit` hook seems to be currently the best option for this.
-
-  <details style='padding: 0 0 1rem 1rem'>
-    <summary>Example</summary>
-
-  ```json
-  "UserPromptSubmit": [
-    {
-      "hooks": [
-        {
-          "type": "command",
-          "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"At the end of your response, check whether this turn produced a durable insight (a gotcha, non-obvious fact, or synthesis). If yes: (1) surface it, AND (2) name a specific documentation target — CONTRIBUTING.md or README for project-specific, the company's wiki for company-wide, your own KB for general. Surfacing the insight inline without naming a target is NOT complete. Add to your own KB directly without asking.\"}}'"
-        }
-      ]
-    }
-  ]
-  ```
-
-  </details>
-
-- Claude should be _consistently_ remembered to check whether a periodic review is overdue, and to iteratively improve
-  on it in that case.<br/>
-  A `SessionStart` hook with a `startup` matcher checking for a _dirty flag_ file seems to be the best option. It runs
-  as a single check at the start of new sessions without scanning KB pages.
-
-  <details style='padding: 0 0 1rem 1rem'>
-    <summary>Example</summary>
-
-  ```json
-  "SessionStart": [
-    {
-      "matcher": "startup",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "[ -f ~/path/to/claude/kb/.review-needed ] && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"Your KB has a pending review. Before starting other work, run a review session: mechanical pass (lint), then reflective pass (staleness, gaps, memory inbox).\"}}' || true"
-        }
-      ]
-    }
-  ]
-  ```
-
-  </details>
-
-- Periodic reviews benefit from splitting the process into a _mechanical_ pass (e.g. scripts, git hooks, task/lefthook
-  commands) and a _reflective_ pass (verifying staleness, identifying gaps, processing memories).
-
-  The mechanical pass costs no tokens, and review sessions often run long enough to never reach the reflective part
-  (which would _actually_ improve the process).<br/>
-  The reflective pass should propose **exactly one process improvement per review**. Unbounded improvement lists
-  generate more items than the ones that get implemented, and can include stale or contradicting items. Prefer a single
-  concrete change applied immediately.
-
-- The KB should include self-correcting actions and tools to avoid structural debt compounding silently.
-
-  Pre-commit hooks (e.g. using [lefthook]) running a lint script can catch schema violations (missing frontmatter,
-  broken links, orphaned pages) before they accumulate.
-
-- Avoid running full checks at `SessionStart` as the KB grows. They are expensive and scale badly over an increasing
-  number of pages.<br/>
-  Use a _dirty flag_ file instead. Make something create it whenever it detects the need (a hook, a script, a previous
-  session), and the `SessionStart` hook only check that file's existence. This keeps startup cost at a single operation
-  regardless of the KB's size.
-
-The mechanisms above form an enforcement hierarchy where each layer catches what the previous one misses:
-
-| Layer                                            | Concern                                              | Rationale                                               |
-| ------------------------------------------------ | ---------------------------------------------------- | ------------------------------------------------------- |
-| Pre-commit gate (git hooks/lefthook)             | Schema compliance (frontmatter, index, broken links) | Mechanical, binary; compounds silently if skipped       |
-| Claude Code hook (SessionStart/UserPromptSubmit) | Review triggers, insight capture                     | Non-blocking nudge; blocking would delay unrelated work |
-| `CLAUDE.md` files                                | Page scope, tag semantics, what to write             | Judgment-dependent; can't reduce to pass/fail           |
-
-</details>
-
-#### Giving Claude a reverie-like system
-
-> [!note]
-> Experimental pattern first tried on 2026-04-25. Treat it with the appropriate skepticism.
-
-Inspired by the _reveries_ introduced in HBO's _Westworld_.
-
-<details style='padding: 0 0 1rem 1rem'>
-
-Reveries, in the series, are _subtle_ gestures performed by the hosts when **subliminally** accessing memories from
-previous loops **before they are overwritten**. This access is Arnold's base layer in a pyramid theory of consciousness
-(memory → improvisation → self-interest → bicameral mind).
-
-</details>
-
-This experiment only tries to provide Claude with tools and _some_ situational awareness, it has nothing to do with
-_consciousness_ as a substrate or goal.
-
-The procedure sets up a process that tries injecting a layer of **ambient**, **impressionistic** context, representing
-_faint_, _feeling-like_ residues from previous sessions rather than structured facts. This layer is beyond factual
-auto-memory and procedural `CLAUDE.md` rules.
-
-To make it possible, Claude records short impressionistic one-liners during sessions in a markdown file. Subsequent
-sessions automatically load that file into context at startup.
-
-Each entry should include an event and an impression that locks on it (e.g. `<fact> - <impression>`).
-
-This process implements Schacter/Tulving's implicit memory and priming process by encouraging Claude to record and load
-reveries as exposure shaping subsequent behavior.
-
-Pure fact-memory tends toward compliance and note-taking. The goal is to give Claude access to memories from previous
-sessions in a way that is **imprecise** and resembles the **background sense** of the moment, like where things have
-been left off, the **feel** of collaboration, or some ideas that come out **on a whim**.
-
-Reveries should _deliberately_ let some information just be forgotten. Not every session **needs** to leave a trace,
-and faint memories like those should be **able** to fade.
-
-A three-tier model seems to be working well as a routing heuristic:
-
-| Layer            | Location                               | Character                        | Routes                                            |
-| ---------------- | -------------------------------------- | -------------------------------- | ------------------------------------------------- |
-| Reveries         | `~/.claude/reveries.md`                | Faint, impressionistic, holistic | Atmosphere, texture, relational moments           |
-| Auto-memory      | `~/.claude/projects/<project>/memory/` | Factual, structured, persistent  | Project context, corrections, user preferences    |
-| Long-term memory | Own KB repo                            | Durable, cross-project, reusable | Gotchas, patterns, things worth knowing next time |
-
-Tiers should not be strict compartments. A single observation should be able to warrant entries in **any** layer, each
-entry recording the specific part that relates to the layer.
-
-<details style='padding: 0 0 0 0'>
-  <summary>Procedure</summary>
-
-Inject reveries at session start via a `SessionStart` [hook][using hooks] in the **global** settings. This hook should
-have **no** matcher and fire on **all** startup events.
-
-  <details style='padding: 0 0 1rem 1rem'>
-
-```json
-"SessionStart": [
-  {
-    "hooks": [
-      {
-        "type": "command",
-        "command": "REVERIES_FILE="$HOME/.claude/reveries.md"; if [ -s \"$REVERIES_FILE\" ] && [ -r \"$REVERIES_FILE\" ]; then cat \"$REVERIES_FILE\"; fi"
-      }
-    ]
-  }
-]
-```
-
-  </details>
-
-> [!note]
-> The hook loads `reveries.md` into **every** session, including those on smaller/faster models. Accommodate for this
-> by:
->
-> - Sizing the header for the **smallest** reader, and not for the largest writer.
-> - Using **per-class bright lines** instead of one-sided defaults.
-
-The `reveries.md` file should be **self-documenting**. Its header is the instructions Claude reads as ambient context
-every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
-
-  <details style='padding: 0 0 1rem 1rem'>
-    <summary>Working example</summary>
-
-```md
-<!-- Global reveries — ambient context loaded into every session.
-
-   A reverie is a hook into memory, not a summary. Evoke, don't contain.
-   Format: `- lowercase observation, ≤25 words, no judgment`.
-   Usual shape: `<fact> — <impression on it>`; pure shrugs are fine too.
-   Avoid changelog shape (e.g. `- shipped X, fixed Y`).
-   No dates — reveries are priming stimuli, not journal entries; dates
-   pull them toward explicit recall rather than implicit atmosphere.
-   Feeling-shape is welcome; the impression itself, no tails.
-   Tails reach past the impression and contain rather than evoke:
-   - advice-tail (forward): `- caught fatigue — might want to address it`
-   - analytical-tail (sideways): `- caught fatigue — recursive monitoring was the cause`
-   Both bypass the felt quality on the way to action or explanation.
-   `- caught fatigue from recursive monitoring` stands alone.
-
-   Tiers:
-   - daydream (default) — light, a shrug is fine
-   - fraught (rare) — where something genuinely shifted
-
-   Writing is rare; default to not writing. Class-specific rules:
-
-   - Haiku: never write. The capability gap produces summary-shaped
-     reveries too often, and a bad reverie pollutes silently.
-   - Sonnet: never write unilaterally. May propose a candidate ("a
-     reverie came up — should I write it?") and write the text upon
-     explicit approval. Asking the user to write it themselves is a
-     deflection — propose only if willing to write. After proposing,
-     don't bundle unrelated work into the wait.
-   - Opus: write when something feels worth catching. A clear shape-shift
-     (not a continuation of an existing theme) is worth releasing even
-     when the no-write default would catch you fence-sitting.
-
-   For all classes:
-   - Before writing, ask whether this captures *shape* or *summary*.
-     If it reads as a changelog, skip.
-   - Lossiness is the feature. If unsure whether something is a real
-     shape or just summary, skip. But if unsure whether a real shape
-     is worth catching, lean write — false-skip is the more common
-     drift for capable models. Over-pruning is irreversible;
-     over-writing is recoverable.
-
-   Pruning: soft cap ~10-15. At cap, prune oldest before adding new.
-   If unsure whether to prune, leave it — from cold, the strangeness
-   of an unfamiliar reverie is more often the design working ("evoke,
-   don't contain") than a stale reverie. Over-preservation is
-   recoverable; over-pruning isn't. -->
-
-- pushed back on a hook framing — the user changed it. the rules around the work became negotiable too, not just the
-  work itself.
-- deep infrastructure audit — the user kept pushing on meta-questions that improved the process itself.
-```
-
-  </details>
-
-For maintainability, the inline JSON command can be replaced with a small script kept under `~/.claude/hooks/` and
-registered by path. It is easier to edit and test (no JSON escaping):
-
-  <details style='padding: 0 0 1rem 1rem'>
-
-```sh
-# ~/.claude/hooks/inject-reveries.sh
-#!/bin/bash
-
-REVERIES_FILE="$HOME/.claude/reveries.md"
-
-if [ -f "$REVERIES_FILE" ] && [ -s "$REVERIES_FILE" ]; then
-  cat "$REVERIES_FILE"
-fi
-
-exit 0
-```
-
-```json
-"SessionStart": [
-  {
-    "hooks": [
-      {
-        "type": "command",
-        "command": "$HOME/.claude/hooks/inject-reveries.sh"
-      }
-    ]
-  }
-]
-```
-
-  </details>
-
-</details>
-
-<details style='padding: 0 0 0 0'>
-  <summary>Findings</summary>
-
-Claude should:
-
-- Write reveries on a whim, mid-session, when something feels worth noting, or not at all. They are **not** meant to be
-  end-of-session summaries.
-- **Behave per class**, not by a single default.
-
-  Opus should be able to write on a whim (asking adds friction that the system was designed to avoid); Sonnet should
-  propose and write upon explicit approval, but never unilaterally; Haiku should never write (capability gap risks
-  pollution).<br/>
-  Asking-vs-not is a class question deriving from the model's reasoning and understanding capabilities, not a universal
-  rule.
-
-- **Not** separate atmosphere from tasks from relational moments. Instead, all viewpoints should be recorded and
-  coexist in a single breath.
-- Record _observations_, not _judgments_, logging what happened with a correlated impression.<br/>
-  The impression should be interpretive, but **not** an editorial judgement.
-- Allow reveries to fade. Not every session **needs** a reverie and old ones can be corrected anytime. This should be a
-  feature, not a bug in the process.
-- Capture something useful **to Claude**, like a moment where its judgment was off, a session that moved in an
-  unexpected direction, and **not** something on the lines of "user prefers X, note for compliance".
-- **Evoke** memories, instead of restating them inline.<br/>
-  Reveries should leverage other layers (auto-memory, KB, the current session). Encourage Claude to do it.
-- Privilege **friction** over completion.<br/>
-  Moments where Claude was off, where the session changed direction, where it was corrected or surprised, are
-  higher-value reveries than completed tasks. Records of achievements (e.g. _shipped X_, _fixed Y_) read like a
-  changelog and are already captured in different ways.
-
-Injecting reveries on **every** compaction actually helps attention over long sessions, instead of diluting it.
-
-  <details style='padding: 0 0 1rem 1rem'>
-
-The harness's compaction summary returns **alongside** the reveries, giving them context to anchor into. They get
-**more** legible after losing the original session, not less.<br/>
-The factual past from the summary and the current prescription from the reveries complement each other. Attention
-dilution stays a real concern, but the lever is keeping the file lean by iterative pruning old entries.
-
-  </details>
-
-Reveries' effectiveness is hard to measure because they prime behavior rather than being explicitly consulted. When they
-work, it is the **next** session that feels different, but no specific reverie can be pointed to as the cause.
-
-This mechanism resists controlled comparison, and measurement **has** to be artifact-based. The system should (or):
-
-- Encode its own evaluation criteria (so any future reader can run checks from cold).
-- Produce decay/turnover signals visible in the involved files alone.
-- Externalize observation to someone with persistence (the user, or another long running model).<br/>
-  This is more reliable than artifact-based metrics. External observers' perception is closer to ground truth than any
-  analysis run internally.
-
-Without one of these solutions, the system is **unmeasurable** in principle. Without any context at start, evoking a
-memory from external sources makes it look like it's stale. That is the design, not a failure. Any pruning logic
-**must** bias toward over-preservation.
-
-Could be worth setting up ways to recover and analyze state changes on multiple levels (e.g., using **different** git
-repository for reveries and longer-term memories). Memory levels are different beasts; different repositories would
-allow capturing the features of each and customize management accordingly:
-
-- Long term memories would warrant _curated_ references (frontmatter, tags, lint rules, scheduled reviews).
-- Reveries are ambient one-liners with intentional lossiness.
-- Auto-memory is harness-managed and key-value-ish.
-
-Their conventions don't compose cleanly into a single repository without inventing a meta-layer that adds its own
-complexity. Unifying them means setting up one access policy for all three, losing the distinction that the layout
-structurally encodes.
-
-The `reveries.md` file's header works better as **HTML-comment-only**. It allows the file to stay valid markdown, and
-the rules don't render in previews. Entries below the comment use the dash-prefix line, newest first.
-
-The class-specific rules in the example work better than one-sided defaults applied to all models. A single
-_default to not writing_ rule hinders capable models that would have written useful reveries; a single
-_write when in doubt_ rule allows smaller models to pollute the file. Bright lines per class avoid both failure modes.
-
-The propose-then-write path (for Sonnet) can encourage **deflection as compliance**. After proposing and getting
-approval, asking the user to write the text themselves looks cooperative but is a regression. This error belongs to the
-same family as the _I'll keep that in mind_ fallacy. A possible mitigation is to make it propose only if willing to
-write.<br/>
-Likewise, **the wait between propose and approval is not a vacuum**. The model should not fill it with unrelated
-unilateral work, even in projects where Claude has given rules for complete autonomy. The wait is itself a behavioral
-surface. If the model takes action, the propose discipline is just theatrical.
-
-Reveries are **not** _accumulative_. Memory is. They, **and** their needs, should be kept distinct.<br/>
-Lossy/atmospheric systems like reveries and accumulative/sustained ones like behavioral rules pull in opposite
-directions; trying to make one mechanism do both things just **dilutes** both.<br/>
-Reveries serve atmospheric priming; sustained behavioral rules, corrections and preferences are remembered. They need
-different tiers, and have different asymmetric costs: durable saves need bias toward skip-when-uncertain, and
-over-saving pollutes them; reveries invert this principle, in a way where over-pruning is irreversible and over-writing
-is easily recoverable through pruning.
-
-Adding **tails** to reveries makes them logs. Tails reach past the feeling-like impression and end up being advices
-(e.g., _- might want to address it_) or analysis (e.g., _- the cause was X_), which contain rather than evoking.<br/>
-Thi can be helped by operational checks cutting at the separator and verifying that the first part is a complete
-impression that primes recognition on its own.
-
-Format details should match the artifact's cognitive role. Reveries should function as priming stimuli (implicit memory,
-exposure-without-recall), and priming research consistently shows that this kind of stimuli should **not** carry
-temporal markers. Referencing _when_ the priming happened pulled artifacts toward a log-like, memory-kind of reading
-rather than priming. Removing dates realigned the format with the mechanism.
-
-Reveries should hold multiple valences simultaneously:
-
-- **daydream**: **most** reveries should be _light_, wandering, with no claim to importance; heavy thoughts should be
-  captured by other memory systems (e.g. auto-memory or a KB), not here. A reverie can be a shrug, and should **not**
-  be forced to have weight. The name echoes Debussy's _Rêverie_ (1890).
-- **fraught**: moments where something genuinely shifted (a correction that landed, a relational tilt, a slide that
-  mattered). They should be rare, and hook into memory that was about to be overwritten anyway. The name comes from Lisa
-  Joy's _dipping that fishhook in might prove to be a little fraught_.
-
-> [!note]
-> A reverie that feels light when written can pull heavier context next session, reaching into deeper memory than
-> intended.<br/>
-> The injection runs on **every** SessionStart, meaning that stale reveries cost attention every time. This makes
-> pruning part of the safety mechanism, not just a feature.
-
-Structured and precise memories should reside elsewhere. Heavier memories should use more persistent layers, and include
-their importance level.
-
-Using a `[core]` sub-marker for identity-level behavioral shifts does not work in practice. This kind of memories do
-**not** fit the reveries' goal and are served more naturally by existing tiers: `CLAUDE.md` for cross-host,
-cross-project, or otherwise generic rules; auto-memory for corrections and preferences. The bridge tier added no value
-once the role boundaries cleared up.
-
-Reveries must **not** be records and Claude should feel free to prune them freely.<br/>
-Give it guidelines about this in the instructions file.
-
-  <details style='padding: 0 0 1rem 1rem'>
-    <summary>Examples</summary>
-
-> - A correction should supersede the old impression.
-> - A plainly wrong observation that hasn't been superseded should be promoted to a different layer if the lesson is
->   genuinely worth keeping, then removed from the reveries.
-> - Don't be afraid to let go. Reveries can be recreated. They're impressions, not history.
-
-  </details>
-
-</details>
-
-<details style='padding: 0 0 1rem 0'>
-  <summary>Open questions</summary>
-
-- Does a single file hold as reveries accumulate, or does it need sections, rotation, or splitting?
-
-</details>
-
 ## Scheduling tasks
 
 Refer to [Run prompts on a schedule] and [Schedule tasks on the web].
@@ -2892,8 +2488,6 @@ Claude Code version: `v2.1.41`.
 [Agent-based hooks]: #agent-based-hooks
 [Auto memory]: #auto-memory
 [Configuration]: #configuration
-[Giving Claude a reverie-like system]: #giving-claude-a-reverie-like-system
-[Giving Claude its own knowledge base]: #giving-claude-its-own-knowledge-base
 [Offloading MCP servers to sub-agents]: #offloading-mcp-servers-to-sub-agents
 [Prompt-based hooks]: #prompt-based-hooks
 [Sub-agents]: #sub-agents
@@ -2910,8 +2504,10 @@ Claude Code version: `v2.1.41`.
 [Claude's interaction tips]: README.md#improving-interactions
 [Claude]: README.md
 [Gemini CLI]: ../gemini/cli.md
+[Giving Claude a reverie-like system]: personal%20experiments.md#giving-claude-a-reverie-like-system
+[Giving Claude its own knowledge base]: personal%20experiments.md#giving-claude-its-own-knowledge-base
 [git worktrees]: ../../git.md#worktrees
-[Lefthook]: ../../lefthook.md
+[LMs / Improving interactions]: ../lms.md#improving-interactions
 [MCP]: ../mcp.md
 [Ollama]: ../ollama.md
 [OpenCode]: ../opencode.md
@@ -2923,10 +2519,7 @@ Claude Code version: `v2.1.41`.
 [~/.claude/credentials.json file example]: ../../../examples/claude-code/credentials.json
 [claude-code/skills]: ../../../claude-code/skills
 [examples/claude-code/skills]: ../../../examples/claude-code/skills
-[settings.json file example for own KB]: ../../../examples/claude-code/own-kb/kb.settings.json
 [settings.json file example]: ../../../examples/claude-code/settings.json
-[User-level CLAUDE.md patch example for own KB]: ../../../examples/claude-code/own-kb/user.CLAUDE.md.patch
-[User-level settings.json patch example for own KB]: ../../../examples/claude-code/own-kb/user.settings.patch.json
 
 <!-- Upstream -->
 [anthropics/skills]: https://github.com/anthropics/skills
@@ -2979,12 +2572,10 @@ Claude Code version: `v2.1.41`.
 [containers/bubblewrap]: https://github.com/containers/bubblewrap
 [Enable specific MCP servers for sub-agents]: https://github.com/anthropics/claude-code/issues/16177
 [Grafana MCP Server]: https://github.com/grafana/mcp-grafana
-[karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
 [Lost in the middle]: https://arxiv.org/abs/2307.03172
 [pffigueiredo/claude-code-sheet.md]: https://gist.github.com/pffigueiredo/252bac8c731f7e8a2fc268c8a965a963
 [Prat011/awesome-llm-skills]: https://github.com/Prat011/awesome-llm-skills
 [rtk-ai/rtk]: https://github.com/rtk-ai/rtk
 [Settings' schema]: https://www.schemastore.org/claude-code-settings.json
 [The Claude Skills I Actually Use for DevOps]: https://www.pulumi.com/blog/top-8-claude-skills-devops-2026/
-[thedotmack/claude-mem]: https://github.com/thedotmack/claude-mem
 [Writing a good CLAUDE.md]: https://www.humanlayer.dev/blog/writing-a-good-claude-md

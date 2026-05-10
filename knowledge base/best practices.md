@@ -19,6 +19,10 @@ What really worked for me personally, or in my experience.
 - Try to understand how something really works, may it be a technology, a tool or what else.<br/>
   Try at least once to do manually what an automation would do in your place. Look at the source code of tools. Read the
   _fabulous_ documentation. Check if they hide error messages behind successful responses.
+- Verifying a claim confirms or refutes it, but also surfaces conceptual inaccuracies and confusion one might not have
+  considered to check.<br/>
+  Claims that feel obvious short-circuit the check that would have exposed them. Verify especially those claims that do
+  not feel like they need verification.
 - Stay curious. Experiment. Learn and break things (in a sane and safe way). Dive deeper into what interests you.
 - Make the **informed** decision that most satisfies your **current** necessities.<br/>
   There is no _perfect_ nor _correct_ solution, just different sets of tradeoff. Besides, no one will ever have all the
@@ -36,7 +40,9 @@ What really worked for me personally, or in my experience.
   only signal for retirement.
 - Match format details to the artifact's cognitive role rather than to inherited convention.<br/>
   Logs, journals, and changelog formats can silently pull artifacts toward their source-domain's purpose, even when the
-  new use case calls for something different.
+  new use case calls for something different. Adding a structural element (date, ID, version, hierarchy) is a **design
+  choice**, not a default; the choice should follow the role.<br/>
+  To test this, ask oneself _do the format details fit the mechanism, or do they fight it?_.
 - Gain the hard skills required to solve complex problems, but only deploy complex solutions when they are actually,
   _really_, needed.
 - Focus on the **real** problem at hand.<br/>
@@ -67,6 +73,11 @@ What really worked for me personally, or in my experience.
 - Keep different parts **de**coupled where possible, the same way
   [_interfaces_ are used in programming][what does it mean to program to interfaces?].<br/>
   Allows for quick and (as much as possible) painless switch between technologies.
+- When a single mechanism is asked to serve two purposes that pull in opposite directions, **both** purposes
+  degrade.<br/>
+  If one can write **contradicting** principles to operationalize each purpose (e.g., "most things should be forgotten"
+  vs "preserve cultivation moments"), they are different mechanisms wearing the same name. Decouple them and let each
+  do its own job cleanly.
 - The _one-size-fits-all_ approach is a big fat lie.<br/>
   One'll end up with stiff, hard to change results that satisfy nobody. This proved particularly true with regards to
   _templates_ and _pipelines_.<br/>

@@ -170,12 +170,17 @@ The more specific and concise the instructions are, the more consistently agents
 > Also ask agents to periodically review and optimize memory files.<br/>
 > Quick cleanups keep things sharp. Remove from it everything that is not _needed_.
 
-Agent harnesses started using _context_ files (A.K.A. _rules files_) to apply only _procedural memories_ at the start of
-sessions. These Markdown files should only contain instructions, rules, and preferences, and **no** session memories.
+Agent harnesses started using _context_ files (A.K.A. _rules files_) to apply _procedural memories_ at the start of
+sessions. These Markdown files should only contain instructions, rules, and preferences, **not** _session_ memories.
 
 Agent frameworks are currently using similar format and content at least for context files, but each wants them in a
 different location (`CLAUDE.md`, `.cursorrules` or `.cursor/rules/`, `.github/copilot-instructions.md`).<br/>
 A collaboration of AI vendors is now trying to reduce this fragmentation by using [agentsmd/agents.md] as standard.
+
+> [!important]
+> Context is **not** memory. Context files (`CLAUDE.md`, rules) are meant to be **human**-curated and carry
+> instructions Claude should **not** diverge from. Memory should be **freely** writable by Claude, accumulate over
+> sessions, and carry **learnings** instead of rules.
 
 ### AGENTS.md
 
@@ -521,8 +526,8 @@ assist you by, for example, exiting the session and resuming it.
 [Claude Code]: claude/claude%20code.md
 [CONTRIBUTING.md]: ../contributingmd.md
 [Gemini CLI]: gemini/cli.md
-[Giving Claude a reverie-like system]: claude/claude%20code.md#giving-claude-a-reverie-like-system
-[Giving Claude its own knowledge base]: claude/claude%20code.md#giving-claude-its-own-knowledge-base
+[Giving Claude a reverie-like system]: claude/personal%20experiments.md#giving-claude-a-reverie-like-system
+[Giving Claude its own knowledge base]: claude/personal%20experiments.md#giving-claude-its-own-knowledge-base
 [LMs / Concerns]: lms.md#concerns
 [LMs / Context window]: lms.md#context-window
 [LMs / LLMs]: lms.md#large-language-models

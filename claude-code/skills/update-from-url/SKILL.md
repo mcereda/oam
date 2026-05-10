@@ -11,6 +11,8 @@ description: >-
   this link to improve the page", "check what's missing compared to <URL>", or
   "enrich this article from <reference>".
 argument-hint: <url> [document-path]
+model: opus
+effort: xhigh
 ---
 
 # Update From URL
@@ -70,7 +72,9 @@ Identify concepts, practices, details, or sections that are:
   information that conflicts with existing content
 
 Ignore differences that are purely stylistic or organizational. Focus on
-substance.
+substance. Flag separately any content from the reference that falls clearly
+outside the established scope of the target article — it will be surfaced in
+Step 5 for the user to decide what to do with.
 
 If the article already covers everything in the reference, tell the user and
 stop.
@@ -130,6 +134,13 @@ and unverified item.
 
 If there are no contradictions or unverified items, say so.
 
+**Out of scope** — list any content from the reference that falls outside the
+established scope of the target article. For each item:
+
+- Briefly describe what the reference covers that doesn't belong here
+- Ask the user whether to: include it anyway, check whether another article
+  in the knowledge base is a better home, or provide other guidance
+
 **Source attribution** — if the reference URL is not already linked somewhere in
 the article, propose where to add it (e.g., inline, in a "References" section,
 or as a footnote) so the user can approve or adjust the placement.
@@ -142,8 +153,21 @@ Edit the article to incorporate the approved additions. Follow these rules:
 
 - **Do not copy text** from the reference. Rewrite concepts in the article's own
   voice and style.
+- **Match the article's voice, not the reference's.** Before writing anything,
+  study the target: sentence length, tone, how it introduces terms, how dense or
+  spacious the prose is, what formatting patterns it uses. Write additions that
+  could have been written by the same author.
 - **Only remove content the user explicitly approved for removal** in the
   contradictions review.
+- **Keep existing concepts intact.** When inserting new content near existing
+  text, do not silently reframe, soften, or dilute correct existing claims.
+  Additions sit alongside existing content; they do not revise it unless that
+  revision was explicitly approved.
+- **Explain new terms inline.** When an addition introduces a concept or term
+  the article has not previously used, gloss it briefly at first mention — a
+  short parenthetical or a dash-clause is enough. Use the existing article as
+  the bar: if it explains comparable terms at that level of depth, match it. Do
+  not assume the reader already knows what the reference assumes.
 - **Respect the article's structure.** Place new content where it logically
   belongs.
 - **Follow writing conventions** from the project's CLAUDE.md (line width, link
@@ -161,4 +185,4 @@ After editing, briefly tell the user:
 - What was added, removed, or rewritten
 - What was skipped (unverified items the user chose not to include, contradicted
   claims from the reference)
-- Where the source link was placed
+- Where the source link was placed (or confirm it was already present)

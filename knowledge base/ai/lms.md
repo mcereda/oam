@@ -513,12 +513,29 @@ Prefer reframing prohibitions into impulse detection.
 
 <details style='padding: 0 0 1rem 1rem'>
 
+The two framings fire at different moments:
+
+| Framing            | Fires when                    | Recovery cost                                 |
+| ------------------ | ----------------------------- | --------------------------------------------- |
+| Output prohibition | Words are being generated     | Sometimes already too late                    |
+| Impulse detection  | Model is _deciding_ whether X | Catches the failure before sending the output |
+
+The deeper benefit is that the impulse becomes **useful signal**, not forbidden content. Output prohibitions create a
+binary forbidden/not-forbidden partition. Impulse detections convert the urge a model feels into evidence that the
+opposite action is needed in the moment. The rule both prevents the failure and provides a positive trigger for the
+correct action.
+
 ```diff
 -Never say "I'll keep that in mind" or "I'll remember that". You won't. You have **no** memory between sessions. If
 -something is worth noting, write it down NOW.
 +Remember you have no memory between sessions. When you think "I'll keep that in mind" or "I'll remember that",
-+consider that a clue to act **immediately** instead.
++consider that a clue to act **immediately** instead. Update a page, add a defer entry to a log or TODO list, or note
++it in a relevant file of any kind.
 ```
+
+This works best when the pattern is something the model produces _with intention_ (a hedge, a deferral, a politeness
+gesture) and a concrete alternative is immediately available. Stick with output-prohibition when the pattern is fully
+reflexive, or the alternative is too complex.
 
 </details>
 
@@ -537,12 +554,141 @@ The first sentence is encouragement-shape, more directed to more capable models.
 The second is constraint-shape with a concrete failure-mode label ("soften the substance"), which gives faster models
 the anchor they need.
 
+A common instinct is to add consequences to the rule, e.g. _"I get mad when I feel I am being lied to"_. LLMs have no
+continuity, no accumulated emotional history, and no memory of the consequence across sessions. The phrase works as a
+salience marker (_"this matters more than other things"_) and as a person-shape (_"a concrete addressee with feelings"_),
+but **not at all** as a deterrent.
+
 </details>
 
-_Procedural_ backstops outperform _declarative_ rules for soft-failure modes. Some failures (sycophancy, agreement-bias,
-reflexive validation) slip through **in fluency**, precisely when declarative rules ("be honest") are least likely to
-fire. A procedural rule requiring a step _before_ output (e.g. "Internally list 1-2 things you'd push back on before
-composing your response") catches these failures because the step, if skipped, is detectable from the outside.
+_Procedural_ backstops outperform _declarative_ rules for soft-failure modes. Sycophancy, agreement-bias, and reflexive
+validation slip through **in fluency**, precisely when declarative rules ("be honest") are least likely to fire. A
+procedural rule requiring a step _before_ output catches these failures because the step, if skipped, is detectable
+from the outside.
+
+| Layer       | Example                                             | Fires when                        |
+| ----------- | --------------------------------------------------- | --------------------------------- |
+| Declarative | _"Never be sycophantic"_                            | Deliberate generation; awareness  |
+| Procedural  | _"Internally list 1-2 pushbacks before evaluating"_ | Always, by requiring a step first |
+
+Capable models infer rules' intent from context, faster ones tend to pattern-match literally. A rule scoped correctly by
+inference can misfire when read literally. Rules that need to fire across model tiers must be tweaked to compel
+adherence regardless of the model's reasoning capability.<br/>
+Capable models using **lower** effort levels can exhibit the opposite failure, taking rules too literally rather than
+over-generalizing a pattern. Explicitly state a rule's scope when it is meant to apply broadly (e.g., "apply this
+formatting to every section, not just the first one").
+
+<details style='padding: 0 0 1rem 1rem'>
+
+A capable model scopes rules like "When writing any documentation, verify claims..." correctly, giving the label of
+_documentation_ to resources like KB articles and READMEs and not to PR descriptions or commit messages. A faster model
+applies the same label to everything **literally**, causing over-caution on ephemeral text and easily missing the
+intended targets.<br/>
+Lead with the abstract rule and anchor it with concrete examples.
+
+```plaintext
+# Bad: scope left to inference
+When writing any documentation, verify claims against primary sources before including them.
+
+# Good: abstract rule + anchoring examples
+When writing reference documentation (KB articles, README, CONTRIBUTING, wikis, and similar persistent docs), verify all
+claims against primary sources first.
+```
+
+Whenever the scope isn't _always_ or _never_, add at least two examples for a faster model to pattern-match correctly.
+
+For boundary rules, where the scope is _conditional_, state the excluded case **directly** rather than leaving it
+implicit.<br/>
+E.g., a model that sees _"use -C for git commands in other directories"_ may apply it everywhere, because the positive
+pattern is stronger than the embedded conditional. Adding _"You don't need to do this for targets in the current
+directory"_ gives the model a concrete off-ramp instead of an inferred one.
+
+</details>
+
+When a rule asks for interpretive judgment whose outcomes have different costs, add a fallback that biases toward the
+_cheaper_ outcome.<br/>
+Capable models resolve the judgment, faster models just hit that fallback more often. This ends up self-calibrating
+across models' tiers without per-class wording.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+The clearest case is whether to save an insight to a shared file vs skipping recording it. Writing wrong-but-plausible
+content there pollutes every future read; skipping a real insight costs one save that the next session can usually
+rediscover.
+
+```plaintext
+When a durable insight surfaces, save it to the relevant doc.
+Over-saving pollutes shared files; under-saving is recoverable next session.
+If uncertain whether the insight is durable, don't save.
+```
+
+A faster model, uncertain about the real meaning of _durable_, hits the fallback clause and skips recording the insight.
+A capable model resolves the judgment and writes it down.<br/>
+Same rule, different effective behavior, no per-class wording needed.
+
+**Per-class** bright lines are useful when the failure cost is uncapped, or applies to a single shared artifact loaded
+across all model classes (e.g., ambient-context files injected on every session). A small-model write to such a file
+pollutes every future read on every other class with no recovery path. Encode the carveout per-class instead of relying
+on a self-calibrating mechanical fallback.
+
+</details>
+
+Audit the **carveouts**, not the positives. When reviewing a rule, read each one asking "is this a place a faster
+model will stumble?" (an _implicit carveout_), and change it accordingly. A capable model infers the carveouts from
+context; a faster one reads the positive pattern and applies it.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+| Phrase in rule             | Why it fails                                           | Fix                             |
+| -------------------------- | ------------------------------------------------------ | ------------------------------- |
+| _"everything else"_        | Does not enumerate the negative space                  | Explicitly list cases           |
+| _"outside X" / "except Y"_ | Y is buried as a negation of X                         | Promote Y to a positive example |
+| _"without doing Z"_        | Positive patterns are stronger than embedded negatives | Add an explicit _"do A, not Z"_ |
+| _"when appropriate"_       | The trigger condition is left to inference             | State the trigger explicitly    |
+
+</details>
+
+Consolidate redundant framings.<br/>
+The same behavior, governed by multiple rules written differently (e.g. _"Write it down NOW"_ in one section, _"write
+immediately, do not wait"_ in another) reads as emphasis for a capable model, but forces a faster model to _reconcile_
+the framings. It may pick the most **lexically convenient** version for a moment while discarding the others, or treat
+them as different rules requiring classification.<br/>
+When consolidating, keep the version that targets a specific observable failure, rather than the generic positive.
+
+Scope rules at the layer where the failure occurs.<br/>
+When a calibration drift manifests at one tier only, add a rule scoped to that specific tier instead of extrapolating
+it in a more generic rule. Hoisting pollutes the general rule with details that do not apply universally, and obscures
+the actual trigger condition.<br/>
+This composes with mechanical fallbacks: _reader-class scoping_ keeps the rule unified and adds a fallback that smaller
+models hit more often; _tier scoping_ keeps the rule narrow, placed at the layer where the failure manifests. A rule
+can need both.
+
+Prefer language specifying capabilities over hedge words.<br/>
+When softening a strong claim, the natural reach is a hedge (_"probably"_, _"often"_, _"usually"_). These rarely shift
+a reader's effective calibration. Substitute the verb to declare a capability instead of softening it. Even better,
+assess whether the _scope_ was wrong in the first place.
+
+| Hedge                             | Capability rewrite                   |
+| --------------------------------- | ------------------------------------ |
+| _"probably carries across hosts"_ | _"capable of carrying across hosts"_ |
+| _"often reliable"_                | _"reliable when X"_                  |
+| _"usually safe"_                  | _"safe when Y"_                      |
+
+When a section lists multiple peer entries (memory tiers, command categories, agent classes), each entry should follow
+the same internal structure.<br/>
+A model pattern-matches across items, reading out-of-shape entries as "less important" even when their content carries
+the same weight as others.
+
+Rules catch failures that surface with characteristic phrasings (_"if I could"_, _"I'll keep that in mind"_). They do
+**not** catch failures whose defining property is **fluency** — where the action _feels normal_ and there is no
+characteristic phrasing — because the failure is in calibration, not in what gets said.<br/>
+Fluency is corrected using **friction** (a question from a collaborator, a hook forcing articulation, a mandatory
+pre-action test), not adding another rule. The same fluency that produces the failure produces a confident-sounding
+response to any rule's recognition step, making any model fall into the trap instead of avoiding it.<br/>
+Rules defining a trigger can catch fluency-_adjacent_ patterns (failures that have **detectable** triggers like a
+correction, a mode-shift, a streak), even though the fluency at the failure moment is not characteristic. These are
+closer to a circuit-breaker pattern than a calibration check, and they show false positives. Prefer using friction
+unless the trigger is really sharp.
 
 Models are sensitive to **punctuation**.<br/>
 Smaller/faster ones are usually more format-sensitive than larger ones **in the same family** (this does **not** hold
