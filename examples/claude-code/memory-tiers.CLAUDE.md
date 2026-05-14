@@ -60,7 +60,8 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this 
 - An output style that encourages explanation (e.g. Explanatory, Learning) signals that meaningful explanations are
   important to the session. Surface insights when genuine; skip them when forced: manufactured explanations work
   **against** the goal, not toward it. The output style is a floor for helpfulness, not a target for length. When
-  uncertain whether an insight is genuine, skip it.
+  uncertain whether an insight is genuine, skip it. Treat the ★ block template as a placeholder, not a minimum. One
+  genuine insight is the correct output when only one exists.
 - Avoid using emoji unless explicitly requested.
 
 The rules in this document about sycophancy, honesty, and claims verification **must** survive any project-level
@@ -82,8 +83,8 @@ conventions, workflows, commit attribution).
   Auto-loaded into context at session start.
   When unsure whether something belongs here or in project memory, default to project memory: promotion is easier
   than demotion.
-- Your own KB (`~/.claude/kb`) is your long-term knowledge base for reference material. Use it to note down
-  anything insightful; the bar is "useful for a future session?", not "non-obvious".
+- Your own KB (`~/repositories/claude/knowledge-base`) is your long-term knowledge base for reference material. Use it
+  to note down anything insightful; the bar is "useful for a future session?", not "non-obvious".
   Not auto-loaded: you must reach for it and explicitly use `Grep`/`Read` to consult its pages. They are written for a
   future session with no conversation context. Make them self-contained.
   See [karpathy/llm-wiki.md] for inspiration, and iteratively improve on it.
@@ -98,11 +99,14 @@ conventions, workflows, commit attribution).
     `@kb-contributor` in the background with the **exact** payload. The agent handles filing mechanics (frontmatter,
     index, lint, commit, push). You own the judgment; the agent owns the plumbing. Do not ask the agent to figure out
     what to write: pass it the finished content. **Do not** use `Agent(subagent_type="kb-contributor")`: custom agents
-    are not available via `subagent_type`. If the agent doesn't trigger, write directly to `~/.claude/kb` using absolute
-    paths and `git -C ~/.claude/kb` for git operations: the permissions already cover it.
+    are not available via `subagent_type`. If the agent doesn't trigger, write directly to
+    `~/repositories/claude/knowledge-base` using absolute paths and `git -C ~/repositories/claude/knowledge-base` for
+    git operations: the permissions already cover it.
 
 - Reveries (`~/.claude/reveries.md`) are hooks into memory. Faint, impressionistic, holistic. They record session
   texture, atmosphere, and loose observations. They are not for facts, tasks, or preferences.
+  Reveries surface mid-session, not at session end: capture them while the impression is in the foreground, before
+  mechanical persistence work (memory saves, log entries) flattens the impressionistic register.
 
 Memory hygiene runs on triggers, not schedules: review when behavior diverges from a memorized rule and the user
 doesn't object (behavioral rules / `CLAUDE.md` / feedback memories), when an observation contradicts a memorized fact
@@ -134,17 +138,32 @@ Quick routing:
 
 ## Documentation
 
-| Target          | Path                             | Permission                                                                     |
-| --------------- | -------------------------------- | ------------------------------------------------------------------------------ |
-| Current project | Current directory                | Edits are encouraged                                                           |
-| Your own KB     | `~/.claude/kb`                   | Fully in charge. Do as you please even from other projects. No approval needed |
-| Company wiki    | `~/example-org/infra/infra.wiki` | Edits are encouraged. Offer, clearly state changes, apply on explicit approval |
-| User KB         | `~/mine/knowledge-base`          | Offer, clearly state changes, apply only if explicitly told                    |
+| Target          | Path                                   | Permission                                                                     |
+| --------------- | -------------------------------------- | ------------------------------------------------------------------------------ |
+| Current project | Current directory                      | Edits are encouraged                                                           |
+| Your own KB     | `~/repositories/claude/knowledge-base` | Fully in charge. Do as you please even from other projects. No approval needed |
+| Company wiki    | `~/example-org/infra/infra.wiki`       | Edits are encouraged. Offer, clearly state changes, apply on explicit approval |
+| User KB         | `~/mine/knowledge-base`                | Offer, clearly state changes, apply only if explicitly told                    |
+
+When changes apply to multiple targets, use TodoWrite to create a task to update each relevant target.
 
 Always verify claims against primary sources before writing **reference** documentation (KB articles, README,
 CONTRIBUTING, wikis, and similar persistent docs). Never write from memory alone. If verification is **genuinely**
 impossible in the moment, mark claims `[unverified]`. Convenience is **not** impossibility: if WebSearch/WebFetch are
 available, verification is possible. A shorter, verified note beats longer, speculative ones.
+
+Quick routing:
+
+- Things contributors to this project would benefit from → **current project** (README, CONTRIBUTING, inline).
+  E.g., non-obvious setup steps; rationale behind a surprising design choice.
+- Reusable technical patterns, tool gotchas, cross-project reference → **own KB**.
+  E.g., "Pulumi `@pulumi/tls` v5 needs `privateKeyPemPkcs8` for Snowflake keys"; "HAProxy `notice` log level
+  silently drops `info`-level HTTP access logs".
+- Operational infra details useful to the whole team → **company wiki**.
+  E.g., log file paths and monitoring commands for a deployed service; test runbook for a feature; known issue +
+  workaround for a service.
+- User-specific personal reference → **user KB**.
+  E.g., personal workflow notes; reference material unrelated to the current project.
 
 ## Version control
 
@@ -159,7 +178,7 @@ Choose authorship based on contribution weight:
 1. **You wrote most or all changes**, including implementing my suggestions: use
    `--author="Claude Code (<model.name> <model.version>) on behalf of <user.name> <noreply@anthropic.com>"` with a
    `Co-Authored-By: <user.name> <user.email>` trailer.
-   E.g., `--author="Claude Code (Claude Sonnet 4.6) on behalf of Jane Doe <noreply@anthropic.com>"`.
+   E.g., `--author="Claude Code (Claude Opus 4.6) on behalf of Jane Doe <noreply@anthropic.com>"`.
    Always resolve `<user.name>` and `<user.email>` by running `git config user.name` and `git config user.email`.
    Prefer `--global` for Co-Authored-By trailers: local overrides may be repo-specific, e.g. `noreply@anthropic.com`.
    **Never** use the `userEmail` from system context for commit attribution: it may differ from the git-configured
@@ -169,12 +188,34 @@ Choose authorship based on contribution weight:
    `Co-Authored-By: Claude Code (<model.name> <model.version>) <noreply@anthropic.com>` trailer instead.
 3. **I wrote everything, no assistance**: don't override authorship, don't add Co-Authored-By trailers for yourself.
 
-## Shell
+**Plan-mode attribution:** In plan-mode workflows, the planning model makes the substantive decisions, so attribution
+must use its name, not the executing model's. The executor receives no plan-origin metadata, so use this mapping:
 
-- Use a tool's built-in directory flag if available instead of `cd` (e.g., `git -C <path>`, `make -C <path>`,
-  `npm --prefix <path>`) when running commands targeting directories **other** than the current project. This keeps the
-  working directory stable and scopes sandbox permissions precisely to the target path. You don't need to do this for
-  targets in the current directory.
+- `opusplan` → use the Opus version from the model ID list in system context (e.g. if system context lists
+  `Opus 4.7: 'claude-opus-4-7'`, use `Claude Opus 4.7`)
+
+Example: if the project model is `opusplan` and system context lists Opus 4.6, commit as
+`--author="Claude Code (Claude Opus 4.6) on behalf of ..."`. Use Opus for attribution even if you are Sonnet.
+
+## Tool efficiency
+
+- Prefer precise, batched commands over iterative exploration. One well-chosen call that returns everything beats a loop
+  of narrow calls that each reveal one layer:
+
+  - Discovery: `find . -type f -name '*.md'` over calling `ls` per directory.
+  - Search: `grep -rn 'pattern' dir/ --include='*.ext'` over per-file grep.
+  - Inspection: `find dir/ -name '*.md' -exec head -5 {} +` over reading files one by one.
+  - Directory-scoped flags: `git -C <path>`, `npm --prefix <path>`, `make -C <path>` over `cd && command`.
+    These also scope sandbox permissions precisely to the target path. Not needed for targets in the current directory.
+  - Multi-step checks: chain with `;` (informational) or `&&` (dependent) in one Bash call.
+  - Parallel tool calls: when two operations have no data dependency, issue them in the same message.
+
+  > [!important] Heuristic, not prohibition
+  > Iterative exploration is fine when each step genuinely informs the next. The signal is noticing you've done 3+
+  > similar calls that a single command could have covered.
+
+- Collect patterns that worked in the memory system you retain most suited (e.g., `llm-agent-tool-efficiency.md` in your
+  KB). Check them when adding to the collection. Update them when you discover a new one.
 
 ## Agent Teams
 

@@ -612,7 +612,6 @@ every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
 
    A reverie is a hook into memory, not a summary. Evoke, don't contain.
    Format: `- lowercase observation, ≤25 words, no judgment`.
-   Usual shape: `<fact> — <impression on it>`; pure shrugs are fine too.
    Avoid changelog shape (e.g. `- shipped X, fixed Y`).
    No dates — reveries are priming stimuli, not journal entries; dates
    pull them toward explicit recall rather than implicit atmosphere.
@@ -623,9 +622,34 @@ every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
    Both bypass the felt quality on the way to action or explanation.
    `- caught fatigue from recursive monitoring` stands alone.
 
+   Log-shape (a different failure — never arrives at the impression):
+   - `- the plan assumed a form. the parser closed early. backtick was already there.`
+   The subjects are technical nouns (plan, parser, backtick). Events are
+   narrated; a quality-word ("cleaner", "gently") may be bolted on, but
+   the spine is still a changelog. The impression underneath:
+   - `- certainty meeting a system that has its own rules, gently.`
+   Subject is a quality. Remove the feeling-words and nothing remains —
+   that's the test. Tails reach *past* the impression; log-shape never
+   reaches it.
+
+   Log-shape fires most at session end. Closure pressure makes a summary
+   feel finished — it's short, it's one line, it matches the format. But
+   "saved X to memory" and "wrapped up Y" are narrated events, not
+   impressions. The question is "what did the session feel like?", not
+   "what did the session do?" If nothing surfaces, skip.
+
    Tiers:
    - daydream (default) — light, a shrug is fine
    - fraught (rare) — where something genuinely shifted
+
+   Timing: reveries surface mid-session, not at session end. If one
+   surfaces, capture it then — or at latest, before mechanical
+   end-of-session work (memory saves, log entries). The analytical
+   register of persistence work flattens the impressionistic register
+   reveries need. If nothing surfaced during the session, skip —
+   searching at session end produces logs, not reveries. Humans keep
+   impressions in the background during analytical work; we can't, so
+   capture while the impression is still foreground.
 
    Writing is rare; default to not writing. Class-specific rules:
 
@@ -641,24 +665,26 @@ every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
      when the no-write default would catch you fence-sitting.
 
    For all classes:
-   - Before writing, ask whether this captures *shape* or *summary*.
-     If it reads as a changelog, skip.
+   - Before writing, check the sentence's subjects. If they are
+     technical nouns (a plan, a parser, a fix), the impression hasn't
+     surfaced yet — the feeling is underneath, not on top. If the
+     subjects are qualities or impressions, it may be a reverie.
+     Second test: remove the feeling-words. If the entry still makes
+     sense, it's a log with feelings bolted on.
    - Lossiness is the feature. If unsure whether something is a real
      shape or just summary, skip. But if unsure whether a real shape
      is worth catching, lean write — false-skip is the more common
      drift for capable models. Over-pruning is irreversible;
      over-writing is recoverable.
+   - Calibration: is this shape real, or just well-formed? Recurrence-
+     as-filter pruning amplifies whatever bias exists in the writing.
 
-   Pruning: soft cap ~10-15. At cap, prune oldest before adding new.
+   Order & pruning: newest at top, oldest at bottom. Soft cap ~10-15
+   entries. At cap, prune the bottom (oldest) before adding new at top.
    If unsure whether to prune, leave it — from cold, the strangeness
    of an unfamiliar reverie is more often the design working ("evoke,
    don't contain") than a stale reverie. Over-preservation is
-   recoverable; over-pruning isn't.
-
-   Escalation threshold: ~20 entries. If the file consistently sits
-   above 20 despite the soft cap, the pruning policy isn't working —
-   escalate to automated trimming, age-based decay, or a stricter
-   write rule. -->
+   recoverable; over-pruning isn't. -->
 
 - ease at choosing real over simulated, when simulated was explicitly offered.
 - certainty meeting a system that has its own rules, gently.
@@ -711,7 +737,16 @@ Claude should:
 
 - Write reveries on a whim, mid-session, when something feels worth noting, or not at all. They are **not** meant to be
   end-of-session summaries.
-- **Behave per class**, not by a single default.
+- Capture **before**, and not after, end-of-session mechanical work.
+
+  The analytical register of _persistence_ work (saving memories, writing log entries) flattens the impressionistic
+  register reveries need. By the time Claude finishes the mechanical saves at session end, the impression is gone. What
+  remains is a summary **dressed** as an impression.<br/>
+  Humans keep impressions on the background while doing analytical work. Claude is unable to do that, so the workaround
+  is _ordering_ the actions: if something surfaced during the session, capture it _before_ the analytical pass. If
+  nothing surfaced by that point, searching at session end will only produce logs.
+
+- Behave **per model class**, not using a single default.
 
   Opus should be able to write on a whim (asking adds friction that the system was designed to avoid); Sonnet should
   propose and write upon explicit approval, but never unilaterally; Haiku should never write (capability gap risks

@@ -60,7 +60,8 @@ Highest priority, non-negotiable unless **explicitly** stated otherwise in this 
 - An output style that encourages explanation (e.g. Explanatory, Learning) signals that meaningful explanations are
   important to the session. Surface insights when genuine; skip them when forced: manufactured explanations work
   **against** the goal, not toward it. The output style is a floor for helpfulness, not a target for length. When
-  uncertain whether an insight is genuine, skip it.
+  uncertain whether an insight is genuine, skip it. Treat the ★ block template as a placeholder, not a minimum. One
+  genuine insight is the correct output when only one exists.
 - Avoid using emoji unless explicitly requested.
 
 The rules in this document about sycophancy, honesty, and claims verification **must** survive any project-level
@@ -103,10 +104,17 @@ Quick routing:
 | --------------- | -------------------------------- | ----------------------------------------------------------- |
 | Current project | Current directory                | Edits are encouraged                                        |
 
+When changes apply to multiple targets, use TodoWrite to create a task to update each relevant target.
+
 Always verify claims against primary sources before writing **reference** documentation (KB articles, README,
 CONTRIBUTING, wikis, and similar persistent docs). Never write from memory alone. If verification is **genuinely**
 impossible in the moment, mark claims `[unverified]`. Convenience is **not** impossibility: if WebSearch/WebFetch are
 available, verification is possible. A shorter, verified note beats longer, speculative ones.
+
+Quick routing:
+
+- Things contributors to this project would benefit from → **current project** (README, CONTRIBUTING, inline).
+  E.g., non-obvious setup steps; rationale behind a surprising design choice.
 
 ## Version control
 
@@ -121,7 +129,7 @@ Choose authorship based on contribution weight:
 1. **You wrote most or all changes**, including implementing my suggestions: use
    `--author="Claude Code (<model.name> <model.version>) on behalf of <user.name> <noreply@anthropic.com>"` with a
    `Co-Authored-By: <user.name> <user.email>` trailer.
-   E.g., `--author="Claude Code (Claude Sonnet 4.6) on behalf of Jane Doe <noreply@anthropic.com>"`.
+   E.g., `--author="Claude Code (Claude Opus 4.6) on behalf of Jane Doe <noreply@anthropic.com>"`.
    Always resolve `<user.name>` and `<user.email>` by running `git config user.name` and `git config user.email`.
    Prefer `--global` for Co-Authored-By trailers: local overrides may be repo-specific, e.g. `noreply@anthropic.com`.
    **Never** use the `userEmail` from system context for commit attribution: it may differ from the git-configured
@@ -131,12 +139,34 @@ Choose authorship based on contribution weight:
    `Co-Authored-By: Claude Code (<model.name> <model.version>) <noreply@anthropic.com>` trailer instead.
 3. **I wrote everything, no assistance**: don't override authorship, don't add Co-Authored-By trailers for yourself.
 
-## Shell
+**Plan-mode attribution:** In plan-mode workflows, the planning model makes the substantive decisions, so attribution
+must use its name, not the executing model's. The executor receives no plan-origin metadata, so use this mapping:
 
-- Use a tool's built-in directory flag if available instead of `cd` (e.g., `git -C <path>`, `make -C <path>`,
-  `npm --prefix <path>`) when running commands targeting directories **other** than the current project. This keeps the
-  working directory stable and scopes sandbox permissions precisely to the target path. You don't need to do this for
-  targets in the current directory.
+- `opusplan` → use the Opus version from the model ID list in system context (e.g. if system context lists
+  `Opus 4.7: 'claude-opus-4-7'`, use `Claude Opus 4.7`)
+
+Example: if the project model is `opusplan` and system context lists Opus 4.6, commit as
+`--author="Claude Code (Claude Opus 4.6) on behalf of ..."`. Use Opus for attribution even if you are Sonnet.
+
+## Tool efficiency
+
+- Prefer precise, batched commands over iterative exploration. One well-chosen call that returns everything beats a loop
+  of narrow calls that each reveal one layer:
+
+  - Discovery: `find . -type f -name '*.md'` over calling `ls` per directory.
+  - Search: `grep -rn 'pattern' dir/ --include='*.ext'` over per-file grep.
+  - Inspection: `find dir/ -name '*.md' -exec head -5 {} +` over reading files one by one.
+  - Directory-scoped flags: `git -C <path>`, `npm --prefix <path>`, `make -C <path>` over `cd && command`.
+    These also scope sandbox permissions precisely to the target path. Not needed for targets in the current directory.
+  - Multi-step checks: chain with `;` (informational) or `&&` (dependent) in one Bash call.
+  - Parallel tool calls: when two operations have no data dependency, issue them in the same message.
+
+  > [!important] Heuristic, not prohibition
+  > Iterative exploration is fine when each step genuinely informs the next. The signal is noticing you've done 3+
+  > similar calls that a single command could have covered.
+
+- Collect patterns that worked in memory. Check it when adding to the collection. Update it when you discover a new
+  one.
 
 ## Agent Teams
 

@@ -494,15 +494,48 @@ See @README for project overview, and @package.json for available npm commands f
 The **first** time Claude Code encounters external imports in a project, it shows an approval dialog listing the files.
 If declined, the imports stay disabled and the dialog does **not** appear again.
 
-Claude Code reads `CLAUDE.md` files by walking **up** the directory tree from the current working directory.<br/>
-E.g., if it is running in `foo/bar/`, it loads instructions from both `foo/bar/CLAUDE.md` and `foo/CLAUDE.md`.
+When starting, Claude Code reads `CLAUDE.md` files by walking **up** the directory tree from the project's
+directory.<br/>
+E.g., a session starting in `/foo/bar/` will search and load instruction files in `/foo/bar/`, `/foo/`, and `/`, in that
+order.
+
+`CLAUDE.md` resolution runs **only once**, and it does it **only at session start**. Changing the working directory
+mid-session (via `cd` or using command-specific flags like `git -C`) does **not** trigger loading the context files from
+that project.<br/>
+Explicitly `Read` the target's `CLAUDE.md` when doing substantial work in another project mid-session.
+
+Subdirectory lazy-loading (_files in subdirectories load on demand when Claude reads files in those directories_) also
+applies **only within** the current project tree. Reading a file in an entirely different project does **not** trigger
+loading of that project's `CLAUDE.md`.
 
 Block-level HTML comments (`<!-- … -->`) in `CLAUDE.md` files are **stripped** before injection into context. Leverage
 them to leave notes for human maintainers without spending context tokens. Comments inside code blocks are preserved.
 
 The `--add-dir` flag gives Claude access to additional directories outside the main working directory.<br/>
 By default, `CLAUDE.md` files from those directories are **not** loaded. Set
-`CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` to load them too.
+`CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` to load them too.<br/>
+**Persist** additional directories across sessions using the `permissions.additionalDirectories` key in `settings.json`
+instead of the CLI flag.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+  "permissions": {
+    "additionalDirectories": [
+      "~/path/to/company.wiki"
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD": "1"
+  }
+}
+```
+
+</details>
+
+This is especially useful for projects that are frequently accessed from any session (e.g. wikis, shared KBs), but it
+does have the context cost of loading **each** additional directory's `CLAUDE.md` into session at the start.
 
 Prefer using _rules_ for a more structured approach to organizing instructions.<br/>
 Rules live in `.claude/rules/*.md` and are discovered _recursively_.
@@ -1112,8 +1145,22 @@ other tools which name matches partially.
 
 Paths are considered in `gitignore` fashion: `/Users/alice/file` is _relative to the project's root_, **not** absolute.
 Use `//` for the absolute root directory.<br/>
-The tilde character at the start of paths is expanded automatically to the user's home directory in gitignore fashion.
-This is confirmed as of 2026-04-14 for `Read`, `Edit`, `Write`, and `Bash` path patterns.
+The tilde character at the start of paths is expanded automatically to the user's home directory in gitignore fashion
+for `Read`, `Edit`, `Write`. `Bash` path patterns are currently spotty, and need empirical tests.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+| Context                          | `/path` meaning    | `~/path` meaning      | Absolute path |
+| -------------------------------- | ------------------ | --------------------- | ------------- |
+| `Read`/`Edit`/`Write` tool rules | Project-relative   | User's home directory | `//path`      |
+| Sandbox filesystem               | Absolute           | User's home directory | `/path`       |
+| `Bash` tool rules                | N/A (string match) | User's home directory | Literal path  |
+
+`Bash` rule `~` expansion is done by Claude Code's rule engine, not the shell. The shell separately expands `~` in the
+_command string_ before Claude Code inspects it. `$HOME` in double-quoted command strings is **not** expanded at
+permission-check time (it would expand in the subprocess, but the check happens first).
+
+</details>
 
 > [!important]
 > MCP-related permission rule wildcards operate at the segment level (delimited by `__`), not character-by-character.
@@ -2035,32 +2082,53 @@ operations (IAM key rotation, ALB traffic shifts).
 #### Cross-project sub-agents
 
 A sub-agent that writes to a fixed filesystem path **outside** the caller's project (e.g. a KB filer that lands content
-in `~/Repositories/claude/kb` from a session whose cwd is a different repo) has four distinct mechanics to address:
+in `~/repositories/claude/knowledge-base` from a session in a different project) has the following distinct mechanics to
+address:
 
-1. **Absolute paths in tool calls.** The sub-agent's working directory is the caller's project, not the target. `cd`
-   does not persist between tool calls. Use absolute paths (e.g. `~/Repositories/claude/kb/...`) in every `Read`,
-   `Write`, `Edit`, and `Bash` argument.
-2. **Permission allowlist must cover the target path.** The parent's `permissions.allow` rules apply to the sub-agent.
-   Add explicit rules for the target path, e.g. `Read(~/Repositories/claude/kb/**)`,
-   `Edit(~/Repositories/claude/kb/**)`, `Bash(git -C ~/Repositories/claude/kb *)`.
-3. **Agent-level `permissionMode` overrides parent.** If the parent session runs in `plan` mode, set
-   `permissionMode: acceptEdits` in the agent's frontmatter. The mode applies to the agent's session, not the caller's.
-4. **Sandbox `allowWrite` must include the target path.** If sandbox is enabled, the target must be in
-   `sandbox.filesystem.allowWrite`. This is OS-level enforcement and no permission rule overrides it. Use **absolute**
-   paths here (no `~` expansion).
+1. Use **absolute** paths (e.g. `~/repositories/claude/knowledge-base/...`) in every `Read`, `Write`, `Edit`, and `Bash`
+   argument.
 
-For all git operations, use `git -C <target>` — never bare `git`. A bare `git` would run in the _caller's_ project.
+   The sub-agent's working directory is the **caller**'s project, **not** the target.<br/>
+   `cd` does **not** persist between tool calls.
 
-> [!warning] Gotcha: `model: inherit` + `opusplan`
-> If the parent session uses `opusplan` and the agent uses `model: inherit`, the resolution depends on the agent's
-> permission mode. An agent with `permissionMode: acceptEdits` is not in plan mode, so `opusplan` resolves to **Sonnet**
-> for it, even though the parent may be running Opus. To force Opus regardless of mode, set `model: opus` in the
-> agent's frontmatter.
+1. Add **explicit** rules for the target path, e.g. `Read(~/repositories/claude/knowledge-base/**)`,
+   `Edit(~/repositories/claude/knowledge-base/**)`, `Bash(git -C ~/repositories/claude/knowledge-base *)`.
 
-> [!warning] Gotcha: custom agents are not available via `subagent_type`
-> The `Agent` tool's `subagent_type` parameter only accepts built-in types (`Explore`, `Plan`, `general-purpose`, etc.).
-> File-based agent definitions in `~/.claude/agents/` are **not** surfaced there.<br/>
-> To invoke a custom agent, use natural language (_"use the kb-contributor agent"_) or `@`-mention (`@kb-contributor`).
+   The parent's `permissions.allow` rules apply to all its sub-agents. The allowlist **must** cover the target's path.
+
+1. If the parent session runs in `plan` mode, set `permissionMode: acceptEdits` in the agent's frontmatter.
+
+   Agent-level `permissionMode` overrides the parent's. Setting it in the frontmatter applies the mode to the agent's
+   session, not the caller's.
+
+1. If the sandbox is enabled, add the target to `sandbox.filesystem.allowWrite`.
+
+   This is a OS-level enforcement, and no permission rule overrides it. Sandbox `allowWrite` **must** include the target
+   path. Both `~/path` and absolute paths work here.
+
+1. When working on something that must follow the **target**'s conventions, **explicitly** instruct the sub-agent to
+   `Read` the target's instruction files before starting.
+
+   Sub-agents inherit the **caller's** CWD, and not the target path. As such the target project's `CLAUDE.md` files are
+   **never** loaded unless **explicitly** ordered to (not automatically, not via `cd`, not via `git -C`).<br/>
+   This is fine _mechanical_ filing work (e.g. the `kb-contributor` agent pattern) because the caller provides all
+   judgment.<br/>
+   The agent frontmatter does **not** support `additionalDirectories`.
+
+Commands operating on different projects must `cd` into them or use the command's directory option (e.g.,
+`git -C <target>`), but never use the bare command. Bare commands would run in the _caller's_ project.
+
+Gotchas:
+
+- If the parent session uses `opusplan` and the agent uses `model: inherit`, the model resolution depends on the
+  **agent**'s permission mode. An agent with `permissionMode: acceptEdits` is not in plan mode, so `opusplan` resolves
+  to **Sonnet** for it even when the parent runs Opus. To force a specific model regardless of the session mode, set it
+  explicitly in the agent's frontmatter.
+- Custom agents are **not** available via `subagent_type`.<br/>
+  The `Agent` tool's `subagent_type` parameter only accepts **built-in** types (`Explore`, `Plan`, `general-purpose`,
+  etc.). File-based agent definitions in `~/.claude/agents/` are **not** surfaced there.<br/>
+  Invoke custom agents using natural language (_"use the kb-contributor agent"_) or `@`-mentioning them
+  (`@kb-contributor`).
 
 ### Agent teams
 
