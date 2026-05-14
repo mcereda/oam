@@ -596,7 +596,11 @@ Each key counts as one when calculating key resource quotas, regardless of the n
 
 ### Lambda functions
 
-TODO.
+TODO
+
+> [!warning]
+> IAM role deletions aren't guarded by AWS when a role being deleted is actively attached to a Lambda. The function
+> simply and silently ends up with a dangling role reference.
 
 ### PrivateLink
 
