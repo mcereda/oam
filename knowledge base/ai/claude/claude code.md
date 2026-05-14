@@ -247,6 +247,12 @@ claude plugin disable 'gitlab@claude-plugins-official'
 claude plugin update 'gitlab@claude-plugins-official'
 ```
 
+Since 2026-06-15, subscriptions separate _interactive_ from _**non**-interactive_ usage. Non-interactive usage
+(`claude -p` and the Agent SDK) now draws **at full API rates** from a **dedicated** monthly credit pool, not from the
+interactive subscription pool. This credit pool has the same size as the subscription ($20, $100 or $200/month depending
+on the active plan).<br/>
+This applies to agent-type hooks, cron jobs, and any other non-interactive invocation.
+
 _Relevant_ commands from within Claude Code (version 2.1.118).<br/>
 Refer to [Built-in commands][built-in commands reference] for the complete list.
 
@@ -1679,10 +1685,14 @@ Plain `stdout` from a `SessionStart` hook is valid context injection method that
 `bypass_permissions_disabled`, others), but ends the REPL **before** the agent has the chance to act.
 
 > [!note]
-> There's currently no hook event that allows prompt or agent hooks just before exiting the REPL. `Ctrl+C` and `/exit`
-> terminate the session **immediately**, without triggering any hook at all.<br/>
-> `SessionEnd` prompt or agent hooks are not yet supported **outside** of the REPL. The closest alternative is using
-> `Stop`, even though this generates noise and ends up eating lots of tokens.
+> There's currently no hook event that allows _prompt_ or _agent_ hooks just before exiting the REPL. `Ctrl+C` and
+> `/exit` terminate the session **immediately**, without triggering any hook at all.
+>
+> `SessionEnd` prompt or agent hooks are not yet supported **outside** of the REPL. The closest alternative is using the
+> `Stop` hook instead, even though this does generate noise and ends up eating lots of tokens.
+> `SessionEnd` _**command**_ hooks can spawn background processes (e.g. `claude -p` via `subprocess`). The hook
+> completes immediately, while background work continues independently. This enables **post**-session tasks without
+> blocking the REPL's exit, like reviewing transcripts for missed memory saves.
 
 `UserPromptSubmit` hooks fire on **every** submit event, **before** Claude starts thinking.<br/>
 It can inject `additionalContext` to shape the whole response from the start.
@@ -2004,6 +2014,11 @@ specific, actionable feedback on quality, security, and best practices.
 ```
 
 </details>
+
+Agents can also be invoked in headless mode via `claude -p --agent <name>`, with `<name>` matching the agent file's
+`name` frontmatter field. The definition's body (after the YAML frontmatter) _becomes_ the system prompt for the agent.
+This makes agent definitions a single source of truth that works both in interactive delegation and headless pipelines
+(e.g. hooks, cron jobs).
 
 The description optimization loop (`run_loop.py`) can be used to tune an agent's descriptions against real
 trigger/no-trigger tests, the same way it is normally used to tune [skills][using skills]' descriptions.

@@ -197,6 +197,10 @@ inferences before they propagate everywhere. An auto-writing global tier bypasse
 A _behavioural_ alternative often beats a _structural_ one: forcing Claude to surface a per-project memory that seems to
 generalize when writing it allows the model to promote it **selectively**.
 
+The tier was formally evaluated after 12 days (47 sessions across 8+ projects). It grew from a 5-entry seed to 10
+entries with no cross-project drift observed. Per-project duplicates identified during the initial audit were cleaned up
+as part of promotion to the main configuration.
+
 </details>
 
 <details>
@@ -259,7 +263,7 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
    for permissions.<br/>
    See [User-level settings.json patch example for own KB].
 1. Add instructions in the **user-level** `CLAUDE.md` file.<br/>
-   See [User-level CLAUDE.md patch example for own KB].
+   See [User-level CLAUDE.md example for own KB].
 1. Ask Claude to initialize it (in a new session):
 
    > Hey! I have prepared your knowledge base repository for you. Please finish initializing it to your likings.
@@ -409,6 +413,33 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   Prefer **not** deleting the original memory during this process, as it may still serve its purpose in that tier.
 
   This is most useful for periodic review sessions.
+
+- A `SessionEnd` hook _can_ act as an extraction backstop to catch insights discussed during a session but not saved to
+  any persistent surface (auto-memory, KB, or context files).
+
+  The hook runs a two-stage pipeline which includes:
+
+  1. A cheap **pattern-matching** pass that uses a regex for signal words like _non-obvious_, _gotcha_, _I learned_ and
+     runs on every session at zero cost.
+  1. A background, headless LLM call (`claude -p --agent <definition>`) for sessions flagged as medium/high-signal that
+     reviews the conversation and stages the results for a triage during a future session.
+
+  The agent definition's body (after YAML frontmatter) serves as the single source of truth for the system prompt. This
+  avoids prompt duplication when the same prompt needs to work across multiple backends (see below). Refer to
+  [sub-agents] for agent definitions.
+
+  Anthropic started billing non-interactive usage (including `claude -p` and the Agent SDK) on 2026-06-15. At Sonnet
+  rates, each extraction costs on average around $0.025. The cost is negligible for light usage, but does scale with the
+  number of session.<br/>
+  Since this is the first step towards a rug pull, it could be worth implementing a three-tier fallback that:
+
+  1. Uses `claude -p` as the current primary mode.
+  1. Falls back to a local model via [Ollama] or other inference servers (Ollama is just the easier for now).
+  1. Skips the LLM call entirely, while still running the pattern-matching step.
+
+  The local fallback reads the same agent definition body as its system prompt, keeping a single source of truth. For
+  signal classification tasks (as opposed to generation), smaller general-purpose models (~5-8 GB) outperformed larger
+  coding-focused ones.
 
 </details>
 
@@ -1163,11 +1194,13 @@ exceeds the cost of one unified tier with shape-tags, this is the design to revi
 [Claude Code]: claude%20code.md
 [Cross-project sub-agents]: claude%20code.md#cross-project-sub-agents
 [Lefthook]: ../../lefthook.md
+[Ollama]: ../ollama.md
+[Sub-agents]: claude%20code.md#sub-agents
 [Using hooks]: claude%20code.md#using-hooks
 
 <!-- Files -->
 [settings.json file example for own KB]: ../../../examples/claude-code/own-kb/kb.settings.json
-[User-level CLAUDE.md patch example for own KB]: ../../../examples/claude-code/own-kb/user.CLAUDE.md.patch
+[User-level CLAUDE.md example for own KB]: ../../../examples/claude-code/own-kb/user.CLAUDE.md
 [User-level settings.json patch example for own KB]: ../../../examples/claude-code/own-kb/user.settings.patch.json
 
 <!-- Upstream -->
