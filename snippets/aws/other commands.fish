@@ -465,6 +465,38 @@ aws ssm get-connection-status --target 'i-0123456789abcdef0' --query 'Status' --
 # Start a shell
 aws ssm start-session --target 'i-0123456789abcdef0'
 
+# Launch a command on an EC2 instance
+aws ssm send-command --output 'json' \
+	--instance-ids 'i-0123456789abcdef0' --region 'eu-west-1' \
+	--document-name 'AWS-RunShellScript' \
+	--parameters '{
+		"commands": [
+			"cat /var/log/messages 2>/dev/null | grep -E \"May 12 11:3|May 12 11:4|May 12 11:5\" | tail -100
+		],
+		"executionTimeout": [
+			"60"
+		]
+	}'
+
+# Get the output of command invocations
+aws ssm get-command-invocation \
+	--instance-id 'i-0123456789abcdef0' --region 'eu-west-1' \
+	--command-id '01234567-abcd-8901-ef23-456789abcdef'
+
+# Launch a command and get its output at once
+aws ssm send-command --output 'json' \
+	--instance-ids 'i-0123456789abcdef0' --region 'eu-west-1' \
+	--document-name 'AWS-RunShellScript' \
+	--parameters '{
+		"commands": [
+			"cat /var/log/messages 2>/dev/null | grep -E \"May 12 11:3|May 12 11:4|May 12 11:5\" | tail -100
+		],
+		"executionTimeout": [
+			"60"
+		]
+	}' \
+| jq -r '.Command.CommandId' \
+| xargs aws ssm get-command-invocation --instance-id 'i-0123456789abcdef0' --region 'eu-west-1' --command-id
 
 ###
 # Step Functions
