@@ -7,6 +7,9 @@ gpgconf --kill 'gpg-agent'
 gpg-connect-agent updatestartuptty '/bye'
 gpg-connect-agent reloadagent '/bye'
 
+# Unlock the GPG Agent
+gpg --sign --armor '/dev/null'
+
 # Enable SSH and Pinentry integration
 set -x 'SSH_AUTH_SOCK' (gpgconf --list-dirs 'agent-ssh-socket')
 set -x 'GPG_TTY' (tty)
