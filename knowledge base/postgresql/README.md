@@ -77,7 +77,7 @@ EOF
 
 </details>
 
-<details>
+<details style='padding: 0 0 1rem 0'>
   <summary>Usage</summary>
 
 ```sh
@@ -167,6 +167,29 @@ Some extensions (like `anon`), need **both** the library preloaded globally **an
 the target database.
 
 Also see [yugabyte/yugabyte-db] for a distributed, PostgreSQL-like DBMS.
+
+Pass **session**-level settings to a server by specifying them in `psql -c` or in `PGOPTIONS`, or specifying the
+`options` parameter in `pg_service.conf`.
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Setting `default_transaction_read_only=on` to make the session RO</summary>
+
+```ini
+[staging]
+host=db.staging.example.org
+dbname=some_db
+user=some_user
+options=-c default_transaction_read_only=on
+```
+
+Any write attempt (`INSERT`, `UPDATE`, `CREATE TABLE`, etc) will fail with `ERROR: cannot execute …` in a read-only
+transaction.
+
+> [!important]
+> This option does prevents accidental writes, but is **not** a security boundary. A user can override it at any point
+> executing `SET default_transaction_read_only = off` in a session.
+
+</details>
 
 ## Roles
 
