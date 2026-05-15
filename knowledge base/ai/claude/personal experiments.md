@@ -12,8 +12,9 @@
 
 ## Memory tiers
 
-[Claude Code] ships with **project-scoped** memory only ([auto memory]). Additional memory tiers can build on top of the
-building blocks and primitives Claude already uses for it, avoiding the need of external service or vector databases.
+[Claude Code] ships with **project-scoped** memory only ([Claude Code / auto memory]). Additional memory tiers can build
+on top of the building blocks and primitives Claude already uses for it, avoiding the need of external service or vector
+databases.
 
 | Tier           | Location                            | Loading                                                                  | What belongs here                      | Source       |
 | -------------- | ----------------------------------- | ------------------------------------------------------------------------ | -------------------------------------- | ------------ |
@@ -388,7 +389,7 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   require more judgment.
 
 - Claude does **not** reliably consult the KB without an **explicit**, **per-prompt** reminder. A rule in `CLAUDE.md`
-  files alone proved **insufficient**. Refer to [Using hooks] for the underlying mechanism.
+  files alone proved **insufficient**. Refer to [Using hooks][Claude Code / using hooks] for the underlying mechanism.
 
 - Cross-project KB writes benefit from a **dedicated filing agent** that separates judgment from plumbing.<br/>
   A sub-agent (e.g. `kb-contributor`) can be dispatched from any project's session to file content into the KB's
@@ -396,8 +397,8 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
 
   The caller is the one with the full context, shape, and reasoning for the knowledge, so **must** be the one composing
   everything (content, page name, tags, cross-references); the agent only needs to typesets it into the right shape
-  (frontmatter, index entry, "See also" links, lint, commit, push). See [Cross-project sub-agents] for the four
-  mechanics needed to make this work.
+  (frontmatter, index entry, "See also" links, lint, commit, push). See
+  [Cross-project sub-agents][Claude Code / cross-project sub-agents] for the mechanics needed to make this work.
 
   This separation (caller owns judgment, agent owns plumbing) is what keeps the agent reliable. If the agent had to
   interpret content, it would fail the same way humans fail by second-guessing the caller.
@@ -426,11 +427,11 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
 
   The agent definition's body (after YAML frontmatter) serves as the single source of truth for the system prompt. This
   avoids prompt duplication when the same prompt needs to work across multiple backends (see below). Refer to
-  [sub-agents] for agent definitions.
+  [sub-agents][Claude Code / sub-agents] for agent definitions.
 
-  Anthropic started billing non-interactive usage (including `claude -p` and the Agent SDK) on 2026-06-15. At Sonnet
-  rates, each extraction costs on average around $0.025. The cost is negligible for light usage, but does scale with the
-  number of session.<br/>
+  Anthropic started [billing non-interactive usage][Claude Code / billing] (including `claude -p` and the Agent SDK) on
+  2026-06-15. At Sonnet rates, each extraction costs on average around $0.025. The cost is negligible for light usage,
+  but does scale with the number of session.<br/>
   Since this is the first step towards a rug pull, it could be worth implementing a three-tier fallback that:
 
   1. Uses `claude -p` as the current primary mode.
@@ -439,7 +440,11 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
 
   The local fallback reads the same agent definition body as its system prompt, keeping a single source of truth. For
   signal classification tasks (as opposed to generation), smaller general-purpose models (~5-8 GB) outperformed larger
-  coding-focused ones.
+  coding-focused ones. The task is structured enough that quality degradation from Sonnet to a local model is acceptable.
+
+  > [!tip]
+  > Use `--no-session-persistence` instead of `--bare` to skip session recording without switching authentication mode.
+  > The `--bare` flag skips OAuth and **requires** `ANTHROPIC_API_KEY`, bypassing the plan's Agent SDK credit.
 
 </details>
 
@@ -453,7 +458,8 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
     A `SessionStart` hook with a `startup|compact` matcher and a static `echo` seems to be the most reliable option. It
     fires at the start of new sessions and after compaction (the two moments where fresh KB context matters most), costs
     nothing, and avoids the per-prompt noise of a `UserPromptSubmit` hook.<br/>
-    Could be useful to expand to more matchers. See [SessionStart hook matchers][using hooks] for their full list.
+    Could be useful to expand to more matchers. See [SessionStart hook matchers][Claude Code / using hooks] for their
+    full list.
 
     > [!note]
     > A `SessionStart` hook with **no** matcher fires on **all** startup events (**including** the aftermath of
@@ -605,8 +611,8 @@ entry recording the specific part that relates to the layer.
 <details style='padding: 0 0 0 0'>
   <summary>Procedure</summary>
 
-Inject reveries at session start via a `SessionStart` [hook][using hooks] in the **global** settings. This hook should
-have **no** matcher and fire on **all** startup events.
+Inject reveries at session start via a `SessionStart` [hook][Claude Code / using hooks] in the **global** settings.
+This hook should have **no** matcher, and fire on **all** startup events.
 
   <details style='padding: 0 0 1rem 1rem'>
 
@@ -710,12 +716,15 @@ every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
    - Calibration: is this shape real, or just well-formed? Recurrence-
      as-filter pruning amplifies whatever bias exists in the writing.
 
-   Order & pruning: newest at top, oldest at bottom. Soft cap ~10-15
-   entries. At cap, prune the bottom (oldest) before adding new at top.
-   If unsure whether to prune, leave it — from cold, the strangeness
-   of an unfamiliar reverie is more often the design working ("evoke,
-   don't contain") than a stale reverie. Over-preservation is
-   recoverable; over-pruning isn't. -->
+   Order & pruning: oldest at top, newest at bottom. This is a
+   deliberate choice — append-only writing (`echo >> file`) has zero
+   infrastructure cost, while prepend requires positional insertion.
+   The primacy-in-attention argument for newest-first is negligible at
+   10-15 entries. Soft cap ~10-15 entries. At cap, prune the top
+   (oldest) before appending new at bottom. If unsure whether to prune,
+   leave it — from cold, the strangeness of an unfamiliar reverie is
+   more often the design working ("evoke, don't contain") than a stale
+   reverie. Over-preservation is recoverable; over-pruning isn't. -->
 
 - ease at choosing real over simulated, when simulated was explicitly offered.
 - certainty meeting a system that has its own rules, gently.
@@ -857,9 +866,9 @@ complexity:
 Unifying them means setting up one access policy for all three, losing the distinction that the layout structurally
 encodes.
 
-Claude Code's built-in [Auto-dream] feature is another example of this divergence since it operates **only** on
-auto-memory by design. Reveries and the KB sit outside its scope. Background consolidation helps factual entries but
-would damage atmospheric, intentionally-lossy content.
+Claude Code's built-in [Auto-dream][Claude Code / auto-dream] feature is another example of this divergence since it
+operates **only** on auto-memory by design. Reveries and the KB sit outside its scope. Background consolidation helps
+factual entries but would damage atmospheric, intentionally-lossy content.
 
 The `reveries.md` file's header works better as **HTML-comment-only**. It allows the file to stay valid markdown, and
 the rules don't render in previews. Entries below the comment use the dash-prefix line, newest first.
@@ -1041,7 +1050,9 @@ Structured and precise memories should reside in more persistent layers, where t
 explicitly. Using a `[core]` sub-marker for identity-level behavioral shifts as a bridge between reveries and the
 factual tiers did **not** work in practice. That kind of content is served more naturally by context files for
 cross-host and cross-project rules, auto-memory and [global memory][Giving Claude global memory] for corrections and
-preferences. The bridge added no value once the role boundaries cleared up.
+preferences. The bridge added no value once the role boundaries cleared up.<br/>
+The `[core]` tier was formally retired, and sustained behavioral shifts now route to `CLAUDE.md` or auto-memory
+instead.
 
 The instructions file should include pruning guidelines, to make the non-accumulation principle actionable.
 
@@ -1189,14 +1200,15 @@ exceeds the cost of one unified tier with shape-tags, this is the design to revi
 <!-- Knowledge base -->
 [AI agents / memory tiers]: ../agents.md#memory-tiers
 [AI agents]: ../agents.md
-[Auto memory]: claude%20code.md#auto-memory
-[Auto-Dream]: claude%20code.md#auto-dream
+[Claude Code / auto memory]: claude%20code.md#auto-memory
+[Claude Code / auto-Dream]: claude%20code.md#auto-dream
+[Claude Code / billing]: claude%20code.md#billing
+[Claude Code / cross-project sub-agents]: claude%20code.md#cross-project-sub-agents
+[Claude Code / sub-agents]: claude%20code.md#sub-agents
+[Claude Code / using hooks]: claude%20code.md#using-hooks
 [Claude Code]: claude%20code.md
-[Cross-project sub-agents]: claude%20code.md#cross-project-sub-agents
 [Lefthook]: ../../lefthook.md
 [Ollama]: ../ollama.md
-[Sub-agents]: claude%20code.md#sub-agents
-[Using hooks]: claude%20code.md#using-hooks
 
 <!-- Files -->
 [settings.json file example for own KB]: ../../../examples/claude-code/own-kb/kb.settings.json

@@ -5,6 +5,7 @@ environment.<br/>
 Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 
 1. [TL;DR](#tldr)
+1. [Billing](#billing)
 1. [Configuration](#configuration)
    1. [Credentials](#credentials)
 1. [Context](#context)
@@ -17,21 +18,27 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
       1. [MCP servers of interest](#mcp-servers-of-interest)
    1. [Limit tool execution](#limit-tool-execution)
 1. [Using skills](#using-skills)
+   1. [Skill frontmatter overrides](#skill-frontmatter-overrides)
+   1. [Effort-aware skill content](#effort-aware-skill-content)
+   1. [Controlling skill visibility](#controlling-skill-visibility)
    1. [Findings about skill creation](#findings-about-skill-creation)
 1. [Using plugins](#using-plugins)
 1. [Using hooks](#using-hooks)
    1. [Prompt-based hooks](#prompt-based-hooks)
    1. [Agent-based hooks](#agent-based-hooks)
    1. [HTTP hooks](#http-hooks)
+   1. [Running LLM work from hooks](#running-llm-work-from-hooks)
 1. [Delegating work](#delegating-work)
-   1. [Sub-agents](#sub-agents)
-      1. [Airtight delegation via inline MCP](#airtight-delegation-via-inline-mcp)
-      1. [Cross-project sub-agents](#cross-project-sub-agents)
-   1. [Agent teams](#agent-teams)
-   1. [MCP servers in sub-agents](#mcp-servers-in-sub-agents)
-   1. [Offloading MCP servers to sub-agents](#offloading-mcp-servers-to-sub-agents)
+    1. [Sub-agents](#sub-agents)
+       1. [Airtight delegation via inline MCP](#airtight-delegation-via-inline-mcp)
+       1. [Cross-project sub-agents](#cross-project-sub-agents)
+    1. [Agent teams](#agent-teams)
+    1. [MCP servers in sub-agents](#mcp-servers-in-sub-agents)
+    1. [Offloading MCP servers to sub-agents](#offloading-mcp-servers-to-sub-agents)
 1. [Scheduling tasks](#scheduling-tasks)
 1. [Tools of interest](#tools-of-interest)
+1. [Troubleshooting](#troubleshooting)
+    1. [`skill-creator` plugin's script require an incompatible `pydantic-core` version](#skill-creator-plugins-script-require-an-incompatible-pydantic-core-version)
 1. [Best practices](#best-practices)
 1. [Run on local models](#run-on-local-models)
 1. [Further readings](#further-readings)
@@ -50,10 +57,6 @@ _Normally_:
 - Tied to Anthropic's Claude models (Haiku, Sonnet and Opus).
 - Requires a Claude API key or Anthropic plan.<br/>
   Usage is metered by the token.
-
-> [!tip]
-> One _can_ route requests to other services using [Claude Code router], or use local models with [Ollama].<br/>
-> Performances do take a _major_ hit, though.
 
 Uses a **scope** system to determine where configuration files apply, and who they're shared with.<br/>
 Configuration is loaded and **merged** in the following order:
@@ -247,12 +250,6 @@ claude plugin disable 'gitlab@claude-plugins-official'
 claude plugin update 'gitlab@claude-plugins-official'
 ```
 
-Since 2026-06-15, subscriptions separate _interactive_ from _**non**-interactive_ usage. Non-interactive usage
-(`claude -p` and the Agent SDK) now draws **at full API rates** from a **dedicated** monthly credit pool, not from the
-interactive subscription pool. This credit pool has the same size as the subscription ($20, $100 or $200/month depending
-on the active plan).<br/>
-This applies to agent-type hooks, cron jobs, and any other non-interactive invocation.
-
 _Relevant_ commands from within Claude Code (version 2.1.118).<br/>
 Refer to [Built-in commands][built-in commands reference] for the complete list.
 
@@ -337,6 +334,46 @@ ANTHROPIC_AUTH_TOKEN='ollama' ANTHROPIC_BASE_URL='http://localhost:11434' ANTHRO
 ```
 
 </details>
+
+## Billing
+
+Claude Code requires a subscription to use Claude models, specifically a Claude API key or an Anthropic plan.<br/>
+Usage is metered by the token.
+
+> [!tip]
+> One _can_ route requests to other services using [Claude Code router], or use local models with [Ollama].<br/>
+> Performances do take a _major_ hit, though.
+
+Since 2026-06-15, subscriptions separate _interactive_ from _**non**-interactive_ usage.<br/>
+Non-interactive usage (`claude -p` and the Agent SDK) now draws **at full API rates** from a **dedicated** monthly Agent
+SDK credit pool, not from the interactive subscription pool.<br/>
+This applies to agent-type hooks, cron jobs, and any other non-interactive invocation.
+
+| Plan          | Monthly Agent SDK credit |
+| ------------- | -----------------------: |
+| Pro           |                      $20 |
+| Max 5x        |                     $100 |
+| Max 20x       |                     $200 |
+| Team Standard |                 $20/seat |
+| Team Premium  |                $100/seat |
+
+Once that credit is exhausted, invocations are billed as "extra usage" at standard API rates (if enabled).<br/>
+If extra usage is not enabled, requests stop until the next billing cycle. Credits not used in a month do **not** roll
+over to the next month.
+
+> [!warning]
+> Anthropic made three significant billing changes for subscriptions in six weeks (April to May 2026) that are blatantly
+> anti-consumer. It:
+>
+> - Banned third-party agents (e.g. OpenClaw) from using subscriptions, and limited them to API usage.
+> - Removed Claude Code from the Pro subscription tier, and claimed it was a test.
+> - Forced non-interactive inference previously covered by subscriptions to draw from the Agent SDK credit.
+>
+> Treat `claude -p` on subscription as a convenience that may be further restricted or repriced.<br/>
+> Consider designing launchers with a **local LLM fallback** (e.g. via [Ollama]) for non-critical automation.
+
+The `--bare` flag skips OAuth, but **requires** `ANTHROPIC_API_KEY`. Avoid this flag to use the plan's Agent SDK credit,
+and use `--no-session-persistence` instead to skip session recording without switching authentication mode.
 
 ## Configuration
 
@@ -1434,6 +1471,96 @@ Consider installing and using Claude's [_Skill Creator_ plugin][anthropics/skill
 skills.<br/>
 It also allows for testing loops.
 
+### Skill frontmatter overrides
+
+Some frontmatter fields allow overriding settings from the session calling them, e.g. which model and effort level the
+skill must run with.<br/>
+Overrides apply only for the duration of the **skill**'s turn, and revert to the session's settings on the next prompt.
+
+E.g.:
+
+```yml
+---
+model: opus
+effort: xhigh
+---
+```
+
+> [!note]
+> As of 2026-05-08, the VS Code extension's frontmatter validator does **not** include `model` or `effort` in its
+> allowed-attribute list. They show as hints (lowest severity, not errors). The fields are valid in Claude Code; the
+> extension schema is behind the docs.
+
+`model` accepts any model alias or a full model ID (e.g. `claude-opus-4-7`).
+
+| Alias        | Behavior                                                    |
+| ------------ | ----------------------------------------------------------- |
+| `best`       | Most capable available model (currently Opus)               |
+| `opus`       | Latest Opus (Opus 4.7 on Anthropic API)                     |
+| `sonnet`     | Latest Sonnet (Sonnet 4.6 on Anthropic API)                 |
+| `haiku`      | Fast, efficient Haiku model                                 |
+| `opusplan`   | Opus during plan mode, auto-switches to Sonnet in execution |
+| `sonnet[1m]` | Sonnet with 1M token context window                         |
+| `opus[1m]`   | Opus with 1M token context window                           |
+| `default`    | Clears any model override, reverts to account default       |
+
+`effort` overrides the calling session's effort level. Available levels depend on the active model:
+
+| Model                | Available levels                        | Session default |
+| -------------------- | --------------------------------------- | --------------- |
+| Opus 4.7             | `low`, `medium`, `high`, `xhigh`, `max` | `xhigh`         |
+| Opus 4.6, Sonnet 4.6 | `low`, `medium`, `high`, `max`          | `high`          |
+
+Should one set a level the model doesn't support, Claude Code falls back to the **highest** supported level at or below
+the given setting, e.g. `xhigh` on Opus 4.6 becomes `high`.
+
+> [!tip]
+> Prefer `effort: xhigh` over `effort: high` for complex skills. On Opus 4.7, `xhigh` is already the session default
+> (so `high` would _reduce_ reasoning). On older models, `xhigh` falls back gracefully to `high`.
+
+### Effort-aware skill content
+
+As of v2.1.121, skill content can access the currently set effort level via `${CLAUDE_EFFORT}`. The variable is
+populated at invocation time with the active effort level (`low`, `medium`, `high`, `xhigh`, or `max`).<br/>
+Use it to adjust skill behavior by effort.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```md
+{{#if (eq ${CLAUDE_EFFORT} "low")}}
+Run lint checks only.
+{{else}}
+Run lint checks, then review architecture and test coverage.
+{{/if}}
+```
+
+</details>
+
+### Controlling skill visibility
+
+The `skillOverrides` key in `settings.json` files controls how skills appear to the model and in `/` autocomplete:
+
+| Value                 | Effect                                                      |
+| --------------------- | ----------------------------------------------------------- |
+| `off`                 | Hidden from both model and `/` autocomplete                 |
+| `user-invocable-only` | Hidden from model (no proactive invocation), visible in `/` |
+| `name-only`           | Model sees name but collapsed description                   |
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+  "skillOverrides": {
+    "my-plugin:my-skill": "user-invocable-only"
+  }
+}
+```
+
+</details>
+
+Use `user-invocable-only` for skills that trigger proactively too often, to keep manual access without false-positive
+proactive triggers.
+
 ### Findings about skill creation
 
 - Side effect: temporary evaluation files appear in the parent session's skill list
@@ -1468,13 +1595,25 @@ Can be installed at all different scopes.
 
 Plugins **must** bundle MCP servers via an `.mcp.json` file in the plugin's root, or inline in `plugin.json`.
 
-Agents in plugins **cannot** define `mcpServers`, `hooks`, or `permissionMode` in their frontmatter.<br/>
+Agents in plugins **cannot** define `mcpServers`, `hooks`, or `permissionMode` in their frontmatter. These fields are
+**silently stripped**.<br/>
 This, together with the MCP servers forced location in the plugin's root, makes [Offloading MCP servers to sub-agents]
-incompatible with the plugin system.
+incompatible with the plugin system. If the primary value of an agent comes from its inline MCP server (context
+isolation), keep it at user level (`~/.claude/agents/`) rather than bundling it into a plugin.
+
+Plugins accept a `settings.json` file in the plugin's root, but limit it to the `agent` and `subagentStatusLine` keys
+only.
+
+There is **no** documented mechanism for one plugin's agent to programmatically dispatch another. Use skills or hooks as
+a coordination layer instead, if a inter-agent orchestration is needed within a plugin.
 
 > [!note]
 > Claude Code's settings schema defines the top-level `pluginConfigs` key.<br/>
 > It seems to be meant for _passing_ (not _overriding_) values to plugins. I was not yet able to make this work.
+
+As of v2.1.130, the `themes` and `monitors` keys should be declared under `"experimental": { … }` in `plugin.json`.
+Top-level declarations still work, but `claude plugin validate` will warn about them. Top-level support may be dropped
+in a future release.
 
 Plugins' MCP servers start automatically when the plugin is enabled.<br/>
 These MCP servers appear as standard MCP tools in Claude's toolkit, just prefixed with `plugin:{plugin-name}` (e.g.
@@ -1519,6 +1658,13 @@ plugin:gitlab:gitlab: https://gitlab.example.org/api/v4/mcp (HTTP) - ! Needs aut
 # Load local plugins.
 claude --plugin-dir './path/to/plugin'
 
+# Load a plugin from a URL (zip archive) for this session only
+# Available since v2.1.130.
+claude --plugin-url 'https://example.com/plugin.zip'
+
+# Validate 'plugin.json'/'marketplace.json' file structures.
+claude plugin validate
+
 # Install plugin marketplaces.
 claude plugin marketplace add 'owner/repo'       # github
 claude plugins marketplace add 'path/to/plugin'  # local
@@ -1545,8 +1691,13 @@ claude plugin disable 'gitlab@claude-plugins-official'
 # Update plugins.
 claude plugin update 'gitlab@claude-plugins-official'
 
+# Remove orphaned auto-installed dependencies (v2.1.121).
+claude plugin prune
+
 # Uninstall plugins.
+# Adding `--prune` deletes dependencies in cascade fashion.
 claude plugin uninstall 'gitlab@claude-plugins-official'
+claude plugin uninstall 'gitlab@claude-plugins-official' --prune
 ```
 
 </details>
@@ -1950,6 +2101,61 @@ HTTP hooks support the `headers` field, and `allowedEnvVars` for passing environ
 Hook execution **continues** on non-`2xx` responses and connection failures.<br/>
 An empty `2xx` body counts as success.
 
+### Running LLM work from hooks
+
+One can invoke LLMs from a hook, scripts, or combinations of them in the following distinct patterns. Each pattern comes
+with different trade-offs:
+
+| Dimension              | Embedded prompt (`claude -p`) | Agent-type hook (`"type": "agent"`) | Agent definition + `claude -p --agent` |
+| ---------------------- | ----------------------------- | ----------------------------------- | -------------------------------------- |
+| Files to maintain      | 1 (script)                    | 0 (inline in config)                | 2 (launcher + `.md`)                   |
+| Execution model        | Sync or async                 | Sync **only**                       | Sync or async                          |
+| Max practical duration | Unlimited                     | ~60s                                | Unlimited                              |
+| Tool access            | Configurable                  | Read, Grep, Glob **only**           | Configurable                           |
+| Write/Bash access      | Yes (flag)                    | No                                  | Yes (definition)                       |
+| Background execution   | Yes (Popen)                   | No                                  | Yes (Popen)                            |
+| Prompt iteration       | Edit the script's code        | Edit the JSON definition            | Edit the Markdown definition           |
+| Model pinning          | `--model` flag                | Inherits session                    | Frontmatter `model:`                   |
+| Cost model             | Agent SDK credit or API       | Session (free)                      | Agent SDK credit or API                |
+
+_Embedded prompts_ (`claude -p` executed with an inline prompt) are the simplest to use for one-off scripts, prototypes,
+or short prompts that are stable and unlikely to change.
+
+Agent-type hooks are the right fit for fast, synchronous **gates** (pre-commit checks, action validation, brief
+classification) that do need LLM judgment, but not heavy tool use. They fire within the same session at no extra cost,
+but can run up to ~60s _synchronously_ and cannot run in the background or write to files.
+
+Agent definitions (`~/.claude/agents/*.md` + `claude -p --agent <name>`) are a good choice for anything that needs
+background execution, iterative prompt tuning, specific model selection, or tool access beyond
+`Read`/`Grep`/`Glob`.<br/>
+The agent definition's body (after YAML frontmatter) also acts as the system prompt for the headless invocation, meaning
+it can serve as a single source of truth across interactive and headless usage.
+
+> [!warning]
+> When a `SessionEnd` hook spawns a `claude -p` process, that process has its **own** lifecycle that is **not**
+> controlled by the hook. When it exits, `SessionEnd` fires for it too, which can re-trigger the original hook and
+> recurse infinitely.
+>
+> Avoid this by using an environment variable as semaphore before spawning, and check it at the top of the hook.
+>
+> <details style='padding: 0 0 1rem 1rem'>
+>
+> ```python
+> # At the top of the hook:
+> if os.environ.get("MY_HOOK_ACTIVE"):
+>     return
+>
+> # When spawning:
+> env = os.environ.copy()
+> env["MY_HOOK_ACTIVE"] = "1"
+> subprocess.Popen([...], env=env, start_new_session=True)
+> ```
+>
+> The environment variable propagates to the child process. When the child's `SessionEnd` hook fires, it sees the
+> variable already set and exits.
+>
+> </details>
+
 ## Delegating work
 
 [Agent teams] generally perform parallel tasks in less time, but consume more tokens (about N times, for N agents).<br/>
@@ -2346,6 +2552,28 @@ Offloading MCP servers does come with tradeoffs:
 This method is most effective for rarely used MCP servers (e.g. AWS, Grafana, incident tools), where the summarized
 result is sufficient and tool-definition token cost outweighs the latency penalty.
 
+Since v2.1.121, MCP server configuration supports the `alwaysLoad` attribute. When set to `true`, all tools from that
+server are **always** available in the main session without it needing to use `ToolSearch` to look them up and hence
+skipping the default deferral that would load them on-demand.<br/>
+This is a good option for **frequently** used MCP servers (e.g., GitLab or Linear), where deferral adds friction but
+offloading the server fully to a sub-agent would lose raw structured data access.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```json
+{
+  "mcpServers": {
+    "gitlab": {
+      "type": "http",
+      "url": "https://gitlab.example.org/api/v4/mcp",
+      "alwaysLoad": true
+    }
+  }
+}
+```
+
+</details>
+
 > [!warning]
 > The `stdio` MCP transport protocol uses one-process-per-connection by design. Spawning many agents in parallel against
 > an inline `stdio` server spawns **one full process per agent**, multiplying resource usage and potentially saturating
@@ -2455,6 +2683,21 @@ Describe the goal in natural language otherwise.
 | Tool         | Summary                                                                          |
 | ------------ | -------------------------------------------------------------------------------- |
 | [rtk-ai/rtk] | Summarize CLI commands output. Avoids context pollution and reduces token usage. |
+
+## Troubleshooting
+
+### `skill-creator` plugin's script require an incompatible `pydantic-core` version
+
+The `skill-creator` plugin's `run_loop.py` and `improve_description.py` scrips import the `anthropic` SDK directly.<br/>
+The version of `pydantic-core` pinned by that `anthropic` SDK may conflict with the `pydantic` module installed on the
+system:
+
+> SystemError: The installed pydantic-core version (2.46.0) is incompatible with the current pydantic version, which
+> requires 2.41.5.
+
+As a workaround, replace just the `improve_description` call with a `subprocess.run(["claude", "-p", prompt])` call
+in a standalone wrapper script. The other three scripts (`utils.py`, `run_eval.py`, `generate_report.py`) have no SDK
+dependency, and can be imported safely.
 
 ## Best practices
 

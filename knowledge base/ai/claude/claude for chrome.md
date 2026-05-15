@@ -20,6 +20,11 @@ The Anthropic ecosystem offers two distinct Google Docs integrations:
 Prefer the Chrome extension for _editing_.<br/>
 Prefer the Drive integration when _just reading_.
 
+The extension has pre-loaded familiarity with specific platforms like Slack, Gmail, Google Calendar, Google Docs, and
+GitHub. High-level commands ("update the doc", "reply to that thread") work **without** requiring step-by-step
+guidance.<br/>
+Other sites might work, but require more explicit instructions about what to click and type.
+
 The extension allows Claude to:
 
 - Operate across **all open tabs in a designated tab group**.
