@@ -431,16 +431,74 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
 
   Anthropic started [billing non-interactive usage][Claude Code / billing] (including `claude -p` and the Agent SDK) on
   2026-06-15. At Sonnet rates, each extraction costs on average around $0.025. The cost is negligible for light usage,
-  but does scale with the number of session.<br/>
-  Since this is the first step towards a rug pull, it could be worth implementing a three-tier fallback that:
+  but does scale with the number of sessions and Anthropic's behaviour feels the first step towards a rug pull.
 
-  1. Uses `claude -p` as the current primary mode.
-  1. Falls back to a local model via [Ollama] or other inference servers (Ollama is just the easier for now).
-  1. Skips the LLM call entirely, while still running the pattern-matching step.
+  One can implement a three-tier fallback to hedge against billing changes:
 
-  The local fallback reads the same agent definition body as its system prompt, keeping a single source of truth. For
-  signal classification tasks (as opposed to generation), smaller general-purpose models (~5-8 GB) outperformed larger
-  coding-focused ones. The task is structured enough that quality degradation from Sonnet to a local model is acceptable.
+  1. Spawn `claude -p --agent session-extractor` using Sonnet and drawing from the Agent SDK credit pool as the primary
+     method.
+  1. Fall back to a free [Ollama] local model, optionally activated via a `EXTRACTION_OLLAMA_MODEL` environment variable
+     of sorts.
+  1. Skip the LLM call entirely, letting the pattern-matching pass cover the basics.
+
+  The local fallback reads the same agent definition body as its system prompt, which allows it to be a single source of
+  truth.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Models evaluated for local execution</summary>
+
+  7 models tested, 10 test cases each.<br/>
+  5 cases were full previous conversations that saved and mises saving insights, the other 5 were synthetic ones,
+  created from previous conversations and stripped of the evidence of saving insights.
+
+  | Model             |   Size |     Score | Avg latency | Failure mode          |
+  | ----------------- | -----: | --------: | ----------: | --------------------- |
+  | Sonnet (baseline) |  cloud |      7/10 |         44s | —                     |
+  | llama3.2:3b       | 2.0 GB |      0/10 |       9-33s | Can't say no (all FP) |
+  | qwen3:8b          | 5.2 GB |      0/10 |      11-28s | Prompt too complex    |
+  | gemma4:e4b        | 9.6 GB | **10/10** |         21s | —                     |
+  | gemma4:26b (MoE)  |  17 GB |      2/10 |         26s | Too conservative      |
+  | glm-4.7-flash     |  19 GB |      1/10 |      15-35s | Too conservative      |
+  | qwen3.6:35b       |  22 GB |      4/10 |     22-115s | Too conservative      |
+
+  `think: false` halves latency, `keep_alive: 0` frees VRAM immediately after execution.<br/>
+  `gemma4:e4b` came out as the absolute winner under these conditions.
+
+  Key findings:
+
+  - The extraction prompt needed to be rewritten to a **conversation-flow framing**.
+
+    The model must check whether the conversation shows the assistant _acting on_ saving an insight ("let me save this",
+    "writing to memory"), not whether a filename in the written-files list matches a topic (metadata inference).<br/>
+    This plays to what small models are good at (comprehension) rather than what they're bad at (inferring file contents
+    from filenames).
+
+  - Model size does **not** predict performance.
+
+    Larger models scored _worse_ than `gemma4:e4b` because they proved better at cross-referencing filenames.
+    Paradoxically, being worse at filename-matching makes a model a better backstop by surfacing items that stronger
+    models incorrectly dismiss.
+
+  - Distinct failure modes emerged across model sizes:
+
+    - Smaller models (`llama3.2:3b`) **always** generate output, scoring 0% precision.
+    - The prompt might be **too** complex, preventing some models (`qwen3:8b`, `glm-4.7-flash`) from finding anything
+      and almost always responding "Nothing missed".
+    - `gemma4:e4b` engaged with the content **and** found real topics with the same prompt, much better than both its
+      bigger sibling and the rest of the evaluated models.
+
+  - The host's resources put constraint on the extractor model size and behaviours.
+
+    Models over ~15 GB caused noticeable sluggishness during inference on a MacBook Pro M3 36GB. `gemma4:e4b` was right
+    at the comfort boundary for background tasks.<br/>
+    This is one more reason to use **remote** models on smaller hosts.
+
+  - `gemma4:e4b` outscored Sonnet on detection (10/10 vs 7/10) while running entirely local.
+
+    Sonnet's output quality was superior (gave back more specifics, named tiers, flagged borderline cases), but
+    detection rate matters more for the backstop role than output polish.
+
+  </details>
 
   > [!tip]
   > Use `--no-session-persistence` instead of `--bare` to skip session recording without switching authentication mode.
