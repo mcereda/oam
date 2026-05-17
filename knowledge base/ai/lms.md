@@ -19,6 +19,7 @@ the previous ones.
 1. [Reasoning](#reasoning)
 1. [Prompting](#prompting)
    1. [Procedural instructions degrade into declarative hints](#procedural-instructions-degrade-into-declarative-hints)
+   1. [Priming](#priming)
 1. [Context window](#context-window)
 1. [Function calling](#function-calling)
 1. [Compression](#compression)
@@ -420,6 +421,40 @@ The model, by its own admission, _knows_ the answer, skips the lookup, and confi
 Negative constraints (e.g. _do not infer_) seems to be key. Without it, the model's default behavior of pattern-matching
 and filling from context could silently override the procedure.
 
+### Priming
+
+Text already present in the context shapes the model's subsequent output, even when that text is never explicitly
+referenced or consulted.
+
+One can leverage this effect, and inject text at the start of a session to shape a model's behaviour (_priming_).<br/>
+The mechanism is similar to cognitive psychology's priming, where prior exposure to a stimulus influences later
+responses without conscious recall. Whether the underlying process is genuinely similar, or a mere statistical pattern
+activation, remains an open question.
+
+The effect in LLMs is proven by research:
+
+- In
+  [Priming, Path-dependence, and Plasticity: Understanding the molding of user-LLM interaction and its implications from (many) chat logs in the wild],
+  Zhu et al. analyzed 140K chatbot sessions. They found that interaction patterns emerge within 5 sessions, and lock in
+  when early pragmatic choices are repeated 5 to 50 times. Users develop 2 to 4 expression types, and then just stop
+  experimenting (_agency paradox_). The study only measures **user** behavior, but in LLMs early tokens constrain later
+  ones, mimicking the mechanism.
+- In [The Power of Stories: Narrative Priming Shapes How LLM Agents Collaborate and Compete], Großmann et al. primed LLM
+  agents with ~260 tokens of story about cooperation. Stories about teamwork (_atmospheric narratives_) outperformed
+  explicit directives like "maximize your reward", and nonsense narratives performed poorly. The outcome is that meaning
+  does matter, but also does the _form_ that meaning is given as: atmospheric-but-meaningful beats
+  instruction-shaped.<br/>
+  The effect requires a **shared narrative**, because different priming stories across agents in the same system can
+  _reverse_ the benefit.
+- In [Do Language Models Exhibit Human-like Structural Priming Effects?], Jumelet et al. found that _rarer_ elements
+  within a prime produce **stronger** priming effects, and that _distinctive_ text does more work than _familiar_ text
+  (inverse-frequency effect).
+
+These effects matter for any system that preloads text into an LLM's context (system prompts, memory injection, ambient
+context files). Position does matter too (text loaded _earliest_ occupies the strongest priming position), as does
+_coherence_ (multiple priming elements pulling in inconsistent directions can dilute rather than reinforce).<br/>
+The [reveries experiment] is an applied analysis of how priming shapes a concrete memory system design for [Claude].
+
 ## Context window
 
 Amount of text, **in tokens**, that a model can _remember_ at any one time.<br/>
@@ -804,6 +839,9 @@ Refer:
 - [karpathy/autoresearch] and its forks ([miolini/autoresearch-macos], [trevin-creator/autoresearch-mlx], …)
 - [Data Distillation: 10x Smaller Models, 10x Faster Inference]
 - [Using evolutionary algorithms with LLMs]
+- [Priming, Path-dependence, and Plasticity: Understanding the molding of user-LLM interaction and its implications from (many) chat logs in the wild]
+- [The Power of Stories: Narrative Priming Shapes How LLM Agents Collaborate and Compete]
+- [Do Language Models Exhibit Human-like Structural Priming Effects?]
 
 ### Sources
 
@@ -850,6 +888,7 @@ Refer:
 [llama.cpp]: llama.cpp.md
 [LMStudio]: lmstudio.md
 [Ollama]: ollama.md
+[Reveries experiment]: claude/personal%20experiments.md#giving-claude-a-reverie-like-system
 [Using evolutionary algorithms with LLMs]: using%20evolutionary%20algorithms%20with%20LLMs.md
 [vLLM]: vllm.md
 
@@ -863,6 +902,7 @@ Refer:
 [Continual Learning: How AI Models Stay Smarter Over Time]: https://blog.premai.io/continual-learning-how-ai-models-stay-smarter-over-time/
 [Copilot]: https://copilot.microsoft.com/
 [Data Distillation: 10x Smaller Models, 10x Faster Inference]: https://blog.premai.io/data-distillation-10x-smaller-models-10x-faster-inference/
+[Do Language Models Exhibit Human-like Structural Priming Effects?]: https://arxiv.org/abs/2406.04847
 [Duck AI]: https://duck.ai/
 [Evaluating Robustness of Large Language Models in Enterprise Applications: Benchmarks for Perturbation Consistency Across Formats and Languages]: https://arxiv.org/abs/2601.06341
 [Fast Inference from Transformers via Speculative Decoding]: https://arxiv.org/abs/2211.17192
@@ -889,6 +929,7 @@ Refer:
 [Mistral]: https://mistral.ai/
 [OpenClaw: Who are you?]: https://www.youtube.com/watch?v=hoeEclqW8Gs
 [Optimizing LLMs for Performance and Accuracy with Post-Training Quantization]: https://developer.nvidia.com/blog/optimizing-llms-for-performance-and-accuracy-with-post-training-quantization/
+[Priming, Path-dependence, and Plasticity: Understanding the molding of user-LLM interaction and its implications from (many) chat logs in the wild]: https://arxiv.org/abs/2605.05767
 [Prompting best practices]: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
 [Quantifying Language Models' Sensitivity to Spurious Features in Prompt Design or: How I learned to start worrying about prompt formatting]: https://arxiv.org/abs/2310.11324
 [ReAct: Synergizing Reasoning and Acting in Language Models]: https://arxiv.org/abs/2210.03629
@@ -899,6 +940,7 @@ Refer:
 [The Dangerous Illusion of AI Coding? / transcript]: study%20material/jeremy-howard-ulmfit-fine-tuning-and-intuition-in-ml-final-rev-f76e2cc7.pdf
 [The Dangerous Illusion of AI Coding?]: https://www.youtube.com/watch?v=dHBEQ-Ryo24
 [The Last Fingerprint: How Markdown Training Shapes LLM Prose]: https://arxiv.org/abs/2603.27006
+[The Power of Stories: Narrative Priming Shapes How LLM Agents Collaborate and Compete]: https://arxiv.org/abs/2505.03961
 [This is not the AI we were promised]: https://www.youtube.com/watch?v=CyyL0yDhr7I
 [trevin-creator/autoresearch-mlx]: https://github.com/trevin-creator/autoresearch-mlx
 [What are Language Models in NLP?]: https://www.geeksforgeeks.org/nlp/what-are-language-models-in-nlp/

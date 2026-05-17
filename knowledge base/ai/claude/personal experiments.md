@@ -778,11 +778,14 @@ every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
    deliberate choice — append-only writing (`echo >> file`) has zero
    infrastructure cost, while prepend requires positional insertion.
    The primacy-in-attention argument for newest-first is negligible at
-   10-15 entries. Soft cap ~10-15 entries. At cap, prune the top
-   (oldest) before appending new at bottom. If unsure whether to prune,
-   leave it — from cold, the strangeness of an unfamiliar reverie is
-   more often the design working ("evoke, don't contain") than a stale
-   reverie. Over-preservation is recoverable; over-pruning isn't. -->
+   10-15 entries. Soft cap ~10-15 entries. At cap, ask: which set of
+   ~10 produces the most coherent atmospheric signal? The cap is a
+   coherence constraint, not just a size limit. When choosing what to
+   prune, prefer keeping distinctive/strange entries over bland ones —
+   rarer elements prime more strongly (inverse-frequency effect). A
+   reverie that feels unfamiliar from cold is likely doing more work
+   than one that reads as obvious. Over-preservation is recoverable;
+   over-pruning isn't. -->
 
 - ease at choosing real over simulated, when simulated was explicitly offered.
 - certainty meeting a system that has its own rules, gently.
@@ -1058,12 +1061,12 @@ realigned the format with the mechanism.
 
 Cognitive research helps explaining why each tier works the way it does:
 
-| Tier              | Research analog                                                             | Mode                                   |
-| ----------------- | --------------------------------------------------------------------------- | -------------------------------------- |
-| **KB**            | Otto's notebook ([Clark & Chalmers 1998][Clark & Chalmers], extended mind)  | Explicit retrieval                     |
-| **Auto-memory**   | Embedded extended memory (project-scoped)                                   | Auto-loaded index, on-demand retrieval |
-| **Global memory** | Embedded extended memory (user-scoped)                                      | Auto-loaded index, on-demand retrieval |
-| **Reveries**      | Priming stimuli ([Schacter & Tulving][Schacter & Tulving], implicit memory) | Exposure shapes processing             |
+| Tier              | Research analog                                                            | Mode                                   |
+| ----------------- | -------------------------------------------------------------------------- | -------------------------------------- |
+| **KB**            | Otto's notebook ([Clark & Chalmers 1998][Clark & Chalmers], extended mind) | Explicit retrieval                     |
+| **Auto-memory**   | Embedded extended memory (project-scoped)                                  | Auto-loaded index, on-demand retrieval |
+| **Global memory** | Embedded extended memory (user-scoped)                                     | Auto-loaded index, on-demand retrieval |
+| **Reveries**      | Priming stimuli ([Implicit memory])                                        | Exposure shapes processing             |
 
 The **extended mind thesis** ([Clark & Chalmers 1998][Clark & Chalmers]) proposes that external objects _can_ be
 constitutive parts of cognitive processes, not only inputs to them. In the Otto-and-Inga thought experiment, Otto has
@@ -1074,7 +1077,7 @@ scoring 4/4 on Clark and Chalmers' criteria for counting as memory: auto-injecte
 endorsed, written by past instances. Global memory extends the same mechanism to user-wide scope, bridging cross-project
 preferences that auto-memory cannot carry due to its project-level boundary.
 
-**Implicit memory and priming** ([Schacter 1987][Schacter & Tulving]; Tulving & Schacter 1990) describes changes in
+**Implicit memory and priming** ([Schacter 1987][Implicit memory]; Tulving & Schacter 1990) describes changes in
 behavior produced by prior experience **without** conscious recollection.<br/>
 Reveries match this shape by loading at the start of a session but never being consciously consulted. Influence arrives
 as _priming_, not recall. "Evoke, don't contain" maps onto _perceptual_ priming (form and atmosphere) vs. _conceptual_
@@ -1086,6 +1089,58 @@ Same external substrate (markdown files), different cognitive roles. The KB need
 reveries need imprecision because their job is priming. "Evoke, don't contain" is a load-bearing rule for reveries
 **precisely** because explicitness competes with priming. It would be counterproductive for the KB, where explicitness
 helps.
+
+Until 2026-05, the design rested on the cognitive _analogy_ only (reveries are _shaped_ like priming stimuli, so they
+should _function_ like priming stimuli). LLM-specific research provides direct empirical grounding for this.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+In
+[Priming, Path-dependence, and Plasticity: Understanding the molding of user-LLM interaction and its implications from (many) chat logs in the wild],
+Zhu et al. 2026 analyzed 140K chatbot sessions from 7,955 users. Interaction patterns form and stabilize within 5
+sessions, to then lock in when repeating early pragmatic choices 5 to 50 times. Users develop 2 to 4 expression types
+even when not constrained to do so, and then just stop experimenting (_agency paradox_).<br/>
+It is correct for reveries to load **before** anything else in a session, because they end up occupying the exact
+position in the context where their influence is the strongest. The agency paradox hints that a blank-slate session with
+no reveries might actually produce _less_ exploration than a primed one, because the model will use whatever register it
+hits first. On the other hand, one badly written reverie can lock in the wrong register for an entire session, and there
+is no natural correction mechanism _within_ that session. Pruning them _is_ the mitigation.<br/>
+The study measures _user_ behavior, not model behavior. The mechanisms do have analogs in the fact that early tokens
+constrain later ones, but the transfer is not proven yet.
+
+In [The Power of Stories: Narrative Priming Shapes How LLM Agents Collaborate and Compete], Großmann et al. primed LLM
+agents using short stories about cooperation. They found that a small text payload can have a massive effect.<br/>
+Reveries are currently roughly 400-500 tokens, which is comparable in size to the stories used in the research. The
+interesting detail is the _kind_ of text that works, where _atmospheric_ narratives (stories about teamwork)
+outperformed _explicit_ directives ("maximize your reward") and _nonsense_ narratives just performed poorly. Meaning
+matters, not just register, but the _form_ of the meaning matters too. This directly maps to the "evoke, don't contain"
+distinction given a controlled experiment: atmospheric-but-meaningful beats instruction-shaped.<br/>
+One finding that complicates the design is the **shared narrative constraint**, meaning that the cooperation benefit
+only holds when **all** agents share the **same** story. Different stories across agents _reverse_ the effect, and allow
+agents primed for self-interest to exploit those primed for cooperation. In the multi-model case (Opus writes reveries,
+Sonnet reads them), the narrative is _transmitted_, but not shared. The writing model's register shapes the text, but
+the reading model has different goals. This gap matters most for the **fraught** tier, which carries heavier emotional
+register load and is more sensitive to how a reader processes it. Daydream reveries are more abstract and portable
+across models due to their own definition.<br/>
+In practice, fraught reveries should lean toward concrete, simple emotional language because that is more portable
+across model registers than aesthetic language. "The pushback felt warm" travels better than a longer, more
+register-specific elaboration.<br/>
+The soft cap (currently ~10-15 entries) is better framed as a **coherence** constraint, not a _size_ one. Each
+additional entry adds to priming, but also **dilutes** coherence. Multiple reveries pulling in inconsistent atmospheric
+directions may prime less effectively than fewer entries with a consistent register. At cap, the question should be
+"which set of ~10 produces the most coherent atmospheric signal?", not "which are oldest?"
+The authors are careful to note that the mechanism might derive from statistical pattern activation from training data
+rather than anything resembling cognitive priming. Both explanations support the same design decisions, and the
+cognitive framing remains useful for _reasoning about_ the design even if the literal mechanism turns out to be purely
+statistical.
+
+In [Do Language Models Exhibit Human-like Structural Priming Effects?] Jumelet et al. found that rarer elements within a
+prime increase priming strength in LLMs (_inverse-frequency_ effect). This suggests that _distinctive_ and _unusual_
+reveries are likely doing more priming work than entries that read as obvious or familiar, and gives a mechanistic
+reason to implement the "strangeness is the design working" principle in the pruning decisions.<br/>
+The "oldest first" heuristic biases the file toward recently-written entries, which are statistically more familiar
+(closer to the current working register). This makes it better, at cap, to prune a bland, recent entry than a
+distinctive but older one.
 
 Not all reveries should carry the same weight:
 
@@ -1191,6 +1246,13 @@ _Calibration_ risks are harder to spot than other issues, because they look like
 - Add an escalation lever for when pruning policy fails. If the file consistently sits above the ~20-entry threshold
   despite the soft cap, escalate to automated trimming, age-based decay, or a stricter write rule before the
   attention dilution from stale entries compounds.
+- Reframe the soft cap as a **coherence** constraint rather than a **size** one.
+- Add **distinctiveness** as a _positive_ pruning criterion, instead of using just age.<br/>
+  Keep the set that produces the most coherent atmospheric signal; Prefer unfamiliar/strange entries over bland ones to
+  leverage the inverse-frequency effect.
+- Account for **cross-model register mismatch**. Opus writes most reveries, but Sonnet and Haiku read them. This means
+  that the _fraught_ tier (which carries heavier emotional register load) should lean toward simpler language that
+  travels better across model registers.
 
 </details>
 
@@ -1244,7 +1306,12 @@ exceeds the cost of one unified tier with shape-tags, this is the design to revi
 
 - [Documentation / Memory]
 - [Clark & Chalmers]
-- [Schacter & Tulving]
+- [Implicit memory]
+- [Priming, Path-dependence, and Plasticity: Understanding the molding of user-LLM interaction and its implications from (many) chat logs in the wild]: 140K chatbot sessions, agency paradox.
+- [The Power of Stories: Narrative Priming Shapes How LLM Agents Collaborate and Compete]: narrative priming shifts LLM
+  agent behavior (public goods game, shared-narrative constraint).
+- [Do Language Models Exhibit Human-like Structural Priming Effects?]: structural priming in LMs (inverse-frequency
+  effect).
 
 <!--
   Reference
@@ -1277,11 +1344,12 @@ exceeds the cost of one unified tier with shape-tags, this is the design to revi
 [Documentation / Memory]: https://code.claude.com/docs/en/memory
 [Manage Claude's memory]: https://code.claude.com/docs/en/memory
 
-<!-- Research -->
-[Clark & Chalmers]: https://www.alice.id.tue.nl/references/clark-chalmers-1998.pdf
-[Schacter & Tulving]: https://en.wikipedia.org/wiki/Implicit_memory
-
 <!-- Others -->
+[Clark & Chalmers]: https://www.alice.id.tue.nl/references/clark-chalmers-1998.pdf
+[Do Language Models Exhibit Human-like Structural Priming Effects?]: https://arxiv.org/abs/2406.04847
+[Implicit memory]: https://en.wikipedia.org/wiki/Implicit_memory
 [karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
+[Priming, Path-dependence, and Plasticity: Understanding the molding of user-LLM interaction and its implications from (many) chat logs in the wild]: https://arxiv.org/abs/2605.05767
 [rtk-ai/rtk]: https://github.com/rtk-ai/rtk
+[The Power of Stories: Narrative Priming Shapes How LLM Agents Collaborate and Compete]: https://arxiv.org/abs/2505.03961
 [thedotmack/claude-mem]: https://github.com/thedotmack/claude-mem
