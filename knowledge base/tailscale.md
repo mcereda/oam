@@ -52,7 +52,7 @@ sudo systemctl enable --now 'tailscaled'
 
 </details>
 
-<details>
+<details style='padding: 0 0 1rem 0'>
   <summary>Usage</summary>
 
 ```sh
@@ -82,6 +82,32 @@ tailscale set --exit-node="$exit_node_id"
 
 </details>
 -->
+
+<details>
+  <summary>Disable automatic update checks</summary>
+
+When installed via [Homebrew], the in-app toggle to check for updates does **not** seem to have any effect.
+
+If installed from the Mac App Store, Tailscale's own settings are irrelevant and the App Store manages the updates.<br/>
+One would need to disable auto-updates at the App Store level (_System Settings_ > _App Store_ > _Automatic Updates_),
+or manage it via MDM.
+
+Tailscale's standalone version uses the Sparkle framework for updates. It has two separate policy keys:
+
+- `SUEnableAutomaticChecks` controls whether it periodically checks for updates.
+- `SUAutomaticallyUpdate` controls whether it installs them automatically.
+
+One can set these via MDM profile, or via `defaults write`:
+
+```sh
+defaults write 'io.tailscale.ipn.macsys' 'SUEnableAutomaticChecks' -bool false
+defaults write 'io.tailscale.ipn.macsys' 'SUAutomaticallyUpdate' -bool false
+```
+
+Check the exact bundle identifier with `osascript -e 'id of app "Tailscale"'` before running the `defaults write`
+commands.The defaults write approach bypasses the UI.
+
+</details>
 
 ## Access existing networks
 
@@ -318,7 +344,8 @@ Tailscale will route `*.elb.amazonaws.com` queries through the subnet router to 
 
 <!-- Knowledge base -->
 [Headscale]: headscale.md
-[WireGuard]: wireguard.md
+[Homebrew]: homebrew.md
+[Wireguard]: wireguard.md
 
 <!-- Files -->
 <!-- Upstream -->
