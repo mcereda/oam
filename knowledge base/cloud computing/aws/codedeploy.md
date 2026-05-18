@@ -7,6 +7,7 @@ Deployment service offered by [AWS][amazon web services].
 1. [Flow](#flow)
 1. [Deployment](#deployment)
    1. [Deploy to instances](#deploy-to-instances)
+1. [Log locations](#log-locations)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -126,6 +127,24 @@ When overall deployments fail or are stopped:
   health value.
 - The deployment group's revision remains the same.
 
+## Log locations
+
+Refer to [View log data for CodeDeploy EC2/On-Premises deployments].
+
+CodeDeploy leaves log files on EC2 instances to allow troubleshooting failed deployments.\
+The agent log rotates daily at midnight instance time and is deleted after 7 days.
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Linux</summary>
+
+| Log source             | Path                                                                                           | Use for                                         |
+| ---------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| CodeDeploy Agent       | `/var/log/aws/codedeploy-agent/codedeploy-agent.log`                                           | Agent issues (e.g., connectivity, registration) |
+| Deployment             | `/opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log`       | Overview of the deployment lifecycle            |
+| Per-deployment scripts | `/opt/codedeploy-agent/deployment-root/<deployment-group-ID>/<deployment-ID>/logs/scripts.log` | `stdout`/`stderr` from lifecycle hook scripts   |
+
+</details>
+
 ## Further readings
 
 - [Documentation]
@@ -150,5 +169,6 @@ When overall deployments fail or are stopped:
 <!-- Upstream -->
 [documentation]: https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html
 [instance health]: https://docs.aws.amazon.com/codedeploy/latest/userguide/instances-health.html
+[View log data for CodeDeploy EC2/On-Premises deployments]: https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-view-logs.html
 
 <!-- Others -->
