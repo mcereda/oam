@@ -122,8 +122,16 @@ They allow to specify permissions for multiple users.
 Groups can be assigned Policies.<br/>
 Any User in a Group inherits all of that Group's permissions.
 
-Groups **cannot** be used as Principals in a Policy.<br/>
-Groups relate to permissions, not authentication, and Principals are authenticated IAM entities.
+> [!warning]
+> Groups **cannot** be used as Principals in resource-based Policies.<br/>
+> Groups relate to permissions, not authentication, and Principals are authenticated IAM entities.
+>
+> Alternatives:
+>
+> - Assign one or more Roles to the resource **instead** of the Group.
+> - Assign one or more Roles to the resource, and grant the Group the ability to **assume** the Role.
+> - Delegate the resources to the `root` principal (`"Principal": { "AWS": "arn:aws:iam::123456789012:root" }`).<br/>
+>   This is the **worst** choice of the three for multiple reasons.
 
 One Group can contain many Users, and one User can belong to up to 10 Groups at any time.<br/>
 That limit is a hard limit, and **cannot** be increased in the account's quotas.
@@ -142,9 +150,11 @@ Refer [Policies](https://blog.awsfundamentals.com/aws-iam-roles-terms-concepts-a
 Define which _actions_ are available for _principals_ on which _resources_ under which _conditions_.<br/>
 Their _effect_ can be to `allow` or `deny` such actions. A `deny` statement **always overwrites** `allow` statements.
 
-> Watch out for explicit `Deny` statements, as they could prevent users from do seemingly completely unrelated things -
-> like accessing an object in a S3 bucket when an explicit `Deny` statement blocks IAM Users from listing IAM Groups
-> when they are not logged in with MFA.
+> [!warning]
+> Be wary of **explicit** `Deny` statements, as they could prevent users from doing _seemingly_ completely unrelated
+> actions.<br/>
+> E.g., IAM Users with a policy using an explicit `Deny` statement to block them from listing IAM Groups when they are
+> not logged in with MFA. cannot access objects in a S3 bucket they do have permissions for.
 
 Mostly stored as structured JSON documents.<br/>
 Each Policy comes with one or several _statements_. Each statement defines an effect.
