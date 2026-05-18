@@ -335,6 +335,19 @@ ANTHROPIC_AUTH_TOKEN='ollama' ANTHROPIC_BASE_URL='http://localhost:11434' ANTHRO
 
 </details>
 
+One can execute commands from within Claude Code by prefixing each of them with `!`. Multiple commands can be
+concatenated in a commands set as usual in a shell, e.g.:
+
+```plaintext
+! echo "$SOME_VAR"
+! cd 'path/to/some/dir' && source '.env' ; set
+```
+
+Every set of commands is executed in its own **fresh**, **distinct** shell, effectively calling `bash -c '…'` (or the
+user's **default** shell equivalent) for each.<br/>
+Invocations do **not** carry environment variables between them, though `! cd some/dir` does change the working
+directory Claude works in.
+
 ## Billing
 
 Claude Code requires a subscription to use Claude models, specifically a Claude API key or an Anthropic plan.<br/>

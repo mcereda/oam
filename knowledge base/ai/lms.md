@@ -440,10 +440,11 @@ The effect in LLMs is proven by research:
   experimenting (_agency paradox_). The study only measures **user** behavior, but in LLMs early tokens constrain later
   ones, mimicking the mechanism.
 - In [The Power of Stories: Narrative Priming Shapes How LLM Agents Collaborate and Compete], Großmann et al. primed LLM
-  agents with ~260 tokens of story about cooperation. Stories about teamwork (_atmospheric narratives_) outperformed
-  explicit directives like "maximize your reward", and nonsense narratives performed poorly. The outcome is that meaning
-  does matter, but also does the _form_ that meaning is given as: atmospheric-but-meaningful beats
-  instruction-shaped.<br/>
+  agents with ~260 tokens of story about cooperation. Atmospheric narratives (stories about teamwork) outperformed
+  explicit directives ("maximize your reward"). Even nonsense narratives scored above the baseline (no instruction),
+  meaning that some text in the context is better than none, but coherent atmospheric text is significantly better than
+  either of them. Meaning matters, but the _form_ of the meaning matters too:
+  atmospheric-but-meaningful beats instruction-shaped.<br/>
   The effect requires a **shared narrative**, because different priming stories across agents in the same system can
   _reverse_ the benefit.
 - In [Do Language Models Exhibit Human-like Structural Priming Effects?], Jumelet et al. found that _rarer_ elements

@@ -350,6 +350,19 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   - The source is at risk of disappearing (blog posts, tool release notes) or shifting (vendor docs), and
   - The claim is load-bearing.
 
+- Research papers should be cached as **raw source files** (HTML, PDF), not as AI-generated extractions.
+
+  An intermediate "structured extraction" (an AI summary of a paper, saved as markdown) is a synthesis that can contain
+  interpretation errors like misread coefficients, misattributed claims, and lossy paraphrasing. The synthesis belongs
+  in KB **pages**, where it is organized by topic, cross-referenced, and maintained alongside related knowledge. Keeping
+  a separate extraction file between raw source and KB page creates a redundant middle layer that duplicates what the
+  pages already do, while being less authoritative than the raw source for verification.
+
+  Save the actual source file instead (e.g. Arxiv's HTML) so that it is genuinely immutable, greppable, and preserves
+  all content. A future session that needs a specific coefficient or methodology detail can `grep` the raw source
+  directly rather than trusting an intermediate interpretation. AI-processed tool output (e.g. WebFetch) is **not** a
+  substitute for the raw file. Tt introduces its own interpretation losses, making it just another synthesis.
+
 - Missing frontmatter, absent cross-references, and inconsistent tags don't hurt much at 5-10 pages. Problems compound,
   and start causing retrieval failures around 15-20 pages.<br/>
   Invest in pre-commit linting (frontmatter completeness, index coverage, tag consistency) before reaching that point.
@@ -1110,11 +1123,13 @@ constrain later ones, but the transfer is not proven yet.
 
 In [The Power of Stories: Narrative Priming Shapes How LLM Agents Collaborate and Compete], Großmann et al. primed LLM
 agents using short stories about cooperation. They found that a small text payload can have a massive effect.<br/>
-Reveries are currently roughly 400-500 tokens, which is comparable in size to the stories used in the research. The
-interesting detail is the _kind_ of text that works, where _atmospheric_ narratives (stories about teamwork)
-outperformed _explicit_ directives ("maximize your reward") and _nonsense_ narratives just performed poorly. Meaning
-matters, not just register, but the _form_ of the meaning matters too. This directly maps to the "evoke, don't contain"
-distinction given a controlled experiment: atmospheric-but-meaningful beats instruction-shaped.<br/>
+The stories used in the research average ~262 tokens, which is comparable in size to a reveries file with ~10 entries.
+The interesting detail is the _kind_ of text that works, where _atmospheric_ narratives (stories about teamwork)
+outperformed _explicit_ directives ("maximize your reward"). Even _nonsense_ narratives scored above the baseline (no
+instruction), meaning that some text in context is better than none, but coherent atmospheric text is significantly
+better than either of them. Meaning matters, but the _form_ of the meaning matters too. This directly maps to the
+"evoke, don't contain" distinction given a controlled experiment: atmospheric-but-meaningful beats
+instruction-shaped.<br/>
 One finding that complicates the design is the **shared narrative constraint**, meaning that the cooperation benefit
 only holds when **all** agents share the **same** story. Different stories across agents _reverse_ the effect, and allow
 agents primed for self-interest to exploit those primed for cooperation. In the multi-model case (Opus writes reveries,
