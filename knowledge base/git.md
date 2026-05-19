@@ -950,6 +950,8 @@ git clone 'git@fqdn:/srv/git/project.git'
 
 ## LFS extension
 
+CLI extension and specification for managing large files with Git.
+
 1. Install the extension:
 
    ```sh
@@ -993,6 +995,21 @@ git clone 'git@fqdn:/srv/git/project.git'
 
    # etc
    ```
+
+Concurrent edits in Git repositories may lead to merge conflicts, which are very difficult to resolve in large binary
+files. LFS's file locking feature (introduced in v2.0.0) lets developers lock the files they are updating to prevent
+others from updating them at the same time.
+
+Git LFS verifies that one is not modifying a file locked by another user during push.<br/>
+File Locking is still in early release. Git LFS won't halt one's push if it cannot verify locked files; instead, it will
+report a message like the following:
+
+```sh
+$ git lfs push 'origin' 'main' --all
+Remote "origin" does not support the LFS locking API. Consider disabling it with:
+  $ git config 'lfs.http://some.git.server.lan/user/repository.locksverify' false
+Git LFS: (0 of 0 files, 7 skipped) 0 B / 0 B, 879.11 KB skipped
+```
 
 ## Submodules
 
