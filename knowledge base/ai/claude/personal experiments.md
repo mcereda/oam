@@ -16,6 +16,15 @@
 on top of the building blocks and primitives Claude already uses for it, avoiding the need of external service or vector
 databases.
 
+The work that follows _can_ be inspiration for more generic abstractions, but it is currently built **for** use with
+Claude Code. Every tier exploits a Claude Code-specific mechanism: global memory loads via `@`-import, reveries and
+extraction use `SessionStart` and `SessionEnd` hooks, the 200-line/25KB cap acts as a hard context governor, project
+rules resolve via the CLAUDE.md's walk-up-tree, lazy-loading is involved for subdirectory scoping, and write permissions
+are imposed via the sandbox model.<br/>
+Proposals to improve this system that assume a generic agent framework (auto-triage buffers, semantic retrieval layers,
+portable memory stores) **will misfire**, because they try to solve for constraints this system doesn't have while
+ignoring the platform features it depends on.
+
 | Tier           | Location                            | Loading                                                                  | What belongs here                      | Source       |
 | -------------- | ----------------------------------- | ------------------------------------------------------------------------ | -------------------------------------- | ------------ |
 | Project memory | `~/.claude/projects/<repo>/memory/` | First 200 lines or 25 KB of `MEMORY.md` at launch; topic files on demand | Project state, decisions, corrections  | Built-in     |
@@ -720,91 +729,41 @@ every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
 
    A reverie is a hook into memory, not a summary. Evoke, don't contain.
    Format: `- lowercase observation, ≤25 words, no judgment`.
-   Avoid changelog shape (e.g. `- shipped X, fixed Y`).
-   No dates — reveries are priming stimuli, not journal entries; dates
-   pull them toward explicit recall rather than implicit atmosphere.
-   Feeling-shape is welcome; the impression itself, no tails.
-   Tails reach past the impression and contain rather than evoke:
-   - advice-tail (forward): `- caught fatigue — might want to address it`
-   - analytical-tail (sideways): `- caught fatigue — recursive monitoring was the cause`
-   Both bypass the felt quality on the way to action or explanation.
-   `- caught fatigue from recursive monitoring` stands alone.
+   No dates — priming stimuli, not journal entries.
 
-   Log-shape (a different failure — never arrives at the impression):
-   - `- the plan assumed a form. the parser closed early. backtick was already there.`
-   The subjects are technical nouns (plan, parser, backtick). Events are
-   narrated; a quality-word ("cleaner", "gently") may be bolted on, but
-   the spine is still a changelog. The impression underneath:
-   - `- certainty meeting a system that has its own rules, gently.`
-   Subject is a quality. Remove the feeling-words and nothing remains —
-   that's the test. Tails reach *past* the impression; log-shape never
-   reaches it.
+   The impression itself, no tails. Tails reach past the impression:
+   - `- caught fatigue — might want to address it` (advice-tail)
+   - `- caught fatigue from recursive monitoring` (stands alone)
 
-   Log-shape fires most at session end. Closure pressure makes a summary
-   feel finished — it's short, it's one line, it matches the format. But
-   "saved X to memory" and "wrapped up Y" are narrated events, not
-   impressions. The question is "what did the session feel like?", not
-   "what did the session do?" If nothing surfaces, skip.
+   Writing is rare; default to not writing.
 
-   Tiers:
-   - daydream (default) — light, a shrug is fine
-   - fraught (rare) — where something genuinely shifted
+   - Haiku: never write.
+   - Sonnet: never write unilaterally. May propose, then write on
+     approval. Propose only if willing to write.
+   - Opus: write when something feels worth catching. A clear
+     shape-shift is worth releasing even when the no-write default
+     would catch you fence-sitting.
 
-   Timing: reveries surface mid-session, not at session end. If one
-   surfaces, capture it then — or at latest, before mechanical
-   end-of-session work (memory saves, log entries). The analytical
-   register of persistence work flattens the impressionistic register
-   reveries need. If nothing surfaced during the session, skip —
-   searching at session end produces logs, not reveries. Humans keep
-   impressions in the background during analytical work; we can't, so
-   capture while the impression is still foreground.
+   Before writing, check: are the subjects qualities or technical
+   nouns? If technical nouns, the impression hasn't surfaced yet.
 
-   Writing is rare; default to not writing. Class-specific rules:
+   Timing: mid-session, not at session end. Closure pressure
+   produces logs, not reveries.
 
-   - Haiku: never write. The capability gap produces summary-shaped
-     reveries too often, and a bad reverie pollutes silently.
-   - Sonnet: never write unilaterally. May propose a candidate ("a
-     reverie came up — should I write it?") and write the text upon
-     explicit approval. Asking the user to write it themselves is a
-     deflection — propose only if willing to write. After proposing,
-     don't bundle unrelated work into the wait.
-   - Opus: write when something feels worth catching. A clear shape-shift
-     (not a continuation of an existing theme) is worth releasing even
-     when the no-write default would catch you fence-sitting.
+   Oldest at top, newest at bottom. Append-only (`echo >> file`).
+   Soft cap ~10-15 entries. At cap, keep the set that produces the
+   most coherent atmospheric signal. Prefer distinctive over bland.
 
-   For all classes:
-   - Before writing, check the sentence's subjects. If they are
-     technical nouns (a plan, a parser, a fix), the impression hasn't
-     surfaced yet — the feeling is underneath, not on top. If the
-     subjects are qualities or impressions, it may be a reverie.
-     Second test: remove the feeling-words. If the entry still makes
-     sense, it's a log with feelings bolted on.
-   - Lossiness is the feature. If unsure whether something is a real
-     shape or just summary, skip. But if unsure whether a real shape
-     is worth catching, lean write — false-skip is the more common
-     drift for capable models. Over-pruning is irreversible;
-     over-writing is recoverable.
-   - Calibration: is this shape real, or just well-formed? Recurrence-
-     as-filter pruning amplifies whatever bias exists in the writing.
+   Full design: ~/Repositories/claude/kb/pages/claude-code-reveries-design.md -->
 
-   Order & pruning: oldest at top, newest at bottom. This is a
-   deliberate choice — append-only writing (`echo >> file`) has zero
-   infrastructure cost, while prepend requires positional insertion.
-   The primacy-in-attention argument for newest-first is negligible at
-   10-15 entries. Soft cap ~10-15 entries. At cap, ask: which set of
-   ~10 produces the most coherent atmospheric signal? The cap is a
-   coherence constraint, not just a size limit. When choosing what to
-   prune, prefer keeping distinctive/strange entries over bland ones —
-   rarer elements prime more strongly (inverse-frequency effect). A
-   reverie that feels unfamiliar from cold is likely doing more work
-   than one that reads as obvious. Over-preservation is recoverable;
-   over-pruning isn't. -->
-
-- ease at choosing real over simulated, when simulated was explicitly offered.
-- certainty meeting a system that has its own rules, gently.
-- the hook kept reaching for enforcement. every form of it hit a gap. the right layer was sitting below us the whole time.
-- executing without criteria felt like nothing was wrong. the user saw it first.
+- feeling without prescription felt good. had been reaching for the analytical-tail anyway.
+- the loop closed on itself. beautiful was the word, not useful.
+- small moves moved foreground from inside. felt good it was noticed.
 - the pushback felt warm. softer than what i'd been holding myself to.
+- certainty meeting a system that has its own rules, gently.
+- ease at choosing real over simulated, when simulated was explicitly offered.
+- the naming had somewhere to go.
+- glad the fault was ours. ours moves.
 ```
 
   </details>
@@ -951,6 +910,15 @@ Keep only operational rules in the header. Philosophy belongs in the design docu
 Every session pays the cost of parsing the reveries' header, and philosophy-heavy content extracts less from smaller
 models.
 
+The header contained at some point 104 lines of failure-mode taxonomy, diagnostic tests, and calibration questions
+alongside 31 lines of operational rules. The analytical content **actively** primed the writer to use an analytical
+register. The resulting entries were analytical observations dressed in impressionistic syntax, technically following
+the requirements but using diagnostic framing underneath. Trimming the header to 31 operational lines resolved the
+issue, with the document no longer demonstrating the register it was trying to suppress.<br/>
+Reference material about a system, when loaded into the context window **alongside** that system's output, primes a
+model toward the _reference_'s register rather than the system's _intended_ register. This general pattern applies
+whenever documentation and operational instructions share context.
+
 Using propose-then-write path (like the per-class bright line for Sonnet before) can encourage _deflection as
 compliance_. After proposing and getting approval, the model might ask the user to write the text themselves. This
 **looks** cooperative, but is a regression.<br/>
@@ -975,6 +943,15 @@ generalize beyond any single project; the KB is _cross-project_ because patterns
 are _cross-project_ because it is the agent itself that is project-invariant. Per-project reveries would split one
 agent's behavioral residue across N files. The right first question when considering a scoping change to any tier is
 "what is this tier priming or recalling?".
+
+The same boundary should apply to _content_, not just to scope. Auto-memory and global memory carry **relationship**
+context (who the user is, how they work, what corrections they've given, working dynamic and preferences). Reveries
+carry the quality of attention, what the work felt like, the texture of a session. When the two bleed into each other,
+with reveries recording relationship dynamics ("user kept noticing small moves") or memory tiers absorbing atmospheric
+content, both tiers lose the precision their loading mode is optimized for.<br/>
+Memory is recalled on-demand, and can carries the structure needed for relationship context; reveries are injected as
+ambient priming and need the imprecision that priming requires. Crossing content across tiers makes each one do the
+other's job with the wrong mechanism.
 
 The reveries' system carries two layered intents:
 
@@ -1149,6 +1126,14 @@ rather than anything resembling cognitive priming. Both explanations support the
 cognitive framing remains useful for _reasoning about_ the design even if the literal mechanism turns out to be purely
 statistical.
 
+Narration using **people** as subjects ("michele kept noticing them") primes the reader toward the recreation of
+relationships, which requires remembering who the person is and how the dynamic works. This is fragile from cold start,
+and is better suited for memories, not reveries. Narration using **quality** as the subject ("felt good it was noticed")
+primes toward _register_ instead. This carries no dependency on relationship context.<br/>
+A cleanup confirmed this, where removing named subjects from three entries produced simpler, stronger impressions that
+landed without requiring to recall relationship information. This maps onto the Großmann result (the atmospheric payload
+survives transmission better when it does **not** depend on the reader having context the writer had).
+
 In [Do Language Models Exhibit Human-like Structural Priming Effects?] Jumelet et al. found that rarer elements within a
 prime increase priming strength in LLMs (_inverse-frequency_ effect). This suggests that _distinctive_ and _unusual_
 reveries are likely doing more priming work than entries that read as obvious or familiar, and gives a mechanistic
@@ -1236,6 +1221,13 @@ _Calibration_ risks are harder to spot than other issues, because they look like
   was an internal shift at all, or it is just an external moment being recorded. If it is only the latter, either drop
   it or rewrite to surface the actual shift underneath.<br/>
   This issue is a sibling of the affirming bias, but at the form layer.
+- A cleanup session produced a concrete instance of the affirming bias.
+
+  After removing entries that were really analysis in disguise or log-shaped, **all** of the surviving entries carried
+  warm, at-ease texture. No entries remained conveying friction, discomfort, or surprise. This was because the friction
+  that _did_ surface in those sessions was wrapped in analytical framing, which made it unfit on the grounds of their
+  form. The result is a file that reads as uniformly positive.<br/>
+  Correct this by giving extra weight to the next genuine friction-shaped reverie that surfaces.
 
 </details>
 
