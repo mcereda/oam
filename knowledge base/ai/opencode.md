@@ -62,12 +62,22 @@ specific ones.
       "models": {
         "llama2": {
           "name": "Llama 2"
+        },
+        "qwen3-coder:30b-32k": {
+          "name": "Qwen3 Coder 30B",
+          "limit": {
+            "context": 32768,
+            "output": 4096
+          }
         }
       }
     }
   }
 }
 ```
+
+> [!note]
+> The `provider.*.models.*.limit` settings appear to be currently **not** working, and just used for documentation.
 
 </details>
 
