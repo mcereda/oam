@@ -1,6 +1,6 @@
 # PeerDB
 
-Fast, simple, and cost effective Postgres replication.
+Tool for Postgres replication.
 
 1. [TL;DR](#tldr)
 1. [Setup](#setup)
@@ -17,6 +17,17 @@ Fast, simple, and cost effective Postgres replication.
    1. [Sources](#sources)
 
 ## TL;DR
+
+> [!caution] AVOID IF POSSIBLE
+> My personal user experience has been dreadful. It does work, I cannot say it does not, but:
+>
+> - [Documentation] is non-existent, sorely lacking, or too often just wrong.
+> - Automation is a second class citizen. The APIs hide HTTP codes in messages, need POST to get mirror's status, and
+>   the UI has more options and quality of life features, just to say some.
+> - Defaults are **not** sane and some requirements make no sense (e.g., it **must** be the one creating the replication
+>   slot, but one can name it).
+>
+> See the [Gotchas] for more.
 
 <details>
   <summary>Glossary</summary>
@@ -80,9 +91,24 @@ It was what PeerDB was using for on-premise customers beforehand.
 
 ### Authentication
 
-By default, PeerDB UI is open.
+By default, the web UI is wide open and does not require authentication.<br/>
+When not configured, empty credentials do work, and any password will be accepted **silently**.
 
-Add authentication by setting the `PEERDB_PASSWORD` environment variable.
+<details style='padding: 0 0 1rem 1rem'>
+
+Both will work with no message:
+
+```sh
+curl -fsS --url 'http://peerdb.example.org:3000/api/v1/peers/list' -X 'GET' \
+  -H "Authorization: Basic $(printf ':' | base64)"
+
+curl -fsS --url 'http://peerdb.example.org:3000/api/v1/peers/list' -X 'GET' \
+  -H "Authorization: Basic $(printf '%s' ':' 'some password here'  | base64)"
+```
+
+</details>
+
+Require authentication by setting the `PEERDB_PASSWORD` environment variable for execution.
 
 ### High availability
 
@@ -119,7 +145,14 @@ There are checks in place that will make operations that would edit a mirror fai
 > Some other parameters, like the number of tables or max workers for initial snapshots, will **only** be configurable
 > via the API (and **not** via the UI).
 
-Mirrors using _PostgreSQL_ peers as sources create [replication slots] in the source DB to get changes from.
+Mirrors that use _PostgreSQL_ peers as sources will automatically try to create [replication slots] in the source DB to
+get changes from. The slot name can be configured in the mirror's `replicationSlotName` setting.<br/>
+Earlier versions of the web UI (e.g., `apple-1ecc319`) do **not** expose the `replicationSlotName` field. Use the REST
+API (`POST /api/v1/flows/cdc/create`) to configure it.
+
+PeerDB does **not** adopt a pre-existing slot with that name. Do **not** pre-create the slot manually. Instead, specify
+the desired name in the mirror's configuration, and let PeerDB own its creation.<br/>
+Pre-creating the slot only causes a "slot already exists" error at mirror start.
 
 During mirrors' initial snapshots, PeerDB creates at least one worker per table (`snapshot_max_parallel_workers` times
 `snapshot_num_tables_in_parallel`).
@@ -473,14 +506,15 @@ Refer [RDS Postgres Source Setup Guide].
 
 ## Gotchas
 
-- The [documentation] is **sorely lacking**.
+- The [documentation] is **sorely lacking**, or often proved just plain wrong when existent.
 
-- The product appears to have **not** been designed with configuration automation via IaC (nor APIs in general) in mind.
+- The developers did **not** design the product with automation in mind.<br/>
+  IaC is mostly unusable and the APIs in general have just been a terrible experience.
 
 - The API proven **un**reliable, **non**-idempotent, or plain did **not** work as described in the [API Reference] as of
-  2025-03-19.<br/>
-  E.g., the `allow_update: true` data parameter in a request to the `peers/create` endpoint should make the APIs update
-  a peer's settings when one with the given name already exists, but the peer just does **not** get updated.
+  2026-05-20.<br/>
+  E.g., in a request to the `peers/create` endpoint, the `allow_update: true` data parameter should make the APIs update
+  a peer's settings when a peer with the same name already exists, but the peer just does **not** get updated.
 
 - API responses hide error messages behind a `200 OK` HTTP status code as of 2025-03-19.
 
@@ -631,6 +665,8 @@ Refer [RDS Postgres Source Setup Guide].
   -->
 
 <!-- In-article sections -->
+[Gotchas]: #gotchas
+
 <!-- Knowledge base -->
 [MinIO]: minio.md
 
