@@ -23,6 +23,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
    1. [Controlling skill visibility](#controlling-skill-visibility)
    1. [Findings about skill creation](#findings-about-skill-creation)
 1. [Using plugins](#using-plugins)
+   1. [Plugins of interest](#plugins-of-interest)
 1. [Using hooks](#using-hooks)
    1. [Prompt-based hooks](#prompt-based-hooks)
    1. [Agent-based hooks](#agent-based-hooks)
@@ -895,6 +896,9 @@ jq '.mcpServers."grafana-aws" |= {
 <details style='padding: 0 0 0 1rem'>
   <summary>AWS API</summary>
 
+> [!caution]
+> Prefer using the server that comes with the [AWS Toolkit] plugin instead.
+
 Refer to [AWS API MCP Server].
 
 Enables interacting with AWS services and resources through AWS CLI commands.
@@ -1712,6 +1716,40 @@ claude plugin prune
 # Adding `--prune` deletes dependencies in cascade fashion.
 claude plugin uninstall 'gitlab@claude-plugins-official'
 claude plugin uninstall 'gitlab@claude-plugins-official' --prune
+```
+
+</details>
+
+### Plugins of interest
+
+| Plugin        | ID                                      | Summary                       |
+| ------------- | --------------------------------------- | ----------------------------- |
+| [AWS Toolkit] | `aws-core@claude-plugins-official`      | Interact with AWS resources   |
+| GitLab        | `gitlab@claude-plugins-official`        | Access and use GitLab servers |
+| Skill creator | `skill-creator@claude-plugins-official` | Create and improve skills     |
+
+<details>
+  <summary>AWS Toolkit</summary>
+
+Refer to [AWS Toolkit].
+
+```sh
+claude plugin install 'aws-core@claude-plugins-official'
+claude plugins i 'aws-core@claude-plugins-official' --scope 'project'
+```
+
+Suggested to download and include the [AWS Guidance] file in a CLAUDE.md file:
+
+```sh
+# put it in "$HOME/.claude/rules" instead to make it available globally
+DEST_FOLDER='.claude/rules'
+mkdir -pv "$DEST_FOLDER" \
+&& curl --silent \
+     --url 'https://raw.githubusercontent.com/aws/agent-toolkit-for-aws/main/rules/aws-agent-rules.md' \
+     --output "$DEST_FOLDER/aws-agent-rules.md"
+
+# add to instruction files
+echo '@.claude/rules/aws-agent-rules.md'
 ```
 
 </details>
@@ -2908,13 +2946,14 @@ Claude Code version: `v2.1.41`.
 [AI agents / Memory tiers]: ../agents.md#memory-tiers
 [AI agents / Skills]: ../agents.md#skills
 [AI agents]: ../agents.md
+[AWS Toolkit]: ../../cloud%20computing/aws/README.md#agent-toolkit
 [Claude Code router]: claude%20code%20router.md
 [Claude's interaction tips]: README.md#improving-interactions
 [Claude]: README.md
 [Gemini CLI]: ../gemini/cli.md
+[Git worktrees]: ../../git.md#worktrees
 [Giving Claude a reverie-like system]: personal%20experiments.md#giving-claude-a-reverie-like-system
 [Giving Claude its own knowledge base]: personal%20experiments.md#giving-claude-its-own-knowledge-base
-[git worktrees]: ../../git.md#worktrees
 [LMs / Improving interactions]: ../lms.md#improving-interactions
 [MCP]: ../mcp.md
 [Ollama]: ../ollama.md
@@ -2975,6 +3014,7 @@ Claude Code version: `v2.1.41`.
 [Agent Skills]: https://agentskills.io/
 [Allow MCP tools to be available only to subagent]: https://github.com/anthropics/claude-code/issues/6915
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
+[AWS Guidance]: https://github.com/aws/agent-toolkit-for-aws/blob/main/rules/aws-agent-rules.md
 [Claude analysis / The System Prompt]: https://rastrigin.systems/blog/claude-code-part-2-system-prompt/
 [Claude analysis / What Claude Code Actually Sends to the Cloud]: https://rastrigin.systems/blog/claude-code-part-1-requests/
 [Claude Code Unpacked]: https://ccunpacked.dev/

@@ -37,6 +37,7 @@
    1. [Python](#python)
 1. [Container images](#container-images)
    1. [Amazon Linux](#amazon-linux)
+1. [Agent toolkit](#agent-toolkit)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -1128,6 +1129,43 @@ Disconnect from the VPN, start the container, and reconnect to the VPN before in
 container locally.<br/>
 If one can, prefer just build the image from an EC2 instance.
 
+## Agent toolkit
+
+Refer to [What is the Agent Toolkit for AWS?].
+
+AWS provides the toolkit free of charge.<br/>
+It gives AI agents tools, knowledge, and guardrails to manage resources on AWS.
+
+Its components work together:
+
+- The _skills_ contain curated, step-by-step **instructions** for decisions and accessing materials.
+- The _knowledge tools_ provide **access** to current information, including API reference and documentation.
+- The _MCP Server_ translates requests into API calls.<br/>
+  Hosted by AWS, used via local proxy. Authentication and authorization leverage [IAM roles and policies][iam].
+- The [_rules files_][AWS Guidance] glue the above together by instructing agents on how and when to use each.<br/>
+  It is meant to be a starting point. Customize as needed, then include in an instructions file.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  ```sh
+  # put it in "$HOME/.claude/rules" instead to make it available globally
+  DEST_FOLDER='.claude/rules'
+  mkdir -pv "$DEST_FOLDER" \
+  && curl --silent \
+       --url 'https://raw.githubusercontent.com/aws/agent-toolkit-for-aws/main/rules/aws-agent-rules.md' \
+       --output "$DEST_FOLDER/aws-agent-rules.md"
+
+  # add to instruction files
+  echo '@.claude/rules/aws-agent-rules.md'
+  ```
+
+</details>
+
+The MCP Server automatically adds the `aws:ViaAWSMCPService` and `aws:CalledViaAWSMCP` global condition context keys to
+all requests. They can be used in IAM policies to differentiate MCP-initiated actions from direct API calls and
+eventually limit or empower them.<br/>
+CloudTrail logs all API calls for audit visibility.
+
 ## Further readings
 
 - [Learn AWS]
@@ -1230,6 +1268,7 @@ If one can, prefer just build the image from an EC2 instance.
 
 <!-- Upstream -->
 [Access AWS services through AWS PrivateLink]: https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-access-aws-services.html
+[AWS Guidance]: https://github.com/aws/agent-toolkit-for-aws/blob/main/rules/aws-agent-rules.md
 [aws icons]: https://aws-icons.com/
 [AWS PrivateLink pricing]: https://aws.amazon.com/privatelink/pricing/
 [aws public ip address ranges now available in json form]: https://aws.amazon.com/blogs/aws/aws-ip-ranges-json/
@@ -1276,6 +1315,7 @@ If one can, prefer just build the image from an EC2 instance.
 [what is aws config?]: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
 [what is aws global accelerator?]: https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html
 [What is Step Functions?]: https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html
+[What is the Agent Toolkit for AWS?]: https://docs.aws.amazon.com/agent-toolkit/latest/userguide/what-is-agent-toolkit.html
 
 <!-- Others -->
 [a guide to tagging resources in aws]: https://medium.com/@staxmarketing/a-guide-to-tagging-resources-in-aws-8f4311afeb46
