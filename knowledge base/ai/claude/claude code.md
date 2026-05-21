@@ -1167,6 +1167,10 @@ Setting `defaultMode: "auto"` normally shows a confirmation prompt at session st
 `skipAutoPermissionPrompt: true` as a **top-level** key (sibling of `permissions`, not nested inside it) in the
 **same** settings file.
 
+> [!important]
+> `auto` is **silently ignored** when set in project or local settings. It only takes effect from user-level settings
+> (`~/.claude/settings.json`). This prevents untrusted repositories from granting themselves auto mode.
+
 <details style='padding: 0 0 1rem 1rem'>
 
 `skipAutoPermissionPrompt` must exist in **both** global and project-level settings:
