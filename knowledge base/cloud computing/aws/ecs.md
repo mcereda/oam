@@ -401,7 +401,12 @@ Defines the underlying infrastructure effectively running containers within ECS.
 ```
 
 The setting is currently **mutually exclusive** with [capacity provider strategies].<br/>
-Prefer using those to leverage enhanced flexibility and advanced features for capacity management.
+Prefer explicitly setting those in a service's definition to leverage enhanced flexibility and advanced features for
+capacity management.
+
+> [!important]
+> Configuring the `launchType` attribute in a service definition bypasses a cluster's default capacity provider strategy
+> entirely.
 
 ### EC2 launch type
 
