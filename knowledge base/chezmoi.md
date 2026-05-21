@@ -11,11 +11,25 @@ Multi-machine dotfiles manager written in Go.
 
 ## TL;DR
 
+The source directory is always exposed as `$.chezmoi.sourceDir`.
+
+Templating uses the [Go text/template] library and [Sprig].
+
+<details>
+  <summary>Setup</summary>
+
 ```sh
 # Install.
 brew install 'chezmoi'
 sudo zypper install 'chezmoi'
+```
 
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
 # Initialize.
 chezmoi init
 chezmoi init 'https://github.com/username/dotfiles.git' --branch 'chezmoi'
@@ -67,6 +81,8 @@ chezmoi git push -- --set-upstream 'origin' 'main'
 chezmoi update
 ```
 
+</details>
+
 ## Save the current state to a remote repository
 
 ```sh
@@ -79,7 +95,6 @@ $
 
 ## Gotchas
 
-- Templating uses the [Go text/template] library and [Sprig].
 - [Sprig]'s `toPrettyJson` sorts keys alphabetically. This is due to Go's `json.MarshalIndent` behaviour and is **not**
   configurable.
 - ~~Due to a feature of a library used by chezmoi, all custom variable names in the configuration file are converted to
@@ -97,6 +112,8 @@ $
   ```
 
   > Solved in [2376](https://github.com/twpayne/chezmoi/pull/2376/files).
+
+- Chezmoi's `glob` function only accepts absolute paths, with relative ones **silently** return an empty list (`[]`).
 
 ## Snippets
 
