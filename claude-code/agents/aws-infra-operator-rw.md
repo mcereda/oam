@@ -33,7 +33,7 @@ mcpServers:
         - --env
         - REQUIRE_MUTATION_CONSENT
         - --volume
-        - /home/some-user/.aws:/app/.aws:rw
+        - /home/some-user/.aws:/app/.aws:rw  # must be writable  # FIXME: path
         - public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest
 ---
 

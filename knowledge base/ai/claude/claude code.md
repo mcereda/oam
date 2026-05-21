@@ -35,6 +35,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
     1. [Agent teams](#agent-teams)
     1. [MCP servers in sub-agents](#mcp-servers-in-sub-agents)
     1. [Offloading MCP servers to sub-agents](#offloading-mcp-servers-to-sub-agents)
+1. [Tracking tasks](#tracking-tasks)
 1. [Scheduling tasks](#scheduling-tasks)
 1. [Tools of interest](#tools-of-interest)
 1. [Troubleshooting](#troubleshooting)
@@ -2197,8 +2198,10 @@ The sub agent works independently, and returns results once finished.
 Most effective for sequential tasks, same-file edits, or tasks with many dependencies.<br/>
 They only report results back to the main agent, and never talk to each other.
 
-Claude Code includes several built-in sub-agents like _Explore_, _Plan_, and _general-purpose_.<br/>
-One can create custom sub-agents to handle specific tasks.
+Claude Code includes several built-in sub-agents like _Explore_, _Plan_, _general-purpose_, and _claude-code-guide_
+(specialized for Claude Code, Agent SDK, and API questions).<br/>
+One can create custom sub-agents to handle specific tasks, e.g. domain-specific agents like [aws-operator-ro] and
+[aws-infra-operator-rw]. This allows scoping MCP access to a single server, and enforcing read/write separation.
 
 Sub-agents are defined in Markdown files with YAML frontmatter.<br/>
 Create them manually or use the `/agents` command.
@@ -2587,6 +2590,37 @@ offloading the server fully to a sub-agent would lose raw structured data access
 
 </details>
 
+The lazy loading deferral removes the **full** tool schemas from context, but there are some costs that do survive and
+are paid **each and every** turn:
+
+- Every deferred tool name appears in the context on every API call. Cost scales with tool count, not with server count;
+  the built-in deferred tools alone consume ~20K tokens/turn, and 50+ MCP tools add ~8.7K on top of it.
+- MCP servers' `instructions` field loads every turn **regardless** of deferral. It is bounded at 2KB per server, but it
+  adds up across servers.
+- Deferral does **not** affect the servers' process lifecycle. `stdio` servers start as child processes, and HTTP/SSE
+  servers open connections at session start regardless wether the server is used or not. The only solution to this is
+  [offloading MCP servers to sub-agents].
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Loading decision heuristic</summary>
+
+| Usage frequency      | Mechanism                 | Per-turn cost                                 |
+| -------------------- | ------------------------- | --------------------------------------------- |
+| Most sessions (>50%) | `alwaysLoad: true`        | Full schemas, but no `ToolSearch` round-trip  |
+| Regular (10-50%)     | Deferred (default)        | Tool name listing, each servers' instructions |
+| Rare (<10%)          | Sub-agent with inline MCP | Zero (the main session never sees the tools)  |
+
+In a 50-turn conversation, the per-turn costs compound 50 times.
+
+</details>
+
+There is currently no mechanism to disable or demote MCP servers that are globally-configured at the project level.<br/>
+`disabledMcpjsonServers` in project settings only affects `.mcp.json`-defined servers, not user-scope ones (from
+`~/.claude.json`) or claude.ai connector servers. `ENABLE_CLAUDEAI_MCP_SERVERS=false` disables all connectors at launch
+time, but is all-or-nothing, not per-project or per-server. Adding a server to `~/.claude.json` means **every project**
+pays the deferred token tax.<br/>
+Refer to [mcp / per-project disable] and [mcp / project-level cloud connectors].
+
 > [!warning]
 > The `stdio` MCP transport protocol uses one-process-per-connection by design. Spawning many agents in parallel against
 > an inline `stdio` server spawns **one full process per agent**, multiplying resource usage and potentially saturating
@@ -2650,6 +2684,41 @@ This gives one the best of both worlds:
 > actually accepting connections.
 
 </details>
+
+## Tracking tasks
+
+Claude code provides built-in tools to handle in-session work tracking (`TaskCreate`, `TaskUpdate`, `TaskList`,
+`TaskGet`).<br/>
+Tasks are **ephemeral** and session-**specific**. They are **not** persisted to disk.
+
+Tasks progress through the following lifecycle: `pending` → `in_progress` → `completed` (or `deleted`).<br/>
+Each task gets an auto-incrementing integer ID on creation. There is **no** priority, position, or manual sort field.
+
+Tasks' **ordering** is functional:
+
+- On an _implicit_ level, with **creation** order.
+
+  The built-in convention is to prefer tasks in ID order (lowest first). Since IDs are sequential, the order tasks are
+  created in becomes the default execution order. This is sufficient for single-agent work, which processes tasks
+  **serially**.
+
+- On an _explicit_ level, if leveraging dependency edges.
+
+  `TaskUpdate` accepts the `addBlocks` and `addBlockedBy` fields. They wire tasks into a DAG. A task with a non-empty
+  `blockedBy` attribute cannot be claimed until **all** its blockers complete.<br/>
+  This is the mechanism providing real ordering when sequence matters structurally.
+
+There is nothing in between: no priority levels, no reordering after creation. The design suits a session-scoped system
+well, since "do them in order unless something blocks something else" covers most workflows without overhead.
+
+In [agent teams], the task list is **shared** across all teammates.<br/>
+The lead creates tasks and wires up their dependencies. Teammates call `TaskList` to find claimable work (pending,
+unowned, unblocked), claim a task by setting its `owner` via `TaskUpdate`, and mark it complete when done. Completing a
+task may unblock downstream work for other teammates.
+
+> [!note]
+> Teammates might fail to mark tasks complete, leaving dependent work blocked. When this happens, the lead needs to
+> intervene manually.
 
 ## Scheduling tasks
 
@@ -2854,6 +2923,8 @@ Claude Code version: `v2.1.41`.
 [tmux]: ../../tmux.md
 
 <!-- Files -->
+[aws-infra-operator-rw]: ../../../claude-code/agents/aws-infra-operator-rw.md
+[aws-operator-ro]: ../../../claude-code/agents/aws-operator-ro.md
 [.mcp.json file example]: ../../../examples/claude-code/dotmcp.json
 [~/.claude/credentials.json file example]: ../../../examples/claude-code/credentials.json
 [claude-code/skills]: ../../../claude-code/skills
@@ -2912,6 +2983,8 @@ Claude Code version: `v2.1.41`.
 [Enable specific MCP servers for sub-agents]: https://github.com/anthropics/claude-code/issues/16177
 [Grafana MCP Server]: https://github.com/grafana/mcp-grafana
 [Lost in the middle]: https://arxiv.org/abs/2307.03172
+[mcp / per-project disable]: https://github.com/anthropics/claude-code/issues/45158
+[mcp / project-level cloud connectors]: https://github.com/anthropics/claude-code/issues/25566
 [pffigueiredo/claude-code-sheet.md]: https://gist.github.com/pffigueiredo/252bac8c731f7e8a2fc268c8a965a963
 [Prat011/awesome-llm-skills]: https://github.com/Prat011/awesome-llm-skills
 [rtk-ai/rtk]: https://github.com/rtk-ai/rtk

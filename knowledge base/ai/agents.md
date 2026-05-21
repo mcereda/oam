@@ -452,8 +452,12 @@ Track session usage to identify what tasks are expensive to delegate, and review
 Prefer using network transport over `stdio` when an MCP server can be used by multiple sessions to avoid spawning one
 dedicated process per session or per parallel sub-agent invocation.
 
-Consider Offloading MCP servers to sub-agents when they are **rarely** used in the main session.<br/>
-See an example of this in [Claude Code's article][Claude Code / MCP servers in sub-agents].
+Consider Offloading MCP servers to sub-agents when they are **rarely** used in the main session. See an example of this
+in [Claude Code's article][Claude Code / MCP servers in sub-agents].<br/>
+Some harnesses support _lazy loading_ MCP tools' schemas (e.g. Claude Code using its `ToolSearch` tool), which defers
+reading the tools' full definitions until the MCP's first use in the session. When available, this feature reduces the
+token-cost argument for offloading. Sub-agents still remain valuable for **isolation** (scoped permissions, context
+separation, summarized output).
 
 When a class of operations **must always** route through a specific sub-agent rather than being handled in the main
 session, use multiple layers rather than the agent's description alone:
@@ -491,6 +495,7 @@ assist you by, for example, exiting the session and resuming it.
 - [AI mistakes you're probably making]
 - [Create custom subagents]
 - [Hermes agent], [OpenClaw][openclaw/openclaw] alternative with built-in self-improving loop
+- [Thoughts on slowing the fuck down], by Mario Zechner
 
 ### Sources
 
@@ -574,6 +579,7 @@ assist you by, for example, exiting the session and resuming it.
 [The Claude Skills I Actually Use for DevOps]: https://www.pulumi.com/blog/top-8-claude-skills-devops-2026/
 [The Complete Guide to AI Agent Memory Files (CLAUDE.md, AGENTS.md, and Beyond)]: https://medium.com/data-science-collective/the-complete-guide-to-ai-agent-memory-files-claude-md-agents-md-and-beyond-49ea0df5c5a9
 [The Emperor Has No Clothes: How to Code Claude Code in 200 Lines of Code]: https://www.mihaileric.com/The-Emperor-Has-No-Clothes/
+[Thoughts on slowing the fuck down]: https://mariozechner.at/posts/2026-03-25-thoughts-on-slowing-the-fuck-down/
 [Token Anxiety]: https://writing.nikunjk.com/p/token-anxiety
 [TotalRecall]: https://github.com/xaitax/TotalRecall
 [Trust No AI: Prompt Injection Along The CIA Security Triad]: https://arxiv.org/pdf/2412.06090

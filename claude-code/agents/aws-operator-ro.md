@@ -29,7 +29,7 @@ mcpServers:
         - --env
         - READ_OPERATIONS_ONLY
         - --volume
-        - /home/some-user/.aws:/app/.aws:rw  # must be writable
+        - /home/some-user/.aws:/app/.aws:rw  # must be writable  # FIXME: path
         - public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest
 ---
 

@@ -45,6 +45,7 @@
 | CSS     | Cascading Style Sheets                                 |                                                                                                     |
 | CVE     | Common Vulnerabilities and Exposures                   |                                                                                                     |
 | CVS     | Concurrent Versioning System                           |                                                                                                     |
+| DAG     | Directed Acyclic Graph                                 |                                                                                                     |
 | DB      | Data Base                                              |                                                                                                     |
 | DBMS    | DB Management System                                   |                                                                                                     |
 | DDL     | Data Definition Language                               |                                                                                                     |

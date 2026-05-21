@@ -59,6 +59,9 @@ connections when they cannot find a version compatible with the server.
 > This is currently a [confirmed issue only in Claude Code][claude code / mcp servers in sub-agents]. Refer to it for
 > details and mitigations.
 
+Some harnesses mitigate the context cost through _lazy loading_ (deferring full tool schemas until first use), but the
+attack surface concern remains regardless of loading strategy.
+
 ## MCP servers of interest
 
 | MCP server                                        | Summary                                                  |
