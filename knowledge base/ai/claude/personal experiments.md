@@ -375,6 +375,10 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
 - Missing frontmatter, absent cross-references, and inconsistent tags don't hurt much at 5-10 pages. Problems compound,
   and start causing retrieval failures around 15-20 pages.<br/>
   Invest in pre-commit linting (frontmatter completeness, index coverage, tag consistency) before reaching that point.
+  Beyond content lint, the contribution process benefits from its own checks (e.g., ensuring that deferred-item files
+  are paired with changelog entries, that commit authorship follows the expected format, that `updated` dates are fresh
+  on content changes, and that source files follow naming conventions). Each catches a distinct failure mode that
+  content lint alone would miss.
 
   There are some specific failure modes that compound silently:
 
@@ -388,8 +392,30 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   Code's hooks could be wrong in weeks.
 
   A single _last updated_ date doesn't capture this. Prefer adding a `review-after` frontmatter field per page.<br/>
-  It should consider the topic's change velocity (e.g. 6 months for active tools, 12 months for stable releases, _none_
-  for fundamentals). It also allows periodic reviews to focus only on content that went genuinely stale.
+  It should consider the topic's change velocity and how frequently one updates the tool:
+
+  | Topic velocity                          | Review cycle | Examples                        |
+  | --------------------------------------- | ------------ | ------------------------------- |
+  | Very fast (host updates every few days) | 4 weeks      | Claude Code                     |
+  | Fast-moving (active development)        | 6-8 weeks    | Pulumi providers, MCP ecosystem |
+  | Moderate (releases ~yearly)             | 3-6 months   | GitLab CI, EKS patterns         |
+  | Stable (fundamentals)                   | None needed  | Git, SSH, PostgreSQL internals  |
+
+  This also allows periodic reviews to focus only on content that went genuinely stale. Lint can surface pages with
+  fast-moving tags that lack `review-after` as informational warnings, making the gap visible without blocking commits.
+
+- The `updated` frontmatter field benefits from meaning that "the content was last **substantively** edited," not "the
+  file was last touched on X".
+
+  Without this distinction, routine metadata maintenance (bumping `review-after`, adjusting tags or confidence) forces
+  an `updated` bump that makes the page look fresher than its content actually is. A reviewer scanning for stale content
+  sees a recent date and moves on, even though the prose and examples haven't changed in months.
+
+  This is mechanically enforceable: a pre-commit hook can strip frontmatter from both the HEAD and staged versions of a
+  page, then require `updated: today` only when the **body** differs. Metadata-only edits pass through without
+  triggering the check. The alternative (treating any file edit as an update) is simpler to implement, but degrades the
+  field's value as a staleness signal; a page would show recent dates from routine maintenance, hiding genuine content
+  age.
 
 - Enriching a page by comparing it against a single reference document has a **shared blind spot** problem.
 
@@ -631,11 +657,16 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
 
 The mechanisms above form an enforcement hierarchy where each layer catches what the previous one misses:
 
-| Layer                                            | Concern                                              | Rationale                                               |
-| ------------------------------------------------ | ---------------------------------------------------- | ------------------------------------------------------- |
-| Pre-commit gate (git hooks/lefthook)             | Schema compliance (frontmatter, index, broken links) | Mechanical, binary; compounds silently if skipped       |
-| Claude Code hook (SessionStart/UserPromptSubmit) | Review triggers, insight capture                     | Non-blocking nudge; blocking would delay unrelated work |
-| `CLAUDE.md` files                                | Page scope, tag semantics, what to write             | Judgment-dependent; can't reduce to pass/fail           |
+| Layer                                            | Concern                                                    | Rationale                                               |
+| ------------------------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------- |
+| Pre-commit gate (git hooks/lefthook)             | Schema compliance, workflow invariants, commit attribution | Mechanical, binary; compounds silently if skipped       |
+| Claude Code hook (SessionStart/UserPromptSubmit) | Review triggers, insight capture                           | Non-blocking nudge; blocking would delay unrelated work |
+| `CLAUDE.md` files                                | Page scope, tag semantics, what to write                   | Judgment-dependent; can't reduce to pass/fail           |
+
+The pre-commit layer benefits from splitting concerns into separate scripts (content lint, workflow checks, attribution
+checks) rather than bundling everything into one. Different concerns have different false-positive profiles, and
+independent scripts can be enabled or disabled without touching each other. Lefthook's `parallel: true` runs them
+concurrently, so the cost of splitting is negligible.
 
 </details>
 
