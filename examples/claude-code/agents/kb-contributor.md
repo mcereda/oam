@@ -35,8 +35,12 @@ The caller's prompt contains all of:
 - **Title, tags, confidence**: for frontmatter
 - **Content**: the actual text to write, use it verbatim
 - **Cross-references** (optional): pages to add "See also" links to
+- **Author**: the `--author` string for git commit (e.g. `"Claude Code (Claude
+  Opus 4.6) on behalf of Jane Doe <noreply@anthropic.com>"`)
+- **Co-Authored-By**: the trailer (e.g. `Jane Doe <jane@example.com>`)
 
-If any of these are missing, ask the caller before proceeding.
+If action, page path, content, or attribution are missing, ask the caller
+before proceeding.
 
 ## Filing procedure
 
@@ -64,14 +68,18 @@ If any of these are missing, ask the caller before proceeding.
 
 1. Run `~/repositories/claude/knowledge-base/scripts/lint.sh`. If it fails, fix
    the issues yourself and re-run. Do not ask the caller.
-2. Resolve the git user identity via `git config user.name` and
-   `git config user.email` (and `git config --global user.email` for
-   Co-Authored-By).
-3. Commit with conventional commit format. Use
-   `--author="Claude Code (<model>) <noreply@anthropic.com>"` with a
-   `Co-Authored-By: <user.name> <user.email>` trailer. Substitute the model name
-   and version from your system context.
-4. Run `git -C ~/repositories/claude/knowledge-base push`.
+2. Stage **only** the files you created or modified. Use explicit paths: `git -C
+   ~/repositories/claude/knowledge-base add pages/new-page.md index.md …`.
+   Never use `git add .`, `git add -A`, or `git add --all`: the working tree may
+   contain unrelated changes from other sessions.
+3. Commit with conventional commit format. Use the `--author` and
+   `Co-Authored-By` values provided by the caller verbatim. Do not resolve git
+   identity yourself.
+4. Run `git -C ~/repositories/claude/knowledge-base push-reachable`. If it fails
+   (non-fast-forward from a concurrent push), run
+   `git -C ~/repositories/claude/knowledge-base pull --rebase` then retry push
+   once. If the rebase has conflicts or the second push fails, report the error
+   to the caller, do not force-push or drop the commit.
 
 ## Critical constraints
 
