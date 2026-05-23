@@ -6,6 +6,8 @@ Git hooks manager.
 1. [Configuration](#configuration)
    1. [Extend other files](#extend-other-files)
    1. [Use files from other repositories](#use-files-from-other-repositories)
+1. [Gotchas](#gotchas)
+   1. [Pre-commit hooks stash unstaged files](#pre-commit-hooks-stash-unstaged-files)
 1. [Monorepo patterns](#monorepo-patterns)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
@@ -85,6 +87,29 @@ $ ls -A1 *lefthook*
 
 Configuration files can extend other files recursively.
 
+> [!tip]
+> Lefthook supports YAML anchors, which one can use to avoid duplication in command definitions.
+>
+> <details style='padding: 0 0 1rem 1rem'>
+>
+> ```yaml
+> validate:
+>   parallel: true
+>   commands:
+>     check-backend-not-local: &check-backend-not-local
+>       glob: Pulumi.yaml
+>       run: yq -e '(.backend.url|test("^file://")?)|not' {all_files} > /dev/null
+>
+> pre-commit:
+>   parallel: true
+>   commands:
+>     check-backend-not-local:
+>       <<: *check-backend-not-local
+>       run: yq -e '(.backend.url|test("^file://")?)|not' {staged_files} > /dev/null
+> ```
+>
+> </details>
+
 ### Extend other files
 
 ```yaml
@@ -146,6 +171,42 @@ lint:
       glob: "*.{yaml,yml}"
   parallel: true
 ```
+
+> [!important]
+> Lefthook fetches `remotes` when running `lefthook install`, not when executing a hook. Updates to the local cache of
+> `remotes` files do **not** propagate automatically<br/>
+> Projects **must** run `lefthook install` every time they want to pick up upstream changes.
+
+## Gotchas
+
+### Pre-commit hooks stash unstaged files
+
+Lefthook stashes unstaged changes before running pre-commit hooks, and restores them after. The hook, when executed,
+sees only the **staged** version of each file, not the working tree.<br/>
+Scripts might pass when run manually (when they can see the full working tree), but fail at commit time (when it sees
+only the stashed-out, staged version of the repository).
+
+Untracked files, on the other hand, are **not** stashed, and the hooks see them as-is on disk.
+
+Example:
+
+- A developer stages a file before making a quick change.
+- The developer forgets to add that change, which remains unstaged.
+- At commit time:
+  - Lefthook stashes the unstaged change.
+  - The `lint` command runs against the staged version, and errors out.
+- Manual lints pass, because no stash happened and they see the unstaged version of the file.
+
+Possible fixes:
+
+- `git add` the working tree.<br/>
+  This folds unstaged changes into the staged version and commits them together.
+- Unstage the file entirely (`git reset HEAD <file>`).<br/>
+  The file becomes untracked or goes back to its committed state; lefthook doesn't stash it, and the hooks sees it
+  as-is.
+- Configure `stage_fixed: true` in the lefthook command.<br/>
+  This is especially useful if the hook itself modifies the file, and one wants those modifications staged for commit
+  too.
 
 ## Monorepo patterns
 
