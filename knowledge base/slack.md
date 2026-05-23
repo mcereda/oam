@@ -9,6 +9,7 @@
 1. [Create slash commands](#create-slash-commands)
    1. [Verifying the signing secret](#verifying-the-signing-secret)
    1. [3-second ack + async pattern](#3-second-ack--async-pattern)
+      1. [Managing the deadline in AWS Lambda](#managing-the-deadline-in-aws-lambda)
 1. [Update an existing app's manifest](#update-an-existing-apps-manifest)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -226,6 +227,54 @@ _In-channel_ responses `{"response_type": "in_channel", "text": "…"}` are visi
 
 Validate the `response_url` starts with `https://hooks.slack.com/` before posting to it: Slack always sends URLs in this
 form, and skipping the check lets a channel member craft a slash command with an arbitrary URL.
+
+#### Managing the deadline in AWS Lambda
+
+The cleanest way to honour the 3-second deadline when calling AWS Lambda functions specifically is by _self-invocation_.
+The synchronous invocation from Slack does the **lightweight** work (verify the signature, parse, ack), then fires a
+second `InvocationType=Event` call to the **same** Lambda for the **actual** work.<br/>
+A sentinel field (e.g. `isAsync: True`) on the payload can distinguish the two paths in the handler.
+
+```python
+def handler(event, context):
+    if event.get('isAsync'):
+        return _handle_async(event)
+    # verify, parse, self-invoke, ack go here
+
+def handle_slack_request(event, context):
+    """
+    Lightweight work goes here.
+    Verify signature, parse, validate response_url, etc.
+    """
+    try:
+        lambda_client.invoke(
+            FunctionName=context.function_name,   # runtime name, not hardcoded
+            InvocationType='Event',
+            Payload=json.dumps({
+                'isAsync': True,
+                'resources': resources,
+                'response_url': response_url,
+            }).encode(),
+        )
+    except Exception:
+        return message_slack('Failed to queue work, try again later.')
+    return message_slack(f'Starting {len(resources)} resources.')
+```
+
+> [!important]
+> The IAM role executing the Lambda requires `lambda:InvokeFunction` on the lambda's ARN, for self-invoke to work:
+>
+> ```json
+> {
+>   "Sid": "AllowSelfInvoke",
+>   "Effect": "Allow",
+>   "Action": "lambda:InvokeFunction",
+>   "Resource": "arn:aws:lambda:<region>:<account>:function:<function-name>"
+> }
+> ```
+>
+> Use `context.function_name` for the target. Hardcoding the function name breaks, when the Lambda is renamed or
+> deployed in blue/green mode.
 
 ## Update an existing app's manifest
 
