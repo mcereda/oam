@@ -1,8 +1,11 @@
 # Elastic Container Registry
 
 1. [TL;DR](#tldr)
+1. [Image scanning](#image-scanning)
 1. [Lifecycle policies](#lifecycle-policies)
+   1. [Archive tier constraints](#archive-tier-constraints)
 1. [Pull through cache feature](#pull-through-cache-feature)
+1. [Cleaning up old images](#cleaning-up-old-images)
 1. [Troubleshooting](#troubleshooting)
    1. [Docker pull errors with `no basic auth credentials`](#docker-pull-errors-with-no-basic-auth-credentials)
 1. [Further readings](#further-readings)
@@ -104,6 +107,36 @@ Constraints:
 | Image tag       | String | 1 <= length <= 300                                                                                 | [ImageIdentifier](https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_ImageIdentifier.html) |
 | Repository name | String | 2 <= length <= 256<br/>Must match `(?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*` | [Image](https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_Image.html)                     |
 
+## Image scanning
+
+ECR can scan images in two ways:
+
+- **Basic** scanning is free, runs on push (or manually), and covers OS-package CVEs only.
+- **Enhanced** scanning is paid through its use in Amazon Inspector, runs on push **and** continuously re-scans any time
+  Inspector's CVE database updates, and covers both OS packages and programming-language packages.
+
+| Feature             | Basic                                   | Enhanced                                 |
+| ------------------- | --------------------------------------- | ---------------------------------------- |
+| Cost                | **Free** (no ECR charge)                | **Paid** via Amazon Inspector            |
+| Coverage            | CVEs for OS packages only               | OS and programming language packages     |
+| Trigger             | On-push or manual                       | On-push AND continuous re-scan           |
+| Configuration scope | Per-repo (deprecated) or registry-level | Registry-level only                      |
+| Billing source      | None (Amazon ECR)                       | Amazon Inspector (per-scan + per-rescan) |
+
+Pulumi's `imageScanningConfiguration.scanOnPush` field on `aws.ecr.Repository` resources enables basic scanning
+**per repository**. The cost for this is zero.
+
+The repository-level scan on push feature is **deprecated** in favour of registry-level scan configurations. Existing
+per-repository configurations continue to work, but consider planning a migration when convenient.
+
+Enhanced scanning is configured at the **registry level only** as a single switch for all repos in the account, or
+selecting a subset of them via filters. Cost is per initial scan, plus per rescan as the CVE database updates, plus per
+CI/CD scan if integrated with Jenkins, TeamCity, or similar.
+
+> [!caution]
+> Switching between basic and enhanced **loses** previous scan findings. The data isn't shared between modes. Switching
+> back **restores** the original mode's findings.
+
 ## Lifecycle policies
 
 One can use lifecycle rules **per repository** to delete or archive untagged images, images not pulled in a while,
@@ -135,20 +168,248 @@ Images matching lifecycle policy criteria are processed within **24 hours**. Use
 create-on-push, or replication. The `ROOT` prefix acts as a catch-all. These do **not** apply to repositories created
 manually.
 
+### Archive tier constraints
+
+When `sinceImagePulled` → `transition` moves images to archival storage, several non-obvious constraints apply:
+
+- Archived images are billed with a **90-day minimum storage duration**.
+
+  Lifecycle policies **cannot** be configured to delete archived images **before** 90 days after transition. AWS just
+  rejects shorter values when one submits the policy with _You cannot configure lifecycle policies that delete images
+  that have been in archive for less than 90 days".<br/>
+  Manual `batch-delete-image` still works, but AWS charges for the 90-day minimum regardless.
+
+- Archived images **fail with `404` on pull**.
+
+  Once archived, images **cannot be pulled** until **explicitly** restored. ECR storage is different from S3's Glacier
+  and its "slower retrieval".<br/>
+  Restoring archived images typically takes **20 minutes** or less; the image's status reads `ACTIVATING` during that
+  time frame.
+
+- ECR does **not** automatically restore an archived image when a pull returns `404`.
+
+  Possible workarounds:
+
+  - **Re-push** the same image.<br/>
+    This immediately restores the image and does not require waiting, but does requires the image to be available
+    locally for push.
+  - **Manual restoration** via API.<br/>
+    Run `aws ecr update-image-storage-class --repository-name 'some/repo' --image-id 'imageDigest=<digest>'
+    --target-storage-class STANDARD`, then wait up to 20 minutes.
+  - Detect the failed `BatchGetImage` call on CloudTrail, and leverage EventBridge to trigger a Lambda to restore the
+    image. Still requires a 20-minute wait; the deployer also needs retry logic.
+
+- For images archived and then restored, but **not** yet pulled since restoration, `sinceImagePulled` uses
+  `last_activated_at` (the restore timestamp) rather than the original `last_recorded_pulltime`.<br/>
+  A restored image gets a fresh hot window before being re-archived.
+
 ## Pull through cache feature
 
-> **Note:** when requesting an image for the first time using the pull through cache, the ECR creates a new repository
-> for that image.<br>
+Refer [Troubleshooting pull through cache issues in Amazon ECR].
+
+> **Note:** when requesting an image for the first time using the pull through cache, the ECR tries creating a new
+> repository for that image.<br>
 > This might™ introduce a small latency and be cause of pull failures. Pulling that (not-yet)cached image from an
 > interactive shell session worked flawlessly.
 
 The user or role pulling the image must be granted the `ecr:BatchImportUpstreamImage` permission for the feature to
-work as expected. This is needed on **every** pull **and** applies also when the tag is already cached locally in the
-ECR.<br/>
+work as expected.<br/>
 The service intercepts the pull request to check the upstream. Without this permission, ECR returns _not found_ (and
-not _access denied_) intentionally.
+not _access denied_) **intentionally**.
 
-Refer [Troubleshooting pull through cache issues in Amazon ECR].
+> [!important]
+> The `ecr:BatchImportUpstreamImage` permission gates the **upstream fetch**, but **allows** reading the cached image in
+> the repository.<br/>
+> Images **already cached** only require the normal pull permissions (`ecr:GetAuthorizationToken`, `ecr:BatchGetImage`,
+> `ecr:GetDownloadUrlForLayer`, `ecr:BatchCheckLayerAvailability`). `ecr:BatchImportUpstreamImage` is only checked on a
+> **cache miss**.
+
+When the cache repository doesn't exist yet under the prefix, the entity pulling the image either needs to create the
+repository first, or it needs `ecr:CreateRepository`. This permission is **not** included in the standard
+`AmazonEC2ContainerRegistryReadOnly` AWS-managed policy.<br/>
+[Repository creation templates] only describe what the new repository should look like, and **do** still require the
+puller to create the repository.
+
+> [!tip]
+> Scope extra permissions to the cache namespace only.<br/>
+> **Never** grant `BatchImportUpstreamImage` and `CreateRepository` on `Resource: "*"`.
+>
+> ```ts
+> new aws.iam.RolePolicy(
+>   'someRole-allowPopulatingTheEcrCache',
+>   {
+>     name: 'AllowPopulatingTheEcrCache',
+>     role: nodeRole.name,
+>     policy: pulumi.jsonStringify({
+>       Version: '2012-10-17',
+>       Statement: [
+>         {
+>           Effect: 'Allow',
+>           Action: [
+>             'ecr:BatchImportUpstreamImage',
+>             'ecr:CreateRepository',
+>           ],
+>           Resource: 'arn:aws:ecr:eu-west-1:012345678901:repository/some-prefix/*',
+>         },
+>       ],
+>     }),
+>   },
+> );
+> ```
+
+> [!warning]
+> For EKS specifically, the **kubelet running on the node** is the one pulling images from ECRs.<br/>
+> The kubelet uses the **node**'s instance-profile role. It does **not** consult pod-level roles (Pod Identity, IRSA)
+> when pulling images. Instead, they only kick in once the container is running and the SDK reaches for credentials. A
+> pod can be perfectly configured with Pod Identity and still hit `ImagePullBackOff` if the node role lacks the relevant
+> ECR permissions.
+
+## Cleaning up old images
+
+When writing cleanup scripts against multi-arch images, pull-through cache repositories, or anything that combines ECR
+with ECS/Lambda/EKS consumer-side lookups, the following issues might arise:
+
+- Pull timestamps for image indices are **not** propagated to their children.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  When pulling a multi-arch image (manifest list / OCI image index), ECR records the `lastRecordedPullTime` only on the
+  **index**. The individual platform manifests (children) keep their own previous `lastRecordedPullTime`. This value
+  is often `null` if they were never pulled directly.
+
+  A naive cleanup rule like `last_pull == null` will incorrectly flag child manifests as safe to delete, even if they
+  are actively used through the parent index. Treat a child as in-use if its parent index has a recent
+  `lastRecordedPullTime` value, regardless of the child's own timestamp.
+
+  </details>
+
+- Children of a manifest index are usually **not** tagged.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  ECR stores platform-specific manifests (children) as untagged images by default. The only way to tell whether an
+  untagged image is a standalone orphan or a child referenced by a live index is to:
+
+  1. Identify indices via `imageManifestMediaType` (`application/vnd.docker.distribution.manifest.list.v2+json` for
+     Docker, `application/vnd.oci.image.index.v1+json` for OCI).
+  1. Call `batch_get_image` on each index to get the manifest's JSON.
+  1. Extract the children's digests.
+  1. Build a `child_digest → parent_digest` map **before** making any deletion decisions.
+
+  Lifecycle policies do **not** understand parent-child relationships, and **will** delete children images orphaning
+  their index.
+
+  </details>
+
+- Indices can share child manifests across the repository.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  Two **distinct** image indexes within the same repository can reference the **same** child manifest by digest. This
+  happens normally when the upstream registry pushes the same manifest under multiple index tags. It is common with
+  pull-through cache repositories holding multi-arch images that share platform layers across releases.
+
+  Cleanup methods like "expand index → delete all children" are unsafe when children are shared. Deleting one stale
+  index can break another live index that shares its children. Before deleting the child manifest of an index, verify
+  that **every** parent index referencing that child is also being deleted. If any parent survives, the shared child
+  must survive too. This is the OCI-registry parallel to reference counting.
+
+  </details>
+
+- `batch_get_image` requires `acceptedMediaTypes` for indices.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  Without setting `acceptedMediaTypes` to the manifest-list types, ECR resolves the index to only the single platform
+  manifest matching the caller's architecture, and silently returns _that child's_ manifest instead. The returned
+  `imageId` will be the **child**'s digest, **not** the index's one.
+
+  ```python
+  index = ecr.batch_get_image(
+      repositoryName=repo,
+      imageIds=[{"imageDigest": index_digest}],
+      acceptedMediaTypes=[
+          "application/vnd.docker.distribution.manifest.list.v2+json",
+          "application/vnd.oci.image.index.v1+json",
+      ],
+  )
+  ```
+
+  </details>
+
+- The `pushed_at` value for pull-through cache is "when it has been first cached", not that image's effective age.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  In pull-through cache repositories, `imagePushedAt` reflects when the ECR first stored that digest, **not** when the
+  upstream image was effectively built or tagged. If a new index version references a platform manifest that ECR already
+  has cached (same digest, different tag), the child's `pushed_at` stays at the original cache date.
+
+  Use the parent index's `pushed_at` as the authoritative age for a multi-arch image, not the children's.
+
+  </details>
+
+- `update_image_storage_class` has no _batch_ equivalent.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  `batch_delete_image` accepts up to 100 digests per call. `update_image_storage_class` accepts **only one** image at a
+  time. To archive multiple images, loop and call once per digest. The response includes `imageStatus`, which will
+  be `ARCHIVED` or `ACTIVATING`. It is **not** an immediate transition.
+
+  </details>
+
+- ECS task definitions might pin images as `<repository>:<tag>@<digest>`.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  Strip the `:tag` suffix after splitting on `@`:
+
+  ```python
+  if "@" in rest:
+      ref, digest = rest.split("@", 1)
+      repo_part = ref.rsplit(":", 1)[0] if ":" in ref else ref
+  ```
+
+  </details>
+
+- Lambda functions based on containers return both `ResolvedImageUri` and `ImageUri`.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  `get_function()` returns two image URI fields in `Code`:
+
+  - `ImageUri`, which is what the user specified  and might be a tag reference like `repo:latest`.
+  - `ResolvedImageUri`, which is the image's SHA256 form, resolved at deploy time (always `repo@sha256:...`).
+
+  For digest matching, use `ResolvedImageUri`. It is always in digest form and avoids a secondary `describe_images`
+  lookup.<br/>
+  `list_functions()` only returns the `$LATEST` configuration; functions that route traffic via aliases to published
+  versions reference a different image from `$LATEST`. Cover those with a `list_aliases()` plus a versioned
+  `get_function(FunctionName=fn, Qualifier=alias)` pass per function. Filter by `PackageType: Image` before calling
+  `get_function` to avoid unnecessary API calls for Zip-based functions.
+
+  </details>
+
+- EKS pod image resolution requires both `imageID` and `spec.containers[].image`.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  When querying running pods from the Kubernetes API, two fields carry image information and both are needed:
+
+  - `status.containerStatuses[].imageID` is the fully resolved digest, set after the image is pulled.<br/>
+  This field is missing on pending or initializing containers.
+  - `spec.containers[].image` is what the manifest declared. This is always present, but may be a tag reference rather
+  than a digest.
+
+  With the legacy Docker runtime, `imageID` is prefixed with `docker-pullable://`. The Containerd runtime omits that
+  prefix. Strip it before parsing:
+
+  ```python
+  image = image.removeprefix("docker-pullable://")
+  ```
+
+  </details>
 
 ## Troubleshooting
 

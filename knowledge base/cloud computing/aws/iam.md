@@ -11,6 +11,7 @@ Controls who is authenticated (signed in) and authorized (has permissions) to us
 1. [Roles](#roles)
    1. [Assume Roles](#assume-roles)
       1. [Require MFA for assuming Roles](#require-mfa-for-assuming-roles)
+1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -440,6 +441,116 @@ UserId: AROA2HKHF74L72AABBCCDD:botocore-session-1234567890
 ```
 
 </details>
+
+## Gotchas
+
+- `Describe*` and list actions silently deny when given tag conditions.
+
+  Many `Describe*` actions and several list-style actions do **not** support resource-level permissions, and as such
+  they do **not** respect `aws:ResourceTag/*` IAM conditions. Adding these conditions silently denies **all** calls
+  because the tag context isn't present in the request, so `StringEquals` / `StringNotEquals` evaluate against an absent
+  key and the implicit `Deny` wins.
+
+  All of `ec2:DescribeInstances`, `ec2:DescribeTags`, `ec2:DescribeVolumes`, `ec2:DescribeSnapshots`,
+  `ec2:DescribeSecurityGroups`, `rds:DescribeDBInstances`, `cloudwatch:DescribeAlarms`, `dynamodb:ListTables`,
+  `sns:ListTopics`, `sqs:ListQueues`, `lambda:ListFunctions` **require** `Resource: "*"` and accept **no** conditions.
+
+  Always check the specific service's IAM action table in the AWS documentation before relying on a tag condition.
+
+  This forces a split for least-privilege roles. Mutating actions _can_ be tag-conditioned, but `Describe`/list actions
+  must use `Resource: "*"` without condition. The calling code is the one left to filter results by tag before acting on
+  any.
+
+  <details style='padding 0 0 1rem 1rem'>
+    <summary>Example</summary>
+
+  ```json
+  {
+    "Statement": [
+      {
+        "Sid": "AllowDiscoveringEc2Instances",
+        "Effect": "Allow",
+        "Action": [
+          "ec2:DescribeInstances",
+          "ec2:DescribeTags"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "AllowStartingNonProductionEc2Instances",
+        "Effect": "Allow",
+        "Action": "ec2:StartInstances",
+        "Resource": "*",
+        "Condition": {
+          "StringNotEquals": {
+            "aws:ResourceTag/Environment": "Production"
+          }
+        }
+      }
+    ]
+  }
+  ```
+
+  `StringEquals` / `StringNotEquals` evaluate to `false` (implicit `Deny`) when the tag key is absent. To require a
+  tag to exists **and** to have a particular value, combine `StringNotEqualsIfExists` with a `Null` clause instead:
+
+  ```json
+  "Condition": {
+    "StringNotEqualsIfExists": {
+      "aws:ResourceTag/Environment": "Production"
+    },
+    "Null": {
+      "aws:ResourceTag/Environment": "false"
+    }
+  }
+  ```
+
+  `Null: { "...": "false" }` requires the tag to be present; `StringNotEqualsIfExists` blocks `Production`. Untagged
+  resources are denied.
+
+  </details>
+
+- Policy simulator is blind to indirect authentication/authorization flows.
+
+  The IAM policy simulator evaluates a single role's permissions against a single API call. It **cannot** test
+  multi-hop credential flows (e.g., where _process A_ fetches credentials and _forwards them_ to _process B_, then
+  _process B_ uses them against AWS).
+
+  Example: a GitLab Runner autoscaling manager on an EC2 instance uses its own role to call `ecr:GetAuthorizationToken`
+  to get a short-lived Docker authentication token, then forwards it to each worker's Docker daemon (a different EC2
+  instance with its own role) before dispatching the CI job.<br/>
+  The worker's Docker daemon uses the forwarded token to pull images, but it never authenticates to the ECR itself.
+
+  If the workers' role has `ecr:BatchGetImage` and other permissions, simulating the **worker** role shows them as
+  _allowed_. But if the **manager**'s role is missing `ecr:GetAuthorizationToken`, the authentication token is never
+  generated and the worker's Docker daemon has nothing to present. The pull fails with `no basic auth credentials` from
+  Docker, **not** with `AccessDenied` from IAM.
+
+  | Error                                    | Meaning                                                          |
+  | ---------------------------------------- | ---------------------------------------------------------------- |
+  | `Access Denied` from AWS                 | IAM policy denied the call. Check the simulator and the policy.  |
+  | `no basic auth credentials` from Docker  | The auth token was never obtained. The auth step did not run.    |
+
+  The Docker error is **upstream** of IAM. The simulator cannot catch it, because no AWS API call ever fails. Instead,
+  the credential-fetch step just doesn't happen.
+
+  When `docker pull` (or any forwarded-credential operation) fails, but the simulator shows _allowed_:
+
+  1. Identify who **fetches** the token, not who **uses** it.
+  1. Check that process's IAM role for the relevant `Get*Token`/`AssumeRole*` permission.
+  1. Check whether a credential helper is installed on the pulling host (which would make it self-authenticating and
+     bypass the forwarding path entirely).
+
+- Role deletion has **no** referential integrity guard.
+
+  AWS allows deleting an IAM role even when it is **actively** attached to a resource (Lambda execution role, ECS task
+  role, EC2 instance profile, etc.). There is **no** foreign key check between resources. The resource continues to
+  exist, but its next invocation fails with an authorization error (e.g., a Lambda gets a silent `AccessDenied`, but no
+  deletion error.
+
+  This bites IaC rename flows in particular. Renaming a managed IAM role is a **delete + create** action because IAM
+  role names are immutable. If the role is in use by a Lambda or ECS task when the delete runs, the function is broken
+  until the new role is created **and** every consumer's `role` property is updated.
 
 ## Further readings
 
