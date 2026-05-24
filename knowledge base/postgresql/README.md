@@ -14,6 +14,7 @@
    1. [PostGIS](#postgis)
    1. [`postgresql_anonymizer`](#postgresql_anonymizer)
 1. [Make it distributed](#make-it-distributed)
+1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -721,6 +722,46 @@ psql -h 'localhost' -p '6543' -U 'postgres' -d 'postgres' -W
 Refer [How to Scale a Single-Server Database: A Guide to Distributed PostgreSQL].<br/>
 See also [yugabyte/yugabyte-db].
 
+## Gotchas
+
+- `pg_upgrade` does **not** preserve logical replication slots when upgrading from PostgreSQL versions
+  **before 17**.<br/>
+  This has effects on all tools using CDC and logical replication like [PeerDB], [Airbyte], and Debezium.
+
+  After a major version upgrade, replication slots must be **recreated** manually. The publication survives the upgrade,
+  but it deletes the replication slot or leaves it in an inconsistent state.<br/>
+  This produces confusing errors, like Airbyte's _Expected exactly one replication slot but found 0_.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Post-upgrade CDC checklist</summary>
+
+  Run this after **any** major PostgreSQL version upgrade on a source DB that has CDC configured:
+
+  ```sql
+  -- 1. Ensure `wal_level` is 'logical'
+  --    The upgrade may revert it to 'replica' in the configuration
+  --    Needs a server restart to apply a change
+  SHOW wal_level;
+
+  -- 2. Ensure the replication slot exists and uses the correct output plugin
+  SELECT slot_name, plugin, slot_type FROM pg_replication_slots;
+
+  -- 3. If missing or stale, drop and recreate the replication slot
+  SELECT pg_drop_replication_slot('some_slot');
+  SELECT pg_create_logical_replication_slot('some_slot', 'pgoutput');
+
+  -- 4. Ensure the publication exists and accesses the expected tables
+  SELECT * FROM pg_publication_tables WHERE pubname = 'some_publication';
+
+  -- 5. Ensure the user has the REPLICATION attribute
+  SELECT rolname, rolreplication FROM pg_roles WHERE rolname = 'some_user';
+  ```
+
+  After all five checks pass, trigger a manual sync in the replication tools.<br/>
+  If `wal_level` was set to the wrong value, PostgreSQL must be restarted **before** creating the slot.
+
+  </details>
+
 ## Further readings
 
 - [SQL]
@@ -770,7 +811,9 @@ See also [yugabyte/yugabyte-db].
 [Write-Ahead Logging]: #write-ahead-logging
 
 <!-- Knowledge base -->
-[mysql]: ../mysql.md
+[Airbyte]: ../airbyte.md
+[MySQL]: ../mysql.md
+[PeerDB]: ../peerdb.md
 [Percona toolkit]: ../percona%20toolkit.md
 [pg_dump]: pg_dump.md
 [pg_dumpall]: pg_dumpall.md
@@ -778,7 +821,7 @@ See also [yugabyte/yugabyte-db].
 [pg_restore]: pg_restore.md
 [pgadmin]: pgadmin.md
 [pgBackRest]: pgbackrest.md
-[sql]: ../sql.md
+[SQL]: ../sql.md
 
 <!-- Upstream -->
 [create function]: https://www.postgresql.org/docs/current/sql-createfunction.html

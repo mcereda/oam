@@ -11,6 +11,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 
 | Name                  | Description                         | Alternatives                              |
 | --------------------- | ----------------------------------- | ----------------------------------------- |
+| [Airbyte]             | ELT platform                        |                                           |
 | [AWX]                 | Task runner                         | [CTFreak], [Rundeck], [Semaphore], [Zuul] |
 | [Baikal]              | CalDAV and CardDAV server           | [Radicale]                                |
 | [CTFreak]             | Task runner                         | [AWX], [Rundeck], [Semaphore], [Zuul]     |
@@ -48,23 +49,24 @@ The _art_ of hosting and managing applications on one's own servers instead of c
   -->
 
 <!-- Knowledge base -->
-[awx]: awx.md
-[baikal]: baikal.md
-[forgejo]: forgejo.md
-[gitea]: gitea.md
+[Airbyte]: airbyte.md
+[AWX]: awx.md
+[Baikal]: baikal.md
+[Forgejo]: forgejo.md
+[Gitea]: gitea.md
 [GitLab]: gitlab.md
-[hoppscotch]: hoppscotch.md
-[immich]: immich.md
-[nextcloud]: nextcloud.md
-[nginx proxy manager]: nginx%20proxy%20manager.md
-[openmediavault]: openmediavault.md
-[paperless-ngx]: paperless-ngx.md
-[photoprism]: photoprism.md
-[rundeck]: rundeck.md
-[safeline]: safeline.md
-[uptime kuma]: uptime%20kuma.md
-[wallabag]: wallabag.md
-[yaade]: yaade.md
+[Hoppscotch]: hoppscotch.md
+[Immich]: immich.md
+[Nextcloud]: nextcloud.md
+[Nginx proxy manager]: nginx%20proxy%20manager.md
+[OpenMediaVault]: openmediavault.md
+[Paperless-ngx]: paperless-ngx.md
+[Photoprism]: photoprism.md
+[Rundeck]: rundeck.md
+[Safeline]: safeline.md
+[Uptime kuma]: uptime%20kuma.md
+[Wallabag]: wallabag.md
+[Yaade]: yaade.md
 
 <!-- Others -->
 [awesome-selfhosted]: https://awesome-selfhosted.net/
