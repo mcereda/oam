@@ -25,6 +25,8 @@
     1. [PostgreSQL: reduce allocated storage by migrating using transportable databases](#postgresql-reduce-allocated-storage-by-migrating-using-transportable-databases)
     1. [Stop instances](#stop-instances)
     1. [Cancel pending modifications](#cancel-pending-modifications)
+1. [Best practices](#best-practices)
+    1. [Scale consumers down before resizing](#scale-consumers-down-before-resizing)
 1. [Pricing](#pricing)
     1. [Cost-saving measures](#cost-saving-measures)
        1. [Reserved DB instances](#reserved-db-instances)
@@ -1152,6 +1154,39 @@ $ aws rds modify-db-instance --db-instance-identifier 'some-db' \
 ```
 
 </details>
+
+## Best practices
+
+### Scale consumers down before resizing
+
+When resizing an instance that serves clients that do **not** gracefully manage losing connections, scale consumers down
+**before** the resize to avoid an error storm during the process. Zeroing consumers first gives a clean resize without
+failed health checks or ECS task restarts cascading through the cluster.<br/>
+Single-AZ instances go offline for 5 to 10 minutes during a resize; Multi-AZ instances fail over in 20 to 60 seconds,
+but connected services still see transient connection errors.
+
+```sh
+# 1. Scale down consumers
+aws ecs update-service --cluster 'production' --service 'grafana' --desired-count '0'
+aws autoscaling update-auto-scaling-group --auto-scaling-group-name 'some-app' \
+  --min-size '0' --max-size '0' --desired-capacity '0'
+
+# 2. Resize the RDS instance
+aws rds modify-db-instance --db-instance-identifier 'some-db-instance' \
+  --db-instance-class 'db.m8g.xlarge' --apply-immediately
+
+# 3. Wait for DB availability
+aws rds wait db-instance-available --db-instance-identifier 'some-db-instance'
+
+# 4. Scale consumers back up
+aws ecs update-service --cluster 'production' --service 'grafana' --desired-count '3'
+aws autoscaling update-auto-scaling-group --auto-scaling-group-name 'some-app' \
+  --min-size '3' --max-size '10' --desired-capacity '3'
+```
+
+One can resize instances with read replicas **concurrently**. Keep consumers at zero until **all** instances (the
+primary and every replica) report `available`. A replica still lagging behind the primary causes read-path errors
+even after the primary is back.
 
 ## Pricing
 

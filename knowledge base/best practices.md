@@ -88,6 +88,8 @@ What really worked for me personally, or in my experience.
   Trackers like [endoflife.date] could help in this.
 - Backup your data, especially when you are about to make changes to something managing or storing it.<br/>
   [Murphy's law] is lurking. Consider [the 3-2-1 backup strategy].
+- Do **not** schedule risky production changes for Thursday afternoon, Friday, or weekends.<br/>
+  Incident response capacity is reduced, and should something go wrong the blast radius spans the weekend.
 - [Branch early, branch often].
 - [Keep a changelog].
 - [Keep changes short and sweet][the art of small pull requests].<br/>
