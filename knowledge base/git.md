@@ -748,7 +748,14 @@ To apply all commits from a patch, use `git am` on a patch created with `git for
 git am 'file.patch'
 ```
 
-The commits are applied one after the other and registered in the repository's logs.
+The commits are applied one after the other, and registered in the repository's logs.
+
+In `.patch` files, unchanged lines shown for context (_context lines_) must be prefixed with a single space. Omitting it
+makes `git apply` read the line as a boundary, and fail with `error: patch fragment without header at line N`.
+
+The `@@ -a,b +c,d @@` header counts **all** lines in the hunk, including removed (`-`), added (`+`), non-blank context,
+**and** _blank_ context lines. If one hand-edits a patch and forgets to include or count a trailing blank context line,
+`git apply --check` will catch the mismatch.
 
 ## The stash stack
 
@@ -852,7 +859,38 @@ git pull --rebase='interactive' 'origin' 'master'
 
 Refer to [git-worktree].
 
-Allows checking out more than one branch at a time in the same repository.
+Allows checking out more than one branch at a time in the same repository. Each branch gets its own directory, and all
+of them share a single `.git` database.<br/>
+Those branches have **no** separate remote, and **no** separate fetch. Commits made in any worktree are immediately
+visible to all others.
+
+```sh
+git worktree add '../path/to/worktree' 'branch-name'    # add an existing branch
+git worktree add -b 'new-branch' '../path/to/worktree'  # create a new branch in the worktree
+git worktree list
+git worktree remove '../path/to/worktree'
+git worktree prune                                      # use if a worktree was deleted manually
+```
+
+Two worktrees **cannot** check out the same branch.<br/>
+Git enforces a single checkout per branch. If `main` is checked out in the primary worktree, a second worktree on `main`
+fails with `fatal: 'main' is already checked out at '/path/to/primary'`.
+
+Placing a worktree inside the repository makes the primary worktree show those files as `untracked`. Place worktrees at
+the same level of the primary (as _siblings_) instead.
+
+Executing `rm -rf` on a directory doesn't remove the worktree it hosts from the git database. Use `git worktree remove`
+instead, or run `git worktree prune` to clean up after a manual delete.
+
+All worktrees **share** the same `.git/refs`, which makes branches, tags, and stashes **global**. Anyway, each worktree
+has its **own** index (staging area) and working tree.<br/>
+AS such, `git stash` in one worktree is visible in others; `git add` and `git status` are private to that worktree;
+hooks fire per-worktree, based on the current directory.
+
+`git push` (and any alias built on it) only pushes the branch tracked in the **current** working directory. A worktree
+branch that's never been pushed stays silently local, with no warning nor push mechanism that covers it
+automatically.<br/>
+Make explicit push part of the worktree lifecycle's checklist.
 
 ## Tags
 
@@ -1010,6 +1048,9 @@ Remote "origin" does not support the LFS locking API. Consider disabling it with
   $ git config 'lfs.http://some.git.server.lan/user/repository.locksverify' false
 Git LFS: (0 of 0 files, 7 skipped) 0 B / 0 B, 879.11 KB skipped
 ```
+
+Consider using `true` in repositories where multiple people edit binary assets (game art, design files, etc.)
+frequently, or when one wants to prevent concurrent edits.
 
 ## Submodules
 
