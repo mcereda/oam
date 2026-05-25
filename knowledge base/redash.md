@@ -200,7 +200,10 @@ Refer [LDAP/AD Authentication].
 
 Refer [API].
 
-Prefer acting on them using [getredash/redash-toolbelt].
+| Library                     | PyPI              | Maintainer              | Groups support | Pagination  | Status               |
+| --------------------------- | ----------------- | ----------------------- | -------------- | ----------- | -------------------- |
+| [getredash/redash-toolbelt] | `redash-toolbelt` | Official (Redash team)  | **No**         | No          | Stale (2021)         |
+| [blacksuan19/redash-python] | `redash-python`   | Community (Blacksuan19) | **Yes**        | Yes (users) | Last release 2023-06 |
 
 <details style='padding: 0 0 0 1rem'>
   <summary>Configuration</summary>
@@ -365,4 +368,5 @@ redash manage db stamp head
 
 <!-- Others -->
 [Ask Devin]: https://deepwiki.com/getredash/redash
+[blacksuan19/redash-python]: https://github.com/blacksuan19/redash-python
 [Redis]: https://redis.io/
