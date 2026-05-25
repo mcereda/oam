@@ -13,7 +13,10 @@ using the tools made available to them.
 1. [Gotchas](#gotchas)
    1. [Sub-agents hallucinate](#sub-agents-hallucinate)
    1. [Identifiers drift easily](#identifiers-drift-easily)
-   1. [MCP servers and sub-agents](#mcp-servers-and-sub-agents)
+   1. [Sub-agents might spawn their own processes for each inherited MCP server](#sub-agents-might-spawn-their-own-processes-for-each-inherited-mcp-server)
+   1. [Agents have no idea of what they missed](#agents-have-no-idea-of-what-they-missed)
+   1. [Context compression creates an asymmetric memory gap with the user's](#context-compression-creates-an-asymmetric-memory-gap-with-the-users)
+   1. [Context rot](#context-rot)
 1. [Concerns](#concerns)
    1. [How much integration is too much?](#how-much-integration-is-too-much)
    1. [Security](#security)
@@ -141,8 +144,8 @@ They do have _short-term memory_ in the form of a session's context window, avai
 responses.<br/>
 This memory is volatile. Once a session ends, or its conversation thread ends or exceeds the model's context window,
 that acquired data fades out.<br/>
-The larger the context grows, the more the LLM's attention degrades. Information gets lost in the middle, and recall
-quality drops. Frontier models reduce this issue by training specifically for long contexts.
+The larger the context grows, the more the LLM's attention normally degrades. Information gets lost in the middle, and
+recall quality drops. How much, depends on the model and its training. See [Context rot] for specifics.
 
 To have a _resemblance_ of long-term memory, they can write notes down and load them in later sessions.<br/>
 Agents might save learnings, patterns, and insights gained during active sessions in local files (like _memory files_ or
@@ -276,10 +279,14 @@ on official naming, especially:
 - Numerical specifics like character limits, token counts, exit codes, timeout values.<br/>
   Agents cite specific numbers confidently. Fabrication comes easy because they look authoritative and are hard to
   cross-check mentally.
-- URLs and paths, that might be _syntactically_ valid but non-existing.<br/>
-  Agents construct plausible-looking URLs from patterns in training data, and don't bother checking them.
+- URLs, paths, and other identifiers that might be _syntactically_ valid but non-existing.<br/>
+  Agents construct **plausible-looking** values from patterns in training data, and don't bother checking them.
 - Behaviour described for a specific version, which is often extrapolated from general knowledge and not verified
   against that version's changelog or docs.
+- Tool calls that return **empty results** (no output, not an error).<br/>
+  Agents receiving empty responses (usually when an MCP server gets saturated with concurrent connections) tend to
+  fabricate fictional resource listings that use valid value formats and internally-consistent IDs. These values are
+  _structurally_ correct, but verifiably wrong.
 
 A sub-agent's summary describes what it _believes_, not necessarily what is _true_.<br/>
 Before writing any agent-reported claim into a reference document, verify it against primary sources.
@@ -307,11 +314,52 @@ instruction layer, e.g.:
 - "Treat literal-string tokens as hot" to encourage names, paths, or IDs to be correctness-sensitive in a way that prose
   is not.
 
-### MCP servers and sub-agents
+### Sub-agents might spawn their own processes for each inherited MCP server
 
-When agent harnesses spawn sub-agents, they may inherit configured [MCP] servers by default, broadening the attack
-surface and wasting context window and computing resources.<br/>
+When agent harnesses spawn sub-agents, they may inherit configured [MCP] servers by default.<br/>
+This broadening the attack surface, and wastes context window and computing resources should they spawn their own
+process for each of them.<br/>
 This is currently a [confirmed issue only in Claude Code][claude code / mcp servers in sub-agents].
+
+### Agents have no idea of what they missed
+
+Agents know what they **found**, not what they **missed**. Positive claims (_this section says X_, _this file contains
+Y_) are well-grounded because agents have real proof of them; negative claims (_this is missing_, _this doesn't exist_)
+are based on the absence of evidence, which is breeding ground for hallucinations.
+
+When dispatching agents on a large or distributed search space (e.g. a 100K+ file, a directory of 15+ files) report that
+something is _missing_, _absent_, or _nonexistent_, treat the claim as a hypothesis to verify, not a finding.
+
+### Context compression creates an asymmetric memory gap with the user's
+
+Human users retain context of the full session (provided it happened in a single shot), remembering what was discussed
+some exchanges ago, mentally tracking multiple threads, and noticing when something was dropped. The LLM's memory does
+**not** survive context compression intact, and specific details of in-progress work can silently vanish during the
+process.
+
+This creates an asymmetry that's easy to miss, because the session **feels** continuous from both sides. The human
+likely assumes the LLM still holds the earlier thread, and the LLM has no awareness that it lost anything (the
+compressed summary looks complete from inside).
+
+The effective failure is the silent loss of items. This is different from confusion. Each context switch caused by the
+user going back and forth between tasks (commit a file, answer a question about a previous thread, pivot to docs, come
+back) increases the probability that an incomplete thread will be the one that gets compressed away. Neither side
+notices this until that item is needed and gone.
+
+External task tracking can bridge this issue. Task lists and TODO files **external** to the conversation function as
+memory, surviving compression the way a sticky note survives closing a browser tab.
+
+### Context rot
+
+Most models experience quality degradation as the context available to them grows:
+
+- Information positioned in the **middle** of long contexts is recalled less reliably.<br/>
+  See _lost in the middle_ by Liu et al.
+- Effective performance tends to degrade **before** the model's advertised context limit, often at roughly 50-65% of the
+  maximum window.
+
+Frontier models trained specifically for long contexts (e.g. Gemini 3 Pro at 1M tokens) reduce this issue significantly.
+Microsoft's LongRoPE2 (2025) extends LLaMA3-8B to 128K effective context retaining ~98.5% short-context performance.
 
 ## Concerns
 
@@ -521,6 +569,7 @@ assist you by, for example, exiting the session and resuming it.
   -->
 
 <!-- In-article sections -->
+[Context rot]: #context-rot
 [Harnesses]: #harnesses
 
 <!-- Knowledge base -->
