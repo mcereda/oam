@@ -819,6 +819,41 @@ runners:
 
 - If any job's pod is killed due to OOM, the pipeline that spawned it will hang until it times out.
 
+- The `service_account` setting under `[runners.kubernetes]` defaults to the **namespace**'s `default` SA, **not** to
+  the runner **manager**'s own SA.
+
+  Job pods spawned by the executor run with the `default` SA by default, which typically has **no** Pod Identity
+  association at all.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example</summary>
+
+  A job cannot reach AWS services even though the runner manager pod has a Pod Identity association wired to a working
+  role. `aws sts get-caller-identity` from within the job either fails with _Unable to locate credentials_ or returns a
+  different identity than expected.
+
+  Fix this by (OR):
+
+  - Using a shared identity by setting `service_account` explicitly in `[runners.kubernetes]` to the runner manager's SA
+    name (the same one the `PodIdentityAssociation` targets):
+
+    ```toml
+    [runners.kubernetes]
+        namespace = "{{.Release.Namespace}}"
+        service_account = "gitlab-runner-executor"   # match the SA name in PodIdentityAssociation
+    ```
+
+    > [!warning]
+    > Sharing the runner manager's SA also shares its **Kubernetes RBAC**. The default GitLab Runner Helm chart grants
+    > the manager SA `pods.create/exec/delete`, `secrets.get/list/create/delete`, `configmaps.*`, `serviceaccounts`,
+    > `events`, and `services` on the namespace. A job container running with that SA inherits **all** of it, meaning
+    > that a malicious job will be able to read other in-flight jobs' secrets, exec into other pods, and steal SA
+    > tokens.
+
+  - Creating a **dedicated** SA for job pods (which is given **no** Helm-chart RBAC), give it its own
+    `PodIdentityAssociation` pointing at the same IAM role, and reference that SA in `service_account`. Same AWS-IAM
+    behaviour, none of the Kubernetes-RBAC tail.
+
 #### Define resource limits and requests for jobs' pods
 
 Define resources requests and limits for jobs' pods to prevent unregulated resource consumption.<br/>
