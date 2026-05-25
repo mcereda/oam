@@ -54,6 +54,18 @@ _Project access tokens_ are similar to PATs, but they limit access to **their pr
 limited role, and require an expiration date.<br/>
 Refer to [Project access tokens].
 
+PATs enforce independent permission layers. The effective allowance is their **intersection**:
+
+- `scopes` (`read_repository`, `read_api`, `api`, …) define the API surface the token can touch.
+- `access_level` (the role of the bot user: Guest, Reporter, Developer, …) define the effective project membership for
+  the token.
+
+Tokens with `read_repository` scope but `access_level: guest` **cannot** clone a private project because the `Guest`
+role lacks the permission to read code in private projects unconditionally. The role gates the access, the scope grants
+the token permissions.<br/>
+The minimum settings to allow mirroring a private project are `access_level: reporter` and `scopes: [read_repository]`.
+`Guest`s can read public repositories, so `access_level: reporter` is only required for private ones.
+
 _Group access tokens_ are similar to PATs and project access tokens, but they relate to **a group** instead.<br/>
 They **cannot** be used to create other group, project, or personal access tokens.<br/>
 Refer to [Group access tokens].
@@ -855,11 +867,11 @@ sudo gitlab-ctl deploy-page down
 
 ## Runners
 
-See [runners](runner.md).
+See [GitLab Runner].
 
 ## CI/CD pipelines
 
-See [pipelines](pipeline.md).
+See [GitLab Pipeline].
 
 ## Artifacts
 
@@ -1145,6 +1157,15 @@ curl -s -w '\n%{http_code}' -H 'Private-Token: glpat-…' \
 
 </details>
 
+The Maven Virtual Registry returns **401 Unauthorized** instead of 404 when asked for artifacts it cannot serve, like
+artifacts from upstreams it doesn't proxy.<br/>
+This creates problem for Gradle's dependency resolution because Gradle interprets 401 as bad credentials, not "artifact
+not found". It results in Gradle **failing immediately** instead of falling through to the next repository in the chain.
+
+The fix is to order `pluginManagement` and `dependencyResolutionManagement` repositories so that those with broader
+coverage (Google, Maven Central, Gradle Plugin Portal) are tried first, or use `exclusiveContent { }` filters to prevent
+Gradle from querying the virtual registry for artifacts it won't have.
+
 ## API
 
 Refer to [Extend with GitLab].
@@ -1363,6 +1384,8 @@ git clone "https://oauth2:${ACCESS_TOKEN}@somegitlab.com/vendor/package.git"
 
 <!-- Knowledge base -->
 [Buildah]: buildah.md
+[GitLab Pipeline]: gitlab/pipeline.md
+[GitLab Runner]: gitlab/runner.md
 [glab]: gitlab/glab.md
 [Integrations]: gitlab/integrations.md
 [Kaniko]: kaniko.md
