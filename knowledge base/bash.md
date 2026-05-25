@@ -8,6 +8,7 @@
 1. [Substitutions](#substitutions)
    1. [!! (command substitution)](#-command-substitution)
    1. [^^ (caret substitution)](#-caret-substitution)
+   1. [Parameter expansion](#parameter-expansion)
 1. [Here documents](#here-documents)
 1. [Keys combinations](#keys-combinations)
 1. [Check if a script is sourced by another](#check-if-a-script-is-sourced-by-another)
@@ -281,6 +282,38 @@ sudo apt show tmux
 …
 ```
 
+### Parameter expansion
+
+| Operator | Function         |
+| -------- | ---------------- |
+| `#`/`##` | Prefix stripping |
+
+When a pattern value starts with the same character used as an operator, operator and content become ambiguous.<br/>
+As a rule of thumb, use `sed` or `cut` instead of parameter expansion when stripping prefixes that contain `#`, `%`, or
+`?` (all bash expansion operators).
+
+<details>
+  <summary>Example: stripping prefixes</summary>
+
+```sh
+line="## Some title"
+
+# Intent: strip "## " prefix
+result="${line### }"
+# Actual: operator is ## (greedy), pattern is "# " (hash space)
+# Strips only "# ", leaving "# Some title"
+
+# Fix: use sed
+result=$(echo "$line" | sed 's/^#* //')
+# Result: "Some title"
+```
+
+The output looks **almost** right, as it strips _some_ of the prefix, but not all. The operation shows no error, nor
+empty result. The subtly wrong value passes downstream, and only shows up in rendered output (e.g. a Mermaid label
+showing `## SSH` instead of `SSH`).
+
+</details>
+
 ## Here documents
 
 A _Here document_ (_heredoc_) is a type of redirection that allows you to pass multiple lines of input to a command.
@@ -352,7 +385,7 @@ $ echo $?
 
 ### Go incognito
 
-See [How do I open an incognito bash session] on [unix.stackexchange.com]
+See [How do I open an incognito bash session].
 
 ```sh
 HISTFILE=
@@ -395,6 +428,7 @@ All the references in the [further readings] section, plus the following:
 <!-- Others -->
 [6 bash tricks you can use daily]: https://medium.com/for-linux-users/6-bash-tricks-you-can-use-daily-a32abdd8b13
 [bash startup files loading order]: https://youngstone89.medium.com/unix-introduction-bash-startup-files-loading-order-562543ac12e9
+[how do i open an incognito bash session]: https://unix.stackexchange.com/questions/158933/how-do-i-open-an-incognito-bash-session/158937#158937
 [how to detect if a script is being sourced]: https://stackoverflow.com/questions/2683279/how-to-detect-if-a-script-is-being-sourced#28776166
 [speed up your command line navigation]: https://blog.jread.com/posts/speed-up-your-command-line-navigation-part-1/
 [the bash trap command]: https://www.linuxjournal.com/content/bash-trap-command
@@ -411,7 +445,6 @@ All the references in the [further readings] section, plus the following:
 [command line arguments in a shell script]: https://tecadmin.net/tutorial/bash-scripting/bash-command-arguments/
 [find out the exit codes of all piped commands]: https://www.cyberciti.biz/faq/unix-linux-bash-find-out-the-exit-codes-of-all-piped-commands
 [histsize vs histfilesize]: https://stackoverflow.com/questions/19454837/bash-histsize-vs-histfilesize#19454838
-[how do i open an incognito bash session]: https://unix.stackexchange.com/questions/158933/how-do-i-open-an-incognito-bash-session/158937#158937
 [how to find a bash shell array length]: https://www.cyberciti.biz/faq/finding-bash-shell-array-length-elements/
 [how to slice an array]: https://stackoverflow.com/questions/1335815/how-to-slice-an-array-in-bash#1336245
 [is there a way of reading the last element of an array?]: https://unix.stackexchange.com/questions/198787/is-there-a-way-of-reading-the-last-element-of-an-array-with-bash#198789
