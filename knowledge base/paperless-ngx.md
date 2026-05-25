@@ -30,16 +30,19 @@ TODO
 
 ## Further readings
 
-- [Website]
+- [Codebase]
+- [Documentation]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[website]: https://docs.paperless-ngx.com/
+[Codebase]: https://github.com/paperless-ngx/paperless-ngx
+[Documentation]: https://docs.paperless-ngx.com/
 
 <!-- Others -->
