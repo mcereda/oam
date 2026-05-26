@@ -194,6 +194,10 @@ Consider what follows for _infrastructure_ and _platform engineering_ as well.
   - Return [207 Multi-Status] instead of [200 OK] if an API fulfilled a request successfully, but something in the more
     global process did not quite _fully_ go as expected.
 
+- Tools which primary action is **destructive** (delete, drop, archive, force-replace) should provide an interactive or
+  dry-run mode **and** default to it. They should also require an **explicit** positive flag (e.g. `--execute`,
+  `--apply`, `--commit`, `--no-dry-run`) to perform real operations.
+
 ## Management
 
 - Beware the [action fallacy][the "action fallacy" tells us that the most effective leaders are unseen].

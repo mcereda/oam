@@ -13,6 +13,8 @@
 
 ## TL;DR
 
+Children images of an image index _can_ carry tags.
+
 ```sh
 # List and get information about the repositories in ECRs.
 aws ecr describe-repositories
@@ -212,6 +214,13 @@ Refer [Troubleshooting pull through cache issues in Amazon ECR].
 > This might™ introduce a small latency and be cause of pull failures. Pulling that (not-yet)cached image from an
 > interactive shell session worked flawlessly.
 
+Docker Hub's official images (e.g. `alpine`, `nginx`, `debian`) use an implicit `library/` namespace that the Docker CLI
+adds transparently (`docker pull alpine` resolves to `docker.io/library/alpine`). ECR's pull-through cache does
+**not**.<br/>
+Always use the **full** path to pull official images from a docker hub pull-through cache
+(`<prefix>/library/<image>:<tag>`). Omitting `library/` from the ECR pull URL for such images returns a
+**403 Forbidden**, not a descriptive error.
+
 The user or role pulling the image must be granted the `ecr:BatchImportUpstreamImage` permission for the feature to
 work as expected.<br/>
 The service intercepts the pull request to check the upstream. Without this permission, ECR returns _not found_ (and
@@ -226,9 +235,10 @@ not _access denied_) **intentionally**.
 
 When the cache repository doesn't exist yet under the prefix, the entity pulling the image either needs to create the
 repository first, or it needs `ecr:CreateRepository`. This permission is **not** included in the standard
-`AmazonEC2ContainerRegistryReadOnly` AWS-managed policy.<br/>
+`AmazonEC2ContainerRegistryReadOnly` and `AmazonECSTaskExecutionRolePolicy` AWS-managed policies.<br/>
 [Repository creation templates] only describe what the new repository should look like, and **do** still require the
-puller to create the repository.
+puller to create the repository. Similarly, ECS services pulling from cache repositories need an additional policy
+granting both actions (possibly scoped to the cache prefix).
 
 > [!tip]
 > Scope extra permissions to the cache namespace only.<br/>
@@ -283,9 +293,11 @@ with ECS/Lambda/EKS consumer-side lookups, the following issues might arise:
 
   </details>
 
-- Children of a manifest index are usually **not** tagged.
+- Children of a manifest index are usually **not** tagged, but _can_ carry a tag.
 
   <details style='padding: 0 0 1rem 1rem'>
+
+  The `describe_images` API returns `imageTags` on every `ImageDetail` regardless of media type.
 
   ECR stores platform-specific manifests (children) as untagged images by default. The only way to tell whether an
   untagged image is a standalone orphan or a child referenced by a live index is to:
