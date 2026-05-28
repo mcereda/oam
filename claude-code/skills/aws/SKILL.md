@@ -41,16 +41,16 @@ handle any preceding reads here too — no need to split.
 ## Handling the request
 
 **Write explicitly requested** (create, update, delete, terminate, modify,
-rotate credentials, change configuration): Dispatch `aws-infra-operator-rw`
+rotate credentials, change configuration): dispatch `aws-infra-operator-rw`
 directly.
 
-**Read-only or ambiguous**: Dispatch `aws-operator-ro` first.
+**Read-only or ambiguous**: dispatch `aws-operator-ro` first.
 After it responds:
 
 - Result fully answers the request → present findings and stop.
 - Result reveals a write is needed → report findings to the user, explain
   what action would address the issue, and ask whether to proceed.
-  Infrastructure changes are hard to reverse — surface the information and let
+  Infrastructure changes are hard to reverse. Surface the information and let
   the user decide consciously before dispatching `aws-infra-operator-rw`.
 
 ## Multi-step workflows
