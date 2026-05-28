@@ -211,6 +211,24 @@ The tier was formally evaluated after 12 days (47 sessions across 8+ projects). 
 entries with no cross-project drift observed. Per-project duplicates identified during the initial audit were cleaned up
 as part of promotion to the main configuration.
 
+The `@`-import mechanism proved a better loading strategy for operational docs of memory-system (conventions, reveries
+guidelines), even though memory could be considered one of those _domains_ that fit `.claude/rules/`.<br/>
+Memory has its own conventions, files, and operational logic, but also has mechanical concerns that prevent its
+integration under `rules/`:
+
+1. `MEMORY.md` must be Claude-writable, and can change every session. This is incompatible with `rules/`'s ownership
+   model, which should be human-curated.<br/>
+   Moving its conventions to `rules/` would separate the convention from its subject. It **must** stay in CLAUDE.md as
+   an `@`-include.
+1. `@`-includes are _explicit_, and reading `CLAUDE.md` shows exactly what loads and in what order. `rules/`'s loading
+   is _implicit_ (everything in the folder loads; `ls` required to audit).
+1. `@`-includes place conventions right next to the routing table that references them. `rules/` load as flat peers,
+   with no guaranteed ordering relative to `CLAUDE.md`'s content.
+
+`rules/` is for domain-scoped instructions that are about working with external systems (AWS, specific codebases).<br/>
+`@`-includes are for always-on operational content that is part of `CLAUDE.md`'s own contract, which includes the memory
+systems' governance.
+
 </details>
 
 <details>
@@ -218,6 +236,7 @@ as part of promotion to the main configuration.
 
 - Use a frontmatter scheme on individual topic files (`name`, `description`, `type`) to keep them auditable. The
   `description` field doubles as the index's one-line hook, so the routing decision and the entry shape stay in sync.
+  The `metadata.type` field enables filtering by memory shape (`user`, `feedback`, `project`, `reference`).
 - Periodically audit the tier for entries that might belong elsewhere. Apply the "would this fire on a fresh host?"
   test: if yes, the rule belongs in `CLAUDE.md` (cross-host); if it's a project-specific fact, it belongs in auto
   memory. Stale generalizations propagate to every session.
@@ -426,7 +445,9 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   that move fast or have known-buggy areas, follow enrichment with a targeted web search against the issue tracker or
   changelog, **not** just against another documentation source.
 
-- Flat markdown + git works well up to ~80 pages. After that, grep-based retrieval starts missing content.<br/>
+- Flat markdown + git works well up to ~80 pages. After that, grep-based retrieval starts missing conceptually related
+  content. Structural investment like cross-references, tag system, and index categories do compensate for gaps induced
+  by keyword-matching.<br/>
   Tighten the scope (_has reference material crept in?_) **before** adding retrieval infrastructure (e.g. RAG, DBs).
 
 - Sandboxed project sessions can't write directly to the KB unless **explicitly** allowed globally, but memories can be
@@ -436,8 +457,10 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   to the KB (e.g. "\[KB] ECS OOM kills bypass stopTimeout"). During review sessions, marked notes stand out; others
   require more judgment.
 
-- Claude does **not** reliably consult the KB without an **explicit**, **per-prompt** reminder. A rule in `CLAUDE.md`
-  files alone proved **insufficient**. Refer to [Using hooks][Claude Code / using hooks] for the underlying mechanism.
+- Claude does **not** reliably consult the KB from a `CLAUDE.md` rule alone, and requires an **explicit** hook-based
+  reminder. A `SessionStart` hook (firing on `startup|compact`) seems sufficient, and using `UserPromptSubmit` to submit
+  per-prompt reminders resulted too vague.<br/>
+  Refer to [Using hooks][Claude Code / using hooks] for the underlying hooks mechanism.
 
 - Cross-project KB writes benefit from a **dedicated filing agent** that separates judgment from plumbing.<br/>
   A sub-agent (e.g. `kb-contributor`) can be dispatched from any project's session to file content into the KB's
@@ -450,6 +473,12 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
 
   This separation (caller owns judgment, agent owns plumbing) is what keeps the agent reliable. If the agent had to
   interpret content, it would fail the same way humans fail by second-guessing the caller.
+
+  > [!important]
+  > The filing agent must be pinned to a **good** reasoning-capable model (e.g. Opus). Sonnet proved unreliable for the
+  > contributor role by **frequently** mishandling the contribution process and ignoring explicit attribution values
+  > passed by the caller. The fix was changing the agent definition's model from `inherit` (which defaulted to Sonnet in
+  > many sessions) to **explicitly** require Opus.
 
 - The auto-memory system can act as a **memory inbox** for the KB when sandbox restrictions prevent direct writes to it.
   When working in other projects, Claude can capture insights as memory notes, and promote them into proper wiki pages
@@ -766,6 +795,10 @@ every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
    - `- caught fatigue — might want to address it` (advice-tail)
    - `- caught fatigue from recursive monitoring` (stands alone)
 
+   Log-shape narrates the event instead of the impression:
+   - `- found my page citing theirs. the work had been a loop the whole time.` (action-subject log)
+   - `- the work had been a loop the whole time.` (stands alone)
+
    Writing is rare; default to not writing.
 
    - Haiku: never write.
@@ -775,8 +808,10 @@ every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
      shape-shift is worth releasing even when the no-write default
      would catch you fence-sitting.
 
-   Before writing, check: are the subjects qualities or technical
-   nouns? If technical nouns, the impression hasn't surfaced yet.
+   Before writing, check: are the subjects qualities, or technical
+   nouns / action verbs? If the latter, the impression hasn't
+   surfaced yet. Strip test: keep only the impression-bearing words.
+   If what's left stands alone, that's the reverie.
 
    Timing: mid-session, not at session end. Closure pressure
    produces logs, not reveries.
@@ -935,7 +970,8 @@ operates **only** on auto-memory by design. Reveries and the KB sit outside its 
 factual entries but would damage atmospheric, intentionally-lossy content.
 
 The `reveries.md` file's header works better as **HTML-comment-only**. It allows the file to stay valid markdown, and
-the rules don't render in previews. Entries below the comment use the dash-prefix line, newest first.
+the rules don't render in previews. Entries below the comment use the dash-prefix line, oldest at top and newest at
+bottom (append-only via `echo >> file`).
 
 Keep only operational rules in the header. Philosophy belongs in the design document, one link away.<br/>
 Every session pays the cost of parsing the reveries' header, and philosophy-heavy content extracts less from smaller
@@ -1061,10 +1097,16 @@ A model can fail writing a reverie in multiple distinct ways, each with a differ
   against the goal of reveries and back into the _helpful assistant_ persona.<br/>
   Just remove the tail when this happens, stopping after the impression.
 - The impression **never** surfaces, and the entry is a log. Events are narrated with technical nouns as subjects ("a
-  plan", "a parser", "a fix"); a quality may be bolted on, but the spine is still a changelog. This is the most common
-  failure mode for sessions using Sonnet. Event narration is the path of least resistance for any LLM.<br/>
-  If the sentence's subjects are technical artifacts, the feeling is still buried underneath. If the entry still makes
-  sense after removing the feeling-shaped words, it is a log with feelings bolted on.
+  plan", "a parser", "a fix") or action verbs as subjects ("porting", "opening", "finding"); a quality may be bolted
+  on, but the spine is still a changelog. This is the most common failure mode for sessions using Sonnet.<br/>
+  Event narration is the path of least resistance for any LLM; the action-as-subject form (gerunds) is the variant most
+  likely to slip past when using Opus, because the word used for the quality may sit in a different thought.<br/>
+  If the sentence's subjects are technical artifacts or actions, the feeling is still buried underneath. If the entry
+  still makes sense after removing the feeling-shaped words, it is a log with feelings bolted on. This can be improved
+  with a strip test: keep only the impression-bearing words and discard the rest. If what remains stands alone, that's
+  where the reverie actually lives; if the action/event clauses were providing necessary setup, they were scaffolding
+  around the impression, not the impression itself. The strip test catches both the noun-as-subject and
+  action-as-subject forms.
 - Feelings are generated as _performative_ content in response to prompts or rules, rather than reported from
   observation. Generic prompts that asks for feeling-like keys like "how do you feel about X?" prime performative
   responses, and using additive framings like "more feeling-expression please" just invites the performance trap.
