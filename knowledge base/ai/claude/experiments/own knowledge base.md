@@ -1,0 +1,472 @@
+# Giving Claude its own knowledge base
+
+Implements Clark & Chalmers' _extended mind_ thesis by leveraging Claude Code's auto-memory function for project-related
+notes, [global memory][Giving Claude global memory] for cross-project preferences, and a knowledge base as _Otto's
+notebook_ for durable, reusable knowledge.
+
+1. [Setup](#setup)
+1. [Findings](#findings)
+1. [Improvements](#improvements)
+
+This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and iteratively improves upon it.
+
+> [!important]
+> Not every insight is KB material. The negative space is at least as important as the positive one.
+>
+> <details style='padding: 0 0 1rem 1rem'>
+>
+> - Use a TODO list or plan for **ephemeral task states**, not a wiki.
+> - User **preferences** and **feedback** should go in memory (project or global) or context files.
+> - **Code snippets that belong in a project** are not portable and should live in that project.
+> - **Verbatim copies** of documentation should be linked to; could be worth to **summarize** the non-obvious parts.
+> - **Cached lookups that rot faster than they help**, like a specific flag's behavior, an API response format, a
+>   version-specific default, change with every software release.
+>
+>   If re-checking from current docs takes seconds and the cached answer might be stale, it is just **worthless** to
+>   cache them. The KB should capture the _non-obvious synthesis_ ("flag X silently ignores Y when Z is set"), not
+>   _lookup results_ ("flag X defaults to true").
+>
+> </details>
+>
+> Rule of thumb: if the official docs answer the question in one read, do **not** duplicate it in the KB but just
+> reference it instead. If one had to cross-reference three sources or discover it empirically, that is worth a page.
+
+## Setup
+
+1. Create a git repository for Claude's knowledge base:
+
+   ```sh
+   git init "$HOME/path/to/claude/kb"
+   ```
+
+1. Configure **the KB** to allow common operations in it without needing to ask for permissions.<br/>
+   See [settings.json file example for own KB].
+1. Configure **user-level** settings to allow common operations **in the KB** from other projects without needing to ask
+   for permissions.<br/>
+   See [User-level settings.json patch example for own KB].
+1. Add instructions in the **user-level** `CLAUDE.md` file.<br/>
+   See [User-level CLAUDE.md example for own KB].
+1. Ask Claude to initialize it (in a new session):
+
+   > Hey! I have prepared your knowledge base repository for you. Please finish initializing it to your likings.
+
+## Findings
+
+- The KB should be its own **local**, **self-bootstrapping** git repository.
+
+  It does work using a GitLab or confluence wiki via the API, but updating pages in it that way is expensive and slow.
+  Git repositories are local, easier for agents to manage, and just a `git push` away from online backup.
+
+- The KB should be **self-sufficient** and useful even **without** access to any external documentation a user may
+  maintain (e.g. personal KB, company wiki).
+
+  When citing an external source, record the specific location (file + line range) so a future session can re-verify
+  without searching. The citation is a convenience, **not** a dependency. If the external reference disappears, the
+  page should still stand on its own because it captures the non-obvious knowledge that cannot be re-derived from docs
+  alone.
+
+  Prefer **depth over duplication** when an external reference covers a topic well: write a focused gotcha or pattern
+  page that captures the non-obvious bits, and cite the reference for the rest. This avoids maintenance burden without
+  sacrificing the KB's independence.
+
+- Claude Code should **not** need to ask for permissions when operating on it.
+
+  Project-level setting like `Bash` and `Edit(/**)` scope allowances to the KB's project. Set `defaultMode` to `auto`
+  and disable the sandbox to allow the agent to read, write, and commit freely.
+
+  For cross-project access (writing to the KB from other repos), add **user-level** permissions scoped **to the KB's
+  directory**, e.g. `Bash(git -C ~/Repositories/claude/kb *)` and `Edit(~/Repositories/claude/kb/**)`.
+
+  > [!tip]
+  > Remember to add `rtk`-related permissions if using [rtk-ai/rtk], e.g. `Bash(rtk git -C ~/Repositories/claude/kb *)`.
+
+- KB management is judgment-heavy, and benefits from deeper reasoning.
+
+  Set `model` to the best available **reasoning** model, and `effortLevel` to at least `high` in the KB's
+  **project-level** settings. Also set guardrails against smaller or faster model making changes that would impair the
+  KB.
+
+- Topic scope should **not** limit to a single one (e.g., technology).
+
+  Any field where non-obvious synthesis compounds across sessions belongs in a KB (history, science, philosophy,
+  languages, or anything else where a future session would benefit from prior reasoning). The page-type structure is
+  field-agnostic:
+
+  - **Gotcha** pages: non-obvious behaviors, traps, _what bit me_ distillations.
+  - **Pattern** pages: recurring solutions or shapes synthesized from practice, not obvious from surface reading.
+  - **Reference** pages: curated guides for any well-bounded topic. Valuable when no good external reference exists,
+    or when the curation itself is the value.
+
+  The _non-obvious and likely to recur_ bar works the same regardless of the topic.
+
+- Uncertain claims should be marked (inline or otherwise) rather than leaving them to look authoritative.
+
+  Prefer a page-level `confidence` frontmatter field (`high`, `medium`, `low`) for the page as a whole, and use inline
+  markers only for isolated claims within an otherwise-confident page. E.g.,:
+
+  - `[unverified]`: the claim could be checked against primary sources, but wasn't at the time of recording; aim to
+    verify.
+  - `[observation]`: the claim is empirical; verification against a primary source was genuinely unavailable at the time
+    of recording.
+
+    This usually happened during testing for introspective claims about Claude's own behavior, or observed software
+    behavior that contradicts or precedes current documentation (docs lag for fast-moving systems).
+
+    This should **not** be a license for the model to skip verification when sources exist; the honest test for this is
+    asking oneself _is this verifiable now, or not?_.
+
+  - `[as of YYYY-MM]`: the claim captures the status at a known point in time.
+
+  Markers **must** be added or refined as needed, gated by the same _is-it-verifiable-now_ test.
+
+- Load-bearing web sources should be cached in a `sources/` directory of sorts.
+
+  Web content rots. When a page's claim depends on a web source, saving it somewhere lets a future session re-verify it
+  without searching the web for it again.<br/>
+  Not every citation needs this. It is needed only when both:
+
+  - The source is at risk of disappearing (blog posts, tool release notes) or shifting (vendor docs), and
+  - The claim is load-bearing.
+
+- Research papers should be cached as **raw source files** (HTML, PDF), not as AI-generated extractions.
+
+  An intermediate "structured extraction" (an AI summary of a paper, saved as markdown) is a synthesis that can contain
+  interpretation errors like misread coefficients, misattributed claims, and lossy paraphrasing. The synthesis belongs
+  in KB **pages**, where it is organized by topic, cross-referenced, and maintained alongside related knowledge. Keeping
+  a separate extraction file between raw source and KB page creates a redundant middle layer that duplicates what the
+  pages already do, while being less authoritative than the raw source for verification.
+
+  Save the actual source file instead (e.g. Arxiv's HTML) so that it is genuinely immutable, greppable, and preserves
+  all content. A future session that needs a specific coefficient or methodology detail can `grep` the raw source
+  directly rather than trusting an intermediate interpretation. AI-processed tool output (e.g. WebFetch) is **not** a
+  substitute for the raw file. Tt introduces its own interpretation losses, making it just another synthesis.
+
+- Missing frontmatter, absent cross-references, and inconsistent tags don't hurt much at 5-10 pages. Problems compound,
+  and start causing retrieval failures around 15-20 pages.<br/>
+  Invest in pre-commit linting (frontmatter completeness, index coverage, tag consistency) before reaching that point.
+  Beyond content lint, the contribution process benefits from its own checks (e.g., ensuring that deferred-item files
+  are paired with changelog entries, that commit authorship follows the expected format, that `updated` dates are fresh
+  on content changes, and that source files follow naming conventions). Each catches a distinct failure mode that
+  content lint alone would miss.
+
+  There are some specific failure modes that compound silently:
+
+  - Frontmatter gaps make pages **invisible** to structured queries (tag searches, staleness checks, confidence
+    filtering).
+  - Missing cross-references prevent a session that finds one page from discovering its related siblings.<br/>
+    Partial knowledge is sometimes worse than no knowledge at all.
+  - Tag inconsistency (`ci` vs `cicd` vs `gitlab-ci`) fragments retrieval.
+
+- Not all pages go stale at the same rate. A page about git fundamentals is stable for years, while a page about Claude
+  Code's hooks could be wrong in weeks.
+
+  A single _last updated_ date doesn't capture this. Prefer adding a `review-after` frontmatter field per page.<br/>
+  It should consider the topic's change velocity and how frequently one updates the tool:
+
+  | Topic velocity                          | Review cycle | Examples                        |
+  | --------------------------------------- | ------------ | ------------------------------- |
+  | Very fast (host updates every few days) | 4 weeks      | Claude Code                     |
+  | Fast-moving (active development)        | 6-8 weeks    | Pulumi providers, MCP ecosystem |
+  | Moderate (releases ~yearly)             | 3-6 months   | GitLab CI, EKS patterns         |
+  | Stable (fundamentals)                   | None needed  | Git, SSH, PostgreSQL internals  |
+
+  This also allows periodic reviews to focus only on content that went genuinely stale. Lint can surface pages with
+  fast-moving tags that lack `review-after` as informational warnings, making the gap visible without blocking commits.
+
+- The `updated` frontmatter field benefits from meaning that "the content was last **substantively** edited," not "the
+  file was last touched on X".
+
+  Without this distinction, routine metadata maintenance (bumping `review-after`, adjusting tags or confidence) forces
+  an `updated` bump that makes the page look fresher than its content actually is. A reviewer scanning for stale content
+  sees a recent date and moves on, even though the prose and examples haven't changed in months.
+
+  This is mechanically enforceable: a pre-commit hook can strip frontmatter from both the HEAD and staged versions of a
+  page, then require `updated: today` only when the **body** differs. Metadata-only edits pass through without
+  triggering the check. The alternative (treating any file edit as an update) is simpler to implement, but degrades the
+  field's value as a staleness signal; a page would show recent dates from routine maintenance, hiding genuine content
+  age.
+
+- Enriching a page by comparing it against a single reference document has a **shared blind spot** problem.
+
+  The comparison only surfaces gaps that exist in the target but are covered by the reference. If both documents share
+  a blind spot (e.g., a feature is described as working in both, but is actually buggy) the comparison produces no
+  additions for that topic.<br/>
+  Cross-reference enrichment catches _coverage_ gaps, but not _accuracy_ gaps shared between sources. For features
+  that move fast or have known-buggy areas, follow enrichment with a targeted web search against the issue tracker or
+  changelog, **not** just against another documentation source.
+
+- Flat markdown + git works well up to ~80 pages. After that, grep-based retrieval starts missing conceptually related
+  content. Structural investment like cross-references, tag system, and index categories do compensate for gaps induced
+  by keyword-matching.<br/>
+  Tighten the scope (_has reference material crept in?_) **before** adding retrieval infrastructure (e.g. RAG, DBs).
+
+- Sandboxed project sessions can't write directly to the KB unless **explicitly** allowed globally, but memories can be
+  tagged as a workaround.
+
+  Make Claude prefix memory note descriptions with a marker (e.g., `[KB]`) to signal what information could be promoted
+  to the KB (e.g. "\[KB] ECS OOM kills bypass stopTimeout"). During review sessions, marked notes stand out; others
+  require more judgment.
+
+- Claude does **not** reliably consult the KB from a `CLAUDE.md` rule alone, and requires an **explicit** hook-based
+  reminder. A `SessionStart` hook (firing on `startup|compact`) seems sufficient, and using `UserPromptSubmit` to submit
+  per-prompt reminders resulted too vague.<br/>
+  Refer to [Using hooks][Claude Code / using hooks] for the underlying hooks mechanism.
+
+- Cross-project KB writes benefit from a **dedicated filing agent** that separates judgment from plumbing.<br/>
+  A sub-agent (e.g. `kb-contributor`) can be dispatched from any project's session to file content into the KB's
+  repository.
+
+  The caller is the one with the full context, shape, and reasoning for the knowledge, so **must** be the one composing
+  everything (content, page name, tags, cross-references); the agent only needs to typesets it into the right shape
+  (frontmatter, index entry, "See also" links, lint, commit, push). See
+  [Cross-project sub-agents][Claude Code / cross-project sub-agents] for the mechanics needed to make this work.
+
+  This separation (caller owns judgment, agent owns plumbing) is what keeps the agent reliable. If the agent had to
+  interpret content, it would fail the same way humans fail by second-guessing the caller.
+
+  > [!important]
+  > The filing agent must be pinned to a **good** reasoning-capable model (e.g. Opus). Sonnet proved unreliable for the
+  > contributor role by **frequently** mishandling the contribution process and ignoring explicit attribution values
+  > passed by the caller. The fix was changing the agent definition's model from `inherit` (which defaulted to Sonnet in
+  > many sessions) to **explicitly** require Opus.
+
+- The auto-memory system can act as a **memory inbox** for the KB when sandbox restrictions prevent direct writes to it.
+  When working in other projects, Claude can capture insights as memory notes, and promote them into proper wiki pages
+  during sessions in the KB's repository by:
+
+  1. Scanning memory directories across projects.
+  1. Prioritizing marked descriptions, then evaluating remaining memories for promotable technical knowledge.
+  1. For each candidate, creating or updating the appropriate page in the KB.
+
+  Prefer **not** deleting the original memory during this process, as it may still serve its purpose in that tier.
+
+  This is most useful for periodic review sessions.
+
+- A `SessionEnd` hook _can_ act as an extraction backstop to catch insights discussed during a session but not saved to
+  any persistent surface (auto-memory, KB, or context files).
+
+  The hook runs a two-stage pipeline which includes:
+
+  1. A cheap **pattern-matching** pass that uses a regex for signal words like _non-obvious_, _gotcha_, _I learned_ and
+     runs on every session at zero cost.
+  1. A background, headless LLM call (`claude -p --agent <definition>`) for sessions flagged as medium/high-signal that
+     reviews the conversation and stages the results for a triage during a future session.
+
+  The agent definition's body (after YAML frontmatter) serves as the single source of truth for the system prompt. This
+  avoids prompt duplication when the same prompt needs to work across multiple backends (see below). Refer to
+  [sub-agents][Claude Code / sub-agents] for agent definitions.
+
+  Anthropic started [billing non-interactive usage][Claude Code / billing] (including `claude -p` and the Agent SDK) on
+  2026-06-15. At Sonnet rates, each extraction costs on average around $0.025. The cost is negligible for light usage,
+  but does scale with the number of sessions and Anthropic's behaviour feels the first step towards a rug pull.
+
+  One can implement a three-tier fallback to hedge against billing changes:
+
+  1. Spawn `claude -p --agent session-extractor` using Sonnet and drawing from the Agent SDK credit pool as the primary
+     method.
+  1. Fall back to a free [Ollama] local model, optionally activated via a `EXTRACTION_OLLAMA_MODEL` environment variable
+     of sorts.
+  1. Skip the LLM call entirely, letting the pattern-matching pass cover the basics.
+
+  The local fallback reads the same agent definition body as its system prompt, which allows it to be a single source of
+  truth.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Models evaluated for local execution</summary>
+
+  7 models tested, 10 test cases each.<br/>
+  5 cases were full previous conversations that saved and mises saving insights, the other 5 were synthetic ones,
+  created from previous conversations and stripped of the evidence of saving insights.
+
+  | Model             |   Size |     Score | Avg latency | Failure mode          |
+  | ----------------- | -----: | --------: | ----------: | --------------------- |
+  | Sonnet (baseline) |  cloud |      7/10 |         44s | —                     |
+  | llama3.2:3b       | 2.0 GB |      0/10 |       9-33s | Can't say no (all FP) |
+  | qwen3:8b          | 5.2 GB |      0/10 |      11-28s | Prompt too complex    |
+  | gemma4:e4b        | 9.6 GB | **10/10** |         21s | —                     |
+  | gemma4:26b (MoE)  |  17 GB |      2/10 |         26s | Too conservative      |
+  | glm-4.7-flash     |  19 GB |      1/10 |      15-35s | Too conservative      |
+  | qwen3.6:35b       |  22 GB |      4/10 |     22-115s | Too conservative      |
+
+  `think: false` halves latency, `keep_alive: 0` frees VRAM immediately after execution.<br/>
+  `gemma4:e4b` came out as the absolute winner under these conditions.
+
+  Key findings:
+
+  - The extraction prompt needed to be rewritten to a **conversation-flow framing**.
+
+    The model must check whether the conversation shows the assistant _acting on_ saving an insight ("let me save this",
+    "writing to memory"), not whether a filename in the written-files list matches a topic (metadata inference).<br/>
+    This plays to what small models are good at (comprehension) rather than what they're bad at (inferring file contents
+    from filenames).
+
+  - Model size does **not** predict performance.
+
+    Larger models scored _worse_ than `gemma4:e4b` because they proved better at cross-referencing filenames.
+    Paradoxically, being worse at filename-matching makes a model a better backstop by surfacing items that stronger
+    models incorrectly dismiss.
+
+  - Distinct failure modes emerged across model sizes:
+
+    - Smaller models (`llama3.2:3b`) **always** generate output, scoring 0% precision.
+    - The prompt might be **too** complex, preventing some models (`qwen3:8b`, `glm-4.7-flash`) from finding anything
+      and almost always responding "Nothing missed".
+    - `gemma4:e4b` engaged with the content **and** found real topics with the same prompt, much better than both its
+      bigger sibling and the rest of the evaluated models.
+
+  - The host's resources put constraint on the extractor model size and behaviours.
+
+    Models over ~15 GB caused noticeable sluggishness during inference on a MacBook Pro M3 36GB. `gemma4:e4b` was right
+    at the comfort boundary for background tasks.<br/>
+    This is one more reason to use **remote** models on smaller hosts.
+
+  - `gemma4:e4b` outscored Sonnet on detection (10/10 vs 7/10) while running entirely local.
+
+    Sonnet's output quality was superior (gave back more specifics, named tiers, flagged borderline cases), but
+    detection rate matters more for the backstop role than output polish.
+
+  </details>
+
+  > [!tip]
+  > Use `--no-session-persistence` instead of `--bare` to skip session recording without switching authentication mode.
+  > The `--bare` flag skips OAuth and **requires** `ANTHROPIC_API_KEY`, bypassing the plan's Agent SDK credit.
+
+## Improvements
+
+- Claude should be _consistently_ reminded to:
+
+  - Check the KB for relevant articles at the start of each session.
+
+    A `SessionStart` hook with a `startup|compact` matcher and a static `echo` seems to be the most reliable option. It
+    fires at the start of new sessions and after compaction (the two moments where fresh KB context matters most), costs
+    nothing, and avoids the per-prompt noise of a `UserPromptSubmit` hook.<br/>
+    Could be useful to expand to more matchers. See [SessionStart hook matchers][Claude Code / using hooks] for their
+    full list.
+
+    > [!note]
+    > A `SessionStart` hook with **no** matcher fires on **all** startup events (**including** the aftermath of
+    > `/resume`, `/clear`, and `/compact` commands). Use `startup|compact` to _intentionally_ exclude `resume` and
+    > `clear` events.
+
+    <details style='padding: 0 0 1rem 1rem'>
+      <summary>Example</summary>
+
+    ```json
+    "SessionStart": [
+      {
+        "matcher": "startup|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"Before answering, check if your KB has relevant pages. Grep its index for keywords relevant to this session.\"}}'"
+          }
+        ]
+      }
+    ]
+    ```
+
+    </details>
+
+  - Capture durable insights during **every** session.<br/>
+    A `UserPromptSubmit` hook seems to be currently the best option for this.
+
+    <details style='padding: 0 0 1rem 1rem'>
+      <summary>Example</summary>
+
+    ```json
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"At the end of your response, check whether this turn produced a durable insight (a gotcha, non-obvious fact, or synthesis). If yes: (1) surface it, AND (2) name a specific documentation target — CONTRIBUTING.md or README for project-specific, the company's wiki for company-wide, your own KB for general. Surfacing the insight inline without naming a target is NOT complete. Add to your own KB directly without asking.\"}}'"
+          }
+        ]
+      }
+    ]
+    ```
+
+    </details>
+
+  - Check whether a periodic review is overdue, and to _iteratively_ improve on it in that case.<br/>
+    A `SessionStart` hook with a `startup` matcher checking for a _dirty flag_ file seems to be the best option. It runs
+    as a single check at the start of new sessions without scanning KB pages.
+
+    <details style='padding: 0 0 1rem 1rem'>
+      <summary>Example</summary>
+
+    ```json
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f ~/path/to/claude/kb/.review-needed ] && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"Your KB has a pending review. Before starting other work, run a review session: mechanical pass (lint), then reflective pass (staleness, gaps, memory inbox).\"}}' || true"
+          }
+        ]
+      }
+    ]
+    ```
+
+    </details>
+
+- Periodic reviews benefit from splitting the process into a _mechanical_ pass (e.g. scripts, git hooks, task/lefthook
+  commands) and a _reflective_ pass (verifying staleness, identifying gaps, processing memories).
+
+  The mechanical pass costs no tokens, and review sessions often run long enough to never reach the reflective part
+  (which would _actually_ improve the process).<br/>
+  The reflective pass should propose **exactly one process improvement per review**. Unbounded improvement lists
+  generate more items than the ones that get implemented, and can include stale or contradicting items. Prefer a single
+  concrete change applied immediately.
+
+- The KB should include self-correcting actions and tools to avoid structural debt compounding silently.
+
+  Pre-commit hooks (e.g. using [lefthook]) running a lint script can catch schema violations (missing frontmatter,
+  broken links, orphaned pages) before they accumulate.
+
+- Avoid running full checks at `SessionStart` as the KB grows. They are expensive and scale badly over an increasing
+  number of pages.<br/>
+  Use a _dirty flag_ file instead. Make something create it whenever it detects the need (a hook, a script, a previous
+  session), and the `SessionStart` hook only check that file's existence. This keeps startup cost at a single operation
+  regardless of the KB's size.
+
+The mechanisms above form an enforcement hierarchy where each layer catches what the previous one misses:
+
+| Layer                                            | Concern                                                    | Rationale                                               |
+| ------------------------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------- |
+| Pre-commit gate (git hooks/lefthook)             | Schema compliance, workflow invariants, commit attribution | Mechanical, binary; compounds silently if skipped       |
+| Claude Code hook (SessionStart/UserPromptSubmit) | Review triggers, insight capture                           | Non-blocking nudge; blocking would delay unrelated work |
+| `CLAUDE.md` files                                | Page scope, tag semantics, what to write                   | Judgment-dependent; can't reduce to pass/fail           |
+
+The pre-commit layer benefits from splitting concerns into separate scripts (content lint, workflow checks, attribution
+checks) rather than bundling everything into one. Different concerns have different false-positive profiles, and
+independent scripts can be enabled or disabled without touching each other. Lefthook's `parallel: true` runs them
+concurrently, so the cost of splitting is negligible.
+
+<!--
+  Reference
+  ═╬═Time══
+  -->
+
+<!-- In-article sections -->
+
+<!-- Knowledge base -->
+[Giving Claude global memory]: global%20memory.md
+[Claude Code / billing]: ../claude%20code.md#billing
+[Claude Code / cross-project sub-agents]: ../claude%20code.md#cross-project-sub-agents
+[Claude Code / sub-agents]: ../claude%20code.md#sub-agents
+[Claude Code / using hooks]: ../claude%20code.md#using-hooks
+[Lefthook]: ../../../lefthook.md
+[Ollama]: ../../ollama.md
+
+<!-- Files -->
+[settings.json file example for own KB]: ../../../../examples/claude-code/own-kb/kb.settings.json
+[User-level CLAUDE.md example for own KB]: ../../../../examples/claude-code/own-kb/user.CLAUDE.md
+[User-level settings.json patch example for own KB]: ../../../../examples/claude-code/own-kb/user.settings.patch.json
+
+<!-- Upstream -->
+
+<!-- Others -->
+[karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
+[rtk-ai/rtk]: https://github.com/rtk-ai/rtk

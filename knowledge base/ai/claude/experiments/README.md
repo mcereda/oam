@@ -1,0 +1,189 @@
+# Personal experiments
+
+1. [Memory tiers](#memory-tiers)
+   1. [Deciding where memory goes](#deciding-where-memory-goes)
+   1. [Alternatives considered](#alternatives-considered)
+      1. [Unified tier with shape tags](#unified-tier-with-shape-tags)
+1. [Further readings](#further-readings)
+   1. [Sources](#sources)
+
+## Memory tiers
+
+[Claude Code] ships with **project-scoped** memory only ([Claude Code / auto memory]). Additional memory tiers can build
+on top of the building blocks and primitives Claude already uses for it, avoiding the need of external service or vector
+databases.
+
+The work that follows _can_ be inspiration for more generic abstractions, but it is currently built **for** use with
+Claude Code. Every tier exploits a Claude Code-specific mechanism: global memory loads via `@`-import, reveries and
+extraction use `SessionStart` and `SessionEnd` hooks, the 200-line/25KB cap acts as a hard context governor, project
+rules resolve via the CLAUDE.md's walk-up-tree, lazy-loading is involved for subdirectory scoping, and write permissions
+are imposed via the sandbox model.<br/>
+Proposals to improve this system that assume a generic agent framework (auto-triage buffers, semantic retrieval layers,
+portable memory stores) **will misfire**, because they try to solve for constraints this system doesn't have while
+ignoring the platform features it depends on.
+
+| Tier           | Location                            | Loading                                                                  | What belongs here                      | Source       |
+| -------------- | ----------------------------------- | ------------------------------------------------------------------------ | -------------------------------------- | ------------ |
+| Project memory | `~/.claude/projects/<repo>/memory/` | First 200 lines or 25 KB of `MEMORY.md` at launch; topic files on demand | Project state, decisions, corrections  | Built-in     |
+| Global memory  | `~/.claude/memory/`                 | Via `@`-import in `~/.claude/CLAUDE.md`; same 200-line/25 KB cap         | Cross-project preferences and identity | Experimental |
+| Knowledge base | Dedicated git repository            | On demand (`Grep`/`Read`), with hook-based reminders                     | Reusable patterns, gotchas, reference  | Experimental |
+| Reveries       | `~/.claude/reveries.md`             | Injected at the start of **every** session via `SessionStart` hook       | Session texture, atmosphere            | Experimental |
+
+> [!important] Reminder: context is **not** memory
+> Context files (`CLAUDE.md`, rules) are meant to be **human**-curated and carry instructions Claude should **not**
+> diverge from. Memory should be **freely** writable by Claude, accumulate over sessions, and carry **learnings**
+> instead of rules.
+
+Routing:
+
+- Store memories by _shape_, not by _topic_.<br/>
+  Refer to [AI agents memory tiers][ai agents / memory tiers] and [Deciding where memory goes].
+- Use **project memory** for project-specific context, **global memory** for cross-project preferences and insights,
+  **Knowledge Bases** (or Wikis) for durable and reusable technical knowledge, and **reveries** for session texture.
+- When unsure, write an insight to project memory and consider moving it later. Promotion from a built-in system is
+  easier than demotion.
+
+Also see [thedotmack/claude-mem] for an example of automatic, plugin-based memory management system.<br/>
+It captures all tool usage, compresses it, stores it in SQLite + ChromaDB, and injects relevant context back via vector
+search.<br/>
+Compared to the memory tiers, it removes the routing decision entirely by capturing **everything** and retrieving data
+**semantically**. The custom file-based approach and claude-mem can be _complementary_: the tiers handle **depth**
+(deliberate curation, always-on loading for high-value content, shape-based routing), claude-mem handles **breadth**
+(nothing gets lost, automatic capture at scale). The tiers' value is in the judgment calls ("what shape is this
+insight?"), claude-mem's is in the wider capture coverage.<br/>
+Worth revisiting its integration or as inspiration if the manual routing proves too lossy in practice.
+
+### Deciding where memory goes
+
+When multiple memory surfaces exist (e.g. project memories, a global tier, a knowledge base, a reverie system), routing
+and recording insights by _shape_ works better than doing it by _topic_.<br/>
+Topics can produce insights of different shapes: a _pattern_ is KB/wiki material, a _correction_ is auto-memory.
+
+Auto-memory and a KB/wiki are legitimately **separate** systems even when the KB is well-scoped:
+
+| Concern (axis) | Auto-memory                              | KB                                                        |
+| -------------- | ---------------------------------------- | --------------------------------------------------------- |
+| Loading        | Auto-loaded (first 200 lines/25 KB)      | On demand (`Grep`/`Read`)                                 |
+| Scope          | Per-repository (shared across worktrees) | Global, tag-filtered                                      |
+| Curation cost  | Light-touch, prefers small entries       | Strict: frontmatter, lint, minor entries are frowned upon |
+| Decay rate     | Fast (project state changes)             | Slow (technical patterns endure)                          |
+| Privacy        | Local-only                               | Pushed to remote, publishable in character                |
+
+Each concern is an _independent_ reason to keep them separate. The KB's character as a public-quality reference depends
+on staying exactly that. Mixing user-private memory in it dilutes the pages' value.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+A KB works well for technical reference, which one only needs when working on a specific topic, and fails for concepts
+that need to be always in the background like collaboration norms, mid-session corrections that should fire **before**
+reaching for the wrong pattern.<br/>
+Knowledge that is useless for a session pollutes the context; putting always-on content in the KB requires recreating
+some sort of auto-loading mechanism inside the KB, at which point it is just reinventing auto-memory under a different
+name.
+
+</details>
+
+Different shapes warrant and require different tiers. A KB legitimately covers cross-project workflow patterns, domain
+reference (cloud, language, tool gotchas), reusable synthesis, LLM-collaboration patterns abstracted from any single
+user. Auto-memory is more suited for user-private collaboration preferences, project-specific state, mid-session
+corrections that are facts (not patterns), identity/profile data.
+
+_Bridging_ different subsystems by promoting content from one to the other matters more than _merging_ them. When a
+per-project memory smells like a KB-worthy **pattern** (and not a fact about a single user), it might be worth surfacing
+it for promotion. The KB stays a reference, auto-memory stays a scratchpad. Each system retains what makes it good.
+
+The same five-axis framework applies whenever one is considering merging **any** two systems. If the axes diverge on
+more than one dimension, just keep the systems separate and build a bridge between them instead of merging them into
+one.
+
+`CLAUDE.md` vs. auto-memory is a sibling decision driven by the same logic, just with **cross-host portability** as
+the discriminator. If a rule needs to fire on a fresh host, before any auto memory has accumulated, it belongs in
+`CLAUDE.md` (which is auto-loaded as system context). If not, it belongs in auto memory (project-scoped, accumulated
+locally).<br/>
+The test should be about cross-host portability, not importance, because a rule can be load-bearing _and_ still be the
+right fit for auto memory if losing it on a different host wouldn't let the same failure recur.
+
+**Within** instruction files, rules should make sense on a **freshly configured** machine. References to host-local
+resources (KB pages by path, repositories that may have not been cloned, tools that may have not been installed) produce
+dangling pointers on a different host. Keep those rules **self-contained** at write time: "see more in document X"
+footers belong in tier-local documentation, where the reference is **guaranteed** to resolve.
+
+Different tiers have different scopes and different needs (a set of short markdown files does not require RAG tools),
+so each should have their own specialized mechanics.
+
+Each tier should also adapt review schedules to its natural cadence, not align to a shared schedule:
+
+| Tier / shape        | Review trigger                                                                                            |
+| ------------------- | --------------------------------------------------------------------------------------------------------- |
+| Behavioral rules    | "I did X, the rule said Y, the user didn't object". Direct divergence-vs-non-objection.                   |
+| Facts (auto-memory) | "I observed something that contradicts the memorized fact". Triggered by epistemic hygiene, fires rarely. |
+| Patterns (KB)       | "I solved this differently than the KB says, and it worked". Higher bar: look for repeated divergence.    |
+| Reveries            | "The reverie loaded at session-start no longer matches my current sense". The load itself is the re-read. |
+
+The _trigger's pattern_ (event-based, in-session, cheap) should trigger an **immediate** review of specific parts of the
+content.<br/>
+_Scheduled_ reviews are still important and should be user-initiated and periodic, but only **complementary** to the
+pattern. These are meant to stale content that triggers can't catch.
+
+### Alternatives considered
+
+#### Unified tier with shape tags
+
+> [!note]
+> Rejected for now.
+
+Instead of separate tiers, have a single Claude-writable tier with a `shape:` tag per entry (`shape: fact`,
+`shape: impression`, `shape: pattern`) and let routing logic key on the tag rather than the file.
+
+Possible advantages:
+
+- Simpler mental model (one place to write, one place to read).
+- No routing decision per insight ("global vs. project", "memory vs. reverie").
+- Shape conventions enforced by tag rather than by file convention.
+
+Separate tiers still win for the following reasons:
+
+- The [five-axis differences][Deciding where memory goes] (loading, scope, curation, decay, privacy) aren't superficial.
+  Reveries are absorbed as atmosphere with no query; memories are queried by topic; KB is grep-loaded on demand. Same
+  epistemic difference, but each with its own, different mechanical needs.
+- Format conventions encode register. Auto-memory's _Why:_ / _How to apply:_ structure crowds out narrative texture by
+  design; reveries' "evoke, don't contain" rule excludes prescriptive content. Collapsing tiers loses that discipline.
+- Per-tier visual separation makes auditing easier ("read just the reveries" vs. "filter by shape across thousands of
+  entries").
+
+This alternative is workable, not obviously wrong. If at some future point the cost of maintaining separate tiers
+exceeds the cost of one unified tier with shape-tags, this is the design to revisit.
+
+## Further readings
+
+- [Claude Code]
+- [AI agents]
+- [Manage Claude's memory]
+- [karpathy/llm-wiki.md]
+- [thedotmack/claude-mem]
+
+### Sources
+
+- [Documentation / Memory]
+
+<!--
+  Reference
+  ═╬═Time══
+  -->
+
+<!-- In-article sections -->
+[Deciding where memory goes]: #deciding-where-memory-goes
+
+<!-- Knowledge base -->
+[AI agents / memory tiers]: ../../agents.md#memory-tiers
+[AI agents]: ../../agents.md
+[Claude Code / auto memory]: ../claude%20code.md#auto-memory
+[Claude Code]: ../claude%20code.md
+
+<!-- Upstream -->
+[Documentation / Memory]: https://code.claude.com/docs/en/memory
+[Manage Claude's memory]: https://code.claude.com/docs/en/memory
+
+<!-- Others -->
+[karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
+[thedotmack/claude-mem]: https://github.com/thedotmack/claude-mem
