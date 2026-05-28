@@ -6,33 +6,43 @@
 # ///
 
 """
-List (and optionally delete or archive) images across one or many ECR repositories.
+List (and optionally delete or archive) images across one or many AWS ECR repositories.
 
 Usage:
-    uv run ecr_images.py <repository> [<repository>...]    # explicit list of repositories
-    uv run ecr_images.py --all                             # check every repository in the registry
-    uv run ecr_images.py <repository> --output json
-    uv run ecr_images.py <repository> --delete             # dry-run delete
-    uv run ecr_images.py <repository> -d --execute         # effective delete
-    uv run ecr_images.py <repository> -d --older-than 60
-    uv run ecr_images.py <repository> <repository/N> -d --check-ecs --check-lambda --check-eks
-    uv run ecr_images.py --all -d --check-ecs --check-lambda --check-eks --verbose
-    uv run ecr_images.py --all -d -o json | jq '.repositories[].candidates[].digest'
-    uv run ecr_images.py <repository> -d --exclude-tag latest --exclude-tag 'v*'
-    uv run ecr_images.py <repository> -d --exclude-digest sha256:abc12
+    - list:
+        uv run cleanup-old-images.py <repository> [<repository>...]   # explicit list
+        uv run cleanup-old-images.py --all                            # every repository in the registry
+        uv run cleanup-old-images.py <repository> --output json
+    - delete:
+        uv run cleanup-old-images.py <repository> --delete                     # dry-run
+        uv run cleanup-old-images.py <repository> -d --execute                 # effectively delete
+        uv run cleanup-old-images.py <repository> -d --older-than 60
+        uv run cleanup-old-images.py <repository> -d --exclude-tag latest --exclude-tag 'v*'
+        uv run cleanup-old-images.py <repository> -d --exclude-digest sha256:abc12
+        uv run cleanup-old-images.py <repository> -d --execute --force         # skip the consumer-check warning
+        uv run cleanup-old-images.py <repository> -d --check-eks --show-kept   # also show images kept by the age gate
+        uv run cleanup-old-images.py <repository> <repository/N> -d --check-ecs --check-lambda --check-eks
+        uv run cleanup-old-images.py --all -d --check-ecs --check-lambda --check-eks --verbose
+        uv run cleanup-old-images.py --all -d -o json | jq '.repositories[].candidates[].digest'
+    - plan for later:
+        uv run cleanup-old-images.py <repository> -d --check-eks --plan-file plan.json   # save results as the plan
+        uv run cleanup-old-images.py --plan-file plan.json --execute                     # apply a saved plan
+        uv run cleanup-old-images.py --plan-file plan.json --execute --force             # apply, and skip warnings
 """
 
 import argparse
-import json
+import base64
 import dataclasses
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
+from typing import NamedTuple
 from datetime import datetime, timedelta, timezone
-
-import base64
 import fnmatch
+import io
+import json
 import logging
 import os
+import shutil
 import ssl
 import sys
 import tempfile
@@ -42,9 +52,15 @@ import urllib.request
 import boto3
 from botocore.exceptions import ClientError
 from botocore.signers import RequestSigner
-import shutil
 import yaml
 from rich.console import Console
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+)
 from rich.table import Table
 from rich import box as _rich_box
 from rich.text import Text as _Text
@@ -53,6 +69,34 @@ _log_main = logging.getLogger("ECR")
 _log_ecs = logging.getLogger("ECS")
 _log_lambda = logging.getLogger("Lambda")
 _log_eks = logging.getLogger("EKS")
+
+
+# ── grouped verbose output for parallel consumer checks ───────────────────────
+
+
+def _captured(fn, logger_name: str) -> tuple:
+
+    """
+    Run a given function with logging for logger_name buffered into a StringIO.
+
+    Temporarily disables propagation on the named logger to store records in the
+    in-memory stream only. The caller writes the buffer to stderr after the
+    future completes, producing grouped output regardless of execution order.
+    """
+
+    buf = io.StringIO()
+    handler = logging.StreamHandler(buf)
+    handler.setFormatter(logging.Formatter("[%(name)s] %(message)s"))
+    logger = logging.getLogger(logger_name)
+    propagate = logger.propagate
+    logger.addHandler(handler)
+    logger.propagate = False
+    try:
+        result = fn()
+    finally:
+        logger.removeHandler(handler)
+        logger.propagate = propagate
+    return result, buf.getvalue()
 
 
 INDEX_MEDIA_TYPES = {
@@ -72,128 +116,285 @@ class Image:
     last_pull: datetime | None
     size_bytes: int
     media_type: str | None = None
-    platform: str | None = None  # set only for index children
-    children: list["Image"] | None = None  # set only for indexes
+    platform: str | None = None             # set only for index children
+    children: list["Image"] | None = None   # set only for indices
 
     @property
     def is_index(self) -> bool:
-        return self.children is not None
+        return self.media_type in INDEX_MEDIA_TYPES
 
     @property
     def total_size(self) -> int:
         return self.size_bytes + sum(c.size_bytes for c in (self.children or []))
 
 
-# ── ECR fetching ───────────────────────────────────────────────────────────────
+class RepoAction(NamedTuple):
+    repository: str
+    candidates: list[Image]
+    excluded: list[Image]
+    digests: list[str]
+    kept: list[Image]
+
+
+# ── ECR fetching ──────────────────────────────────────────────────────────────
 
 
 def fetch_repository(ecr, repository: str) -> list[Image]:
+
     """
-    Fetch all images, resolving index → child relationships.
-    Returns top-level images only; children are nested under their parent Image.
+    Fetch all images via describe_images only. Avoid batch_get_image calls.
+
+    Returns a flat list of every manifest in the repository, including platform
+    children of multi-arch indices. Parent-child relationships resolution is
+    deferred to resolve_candidate_children (action path only) to avoid polluting
+    their last pull value.
+    Indices are identified by their imageManifestMediaType, not by resolved
+    children.
     """
 
     raw = []
-    for page in ecr.get_paginator("describe_images").paginate(
-        repositoryName=repository
-    ):
+    for page in ecr.get_paginator("describe_images").paginate(repositoryName=repository):
         raw.extend(page["imageDetails"])
 
     raw.sort(
         key=lambda x: x.get("imagePushedAt", datetime.min.replace(tzinfo=timezone.utc))
     )
 
-    # Resolve children for each image index
-    index_children: dict[str, list[dict]] = {}
-    for img in raw:
-        if img.get("imageManifestMediaType") not in INDEX_MEDIA_TYPES:
-            continue
-        digest = img["imageDigest"]
-        resp = ecr.batch_get_image(
-            repositoryName=repository,
-            imageIds=[{"imageDigest": digest}],
-            acceptedMediaTypes=list(INDEX_MEDIA_TYPES),
+    return [
+        Image(
+            digest=r["imageDigest"],
+            tags=sorted(r.get("imageTags", [])),
+            pushed_at=r.get("imagePushedAt"),
+            last_pull=r.get("lastRecordedPullTime"),
+            size_bytes=r.get("imageSizeInBytes", 0),
+            media_type=r.get("imageManifestMediaType"),
         )
-        pages = resp.get("images", [])
-        if not pages:
-            continue
-        manifest = json.loads(pages[0]["imageManifest"])
-        children = []
-        for entry in manifest.get("manifests", []):
-            plat = entry.get("platform", {})
-            arch = plat.get("architecture", "?")
-            variant = plat.get("variant", "")
-            os_ = plat.get("os", "?")
-            platform = f"{os_}/{arch}" + (f"/{variant}" if variant else "")
-            children.append({"digest": entry["digest"], "platform": platform})
-        index_children[digest] = children
-
-    child_digests = {c["digest"] for kids in index_children.values() for c in kids}
-    by_digest = {img["imageDigest"]: img for img in raw}
-
-    images = []
-    for r in raw:
-        digest = r["imageDigest"]
-        if digest in child_digests:
-            continue
-
-        children = None
-        if digest in index_children:
-            children = []
-            for c in index_children[digest]:
-                raw_child = by_digest.get(c["digest"])
-                if raw_child is None:
-                    continue
-                children.append(
-                    Image(
-                        digest=c["digest"],
-                        tags=sorted(raw_child.get("imageTags", [])),
-                        pushed_at=raw_child.get("imagePushedAt"),
-                        last_pull=raw_child.get("lastRecordedPullTime"),
-                        size_bytes=raw_child.get("imageSizeInBytes", 0),
-                        platform=c["platform"],
-                    )
-                )
-
-        images.append(
-            Image(
-                digest=digest,
-                tags=sorted(r.get("imageTags", [])),
-                pushed_at=r.get("imagePushedAt"),
-                last_pull=r.get("lastRecordedPullTime"),
-                size_bytes=r.get("imageSizeInBytes", 0),
-                media_type=r.get("imageManifestMediaType"),
-                children=children,
-            )
-        )
-
-    return images
+        for r in raw
+    ]
 
 
 def list_all_repositories(ecr) -> list[str]:
-    """Return all repository names in the registry (sorted)."""
+
+    """
+    Return all repository names in the registry, sorted alphabetically.
+    """
+
     repos: list[str] = []
     for page in ecr.get_paginator("describe_repositories").paginate():
         repos.extend(r["repositoryName"] for r in page["repositories"])
     return sorted(repos)
 
 
-# ── deletion helpers ───────────────────────────────────────────────────────────
+# ── deletion helpers ──────────────────────────────────────────────────────────
 
 
-def find_candidates(images: list[Image], older_than_days: int) -> list[Image]:
+def _detect_poisoned_timestamps(
+    indices: list[Image],
+    window_seconds: int = 60,
+    min_cluster: int = 3,
+) -> set[str]:
+
+    """
+    Return digests of indices whose last_pull is likely a batch_get_image
+    artifact from a prior inspection run.
+
+    A sequential batch_get_image loop stamps last_pull within seconds across all
+    inspected indices. Treat N+ timestamps within window_seconds of each other
+    as a scripted event, not genuine Docker pulls.
+    """
+
+    with_pull = sorted(
+        [(img.last_pull, img.digest) for img in indices if img.last_pull is not None],
+        key=lambda x: x[0],
+    )
+    poisoned: set[str] = set()
+    i = 0
+    while i < len(with_pull):
+        j = i + 1
+        while (
+            j < len(with_pull)
+            and (with_pull[j][0] - with_pull[i][0]).total_seconds() < window_seconds
+        ):
+            j += 1
+        if j - i >= min_cluster:
+            for _, digest in with_pull[i:j]:
+                poisoned.add(digest)
+        i = j
+    return poisoned
+
+
+def find_candidates(
+    images: list[Image],
+    older_than_days: int
+) -> tuple[list[Image], list[Image]]:
+
+    """
+    Identify stale images as deletion/archive candidates.
+
+    Returns (candidates, kept_by_age). kept_by_age contains images that were
+    considered, but excluded because they were pulled recently. Skips untagged
+    non-indices (likely platform children) so that they appear in neither list.
+
+    Each category sends a different signal:
+
+    - indices: last_pull is unreliable, possibly poisoned by batch_get_image in
+      previous runs. _detect_poisoned_timestamps identifies suspect timestamps
+      by clustering. For trustworthy last_pull, use the standard recency check.
+      For poisoned last_pull, fall back to pushed_at signals (rots, but consumer
+      checks act as safety net).
+
+    - Standalone tagged non-indices: last_pull is clean (batch_get_image is
+      never called on platform manifests). Standard recency check applies.
+
+    - Untagged non-indices: likely platform children of some index. Skipped
+      here, included in deletion via resolve_candidate_children after
+      identifying candidate indices.
+    """
+
     cutoff = datetime.now(timezone.utc) - timedelta(days=older_than_days)
-    return [img for img in images if img.last_pull is None or img.last_pull < cutoff]
+    epsilon = timedelta(days=7)
+
+    indices = [img for img in images if img.is_index]
+    poisoned = _detect_poisoned_timestamps(indices)
+    if poisoned:
+        _log_main.info(
+            "%d index last_pull timestamp(s) look like prior inspection artifacts; "
+            "using pushed_at signals for those",
+            len(poisoned),
+        )
+
+    candidates: list[Image] = []
+    kept: list[Image] = []
+    for img in images:
+        if img.is_index:
+            if img.digest in poisoned:
+                deploy_once = (
+                    img.last_pull is not None
+                    and img.pushed_at is not None
+                    and (img.last_pull - img.pushed_at) < epsilon
+                )
+                if (
+                    img.last_pull is None
+                    or deploy_once
+                    or (img.pushed_at is not None and img.pushed_at < cutoff)
+                ):
+                    candidates.append(img)
+                else:
+                    kept.append(img)
+            else:
+                recently_pulled = img.last_pull is not None and img.last_pull >= cutoff
+                recently_pushed = img.pushed_at is not None and img.pushed_at >= cutoff
+                if recently_pulled or recently_pushed:
+                    kept.append(img)
+                else:
+                    candidates.append(img)
+        elif img.tags:
+            # Standalone tagged single-arch: last_pull is a reliable signal.
+            recently_pulled = img.last_pull is not None and img.last_pull >= cutoff
+            recently_pushed = img.pushed_at is not None and img.pushed_at >= cutoff
+            if recently_pulled or recently_pushed:
+                kept.append(img)
+            else:
+                candidates.append(img)
+        # Untagged non-index (likely a platform child manifest): skip.
+        # These are included in deletion as children of candidate indices.
+
+    return candidates, kept
+
+
+def resolve_candidate_children(
+    ecr,
+    repository: str,
+    candidates: list[Image],
+    all_images: list[Image],
+) -> None:
+
+    """
+    Populate .children on candidate index images in-place.
+
+    Calls batch_get_image only on candidate indices. Never touches non-candidate
+    indices to avoid affecting their lastRecordedPullTime in this run.
+    all_images provides the metadata (size, tags, timestamps) for child lookup.
+
+    Resolve all candidate indices in a single, batched call (chunked at 100)
+    rather than one call per index. batch_get_image poisons lastRecordedPullTime
+    on every index it touches, but batching stamps them all at the same instant,
+    which produces a tighter timestamp cluster (more detectable by
+    _detect_poisoned_timestamps on the next run, not less). Candidate timestamps
+    do not affect the current run's survival decisions, since candidates are
+    already committed to deletion before this function is called.
+    """
+
+    by_digest = {img.digest: img for img in all_images}
+    candidate_indices = [img for img in candidates if img.is_index]
+    if not candidate_indices:
+        return
+
+    _log_main.info(
+        "Resolving children for %d candidate index(es) in %s",
+        len(candidate_indices),
+        repository,
+    )
+
+    index_by_digest = {img.digest: img for img in candidate_indices}
+    for img in candidate_indices:
+        img.children = []  # default; overwritten below if manifest resolves
+
+    for i in range(0, len(candidate_indices), 100):
+        batch = candidate_indices[i : i + 100]
+        resp = ecr.batch_get_image(
+            repositoryName=repository,
+            imageIds=[{"imageDigest": img.digest} for img in batch],
+            acceptedMediaTypes=list(INDEX_MEDIA_TYPES),
+        )
+        for item in resp.get("images", []):
+            digest = item["imageId"]["imageDigest"]
+            img = index_by_digest.get(digest)
+            if img is None:
+                continue
+            manifest = json.loads(item["imageManifest"])
+            children = []
+            for entry in manifest.get("manifests", []):
+                plat = entry.get("platform", {})
+                arch = plat.get("architecture", "?")
+                variant = plat.get("variant", "")
+                os_ = plat.get("os", "?")
+                platform = f"{os_}/{arch}" + (f"/{variant}" if variant else "")
+                child_digest = entry["digest"]
+                raw_child = by_digest.get(child_digest)
+                if raw_child is None:
+                    continue
+                children.append(
+                    Image(
+                        digest=child_digest,
+                        tags=sorted(raw_child.tags),
+                        pushed_at=raw_child.pushed_at,
+                        last_pull=raw_child.last_pull,
+                        size_bytes=raw_child.size_bytes,
+                        platform=platform,
+                    )
+                )
+            img.children = children
+        for f in resp.get("failures", []):
+            digest = f.get("imageId", {}).get("imageDigest", "?")
+            _log_main.warning("Failed to resolve index %s: %s", digest[:19], f.get("failureReason", "?"))
 
 
 def deletion_digests(candidates: list[Image], all_images: list[Image]) -> list[str]:
-    """
-    Index candidates expand to include their children, but a child manifest is only
-    emitted when every parent index that references it is also being deleted.
 
-    ECR is content-addressed: two indexes can share the same child manifest by digest.
-    Deleting a shared child while a non-candidate parent still references it would
-    break that parent.
+    """
+    Expand index candidates to include their children, but only emit a child
+    manifest when every parent index that references it is also being deleted.
+
+    ECR is content-addressed. Two indices can share the same child manifest by
+    its digest. Deleting a shared child while a non-candidate parent still
+    references it would break that parent.
+
+    Note: the shared-child safety check is limited to candidate indices (those
+    whose children have been resolved by resolve_candidate_children).
+    Non-candidate indices are not resolved, so cross-candidate sharing is not
+    detected. This is an accepted tradeoff; consumer checks (--check-eks etc.)
+    provide the primary safety net.
     """
 
     candidate_digests = {img.digest for img in candidates}
@@ -217,45 +418,136 @@ def deletion_digests(candidates: list[Image], all_images: list[Image]) -> list[s
     return result
 
 
-def execute_delete(ecr, repository: str, digests: list[str]) -> None:
-    resp = ecr.batch_delete_image(
-        repositoryName=repository,
-        imageIds=[{"imageDigest": d} for d in digests],
-    )
-    print(f"Deleted: {len(resp.get('imageIds', []))} digest(s)")
-    for f in resp.get("failures", []):
-        img_id = f.get("imageId", {})
-        print(
-            f"  FAILED {img_id.get('imageDigest', '?')[:19]} — {f['failureCode']}: {f['failureReason']}"
-        )
+def execute_delete(ecr, repository: str, digests: list[str], total_size_bytes: int = 0) -> None:
 
+    """
+    Delete ECR images by digest.
 
-def execute_archive(ecr, repository: str, digests: list[str]) -> None:
-    # No batch equivalent for update_image_storage_class; one call per digest required.
-    succeeded = 0
-    for digest in digests:
-        resp = ecr.update_image_storage_class(
+    Chunks into batches of 100, since batch_delete_image accepts at most 100
+    image IDs per call.
+    """
+
+    total_deleted = 0
+    for i in range(0, len(digests), 100):
+        batch = digests[i : i + 100]
+        resp = ecr.batch_delete_image(
             repositoryName=repository,
-            imageId={"imageDigest": digest},
-            targetStorageClass="ARCHIVE",
+            imageIds=[{"imageDigest": d} for d in batch],
         )
-        status = resp.get("imageStatus", "?")
-        if status in ("ARCHIVED", "ACTIVATING"):
-            succeeded += 1
+        total_deleted += len(
+            {r["imageDigest"] for r in resp.get("imageIds", []) if "imageDigest" in r}
+        )
+        for f in resp.get("failures", []):
+            img_id = f.get("imageId", {})
+            print(
+                f"  FAILED {img_id.get('imageDigest', '?')[:19]} — {f['failureCode']}: {f['failureReason']}"
+            )
+    size_note = f", {_size(total_size_bytes)}" if total_size_bytes else ""
+    print(f"Deleted: {total_deleted}/{len(digests)} digest(s){size_note}")
+
+
+def execute_archive(ecr, repository: str, digests: list[str], total_size_bytes: int = 0) -> None:
+
+    """
+    Archive ECR images by digest.
+
+    There is currently no batch equivalent for update_image_storage_class; one
+    call per digest is required, not a choice.
+    """
+
+    succeeded = 0
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        MofNCompleteColumn(),
+        console=Console(stderr=True, highlight=False),
+        transient=True,
+    ) as progress:
+        archive_task = progress.add_task(f"Archiving {repository}", total=len(digests))
+        for digest in digests:
+            resp = ecr.update_image_storage_class(
+                repositoryName=repository,
+                imageId={"imageDigest": digest},
+                targetStorageClass="ARCHIVE",
+            )
+            status = resp.get("imageStatus", "?")
+            if status in ("ARCHIVED", "ACTIVATING"):
+                succeeded += 1
+            else:
+                print(f"  UNEXPECTED STATUS {digest[:19]} — {status}")
+            progress.advance(archive_task)
+    size_note = f", {_size(total_size_bytes)}" if total_size_bytes else ""
+    print(f"Archived: {succeeded}/{len(digests)} digest(s){size_note}")
+
+
+def _run_execute_plan(ecr, plan_file: str, force: bool) -> None:
+
+    """
+    Execute a deletion or archive plan previously saved via --plan-file
+    (dry-run).
+
+    Action and target repositories are read from the plan file. Candidate
+    recomputation and consumer checks are skipped; the saved digests are the
+    source of truth.
+
+    Warns and exits if the plan was saved without consumer checks, unless
+    --force is passed. This mirrors the same guard on bare --execute.
+    """
+
+    with open(plan_file) as f:
+        plan = json.load(f)
+
+    action = plan.get("action")
+    if action not in ("delete", "archive"):
+        print(f"error: plan file has unknown action {action!r}", file=sys.stderr)
+        sys.exit(1)
+
+    consumer_checks = plan.get("consumer_checks", [])
+    if not consumer_checks and not force:
+        print(
+            "warning: plan was saved without consumer checks; "
+            "add --force to execute anyway, or re-generate with "
+            "--check-eks/--check-ecs/--check-lambda",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    created_at = plan.get("created_at", "unknown")
+    repos = plan.get("repositories", [])
+    summary = plan.get("summary", {})
+
+    print(
+        f"\nExecuting plan from {plan_file!r}  (saved {created_at})\n"
+        f"  action={action}  "
+        f"repos={summary.get('repository_count', '?')}  "
+        f"images={summary.get('total_candidates', '?')}  "
+        f"digests={summary.get('total_digests', '?')}  "
+        f"size={_size(summary.get('total_size_bytes', 0))}\n"
+    )
+
+    for entry in repos:
+        repo = entry["repository"]
+        digests = entry.get("digests_to_delete", [])
+        if not digests:
+            continue
+        size = entry.get("total_size_bytes", 0)
+        if action == "delete":
+            execute_delete(ecr, repo, digests, total_size_bytes=size)
         else:
-            print(f"  UNEXPECTED STATUS {digest[:19]} — {status}")
-    print(f"Archived: {succeeded}/{len(digests)} digest(s)")
+            execute_archive(ecr, repo, digests, total_size_bytes=size)
 
 
 # ── consumer protection ───────────────────────────────────────────────────────
 
 
 def _collect_ecr_digest(ecr, image: str, in_use: dict[str, set[str]]) -> bool:
+
     """
     Parse an ECR image URI and record (repo, digest) into in_use.
 
-    Returns True if a new digest was recorded; False otherwise (no match, malformed URI,
-    or duplicate digest already in the set).
+    Returns True if a new digest was recorded; False otherwise (no match,
+    malformed URI, or duplicate digest already in the set).
 
     Handles tag-only, digest-only, and tag+digest (<repo>:<tag>@<digest>) forms.
     Strips the docker-pullable:// prefix used by older container runtimes.
@@ -300,14 +592,15 @@ def _collect_ecr_digest(ecr, image: str, in_use: dict[str, set[str]]) -> bool:
 
 
 def fetch_ecs_digests(ecr, ecs) -> dict[str, set[str]]:
+
     """
     Return all ECR digests actively referenced by ECS, grouped by repo.
 
     Two passes per cluster:
-    1. Services → active task definitions (desired state; covers pending tasks whose
-       containers have not pulled yet).
-    2. Currently running tasks via list_tasks + describe_tasks (running state; covers
-       old revisions still alive during a rolling deployment).
+    1. Services → active task definitions (desired state; covers pending tasks
+       which containers have not pulled yet).
+    2. Currently running tasks via list_tasks + describe_tasks (running state;
+       covers old revisions still alive during a rolling deployment).
     """
 
     _log_ecs.info("Scanning clusters...")
@@ -323,9 +616,7 @@ def fetch_ecs_digests(ecr, ecs) -> dict[str, set[str]]:
                 arns.extend(p["serviceArns"])
             cluster_task_defs: set[str] = set()
             for i in range(0, len(arns), 10):  # describe_services max 10 per call
-                for svc in ecs.describe_services(
-                    cluster=cluster, services=arns[i : i + 10]
-                )["services"]:
+                for svc in ecs.describe_services(cluster=cluster, services=arns[i : i + 10])["services"]:
                     if svc.get("taskDefinition"):
                         cluster_task_defs.add(svc["taskDefinition"])
             task_def_arns |= cluster_task_defs
@@ -341,15 +632,12 @@ def fetch_ecs_digests(ecr, ecs) -> dict[str, set[str]]:
             # the container pulls its image, so we fall back to image URI for pending ones)
             running_arns: list[str] = []
             for p in ecs.get_paginator("list_tasks").paginate(
-                cluster=cluster, desiredStatus="RUNNING"
+                cluster=cluster,
+                desiredStatus="RUNNING",
             ):
                 running_arns.extend(p["taskArns"])
-            for i in range(
-                0, len(running_arns), 100
-            ):  # describe_tasks max 100 per call
-                for task in ecs.describe_tasks(
-                    cluster=cluster, tasks=running_arns[i : i + 100]
-                )["tasks"]:
+            for i in range(0, len(running_arns), 100):  # describe_tasks max 100 per call
+                for task in ecs.describe_tasks(cluster=cluster, tasks=running_arns[i : i + 100])["tasks"]:
                     task_id = task.get("taskArn", "?").split("/")[-1]
                     for container in task.get("containers", []):
                         img = container.get("image", "")
@@ -368,20 +656,28 @@ def fetch_ecs_digests(ecr, ecs) -> dict[str, set[str]]:
                                 container.get("name", "?"),
                                 uri,
                             )
-            _log_ecs.info(
-                "  %s: %d running task(s) scanned", cluster_short, len(running_arns)
-            )
+            _log_ecs.info("  %s: %d running task(s) scanned", cluster_short, len(running_arns))
 
-    for td_arn in task_def_arns:
+    def _fetch_td(td_arn: str) -> tuple[str, dict[str, set[str]], list[str]]:
         td = ecs.describe_task_definition(taskDefinition=td_arn)["taskDefinition"]
         parts = td_arn.split(":")
-        td_short = (
-            f"{parts[-2].split('/')[-1]}:{parts[-1]}" if len(parts) >= 2 else td_arn
-        )
+        td_short = (f"{parts[-2].split('/')[-1]}:{parts[-1]}" if len(parts) >= 2 else td_arn)
+        local: dict[str, set[str]] = {}
+        matches: list[str] = []
         for container in td.get("containerDefinitions", []):
             image = container.get("image", "")
-            if _collect_ecr_digest(ecr, image, in_use):
-                _log_ecs.info("  match (task def): %s  (%s)", image, td_short)
+            if _collect_ecr_digest(ecr, image, local):
+                matches.append(image)
+        return td_short, local, matches
+
+    if task_def_arns:
+        with ThreadPoolExecutor(max_workers=min(len(task_def_arns), 10)) as ex:
+            for fut in as_completed(ex.submit(_fetch_td, arn) for arn in task_def_arns):
+                td_short, local, matches = fut.result()
+                for image in matches:
+                    _log_ecs.info("  match (task def): %s  (%s)", image, td_short)
+                for repo, digests in local.items():
+                    in_use.setdefault(repo, set()).update(digests)
 
     total = sum(len(v) for v in in_use.values())
     _log_ecs.info("%d digest(s) across %d repo(s)", total, len(in_use))
@@ -389,11 +685,14 @@ def fetch_ecs_digests(ecr, ecs) -> dict[str, set[str]]:
 
 
 def fetch_lambda_digests(ecr, lambda_client) -> dict[str, set[str]]:
-    """
-    Return all ECR digests referenced by Lambda image functions, grouped by repo.
 
-    Checks $LATEST configuration only. Published versions pointed to by aliases are
-    not inspected; they would require an extra list_aliases + versioned get_function pass.
+    """
+    Return all ECR digests referenced by Lambda image functions, grouped by
+    repository.
+
+    Checks $LATEST configuration only. Published versions pointed to by aliases
+    are not inspected; they would require an extra list_aliases + versioned
+    get_function pass.
     """
 
     _log_lambda.info("Scanning image functions...")
@@ -404,9 +703,7 @@ def fetch_lambda_digests(ecr, lambda_client) -> dict[str, set[str]]:
             if fn.get("PackageType") != "Image":
                 continue
             fn_count += 1
-            code = lambda_client.get_function(FunctionName=fn["FunctionName"]).get(
-                "Code", {}
-            )
+            code = lambda_client.get_function(FunctionName=fn["FunctionName"]).get("Code", {})
             uri = code.get("ResolvedImageUri") or code.get("ImageUri", "")
             if _collect_ecr_digest(ecr, uri, in_use):
                 _log_lambda.info("  match: %s -> %s", fn["FunctionName"], uri)
@@ -421,11 +718,12 @@ def fetch_lambda_digests(ecr, lambda_client) -> dict[str, set[str]]:
 
 
 def _eks_token(cluster_name: str, region: str, session) -> str:
+
     """
     Generate an EKS bearer token (equivalent to aws eks get-token).
 
-    Uses a SigV4-presigned STS GetCallerIdentity URL.
-    Standard EKS auth mechanism.
+    Uses a SigV4-presigned STS GetCallerIdentity URL (standard EKS
+    authentication mechanism).
     """
 
     sts = session.client("sts", region_name=region)
@@ -449,20 +747,20 @@ def _eks_token(cluster_name: str, region: str, session) -> str:
         expires_in=60,
         operation_name="",
     )
-    return "k8s-aws-v1." + base64.urlsafe_b64encode(
-        signed_url.encode()
-    ).decode().rstrip("=")
+    return "k8s-aws-v1." + base64.urlsafe_b64encode(signed_url.encode()).decode().rstrip("=")
 
 
 def fetch_eks_digests(ecr, eks_client, region: str, session) -> dict[str, set[str]]:
+
     """
     Return digests in use by pods across all EKS clusters.
 
-    Queries /api/v1/pods on each cluster's Kubernetes API server. Private-endpoint
+    Queries /api/v1/pods on each cluster's Kubernetes API server. Private
     clusters are only reachable from within the cluster's VPC.
     Unreachable clusters are skipped with a stderr warning.
-    Checks both status.containerStatuses[].imageID (resolved digest, set after pull)
-    and spec.containers[].image (covers pending containers before imageID is populated).
+    Checks both status.containerStatuses[].imageID (resolved digest, set after
+    pull) and spec.containers[].image (covers pending containers before imageID
+    is populated).
     """
 
     in_use: dict[str, set[str]] = {}
@@ -489,7 +787,7 @@ def fetch_eks_digests(ecr, eks_client, region: str, session) -> dict[str, set[st
                 f"{endpoint}/api/v1/pods",
                 headers={"Authorization": f"Bearer {token}"},
             )
-            with urllib.request.urlopen(req, context=ctx) as resp:
+            with urllib.request.urlopen(req, context=ctx, timeout=30) as resp:
                 pod_list = json.loads(resp.read())
         except urllib.error.URLError as e:
             _log_eks.warning("skipping cluster %r: %s", cluster_name, e.reason)
@@ -503,9 +801,7 @@ def fetch_eks_digests(ecr, eks_client, region: str, session) -> dict[str, set[st
         for pod in pod_list.get("items", []):
             pod_name = pod.get("metadata", {}).get("name", "?") if verbose_pods else ""
             status = pod.get("status", {})
-            for cs in (status.get("containerStatuses") or []) + (
-                status.get("initContainerStatuses") or []
-            ):
+            for cs in (status.get("containerStatuses") or []) + (status.get("initContainerStatuses") or []):
                 image_id = cs.get("imageID", "")
                 if _collect_ecr_digest(ecr, image_id, in_use):
                     _log_eks.info(
@@ -515,9 +811,7 @@ def fetch_eks_digests(ecr, eks_client, region: str, session) -> dict[str, set[st
                         image_id,
                     )
             spec = pod.get("spec", {})
-            for c in (spec.get("containers") or []) + (
-                spec.get("initContainers") or []
-            ):
+            for c in (spec.get("containers") or []) + (spec.get("initContainers") or []):
                 image = c.get("image", "")
                 if _collect_ecr_digest(ecr, image, in_use):
                     _log_eks.info(
@@ -528,18 +822,15 @@ def fetch_eks_digests(ecr, eks_client, region: str, session) -> dict[str, set[st
                     )
 
         matched = sum(len(v) for v in in_use.values()) - before_cluster
-        _log_eks.info(
-            "  %d pod(s), %d new digest(s)", len(pod_list.get("items", [])), matched
-        )
+        _log_eks.info("  %d pod(s), %d new digest(s)", len(pod_list.get("items", [])), matched)
 
     total = sum(len(v) for v in in_use.values())
     _log_eks.info("%d digest(s) across %d repo(s)", total, len(in_use))
     return in_use
 
 
-def exclude_ecs_used(
-    candidates: list[Image], in_use: set[str]
-) -> tuple[list[Image], list[Image]]:
+def exclude_ecs_used(candidates: list[Image], in_use: set[str]) -> tuple[list[Image], list[Image]]:
+
     """
     Split candidates into (to_act_on, excluded_by_ecs).
 
@@ -561,17 +852,20 @@ def exclude_manual(
     exclude_tags: list[str],
     exclude_digests: list[str],
 ) -> tuple[list[Image], list[Image]]:
+
     """
     Split candidates into (to_act_on, excluded_by_rule).
 
-    --exclude-tag  PATTERN  fnmatch glob against top-level tags (e.g. "latest", "v*")
-    --exclude-digest DIGEST full or short-prefix match; sha256: prefix is optional
+    --exclude-tag    PATTERN  fnmatch glob against top-level tags
+                              (e.g. "latest", "v*")
+    --exclude-digest DIGEST   full or short-prefix match; sha256: prefix is
+                              optional
 
-    Note: ECR allows any manifest (including index children) to carry imageTags.
+    ECR allows any manifest (including index children) to carry imageTags.
     However, fetch_repository excludes child digests from the candidate list, so
-    --exclude-tag only sees top-level images. A tagged child whose parent is a candidate
-    but has no matching tag is not reachable via --exclude-tag; use --exclude-digest
-    for that edge case.
+    --exclude-tag only sees top-level images. A tagged child whose parent is a
+    candidate but has no matching tag is not reachable via --exclude-tag; use
+    --exclude-digest for that edge case.
     """
 
     if not exclude_tags and not exclude_digests:
@@ -586,14 +880,12 @@ def exclude_manual(
         if not matched and norm_refs:
             all_digests = {img.digest} | {c.digest for c in (img.children or [])}
             norm_digests = {d.removeprefix("sha256:") for d in all_digests}
-            matched = any(
-                nd.startswith(ref) for nd in norm_digests for ref in norm_refs
-            )
+            matched = any(nd.startswith(ref) for nd in norm_digests for ref in norm_refs)
         (excluded if matched else active).append(img)
     return active, excluded
 
 
-# ── serialization ──────────────────────────────────────────────────────────────
+# ── serialization ─────────────────────────────────────────────────────────────
 
 
 def _serialize(obj):
@@ -604,6 +896,52 @@ def _serialize(obj):
     if dataclasses.is_dataclass(obj):
         return {k: _serialize(v) for k, v in vars(obj).items()}
     return obj
+
+
+def _deserialize_images(data: list[dict]) -> list[Image]:
+
+    """
+    Reconstruct a flat list[Image] from a cache file written by _serialize.
+
+    Children are not stored in the flat cache (they are None in the output of
+    fetch_repository), so they are left as None here too.
+    """
+
+    def _dt(s: str | None) -> datetime | None:
+        return datetime.fromisoformat(s) if s else None
+
+    return [
+        Image(
+            digest=d["digest"],
+            tags=d.get("tags") or [],
+            pushed_at=_dt(d.get("pushed_at")),
+            last_pull=_dt(d.get("last_pull")),
+            size_bytes=d.get("size_bytes", 0),
+            media_type=d.get("media_type"),
+            platform=d.get("platform"),
+        )
+        for d in data
+    ]
+
+
+def _cache_path(cache_dir: str, repository: str) -> str:
+    slug = repository.replace("/", "__")
+    return os.path.join(cache_dir, f"{slug}.json")
+
+
+def _load_cache(cache_dir: str, repository: str) -> list[Image] | None:
+    path = _cache_path(cache_dir, repository)
+    if not os.path.exists(path):
+        return None
+    with open(path) as f:
+        return _deserialize_images(json.load(f))
+
+
+def _save_cache(cache_dir: str, repository: str, images: list[Image]) -> None:
+    os.makedirs(cache_dir, exist_ok=True)
+    path = _cache_path(cache_dir, repository)
+    with open(path, "w") as f:
+        json.dump([_serialize(img) for img in images], f, indent=2)
 
 
 def listing_as_dict(per_repo: list[tuple[str, list[Image]]]) -> dict:
@@ -634,7 +972,7 @@ def listing_as_dict(per_repo: list[tuple[str, list[Image]]]) -> dict:
 
 
 def action_plan_as_dict(
-    per_repo: list[tuple[str, list[Image], list[Image], list[str]]],
+    per_repo: list[RepoAction],
     older_than_days: int,
     dry_run: bool,
     action: str,
@@ -643,7 +981,7 @@ def action_plan_as_dict(
     grand_candidates = 0
     grand_digests = 0
     grand_size = 0
-    for repo, candidates, excluded, digests in per_repo:
+    for repo, candidates, excluded, digests, _kept in per_repo:
         total_size = sum(img.total_size for img in candidates)
         repositories.append(
             {
@@ -677,20 +1015,22 @@ def emit(data: dict, fmt: str) -> None:
     if fmt == "json":
         print(json.dumps(data, indent=2))
     elif fmt == "yaml":
-        print(
-            yaml.dump(
-                data, default_flow_style=False, sort_keys=False, allow_unicode=True
-            )
-        )
+        print(yaml.dump(data, default_flow_style=False, sort_keys=False, allow_unicode=True))
 
 
-# ── table renderers ────────────────────────────────────────────────────────────
+# ── table renderers ───────────────────────────────────────────────────────────
+
 
 _console = Console(
     highlight=False,
     width=max(shutil.get_terminal_size(fallback=(120, 24)).columns, 120),
 )
-_SYM_STYLE: dict[str, str] = {"[-]": "bold red", "[~]": "bold yellow", "[=]": "dim"}
+_SYM_STYLE: dict[str, str] = {
+    "[-]": "bold red",
+    "[~]": "bold yellow",
+    "[=]": "dim",
+    "[+]": "dim green",
+}
 
 
 def _tag_text(sym: str | None, content: str) -> _Text:
@@ -711,9 +1051,7 @@ def _child_text(tree: str, sym: str | None, platform: str, tags: str) -> _Text:
 
 
 def _make_table() -> Table:
-    t = Table(
-        box=_rich_box.SIMPLE_HEAD, show_edge=False, pad_edge=False, header_style="bold"
-    )
+    t = Table(box=_rich_box.SIMPLE_HEAD, show_edge=False, pad_edge=False, header_style="bold")
     t.add_column("TAGS", min_width=40, no_wrap=True)
     t.add_column("PUSHED", no_wrap=True)
     t.add_column("LAST PULL", no_wrap=True)
@@ -758,9 +1096,7 @@ def render_listing(per_repo: list[tuple[str, list[Image]]]) -> None:
         grand_count += sum(1 + len(img.children or []) for img in images)
         grand_size += sum(img.total_size for img in images)
     if len(per_repo) > 1:
-        print(
-            f"=== Summary: {len(per_repo)} repositories, {grand_count} images, {_size(grand_size)} ===\n"
-        )
+        print(f"=== Summary: {len(per_repo)} repositories, {grand_count} images, {_size(grand_size)} ===\n")
 
 
 def _render_repo_action(
@@ -771,6 +1107,8 @@ def _render_repo_action(
     dry_run: bool,
     action: str,
     excluded: list[Image],
+    kept: list[Image],
+    show_kept: bool,
 ) -> None:
     VERBS = {
         "delete": ("DELETE", "Would delete", "Deleting"),
@@ -793,9 +1131,7 @@ def _render_repo_action(
         retained = len(unique_children) - n_children
         child_note = f" + {n_children} child(ren)" if n_children else ""
         retained_note = f" — {retained} shared child(ren) retained" if retained else ""
-        print(
-            f"[{label}] {verb} {len(candidates)} image(s){child_note} = {len(digests)} digest(s), {_size(total_size)}{retained_note}\n"
-        )
+        print(f"[{label}] {verb} {len(candidates)} image(s){child_note} = {len(digests)} digest(s), {_size(total_size)}{retained_note}\n")
         t = _make_table()
         for img in candidates:
             tags = ", ".join(img.tags) or "[untagged]"
@@ -819,9 +1155,7 @@ def _render_repo_action(
                 )
         _console.print(t)
     else:
-        print(
-            f"[{label}] No images match criteria (not pulled in {older_than_days}+ days)\n"
-        )
+        print(f"[{label}] No images match criteria (not pulled in {older_than_days}+ days)\n")
 
     if excluded:
         print(f"\n[PROTECTED] {len(excluded)} image(s) excluded\n")
@@ -846,33 +1180,65 @@ def _render_repo_action(
                     child.digest[:19],
                 )
         _console.print(t)
+
+    if kept:
+        kept_size = sum(img.size_bytes for img in kept)
+        print(
+            f"\n[KEPT] {len(kept)} image(s), {_size(kept_size)}"
+            f"  (pulled within {older_than_days} days — not candidates)\n"
+        )
+        if show_kept:
+            t = _make_table()
+            for img in kept:
+                tags = ", ".join(img.tags) or "[untagged]"
+                t.add_row(
+                    _tag_text("[+]", f"{tags} [index]" if img.is_index else tags),
+                    _age(img.pushed_at),
+                    _age(img.last_pull),
+                    _size(img.size_bytes),
+                    img.digest[:19],
+                )
+            _console.print(t)
+
     print()
 
 
 def render_action(
-    per_repo: list[tuple[str, list[Image], list[Image], list[str]]],
+    per_repo: list[RepoAction],
     older_than_days: int,
     dry_run: bool,
     action: str,
+    show_kept: bool = False,
 ) -> None:
     grand_candidates = 0
     grand_digests = 0
     grand_size = 0
-    for repo, candidates, excluded, digests in per_repo:
+    grand_kept = 0
+    for repo, candidates, excluded, digests, kept in per_repo:
         _render_repo_action(
-            repo, candidates, digests, older_than_days, dry_run, action, excluded
+            repo,
+            candidates,
+            digests,
+            older_than_days,
+            dry_run,
+            action,
+            excluded,
+            kept,
+            show_kept,
         )
         grand_candidates += len(candidates)
         grand_digests += len(digests)
         grand_size += sum(img.total_size for img in candidates)
+        grand_kept += len(kept)
     if len(per_repo) > 1:
         verb = f"Would {action}" if dry_run else f"{action.capitalize()}d"
+        kept_note = f", {grand_kept} kept by age gate" if grand_kept else ""
         print(
-            f"=== Summary: {len(per_repo)} repos, {verb} {grand_candidates} image(s) = {grand_digests} digest(s), {_size(grand_size)} ===\n"
+            f"=== Summary: {len(per_repo)} repos, {verb} {grand_candidates} image(s) = {grand_digests} digest(s), {_size(grand_size)}{kept_note} ===\n"
         )
 
 
-# ── formatting utils ───────────────────────────────────────────────────────────
+# ── formatting utils ──────────────────────────────────────────────────────────
 
 
 def _age(dt: datetime | None) -> str:
@@ -881,7 +1247,7 @@ def _age(dt: datetime | None) -> str:
     days = (datetime.now(timezone.utc) - dt).days
     if days == 0:
         return "today"
-    return f"1d ago" if days == 1 else f"{days}d ago"
+    return "1d ago" if days == 1 else f"{days}d ago"
 
 
 def _size(size_bytes: int) -> str:
@@ -892,7 +1258,7 @@ def _size(size_bytes: int) -> str:
     return f"{size_bytes:.1f} TB"
 
 
-# ── main ───────────────────────────────────────────────────────────────────────
+# ── main ──────────────────────────────────────────────────────────────────────
 
 
 def main() -> None:
@@ -953,11 +1319,29 @@ def main() -> None:
         help="take actual action on the candidates",
     )
     parser.add_argument(
+        "--force",
+        action="store_true",
+        help="suppress the consumer-checks safety warning when using --execute without any --check-* flag",
+    )
+    parser.add_argument(
+        "--plan-file",
+        metavar="FILE",
+        help="path to a plan JSON file; without --execute: compute the dry-run plan and save it to FILE "
+        "(requires --delete or --archive); with --execute: read from FILE and execute it, bypassing "
+        "candidate recomputation (--delete/--archive and repository arguments are not needed)",
+    )
+    parser.add_argument(
         "--max-workers",
         type=int,
         default=10,
         metavar="N",
         help="parallel workers for per-repo fetching (default: 10)",
+    )
+    parser.add_argument(
+        "--cache-dir",
+        metavar="DIR",
+        help="directory for per-repository cache files; reads from cache when present, writes on first fetch;"
+        "delete files in it to force a refresh for those repositories",
     )
     parser.add_argument(
         "--check-ecs",
@@ -997,10 +1381,12 @@ def main() -> None:
         action="store_true",
         help="print scanning progress and matches to stderr",
     )
+    parser.add_argument(
+        "--show-kept",
+        action="store_true",
+        help="show recently-pulled images kept by the age gate (only meaningful with --delete or --archive)",
+    )
     args = parser.parse_args()
-
-    if bool(args.repositories) == bool(args.all_repos):
-        parser.error("specify either <repository>(s) positional or --all (not both)")
 
     logging.basicConfig(
         level=logging.INFO if args.verbose else logging.WARNING,
@@ -1012,6 +1398,14 @@ def main() -> None:
     session = boto3.Session(profile_name=args.profile, region_name=args.region)
     ecr = session.client("ecr")
 
+    # --plan-file + --execute: action and repos come from the plan file, no re-computation
+    if args.plan_file and args.execute:
+        _run_execute_plan(ecr, args.plan_file, args.force)
+        return
+
+    if bool(args.repositories) == bool(args.all_repos):
+        parser.error("specify either <repository>(s) positional or --all (not both)")
+
     # Resolve target repos
     if args.all_repos:
         target_repos = list_all_repositories(ecr)
@@ -1021,9 +1415,21 @@ def main() -> None:
 
     action = "delete" if args.delete else "archive" if args.archive else None
 
+    if args.plan_file and not action:
+        parser.error("--plan-file without --execute requires --delete or --archive")
+
     # Run consumer checks ONCE (across the whole registry, not per-repo)
     in_use_by_repo: dict[str, set[str]] = {}
     any_check = args.check_ecs or args.check_lambda or args.check_eks_flag
+
+    if action and args.execute and not any_check and not args.force:
+        print(
+            "warning: executing without consumer checks; add --check-eks/--check-ecs/--check-lambda "
+            "to exclude in-use images, or pass --force to suppress this warning",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     if any_check and not action:
         print(
             "warning: --check-ecs/--check-lambda/--check-eks have no effect without --delete or --archive",
@@ -1035,29 +1441,73 @@ def main() -> None:
             for r, digests in other.items():
                 in_use_by_repo.setdefault(r, set()).update(digests)
 
+        check_fns = []
         if args.check_ecs:
-            _merge(fetch_ecs_digests(ecr, session.client("ecs")))
+            check_fns.append(
+                lambda: _captured(
+                    lambda: fetch_ecs_digests(session.client("ecr"), session.client("ecs")),
+                    "ECS",
+                )
+            )
         if args.check_lambda:
-            _merge(fetch_lambda_digests(ecr, session.client("lambda")))
+            check_fns.append(
+                lambda: _captured(
+                    lambda: fetch_lambda_digests(session.client("ecr"), session.client("lambda")),
+                    "Lambda",
+                )
+            )
         if args.check_eks_flag:
-            _merge(fetch_eks_digests(ecr, session.client("eks"), args.region, session))
+            check_fns.append(
+                lambda: _captured(
+                    lambda: fetch_eks_digests(
+                        session.client("ecr"), session.client("eks"), args.region, session
+                    ),
+                    "EKS",
+                )
+            )
+        with ThreadPoolExecutor(max_workers=len(check_fns)) as ex:
+            for fut in as_completed(ex.submit(fn) for fn in check_fns):
+                result, log_output = fut.result()
+                sys.stderr.write(log_output)
+                _merge(result)
 
-    # Parallel per-repo fetch
+    # Parallel per-repo fetch (with optional describe_images cache)
+    def _fetch_repo(repo: str) -> list[Image]:
+        if args.cache_dir:
+            cached = _load_cache(args.cache_dir, repo)
+            if cached is not None:
+                _log_main.info("cache hit: %s (%d images)", repo, len(cached))
+                return cached
+        images = fetch_repository(session.client("ecr"), repo)
+        if args.cache_dir:
+            _save_cache(args.cache_dir, repo, images)
+            _log_main.info("cache saved: %s", repo)
+        return images
+
     _log_main.info(
-        "Fetching %d repo(s) with %d worker(s)...", len(target_repos), args.max_workers
+        "Fetching %d repo(s) with %d worker(s)...",
+        len(target_repos), args.max_workers
     )
     fetched: dict[str, list[Image]] = {}
-    with ThreadPoolExecutor(max_workers=args.max_workers) as ex:
-        futures = {
-            ex.submit(fetch_repository, ecr, repo): repo for repo in target_repos
-        }
-        for fut in as_completed(futures):
-            repo = futures[fut]
-            try:
-                fetched[repo] = fut.result()
-            except Exception as e:
-                _log_main.warning("failed to fetch %s: %s", repo, e)
-                fetched[repo] = []
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        MofNCompleteColumn(),
+        console=Console(stderr=True, highlight=False),
+        transient=True,
+    ) as progress:
+        fetch_task = progress.add_task("Fetching repositories", total=len(target_repos))
+        with ThreadPoolExecutor(max_workers=args.max_workers) as ex:
+            futures = {ex.submit(_fetch_repo, repo): repo for repo in target_repos}
+            for fut in as_completed(futures):
+                repo = futures[fut]
+                try:
+                    fetched[repo] = fut.result()
+                except Exception as e:
+                    _log_main.warning("failed to fetch %s: %s", repo, e)
+                    fetched[repo] = []
+                progress.advance(fetch_task)
 
     # Preserve input order
     ordered_listing: list[tuple[str, list[Image]]] = [
@@ -1065,38 +1515,89 @@ def main() -> None:
     ]
 
     if action:
-        ordered_action: list[tuple[str, list[Image], list[Image], list[str]]] = []
+        ordered_action: list[RepoAction] = []
         for repo, images in ordered_listing:
-            candidates = find_candidates(images, args.older_than)
+            candidates, kept = find_candidates(images, args.older_than)
             candidates, excluded_manual = exclude_manual(
                 candidates, args.exclude_tag, args.exclude_digest
             )
             in_use = in_use_by_repo.get(repo, set())
+
+            # First consumer exclusion: by digest alone, before child resolution.
+            # Catches indices or images whose own digest is directly in use.
             if in_use:
-                candidates, excluded_in_use = exclude_ecs_used(candidates, in_use)
+                candidates, excluded_in_use_1 = exclude_ecs_used(candidates, in_use)
             else:
-                excluded_in_use = []
-            excluded = excluded_manual + excluded_in_use
+                excluded_in_use_1 = []
+
+            # Resolve children only for the remaining candidate indices.
+            # batch_get_image is called here, but only on candidates not yet excluded.
+            resolve_candidate_children(ecr, repo, candidates, images)
+
+            # Remove any image now confirmed as a child of a candidate index from the
+            # top-level candidate list to avoid double-counting in display and digests.
+            known_child_digests = {
+                c.digest
+                for img in candidates
+                if img.is_index
+                for c in (img.children or [])
+            }
+            candidates = [
+                img for img in candidates if img.digest not in known_child_digests
+            ]
+
+            # Second consumer exclusion: now that children are resolved, catch indices
+            # whose child digest is in use (e.g. a specific platform manifest pulled by EKS).
+            if in_use:
+                candidates, excluded_in_use_2 = exclude_ecs_used(candidates, in_use)
+            else:
+                excluded_in_use_2 = []
+
+            excluded = excluded_manual + excluded_in_use_1 + excluded_in_use_2
             digests = deletion_digests(candidates, images)
-            ordered_action.append((repo, candidates, excluded, digests))
+            ordered_action.append(RepoAction(repo, candidates, excluded, digests, kept))
 
         dry_run = not args.execute
         if args.output == "table":
-            render_action(ordered_action, args.older_than, dry_run, action)
+            render_action(
+                ordered_action,
+                args.older_than,
+                dry_run,
+                action,
+                show_kept=args.show_kept,
+            )
         else:
             emit(
                 action_plan_as_dict(ordered_action, args.older_than, dry_run, action),
                 args.output,
             )
 
+        if args.plan_file:
+            consumer_checks = []
+            if args.check_ecs:
+                consumer_checks.append("ecs")
+            if args.check_lambda:
+                consumer_checks.append("lambda")
+            if args.check_eks_flag:
+                consumer_checks.append("eks")
+            plan = action_plan_as_dict(
+                ordered_action, args.older_than, dry_run=True, action=action
+            )
+            plan["consumer_checks"] = consumer_checks
+            plan["created_at"] = datetime.now(timezone.utc).isoformat()
+            with open(args.plan_file, "w") as f:
+                json.dump(plan, f, indent=2)
+            print(f"Plan saved to {args.plan_file!r}", file=sys.stderr)
+
         if args.execute:
-            for repo, candidates, _, digests in ordered_action:
+            for repo, candidates, _, digests, _kept in ordered_action:
                 if not candidates:
                     continue
+                size = sum(img.total_size for img in candidates)
                 if action == "delete":
-                    execute_delete(ecr, repo, digests)
+                    execute_delete(ecr, repo, digests, total_size_bytes=size)
                 else:
-                    execute_archive(ecr, repo, digests)
+                    execute_archive(ecr, repo, digests, total_size_bytes=size)
     else:
         if args.output == "table":
             render_listing(ordered_listing)

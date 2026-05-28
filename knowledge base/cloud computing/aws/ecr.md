@@ -4,6 +4,7 @@
 1. [Image scanning](#image-scanning)
 1. [Lifecycle policies](#lifecycle-policies)
    1. [Archive tier constraints](#archive-tier-constraints)
+   1. [Middling with multi-arch images](#middling-with-multi-arch-images)
 1. [Pull through cache feature](#pull-through-cache-feature)
 1. [Cleaning up old images](#cleaning-up-old-images)
 1. [Troubleshooting](#troubleshooting)
@@ -205,6 +206,25 @@ When `sinceImagePulled` → `transition` moves images to archival storage, sever
   `last_activated_at` (the restore timestamp) rather than the original `last_recorded_pulltime`.<br/>
   A restored image gets a fresh hot window before being re-archived.
 
+### Middling with multi-arch images
+
+AWS documents an `ImageReferencedByManifestList` guard that _should_™ prevent lifecycle policies from expiring or
+archiving child manifests while their parent manifest list exists. In practice, this guard proved **unreliable**,
+particularly for pull-through cache repositories.
+
+The guard fires **only** at **execution** time. The lifecycle evaluator might mark untagged children as candidates
+**without** checking manifest-list relationships.<br/>
+The guard may catch some of those relationships at deletion time, but race conditions in the execution engine cause it
+to misfire inconsistently. See [containers-roadmap#2613](https://github.com/aws/containers-roadmap/issues/2613).
+
+> [!caution]
+> Consider lifecycle rules with `tagStatus: untagged` as **unsafe** for repositories containing multi-architecture
+> images, regardless of the documented protection. A `tagStatus: untagged` rule with a short expiry on a pull-through
+> cache repository deleted platform-specific children of a live production multi-arch image, breaking deployments.
+>
+> Custom cleanup scripts must build a parent-child map **explicitly** before making deletion decisions. See
+> [Cleaning up old images].
+
 ## Pull through cache feature
 
 Refer [Troubleshooting pull through cache issues in Amazon ECR].
@@ -239,6 +259,12 @@ repository first, or it needs `ecr:CreateRepository`. This permission is **not**
 [Repository creation templates] only describe what the new repository should look like, and **do** still require the
 puller to create the repository. Similarly, ECS services pulling from cache repositories need an additional policy
 granting both actions (possibly scoped to the cache prefix).
+
+AWS has since published `AmazonEC2ContainerRegistryPullOnly`, which includes `ecr:BatchImportUpstreamImage` alongside
+the plain pull actions.<br/>
+This is now the recommended least-privilege policy for node roles, and EKS Auto Mode uses it by default.
+`ecr:CreateRepository` remains **absent** from both managed policies, and upstream paths not yet in the cache still
+require it to be granted in an additional policy.
 
 > [!tip]
 > Scope extra permissions to the cache namespace only.<br/>
@@ -317,7 +343,7 @@ with ECS/Lambda/EKS consumer-side lookups, the following issues might arise:
 
   <details style='padding: 0 0 1rem 1rem'>
 
-  Two **distinct** image indexes within the same repository can reference the **same** child manifest by digest. This
+  Two **distinct** image indices within the same repository can reference the **same** child manifest by digest. This
   happens normally when the upstream registry pushes the same manifest under multiple index tags. It is common with
   pull-through cache repositories holding multi-arch images that share platform layers across releases.
 
@@ -423,6 +449,91 @@ with ECS/Lambda/EKS consumer-side lookups, the following issues might arise:
 
   </details>
 
+- `lastRecordedPullTime` is updated at most once every 24 hours.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  ECR rate-limits `lastRecordedPullTime` advances to at most one update per image per 24 hours. A timestamp of
+  "1 day ago" means the image was pulled at least once in the last 24 hours, but not that it was pulled _exactly_ once
+  at that time. ECR does not update the timestamp without an actual pull.
+
+  This affects threshold decisions during cleanups, since an image pulled 23 hours ago and one pulled 25 hours ago may
+  appear indistinguishable from this field alone.
+
+  </details>
+
+- `batch_get_image` on an index manifest updates its `lastRecordedPullTime`.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  Calling `batch_get_image` on an index to inspect its children (e.g. to build the parent-child map) counts as a pull,
+  and updates `lastRecordedPullTime` on that index. A cleanup script that iterates all indices to resolve their children
+  will set every index's timestamp to roughly "one run-interval ago".<br/>
+  This makes the last pull's time an unreliable signal for indices.
+
+  If **all** index images in a repository show `lastRecordedPullTime` with sequential gaps within a couple of seconds in
+  the order they would be iterated, the timestamps were likely updated by an inspection, not by real pulls.
+
+  Child manifests are **not** updated by `batch_get_image` for their parent, so they preserve their pull history.
+  When using the last pull time as a cleanup signal, prefer child timestamps over the index's, or actively check
+  consumers (e.g., ECS, EKS, lambdas).
+
+  </details>
+
+- `batch_delete_image` accepts up to 100 image IDs per single call.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  The `BatchDeleteImage` API raises `InvalidParameterException` if the `imageIds` list exceeds 100 entries.<br/>
+  This limit is easy to hit when deleting multi-arch images (17 indices with ~9 children each produce ~153 digests in a
+  single pass). Chunk deletion calls into slices of at most 100.
+
+  ```python
+  for i in range(0, len(digests_to_delete), 100):
+      ecr.batch_delete_image(
+          repositoryName=repo,
+          imageIds=[{"imageDigest": d} for d in digests_to_delete[i:i+100]],
+      )
+  ```
+
+  </details>
+
+- Actively checking ECS clusters for currently used images requires to check both the desired state and the running
+  state of tasks and services.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  During a rolling deployment, old tasks continue running from the previous task definition revision. Querying only
+  `service["taskDefinition"]` (the desired revision) leaves those tasks' images unprotected. Instead:
+
+  1. Cover pending tasks whose containers have not pulled yet (desired state) with `list_services` → `describe_services`
+     → `taskDefinition` ARNs → `describe_task_definition`.
+  1. Cover tasks running from any revision, including old ones mid-rollout (running state) with
+     `list_tasks(desiredStatus="RUNNING")` → `describe_tasks` (max 100 ARNs per call) → `container.image` +
+     `container.imageDigest`.
+
+  Use `desiredStatus="RUNNING"` instead of `lastStatus`. ECS never sets the desired status of a task to `PENDING`, so
+  this captures tasks in the `PROVISIONING`, `ACTIVATING`, or `RUNNING` states.
+
+  ```python
+  running_arns: list[str] = []
+  for p in ecs.get_paginator("list_tasks").paginate(cluster=cluster, desiredStatus="RUNNING"):
+      running_arns.extend(p["taskArns"])
+  for i in range(0, len(running_arns), 100):
+      for task in ecs.describe_tasks(cluster=cluster, tasks=running_arns[i:i+100])["tasks"]:
+          for container in task.get("containers", []):
+              # see double-digest gotcha below before combining image + imageDigest
+              img = container.get("image", "")
+              img_digest = container.get("imageDigest", "")
+              uri = f"{img}@{img_digest}" if img and img_digest and "@" not in img else img
+              if uri:
+                  protect(uri)
+  ```
+
+  </details>
+
+- Container images in definitions may already use a digest. Be sure to account for that.
+
 ## Troubleshooting
 
 ### Docker pull errors with `no basic auth credentials`
@@ -454,6 +565,9 @@ Context: trying to pull an image on an EC2 instance that is using the amazon-ecr
   Reference
   ═╬═Time══
   -->
+
+<!-- In-article sections -->
+[Cleaning up old images]: #cleaning-up-old-images
 
 <!-- Knowledge base -->
 [amazon web services]: README.md
