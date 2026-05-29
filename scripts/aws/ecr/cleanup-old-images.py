@@ -22,6 +22,7 @@ Usage:
         uv run cleanup-old-images.py <repository> -d --exclude-digest sha256:abc12
         uv run cleanup-old-images.py <repository> -d --execute --force         # skip the consumer-check warning
         uv run cleanup-old-images.py <repository> -d --check-eks --show-kept   # also show images kept by the age gate
+        uv run cleanup-old-images.py <repository> -d --include-untagged        # also clean up untagged orphan images
         uv run cleanup-old-images.py <repository> <repository/N> -d --check-ecs --check-lambda --check-eks
         uv run cleanup-old-images.py --all -d --check-ecs --check-lambda --check-eks --verbose
         uv run cleanup-old-images.py --all -d -o json | jq '.repositories[].candidates[].digest'
@@ -252,7 +253,9 @@ def find_candidates(
 
     - Untagged non-indices: likely platform children of some index. Skipped
       here, included in deletion via resolve_candidate_children after
-      identifying candidate indices.
+      identifying candidate indices. Repos with untagged standalone orphans
+      (not children of any index) can opt in via --include-untagged, which
+      calls find_orphan_untagged_candidates after the standard pipeline.
     """
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=older_than_days)
@@ -318,6 +321,108 @@ def find_candidates(
         # These are included in deletion as children of candidate indices.
 
     return candidates, kept
+
+
+def find_orphan_untagged_candidates(
+    ecr,
+    repository: str,
+    images: list[Image],
+    known_child_digests: set[str],
+    older_than_days: int,
+) -> list[Image]:
+
+    """
+    Return untagged non-index images not referenced by any index in a
+    repository.
+
+    Resolves all index manifests not already resolved (non-candidate indices)
+    via batch_get_image to build a complete parent-child map. This poisons
+    lastRecordedPullTime on those indices; acceptable when the caller opts in
+    with --include-untagged.
+
+    known_child_digests includes child digests already populated by
+    resolve_candidate_children. Orphan candidates pass through the standard age
+    gate (age > older_than_days). --keep-last does not apply to untagged orphans
+    since they are not part of any tagged deployment sequence.
+    """
+
+    untagged_non_indices = [
+        img for img in images
+        if not img.is_index and not img.tags and img.digest not in known_child_digests
+    ]
+    if not untagged_non_indices:
+        return []
+
+    # Resolve index manifests not yet resolved (non-candidate / kept indices).
+    unresolved_indices = [img for img in images if img.is_index and img.children is None]
+    if unresolved_indices:
+        _log_main.info(
+            "Resolving %d non-candidate index(es) in %s to identify orphaned images",
+            len(unresolved_indices),
+            repository,
+        )
+        index_by_digest = {img.digest: img for img in unresolved_indices}
+        for i in range(0, len(unresolved_indices), 100):
+            batch = unresolved_indices[i : i + 100]
+            resp = ecr.batch_get_image(
+                repositoryName=repository,
+                imageIds=[{"imageDigest": img.digest} for img in batch],
+                acceptedMediaTypes=list(INDEX_MEDIA_TYPES),
+            )
+            for item in resp.get("images", []):
+                digest = item["imageId"]["imageDigest"]
+                idx = index_by_digest.get(digest)
+                if idx is None:
+                    continue
+                manifest = json.loads(item["imageManifest"])
+                idx.children = [
+                    Image(
+                        digest=entry["digest"],
+                        tags=[],
+                        pushed_at=None,
+                        last_pull=None,
+                        size_bytes=0,
+                    )
+                    for entry in manifest.get("manifests", [])
+                ]
+            for failure in resp.get("failures", []):
+                digest = failure.get("imageId", {}).get("imageDigest", "?")
+                idx = index_by_digest.get(digest)
+                if idx is not None:
+                    idx.children = []
+                _log_main.warning(
+                    "Failed to resolve non-candidate index %s: %s",
+                    digest[:19],
+                    failure.get("failureReason", "?"),
+                )
+
+    # Build complete child digest set (candidate children + newly-resolved non-candidate children).
+    all_child_digests = known_child_digests | {
+        c.digest
+        for img in images
+        if img.is_index
+        for c in (img.children or [])
+    }
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=older_than_days)
+    orphans: list[Image] = []
+    for img in untagged_non_indices:
+        if img.digest in all_child_digests:
+            continue
+        recently = (
+            (img.last_pull is not None and img.last_pull >= cutoff)
+            or (img.pushed_at is not None and img.pushed_at >= cutoff)
+        )
+        if not recently:
+            orphans.append(img)
+
+    if orphans:
+        _log_main.info(
+            "%d untagged orphan image(s) identified as candidates in %s",
+            len(orphans),
+            repository,
+        )
+    return orphans
 
 
 def resolve_candidate_children(
@@ -1426,6 +1531,20 @@ def main() -> None:
         action="store_true",
         help="show images kept by the age gate or --keep-last (only meaningful with --delete or --archive)",
     )
+    parser.add_argument(
+        "--include-untagged",
+        action="store_true",
+        dest="include_untagged",
+        help=(
+            "also consider untagged non-index images as deletion candidates. "
+            "ECR cannot distinguish orphaned standalone images from platform children "
+            "via describe_images alone; this flag resolves all non-candidate index "
+            "manifests to build a complete parent-child map and treats any untagged "
+            "image not referenced by any index as an orphan candidate. "
+            "Poisons lastRecordedPullTime on non-candidate indices for the next run. "
+            "Safe for repositories with no multi-arch images; use with caution otherwise."
+        ),
+    )
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -1588,6 +1707,18 @@ def main() -> None:
             candidates, excluded_in_use_2 = exclude_in_use(candidates, in_use)
 
             excluded = excluded_manual + excluded_in_use_1 + excluded_in_use_2
+
+            if args.include_untagged:
+                orphans = find_orphan_untagged_candidates(
+                    ecr, repo, images, known_child_digests, args.older_than
+                )
+                orphans, excluded_orphan_manual = exclude_manual(
+                    orphans, args.exclude_tag, args.exclude_digest
+                )
+                orphans, excluded_orphan_in_use = exclude_in_use(orphans, in_use)
+                candidates.extend(orphans)
+                excluded = excluded + excluded_orphan_manual + excluded_orphan_in_use
+
             digests = deletion_digests(candidates, images)
             ordered_action.append(RepoAction(repo, candidates, excluded, digests, kept))
 
