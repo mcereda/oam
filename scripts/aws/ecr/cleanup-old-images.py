@@ -17,6 +17,7 @@ Usage:
         uv run cleanup-old-images.py <repository> --delete                     # dry-run
         uv run cleanup-old-images.py <repository> -d --execute                 # effectively delete
         uv run cleanup-old-images.py <repository> -d --older-than 60
+        uv run cleanup-old-images.py <repository> -d --keep-last 5             # always keep the 5 newest images
         uv run cleanup-old-images.py <repository> -d --exclude-tag latest --exclude-tag 'v*'
         uv run cleanup-old-images.py <repository> -d --exclude-digest sha256:abc12
         uv run cleanup-old-images.py <repository> -d --execute --force         # skip the consumer-check warning
@@ -145,9 +146,10 @@ def fetch_repository(ecr, repository: str) -> list[Image]:
     Fetch all images via describe_images only. Avoid batch_get_image calls.
 
     Returns a flat list of every manifest in the repository, including platform
-    children of multi-arch indices. Parent-child relationships resolution is
-    deferred to resolve_candidate_children (action path only) to avoid polluting
-    their last pull value.
+    children of multi-arch indices. Parent-child resolution is deferred to
+    resolve_candidate_children (action path only) to avoid polluting their
+    last pull value.
+
     Indices are identified by their imageManifestMediaType, not by resolved
     children.
     """
@@ -225,15 +227,17 @@ def _detect_poisoned_timestamps(
 
 def find_candidates(
     images: list[Image],
-    older_than_days: int
+    older_than_days: int,
+    keep_last: int = 1,
 ) -> tuple[list[Image], list[Image]]:
 
     """
     Identify stale images as deletion/archive candidates.
 
-    Returns (candidates, kept_by_age). kept_by_age contains images that were
-    considered, but excluded because they were pulled recently. Skips untagged
-    non-indices (likely platform children) so that they appear in neither list.
+    Returns (candidates, kept). kept contains images excluded because they were
+    pulled recently OR because they are in the top keep_last by push date.
+    Skips untagged non-indices (likely platform children) so that they appear
+    in neither list.
 
     Each category sends a different signal:
 
@@ -254,6 +258,16 @@ def find_candidates(
     cutoff = datetime.now(timezone.utc) - timedelta(days=older_than_days)
     epsilon = timedelta(days=7)
 
+    # Protect the N most recently pushed top-level images unconditionally.
+    protected_by_count: set[str] = set()
+    if keep_last > 0:
+        sortable = [img for img in images if img.is_index or img.tags]
+        sortable.sort(
+            key=lambda x: x.pushed_at or datetime.min.replace(tzinfo=timezone.utc),
+            reverse=True,
+        )
+        protected_by_count = {img.digest for img in sortable[:keep_last]}
+
     indices = [img for img in images if img.is_index]
     poisoned = _detect_poisoned_timestamps(indices)
     if poisoned:
@@ -265,7 +279,21 @@ def find_candidates(
 
     candidates: list[Image] = []
     kept: list[Image] = []
+
+    def _classify(img: Image) -> None:
+        recently = (
+            (img.last_pull is not None and img.last_pull >= cutoff)
+            or (img.pushed_at is not None and img.pushed_at >= cutoff)
+        )
+        if recently:
+            kept.append(img)
+        else:
+            candidates.append(img)
+
     for img in images:
+        if img.digest in protected_by_count:
+            kept.append(img)
+            continue
         if img.is_index:
             if img.digest in poisoned:
                 deploy_once = (
@@ -282,20 +310,10 @@ def find_candidates(
                 else:
                     kept.append(img)
             else:
-                recently_pulled = img.last_pull is not None and img.last_pull >= cutoff
-                recently_pushed = img.pushed_at is not None and img.pushed_at >= cutoff
-                if recently_pulled or recently_pushed:
-                    kept.append(img)
-                else:
-                    candidates.append(img)
+                _classify(img)
         elif img.tags:
             # Standalone tagged single-arch: last_pull is a reliable signal.
-            recently_pulled = img.last_pull is not None and img.last_pull >= cutoff
-            recently_pushed = img.pushed_at is not None and img.pushed_at >= cutoff
-            if recently_pulled or recently_pushed:
-                kept.append(img)
-            else:
-                candidates.append(img)
+            _classify(img)
         # Untagged non-index (likely a platform child manifest): skip.
         # These are included in deletion as children of candidate indices.
 
@@ -316,13 +334,14 @@ def resolve_candidate_children(
     indices to avoid affecting their lastRecordedPullTime in this run.
     all_images provides the metadata (size, tags, timestamps) for child lookup.
 
-    Resolve all candidate indices in a single, batched call (chunked at 100)
+    Resolve all candidate indices in a single batched call (chunked at 100)
     rather than one call per index. batch_get_image poisons lastRecordedPullTime
     on every index it touches, but batching stamps them all at the same instant,
     which produces a tighter timestamp cluster (more detectable by
-    _detect_poisoned_timestamps on the next run, not less). Candidate timestamps
-    do not affect the current run's survival decisions, since candidates are
-    already committed to deletion before this function is called.
+    _detect_poisoned_timestamps on the next run, not less).
+    Candidate timestamps do not affect the current run's survival decisions,
+    since candidates are already committed to deletion before this function
+    is called.
     """
 
     by_digest = {img.digest: img for img in all_images}
@@ -615,7 +634,7 @@ def fetch_ecs_digests(ecr, ecs) -> dict[str, set[str]]:
             for p in ecs.get_paginator("list_services").paginate(cluster=cluster):
                 arns.extend(p["serviceArns"])
             cluster_task_defs: set[str] = set()
-            for i in range(0, len(arns), 10):  # describe_services max 10 per call
+            for i in range(0, len(arns), 10):  # describe_services, max 10 per call
                 for svc in ecs.describe_services(cluster=cluster, services=arns[i : i + 10])["services"]:
                     if svc.get("taskDefinition"):
                         cluster_task_defs.add(svc["taskDefinition"])
@@ -627,23 +646,24 @@ def fetch_ecs_digests(ecr, ecs) -> dict[str, set[str]]:
                 len(cluster_task_defs),
             )
 
-            # Pass 2: running state, all tasks ECS intends to run (desiredStatus=RUNNING
-            # includes PROVISIONING/ACTIVATING/RUNNING lastStatus; imageDigest is set once
-            # the container pulls its image, so we fall back to image URI for pending ones)
+            # Pass 2: running state.
+            # desiredStatus=RUNNING covers PROVISIONING/ACTIVATING/RUNNING;
+            # imageDigest is set after the container pulls the image, so we need
+            # to fall back to image URI for pending ones.
             running_arns: list[str] = []
             for p in ecs.get_paginator("list_tasks").paginate(
                 cluster=cluster,
                 desiredStatus="RUNNING",
             ):
                 running_arns.extend(p["taskArns"])
-            for i in range(0, len(running_arns), 100):  # describe_tasks max 100 per call
+            for i in range(0, len(running_arns), 100):  # describe_tasks, max 100 per call
                 for task in ecs.describe_tasks(cluster=cluster, tasks=running_arns[i : i + 100])["tasks"]:
                     task_id = task.get("taskArn", "?").split("/")[-1]
                     for container in task.get("containers", []):
                         img = container.get("image", "")
                         img_digest = container.get("imageDigest", "")
                         # Only append imageDigest when img is a tag-only reference;
-                        # if img already carries @sha256:..., it's already pinned.
+                        # @sha256:... URIs are already pinned by the digest.
                         uri = (
                             f"{img}@{img_digest}"
                             if img and img_digest and "@" not in img
@@ -829,10 +849,10 @@ def fetch_eks_digests(ecr, eks_client, region: str, session) -> dict[str, set[st
     return in_use
 
 
-def exclude_ecs_used(candidates: list[Image], in_use: set[str]) -> tuple[list[Image], list[Image]]:
+def exclude_in_use(candidates: list[Image], in_use: set[str]) -> tuple[list[Image], list[Image]]:
 
     """
-    Split candidates into (to_act_on, excluded_by_ecs).
+    Split candidates into (to_act_on, excluded).
 
     Excludes an image if its digest or any child digest appears in in_use.
     """
@@ -871,7 +891,7 @@ def exclude_manual(
     if not exclude_tags and not exclude_digests:
         return candidates, []
 
-    # Normalise digest refs: strip sha256: prefix so both "sha256:abc12" and "abc12" work.
+    # Normalise digest-based references by striping sha256: so both "sha256:abc12" and "abc12" match.
     norm_refs = [r.removeprefix("sha256:") for r in exclude_digests]
 
     active, excluded = [], []
@@ -976,6 +996,7 @@ def action_plan_as_dict(
     older_than_days: int,
     dry_run: bool,
     action: str,
+    keep_last: int = 1,
 ) -> dict:
     repositories = []
     grand_candidates = 0
@@ -1001,6 +1022,7 @@ def action_plan_as_dict(
         "action": action,
         "dry_run": dry_run,
         "older_than_days": older_than_days,
+        "keep_last": keep_last,
         "repositories": repositories,
         "summary": {
             "repository_count": len(per_repo),
@@ -1109,6 +1131,7 @@ def _render_repo_action(
     excluded: list[Image],
     kept: list[Image],
     show_kept: bool,
+    keep_last: int = 1,
 ) -> None:
     VERBS = {
         "delete": ("DELETE", "Would delete", "Deleting"),
@@ -1131,7 +1154,10 @@ def _render_repo_action(
         retained = len(unique_children) - n_children
         child_note = f" + {n_children} child(ren)" if n_children else ""
         retained_note = f" — {retained} shared child(ren) retained" if retained else ""
-        print(f"[{label}] {verb} {len(candidates)} image(s){child_note} = {len(digests)} digest(s), {_size(total_size)}{retained_note}\n")
+        print(
+            f"[{label}] {verb} {len(candidates)} image(s){child_note}"
+            f" = {len(digests)} digest(s), {_size(total_size)}{retained_note}\n"
+        )
         t = _make_table()
         for img in candidates:
             tags = ", ".join(img.tags) or "[untagged]"
@@ -1183,9 +1209,13 @@ def _render_repo_action(
 
     if kept:
         kept_size = sum(img.size_bytes for img in kept)
+        reasons = [f"pulled within {older_than_days} days"]
+        if keep_last:
+            reasons.append(f"top {keep_last} by push date")
+        reason_str = " or ".join(reasons)
         print(
             f"\n[KEPT] {len(kept)} image(s), {_size(kept_size)}"
-            f"  (pulled within {older_than_days} days — not candidates)\n"
+            f"  ({reason_str} — not candidates)\n"
         )
         if show_kept:
             t = _make_table()
@@ -1209,6 +1239,7 @@ def render_action(
     dry_run: bool,
     action: str,
     show_kept: bool = False,
+    keep_last: int = 1,
 ) -> None:
     grand_candidates = 0
     grand_digests = 0
@@ -1225,6 +1256,7 @@ def render_action(
             excluded,
             kept,
             show_kept,
+            keep_last,
         )
         grand_candidates += len(candidates)
         grand_digests += len(digests)
@@ -1232,9 +1264,10 @@ def render_action(
         grand_kept += len(kept)
     if len(per_repo) > 1:
         verb = f"Would {action}" if dry_run else f"{action.capitalize()}d"
-        kept_note = f", {grand_kept} kept by age gate" if grand_kept else ""
+        kept_note = f", {grand_kept} kept" if grand_kept else ""
         print(
-            f"=== Summary: {len(per_repo)} repos, {verb} {grand_candidates} image(s) = {grand_digests} digest(s), {_size(grand_size)}{kept_note} ===\n"
+            f"=== Summary: {len(per_repo)} repos, {verb} {grand_candidates} image(s)"
+            f" = {grand_digests} digest(s), {_size(grand_size)}{kept_note} ===\n"
         )
 
 
@@ -1314,6 +1347,13 @@ def main() -> None:
         help="limit the action to images older than X days (default: 30)",
     )
     parser.add_argument(
+        "--keep-last",
+        type=int,
+        default=1,
+        metavar="N",
+        help="always keep the N most recently pushed images per repository, regardless of age (default: 1)",
+    )
+    parser.add_argument(
         "--execute",
         action="store_true",
         help="take actual action on the candidates",
@@ -1384,7 +1424,7 @@ def main() -> None:
     parser.add_argument(
         "--show-kept",
         action="store_true",
-        help="show recently-pulled images kept by the age gate (only meaningful with --delete or --archive)",
+        help="show images kept by the age gate or --keep-last (only meaningful with --delete or --archive)",
     )
     args = parser.parse_args()
 
@@ -1517,7 +1557,7 @@ def main() -> None:
     if action:
         ordered_action: list[RepoAction] = []
         for repo, images in ordered_listing:
-            candidates, kept = find_candidates(images, args.older_than)
+            candidates, kept = find_candidates(images, args.older_than, keep_last=args.keep_last)
             candidates, excluded_manual = exclude_manual(
                 candidates, args.exclude_tag, args.exclude_digest
             )
@@ -1525,10 +1565,7 @@ def main() -> None:
 
             # First consumer exclusion: by digest alone, before child resolution.
             # Catches indices or images whose own digest is directly in use.
-            if in_use:
-                candidates, excluded_in_use_1 = exclude_ecs_used(candidates, in_use)
-            else:
-                excluded_in_use_1 = []
+            candidates, excluded_in_use_1 = exclude_in_use(candidates, in_use)
 
             # Resolve children only for the remaining candidate indices.
             # batch_get_image is called here, but only on candidates not yet excluded.
@@ -1548,10 +1585,7 @@ def main() -> None:
 
             # Second consumer exclusion: now that children are resolved, catch indices
             # whose child digest is in use (e.g. a specific platform manifest pulled by EKS).
-            if in_use:
-                candidates, excluded_in_use_2 = exclude_ecs_used(candidates, in_use)
-            else:
-                excluded_in_use_2 = []
+            candidates, excluded_in_use_2 = exclude_in_use(candidates, in_use)
 
             excluded = excluded_manual + excluded_in_use_1 + excluded_in_use_2
             digests = deletion_digests(candidates, images)
@@ -1565,10 +1599,11 @@ def main() -> None:
                 dry_run,
                 action,
                 show_kept=args.show_kept,
+                keep_last=args.keep_last,
             )
         else:
             emit(
-                action_plan_as_dict(ordered_action, args.older_than, dry_run, action),
+                action_plan_as_dict(ordered_action, args.older_than, dry_run, action, keep_last=args.keep_last),
                 args.output,
             )
 
@@ -1581,7 +1616,7 @@ def main() -> None:
             if args.check_eks_flag:
                 consumer_checks.append("eks")
             plan = action_plan_as_dict(
-                ordered_action, args.older_than, dry_run=True, action=action
+                ordered_action, args.older_than, dry_run=True, action=action, keep_last=args.keep_last
             )
             plan["consumer_checks"] = consumer_checks
             plan["created_at"] = datetime.now(timezone.utc).isoformat()
