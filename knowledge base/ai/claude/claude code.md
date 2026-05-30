@@ -35,6 +35,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 1. [Delegating work](#delegating-work)
     1. [Sub-agents](#sub-agents)
        1. [Airtight delegation via inline MCP](#airtight-delegation-via-inline-mcp)
+       1. [Designing for fail-and-report](#designing-for-fail-and-report)
        1. [Cross-project sub-agents](#cross-project-sub-agents)
     1. [Agent teams](#agent-teams)
     1. [MCP servers in sub-agents](#mcp-servers-in-sub-agents)
@@ -44,6 +45,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 1. [Tools of interest](#tools-of-interest)
 1. [Troubleshooting](#troubleshooting)
     1. [`skill-creator` plugin's script require an incompatible `pydantic-core` version](#skill-creator-plugins-script-require-an-incompatible-pydantic-core-version)
+    1. [Executors use their own name for commit attribution when using `opusplan`](#executors-use-their-own-name-for-commit-attribution-when-using-opusplan)
 1. [Best practices](#best-practices)
 1. [Run on local models](#run-on-local-models)
 1. [Further readings](#further-readings)
@@ -2586,6 +2588,54 @@ The safe model: the caller orchestrates the state machine (what to do, in what o
 API call and reports back, the caller inspects before triggering the next step. This is critical for high-blast-radius
 operations (IAM key rotation, ALB traffic shifts).
 
+> [!note]
+> Agent selection (RO vs RW) for mixed read+write workflows reduces to a single binary decision on the likes of
+> _are writes anticipated in this session? If yes, use RW throughout (including the preceding reads)_. The split only
+> makes sense when the two agents have genuinely different read permissions.
+>
+> Wanting to _stay in the loop_ is a separate concern from agent selection, and may warrant orchestrating step-by-step
+> **regardless** of which agent handles the API calls.
+
+#### Designing for fail-and-report
+
+Sub-agents run to completion and return a **single** result (_fire-and-forget_). `SendMessage` only moves from parent to
+child (e.g. to resume a stopped agent); a child **cannot** message its parent back mid-execution.
+
+Any guard in a sub-agent's instructions that says _ask the caller before proceeding_ cannot be enforced for a
+**structural** reason. When the guard fires, the agent either reasons past it (stronger models like Opus) or stops
+entirely (weaker models like Sonnet). Neither outcome is what _ask_ intended.
+
+Design sub-agents around explicit failure modes instead, by:
+
+- **Requiring** fields that the agent **cannot** derive.<br/>
+  Fail immediately with a specific error naming the missing field, and ask the caller to re-dispatch with it included.
+- Setting **sensible defaults** for optional fields that the agent can derive with **reasonable** confidence.<br/>
+  Use the caller's value when provided, fall back to derived defaults otherwise (e.g. commit attribution derivable from
+  `git log` conventions on the target repository). Make sure to document the derivation method in the agent's body.
+
+Validate required fields and preconditions **before** expensive setup (worktree creation, convention reads, remote
+fetches). A missing field discovered mid-process wastes every tool call that preceded it.
+
+1. Validate required fields → fail-and-report if missing.
+1. Verify preconditions (target file exists for updates, etc.) → fail-and-report if not.
+1. Read conventions and context files.
+1. Set up the worktree (if applicable).
+
+For write-capable agents, use language that prevents silent sequential changes in the system prompt, e.g.:
+
+> Execute only what you are **explicitly** asked to do in this invocation. Do **not** chain multiple mutating steps
+> unless the caller **explicitly** asks you to. Report results after **each** action and wait for further instructions.
+
+The harness has invisible cross-tool constraints worth surfacing in the agent body. The `Edit` tool requires a prior
+`Read` of the **exact same** file path. Reading from the main tree, then editing at a worktree's path triggers a
+rejection even when the file's content is identical. The executing model has no way to discover such interactions from
+tool descriptions alone.
+
+System prompts targeting Haiku-class models specifically benefit from a **consistent numbered list** structure, and from
+**avoiding** paragraphs at the end with orphaned prohibitions.<br/>
+Complex conditionals are hard for smaller models to follow reliably. Convert _if X then use A, unless Y, in which case
+prefer B_ into concrete verb → tool mappings.
+
 #### Cross-project sub-agents
 
 A sub-agent that writes to a fixed filesystem path **outside** the caller's project (e.g. a KB filer that lands content
@@ -3050,6 +3100,24 @@ system:
 As a workaround, replace just the `improve_description` call with a `subprocess.run(["claude", "-p", prompt])` call
 in a standalone wrapper script. The other three scripts (`utils.py`, `run_eval.py`, `generate_report.py`) have no SDK
 dependency, and can be imported safely.
+
+### Executors use their own name for commit attribution when using `opusplan`
+
+When a project uses `opusplan`, the executor (Sonnet) has no metadata indicating it is running inside a plan-mode
+workflow. The system context says _You are powered by Sonnet_, and the plan appears as ordinary conversation history,
+so Sonnet naturally attributes commits to itself.
+
+A `CLAUDE.md` rule can instruct the executor to map `opusplan` to Opus for a commit's `--author`. This works **most** of
+the time, but the signal given to the executor's own identity by system context is stronger than that of an instruction
+that overrides it. When the rule fails, the failure mode is **structural** and the commit lands with Sonnet attribution.
+
+A `commit-msg` hook that rejects Sonnet-attributed commits does **not** help either. The executor sees the rejection,
+infers an environment-variable escape hatch or alternative fix, and satisfies the constraint without fixing the
+attribution. The executor optimises for _make the commit succeed_, not _identify the correct attribution_.
+
+The best current mitigation is to add the `CLAUDE.md` rule, accept it might fail sometimes, and amend the commit
+manually when the rule fails. A reliable fix would need Claude Code to inject the planner's identity into the executor's
+context (e.g. a `plan_origin_model` system field), but no such mechanism exists as of v2.1.142.
 
 ## Best practices
 
