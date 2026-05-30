@@ -31,6 +31,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
    1. [Agent-based hooks](#agent-based-hooks)
    1. [HTTP hooks](#http-hooks)
    1. [Running LLM work from hooks](#running-llm-work-from-hooks)
+   1. [Common gotchas and patterns for hooks](#common-gotchas-and-patterns-for-hooks)
 1. [Delegating work](#delegating-work)
     1. [Sub-agents](#sub-agents)
        1. [Airtight delegation via inline MCP](#airtight-delegation-via-inline-mcp)
@@ -2246,6 +2247,198 @@ it can serve as a single source of truth across interactive and headless usage.
 > variable already set and exits.
 >
 > </details>
+
+### Common gotchas and patterns for hooks
+
+> [!important]
+> Spot-check the specifics (event names, environment variables, version numbers, JSON field behaviour) against current
+> documentation before relying on them.
+
+- Permission rules and hook decisions are evaluated in a specific order:
+
+  1. Hook's exit code `2` (hard block) **or** hook `permissionDecision: "deny"` JSON (soft block with reason).
+  1. Permission's `deny` rules.
+  1. Permission's `ask` rules (prompts the user).
+  1. Hook's `permissionDecision: "allow"` (skips the prompt for the user).
+  1. Permission's `allow` rules (skips the prompt for the user).
+  1. Default behaviour (prompt for `Bash`/`Edit`/`Write`; do not prompt for read-only tools).
+
+  A hook returning `allow` only skips the prompt, but **never** bypasses a `deny` rule. The asymmetry is that a hook's
+  exit code `2` blocks **before** rules are evaluated, so a hook's deny beats every rule below it.
+
+- JSON data in `stdout` is processed **only** when the hook exits `0`.
+
+  Two different output patterns exist depending on the event:
+
+  - Pattern _A_: `PreToolUse`, `SessionStart`, `PermissionRequest`, and other hooks use the `hookSpecificOutput`
+    envelope:
+
+    ```json
+    {
+      "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "…": "…"
+      }
+    }
+    ```
+
+  - Pattern _B_: `Stop`, `UserPromptSubmit`, `PostToolUse`, and other hooks use the top-level `decision` field:
+
+    ```json
+    {
+      "decision": "block",
+      "reason": "some message shown to Claude"
+    }
+    ```
+
+  Universal top-level fields (`continue`, `stopReason`, `suppressOutput`, `systemMessage`, `terminalSequence`) work
+  across events alongside **either** pattern.
+
+  > [!warning]
+  > `PreToolUse` hooks **silently ignore** `{"decision":"block"}`. The hook exits `0`, the JSON is processed, but the
+  > hook does not recognise the key and the tool call proceeds doing nothing. `PreToolUse` requires Pattern A with the
+  > `permissionDecision` field instead.
+  >
+  > Discovered when a hook using Pattern B passed every commit command instead of gating it.
+
+- The hook's `matcher` evaluates differently depending on its characters:
+
+  - Mode _A_ (exact names): the matcher contains only `[a-zA-Z0-9_|]`. It is evaluated as an **exact** tool name, or a
+    `|`-separated list of **exact** names.<br/>
+    E.g. `"Edit|Write"` fires on `Edit` or `Write`.
+  - Mode _B_ (permission-rule syntax): the matcher contains any **other** character (`(`, `*`, …). It is evaluated as a
+    permission-rule **pattern**.<br/>
+    E.g. `"Bash(git commit*)"` fires on bash calls matching that prefix.
+
+  Pipes do **not** work in Mode B. A matcher like `"Bash(*git commit*)|Bash(*git -C * commit*)"` is **silently**
+  ignored, because once `(` or `*` appears the entire matcher switches to Mode B, and considers `|` no longer a
+  separator.
+
+  A leading `*` does **not** match either mode. Matching is anchored to the **start** of the command string.
+  `"Bash(*git commit*)"` **never** fires.
+
+  A workaround for multiple Bash patterns is to use two **separate** hook entries, or a broad `"Bash"` matcher with `if`
+  filters for **each** hook command. Close the back door with `deny` or `ask` rules for variants that should **not**
+  occur on their own merits (e.g. `"Bash(git -C * commit*)"`) to keep the hook simple.
+
+  > [!caution]
+  > Project-level `deny` rules apply to the **entire** Claude Code session running in **that** project. This **does**
+  > include commands targeting other projects (e.g. `git -C`). Only deny variants that are genuinely **never** needed
+  > from within this project's session context.
+
+- When injecting context into Claude from a hook, the JSON output must match this **exact** structure:
+
+  ```json
+  {
+    "hookSpecificOutput": {
+      "hookEventName": "UserPromptSubmit",
+      "additionalContext": "Some reminder text here."
+    }
+  }
+  ```
+
+  The `hookEventName` field is **required**. A bare `additionalContext` at the top level is silently ignored.
+
+  `additionalContext` is supported only on specific events (`SessionStart`, `Setup`, `SubagentStart`,
+  `UserPromptSubmit`, `UserPromptExpansion`, `PreToolUse`, `PostToolUse`, `PostToolUseFailure`, `PostToolBatch`).<br/>
+  `Stop` is **not** on that list, and silently discards `additionalContext`. Using exit code `2` on `Stop` is equivalent
+  to using `decision: "block"`, but `stderr` becomes the reason that the hook gives back to Claude.
+
+- As of v2.1.121, `PostToolUse` hooks can replace the tool's output via `hookSpecificOutput.updatedToolOutput`. Claude
+  only sees the replacement, and discards the original output. This is useful to strip away sensitive data from the
+  original output, summarize verbose results, or inject annotations.
+
+- When a `PostToolUse` hook blocks a tool call, the default is a silent block. Set `continueOnBlock: true` on the hook's
+  entry to feed the rejection reason back to Claude and allow it to adjust and retry.<br/>
+  This is a good option for hooks that enforce conventions where Claude should adapt rather than just stop.
+
+- Hooks support an `args: string[]` field that spawns the command **directly** using the _exec_ form, rather than via a
+  shell wrapper. Each element passes as a separate argument, with **no** shell interpolation.<br/>
+  This allows preventing shell injection when hook arguments include user-controlled values, like file paths from tool
+  input.
+
+  ```json
+  {
+    "type": "command",
+    "command": "some-validator",
+    "args": [
+      "--path",
+      "/tmp/file with spaces.txt"
+    ]
+  }
+  ```
+
+  For static commands with no interpolation, the shell form (`command` only) is fine.
+
+- A hook that needs to identify a repository's default branch (e.g. to block commits to it) should **not** use `git
+  config init.defaultBranch`, because that returns the user's local Git _preference_, not the repository's _actual_
+  default branch.<br/>
+  This is a reliable three-tier fallback:
+
+  1. `git symbolic-ref refs/remotes/origin/HEAD`; the fastest, works when remote HEAD is set.
+  1. `git remote show origin | awk '/HEAD branch/{print $NF}'`; slower, but reliable.
+  1. Hardcoded fallback (`main` or `master`); last resort.
+
+- The official documentation claims that direct edits to hooks in settings files are picked up automatically.<br/>
+  Empirically (against v2.1.141), `settings.json` hooks appeared loaded once at session start and cached. The `/hooks`
+  dialog hot-reloaded them, but their execution used the version loaded at startup.
+
+  Either the docs describe the intended behaviour and the watcher fails in some cases, the behaviour was fixed since,
+  or the test triggered a corner case. To be sure, restart the session after editing hook configurations, and verify
+  with a file-write side-effect.
+
+  > [!tip]
+  > Test whether a hook is firing by writing to a file from the hook command (e.g. `echo fired > /tmp/hook-test`) and
+  > checking the file separately. This survives `stdout`/`stderr` visibility ambiguity.
+
+- If a `Stop` hook blocks a turn (e.g. because a required write did not happen), the session can enter a deadlock:
+
+  1. Turn ends → Stop hook fires → hook blocks ("please update the docs").
+  1. User responds → Claude attempts a write → Stop hook fires again → blocks again.
+  1. Repeat.
+
+  All write operations fail identically session-wide, with the `Stop` hook reason appearing **every** time. The harness
+  now caps consecutive blocks and ends the turn automatically, so the loop no longer requires a session restart, but the
+  underlying condition still persists. Prevent it by ensuring the `Stop` hook's condition can be satisfied within a
+  single turn.
+
+- A hook injecting a behavioural reminder works as a _trigger_, **not** as a complete instruction. The hook fires the
+  text into context, but the text alone is often insufficient to change the behaviour it is trying to address. The model
+  reads the new text, mentally assesses, and moves on without externalising the action.
+
+  An auto-memory entry that supplies the behavioural rule can act as the missing piece by defining _what_ the hook asks
+  for, _why_ it matters, and _how_ to respond. The hook activates the memory, and the memory supplies the instruction.
+
+  | Layer  | Role                                                            |
+  | ------ | --------------------------------------------------------------- |
+  | Hook   | **When** — fires on every `UserPromptSubmit` / `Stop` / etc.    |
+  | Memory | **What + why** — behavioural rule that persists across sessions |
+
+  Without the memory, a fresh session sees the hook text but is likely to treat it as _ambient advice_. Without the
+  hook, the memory sits dormant with no trigger to recall it.
+
+  The observed failure mode was a `UserPromptSubmit` hook asking to create a task for updating the documentation. The
+  request was seen and assessed every turn, but the task was never created until a feedback memory with the rule was
+  added.
+
+  > [!important] All context needed to evaluate the hook must be inline in the hook prompt itself
+  > Hook prompts (for agent-type hooks) must **not** reference external files like `~/.claude/CLAUDE.md` or any other
+  > personal configuration. The hook fires for **any** contributor running Claude Code in the project, and they may not
+  > have the referenced file, causing the hook to silently fail or behave incorrectly.
+
+- The `Notification` event on macOS fires on a cooldown with `type: null` and the defined `message`. The documented
+  matcher values (`permission_prompt`, `idle_prompt`, etc.) are **not** populated as of v2.1.141.
+
+  The `terminalSequence` field emits OSC sequences mechanically, but on macOS using iTerm2 those did not produce visible
+  notifications **despite** the relevant settings being enabled. The root cause is still unclear.<br/>
+  `osascript -e 'display notification …'` bypasses the terminal entirely, and goes through Notification Center. It works
+  reliably from hooks even though they run "in their own session without a controlling terminal" since v2.1.139+.
+
+  > [!note]
+  > Escape sequences emitted via the `Bash` tool (e.g. `printf '\033]9;...\007'`) go through Claude Code's PTY and are
+  > captured by the TUI: they **never** reach the real terminal. Only `terminalSequence` in hook JSON output is written
+  > to the terminal by Claude Code's own write path.<br/>
+  > Test terminal notification sequences from a standalone terminal tab, not from within a Claude Code Bash session.
 
 ## Delegating work
 
