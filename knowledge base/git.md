@@ -1189,6 +1189,9 @@ export GPG_TTY=$(tty)
    git lfs migrate import --include='*.pdf' --include-ref='refs/heads/main'
    ```
 
+   The `--include-ref` flag above scopes the rewrite to just `main`'s history. Add feature branches too with
+   `--include-ref=refs/heads/feature-x`, or use `--everything` to rewrite all references at once.
+
 1. List what's now tracked by LFS (sanity check, should include the older files).
 
    ```sh
@@ -1207,6 +1210,10 @@ export GPG_TTY=$(tty)
    ```sh
    git push --force-with-lease 'origin' 'main'
    ```
+
+If anything goes sideways during the migration, one can still access the original history in the reflog (`git reflog`
+will show `main` before the rewrite) for ~30 days. Recover it with `git update-ref 'refs/heads/main' '<old-sha>'` if
+needed.
 
 After the push:
 
