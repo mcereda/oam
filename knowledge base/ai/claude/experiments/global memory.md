@@ -40,6 +40,12 @@ the user-level `CLAUDE.md` file.
 
    The feature does **not** load automatically without this import.
 
+   > [!note]
+   > Relative paths in `@<path>` imports resolve relative **to the file that contains the import**.<br/>
+   > Imported files can recursively import additional files themselves, up to **4 hops**, and imports inside markdown
+   > code blocks are ignored.<br/>
+   > Use `/memory` to see exactly which files are loaded via the import chain.
+
 1. Add a one-liner routing rule near the import in `CLAUDE.md` to inform Claude about what belongs where:
 
    > Global memory is for cross-project behavioral preferences and identity. Project memory is for project-specific

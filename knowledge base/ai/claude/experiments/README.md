@@ -111,6 +111,23 @@ footers belong in tier-local documentation, where the reference is **guaranteed*
 Different tiers have different scopes and different needs (a set of short markdown files does not require RAG tools),
 so each should have their own specialized mechanics.
 
+Memory-system documents must be referenced as `@`-includes, not be put under `.claude/rules/`.<br/>
+The memory system is a domain with its own conventions, files, and operational logic (`CONVENTIONS.md`, reveries
+guidelines). There are **mechanical** concerns that prevent moving these conventions to `rules/`:
+
+- `MEMORY.md` must be autonomously writable by Claude, and changes every session. This is incompatible with `rules/`'s
+  ownership model, which requires humans to curate it. Moving its conventions to `rules/` would separate the convention
+  from its subject.
+- `@`-includes are **explicit**, and reading `CLAUDE.md` shows exactly what loads and in what order. `rules/`'s loading
+  is **implicit** (loads everything in the folder as it finds them), not guaranteeing the order and requiring `ls` to
+  audit them.
+- `@`-includes place conventions right _next_ to the routing table that references them. `rules/` files load as flat
+  peers, with no guaranteed ordering relative to `CLAUDE.md` content.
+
+`rules/` is more adequate for domain-scoped instructions that define working with external systems (e.g. AWS, specific
+codebases). `@`-includes are meant for always-on operational content that is part of `CLAUDE.md`'s own contract, which
+includes the memory system's governance.
+
 Each tier should also adapt review schedules to its natural cadence, not align to a shared schedule:
 
 | Tier / shape        | Review trigger                                                                                            |

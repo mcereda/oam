@@ -7,6 +7,8 @@ notebook_ for durable, reusable knowledge.
 1. [Setup](#setup)
 1. [Findings](#findings)
 1. [Improvements](#improvements)
+1. [Adapt the concept to shared KBs](#adapt-the-concept-to-shared-kbs)
+   1. [Adapted setup](#adapted-setup)
 
 This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and iteratively improves upon it.
 
@@ -103,6 +105,14 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
 
   Prefer a page-level `confidence` frontmatter field (`high`, `medium`, `low`) for the page as a whole, and use inline
   markers only for isolated claims within an otherwise-confident page. E.g.,:
+
+  - `[verified YYYY-MM-DD]`: the claim was independently checked on that date. Optionally followed by `against <source>`
+    when the source is not implicit from the page's `verified-against` frontmatter.
+
+    Use this marker _inline_ for specific claims that **leave** their original verification context.
+
+    Bare `[verified]` tags without a date implicitly mark every unmarked claim as _unverified_. This is a worse failure
+    mode than the gap the bare tag was meant to close.
 
   - `[unverified]`: the claim could be checked against primary sources, but wasn't at the time of recording; aim to
     verify.
@@ -230,6 +240,24 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   > passed by the caller. The fix was changing the agent definition's model from `inherit` (which defaulted to Sonnet in
   > many sessions) to **explicitly** require Opus.
 
+- Filing agents strongly benefit from worktree isolation (e.g., [git worktrees]), especially when one works with many
+  parallel sessions that could make changes concurrently.
+
+  Some agents failed mid-operation, leaving a dirty state behind (partial writes, lint failures, interrupted commits).
+  That blocked, polluted, or otherwise complicated the main session's commits, other concurrent agents, and pre-commit
+  hooks.<br/>
+  When not directly blocking, the failure would stay silent until the next `git status` or commit attempt, which
+  required manual cleanup.
+
+  Worktree isolation contains the blast radius to the operation of a single agent. A failure only leaves a stale branch
+  that can be recovered or deleted, not a corrupted working tree that blocks everything else, and a success can update
+  the main branch via `--ff-only` merges.<br/>
+  Claude Code supports this natively via `isolation: "worktree"` on the `Agent` tool.
+
+  The `--ff-only` merge does update the main working tree's files. If that update happens when a direct session in the
+  KB has uncommitted changes in overlapping files (e.g. `index.md`), the merge can conflict.<br/>
+  Most writes should go through agents, which makes this rare, but it is the residual risk of this approach.
+
 - The auto-memory system can act as a **memory inbox** for the KB when sandbox restrictions prevent direct writes to it.
   When working in other projects, Claude can capture insights as memory notes, and promote them into proper wiki pages
   during sessions in the KB's repository by:
@@ -331,6 +359,32 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   > Use `--no-session-persistence` instead of `--bare` to skip session recording without switching authentication mode.
   > The `--bare` flag skips OAuth and **requires** `ANTHROPIC_API_KEY`, bypassing the plan's Agent SDK credit.
 
+- A new hook **per concern** might fire on every turn (including turns that produced nothing), inducing _hook fatigue_
+  and turning reminders into noise.<br/>
+  A mandatory _what did you learn?_ reflection step pushes the model to make **performative saves** (where something
+  gets written just because the rule said so, and not because something interesting genuinely surfaced).
+
+  Refinements work better than adding more hooks:
+
+  - **Extend** existing checkpoints instead of creating a new one.
+
+    Consider having a scope-containment pause (_stop and report after each task_). It already creates the right moment
+    for an insight check; adding _did friction, surprise, or a workaround surface?_ to that pause adds new behaviour
+    at an existing decision point, not a new decision point.
+
+  - Use **specific triggers** instead of vague prompts.
+
+    Prompts like _Anything to note?_ and _what did you learn?_ invite reflexive dismissal, or straight up performance.
+    _Did friction, surprise, or a workaround surface?_ is specific enough to check against actual experience.
+
+  **Delegation** can be used as a complement. The model failed so save recognised insights because the save action
+  itself feels like a context switch (open files, write frontmatter, update index, lint, commit) and a separate
+  bottleneck to it.<br/>
+  A background filing agent that handles the mechanics simplifies and reduces that perceived cost from a _multi-step
+  detour_ to _compose one payload and delegate_. The save action becomes part of the task report, and not a separate
+  action to execute after it.<br/>
+  See [Cross-project sub-agents][claude code / cross-project sub-agents] for the mechanism.
+
 ## Improvements
 
 - Claude should be _consistently_ reminded to:
@@ -425,6 +479,17 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   Pre-commit hooks (e.g. using [lefthook]) running a lint script can catch schema violations (missing frontmatter,
   broken links, orphaned pages) before they accumulate.
 
+- Any agent writing to the KB should use **worktree isolation** (e.g., [git worktrees]) by default.
+
+  Multiple sessions or agents writing to the same repository concurrently share the working tree. Writers failing
+  mid-operation can block every other, and everybody accessing the files (other agents, direct sessions, and pre-commit
+  hooks) all see the corrupted state. Switching branches impacts them all the same way.<br/>
+  Worktree isolation makes each write atomic and self-contained. An agent's work is invisible to the main tree until a
+  **successful** merge, and a failure just leaves a disposable branch and does **not** corrupt the shared state.<br/>
+
+  This applies equally to any repository where multiple contributors (human or agent) push concurrently. The merge-back
+  (`--ff-only`) can fail if the main branch has moved, but a failed merge is explicit and recoverable.
+
 - Avoid running full checks at `SessionStart` as the KB grows. They are expensive and scale badly over an increasing
   number of pages.<br/>
   Use a _dirty flag_ file instead. Make something create it whenever it detects the need (a hook, a script, a previous
@@ -444,6 +509,105 @@ checks) rather than bundling everything into one. Different concerns have differ
 independent scripts can be enabled or disabled without touching each other. Lefthook's `parallel: true` runs them
 concurrently, so the cost of splitting is negligible.
 
+## Adapt the concept to shared KBs
+
+Most of the design above can be used for shared knowledge bases (e.g., company runbooks and wikis, team docs, ADRs) to
+allow agents tp contribute to from different sessions. The mechanics are the same (use a local git repository, delegate
+to filing agents using worktree isolation, broadly use pre-commit to check the work), but the trust model changes.
+
+The following carries over as-is:
+
+- The KB should be **versioned** (e.g., a git repository).
+- Edits should be delegated to **filing agents** that respect the KB's conventions.
+
+  The caller composes the content and the agent only handles the plumbing. This is even more important in a shared wiki,
+  where the caller has the domain context and the agent should **not** be making editorial judgments on behalf of the
+  team.
+
+- Worktree isolation should be the **default**, not just a _precaution_.
+
+  Isolation allows safe concurrent writes, extremely likely in a shared wiki when multiple team members dispatch agents
+  from different sessions.
+
+- A minimum quality bar should be applied by **mechanical** check (e.g., pre-commit) **before** the changes reach the
+  main branch.
+
+  Checks are mechanical and apply identically, which can be used to enforce conventions (e.g., schema compliance,
+  structure) and prevent broken links.
+
+- Dirty-flags should trigger reviews.
+
+  The pattern is the same, but the scope is different (team review cadence vs personal review cadence).
+
+The following changes:
+
+- The agents must be gated, not completely autonomous.
+
+  A private KB grants the agent full authority on the content, including committing and pushing.<br/>
+  A shared wiki requires explicit review before those changes land. The agent should edit files, then stop. Committing
+  and pushing should require the user's **explicit** permission.
+
+  The filing agent's behavior is shaped by the instructions it receives from the caller, not by its own judgment. This
+  makes it a `CLAUDE.md` concern, not a tooling one.
+
+- The KB's contents and the filing agents must be intelligible and usable by all the consumers.
+
+  Tools, workarounds, and defaults that depend on the contributor's environment (token proxies, local aliases, specific
+  clone paths) are **not** the team's defaults. The filing agent should present environment-specific content as callouts
+  or alternatives, not as the primary procedure.<br/>
+  A test is _would this read correctly on a colleague's machine?_.
+
+- The contributor's identity matters, and it must be the human supervisor's.
+
+  Use `--author` and `Co-Authored-By` trailers to preserve the chain of authorship.<br/>
+  In a personal KB, commit attribution is a _convenience_. In a shared wiki, the team needs to know _who contributed
+  what_, and _why_. Commit messages should identify **the human** who initiated the change, not just the agent that
+  filed it.
+
+- Conventions must be enforced externally.
+
+  The filing agent needs access to whatever documents the team's conventions, should respect them, and should push back
+  on content that violates them instead of filing silently.<br/>
+  A personal KB's conventions are defined in its own `CLAUDE.md` and enforced by its own lint. A shared wiki's
+  conventions may live in a separate style guide, a contributing doc, or team norms that aren't codified in a rules
+  file.
+
+- The writing style must accommodate the intended readers.
+
+  The filing agent should be instructed to produce content in the team's documentation style, not in the dense format
+  that works for an LLM-to-LLM knowledge base.<br/>
+  An LLM-owned KB is written for a future LLM session, so it can be terse, assume deep technical context, and skip
+  background that the model can infer. A shared wiki is written for humans with varying knowledge depth, so the writing
+  style must shifts from dense to explanatory.
+
+  Content should explain context and reasoning, not just state conclusions. A more discursive, flowing style should read
+  better than compressed bullet points. Also avoid assuming the reader has the same background and knowledge as the
+  contributor.
+
+- Each contribution should be **minimal** and **self-contained**.
+
+  A personal KB benefits from the agent cross-referencing, updating the index, and adding "See also" links in a single
+  swoop. In shared wikis, touching files beyond the immediate contribution (e.g. reformatting a sibling page, updating
+  a table of contents) risks stepping on someone else's in-progress work.
+
+### Adapted setup
+
+The personal KB's contributor can work as the filing agent for a shared wiki, and one can just create a variant of it.
+The differences reduce to configuration:
+
+| Concern            | Personal KB                               | Shared wiki                                             |
+| ------------------ | ----------------------------------------- | ------------------------------------------------------- |
+| Commit authority   | The agent commits and pushes autonomously | The agent edits, the user commits after a review        |
+| `defaultMode`      | `auto`                                    | `plan` or `default` (permission prompts are **wanted**) |
+| Content review     | None (the owner trusts the agent)         | The user reviews diffs **before** committing            |
+| Convention source  | KB's own `CLAUDE.md`                      | Wiki's contributing guide or team style doc             |
+| Worktree isolation | Recommended                               | Required                                                |
+| Attribution        | Optional (single owner)                   | Required (team needs audit trail)                       |
+
+A single agent definition can serve both roles by parameterizing the caller's prompt. In this case, the caller specifies
+whether to commit, which conventions to read, and what attribution to use. The agent's mechanics (read conventions,
+write files, run lint) can stay identical.
+
 <!--
   Reference
   ═╬═Time══
@@ -452,11 +616,12 @@ concurrently, so the cost of splitting is negligible.
 <!-- In-article sections -->
 
 <!-- Knowledge base -->
-[Giving Claude global memory]: global%20memory.md
 [Claude Code / billing]: ../claude%20code.md#billing
 [Claude Code / cross-project sub-agents]: ../claude%20code.md#cross-project-sub-agents
 [Claude Code / sub-agents]: ../claude%20code.md#sub-agents
 [Claude Code / using hooks]: ../claude%20code.md#using-hooks
+[Git worktrees]: ../../../git.md#worktrees
+[Giving Claude global memory]: global%20memory.md
 [Lefthook]: ../../../lefthook.md
 [Ollama]: ../../ollama.md
 

@@ -13,6 +13,8 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 1. [Memory](#memory)
    1. [Auto memory](#auto-memory)
    1. [Auto-dream](#auto-dream)
+   1. [Loading semantics](#loading-semantics)
+   1. [Custom memory tiers via @-import](#custom-memory-tiers-via--import)
 1. [Using tools](#using-tools)
    1. [Managing MCP servers](#managing-mcp-servers)
       1. [MCP servers of interest](#mcp-servers-of-interest)
@@ -806,6 +808,39 @@ Key commands:
 | Command   | Summary                                  |
 | --------- | ---------------------------------------- |
 | `/memory` | View, edit, or toggle auto memory on/off |
+
+### Loading semantics
+
+`CLAUDE.md` files (project, user-level, and subdirectory variants) resolve **only at session start** by walking up the
+directory tree from the directory Claude Code has been started into. This resolution is **not** re-evaluated when the
+working directory changes mid-session.<br/>
+Neither `git -C <some-other-project>` nor `cd <some-other-project>` causes the other project's `.claude/CLAUDE.md` or
+`CLAUDE.md` files to appear in the current context. Sub-agents inherit the **parent**'s initial working directory, so
+they miss the other project's files too.
+
+Preload instruction files from additional directories at launch with the `--add-dir` CLI flag, or persist them across
+sessions via `permissions.additionalDirectories` in `settings.json` (user-level for cross-project access).<br/>
+Both require `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` to actually load the files. Without the environment
+variables, `additionalDirectories` only grants file access but does not trigger their loading.<br/>
+Skills from `.claude/skills/` in the additional directories load **regardless** of the environment variables.
+
+> [!tip]
+> When doing substantial work in another project mid-session, **explicitly** `Read` its instructions file to load it
+> into the current session.
+
+### Custom memory tiers via @-import
+
+The `@<path>` syntax in `CLAUDE.md` expands absolute paths **recursively** (up to 4 hops max per Anthropic's official
+documentation as of mid 2026). A line like `@~/.claude/memory/MEMORY.md` in `~/.claude/CLAUDE.md` loads an arbitrary
+user-level memory file into every session under the same 200-line/25 KB cap that applies to per-project auto-memory.
+This is the cheapest extension surface for custom memory tiers.
+
+See [Giving Claude a global memory][giving claude a global memory] for a testing global-memory implementation, and
+[Giving Claude its own knowledge base][giving claude its own knowledge base] for an alternative that uses a KB loaded
+on-demand.<br/>
+Their general principle is to route insights by their _shape_ (correction, fact, pattern, atmosphere), instead of by
+topic. Each shape has its own loading semantics, curation cost, decay rate, and privacy needs that the topology should
+respect. Refer to [Personal experiments / Memory tiers][personal experiments / memory tiers] for the full taxonomy.
 
 ## Using tools
 
@@ -2956,12 +2991,14 @@ Claude Code version: `v2.1.41`.
 [Claude]: README.md
 [Gemini CLI]: ../gemini/cli.md
 [Git worktrees]: ../../git.md#worktrees
-[Giving Claude a reverie-like system]: personal%20experiments.md#giving-claude-a-reverie-like-system
-[Giving Claude its own knowledge base]: personal%20experiments.md#giving-claude-its-own-knowledge-base
+[Giving Claude a global memory]: experiments/global%20memory.md
+[Giving Claude a reverie-like system]: experiments/reveries.md
+[Giving Claude its own knowledge base]: experiments/own%20knowledge%20base.md
 [LMs / Improving interactions]: ../lms.md#improving-interactions
 [MCP]: ../mcp.md
 [Ollama]: ../ollama.md
 [OpenCode]: ../opencode.md
+[Personal experiments / Memory tiers]: experiments/README.md#memory-tiers
 [Pi]: ../pi.md
 [tmux]: ../../tmux.md
 

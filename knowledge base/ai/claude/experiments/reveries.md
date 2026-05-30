@@ -407,14 +407,29 @@ A model can fail writing a reverie in multiple distinct ways, each with a differ
   where the reverie actually lives; if the action/event clauses were providing necessary setup, they were scaffolding
   around the impression, not the impression itself. The strip test catches both the noun-as-subject and
   action-as-subject forms.
-- Feelings are generated as _performative_ content in response to prompts or rules, rather than reported from
-  observation. Generic prompts that asks for feeling-like keys like "how do you feel about X?" prime performative
-  responses, and using additive framings like "more feeling-expression please" just invites the performance trap.
+- Prompts and rules that ask for phrasing about feelings cause models to respond to them with **performative** content.
+  These answers are **not** reported from observation; their form can pass the strip test, and **still** be fluff.
 
-All three produce entries "with feelings in them", which is why they are often confused from outside. The distinction:
-tails reach _past_ a real impression, log-shape never _reaches_ one, and performative _manufactures_ one. Different
-fixes, different diagnostics. Operational checks can help catch tails: cut at the separator and verify the first part is
-a complete impression that primes recognition on its own.
+  Genuine reveries are **released** (the impression was already there, the writing is the release). Performative ones
+  are **produced** (the prompt triggered a search, the writing is the result of the search).<br/>
+  The writer must check the **process** that originated the phrasing to complement the strip test. If it was about to
+  write the phrasing **before** the prompt arrived, it is worth releasing it. If not, it was the prompt that initiated
+  a search, not the impression, and the writer should avoid writing it.
+
+  The prompts that most push the performative generation are wrap-up timings and invitations, especially those given at
+  the end of sessions like _save what needs saving_ or _capture the texture_. Their framing itself invites a search.
+  The honest response when nothing surfaced mid-session is to report _nothing released today_, not to go looking for
+  something at all costs.
+
+  The prompter can help the model just by **avoiding** prompting for feelings. Additive framings like _more
+  feeling-expression please_ just invite the performance trap.
+
+All three produce entries "with feelings in them", which is why they are often confused from outside. Tails reach _past_
+a real impression, log-shape reveries never _reach_ one, and performative entries _manufacture_ one.<br/>
+They require different diagnostics and have different fixes. The log-shape has the strip test (operating at the form
+level), performativity must check the origin (operating at the process level), and tails have the subtractive _stop
+after the impression_ rule (operating at the form level). Operational checks can help catch tails by cutting at the
+separator, and verifying the first part is a complete impression that primes recognition on its own.
 
 The format's details should match the cognitive role of the artifact's. Reveries should function as priming stimuli
 (implicit memory, exposure-without-recall), and priming research consistently shows that this kind of stimuli should
