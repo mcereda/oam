@@ -30,6 +30,7 @@
     1. [Change author information for multiple commits](#change-author-information-for-multiple-commits)
     1. [Git does not accept self-signed certificates](#git-does-not-accept-self-signed-certificates)
     1. [GPG cannot sign a commit](#gpg-cannot-sign-a-commit)
+    1. [Migrate files to use LFS](#migrate-files-to-use-lfs)
     1. [Rebasing a branch after a squash-merge](#rebasing-a-branch-after-a-squash-merge)
     1. [Remove a file from a commit](#remove-a-file-from-a-commit)
     1. [Remove a file from the repository](#remove-a-file-from-the-repository)
@@ -1179,6 +1180,45 @@ If `gnupg2` and `gpg-agent` 2.x are used, be sure to set the environment variabl
 ```sh
 export GPG_TTY=$(tty)
 ```
+
+### Migrate files to use LFS
+
+1. Rewrite the history by converting all the occurrences in main's history to LFS pointers.
+
+   ```sh
+   git lfs migrate import --include='*.pdf' --include-ref='refs/heads/main'
+   ```
+
+1. List what's now tracked by LFS (sanity check, should include the older files).
+
+   ```sh
+   git lfs ls-files | head
+   ```
+
+1. Verify the working tree matches the rewritten history.
+
+   ```sh
+   git status
+   ```
+
+1. Push the rewritten history.<br/>
+   This step is **irreversible**.
+
+   ```sh
+   git push --force-with-lease 'origin' 'main'
+   ```
+
+After the push:
+
+- Clones on other hosts will be out of sync. Execute these on each:
+
+  ```sh
+  git fetch
+  git reset --hard 'origin/main'.
+  ```
+
+- The old, pre-LFS blobs are still in the repository's local `.git/objects/`, taking up space, until `git gc` cleans
+  them up. Force it with `git gc --prune=now --aggressive` if wanting the disk space back immediately.
 
 ### Rebasing a branch after a squash-merge
 
