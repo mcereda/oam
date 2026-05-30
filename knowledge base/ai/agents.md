@@ -153,7 +153,8 @@ wikis), or other storage means like databases and vector stores.<br/>
 The concept has been explored in projects like [MemGPT] (self-editing tiered memory) and crystallized in write-ups like
 [karpathy/llm-wiki.md], but the pattern itself emerged from practitioners who were already putting agents in charge of
 their own project docs, memory files, and tool configurations.<br/>
-See [Giving Claude its own knowledge base] for an example.
+See [Giving Claude its own knowledge base] for an example, including how the same pattern adapts to shared team wikis
+where agents contribute alongside humans.
 
 Filesystem-based approaches are currently winning as an _interface_ because models already know how to list directories,
 grep for patterns, read ranges, and write artifacts.<br/>
@@ -232,6 +233,33 @@ memory material. Same topic, different shapes.
 
 Projects like [MemGPT] formalized tiered memory early. Harness-specific implementations vary, but the underlying pattern
 is harness-agnostic. See [Claude Code's memory tiers][claude code / memory] for one approach.
+
+The distinction between tiers maps well onto cognitive theory concepts. Comparing the tiers to those helps explain why
+a single mechanism cannot serve all roles:
+
+- Clark and Chalmers' thesis of [The Extended Mind] proposes that external resources _can_ count as constitutive parts
+  of cognition, not just inputs to it.<br/>
+  Their criteria (constant access, directly available, automatically endorsed, written by past instances) describe
+  knowledge bases and auto-loaded memory files quite literally. A KB satisfies the role of _Otto's notebook_ from their
+  thought experiment, and an auto-loaded memory file scores even higher on those criteria because it is always-on.<br/>
+  Both systems are _explicit_ retrieval surfaces.
+- [Understanding implicit memory] describes how changes in behavior can be produced by prior experience **without** them
+  being recollected consciously.<br/>
+  _Ambient_ context files (loaded at the start of the session, but never explicitly consulted) operate this way. Their
+  influence is priming, not recall, which is why "evoke, don't contain" rules apply to them but not to KB pages.
+
+The tiers use the same external substrate (markdown files), but have different cognitive roles.<br/>
+The KB needs _clarity_, because its job is the retrieval of information; ambient files need _imprecision_ because their
+job is priming the model reading them.<br/>
+Explicit retrieval and priming compete with each other. Explicit content in a priming file dilutes the priming effect,
+while priming-shaped content in a retrieval file fails to answer a query.
+
+A weaker version of this distinction shows up in Großmann et al.'s 2025 [The Power of Stories]. Short atmospheric
+narratives (~262 tokens) primed LLM agents to cooperate in a public-goods game more than what explicit cooperation
+directives did.<br/>
+This shows that the framing of **how** matters at least as much as the **what**. _Coherent_ atmospheric context
+outperforms instructions even for the same goal. This is direct empirical grounding for keeping different tiers separate
+_by register_, and not just by topic.
 
 #### Reverie-like system experiment
 
@@ -562,6 +590,8 @@ assist you by, for example, exiting the session and resuming it.
 - [Harness engineering for coding agent users]
 - [How to Build an Agent]
 - [The Emperor Has No Clothes: How to Code Claude Code in 200 Lines of Code]
+- Tulving and Schacter's [Understanding implicit memory], 1990
+- Clark & Chalmers' theory of [The Extended Mind], 1998
 
 <!--
   Reference
@@ -580,8 +610,8 @@ assist you by, for example, exiting the session and resuming it.
 [Claude Code]: claude/claude%20code.md
 [CONTRIBUTING.md]: ../contributingmd.md
 [Gemini CLI]: gemini/cli.md
-[Giving Claude a reverie-like system]: claude/personal%20experiments.md#giving-claude-a-reverie-like-system
-[Giving Claude its own knowledge base]: claude/personal%20experiments.md#giving-claude-its-own-knowledge-base
+[Giving Claude a reverie-like system]: claude/experiments/reveries.md
+[Giving Claude its own knowledge base]: claude/experiments/own%20knowledge%20base.md
 [LMs / Concerns]: lms.md#concerns
 [LMs / Context window]: lms.md#context-window
 [LMs / LLMs]: lms.md#large-language-models
@@ -590,6 +620,10 @@ assist you by, for example, exiting the session and resuming it.
 [MCP]: mcp.md
 [OpenCode]: opencode.md
 [Pi]: pi.md
+
+<!-- Files -->
+[The Extended Mind]: study%20material/the%20extended%20mind%20%20clark,%20chalmers%20%201998.pdf
+[Understanding implicit memory]: study%20material/understanding%20implicit%20memory%20%20daniel%20schacter%20%201992.pdf
 
 <!-- Others -->
 [39C3 - Agentic ProbLLMs: Exploiting AI Computer-Use and Coding Agents]: https://www.youtube.com/watch?v=8pbz5y7_WkM
@@ -628,6 +662,7 @@ assist you by, for example, exiting the session and resuming it.
 [The Claude Skills I Actually Use for DevOps]: https://www.pulumi.com/blog/top-8-claude-skills-devops-2026/
 [The Complete Guide to AI Agent Memory Files (CLAUDE.md, AGENTS.md, and Beyond)]: https://medium.com/data-science-collective/the-complete-guide-to-ai-agent-memory-files-claude-md-agents-md-and-beyond-49ea0df5c5a9
 [The Emperor Has No Clothes: How to Code Claude Code in 200 Lines of Code]: https://www.mihaileric.com/The-Emperor-Has-No-Clothes/
+[The Power of Stories]: https://arxiv.org/abs/2505.03961
 [Thoughts on slowing the fuck down]: https://mariozechner.at/posts/2026-03-25-thoughts-on-slowing-the-fuck-down/
 [Token Anxiety]: https://writing.nikunjk.com/p/token-anxiety
 [TotalRecall]: https://github.com/xaitax/TotalRecall

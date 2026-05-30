@@ -4,6 +4,7 @@
    1. [Deciding where memory goes](#deciding-where-memory-goes)
    1. [Alternatives considered](#alternatives-considered)
       1. [Unified tier with shape tags](#unified-tier-with-shape-tags)
+      1. [Offload writing to a dedicated `memory-contributor` subagent](#offload-writing-to-a-dedicated-memory-contributor-subagent)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -170,6 +171,38 @@ Separate tiers still win for the following reasons:
 
 This alternative is workable, not obviously wrong. If at some future point the cost of maintaining separate tiers
 exceeds the cost of one unified tier with shape-tags, this is the design to revisit.
+
+#### Offload writing to a dedicated `memory-contributor` subagent
+
+> [!note]
+> Rejected for now.
+
+One would think a `memory-contributor` subagent could be dispatched from any session to file entries into
+`~/.claude/memory/` or `~/.claude/projects/<project>/memory/`, the same way the `kb-contributor` agent handles writes to
+the KB cross-project.
+
+The advantages are the same as the KB contributor:
+
+- The caller composes the content, the agent handles the plumbing (write topic file, append index entry, eventual lint).
+- Cross-project writes feel symmetric with the KB flow.
+
+The economics of the agent, though, do **not** work out:
+
+- Filing a memory entry takes _two_ steps (write the topic file, append one line to the index), while its KB equivalent
+  involves seven or more (write page, update `index.md`, check tags in `_tags.md`, add bidirectional cross-references,
+  run lint, commit with the right attribution, push).<br/>
+  Nearly all the work in memory filing is _deciding what to save and how to phrase it_, which the caller does regardless
+  of whether a subagent exists. The mechanical overhead is just too low to justify the agent.
+- The memory format is still evolving (new frontmatter fields, linking conventions, routing rules). Adding a tool
+  requires codifying the current format, and forces an update with every evolution. With raw writes, the caller
+  adapts immediately.
+- The KB lives in its own git repository accessed from any project, which introduces the need for directory flags
+  (`git -C`), absolute paths, and sandbox considerations a subagent can handle uniformly. Memory directories need to be
+  **always** writable from **any** session, and are subject only to sandbox `allowWrite` rules. The mechanical
+  complexity that justified `kb-contributor` simply does not exist.
+
+Revisit this only if memory filing accumulates real mechanical complexity (lint checks, duplicate detection,
+cross-memory linking, format validation).
 
 ## Further readings
 

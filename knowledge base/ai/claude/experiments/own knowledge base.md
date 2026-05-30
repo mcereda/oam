@@ -359,6 +359,34 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   > Use `--no-session-persistence` instead of `--bare` to skip session recording without switching authentication mode.
   > The `--bare` flag skips OAuth and **requires** `ANTHROPIC_API_KEY`, bypassing the plan's Agent SDK credit.
 
+- A `SessionEnd` hook that spawns `claude -p` will cause that child process to fire its **own** `SessionEnd` event when
+  it exits, which re-triggers the original hook for the child session, which spawns yet another `claude -p` invocation,
+  recursing indefinitely.
+
+  A reliable workaround is to set an environment variable as a semaphore **before** spawning the child, and make the
+  hook check for it at the very top.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example</summary>
+
+  ```python
+  # At the top of the hook script:
+  if os.environ.get("CLAUDE_EXTRACTION_ACTIVE"):
+      return
+
+  # When spawning the background extractor:
+  env = os.environ.copy()
+  env["CLAUDE_EXTRACTION_ACTIVE"] = "1"
+  subprocess.Popen([...], env=env, start_new_session=True)
+  ```
+
+  </details>
+
+  The environment variable does propagate to the child process. When the child's `SessionEnd` fires, the hook sees the
+  variable already set, and exits before doing any work.<br/>
+  This is the only mechanism that survives `start_new_session`. Pid-files or flags written to disk race with the child's
+  startup and miss the very-fast-failure case.
+
 - A new hook **per concern** might fire on every turn (including turns that produced nothing), inducing _hook fatigue_
   and turning reminders into noise.<br/>
   A mandatory _what did you learn?_ reflection step pushes the model to make **performative saves** (where something

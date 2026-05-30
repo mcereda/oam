@@ -31,6 +31,26 @@ the user-level `CLAUDE.md` file.
 1. \[if running Claude Code with the sandbox enabled] Add the tier's directory to `sandbox.filesystem.allowWrite` in the
    **user**-level `settings.json` file. Use an **absolute** path, as `~` does **not** expand in that list.
 
+1. Add permission rules for cross-project access to the **user**-level `settings.json`<br/>
+
+   ```json
+   {
+     "permissions": {
+       "allow": [
+         "Read(~/.claude/memory/**)",
+         "Edit(~/.claude/memory/**)",
+         "Write(~/.claude/memory/**)"
+       ]
+     }
+   }
+   ```
+
+   Without these, Claude Code will prompt the user for every memory write from any project other than the one matching
+   `$HOME`. The tilde expands for `Read`, `Edit`, and `Write` rules in gitignore fashion.<br/>
+   `Bash` rules require literal paths instead; if Claude is meant to manipulate the directory via `git` or other shell
+   tools (e.g., to commit the memory tier if it lives in its own repository), add absolute-path patterns like
+   `Bash(git -C /Users/<user>/.claude/memory *)` in addition to the above.
+
 1. Add the `@`-import to the **user**-level `CLAUDE.md` file to force Claude Code to load the index at the start of
    every session:
 
@@ -118,3 +138,13 @@ systems' governance.
   silent drift.
 - Prefer surfacing candidate promotions to the user over auto-writing across projects (see _Findings_ on cross-project
   drift).
+
+<!--
+  Reference
+  ═╬═Time══
+  -->
+
+<!-- In-article sections -->
+<!-- Knowledge base -->
+<!-- Upstream -->
+<!-- Others -->

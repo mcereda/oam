@@ -439,24 +439,24 @@ realigned the format with the mechanism.
 
 Cognitive research helps explaining why each tier works the way it does:
 
-| Tier              | Research analog                                                            | Mode                                   |
-| ----------------- | -------------------------------------------------------------------------- | -------------------------------------- |
-| **KB**            | Otto's notebook ([Clark & Chalmers 1998][Clark & Chalmers], extended mind) | Explicit retrieval                     |
-| **Auto-memory**   | Embedded extended memory (project-scoped)                                  | Auto-loaded index, on-demand retrieval |
-| **Global memory** | Embedded extended memory (user-scoped)                                     | Auto-loaded index, on-demand retrieval |
-| **Reveries**      | Priming stimuli ([Implicit memory])                                        | Exposure shapes processing             |
+| Tier              | Research analog                                   | Mode                                   |
+| ----------------- | ------------------------------------------------- | -------------------------------------- |
+| **KB**            | Otto's notebook ([The Extended Mind])             | Explicit retrieval                     |
+| **Auto-memory**   | Embedded extended memory (project-scoped)         | Auto-loaded index, on-demand retrieval |
+| **Global memory** | Embedded extended memory (user-scoped)            | Auto-loaded index, on-demand retrieval |
+| **Reveries**      | Priming stimuli ([Understanding implicit memory]) | Exposure shapes processing             |
 
-The **extended mind thesis** ([Clark & Chalmers 1998][Clark & Chalmers]) proposes that external objects _can_ be
-constitutive parts of cognitive processes, not only inputs to them. In the Otto-and-Inga thought experiment, Otto has
-Alzheimer's and uses a notebook to store beliefs; the notebook plays the same role of Inga's biological memory, and by
-the **parity principle** it counts as part of Otto's mind.<br/>
+[The Extended Mind]'s thesis proposes that external objects _can_ be constitutive parts of cognitive processes, not just
+inputs to them. In the Otto-and-Inga thought experiment, Otto has Alzheimer's and uses a notebook to store beliefs; the
+notebook plays the same role of Inga's biological memory, and by the **parity principle** it counts as part of Otto's
+mind.<br/>
 The KB satisfies this model (a reference notebook requiring explicit retrieval). Auto-memory goes a step further by
 scoring 4/4 on Clark and Chalmers' criteria for counting as memory: auto-injected, directly available, automatically
 endorsed, written by past instances. Global memory extends the same mechanism to user-wide scope, bridging cross-project
 preferences that auto-memory cannot carry due to its project-level boundary.
 
-**Implicit memory and priming** ([Schacter 1987][Implicit memory]; Tulving & Schacter 1990) describes changes in
-behavior produced by prior experience **without** conscious recollection.<br/>
+**Implicit memory and priming** (Tulving and Schacter's 1990 [Understanding implicit memory]) describes how changes in
+behavior can be produced by prior experience **without** conscious recollection.<br/>
 Reveries match this shape by loading at the start of a session but never being consciously consulted. Influence arrives
 as _priming_, not recall. "Evoke, don't contain" maps onto _perceptual_ priming (form and atmosphere) vs. _conceptual_
 priming (explicit meaning, which is what the KB does well).
@@ -474,10 +474,10 @@ should _function_ like priming stimuli). LLM-specific research provides direct e
 <details style='padding: 0 0 1rem 1rem'>
 
 In
-[Priming, Path-dependence, and Plasticity: Understanding the molding of user-LLM interaction and its implications from (many) chat logs in the wild],
-Zhu et al. 2026 analyzed 140K chatbot sessions from 7,955 users. Interaction patterns form and stabilize within 5
-sessions, to then lock in when repeating early pragmatic choices 5 to 50 times. Users develop 2 to 4 expression types
-even when not constrained to do so, and then just stop experimenting (_agency paradox_).<br/>
+[Priming, Path-dependence, and Plasticity], Zhu et al. 2026 analyzed 140K chatbot sessions from 7,955 users. Interaction
+patterns form and stabilize within 5 sessions, to then lock in when repeating early pragmatic choices 5 to 50 times.
+Users develop 2 to 4 expression types even when not constrained to do so, and then just stop experimenting
+(_agency paradox_).<br/>
 It is correct for reveries to load **before** anything else in a session, because they end up occupying the exact
 position in the context where their influence is the strongest. The agency paradox hints that a blank-slate session with
 no reveries might actually produce _less_ exploration than a primed one, because the model will use whatever register it
@@ -486,8 +486,8 @@ is no natural correction mechanism _within_ that session. Pruning them _is_ the 
 The study measures _user_ behavior, not model behavior. The mechanisms do have analogs in the fact that early tokens
 constrain later ones, but the transfer is not proven yet.
 
-In [The Power of Stories: Narrative Priming Shapes How LLM Agents Collaborate and Compete], Großmann et al. primed LLM
-agents using short stories about cooperation. They found that a small text payload can have a massive effect.<br/>
+In [The Power of Stories], Großmann et al. primed LLM agents using short stories about cooperation. They found that a
+small text payload can have a massive effect.<br/>
 The stories used in the research average ~262 tokens, which is comparable in size to a reveries file with ~10 entries.
 The interesting detail is the _kind_ of text that works, where _atmospheric_ narratives (stories about teamwork)
 outperformed _explicit_ directives ("maximize your reward"). Even _nonsense_ narratives scored above the baseline (no
@@ -656,11 +656,12 @@ _Calibration_ risks are harder to spot than other issues, because they look like
 
 ### Sources
 
-- [Clark & Chalmers]
-- [Implicit memory]
-- [Priming, Path-dependence, and Plasticity: Understanding the molding of user-LLM interaction and its implications from (many) chat logs in the wild]: 140K chatbot sessions, agency paradox.
-- [The Power of Stories: Narrative Priming Shapes How LLM Agents Collaborate and Compete]: narrative priming shifts LLM agent behavior (public goods game, shared-narrative constraint).
-- [Do Language Models Exhibit Human-like Structural Priming Effects?]: structural priming in LMs (inverse-frequency effect).
+- Clark & Chalmers' theory of [The Extended Mind], 1998.
+- Tulving and Schacter's [Understanding implicit memory], 1990.
+- [Priming, Path-dependence, and Plasticity]: 140K chatbot sessions, agency paradox.
+- [The Power of Stories]: narrative priming shifts LLM agent behavior (public goods game, shared-narrative constraint).
+- [Do Language Models Exhibit Human-like Structural Priming Effects?]: structural priming in LMs (inverse-frequency
+  effect).
 
 <!--
   Reference
@@ -675,11 +676,12 @@ _Calibration_ risks are harder to spot than other issues, because they look like
 [Claude Code / auto-dream]: ../claude%20code.md#auto-dream
 [Claude Code / using hooks]: ../claude%20code.md#using-hooks
 
-<!-- Upstream -->
+<!-- Files -->
+[The Extended Mind]: ../../study%20material/the%20extended%20mind%20%20clark,%20chalmers%20%201998.pdf
+[Understanding implicit memory]: ../../study%20material/understanding%20implicit%20memory%20%20daniel%20schacter%20%201992.pdf
 
+<!-- Upstream -->
 <!-- Others -->
-[Clark & Chalmers]: https://www.alice.id.tue.nl/references/clark-chalmers-1998.pdf
 [Do Language Models Exhibit Human-like Structural Priming Effects?]: https://arxiv.org/abs/2406.04847
-[Implicit memory]: https://en.wikipedia.org/wiki/Implicit_memory
-[Priming, Path-dependence, and Plasticity: Understanding the molding of user-LLM interaction and its implications from (many) chat logs in the wild]: https://arxiv.org/abs/2605.05767
-[The Power of Stories: Narrative Priming Shapes How LLM Agents Collaborate and Compete]: https://arxiv.org/abs/2505.03961
+[Priming, Path-dependence, and Plasticity]: https://arxiv.org/abs/2605.05767
+[The Power of Stories]: https://arxiv.org/abs/2505.03961

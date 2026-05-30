@@ -2250,6 +2250,31 @@ it can serve as a single source of truth across interactive and headless usage.
 >
 > </details>
 
+<details>
+  <summary>Example: session extraction backstop</summary>
+
+A `SessionEnd` hook that scans the closing transcript for insights that were discussed, but never saved to any
+persistent surface (memory, KB, project docs), is a natural fit for the **agent-definition** pattern.<br/>
+The full design lives in [Giving Claude its own knowledge base]. It exercises every property that makes the pattern
+preferable to embedded prompts or agent-type hooks:
+
+- Background execution via `Popen(…, start_new_session=True)`.<br/>
+  This allows the REPL to exit cleanly while the extractor keeps running detached.
+- Tunable prompt in the agent's Markdown body.<br/>
+  It went through several rewrites to converge on a conversation-flow framing ("did the assistant act on saving an
+  insight?"). Markdown edits beat Python-string edits for that kind of iteration.
+- Model pinning in the agent's frontmatter (Sonnet for the `claude -p` backend).
+- Local fallback that reads the **same** agent body as its system prompt.<br/>
+  This makes it a single source of truth across backends, and protects against billing changes for non-interactive
+  usage. The benchmark in the experiment found `gemma4:e4b` (10/10 detection rate, ~21s latency, ~9.6 GB) to be the best
+  small-host option among the candidates.
+
+Stage results to a triage folder (e.g. `~/.claude/session-extractions/`) for review at the start of the next session,
+instead of saving them autonomously. The false-positive rate is high, and committing directly could pollute the target
+tier (memory, KB, or wherever the insight belongs).
+
+</details>
+
 ### Common gotchas and patterns for hooks
 
 > [!important]
