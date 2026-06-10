@@ -26,6 +26,7 @@
 1. [Virtual registries](#virtual-registries)
 1. [API](#api)
 1. [Send logs to a central location](#send-logs-to-a-central-location)
+1. [Rotating tokens](#rotating-tokens)
 1. [Troubleshooting](#troubleshooting)
     1. [A user is unable to login](#a-user-is-unable-to-login)
     1. [DB migrations failed](#db-migrations-failed)
@@ -1200,12 +1201,95 @@ gitlab --order-by 'name' user list --get-all --per-page '100'
 ## Send logs to a central location
 
 > [!caution]
-> GitLab components do **not** use a uniform log format.
+> GitLab components do **not** use a uniform log format.<br/>
+> External loggers (e.g. [Fluent Bit]) will need to normalize that format **and** handle unparsed plaintext logs.
 >
 > <details style='padding 0 0 1rem 1rem'>
-> Ruby-side services (rails, sidekiq) produce JSON output with a `severity` field, Go-side services (gitaly, workhorse)
-> produce JSON with a `level` field, and several components (nginx, puma, postgresql, redis) produce plaintext. The Fluent Bit config will need to handle this heterogeneity -- normalizing the severity field name and deciding how to handle
-   unparsed plaintext logs.
+>
+> Ruby services (rails, sidekiq) produce JSON output with a `severity` field, Golang services (gitaly, workhorse)
+> produce JSON output with a `level` field, and several other components (nginx, puma, postgresql, redis) produce
+> plaintext output with no way to configure alternatives.
+>
+> </details>
+
+## Rotating tokens
+
+Refer to [Rotate a personal access token].
+
+One can rotate access tokens (at any level) using the API.
+
+Who makes the request needs to use credentials that grants them the `api` scope. The target token does not need any
+special scope in this setting.
+
+Tokens _can_ rotate themselves when given the `self_rotate` scope.<br/>
+That scope **only** grants the rotation permissions. The alternative is to give them the `api` scope, but doing that
+gives them far broader access than what the rotation action needs.
+
+API endpoints:
+
+```plaintext
+POST /personal_access_tokens/self/rotate
+POST /projects/:id/access_tokens/self/rotate
+POST /groups/:id/access_tokens/self/rotate
+```
+
+When hit:
+
+1. The rotation is _atomic_. The old token is revoked **immediately**, and a new one is returned **in the response**.
+
+   There is **no** grace period, and the new token **cannot** be recovered later. The old token dies the instant the new
+   one is created. If an automation fails to store the new token from the response, one is locked out.
+
+1. The new token expires in one week by default.<br/>
+   Unless one passes `expires_at` in the request's body to specify a date, that is the expiration date.
+
+   > [!important]
+   > The maximum lifetime of tokens on self-managed GitLab is hard capped at 365 days.
+
+1. GitLab tracks the token's family, with the full parent-child chain. When a revoked token is used to attempt a
+   rotation, **all** the active tokens in that family get revoked **automatically** and **immediately**.
+
+   This behaviour is due to the _reuse detection_ feature introduced in v16.3. Automations need to be especially wary of
+   it, since any retry (e.g., a network timeout lost the response after the rotation succeeded) can make GitLab revoke
+   the whole token's family.
+
+<details>
+  <summary>Examples</summary>
+
+```sh
+# Rotate a project access token (self-rotation).
+# The token authenticating the request is the one being rotated.
+curl -X 'POST' -H 'PRIVATE-TOKEN: glpat-…' \
+  'https://gitlab.example.org/api/v4/projects/42/access_tokens/self/rotate' \
+  -H 'Content-Type: application/json' \
+  -d '{"expires_at": "2027-05-01"}'
+
+# Rotate a personal access token (self-rotation).
+curl -X 'POST' -H 'PRIVATE-TOKEN: glpat-…' \
+  'https://gitlab.example.org/api/v4/personal_access_tokens/self/rotate' \
+  -H 'Content-Type: application/json' \
+  -d '{"expires_at": "2027-05-01"}'
+
+# Verify a token works.
+curl -fsSL -H 'PRIVATE-TOKEN: glpat-…' \
+  'https://gitlab.example.org/api/v4/personal_access_tokens/self'
+```
+
+</details>
+
+Projects requiring long-lived project access tokens can benefit from maintaining **two independent tokens** with
+staggered rotation schedules, instead of a single token.<br/>
+Using two tokens (e.g., `app-1`, `app-2`), each on its own rotation schedule offset by _half_ the tokens' lifespan
+(e.g., 2 weeks for a 1 month lifespan), allows preventing the lock out issue that happens with a single token:
+
+- A failure on one token leaves the other completely unaffected, because they appear as separate token families.
+- The surviving token grants some fallback time to manually recover the first token's rotation failure.
+- Both rotations would need to fail _consecutively_ before one is locked out completely.
+
+Both tokens should have `self_rotate` permissions, plus the minimum scopes required for their purpose (e.g.
+`read_repository`).<br/>
+Systems that do not allow using multiple credentials would use one token as the _active_ one, while the other would
+be the _standby_ that rotates itself to stay fresh.
 
 ## Troubleshooting
 
@@ -1384,6 +1468,7 @@ git clone "https://oauth2:${ACCESS_TOKEN}@somegitlab.com/vendor/package.git"
 
 <!-- Knowledge base -->
 [Buildah]: buildah.md
+[Fluent Bit]: fluent%20bit.md
 [GitLab Pipeline]: gitlab/pipeline.md
 [GitLab Runner]: gitlab/runner.md
 [glab]: gitlab/glab.md
@@ -1442,6 +1527,7 @@ git clone "https://oauth2:${ACCESS_TOKEN}@somegitlab.com/vendor/package.git"
 [Project access tokens]: https://docs.gitlab.com/user/project/settings/project_access_tokens/
 [reset a user's password]: https://docs.gitlab.com/security/reset_user_password/
 [restore gitlab]: https://docs.gitlab.com/ee/administration/backup_restore/restore_gitlab.html
+[Rotate a personal access token]: https://docs.gitlab.com/ee/api/personal_access_tokens.html#rotate-a-personal-access-token
 [runners on kubernetes]: https://docs.gitlab.com/runner/install/kubernetes.html
 [sign-up restrictions]: https://docs.gitlab.com/ee/administration/settings/sign_up_restrictions.html
 [support object storage bucket prefixes]: https://gitlab.com/gitlab-org/charts/gitlab/-/issues/3376
