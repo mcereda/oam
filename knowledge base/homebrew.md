@@ -62,7 +62,7 @@ brew search --cask 'gpg'
 brew install 'gettext'
 brew install --cask 'spotify'
 
-# Start managing manually-installed apps
+# Start managing manually-installed apps.
 brew install --cask --adopt 'textmate'
 
 # Get formulae's dependencies.
@@ -92,6 +92,11 @@ brew outdated --cask --greedy
 # Add taps.
 # Only one at a time.
 brew tap 'homebrew/services'
+
+# Trust specific formulae, casks or commands.
+brew trust --formula 'turbot/tap/powerpipe'
+brew trust --cask <user>/<tap>/<cask>
+brew trust --command <user>/<tap>/<command>
 
 # Manage services.
 # Requires the 'homebrew/services' tap.
