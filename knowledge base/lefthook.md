@@ -4,13 +4,13 @@ Git hooks manager.
 
 1. [TL;DR](#tldr)
 1. [Configuration](#configuration)
-   1. [Extend other files](#extend-other-files)
    1. [Use files from other repositories](#use-files-from-other-repositories)
+   1. [Ensure the execution order in tasks](#ensure-the-execution-order-in-tasks)
 1. [Gotchas](#gotchas)
    1. [Pre-commit hooks stash unstaged files](#pre-commit-hooks-stash-unstaged-files)
 1. [Monorepo patterns](#monorepo-patterns)
 1. [Further readings](#further-readings)
-1. [Sources](#sources)
+   1. [Sources](#sources)
 
 ## TL;DR
 
@@ -67,15 +67,16 @@ Uses the [Go glob library] for glob patterns.
 
 ## Configuration
 
-Configuration files can be written in JSON, TOML or YAML.<br/>
-Only one of them will be used, even if there are more than one in the repository. The chosen one will be the first one
-found during initialization, hence it is suggested to use a **single** configuration file in any of the above formats.
+Configuration files can be written in JSON, TOML or YAML format.<br/>
+Lefthook will **only** use the **first** configuration file it finds during initialization, even when there are more
+than one in the repository. Suggested to use a **single** configuration file in any of the above formats.
 
-The _main_ configuration file must exist and go by the name `lefthook.<formatExtension>` or `.lefthook.<formatExtension>`.
+The _main_ configuration file **must** exist **and** go by the name `lefthook.<formatExtension>` or
+`.lefthook.<formatExtension>`.
 
-An _extra_ configuration file named `lefthook-local` is merged with the main file if found upon initialization. All
-supported formats can be applied to this `-local` file.<br/>
-If the main configuration file starts with the leading dot, the `-local` file must also start with the leading dot.
+An _extra_ configuration file named `lefthook-local.<formatExtension>` is then merged on the main file if it is found
+during initialization.<br/>
+If the main configuration file starts with the leading dot, the `-local` file must **also** start with the leading dot.
 
 ```sh
 $ ls -A1 *lefthook*
@@ -84,8 +85,6 @@ $ ls -A1 *lefthook*
 ```
 
 [Configuration file example]
-
-Configuration files can extend other files recursively.
 
 > [!tip]
 > Lefthook supports YAML anchors, which one can use to avoid duplication in command definitions.
@@ -110,14 +109,25 @@ Configuration files can extend other files recursively.
 >
 > </details>
 
-### Extend other files
+Configuration files can _extend_ other files **recursively** by merging their content.<br/>
+Lefthook handles `extends` for `lefthook.yml`, `lefthook-local.yml`, and `remotes` separately.
 
 ```yaml
 extends:
-  - .lefthook/commitlint.yml
+  - /path/to/commitlint.yml
   - .lefthook/docker.yml
-  - .lefthook/json.yml
+  - ../json.yml
 ```
+
+Settings are applied in the following order:
+
+1. `lefthook.yml`, the main configuration file.
+1. Configurations specified in the `extends` option.
+1. Configurations specified in the [`remotes` option][use files from other repositories].
+1. The `lefthook-local.yml` configuration file.
+
+`extends` overrides settings from `lefthook.yml`, `remotes` override `extends`, and `lefthook-local.yml` overrides
+everything.
 
 ### Use files from other repositories
 
@@ -132,6 +142,18 @@ The configuration from remotes will be merged to the local config using the foll
 
 ```yaml
 # lefthook.yml
+
+remotes:
+  - git_url: https://gitlab.com/mine/oam
+    ref: main
+    configs:
+      - quality-assurance/lefthook/commitlint.yml
+      - quality-assurance/lefthook/docker.yml
+  - git_url: git@gitlab.com:mine/oam.git
+    ref: development
+    configs:
+      - quality-assurance/lefthook/json.yml
+
 lint:
   parallel: true
   commands:
@@ -140,13 +162,6 @@ lint:
       run: >-
         docker run --rm -v "$PWD:/code" 'registry.gitlab.com/pipeline-components/yamllint:latest'
         yamllint {all_files}
-remotes:
-  - git_url: https://gitlab.com/mine/oam.git
-    ref: main
-    configs:
-      - quality-assurance/lefthook/commitlint.yml
-      - quality-assurance/lefthook/docker.yml
-      - quality-assurance/lefthook/json.yml
 ```
 
 ```yaml
@@ -175,7 +190,13 @@ lint:
 > [!important]
 > Lefthook fetches `remotes` when running `lefthook install`, not when executing a hook. Updates to the local cache of
 > `remotes` files do **not** propagate automatically<br/>
-> Projects **must** run `lefthook install` every time they want to pick up upstream changes.
+> Projects **must** run `lefthook install` every time they want to pull changes from upstream.
+
+### Ensure the execution order in tasks
+
+Use command-specific `priority:`. Also use `piped:` when commands in the same hook need to be sequential.
+
+TODO: examples
 
 ## Gotchas
 
@@ -288,13 +309,11 @@ This solution offers zero maintenance, but lefthook only reports a single **aggr
 
 ## Further readings
 
-- [Github]
+- [Codebase]
 - [Configuration]
 - [Pre-commit]
 
-## Sources
-
-All the references in the [further readings] section, plus the following:
+### Sources
 
 - [Lefthook: knock your team's code back into shape]
 - [5 cool (and surprising) ways to configure Lefthook for automation joy]
@@ -305,7 +324,7 @@ All the references in the [further readings] section, plus the following:
   -->
 
 <!-- In-article sections -->
-[further readings]: #further-readings
+[Use files from other repositories]: #use-files-from-other-repositories
 
 <!-- Knowledge base -->
 [pre-commit]: pre-commit.md
@@ -315,8 +334,8 @@ All the references in the [further readings] section, plus the following:
 
 <!-- Upstream -->
 [5 cool (and surprising) ways to configure Lefthook for automation joy]: https://evilmartians.com/chronicles/5-cool-and-surprising-ways-to-configure-lefthook-for-automation-joy
-[configuration]: https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
-[github]: https://github.com/evilmartians/lefthook
+[Codebase]: https://github.com/evilmartians/lefthook
+[Configuration]: https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
 [lefthook: knock your team's code back into shape]: https://evilmartians.com/chronicles/lefthook-knock-your-teams-code-back-into-shape
 
 <!-- Others -->

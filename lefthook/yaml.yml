@@ -3,14 +3,19 @@
 # No official docker images are available for 'yq' at the time of writing, falling back to the local command.
 
 
+templates:
+  yq_bin: .venv/bin/yq
+  venv_dir: .venv
+
+
 bootstrap:
   commands:
     yamllint:
       run: docker pull 'registry.gitlab.com/pipeline-components/yamllint:latest'
     yq:
       run: >-
-        python3 -m 'venv' '.venv'
-        && .venv/bin/pip install --require-virtualenv 'yq'
+        test -d '{venv_dir}' || python3 -m 'venv' '{venv_dir}'
+        && {venv_dir}/bin/pip install --require-virtualenv 'yq'
 
 lint:
   commands:
@@ -26,7 +31,7 @@ validate:
       glob: '*.{yaml,yml}'
       run: >-
         echo '{all_files}'
-        | xargs -t .venv/bin/yq '.'
+        | xargs -t {yq_bin} '.'
 
 
 pre-commit:
@@ -34,7 +39,7 @@ pre-commit:
     validate-yaml:
       <<: *yq
       run: >-
-        .venv/bin/yq '.' {staged_files} > /dev/null
+        {yq_bin} '.' {staged_files} > /dev/null
         && echo 'All YAML files are readable'
     lint-yaml:
       <<: *yamllint

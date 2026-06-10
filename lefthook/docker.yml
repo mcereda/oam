@@ -1,22 +1,29 @@
 ---
 # Hadolint's official docker image is based on 'scratch', and takes only one input file at a time.
-# I have no clue how to fix that at the time of writing so let's just use the local command.
+# I have no clue how to fix that at the time of writing so let's just use a command local to the project.
+
+
+templates:
+  hadolint_bin: .venv/bin/hadolint
+  venv_dir: .venv
 
 
 bootstrap:
   commands:
     hadolint:
-      run: brew install 'hadolint'
+      run: >-
+        test -d '{venv_dir}' || python3 -m 'venv' '{venv_dir}'
+        && {venv_dir}/bin/pip install --require-virtualenv 'hadolint-py'
 
 lint:
   commands:
     docker: &hadolint
       glob: "*[Dd]ockerfile*"
-      run: hadolint {all_files}
+      run: '{hadolint_bin} {all_files}'
 
 
 pre-commit:
   commands:
     lint-docker:
       <<: *hadolint
-      run: hadolint {staged_files}
+      run: '{hadolint_bin} {staged_files}'
