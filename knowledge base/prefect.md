@@ -10,6 +10,7 @@ complexity.<br/>
 Handles automatic state tracking, failure handling, real-time monitoring, and more.
 
 1. [TL;DR](#tldr)
+1. [Secrets and credentials](#secrets-and-credentials)
 1. [Limiting concurrent jobs on a work pool](#limiting-concurrent-jobs-on-a-work-pool)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -87,6 +88,61 @@ prefect cloud workspace set --workspace "some/workspace"
 </details>
 -->
 
+## Secrets and credentials
+
+Refer to [How to store secrets].
+
+Blocks referenced in deployment pull steps are resolved by the workers/agents at **runtime**. They fetch them fresh
+**each and every time** a flow runs.
+
+Blocks can refer to secrets in AWS Secrets Manager.<br/>
+The [`prefect-aws`][prefect-aws] integration provides an `AwsSecret` block type, which makes agents read from Secrets
+Manager using the [boto3 credential chain] and prevents the need for explicit AWS credentials to be stored in Prefect.
+
+The `git_clone` pull step supports specifying credentials via:
+
+- _Credentials_ block references, e.g. `credentials: "{{ prefect.blocks.gitlab-credentials.name }}"`.
+
+  > [!important]
+  > Some Prefect 2.x versions might hit a
+  > [known issue][Prefect deployment git clone step not working with Gitlab/Github Credential blocks] where
+  > `git_clone` does not properly resolve `GitLabCredentials` blocks.<br/>
+  > In this case, use _access token_ type blocks referencing a `Secret` or `AwsSecret` block instead.
+
+- _Access token_ block references, e.g. `access_token: "{{ prefect.blocks.aws-secret.name }}"`.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  ```yml
+  pull:
+    - prefect.deployments.steps.git_clone:
+        repository: https://gitlab.example.org/some/project
+        access_token: "{{ prefect.blocks.aws-secret.some-gitlab-project-token }}"
+  ```
+
+  </details>
+
+- Chained shell script.<br/>
+  This means running a `run_shell_script` step before `git_clone`. The shell script fetches the token from an external
+  secret store, and passes it as output.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  ```yml
+  pull:
+    - prefect.deployments.steps.run_shell_script:
+        script: |
+          aws secretsmanager get-secret-value \
+            --secret-id some/gitlab/project/token \
+            --query SecretString --output text
+        stream_output: false
+    - prefect.deployments.steps.git_clone:
+        repository: https://gitlab.example.org/some/project
+        access_token: "{{ run_shell_script.stdout }}"
+  ```
+
+  </details>
+
 ## Limiting concurrent jobs on a work pool
 
 One can cap concurrency on multiple layers (pool > queue > worker).<br/>
@@ -149,8 +205,12 @@ be changed at runtime without restarting the worker.
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/PrefectHQ/Prefect
-[documentation]: https://docs.prefect.io/v3/get-started/index
-[website]: https://www.prefect.io/
+[Codebase]: https://github.com/PrefectHQ/Prefect
+[Documentation]: https://docs.prefect.io/v3/get-started/index
+[How to store secrets]: https://docs.prefect.io/v3/develop/secrets
+[Prefect deployment git clone step not working with Gitlab/Github Credential blocks]: https://github.com/PrefectHQ/prefect/issues/11279
+[prefect-aws]: https://docs.prefect.io/integrations/prefect-aws/index
+[Website]: https://www.prefect.io/
 
 <!-- Others -->
+[boto3 credential chain]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html#configuring-credentials
