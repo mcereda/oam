@@ -302,6 +302,7 @@ def find_candidates(
                 deploy_once = (
                     img.last_pull is not None
                     and img.pushed_at is not None
+                    and img.pushed_at < cutoff
                     and (img.last_pull - img.pushed_at) < epsilon
                 )
                 if (
