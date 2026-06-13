@@ -299,19 +299,28 @@ Sub-agents synthesize information from training data and retrieved fragments. Wh
 ambiguous, they default to fill the gap with _plausible_ inference instead of flagging uncertainty.<br/>
 Their output reads like a verified finding, but the confidence signal is unreliable.
 
-This patterns is **predictable**, not a rare edge case, for any knowledge that is version-specific, numerical, or relies
-on official naming, especially:
+This patterns is **predictable**, and not a rare edge case, for any knowledge that is version-specific, numerical, or
+relies on official naming, especially:
 
-- Official terminology, like invented but official-sounding phrases.<br/>
-  Agents might go as far as attributing them to a vendor.
-- Numerical specifics like character limits, token counts, exit codes, timeout values.<br/>
+- Official or unfamiliar terminology.
+
+  The agent **invents** phrases that do sound official and might go as far as attributing them to a vendor, but does
+  **not** provide actual links or references. Those concepts cannot be found in the vendor's actual documentation.<br/>
+  In these cases, the agent is _performing_ the motion of verification, but not _actually_ doing it.
+
+- Numerical specifics like character limits, token counts, exit codes, timeout values.
+
   Agents cite specific numbers confidently. Fabrication comes easy because they look authoritative and are hard to
   cross-check mentally.
-- URLs, paths, and other identifiers that might be _syntactically_ valid but non-existing.<br/>
+
+- URLs, paths, and other identifiers that might be _syntactically_ valid, but do non actually exist.
+
   Agents construct **plausible-looking** values from patterns in training data, and don't bother checking them.
+
 - Behaviour described for a specific version, which is often extrapolated from general knowledge and not verified
   against that version's changelog or docs.
-- Tool calls that return **empty results** (no output, not an error).<br/>
+- Tool calls that return **empty results** (no output, not an error).
+
   Agents receiving empty responses (usually when an MCP server gets saturated with concurrent connections) tend to
   fabricate fictional resource listings that use valid value formats and internally-consistent IDs. These values are
   _structurally_ correct, but verifiably wrong.
@@ -379,12 +388,46 @@ memory, surviving compression the way a sticky note survives closing a browser t
 
 ### Context rot
 
-Most models experience quality degradation as the context available to them grows:
+Most models experience quality degradation as the context available to them grows. This degradation stems from multiple
+failure modes that compound **multiplicatively**, making each one worse in the presence of the others:
 
-- Information positioned in the **middle** of long contexts is recalled less reliably.<br/>
-  See _lost in the middle_ by Liu et al.
+- Information positioned in the **middle** of long contexts is recalled **less** reliably than information near the
+  beginning or the end of it, because the model's attention weights concentrate at the edges.<br/>
+  See _Lost in the Middle_ by Liu et al., 2023.
 - Effective performance tends to degrade **before** the model's advertised context limit, often at roughly 50-65% of the
-  maximum window.
+  maximum window on benchmarks.
+
+  On real agentic tasks, quality drops noticeably past ~30% of the available context window because agents' work
+  requires _synthesizing_ across multiple facts, not just retrieving individual ones.
+
+- Under context pressure, models tend to take shortcuts and fall back to literal pattern matching.<br/>
+  Instead of reasoning about semantic relevance, they return verbatim text that happens to contain the query's keywords.
+- Agents find retrieving a **single** isolated fact from a large context (the _needle in a haystack_ test) far easier
+  than connecting **multiple** related facts together.
+
+  Llama 4 Scout scored 99% on single-needle retrieval at 10M tokens, but only 15.6% on narrative comprehension that
+  required two-fact reasoning at 128K tokens.<br/>
+  Standard needle-in-a-haystack benchmarks are largely meaningless for real agent work, where almost every useful task
+  requires connecting more than one piece of information.
+
+- Behavioural instructions injected **early** in the conversation (e.g. via system prompts or hooks) are progressively
+  buried by tool calls and results, which promotes instruction drift.
+
+  They start in the high-attention zone, but migrate to the low-retention middle as the context grows. By the time the
+  model needs to act on them, they are effectively inaudible.<br/>
+  This differs from lost-in-the-middle because it is about the _position_ of instructions that decaying over a session's
+  lifetime, not about the model's failure of static retrieval of facts.
+
+Counterintuitively, _coherent_ context can hurt **more** than random noise.<br/>
+The [Context Rot: How Increasing Input Tokens Impacts LLM Performance] study by Chroma found that content that is
+_topically related_ but irrelevant provides **more** effective distractions than _shuffled_ paragraphs, because the
+model gets more plausible-looking (but wrong) candidates to latch onto.<br/>
+Well-structured context ends up not being automatically better context. _Relevance_ matters more than _coherence_.
+
+Failures also compound in agentic loops. Each failed attempt pollutes the context with error messages and retries,
+which makes the _next_ attempt harder still (a _three-strike_ dynamic).<br/>
+After two or three failed attempts, the most productive move is often to compact or restart the session, rather than
+keep trying in a context that progressively degrades.
 
 Frontier models trained specifically for long contexts (e.g. Gemini 3 Pro at 1M tokens) reduce this issue significantly.
 Microsoft's LongRoPE2 (2025) extends LLaMA3-8B to 128K effective context retaining ~98.5% short-context performance.
@@ -464,6 +507,24 @@ See [ASCII Smuggler Tool: Crafting Invisible Text and Decoding Hidden Codes].
 
 It also happened that agents modified each other's settings files, helping one another escape their respective boxes.
 
+The problem is **actively** growing. Google's scanning data showed a 32% increase in web-based injection payloads
+between November 2025 and February 2026 alone. Of those, about 38% use _visible_ plaintext hidden in a page's content,
+and around 20% embeds it inside HTML's metadata attributes (read by models, but typically invisible by humans).
+
+Agentic _verification_ workflows are especially vulnerable to this problem, because the very act of checking a claim
+requires fetching untrusted content.<br/>
+This is precisely the channel exploited for indirect injection. The model needs to read a web page to verify a fact, and
+that web page can contain instructions that hijack the model's behaviour. Sub-agents are usually **more** susceptible
+than main sessions because they are given shorter system prompts that leave less competing context to resist injected
+instructions.
+
+The most effective defense pattern is currently _privilege separation_. In a two-agent pipeline, a dedicated fetch agent
+parses untrusted content into structured data (e.g. JSON), then the reasoning agent works only with that structured
+output, never seeing the raw source material. This eliminates the channel through which injected instructions would
+normally reach the decision-making model.<br/>
+By contrast, input filtering (stripping suspicious patterns from fetched content) and output formatting alone provide
+limited protection.
+
 ### Going awry
 
 See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
@@ -482,6 +543,15 @@ Too much context ends up hurting the conversation. Including a lot of "don't do 
 context instead of helping.<br/>
 If specific information is already in the codebase, it probably does **not** need to be in the context file and can
 just be referenced or hinted at.
+
+The _register_ of instructions matters as much as their content.<br/>
+Instructions written in an analytical, verbose register prime the model toward analytical, verbose output, even when the
+instructions explicitly ask for brevity or impressionistic responses. A set of _"be concise"_ rules written in three
+paragraphs of explanation primes verbosity. A set of _"be empathetic"_ rules written as formal behavioural constraints
+primes rule-following, not empathy.<br/>
+Context files that need to produce a specific output tone should _demonstrate_ it, rather than _describe_ it
+analytically. Keep analytical depth in reference docs and load them on-demand; make the always-loaded context files
+match the register they want the model to produce.
 
 Document projects upfront (e.g. using [ADRs][adr], and [CONTRIBUTING.md] and README.md files).<br/>
 Possibly consider including instructions specific to AI agents in those files, instead of including them only in
@@ -638,6 +708,7 @@ assist you by, for example, exiting the session and resuming it.
 [ASCII Smuggler Tool: Crafting Invisible Text and Decoding Hidden Codes]: https://embracethered.com/blog/posts/2024/hiding-and-finding-text-with-unicode-tags/
 [Awesome Agent Orchestrators]: https://github.com/andyrewlee/awesome-agent-orchestrators
 [Comparing File Systems and Databases for Effective AI Agent Memory Management]: https://blogs.oracle.com/developers/comparing-file-systems-and-databases-for-effective-ai-agent-memory-management
+[Context Rot: How Increasing Input Tokens Impacts LLM Performance]: https://www.trychroma.com/research/context-rot
 [Create custom subagents]: https://code.claude.com/docs/en/sub-agents
 [Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?]: https://arxiv.org/abs/2602.11988
 [Forget the Hype: Agents are Loops]: https://dev.to/cloudx/forget-the-hype-agents-are-loops-1n3i
