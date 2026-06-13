@@ -572,6 +572,7 @@ assist you by, for example, exiting the session and resuming it.
 - [Create custom subagents]
 - [Hermes agent], [OpenClaw][openclaw/openclaw] alternative with built-in self-improving loop
 - [Thoughts on slowing the fuck down], by Mario Zechner
+- [Awesome Agent Orchestrators], a curated list of tools and frameworks for orchestrating AI coding agents
 
 ### Sources
 
@@ -635,6 +636,7 @@ assist you by, for example, exiting the session and resuming it.
 [AI mistakes you're probably making]: https://www.youtube.com/watch?v=Jcuig8vhmx4
 [An AI Agent Published a Hit Piece on Me]: https://theshamblog.com/an-ai-agent-published-a-hit-piece-on-me/
 [ASCII Smuggler Tool: Crafting Invisible Text and Decoding Hidden Codes]: https://embracethered.com/blog/posts/2024/hiding-and-finding-text-with-unicode-tags/
+[Awesome Agent Orchestrators]: https://github.com/andyrewlee/awesome-agent-orchestrators
 [Comparing File Systems and Databases for Effective AI Agent Memory Management]: https://blogs.oracle.com/developers/comparing-file-systems-and-databases-for-effective-ai-agent-memory-management
 [Create custom subagents]: https://code.claude.com/docs/en/sub-agents
 [Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?]: https://arxiv.org/abs/2602.11988
