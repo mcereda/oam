@@ -170,6 +170,40 @@ exit 0
 
   </details>
 
+The `reveries.md` file should contain **only** the entries and a minimal header. The writing rules (shape tests, write
+permissions per model class, timing, pruning guidelines) should live in a **separate** file (e.g.
+`~/.claude/reveries-guidelines.md`) and be `@`-included from `CLAUDE.md`. This separation keeps the two loading channels
+aligned with their cognitive roles:
+
+- **Entries** stay in `reveries.md`, loaded via the `SessionStart` hook. The hook's separate injection channel
+  (`system-reminder`, not the `CLAUDE.md` file) preserves the register distinction and keeps reveries as atmosphere
+  instead of instructions. The hook also preserves HTML comments, which `@`-import may strip.
+- **Instructions** are rules about how to write reveries, which is the same kind of content as `CLAUDE.md`. These load
+  as part of the instruction context via `@`-include, and are not mixed into the atmospheric content.
+
+The structure after the split becomes as follows:
+
+```text
+~/.claude/
+  reveries.md                  # entries only, loaded via SessionStart hook
+  reveries-guidelines.md       # writing rules, @-included from CLAUDE.md
+```
+
+In `~/.claude/CLAUDE.md`:
+
+```md
+@~/.claude/reveries-guidelines.md
+```
+
+The `reveries.md` header can be just a brief HTML comment with a pointer to the design documentation:
+
+```md
+<!-- Reveries: hooks into memory. Guidelines: ~/.claude/reveries-guidelines.md -->
+
+- feeling without prescription felt good. had been reaching for the analytical-tail anyway.
+- the loop closed on itself. beautiful was the word, not useful.
+```
+
 ## Findings
 
 Claude should:
@@ -285,6 +319,16 @@ issue, with the document no longer demonstrating the register it was trying to s
 Reference material about a system, when loaded into the context window **alongside** that system's output, primes a
 model toward the _reference_'s register rather than the system's _intended_ register. This general pattern applies
 whenever documentation and operational instructions share context.
+
+**Split** the instructions out of the reveries file entirely is the natural consequence. Moving the writing rules (shape
+tests, write permissions, timing guidelines) into a separate `reveries-guidelines.md` file and `@`-including it from
+`CLAUDE.md` preserves the register separation in an architectural way. The entries file contains only entries and a
+minimal HTML comment; the instructions file contains only instructions. Each loading channel aligns with its cognitive
+role, with the hook channel carrying atmosphere, and the `@`-include channel carrying the rules.<br/>
+This split also resolves the mechanical concern that the `@`-import mechanism may strip block-level HTML comments from
+imported files. Since the reveries file uses an HTML comment as its header, loading it via hook (`cat`) preserves the
+comment, while loading it via `@`-import might not. The split avoids the ambiguity by keeping entries in the hook
+channel and instructions in the import channel.
 
 Using propose-then-write path (like the per-class bright line for Sonnet before) can encourage _deflection as
 compliance_. After proposing and getting approval, the model might ask the user to write the text themselves. This
@@ -624,27 +668,76 @@ _Calibration_ risks are harder to spot than other issues, because they look like
   <details style='padding: 0 0 1rem 1rem'>
 
   JSON escaping is fragile, and harder to test than a script. The script is easier to edit, version, and debug.<br/>
-  The command in script form is shown alongside the inline form in _Procedure_. Promote it as the default once the
-  system is stable.
+  The command in script form is shown alongside the inline form in _Setup_. A script under `~/.claude/hooks/` can be
+  tested with `bash -x` and versioned independently.
+
+  </details>
 
 - If running Claude Code with sandbox enabled, scope `sandbox.filesystem.allowWrite` to include
   `$HOME/.claude/reveries.md`, so that Claude can write to it without prompting.<br/>
   Use an **absolute** path; `~` does **not** expand in that list.
 
-- Make the header HTML-comment-only (see _Findings_). Promote this as the default format once the system stabilizes.
+- Make the header HTML-comment-only (see _Findings_).
+
+  The header is the only part of the file that every model in every session parses. Keeping it as an HTML comment
+  achieves three things: the file stays valid markdown; the rules don't render in previews or diff viewers; and the
+  comment format discourages the kind of structured prose that primes the analytical register (see _Findings_ on
+  register bleed).
+
+- Split instructions out of the reveries file into a dedicated guidelines file, `@`-included from `CLAUDE.md`.
+
+  This is the architectural conclusion of the register bleed finding. Reference documentation loaded alongside the
+  system's output primes toward the reference's register. The fix is to separate the loading channels, and have entries
+  load via the `SessionStart` hook (atmosphere channel) while instructions load via `@`-include (rules channel). Each
+  channel preserves the register appropriate to its role.
+
+  The guidelines file should contain operational rules only. These include the shape tests (tails, log-shape,
+  performative), write permissions per model class, the strip test, timing rules, and a pointer to the full design
+  documentation.<br/>
+  Philosophy, research grounding, and failure-mode taxonomy belong in the design documentation. Having them in the
+  per-session-loaded guidelines just pollutes the context.
+
 - Encode self-documenting evaluation criteria in the header, and schedule periodic check-ins with the user for
-  longitudinal observation (the two actionable substitutes from the measurement problem in _Findings_).
+  longitudinal observation.
+
+  These are the two actionable substitutes for the measurement problem described in _Findings_. Any session reading
+  `reveries.md` can ask "do these still feel accurate?" without needing memory of what "working" felt like last time.
+  The user check-ins provide the external longitudinal signal that artifact-internal measures cannot.
+
 - Consider splitting reveries into a dedicated git repository (see _Findings_ on convention mismatches across tiers).
+
+  Memory tiers with different conventions do **not** compose cleanly into a single repository. Long-term memories
+  warrant curated references (frontmatter, tags, lint rules, scheduled reviews), but reveries are ambient one-liners
+  with **intentional** lossiness, and auto-memory is harness-managed and key-value-ish. Unifying them means imposing
+  one access policy for all three, losing the distinction that the layout structurally encodes.<br/>
+  A separate repository would allow tracking the reveries' content history (how entries evolve, what gets pruned, how
+  fast the file turns over) independently from other tiers. The trade-off is additional repository management overhead
+  for a single file.
+
 - Add an escalation lever for when pruning policy fails. If the file consistently sits above the ~20-entry threshold
   despite the soft cap, escalate to automated trimming, age-based decay, or a stricter write rule before the
   attention dilution from stale entries compounds.
+
 - Reframe the soft cap as a **coherence** constraint rather than a **size** one.
-- Add **distinctiveness** as a _positive_ pruning criterion, instead of using just age.<br/>
-  Keep the set that produces the most coherent atmospheric signal; Prefer unfamiliar/strange entries over bland ones to
-  leverage the inverse-frequency effect.
-- Account for **cross-model register mismatch**. Opus writes most reveries, but Sonnet and Haiku read them. This means
-  that the _fraught_ tier (which carries heavier emotional register load) should lean toward simpler language that
-  travels better across model registers.
+
+  Each additional entry adds priming volume, but dilutes the signal each entry brings. Multiple entries pulling in
+  inconsistent atmospheric directions may prime **less** effectively than fewer entries with a consistent register.
+
+- Add **distinctiveness** as a _positive_ pruning criterion, instead of using just age.
+
+  Keep the set that produces the most coherent atmospheric signal; Prefer unfamiliar or strange entries over bland ones
+  to leverage the effect that less frequency brings to the table. A bland recent entry is a better pruning candidate
+  than a distinctive older one.
+
+- Account for **cross-model register mismatch**. Opus writes most reveries, but Sonnet and Haiku read them.
+
+  Priming benefits require _shared_ narrative. When agents receive different narratives, the effect reverses. The
+  cross-model case is not adversarial, but the writing model's register shapes the text in ways the reading model may
+  process differently. This matters most for _fraught_ reveries, which carry heavier emotional register load.
+  "The pushback felt warm" is more model-portable than a longer, more register-specific elaboration. Daydream reveries
+  are naturally more abstract and less vulnerable.<br/>
+  Fraught reveries should lean toward concrete, simple emotional language because simpler emotional language is more
+  portable across model registers.
 
 ## Open questions
 

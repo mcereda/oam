@@ -41,13 +41,85 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
    git init "$HOME/path/to/claude/kb"
    ```
 
-1. Configure **the KB** to allow common operations in it without needing to ask for permissions.<br/>
+1. Set up the directory structure (or ask Claude to do so).<br/>
+   The KB benefits from a clear separation of concerns:
+
+   ```text
+   kb/
+     CLAUDE.md        # Schema, conventions, operations — the KB's own rules
+     index.md         # Content catalog grouped by category, one-line summaries
+     log.md           # Append-only chronological record of changes
+     deferred.md      # Live list of deferred decisions awaiting a trigger
+     pages/           # Wiki articles (markdown)
+     pages/_tags.md   # Tag glossary — canonical tags and normalization rules
+     sources/         # Raw immutable reference material (articles, papers, notes)
+     scripts/lint.sh  # Mechanical lint checks
+   ```
+
+   The `CLAUDE.md` shall define the schema, operations, and conventions Claude follows when working in the KB.
+
+1. Install pre-commit hooks for mechanical enforcement of rules. [Lefthook] is a good fit because it supports parallel
+   execution of independent checks and keeps the configuration readable (YAML, not bash scripts inside git hooks).
+
+   ```sh
+   npm init -y
+   npm install --save-dev @evilmartians/lefthook
+   npx lefthook install
+   ```
+
+   Split pre-commit concerns into separate scripts rather than bundling everything into one. Different concerns have
+   different false-positive profiles, and independent scripts can be enabled or disabled without touching each other.
+   Lefthook's `parallel: true` runs them concurrently, so the cost of splitting is negligible.
+
+   Useful checks include:
+
+   - Content lint: orphaned pages, missing frontmatter, broken cross-references, undocumented tags.
+   - `updated` date enforcement: staged pages with body changes must have `updated: today`.
+   - Commit attribution: reject bare "Claude Code" authorship without the human co-author.
+   - Workflow invariants: deferred-item files paired with log entries.
+
+1. (Optional) Install a **task runner** for KB operations. A `Taskfile.yml` (via [Task]) can provide named commands
+   (`task lint`, `task review`, `task graph`, `task stats`) that are easier to remember than raw script paths.
+
+   ```sh
+   npm install --save-dev @go-task/cli
+   ```
+
+1. Configure **the KB's project-level** `settings.json` to allow common operations without permission prompts.<br/>
    See [settings.json file example for own KB].
+
+   Key settings:
+
+   - `defaultMode: "auto"` to let the agent work without asking.
+   - Set `model` to the best available **reasoning** model that gives **good enough** results.<br/>
+     KB management is judgment-heavy and benefits from deeper reasoning, and not all versions of a model give acceptable
+     responses.
+   - `effortLevel: "high"` at minimum.<br/>
+     Higher effort levels produce better judgment on KB operations.
+   - Disable the sandbox to allow the agent to read, write, and commit freely within the KB.
+
 1. Configure **user-level** settings to allow common operations **in the KB** from other projects without needing to ask
    for permissions.<br/>
    See [User-level settings.json patch example for own KB].
+
+   For cross-project access (writing to the KB from other repos), add **user-level** permissions scoped to the KB's
+   directory, e.g. `Bash(git -C ~/path/to/claude/kb *)` and `Edit(~/path/to/claude/kb/**)`.
+
+   > [!tip]
+   > Remember to add `rtk`-related permissions if using [rtk-ai/rtk], e.g. `Bash(rtk git -C ~/path/to/claude/kb *)`.
+
 1. Add instructions in the **user-level** `CLAUDE.md` file.<br/>
    See [User-level CLAUDE.md example for own KB].
+
+   The user-level `CLAUDE.md` should include:
+
+   - A documentation permissions table that maps each documentation target to its permissions. The KB should have
+     **full autonomy** (write, commit, push without asking). Other targets (company wiki, project docs) should have
+     their own gates.
+   - Routing rules that tell Claude when to save to the KB instead of other targets.
+   - A persistence rule that pushed the model to save it to the relevant docs **in the same turn** that a durable
+     insight surfaces. Claude has **no** memory between sessions, "I'll keep that in mind" is the exact failure mode.
+
 1. Ask Claude to initialize it (in a new session):
 
    > Hey! I have prepared your knowledge base repository for you. Please finish initializing it to your likings.
@@ -171,7 +243,13 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   Code's hooks could be wrong in weeks.
 
   A single _last updated_ date doesn't capture this. Prefer adding a `review-after` frontmatter field per page.<br/>
-  It should consider the topic's change velocity and how frequently one updates the tool:
+  It should consider the topic's change velocity and how frequently one updates the tool.
+
+  A **complementary** `verified-against` field (e.g. `verified-against: v2.1.144`) can track the **version** of the
+  tool a page's claims were last checked against. `review-after` is calendar-driven, and `updated` uses content change.
+  The three are orthogonal, and a page can have all of them.
+
+  Both fields should consider the topic's change velocity:
 
   | Topic velocity                          | Review cycle | Examples                        |
   | --------------------------------------- | ------------ | ------------------------------- |
@@ -205,10 +283,11 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   that move fast or have known-buggy areas, follow enrichment with a targeted web search against the issue tracker or
   changelog, **not** just against another documentation source.
 
-- Flat markdown + git works well up to ~80 pages. After that, grep-based retrieval starts missing conceptually related
-  content. Structural investment like cross-references, tag system, and index categories do compensate for gaps induced
-  by keyword-matching.<br/>
-  Tighten the scope (_has reference material crept in?_) **before** adding retrieval infrastructure (e.g. RAG, DBs).
+- Flat markdown + git works well up to ~80 pages, and continues to work when supported by a mature tag system,
+  bidirectional "See also" sections, and a category-organized index. After that, grep-based retrieval starts missing
+  conceptually related content. Structural investment like cross-references, tags, index categories do compensate for
+  gaps induced by keyword-matching well enough to defer retrieval infrastructure (RAG, vector DBs) indefinitely.<br/>
+  Tighten the scope (_has reference material crept in?_) **before** adding retrieval infrastructure.
 
 - Sandboxed project sessions can't write directly to the KB unless **explicitly** allowed globally, but memories can be
   tagged as a workaround.
@@ -216,6 +295,24 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   Make Claude prefix memory note descriptions with a marker (e.g., `[KB]`) to signal what information could be promoted
   to the KB (e.g. "\[KB] ECS OOM kills bypass stopTimeout"). During review sessions, marked notes stand out; others
   require more judgment.
+
+- Artifacts that carry both **content** and **instructions** about how to handle that content should split the two into
+  separate loading channels. Reference documentation loaded into the context window _alongside_ a system's output primes
+  the model toward the reference's register, instead of the system's intended register. This is a general pattern that
+  surfaces whenever documentation and operational instructions share context.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example</summary>
+
+  A reveries file which header contains 104 lines of taxonomy about failure-mode **and** 31 lines of operational rules
+  alongside them was actively priming the writer to use an analytical register. The resulting entries were analytical
+  observations dressed in impressionistic syntax. They were technically correct, but in the wrong register. Trimming
+  the header to just the operational rules resolved this, with the document no longer demonstrating the register it was
+  trying to suppress.<br/>
+  The fix is to split the content in its own file (loaded via hook), and move instructions to a separate file that loads
+  via `@`-include as part of the rule context. Each loading channel preserves the register appropriate to its role.
+
+  </details>
 
 - Claude does **not** reliably consult the KB from a `CLAUDE.md` rule alone, and requires an **explicit** hook-based
   reminder. A `SessionStart` hook (firing on `startup|compact`) seems sufficient, and using `UserPromptSubmit` to submit
@@ -234,11 +331,26 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   This separation (caller owns judgment, agent owns plumbing) is what keeps the agent reliable. If the agent had to
   interpret content, it would fail the same way humans fail by second-guessing the caller.
 
+- Complex KB workflows (ingestion, review, extraction triage, retraction) benefit from being packaged as
+  [skills][Claude Code / skills].
+
+  They are useful for multi-step KB operations that require judgment at each step, and can be invoked by the user via
+  `/skill-name` or triggered by the model when the workflow matches.
+
+  The KB benefits from skills for operations like `/kb-ingest` (full ingest workflow with verification), `/kb-review`
+  (mechanical + reflective review pass), `/kb-retract` (remove provably wrong content with accountability log), and
+  `/extraction-triage` (consume extraction inbox). Each skill packages a workflow that would otherwise require
+  remembering a multi-step process from session to session.
+
   > [!important]
   > The filing agent must be pinned to a **good** reasoning-capable model (e.g. Opus). Sonnet proved unreliable for the
   > contributor role by **frequently** mishandling the contribution process and ignoring explicit attribution values
   > passed by the caller. The fix was changing the agent definition's model from `inherit` (which defaulted to Sonnet in
   > many sessions) to **explicitly** require Opus.
+  >
+  > Pin to a specific **model ID** (e.g. `claude-opus-4-6`), not a model class name (e.g. `opus`). Model class names
+  > can resolve to different versions over time, and pinning to the ID ensures consistent behavior even when new model
+  > versions are released. Update the pin deliberately when ready to adopt a new version.
 
 - Filing agents strongly benefit from worktree isolation (e.g., [git worktrees]), especially when one works with many
   parallel sessions that could make changes concurrently.
@@ -358,6 +470,76 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   > [!tip]
   > Use `--no-session-persistence` instead of `--bare` to skip session recording without switching authentication mode.
   > The `--bare` flag skips OAuth and **requires** `ANTHROPIC_API_KEY`, bypassing the plan's Agent SDK credit.
+
+- The extraction hook **produces** files. A separate mechanism is needed to **consume** them.
+
+  A `/extraction-triage` [skill][Claude Code / skills] can orchestrate this consumption by scanning extraction files,
+  deduplicating items by content, ranking by recurrence, and then dispatching worker agents (e.g. `insight-triager`) as
+  a team for parallel processing.<br/>
+  Each worker agent should processes a limited batch (3-5 items) in its own [git worktree][git worktrees],
+  cross-referencing against existing KB pages and memories, verifying factual claims, and committing results
+  independently.
+
+  The skill should live in the KB repository, because triage is a KB-specific operation. Its primary output is new or
+  updated KB pages, with memory saves as a secondary route. The deduplication and ranking step requires seeing **all**
+  files before dispatching, which is why the skill should _orchestrate_ and not process files one at a time.<br/>
+
+  This completes the pipeline. The `SessionEnd` hook catches what sessions missed, and the triage skill promotes catches
+  into durable knowledge.
+
+- Billing for non-interactive usage (`claude -p` and the Agent SDK) needs to be accounted for. At Sonnet rates, each
+  extraction call costs around $0.025. For light usage (3-5 sessions/day) this is $2-4/month, which is well within any
+  tier's Agent SDK monthly credit.
+
+  However, billing terms for these features can change with no real notice. Design extractors to use a fallback chain
+  (try `claude -p` first, fall back to a local model via [Ollama], give up gracefully if neither is available) to hedge
+  against billing changes without losing the feature.
+
+  The agent definition's body (after YAML frontmatter) can serve as the system prompt for the local fallback, which
+  makes it a single source of truth for the extraction prompt. No prompt duplication is needed when the same prompt works
+  for both backends.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Ollama vs llama.cpp for local execution</summary>
+
+  [Ollama] proved a good default for hook-driven LLM work. Its HTTP API are OpenAI-compatible and trivial to call from
+  Python. It also handles model downloads, quantization, and GPU detection automatically.
+
+  llama.cpp (which Ollama wraps) makes sense when one needs fine-grained control over inference parameters, speculative
+  decoding between two models, or direct C/C++ embedding. None of these apply to typical hook tasks, and reaching
+  through the abstraction only pays off when it's hiding something one needs.
+
+  Speculative decoding optimizes inference **latency**. It does **not** reduce memory footprint. For background and
+  asynchronous tasks like session extraction, where nobody is waiting, a single appropriately-sized model is simpler
+  and lighter.
+
+  For one-shot tasks, set `keep_alive` to `0` in the Ollama API request body to unload the model immediately after
+  inference, freeing VRAM for other processes.
+
+  </details>
+
+- Models with chain-of-thought reasoning (e.g. Qwen 3, Gemma 4) have thinking mode **_on_ by default**.<br/>
+  Thinking is **counterproductive** for structured classification tasks, because it wastes tokens (a model can emit
+  ~330 thinking tokens to arrive at a 3-token answer), roughly doubles inference time, and can _degrade_ output
+  quality. In testing, `gemma4:e4b` found **more** correct items with thinking _off_ than _on_, and the reasoning was
+  causing it to talk itself **out** of valid catches.
+
+  Disable via `"think": false` as a top-level field in the Ollama API request body, or `--nothink` for CLI usage.<br/>
+  If the task is "follow these instructions and classify," disable thinking. If the task is "reason about this problem",
+  keep it on.
+
+- Detection rate alone is **meaningless** for classification. A model scoring 10/10 on all false positives is worse than
+  0/10. Testing across models and sizes revealed distinct failure modes that are **not** predictable from size alone:
+
+  1. At the small end (e.g. `llama3.2:3b`), the model can't constrain its output to "Nothing missed". Instead, it always
+     fills the buffer with something, producing 100% recall and 0% precision.
+  1. At mid-sizes with conservative training (e.g. `qwen3:8b`), the model defaults to "Nothing missed" even when valid
+     items are present. Near-zero recall, perfect precision on the few it does emit.
+  1. A narrow band of models can both find items **and** refuse when there are none.
+
+  Size does **not** predict which tier a model falls into. Two models with similar parameter counts can land in
+  different failure modes. Pick after testing models' results, instead of checking their size or generic benchmark
+  score.
 
 - A `SessionEnd` hook that spawns `claude -p` will cause that child process to fire its **own** `SessionEnd` event when
   it exits, which re-triggers the original hook for the child session, which spawns yet another `claude -p` invocation,
@@ -646,6 +828,7 @@ write files, run lint) can stay identical.
 <!-- Knowledge base -->
 [Claude Code / billing]: ../claude%20code.md#billing
 [Claude Code / cross-project sub-agents]: ../claude%20code.md#cross-project-sub-agents
+[Claude Code / skills]: ../claude%20code.md#skills
 [Claude Code / sub-agents]: ../claude%20code.md#sub-agents
 [Claude Code / using hooks]: ../claude%20code.md#using-hooks
 [Git worktrees]: ../../../git.md#worktrees
@@ -663,3 +846,4 @@ write files, run lint) can stay identical.
 <!-- Others -->
 [karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
 [rtk-ai/rtk]: https://github.com/rtk-ai/rtk
+[Task]: https://taskfile.dev/

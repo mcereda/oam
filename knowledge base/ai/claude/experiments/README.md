@@ -44,6 +44,31 @@ Routing:
 - When unsure, write an insight to project memory and consider moving it later. Promotion from a built-in system is
   easier than demotion.
 
+Within each tier, memories benefit from being categorized by **type**. The following types emerged during testing as a
+reliable routing heuristic:
+
+| Type        | What belongs here                                              | Examples                                                 |
+| ----------- | -------------------------------------------------------------- | -------------------------------------------------------- |
+| `user`      | User's role, goals, responsibilities, knowledge                | Role, domain expertise, collaboration preferences        |
+| `feedback`  | Guidance the user gave about how to approach work              | Corrections, confirmed approaches, style preferences     |
+| `project`   | Ongoing work, goals, initiatives, bugs within a project        | Ticket status, merge freezes, architecture decisions     |
+| `reference` | Pointers to where information can be found in external systems | Linear project names, Grafana dashboards, wiki locations |
+
+Recording from **both** failure **and** success matters. If one only saves corrections, the system drifts away from
+validated approaches and grows overly cautious. Confirmations are quieter than corrections, and easier to miss because
+they are the system doing its job.
+
+Entries benefit from a shared frontmatter scheme (`name`, `description`, `metadata.type`) that keeps them
+auditable.<br/>
+The `description` field doubles as the index's one-line hook, which allows the routing decision and the entry shape to
+stay in sync. Cross-referencing between memories can use a lightweight linking convention (e.g. `[[name]]` where `name`
+is another memory's identifier slug). Links to non-existent memories are valid, and signal something worth writing later
+instead of errors.
+
+Convention enforcement benefits from a dedicated file (e.g. `CONVENTIONS.md`) that is `@`-included alongside the memory
+index. It can codify deduplication rules, promotion signals, and hygiene triggers. This allows loading them alongside
+the memories they govern, keeping the main `CLAUDE.md` from growing with memory-specific operational details.
+
 Also see [thedotmack/claude-mem] for an example of automatic, plugin-based memory management system.<br/>
 It captures all tool usage, compresses it, stores it in SQLite + ChromaDB, and injects relevant context back via vector
 search.<br/>
@@ -92,6 +117,12 @@ corrections that are facts (not patterns), identity/profile data.
 _Bridging_ different subsystems by promoting content from one to the other matters more than _merging_ them. When a
 per-project memory smells like a KB-worthy **pattern** (and not a fact about a single user), it might be worth surfacing
 it for promotion. The KB stays a reference, auto-memory stays a scratchpad. Each system retains what makes it good.
+
+**Deduplication** and **promotion** between tiers should follow explicit rules to prevent drift. When a memory
+duplicates a rule that already exists in a higher tier (e.g. `CLAUDE.md`), fold unique context into the rule, then
+archive and prune the memory. When a correction keeps recurring despite the memory existing, that is the promotion
+signal from the lower tier to the higher one. The test is always whether losing the memory on a fresh host would let
+the same failure recur.
 
 The same five-axis framework applies whenever one is considering merging **any** two systems. If the axes diverge on
 more than one dimension, just keep the systems separate and build a bridge between them instead of merging them into
