@@ -9,6 +9,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 1. [Configuration](#configuration)
    1. [Credentials](#credentials)
 1. [Context](#context)
+   1. [Compaction](#compaction)
    1. [Writing effective rules](#writing-effective-rules)
 1. [Memory](#memory)
    1. [Auto memory](#auto-memory)
@@ -612,6 +613,14 @@ loading of that project's `CLAUDE.md`.
 Block-level HTML comments (`<!-- … -->`) in `CLAUDE.md` files are **stripped** before injection into context. Leverage
 them to leave notes for human maintainers without spending context tokens. Comments inside code blocks are preserved.
 
+When files are modified _outside_ the active session (by the user in an editor, a linter, another Claude Code session,
+or any other process), the harness detects the change and auto-injects a diff as a system-reminder.<br/>
+This piggybacks on the **next** unrelated tool result. It is the **only** notification the model receives about that;
+there is no standalone alert.<br/>
+The injected content is a **diff**, not the full file. For files that have not been read yet in the session, this can
+mislead the model, which sees _what changed_ but has no baseline for _what the file currently contains_. Re-read the
+file **explicitly**, before acting on the diff.
+
 The `--add-dir` flag gives Claude access to additional directories outside the main working directory.<br/>
 By default, `CLAUDE.md` files from those directories are **not** loaded. Set
 `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` to load them too.<br/>
@@ -769,7 +778,52 @@ Consider delegating ownership of tools and documentation to Claude early in a pr
 tools and documents it creates _and_ uses. Also include in the request to periodically to check and update those files
 to correct its own behavior across sessions.
 
+When preparing a repository for agents, the highest returns come from giving them instructions at distinct levels of
+context. Roughly in order of diminishing returns, those are as follows:
+
+1. Use `CLAUDE.md` and rules files for **orientation**.<br/>
+   The agent needs to learn what the project is, how it should behave, and what to avoid.
+1. Use `CONTRIBUTING.md` and workflow documentation for **processes**.<br/>
+   The agent needs to understand _how_ the work is done in the repository (branching strategy, testing requirements,
+   review conventions, etc).
+1. Skills and reference documentation should contain **domain knowledge**.<br/>
+   The agent can use them to specialize expertise it could not derive from the code alone (e.g. infrastructure patterns,
+   API design decisions, compliance requirements).
+1. **Cross-repo context** informs the model about how this project relates to others.<br/>
+   This is both the level most commonly missing and the one hardest to provide, because Claude Code does **not**
+   automatically load context from other projects.
+
+Tooling that agents interact with (linters, formatters, build scripts, test runners) needs to be _agent-compatible_ to
+avoid silent failures. Specifically, tools should allow to be used **non-interactively** (requiring no prompts or
+confirmations), accept **explicit** input (and not implicit defaults that require human context), produce **parseable**
+output (structured, or at least greppable), return **clear** exit codes, and ideally be **idempotent**.<br/>
+Interactive prompts cause agents to hang or send garbage input. Missing exit codes cause agents to miss failures
+entirely.
+
 See [Giving Claude its own knowledge base] for how to set up a persistent filesystem-based KB.
+
+### Compaction
+
+When the conversation approaches the model's context limit, Claude Code _compacts_ it automatically.<br/>
+It summarizes the current conversation, and the summary replaces the original messages as the new context for subsequent
+turns. One can compact manually using `/compact`, optionally passing focus instructions to steer what the summary
+retains.
+
+Compaction uses the **same model** as the active session. There is no `compactModel` setting that allows overriding
+this.<br/>
+Opus preserves more nuance and reasoning traces during compaction; Haiku loses subtle details, rejected alternatives,
+and intermediate reasoning. The model doing the compacting **directly** affects how much the session forgets after
+compaction.
+
+_Negative_ decisions are the primary casualty of the process. They include reasoning about **why** something was
+rejected, alternatives that were considered but discarded, and the context behind any choice. The structured compaction
+prompt has no dedicated section for "alternatives considered", so the compressor tends to keep the outcome but also drop
+the deliberation that led to it.<br/>
+If a decision's reasoning matters beyond the current turn, persist it (in a commit message, a doc file, or a task note)
+_before_ the context compresses.
+
+Compaction's own token costs are **not** reflected in the usage counters shown by `/cost`. The displayed input and
+output token counts cover only the main conversation turns, not the summarization work.
 
 ### Writing effective rules
 
@@ -1364,6 +1418,11 @@ expanded to the current user's home path, but it doesn't match the literal strin
 
 Rules in `settings.json` files should use **absolute** paths, e.g. `"Bash(git -C /home/some-user/path/to/whatever *)"`,
 or Claude needs to know to use `~/` **unquoted** in related commands instead of `$HOME/`.
+
+Compound shell commands (`&&`, `||`, `;`) are split **before** permission matching. Each sub-command is evaluated
+against the rules **independently**, so if `git status` is allowed but `cd /some/path` is not, the compound
+`cd /some/path && git status` might fail.<br/>
+Use directory-scoped flags like `git -C /some/path` instead of `cd` to keep the permission surface to a single command.
 
 Refine permissions using `PreToolUse` [hooks][using hooks].<br/>
 `deny` and `ask` rules are **still** evaluated **after** a hook returns _allow_. This allows using them to further
@@ -2516,7 +2575,9 @@ One can create custom sub-agents to handle specific tasks, e.g. domain-specific 
 [aws-infra-operator-rw]. This allows scoping MCP access to a single server, and enforcing read/write separation.
 
 Sub-agents are defined in Markdown files with YAML frontmatter.<br/>
-Create them manually or use the `/agents` command.
+Create them manually or use the `/agents` command.<br/>
+Agent definition files are **cached at session start**; edits made mid-session are not picked up. Restart the session to
+apply changes to agent definitions.
 
 Sub-agents' description affects how reliably they are called.<br/>
 _Directive_ phrasing (e.g., _Always use this agent for X, never do X directly_) delegates more consistently than
@@ -2612,8 +2673,8 @@ A Docker-based MCP server adds a fourth layer at the infrastructure level (`READ
 sandboxed credentials, etc.).
 
 Delegation was empirically tested with 5 increasingly complex queries. Delegation rate was 10/10 for all
-account-specific queries. The only dip (9/10) was for cross-service analytical questions that sound conceptual (_"are we
-over-provisioned?"_) but actually require live metrics.
+account-specific queries. The only dip (9/10) was for cross-service analytical questions that sound conceptual ("are we
+over-provisioned?") but actually require live metrics.
 
 The real risk is _over_-delegation: sending trivial queries through the agent when Docker startup (~30s) is
 disproportionate to the query. No mitigation short of a persistent HTTP-transport MCP server.
@@ -2728,6 +2789,22 @@ Gotchas:
   etc.). File-based agent definitions in `~/.claude/agents/` are **not** surfaced there.<br/>
   Invoke custom agents using natural language (_"use the kb-contributor agent"_) or `@`-mentioning them
   (`@kb-contributor`).
+
+When a task spans multiple repositories, the approach to take depends on how tightly coupled the changes are, and how
+much review each needs:
+
+| Strategy                     | Coupling | Review cadence   | Trade-off                                                          |
+| ---------------------------- | -------- | ---------------- | ------------------------------------------------------------------ |
+| `--add-dir` with permissions | Tight    | Inline           | Simple, but loads all directories' context at launch               |
+| Coordinator + sub-agents     | Medium   | Per-agent        | Good isolation, but sub-agents miss other projects' `CLAUDE.md`    |
+| Plan-as-handoff              | Loose    | Per-repo session | Coordination session produces a plan; per-repo sessions execute it |
+| Per-project memory pointers  | Loose    | Async            | Lightweight, but relies on the next session picking up the pointer |
+
+_Plan-as-handoff_ is the recommended default for tasks that are loosely-coupled and cross-repository.<br/>
+A coordination session reads the relevant repos, produces a concrete plan with per-repository action items, and saves it
+to a shared location. Separate sessions in each repo then execute their portion independently. The plan acts as a shared
+contract without requiring the sessions to share context. They must include all the information needed by the session to
+properly execute the changes.
 
 ### Agent teams
 
@@ -3051,6 +3128,7 @@ This gives one the best of both worlds:
 
 Claude code provides built-in tools to handle in-session work tracking (`TaskCreate`, `TaskUpdate`, `TaskList`,
 `TaskGet`).<br/>
+`TodoWrite` was deprecated and disabled by default since v2.1.142.<br/>
 Tasks are **ephemeral** and session-**specific**. They are **not** persisted to disk.
 
 Tasks progress through the following lifecycle: `pending` → `in_progress` → `completed` (or `deleted`).<br/>
