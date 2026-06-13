@@ -22,7 +22,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 1. [Using skills](#using-skills)
    1. [Skill frontmatter overrides](#skill-frontmatter-overrides)
    1. [Effort-aware skill content](#effort-aware-skill-content)
-   1. [Controlling skill visibility](#controlling-skill-visibility)
+   1. [Controlling the skill's visibility](#controlling-the-skills-visibility)
    1. [Findings about skill creation](#findings-about-skill-creation)
 1. [Using plugins](#using-plugins)
    1. [Plugins of interest](#plugins-of-interest)
@@ -296,7 +296,7 @@ Refer to [Built-in commands][built-in commands reference] for the complete list.
 /loop [interval] [prompt]                  Run a prompt on a recurring interval (alias of /proactive)
 /mcp                                       Manage MCP servers' connection and authentication
 /memory                                    Edit memory files, enable/disable auto-memory
-/model [model]                             Select the AI model to use during the conversation
+/model [model id or alias]                 Select the AI model to use during the conversation
 /permissions                               Manage allow, ask, and deny tool permission rules (alias of /allowed-tools)
 /plan [description]                        Enable plan mode or view the current session plan
 /plugin                                    Manage Claude Code plugins
@@ -459,8 +459,46 @@ Claude Code. Prefer **not** editing this file manually.<br/>
 
 See also [Configuration] and [Environment variables][environment variables reference].
 
+`model` accepts any model alias or a full model ID (e.g. `claude-opus-4-6[1m]`).
+
+| Alias          | Behavior                                                    | Notes                                                          |
+| -------------- | ----------------------------------------------------------- | -------------------------------------------------------------- |
+| `best`         | Most capable available model (currently Fable 5 or Opus)    |                                                                |
+| `mythos`       | Latest Mythos (Mythos 5 on Anthropic's API)                 | Where available                                                |
+| `fable`        | Latest Fable (Fable 5 on Anthropic's API)                   | Where available                                                |
+| `opus`         | Latest Opus (Opus 4.8 on Anthropic's API)                   |                                                                |
+| `opus[1m]`     | Opus with 1M token context window                           |                                                                |
+| `sonnet`       | Latest Sonnet (Sonnet 4.6 on Anthropic's API)               |                                                                |
+| `sonnet[1m]`   | Sonnet with 1M token context window                         |                                                                |
+| `haiku`        | Fast, efficient Haiku model                                 |                                                                |
+| `opusplan`     | Opus during plan mode, auto-switches to Sonnet in execution | During action, the model has no idea it used Opus for planning |
+| `opusplan[1m]` | Opusplan with 1M token context window                       |                                                                |
+| `default`      | Clears any model override, reverts to the account's default |                                                                |
+
+Starting from generation 4.6, model IDs switched to the dateless format (e.g. `claude-opus-4-8` instead of `claude-opus-4-5-20251101`).<br/>
+These are still pinned snapshots, not pointers to the latest version. The format just dropped the date suffix.
+
+| Model  | ID examples                                                                                      |
+| ------ | ------------------------------------------------------------------------------------------------ |
+| Mythos | `claude-mythos-5`                                                                                |
+| Fable  | `claude-fable-5`                                                                                 |
+| Opus   | `claude-opus-4-5-20251101`<br/>`claude-opus-4-6[1m]`<br/>`claude-opus-4-7`<br/>`claude-opus-4-8` |
+| Sonnet | `claude-sonnet-4-5-20250929`<br/>`claude-sonnet-4-5`<br/>`claude-sonnet-4-6[1m]`                 |
+| Haiku  | `claude-haiku-4-5-20251001`<br/>`claude-haiku-4-7`<br/>`claude-haiku-4-8`                        |
+
+`effort` overrides the calling session's effort level. Available levels depend on the active model:
+
+| Model                | Available levels                        | Session default | Notes                         |
+| -------------------- | --------------------------------------- | --------------- | ----------------------------- |
+| Opus 4.8             | `low`, `medium`, `high`, `xhigh`, `max` | `high`          | Always uses adaptive thinking |
+| Opus 4.7             | `low`, `medium`, `high`, `xhigh`, `max` | `xhigh`         |                               |
+| Opus 4.6, Sonnet 4.6 | `low`, `medium`, `high`, `max`          | `high`          |                               |
+
+Should one set a level the model doesn't support, Claude Code falls back to the **highest** supported level at or below
+the given setting, e.g. `xhigh` on Opus 4.6 becomes `high`.
+
 The `effortLevel` key in `settings.json` files accepts `low`, `medium`, `high`, and `xhigh` values, and, if not
-configured, it defaults to `xhigh` for Opus 4.7 and `high` for Opus and Sonnet 4.6 as of v2.1.117.<br/>
+configured, it defaults to `xhigh` for Opus 4.7 and `high` for Opus and Sonnet 4.6.<br/>
 Models support _subsets_ of the effort level: Opus and Sonnet 4.6 do not support `xhigh`, and Haiku does not support
 effort levels at all.
 
@@ -1551,28 +1589,7 @@ effort: xhigh
 > allowed-attribute list. They show as hints (lowest severity, not errors). The fields are valid in Claude Code; the
 > extension schema is behind the docs.
 
-`model` accepts any model alias or a full model ID (e.g. `claude-opus-4-7`).
-
-| Alias        | Behavior                                                    |
-| ------------ | ----------------------------------------------------------- |
-| `best`       | Most capable available model (currently Opus)               |
-| `opus`       | Latest Opus (Opus 4.7 on Anthropic API)                     |
-| `sonnet`     | Latest Sonnet (Sonnet 4.6 on Anthropic API)                 |
-| `haiku`      | Fast, efficient Haiku model                                 |
-| `opusplan`   | Opus during plan mode, auto-switches to Sonnet in execution |
-| `sonnet[1m]` | Sonnet with 1M token context window                         |
-| `opus[1m]`   | Opus with 1M token context window                           |
-| `default`    | Clears any model override, reverts to account default       |
-
-`effort` overrides the calling session's effort level. Available levels depend on the active model:
-
-| Model                | Available levels                        | Session default |
-| -------------------- | --------------------------------------- | --------------- |
-| Opus 4.7             | `low`, `medium`, `high`, `xhigh`, `max` | `xhigh`         |
-| Opus 4.6, Sonnet 4.6 | `low`, `medium`, `high`, `max`          | `high`          |
-
-Should one set a level the model doesn't support, Claude Code falls back to the **highest** supported level at or below
-the given setting, e.g. `xhigh` on Opus 4.6 becomes `high`.
+`model` accepts any model alias or a full model ID (e.g. `claude-opus-4-6[1m]`) as the normal [configuration] key would.
 
 > [!tip]
 > Prefer `effort: xhigh` over `effort: high` for complex skills. On Opus 4.7, `xhigh` is already the session default
@@ -1580,11 +1597,10 @@ the given setting, e.g. `xhigh` on Opus 4.6 becomes `high`.
 
 ### Effort-aware skill content
 
-As of v2.1.121, skill content can access the currently set effort level via `${CLAUDE_EFFORT}`. The variable is
-populated at invocation time with the active effort level (`low`, `medium`, `high`, `xhigh`, or `max`).<br/>
-Use it to adjust skill behavior by effort.
+The skill's content itself can access the currently set effort level using the `${CLAUDE_EFFORT}` variable.<br/>
+It is populated at invocation time with the **active** effort level (`low`, `medium`, `high`, `xhigh`, or `max`).
 
-<details style='padding: 0 0 1rem 1rem'>
+One can use it in templates in the skill's body to adjust the behavior depending on the current effort:
 
 ```md
 {{#if (eq ${CLAUDE_EFFORT} "low")}}
@@ -1594,19 +1610,18 @@ Run lint checks, then review architecture and test coverage.
 {{/if}}
 ```
 
-</details>
-
-### Controlling skill visibility
+### Controlling the skill's visibility
 
 The `skillOverrides` key in `settings.json` files controls how skills appear to the model and in `/` autocomplete:
 
-| Value                 | Effect                                                      |
-| --------------------- | ----------------------------------------------------------- |
-| `off`                 | Hidden from both model and `/` autocomplete                 |
-| `user-invocable-only` | Hidden from model (no proactive invocation), visible in `/` |
-| `name-only`           | Model sees name but collapsed description                   |
+| Value                 | Effect                                                                 |
+| --------------------- | ---------------------------------------------------------------------- |
+| `off`                 | Hidden from both the model and `/` autocomplete                        |
+| `user-invocable-only` | Hidden from the model (prevents proactive invocation), visible in `/`  |
+| `name-only`           | The model sees the skill's name, but only sees a collapsed description |
 
 <details style='padding: 0 0 1rem 1rem'>
+  <summary>Example</summary>
 
 ```json
 {
@@ -2533,6 +2548,8 @@ specific, actionable feedback on quality, security, and best practices.
 ```
 
 </details>
+
+`model` accepts any model alias or a full model ID (e.g. `claude-opus-4-6[1m]`) as the normal [configuration] key would.
 
 Agents can also be invoked in headless mode via `claude -p --agent <name>`, with `<name>` matching the agent file's
 `name` frontmatter field. The definition's body (after the YAML frontmatter) _becomes_ the system prompt for the agent.
