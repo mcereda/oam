@@ -166,6 +166,10 @@ The `Agent` tool routes to built-in agent types **and** user-level custom agents
 - The main session delegates automatically to dedicated sub-agents.
 - Each sub-agent has only the MCP servers it needs, defined inline in its frontmatter.
 
+The system context only gives Claude a date, but no time at all. No timestamp, no timezone, no clock.<br/>
+When in need to reason about things that require the time of day (e.g., scheduling, "do X within business hours", …),
+tell Claude the current time or timezone instead. It will work from that.
+
 <details>
   <summary>Setup</summary>
 
