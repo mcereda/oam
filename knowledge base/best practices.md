@@ -121,6 +121,15 @@ What really worked for me personally, or in my experience.
   interpretative capabilities_ (fast/small LLMs or just stupid users), pair them with their rationale and state
   negative cases explicitly.
 
+- Separate a design from its implementation details.
+
+  _Concepts_ decay on a different schedule than _implementations_. Workflow strategies will be valid long after the
+  specific file format changes.<br/>
+  Splitting them allows to freely iterate on the implementation details without churning the conceptual framework.
+
+  When doing a study, document it separately from its study cases. When doing software, separate interfaces from their
+  implementations and APIs from internals.
+
 ## Teamwork
 
 - Respect what is already there, but strive to improve it.<br/>
