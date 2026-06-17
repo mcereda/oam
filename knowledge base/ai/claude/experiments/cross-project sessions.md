@@ -65,7 +65,8 @@ settings or auto-memory from those directories.
 > `settings.json` and as a shell variable) did **not** load either `CLAUDE.md` or `.claude/rules/`; adding `--add-dir`
 > loaded both.
 
-Cross-project sessions can build on [global memory][Giving Claude a global memory], the use of `additionalDirectories`, and a plan file.<br/>
+Cross-project sessions can build on [global memory][Giving Claude a global memory], the use of `additionalDirectories`,
+and a plan file.<br/>
 The global memory tier (`~/.claude/memory/`) provides a shared place that is automatically loaded by all sessions, and
 acts as the coordination surface between sessions running in different repositories.
 
@@ -306,7 +307,7 @@ acts as the coordination surface between sessions running in different repositor
   - Idempotency caveats, version pins and tool-specific gotchas.
   - Credential sources (gopass paths, Secrets Manager ARNs).
 
-  Session working on instructions with missing details have to be manually supplemented with those information.
+  Sessions working on instructions with missing details have to be manually supplemented with that information.
 
 - Cross-project task handoffs must be written to a **shared** place that (possibly) loads automatically.
 
@@ -374,7 +375,7 @@ acts as the coordination surface between sessions running in different repositor
   The original session should renew its claim periodically, as long as it is still actively working on it.<br/>
   Should the claim be re-taken despite active work, the original session will notice it when it tries to mark the task
   `done`, as the claim file will have a different session ID.<br/>
-  At that point, the session should check whether the other session completed the work, and if so, discard it's own.
+  At that point, the session should check whether the other session completed the work, and if so, discard its own.
 
 - Should **all** sessions skip a subtask, each session would check claims, see nothing, but decide that "another session
   will handle it" based on a pre-assignment. This could happen when a pre-assigned session crashes without claiming.
@@ -458,14 +459,14 @@ acts as the coordination surface between sessions running in different repositor
 
 - A **dedicated directory** per each cross-project task eliminates write contention and makes progress visible.
 
-  Cross-project execution could rise issues like write contention (two sessions writing the same file simultaneously,
+  Cross-project execution could raise issues like write contention (two sessions writing the same file simultaneously,
   with the last writer winning) and duplicate work (two sessions independently performing the same shared subtask,
   without knowing the other will too).<br/>
   A dedicated directory solves contention by giving each session its own file; the [claiming protocol] (below) solves
   duplicate work. Together, they form a coordination framework that works across all three orchestration modes.
 
   The plan file must be treated as **read-only** after the planning phase, because it is the most-read file in the
-  directory,  and allowing execution sessions to edit it would reintroduce the contention the directory structure is
+  directory, and allowing execution sessions to edit it would reintroduce the contention the directory structure is
   meant to eliminate. If execution reveals the plan is wrong, the session notes the discrepancy in its own session file
   instead.
 
