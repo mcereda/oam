@@ -1,5 +1,10 @@
 # Personal experiments
 
+> [!important]
+> These experiments try to extend the capabilities of Claude, with **varying** degrees of success.<br/>
+> They feel like patching a leaking tank. Some changes would require to retrain the model so that the requirements stick
+> **without** the need of rules and continuous reminders.
+
 1. [Memory tiers](#memory-tiers)
    1. [Deciding where memory goes](#deciding-where-memory-goes)
    1. [Alternatives considered](#alternatives-considered)

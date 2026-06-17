@@ -625,13 +625,19 @@ The injected content is a **diff**, not the full file. For files that have not b
 mislead the model, which sees _what changed_ but has no baseline for _what the file currently contains_. Re-read the
 file **explicitly**, before acting on the diff.
 
-The `--add-dir` flag gives Claude access to additional directories outside the main working directory.<br/>
-By default, `CLAUDE.md` files from those directories are **not** loaded. Set
-`CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` to load them too.<br/>
-**Persist** additional directories across sessions using the `permissions.additionalDirectories` key in `settings.json`
-instead of the CLI flag.
+The `--add-dir` CLI flag gives Claude access to additional directories outside the main working directory **and** can
+trigger convention loading.<br/>
+`permissions.additionalDirectories` in `settings.json` persists the **file access** across sessions, but does **not**
+trigger convention loading, requiring the `--add-dir` CLI flag at launch for that.
+
+To load conventions (`CLAUDE.md` and `.claude/rules/`) from additional directories, a session needs **both** the
+`--add-dir` CLI flag **and** `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1`.<br/>
+Without the CLI flag, the environment variable has no effect even when set as a shell variable. Without the environment
+variable, `--add-dir` grants file access but does not load conventions.
 
 <details style='padding: 0 0 1rem 1rem'>
+
+Persist file access and the environment variable in `settings.json`:
 
 ```json
 {
@@ -646,10 +652,17 @@ instead of the CLI flag.
 }
 ```
 
+Then launch with the CLI flag to trigger convention loading:
+
+```sh
+claude --add-dir ~/path/to/company.wiki
+```
+
 </details>
 
-This is especially useful for projects that are frequently accessed from any session (e.g. wikis, shared KBs), but it
-does have the context cost of loading **each** additional directory's `CLAUDE.md` into session at the start.
+This is especially useful for projects that are frequently accessed from any session (e.g. wikis, shared KBs), but
+launching with `--add-dir` does have the context cost of loading each additional directory's `CLAUDE.md` and
+`.claude/rules/` into the session.
 
 Prefer using _rules_ for a more structured approach to organizing instructions.<br/>
 Rules live in `.claude/rules/*.md` and are discovered _recursively_.
@@ -917,11 +930,12 @@ Neither `git -C <some-other-project>` nor `cd <some-other-project>` causes the o
 `CLAUDE.md` files to appear in the current context. Sub-agents inherit the **parent**'s initial working directory, so
 they miss the other project's files too.
 
-Preload instruction files from additional directories at launch with the `--add-dir` CLI flag, or persist them across
-sessions via `permissions.additionalDirectories` in `settings.json` (user-level for cross-project access).<br/>
-Both require `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` to actually load the files. Without the environment
-variables, `additionalDirectories` only grants file access but does not trigger their loading.<br/>
-Skills from `.claude/skills/` in the additional directories load **regardless** of the environment variables.
+Preload instruction files (`CLAUDE.md` and `.claude/rules/`) from additional directories at launch with the `--add-dir`
+CLI flag and `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1`.<br/>
+Persist **file access** (but not convention loading) across sessions via `permissions.additionalDirectories` in
+`settings.json` (user-level for cross-project access). `additionalDirectories` only grants file access. The `--add-dir`
+CLI flag at launch is **still** required for convention loading, even when the environment variable is set.<br/>
+Skills from `.claude/skills/` in the additional directories load **regardless** of the environment variable.
 
 > [!tip]
 > When doing substantial work in another project mid-session, **explicitly** `Read` its instructions file to load it

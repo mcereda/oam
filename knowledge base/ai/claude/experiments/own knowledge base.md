@@ -329,7 +329,9 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   [Cross-project sub-agents][Claude Code / cross-project sub-agents] for the mechanics needed to make this work.
 
   This separation (caller owns judgment, agent owns plumbing) is what keeps the agent reliable. If the agent had to
-  interpret content, it would fail the same way humans fail by second-guessing the caller.
+  interpret content, it would fail the same way humans fail by second-guessing the caller.<br/>
+  See [Cross-project sessions] for the broader strategies of coordinating work across repositories, including the
+  planning phase that produces the content these agents file.
 
 - Complex KB workflows (ingestion, review, extraction triage, retraction) benefit from being packaged as
   [skills][Claude Code / skills].
@@ -824,13 +826,13 @@ write files, run lint) can stay identical.
   -->
 
 <!-- In-article sections -->
-
 <!-- Knowledge base -->
 [Claude Code / billing]: ../claude%20code.md#billing
 [Claude Code / cross-project sub-agents]: ../claude%20code.md#cross-project-sub-agents
 [Claude Code / skills]: ../claude%20code.md#skills
 [Claude Code / sub-agents]: ../claude%20code.md#sub-agents
 [Claude Code / using hooks]: ../claude%20code.md#using-hooks
+[Cross-project sessions]: cross-project%20sessions.md
 [Git worktrees]: ../../../git.md#worktrees
 [Giving Claude global memory]: global%20memory.md
 [Lefthook]: ../../../lefthook.md

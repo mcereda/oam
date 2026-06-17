@@ -12,6 +12,7 @@ MD028:  # no-blanks-blockquote
   false
 MD033:  # no-inline-html
   allowed_elements:
+    - a
     - b
     - br
     - code
