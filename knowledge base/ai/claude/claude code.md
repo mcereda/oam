@@ -3403,7 +3403,7 @@ Claude Code version: `v2.1.41`.
 [Git worktrees]: ../../git.md#worktrees
 [Giving Claude a global memory]: experiments/global%20memory.md
 [Giving Claude a reverie-like system]: experiments/reveries.md
-[Giving Claude its own knowledge base]: experiments/own%20knowledge%20base.md
+[Giving Claude its own knowledge base]: experiments/llm-owned%20knowledge%20base.md
 [LMs / Improving interactions]: ../lms.md#improving-interactions
 [MCP]: ../mcp.md
 [Ollama]: ../ollama.md

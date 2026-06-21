@@ -682,7 +682,7 @@ assist you by, for example, exiting the session and resuming it.
 [CONTRIBUTING.md]: ../contributingmd.md
 [Gemini CLI]: gemini/cli.md
 [Giving Claude a reverie-like system]: claude/experiments/reveries.md
-[Giving Claude its own knowledge base]: claude/experiments/own%20knowledge%20base.md
+[Giving Claude its own knowledge base]: claude/experiments/llm-owned%20knowledge%20base.md
 [LMs / Concerns]: lms.md#concerns
 [LMs / Context window]: lms.md#context-window
 [LMs / LLMs]: lms.md#large-language-models

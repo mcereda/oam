@@ -662,7 +662,7 @@ acts as the coordination surface between sessions running in different repositor
 <!-- Knowledge base -->
 [Claude Code]: ../claude%20code.md
 [Giving Claude a global memory]: global%20memory.md
-[Giving Claude its own knowledge base]: own%20knowledge%20base.md
+[Giving Claude its own knowledge base]: llm-owned%20knowledge%20base.md
 
 <!-- Upstream -->
 [Documentation / Additional directories]: https://docs.anthropic.com/en/docs/claude-code/settings#additional-directories
