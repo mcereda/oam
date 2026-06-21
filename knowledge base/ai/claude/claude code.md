@@ -1862,11 +1862,12 @@ claude plugin uninstall 'gitlab@claude-plugins-official' --prune
 
 ### Plugins of interest
 
-| Plugin        | ID                                      | Summary                       |
-| ------------- | --------------------------------------- | ----------------------------- |
-| [AWS Toolkit] | `aws-core@claude-plugins-official`      | Interact with AWS resources   |
-| GitLab        | `gitlab@claude-plugins-official`        | Access and use GitLab servers |
-| Skill creator | `skill-creator@claude-plugins-official` | Create and improve skills     |
+| Plugin                              | ID                                      | Summary                                  |
+| ----------------------------------- | --------------------------------------- | ---------------------------------------- |
+| [AWS Toolkit]                       | `aws-core@claude-plugins-official`      | Interact with AWS resources              |
+| GitLab                              | `gitlab@claude-plugins-official`        | Access and use GitLab servers            |
+| [Ponytail][dietrichgebert/ponytail] | `ponytail@ponytail`                     | Force the simplest and shortest solution |
+| Skill creator                       | `skill-creator@claude-plugins-official` | Create and improve skills                |
 
 <details>
   <summary>AWS Toolkit</summary>
@@ -3482,3 +3483,4 @@ Claude Code version: `v2.1.41`.
 [Settings' schema]: https://www.schemastore.org/claude-code-settings.json
 [The Claude Skills I Actually Use for DevOps]: https://www.pulumi.com/blog/top-8-claude-skills-devops-2026/
 [Writing a good CLAUDE.md]: https://www.humanlayer.dev/blog/writing-a-good-claude-md
+[dietrichgebert/ponytail]: https://github.com/dietrichgebert/ponytail
