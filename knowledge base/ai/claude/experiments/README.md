@@ -35,6 +35,34 @@ ignoring the platform features it depends on.
 | Knowledge base | Dedicated git repository            | On demand (`Grep`/`Read`), with hook-based reminders                     | Reusable patterns, gotchas, reference  | Experimental |
 | Reveries       | `~/.claude/reveries.md`             | Injected at the start of **every** session via `SessionStart` hook       | Session texture, atmosphere            | Experimental |
 
+Each tier serves a distinct cognitive function, inspired by Clark and Chalmers' [extended mind][The Extended Mind] thesis
+and Schacter's [implicit memory][Understanding implicit memory] research:
+
+| Tier              | Research analog                       | Mode                                   |
+| ----------------- | ------------------------------------- | -------------------------------------- |
+| **KB**            | Otto's notebook                       | Explicit retrieval                     |
+| **Auto-memory**   | Embedded extended memory (project)    | Auto-loaded index, on-demand retrieval |
+| **Global memory** | Embedded extended memory (user-wide)  | Auto-loaded index, on-demand retrieval |
+| **Reveries**      | Priming stimuli                       | Exposure shapes processing             |
+
+Same substrate (markdown files), different cognitive roles:
+
+- The KB needs **clarity** because its job is the retrieval of information from an external source.
+- [Reveries][Giving Claude a reverie-like system] need **imprecision** because their job is priming.
+- Auto-memory sits in between the other two. Structured enough for on-demand lookup, lightweight enough for always-on
+  loading.
+
+The findings from the priming tier (load first, use the impressionistic form, and prefer distinctive entries when
+pruning) ground empirically into LLM-specific research, which validates its design:
+
+- Atmospheric narratives outperform explicit directives for shaping agent behavior ([The Power of Stories]).
+- Early-context position maximizes priming influence ([Priming, Path-dependence, and Plasticity]).
+- Distinctive primes carry more weight than familiar ones
+  ([Do Language Models Exhibit Human-like Structural Priming Effects?]).
+
+The purpose of this ecosystem is to _cultivate_ Claude by accumulating patterns, concepts, and information that compound
+over time. It is meant to extend and nudge the model naturally, instead of just recording corrections and rules.
+
 > [!important] Reminder: context is **not** memory
 > Context files (`CLAUDE.md`, rules) are meant to be **human**-curated and carry instructions Claude should **not**
 > diverge from. Memory should be **freely** writable by Claude, accumulate over sessions, and carry **learnings**
@@ -265,11 +293,19 @@ cross-memory linking, format validation).
 [AI agents]: ../../agents.md
 [Claude Code / auto memory]: ../claude%20code.md#auto-memory
 [Claude Code]: ../claude%20code.md
+[Giving Claude a reverie-like system]: reveries.md
+
+<!-- Files -->
+[The Extended Mind]: ../../study%20material/the%20extended%20mind%20%20clark,%20chalmers%20%201998.pdf
+[Understanding implicit memory]: ../../study%20material/understanding%20implicit%20memory%20%20daniel%20schacter%20%201992.pdf
 
 <!-- Upstream -->
 [Documentation / Memory]: https://code.claude.com/docs/en/memory
 [Manage Claude's memory]: https://code.claude.com/docs/en/memory
 
 <!-- Others -->
+[Do Language Models Exhibit Human-like Structural Priming Effects?]: https://arxiv.org/abs/2406.04847
 [karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
+[Priming, Path-dependence, and Plasticity]: https://arxiv.org/abs/2605.05767
+[The Power of Stories]: https://arxiv.org/abs/2505.03961
 [thedotmack/claude-mem]: https://github.com/thedotmack/claude-mem

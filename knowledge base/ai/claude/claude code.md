@@ -959,10 +959,12 @@ respect. Refer to [Personal experiments / Memory tiers][personal experiments / m
 
 Refer to [Tools reference].
 
-Claude Code comes with built-in tools (e.g. run shell commands, read and write files, search the web).<br/>
-It can be extended to other tools by means of MCP servers and [skills][using skills].
+Tools allow Claude Code to perform discrete actions to interact with the environment.<br/>
+Claude Code comes with some _built-in_ tools to, e.g., run shell commands, read and write files, search the web).<br/>
+It can be extended with [MCP] servers and [skills][using skills].
 
-MCP servers connect Claude Code to the data and give it tools to act on it, skills teach it what to do with them.
+MCP servers connect Claude Code to external services and data, giving it new tools to act with. Skills teach it _how_
+and _when_ to use those tools for specific workflows.
 
 > [!caution]
 > MCPs are **not** verified, nor otherwise checked for security issues.<br/>
@@ -1581,6 +1583,10 @@ See also:
 - [Anthropic's own source-available skills][anthropics/skills]
 - [Prat011/awesome-llm-skills].
 - This repository's [skills][claude-code/skills] and [skill examples][examples/claude-code/skills].
+
+Skills are reusable sets of instruction that teach Claude _how_ to perform specific **repeatable** workflows. They
+define what Claude _should do_ for a given task like a multi-step review process, an ingestion workflow, or a deployment
+procedure, packaging the judgment and sequencing that one would otherwise need to re-explain it every session.
 
 Claude Skills follow and extend the [Agent Skills] standard format.
 
@@ -2560,6 +2566,11 @@ tier (memory, KB, or wherever the insight belongs).
   > Test terminal notification sequences from a standalone terminal tab, not from within a Claude Code Bash session.
 
 ## Delegating work
+
+Claude Code can delegate work to other Claude instances. Those run in their **own** context, with their **own** tools
+and permissions.<br/>
+Useful for parallelizing independent tasks, isolating operations that need specific tools (e.g. a single MCP server),
+or scoping the blast radius of write operations.
 
 [Agent teams] generally perform parallel tasks in less time, but consume more tokens (about N times, for N agents).<br/>
 [Sub-agents] currently consistently produce better quality output than teams.

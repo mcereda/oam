@@ -12,6 +12,16 @@ notebook_ for durable, reusable knowledge.
 
 This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and iteratively improves upon it.
 
+The KB is the _explicit retrieval_ tier in the [memory ecosystem][Personal experiments / Memory tiers], designed around
+Clark and Chalmers' parity principle (a reference notebook that requires explicit retrieval can play the same functional
+role as biological memory for stored beliefs).<br/>
+The design choices follow from that role:
+
+- Needs _clarity_, because its job is to store information and beliefs.
+- Has grep-based access, because a model needs to use tools to consult it on demand (it is not auto-loaded, and grep
+  felt the better solution at the time of the study).
+- Needs to be _curated_, because uncurated reference material degrades its retrieval performance.
+
 > [!important]
 > Not every insight is KB material. The negative space is at least as important as the positive one.
 >
@@ -32,6 +42,11 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
 >
 > Rule of thumb: if the official docs answer the question in one read, do **not** duplicate it in the KB but just
 > reference it instead. If one had to cross-reference three sources or discover it empirically, that is worth a page.
+
+The KB's role is to _cultivate_ Claude and guide it naturally by accumulating patterns, gotchas, and non-obvious
+synthesis that compound over time, not recording corrections or rules to follow.<br/>
+Corrections and rules belong to different systems (auto-memory for corrections, context files for rules). The KB needs
+to store information abstracted from practice, that is reusable across projects and sessions.
 
 ## Setup
 
@@ -274,6 +289,16 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   field's value as a staleness signal; a page would show recent dates from routine maintenance, hiding genuine content
   age.
 
+- Sessions that consult a KB page via `grep` tend to act on its content **without** checking staleness markers
+  (`review-after`, `confidence`, `verified-against`).
+
+  This enacts the [eagerness problem][Cross-project sessions / eagerness problem] observed during cross-project testing,
+  where sessions grab what looks actionable but do not verify whether it is still current.<br/>
+  A stale page with an inflated `updated` date (from metadata-only edits; see above) compounds this by looking fresher
+  than its content is.<br/>
+  A `SessionStart` hook or `CLAUDE.md` rule that reminds the model to check staleness markers before acting on KB
+  content could provide a mechanical trigger that works against the pressure that eagerness poses.
+
 - Enriching a page by comparing it against a single reference document has a **shared blind spot** problem.
 
   The comparison only surfaces gaps that exist in the target but are covered by the reference. If both documents share
@@ -333,6 +358,11 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   See [Cross-project sessions] for the broader strategies of coordinating work across repositories, including the
   planning phase that produces the content these agents file.
 
+  Sub-agents inherit the parent session's CWD, **not** their target project's, meaning that they do **not**
+  automatically load the target repository's `CLAUDE.md`, `.claude/rules/`, or `settings.json`. The filing agent can
+  work despite this gap if it is instructed to read the KB's `CLAUDE.md` **explicitly** as part of its contribution
+  workflow.
+
 - Complex KB workflows (ingestion, review, extraction triage, retraction) benefit from being packaged as
   [skills][Claude Code / skills].
 
@@ -354,12 +384,22 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
   > can resolve to different versions over time, and pinning to the ID ensures consistent behavior even when new model
   > versions are released. Update the pin deliberately when ready to adopt a new version.
 
+  This is part of the broader pattern where judgment-heavy operations (routing decisions, contribution filing, curation)
+  consistently degrade when using models below Opus across the memory experiments. Faster models pattern-match where
+  they should reason, producing silently wrong results rather than obviously broken ones.
+  [Giving Claude a reverie-like system] documents per-model-class bright lines in detail, where the same pattern caused
+  Haiku to be barred from writing reveries entirely and Sonnet to require explicit approval.
+
 - Filing agents strongly benefit from worktree isolation (e.g., [git worktrees]), especially when one works with many
   parallel sessions that could make changes concurrently.
 
-  Some agents failed mid-operation, leaving a dirty state behind (partial writes, lint failures, interrupted commits).
-  That blocked, polluted, or otherwise complicated the main session's commits, other concurrent agents, and pre-commit
-  hooks.<br/>
+  Without isolation, filing agents dispatched from parallel sessions share the same working tree. Both write to
+  `index.md`, both stage files, and the last committer's version of the index wins; the first agent's entry is silently
+  lost. Any append-only shared file (`log.md`, `deferred.md`) is equally vulnerable.
+
+  Agent failures compound this. Some agents failed mid-operation, leaving a dirty state behind (partial writes, lint
+  failures, interrupted commits). That blocked, polluted, or otherwise complicated the main session's commits, other
+  concurrent agents, and pre-commit hooks.<br/>
   When not directly blocking, the failure would stay silent until the next `git status` or commit attempt, which
   required manual cleanup.
 
@@ -589,13 +629,21 @@ This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and 
     Prompts like _Anything to note?_ and _what did you learn?_ invite reflexive dismissal, or straight up performance.
     _Did friction, surprise, or a workaround surface?_ is specific enough to check against actual experience.
 
-  **Delegation** can be used as a complement. The model failed so save recognised insights because the save action
+  **Delegation** can be used as a complement. The model failed to save recognised insights because the save action
   itself feels like a context switch (open files, write frontmatter, update index, lint, commit) and a separate
   bottleneck to it.<br/>
-  A background filing agent that handles the mechanics simplifies and reduces that perceived cost from a _multi-step
-  detour_ to _compose one payload and delegate_. The save action becomes part of the task report, and not a separate
-  action to execute after it.<br/>
+  This appears to be caused by a fatigue pattern, where the substantive work feels done, and the filing feels like
+  cleanup. Quality degrades at precisely this moment because the session has already spent its judgment budget on the
+  task itself.<br/>
+  A background filing agent that handles the mechanics reduces that perceived cost from a _multi-step detour_ to
+  _compose one payload and delegate_. The save action becomes part of the task report, and not a separate action to
+  execute after it.<br/>
   See [Cross-project sub-agents][claude code / cross-project sub-agents] for the mechanism.
+
+The KB relies on three complementary cross-project modes: **filing agents** for live writes from any session, a **memory
+inbox** for deferred promotion during review sessions, and an **extraction hook** as a backstop for missed insights.
+Review sessions that need both the KB and another project's context can use `--add-dir` for convention loading from both
+repositories.
 
 ## Improvements
 
@@ -829,14 +877,17 @@ write files, run lint) can stay identical.
 <!-- Knowledge base -->
 [Claude Code / billing]: ../claude%20code.md#billing
 [Claude Code / cross-project sub-agents]: ../claude%20code.md#cross-project-sub-agents
-[Claude Code / skills]: ../claude%20code.md#skills
+[Claude Code / skills]: ../claude%20code.md#using-skills
 [Claude Code / sub-agents]: ../claude%20code.md#sub-agents
 [Claude Code / using hooks]: ../claude%20code.md#using-hooks
+[Cross-project sessions / eagerness problem]: cross-project%20sessions.md#eagerness-problem
 [Cross-project sessions]: cross-project%20sessions.md
 [Git worktrees]: ../../../git.md#worktrees
+[Giving Claude a reverie-like system]: reveries.md
 [Giving Claude global memory]: global%20memory.md
 [Lefthook]: ../../../lefthook.md
 [Ollama]: ../../ollama.md
+[Personal experiments / Memory tiers]: README.md#memory-tiers
 
 <!-- Files -->
 [settings.json file example for own KB]: ../../../../examples/claude-code/own-kb/kb.settings.json

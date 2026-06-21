@@ -13,10 +13,10 @@ Family of [LLMs][large language models] developed by Anthropic.
 
 ## TL;DR
 
-As of 2026-05, the model family is **Claude 4.X**. All models support text and image input, text output, multilingual
-capabilities, and vision.<br/>
-Current model IDs: Opus 4.7 (`claude-opus-4-7`), Opus 4.6 (`claude-opus-4-6`), Sonnet 4.6 (`claude-sonnet-4-6`),
-Haiku 4.5 (`claude-haiku-4-5-20251001`).
+As of 2026-06, the model family spans **Claude 4.X**, **Fable 5** and **Mythos 5**. All models support text and image
+input, text output, multilingual capabilities, and vision.<br/>
+Current model IDs include `claude-opus-4-8`, `claude-opus-4-6[1m]`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001`,
+`claude-fable-5`, and `claude-mythos-5`. Refer to [Claude Code] for the full model alias table and ID examples.
 
 Prefer **Opus** for the most _demanding_ tasks or when in need for deep reasoning, e.g. large-scale code refactoring,
 complex architectural decisions, multi-step research and analysis, or advanced agentic workflows.<br/>
@@ -226,6 +226,7 @@ Create a recurring job:
 [Models' code of conduct]: #models-code-of-conduct
 
 <!-- Knowledge base -->
+[Claude Code]: claude%20code.md
 [Gemini]: ../gemini/README.md
 [Large Language Models]: ../lms.md#large-language-models
 [LLM's interaction tips]: ../lms.md#improving-interactions
