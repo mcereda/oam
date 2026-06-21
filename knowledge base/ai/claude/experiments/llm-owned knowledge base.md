@@ -890,9 +890,9 @@ write files, run lint) can stay identical.
 [Personal experiments / Memory tiers]: README.md#memory-tiers
 
 <!-- Files -->
-[settings.json file example for own KB]: ../../../../examples/claude-code/own-kb/kb.settings.json
-[User-level CLAUDE.md example for own KB]: ../../../../examples/claude-code/own-kb/user.CLAUDE.md
-[User-level settings.json patch example for own KB]: ../../../../examples/claude-code/own-kb/user.settings.patch.json
+[settings.json file example for own KB]: ../../../../examples/claude-code/llm-owned%20kb/kb.settings.json
+[User-level CLAUDE.md example for own KB]: ../../../../examples/claude-code/llm-owned%20kb/user.CLAUDE.md
+[User-level settings.json patch example for own KB]: ../../../../examples/claude-code/llm-owned%20kb/user.settings.patch.json
 
 <!-- Upstream -->
 
