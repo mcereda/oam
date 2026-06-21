@@ -31,11 +31,13 @@ Read wiki pages from a GitLab instance using whichever tools are available.
 Before doing anything, verify that at least one wiki-access method exists in
 this session. Check in order:
 
-1. **GitLab MCP tools** — look for any tool prefixed with `mcp__` that relates
+1. **Local wiki checkout**: check if the wiki is cloned locally first. Look for
+   a `.wiki.git` clone or a sibling directory ending in `.wiki`, or use Glob for
+   wiki-style `.md` files nearby. A local clone is the fastest path and needs no
+   auth or network access.
+2. **GitLab MCP tools**: look for any tool prefixed with `mcp__` that relates
    to GitLab and supports a `search` operation with `scope: "wiki_blobs"`.
-2. **`gitlab` CLI** — run `which gitlab` to check if python-gitlab is installed.
-3. **Local wiki checkout** — check if the current directory (or a sibling) is a
-   `.wiki.git` clone, or use Glob to look for wiki-style `.md` files.
+3. **`gitlab` CLI**: run `which gitlab` to check if python-gitlab is installed.
 
 If **none** of these are available and nothing in the environment points to
 GitLab (no GitLab remote in `git remote -v`, no MCP tools), stop early and tell
@@ -94,10 +96,19 @@ explicit scope.
 
 ## Choosing your tools
 
-Check what is available in this session and prefer MCP when it exists — it is
-faster, avoids sandbox configuration, and can search content server-side.
+Prefer a local clone when one exists: it is the fastest path, needs no auth,
+and works offline. Use MCP when there is no local clone. Fall back to the CLI
+only when neither of the above is available.
 
-### GitLab MCP tools (preferred)
+### Local checkout (preferred when available)
+
+GitLab wikis are git repositories. If the wiki is cloned locally (check the
+current working directory — you may already be inside it), read pages directly
+as Markdown files using Glob, Grep, and Read. No auth or configuration needed.
+Slugs map to file paths by appending `.md`, e.g. `Guides/Deploy-Process`
+becomes `Guides/Deploy-Process.md`.
+
+### GitLab MCP tools (when no local clone)
 
 Find the GitLab MCP `search` tool (prefix varies: `mcp__plugin_gitlab_gitlab__`,
 `mcp__gitlab__`, etc.) and call it with:
@@ -111,21 +122,12 @@ Results include content snippets alongside page paths. For straightforward
 questions, the snippets alone may contain the answer — check before doing a full
 page fetch.
 
-### `gitlab` CLI (second choice)
+### `gitlab` CLI (last resort)
 
 The `gitlab` CLI (python-gitlab) works everywhere but requires a configuration
 file with connection details and a personal access token. If you encounter
 `No config file found` or `permission denied`, read `setup.md` in this skill's
 directory for setup instructions and walk the user through it.
-
-### Local checkout (last resort, but fast)
-
-GitLab wikis are git repositories. If the wiki is cloned locally (check the
-current working directory — you may already be inside it), you can read pages
-directly as Markdown files using Glob, Grep, and Read. This bypasses both MCP
-and CLI entirely and needs no configuration. Slugs map to file paths by
-appending `.md` — e.g. `Guides/Deploy-Process` becomes
-`Guides/Deploy-Process.md`.
 
 ## Workflow
 
@@ -139,7 +141,7 @@ runbook costs real time. Only ask first when the topic is genuinely ambiguous.
 - **Search automatically**: explicit wiki/runbook/ADR request, or clearly about
   an internal process, convention, or architectural decision.
 - **Ask first** ("Might be in the wiki — want me to check?"): could be answered
-  by vendor docs *or* internal docs and you can't tell which (e.g. "how do I set
+  by vendor docs _or_ internal docs and you can't tell which (e.g. "how do I set
   up Redis" — generic setup vs. the team's specific Redis conventions).
 
 ### Step 1: Find the page
@@ -147,8 +149,7 @@ runbook costs real time. Only ask first when the topic is genuinely ambiguous.
 Determine what the user wants: a specific page (by slug, name, or identifier), a
 topic search, or an enumeration of what exists.
 
-**Slug already known** (user pasted it or you recall it) — go straight to Step
-2.
+**Slug already known** (user pasted it or you recall it): go straight to Step 2.
 
 **Searching by keyword or topic:**
 
@@ -159,9 +160,11 @@ exhaustively trying variations. Fetching a full page via CLI is worthwhile when
 MCP snippets look relevant but incomplete; skip it when the snippets already
 answer the question.
 
-Follow the fallback chain from **Choosing your tools** (MCP → CLI → local). Key
+Follow the fallback chain from **Choosing your tools** (local → MCP → CLI). Key
 notes:
 
+- **Local:** Glob for `**/*keyword*` or `**/*.md`, Grep content, Read matching
+  files.
 - **MCP:** if snippets already answer the question, skip Step 2 and go to Step
   3.
 - **CLI list:** always pass `--per-page 100` — the default of 20 truncates most
@@ -173,9 +176,6 @@ notes:
   ```
 
   Each entry has `slug` and `title`. Match loosely against the user's query.
-
-- **Local:** Glob for `**/*keyword*` or `**/*.md`, Grep content, Read matching
-  files.
 
 **Browsing / enumeration** (user wants to see what exists): list pages via CLI
 or Glob the local checkout, then present a concise numbered summary of titles so
@@ -214,6 +214,11 @@ path.
   follow-ups.
 
 ### Step 4: Anchor this knowledge so future sessions don't miss it
+
+Before proposing any additions to CLAUDE.md or to the wiki itself, first read
+the wiki's `Home.md` (or equivalent index page) and `CONTRIBUTING.md` to check
+whether the content already exists. What looks like a gap from the code often
+has a dedicated wiki page; duplicating it creates drift rather than value.
 
 After any lookup — successful or partial — check whether the project's CLAUDE.md
 already points to this wiki content. If it doesn't, draft a concrete addition
