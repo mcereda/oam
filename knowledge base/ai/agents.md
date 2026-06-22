@@ -581,6 +581,14 @@ refactoring, generating tests or boilerplate, and documentation.
 changed, should something go wrong in the process.<br/>
 Review and test changes **incrementally**, especially when involving critical files.
 
+Offload _mechanical_ operations from agents where possible (e.g. by using deterministic scripts), especially when
+building automation, hooks, or CI for repositories where the primary operator is an agent.<br/>
+Those actions only fail when something goes wrong, not when an agent hallucinates (e.g. makes a typo in a command's
+path). Making an agent execute deterministic operations costs a full cycle (token spend, tool calls, context
+reconstruction), but requires **none** of the complexity the agent has.<br/>
+Only make an agent execute mechanical operations when the action requires context only the agent has (e.g. the model's
+identity) or judgment (e.g. writing a rationale).
+
 Prefer CLI utilities over MCP servers. They're lighter, faster, independent, work offline (unless they require
 connecting to a server), and do not hog the session's context just by existing.<br/>
 Prefer MCP servers over CLI tools when requiring persistent states across sessions or bidirectional communication, or
