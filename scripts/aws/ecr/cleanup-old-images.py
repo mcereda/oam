@@ -2,7 +2,7 @@
 
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["boto3", "pyyaml", "rich"]
+# dependencies = ["boto3>=1.43", "pyyaml", "rich"]
 # ///
 
 """
@@ -26,8 +26,13 @@ Usage:
         uv run cleanup-old-images.py <repository> <repository/N> -d --check-ecs --check-lambda --check-eks
         uv run cleanup-old-images.py --all -d --check-ecs --check-lambda --check-eks --verbose
         uv run cleanup-old-images.py --all -d -o json | jq '.repositories[].candidates[].digest'
+    - archive:
+        uv run cleanup-old-images.py <repository> --archive                    # dry-run
+        uv run cleanup-old-images.py <repository> -a --execute                 # effectively archive
+        uv run cleanup-old-images.py <repository> -a --older-than 60
     - plan for later:
         uv run cleanup-old-images.py <repository> -d --check-eks --plan-file plan.json   # save results as the plan
+        uv run cleanup-old-images.py <repository> -a --plan-file plan.json               # archive plan
         uv run cleanup-old-images.py --plan-file plan.json --execute                     # apply a saved plan
         uv run cleanup-old-images.py --plan-file plan.json --execute --force             # apply, and skip warnings
 """
@@ -118,6 +123,8 @@ class Image:
     last_pull: datetime | None
     size_bytes: int
     media_type: str | None = None
+    image_status: str | None = None         # ACTIVE | ARCHIVED | ACTIVATING
+    last_archived_at: datetime | None = None
     platform: str | None = None             # set only for index children
     children: list["Image"] | None = None   # set only for indices
 
@@ -171,6 +178,8 @@ def fetch_repository(ecr, repository: str) -> list[Image]:
             last_pull=r.get("lastRecordedPullTime"),
             size_bytes=r.get("imageSizeInBytes", 0),
             media_type=r.get("imageManifestMediaType"),
+            image_status=r.get("imageStatus"),
+            last_archived_at=r.get("lastArchivedAt"),
         )
         for r in raw
     ]
@@ -261,6 +270,11 @@ def find_candidates(
     cutoff = datetime.now(timezone.utc) - timedelta(days=older_than_days)
     epsilon = timedelta(days=7)
 
+    # ECR archive tier has a 90-day minimum billing period; deleting earlier
+    # still incurs the full charge.
+    archive_min_days = 90
+    archive_cutoff = datetime.now(timezone.utc) - timedelta(days=archive_min_days)
+
     # Protect the N most recently pushed top-level images unconditionally.
     protected_by_count: set[str] = set()
     if keep_last > 0:
@@ -297,6 +311,10 @@ def find_candidates(
         if img.digest in protected_by_count:
             kept.append(img)
             continue
+        if img.image_status == "ARCHIVED":
+            if img.last_archived_at is None or img.last_archived_at >= archive_cutoff:
+                kept.append(img)
+                continue
         if img.is_index:
             if img.digest in poisoned:
                 deploy_once = (
@@ -568,7 +586,7 @@ def execute_delete(ecr, repository: str, digests: list[str], total_size_bytes: i
                 f"  FAILED {img_id.get('imageDigest', '?')[:19]} — {f['failureCode']}: {f['failureReason']}"
             )
     size_note = f", {_size(total_size_bytes)}" if total_size_bytes else ""
-    print(f"Deleted: {total_deleted}/{len(digests)} digest(s){size_note}")
+    print(f"Deleted: {repository}: {total_deleted}/{len(digests)} digest(s){size_note}")
 
 
 def execute_archive(ecr, repository: str, digests: list[str], total_size_bytes: int = 0) -> None:
@@ -581,6 +599,7 @@ def execute_archive(ecr, repository: str, digests: list[str], total_size_bytes: 
     """
 
     succeeded = 0
+    skipped = 0
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -591,19 +610,25 @@ def execute_archive(ecr, repository: str, digests: list[str], total_size_bytes: 
     ) as progress:
         archive_task = progress.add_task(f"Archiving {repository}", total=len(digests))
         for digest in digests:
-            resp = ecr.update_image_storage_class(
-                repositoryName=repository,
-                imageId={"imageDigest": digest},
-                targetStorageClass="ARCHIVE",
-            )
+            try:
+                resp = ecr.update_image_storage_class(
+                    repositoryName=repository,
+                    imageId={"imageDigest": digest},
+                    targetStorageClass="ARCHIVE",
+                )
+            except ecr.exceptions.ImageStorageClassUpdateNotSupportedException:
+                skipped += 1
+                progress.advance(archive_task)
+                continue
             status = resp.get("imageStatus", "?")
             if status in ("ARCHIVED", "ACTIVATING"):
                 succeeded += 1
             else:
                 print(f"  UNEXPECTED STATUS {digest[:19]} — {status}")
             progress.advance(archive_task)
+    skip_note = f" ({skipped} skipped — referenced by active index)" if skipped else ""
     size_note = f", {_size(total_size_bytes)}" if total_size_bytes else ""
-    print(f"Archived: {succeeded}/{len(digests)} digest(s){size_note}")
+    print(f"Archived: {repository}: {succeeded}/{len(digests)} digest(s){size_note}{skip_note}")
 
 
 def _run_execute_plan(ecr, plan_file: str, force: bool) -> None:
@@ -1044,6 +1069,8 @@ def _deserialize_images(data: list[dict]) -> list[Image]:
             last_pull=_dt(d.get("last_pull")),
             size_bytes=d.get("size_bytes", 0),
             media_type=d.get("media_type"),
+            image_status=d.get("image_status"),
+            last_archived_at=_dt(d.get("last_archived_at")),
             platform=d.get("platform"),
         )
         for d in data
@@ -1636,12 +1663,12 @@ def main() -> None:
         if args.cache_dir:
             cached = _load_cache(args.cache_dir, repo)
             if cached is not None:
-                _log_main.info("cache hit: %s (%d images)", repo, len(cached))
+                _log_main.debug("cache hit: %s (%d images)", repo, len(cached))
                 return cached
         images = fetch_repository(session.client("ecr"), repo)
         if args.cache_dir:
             _save_cache(args.cache_dir, repo, images)
-            _log_main.info("cache saved: %s", repo)
+            _log_main.debug("cache saved: %s", repo)
         return images
 
     _log_main.info(
