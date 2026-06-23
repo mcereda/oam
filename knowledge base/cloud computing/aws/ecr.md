@@ -177,6 +177,9 @@ manually.
 
 ### Archive tier constraints
 
+Archival **below 150 TB** is a pricing trap. It costs the same rate as the standard tier ($0.10/GB/month in Ireland),
+but loses direct pull access, retrieval costs an additional fee of $0.03/GB, and locks into a 90-day minimum.
+
 When `sinceImagePulled` → `transition` moves images to archival storage, several non-obvious constraints apply:
 
 - Archived images are billed with a **90-day minimum storage duration**.
