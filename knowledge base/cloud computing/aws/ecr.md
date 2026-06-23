@@ -110,6 +110,10 @@ Constraints:
 | Image tag       | String | 1 <= length <= 300                                                                                 | [ImageIdentifier](https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_ImageIdentifier.html) |
 | Repository name | String | 2 <= length <= 256<br/>Must match `(?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*` | [Image](https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_Image.html)                     |
 
+Lambda functions do **not** pull from ECR on cold starts. After the initial deployment, the service breaks the image
+into chunks and stores them in S3, then uses them from a tiered internal cache for subsequent cold starts.<br/>
+Images actively serving Lambda invocations can have a `lastRecordedPullTime` value that has been stale for years.
+
 ## Image scanning
 
 ECR can scan images in two ways:
