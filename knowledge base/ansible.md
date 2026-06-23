@@ -31,6 +31,7 @@
 1. [Secrets management](#secrets-management)
     1. [Hiding sensitive values in verbose runs](#hiding-sensitive-values-in-verbose-runs)
     1. [Ansible Vault](#ansible-vault)
+    1. [AWS Secrets Manager](#aws-secrets-manager)
 1. [Best practices](#best-practices)
     1. [AWS-specific best practices](#aws-specific-best-practices)
 1. [Troubleshooting](#troubleshooting)
@@ -1421,6 +1422,28 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFIw4vv6LYg3P7bfgrR5I4k/0123456789abcdefghIL
 </details>
 
 Or even edit their content with `ansible-vault edit 'path/to/file'`.
+
+### AWS Secrets Manager
+
+The `amazon.aws.secretsmanager_secret` **lookup** requires only `secretsmanager:GetSecretValue`.
+
+The `community.aws.secretsmanager_secret` module requires **read** permissions even when doing write operations. A
+write-only IAM policy will fail due to missing permissions.<br/>
+Before **creating** or **updating** a secret, the module **always** calls `GetSecretValue` to get the diff against the new
+value, and `GetResourcePolicy` to check the existing policy.
+
+Minimum actions for creating or updating a secret:
+
+| Required action                    | Reason                                      |
+| ---------------------------------- | ------------------------------------------- |
+| `secretsmanager:DescribeSecret`    | Check if the secret exists                  |
+| `secretsmanager:GetResourcePolicy` | Check existing resource policy              |
+| `secretsmanager:GetSecretValue`    | Compare current value with new value        |
+| `secretsmanager:CreateSecret`      | Create the secret (if it doesn't exist yet) |
+| `secretsmanager:UpdateSecret`      | Update the secret (if it already exists)    |
+
+If a custom KMS key is specified via `kms_key_id`, the IAM entity also needs `kms:GenerateDataKey` and `kms:Decrypt` on
+that key. The default, AWS-managed `aws/secretsmanager` key does **not** need explicit grants.
 
 ## Best practices
 
