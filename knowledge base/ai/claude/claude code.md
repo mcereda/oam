@@ -1531,6 +1531,11 @@ Commands that cannot be sandboxed fall back to the regular permission flow.
 
 Customize sandbox behavior through the `settings.json` file.
 
+Sandbox `allowRead` and `denyRead` paths are communicated to the model by expanding them into the Bash tool's system
+description.\
+Every sandbox path rule adds to the description sent with every turn, increasing token usage. Broad globs matching
+large directory trees can inflate the description enough to make a session unusable.
+
 When a command fails due to sandbox restrictions, Claude Code retries that command **outside** the sandbox using the
 `dangerouslyDisableSandbox` parameter.<br/>
 According to the docs, the retry should go through the **normal permissions flow** and require user approval.
