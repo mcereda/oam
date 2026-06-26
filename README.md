@@ -13,7 +13,11 @@ In short, the private collection of notes and scripts I use to ease my tech life
 
 ## License
 
-The MIT license is used here, see [LICENSE].
+> Human knowledge belongs to the world.
+
+This content is licensed under the [Creative Commons Attribution-ShareAlike 4.0 International
+License][CC BY-SA 4.0].<br/>
+See [LICENSE] for the full text.
 
 ## Status
 
@@ -46,5 +50,6 @@ I might accept suggestions, though. Use the repository's hosting platform's tool
 [license]: LICENSE
 
 <!-- Others -->
+[CC BY-SA 4.0]: https://creativecommons.org/licenses/by-sa/4.0/
 [freekb.net]: https://www.freekb.net/
 [myshittycode.com]: https://myshittycode.com/
