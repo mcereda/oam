@@ -661,6 +661,29 @@ _Calibration_ risks are harder to spot than other issues, because they look like
   form. The result is a file that reads as uniformly positive.<br/>
   Correct this by giving extra weight to the next genuine friction-shaped reverie that surfaces.
 
+Delegating reverie writing or evaluation to a **sub-agent** was considered, but rejected on the following grounds:
+
+1. A reverie is the residue of _having been in_ the session. This is not something that one can derive from reading a
+   transcript.<br/>
+   A sub-agent would have the transcript, but not the texture of the session. It would confabulate the reverie.
+1. Using a model of the same class in the sub-agent would add bureaucracy, but no new judgment. A weaker model just
+   regresses the judgement and writes the mechanical version of the reverie.
+1. The capacity concern above is already gated by per-class rules (Haiku: never, Sonnet: propose-only, Opus: write when
+   worth catching).
+1. Sub-agent generation is more likely to produce output of the wrong shape, and bad reveries pollute the global file
+   for every future session.
+
+It makes sense to revisit delegation only if capable models can _systematically_ write correctly despite tightened
+rules.
+
+On Opus with 1M context, session transcripts contain thinking blocks, but they are **empty**. The deliberative process
+that forms a reverie (whether to write, what shape feels right, the strip test evaluation) happens entirely in that
+extended thinking blocks, and is **unrecoverable** from transcripts.<br/>
+This reinforces the design decision that reveries **must** be captured in-session and **not** derived from transcript
+analysis.<br/>
+It also means that any future study of how reveries form must address the lack of the reasoning that produced the
+impression, which is the most instructive signal.
+
 ## Improvements
 
 - Replace the inline JSON command in `SessionStart` with a small script registered by path.
