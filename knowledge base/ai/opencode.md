@@ -76,8 +76,28 @@ specific ones.
 }
 ```
 
-> [!note]
-> The `provider.*.models.*.limit` settings appear to be currently **not** working, and just used for documentation.
+> [!warning]
+> The `provider.*.models.*.limit.context` setting appear to be currently used only to control when the compaction
+> triggers. It does **not** signal the context size to the provider.<br/>
+> OpenCode connects to [Ollama] via the OpenAI-compatible `/v1` endpoint, which has **no** `num_ctx` parameter. Context
+> must be controlled on the Ollama side by:
+>
+> 1. Creating a Modelfile variant (most reliable, creates a configuration pointing to the same weights at no disk cost).
+>
+>    <details style='padding: 0 0 1rem 1rem'>
+>
+>    ```sh
+>    ollama create model-32k --from model:tag --set "parameter num_ctx=32768"
+>    ```
+>
+>    <details>
+>
+> 1. Setting the `OLLAMA_CONTEXT_LENGTH=32768` environment variable.<br/>
+>    This affects **all** served models. May be overridden by VRAM auto-detection in newer Ollama versions.
+>
+> Without this, Ollama [auto-sizes context based on available VRAM][ollama / context auto-sizing], which on
+> Apple Silicon machines with >= 48 GiB unified memory silently allocates 262k tokens, consuming most of the available
+> memory.
 
 </details>
 
@@ -141,6 +161,8 @@ opencode agent list
 <!-- Knowledge base -->
 [Claude Code]: claude/claude%20code.md
 [Gemini CLI]: gemini/cli.md
+[Ollama / context auto-sizing]: ollama.md#gotchas
+[Ollama]: ollama.md
 [Pi]: pi.md
 
 <!-- Files -->
