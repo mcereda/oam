@@ -5,6 +5,7 @@ a standardized way to enable LLMs to access key information and perform tasks.
 
 1. [TL;DR](#tldr)
 1. [MCP servers of interest](#mcp-servers-of-interest)
+   1. [AWS API](#aws-api)
 1. [Troubleshooting](#troubleshooting)
    1. [Cloudflare WAF blocks Linear comments with code blocks](#cloudflare-waf-blocks-linear-comments-with-code-blocks)
    1. [Google Drive `create_file` only auto-converts plain text](#google-drive-create_file-only-auto-converts-plain-text)
@@ -60,7 +61,17 @@ connections when they cannot find a version compatible with the server.
 > details and mitigations.
 
 Some harnesses mitigate the context cost through _lazy loading_ (deferring full tool schemas until first use), but the
-attack surface concern remains regardless of loading strategy.
+following costs survive deferral (and are paid **every** turn):
+
+- **Every** deferred tool name appears in context on **every** API call.<br/>
+  Cost scales with tool count, making a server with 40 tools cost ~20x more than one with 2 tools.
+- Server instructions provided via an `instructions` field.<br/>
+  This field loads into context every turn, regardless of deferral. It is bounded at 2 KB per server, but costs still
+  add up across servers.
+- Stdio servers launch at session start and HTTP/SSE servers open connections. More servers means slower startup, even
+  if their tools are never used.
+
+The attack surface concern remains regardless of loading strategy.
 
 ## MCP servers of interest
 
@@ -68,12 +79,27 @@ attack surface concern remains regardless of loading strategy.
 | ------------------------------------------------- | -------------------------------------------------------- |
 | [AWS API][aws api mcp server]                     | Interact with all AWS services and resources via AWS CLI |
 | [AWS Cost Explorer][aws cost explorer mcp server] | Analyze AWS costs and usage data                         |
-| [Grafana MCP Server]                              | Interact with [Grafana] dashboards and services          |
+| [Grafana][grafana mcp Server]                     | Interact with [Grafana] dashboards and services          |
 
 > [!caution]
 > Verify MCP servers and the tools they offer before using them.<br/>
 > Using MCP servers without verifying tools and descriptions could lead to vulnerability to tool- and prompt- poisoning,
 > shadowing, or injection.
+
+### AWS API
+
+> [!important] AWS managed MCP endpoint is us-east-1 only
+> The [AWS API MCP Server]'s managed endpoint (`plugin:aws-core:aws-mcp` in Claude Code) currently exists only at
+> `aws-mcp.us-east-1.api.aws`. There is **no** regional variant of it.<br/>
+> To access resources in other regions, pass `--metadata AWS_REGION=eu-west-1` in the server's args. This targets the
+> _resources_, not the MCP endpoint itself.
+
+The self-hosted Docker alternative from AWSLabs (`awslabs/aws-api-mcp-server`) provides 2 tools (`call_aws` + host
+validation), against the 11 available in the managed version (including `search_documentation`, `read_documentation`,
+`recommend`, `retrieve_skill`).
+
+For AWS service documentation, prefer the managed server's `read_documentation` and `search_documentation` tools over
+general web search. They query AWS docs directly and _should_™ have no prompt injection risk.
 
 ## Troubleshooting
 
