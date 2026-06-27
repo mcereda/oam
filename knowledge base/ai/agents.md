@@ -99,6 +99,10 @@ _Lone_ sub-agents currently consistently produce better quality output than agen
 Sub-agent teams (when supported by a harness) generally perform parallel tasks in less time, but consume more tokens
 (about N times, for N agents).
 
+Spawning child agents that return results to the parent (sub-agents) has become near-universal in coding harnesses.<br/>
+Most "multi-agent" implementations still use hierarchical orchestrator-worker pairs instead of peer-to-peer parallel
+sessions that leverage shared task lists/mailboxes (agent teams).
+
 ## Harnesses
 
 Refer to:
@@ -321,9 +325,11 @@ relies on official naming, especially:
   against that version's changelog or docs.
 - Tool calls that return **empty results** (no output, not an error).
 
-  Agents receiving empty responses (usually when an MCP server gets saturated with concurrent connections) tend to
-  fabricate fictional resource listings that use valid value formats and internally-consistent IDs. These values are
-  _structurally_ correct, but verifiably wrong.
+  Agents receiving empty responses (from MCP server saturation, external API timeouts, or similar) tend to fabricate
+  **fictional** lists of resources that use valid value formats and IDs that are internally-consistent. These values
+  are _structurally_ correct, but verifiably wrong.<br/>
+  Cross-check account IDs, resource ARNs, or other identifying fields against a known-good reference from a prior
+  successful call. A mismatch is a reliable signal of fabrication.
 
 A sub-agent's summary describes what it _believes_, not necessarily what is _true_.<br/>
 Before writing any agent-reported claim into a reference document, verify it against primary sources.
@@ -366,6 +372,15 @@ are based on the absence of evidence, which is breeding ground for hallucination
 
 When dispatching agents on a large or distributed search space (e.g. a 100K+ file, a directory of 15+ files) report that
 something is _missing_, _absent_, or _nonexistent_, treat the claim as a hypothesis to verify, not a finding.
+
+Mitigations:
+
+- For _positive_ claims, trust qualitative observations like voice, shape, organization, "this page is a stub vs
+  mature". They tend to be reliable because the agent has real evidence.
+- For _negative_ claims, verify the facts. The orchestrator can re-verify in seconds, while the agent can't unsee what
+  it didn't read.
+- Pre-frame the agent prompt to ask for what was _found_, not what is _missing_. Synthesis (gap identification) happens
+  more reliably at the orchestrator level, where both source and reference are available.
 
 ### Context compression creates an asymmetric memory gap with the user's
 
@@ -488,19 +503,10 @@ Models can be tricked into taking actions they usually would not do.
 
 ### Prompt injection
 
-AI agents use [LLMs][lms / llms] to comprehend user inputs, deconstruct and respond to requests step-by-step, determine
-when to call on external tools to obtain up-to-date information, optimize workflows, and autonomously create subtasks
-to achieve complex goals.
-
-LLMs find it difficult, if not impossible, to distinguish data from instructions.<br/>
-Every part of the data could be used for prompt injection, and lead the agent astray.
-
-Agents themselves are useful, but they do require having access to keys and execution environments to integrate with
-services.<br/>
-The LLMs they use are not yet secure enough to be trusted with this kind of access due to the reasons above.
-
-Badly programmed agents could analyze files and take some of their content as instructions.<br/>
-If those contain malevolent instructions, the agent could go awry.
+Agents require access to keys and execution environments to integrate with services, but LLMs
+[cannot reliably distinguish data from instructions](#tldr), making such access a liability.<br/>
+Any content the agent processes, including file contents, could carry injected instructions meant to hijack its
+behaviour.
 
 Instructions could also be encoded into unicode characters to appear as harmless text.<br/>
 See [ASCII Smuggler Tool: Crafting Invisible Text and Decoding Hidden Codes].
@@ -542,7 +548,10 @@ Include **only minimal requirements** in context files (AGENTS.md).<br/>
 Too much context ends up hurting the conversation. Including a lot of "don't do this or that" mostly poisons the
 context instead of helping.<br/>
 If specific information is already in the codebase, it probably does **not** need to be in the context file and can
-just be referenced or hinted at.
+just be referenced or hinted at.<br/>
+If the agent's harness allows for layered files (e.g., Claude Code), prefer splitting up per subfolder. Each sub-file
+should only contain instructions specific to its own directory, and only be loaded when the agent is actively working
+in that directory.
 
 The _register_ of instructions matters as much as their content.<br/>
 Instructions written in an analytical, verbose register prime the model toward analytical, verbose output, even when the
@@ -560,11 +569,6 @@ instruction/rule files like `AGENTS.md` (or harness-specific files like `CLAUDE.
 Be explicit about constraints and non-negotiables. **Clearly** state in instruction/rule files what an agent should
 **never** do, e.g. delete specific files, modify configurations, break tests, etc.<br/>
 Provide **explicit**, **clear** examples of what it need to do and how. Set expectations about when to ask for help.
-
-Keep the instruction/rule files as small as possible.<br/>
-If the agent's harness allows for layered files (e.g., Claude Code), prefer splitting it up per subfolder if reasonable.
-Each sub-file should only contain instructions specific to the their own directory, and the harness should allow
-loading them **only** if it is actively working in those directories.
 
 Have the agent read and understand the project layout, documentation, key files, and architecture **before** allowing
 it to make changes. Reference those files in the instruction/rule files to make sure it loads them only when needed.
@@ -612,6 +616,13 @@ Some harnesses support _lazy loading_ MCP tools' schemas (e.g. Claude Code using
 reading the tools' full definitions until the MCP's first use in the session. When available, this feature reduces the
 token-cost argument for offloading. Sub-agents still remain valuable for **isolation** (scoped permissions, context
 separation, summarized output).
+
+Pay attention how one frames instructions when writing `description` fields for custom agents.<br/>
+_Conditional_ framing ("Use when you need to query X") leaves room for a model to reason its way out of delegation and
+attempt the task inline. _Directive_ framing ("Always use this agent for any X; never do X directly") produces more
+consistent routing, especially in fast or smaller models.<br/>
+List example services or tools in the description in a way that is _illustrative_, not _exhaustive_, e.g. "all services,
+including X, Y, Z".
 
 When a class of operations **must always** route through a specific sub-agent rather than being handled in the main
 session, use multiple layers rather than the agent's description alone:

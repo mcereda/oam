@@ -39,6 +39,7 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
        1. [Designing for fail-and-report](#designing-for-fail-and-report)
        1. [Cross-project sub-agents](#cross-project-sub-agents)
     1. [Agent teams](#agent-teams)
+    1. [Dynamic workflows](#dynamic-workflows)
     1. [MCP servers in sub-agents](#mcp-servers-in-sub-agents)
     1. [Offloading MCP servers to sub-agents](#offloading-mcp-servers-to-sub-agents)
 1. [Tracking tasks](#tracking-tasks)
@@ -2581,14 +2582,14 @@ or scoping the blast radius of write operations.
 [Agent teams] generally perform parallel tasks in less time, but consume more tokens (about N times, for N agents).<br/>
 [Sub-agents] currently consistently produce better quality output than teams.
 
-| /              | Sub-agents                             | Agent teams                                                                               |
-| -------------- | -------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Model          | Hierarchical: spawn, work, report back | Peer-to-peer: independent sessions communicate via mailbox                                |
-| Context        | Share parent's context window          | Own context window; load `CLAUDE.md` and MCP servers, but **not** the lead's conversation |
-| Communication  | Only back to caller                    | Any teammate can message any other                                                        |
-| File isolation | None (same working tree)               | [Git worktrees]: each agent edits independently, merges back                              |
-| Coordination   | Caller manages                         | Shared task list that teammates can claim                                                 |
-| Cost           | Moderate (still one session)           | Scales with team size                                                                     |
+|                | Sub-agents                             | Agent teams                                                                               | [Dynamic workflows]                                                       |
+| -------------- | -------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Model          | Hierarchical: spawn, work, report back | Peer-to-peer: independent sessions communicate via mailbox                                | Script-driven: a JavaScript script orchestrates the control flow          |
+| Context        | Share parent's context window          | Own context window; load `CLAUDE.md` and MCP servers, but **not** the lead's conversation | Each agent gets its own context window; script holds intermediate results |
+| Communication  | Only back to caller                    | Any teammate can message any other                                                        | Script wires results between stages                                       |
+| File isolation | None (same working tree)               | [Git worktrees]: each agent edits independently, merges back                              | Optional `isolation: 'worktree'` per agent                                |
+| Coordination   | Caller manages                         | Shared task list that teammates can claim                                                 | Script manages (loops, conditionals, fan-out)                             |
+| Cost           | Moderate (still one session)           | Scales with team size                                                                     | ~35k tokens per agent (fixed context floor); scales with agent count      |
 
 ### Sub-agents
 
@@ -2603,6 +2604,18 @@ The sub agent works independently, and returns results once finished.
 
 Most effective for sequential tasks, same-file edits, or tasks with many dependencies.<br/>
 They only report results back to the main agent, and never talk to each other.
+
+Sub-agents can spawn their own sub-agents up to **5 levels** deep. A sub-agent at depth 5 does **not** receive the
+`Agent` tool and cannot spawn further. The limit applies to both foreground and background sub-agents.<br/>
+To prevent a sub-agent from spawning others entirely, omit `Agent` from its `tools` array or add it to the
+`disallowedTools` key in the agent's frontmatter.
+
+> [!warning]
+> A `general-purpose` agent given a research task may spawn another `general-purpose` agent with the same task,
+> recursively, until the depth cap kills the chain. Each agent has the `Agent` tool and the same "delegate when
+> uncertain" instinct, producing a chain where no agent actually does the work.<br/>
+> Use agent types **without** the `Agent` tool (e.g. `Explore`) for leaf tasks, or include explicit instructions in the
+> agent's prompt to do the work directly rather than delegate.
 
 Claude Code includes several built-in sub-agents like _Explore_, _Plan_, _general-purpose_, and _claude-code-guide_
 (specialized for Claude Code, Agent SDK, and API questions).<br/>
@@ -2948,6 +2961,51 @@ Known current limitations:
 - Teammates sometimes fail to mark tasks as complete, blocking dependent work.
 - Uses only **one** team per session. A teammate **cannot** spawn its own nested team.
 - Teammates finish their current request before stopping.
+
+### Dynamic workflows
+
+Refer to [Orchestrate subagents at scale with dynamic workflows].
+
+Deterministic JavaScript scripts that orchestrate multiple sub-agents. Claude writes the script for a task; the script
+holds the loop, branching, and the intermediate results. Claude's context receives only the final answer.
+
+With sub-agents and teams, Claude decides turn-by-turn what to spawn or assign next, and every result lands in the
+context window. Workflow scripts integrate the plan, offloading Claude from managing it.
+
+Scripts coordinate agents via the `agent()`, `parallel()`, `pipeline()`, and `phase()` primitives:
+
+| Primitive    | Behavior                                                                        | Use when                                            |
+| ------------ | ------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `agent()`    | Spawn a single sub-agent                                                        | Every task                                          |
+| `parallel()` | Run tasks concurrently, awaits **all** thunks before returning (_barrier_)      | All results are needed together (dedup, comparison) |
+| `pipeline()` | Run each item through stages independently, does **not** barrier between stages | Multi-stage work (the default)                      |
+| `phase()`    | Group agents under a titled progress section                                    | Visual organization                                 |
+
+Prefer `pipeline()` for normal work.<br/>
+Only use `parallel()` between stages when stage N genuinely needs **all** of stage N-1's results (e.g. dedup across
+findings, early-exit on zero results). The barrier forces the turn to wait for the slowest worker.
+
+> [!important]
+> Every workflow agent gets the **full** context window (CLAUDE.md, system prompt, project context) regardless of its
+> task size.<br/>
+> An agent running a trivial task like "return your index number" costs ~35k tokens, the same as a complex research
+> agent.<br/>
+> Prefer _fewer_ agents with _broader_ scope over _many_ agents with _narrow_ scope. A single agent that finds 5 bugs
+> is cheaper than 5 agents that each find 1.
+
+The `schema` option on `agent()` forces structured output via a `StructuredOutput` tool call and requires JSON Schema
+validation. Compliance is guaranteed by the harness, which makes it equally reliable on Haiku as on Opus.
+
+Completed runs can be **resumed** with `resumeFromRunId`.<br/>
+Resume compares the resolved prompts (after string interpolation). Agents that did **not** change return their cached
+results instantly at near-zero cost.<br/>
+The cache uses **position**-based matching. Reordering agents within a `parallel()` call breaks caching.
+
+One can save a workflow's script as a command for tasks that repeat (e.g. a review process run on every branch). The
+same orchestration then runs identically each time.
+
+Dynamic workflows are most effective for codebase-wide audits, large migrations, and cross-checked research where the
+shape of the work is known in advance. They are **never** needed for a single agent call.
 
 ### MCP servers in sub-agents
 
@@ -3389,6 +3447,7 @@ Claude Code version: `v2.1.41`.
 [Agent-based hooks]: #agent-based-hooks
 [Auto memory]: #auto-memory
 [Configuration]: #configuration
+[Dynamic workflows]: #dynamic-workflows
 [Offloading MCP servers to sub-agents]: #offloading-mcp-servers-to-sub-agents
 [Prompt-based hooks]: #prompt-based-hooks
 [Sub-agents]: #sub-agents
@@ -3458,6 +3517,7 @@ Claude Code version: `v2.1.41`.
 [Issue #38461]: https://github.com/anthropics/claude-code/issues/38461
 [Manage Claude's memory]: https://code.claude.com/docs/en/memory
 [Mastering Claude Code in 30 minutes]: https://www.youtube.com/watch?v=6eBSHbLKuN0
+[Orchestrate subagents at scale with dynamic workflows]: https://code.claude.com/docs/en/workflows
 [Orchestrate teams of Claude Code sessions]: https://code.claude.com/docs/en/agent-teams
 [Output styles]: https://code.claude.com/docs/en/output-styles
 [Plugins reference]: https://code.claude.com/docs/en/plugins-reference
