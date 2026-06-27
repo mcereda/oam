@@ -645,6 +645,7 @@ acts as the coordination surface between sessions running in different repositor
 - [Claude Code]
 - [Giving Claude a global memory]
 - [Giving Claude its own knowledge base]
+- [Propagating knowledge between concurrent sessions]
 
 ### Sources
 
@@ -663,6 +664,7 @@ acts as the coordination surface between sessions running in different repositor
 [Claude Code]: ../claude%20code.md
 [Giving Claude a global memory]: global%20memory.md
 [Giving Claude its own knowledge base]: llm-owned%20knowledge%20base.md
+[Propagating knowledge between concurrent sessions]: cross-session%20live%20propagation.md
 
 <!-- Upstream -->
 [Documentation / Additional directories]: https://docs.anthropic.com/en/docs/claude-code/settings#additional-directories

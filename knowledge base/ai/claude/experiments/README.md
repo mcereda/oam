@@ -272,6 +272,7 @@ cross-memory linking, format validation).
 
 - [Claude Code]
 - [AI agents]
+- [Propagating knowledge between concurrent sessions]
 - [Manage Claude's memory]
 - [karpathy/llm-wiki.md]
 - [thedotmack/claude-mem]
@@ -294,6 +295,7 @@ cross-memory linking, format validation).
 [Claude Code / auto memory]: ../claude%20code.md#auto-memory
 [Claude Code]: ../claude%20code.md
 [Giving Claude a reverie-like system]: reveries.md
+[Propagating knowledge between concurrent sessions]: cross-session%20live%20propagation.md
 
 <!-- Files -->
 [The Extended Mind]: ../../study%20material/the%20extended%20mind%20%20clark,%20chalmers%20%201998.pdf

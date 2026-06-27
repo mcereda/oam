@@ -260,6 +260,10 @@ systems' governance.
   structure (`Why:` + `How to apply:`) captures the reason and the scope without over-structuring the entry. Project and
   reference memories are simpler and do not need this structure.
 
+## Further readings
+
+- [Propagating knowledge between concurrent sessions]
+
 <!--
   Reference
   ═╬═Time══
@@ -267,5 +271,7 @@ systems' governance.
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[Propagating knowledge between concurrent sessions]: cross-session%20live%20propagation.md
+
 <!-- Upstream -->
 <!-- Others -->
