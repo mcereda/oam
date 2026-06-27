@@ -47,6 +47,8 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
 1. [Tools of interest](#tools-of-interest)
 1. [Troubleshooting](#troubleshooting)
     1. [`skill-creator` plugin's script require an incompatible `pydantic-core` version](#skill-creator-plugins-script-require-an-incompatible-pydantic-core-version)
+    1. [AWS MCP plugin override causes `-32602`](#aws-mcp-plugin-override-causes--32602)
+    1. [`workspace` is a reserved MCP server name](#workspace-is-a-reserved-mcp-server-name)
     1. [Executors use their own name for commit attribution when using `opusplan`](#executors-use-their-own-name-for-commit-attribution-when-using-opusplan)
 1. [Best practices](#best-practices)
 1. [Run on local models](#run-on-local-models)
@@ -463,6 +465,11 @@ Claude Code. Prefer **not** editing this file manually.<br/>
 > [!tip]
 > Run `/status` from inside Claude Code to see which settings sources are active and where they come from.
 
+Claude Code watches settings files, and reloads them when they change. Edits to **most** keys (permissions, hooks,
+credential helpers) apply to the running session **without** needing it to restart. A few keys are read once at session
+start and do only take effect on the next restart.<br/>
+The `ConfigChange` hook fires for each detected change.
+
 See also [Configuration] and [Environment variables][environment variables reference].
 
 `model` accepts any model alias or a full model ID (e.g. `claude-opus-4-6[1m]`).
@@ -832,6 +839,16 @@ this.<br/>
 Opus preserves more nuance and reasoning traces during compaction; Haiku loses subtle details, rejected alternatives,
 and intermediate reasoning. The model doing the compacting **directly** affects how much the session forgets after
 compaction.
+
+Claude Code overrides the default API compaction prompt with a structured format that summarizes for primary intent, key
+technical concepts, files touched, errors and fixes, problem-solving steps, all user messages, security-relevant
+instructions (preserved verbatim), pending tasks, and current work state.<br/>
+The prompt uses chain-of-thought with a scratchpad that gets stripped from the final summary, and demands direct quoting
+of key phrases rather than paraphrasing to prevent context drift.
+
+One can influence what compaction preserves using a `# Compact instructions` section in `CLAUDE.md`. These instructions
+persist across autocompacts. Custom instructions **fully replace** the default compaction prompt, they do **not**
+supplement it.
 
 _Negative_ decisions are the primary casualty of the process. They include reasoning about **why** something was
 rejected, alternatives that were considered but discarded, and the context behind any choice. The structured compaction
@@ -3224,8 +3241,14 @@ Claude code provides built-in tools to handle in-session work tracking (`TaskCre
 `TodoWrite` was deprecated and disabled by default since v2.1.142.<br/>
 Tasks are **ephemeral** and session-**specific**. They are **not** persisted to disk.
 
+The `Task*` tools require **no** permissions. They always run without prompting. Any explicit `allow` entries for them
+in `permissions.allow` are inert but harmless.
+
 Tasks progress through the following lifecycle: `pending` → `in_progress` → `completed` (or `deleted`).<br/>
 Each task gets an auto-incrementing integer ID on creation. There is **no** priority, position, or manual sort field.
+
+Beyond `subject`, `description`, and `status`, tasks support `activeForm` (present-continuous text for the spinner, e.g.
+"Fixing auth bug") and `metadata` (arbitrary key-value pairs; set a key to `null` to delete it).
 
 Tasks' **ordering** is functional:
 
@@ -3313,6 +3336,23 @@ system:
 As a workaround, replace just the `improve_description` call with a `subprocess.run(["claude", "-p", prompt])` call
 in a standalone wrapper script. The other three scripts (`utils.py`, `run_eval.py`, `generate_report.py`) have no SDK
 dependency, and can be imported safely.
+
+### AWS MCP plugin override causes `-32602`
+
+Adding `plugin:aws-core:aws-mcp` as a key in MCP server configuration to override the plugin's settings triggers a
+`-32602 Invalid params` error during initialization with no hint that the plugin namespace is the cause.
+
+> [!tip]
+> Remove the override entirely and let the plugin self-configure. If a custom configuration is needed, use a different
+> key name (e.g. `aws-toolkit`), but it becomes a separate server instance, not an override.
+
+This is distinct from the `-32602` caused by host header validation in the Docker-based [MCP] server (see
+[Docker-based MCP host header validation differs from listen address][MCP / Docker-based MCP host header validation]).
+
+### `workspace` is a reserved MCP server name
+
+An MCP server named `workspace` in `.mcp.json` or `~/.claude.json` is **silently** skipped. The server simply does not
+load. Use a different name.
 
 ### Executors use their own name for commit attribution when using `opusplan`
 
@@ -3471,6 +3511,7 @@ Claude Code version: `v2.1.41`.
 [Giving Claude its own knowledge base]: experiments/llm-owned%20knowledge%20base.md
 [LMs / Improving interactions]: ../lms.md#improving-interactions
 [MCP]: ../mcp.md
+[MCP / Docker-based MCP host header validation]: ../mcp.md#docker-based-mcp-host-header-validation-differs-from-listen-address
 [Ollama]: ../ollama.md
 [OpenCode]: ../opencode.md
 [Personal experiments / Memory tiers]: experiments/README.md#memory-tiers
