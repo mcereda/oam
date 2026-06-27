@@ -1,12 +1,26 @@
 # Using evolutionary algorithms with LLMs
 
-[Evolutionary algorithms] are being applied to modern AI systems, particularly to [large language models][LLMs].
+[Evolutionary algorithms] are being applied to modern AI systems, particularly to [large language models][LLMs].<br/>
+See [evolutionary algorithms] for the foundational concepts (the core loop, classical families, selection pressure,
+quality diversity).
 
+1. [TL;DR](#tldr)
 1. [Evolution strategies at scale](#evolution-strategies-at-scale)
+1. [LLM x EA: the operator inversion](#llm-x-ea-the-operator-inversion)
 1. [Transferable strategy patterns](#transferable-strategy-patterns)
    1. [Using LoRA to score fitness](#using-lora-to-score-fitness)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
+
+## TL;DR
+
+These concepts are especially load-bearing here:
+
+- _Deceptive fitness_ is when the score's gradient points _away_ from the optimum, which makes score-driven search
+  **actively** harmful. This is the canonical motivation for
+  [novelty search][evolutionary algorithms / Quality Diversity].
+- Evolving a program that _builds_ a solution (genotype) vs. _evolving_ the solution (phenotype) directly is the insight
+  provided by [FunSearch][Mathematical discoveries from program search with large language models].
 
 ## Evolution strategies at scale
 
@@ -51,6 +65,32 @@ RL method for LLMs) on post-training reasoning tasks.
 
 </details>
 
+## LLM x EA: the operator inversion
+
+LLMs make excellent mutation operators. Given a candidate (prompt, code, idea) and using "make this better" as the
+task's prompt, an LLM can propose semantically meaningful variations.<br/>
+This result is far smarter than using random perturbation, because the LLM encodes priors about what "better" might
+mean.
+
+The [evolutionary algorithms article][evolutionary algorithms / LLMs] covers the systems in detail. These are the
+structural patterns they introduced:
+
+- [PromptBreeder] evolves prompts, **including** the very same mutation prompts that mutate the task prompts
+  (_self-referential_).
+- [EvoPrompt] wraps classical GA/DE structures around LLMs as crossover/mutation operators.<br/>
+  Uses _fixed_ mutation prompts (in contrast with PromptBreeder).
+- [FunSearch][Mathematical discoveries from program search with large language models] evolves Python functions.
+  An automated executor gates fitness (hallucinations get filtered).
+
+  Its structural keys are best-shot prompting, program _skeletons_ with only the priority-function evolving, and
+  **island-based parallel populations**.
+- [AlphaEvolve][AlphaEvolve: A coding agent for scientific and algorithmic discovery] (FunSearch's successor) evolves
+  whole codebases using an ensemble of a fast, cheap model for high-throughput generation and a slow, stronger model for
+  occasional high-quality leaps.
+
+The LLM's priors _are_ the search bias. The search gravitates toward whatever the model finds plausible. LLM-driven EAs
+inherit the model's aesthetic preferences.
+
 ## Transferable strategy patterns
 
 Evolutionary algorithms' application can be used for more than just fine-tuning model weights. Prompt systems, agent
@@ -75,9 +115,9 @@ Some patterns that travel well are the following:
   It can be useful as a temporary seeding strategy, even if planning to reintroduce scoring later.
 
 - Use **self-referential** mutations
-  ([PromptBreeder][Promptbreeder: Self-Referential Self-Improvement Via Prompt Evolution]'s pattern).
+  ([PromptBreeder][PromptBreeder]'s pattern).
 
-  PromptBreeder evolves the prompts that evolve the prompts, making the mutation operators themselves subject to
+  [PromptBreeder] evolves the prompts that evolve the prompts, making the mutation operators themselves subject to
   evolution alongside the population. The payoff is that one can stop hand-tuning the meta-level indefinitely, because
   the system now discovers its own effective mutation operators.
 
@@ -149,13 +189,15 @@ shortcuts to achieve defined results by cheating.
 - [Evolution Strategies as a Scalable Alternative to Reinforcement Learning]
 - [Evolution Strategies at Scale: LLM Fine-Tuning Beyond Reinforcement Learning]
 - [Evolution Strategies at the Hyperscale]
-- [Promptbreeder: Self-Referential Self-Improvement Via Prompt Evolution]
+- [PromptBreeder]
+- [EvoPrompt]
 - [FunSearch][Mathematical discoveries from program search with large language models]
 - [AlphaEvolve][AlphaEvolve: A coding agent for scientific and algorithmic discovery]
 
 <!-- Reference-style links -->
 
 <!-- Knowledge base -->
+[evolutionary algorithms / LLMs]: ../evolutionary%20algorithms.md#llms-as-the-mutation-operator
 [evolutionary algorithms / MAP-Elites]: ../evolutionary%20algorithms.md#map-elites
 [evolutionary algorithms / Quality Diversity]: ../evolutionary%20algorithms.md#quality-diversity
 [evolutionary algorithms]: ../evolutionary%20algorithms.md
@@ -166,10 +208,11 @@ shortcuts to achieve defined results by cheating.
 <!-- Upstream -->
 <!-- Others -->
 [AlphaEvolve: A coding agent for scientific and algorithmic discovery]: https://arxiv.org/abs/2506.13131
+[EvoPrompt]: https://arxiv.org/abs/2309.08532
 [Evolution Strategies as a Scalable Alternative to Reinforcement Learning]: https://arxiv.org/abs/1703.03864
 [Evolution Strategies at Scale: LLM Fine-Tuning Beyond Reinforcement Learning]: https://arxiv.org/abs/2509.24372
 [Evolution Strategies at the Hyperscale]: https://arxiv.org/abs/2511.16652
 [Mathematical discoveries from program search with large language models]: https://www.nature.com/articles/s41586-023-06924-6
-[Promptbreeder: Self-Referential Self-Improvement Via Prompt Evolution]: https://arxiv.org/abs/2309.16797
+[PromptBreeder]: https://arxiv.org/abs/2309.16797
 [sglang]: https://github.com/sgl-project/sglang
 [vllm]: https://github.com/vllm-project/vllm
