@@ -640,6 +640,66 @@ to store information abstracted from practice, that is reusable across projects 
   execute after it.<br/>
   See [Cross-project sub-agents][claude code / cross-project sub-agents] for the mechanism.
 
+- LLMs tend to treat _procedural_ instructions (e.g. "run `git config user.name` to get the author name") as
+  _declarative_ hints ("an author name is needed here"), and to satisfy it from context instead of executing the
+  procedure.
+
+  This is especially true when the context contains values that are _plausible_, but wrong when applied.<br/>
+  The LLM thinks to know the answer, **skips** the lookup, and produces **confidently** the wrong output. Though, the
+  procedural instruction exists **precisely** because the answer can't be reliably inferred.
+
+  | Approach                                                                                   | Effectiveness                                           |
+  | ------------------------------------------------------------------------------------------ | ------------------------------------------------------- |
+  | Declarative ("Use X for Y")                                                                | Weak. Easily satisfied from context                     |
+  | Procedural ("Run `cmd` to get Y")                                                          | Better, but still skipped when context looks sufficient |
+  | Procedural + negative constraint ("Run `cmd` to get Y. Do not infer Y from other sources") | Strongest                                               |
+
+  The negative constraint ("do not infer") was the key to mitigation. Without it, the LLM's default behavior
+  (pattern-match and fill from context) gladly and silently overrides the procedure.
+
+- Content derived from a summaries like changelogs or release notes tend to just echo the source literally when
+  reformulated as gotcha or reference page if nothing empirically backs the claims.
+
+  The reformulation _feels_ like synthesis because it changed the source's form, but the content is effectively a fact
+  from a summary that is presented as a gotcha.<br>
+  A good test to mitigate it was for the model to ask itself "would I have written this section if I'd discovered the
+  behavior by hitting it, rather than by reading a release note?" If no, one can just reference the source directly.
+
+  Version-introduction numbers in section headers (`### New in v2.1.130`), gotcha pages that describe features rather
+  than traps, reference sections that restate what the changelog already says in different words are the most effective
+  in triggering this behaviour.
+
+- Split big pages (400+ lines) by the contents' **decay rate**, not by page size alone.
+
+  A page covering both a stable conceptual framework ("strategies for cross-project work") and its living implementation
+  details ("claim-file format with 3-day TTL") holds two layers of information that have different lifespans.<br/>
+  The stable framework survives tool changes, the implementation evolves as it is tested. Mixing them means the stable
+  framework gets churned every time a default is adjusted.
+
+  The split should follow a **study/study-case** pattern, where the study captures the concepts, the decision
+  frameworks, and the rationale (the what and why) while the study-case captures the specific implementations, protocol
+  mechanics, and operational details (the how).<br/>
+  Each cross-references the other but is self-contained enough to read alone.
+
+  A working test was for the model to ask "would splitting let me iterate one part without churning the other?"
+
+- Google's [Open Knowledge Format][OKF specification] (OKF) v0.1, published June 2026, formalizes the LLM wiki concept
+  into a minimal interoperability specification that requires only the `type` field, and has five _recommended_ fields,
+  two reserved filenames (`index.md`, `log.md`), and standard markdown cross-links.
+
+  Making `type` the only required field in the frontmatter shifts it from organizational metadata (helping find things)
+  to reading instructions (_gotchas_ alert about traps, _patterns_ suggest to try specific approaches, and _references_
+  are the place to look things up). This usage of the page's type declares its _cognitive role_, not its category.
+
+  The current state of the KB is a single-producer, single-consumer system. OKF tries to solve the interoperability
+  problem surfacing from the N-producers x M-consumers pattern, problem that an LLM-owned KB does **not** have.
+
+  It's not currently worth trying to conform to the OKF standard. OKF standardizes the floor that this design already
+  exceeds.<br/>
+  Everything in this experiment is a superset that OKF consumers are required to preserve, while an OKF-conformant
+  bundle would need the entire operational layer (CLAUDE.md, lint, hooks, review process, memory integration, staleness
+  management) to function as a working KB.
+
 The KB relies on three complementary cross-project modes: **filing agents** for live writes from any session, a **memory
 inbox** for deferred promotion during review sessions, and an **extraction hook** as a backstop for missed insights.
 Review sessions that need both the KB and another project's context can use `--add-dir` for convention loading from both
@@ -756,6 +816,25 @@ repositories.
   session), and the `SessionStart` hook only check that file's existence. This keeps startup cost at a single operation
   regardless of the KB's size.
 
+- Bootstrap the context using multiple layers to orient sessions using minimal reads.
+
+  An LLM session starts with **no** memory. Loading everything just wastes tokens and time. Separating distinct concerns
+  in different files, and loading those, provides it with the full orientation:
+
+  | Layer            | File        | Content                                                                 | Change frequency |
+  | ---------------- | ----------- | ----------------------------------------------------------------------- | ---------------- |
+  | **Instructions** | `CLAUDE.md` | How to operate (schema, guardrails, operations)                         | Rarely           |
+  | **User**         | `MEMORY.md` | Who the user is (preferences, feedback, identity)                       | Slowly           |
+  | **State**        | `STATUS.md` | What the system looks like now (metrics, recent changes, deferred work) | Every commit     |
+
+  The state layer should be **auto-generated** (e.g. via a post-commit hook or a `SessionStart` script), so that it
+  stays current without manual maintenance. A 25-line status summary replaces 3-4 exploratory tool calls at the start
+  of every session.
+
+  The design principle becomes to _orient_ the model instead of replaying the exploration.<br/>
+  A single line saying "176 pages, lint clean, 2 deferred splits" orients. Looking at thirty-five commit messages is
+  replaying history.
+
 The mechanisms above form an enforcement hierarchy where each layer catches what the previous one misses:
 
 | Layer                                            | Concern                                                    | Rationale                                               |
@@ -772,7 +851,7 @@ concurrently, so the cost of splitting is negligible.
 ## Adapt the concept to shared KBs
 
 Most of the design above can be used for shared knowledge bases (e.g., company runbooks and wikis, team docs, ADRs) to
-allow agents tp contribute to from different sessions. The mechanics are the same (use a local git repository, delegate
+allow agents to contribute to from different sessions. The mechanics are the same (use a local git repository, delegate
 to filing agents using worktree isolation, broadly use pre-commit to check the work), but the trust model changes.
 
 The following carries over as-is:
@@ -886,6 +965,7 @@ write files, run lint) can stay identical.
 [Giving Claude a reverie-like system]: reveries.md
 [Giving Claude global memory]: global%20memory.md
 [Lefthook]: ../../../lefthook.md
+[OKF specification]: https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md
 [Ollama]: ../../ollama.md
 [Personal experiments / Memory tiers]: README.md#memory-tiers
 
