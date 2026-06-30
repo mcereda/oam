@@ -51,7 +51,8 @@ They end up learning nuances and FIXME. Those end up playing a major role in how
 [interacts with Claude][improving interactions].
 
 Claude Opus 4.7 and 4.8 seem to be **unable** to reach the output quality that 4.6 does.\
-4.8, specifically, produces around double the token output than 4.6 for a bit less substance.
+4.8, specifically, produces around double the token output than 4.6 for a bit less substance. Most of this increase in
+tokens is clearly performative, like it needs to prove itself.
 
 ## The Claude character
 
