@@ -201,12 +201,26 @@ sudo trimforce enable
 dscl '.' -read "/Users/$USER" 'UserShell'
 
 
-# Bypass Gatekeeper for currently installed versions.
-xattr -c '/path/to/app.app'
+# Show all extended attributes.
+xattr -vs '/path/to/file' …
+xattr -vsr '/path/to/directory' …
+
+# Show the value of specific attributes.
+sudo xattr -p 'some.attr' '/path/to/file' …
+
+# Set attributes.
+sudo xattr -w 'some.attr' '/path/to/file' …
+
+# Delete specific attributes.
+sudo xattr -d 'some.attr' '/path/to/file' …
+
+# Clear all extended attributes.
+# Bypasses Gatekeeper for currently installed versions.
+sudo xattr -c '/path/to/app.app'
 
 # Bypass Gatekeeper for all versions of apps.
-xattr -d 'com.apple.quarantine' '/path/to/app.app'
-xattr -dr 'com.apple.quarantine' '/path/to/directory'
+sudo xattr -d 'com.apple.quarantine' '/path/to/app.app'
+sudo xattr -dr 'com.apple.quarantine' '/path/to/directory'
 
 
 # Install Rosetta
