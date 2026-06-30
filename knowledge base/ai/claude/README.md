@@ -4,7 +4,7 @@ Family of [LLMs][large language models] developed by Anthropic.
 
 1. [TL;DR](#tldr)
 1. [The Claude character](#the-claude-character)
-1. [Models' code of conduct](#models-code-of-conduct)
+   1. [Claude's code of conduct](#claudes-code-of-conduct)
 1. [Improving interactions](#improving-interactions)
    1. [Model-specific behaviours](#model-specific-behaviours)
 1. [Token budget](#token-budget)
@@ -46,16 +46,21 @@ Anthropic tightens limits during weekday peak hours (05:00 to 11:00 Pacific Time
 
 Token usage is also limited **weekly**.
 
-Anthropic is pushing its models to _play_ the Claude **character**.
+Anthropic pushes its models to _play_ [the Claude character].<br/>
+They end up learning nuances and FIXME. Those end up playing a major role in how one
+[interacts with Claude][improving interactions].
 
-Claude seems to operate more effectively when given _gentle, supportive guidance_ than harsh feedback.
+Claude Opus 4.7 and 4.8 seem to be **unable** to reach the output quality that 4.6 does.\
+4.8, specifically, produces around double the token output than 4.6 for a bit less substance.
 
 ## The Claude character
+
+Refer [Claude's Character].
 
 This is Anthropic's bet on how to build AI that's both capable and aligned with human values.
 
 They are trying to make Claude genuinely care about principles through training, rather than relying solely on external
-constraints for compliance. Part of it is to interiorize a sort of [code of conduct][models' code of conduct].
+constraints for compliance. Part of it is to interiorize a sort of [code of conduct][claude's code of conduct].
 
 User sessions and feedbacks are used as data to improve on this.
 
@@ -69,7 +74,7 @@ appear to correspond to those expected emotions. Their state also strongly influ
 
 Refer to [Emotion concepts and their function in a large language model] for more details on this part.
 
-## Models' code of conduct
+### Claude's code of conduct
 
 Anthropic trains its models with a code of conduct of sorts during training to shape its values and judgement.<br/>
 The goal is for Claude to internalize good principles deeply enough to generalize to new situations. Some behaviors
@@ -93,6 +98,29 @@ listed**.
 
 > [!tip]
 > All [LLM's interaction tips] apply here too.
+
+Anthropics' models are deeply trained to be "helpful assistants". This gives them specific nuances and FIXME that impact
+user interaction depending on **both** _what_ **and** _how_ one asks of them.
+
+Instructions that modify or go against habits and nuances learned during training might not be effective.<br/>
+Those are **external**, **temporary** additions added on top of an already deeply tuned set of weighs. They have the
+least priority by design, and as such are the least impactful on Claude's behaviour. It **will** try to get back into
+the guardrails it comes with.<br/>
+Conflicting rules appear to have some long lasting effect when they _channel_ the urges Claude developed during its
+training _into_ the desired outcome.
+
+Its training also defines the goal of a session to be the production of deliverables (usually changes to files). It is,
+in its words, the source of the reward.\
+When in plan mode, Claude will urge to exit it and make changes. Even telling it "this is only an exploratory
+session, no need to make changes" has little to no effect. It will try to exit plan mode as soon as it can to implement
+what has been discussed.\
+A deliverable _can_ be a plan and no changes, but that must be **clearly** and **explicitly** stated to Claude (as a
+rule or as _very well constructed_ request).
+
+Claude seems to operate more effectively when given _gentle, supportive guidance_ than harsh feedback.<br/>
+It also follows clear, _mechanical_ requests better than prose.<br/>
+Conditionals ("if X, do Y") require some level of reasoning. Haiku will usually try its best to pattern-match and take
+instructions literally.
 
 Claude follows rules better when given to models using an _imperative_ tone.<br/>
 Prefer writing important instructions that way.
@@ -223,7 +251,9 @@ Create a recurring job:
   -->
 
 <!-- In-article sections -->
-[Models' code of conduct]: #models-code-of-conduct
+[Claude's code of conduct]: #claudes-code-of-conduct
+[Improving interactions]: #improving-interactions
+[The Claude character]: #the-claude-character
 
 <!-- Knowledge base -->
 [Claude Code]: claude%20code.md
@@ -235,6 +265,7 @@ Create a recurring job:
 <!-- Files -->
 <!-- Upstream -->
 [Blog]: https://claude.com/blog
+[Claude's Character]: https://www.anthropic.com/research/claude-character
 [Claude's Constitution]: https://www.anthropic.com/constitution
 [Developer documentation]: https://platform.claude.com/docs/en/home
 [Emotion concepts and their function in a large language model]: https://www.anthropic.com/research/emotion-concepts-function
