@@ -1264,8 +1264,12 @@ Installation:
 
    </details>
 
-Ingresses annotations will configure the load balancers they create.<br/>
-Refer [Ingress annotations][aws load balancer controller ingress annotations] for the full list.
+Ingresses' annotations will configure the load balancers they create.<br/>
+Refer [Ingress annotations][aws load balancer controller ingress annotations] for the full list. Notable mentions:
+
+| Annotation                             | Summary                                                                                                                                   |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `alb.ingress.kubernetes.io/group.name` | Ingresses specifying the same group name will use a single ALB; rules will route between target groups, each pointing to a single ingress |
 
 ### EBS CSI driver
 
