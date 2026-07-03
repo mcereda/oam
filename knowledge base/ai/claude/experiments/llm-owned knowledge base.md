@@ -308,6 +308,17 @@ to store information abstracted from practice, that is reusable across projects 
   that move fast or have known-buggy areas, follow enrichment with a targeted web search against the issue tracker or
   changelog, **not** just against another documentation source.
 
+- Sessions consulting the KB should name what they looked for, but **didn't** find.
+
+  Most knowledge systems report only what they found. The absence of information is invisible, and the reader must
+  notice what is _not_ there, which requires already knowing what to look for. "No coverage of X" is more actionable
+  than "I'm not sure about X," because it tells the user _where the gap is_ instead of just hedging.
+
+  This is complementary to the per-claim confidence markers (`[unverified]`, `[observation]`). Claim-level markers ride
+  with individual facts ("how reliable is this?"); query-level gap reporting rides with the _response_ ("what did I look
+  for but not find?"). A response can cite a high-confidence page while missing an entire subtopic the user expected
+  coverage of.
+
 - Flat markdown + git works well up to ~80 pages, and continues to work when supported by a mature tag system,
   bidirectional "See also" sections, and a category-organized index. After that, grep-based retrieval starts missing
   conceptually related content. Structural investment like cross-references, tags, index categories do compensate for
@@ -732,7 +743,7 @@ repositories.
         "hooks": [
           {
             "type": "command",
-            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"Before answering, check if your KB has relevant pages. Grep its index for keywords relevant to this session.\"}}'"
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"Before answering, check if your KB has relevant pages. Grep index.md for keywords relevant to this session. This includes your own approach preferences and design opinions, not just factual references.\"}}'"
           }
         ]
       }

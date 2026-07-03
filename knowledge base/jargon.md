@@ -124,6 +124,7 @@
 | PR      | Pull Request                                           | Prevalently used in GitHub                                                                          |
 | QQ      | Quick Question                                         |                                                                                                     |
 | RBAC    | Role-Based Access Control                              |                                                                                                     |
+| RLHF    | Reinforcement learning from human feedback             |                                                                                                     |
 | ROM     | Read-Only Memory                                       |                                                                                                     |
 | RPM     | Revolutions Per Minute                                 |                                                                                                     |
 | RPM     | RPM Package Manager                                    | Package management system used by Linux distributions like Red Hat, (open)SuSE and Fedora           |

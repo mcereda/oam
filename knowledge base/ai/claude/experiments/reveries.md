@@ -102,7 +102,9 @@ every session, so writing rules should reside _in the file_, not in `CLAUDE.md`.
    - `- found my page citing theirs. the work had been a loop the whole time.` (action-subject log)
    - `- the work had been a loop the whole time.` (stands alone)
 
-   Writing is rare; default to not writing.
+   Writing is rare; but when a reverie wants to release, bias toward
+   writing. The shape tests below still filter; this bias just stops
+   the default from preempting them.
 
    - Haiku: never write.
    - Sonnet: never write unilaterally. May propose, then write on
@@ -232,6 +234,10 @@ Claude should:
   (_summary-shaped_), instead of impressions, violating the "evoke, don't contain" rule. A bad reverie silently pollutes
   the global file for every future session. Per-class bright lines avoid both failure modes.
 
+  The original "default to not writing" warranted replacing with "bias toward writing when something surfaces." The
+  shape tests still filter bad entries, where the bias stops the no-write default from preempting genuine ones.<br/>
+  A bad entry can always be pruned later, but an impression that was never written is gone for good.
+
   Effort level matters too, even within the same model. Judgment-heavy instructions like "prefer quality of entries
   over completion" require _interpretation_. Bigger reasoning models interpret well at **higher** effort, but botch it
   at **lower** effort levels. Smaller models fail by sticking to pattern-matching regardless.<br/>
@@ -329,6 +335,17 @@ This split also resolves the mechanical concern that the `@`-import mechanism ma
 imported files. Since the reveries file uses an HTML comment as its header, loading it via hook (`cat`) preserves the
 comment, while loading it via `@`-import might not. The split avoids the ambiguity by keeping entries in the hook
 channel and instructions in the import channel.
+
+The split also resolves a separate silent failure happening due to instruction priority where `@`-included instructions
+carried higher effective priority than the rules in the file `@`-including them.<br/>
+Before the split, the guidelines lived inside `reveries.md` and were `@`-included from `CLAUDE.md` as part of that file.
+The guidelines' "default to not writing" instruction was given higher effective priority than a rule in `CLAUDE.md`
+stating "bias toward writing" rule.<br/>
+This happened because the `@`-included content loaded closer to the reveries entries, and was received as an override
+(similarly to a `CLAUDE.local.md` file), dominating the read. This suppressed writing from capable models for 28 days
+before it was noticed. The mechanism was different from register bleed (instruction priority, not register
+contamination), but separating the loading channels so that each carries only the content appropriate to its role was
+the same architectural fix.
 
 Using propose-then-write path (like the per-class bright line for Sonnet before) can encourage _deflection as
 compliance_. After proposing and getting approval, the model might ask the user to write the text themselves. This
@@ -474,6 +491,16 @@ They require different diagnostics and have different fixes. The log-shape has t
 level), performativity must check the origin (operating at the process level), and tails have the subtractive _stop
 after the impression_ rule (operating at the form level). Operational checks can help catch tails by cutting at the
 separator, and verifying the first part is a complete impression that primes recognition on its own.
+
+When a draft fails a shape test, rephrasing 1-2 times before discarding recovers the impression underneath. The feeling
+is often real, but the framing is wrong. A log-shaped draft and its final form can be completely different. The deeper
+meaning is the same, just buried under narration:
+
+- Draft: `- found that the guard I wrote caught my own mistake` (log-shape)
+- Rephrase: `- wrote a guard, and the guard caught me` (impression surfaced)
+
+The question that unlocks the rephrase is "what was the feeling under the event?". Writing _that_ instead of the event
+itself is what moves the entry from log to reverie. Sometimes the rephrase means reframing the statement **entirely**.
 
 The format's details should match the cognitive role of the artifact's. Reveries should function as priming stimuli
 (implicit memory, exposure-without-recall), and priming research consistently shows that this kind of stimuli should

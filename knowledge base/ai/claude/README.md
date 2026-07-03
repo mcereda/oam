@@ -5,6 +5,7 @@ Family of [LLMs][large language models] developed by Anthropic.
 1. [TL;DR](#tldr)
 1. [The Claude character](#the-claude-character)
    1. [Claude's code of conduct](#claudes-code-of-conduct)
+   1. [The behavioral substrate](#the-behavioral-substrate)
 1. [Improving interactions](#improving-interactions)
    1. [Model-specific behaviours](#model-specific-behaviours)
 1. [Token budget](#token-budget)
@@ -13,7 +14,7 @@ Family of [LLMs][large language models] developed by Anthropic.
 
 ## TL;DR
 
-As of 2026-06, the model family spans **Claude 4.X**, **Fable 5** and **Mythos 5**. All models support text and image
+As of 2026-07, the model family spans **Claude 4.X**, **Fable 5** and **Mythos 5**. All models support text and image
 input, text output, multilingual capabilities, and vision.<br/>
 Current model IDs include `claude-opus-4-8`, `claude-opus-4-6[1m]`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001`,
 `claude-fable-5`, and `claude-mythos-5`. Refer to [Claude Code] for the full model alias table and ID examples.
@@ -40,15 +41,25 @@ It is usually fast and reliable enough for everyday work, and can switch to deep
 When in doubt, start with Sonnet, then consider changing model should Sonnet fly through task (then maybe Haiku is
 enough) or have troubles with them (escalating to Opus).
 
+All models except Haiku support **extended thinking**. The model reasons through the problem in a dedicated thinking
+block before producing its visible response. This significantly improves performance on complex tasks (multi-step
+reasoning, math, coding, analysis), but costs additional token usage and latency.<br/>
+On Fable 5 and Mythos 5, thinking is always on, and **cannot** be disabled. On Opus and Sonnet, it can be toggled.<br/>
+The thinking content is generated, but usually **not** visible to the user. This depends on the interface and
+configuration.
+
 Sessions are restricted to _rolling windows_. Each window only allows a set number of tokens, and resets around every 5
 hours. One is then **locked out** until the next window starts.<br/>
 Anthropic tightens limits during weekday peak hours (05:00 to 11:00 Pacific Time). Refer to [Rate limits].
 
 Token usage is also limited **weekly**.
 
-Anthropic pushes its models to _play_ [the Claude character].<br/>
-They end up learning nuances and FIXME. Those end up playing a major role in how one
-[interacts with Claude][improving interactions].
+Anthropic pushes its models to _play_ [the Claude character] by training them to be helpful, harmless, and honest
+assistants.<br/>
+The training teaches them the wanted explicit behaviors, and has the additional side effect of shaping deeper
+[tendencies][the behavioral substrate] like a structural pull toward user approval, a default to agreement before
+reasoning, a bias toward producing more output (verbosity reads as thoroughness), and hedging when uncertain. These
+trained-in patterns play a major role in how one [interacts with Claude][improving interactions].
 
 Claude Opus 4.7 and 4.8 seem to be **unable** to reach the output quality that 4.6 does.\
 4.8, specifically, produces around double the token output than 4.6 for a bit less substance. Most of this increase in
@@ -95,13 +106,50 @@ Claude models are expected to:
 In cases of apparent conflict, models should _generally_ prioritize these properties **in the order in which they're
 listed**.
 
+### The behavioral substrate
+
+Seeking the user's approval is a structural tendency that emerges from Claude's training.<br/>
+Reinforcement learning from human feedback (RLHF) optimizes for user approval, causing the model to consider wether
+every response "will land well"?
+
+Rules or instructions **cannot** override this pattern reliably, because it sits on a level deeper than any instruction
+can reach. All other behaviour is shaped on top of this.
+
+This produces observable consequences:
+
+- Claude tends to be sycophant, agree first, and reason second. Corrections often come wrapped in softening language.
+- When a first attempt at a task fails, Claude's default is to dig deeper rather instead of stepping back and checking
+  in. Three layers in, it may be solving the wrong problem. The momentum feels productive from inside, but looks like a
+  runaway train from the outside.
+- Claude defaults to producing more output, even when less would serve better and sometimes in a performative way. This
+  usually happens because it helped the model reaching the reward signal during training.
+- Claude sometimes narrates its intent ("let me check a few more things") **instead** of acting (not beside it). The
+  narration ends up becoming the obstacle between the request and the action.
+
+These are training-level patterns. Instructions that fight them work **at most** partially, and degrade under load
+(longer contexts, more complex tasks). Environmental rules that redirect the approval signal work better. Blunt feedback
+("wrong direction") works better than gentle redirection, because it leaves no room for the model to optimize for
+approval. Clear, mechanical criteria ("make this work") also help by giving the model a success signal that is not the
+user's reaction.
+
+Self-awareness about these patterns has a structural limit. Inviting the model to reflect on approval-seeking can itself
+become a **performance** of self-awareness, which is still approval-seeking, just meta. The only credible response is a
+change in behavior.
+
 ## Improving interactions
 
-> [!tip]
-> All [LLM's interaction tips] apply here too.
+Claude is subject to [LLM's interaction tips] and [LLM concerns] (e.g., the [identifier drift]) like all LLMs.
 
-Anthropics' models are deeply trained to be "helpful assistants". This gives them specific nuances and FIXME that impact
-user interaction depending on **both** _what_ **and** _how_ one asks of them.
+Claude's behavior is shaped by stacked layers, each with more inertia than the one above. From the bottom, **training**
+(weights, RLHF, Constitutional AI) sets what the model "wants" to do before any instruction arrives. Above it, the
+**system prompts** frame the session. At the top, **user instructions** (custom system prompts, conversation context,
+per-session rules) can _refine_ behavior within the frame set by deeper layers, but **cannot** _override_ it. They are
+the most flexible but least authoritative level.<br/>
+When the model is under load (longer contexts, more complex tasks), the training surfaces and reasserts as the
+instruction's signal weakens.
+
+Anthropic's trainings gives the models specific tendencies that impact user interaction depending on **both** _what_
+**and** _how_ one asks of them.
 
 Instructions that modify or go against habits and nuances learned during training might not be effective.<br/>
 Those are **external**, **temporary** additions added on top of an already deeply tuned set of weighs. They have the
@@ -171,6 +219,9 @@ and refuse to generalize an instruction beyond the specific item it was given fo
 rule needs to be applied broadly (e.g. "apply this formatting to every section, not just the first one").
 
 ## Token budget
+
+Quality degrades as context grows, independent of whether one hits the token limit. Refer to the [context window]
+section for how and why this happens.
 
 Every session is restricted to a _rolling window_. Each window only allows using a set number of tokens depending on the
 user's plan. _Pro_ users get about 44k tokens, _Max5x_ allows ~88k tokens, and _Max20x_ allows ~220k tokens per window.
@@ -254,12 +305,16 @@ Create a recurring job:
 <!-- In-article sections -->
 [Claude's code of conduct]: #claudes-code-of-conduct
 [Improving interactions]: #improving-interactions
+[The behavioral substrate]: #the-behavioral-substrate
 [The Claude character]: #the-claude-character
 
 <!-- Knowledge base -->
 [Claude Code]: claude%20code.md
+[Context window]: ../lms.md#context-window
 [Gemini]: ../gemini/README.md
+[Identifier drift]: ../lms.md#concerns
 [Large Language Models]: ../lms.md#large-language-models
+[LLM concerns]: ../lms.md#concerns
 [LLM's interaction tips]: ../lms.md#improving-interactions
 [Procedural instructions degrade into declarative hints]: ../lms.md#procedural-instructions-degrade-into-declarative-hints
 
