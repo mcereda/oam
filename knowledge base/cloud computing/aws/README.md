@@ -150,9 +150,13 @@ communications in **any** direction.<br/>
 _NACL rules_ allow all traffic by default. They also have a priority.
 
 Gateways connect VPCs to other networks.<br/>
-[_Internet gateways_][connect to the internet using an internet gateway] connect VPCs to the Internet.<br/>
-[_NAT gateways_][nat gateways] allow resources in private subnets to connect to the Internet, other VPCs, or on-premises
-networks. They can communicate with services outside the VPC, but cannot receive unsolicited connection requests.<br/>
+[_Internet gateways_][connect to the internet using an internet gateway] is stateless, free, 1:1 NAT devices that
+connect VPCs to the Internet. They translates between private and public IPs, but do **not** track connections **nor**
+charge for data processing.<br/>
+[_NAT gateways_][nat gateways] are stateful, paid devices that allow resources in private subnets to connect to the
+Internet, other VPCs, or on-premises networks. They replace the source IP entirely with their own. They can communicate
+with services outside the VPC, but cannot receive unsolicited connection requests. They also charge for data
+processing.<br/>
 [_VPC endpoints_][access aws services through aws privatelink] connect VPCs to AWS services privately, without the need
 of Internet gateways or NAT devices.
 
@@ -260,6 +264,16 @@ To create peerings between VPCs:
    reached from the origin.
 1. \[Destination account] Add ingress rules to the destination's security group to accept traffic coming from the
    origin's VPC's CIDR.
+
+AWS charges for network traffic when it crosses a _boundary_:
+
+- In or out of AWS's network, towards or from the Internet.<br/>
+  Outbound (_egress_) traffic is charged for (~$0.09/GB), inbound (_ingress_) traffic is free.
+- Traffic cross-AZ, within the same region is charged $0.01/GB in **each** direction.<br/>
+  Internal to the VPC. Applies regardless of whether one uses private IPs, public IPs, or routes through the IGW.
+- NAT Gateway processing is $0.045/GB for **anything** passing through, in addition to the other charges a NAT GW
+  incurs.
+- Traffic in the same AZ in the same region is free.
 
 ### Elastic IP addresses
 
