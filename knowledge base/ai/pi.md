@@ -50,8 +50,83 @@ Use `-l` for project-local installations (`.pi/git/`, `.pi/npm/` in project).
 
 ```sh
 # Install.
+brew install 'pi-coding-agent'
 npm install -g '@mariozechner/pi-coding-agent'
+
+# Configure via ollama
+ollama launch 'pi'
 ```
+
+| File                            | Summary              |
+| ------------------------------- | -------------------- |
+| `$HOME/.pi/agent/models.json`   | models configuration |
+| `$HOME/.pi/agent/settings.json` | settings             |
+
+  <details style='padding: 0 0 0 1rem'>
+    <summary>Example: models file</summary>
+
+```json
+{
+  "providers": {
+    "ollama": {
+      "api": "openai-completions",
+      "apiKey": "ollama",
+      "baseUrl": "http://127.0.0.1:11434/v1",
+      "models": [
+        {
+          "_launch": true,
+          "id": "lfm2.5:8b",
+          "input": [
+            "text"
+          ],
+          "reasoning": true
+        },
+        {
+          "_launch": true,
+          "id": "gemma4:12b-mlx",
+          "input": [
+            "text"
+          ],
+          "reasoning": true
+        },
+        {
+          "_launch": true,
+          "id": "qwen3.6:35b-a3b-coding-nvfp4",
+          "input": [
+            "text",
+            "image"
+          ],
+          "reasoning": true
+        }
+      ]
+    }
+  }
+}
+```
+
+  </details>
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Example: settings</summary>
+
+```json
+{
+  "defaultModel": "gemma4:12b-mlx",
+  "defaultProvider": "ollama",
+  "defaultThinkingLevel": "high",
+  "enableInstallTelemetry": false,
+  "followUpMode": "all",
+  "lastChangelogVersion": "0.80.3",
+  "steeringMode": "all",
+  "terminal": {
+    "showTerminalProgress": true
+  },
+  "theme": "dark",
+  "treeFilterMode": "default"
+}
+```
+
+  </details>
 
 </details>
 

@@ -219,15 +219,17 @@ ollama signout
 
 </details>
 
-<!-- Uncomment if used
-<details>
+<details style='padding: 0 0 1rem 0'>
   <summary>Real world use cases</summary>
 
 ```sh
+# Find the blob file used by a model.
+ollama show 'lfm2.5:8b' --modelfile | grep "^FROM " | cut -d ' ' -f '2' -  # for those that use FROM with a path
+jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
+  "$HOME/.ollama/models/manifests/registry.ollama.ai/library/codellama/13b"
 ```
 
 </details>
--->
 
 ## Gotchas
 
