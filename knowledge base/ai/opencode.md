@@ -118,6 +118,7 @@ opencode models --refresh
 
 # Run tasks in headless mode.
 opencode run "Explain how closures work in JavaScript"
+opencode run -m "ollama/lfm2.5:8b" "What tools do you have access to?"
 
 # Start a headless server.
 opencode serve
