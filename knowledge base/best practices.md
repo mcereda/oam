@@ -130,6 +130,11 @@ What really worked for me personally, or in my experience.
   When doing a study, document it separately from its study cases. When doing software, separate interfaces from their
   implementations and APIs from internals.
 
+- Fixing a lot of issues to achieve a goal might be an indicator that the decision is wrong. Stop and reconsider.<br/>
+  Inside the loop it feels like making progress, but the high might hide poor decisions.
+- When a decision feels obviously correct and frictionless, question it harder. It might come from habits instead of
+  reasoning.
+
 ## Teamwork
 
 - Respect what is already there, but strive to improve it.<br/>
