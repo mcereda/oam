@@ -22,6 +22,7 @@ using the tools made available to them.
    1. [Security](#security)
    1. [Prompt injection](#prompt-injection)
    1. [Going awry](#going-awry)
+   1. [Normalization of sketchy practices and inferior quality](#normalization-of-sketchy-practices-and-inferior-quality)
 1. [Best practices](#best-practices)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -535,6 +536,26 @@ limited protection.
 
 See [An AI Agent Published a Hit Piece on Me] by Scott Shambaugh.
 
+### Normalization of sketchy practices and inferior quality
+
+AI agents make hard or time-consuming actions trivial, so much so that they end up encouraging sketchy practices.
+
+The main example is replicating functionality from documentation and public interfaces alone, without engaging with the
+source code or its license. [MALUS] demonstrates this explicitly as "clean room as a service," but any agent that can
+read documentation and produce equivalent code provides the same capability, one prompt at a time.<br/>
+Individual instances may be legally defensible or too small to matter.
+
+When taking requires less effort than collaborating, people default to taking.<br/>
+The moment extraction is easier than contribution, the culture shifts, and the open ecosystems stop being worth
+contributing to.
+
+Agents also make creating code trivially cheap. This has already resulted in a sharp rise of new software and faster
+deployments, but also a general decline in code quality and stability. Good practices, tests, and considered
+architectures get skipped when one can recreate an app from scratch in a few hours.<br/>
+LLMs' [own issues][lms / concerns] compound on top.
+
+Those things always existed and will always exist. The concern is about such practices being **normalized**.
+
 ## Best practices
 
 Employ preferably **local** agents, possibly hooked up to **local** LLMs to keep the data private.
@@ -739,6 +760,7 @@ assist you by, for example, exiting the session and resuming it.
 [How to Build an Agent]: https://ampcode.com/notes/how-to-build-an-agent
 [karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
 [Let's build an AI agent]: https://www.youtube.com/watch?v=2r47_vCEkyo
+[MALUS]: https://malus.sh/
 [MemGPT]: https://arxiv.org/abs/2310.08560
 [moltbot security situation is insane]: https://www.youtube.com/watch?v=kSno1-xOjwI
 [nullclaw/nullclaw]: https://github.com/nullclaw/nullclaw
