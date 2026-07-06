@@ -54,10 +54,10 @@ stateDiagram-v2
   ifState --> [*]: outcome achieved
 ```
 
-Agent _harnesses_ provide the LLM with a runtime environment, and try to enforce rules to make the looped
-execution more reliable.<br/>
-They define how one wires tools, where one writes artifacts, how one logs/traces behavior, how one manages memory, and
-how one prevents the agent from drowning in context.
+Agent _harnesses_ provide an LLM with a runtime environment. They instruct it to print text in a specific format when it
+wants to take actions, and try to enforce rules (e.g., access control) to make the looped execution more reliable.<br/>
+They define how the LLM can wire tools, where to writes artifacts, how one logs/traces behavior, how one manages memory,
+and how one prevents the agent from drowning in context.
 
 _Context engineering_ is the systematic design and curation of the content loaded in a context window so that the model
 produces the intended, reliable output within a fixed budget.
@@ -682,6 +682,7 @@ assist you by, for example, exiting the session and resuming it.
 - [The Emperor Has No Clothes: How to Code Claude Code in 200 Lines of Code]
 - Tulving and Schacter's [Understanding implicit memory], 1990
 - Clark & Chalmers' theory of [The Extended Mind], 1998
+- Phil Nash's [Let's build an AI agent]
 
 <!--
   Reference
@@ -737,6 +738,7 @@ assist you by, for example, exiting the session and resuming it.
 [How does Claude Code _actually_ work? | Theo - t3.gg]: https://www.youtube.com/watch?v=I82j7AzMU80
 [How to Build an Agent]: https://ampcode.com/notes/how-to-build-an-agent
 [karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
+[Let's build an AI agent]: https://www.youtube.com/watch?v=2r47_vCEkyo
 [MemGPT]: https://arxiv.org/abs/2310.08560
 [moltbot security situation is insane]: https://www.youtube.com/watch?v=kSno1-xOjwI
 [nullclaw/nullclaw]: https://github.com/nullclaw/nullclaw
