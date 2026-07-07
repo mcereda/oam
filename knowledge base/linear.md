@@ -15,6 +15,7 @@ Project management tool.
 1. [Integrations](#integrations)
     1. [GitLab](#gitlab)
     1. [Slack](#slack)
+1. [Convert an existing issue into a recurring one](#convert-an-existing-issue-into-a-recurring-one)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -214,6 +215,15 @@ _Synced_ threads keep Slack conversations and Linear comments updated bidirectio
 
 Linear can auto-create a public Slack channel per project. When doing it, it can invite all members and bookmark the
 project's link.
+
+## Convert an existing issue into a recurring one
+
+This procedure is UI-only (no API support).
+
+1. Open the issue in Linear.
+1. Click the `…` menu at the top and choose _Convert into_ > _Recurring issue…_ (or use `Cmd+K` and type "Convert into
+   recurring issue").
+1. Pick the first due date and the cadence (e.g., every 2 months).
 
 ## Further readings
 
