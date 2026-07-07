@@ -2,7 +2,8 @@
 
 [Agentic][ai agents] harness around [Claude] providing it with tools, context management, and execution
 environment.<br/>
-Works in a terminal, IDE (via plugin), and in Claude's desktop app.
+Works in a terminal, IDE (via plugin), Claude's desktop app, the browser ([claude.ai/code]), and on mobile via
+[Remote Control].
 
 1. [TL;DR](#tldr)
 1. [Billing](#billing)
@@ -44,6 +45,12 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
     1. [Offloading MCP servers to sub-agents](#offloading-mcp-servers-to-sub-agents)
 1. [Tracking tasks](#tracking-tasks)
 1. [Scheduling tasks](#scheduling-tasks)
+    1. [Routines](#routines)
+1. [Working across surfaces](#working-across-surfaces)
+    1. [Remote Control](#remote-control)
+    1. [Dispatch](#dispatch)
+    1. [Claude Code on the web](#claude-code-on-the-web)
+    1. [Computer Use](#computer-use)
 1. [Emergent features](#emergent-features)
     1. [A session can be aware of other active sessions](#a-session-can-be-aware-of-other-active-sessions)
     1. [Active sessions can communicate with each other](#active-sessions-can-communicate-with-each-other)
@@ -3351,6 +3358,122 @@ Use Desktop tasks when in need to access local files and tools.<br/>
 Use `/loop` for quick polling during an active session.<br/>
 Describe the goal in natural language otherwise.
 
+### Routines
+
+Refer to [Routines].
+
+Saved Claude Code configurations (a prompt, repositories, and connectors) that can run Anthropic's managed cloud
+infrastructure. They keep running when the local machine is off.
+
+> [!note] Research preview
+> Behavior, limits, and the API surface may change.
+
+Each routine supports one or more triggers that can be combined on a single routine:
+
+| Trigger   | Fires when                                                                      |
+| --------- | ------------------------------------------------------------------------------- |
+| Scheduled | Recurring cadence (hourly, daily, weekly) or one-off at a specific time         |
+| API       | HTTP POST to a per-routine endpoint with a bearer token                         |
+| GitHub    | Repository events (pull requests opened/closed/labeled, releases created, etc.) |
+
+Create routines from [claude.ai/code/routines], the Desktop app, or via `/schedule` in the CLI. All three surfaces write
+to the same cloud account.
+
+Routines run **autonomously**, as full cloud sessions with **no** permission prompts. They can run shell commands, use
+skills from cloned repositories, and call any included connectors.<br/>
+Anything a routine does through connected identities (GitHub, Slack, Linear) appears as the routine's owner.
+
+_One-off_ runs do **not** count against the daily routine cap. _Recurring_ runs do.
+
+The feature is available on Pro, Max, Team, and Enterprise plans with [Claude Code on the web] enabled.<br/>
+Team and Enterprise Owners can disable routines for all members via the admin settings.
+
+## Working across surfaces
+
+Sessions can use **multiple** devices or interfaces. Several features allow continuing, steering, or triggering work
+from other surfaces.
+
+|                 | Trigger                                   | Claude runs on  | Best for                                        |
+| --------------- | ----------------------------------------- | --------------- | ----------------------------------------------- |
+| Remote Control  | Drive a running session from any device   | Local machine   | Steering in-progress work from phone or browser |
+| Dispatch        | Message a task from the Claude mobile app | Local machine   | Delegating work while away, minimal setup       |
+| Claude Code web | Start a task in the browser               | Anthropic cloud | Self-contained async work, no local setup       |
+| Computer Use    | Claude controls the screen                | Local machine   | GUI-only apps, simulators, design tools         |
+
+### Remote Control
+
+Refer to [Remote Control].
+
+Connects [claude.ai/code](https://claude.ai/code) or the Claude mobile app to a Claude Code session running on a local
+machine. The session stays local while the web/mobile interface offers control.
+
+> [!note] Research preview
+> Off by default on Team and Enterprise subscriptions until an Owner enables it in admin settings.
+
+Start a Remote Control session from the local host:
+
+- In **server** mode by using `claude remote-control`. The session lingers there, running, and waiting for remote
+  connections.<br/>
+  Supports `--spawn worktree` for isolated sessions and `--capacity N` to limit concurrent connections.
+- In **interactive** mode by using `claude --remote-control`. The full, local terminal session will also be available
+  remotely.
+- From **existing** sessions by sending `/remote-control` or `/rc` to make the _current_ session available remotely.
+
+The local process only makes **outbound** HTTPS requests and pings the servers for instructions. The feature does
+**not** open inbound ports on the machine.<br/>
+Every Claude Code instance keeps its own conversation in sync across all connected devices. One can send messages from
+any surface interchangeably.
+
+Attachments (e.g., images or files) sent from the mobile app or browser are downloaded to the local machine and passed
+to Claude as `@` file references.
+
+Mobile push notifications are available when Remote Control is active. Claude sends them when a long-running task
+finishes or when it needs a decision.<br/>
+Configure this via `/config`.
+
+Requires a direct claude.ai subscription. Not available on Bedrock, Vertex, or Foundry.<br/>
+Each interactive Claude Code process supports a single remote session. Use server mode for multiple concurrent sessions.
+
+### Dispatch
+
+Message a task from the Claude mobile app; it spawns a Desktop session to handle it.<br/>
+Requires pairing the mobile app with the Desktop app. The session runs on the local machine with access to local files
+and tools.
+
+### Claude Code on the web
+
+Refer to [Claude Code on the web].
+
+Run Claude Code in the browser with no local setup at [claude.ai/code](https://claude.ai/code).<br/>
+Sessions run on Anthropic-managed cloud infrastructure. The code can be cloned from connected GitHub repositories.
+
+Each session runs in a cloud environment that controls network access, environment variables, and setup scripts.<br/>
+Network access defaults to _Trusted_ (package registries, cloud APIs, common dev domains). Custom and _Full_
+(unrestricted) modes are available.
+
+Use web sessions to kick off long-running tasks and check back later, work on repos not cloned locally, or run multiple
+tasks in parallel.
+
+### Computer Use
+
+Refer to [Computer Use].
+
+Lets Claude open apps, control the screen, and interact with GUIs on macOS.<br/>
+Available as a **built-in** MCP server (`computer-use`). Off by default. Enable it via `/mcp`.
+
+> [!note] Research preview
+> Limited to macOS.<br/>
+> Requires a Pro or Max plan, Claude Code v2.1.85+, and an interactive session.
+
+First use requires granting macOS Accessibility and Screen Recording permissions.
+
+Claude tries more precise tools first (MCP servers, Bash), then falls back to computer use only when nothing else can
+reach the target. Screen control is reserved for native apps, simulators, and tools without an API.
+
+Per-app approval is required each session. Apps with broad reach (terminals, Finder, System Settings) show extra
+warnings before approval.<br/>
+Computer use holds a machine-wide lock from the first action until the session exits. Press `Esc` anywhere to abort.
+
 ## Emergent features
 
 ### A session can be aware of other active sessions
@@ -3636,8 +3759,12 @@ Claude Code version: `v2.1.41`.
 [Automate workflows with hooks]: https://code.claude.com/docs/en/hooks-guide
 [Blog]: https://claude.com/blog
 [Built-in commands reference]: https://code.claude.com/docs/en/commands
+[Claude Code on the web]: https://code.claude.com/docs/en/claude-code-on-the-web
+[claude.ai/code]: https://claude.ai/code
+[claude.ai/code/routines]: https://claude.ai/code/routines
 [CLI reference]: https://code.claude.com/docs/en/cli-reference
 [Codebase]: https://github.com/anthropics/claude-code
+[Computer Use]: https://code.claude.com/docs/en/computer-use
 [Create custom sub-agents]: https://code.claude.com/docs/en/sub-agents
 [Documentation / Memory]: https://code.claude.com/docs/en/memory
 [Documentation / Model configuration]: https://code.claude.com/docs/en/model-config
@@ -3665,6 +3792,8 @@ Claude Code version: `v2.1.41`.
 [Orchestrate teams of Claude Code sessions]: https://code.claude.com/docs/en/agent-teams
 [Output styles]: https://code.claude.com/docs/en/output-styles
 [Plugins reference]: https://code.claude.com/docs/en/plugins-reference
+[Remote Control]: https://code.claude.com/docs/en/remote-control
+[Routines]: https://code.claude.com/docs/en/routines
 [Run prompts on a schedule]: https://code.claude.com/docs/en/scheduled-tasks
 [Schedule tasks on the web]: https://code.claude.com/docs/en/web-scheduled-tasks
 [Sub-agent memory configuration]: https://code.claude.com/docs/en/sub-agents#enable-persistent-memory
