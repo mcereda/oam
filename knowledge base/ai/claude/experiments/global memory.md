@@ -5,6 +5,8 @@ Mirrors Claude Code's built-in project-only memory pattern at the user level.
 1. [Setup](#setup)
 1. [Findings](#findings)
 1. [Improvements](#improvements)
+1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 Without a global tier, cross-project facts (user identity, collaboration preferences, recurring feedback) end up
 scattered across whichever project's auto-memory Claude happens to be in when learning them.
@@ -184,23 +186,11 @@ in `CLAUDE.md` (cross-host portable). If it is a project-specific fact, it belon
 accumulated locally). The test is about cross-host portability. A rule can be load-bearing and still fit auto-memory, if
 losing it on a different host wouldn't let the same failure recur.
 
-The `@`-import mechanism proved a better loading strategy for operational docs of memory-system (conventions, reveries
-guidelines), even though memory could be considered one of those _domains_ that fit `.claude/rules/`.<br/>
-Memory has its own conventions, files, and operational logic, but also has mechanical concerns that prevent its
-integration under `rules/`:
-
-1. `MEMORY.md` must be Claude-writable, and can change every session. This is incompatible with `rules/`'s ownership
-   model, which should be human-curated.<br/>
-   Moving its conventions to `rules/` would separate the convention from its subject. It **must** stay in CLAUDE.md as
-   an `@`-include.
-1. `@`-includes are _explicit_, and reading `CLAUDE.md` shows exactly what loads and in what order. `rules/`'s loading
-   is _implicit_ (everything in the folder loads; `ls` required to audit).
-1. `@`-includes place conventions right next to the routing table that references them. `rules/` load as flat peers,
-   with no guaranteed ordering relative to `CLAUDE.md`'s content.
-
-`rules/` is for domain-scoped instructions that are about working with external systems (AWS, specific codebases).<br/>
-`@`-includes are for always-on operational content that is part of `CLAUDE.md`'s own contract, which includes the memory
-systems' governance.
+The `@`-import mechanism proved a better loading strategy for operational docs of the memory system (conventions,
+reveries guidelines) than `.claude/rules/`. The memory system has mechanical concerns (Claude-writable files, explicit
+load ordering, proximity to the routing table) that are incompatible with `rules/`'s implicit-loading, human-curated
+ownership model.<br/>
+Refer to [Deciding where memory goes] for the full rationale behind the `@`-include vs `rules/` distinction.
 
 ## Improvements
 
@@ -262,7 +252,13 @@ systems' governance.
 
 ## Further readings
 
+- [Personal experiments]
 - [Propagating knowledge between concurrent sessions]
+- [Claude Code]
+
+### Sources
+
+- [How Claude remembers your project]
 
 <!--
   Reference
@@ -271,7 +267,12 @@ systems' governance.
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[Claude Code]: ../claude%20code.md
+[Deciding where memory goes]: README.md#deciding-where-memory-goes
+[Personal experiments]: README.md
 [Propagating knowledge between concurrent sessions]: cross-session%20live%20propagation.md
 
 <!-- Upstream -->
+[How Claude remembers your project]: https://code.claude.com/docs/en/memory
+
 <!-- Others -->

@@ -272,6 +272,7 @@ cross-memory linking, format validation).
 
 - [Claude Code]
 - [AI agents]
+- [Discovering active sessions]
 - [Propagating knowledge between concurrent sessions]
 - [Manage Claude's memory]
 - [karpathy/llm-wiki.md]
@@ -294,6 +295,7 @@ cross-memory linking, format validation).
 [AI agents]: ../../agents.md
 [Claude Code / auto memory]: ../claude%20code.md#auto-memory
 [Claude Code]: ../claude%20code.md
+[Discovering active sessions]: session%20registry.md
 [Giving Claude a reverie-like system]: reveries.md
 [Propagating knowledge between concurrent sessions]: cross-session%20live%20propagation.md
 

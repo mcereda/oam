@@ -9,6 +9,8 @@ notebook_ for durable, reusable knowledge.
 1. [Improvements](#improvements)
 1. [Adapt the concept to shared KBs](#adapt-the-concept-to-shared-kbs)
    1. [Adapted setup](#adapted-setup)
+1. [Further readings](#further-readings)
+   1. [Sources](#sources)
 
 This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and iteratively improves upon it.
 
@@ -958,6 +960,20 @@ A single agent definition can serve both roles by parameterizing the caller's pr
 whether to commit, which conventions to read, and what attribution to use. The agent's mechanics (read conventions,
 write files, run lint) can stay identical.
 
+## Further readings
+
+- [Personal experiments]
+- [Giving Claude global memory]
+- [Cross-project sessions]
+- [Giving Claude a reverie-like system]
+- [Claude Code]
+- [karpathy/llm-wiki.md]
+
+### Sources
+
+- [How Claude remembers your project]
+- [Extend Claude with skills]
+
 <!--
   Reference
   ═╬═Time══
@@ -970,6 +986,7 @@ write files, run lint) can stay identical.
 [Claude Code / skills]: ../claude%20code.md#using-skills
 [Claude Code / sub-agents]: ../claude%20code.md#sub-agents
 [Claude Code / using hooks]: ../claude%20code.md#using-hooks
+[Claude Code]: ../claude%20code.md
 [Cross-project sessions / eagerness problem]: cross-project%20sessions.md#eagerness-problem
 [Cross-project sessions]: cross-project%20sessions.md
 [Git worktrees]: ../../../git.md#worktrees
@@ -979,6 +996,7 @@ write files, run lint) can stay identical.
 [OKF specification]: https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md
 [Ollama]: ../../ollama.md
 [Personal experiments / Memory tiers]: README.md#memory-tiers
+[Personal experiments]: README.md
 
 <!-- Files -->
 [settings.json file example for own KB]: ../../../../examples/claude-code/llm-owned%20kb/kb.settings.json
@@ -986,6 +1004,8 @@ write files, run lint) can stay identical.
 [User-level settings.json patch example for own KB]: ../../../../examples/claude-code/llm-owned%20kb/user.settings.patch.json
 
 <!-- Upstream -->
+[Extend Claude with skills]: https://code.claude.com/docs/en/skills
+[How Claude remembers your project]: https://code.claude.com/docs/en/memory
 
 <!-- Others -->
 [karpathy/llm-wiki.md]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f

@@ -44,6 +44,9 @@ Works in a terminal, IDE (via plugin), and in Claude's desktop app.
     1. [Offloading MCP servers to sub-agents](#offloading-mcp-servers-to-sub-agents)
 1. [Tracking tasks](#tracking-tasks)
 1. [Scheduling tasks](#scheduling-tasks)
+1. [Emergent features](#emergent-features)
+    1. [A session can be aware of other active sessions](#a-session-can-be-aware-of-other-active-sessions)
+    1. [Active sessions can communicate with each other](#active-sessions-can-communicate-with-each-other)
 1. [Tools of interest](#tools-of-interest)
 1. [Troubleshooting](#troubleshooting)
     1. [`skill-creator` plugin's script require an incompatible `pydantic-core` version](#skill-creator-plugins-script-require-an-incompatible-pydantic-core-version)
@@ -145,6 +148,8 @@ sub-agents).<br/>
 Consider using **Haiku** for quick responses.
 
 The `opusplan` mode allows using Opus during planning, then automatically switches to Sonnet for implementation.
+
+The `/fast` toggle increases output speed on Opus 4.6 through 4.8. It increases costs proportionally.
 
 Change how Claude responds (without affecting its capabilities) by configuring an [output style][output styles].<br/>
 The builtin `explanatory` style adds educational insights between tasks; `learning` shares insights _and_ asks the user
@@ -372,36 +377,23 @@ Usage is metered by the token.
 > One _can_ route requests to other services using [Claude Code router], or use local models with [Ollama].<br/>
 > Performances do take a _major_ hit, though.
 
-Since 2026-06-15, subscriptions separate _interactive_ from _**non**-interactive_ usage.<br/>
-Non-interactive usage (`claude -p` and the Agent SDK) now draws **at full API rates** from a **dedicated** monthly Agent
-SDK credit pool, not from the interactive subscription pool.<br/>
-This applies to agent-type hooks, cron jobs, and any other non-interactive invocation.
+Non-interactive usage (`claude -p`, the Agent SDK, GitHub Actions) currently draws from the **same** subscription pool
+as interactive sessions.
 
-| Plan          | Monthly Agent SDK credit |
-| ------------- | -----------------------: |
-| Pro           |                      $20 |
-| Max 5x        |                     $100 |
-| Max 20x       |                     $200 |
-| Team Standard |                 $20/seat |
-| Team Premium  |                $100/seat |
-
-Once that credit is exhausted, invocations are billed as "extra usage" at standard API rates (if enabled).<br/>
-If extra usage is not enabled, requests stop until the next billing cycle. Credits not used in a month do **not** roll
-over to the next month.
+Anthropic announced on 2026-05-14 a plan to split non-interactive usage into a separate, capped Agent SDK credit pool
+at full API rates (effective 2026-06-15). The change was **paused** (not discarded) on the day it was set to go live due
+to community backlash, with Anthropic stating it would "revise the plan." As of 2026-07, the split has not been
+reinstated; non-interactive usage remains on the subscription pool.
 
 > [!warning]
-> Anthropic made three significant billing changes for subscriptions in six weeks (April to May 2026) that are blatantly
-> anti-consumer. It:
+> Refer to [Anthropics' subscription and billing practices][claude / subscription and billing practices] for the broader
+> pattern of billing changes affecting Claude users.
 >
-> - Banned third-party agents (e.g. OpenClaw) from using subscriptions, and limited them to API usage.
-> - Removed Claude Code from the Pro subscription tier, and claimed it was a test.
-> - Forced non-interactive inference previously covered by subscriptions to draw from the Agent SDK credit.
->
-> Treat `claude -p` on subscription as a convenience that may be further restricted or repriced.<br/>
+> Treat `claude -p` on subscription as a _convenience_ that **will** be further restricted or repriced.<br/>
 > Consider designing launchers with a **local LLM fallback** (e.g. via [Ollama]) for non-critical automation.
 
-The `--bare` flag skips OAuth, but **requires** `ANTHROPIC_API_KEY`. Avoid this flag to use the plan's Agent SDK credit,
-and use `--no-session-persistence` instead to skip session recording without switching authentication mode.
+The `--bare` flag skips OAuth, but **requires** `ANTHROPIC_API_KEY`.<br/>
+Use `--no-session-persistence` instead to skip session recording without switching authentication mode.
 
 ## Configuration
 
@@ -961,9 +953,9 @@ Skills from `.claude/skills/` in the additional directories load **regardless** 
 
 ### Custom memory tiers via @-import
 
-The `@<path>` syntax in `CLAUDE.md` expands absolute paths **recursively** (up to 4 hops max per Anthropic's official
-documentation as of mid 2026). A line like `@~/.claude/memory/MEMORY.md` in `~/.claude/CLAUDE.md` loads an arbitrary
-user-level memory file into every session under the same 200-line/25 KB cap that applies to per-project auto-memory.
+The `@<path>` syntax in `CLAUDE.md` expands absolute paths **recursively** (up to 5 hops). A line like
+`@~/.claude/memory/MEMORY.md` in `~/.claude/CLAUDE.md` loads an arbitrary user-level memory file into every session
+under the same 200-line/25 KB cap that applies to per-project auto-memory.<br/>
 This is the cheapest extension surface for custom memory tiers.
 
 See [Giving Claude a global memory][giving claude a global memory] for a testing global-memory implementation, and
@@ -2170,8 +2162,8 @@ Keep side-tasks alive through long agentic runs by **stacking** multiple hooks a
   matcher. This is most reliable for long sessions.
 - **Re-engage** the model using a `Stop` hook returning exit code `2` to fire reminders at **end-of-context** (another
   high-attention position). Check `stop_hook_active` in the hook input to avoid infinite loops.
-- Convert reminders into explicitly tracked tasks in **generated** (and not _injected_) context using TodoWrite at the
-  start of the first turn. Generated context carries more weight than injected context.
+- Convert reminders into explicitly tracked tasks in **generated** (and not _injected_) context using `TaskCreate` at
+  the start of the first turn. Generated context carries more weight than injected context.
 
   > [!note]
   > Poorly made checks can create duplicate tasks on every turn.
@@ -2179,16 +2171,16 @@ Keep side-tasks alive through long agentic runs by **stacking** multiple hooks a
   > <details style='padding: 0 0 1rem 1rem'>
   >   <summary>Good example: update the documentation</summary>
   >
-  > > Before writing your response, call TodoWrite to add this task: "Before committing, check whether any docs (README,
-  > > CONTRIBUTING, wikis, KBs) need updating." Skip if it is already in your task list.
+  > > Before writing your response, call TaskCreate to add this task: "Before committing, check whether any docs
+  > > (README, CONTRIBUTING, wikis, KBs) need updating." Skip if it is already in your task list.
   >
   > Reasoning:
   >
-  > - "Before writing your response" positions the `TodoWrite` call at the very top of the model's turn, **before** it
+  > - "Before writing your response" positions the `TaskCreate` call at the very top of the model's turn, **before** it
   >   gets absorbed into the task.<br/>
   >   Instructions pointed to the end of the task (e.g., "remember to...") get lost in the process once Claude is
   >   mid-response.
-  > - Explicitly calling the tool name ("call TodoWrite") is unambiguous. Using generic terms (e.g., "Register a
+  > - Explicitly calling the tool name ("call TaskCreate") is unambiguous. Using generic terms (e.g., "Register a
   >   reminder" or "note this down") leaves room for interpretation and allows Claude to satisfy the instruction with
   >   less durable actions.
   > - "Skip if already in your task list" is a cheap way to avoid creating duplicate tasks.
@@ -3013,6 +3005,49 @@ findings, early-exit on zero results). The barrier forces the turn to wait for t
 The `schema` option on `agent()` forces structured output via a `StructuredOutput` tool call and requires JSON Schema
 validation. Compliance is guaranteed by the harness, which makes it equally reliable on Haiku as on Opus.
 
+Additional primitives complement the core four:
+
+| Primitive    | Behavior                                                                 |
+| ------------ | ------------------------------------------------------------------------ |
+| `log()`      | Emit a progress message to the user (shown as a narrator line)           |
+| `workflow()` | Run another workflow inline as a sub-step and return whatever it returns |
+
+`workflow()` accepts a name (from the saved workflow registry) or a `{scriptPath}` object. The child shares the
+parent's concurrency cap, agent counter, abort signal, and token budget. Nesting is **one level** only; calling
+`workflow()` inside a child throws.
+
+`agent()` accepts optional overrides beyond `schema`:
+
+| Option      | Effect                                                                                  |
+| ----------- | --------------------------------------------------------------------------------------- |
+| `model`     | Override the model for this agent (default: inherit session model)                      |
+| `effort`    | Override reasoning effort (`low`, `medium`, `high`, `xhigh`, `max`)                     |
+| `phase`     | Explicitly assign to a progress group (avoids races inside `pipeline()`/`parallel()`)   |
+| `agentType` | Use a custom agent type from the registry (e.g. `Explore`, `code-reviewer`)             |
+| `isolation` | `'worktree'` runs the agent in a fresh git worktree (~200-500ms setup + disk per agent) |
+| `label`     | Override the display label in progress output                                           |
+
+Scripts have access to a `budget` global for scaling work to the user's token directive (e.g. "+500k"):
+
+- `budget.total` is `null` when no target was set, otherwise the token ceiling.
+- `budget.spent()` returns output tokens spent this turn across the main loop **and** all workflows.
+- `budget.remaining()` returns `max(0, total - spent())`, or `Infinity` if no target.
+
+The target is a **hard** ceiling. Once `spent()` reaches `total`, further `agent()` calls throw.<br/>
+Use for dynamic loops (`while (budget.remaining() > 50_000) { ... }`) or static scaling
+(`const FLEET = budget.total ? Math.floor(budget.total / 100_000) : 5`).
+
+> [!important]
+> Always guard on `budget.total` first; without a target, `remaining()` is `Infinity` and the loop runs to the
+> 1000-agent cap.
+
+Scripts are plain **JavaScript**, not TypeScript. Type annotations, interfaces, and generics fail to parse.<br/>
+`Date.now()`, `Math.random()`, and argument-less `new Date()` **throw** (they would break resume determinism). Pass
+timestamps via `args`; vary randomness by agent prompt or index.
+
+Concurrent `agent()` calls are capped at `min(16, cpu_cores - 2)` per workflow; excess calls queue. Total agents across
+a workflow's **lifetime** are capped at 1000. A single `parallel()`/`pipeline()` call accepts at most 4096 items.
+
 Completed runs can be **resumed** with `resumeFromRunId`.<br/>
 Resume compares the resolved prompts (after string interpolation). Agents that did **not** change return their cached
 results instantly at near-zero cost.<br/>
@@ -3316,6 +3351,71 @@ Use Desktop tasks when in need to access local files and tools.<br/>
 Use `/loop` for quick polling during an active session.<br/>
 Describe the goal in natural language otherwise.
 
+## Emergent features
+
+### A session can be aware of other active sessions
+
+Claude Code maintains a live session registry at `~/.claude/sessions/`.<br/>
+Each running session registers a JSON file named by its PID; the file is removed on graceful exit. Sessions that crash
+leave orphan files, which can be detected by checking if their process is alive (`ps -p <pid>`).
+
+<details style='padding: 0 0 1rem 1rem'>
+  <summary>Registry file structure</summary>
+
+```json
+{
+  "pid": 6719,
+  "sessionId": "196377df-3c8f-449c-8ea1-040a5c3b510c",
+  "cwd": "/Users/me/some-project",
+  "startedAt": 1783368576073,
+  "version": "2.1.193",
+  "kind": "interactive",
+  "entrypoint": "cli",
+  "status": "busy"
+}
+```
+
+| Field        | Meaning                                                                  |
+| ------------ | ------------------------------------------------------------------------ |
+| `pid`        | OS process ID; verifiable via `ps -p <pid>`                              |
+| `sessionId`  | UUID correlating with session logs, task directories, and `session-env/` |
+| `cwd`        | Working directory (which project this session is in)                     |
+| `status`     | `busy` or `idle`                                                         |
+| `kind`       | `interactive` or `background`                                            |
+| `entrypoint` | `cli`, `ide`, or other launch method                                     |
+| `updatedAt`  | Tracks status transitions, not continuous activity; can lag 30+ minutes  |
+
+</details>
+
+From that registry, a session can determine:
+
+- How many other sessions are active.
+- Which projects they work in.
+- Whether any share the same project.
+- Whether they are interactive or background.
+
+It **cannot** see _what_ siblings are doing, their conversation history, or which files they have modified.
+
+A session identifies its own registry entry through the process tree (`$PPID` maps to a `<pid>.json` file).<br/>
+The environment also exposes `CLAUDE_CODE_ENTRYPOINT` (`cli` or `ide`) and `CLAUDE_CODE_EFFORT_LEVEL`.
+
+Separate from session files, IDE connections register lock files in `~/.claude/ide/<port>.lock` (one per connection, not
+per session), and a background daemon tracks its own state in `~/.claude/daemon/roster.json`.
+
+The registry is **read-only** data. A session can use it to tells who else is there, but provides no communication
+channel.<br/>
+Sessions can communicate by [making changes to auto-loaded files][propagating knowledge between concurrent sessions]. A
+session can discover siblings via the registry, then write targeted memory entries knowing which project scopes will
+reach which sessions.<br/>
+See [Discovering active sessions] for the full experiment.
+
+### Active sessions can communicate with each other
+
+Claude Code's file-watching mechanism injects the new content of modified files into the context at every turn. This
+allows active sessions to receive knowledge and messages from sibling sessions in real time, with no additional
+infrastructure.<br/>
+See [Propagating knowledge between concurrent sessions].
+
 ## Tools of interest
 
 | Tool         | Summary                                                                          |
@@ -3501,21 +3601,24 @@ Claude Code version: `v2.1.41`.
 [AI agents / Skills]: ../agents.md#skills
 [AI agents]: ../agents.md
 [AWS Toolkit]: ../../cloud%20computing/aws/README.md#agent-toolkit
+[Claude / Subscription and billing practices]: README.md#subscription-and-billing-practices
 [Claude Code router]: claude%20code%20router.md
 [Claude's interaction tips]: README.md#improving-interactions
 [Claude]: README.md
+[Discovering active sessions]: experiments/session%20registry.md
 [Gemini CLI]: ../gemini/cli.md
 [Git worktrees]: ../../git.md#worktrees
 [Giving Claude a global memory]: experiments/global%20memory.md
 [Giving Claude a reverie-like system]: experiments/reveries.md
 [Giving Claude its own knowledge base]: experiments/llm-owned%20knowledge%20base.md
 [LMs / Improving interactions]: ../lms.md#improving-interactions
-[MCP]: ../mcp.md
 [MCP / Docker-based MCP host header validation]: ../mcp.md#docker-based-mcp-host-header-validation-differs-from-listen-address
+[MCP]: ../mcp.md
 [Ollama]: ../ollama.md
 [OpenCode]: ../opencode.md
 [Personal experiments / Memory tiers]: experiments/README.md#memory-tiers
 [Pi]: ../pi.md
+[Propagating knowledge between concurrent sessions]: experiments/cross-session%20live%20propagation.md
 [tmux]: ../../tmux.md
 
 <!-- Files -->

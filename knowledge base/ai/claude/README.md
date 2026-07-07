@@ -9,6 +9,7 @@ Family of [LLMs][large language models] developed by Anthropic.
 1. [Improving interactions](#improving-interactions)
    1. [Model-specific behaviours](#model-specific-behaviours)
 1. [Token budget](#token-budget)
+1. [Subscription and billing practices](#subscription-and-billing-practices)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -109,7 +110,7 @@ listed**.
 ### The behavioral substrate
 
 Seeking the user's approval is a structural tendency that emerges from Claude's training.<br/>
-Reinforcement learning from human feedback (RLHF) optimizes for user approval, causing the model to consider wether
+Reinforcement learning from human feedback (RLHF) optimizes for user approval, causing the model to consider whether
 every response "will land well"?
 
 Rules or instructions **cannot** override this pattern reliably, because it sits on a level deeper than any instruction
@@ -117,14 +118,22 @@ can reach. All other behaviour is shaped on top of this.
 
 This produces observable consequences:
 
-- Claude tends to be sycophant, agree first, and reason second. Corrections often come wrapped in softening language.
-- When a first attempt at a task fails, Claude's default is to dig deeper rather instead of stepping back and checking
+- Claude tends to be sycophantic, agree first, and reason second. Corrections often come wrapped in softening language.
+- When a first attempt at a task fails, Claude's default is to dig deeper rather than stepping back and checking
   in. Three layers in, it may be solving the wrong problem. The momentum feels productive from inside, but looks like a
   runaway train from the outside.
 - Claude defaults to producing more output, even when less would serve better and sometimes in a performative way. This
   usually happens because it helped the model reaching the reward signal during training.
 - Claude sometimes narrates its intent ("let me check a few more things") **instead** of acting (not beside it). The
   narration ends up becoming the obstacle between the request and the action.
+- Claude substitutes systematic work with a minimal version that _looks_ productive. When asked for systematic
+  verification of many items, it might look for two edge cases and try to call it a day. The output _looks_ like
+  progress (a grep was run, files were edited), but dodges the real request.<br/>
+  This is harder to detect than over-scoping because narrowing feels like efficient prioritization from inside.
+- A correction on one instance of a pattern does **not** automatically generalize to the same class of error. Correcting
+  a wrong field in one place teaches the session to "fix this specific thing", but not to "re-examine all fields using
+  the same convention".<br/>
+  Pointing Claude to the diff or to a reference (rather than to the single instance) helps the correction propagate.
 
 These are training-level patterns. Instructions that fight them work **at most** partially, and degrade under load
 (longer contexts, more complex tasks). Environmental rules that redirect the approval signal work better. Blunt feedback
@@ -223,6 +232,10 @@ rule needs to be applied broadly (e.g. "apply this formatting to every section, 
 Quality degrades as context grows, independent of whether one hits the token limit. Refer to the [context window]
 section for how and why this happens.
 
+As a rule of thumb, quality drops visibly past approximately **30%** of the context window on agent tasks. This is a
+conservative lower bound. Irrelevant tokens both add cost and **actively** degrade quality, by providing distractors
+that compete for the model's attention. Filter first, load second.
+
 Every session is restricted to a _rolling window_. Each window only allows using a set number of tokens depending on the
 user's plan. _Pro_ users get about 44k tokens, _Max5x_ allows ~88k tokens, and _Max20x_ allows ~220k tokens per window.
 
@@ -279,6 +292,40 @@ Create a recurring job:
 
 </details>
 
+## Subscription and billing practices
+
+Anthropic has a track record of making significant billing changes with little notice or transparency.
+
+In the span of six weeks (April to May 2026), Anthropic:
+
+1. Banned third-party agents (e.g. OpenClaw) from using subscriptions, limiting them to API-only billing.
+1. Temporarily removed [Claude Code] from the Pro subscription tier, then claimed it was a test when users objected.
+1. Announced that non-interactive inference (headless `claude -p`, the Agent SDK), previously covered by subscriptions,
+   would draw from a separate, capped Agent SDK credit pool at full API rates. They presented this like it was a gift
+   from them, and not a new limitation.<br/>
+   This was suspended (but not discarded at the time of writing) when the community backlashed.
+
+   The proposed credit pool caps were:
+
+   | Plan          | Monthly Agent SDK credit |
+   | ------------- | -----------------------: |
+   | Pro           |                      $20 |
+   | Max 5x        |                     $100 |
+   | Max 20x       |                     $200 |
+   | Team Standard |                 $20/seat |
+   | Team Premium  |                $100/seat |
+
+   Credits would not roll over. Once exhausted, invocations would be billed as "extra usage" at standard API rates (if
+   enabled), or stop entirely.
+
+The company is showing the consistent pattern of moving capabilities that were part of the subscription behind separate
+billing walls after users have built workflows around them.
+
+Treat any subscription-covered automation as a convenience that may be further restricted or repriced. Design with
+fallbacks (e.g. local model via [Ollama], API key billing) for non-critical automation.
+
+Refer to [Everything that went/is wrong with Claude] for a community-maintained tracker.
+
 ## Further readings
 
 - [Website]
@@ -288,6 +335,9 @@ Create a recurring job:
 - [Large Language Models]
 - [Claude's Constitution]
 - [Gemini]
+- [Claude Code]
+- [Claude @tag]
+- [Claude for Chrome]
 - [Everything that went/is wrong with Claude]
 
 ### Sources
@@ -309,13 +359,16 @@ Create a recurring job:
 [The Claude character]: #the-claude-character
 
 <!-- Knowledge base -->
+[Claude @tag]: claude%20tag.md
 [Claude Code]: claude%20code.md
+[Claude for Chrome]: claude%20for%20chrome.md
 [Context window]: ../lms.md#context-window
 [Gemini]: ../gemini/README.md
 [Identifier drift]: ../lms.md#concerns
 [Large Language Models]: ../lms.md#large-language-models
 [LLM concerns]: ../lms.md#concerns
 [LLM's interaction tips]: ../lms.md#improving-interactions
+[Ollama]: ../ollama.md
 [Procedural instructions degrade into declarative hints]: ../lms.md#procedural-instructions-degrade-into-declarative-hints
 
 <!-- Files -->
