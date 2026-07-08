@@ -60,7 +60,7 @@ brew search --cask 'gpg'
 
 # Install something.
 brew install 'gettext'
-brew install --cask 'spotify'
+brew install --cask --force 'spotify'
 
 # Start managing manually-installed apps.
 brew install --cask --adopt 'textmate'
@@ -76,6 +76,10 @@ brew info 'sponge'
 # List all files installed by formulae.
 brew ls -v 'coreutils'
 brew ls -v --cask 'firefox'
+
+# Upgrade something.
+brew upgrade 'gettext'
+brew upgrade --greedy --force 'spotify'
 
 # Prevent formulae from upgrading.
 brew pin 'gnupg2'
@@ -220,6 +224,7 @@ See also [How to manually download brew package for installation?].
 - [How to stop homebrew from upgrading itself on every run]
 - [macOS migrations with Brewfile]
 - [How to manually download brew package for installation?]
+- [Getting "It seems there is already an App at ..." even when trying to uninstall]
 
 <!--
   Reference
@@ -235,6 +240,7 @@ See also [How to manually download brew package for installation?].
 <!-- Upstream -->
 [Codebase]: https://github.com/Homebrew/brew
 [Documentation]: https://docs.brew.sh/
+[Getting "It seems there is already an App at ..." even when trying to uninstall]: https://github.com/orgs/Homebrew/discussions/4758#discussioncomment-7492477
 [Homebrew Bundle, brew bundle and Brewfile]: https://docs.brew.sh/Brew-Bundle-and-Brewfile
 [Manpage]: https://docs.brew.sh/Manpage
 [Tips and tricks]: https://docs.brew.sh/Tips-N'-Tricks
