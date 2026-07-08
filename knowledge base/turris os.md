@@ -22,6 +22,9 @@ Linux distribution based on top of OpenWrt. Check the [website] for more informa
 
 ## TL;DR
 
+<details>
+  <summary>Usage</summary>
+
 ```sh
 # Show settings.
 uci show
@@ -102,6 +105,12 @@ schnapps delete '3'
 # Delete snapshots by type.
 schnapps delete -t 'post'
 ```
+
+</details>
+
+Using SQM might **slow down** network throughput instead of boosting performances.<br>
+This is especially true on older, lower power devices. A Turris Omnia (ARMv7 Processor rev 1, v7l) dropped Internet
+download speed from ~30 MBps to at most 1.3 MBps on the interfaces it was configured on.
 
 ## LED diodes settings
 
