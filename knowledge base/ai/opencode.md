@@ -126,6 +126,16 @@ opencode serve
 # Attach to headless servers.
 opencode run --attach 'http://localhost:4096' "Explain async/await in JavaScript"
 
+# List sessions that happened in the directory this command is executed from.
+opencode session list
+
+# Resume sessions.
+opencode -c
+opencode -s 'ses_0a8f93749ffeIjrFThAEIC6vxS'
+
+# Delete sessions that happened in the directory this command is executed from.
+opencode session delete 'ses_0a8f93749ffeIjrFThAEIC6vxS'
+
 # List existing agents.
 opencode agent list
 ```
