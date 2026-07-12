@@ -14,6 +14,7 @@ Multi-machine dotfiles manager written in Go.
 The source directory is always exposed as `$.chezmoi.sourceDir`.
 
 Templating uses the [Go text/template] library and [Sprig].
+`includeTemplate` needs files in `.chezmoitemplates/` to have the `.tmpl` extension to find them.
 
 <details>
   <summary>Setup</summary>
