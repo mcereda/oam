@@ -22,7 +22,8 @@ The configuration consists of the application's defaults, overridden by the user
 workspace settings.<br/>
 See the [settings.json] example.
 
-The user configuration is loaded from the `settings.json` file in the user's configuration directory for the application.
+The user configuration is loaded from the `settings.json` file in the user's configuration directory for the
+application.
 The workspace configuration is loaded from the `.vscode/settings.json` file in the workspace's root directory.
 
 Make sure to quote names containing spaces (e.g.: `'Courier New'`).
@@ -79,33 +80,42 @@ Example: change font to JetBrains Mono.
 
 Add the `extensions.json` file to the workspace's `.vscode` folder.
 
-The `recommendations[]` key shall contain the recommended extensions' identifiers from the Visual Studio Marketplace.<br/>
+The `recommendations[]` key shall contain the recommended extensions' identifiers from the Visual Studio
+Marketplace.<br/>
 [Example][extensions.json].
 
 ## Use JSON schemas
 
+The VS Code settings schema is generated at runtime.<br/>
+It can be found in the source code, and referenced as `vscode://schemas/settings/<type>`. This is proven for user
+settings, but not yet for others (e.g. workspace, though it should use the same schema).
+
 ```json
 "json.schemas": [
   {
-    "fileMatch": ["/.commitlintrc"],
-    "url": "https://json.schemastore.org/commitlintrc.json"
+    "url": "vscode://schemas/settings/user",
+    "fileMatch": ["/examples/vscode/user.settings.json"]
   },
   {
-    "fileMatch": ["/.hadolint.yaml"],
-    "url": "https://raw.githubusercontent.com/hadolint/hadolint/master/contrib/hadolint.json"
+    "url": "https://json.schemastore.org/commitlintrc.json",
+    "fileMatch": ["/.commitlintrc"]
   },
   {
-      "fileMatch": [
-          ".markdownlint.js",
-          ".markdownlint.json",
-          ".markdownlint.jsonc",
-          ".markdownlint.y*ml"
-      ],
-      "url": "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json"
+    "url": "https://raw.githubusercontent.com/hadolint/hadolint/master/contrib/hadolint.json",
+    "fileMatch": ["/.hadolint.yaml"]
   },
   {
-    "fileMatch": ["/.yamllint.y*ml"],
-    "url": "https://json.schemastore.org/yamllint.json"
+    "url": "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json",
+    "fileMatch": [
+      ".markdownlint.js",
+      ".markdownlint.json",
+      ".markdownlint.jsonc",
+      ".markdownlint.y*ml"
+    ]
+  },
+  {
+    "url": "https://json.schemastore.org/yamllint.json",
+    "fileMatch": ["/.yamllint.y*ml"]
   }
 ],
 ```
