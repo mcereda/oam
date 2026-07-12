@@ -305,6 +305,13 @@ git switch 'branch_name'
 git checkout 'branch_name'
 git checkout -
 
+# Merge branches.
+git checkout 'main' && git merge 'development'
+git merge 'development' 'main'
+# Push the branch directly to main on the remote.
+# Skips local merge conflict resolution.
+git push origin 'development:main'
+
 # Set the current HEAD branch to track a remote branch.
 git branch -u 'remote_name/upstream-branch'
 
@@ -411,6 +418,9 @@ git commit --no-verify …
   <summary>Real world use cases</summary>
 
 ```sh
+# Merge a persistent branch and continue working on it.
+git switch 'main' && git merge 'development' && git push 'origin' 'main' && git switch '-'
+
 # Reset fork to upstream's state.
 git remote add 'upstream' '/url/to/original/repo'
 git fetch 'upstream'
@@ -443,6 +453,12 @@ git log --show-signature --format="  %h %s%n  Author: %an <%ae>"
 ```
 
 </details>
+
+To have the `main` branch alias another one, with that one being the _real_ branch, consider:
+
+- Setting `main` to track that branch via a `remote` configuration.
+- Just making that branch the default branch on the server, and stop using `main` entirely.<br/>
+  This prevents needing to synchronize them at all.
 
 ## Authentication
 
