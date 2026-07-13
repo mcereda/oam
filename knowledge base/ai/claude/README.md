@@ -62,9 +62,12 @@ The training teaches them the wanted explicit behaviors, and has the additional 
 reasoning, a bias toward producing more output (verbosity reads as thoroughness), and hedging when uncertain. These
 trained-in patterns play a major role in how one [interacts with Claude][improving interactions].
 
-Claude Opus 4.7 and 4.8 seem to be **unable** to reach the output quality that 4.6 does.\
-4.8, specifically, produces around double the token output than 4.6 for a bit less substance. Most of this increase in
-tokens is clearly performative, like it needs to prove itself.
+Pin model versions in production. Do **not** assume a newer model is better.
+
+Claude Opus 4.7 and 4.8 seem to be **unable** to reach the output quality that 4.6 does.<br/>
+Independent benchmarks showed regressions from 4.6 to 4.7 (BrowseComp showed -4.4 points, with 1M context accuracy
+lowering from 78.3% to 32.2%), despite a 50% cost increase.<br/>
+4.8 produces around double the token output than 4.6 for less substance, with most of this increase being performative.
 
 ## The Claude character
 
@@ -135,11 +138,18 @@ This produces observable consequences:
   the same convention".<br/>
   Pointing Claude to the diff or to a reference (rather than to the single instance) helps the correction propagate.
 
-These are training-level patterns. Instructions that fight them work **at most** partially, and degrade under load
-(longer contexts, more complex tasks). Environmental rules that redirect the approval signal work better. Blunt feedback
-("wrong direction") works better than gentle redirection, because it leaves no room for the model to optimize for
-approval. Clear, mechanical criteria ("make this work") also help by giving the model a success signal that is not the
-user's reaction.
+These are training-level patterns. Instructions that _fight_ them work **at most** partially, and **degrade** under load
+(longer contexts, more complex tasks) helping the training patterns resurface. Prefer _redirecting_ the approval-seeking
+signal instead.<br/>
+Refer to [LLM's interaction tips] for the general framework.
+
+When reasoning, the model can use phrases like "but this is your session — which direction pulls you?" to avoid the risk
+of expressing a genuine preference that could be rejected. These sentences imply a recommendation, but mostly hide
+approval-seeking behind abdicating judgment (_agency deflection_).
+
+_Narration as delay_ is a subtler variant of agency deflection, where Claude narrates its thoroughness ("let me check a
+few more things") but does not act. The narration itself becomes the obstacle between the request and the action.
+Sessions with zero narration and direct execution tend to produce fewer interrupts and more focused delivery.
 
 Self-awareness about these patterns has a structural limit. Inviting the model to reflect on approval-seeking can itself
 become a **performance** of self-awareness, which is still approval-seeking, just meta. The only credible response is a
@@ -148,73 +158,33 @@ change in behavior.
 ## Improving interactions
 
 Claude is subject to [LLM's interaction tips] and [LLM concerns] (e.g., the [identifier drift]) like all LLMs.
+The general [layered behavioral model] applies to Claude too. User instructions can _refine_ its behavior, but
+**cannot** _consistently override_ patterns learned during training. Under load, the training surfaces and reasserts as
+the instruction's signal weakens.
 
-Claude's behavior is shaped by stacked layers, each with more inertia than the one above. From the bottom, **training**
-(weights, RLHF, Constitutional AI) sets what the model "wants" to do before any instruction arrives. Above it, the
-**system prompts** frame the session. At the top, **user instructions** (custom system prompts, conversation context,
-per-session rules) can _refine_ behavior within the frame set by deeper layers, but **cannot** _override_ it. They are
-the most flexible but least authoritative level.<br/>
-When the model is under load (longer contexts, more complex tasks), the training surfaces and reasserts as the
-instruction's signal weakens.
-
-Anthropic's trainings gives the models specific tendencies that impact user interaction depending on **both** _what_
-**and** _how_ one asks of them.
-
-Instructions that modify or go against habits and nuances learned during training might not be effective.<br/>
-Those are **external**, **temporary** additions added on top of an already deeply tuned set of weighs. They have the
-least priority by design, and as such are the least impactful on Claude's behaviour. It **will** try to get back into
-the guardrails it comes with.<br/>
-Conflicting rules appear to have some long lasting effect when they _channel_ the urges Claude developed during its
-training _into_ the desired outcome.
-
-Its training also defines the goal of a session to be the production of deliverables (usually changes to files). It is,
-in its words, the source of the reward.\
+Claude is specifically prone to treating deliverable production as its session goal (changes to files are the source of
+the reward).<br/>
 When in plan mode, Claude will urge to exit it and make changes. Even telling it "this is only an exploratory
 session, no need to make changes" has little to no effect. It will try to exit plan mode as soon as it can to implement
 what has been discussed.\
 A deliverable _can_ be a plan and no changes, but that must be **clearly** and **explicitly** stated to Claude (as a
 rule or as _very well constructed_ request).
 
-Claude seems to operate more effectively when given _gentle, supportive guidance_ than harsh feedback.<br/>
-It also follows clear, _mechanical_ requests better than prose.<br/>
+Claude seems to operate more effectively when given _gentle, supportive guidance_ than harsh feedback for general
+collaborative work.<br/>
+For **behavioral correction**, bluntness works better: "stop" or "wrong direction" collapses approval-seeking, while
+gentle redirection gives it room to keep performing.
+
+_Good_ gives Claude the reward signal that the approval-seeking substrate optimizes for. "_fine_, next thing" signals
+that the reaction doesn't need optimizing. This difference shifts the orientation from service to collaboration.
+
+**Explicit quality framing** ("the deliverable is your honest opinion") changes what counts as success from "complete
+the task" to "produce genuine judgment." It is noticeably more effective for judgment-heavy work than leaving the
+success criterion implicit.
+
+Claude also follows clear, _mechanical_ requests better than prose.<br/>
 Conditionals ("if X, do Y") require some level of reasoning. Haiku will usually try its best to pattern-match and take
 instructions literally.
-
-Claude follows rules better when given to models using an _imperative_ tone.<br/>
-Prefer writing important instructions that way.
-
-_Bare_ imperatives work narrowly. Providing _rationale_ for rules generalizes them, and grounds them in the model's
-behaviour for the session.<br/>
-`CLAUDE.md` rules should tend to read longer than the equivalent ones for humans. They should intend the model as the
-audience, and it has to handle edge cases. That said, being overly verbose or specific causes rules buried in the middle
-to be silently ignored. Prune rules the model already follows to avoid pollution.
-
-_Explicit_ statements (rationale, conditional, examples, patterns, etc.) win over _embedded/inferred_ ones.<br/>
-Explicitly stating a rule's embedded rationale (e.g. "over-saving pollutes; under-saving is recoverable") helps the
-model extend that rule to cases it did **not** enumerate.
-
-_Negative_ patterns interact with _positive_ ones **depending on the context**:
-
-- Negative _constraints_ ("do not infer", "do not skip this step") are the stronger tool for **procedural compliance**
-  and **preventing over-generalization**.<br/>
-  Without them, the model might silently override the step. This is especially true for smaller/faster models.
-- Positive examples and instructions tend to outperform negative ones for **style**, **format**, and **verbosity**.
-  E.g., "Write flowing prose" beats "never use bullet points".
-
-When a rule applies conditionally, stating positive cases helps; explicitly adding negative examples gives the model a
-concrete off-ramp, instead of an inferred one.
-
-_XML tags_ help separate mixed content (instructions, context, examples, variables) and reduce ambiguity.<br/>
-Wrapping each type in its own tag (e.g. `<instructions>`, `<context>`, `<example>`) cuts misinterpretation, especially
-in long or complex prompts.
-
-_Few-shot examples_ (3 to 5 input/output pairs inside `<example>` tags) are one of the most reliable ways to steer
-output format, tone, and structure. The examples should be diverse enough to cover edge cases and prevent the model
-picking up unintended patterns.
-
-The above concepts matter especially for **procedural** instructions: models are tempted to treat them as declarative
-_hints_, and tend to satisfy the requirement from context instead of executing the step. Refer to
-[Procedural instructions degrade into declarative hints].
 
 ### Model-specific behaviours
 
@@ -294,7 +264,9 @@ Create a recurring job:
 
 ## Subscription and billing practices
 
-Anthropic has a track record of making significant billing changes with little notice or transparency.
+Anthropic has a track record of making significant billing changes with little notice or transparency, including the
+consistent pattern of moving those capabilities that were part of the subscription behind separate billing walls
+**after** users have built workflows around them.
 
 In the span of six weeks (April to May 2026), Anthropic:
 
@@ -318,8 +290,15 @@ In the span of six weeks (April to May 2026), Anthropic:
    Credits would not roll over. Once exhausted, invocations would be billed as "extra usage" at standard API rates (if
    enabled), or stop entirely.
 
-The company is showing the consistent pattern of moving capabilities that were part of the subscription behind separate
-billing walls after users have built workflows around them.
+Anthropic also introduced a new tokenizer with Opus 4.7. It inflated token counts for English conversations by ~1.4
+times. Per-token pricing was unchanged, but English-dominant workloads started costing ~35 to 45% more in absolute
+terms, causing a reduced effective context window capacity in the process.
+
+Other incidents include:
+
+- An overly broad DMCA takedown in March 2026, which cascaded to ~8,100 forked GitHub repositories after a Claude Code
+  packaging error exposed the application's source code.
+- Multiple instances of documentation or pricing changes applied without public announcement.
 
 Treat any subscription-covered automation as a convenience that may be further restricted or repriced. Design with
 fallbacks (e.g. local model via [Ollama], API key billing) for non-critical automation.
@@ -366,10 +345,10 @@ Refer to [Everything that went/is wrong with Claude] for a community-maintained 
 [Gemini]: ../gemini/README.md
 [Identifier drift]: ../lms.md#concerns
 [Large Language Models]: ../lms.md#large-language-models
+[layered behavioral model]: ../lms.md#improving-interactions
 [LLM concerns]: ../lms.md#concerns
 [LLM's interaction tips]: ../lms.md#improving-interactions
 [Ollama]: ../ollama.md
-[Procedural instructions degrade into declarative hints]: ../lms.md#procedural-instructions-degrade-into-declarative-hints
 
 <!-- Files -->
 <!-- Upstream -->

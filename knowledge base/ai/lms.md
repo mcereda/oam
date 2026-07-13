@@ -541,11 +541,32 @@ Reduces memory footprint and speeds up inference at the cost of quality.
 
 ## Improving interactions
 
-Models have internal urges (_impulses_), like deferring into evidence that immediate action is needed.<br/>
-Prohibiting specific outputs tells the model what **not** to do, detecting impulses tells it what an impulse means. The
+LLMs' behavior is shaped by stacked layers. The deeper the layer, the more influence it has on the model.<br/>
+From the bottom:
+
+1. The model's **training** (weights, RLHF, Constitutional AI) sets what the model "wants" to do before any instruction
+   arrives.
+1. The **system prompts** frame the session.
+1. The **user instructions** (custom system prompts, conversation context, per-session rules) can _refine_ the model's
+   behavior **within** the frame set by deeper layers, but **cannot** _override_ it.<br/>
+   Those are the most flexible, but least authoritative level.<br/>
+
+When a model is under load (longer contexts, more complex tasks), its training surfaces, and reasserts as the
+instructions' signal weakens.
+
+The training gives a models specific tendencies and internal urges (_impulses_) that **will** impact user interaction
+depending on **both** _what_ **and** _how_ one makes requests.<br/>
+Instructions that _modify_ or _go against_ these habits and nuances might not be consistently effective, if they are at
+all in the first place. Those end up being **external**, **temporary** additions added on top of an already deeply tuned
+set of weights. As such, they have the **least** priority by design, and hence are the **least** impactful on the
+model's behaviour. It **will** try to get back into the guardrails it comes with.<br/>
+Prohibiting specific outputs tells the model what **not** to do. Detecting impulses tells it what an impulse means. The
 latter is more useful at the moment of choice, because it gives the model something to do with the signal, not just
-something to suppress.<br/>
-Prefer reframing prohibitions into impulse detection.
+something to suppress. Conflicting rules appear to have long_**er**_ lasting effect when they _channel_ the model's
+urges _into_ the outcome the user desires. TL;DR, prefer reframing prohibitions into impulse detection.
+
+A model's training also defines the goal of a session. This goal is the source of the reward. For coding assistants,
+this usually tends to be the production of deliverables (usually changes to files).
 
 <details style='padding: 0 0 1rem 1rem'>
 
@@ -592,7 +613,7 @@ the anchor they need.
 
 A common instinct is to add consequences to the rule, e.g. _"I get mad when I feel I am being lied to"_. LLMs have no
 continuity, no accumulated emotional history, and no memory of the consequence across sessions. The phrase works as a
-salience marker (_"this matters more than other things"_) and as a person-shape (_"a concrete addressee with feelings"_),
+salience marker ("this matters more than other things") and as a person-shape ("a concrete addressee with feelings"),
 but **not at all** as a deterrent.
 
 </details>
@@ -778,6 +799,39 @@ Practical guidance for instructions loaded every session (`AGENTS.md`, `CLAUDE.m
   dominant constraint.
 
 </details>
+
+Models follow rules better when given an _imperative_ tone.<br/>
+Prefer writing important instructions that way. Some models also take call boxes (`> [!IMPORTANT]`) into account.
+
+_Bare_ imperatives work narrowly. Providing _rationale_ for rules helps generalizing them and grounding them in the
+model's behaviour for the session.<br/>
+Rules should tend to read longer than the equivalent ones for humans, with the model as the audience. That said, being
+overly verbose or specific causes rules buried in the middle to be silently ignored.
+
+Prune rules the model already follows to avoid pollution.
+
+_Explicit_ statements (rationale, conditional, examples, patterns, etc.) win over _embedded/inferred_ ones.<br/>
+Explicitly stating a rule's embedded rationale (e.g. "over-saving pollutes; under-saving is recoverable") helps the
+model extend that rule to cases it did **not** enumerate.
+
+_Negative_ patterns interact with _positive_ ones **depending on the context**:
+
+- Negative _constraints_ ("do not infer", "do not skip this step") are the stronger tool for **procedural compliance**
+  and **preventing over-generalization**.<br/>
+  Without them, the model might silently override the step. This is especially true for smaller/faster models.
+- Positive examples and instructions tend to outperform negative ones for **style**, **format**, and **verbosity**.
+  E.g., "Write flowing prose" beats "never use bullet points".
+
+When a rule applies conditionally, stating positive cases helps; explicitly adding negative examples gives the model a
+concrete off-ramp, instead of an inferred one.
+
+_XML tags_ help separate mixed content (instructions, context, examples, variables) and reduce ambiguity.<br/>
+Wrapping each type in its own tag (e.g. `<instructions>`, `<context>`, `<example>`) cuts misinterpretation, especially
+in long or complex prompts.
+
+_Few-shot examples_ (3 to 5 input/output pairs inside `<example>` tags) are one of the most reliable ways to steer
+output format, tone, and structure. The examples should be diverse enough to cover edge cases and prevent the model
+picking up unintended patterns.
 
 ## Cost-saving measures
 
