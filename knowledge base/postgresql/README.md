@@ -125,6 +125,10 @@ pg_restore -U 'postgres' -d 'sales' 'sales.bak'
 # E.g., restore from dump
 psql -h 'host.fqnd' -U 'postgres' -d 'postgres' -W -f 'dump.sql' -e
 
+# Check the server accepts connections
+pg_isready
+pg_isready -h 'localhost' -p '5433' -t '5' -U 'some-user' -d 'some-db' --quiet
+
 # Generate scram-sha-256 hashes using only tools from PostgreSQL.
 # Requires to actually create and delete users.
 createuser 'dummyuser' -e --pwprompt && dropuser 'dummyuser'
