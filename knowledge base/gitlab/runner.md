@@ -313,6 +313,22 @@ The workers _might_ need specific credentials **helpers** to authenticate to con
 Multiple Autoscalers do **not** play well managing the same resources (e.g., HA setups).<br/>
 They end up competing for resources, and will try to **delete** each other's worker instances.
 
+When the ASG uses [spot instances][ec2 spot instances], the fleeting plugin's internal pool can end up retaining stale
+instance IDs after spot reclamation. This can cause `unknown instance` job failures until the plugin refreshes its
+state.<br/>
+Consider enabling [Capacity Rebalancing] (`CapacityRebalance: true`) on the ASG, and tuning the plugin's
+`update_interval` to reduce this window.
+
+The plugin is also aware of spot instances, with its `Heartbeat()` function probing the instances' status via
+`DescribeSpotInstanceRequests`. This feature is **silently** disabled if the manager's IAM role lacks the
+`ec2:DescribeSpotInstanceRequests` permission. In this case, the plugin logs a warning, but continues without checking
+the instances.<br/>
+The plugin's [recommended IAM policy][fleeting aws recommended iam policy] includes this permission.
+
+> [!important]
+> The plugin's `README` recommends suspending the `AZRebalance` ASG process to prevent AWS from redistributing instances
+> across availability zones, which can cause the same stale pool problem as spot reclamation.
+
 <details>
   <summary>Setup</summary>
 
@@ -1273,6 +1289,7 @@ Refer to [External secrets in pipelines].
 <!-- Knowledge base -->
 [AWS IAM roles]: ../cloud%20computing/aws/iam.md#roles
 [AWS Secrets Manager]: ../cloud%20computing/aws/secrets%20manager.md
+[EC2 spot instances]: ../cloud%20computing/aws/ec2.md#spot-instances
 [External secrets in pipelines]: pipeline.md#external-secrets
 [GitLab]: ../gitlab.md
 
@@ -1280,6 +1297,7 @@ Refer to [External secrets in pipelines].
 <!-- Upstream -->
 [Advanced configuration]: https://docs.gitlab.com/runner/configuration/advanced-configuration/
 [autoscaling gitlab runner on aws ec2]: https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/
+[Capacity Rebalancing]: https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-capacity-rebalancing.html
 [docker executor]: https://docs.gitlab.com/runner/executors/docker/
 [docker machine executor autoscale configuration]: https://docs.gitlab.com/runner/configuration/autoscale/
 [docker machine's aws driver's options]: https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/blob/main/docs/drivers/aws.md#options
@@ -1287,6 +1305,7 @@ Refer to [External secrets in pipelines].
 [docker machine]: https://gitlab.com/gitlab-org/ci-cd/docker-machine
 [Documentation / Docker Autoscaler executor]: https://docs.gitlab.com/runner/executors/docker_autoscaler/
 [Documentation / GitLab Runner Autoscaling]: https://docs.gitlab.com/runner/runner_autoscale/
+[fleeting aws recommended iam policy]: https://gitlab.com/gitlab-org/fleeting/plugins/aws#recommended-iam-policy
 [fleeting]: https://gitlab.com/gitlab-org/fleeting/fleeting
 [gitlab runner helm chart]: https://docs.gitlab.com/runner/install/kubernetes/
 [GitLab Secrets Manager]: https://docs.gitlab.com/ci/secrets/secrets_manager/

@@ -150,8 +150,15 @@ gracefully handle this notification, and respond by check pointing or draining t
 In addition to Interruption Notifications, AWS sends
 [Rebalance Recommendation Events][ec2 instance rebalance recommendations] to spot instances that are at higher risk of
 being interrupted.<br/>
-Handling Rebalance Recommendations can potentially give an application more time to gracefully shutdown than the 2
-minutes given by an Interruption Notification.
+Handling Rebalance Recommendations can **potentially** give an application more time to gracefully shutdown than the 2
+minutes given by an Interruption Notification. The recommendation signal _usually_ arrive before the interruption
+notice, but it is managed on a best effort basis, and sometimes the two signals arrive _together_.
+
+[Auto Scaling Groups][amazon ec2 auto scaling] can respond automatically to rebalance recommendations when
+[Capacity Rebalancing] is enabled (`CapacityRebalance: true`). In this case, the ASG proactively launches a replacement
+instance, waits for it to pass health checks, then terminates the at-risk one.<br/>
+The ASG can temporarily exceed its maximum capacity by up to 10% during this process, and will only launch a replacement
+if its availability is the same or better than the at-risk instance's.
 
 Test Spot Interruption Notifications and Rebalance Recommendations:
 
@@ -353,6 +360,7 @@ Also see [Automatic instance recovery].
 [aws/amazon-ec2-spot-interrupter]: https://github.com/aws/amazon-ec2-spot-interrupter
 [best practices for handling ec2 spot instance interruptions]: https://aws.amazon.com/blogs/compute/best-practices-for-handling-ec2-spot-instance-interruptions/
 [burstable performance instances]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html
+[Capacity Rebalancing]: https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-capacity-rebalancing.html
 [change the instance type]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html
 [completelifecycleaction]: https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_CompleteLifecycleAction.html
 [connect to your instances without requiring a public ipv4 address using ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-with-ec2-instance-connect-endpoint.html

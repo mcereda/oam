@@ -1415,10 +1415,24 @@ interruptions, ASG Scale-In, ASG AZ Rebalance, and EC2 Instance Termination via 
 Those events are usually announced in some way (I.E., a spot instance's metadata server, or an SQS queue) and can be
 monitored in order to respond appropriately and with grace to them.
 
-EKS [managed node groups] are already configured to react to such events.
+EKS [managed node groups] are already configured to react to such events.<br/>
+When the capacity type is set to spot, managed node groups automatically:
+
+- Enable [Capacity Rebalancing] on the underlying ASG.
+- Set the ASG's allocation strategy to `capacity-optimized`.
+
+These settings **cannot** be modified.<br/>
+When a spot node receives a rebalance recommendation, the ASG launches a replacement, and EKS drains the node at risk
+before its termination.
+
+> [!warning]
+> Pod disruption budgets are **not** respected during terminations triggered by AZ rebalancing or by capacity reduction.
+> Pods are evicted, but the node is terminated regardless after 15 minutes .
 
 When **not** using managed node groups, one can install the [AWS Node Termination Handler] helm chart in the
-cluster. It will be the one monitoring for such events and reacting accordingly.
+cluster. It will be the one monitoring for such events and reacting accordingly.<br/>
+For self-managed node groups using spot instances, also enable `CapacityRebalance: true` on the ASG to get the same
+proactive replacement behaviour that managed node groups provide by default.
 
 ## Troubleshooting
 
@@ -1580,6 +1594,7 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [AWS Node Termination Handler]: https://github.com/aws/aws-node-termination-handler
 [awssupport-troubleshooteksworkernode runbook]: https://docs.aws.amazon.com/systems-manager-automation-runbooks/latest/userguide/automation-awssupport-troubleshooteksworkernode.html
 [Building for Cost optimization and Resilience for EKS with Spot Instances]: https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
+[Capacity Rebalancing]: https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-capacity-rebalancing.html
 [choosing an amazon ec2 instance type]: https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html
 [configure instance permissions required for systems manager]: https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-policies-overview
 [create an amazon ebs csi driver iam role]: https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html
