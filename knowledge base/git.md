@@ -203,6 +203,8 @@ git push 'remote' 'branch_1' 'branch_N'
 git push 'git@github.com:user/repo.git'
 git push --set-upstream github --all
 git push --all --force
+git push --force-with-lease  # compares the local tracking ref; doesn't exist when pushing HEAD:different-name
+git push --force-with-lease='<remote-ref>:<expected-sha>'
 
 # Push to all remotes at once.
 git remote | xargs -n 1 git push
