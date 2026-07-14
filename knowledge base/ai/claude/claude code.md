@@ -1635,12 +1635,12 @@ skill).
 When working with files in subdirectories, Claude Code automatically discovers skills from nested `.claude/skills/`
 directories.
 
-Skills sharing the same name across different scopes replace one another with the most specific scope winning on the
-broadest, and managed skills winning over everything:
+Skills sharing the same name across different scopes shadow one another. Counterintuitively, **broader** scopes shadow
+narrower ones as follows:
 
 ```mermaid
 flowchart LR
-  m("Managed") --shadows--> s("Subdirectory") --shadows--> p("Project") --shadows--> u("User")
+  m("Managed") --shadows--> u("User") --shadows--> p("Project")
 ```
 
 Plugin skills use a `plugin-name:skill-name` namespace, so they cannot conflict with other levels.<br/>
