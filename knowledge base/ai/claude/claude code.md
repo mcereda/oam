@@ -1741,6 +1741,10 @@ The `skillOverrides` key in `settings.json` files controls how skills appear to 
 Use `user-invocable-only` for skills that trigger proactively too often, to keep manual access without false-positive
 proactive triggers.
 
+Use `name-only` when calling a skill by name most of the time, or when a rule routes to it (e.g. "You can explore
+repositories in a dedicated folder. Ensure you consulted the `explore-repos` skill beforehand"). This prevents the model
+from needing to pattern match every prompt for that skill.
+
 ### Findings about skill creation
 
 - Side effect: temporary evaluation files appear in the parent session's skill list
