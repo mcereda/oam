@@ -32,8 +32,8 @@ the resolver. Node.js notably changed its `localhost` resolution behavior across
 Any HTTP client that resolves localhost to `::1` first might fail against a server listening only on IPv4 (bound to
 `0.0.0.0` or `127.0.0.1`).
 
-`/bin/sh` on macOS is `zsh` in POSIX mode. It **will** choke on any non-POSIX syntax in `.zshenv` and other autoloaded
-files.
+`/bin/sh` on macOS resolves to `bash`. macOS's onboard version of Bash is infamously old (3.2.57 at a time 5.3.15 is the
+current one).
 
 <details>
   <summary>Setup</summary>
