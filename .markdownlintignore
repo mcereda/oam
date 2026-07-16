@@ -1,5 +1,4 @@
 node_modules/
 TODO.md
 
-/examples/claude-code/agents/**.md
-claude-code/agents/**.md
+/examples/claude-code/**
