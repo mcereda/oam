@@ -963,6 +963,7 @@ write files, run lint) can stay identical.
 ## Further readings
 
 - [Personal experiments]
+- [Giving Claude a way to learn from experience]
 - [Giving Claude global memory]
 - [Cross-project sessions]
 - [Giving Claude a reverie-like system]
@@ -991,6 +992,7 @@ write files, run lint) can stay identical.
 [Cross-project sessions]: cross-project%20sessions.md
 [Git worktrees]: ../../../git.md#worktrees
 [Giving Claude a reverie-like system]: reveries.md
+[Giving Claude a way to learn from experience]: learning%20system/v1.md
 [Giving Claude global memory]: global%20memory.md
 [Lefthook]: ../../../lefthook.md
 [OKF specification]: https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md

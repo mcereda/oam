@@ -797,6 +797,8 @@ impression, which is the most instructive signal.
 
 ## Further readings
 
+- [Giving Claude a way to learn from experience]
+
 ### Sources
 
 - Clark & Chalmers' theory of [The Extended Mind], 1998.
@@ -815,9 +817,10 @@ impression, which is the most instructive signal.
 [Deciding where memory goes]: README.md#deciding-where-memory-goes
 
 <!-- Knowledge base -->
-[Giving Claude global memory]: global%20memory.md
 [Claude Code / auto-dream]: ../claude%20code.md#auto-dream
 [Claude Code / using hooks]: ../claude%20code.md#using-hooks
+[Giving Claude a way to learn from experience]: learning%20system/v1.md
+[Giving Claude global memory]: global%20memory.md
 
 <!-- Files -->
 [The Extended Mind]: ../../study%20material/the%20extended%20mind%20%20clark,%20chalmers%20%201998.pdf

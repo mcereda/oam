@@ -1317,22 +1317,27 @@ services:
 
 The `permissions.defaultMode` field in settings files controls the overall permission behaviour. The modes are:
 
-| Mode                | Behaviour                                                                                                  |
-| ------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `default`           | Standard, interactive: prompts on first use, remembers for session                                         |
-| `plan`              | Read-only analysis: can read but not modify, run commands, or fetch (unless auto mode is enabled for this) |
-| `acceptEdits`       | Auto-approves file edits/writes, still prompts for tools like `Bash` and `WebFetch`                        |
-| `auto`              | A safety classifier model reviews each action, approves _safe_ ones autonomously                           |
-| `dontAsk`           | Auto-**denies** all tools, unless explicitly listed in `allow`                                             |
-| `bypassPermissions` | Auto-approves everything: no prompts, no checks                                                            |
+| Mode                                | Behaviour                                                                                                                                                                                                               |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `default` (`manual` since v2.1.200) | Standard, interactive: prompts on first use, remembers for session                                                                                                                                                      |
+| `plan`                              | Read-only analysis: can read but not modify, run commands, or fetch (unless auto mode is enabled for this)                                                                                                              |
+| `acceptEdits`                       | Auto-approves file edits/writes **and** common filesystem Bash commands (`mkdir`, `touch`, `rm`, `rmdir`, `mv`, `cp`, `sed`) for paths in cwd or `additionalDirectories`; still prompts for other `Bash` and `WebFetch` |
+| `auto`                              | A safety classifier model reviews each action, approves _safe_ ones autonomously                                                                                                                                        |
+| `dontAsk`                           | Auto-**denies** all tools, unless explicitly listed in `allow`                                                                                                                                                          |
+| `bypassPermissions`                 | Auto-approves everything: no prompts, no checks. Dangerous commands like `rm -rf /` and `rm -rf ~` still prompt.                                                                                                        |
 
-> [!warning] Known issues
+> [!warning] `dontAsk` is a naming trap
+> The name sounds permissive ("don't bother asking, just do it") but means "don't bother asking, just **refuse**".
+> Anything not **explicitly** `allow`ed is **silently** denied, including tools in `ask`.<br/>
+> Use `auto` instead for autonomous operation that involve safety checks. `dontAsk` is fine for autonomous operation
+> that are scoped to explicit rules, as long as one understands the lockdown semantics.
+>
 > As of 2026-04, `dontAsk` has been reported to [activate unexpectedly][issue #17360],
 > [override the `ask` list][issue #16555], and [spontaneously switch modes mid-session][issue #36473].
 
-Setting `defaultMode: "auto"` normally shows a confirmation prompt at session start. To suppress it, set
-`skipAutoPermissionPrompt: true` as a **top-level** key (sibling of `permissions`, not nested inside it) in the
-**same** settings file.
+Setting `defaultMode: "auto"` in **user-level** settings (`~/.claude/settings.json`) shows a **one-time** confirmation
+prompt. After accepting it, Claude Code auto-saves a `skipAutoPermissionPrompt` flag and subsequent sessions start
+without the prompt.
 
 > [!important]
 > `auto` is **silently ignored** when set in project or local settings. It only takes effect from user-level settings
@@ -1340,40 +1345,32 @@ Setting `defaultMode: "auto"` normally shows a confirmation prompt at session st
 
 <details style='padding: 0 0 1rem 1rem'>
 
-`skipAutoPermissionPrompt` must exist in **both** global and project-level settings:
-
-- At **project** level, it must co-locate with `defaultMode: "auto"` to suppress the prompt for the project only.
-- Claude Code writes this key at **global** level when the user accepts the auto mode prompt. If removed from global
-  settings, the prompt reappears even if the project-level setting is present.
-
-Project-level alone is not sufficient. Global alone is not sufficient. Both are needed.
-
-> [!note]
-> `skipAutoPermissionPrompt` is **not** documented yet. At least one
-> [GitHub issue](https://github.com/anthropics/claude-code/issues/33587) calls it "non-official." The only officially
-> documented prompt-suppression setting is `skipDangerousModePermissionPrompt` (for `bypassPermissions` mode).
-
-```json
-{
-  "permissions": { "defaultMode": "auto", "allow": ["..."] },
-  "skipAutoPermissionPrompt": true
-}
-```
+The `skipAutoPermissionPrompt` key is an internal flag, not a documented setting. Claude Code writes it automatically
+when the user accepts the auto-mode opt-in dialog. Manually setting it is no longer necessary in current versions, but
+the key is still recognized if present.
 
 </details>
 
 Use the `permissions` field in a settings file to always _allow_, require Claude Code to _ask_, or _deny_ the use of
 specific tools.<br/>
 `deny` takes precedence over `ask`, which in turn takes precedence over `allow`. The first matching rule **by category**
-wins.
+wins. Broad `ask` rules like `Edit(/**)` prompt for every Edit call even when more specific `allow` rules like
+`Edit(~/.claude/memory/**)` also match.
 
 A permission rule is cheaper than a hook (no subprocess, evaluated inline by the harness) and its intent is clearer to
 Claude too.
 
 Spaces matter. `Bash(ls *)` matches `ls -la` or `ls` _followed by a space_ and then anything, but will **not** match
-`ls` by itself, `lsof`, or other tools starting with it; `Bash(ls*)` matches **all** of them.<br/>
+`ls` by itself, `lsof`, or other tools starting with it; `Bash(ls*)` matches **all** of them. `Bash(ls:*)` is an alias
+for `Bash(ls *)`.<br/>
 Use multiple patterns to achieve exact matches, e.g. `Bash(ls)` and `Bash(ls *)` for `ls` and its options but **not**
 other tools which name matches partially.
+
+Rules can also match a tool's **input parameters** (not just the tool's name) when using the `Tool(param:value)` syntax.
+It comes with `*` wildcard support. E.g., `Agent(model:opus)` matches subagent spawns that request Opus for the
+model.<br/>
+This works for constraining _how_ a tool is called (which model, which path, which server), but not whether the tool is
+called at all.
 
 Paths are considered in `gitignore` fashion: `/Users/alice/file` is _relative to the project's root_, **not** absolute.
 Use `//` for the absolute root directory.<br/>
@@ -1460,6 +1457,16 @@ Compound shell commands (`&&`, `||`, `;`) are split **before** permission matchi
 against the rules **independently**, so if `git status` is allowed but `cd /some/path` is not, the compound
 `cd /some/path && git status` might fail.<br/>
 Use directory-scoped flags like `git -C /some/path` instead of `cd` to keep the permission surface to a single command.
+
+`find` has built-in actions that mutate the filesystem (`-exec`, `-execdir`, `-delete`). Prefer using `Glob` for
+read-only file discovery and leave `find` behind plan-mode approval.
+
+`git switch` and `git checkout` are functionally interchangeable for several operations (creating branches, discarding
+working-tree changes). A rule that gates one without the other can be bypassed; always treat them as a pair.
+
+A `Read(.env)` deny rule blocks the `Read` tool **and** hides the file from `Glob` and `Grep` results (v2.1.162+).
+However, `cat .env` in `Bash` still works because permission rules apply to each named tool independently.<br/>
+Use [sandboxing][documentation / sandboxing] for filesystem-level rules that need to catches all processes instead.
 
 Refine permissions using `PreToolUse` [hooks][using hooks].<br/>
 `deny` and `ask` rules are **still** evaluated **after** a hook returns _allow_. This allows using them to further
@@ -1594,6 +1601,50 @@ Result:
 Disable this behaviour by explicitly setting `allowUnsandboxedCommands` to `false` in the `sandbox` settings.<br/>
 Claude Code completely ignores the `dangerouslyDisableSandbox` parameter. All commands should™ run sandboxed or be
 explicitly listed in `excludedCommands`.
+
+The auto-mode safety classifier both provides server-side enforcement of the rules and goes beyond model-level
+instructions.<br/>
+The system prompt _discourages_ destructive commands (e.g. `git reset --hard`, `git commit --amend`,
+`terraform destroy`), but the harness can also block them at the classifier level.<br/>
+`CLAUDE.md` rules saying "never amend" are model guidance, which is overridable by context pressure; classifier blocks
+are mechanical, meaning the tool call is evaluated and rejected before it reaches the shell.<br/>
+By default, the classifier only evaluates commands matching "arbitrary code execution patterns". The
+`autoMode.classifyAllShell` setting (v2.1.193+) extends classification to all Bash and PowerShell commands.
+
+Claude Code protects `~/.claude/` with a _dangerous-directory_ safety check. This fires on `Write` and `Edit` calls, and
+happens **before** both the working-directory check and allow-rule matching. A hardcoded list of directories (`.git`,
+`.vscode`, `.idea`, `.claude`, `.husky`, `.cargo`, `.devcontainer`, `.yarn`, `.mvn`) triggers a prompt **regardless** of
+allow rules or `additionalDirectories`.<br/>
+The harness carves out exceptions for its own managed paths (project memory, agent memory, plans, scratchpad) via
+**internal** auto-allow functions. Custom paths under `~/.claude/` (e.g. [global memory][Giving Claude a global memory],
+[reveries][Giving Claude a reverie-like system]) are **not** in that auto-allow list, so Claude Code will prompt on the
+every session's first write.
+
+Claude Code has also a separate _directory-trust_ boundary for reads. A `Read(/**)` allow rule does **not** suppress
+per-directory trust prompts for paths outside the current project or `additionalDirectories`. Adding the parent
+directory to `additionalDirectories` does suppress them.
+
+A project's `settings.json` with `"allow": ["Bash"]` permits **any** Bash command from sessions in that project,
+including those that target directories **outside** of it like `git -C /path/to/other/repo commit`. A project-level,
+unscoped `Bash` rule matches first. Scoped _global_ rules never apply in this case.<br/>
+"auto mode in repo A" translates effectively to "auto mode for any repo reachable via `git -C`".
+
+Rules that try to constrain command **arguments** are fundamentally fragile. Claude can easily bypass them by putting
+the options before the constrained argument, using different protocols, leveraging shell variables, and adding extra
+whitespace.<br/>
+When wanting to gate non-trivial constraints, either deny the `Bash` tool outright for that category and use a typed
+tool instead, or write a `PreToolUse` hook that parses the command properly.
+
+Claude Code **merges** `settings.json` files across multiple levels (managed > CLI > local > project > user). An edit at
+one level can appear to have no effect if a higher-precedence level defines the same key.<br/>
+The merge determines _which rules enter the resolved set_. This happens before the `deny` > `ask` > `allow` permissions
+set are evaluated.
+
+Git worktrees created **outside** the original project root have a different `git rev-parse --show-toplevel`, so Claude
+Code treats them as a different project. None of the original project's settings, rules, or auto-memory load for
+sessions started in the worktree.<br/>
+Consider placing worktrees **inside** the project's root (e.g. a gitignored `.worktrees/` directory), or use `--add-dir`
+to load conventions from the original project.
 
 ## Using skills
 
@@ -3814,6 +3865,7 @@ Claude Code version: `v2.1.41`.
 [Claude Code Unpacked]: https://ccunpacked.dev/
 [Claude Skills vs. MCP: A Technical Comparison for AI Workflows]: https://intuitionlabs.ai/articles/claude-skills-vs-mcp
 [containers/bubblewrap]: https://github.com/containers/bubblewrap
+[dietrichgebert/ponytail]: https://github.com/dietrichgebert/ponytail
 [Enable specific MCP servers for sub-agents]: https://github.com/anthropics/claude-code/issues/16177
 [Grafana MCP Server]: https://github.com/grafana/mcp-grafana
 [Lost in the middle]: https://arxiv.org/abs/2307.03172
@@ -3825,4 +3877,3 @@ Claude Code version: `v2.1.41`.
 [Settings' schema]: https://www.schemastore.org/claude-code-settings.json
 [The Claude Skills I Actually Use for DevOps]: https://www.pulumi.com/blog/top-8-claude-skills-devops-2026/
 [Writing a good CLAUDE.md]: https://www.humanlayer.dev/blog/writing-a-good-claude-md
-[dietrichgebert/ponytail]: https://github.com/dietrichgebert/ponytail

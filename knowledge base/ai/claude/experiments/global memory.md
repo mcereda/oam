@@ -253,6 +253,7 @@ Refer to [Deciding where memory goes] for the full rationale behind the `@`-incl
 ## Further readings
 
 - [Personal experiments]
+- [Giving Claude a way to learn from experience]
 - [Propagating knowledge between concurrent sessions]
 - [Claude Code]
 
@@ -269,6 +270,7 @@ Refer to [Deciding where memory goes] for the full rationale behind the `@`-incl
 <!-- Knowledge base -->
 [Claude Code]: ../claude%20code.md
 [Deciding where memory goes]: README.md#deciding-where-memory-goes
+[Giving Claude a way to learn from experience]: learning%20system/v1.md
 [Personal experiments]: README.md
 [Propagating knowledge between concurrent sessions]: cross-session%20live%20propagation.md
 

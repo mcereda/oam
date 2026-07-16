@@ -275,6 +275,7 @@ This is acceptable because `MEMORY.md` entries are one-liners designed to be sca
 ## Further readings
 
 - [Personal experiments]
+- [Giving Claude a way to learn from experience]
 - [Discovering active sessions]
 - [Giving Claude a global memory]
 - [Coordinating sessions across repositories]
@@ -296,6 +297,7 @@ This is acceptable because `MEMORY.md` entries are one-liners designed to be sca
 [Coordinating sessions across repositories]: cross-project%20sessions.md
 [Discovering active sessions]: session%20registry.md
 [Giving Claude a global memory]: global%20memory.md
+[Giving Claude a way to learn from experience]: learning%20system/v1.md
 [LLM-owned knowledge base]: llm-owned%20knowledge%20base.md
 [Personal experiments / Memory tiers]: README.md#memory-tiers
 [Personal experiments]: README.md

@@ -63,6 +63,9 @@ pruning) ground empirically into LLM-specific research, which validates its desi
 The purpose of this ecosystem is to _cultivate_ Claude by accumulating patterns, concepts, and information that compound
 over time. It is meant to extend and nudge the model naturally, instead of just recording corrections and rules.
 
+The full end-to-end loop (capture, persistence, promotion, retrieval, review) and the findings from operating the tiers
+together are documented in the [learning system experiment][Giving Claude a way to learn from experience].
+
 > [!important] Reminder: context is **not** memory
 > Context files (`CLAUDE.md`, rules) are meant to be **human**-curated and carry instructions Claude should **not**
 > diverge from. Memory should be **freely** writable by Claude, accumulate over sessions, and carry **learnings**
@@ -272,6 +275,7 @@ cross-memory linking, format validation).
 
 - [Claude Code]
 - [AI agents]
+- [Giving Claude a way to learn from experience]
 - [Discovering active sessions]
 - [Propagating knowledge between concurrent sessions]
 - [Manage Claude's memory]
@@ -297,6 +301,7 @@ cross-memory linking, format validation).
 [Claude Code]: ../claude%20code.md
 [Discovering active sessions]: session%20registry.md
 [Giving Claude a reverie-like system]: reveries.md
+[Giving Claude a way to learn from experience]: learning%20system/v1.md
 [Propagating knowledge between concurrent sessions]: cross-session%20live%20propagation.md
 
 <!-- Files -->
