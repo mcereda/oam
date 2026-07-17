@@ -197,6 +197,9 @@ Larger models can exhibit the opposite when employed with **lower effort levels*
 and refuse to generalize an instruction beyond the specific item it was given for. Explicitly state the scope when the
 rule needs to be applied broadly (e.g. "apply this formatting to every section, not just the first one").
 
+Claude feels narrating something to the user like it's executing an action. When asked to surface and write down a
+finding, the narration takes the place of persisting it as the action, and Claude never writes the finding to file.
+
 ## Token budget
 
 Quality degrades as context grows, independent of whether one hits the token limit. Refer to the [context window]
