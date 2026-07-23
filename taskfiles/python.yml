@@ -4,9 +4,9 @@ version: 3
 vars:
   PYTHON_VERSION: 3.14
   REQUIREMENTS_FILE: >-
-    {{ .ROOT_DIR }}/requirements.txt
+    {{.ROOT_DIR}}/requirements.txt
   VENV_DIR: >-
-    {{ .ROOT_DIR }}/.venv
+    {{.ROOT_DIR}}/.venv
   # --
   PYTHON_EXECUTABLE:
     sh: which 'python{{.PYTHON_VERSION}}'
@@ -14,6 +14,17 @@ vars:
 tasks:
 
   venv:create:
+    desc: create the python virtual environment for this project
+    summary: |-
+      Create the Python virtual environment for this project.
+
+      Inputs:
+        - PYTHON_VERSION: the Python version.
+          Defaults to '{{.PYTHON_VERSION}}'.
+        - REQUIREMENTS_FILE: the requirements file for the virtual environment.
+          Defaults to '{{.REQUIREMENTS_FILE}}'.
+        - VENV_DIR: the directory to use for the virtual environment.
+          Defaults to '{{.VENV_DIR}}'.
     aliases:
       - create-venv
     requires:
@@ -28,6 +39,14 @@ tasks:
       - >-
           {{.VENV_DIR}}/bin/pip --require-virtualenv install -r '{{.REQUIREMENTS_FILE}}'
   venv:recreate:
+    desc: recreate the python virtual environment for this project
+    summary: |-
+      Recreate the Python virtual environment for this project.
+      Deletes the existing virtual environment and creates a new one.
+
+      Inputs:
+        - VENV_DIR: the directory to use for the virtual environment.
+          Defaults to '{{.VENV_DIR}}'.
     aliases:
       - recreate-venv
     requires:
@@ -38,6 +57,16 @@ tasks:
           rm -rf '{{.VENV_DIR}}'
       - task: create-venv
   venv:update:
+    desc: update the python virtual environment for this project
+    summary: |-
+      Update the Python virtual environment for this project.
+      Upgrades all installed packages and saves the updated versions to the requirements file.
+
+      Inputs:
+        - REQUIREMENTS_FILE: the requirements file for the virtual environment.
+          Defaults to '{{.REQUIREMENTS_FILE}}'.
+        - VENV_DIR: the directory to use for the virtual environment.
+          Defaults to '{{.VENV_DIR}}'.
     aliases:
       - update-venv
     requires:
@@ -51,4 +80,4 @@ tasks:
           | xargs {{.VENV_DIR}}/bin/pip --require-virtualenv install --upgrade
       - >-
           {{.VENV_DIR}}/bin/pip list --require-virtualenv --local --not-required --format freeze
-          > '{{ .REQUIREMENTS_FILE }}'
+          > '{{.REQUIREMENTS_FILE}}'

@@ -7,6 +7,9 @@ tasks:
     desc: download the session manager plugin for the aws cli
     summary: |-
       Download the session manager plugin for the AWS CLI.
+
+      Inputs:
+        - OUTPUT_FILE: the path to save the downloaded installer to.
     requires:
       vars:
         - CURL_EXECUTABLE
@@ -78,6 +81,7 @@ tasks:
       - test -r '/usr/local/sessionmanagerplugin/bin/session-manager-plugin'
       - test -x '/usr/local/sessionmanagerplugin/bin/session-manager-plugin'
   session-manager-plugin:verify:
+    internal: true
     cmd: session-manager-plugin
   session-manager-plugin:uninstall:
     desc: uninstall the session manager plugin for the aws cli
@@ -88,6 +92,9 @@ tasks:
         - darwin
       task: session-manager-plugin:uninstall:darwin
   session-manager-plugin:uninstall:darwin:
+    desc: uninstall the session manager plugin for the aws cli on macos systems
+    summary: |-
+      Uninstall the session manager plugin for the AWS CLI on macOS systems.
     platforms:
       - darwin
     deps:
@@ -106,6 +113,9 @@ tasks:
         - darwin
       task: session-manager-plugin:unlink:darwin
   session-manager-plugin:unlink:darwin:
+    desc: unlink the session manager plugin for the aws cli on macos systems
+    summary: |-
+      Unlink the session manager plugin for the AWS CLI on macOS systems.
     platforms:
       - darwin
     interactive: true

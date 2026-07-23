@@ -6,47 +6,185 @@ tasks:
   install:
     desc: install packages and plugins for the current pulumi program or policy pack
     summary: |-
+      Wrapper for `pulumi install`.
       Install packages and plugins for the current Pulumi program or policy pack.
-    cmd: pulumi install
     preconditions:
-      - test -r 'Pulumi.yaml'
+      - sh: test -r 'Pulumi.yaml'
+        msg: "No Pulumi.yaml found. Check the current working directory."
+    cmd: pulumi install
 
+  preview:base:
+    internal: true
+    deps:
+      - install
+    preconditions:
+      - sh: test -r 'Pulumi.yaml'
+        msg: "No Pulumi.yaml found. Check the current working directory."
+    cmd: >-
+      pulumi preview
+      {{.EXTRA_PREVIEW_OPTIONS}}
+      {{.CLI_ARGS}}
   preview:
-    desc: show a preview of updates to a pulumi stack's resources
+    desc: interactively preview updates to a pulumi stack's resources
     summary: |-
-      Show a preview of updates to a Pulumi stack's resources.
+      Wrapper for `pulumi preview`.
+      Display an interactive preview of the changes that would be applied to an existing stack.
+      No changes to the stack will actually take place.
     aliases:
       - pre
     interactive: true
-    deps:
-      - install
-    cmd: pulumi preview {{.CLI_ARGS}}
-
-  refresh:
-    deps:
-      - install
-    desc: refresh the resources in a pulumi stack
+    cmd:
+      task: preview:base
+  preview:non-interactive:
+    desc: non-interactively preview updates to a pulumi stack's resources
     summary: |-
-      Refresh the resources in a Pulumi stack.
+      Wrapper for `pulumi preview --non-interactive --suppress-progress`.
+      Display a non-interactive preview of the changes that would be applied to an existing stack.
+      No changes to the stack will actually take place.
+    aliases:
+      - pre:non-interactive
+    cmd:
+      task: preview:base
+      vars:
+        EXTRA_PREVIEW_OPTIONS: '--non-interactive --suppress-progress'
+  preview:non-interactive:json:
+    desc: preview updates and emit result as JSON on stdout
+    summary: |-
+      Wrapper for `pulumi preview --non-interactive --json --suppress-progress`.
+      Emit the full preview result as a single JSON object on stdout; diagnostics go to stderr.
+      No changes to the stack will actually take place.
+
+      Pipe stdout to jq to query the result, e.g.:
+        task pulumi:preview:non-interactive:json | jq '.changeSummary'
+        task pulumi:preview:non-interactive:json | jq '[.steps[] | select(.op != "same") | {op, urn}]'
+    aliases:
+      - pre:non-interactive:json
+      - pre:json
+      - preview:json
+    preconditions:
+      - sh: test -r 'Pulumi.yaml'
+        msg: "No Pulumi.yaml found. Check the current working directory."
+    cmds:
+      - cmd: pulumi install >&2
+      - >-
+        pulumi preview
+        --non-interactive --json --suppress-progress
+        {{.CLI_ARGS}}
+
+  refresh:base:
+    internal: true
+    deps:
+      - install
+    preconditions:
+      - sh: test -r 'Pulumi.yaml'
+        msg: "No Pulumi.yaml found. Check the current working directory."
+    cmd: >-
+      pulumi refresh
+      {{.EXTRA_REFRESH_OPTIONS}}
+      {{.CLI_ARGS}}
+  refresh:
+    desc: interactively refresh the resources in a pulumi stack
+    summary: |-
+      Wrapper for `pulumi refresh`.
+      Interactively refresh the state of Pulumi's resources in a stack.
     interactive: true
-    cmd: pulumi refresh {{.CLI_ARGS}}
+    cmd:
+      task: refresh:base
+  refresh:non-interactive:
+    desc: non-interactively refresh the resources in a pulumi stack
+    summary: |-
+      Wrapper for `pulumi refresh --non-interactive --yes --suppress-progress`.
+      Non-interactively refresh the state of Pulumi's resources in a stack.
+    cmd:
+      task: refresh:base
+      vars:
+        EXTRA_REFRESH_OPTIONS: '--non-interactive --yes --suppress-progress'
+  refresh:non-interactive:json:
+    desc: refresh state and emit result as a JSON event stream on stdout
+    summary: |-
+      Wrapper for `pulumi refresh --non-interactive --yes --json --suppress-progress`.
+      Refreshes state non-interactively and emits a newline-delimited stream of JSON events on stdout;
+      diagnostics go to stderr.
+      Parse with `jq -s` (slurp) or process line-by-line with `jq -c`.
+    aliases:
+      - refresh:json
+    preconditions:
+      - sh: test -r 'Pulumi.yaml'
+        msg: "No Pulumi.yaml found. Check the current working directory."
+    cmds:
+      - cmd: pulumi install >&2
+      - >-
+        pulumi refresh
+        --non-interactive --yes --json --suppress-progress
+        {{.CLI_ARGS}}
 
   stack:init:
     desc: create an empty pulumi stack with the given name
     summary: |-
+      Wrapper for `pulumi stack init`.
       Create an empty Pulumi stack with the given name, ready for updates.
+
+      Inputs:
+        - STACK: the name of the stack.
+          Defaults to 'dev'.
     interactive: true
     deps:
       - install
-    cmd: pulumi stack init dev {{.CLI_ARGS}}
+    vars:
+      STACK: '{{.STACK | default "dev"}}'
+    cmd: pulumi stack init '{{.STACK}}' {{.CLI_ARGS}}
 
+  up:base:
+    internal: true
+    deps:
+      - install
+    preconditions:
+      - sh: test -r 'Pulumi.yaml'
+        msg: "No Pulumi.yaml found. Check the current working directory."
+    cmd: >-
+      pulumi up
+      {{.EXTRA_UP_OPTIONS}}
+      {{.CLI_ARGS}}
   up:
-    desc: create or update the resources in a pulumi stack
+    desc: interactively create or update the resources in a pulumi stack
     summary: |-
-      Create or update the resources in a Pulumi stack.
+      Wrapper for `pulumi up`.
+      Interactively create or update Pulumi's resources in a stack.
     aliases:
       - update
     interactive: true
-    deps:
-      - install
-    cmd: pulumi up {{.CLI_ARGS}}
+    cmd:
+      task: up:base
+  up:non-interactive:
+    desc: non-interactively create or update the resources in a pulumi stack
+    summary: |-
+      Wrapper for `pulumi up --non-interactive --yes --suppress-progress`.
+      Non-interactively create or update Pulumi's resources in a stack.
+    aliases:
+      - update:non-interactive
+    cmd:
+      task: up:base
+      vars:
+        EXTRA_UP_OPTIONS: '--non-interactive --yes --suppress-progress'
+  up:non-interactive:json:
+    desc: non-interactively apply updates and emit events as a JSON stream on stdout
+    summary: |-
+      Wrapper for `pulumi up --non-interactive --yes --json --suppress-progress`.
+      Applies updates non-interactively and emits a newline-delimited stream of JSON events on stdout;
+      diagnostics go to stderr.
+
+      Unlike preview:non-interactive:json (single object), this emits one JSON object per line (NDJSON), e.g.:
+        task pulumi:up:non-interactive:json | jq -s '[.[] | select(.type == "summary")]'
+    aliases:
+      - update:non-interactive:json
+      - update:json
+      - up:json
+    preconditions:
+      - sh: test -r 'Pulumi.yaml'
+        msg: "No Pulumi.yaml found. Check the current working directory."
+    cmds:
+      - cmd: pulumi install >&2
+      - >-
+        pulumi up
+        --non-interactive --yes --json --suppress-progress
+        {{.CLI_ARGS}}

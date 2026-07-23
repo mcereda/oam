@@ -11,8 +11,10 @@ tasks:
     desc: login to an ecr using docker
     summary: |-
       Login to an ECR using Docker.
-
       Enables pulling and pushing images to an ECR using Docker, as long as the AWS identity has sufficient permissions.
+
+      Inputs:
+        - ECR_URL: the ECR URL to log into.
     aliases:
       - login
     requires:

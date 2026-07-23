@@ -17,4 +17,7 @@ check-compliance:
 pre-commit:
   commands:
     check-compliance:
-      <<: *kics
+      glob: '*Dockerfile*'
+      run: >-
+        docker run --rm -v "$PWD:/app/bin/repository" 'checkmarx/kics'
+        scan -p "$(printf 'repository/%s,' {staged_files} | sed 's/,$//')"

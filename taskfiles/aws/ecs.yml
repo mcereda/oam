@@ -14,6 +14,10 @@ tasks:
     desc: check one can execute commands in an ecs service's tasks
     summary: |-
       Check one can execute commands in an ECS service's tasks.
+
+      Inputs:
+        - CLUSTER: the ECS cluster name.
+        - SERVICE_NAME: the ECS service name.
     internal: true
     requires:
       vars:
@@ -35,6 +39,12 @@ tasks:
     desc: execute a command in an ecs service's task
     summary: |-
       Execute a command in an ECS service's task.
+
+      Inputs:
+        - CLUSTER: the ECS cluster name.
+        - CONTAINER_NAME: the container name in the task.
+        - SERVICE_NAME: the ECS service name.
+        - COMMAND: the command to execute.
     internal: true
     interactive: true
     deps:
@@ -58,6 +68,11 @@ tasks:
     desc: get a shell in an ecs service's task
     summary: |-
       Get a shell in an ECS service's task.
+
+      Inputs:
+        - CLUSTER: the ECS cluster name.
+        - CONTAINER_NAME: the container name in the task.
+        - SERVICE_NAME: the ECS service name.
     internal: true
     interactive: true
     cmd:
@@ -70,6 +85,10 @@ tasks:
     desc: get the ip addresses of an ecs service's tasks
     summary: |-
       Get the IP addresses of an ECS service's tasks.
+
+      Inputs:
+        - CLUSTER: the ECS cluster name.
+        - SERVICE_NAME: the ECS service name.
     internal: true
     requires:
       vars:
@@ -89,6 +108,11 @@ tasks:
     desc: restart an ecs service's tasks
     summary: |-
       Restart an ECS service's tasks.
+
+      Inputs:
+        - CLUSTER: the ECS cluster name.
+          Defaults to 'staging'.
+        - SERVICE_NAME: the ECS service name.
     requires:
       vars:
         - AWS_USER

@@ -8,6 +8,8 @@ Git hooks manager.
    1. [Ensure the execution order in tasks](#ensure-the-execution-order-in-tasks)
 1. [Gotchas](#gotchas)
    1. [Pre-commit hooks stash unstaged files](#pre-commit-hooks-stash-unstaged-files)
+   1. [`piped` and `parallel` can't be both `true`](#piped-and-parallel-cant-be-both-true)
+   1. [HTTPS URLs for remote hang when the target repository requiring authentication](#https-urls-for-remote-hang-when-the-target-repository-requiring-authentication)
 1. [Monorepo patterns](#monorepo-patterns)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -64,6 +66,9 @@ LEFTHOOK_EXCLUDE=ruby,security,lint git commit -am "Skip some tag checks"
 ```
 
 Uses the [Go glob library] for glob patterns.
+
+The remote configuration files' cache lives in `.git/info/lefthook-remotes/`. This directory is shared across
+[git worktrees], so no extra action is needed when using them.
 
 ## Configuration
 
@@ -229,6 +234,25 @@ Possible fixes:
   This is especially useful if the hook itself modifies the file, and one wants those modifications staged for commit
   too.
 
+### `piped` and `parallel` can't be both `true`
+
+Lefthook deep-merges remote configs at the key level. Should a consumer set `parallel: true` on a hook group, and a
+remote config sets `piped: true` on the same group, both keys survive the merge.
+
+Lefthook rejects this combination at runtime with error `conflicting options 'piped' and 'parallel' are set to 'true'`.
+Set `parallel: false` explicitly alongside `piped: true` on the groups that require piping (e.g. shared groups between
+multiple remotes) to prevent this.
+
+When encountering this error, check whether a local configuration or a remote is setting `parallel: true` on the same
+hook group that has `piped: true`.
+
+### HTTPS URLs for remote hang when the target repository requiring authentication
+
+When `no_tty: true` is set (recommended for non-interactive hooks), using an HTTPS remote URL for a private repository
+will cause `lefthook install` to hang indefinitely. The git credential prompt is suppressed, and the clone never
+completes.<br/>
+Use the SSH URL counterpart instead to leverage the SSH agent or keys.
+
 ## Monorepo patterns
 
 Lefthook is **not** yet capable of auto-discovering directories with changes in monorepos, **nor** `extends` or
@@ -327,7 +351,8 @@ This solution offers zero maintenance, but lefthook only reports a single **aggr
 [Use files from other repositories]: #use-files-from-other-repositories
 
 <!-- Knowledge base -->
-[pre-commit]: pre-commit.md
+[Git worktrees]: git.md#worktrees
+[Pre-commit]: pre-commit.md
 
 <!-- Files -->
 [configuration file example]: ../examples/dotfiles/.lefthook.yml

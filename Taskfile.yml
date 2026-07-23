@@ -7,16 +7,27 @@ includes:
 tasks:
 
   dev-tools:bootstrap:
+    desc: bootstrap the development tools for this project
+    summary: |-
+      Bootstrap the development tools for this project.
+      Creates the Python virtual environment and installs npm packages.
     cmds:
       - task: python:create-venv
       - npm install
 
   dev-tools:update:
+    desc: update the development tools for this project
+    summary: |-
+      Update the development tools for this project.
+      Updates the Python virtual environment's packages and npm packages.
     cmds:
       - task: python:update-venv
       - npm update --save
 
   show-platform:
+    desc: print the current platform information
+    summary: |-
+      Print the current platform information (OS and architecture).
     silent: true
     cmds:
       - 'echo "OS: {{OS}}"'

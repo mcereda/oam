@@ -17,11 +17,19 @@ dotenv:
 tasks:
 
   dev-tools:bootstrap:
+    desc: bootstrap the development tools for this project
+    summary: |-
+      Bootstrap the development tools for this project.
+      Creates the Python virtual environment and installs npm packages.
     cmds:
       - task: python:venv:create
       - npm install
 
   dev-tools:update:
+    desc: update the development tools for this project
+    summary: |-
+      Update the development tools for this project.
+      Updates the Python virtual environment's packages and npm packages.
     cmds:
       - task: python:update-venv
       - npm update --save
@@ -34,6 +42,17 @@ tasks:
       - set | sort
 
   python:venv:create:
+    desc: create the python virtual environment for this project
+    summary: |-
+      Create the Python virtual environment for this project.
+
+      Inputs:
+        - PYTHON_VERSION: the Python version.
+          Defaults to '{{ .PYTHON_VERSION }}'.
+        - REQUIREMENTS_FILE: the requirements file for the virtual environment.
+          Defaults to '{{ .ROOT_DIR }}/requirements.txt'.
+        - VENV_DIR: the directory to use for the virtual environment.
+          Defaults to '{{ .VENV_DIR }}'.
     vars:
       PYTHON_VERSION: '{{ .PYTHON_VERSION | default 3.12}}'
       REQUIREMENTS_FILE: '{{ .ROOT_DIR }}/requirements.txt'
@@ -43,11 +62,27 @@ tasks:
           {{ .VENV_DIR }}/bin/pip --require-virtualenv install -r '{{ .REQUIREMENTS_FILE }}'
 
   python:venv:recreate:
+    desc: recreate the python virtual environment for this project
+    summary: |-
+      Recreate the Python virtual environment for this project.
+      Deletes the existing virtual environment and creates a new one.
+
+      Inputs:
+        - VENV_DIR: the directory to use for the virtual environment.
+          Defaults to '{{ .VENV_DIR }}'.
     cmds:
       - rm -rf '{{ .VENV_DIR }}'
       - task: python:venv:create
 
   python:venv:update:
+    desc: update the python virtual environment for this project
+    summary: |-
+      Update the Python virtual environment for this project.
+      Upgrades all installed packages in-place.
+
+      Inputs:
+        - VENV_DIR: the directory to use for the virtual environment.
+          Defaults to '{{ .VENV_DIR }}'.
     cmd: >-
       {{ .VENV_DIR }}/bin/pip freeze -l --require-virtualenv | sed 's/==/>=/'
       | xargs {{ .VENV_DIR }}/bin/pip --require-virtualenv install -U
