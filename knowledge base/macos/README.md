@@ -651,6 +651,7 @@ your Mac, or after your Mac begins to restart. Keep holding until the described 
 - [`openssl-osx-ca`][openssl-osx-ca]
 - [Little Snitch]
 - [macOS default values command reference]
+- [Asahi Linux]
 
 ### Sources
 
@@ -707,6 +708,7 @@ your Mac, or after your Mac begins to restart. Keep holding until the described 
 [resize, rotate, or flip an image in preview on mac]: https://support.apple.com/guide/preview/resize-rotate-or-flip-an-image-prvw2015/11.0/mac/13.0
 
 <!-- Others -->
+[Asahi Linux]: https://asahilinux.org/
 [boot a mac from usb drive]: https://www.wikihow.com/Boot-a-Mac-from-USB-Drive
 [caffeinate your mac]: https://www.theapplegeek.co.uk/blog/caffeinate
 [can touch id for the mac touch bar authenticate sudo users and admin privileges?]: https://apple.stackexchange.com/questions/259093/can-touch-id-for-the-mac-touch-bar-authenticate-sudo-users-and-admin-privileges#306324
