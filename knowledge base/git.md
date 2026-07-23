@@ -412,6 +412,9 @@ git lfs pull
 # Skip commit hooks.
 # Most useful with a broken `pre-commit` or `lefthook` executable or config.
 git commit --no-verify …
+
+# Check a file is properly ignored.
+git check-ignore '.lefthook-local.yml'
 ```
 
 </details>
