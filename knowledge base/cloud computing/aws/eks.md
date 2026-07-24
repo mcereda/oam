@@ -3,26 +3,29 @@
 1. [TL;DR](#tldr)
 1. [Requirements](#requirements)
 1. [Cluster creation procedure](#cluster-creation-procedure)
+1. [Version lifecycle](#version-lifecycle)
+   1. [Version rollback](#version-rollback)
 1. [Access management](#access-management)
    1. [OIDC providers](#oidc-providers)
 1. [Create worker nodes](#create-worker-nodes)
    1. [Create managed node groups](#create-managed-node-groups)
       1. [Managed node groups' gotchas](#managed-node-groups-gotchas)
    1. [Schedule pods on Fargate](#schedule-pods-on-fargate)
+1. [EKS Auto Mode](#eks-auto-mode)
 1. [Secrets encryption through KMS](#secrets-encryption-through-kms)
 1. [Storage](#storage)
    1. [Use EBS as volumes](#use-ebs-as-volumes)
 1. [Autoscaling](#autoscaling)
 1. [Add-ons](#add-ons)
-   1. [Metrics server](#metrics-server)
-   1. [Pod identity](#pod-identity)
-      1. [IRSA vs Pod Identity credential precedence](#irsa-vs-pod-identity-credential-precedence)
-      1. [Migrating from IRSA to Pod Identity](#migrating-from-irsa-to-pod-identity)
-   1. [Cluster autoscaler](#cluster-autoscaler)
-   1. [AWS Load Balancer Controller](#aws-load-balancer-controller)
-   1. [EBS CSI driver](#ebs-csi-driver)
-      1. [EBS CSI driver as aws-managed add-on](#ebs-csi-driver-as-aws-managed-add-on)
-      1. [EBS CSI driver as self-managed add-on](#ebs-csi-driver-as-self-managed-add-on)
+    1. [Metrics server](#metrics-server)
+    1. [Pod identity](#pod-identity)
+       1. [IRSA vs Pod Identity credential precedence](#irsa-vs-pod-identity-credential-precedence)
+       1. [Migrating from IRSA to Pod Identity](#migrating-from-irsa-to-pod-identity)
+    1. [Cluster autoscaler](#cluster-autoscaler)
+    1. [AWS Load Balancer Controller](#aws-load-balancer-controller)
+    1. [EBS CSI driver](#ebs-csi-driver)
+       1. [EBS CSI driver as aws-managed add-on](#ebs-csi-driver-as-aws-managed-add-on)
+       1. [EBS CSI driver as self-managed add-on](#ebs-csi-driver-as-self-managed-add-on)
 1. [Handle EC2 worker nodes' shutdown gracefully](#handle-ec2-worker-nodes-shutdown-gracefully)
 1. [Troubleshooting](#troubleshooting)
     1. [Identify common issues](#identify-common-issues)
@@ -39,7 +42,8 @@ AWS managed, dedicated nodes that keep it running.
 
 _Worker nodes_ depend upon the control plane, and **must** be created **after** the control plane.<br/>
 Worker nodes can consist of any combination of [self-managed nodes], [managed node groups] and [Fargate], but only
-support specific instance types.
+support specific instance types.<br/>
+[Hybrid nodes] can also register on-premises and edge infrastructure as nodes in an EKS cluster.
 
 EKS automatically installs some [self-managed add-ons][amazon eks add-ons] like the AWS VPC CNI plugin, `kube-proxy` and
 CoreDNS to allow the cluster to work correctly in AWS.<br/>
@@ -333,10 +337,57 @@ This is what worked for me:
 1. [Create some worker nodes][create worker nodes].
 1. Profit!
 
+## Version lifecycle
+
+Refer [Understand the Kubernetes version lifecycle on EKS].
+
+Each Kubernetes **minor** version is in _standard support_ from its EKS release date for the next 14 months. Then, it
+gets 12 months of _extended support_ (for 26 months total) if configured.
+
+Standard support costs $0.10 per cluster per hour. Extended support costs $0.60 per cluster per hour, and is **enabled**
+by default on all new clusters.<br/>
+Upgrade before the standard support window closes, or [disable extended support][disable eks extended support] to avoid
+the higher costs.
+
+At the end of extended support, EKS auto-upgrades the control plane to the oldest currently supported version
+**automatically**.<br/>
+This upgrade covers the control plane, but **not** managed node groups and self-managed nodes. They remain on their
+prior version, and must be updated manually.
+
+EKS supports all Kubernetes API features that reached general availability.<br/>
+New _beta_ APIs are **not** enabled by default the first time they appear. They are enabled automatically in the next
+release, together with beta APIs that were available before and new versions of existing beta APIs.<br/>
+Alpha features are **not** supported at all.
+
+```sh
+# Check support status and dates for available versions.
+aws eks describe-cluster-versions
+```
+
+### Version rollback
+
+Refer [Rollback cluster to previous Kubernetes version][rollback cluster].
+
+Clusters upgraded through in-place upgrade _can_ be rolled back to the previous minor version **within 7 days of the
+upgrade**.<br/>
+The rollback preserves etcd data and running workloads, but **only** reverts the control plane's version.
+
+EKS evaluates rollback readiness through [cluster insights][cluster insights] before proceeding.<br/>
+Using the `--force` flag bypasses insight checks only. EKS respects hard prerequisites (the 7-day window, creation
+version, sequential rollback).
+
+EKS clusters in [Auto Mode](#eks-auto-mode) honor configured disruption controls by rolling back worker nodes
+automatically if needed.
+
 ## Access management
 
 The current default authentication method for EKS clusters created using AWS' APIs is through the `aws-auth` configMap
 stored in the `kube-system` namespace.
+
+> [!warning]
+> The `aws-auth` configMap is [deprecated][grant iam users access to kubernetes with a configmap].
+> AWS recommends using access entries (API mode) for new clusters. In a future EKS version, `aws-auth` will be removed
+> entirely from the supported authentication sources.
 
 By default, **only** the IAM principal creating the cluster is added to that configMap.<br/>
 As such, **only that principal** is allowed to make calls to that cluster's API server.
@@ -713,6 +764,31 @@ Procedure:
 
    </details>
 
+## EKS Auto Mode
+
+Refer [Automate cluster infrastructure with EKS Auto Mode][eks auto mode].
+
+EKS Auto Mode (GA December 2024) extends AWS management to compute, storage, networking, and load balancing for the
+cluster's data plane.
+
+Enabling Auto Mode on a new or existing cluster allows to avoid the need to manually create [managed node groups],
+configure [add-ons][amazon eks add-ons] like the EBS CSI driver or VPC CNI, or install the
+[AWS Load Balancer Controller] or [Pod Identity] agent.<br/>
+These capabilities are made available as core components in this mode.
+
+Key operational differences from self-managed infrastructure:
+
+- Nodes are limited to run [Bottlerocket] AMIs with SELinux enforcing, read-only root filesystems, and **no** SSH or SSM
+  access.
+- Nodes have a maximum lifetime of 21 days, after which they are automatically replaced.
+- Autoscaling uses [Karpenter] under the hood; custom `NodePool` and `NodeClass` resources control instance selection,
+  storage, and networking.
+- Upgrades, security patches, and EC2 interruption handling are automatic.
+- The [Pod Identity] agent is included; no separate add-on installation is needed.
+
+Auto Mode _can_ run **alongside** managed node groups in the same cluster.<br/>
+This is useful in case of incremental migrations.
+
 ## Secrets encryption through KMS
 
 Refer [Enabling secret encryption on an existing cluster].
@@ -839,6 +915,10 @@ This means giving them pods access keys, or enabling [Pod Identity].
 EKS automatically installs some [self-managed add-ons][amazon eks add-ons] like the AWS VPC CNI plugin, `kube-proxy` and
 CoreDNS to allow the cluster to work correctly in AWS.<br/>
 Add-ons _can_ be disabled **after** creation or in the clusters' IaC.
+
+[EKS Capabilities] (GA November 2025) are a separate feature that provides managed platform-like actions in resources
+outside the cluster (but still in AWS). Those include continuous deployment via Argo CD, AWS resource management via
+ACK, and dynamic resource orchestration via KRO.
 
 ### Metrics server
 
@@ -1545,6 +1625,10 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 - [Route application and HTTP traffic with Application Load Balancers]
 - [Hands-On Guide to Creating an Amazon EKS Cluster with Self-Managed Worker Nodes]
 - [EKS nodegroup AMI types]
+- [Understand the Kubernetes version lifecycle on EKS]
+- [Automate cluster infrastructure with EKS Auto Mode][eks auto mode]
+- [Amazon EKS Hybrid Nodes overview][hybrid nodes]
+- [Rollback cluster to previous Kubernetes version][rollback cluster]
 
 <!--
   Reference
@@ -1553,6 +1637,7 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 
 <!-- In-article sections -->
 [access management]: #access-management
+[AWS Load Balancer Controller]: #aws-load-balancer-controller
 [cluster autoscaler]: #cluster-autoscaler
 [create worker nodes]: #create-worker-nodes
 [ebs csi driver as aws-managed add-on]: #ebs-csi-driver-as-aws-managed-add-on
@@ -1593,12 +1678,17 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [aws eks create-nodegroup]: https://docs.aws.amazon.com/cli/latest/reference/eks/create-nodegroup.html
 [AWS Node Termination Handler]: https://github.com/aws/aws-node-termination-handler
 [awssupport-troubleshooteksworkernode runbook]: https://docs.aws.amazon.com/systems-manager-automation-runbooks/latest/userguide/automation-awssupport-troubleshooteksworkernode.html
+[Bottlerocket]: https://aws.amazon.com/bottlerocket/
 [Building for Cost optimization and Resilience for EKS with Spot Instances]: https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
 [Capacity Rebalancing]: https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-capacity-rebalancing.html
 [choosing an amazon ec2 instance type]: https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html
+[cluster insights]: https://docs.aws.amazon.com/eks/latest/userguide/cluster-insights.html
 [configure instance permissions required for systems manager]: https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-policies-overview
 [create an amazon ebs csi driver iam role]: https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html
 [de-mystifying cluster networking for amazon eks worker nodes]: https://aws.amazon.com/blogs/containers/de-mystifying-cluster-networking-for-amazon-eks-worker-nodes/
+[disable eks extended support]: https://docs.aws.amazon.com/eks/latest/userguide/disable-extended-support.html
+[eks auto mode]: https://docs.aws.amazon.com/eks/latest/userguide/automode.html
+[EKS Capabilities]: https://docs.aws.amazon.com/eks/latest/userguide/capabilities.html
 [EKS nodegroup AMI types]: https://docs.aws.amazon.com/eks/latest/APIReference/API_Nodegroup.html#AmazonEKS-Type-Nodegroup-amiType
 [eks workshop]: https://www.eksworkshop.com/
 [Elastic network interfaces]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html
@@ -1607,10 +1697,12 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [fargate storage]: https://docs.aws.amazon.com/eks/latest/userguide/fargate-pod-configuration.html#fargate-storage
 [fargate]: https://docs.aws.amazon.com/eks/latest/userguide/fargate.html
 [getting started with amazon eks - aws management console and aws cli]: https://docs.aws.amazon.com/eks/latest/userguide/getting-started-console.html
+[grant iam users access to kubernetes with a configmap]: https://docs.aws.amazon.com/eks/latest/userguide/auth-configmap.html
 [how can i get my worker nodes to join my amazon eks cluster?]: https://repost.aws/knowledge-center/eks-worker-nodes-cluster
 [how do i resolve the error "you must be logged in to the server (unauthorized)" when i connect to the amazon eks api server?]: https://repost.aws/knowledge-center/eks-api-server-unauthorized-error
 [how do i use persistent storage in amazon eks?]: https://repost.aws/knowledge-center/eks-persistent-storage
 [How EKS Pod Identity works]: https://docs.aws.amazon.com/eks/latest/userguide/pod-id-how-it-works.html
+[hybrid nodes]: https://docs.aws.amazon.com/eks/latest/userguide/hybrid-nodes-overview.html
 [identity and access management]: https://aws.github.io/aws-eks-best-practices/security/docs/iam/
 [install the aws load balancer controller using helm]: https://docs.aws.amazon.com/eks/latest/userguide/lbc-helm.html
 [learn how eks pod identity grants pods access to aws services]: https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html
@@ -1620,11 +1712,13 @@ helm upgrade -i --repo 'https://aws.github.io/eks-charts' \
 [migrating amazon eks clusters from gp2 to gp3 ebs volumes]: https://aws.amazon.com/blogs/containers/migrating-amazon-eks-clusters-from-gp2-to-gp3-ebs-volumes/
 [private cluster requirements]: https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html
 [required permissions to view eks resources]: https://docs.aws.amazon.com/eks/latest/userguide/view-kubernetes-resources.html#view-kubernetes-resources-permissions
+[rollback cluster]: https://docs.aws.amazon.com/eks/latest/userguide/rollback-cluster.html
 [route application and http traffic with application load balancers]: https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html
 [running stateful workloads with amazon eks on aws fargate using amazon efs]: https://aws.amazon.com/blogs/containers/running-stateful-workloads-with-amazon-eks-on-aws-fargate-using-amazon-efs/
 [self-managed nodes]: https://docs.aws.amazon.com/eks/latest/userguide/worker.html
 [service-linked role permissions for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles-eks.html#service-linked-role-permissions-eks
 [simplified amazon eks access - new cluster access management controls]: https://www.youtube.com/watch?v=ae25cbV5Lxo
+[Understand the Kubernetes version lifecycle on EKS]: https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
 [use amazon ebs storage]: https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html
 [using iam groups to manage kubernetes cluster access]: https://archive.eksworkshop.com/beginner/091_iam-groups/
 [using service-linked roles for amazon eks]: https://docs.aws.amazon.com/eks/latest/userguide/using-service-linked-roles.html

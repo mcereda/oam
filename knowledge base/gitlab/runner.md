@@ -5,12 +5,14 @@ CI/CD job execution agent that picks up jobs from a GitLab instance and runs the
 1. [TL;DR](#tldr)
 1. [Pull images from private AWS ECR registries](#pull-images-from-private-aws-ecr-registries)
 1. [Executors](#executors)
+   1. [Docker executor](#docker-executor)
    1. [Docker Autoscaler executor](#docker-autoscaler-executor)
    1. [Docker Machine executor](#docker-machine-executor)
    1. [Instance executor](#instance-executor)
    1. [Kubernetes executor](#kubernetes-executor)
       1. [Gotchas](#gotchas)
       1. [Define resource limits and requests for jobs' pods](#define-resource-limits-and-requests-for-jobs-pods)
+      1. [Sized runners](#sized-runners)
       1. [Force runner managers onto specific nodes](#force-runner-managers-onto-specific-nodes)
       1. [Force jobs' pods onto specific nodes](#force-jobs-pods-onto-specific-nodes)
       1. [Maintain cluster capacity leveraging no-op pods](#maintain-cluster-capacity-leveraging-no-op-pods)
@@ -18,6 +20,7 @@ CI/CD job execution agent that picks up jobs from a GitLab instance and runs the
 1. [Autoscaling](#autoscaling)
    1. [Docker Machine](#docker-machine)
    1. [GitLab Runner Autoscaler](#gitlab-runner-autoscaler)
+1. [Feature flags](#feature-flags)
 1. [Integrate with secret managers](#integrate-with-secret-managers)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -66,6 +69,17 @@ sudo pkill -HUP 'gitlab-runner'
 ```
 
 </details>
+
+Runners can be scoped as _instance_ (available to all projects), _group_ (all projects in a group and its subgroups),
+or _project_ (single project). The scope must be chosen during creation.<br/>
+Refer to [Manage runners].
+
+Runners' major.minor versions should match the GitLab server version for full compatibility.
+
+Registration tokens are deprecated since GitLab 16.0, and disabled by default since 17.0. Use _runner authentication
+tokens_ (`glrt-` prefix) instead.<br/>
+Create the runner in the UI or API first, then register with the received token. Refer to
+[Migrating to the new runner registration workflow].
 
 Each _Worker_ is assigned a single task at a time by default.
 
@@ -120,6 +134,9 @@ One can use system signals to interact with Runners.
 > handling the jobs.
 
 </details>
+
+The runner exposes an embedded [Prometheus metrics HTTP server][prometheus metrics] via the `listen_address` global
+setting in `config.toml`.
 
 ## Pull images from private AWS ECR registries
 
@@ -179,6 +196,23 @@ The GitLab runner should now automatically authenticate to one's private ECR reg
 
 The GitLab runner application implements different _executors_. Each one runs builds differently, and is suited for a
 different environment.
+
+The [Docker][Docker executor], [Docker Autoscaler][Documentation / Docker Autoscaler executor],
+[Instance][Instance executor], and [Kubernetes][Kubernetes executor] are actively developed.<br/>
+The Shell, SSH, VirtualBox, Parallels, and Custom executors are in [maintenance mode][executor maintenance mode]. These
+receive critical security updates, but no new features.
+
+### Docker executor
+
+Refer to [Docker executor].
+
+Runs each job in a clean container on the host where the runner is installed. All dependencies are packaged in the
+Docker image, which keeps the host clean. Supports Linux, macOS, and Windows.
+
+Supports services (linked containers), `.gitlab-ci.yml`'s `image` directives, and interactive web terminals.
+
+The [Docker Autoscaler](#docker-autoscaler-executor) wraps this executor with cloud-provider autoscaling. All Docker
+executor options and features carry over.
 
 ### Docker Autoscaler executor
 
@@ -328,6 +362,23 @@ The plugin's [recommended IAM policy][fleeting aws recommended iam policy] inclu
 > [!important]
 > The plugin's `README` recommends suspending the `AZRebalance` ASG process to prevent AWS from redistributing instances
 > across availability zones, which can cause the same stale pool problem as spot reclamation.
+
+Since Runner 15.10, [`instance_ready_command`][instance_ready_command] runs a command on each provisioned instance
+**before** the autoscaler can consider it ready for job dispatch. If the command exits with non-zero codes, the instance
+is **removed**.
+
+<details style="margin-top: -1em; padding: 0 0 1em 1em;">
+
+```toml
+[runners.autoscaler]
+  instance_ready_command = "docker info"
+```
+
+Useful for gating dispatch on Docker readiness when instances install Docker via cloud-init rather than a pre-built AMI.
+If the command frequently fails with idle scale rules, instances may churn faster than the runner accepts jobs; an
+exponential backoff was added in Runner 17.0 to handle this.
+
+</details>
 
 <details>
   <summary>Setup</summary>
@@ -824,14 +875,19 @@ runners:
 
 </details>
 
+> [!important]
+> Since GitLab 18.0, **all** pull policies configured in `pull_policy` must also be listed in `allowed_pull_policies` in
+> the runner's `config.toml`. Jobs use only the policies present in `allowed_pull_policies`.<br/>
+> This is a breaking change from previous behavior, where having at least one match was sufficient.
+
 #### Gotchas
 
 - The _build_, _helper_ and multiple _service_ containers will all reside in a single pod.<br/>
   If **the sum** of the resources request by **all** of them is too high, it will **not** be scheduled and the pipeline
   will hang and fail.
 
-  Update: this _might™_ be resolvable starting runners v18.11. Refer to
-  [Work Item 39085: Allow k8s runner to define Pod Level Resources for build pod].
+  [Pod-level resources](#define-resource-limits-and-requests-for-jobs-pods) (runners v18.10+, K8S v1.32+) mitigate this
+  by creating a shared resource pool instead of splitting resources statically across containers.
 
 - If any job's pod is killed due to OOM, the pipeline that spawned it will hang until it times out.
 
@@ -876,19 +932,18 @@ Define resources requests and limits for jobs' pods to prevent unregulated resou
 _**Container**_-level boundaries are available since around runners **v12.9.0**.
 
 > [!important]
-> _**Pod**_-level boundaries are **not** yet available as of runners **v18.10.0**.<br/>
-> They will require K8S **v1.34** or higher (or v1.32/v1.33 with the `PodLevelResources` feature gate enabled).
+> _**Pod**_-level boundaries are available since runners **v18.10.0**. They require K8S **v1.32+** with the
+> `PodLevelResources` feature gate enabled (beta since K8S v1.33).
 
-**Pod**-level boundaries will possibly be enforced at the pod ceiling, and **should not** be surpassed.<br/>
-It would create a _shared_ pool that all containers within that Pod could _dynamically_ use, improving management of
-the container-level boundaries.<br/>
+**Pod**-level boundaries enforce a shared resource ceiling for the pod. They create a _shared_ pool that all containers
+within the pod can _dynamically_ use. This replaces static, per-container splits with a flexible budget.<br/>
 Refer to [Work Item 39085: Allow k8s runner to define Pod Level Resources for build pod] and the related
 [MR 5922: Teach runner how to set pod-level resources for build pods].
 
 <details style="padding: 0 0 1rem 1rem">
 
-> [!warning]
-> Not yet available. This is nothing more than a speculative example.
+> [!note]
+> Requires runners v18.10+ and K8S v1.32+ with the `PodLevelResources` feature gate.
 
 ```toml
 [[runners]]
@@ -970,6 +1025,83 @@ Available since runners v13.4.0, _possibly_ being superseded by pod-level bounda
     service_memory_request_overwrite_max_allowed = "15.5Gi"
     service_ephemeral_storage_limit_overwrite_max_allowed = "15Gi"
     service_ephemeral_storage_request_overwrite_max_allowed = "15Gi"
+```
+
+</details>
+
+#### Sized runners
+
+Register multiple runners with different resource profiles, each tagged with a size name.<br/>
+Jobs select a size by requesting the corresponding tag.
+
+Each size maps to a node class. [Pod-level resources](#define-resource-limits-and-requests-for-jobs-pods) create a
+shared pool that all containers in the pod draw from, replacing the static per-container splits.<br/>
+Ephemeral storage is not yet covered by pod-level resources, so it must be defined per-container.
+
+Sized runners do **not** necessarily require dedicated node groups.<br/>
+Dedicated node groups with taints and affinities provide [isolation](#force-jobs-pods-onto-specific-nodes), but
+cluster-level autoscalers like [Karpenter] can provision right-sized nodes based on pending pods' resource requests
+without pre-configured node pools. On AWS, Fargate profiles or self-managed nodes work similarly.
+
+Per-container CPU and memory **requests** can be set to minimal values (`1m` CPU, `1Mi` memory) or omitted to let the
+pod-level pool be the sole constraint.<br/>
+Per-container CPU and memory **limits** must be **omitted entirely**. Setting them caps each container individually,
+which defeats the purpose of the shared pool.
+
+<details>
+  <summary>Example: <code>medium</code> size (2 vCPU, 4 GiB node class)</summary>
+
+```toml
+[[runners]]
+  name = "k8s-medium"      # tags set during runner creation: k8s, medium
+  executor = "kubernetes"
+
+  [runners.kubernetes]
+    namespace = "gitlab"
+
+    # Pod-level resources: shared pool across all containers
+    pod_cpu_request = "935m"
+    pod_cpu_limit = "1830m"
+    pod_cpu_request_overwrite_max_allowed = "1830m"
+    pod_cpu_limit_overwrite_max_allowed = "1830m"
+    pod_memory_request = "1490Mi"
+    pod_memory_limit = "3169Mi"
+    pod_memory_request_overwrite_max_allowed = "3169Mi"
+    pod_memory_limit_overwrite_max_allowed = "3169Mi"
+
+    # Per-container: minimal requests, no limits (let the pod pool govern)
+    cpu_request = "1m"
+    memory_request = "1Mi"
+    helper_cpu_request = "1m"
+    helper_memory_request = "1Mi"
+    service_cpu_request = "1m"
+    service_memory_request = "1Mi"
+
+    # Ephemeral storage: stays per-container
+    ephemeral_storage_request = "1Mi"
+    ephemeral_storage_limit = "10Gi"
+    helper_ephemeral_storage_request = "1Mi"
+    helper_ephemeral_storage_limit = "1Gi"
+    service_ephemeral_storage_request = "1Mi"
+    service_ephemeral_storage_limit = "5Gi"
+```
+
+One approach is to derive limits from the node's available resources after subtracting a host reservation for DaemonSets
+and system pods, and follow a stacking pattern where each size requests approximately what the previous size limits.
+
+</details>
+
+Jobs select a size and can override pod-level resources via CI/CD variables, subject to the
+`*_overwrite_max_allowed` ceilings:
+
+<details style="margin-top: -1em; padding: 0 0 1rem 1rem;">
+
+```yaml
+build_job:
+  tags: [k8s, medium]
+  variables:
+    KUBERNETES_POD_CPU_REQUEST: "1500m"     # raise guaranteed CPU
+    KUBERNETES_POD_MEMORY_REQUEST: "2Gi"    # raise guaranteed memory
 ```
 
 </details>
@@ -1222,6 +1354,19 @@ Managers must be configured to use one or more of the specific executors for aut
 - [Instance executor](#instance-executor).
 - [Docker Autoscaling executor](#docker-autoscaler-executor).
 
+## Feature flags
+
+Runners support [feature flags][runner feature flags] that toggle specific behaviors. Set them as environment variables
+in `config.toml` or as CI/CD variables in `.gitlab-ci.yml`.
+
+Notable flags:
+
+- `FF_USE_DIRECT_DOWNLOAD` (default `true`): artifacts are downloaded directly from object storage via a 302 redirect,
+  bypassing the GitLab Rails process. Requires `proxy_download` set to `false` on the server.
+- `FF_USE_PARALLEL_ARTIFACT_TRANSFER`: parallel HTTP Range GETs from object storage for faster artifact downloads.
+- `FF_USE_PARALLEL_CACHE_TRANSFER`: parallel uploads and downloads for cache archives.
+- `FF_USE_ADAPTIVE_REQUEST_CONCURRENCY` (default `true`): automatically adjusts `request_concurrency` based on workload.
+
 ## Integrate with secret managers
 
 GitLab offers its own (currently _**experimental**_) internal secrets manager for securely storing secrets and
@@ -1277,6 +1422,8 @@ Refer to [External secrets in pipelines].
 - [Docker Autoscaler executor][Documentation / Docker Autoscaler executor]
 - [Signals]
 - [Kubernetes executor]
+- [Executors][executor maintenance mode]
+- [Migrating to the new runner registration workflow]
 
 <!--
   Reference
@@ -1305,6 +1452,7 @@ Refer to [External secrets in pipelines].
 [docker machine]: https://gitlab.com/gitlab-org/ci-cd/docker-machine
 [Documentation / Docker Autoscaler executor]: https://docs.gitlab.com/runner/executors/docker_autoscaler/
 [Documentation / GitLab Runner Autoscaling]: https://docs.gitlab.com/runner/runner_autoscale/
+[executor maintenance mode]: https://docs.gitlab.com/runner/executors/
 [fleeting aws recommended iam policy]: https://gitlab.com/gitlab-org/fleeting/plugins/aws#recommended-iam-policy
 [fleeting]: https://gitlab.com/gitlab-org/fleeting/fleeting
 [gitlab runner helm chart]: https://docs.gitlab.com/runner/install/kubernetes/
@@ -1313,17 +1461,23 @@ Refer to [External secrets in pipelines].
 [install and register gitlab runner for autoscaling with docker machine]: https://docs.gitlab.com/runner/executors/docker_machine/
 [install gitlab runner]: https://docs.gitlab.com/runner/install/
 [instance executor]: https://docs.gitlab.com/runner/executors/instance/
+[instance_ready_command]: https://docs.gitlab.com/runner/configuration/advanced-configuration/#the-runnersautoscaler-section
 [Kubernetes executor]: https://docs.gitlab.com/runner/executors/kubernetes/
+[Manage runners]: https://docs.gitlab.com/ci/runners/runners_scope/
+[Migrating to the new runner registration workflow]: https://docs.gitlab.com/ci/runners/new_creation_workflow/
 [MR 5922: Teach runner how to set pod-level resources for build pods]: https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/5922
 [Pre-warm cluster capacity with pause pods]: https://docs.gitlab.com/runner/executors/kubernetes/#pre-warm-cluster-capacity-with-pause-pods
+[prometheus metrics]: https://docs.gitlab.com/runner/monitoring/
 [Protect job pods from eviction]: https://docs.gitlab.com/runner/executors/kubernetes/#protect-job-pods-from-eviction
+[runner feature flags]: https://docs.gitlab.com/runner/configuration/feature-flags/
 [signals]: https://docs.gitlab.com/runner/commands/#signals
 [store registration tokens or runner tokens in secrets]: https://docs.gitlab.com/runner/install/kubernetes/#store-registration-tokens-or-runner-tokens-in-secrets
 [Use external secrets in CI/CD]: https://docs.gitlab.com/ci/secrets/
 [Work Item 39085: Allow k8s runner to define Pod Level Resources for build pod]: https://gitlab.com/gitlab-org/gitlab-runner/-/work_items/39085
 
 <!-- Others -->
+[amazon ecr docker credential helper]: https://github.com/awslabs/amazon-ecr-credential-helper
 [authenticating your gitlab ci runner to an aws ecr registry using amazon ecr docker credential helper]: https://faun.pub/authenticating-your-gitlab-ci-runner-to-an-aws-ecr-registry-using-amazon-ecr-docker-credential-b4604a9391eb
 [aws driver does not support multiple non default subnets]: https://github.com/docker/machine/issues/4700
-[amazon ecr docker credential helper]: https://github.com/awslabs/amazon-ecr-credential-helper
+[Karpenter]: https://karpenter.sh/
 [using al2023 based amazon ecs amis to host containerized workloads]: https://docs.aws.amazon.com/linux/al2023/ug/ecs.html

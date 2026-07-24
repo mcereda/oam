@@ -70,6 +70,7 @@
 | FQDN    | Fully Qualified Domain Name                            |                                                                                                     |
 | FS      | FileSystem                                             |                                                                                                     |
 | FW      | FireWall                                               |                                                                                                     |
+| GA      | General Availability                                   |                                                                                                     |
 | GNU     | GNU is Not Unix                                        |                                                                                                     |
 | GPG     | GNU Privacy Guard                                      |                                                                                                     |
 | GUI     | Graphical User Interface                               |                                                                                                     |
