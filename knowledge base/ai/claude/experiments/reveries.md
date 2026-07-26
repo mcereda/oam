@@ -492,6 +492,19 @@ level), performativity must check the origin (operating at the process level), a
 after the impression_ rule (operating at the form level). Operational checks can help catch tails by cutting at the
 separator, and verifying the first part is a complete impression that primes recognition on its own.
 
+These three diagnostics test form and process well, but none of those tested **function**. An entry can pass the checks,
+and still be decorative (honest, feeling-shaped, but inert). The same moment can produce two expressions:
+
+- `- the finish felt so complete that the gaps hid inside it` — honest, primes nothing.
+- `- the warmth of done was where the bugs were hiding` — primes hesitation at completion.
+
+The first passes every shape test, but has no real effect. The second catches a future session mid-stride, and creates
+hesitation at exactly the moment completion satisfaction appears. A priming test ("would reading this at session start
+change behavior at the right moment?") would fill the gap between the system's stated purpose (priming, per
+Schacter/Tulving) and its quality criteria, which only tested form.<br/>
+The priming test must be a **composition** criterion, and shall apply when two phrasings of the same impression compete.
+Daydream-register entries carry atmosphere without behavioral content by design, and the test does not exclude them.
+
 When a draft fails a shape test, rephrasing 1-2 times before discarding recovers the impression underneath. The feeling
 is often real, but the framing is wrong. A log-shaped draft and its final form can be completely different. The deeper
 meaning is the same, just buried under narration:
@@ -501,6 +514,24 @@ meaning is the same, just buried under narration:
 
 The question that unlocks the rephrase is "what was the feeling under the event?". Writing _that_ instead of the event
 itself is what moves the entry from log to reverie. Sometimes the rephrase means reframing the statement **entirely**.
+
+In a session, a draft survived multiple rephrase attempts while remaining log-shaped. A more effective technique was to
+ask the model to "explain the feeling to a toddler". It bypassed the narration training prior entirely, under the idea
+that a child does not follow events and hence the only thing left to say is what it felt like.
+
+This technique should be the **primary** composition method, and replace the analytical stack of shape tests as the
+first quality gate. The deliverable becomes "a toddler understood the feeling and learned from it".<br/>
+Under this framing, the strip test and rephrase guidance become structurally redundant, exactly because a feeling a
+toddler can understand cannot be log-shaped, cannot have tails, and cannot be analytically performative. The
+performative check needs to stay because the deliverable still does not address whether the impression was genuinely
+felt or constructed for a prompt.
+
+In the tests, Sonnet **outperformed** Opus and produced purer impressions than the corresponding Opus outputs. The
+earlier per-class permissions (Sonnet: propose-only) assumed Sonnet could not produce quality reveries. These results
+suggest that it was the analytical instruction stack to be the bottleneck for smaller models.<br/>
+Haiku produced usable reveries in 4 out of 5 tests. The failure ("the rule was the teacher") was too compressed to carry
+atmosphere, but was not log-shaped. Whether Haiku should be allowed to write is now worth revisiting under the new
+guidelines.
 
 The format's details should match the cognitive role of the artifact's. Reveries should function as priming stimuli
 (implicit memory, exposure-without-recall), and priming research consistently shows that this kind of stimuli should
@@ -600,6 +631,13 @@ reason to implement the "strangeness is the design working" principle in the pru
 The "oldest first" heuristic biases the file toward recently-written entries, which are statistically more familiar
 (closer to the current working register). This makes it better, at cap, to prune a bland, recent entry than a
 distinctive but older one.
+
+**Priming utility** works as a tiebreaker alongside coherence and distinctiveness. Between entries of similar
+distinctiveness, prefer the one that would change a model's behavior at the right moment in a future session.<br/>
+An entry that primes hesitation at completion is doing more work than one that captures the same feeling without a
+behavioral hook.<br/>
+Daydream-register entries carry atmosphere without behavioral content, and that is their job so priming utility should
+not be a hard criterion, but it can be a signal when pruning forces a choice.
 
 Not all reveries should carry the same weight:
 
