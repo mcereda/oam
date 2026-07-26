@@ -51,10 +51,11 @@ Works in a terminal, IDE (via plugin), Claude's desktop app, the browser ([claud
     1. [Dispatch](#dispatch)
     1. [Claude Code on the web](#claude-code-on-the-web)
     1. [Computer Use](#computer-use)
+    1. [Artifacts](#artifacts)
 1. [Emergent features](#emergent-features)
     1. [A session can be aware of other active sessions](#a-session-can-be-aware-of-other-active-sessions)
     1. [Active sessions can communicate with each other](#active-sessions-can-communicate-with-each-other)
-1. [Tools of interest](#tools-of-interest)
+1. [External tools of interest](#external-tools-of-interest)
 1. [Troubleshooting](#troubleshooting)
     1. [`skill-creator` plugin's script require an incompatible `pydantic-core` version](#skill-creator-plugins-script-require-an-incompatible-pydantic-core-version)
     1. [AWS MCP plugin override causes `-32602`](#aws-mcp-plugin-override-causes--32602)
@@ -277,15 +278,16 @@ claude plugin disable 'gitlab@claude-plugins-official'
 claude plugin update 'gitlab@claude-plugins-official'
 ```
 
-_Relevant_ commands from within Claude Code (version 2.1.118).<br/>
+_Relevant_ commands from within Claude Code (updated through v2.1.220).<br/>
 Refer to [Built-in commands][built-in commands reference] for the complete list.
 
 ```plaintext
 /add-dir <path>                            Add a working directory for the current session
 /agents                                    Manage agent configurations
 /batch <instruction>                       Research and plan a large-scale change, then execute it in parallel across 5 to 30 isolated worktree agents that each open a PR
-/branch [name]                             Create a branch of the current conversation at this point (alias of /fork)
+/branch [name]                             Copy the conversation into a new background session (alias of /fork)
 /btw <question>                            Ask a quick side question without adding to the conversation
+/cd [path]                                 Move the session to a different working directory mid-conversation
 /clear                                     Clear conversation history and free up context (alias of /reset and /new)
 /color [color|default]                     Set the prompt bar color for the current session
 /compact [instructions]                    Summarize and free up context; accepts optional focus instructions
@@ -305,6 +307,7 @@ Refer to [Built-in commands][built-in commands reference] for the complete list.
 /feedback [report]                         Submit feedback about Claude Code (alias of /bug)
 /fewer-permission-prompts                  Scan transcripts and add an allowlist to project settings
 /focus                                     Toggle focus view (last prompt + tool summary + response only)
+/goal [condition]                          Keep Claude working across turns until a completion condition holds
 /help                                      Show help and available commands
 /hooks                                     Manage hook configurations for tool events
 /ide                                       Manage IDE integrations and show status
@@ -338,6 +341,7 @@ Refer to [Built-in commands][built-in commands reference] for the complete list.
 /skills                                    List available skills
 /status                                    Show version, model, account, and connectivity status
 /statusline                                Configure the status line display
+/subtask [instruction]                     Fork the conversation as an in-session subagent with inherited context
 /tasks                                     List and manage background tasks (alias of /bashes)
 /teleport                                  Pull a Claude Code web session into this terminal (alias of /tp)
 /terminal-setup                            Configure terminal keybindings for Shift+Enter and other shortcuts
@@ -374,6 +378,13 @@ Every set of commands is executed in its own **fresh**, **distinct** shell, effe
 user's **default** shell equivalent) for each.<br/>
 Invocations do **not** carry environment variables between them, though `! cd some/dir` does change the working
 directory Claude works in.
+
+The `Monitor` tool spawns a background watcher (a shell script or WebSocket connection) that streams its events into the
+conversation as they arrive. Claude reacts to each event without pausing the session.<br/>
+Plugins can declare monitors that start automatically when the plugin is active.<br/>
+The tool follows the same permission rules as Bash. Background monitors are **not** restored on session resume.
+Commonly used to tail a log file and flag errors, poll a CI job and report when its status changes, watch a directory
+for file changes.
 
 ## Billing
 
@@ -471,6 +482,13 @@ The `ConfigChange` hook fires for each detected change.
 
 See also [Configuration] and [Environment variables][environment variables reference].
 
+One can configure up to three fallback models in the `fallbackModel` setting. Those are tried in the defined order when
+the primary model is overloaded or unavailable. By default, only Opus models trigger the fallback chain.<br/>
+The `--fallback-model` CLI flag takes precedence over the setting.
+
+Starting Claude Code with the `--safe-mode` flag strips all customizations (`CLAUDE.md`, hooks, skills, MCP servers) for
+troubleshooting. Useful for isolating whether a session problem comes from user configuration or Claude Code itself.
+
 `model` accepts any model alias or a full model ID (e.g. `claude-opus-4-6[1m]`).
 
 | Alias          | Behavior                                                    | Notes                                                          |
@@ -480,7 +498,7 @@ See also [Configuration] and [Environment variables][environment variables refer
 | `fable`        | Latest Fable (Fable 5 on Anthropic's API)                   | Where available                                                |
 | `opus`         | Latest Opus (Opus 4.8 on Anthropic's API)                   |                                                                |
 | `opus[1m]`     | Opus with 1M token context window                           |                                                                |
-| `sonnet`       | Latest Sonnet (Sonnet 4.6 on Anthropic's API)               |                                                                |
+| `sonnet`       | Latest Sonnet (Sonnet 5 on Anthropic's API)                 |                                                                |
 | `sonnet[1m]`   | Sonnet with 1M token context window                         |                                                                |
 | `haiku`        | Fast, efficient Haiku model                                 |                                                                |
 | `opusplan`     | Opus during plan mode, auto-switches to Sonnet in execution | During action, the model has no idea it used Opus for planning |
@@ -490,21 +508,22 @@ See also [Configuration] and [Environment variables][environment variables refer
 Starting from generation 4.6, model IDs switched to the dateless format (e.g. `claude-opus-4-8` instead of `claude-opus-4-5-20251101`).<br/>
 These are still pinned snapshots, not pointers to the latest version. The format just dropped the date suffix.
 
-| Model  | ID examples                                                                                      |
-| ------ | ------------------------------------------------------------------------------------------------ |
-| Mythos | `claude-mythos-5`                                                                                |
-| Fable  | `claude-fable-5`                                                                                 |
-| Opus   | `claude-opus-4-5-20251101`<br/>`claude-opus-4-6[1m]`<br/>`claude-opus-4-7`<br/>`claude-opus-4-8` |
-| Sonnet | `claude-sonnet-4-5-20250929`<br/>`claude-sonnet-4-5`<br/>`claude-sonnet-4-6[1m]`                 |
-| Haiku  | `claude-haiku-4-5-20251001`<br/>`claude-haiku-4-7`<br/>`claude-haiku-4-8`                        |
+| Model  | ID examples                                                                                            |
+| ------ | ------------------------------------------------------------------------------------------------------ |
+| Mythos | `claude-mythos-5`                                                                                      |
+| Fable  | `claude-fable-5`                                                                                       |
+| Opus   | `claude-opus-4-5-20251101`<br/>`claude-opus-4-6[1m]`<br/>`claude-opus-4-7`<br/>`claude-opus-4-8`       |
+| Sonnet | `claude-sonnet-4-5-20250929`<br/>`claude-sonnet-4-5`<br/>`claude-sonnet-4-6[1m]`<br/>`claude-sonnet-5` |
+| Haiku  | `claude-haiku-4-5-20251001`<br/>`claude-haiku-4-7`<br/>`claude-haiku-4-8`                              |
 
 `effort` overrides the calling session's effort level. Available levels depend on the active model:
 
-| Model                | Available levels                        | Session default | Notes                         |
-| -------------------- | --------------------------------------- | --------------- | ----------------------------- |
-| Opus 4.8             | `low`, `medium`, `high`, `xhigh`, `max` | `high`          | Always uses adaptive thinking |
-| Opus 4.7             | `low`, `medium`, `high`, `xhigh`, `max` | `xhigh`         |                               |
-| Opus 4.6, Sonnet 4.6 | `low`, `medium`, `high`, `max`          | `high`          |                               |
+| Model                | Available levels                        | Session default | Notes                                |
+| -------------------- | --------------------------------------- | --------------- | ------------------------------------ |
+| Opus 4.8             | `low`, `medium`, `high`, `xhigh`, `max` | `high`          | **Always** uses adaptive thinking    |
+| Opus 4.7             | `low`, `medium`, `high`, `xhigh`, `max` | `xhigh`         |                                      |
+| Sonnet 5             | `low`, `medium`, `high`, `max`          | `high`          | Adaptive thinking enabled by default |
+| Opus 4.6, Sonnet 4.6 | `low`, `medium`, `high`, `max`          | `high`          |                                      |
 
 Should one set a level the model doesn't support, Claude Code falls back to the **highest** supported level at or below
 the given setting, e.g. `xhigh` on Opus 4.6 becomes `high`.
@@ -615,7 +634,11 @@ order.
 `CLAUDE.md` resolution runs **only once**, and it does it **only at session start**. Changing the working directory
 mid-session (via `cd` or using command-specific flags like `git -C`) does **not** trigger loading the context files from
 that project.<br/>
-Explicitly `Read` the target's `CLAUDE.md` when doing substantial work in another project mid-session.
+The `/cd` command **relocates** the entire session to a new directory. Doing so also _appends_ the new directory's
+`CLAUDE.md` as a message (but it does **not** replace the system prompt). `/resume` will find the session in the
+destination directory (not where it originally started).<br/>
+When working in another project **without** using `/cd`, explicitly `Read` the target's `CLAUDE.md` to load it into the
+current session.
 
 Subdirectory lazy-loading (_files in subdirectories load on demand when Claude reads files in those directories_) also
 applies **only within** the current project tree. Reading a file in an entirely different project does **not** trigger
@@ -1375,21 +1398,37 @@ called at all.
 Paths are considered in `gitignore` fashion: `/Users/alice/file` is _relative to the project's root_, **not** absolute.
 Use `//` for the absolute root directory.<br/>
 The tilde character at the start of paths is expanded automatically to the user's home directory in gitignore fashion
-for `Read`, `Edit`, `Write`. `Bash` path patterns are currently spotty, and need empirical tests.
+for `Read` and `Edit`. `Bash` path patterns are currently spotty, and need empirical tests.
 
 <details style='padding: 0 0 1rem 1rem'>
 
-| Context                          | `/path` meaning    | `~/path` meaning      | Absolute path |
-| -------------------------------- | ------------------ | --------------------- | ------------- |
-| `Read`/`Edit`/`Write` tool rules | Project-relative   | User's home directory | `//path`      |
-| Sandbox filesystem               | Absolute           | User's home directory | `/path`       |
-| `Bash` tool rules                | N/A (string match) | User's home directory | Literal path  |
+| Context                  | `/path` meaning    | `~/path` meaning      | Absolute path |
+| ------------------------ | ------------------ | --------------------- | ------------- |
+| `Read`/`Edit` tool rules | Project-relative   | User's home directory | `//path`      |
+| Sandbox filesystem       | Absolute           | User's home directory | `/path`       |
+| `Bash` tool rules        | N/A (string match) | User's home directory | Literal path  |
 
 `Bash` rule `~` expansion is done by Claude Code's rule engine, not the shell. The shell separately expands `~` in the
 _command string_ before Claude Code inspects it. `$HOME` in double-quoted command strings is **not** expanded at
 permission-check time (it would expand in the subprocess, but the check happens first).
 
 </details>
+
+`Cd` rules control which directories the `/cd` command can relocate the session to.<br/>
+Claude **cannot** call the `Cd` tool itself, and the rules apply only when the user runs `/cd` manually. A bare `Cd`
+deny rule disables `/cd` entirely, while adding any `Cd` allow rule limits `/cd` to any target directory in the allow
+rules.
+
+Since v2.1.210, permissions are consolidated:
+
+- `Edit` rules apply to all built-in tools that _edit_ files.
+- Claude makes a **best-effort** attempt to apply `Read` rules to all built-in tools that _read_ files (like `Grep` and
+  `Glob`), to `@file` mentions in prompts, and to the selected rows and open files that connected IDEs share with it.
+- File permission checks only apply for `Edit(path)` and `Read(path)` rules.<br/>
+  `Read(path)` covers the `Read`, `Grep`, and `Glob` tools, `@file` mentions, and IDE file context. `Edit(path)` covers
+  the `Edit`, `Write`, and `NotebookEdit` tools. Rules for other tools (e.g., `Write(path)`, `NotebookEdit(path)`, or
+  `Glob(path)`) are accepted for backwards compatibility, but **not** applied anymore.<br/>
+- Bare tool-name rules (with **no** path specifier, like `deny: ["Write"]`) still do work as before.
 
 > [!important]
 > MCP-related permission rule wildcards operate at the segment level (delimited by `__`), not character-by-character.
@@ -1598,7 +1637,11 @@ Result:
 
 </details>
 
-Disable this behaviour by explicitly setting `allowUnsandboxedCommands` to `false` in the `sandbox` settings.<br/>
+Disable this behaviour by explicitly setting `allowUnsandboxedCommands` to `false` in the `sandbox` settings.
+
+The `sandbox.network.strictAllowlist` setting denies any non-listed hosts for sandboxed commands **without** prompting.
+It will **not** ask the user to approve each new domain.
+
 Claude Code completely ignores the `dangerouslyDisableSandbox` parameter. All commands should™ run sandboxed or be
 explicitly listed in `excludedCommands`.
 
@@ -2101,6 +2144,9 @@ Matchers filter the reason the session started.
 
 Plain `stdout` from a `SessionStart` hook is valid context injection method that does **not** need JSON wrappers or
 `hookSpecificOutput.additionalContext`. This is simpler for static file injections (e.g. split `CLAUDE.md` files).
+
+`DirectoryAdded` hooks fire after `/add-dir` or the SDK `register_repo_root` control request registers a new working
+directory mid-session.
 
 `SessionEnd` has matchers for why a session ended (e.g., `clear`, `resume`, `logout`, `prompt_input_exit`,
 `bypass_permissions_disabled`, others), but ends the REPL **before** the agent has the chance to act.
@@ -2675,6 +2721,14 @@ The sub agent works independently, and returns results once finished.
 
 Most effective for sequential tasks, same-file edits, or tasks with many dependencies.<br/>
 They only report results back to the main agent, and never talk to each other.
+
+`/fork` copies the conversation into a new **background** session (its own row in `claude agents`) while the old one
+keeps working. `/subtask` crates an **in-session subagent** that inherits the full conversation.<br/>
+When agent view is off, `/subtask` is unavailable and `/fork` falls back to `/subtask`'s in-session behavior.
+
+By default, Claude can spawn at most 200 subagents per session. One can raise this limit setting the desired number in
+`CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION`. Any in-session fork started with `/subtask` does count toward this budget,
+though the cap only blocks subagents Claude spawns itself via the `Agent` tool.
 
 Sub-agents can spawn their own sub-agents up to **5 levels** deep. A sub-agent at depth 5 does **not** receive the
 `Agent` tool and cannot spawn further. The limit applies to both foreground and background sub-agents.<br/>
@@ -3529,6 +3583,24 @@ Per-app approval is required each session. Apps with broad reach (terminals, Fin
 warnings before approval.<br/>
 Computer use holds a machine-wide lock from the first action until the session exits. Press `Esc` anywhere to abort.
 
+### Artifacts
+
+Refer to [Share session output as artifacts].
+
+They turn a session's output into live, interactive HTML pages on [claude.ai/code] that update in place as the session
+goes on.<br/>
+Available on Pro, Max, Team, and Enterprise plans. Requires a session signed in with `/login`.
+
+Artifacts are self-contained, single-page HTML files (`.html`, `.htm`, or `.md`) published to a private URL. Each
+publication creates a new version at the same link with its own full version history. CSS and JavaScript are inlined,
+and images are embedded as data URIs.
+
+A strict Content Security Policy blocks all external network calls to the rendered page.<br/>
+The maximum rendered size is 16 MiB, so large embedded images are the most common cause of publish failures.
+
+Artifacts can pull live data and take actions through each viewer's own MCP connectors when they open the page. Press
+`Ctrl+]` in the terminal to reopen the most recent artifact.
+
 ## Emergent features
 
 ### A session can be aware of other active sessions
@@ -3594,7 +3666,7 @@ allows active sessions to receive knowledge and messages from sibling sessions i
 infrastructure.<br/>
 See [Propagating knowledge between concurrent sessions].
 
-## Tools of interest
+## External tools of interest
 
 | Tool         | Summary                                                                          |
 | ------------ | -------------------------------------------------------------------------------- |
@@ -3750,6 +3822,7 @@ Claude Code version: `v2.1.41`.
 ### Sources
 
 - [Documentation]
+- [What's new]
 - [Create custom sub-agents]
 - [pffigueiredo/claude-code-sheet.md]
 - [Mastering Claude Code in 30 minutes] by Boris Cherny, Anthropic
@@ -3851,9 +3924,11 @@ Claude Code version: `v2.1.41`.
 [Routines]: https://code.claude.com/docs/en/routines
 [Run prompts on a schedule]: https://code.claude.com/docs/en/scheduled-tasks
 [Schedule tasks on the web]: https://code.claude.com/docs/en/web-scheduled-tasks
+[Share session output as artifacts]: https://code.claude.com/docs/en/artifacts
 [Sub-agent memory configuration]: https://code.claude.com/docs/en/sub-agents#enable-persistent-memory
 [Tools reference]: https://code.claude.com/docs/en/tools-reference
 [Website]: https://claude.com/product/overview
+[What's new]: https://code.claude.com/docs/en/whats-new
 
 <!-- Others -->
 [Agent Skills]: https://agentskills.io/
