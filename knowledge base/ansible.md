@@ -62,6 +62,26 @@
 
 ## TL;DR
 
+`combine()` is Jinja2's dict merge filter.
+
+<details style='padding: 0 0 1rem 1rem'>
+
+```yml
+{ 'effective_cache_size': '232993', ... } | combine(pg_config | default({}))
+```
+
+The base dict must be on the left side, overrides on the right side. The right side wins on key collisions.<br/>
+`default({})` handles the "not set" case, and since merging an empty dict is a no-op it gives back the base dict
+unchanged.
+
+</details>
+
+Ansible's implicit `gather_facts` task inherits play-level tags.<br/>
+When a playbook uses per-play tags for host filtering, running `--tags='some,tag'` skips `gather_facts` for those plays
+that do not match. `always`-tagged tasks still execute, which can cause undefined variable errors for facts.<br/>
+Add an explicit `ansible.builtin.setup` task tagged `always` before any `always`-tagged block that uses gathered facts,
+and use `--limit` for host filtering instead of `--tags` when plays target different host groups.
+
 <details>
   <summary>Setup</summary>
 
