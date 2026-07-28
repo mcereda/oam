@@ -15,7 +15,7 @@ Engineered specifically for high-performance, production-grade LLM inference.
 
 Enables _local execution_ of [Language Models].
 
-Offers production-ready, highly mature OpenAI-compatible API.<br/>
+Offers production-ready OpenAI-compatible API, plus gRPC serving (`--grpc` flag) for RPC-based workloads.<br/>
 Has full support for streaming, embeddings, tool/function calling with parallel invocation capability, vision-language
 model support, rate limiting, and token-based authentication. Optimized for high-throughput and batch requests.
 
@@ -25,6 +25,11 @@ Does **not** natively support GGUF (requires conversion).
 Offers production-grade, fully-featured, OpenAI-compatible tool calling functionality via API.<br/>
 Support includes parallel function calls, the `tool_choice parameter` for controlling tool selection, and streaming
 support for tool calls.
+
+Runs an async scheduler by default. It lowers time-to-first-token for most workloads.
+
+GPU-less render serving separates multimodal preprocessing from GPU inference.<br/>
+The smart KV cache offloads frequently-reused blocks to the CPU.
 
 Considered the gold standard for production deployments requiring enterprise-grade tool orchestration.<br/>
 Best for production-grade performance and reliability, high concurrent request handling, multi-GPU deployment
@@ -56,6 +61,7 @@ vllm serve 'meta-llama/Llama-2-7b-hf'
 vllm serve '/path/to/local/model'
 vllm serve … --port '8000' --gpu-memory-utilization '0.9'
 vllm serve … --tensor-parallel-size '2' --uds '/tmp/vllm.sock'
+vllm serve … --grpc
 
 # Chat.
 vllm chat

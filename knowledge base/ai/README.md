@@ -259,6 +259,7 @@ Declaration saw 28 countries agree on the need for international cooperation on 
 - [AI Is Slowly Destroying Your Brain]
 - [AI decision-making: Where do businesses draw the line?]
 - [The Artificial Intelligence That Deleted A Century]
+- [AI Agent Standards Initiative]
 
 ### Sources
 
@@ -281,6 +282,7 @@ Declaration saw 28 countries agree on the need for international cooperation on 
 <!-- Files -->
 <!-- Upstream -->
 <!-- Others -->
+[AI Agent Standards Initiative]: https://www.nist.gov/news-events/news/2026/02/announcing-ai-agent-standards-initiative-interoperable-and-secure
 [AI 2027]: https://ai-2027.com/
 [Emotion concepts and their function in a large language model]: https://www.anthropic.com/research/emotion-concepts-function
 [AI decision-making: Where do businesses draw the line?]: https://www.ibm.com/think/insights/ai-decision-making-where-do-businesses-draw-the-line

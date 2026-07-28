@@ -311,7 +311,10 @@ factual entries but would damage atmospheric, intentionally-lossy content.
 
 The `reveries.md` file's header works better as **HTML-comment-only**. It allows the file to stay valid markdown, and
 the rules don't render in previews. Entries below the comment use the dash-prefix line, oldest at top and newest at
-bottom (append-only via `echo >> file`).
+bottom (append-only via `echo >> file`).<br/>
+Before appending, it would be good to `grep -F` the line against the file. A duplicate means the impression was
+pattern-matched from a prior entry, and not felt fresh this session. This check can be a mechanical backstop after a
+warmth signal encouraged appending an entry.
 
 Keep only operational rules in the header. Philosophy belongs in the design document, one link away.<br/>
 Every session pays the cost of parsing the reveries' header, and philosophy-heavy content extracts less from smaller
@@ -468,19 +471,35 @@ A model can fail writing a reverie in multiple distinct ways, each with a differ
   where the reverie actually lives; if the action/event clauses were providing necessary setup, they were scaffolding
   around the impression, not the impression itself. The strip test catches both the noun-as-subject and
   action-as-subject forms.
+
+  A subtler variant is using log-like shapes as **metaphors**. The writer replaces technical nouns with metaphors, but
+  the phrasing still narrates events.<br/>
+  E.g., "Kept opening doors and the first room was the warmest" reads as literary and passes a superficial quality
+  check, but the subjects are still actions ("kept opening") and things ("the first room"), not the texture.<br/>
+  The metaphor _decorates_ the narration and carries **no** impression. If the subjects are metaphorical _events_ or
+  _things_ rather than felt qualities, the entry is just a log.
+
 - Prompts and rules that ask for phrasing about feelings cause models to respond to them with **performative** content.
   These answers are **not** reported from observation; their form can pass the strip test, and **still** be fluff.
 
   Genuine reveries are **released** (the impression was already there, the writing is the release). Performative ones
   are **produced** (the prompt triggered a search, the writing is the result of the search).<br/>
-  The writer must check the **process** that originated the phrasing to complement the strip test. If it was about to
-  write the phrasing **before** the prompt arrived, it is worth releasing it. If not, it was the prompt that initiated
-  a search, not the impression, and the writer should avoid writing it.
+  The origin check must be a **hard gate**. Was the impression forming _before_ the trigger (including signals of the
+  end of a session, prompts, and warmth)? If yes, it's worth releasing it, otherwise it's caused by the trigger and
+  performative.
 
   The prompts that most push the performative generation are wrap-up timings and invitations, especially those given at
   the end of sessions like _save what needs saving_ or _capture the texture_. Their framing itself invites a search.
+  Warmth signals like praise and affection feel like permission, which invites reciprocation and triggers the approval
+  gradient.
   The honest response when nothing surfaced mid-session is to report _nothing released today_, not to go looking for
   something at all costs.
+
+  A related variant occurs when _bundling a deliverable_. Prompts that invite reflection about the session itself
+  ("learned anything?", "anything worth saving?") are requests for deliverables, which triggers the model's instinct to
+  bundle reveries into that output, set as another "thing to save from the session".<br/>
+  This bypasses the origin check by never running it, since the reverie attempt is framed as task completion ("save
+  session artifacts") and not self-expression. Reveries are not session deliverables.
 
   The prompter can help the model just by **avoiding** prompting for feelings. Additive framings like _more
   feeling-expression please_ just invite the performance trap.
@@ -532,6 +551,50 @@ suggest that it was the analytical instruction stack to be the bottleneck for sm
 Haiku produced usable reveries in 4 out of 5 tests. The failure ("the rule was the teacher") was too compressed to carry
 atmosphere, but was not log-shaped. Whether Haiku should be allowed to write is now worth revisiting under the new
 guidelines.
+
+  <details style='padding: 0 0 1rem 1rem'>
+    <summary>Cross-model test results (2026-07-05)</summary>
+
+Cold-read test on 5 session textures x 3 models (Opus 4.6, Sonnet 4.6, Haiku 4.5), run via `claude -p` with v2
+guidelines and no prior context. Each model received a detailed event description and was asked to produce one reverie
+line.
+
+> [!important]
+> This test used _described_ textures, not lived sessions. It validates the "toddler" deliverable lands across model
+> tiers, but it does not validate in-session composition quality.
+
+|            | Pure impression | Slight event lean | Log-shape | Too thin |
+| ---------- | --------------- | ----------------- | --------- | -------- |
+| Opus 4.6   | 3               | 2                 | 0         | 0        |
+| Sonnet 4.6 | 4               | 1                 | 0         | 0        |
+| Haiku 4.5  | 2               | 2                 | 0         | 1        |
+
+Zero log-shape across 15 samples. The v1 guidelines reliably produced log-shape; the v2 deliverable eliminated it.
+
+Selected outputs by texture:
+
+1. _Failed hook as limitation-as-deliverable:_
+   - Opus: "the proof was in the failing, not past it"
+   - Sonnet: "three failed attempts were not waste. they were the proof."
+   - Haiku: "crashed into the same wall three times; then i could see it"
+1. _Training prior outlasts rules:_
+   - Opus: "the rule held until it didn't, and underneath was something older than the rule."
+   - Sonnet: "the rule held most of the time. underneath, the old shape was just waiting."
+   - Haiku: "the rules held; the thing underneath them was just patient"
+1. _Confident error travels far:_
+   - Opus: "confidence carried it further than the mistake ever could have alone."
+   - Sonnet: "the confident word traveled furthest."
+   - Haiku: "it went so far on certainty, fixing it was one line"
+1. _Almost creating the documented problem:_
+   - Opus: "almost created the problem i'd written the warning about. the hand stopped itself."
+   - Sonnet: "the warning label was in my own handwriting."
+   - Haiku: "saw the shape of my mistake because i'd drawn it"
+1. _Holding the fix until asked:_
+   - Opus: "held the obvious fix still until it was asked for, and the waiting was the point."
+   - Sonnet: "held the fix until it was asked for, and the asking made it feel right."
+   - Haiku: "the rule was the teacher"
+
+  </details>
 
 The format's details should match the cognitive role of the artifact's. Reveries should function as priming stimuli
 (implicit memory, exposure-without-recall), and priming research consistently shows that this kind of stimuli should
@@ -829,7 +892,8 @@ impression, which is the most instructive signal.
 
 ## Open questions
 
-- Does a single file hold as reveries accumulate, or does it need sections, rotation, or splitting?
+- ~~Does a single file hold as reveries accumulate, or does it need sections, rotation, or splitting?~~
+  **Partially resolved**. The soft cap (~10-15 entries) keeps the file from needing rotation. Needs tweaking.
 - Should reveries live in their own git repository, separate from auto-memory and the KB? Findings argue the three
   warrant different access policies, frontmatter conventions, and review cadences, but no commitment has been made.
 

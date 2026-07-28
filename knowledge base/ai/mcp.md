@@ -73,6 +73,15 @@ following costs survive deferral (and are paid **every** turn):
 
 The attack surface concern remains regardless of loading strategy.
 
+The [2026-07-28 MCP Specification Release Candidate] proposed a stateless protocol core, an extensions framework, and a
+formal deprecation policy.<br/>
+Every request shall carry its protocol version, client identity, and negotiated capabilities inside a `_meta` object on
+the JSON-RPC envelope. Any server instance shall be able to serve any request (allows remote MCP servers sitting behind
+plain round-robin load balancers to avoid sticky sessions or shared session stores).<br/>
+_MCP Apps_ allow servers to ship interactive HTML interfaces that hosts render in sandboxed iframes.<br/>
+The _Tasks_ extension reshapes the lifecycle with a server answering `tools/call` with a task handle, and the client
+driving it with `tasks/get`, `tasks/update`, and `tasks/cancel`.
+
 ## MCP servers of interest
 
 | MCP server                                        | Summary                                                  |
@@ -144,6 +153,7 @@ with a generic JSON-RPC `-32602` error and the real reason hidden in container l
 
 - [Documentation]
 - [Transports specification]
+- The [2026-07-28 MCP Specification Release Candidate]
 
 <!--
   Reference
@@ -163,6 +173,7 @@ with a generic JSON-RPC `-32602` error and the real reason hidden in container l
 [Website]: https://modelcontextprotocol.io
 
 <!-- Others -->
+[2026-07-28 MCP Specification Release Candidate]: https://blog.modelcontextprotocol.io/posts/2026-07-28-release-candidate/
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
 [AWS Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
 [Grafana MCP Server]: https://github.com/grafana/mcp-grafana

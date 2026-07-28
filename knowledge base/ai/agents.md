@@ -502,6 +502,11 @@ This also allows them to create, make changes, and save files on the host they a
 
 Models can be tricked into taking actions they usually would not do.
 
+Almost every technical teams started using agents in production, but only around 14% of those agents went live with full
+security and IT approval. The rest most likely operates without consistent (or any) security oversight or logging.
+NIST launched the [AI Agent Standards Initiative] to try and address this. The initiative treats prompt injection as
+a security control problem to be designed into the architecture.
+
 ### Prompt injection
 
 Agents require access to keys and execution environments to integrate with services, but LLMs
@@ -743,6 +748,7 @@ assist you by, for example, exiting the session and resuming it.
 [Agent Skills]: https://agentskills.io/
 [Agentic ProbLLMs - The Month of AI Bugs]: https://monthofaibugs.com/
 [agentsmd/agents.md]: https://github.com/agentsmd/agents.md
+[AI Agent Standards Initiative]: https://www.nist.gov/news-events/news/2026/02/announcing-ai-agent-standards-initiative-interoperable-and-secure
 [AI Doesn't Reduce Work — It Intensifies It]: https://hbr.org/2026/02/ai-doesnt-reduce-work-it-intensifies-it
 [AI mistakes you're probably making]: https://www.youtube.com/watch?v=Jcuig8vhmx4
 [An AI Agent Published a Hit Piece on Me]: https://theshamblog.com/an-ai-agent-published-a-hit-piece-on-me/

@@ -15,12 +15,19 @@ Vastly used as base for AI tools like [Ollama] and [Docker model runner].
 Enables _local execution_ of [Language Models].
 
 Uses models in the GGUF format.<br/>
-It includes all the necessary metadata, tokenizer information and model weights in a single, portable file that allows
-for quick swapping of models.
+GGUF bundles all necessary metadata, tokenizer information, and model weights in a single portable file for quick
+swapping.
+
+Supports CUDA, Metal, AMD ROCm and Qualcomm Hexagon NPU for Snapdragon edge devices.
 
 Supports different _SIMD instructions_ and _GPU kernels_.<br/>
 Automatically detects one's hardware, selects the best kernels for the host, determines how many layers to offload to
 the GPU if available, and configures memory mapping.
+
+Supports backend-agnostic tensor parallelism to split individual operations across multiple GPUs to ensure every GPU
+stays busy on every token.<br/>
+Tensor parallelism uses NCCL (NVIDIA) and RCCL (AMD) for topology-aware communication, and works with heterogeneous GPU
+setups (e.g. an 80 GB and a 40 GB card with proportional allocation).
 
 The system:
 
@@ -68,7 +75,9 @@ llama-bench -m 'models/7B/ggml-model-q4_0.gguf' -m 'models/13B/ggml-model-q4_0.g
 ```
 
 The web UI can be accessed via browser at <http://localhost:8080>.<br/>
-The chat completion endpoint it at <http://localhost:8080/v1/chat/completions>.
+The chat completion endpoint is at <http://localhost:8080/v1/chat/completions>.
+
+The server's web UI includes [MCP] integration for connecting to external tool servers.
 
 </details>
 
@@ -105,6 +114,7 @@ jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
 <!-- Knowledge base -->
 [Docker model runner]: ../docker.md#running-llms-locally
 [Language Models]: lms.md
+[MCP]: mcp.md
 [Ollama]: ollama.md
 [vLLM]: vllm.md
 

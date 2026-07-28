@@ -14,7 +14,7 @@ Emerged as one of the most popular tools for local LLM deployment.
 
 ## TL;DR
 
-Leverages [llama.cpp].
+Leverages [llama.cpp]. Uses MLX as the compute backend on Apple Silicon.
 
 Supports primarily the GGUF file format with quantization levels Q2_K through Q8_0.<br/>
 Offers automatic conversion of models from Hugging Face and allows customization through Modelfile.
@@ -132,6 +132,11 @@ Some of those models (e.g. `gpt-oss`) also (or only) allow to set thinking level
 
 Vision models accept images alongside text.<br/>
 The model can describe, classify, and answer questions about what it sees.
+
+Running `ollama` with no arguments launches an interactive agent session with chat, coding assistance, and web search.
+The web search API provides 100 free searches per day.
+
+KV cache quantization to 8-bit halves cache memory.
 
 <details>
   <summary>Usage</summary>
