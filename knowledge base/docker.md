@@ -316,6 +316,11 @@ Docker's `host` network mode will use the VM's network, and **not** the host's o
 result in the containers being **silently unable** to receive traffic from outside the host.<br/>
 To solve this, use a different network mode and **explicitly publish** the ports used.
 
+`docker compose restart` sends `SIGTERM`+`SIGSTART` to existing containers, but keeps their image, volumes, and
+configuration frozen to the values used during creation.<br/>
+`docker compose up -d` compares the running containers against the current composition file, and recreates them when
+anything differs (image, env, ports, volumes). `--force-recreate` skips the comparison and forces their recreation.
+
 ## Gotchas
 
 - Containers created with no specified name will be assigned one automatically:
