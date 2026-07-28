@@ -9,6 +9,9 @@ Package manager for Kubernetes.
 
 ## TL;DR
 
+`--set-file path.to.key=path/to/file` loads `file`'s contents as a string value.<br/>
+The chart's template engine still processes Go expressions like `{{.Release.Namespace}}` inside it.
+
 ```sh
 # List installed plugins.
 helm plugin list
@@ -74,6 +77,8 @@ helm upgrade --install 'my-wordpress' 'wordpress'
 helm upgrade --values 'values.yaml' 'my-wordpress' 'wordpress'
 helm upgrade --namespace 'gitlab' --values 'values.yaml' 'gitlab gitlab/gitlab' --dry-run
 helm upgrade --atomic --create-namespace --namespace 'gitlab' --timeout 0 --values 'values.yaml' 'gitlab' 'gitlab/gitlab' --debug
+helm upgrade --install 'gitlab-runner-{{.RUNNER_SIZE}}' --values 'values.yml' --values 'values.{{.RUNNER_SIZE}}.yml'
+  --set-file 'runners.config=config.{{.RUNNER_SIZE}}.toml'
 
 # Inspect deployed releases' manifests.
 helm get manifest 'wordpress'
@@ -95,7 +100,8 @@ To achieve this:
      app.kubernetes.io/managed-by: Helm
    ```
 
-   with `app-release-name` being the release name used to deploy the helm chart and `app-deployment-namespace-name` being the deployment namespace.
+   with `app-release-name` being the release name used to deploy the helm chart and `app-deployment-namespace-name`
+   being the deployment namespace.
 
    ```sh
    kubectl annotate "$KIND" "$NAME" "meta.helm.sh/release-name=${RELEASE_NAME}"

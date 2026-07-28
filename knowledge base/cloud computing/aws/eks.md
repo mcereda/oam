@@ -84,6 +84,13 @@ This number defaults to `N * (M-1) + 2`, where:
 maximum limit of pods per node when using the CNI plugin.<br/>
 Refer [Assign more IP addresses to Amazon EKS nodes with prefixes].
 
+Managed node groups reject taints with reserved prefixes (`kubernetes.io/`, `k8s.io/`, `eks.amazonaws.com/`).<br/>
+Use custom prefixes (e.g. `example.org/`) instead.
+
+When a node group references a launch template that specifies **no** AMI, EKS defaults `amiType` to
+`AL2023_x86_64_STANDARD`, **regardless** of the instance types the node group uses.<br/>
+Set `amiType` explicitly on each node group (e.g. `AL2023_ARM_64_STANDARD` for arm64).
+
 <details>
   <summary>Usage</summary>
 
