@@ -3,16 +3,24 @@
 Mesh VPN solution based on [WireGuard].
 
 1. [TL;DR](#tldr)
+1. [Disable automatic update checks](#disable-automatic-update-checks)
 1. [Access existing networks](#access-existing-networks)
    1. [Access VPCs in cloud providers](#access-vpcs-in-cloud-providers)
 1. [Subnet routers](#subnet-routers)
    1. [Configure subnet routers](#configure-subnet-routers)
 1. [Exit nodes](#exit-nodes)
+1. [Tailscale Serve](#tailscale-serve)
+1. [Tailscale Funnel](#tailscale-funnel)
+1. [Taildrop](#taildrop)
+1. [Tailscale SSH](#tailscale-ssh)
+1. [Tags](#tags)
+1. [MagicDNS](#magicdns)
+    1. [HTTPS certificates](#https-certificates)
 1. [Specify search domains](#specify-search-domains)
 1. [Override DNS servers](#override-dns-servers)
 1. [Split DNS (A.K.A. restricted nameservers)](#split-dns-aka-restricted-nameservers)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -25,6 +33,8 @@ console.<br/>
 Alternatively, one could use [Headscale] to host their own control server.
 
 Clients need to register with the tailnet's control server.
+
+Devices on the tailnet are automatically assigned DNS names via [MagicDNS]. It allows one to access them by that name.
 
 Access to existing resources in a network is granted by machines in that network acting as _subnet routers_.<br/>
 This can be useful to access devices that do not support the Tailscale client, like printers.
@@ -64,11 +74,47 @@ sudo tailscale up --exit-node-allow-lan-access
 # Find host's tailnet IPv4 address.
 tailscale ip -4
 
+# Disable MagicDNS on Linux.
+tailscale set --accept-dns=false
+
 # Show the recommended exit node.
 tailscale exit-node suggest
 
 # Use an exit node.
 tailscale set --exit-node="$exit_node_id"
+
+# Obtain TLS certificates.
+tailscale cert <machine-name.tailnet-name.ts.net>
+
+# Serve a local service running on port 3000.
+tailscale serve 3000
+
+# Serve a local directory.
+tailscale serve /path/to/dir
+
+# Show current serve configuration.
+tailscale serve status
+
+# Turn off serving.
+tailscale serve off
+
+# Expose a local service on port 3000 to the public internet.
+tailscale funnel 3000
+
+# Expose on an alternate allowed port.
+tailscale funnel --https=8443 3000
+
+# Turn off Funnel.
+tailscale funnel off
+
+# Send files.
+tailscale file cp <files> <name-or-ip>:
+
+# Receive files in the current directory.
+sudo tailscale file get '.'
+
+# Enable Tailscale SSH on a host.
+tailscale set --ssh
 ```
 
 </details>
@@ -83,8 +129,7 @@ tailscale set --exit-node="$exit_node_id"
 </details>
 -->
 
-<details>
-  <summary>Disable automatic update checks</summary>
+## Disable automatic update checks
 
 When installed via [Homebrew], the in-app toggle to check for updates does **not** seem to have any effect.
 
@@ -106,8 +151,6 @@ defaults write 'io.tailscale.ipn.macsys' 'SUAutomaticallyUpdate' -bool false
 
 Check the exact bundle identifier with `osascript -e 'id of app "Tailscale"'` before running the `defaults write`
 commands.The defaults write approach bypasses the UI.
-
-</details>
 
 ## Access existing networks
 
@@ -250,6 +293,192 @@ of a privately owned device.<br/>
 They support _most_ of the functionality of other exit nodes, but they do have some limitations.<br/>
 Refer [Mullvad exit nodes].
 
+## Tailscale Serve
+
+Refer [Tailscale Serve][documentation / tailscale serve].
+
+Tailscale Serve allows sharing a local service with other devices on the tailnet over HTTPS.<br/>
+Useful for exposing a development server, internal tool, or web application to other tailnet members without the need to
+configure port forwarding or firewall rules.
+
+Serve requires [HTTPS certificates] to be enabled.
+
+<details style='padding: 0 0 1rem 0'>
+  <summary>Usage</summary>
+
+```sh
+# Serve a local service running on port 3000.
+tailscale serve 3000
+
+# Serve a local directory.
+tailscale serve /path/to/dir
+
+# Show current serve configuration.
+tailscale serve status
+
+# Turn off serving.
+tailscale serve off
+```
+
+</details>
+
+The same port **cannot** be used for both Serve and [Funnel] at the same time.<br/>
+If the most recent command to configure the port was `serve`, the port will be completely private to the tailnet.
+
+## Tailscale Funnel
+
+Refer [Tailscale Funnel][documentation / tailscale funnel].
+
+Extends [Serve] to share a process on the public internet. Lets anyone access a local service without needing Tailscale
+themselves.<br/>
+Traffic is routed through Tailscale's relay infrastructure with end-to-end encryption.
+
+Funnel requires:
+
+- Tailscale v1.38.3 or later.
+- [MagicDNS] enabled.
+- [HTTPS certificates] enabled.
+- A `funnel` node attribute in the tailnet policy file.
+
+Funnel can only listen on ports **443**, **8443**, and **10000**. All ports require TLS.
+
+<details style='padding: 0 0 1rem 0'>
+  <summary>Usage</summary>
+
+```sh
+# Expose a local service on port 3000 to the public internet.
+tailscale funnel 3000
+
+# Expose on an alternate allowed port.
+tailscale funnel --https=8443 3000
+
+# Turn off Funnel.
+tailscale funnel off
+```
+
+</details>
+
+Public DNS records can take up to 10 minutes to propagate for the tailnet domain.
+
+> [!warning]
+> Frequent certificate requests may exceed [Let's Encrypt]'s rate limits. It this case, one will need to wait 34 hours
+> before retrying.
+
+By default, the `funnel` node attribute is granted to `autogroup:member`.<br/>
+One can restrict it to specific tagged devices in the tailnet policy file:
+
+```json
+"nodeAttrs": [
+    {
+        "target": ["tag:servers"],
+        "attr": ["funnel"]
+    }
+]
+```
+
+## Taildrop
+
+Refer [Taildrop][documentation / taildrop].
+
+Taildrop allows sending files between personal devices on the tailnet over encrypted peer-to-peer connections using the
+fastest available path.<br/>
+It **cannot** send files to other users' devices, even if they are on the same tailnet.
+
+<details style='padding: 0 0 1rem 0'>
+  <summary>Usage</summary>
+
+```sh
+# Send files.
+tailscale file cp <files> <name-or-ip>:
+
+# Receive files in the current directory.
+sudo tailscale file get '.'
+```
+
+</details>
+
+Interrupted transfers can resume for up to one hour.
+
+## Tailscale SSH
+
+Refer [Tailscale SSH][documentation / tailscale ssh].
+
+Manages SSH authentication and authorization through Tailscale's identity infrastructure. Eliminates the need to
+distribute and manage SSH keys.<br/>
+Connections are authenticated and encrypted over WireGuard using Tailscale node keys.
+
+Intercepts traffic on port 22 for the Tailscale IP only. It does **not** modify the existing SSH configuration
+(`/etc/ssh/sshd_config`) and keys (`~/.ssh/authorized_keys`).<br/>
+At this time, the port **cannot** be changed from the default `22`.
+
+```sh
+# Enable Tailscale SSH on a host.
+tailscale set --ssh
+```
+
+Both a network access rule and an SSH access rule must exist in the tailnet policy file.
+
+> [!caution]
+> Requiring re-authentication on every connection (`checkPeriod: "always"`) may cause issues with automation tools that
+> open many SSH connections in a short time (like [Ansible]).
+
+## Tags
+
+Refer [Tags][documentation / tags].
+
+They authenticate and identify non-user devices like servers, containers, or IoT devices.<br/>
+They allow managing access control policies based on a device's purpose rather than the user who registered it.
+
+A device **cannot** have both a user and a tag simultaneously. Adding a tag removes the associated user.<br/>
+Tag owners are defined in the `tagOwners` section of the tailnet policy file, and only designated tag owners (or
+Owners/Admins) can apply tags to devices.
+
+```json
+"tagOwners": {
+    "tag:servers": ["group:devops"],
+    "tag:monitoring": ["group:sre"]
+}
+```
+
+## MagicDNS
+
+Refer [MagicDNS][documentation / magicdns].
+
+Automatically registers DNS names for every device in the tailnet. It allows accessing hosts by name instead of using IP
+address.<br/>
+Each device gets a fully qualified domain name. It combines the machine name and the tailnet's DNS name, e.g.
+`monitoring.example-org.ts.net`.
+
+Enabled by default on tailnets created after October 20, 2022.
+
+Search domains are automatically added. One can usually access devices by just the machine name (e.g.
+`ssh user@monitoring` instead of `ssh user@monitoring.example-org.ts.net`).
+
+Shared devices from other tailnets require using the full domain name.
+
+```sh
+# Disable MagicDNS on Linux.
+tailscale set --accept-dns=false
+```
+
+### HTTPS certificates
+
+Refer [Enabling HTTPS].
+
+Tailscale can automatically provision TLS certificates using [Let's Encrypt] for devices on the tailnet's `*.ts.net`
+The certificate uses the DNS-01 challenge.<br/>
+Required by [Serve] and [Funnel].
+
+Enabling HTTPS publishes machine names and the tailnet DNS name on the public Certificate Transparency ledger.<br/>
+One can use a randomized tailnet DNS name (e.g. `yak-bebop.ts.net`) to avoid publicizing organization names.
+
+Certificates have a 90-day expiry and require periodic renewal.
+
+```sh
+# Obtain TLS certificates.
+tailscale cert <machine-name.tailnet-name.ts.net>
+```
+
 ## Specify search domains
 
 Search domains provide a convenient way for users to access the tailnet's resources without having to specify the full
@@ -320,6 +549,8 @@ Internal ELB DNS names (e.g. `internal-*.eu-west-1.elb.amazonaws.com`) are **pub
 
 Tailscale will route `*.elb.amazonaws.com` queries through the subnet router to the VPC DNS resolver.
 
+</details>
+
 ## Further readings
 
 - [Website]
@@ -340,19 +571,32 @@ Tailscale will route `*.elb.amazonaws.com` queries through the subnet router to 
 
 <!-- In-article sections -->
 [Exit nodes]: #exit-nodes
+[Funnel]: #tailscale-funnel
+[HTTPS certificates]: #https-certificates
+[MagicDNS]: #magicdns
+[Serve]: #tailscale-serve
 [Subnet routers]: #subnet-routers
 
 <!-- Knowledge base -->
+[Ansible]: ansible.md
 [Headscale]: headscale.md
 [Homebrew]: homebrew.md
+[Let's Encrypt]: letsencrypt.md
 [Wireguard]: wireguard.md
 
 <!-- Files -->
 <!-- Upstream -->
 [Codebase]: https://github.com/tailscale/tailscale
 [Documentation / exit nodes]: https://tailscale.com/kb/1103/exit-nodes
+[Documentation / magicdns]: https://tailscale.com/docs/features/magicdns
 [Documentation / subnet routers]: https://tailscale.com/kb/1019/subnets
+[Documentation / tags]: https://tailscale.com/docs/features/tags
+[Documentation / taildrop]: https://tailscale.com/docs/features/taildrop
+[Documentation / tailscale funnel]: https://tailscale.com/docs/features/tailscale-funnel
+[Documentation / tailscale serve]: https://tailscale.com/docs/features/tailscale-serve
+[Documentation / tailscale ssh]: https://tailscale.com/docs/features/tailscale-ssh
 [Documentation]: https://tailscale.com/kb
+[Enabling HTTPS]: https://tailscale.com/docs/how-to/set-up-https-certificates
 [Mullvad exit nodes]: https://tailscale.com/kb/1258/mullvad-exit-nodes
 [Set up a subnet router]: https://tailscale.com/kb/1019/subnets#set-up-a-subnet-router
 [Website]: https://tailscale.com/
