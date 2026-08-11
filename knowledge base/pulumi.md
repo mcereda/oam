@@ -673,6 +673,14 @@ Property names passed to `ignoreChanges` shall always be the _camelCase_ version
 E.g., specify the `nested_resource` property as `nestedResource`.<br/>
 See also [Property Paths].
 
+> [!warning]
+> For resources that create **new versions** on update (e.g., LaunchTemplates, ECS task definitions, Lambda functions),
+> `ignoreChanges` carries the **state-frozen** value into each new version. When an unrelated field change triggers a
+> replacement, the ignored field silently reverts to whatever value Pulumi **last** recorded, not the **current** live
+> value.<br/>
+> Use data source lookups (e.g., `getAmiOutput`) instead of relying on `ignoreChanges` when another system manages the
+> ignored field.
+
 ### Delete before replacing
 
 Add the [`deleteBeforeReplace` option][deletebeforereplace] to the resource.
