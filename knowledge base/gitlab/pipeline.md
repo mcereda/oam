@@ -83,6 +83,11 @@ Gotchas:
 - Multiple entries in the `changes` condition are validated in an `OR` fashion.
 - Glob patterns in `changes` and `exists` are interpreted with Ruby's `File.fnmatch` function using the
   `File::FNM_PATHNAME | File::FNM_DOTMATCH | File::FNM_EXTGLOB` flag.
+
+  A single `*` does **not** cross directories. A pattern like `*.ts` matches only root-level files, and changes to files
+  in subdirectories do **not** trigger the the job (no error, no preview, no deploy on merge).<br/>
+  Use `**/*.ts` for recursive matching, or list explicit per-directory globs.
+
 - The [`push` pipeline source](https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#push-events)
   should™ limit jobs to code changes or deliberate pushes.<br/>
   Scheduled pipelines should™ avoid triggering jobs with this condition as they present a `schedule` source instead.
