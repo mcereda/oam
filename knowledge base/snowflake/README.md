@@ -17,6 +17,8 @@ Cloud-based [data warehousing][data warehouse] platform.
    1. [From AWS accounts](#from-aws-accounts)
 1. [Parameters](#parameters)
 1. [Tagging queries](#tagging-queries)
+1. [Gotchas](#gotchas)
+    1. [VARIANT JSON's null is different from SQL's NULL](#variant-jsons-null-is-different-from-sqls-null)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -984,6 +986,25 @@ query tags at the session level.
 Query comments can also be used to add metadata to queries, but they are more limited.<br/>
 Query tags are simpler to parse and analyze downstream, while query comments may require additional processing.<br/>
 Query comments also have a size limit of 1MB, whereas query tags are limited to 2000 characters.
+
+## Gotchas
+
+### VARIANT JSON's null is different from SQL's NULL
+
+A JSON's `null` value (`"key": null`) stored in a `VARIANT` column is **different** from SQL's `NULL` value.<br/>
+`IS NULL` returns false for the JSON one because the key does exist and holds a VARIANT-typed JSON `null` value.
+
+Casting that value to a scalar type (`::varchar`, `::number`, etc.) **does** produce SQL's `NULL` value.<br/>
+`some_data:"Field" IS NULL` (the key is missing from the JSON) and `some_data:"Field"::varchar IS NULL` (the key is
+present, but its value is JSON's `null`) test different conditions, and both return rows that look like "null" in query
+results.
+
+Use `IS_NULL_VALUE()` instead to **explicitly** test for JSON's `null` values without needing to cast:
+
+```sql
+SELECT * FROM my_table
+WHERE IS_NULL_VALUE(variant_col:"field");
+```
 
 ## Further readings
 
