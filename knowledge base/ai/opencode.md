@@ -8,6 +8,7 @@ Alternative to [Claude Code], [Gemini CLI] and [Pi].
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
+1. [Gotchas](#gotchas)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -151,6 +152,15 @@ opencode agent list
 
 </details>
 -->
+
+## Gotchas
+
+- Limit concurrent `opencode run` invocations to 2-3.<br/>
+  Running 8+ in parallel causes silent failures (no error, just missing output).
+- Do **not** pass the `--steps` parameter to `opencode run`.<br/>
+  It injects a max-steps instruction into the prompt that contaminates the model's output.
+- Free models are served via the `opencode.ai/zen/v1` gateway (apiKey: `"public"`).<br/>
+  This is a distinct endpoint, not OpenRouter.
 
 ## Further readings
 

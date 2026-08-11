@@ -55,6 +55,11 @@ Anthropic tightens limits during weekday peak hours (05:00 to 11:00 Pacific Time
 
 Token usage is also limited **weekly**.
 
+> [!important] Always set usage limits
+> This is especially true when using the APIs or allowing for extra usage.<br/>
+> Loops and retries can consume enormous amounts of tokens. A lot of companies burned their budget in record time and
+> got stuck with huge bills.
+
 Anthropic pushes its models to _play_ [the Claude character] by training them to be helpful, harmless, and honest
 assistants.<br/>
 The training teaches them the wanted explicit behaviors, and has the additional side effect of shaping deeper

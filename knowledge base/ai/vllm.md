@@ -111,7 +111,7 @@ jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
 - [Website]
 - [Codebase]
 - [Blog]
-- Alternatives: [llama.cpp]
+- Alternatives: [Colibri], [Flash-MoE], [llama.cpp]
 
 ### Sources
 
@@ -124,6 +124,8 @@ jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[Colibri]: colibri.md
+[Flash-MoE]: flash-moe.md
 [Language Models]: lms.md
 [llama.cpp]: llama.cpp.md
 

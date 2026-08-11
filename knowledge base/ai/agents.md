@@ -572,7 +572,7 @@ they _absolutely_ need.
 
 Include **only minimal requirements** in context files (AGENTS.md).<br/>
 Too much context ends up hurting the conversation. Including a lot of "don't do this or that" mostly poisons the
-context instead of helping.<br/>
+context instead of helping. Prefer addressing the model's nuances over setting prohibitions.<br/>
 If specific information is already in the codebase, it probably does **not** need to be in the context file and can
 just be referenced or hinted at.<br/>
 If the agent's harness allows for layered files (e.g., Claude Code), prefer splitting up per subfolder. Each sub-file

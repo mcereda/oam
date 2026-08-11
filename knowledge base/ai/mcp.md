@@ -103,6 +103,10 @@ driving it with `tasks/get`, `tasks/update`, and `tasks/cancel`.
 > To access resources in other regions, pass `--metadata AWS_REGION=eu-west-1` in the server's args. This targets the
 > _resources_, not the MCP endpoint itself.
 
+The managed endpoint rejects `--profile` outright, despite its tool description claiming support for alternate
+profiles. Any AWS command needing a non-default profile must go through the AWS CLI directly. The MCP tool can only use
+the profile set in its configuration.
+
 The self-hosted Docker alternative from AWSLabs (`awslabs/aws-api-mcp-server`) provides 2 tools (`call_aws` + host
 validation), against the 11 available in the managed version (including `search_documentation`, `read_documentation`,
 `recommend`, `retrieve_skill`).

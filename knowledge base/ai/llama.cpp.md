@@ -101,7 +101,7 @@ jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
 - [Website]
 - [Codebase]
 - [ik_llama.cpp]
-- Alternatives: [vLLM]
+- Alternatives: [Colibri], [Flash-MoE], [vLLM]
 
 ### Sources
 
@@ -112,7 +112,9 @@ jq -r '.layers|sort_by(.size)[-1].digest|sub(":";"-")' \
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[Colibri]: colibri.md
 [Docker model runner]: ../docker.md#running-llms-locally
+[Flash-MoE]: flash-moe.md
 [Language Models]: lms.md
 [MCP]: mcp.md
 [Ollama]: ollama.md
