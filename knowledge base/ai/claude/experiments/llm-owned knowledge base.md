@@ -713,9 +713,34 @@ to store information abstracted from practice, that is reusable across projects 
   bundle would need the entire operational layer (CLAUDE.md, lint, hooks, review process, memory integration, staleness
   management) to function as a working KB.
 
-The KB relies on three complementary cross-project modes: **filing agents** for live writes from any session, a **memory
-inbox** for deferred promotion during review sessions, and an **extraction hook** as a backstop for missed insights.
-Review sessions that need both the KB and another project's context can use `--add-dir` for convention loading from both
+- Claude Code's [auto-dream][Claude Code / auto-dream] feature (`autoDreamEnabled: true`) is meant to consolidate
+  auto-memory files between sessions by merging duplicates, converting relative dates, and pruning obsolete entries.
+
+  If it worked, it could automate part of the memory maintenance that review sessions handle manually.<br/>
+  It is described to **only** touch auto-memory. It would reduce the backlog that accumulates between reviews and
+  keep the memory inbox cleaner for promotion sessions.<br/>
+  Auto-dream is currently **undocumented**, and has a [known bug][Claude Code / auto-dream] where the toggle can be
+  on **without** the background task actually running. Do not rely on it without verifying it is active.
+
+- The [`InstructionsLoaded` hook][Claude Code / InstructionsLoaded hook] logs which instruction files are loaded, when
+  they load, and why. Useful for debugging context loading issues like KB-related `CLAUDE.md` files not loading from
+  additional directories, or path-scoped rules not triggering as expected.
+
+- Sub-agents can maintain their **own** persistent [auto memory][Claude Code / sub-agent memory].
+
+  Relevant to the `kb-contributor` pattern. A filing agent that accumulates its own learnings about conventions and
+  common mistakes across invocations could reduce repeated failures without the caller needing to encode every lesson
+  in the dispatch prompt.
+
+- Use [claudeMdExcludes][Claude Code / claudeMdExcludes] to prevent the KB's `CLAUDE.md` from loading in contexts where
+  it should **not** apply (e.g., when a session uses `--add-dir` to read KB files but should not follow the KB's
+  operational rules).
+
+The KB relies on multiple cross-project modes that are **complementary**: _filing agents_ take care of live writes from
+any session, a _memory inbox_ allows deferring promotion during review sessions, and an _extraction hook_ is a backstop
+for missed insights.
+
+Review sessions that need both the KB and another project's context can use `--add-dir` to load conventions from both
 repositories.
 
 ## Improvements
@@ -982,9 +1007,13 @@ write files, run lint) can stay identical.
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[Claude Code / auto-dream]: ../claude%20code.md#auto-dream
 [Claude Code / billing]: ../claude%20code.md#billing
+[Claude Code / claudeMdExcludes]: ../claude%20code.md#context
 [Claude Code / cross-project sub-agents]: ../claude%20code.md#cross-project-sub-agents
+[Claude Code / InstructionsLoaded hook]: ../claude%20code.md#using-hooks
 [Claude Code / skills]: ../claude%20code.md#using-skills
+[Claude Code / sub-agent memory]: ../claude%20code.md#auto-memory
 [Claude Code / sub-agents]: ../claude%20code.md#sub-agents
 [Claude Code / using hooks]: ../claude%20code.md#using-hooks
 [Claude Code]: ../claude%20code.md

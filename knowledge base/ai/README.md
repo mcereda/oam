@@ -6,6 +6,7 @@ making decisions with various degrees of autonomy and success.
 1. [TL;DR](#tldr)
 1. [Benefits](#benefits)
 1. [Concerns](#concerns)
+   1. [Quality degradation](#quality-degradation)
    1. [Tools misusage](#tools-misusage)
    1. [Anthropomorphisation](#anthropomorphisation)
    1. [Mental and emotional manipulation](#mental-and-emotional-manipulation)
@@ -69,6 +70,22 @@ Refer to:
 - [The Compendium]
 - [Control AI]
 - [When machines feel too real: the dangers of anthropomorphizing AI]
+
+### Quality degradation
+
+AI-generated content is flooding the web, and it continues to grow.<br/>
+Since models are typically trained on data crawled from the web, future training datasets will inevitably contain more
+and more synthetic material. Models that trained iteratively on their own outputs (or those of similar models) suffer a
+progressive degradation in output quality and diversity (_model collapse_). Long-tail knowledge, unusual perspectives,
+and creative variety quietly disappear.
+
+This degradation is insidious because standard benchmarks measure dominant patterns, which are the very ones that
+survive collapse. A model trained on data that is increasingly homogenized scores well on those same patterns, but its
+effective range narrows.
+
+Collapse seems to be avoidable when synthetic data is **mixed** with real human-generated data, but curated enough so
+that it does not replace it. The problem is synthetic data entering training pipelines without quality curation or
+tracking where it comes from.
 
 ### Tools misusage
 

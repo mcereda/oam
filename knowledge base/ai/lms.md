@@ -13,6 +13,7 @@ the previous ones.
    1. [Train from scratch](#train-from-scratch)
    1. [Fine-tuning](#fine-tuning)
    1. [Knowledge distillation](#knowledge-distillation)
+   1. [Alignment](#alignment)
 1. [Evaluation](#evaluation)
 1. [Inference](#inference)
    1. [Speculative decoding](#speculative-decoding)
@@ -22,6 +23,8 @@ the previous ones.
    1. [Priming](#priming)
 1. [Context window](#context-window)
 1. [Function calling](#function-calling)
+1. [Retrieval-augmented generation](#retrieval-augmented-generation)
+1. [Scaffolding](#scaffolding)
 1. [Compression](#compression)
     1. [Quantization](#quantization)
 1. [Improving interactions](#improving-interactions)
@@ -127,12 +130,16 @@ Continuously increasing the amount of data and computational resources during tr
 but multiple frontier model training runs confirmed that using this technique alone is giving diminishing returns.<br/>
 AI researchers are now actively exploring different architectures like state-space models and hybrids.
 
-Models' parameters must grow proportionally with the data, but:
+Models' parameters **must** grow proportionally with the data, but:
 
 - Models with _more_ parameters usually perform better than models with _fewer_ parameters given the _same_ training
   data.
 - Models with _fewer_ parameters and training data of _better quality_ beat models with _more_ parameters and less
   valuable training data.
+
+LLMs increasingly process multiple _modalities_ (text, images, audio, video) **natively**, _within_ a single model
+architecture rather than through separate specialized pipelines. The underlying transformer architecture and the
+objective of predicting the next token remain the same.
 
 ## Small Language Models
 
@@ -276,6 +283,31 @@ Consider this method when:
 
 - One wants LLM-quality outputs, but needs SLM-level latency and cost.
 - One can afford to run teacher models enough to generate the needed training data.
+
+### Alignment
+
+After pre-training and fine-tuning, models can go through _alignment_ phases. These steer the model's behavior toward
+human preferences and values.
+
+**Reinforcement Learning from Human Feedback** (RLHF) was the first widely adopted alignment technique.<br/>
+It works in two stages:
+
+1. Human annotators rank the model's outputs to train a separate _reward model_ that learns to predict human
+   preferences.
+1. The main model is optimized against that reward model using reinforcement learning (typically PPO).
+
+RLHF is effective, but also expensive and complex. It requires a separate reward model, careful hyperparameter tuning,
+and a training pipeline that is prone to instability.
+
+**Direct Preference Optimization** (DPO) eliminates the reward model from RLHF entirely. It optimizes the model directly
+given pairs of _preferred_ and _rejected_ responses for the same prompt, by increasing the probability of the preferred
+response relative to the rejected one.<br/>
+This method retains RLHF's alignment benefits but requires significantly less infrastructure and has better training
+stability.
+
+**Constitutional AI** is the method used by Anthropic to train Claude.<br/>
+It extends the alignment process by having the model critique and revise its own outputs against a set of written
+principles **before** the RLHF stage. This reduces dependence on human labelers for identifying harmful content.
 
 ## Evaluation
 
@@ -524,15 +556,57 @@ just inferring the next token.
 > Allowing LLMs to call functions can have real-world consequences.<br/>
 > This includes financial loss, data corruption or exfiltration, and security breaches.
 
-<!--
+## Retrieval-augmented generation
+
+A.K.A. _RAG_.
+
+Refer to:
+
+- [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks].
+- [RAG and RAG Fusion: A Guide].
+
+Allows LLMs to retrieve relevant content from external knowledge sources (documents, databases, APIs) before generating
+an answer, instead of relying solely on what the model learned during training.<br/>
+The system searches the external knowledge sources for content relevant to the query, injects it into the prompt as
+context, and lets the model generate a response informed by that retrieved material.
+
+This reduces hallucinations, since the model has something concrete to reference, enables access to private or
+up-to-date information the model was never trained on, and allows tracing the source of an answer.
+
+RAG pipelines usually rely on _embedding models_ to convert text into vectors that capture semantic meaning.<br/>
+Texts that is _semantically_ similar end up close together in the vector space, which enables retrieval by _meaning_
+instead of using keyword match.<br/>
+Those vectors are stored in specialized _vector databases_ (e.g. Pinecone, Weaviate, Qdrant, Chroma, pgvector) that are
+optimized for nearest-neighbor search.
+
+A basic RAG pipeline is as follows:
+
+1. **Index**: split documents into chunks, convert each to an embedding vector, store vectors in a vector database.
+1. **Retrieve**: convert the query to a vector, find the closest stored vectors.
+1. **Generate**: inject the retrieved chunks into the prompt alongside the query, let the model generate from them.
+
+Modern pipelines go beyond this basic retrieve-then-generate pattern. Multi-step RAG can perform _iterative_ retrieval
+and reasoning cycles, and _GraphRAG_ augments flat chunk retrieval with knowledge graphs that enable multi-hop reasoning
+across related entities.
+
+RAG is complementary to [fine-tuning]. Fine-tuning teaches the model _how_ to behave (tone, format, domain-specific
+reasoning), while RAG teaches it _what_ to reference (facts, documents, current data). Many production systems combine
+both.
+
 ## Scaffolding
 
-TODO
--->
+The software architecture and tooling that is built around an LLM to transform it into a goal-driven agent.<br/>
+Includes prompt management, tool integration, memory systems, and orchestration logic.
+
+[AI agents harnesses] are an example of this. See especially the mechanical loop, context management, and design
+patterns.
 
 ## Compression
 
-<!-- TODO -->
+Techniques to reduce a model's size and its computational requirements for inference. It trades quality for efficiency.
+
+Common approaches include [quantization] (reducing the vectors' numerical precision), pruning (removing less important
+weights or connections), and [knowledge distillation] (training a smaller model to replicate a larger one's behavior).
 
 ### Quantization
 
@@ -929,12 +1003,14 @@ Refer:
 [Fine-tuning]: #fine-tuning
 [Function calling]: #function-calling
 [Knowledge distillation]: #knowledge-distillation
+[Quantization]: #quantization
 [Run LLMs Locally]: #run-llms-locally
 [Train from scratch]: #train-from-scratch
 
 <!-- Knowledge base -->
-[AI agents]: agents.md
 [AI agents gotchas]: agents.md#gotchas
+[AI agents harnesses]: agents.md#harnesses
+[AI agents]: agents.md
 [AI anthropomorphisation concern]: README.md#anthropomorphisation
 [AI concerns]: README.md#concerns
 [Claude]: claude/README.md
@@ -943,7 +1019,7 @@ Refer:
 [llama.cpp]: llama.cpp.md
 [LMStudio]: lmstudio.md
 [Ollama]: ollama.md
-[Reveries experiment]: claude/personal%20experiments.md#giving-claude-a-reverie-like-system
+[Reveries experiment]: claude/experiments/reveries.md
 [Using evolutionary algorithms with LLMs]: using%20evolutionary%20algorithms%20with%20LLMs.md
 [vLLM]: vllm.md
 
@@ -987,7 +1063,9 @@ Refer:
 [Priming, Path-dependence, and Plasticity: Understanding the molding of user-LLM interaction and its implications from (many) chat logs in the wild]: https://arxiv.org/abs/2605.05767
 [Prompting best practices]: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
 [Quantifying Language Models' Sensitivity to Spurious Features in Prompt Design or: How I learned to start worrying about prompt formatting]: https://arxiv.org/abs/2310.11324
+[RAG and RAG Fusion: A Guide]: https://dev.to/jamesli/rag-and-rag-fusion-a-comprehensive-guide-4bk5
 [ReAct: Synergizing Reasoning and Acting in Language Models]: https://arxiv.org/abs/2210.03629
+[Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks]: https://arxiv.org/abs/2005.11401
 [Run LLMs Locally: 6 Simple Methods]: https://www.datacamp.com/tutorial/run-llms-locally-tutorial
 [SEQUOIA: Serving exact Llama2-70B on an RTX4090 with half-second per token latency]: https://infini-ai-lab.github.io/Sequoia-Page/
 [Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training]: https://arxiv.org/abs/2401.05566

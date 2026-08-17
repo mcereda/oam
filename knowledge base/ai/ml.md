@@ -11,6 +11,8 @@ hard-coded instructions.
    1. [Deep learning](#deep-learning)
 1. [Architectures](#architectures)
    1. [Mixture of Experts](#mixture-of-experts)
+   1. [State-space models](#state-space-models)
+   1. [World models](#world-models)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -149,6 +151,62 @@ All expert weights still need to be stored and loaded in memory.
 MoE is used across many domains, including vision models, multimodal models, and speech recognition and recommendation
 systems.
 
+### State-space models
+
+Refer:
+
+- [Mamba: Linear-Time Sequence Modeling with Selective State Spaces].
+- [A Visual Guide to Mamba and State Space Models].
+
+Alternative to the transformer architecture for modelling of sequences (like text).<br/>
+Rooted in dynamical systems theory rather than pairwise attention.
+
+Transformers use _self-attention_ to check how every token relates to every other token in a sequence. Long contexts
+become expensive really fast in both compute and memory.<br/>
+State-space models (SSMs) process sequences by maintaining a hidden state. This state gets updated at each step, in a
+similar way to recurrent neural networks but with a mathematical formulation that allows parallel training. The result
+is that the model scales linear-time scaling with sequence length.
+
+Early structured SSMs' parameters were fixed **regardless** of the input (_time-invariant_), which limited their ability
+to perform content-dependent reasoning.<br/>
+_Mamba_ (Dao and Gu, 2023) introduced _selective_ state spaces, where the model's parameters **depend** on the input
+(_time-varying_). It also used a hardware-aware algorithm to reduce memory I/O during computation.<br/>
+_Mamba-2_ (2024) improved efficiency further using a reformulation that maps better onto GPU hardware by changing the
+state's matrix structure (_state space duality_).
+
+Mamba matches transformers of equivalent size on standard LLM benchmarks while being significantly more efficient in
+latency and memory, particularly for long sequences.<br/>
+SSMs have been applied also in computer vision (Vision Mamba), speech processing, and genomics.
+
+Pure SSM models do exist (e.g., Mistral's Codestral Mamba), but transformers have remained dominant for frontier LLMs
+despite SSM's efficiency advantages.<br/>
+ost production deployments still use transformers, or hybrids that combine attention layers with SSM layers to get
+explicit relational reasoning from attention and scalable temporal memory from SSMs.
+
+### World models
+
+Models learn an internal representation of _how_ an environment works, then use that representation to simulate outcomes
+and plan actions **without** needing to act in the real environment first.
+
+World model predict the next _state_ of an environment, given a current state and an action, instead of the next token.
+The model builds an internal simulator it can run forward to evaluate "what would happen if I did X?" before committing
+to X, analogously to having a mental model.
+
+The concept originates from control theory and model-based reinforcement learning. Learning a dynamics model (how states
+transition) allows an agent to plan more efficiently than using trial and error.<br/>
+Ha and Schmidhuber's 2018 [World Models] paper demonstrated agents learning compressed representations of their
+environment and training entirely inside that learned simulation.
+
+Current applications span robotics (learning physics to plan manipulation), autonomous driving (predicting how traffic
+evolves), and video generation (models like Sora generate temporally coherent video by maintaining an internal
+representation of scene dynamics across frames).
+
+The relevance to LLMs is debated. Some researchers argue that large-scale next-token prediction on diverse enough data
+_implicitly_ learns world-model-like representations (spatial reasoning, causal chains, temporal dynamics) as a
+byproduct. Others contend that pattern matching over text, however sophisticated, remains fundamentally different from
+learning environment dynamics. The question is whether LLMs _have_ world models, or just _approximate_ behaviors that
+look like having them.
+
 ## Further readings
 
 - [Mixtral of Experts]
@@ -179,11 +237,14 @@ systems.
 
 <!-- Upstream -->
 <!-- Others -->
+[A Visual Guide to Mamba and State Space Models]: https://newsletter.maartengrootendorst.com/p/a-visual-guide-to-mamba-and-state
 [geeksforgeeks / Machine Learning Tutorial]: https://www.geeksforgeeks.org/machine-learning/
 [IBM / What is artificial intelligence (AI)?]: https://www.ibm.com/think/topics/artificial-intelligence
 [IBM / What is machine learning?]: https://www.ibm.com/think/topics/machine-learning
 [IBM / What is mixture of experts?]: https://www.ibm.com/think/topics/mixture-of-experts
 [Machine learning, explained]: https://mitsloan.mit.edu/ideas-made-to-matter/machine-learning-explained
+[Mamba: Linear-Time Sequence Modeling with Selective State Spaces]: https://arxiv.org/abs/2312.00752
 [Mixtral of Experts]: https://arxiv.org/abs/2401.04088
 [Oracle / What is machine learning?]: https://www.oracle.com/artificial-intelligence/machine-learning/what-is-machine-learning/
 [What is AI Technical Debt? Key Risks for Machine Learning Projects | IBM Technology]: https://www.youtube.com/watch?v=DgXV8QSlI4U
+[World Models]: https://arxiv.org/abs/1803.10122

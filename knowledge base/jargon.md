@@ -54,6 +54,7 @@
 | DML     | Data Manipulation Language                             |                                                                                                     |
 | DoH     | DNS over HTTPS                                         |                                                                                                     |
 | DoT     | DNS over TLS                                           |                                                                                                     |
+| DPO     | Direct Preference Optimization                         |                                                                                                     |
 | EA      | Extended Attributes                                    |                                                                                                     |
 | EEPROM  | Electronically Erasable Programmable Read-Only Memory  |                                                                                                     |
 | ELI5    | Explain Like I'm 5                                     |                                                                                                     |
@@ -124,6 +125,7 @@
 | PII     | Personally Identifiable Information                    |                                                                                                     |
 | PR      | Pull Request                                           | Prevalently used in GitHub                                                                          |
 | QQ      | Quick Question                                         |                                                                                                     |
+| RAG     | Retrieval-Augmented Generation                         |                                                                                                     |
 | RBAC    | Role-Based Access Control                              |                                                                                                     |
 | RLHF    | Reinforcement learning from human feedback             |                                                                                                     |
 | ROM     | Read-Only Memory                                       |                                                                                                     |
@@ -143,6 +145,7 @@
 | SRE     | Site Reliability Engineer                              |                                                                                                     |
 | SSH     | [Secure SHell]                                         |                                                                                                     |
 | SSID    | Service Set IDentifier                                 | Wireless network name                                                                               |
+| SSM     | State-Space Model                                      |                                                                                                     |
 | SSSD    | [System Security Services Daemon]                      |                                                                                                     |
 | TCP     | Transport Control Protocol                             |                                                                                                     |
 | TFE     | [TerraForm Enterprise]                                 |                                                                                                     |
