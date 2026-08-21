@@ -4,6 +4,7 @@ Free software media system.<br/>
 Allows streaming to any device from one's own server, with no strings attached.
 
 1. [TL;DR](#tldr)
+1. [Use hardware acceleration for transcoding](#use-hardware-acceleration-for-transcoding)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -126,6 +127,43 @@ Shows
 </details>
 -->
 
+## Use hardware acceleration for transcoding
+
+Refer to [Hardware Acceleration][Transcoding / Hardware acceleration].
+
+Docker images contain all the required packages. Other installation methods might skip those.
+
+Settings under Account icon > _Administration_ > _Dashboard_ > _Playback_ > _Transcoding_.
+
+> [!important]
+> For some reason, enabling the _Enable hardware encoding_ option in the _Hardware encoding options_ section breaks the
+> transcoding command.<br/>
+> The rest seems to be working though.
+
+When transcoded files are not meant to be saved, consider:
+
+- Deleting old transcoded segments after they have been downloaded by the client.
+- Setting the cache to be on a RamDisk (`tmpfs`).
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  ```dockerfile
+  services:
+    jellyfin:
+      …
+      volumes:
+        …
+        - type: tmpfs
+          tmpfs:
+            mode: 0o01777
+          target: /cache
+  ```
+
+  </details>
+
+The _Allow encoding in HEVC format_ and _Allow encoding in AV1 format_ under the _Encoding format options_ section
+happened to really slow down playback.
+
 ## Further readings
 
 - [Website]
@@ -150,6 +188,7 @@ Shows
 [Documentation / Media / Movies]: https://jellyfin.org/docs/general/server/media/movies
 [Documentation / Media / Shows]: https://jellyfin.org/docs/general/server/media/shows
 [Documentation]: https://jellyfin.org/docs
+[Transcoding / Hardware acceleration]: https://jellyfin.org/docs/general/post-install/transcoding/hardware-acceleration/
 [Website]: https://jellyfin.org/
 
 <!-- Others -->

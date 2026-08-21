@@ -9,6 +9,7 @@
    1. [Exclude files from the build context](#exclude-files-from-the-build-context)
    1. [Only include what the final image needs](#only-include-what-the-final-image-needs)
 1. [Containers configuration](#containers-configuration)
+   1. [Using RamDisk for volumes](#using-ramdisk-for-volumes)
 1. [Health checks](#health-checks)
 1. [Advanced build with `buildx`](#advanced-build-with-buildx)
    1. [Create builders](#create-builders)
@@ -439,11 +440,29 @@ Docker mounts specific system files in all containers to forward its settings:
 Those files come from the volume the docker container is using for its root, and are modified on the container's startup
 with the information from the CLI, the daemon itself and, when missing, the host.
 
+### Using RamDisk for volumes
+
+One can use RamDisks (the `tmpfs` file system) for volumes.<br/>
+Those do not define a `source`.
+
+```dockerfile
+services:
+  jellyfin:
+    …
+    volumes:
+      …
+      - type: tmpfs
+        tmpfs:
+          mode: 0o01777
+        target: /cache
+```
+
 ## Health checks
 
 The following have the same effect:
 
-<details><summary>Command line</summary>
+<details>
+  <summary>Command line</summary>
 
 ```sh
 docker run … \
@@ -455,7 +474,9 @@ docker run … \
 ```
 
 </details>
-<details><summary>Dockerfile</summary>
+
+<details>
+  <summary>Dockerfile</summary>
 
 ```Dockerfile
 HEALTHCHECK --interval=5m --timeout=3s --start-period=10s --retries=4 \
@@ -463,7 +484,9 @@ HEALTHCHECK --interval=5m --timeout=3s --start-period=10s --retries=4 \
 ```
 
 </details>
-<details><summary>Docker-compose file</summary>
+
+<details style='padding: 0 0 1rem 0'>
+  <summary>Docker-compose file</summary>
 
 ```yaml
 services:
@@ -477,7 +500,7 @@ services:
     …
 ```
 
-</details><br/>
+</details>
 
 The command's exit status indicates the health status of the container. The possible values are:
 
