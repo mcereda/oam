@@ -442,6 +442,8 @@ with the information from the CLI, the daemon itself and, when missing, the host
 
 ### Using RamDisk for volumes
 
+Refer to [tmpfs mounts].
+
 One can use RamDisks (the `tmpfs` file system) for volumes.<br/>
 Those do not define a `source`.
 
@@ -836,6 +838,7 @@ Alternatively, keep the exec form but force invoking a shell in it:
 [Local models with Docker Model Runner]: https://docs.docker.com/ai/docker-agent/local-models/
 [Multi-stage builds]: https://docs.docker.com/build/building/multi-stage/
 [Run LLMs Locally with Docker: A Quickstart Guide to Model Runner]: https://www.docker.com/blog/run-llms-locally/
+[tmpfs mounts]: https://docs.docker.com/engine/storage/tmpfs/
 
 <!-- Others -->
 [amazon-ecr-credential-helper]: https://github.com/awslabs/amazon-ecr-credential-helper
