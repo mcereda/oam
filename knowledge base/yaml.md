@@ -1,6 +1,7 @@
 # YAML
 
 1. [TL;DR](#tldr)
+1. [Anchors and aliases](#anchors-and-aliases)
 1. [Further readings](#further-readings)
 
 ## TL;DR
@@ -26,6 +27,10 @@ object:
       - too
 "key:with:chars": requiring quotation
 ```
+
+## Anchors and aliases
+
+TODO
 
 ## Further readings
 

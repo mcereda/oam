@@ -1,12 +1,17 @@
 # CI/CD pipeline
 
-Refer to [CI/CD pipelines] and [CI/CD pipeline templates].<br/>
+Refer to [CI/CD pipelines].<br/>
 Also check [Use CI/CD configuration from other files] and [Use extends to reuse configuration sections].
 
+1. [TL;DR](#tldr)
 1. [Specify when to run jobs](#specify-when-to-run-jobs)
 1. [Specify when to run entire pipelines](#specify-when-to-run-entire-pipelines)
 1. [External secrets](#external-secrets)
    1. [AWS Secrets Manager](#aws-secrets-manager)
+1. [Reusability](#reusability)
+   1. [Pipeline templates](#pipeline-templates)
+   1. [Pipeline components](#pipeline-components)
+   1. [Templates vs Components](#templates-vs-components)
 1. [Cross-project pipelines](#cross-project-pipelines)
 1. [Serializing jobs](#serializing-jobs)
    1. [Resource groups](#resource-groups)
@@ -14,9 +19,19 @@ Also check [Use CI/CD configuration from other files] and [Use extends to reuse 
 1. [API](#api)
 1. [Git options](#git-options)
 1. [Troubleshooting](#troubleshooting)
-   1. [Pipeline fails with error `You are not allowed to download code from this project`](#pipeline-fails-with-error-you-are-not-allowed-to-download-code-from-this-project)
+    1. [Pipeline fails with error `You are not allowed to download code from this project`](#pipeline-fails-with-error-you-are-not-allowed-to-download-code-from-this-project)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
+
+## TL;DR
+
+TODO: define pipelines
+
+TODO: define jobs
+
+Jobs are **_hidden_** when their name is prefixed with a dot (e.g., `.build-docker-image:`).<br/>
+Hidden jobs need to be _extended_ (`extends:`) or otherwise referenced (e.g., via [YAML anchors and aliases]) by others
+to be used.
 
 ## Specify when to run jobs
 
@@ -30,7 +45,7 @@ Use the `rules` key and specify the conditions the job needs.
 
 Rules are evaluated when the pipeline is created, **in order**, until the first applies. The rest are ignored.
 
-The `rules`key accepts an array of rules.<br/>
+The `rules` key accepts an array of rules.<br/>
 Each rule:
 
 - Must have **at least one** of:
@@ -59,7 +74,7 @@ Multiple keys from the above lists can be combined to create complex rules.
 - `never`: don't run the job regardless of the status of jobs in earlier stages.
 - `always`: run the job regardless of the status of jobs in earlier stages.
 - `manual`: add the job to the pipeline as a manual job.
-  When this condition is used, `allow_failure`for the job defaults to `false`.
+  When this condition is used, `allow_failure` for the job defaults to `false`.
 - `delayed`: add the job to the pipeline as a delayed job.
 
 Jobs are **added** to the pipeline if:
@@ -81,20 +96,17 @@ Gotchas:
   to compare against.
 - `changes` and `exists` allow a maximum of 50 patterns or file paths.
 - Multiple entries in the `changes` condition are validated in an `OR` fashion.
-- Glob patterns in `changes` and `exists` are interpreted with Ruby's `File.fnmatch` function using the
-  `File::FNM_PATHNAME | File::FNM_DOTMATCH | File::FNM_EXTGLOB` flag.
+- Glob patterns in `changes` and `exists` follow `FNM_PATHNAME | FNM_DOTMATCH | FNM_EXTGLOB` semantics.
 
   A single `*` does **not** cross directories. A pattern like `*.ts` matches only root-level files, and changes to files
-  in subdirectories do **not** trigger the the job (no error, no preview, no deploy on merge).<br/>
+  in subdirectories do **not** trigger the job (no error, no preview, no deploy on merge).<br/>
   Use `**/*.ts` for recursive matching, or list explicit per-directory globs.
 
-- The [`push` pipeline source](https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#push-events)
-  should™ limit jobs to code changes or deliberate pushes.<br/>
+- The [`push` pipeline source events] should™ limit jobs to code changes or deliberate pushes.<br/>
   Scheduled pipelines should™ avoid triggering jobs with this condition as they present a `schedule` source instead.
 
-  Using the `merge_request_event` source in place of `push` prevents the job to run should somebody push to the default
-  branch, even though
-  [the documentation clearly states it includes merges](https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#merge-request-events).
+  Using the `merge_request_event` source in place of `push` prevents the job from running when changes land on the
+  default branch, since merging an MR produces a `push` event on the target branch, not a `merge_request_event`.
 
   [Linting](https://docs.gitlab.com/ee/ci/lint.html#check-cicd-syntax) and
   [simulations](https://docs.gitlab.com/ee/ci/lint.html#simulate-a-pipeline) seem to accept using other ways, but then
@@ -126,7 +138,7 @@ pulumi-update:
       changes:
         paths:
           - infra/*.ts
-          - infra/packages.json
+          - infra/package.json
     - when: never
 ```
 
@@ -186,13 +198,14 @@ docker-build:
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       when: never
+    - when: on_success
 ```
 
 </details>
 
 ## Specify when to run entire pipelines
 
-Refer the [`workflow.rules` syntax reference](https://docs.gitlab.com/ee/ci/yaml/#workflowrules).
+Refer to the [`workflow.rules` syntax reference](https://docs.gitlab.com/ee/ci/yaml/#workflowrules).
 
 The `workflow.rules` keyword is similar to the `rules` keyword defined in jobs, but controls whether or not a whole
 pipeline is created.<br/>
@@ -215,7 +228,7 @@ workflow:
     - # Run for merge requests where key files changed.
       if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - packages.json
+        - package.json
     - when: always                            # Run the pipeline in other cases.
 ```
 
@@ -257,10 +270,10 @@ some_job:
       aws_secrets_manager:
         secret_id: "some/other/other/secret/name"                      # the secret name or ARN in Secrets Manager
         version_stage: 'AWSCURRENT'                                    # specific secret's version by AWS label
-        file: true                                                     # explicitly save the value as file
         region: eu-west-1
         role_arn: 'arn:aws:iam::123456789012:role/eu-deployment-role'  # role to assume
         role_session_name: gitlab-eu-deployment                        # name for the assume role session
+      file: true                                                       # explicitly save the value as file
   script:
     - echo "Some secret is '$SOME_SECRET_VAR'"
     - echo "Some other secret is '$SOME_OTHER_SECRET_VAR'"
@@ -271,7 +284,7 @@ some_job:
 
 Runners using the Docker autoscaler executor can authenticate by assuming an IAM role, or via OIDC tokens or static
 credentials.<br/>
-Runners using the Kubernetes executor can authenticate via EKS Pod Identity an IAM role, OIDC tokens, or static
+Runners using the Kubernetes executor can authenticate via EKS Pod Identity, an IAM role, OIDC tokens, or static
 credentials.
 
 If using IAM roles, the runners' role must have `secretsmanager:GetSecretValue` on the secrets' ARNs.
@@ -289,6 +302,200 @@ JSON-formatted secrets allow using fields to extract specific keys. Omit `field`
 > ```
 >
 > This is an instance-wide admin operation.
+
+## Reusability
+
+### Pipeline templates
+
+Also see [CI/CD pipeline templates].
+
+_Templates_ are regular YAML files that usually define hidden jobs.<br/>
+Consumers `include:` the template file and optionally `extends:` the jobs they provide, usually overriding their
+attributes to customize their behavior.
+
+Templates are meant to be flexible and composable.
+
+<details>
+  <summary>Example</summary>
+
+Template file in some git repository (e.g., `example-org/ci-cd/pipelines/templates/build-docker-image.yml`):
+
+```yml
+.build-docker-image:
+  stage: build
+  image: docker.io/library/docker:26.0.1
+  variables:
+    BUILD_PATH: $CI_PROJECT_DIR
+    IMAGE_NAME: $CI_PROJECT_NAME
+    PLATFORM: linux/amd64
+    PUSH: false
+  script:
+    - aws ecr get-login-password | docker login --username AWS --password-stdin "$CI_REGISTRY"
+    - docker buildx build --platform=$PLATFORM --tag=$IMAGE_NAME $BUILD_PATH
+```
+
+Pipeline file in another git repository:
+
+```yml
+include:
+  - project: 'example-org/ci-cd'
+    ref: main
+    file: '/pipelines/templates/build-docker-image.yml'
+
+my-image - build and push:
+  extends: .build-docker-image
+  variables:
+    BUILD_PATH: ${CI_PROJECT_DIR}/docker
+    IMAGE_NAME: my-service
+    PLATFORM: linux/arm64,linux/amd64
+    PUSH: 'true'
+```
+
+</details>
+
+Templates work on any GitLab version.
+
+Templates' inputs have no type and are undocumented at the YAML level (the author can write a comment block, but
+consumers need to access the template's code to read it).<br/>
+This also means there is **no** validation whatsoever, where a typo in a variable name will make it default _silently_.
+
+Version pinning is done via `ref:`, which accepts a branch, tag, or SHA. Branch refs (`ref: main`) are mutable, so a
+breaking change hits all consumers immediately. Tag or SHA refs are stable pins.
+
+### Pipeline components
+
+Components are YAML files that live under the `templates/` folder at the root of a repository.<br/>
+GitLab's component resolution **hardcodes** the `templates/<component-name>/template.yml` and
+`templates/<component-name>.yml` paths. One cannot nest them under other folders like `pipelines/templates/` nor rename
+that directory.
+
+They come with a `spec:` header that declares typed and validated inputs.<br/>
+Consumers can include a component using the `component:` syntax and pass inputs to it explicitly. GitLab rejects the
+pipeline if a required input is missing or the wrong type.
+
+<details>
+  <summary>Example</summary>
+
+Component file in some git repository (e.g., `example-org/ci-cd/templates/docker-build/template.yml`):
+
+```yml
+spec:
+  inputs:
+    build-path:
+      default: $CI_PROJECT_DIR
+      description: 'Path to the build context'
+    image-name:
+      default: $CI_PROJECT_NAME
+      description: 'Name of the Docker image'
+    platform:
+      default: 'linux/amd64'
+      description: 'Target platform(s), comma-separated'
+    push:
+      type: boolean
+      default: false
+      description: 'Whether to push the built image'
+    ecr-repository:
+      description: 'ECR repository prefix (e.g. example-org)'
+    extra-opts:
+      default: ''
+      description: 'Additional docker buildx build flags'
+
+---
+
+docker-build:
+  stage: build
+  image: 012345678901.dkr.ecr.eu-west-2.amazonaws.com/cache/library/docker:26.0.1
+  variables:
+    CI_REGISTRY: 012345678901.dkr.ecr.eu-west-2.amazonaws.com
+    BUILDER_NAME: tmp-$CI_JOB_ID
+  before_script:
+    - docker buildx create --driver docker-container --name "$BUILDER_NAME" --use
+  script:
+    - aws ecr get-login-password | docker login --username AWS --password-stdin "$CI_REGISTRY"
+    - |
+        ECR_URI=$(echo "$CI_REGISTRY/$[[ inputs.ecr-repository ]]/$[[ inputs.image-name ]]" | sed -E 's|/+|/|g; s|^/||; s|/$||')
+
+        BUILD_OPTS="--file=$[[ inputs.build-path ]]/Dockerfile"
+        BUILD_OPTS="$BUILD_OPTS --platform=$[[ inputs.platform ]]"
+        BUILD_OPTS="$BUILD_OPTS --tag=$ECR_URI:$CI_COMMIT_SHORT_SHA"
+
+        if [ "$[[ inputs.push ]]" = "true" ]; then
+          aws ecr describe-repositories --repository-names "$ECR_URI" 2>/dev/null \
+            || aws ecr create-repository --repository-name "$ECR_URI"
+          BUILD_OPTS="$BUILD_OPTS --push"
+        fi
+
+        BUILD_OPTS="$BUILD_OPTS $[[ inputs.extra-opts ]]"
+        docker buildx build $BUILD_OPTS $[[ inputs.build-path ]]
+  after_script:
+    - docker buildx rm "$BUILDER_NAME"
+```
+
+Pipeline file in another git repository:
+
+```yml
+include:
+  - component: gitlab.example.org/example-org/ci-cd/docker-build@1.0.0
+    inputs:
+      build-path: ${CI_PROJECT_DIR}
+      image-name: my-service
+      ecr-repository: example-org
+      platform: 'linux/arm64,linux/amd64'
+      push: true
+      extra-opts: '--build-arg "REVISION=$CI_COMMIT_SHORT_SHA"'
+```
+
+</details>
+
+Key differences from [pipeline templates] in the definition:
+
+- `spec.inputs:` defines the inputs, which replaces the need for documentation in comments.
+- Each input specifies a **type** (`string` by default, but also `number`, `boolean`, or `array`), if it has a default
+  (omit the `default:` key to make the job require that input), and a description.
+- The `$[[ inputs.name ]]` interpolation format replaces `$VARIABLE` overrides.
+- The `---` separator divides the specification from the jobs' definition.
+
+The `@<git-ref>` part in the `component:` key pins the component to a specific git tag, SHA or branch.
+
+Components require GitLab version 17.0.
+
+GitLab **does** validate inputs for component when a pipeline is created, **before** parsing its YAML.<br/>
+A wrong type, a missing required input, or an unknown input name all fail loudly. Versioning is explicit.<br/>
+Components show up in the CI/CD Catalog, which allows teams to discover what's available.
+
+### Templates vs Components
+
+[Pipeline components] are stricter and safer than [pipeline templates]. Their idea is that they define a job that can be
+_tweaked_ with specific knobs.<br/>
+Templates are better when needing to define the _skeleton_ of a job and allow one to _override_ it to fill in whatever
+they need.
+
+Prefer templates when:
+
+- Their consumer needs to override the templates' **structure**, and not just the values they expose.
+
+  Templates allow consumers to override any of their key (e.g., `script:`, `before_script:`, `rules:`, `stage:`,
+  etc).<br/>
+  Components produce a **complete** job that only allows tweaking. The consumer can't surgically replace a section with
+  a complete override.
+
+- The job is an external CI configuration piece that a **different** repository wants to use.
+- One needs to allow composition via `!reference` to inject fragments into another job.<br/>
+  Since components produce whole jobs, they do **not** provide fragments one can splice into other jobs.
+
+Prefer components when:
+
+- The reusable unit is a **complete** job that defines a clear input **contract**.<br/>
+  The consumer shouldn't need to know the job's internals.
+- One wants **validation** of the job's inputs at pipeline creation time.<br/>
+  Missing a required variable in a template makes that variable default silently. Missing a required input for a
+  component fails the pipeline before any job runs.
+- Multiple teams consume it.<br/>
+  Catalog discoverability and version pinning allow teams to adopt components without needing to read its source or
+  asking the author.
+- One needs safe and independent versioning.<br/>
+  @1.0.0 means the consumer is insulated from changes until they choose to bump. `ref: main` means one is on the latest
+  version in a branch or tag whether they wanted it or not.
 
 ## Cross-project pipelines
 
@@ -310,7 +517,7 @@ deploy_to_shared_infra:
 
 CI/CD variables defined in the GUI for Project A are **not** passed automatically to the targeted job. One needs to
 re-declare them in `variables:` if needed.<br/>
-One can also pass artifacts via dotenv reports (`needs:project`), usually a good way to pass structured variable
+One can also pass artifacts via dotenv reports (`needs:project`), usually a good way to pass structured variables
 cross-project.
 
 Cross-project triggers do **not** support `script:`, and hence cannot _modify_ targeted jobs.
@@ -335,7 +542,7 @@ Refer to [Resource group].
 
 `resource_group` prevents two jobs with the same group name from running simultaneously, no matter how many pipelines
 are in flight.<br/>
-This  is the most direct way to serialize deploys against shared targets (e.g., Pulumi stacks, databases, environments).
+This is the most direct way to serialize deploys against shared targets (e.g., Pulumi stacks, databases, environments).
 
 ```yaml
 deploy_prd:
@@ -405,7 +612,7 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 
 ## Further readings
 
-- [Gitlab]
+- [GitLab]
 - [CI/CD pipelines]
 - [Customize pipeline configuration]
 - [Predefined CI/CD variables reference]
@@ -427,13 +634,17 @@ Solution: give that user _developer_ access or have somebody else with enough pr
 
 <!-- In-article sections -->
 [Merge trains]: #merge-trains
+[Pipeline components]: #pipeline-components
+[Pipeline templates]: #pipeline-templates
 [Resource groups]: #resource-groups
 
 <!-- Knowledge base -->
 [GitLab]: ../gitlab.md
+[YAML anchors and aliases]: ../yaml.md#anchors-and-aliases
 
 <!-- Files -->
 <!-- Upstream -->
+[`push` pipeline source events]: https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#push-events
 [ci/cd pipeline templates]: https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates
 [ci/cd pipelines]: https://docs.gitlab.com/ci/pipelines/
 [customize pipeline configuration]: https://docs.gitlab.com/ci/pipelines/settings.html
