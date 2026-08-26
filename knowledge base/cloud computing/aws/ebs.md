@@ -185,8 +185,16 @@ When archived, incremental snapshots are converted to **full snapshots** and mov
 When access to archived snapshots is needed, they need to be restored to the standard tier before use. Restoring can
 take **up to 72h**.
 
-Lifecycle policies' `targetTags` attribute targets resources of the specified type in an **OR** fashion, not **AND**,
-meaning they will target all resources with **at least one** of the defined target tags.
+One can use [Amazon Data Lifecycle Manager][automate snapshot lifecycles] (DLM) to automate creating, retaining,
+[archiving], and deleting EBS snapshots and EBS-backed AMIs via policies.<br/>
+These policies are based on tags, and can run on regular intervals or cron expressions.
+DLM also offers _default policies_ to automatically back up volumes and instances that have not been already backed up
+by any other method within a specified interval (e.g. a 3-day frequency skips volumes backed up in the last 3 days).
+Default policies require the `AWSDataLifecycleManagerDefaultRole` IAM role (or a custom one with the
+`AWSDataLifecycleManagerServiceRole` [managed policy][aws managed policies for dlm] attached).
+
+DLM policies' `targetTags` attribute targets resources in an **OR** fashion, not **AND**, meaning they will target all
+resources with **at least one** of the defined target tags.
 
 ## Encryption
 
@@ -390,6 +398,7 @@ performance, whichever is higher.
 [amazon ebs-optimized instance types]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html
 [Archive Amazon EBS snapshots]: https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-archive.html
 [automate snapshot lifecycles]: https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-ami-policy.html
+[aws managed policies for dlm]: https://docs.aws.amazon.com/ebs/latest/userguide/managed-policies.html
 [choose the best amazon ebs volume type for your self-managed database deployment]: https://aws.amazon.com/blogs/storage/how-to-choose-the-best-amazon-ebs-volume-type-for-your-self-managed-database-deployment/
 [delete-volume]: https://docs.aws.amazon.com/cli/latest/reference/ec2/delete-volume.html
 [describe-volumes]: https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-volumes.html

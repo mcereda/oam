@@ -1,0 +1,14 @@
+{
+    "Rules": [
+        {
+            "ID": "AbortIncompleteMultipartUploads",
+            "Filter": {
+                "Prefix": ""
+            },
+            "Status": "Enabled",
+            "AbortIncompleteMultipartUpload": {
+                "DaysAfterInitiation": 7
+            }
+        }
+    ]
+}
