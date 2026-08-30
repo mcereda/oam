@@ -113,6 +113,8 @@ Refer [IAM and AWS STS quotas].
 
 Only **one** IAM User can exist with a specific username, no matter the path defined at its creation.
 
+IAM Users can have inline policies up to a **total** limit of **2048 URL-encoded characters**.
+
 ## Groups
 
 Refer [IAM user groups].

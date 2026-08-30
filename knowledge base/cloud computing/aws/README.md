@@ -613,9 +613,24 @@ Each key counts as one when calculating key resource quotas, regardless of the n
 
 TODO
 
+> [!warning] IAM role deletions aren't guarded by AWS
+> AWS does not check wether a role being deleted is actively attached to a Lambda function. When such a role is deleted,
+> the function simply and silently ends up with a dangling role reference.
+
+To deploy:
+
+1. Archive the code (as `.zip`) and upload it to S3.
+1. Point The lambda function to that archive.
+
+During a **cold** start, the Lambda service downloads the configured archive from S3 and extracts it to `/var/task/` in
+the function's execution environment. Its working directory contains all the files in the archive, side by side.<br/>
+This allows including data alongside the code (e.g., configuration files and blobs).
+
 > [!warning]
-> IAM role deletions aren't guarded by AWS when a role being deleted is actively attached to a Lambda. The function
-> simply and silently ends up with a dangling role reference.
+> Lambda support environment variables up to a **hard** limit of **4KB** across all variables and values combined.<br/>
+> Over that, one should move at least the large configuration values out of the environment variables and bundle them
+> with the code (e.g., as a `config.json` file inside the Lambda's package) and read them from the execution environment
+> during cold start instead.
 
 ### PrivateLink
 
