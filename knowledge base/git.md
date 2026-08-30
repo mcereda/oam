@@ -415,6 +415,22 @@ git commit --no-verify …
 
 # Check a file is properly ignored.
 git check-ignore '.lefthook-local.yml'
+
+# Collect garbage.
+git gc --aggressive
+
+# Backup repositories.
+git bundle create 'repo-name.backup.bundle' --all         # to a single, portable, clonable file
+tar -czf 'repo-name.backup.tar.gz' '.git/'                # direct archive (best for local backups)
+git clone --bare '/path/to/repo' '/backup/path/repo.git'  # optimized, space-efficient format
+git archive --format='tar.gz' -o 'backup.tar.gz' 'HEAD'   # snapshot without full history
+
+# Verify bundle backups.
+git bundle verify 'repo-name.backup.bundle'
+tar -xzf 'repo-name.backup.tar.gz'
+
+# Restore backups.
+git clone 'repo-name.backup.bundle'
 ```
 
 </details>
