@@ -23,3 +23,5 @@ MD033:  # no-inline-html
     - sup
     - u
     - ul
+MD041:  # first-line-heading
+  allow_preamble: true

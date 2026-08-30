@@ -13,6 +13,10 @@ model: haiku
 tools: []
 mcpServers:
   - aws-cli-ro:
+      # DEPRECATED
+      # awslabs/aws-api-mcp-server is deprecated in favor of the AWS Toolkit
+      # MCP server.
+      # See https://docs.aws.amazon.com/agent-toolkit/latest/userguide/mcp-server.html
       env:
         AWS_API_MCP_TELEMETRY: "false"
         AWS_REGION: "eu-west-1"

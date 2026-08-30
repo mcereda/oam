@@ -84,11 +84,11 @@ driving it with `tasks/get`, `tasks/update`, and `tasks/cancel`.
 
 ## MCP servers of interest
 
-| MCP server                                        | Summary                                                  |
-| ------------------------------------------------- | -------------------------------------------------------- |
-| [AWS API][aws api mcp server]                     | Interact with all AWS services and resources via AWS CLI |
-| [AWS Cost Explorer][aws cost explorer mcp server] | Analyze AWS costs and usage data                         |
-| [Grafana][grafana mcp Server]                     | Interact with [Grafana] dashboards and services          |
+| MCP server                                        | Summary                                                                  |
+| ------------------------------------------------- | ------------------------------------------------------------------------ |
+| [AWS API][aws api mcp server]                     | **Deprecated**. Interact with all AWS services and resources via AWS CLI |
+| [AWS Cost Explorer][aws cost explorer mcp server] | **Deprecated**. Analyze AWS costs and usage data                         |
+| [Grafana][grafana mcp Server]                     | Interact with [Grafana] dashboards and services                          |
 
 > [!caution]
 > Verify MCP servers and the tools they offer before using them.<br/>
@@ -96,6 +96,14 @@ driving it with `tasks/get`, `tasks/update`, and `tasks/cancel`.
 > shadowing, or injection.
 
 ### AWS API
+
+> [!caution] Deprecated
+> The `awslabs/mcp` repository's servers are being superseded by the [AWS Toolkit MCP server].
+>
+> The repository still accepts contributions, but individual servers are being deprecated with migration guides.
+> `aws-api-mcp-server` migrates to the toolkit's included one; `cost-explorer-mcp-server` migrates to
+> `billing-cost-management-mcp-server` (currently in the `awslabs/mcp` repository).<br/>
+> Existing configurations still work. Migrate when possible.
 
 > [!important] AWS managed MCP endpoint is us-east-1 only
 > The [AWS API MCP Server]'s managed endpoint (`plugin:aws-core:aws-mcp` in Claude Code) currently exists only at
@@ -180,5 +188,6 @@ with a generic JSON-RPC `-32602` error and the real reason hidden in container l
 [2026-07-28 MCP Specification Release Candidate]: https://blog.modelcontextprotocol.io/posts/2026-07-28-release-candidate/
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
 [AWS Cost Explorer MCP Server]: https://github.com/awslabs/mcp/tree/main/src/cost-explorer-mcp-server
+[AWS Toolkit MCP server]: https://docs.aws.amazon.com/agent-toolkit/latest/userguide/mcp-server.html
 [Grafana MCP Server]: https://github.com/grafana/mcp-grafana
 [Transports specification]: https://modelcontextprotocol.io/specification/2025-03-26/basic/transports

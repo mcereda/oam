@@ -1,4 +1,10 @@
 ---
+
+# DEPRECATED
+# awslabs/aws-api-mcp-server is deprecated in favor of the AWS Toolkit MCP
+# server.
+# See https://docs.aws.amazon.com/agent-toolkit/latest/userguide/mcp-server.html
+
 services:
   aws_cli:
     container_name: aws-cli-mcp-server-rw
