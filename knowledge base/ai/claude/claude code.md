@@ -28,12 +28,13 @@ Works in a terminal, IDE (via plugin), Claude's desktop app, the browser ([claud
    1. [Findings about skill creation](#findings-about-skill-creation)
 1. [Using plugins](#using-plugins)
    1. [Plugins of interest](#plugins-of-interest)
+1. [Output styles](#output-styles)
 1. [Using hooks](#using-hooks)
-   1. [Prompt-based hooks](#prompt-based-hooks)
-   1. [Agent-based hooks](#agent-based-hooks)
-   1. [HTTP hooks](#http-hooks)
-   1. [Running LLM work from hooks](#running-llm-work-from-hooks)
-   1. [Common gotchas and patterns for hooks](#common-gotchas-and-patterns-for-hooks)
+    1. [Prompt-based hooks](#prompt-based-hooks)
+    1. [Agent-based hooks](#agent-based-hooks)
+    1. [HTTP hooks](#http-hooks)
+    1. [Running LLM work from hooks](#running-llm-work-from-hooks)
+    1. [Common gotchas and patterns for hooks](#common-gotchas-and-patterns-for-hooks)
 1. [Delegating work](#delegating-work)
     1. [Sub-agents](#sub-agents)
        1. [Airtight delegation via inline MCP](#airtight-delegation-via-inline-mcp)
@@ -50,8 +51,10 @@ Works in a terminal, IDE (via plugin), Claude's desktop app, the browser ([claud
     1. [Remote Control](#remote-control)
     1. [Dispatch](#dispatch)
     1. [Claude Code on the web](#claude-code-on-the-web)
+    1. [Self-hosted environments](#self-hosted-environments)
     1. [Computer Use](#computer-use)
     1. [Artifacts](#artifacts)
+1. [Cross-session messaging](#cross-session-messaging)
 1. [Emergent features](#emergent-features)
     1. [A session can be aware of other active sessions](#a-session-can-be-aware-of-other-active-sessions)
     1. [Active sessions can communicate with each other](#active-sessions-can-communicate-with-each-other)
@@ -105,8 +108,11 @@ Supports a **plugin** system for extending its capabilities.
 Sends Statsig telemetry data by default. Includes operational metrics (latency, reliability, usage patterns).<br/>
 Disable it by setting the `DISABLE_TELEMETRY` environment variable to `1`.
 
-> [!tip]
-> Gives better results when asked to _plan_ before writing code, and then _iterates_ on it.
+> [!important]
+> Disabling telemetry also disables feature-flag evaluation. This **silently** turns off features that depend on it
+> like [cross-session messaging].
+
+Gives better results when asked to _plan_ before writing code, and then _iterates_ on it.
 
 Common workflows:
 
@@ -159,10 +165,7 @@ The `opusplan` mode allows using Opus during planning, then automatically switch
 
 The `/fast` toggle increases output speed on Opus 4.6 through 4.8. It increases costs proportionally.
 
-Change how Claude responds (without affecting its capabilities) by configuring an [output style][output styles].<br/>
-The builtin `explanatory` style adds educational insights between tasks; `learning` shares insights _and_ asks the user
-to contribute to changes.<br/>
-Custom styles can be created as Markdown files in the `~/.claude/output-styles/` and `.claude/output-styles/` folders.
+Change how Claude responds (without affecting its capabilities) by configuring an [output style][output styles].
 
 Use memory and context files (`CLAUDE.md`) to instruct Claude Code on commands, style guidelines, and give it _key_
 context. Try to keep them small.
@@ -496,7 +499,7 @@ troubleshooting. Useful for isolating whether a session problem comes from user 
 | `best`         | Most capable available model (currently Fable 5 or Opus)    |                                                                |
 | `mythos`       | Latest Mythos (Mythos 5 on Anthropic's API)                 | Where available                                                |
 | `fable`        | Latest Fable (Fable 5 on Anthropic's API)                   | Where available                                                |
-| `opus`         | Latest Opus (Opus 4.8 on Anthropic's API)                   |                                                                |
+| `opus`         | Latest Opus (Opus 5 on Anthropic's API)                     |                                                                |
 | `opus[1m]`     | Opus with 1M token context window                           |                                                                |
 | `sonnet`       | Latest Sonnet (Sonnet 5 on Anthropic's API)                 |                                                                |
 | `sonnet[1m]`   | Sonnet with 1M token context window                         |                                                                |
@@ -508,28 +511,28 @@ troubleshooting. Useful for isolating whether a session problem comes from user 
 Starting from generation 4.6, model IDs switched to the dateless format (e.g. `claude-opus-4-8` instead of `claude-opus-4-5-20251101`).<br/>
 These are still pinned snapshots, not pointers to the latest version. The format just dropped the date suffix.
 
-| Model  | ID examples                                                                                            |
-| ------ | ------------------------------------------------------------------------------------------------------ |
-| Mythos | `claude-mythos-5`                                                                                      |
-| Fable  | `claude-fable-5`                                                                                       |
-| Opus   | `claude-opus-4-5-20251101`<br/>`claude-opus-4-6[1m]`<br/>`claude-opus-4-7`<br/>`claude-opus-4-8`       |
-| Sonnet | `claude-sonnet-4-5-20250929`<br/>`claude-sonnet-4-5`<br/>`claude-sonnet-4-6[1m]`<br/>`claude-sonnet-5` |
-| Haiku  | `claude-haiku-4-5-20251001`<br/>`claude-haiku-4-7`<br/>`claude-haiku-4-8`                              |
+| Model  | ID examples                                                                                                          |
+| ------ | -------------------------------------------------------------------------------------------------------------------- |
+| Mythos | `claude-mythos-5`                                                                                                    |
+| Fable  | `claude-fable-5`                                                                                                     |
+| Opus   | `claude-opus-5`<br/>`claude-opus-4-8`<br/>`claude-opus-4-7`<br/>`claude-opus-4-6[1m]`<br/>`claude-opus-4-5-20251101` |
+| Sonnet | `claude-sonnet-5`<br/>`claude-sonnet-4-6[1m]`<br/>`claude-sonnet-4-5`<br/>`claude-sonnet-4-5-20250929`               |
+| Haiku  | `claude-haiku-4-5-20251001`<br/>`claude-haiku-4-7`<br/>`claude-haiku-4-8`                                            |
 
 `effort` overrides the calling session's effort level. Available levels depend on the active model:
 
 | Model                | Available levels                        | Session default | Notes                                |
 | -------------------- | --------------------------------------- | --------------- | ------------------------------------ |
+| Opus 5, Sonnet 5     | `low`, `medium`, `high`, `xhigh`, `max` | `high`          | Adaptive thinking enabled by default |
 | Opus 4.8             | `low`, `medium`, `high`, `xhigh`, `max` | `high`          | **Always** uses adaptive thinking    |
 | Opus 4.7             | `low`, `medium`, `high`, `xhigh`, `max` | `xhigh`         |                                      |
-| Sonnet 5             | `low`, `medium`, `high`, `max`          | `high`          | Adaptive thinking enabled by default |
 | Opus 4.6, Sonnet 4.6 | `low`, `medium`, `high`, `max`          | `high`          |                                      |
 
 Should one set a level the model doesn't support, Claude Code falls back to the **highest** supported level at or below
 the given setting, e.g. `xhigh` on Opus 4.6 becomes `high`.
 
-The `effortLevel` key in `settings.json` files accepts `low`, `medium`, `high`, and `xhigh` values, and, if not
-configured, it defaults to `xhigh` for Opus 4.7 and `high` for Opus and Sonnet 4.6.<br/>
+The `effortLevel` key in `settings.json` files accepts `low`, `medium`, `high`, and `xhigh` values. Defaults to `xhigh`
+for Opus 4.7 and `high` for all other models.<br/>
 Models support _subsets_ of the effort level: Opus and Sonnet 4.6 do not support `xhigh`, and Haiku does not support
 effort levels at all.
 
@@ -1032,12 +1035,6 @@ Set `ENABLE_TOOL_SEARCH=false` if using a proxy that does not forward `tool_refe
 # Defaults to the 'local' scope if not specified.
 claude mcp add --transport 'http' 'GitLab' 'https://gitlab.example.org/api/v4/mcp'
 claude mcp add --transport 'http' 'linear' 'https://mcp.linear.app/mcp' --scope 'user'
-claude mcp add 'aws-cost-explorer' --scope 'project' \
-  --env 'AWS_REGION=eu-west-1' --env 'AWS_API_MCP_TELEMETRY=false' \
-  -- \
-  docker run --rm --interactive --volume "$HOME/.aws:/app/.aws" \
-    --env 'AWS_REGION' --env 'AWS_API_MCP_TELEMETRY' \
-    'public.ecr.aws/awslabs-mcp/awslabs/cost-explorer-mcp-server:latest'
 
 # List installed MCP servers.
 claude mcp list
@@ -1084,10 +1081,12 @@ jq '.mcpServers."grafana-aws" |= {
 #### MCP servers of interest
 
 <details style='padding: 0 0 0 1rem'>
-  <summary>AWS API</summary>
+  <summary>AWS API (<b><i>deprecated</i></b>)</summary>
 
-> [!caution]
-> Prefer using the server that comes with the [AWS Toolkit] plugin instead.
+> [!caution] Deprecated
+> `awslabs/aws-api-mcp-server` is deprecated in favor of the [AWS Toolkit] plugin's MCP server
+> ([docs][AWS Toolkit MCP server]).<br/>
+> Existing configurations still work, but will not receive updates.
 
 Refer to [AWS API MCP Server].
 
@@ -1358,9 +1357,12 @@ The `permissions.defaultMode` field in settings files controls the overall permi
 > As of 2026-04, `dontAsk` has been reported to [activate unexpectedly][issue #17360],
 > [override the `ask` list][issue #16555], and [spontaneously switch modes mid-session][issue #36473].
 
-Setting `defaultMode: "auto"` in **user-level** settings (`~/.claude/settings.json`) shows a **one-time** confirmation
-prompt. After accepting it, Claude Code auto-saves a `skipAutoPermissionPrompt` flag and subsequent sessions start
-without the prompt.
+The _auto_ mode is the **default** for new sessions on Pro, Max, and Team plans since 2026-08-14. A custom default
+setting stays in place unless the one-time switch prompt is accepted.<br/>
+Classifier calls made in auto mode do **not** (currently™) count toward usage limits.
+
+Auto mode remains opt-in on Claude Enterprise, the Claude API, Amazon Bedrock, Google Cloud's Agent Platform, and
+Microsoft Foundry.
 
 > [!important]
 > `auto` is **silently ignored** when set in project or local settings. It only takes effect from user-level settings
@@ -1729,13 +1731,9 @@ skill).
 When working with files in subdirectories, Claude Code automatically discovers skills from nested `.claude/skills/`
 directories.
 
-Skills sharing the same name across different scopes shadow one another. Counterintuitively, **broader** scopes shadow
-narrower ones as follows:
-
-```mermaid
-flowchart LR
-  m("Managed") --shadows--> u("User") --shadows--> p("Project")
-```
+Skills that share the **same name** across different scopes do **not** silently replace each other.<br/>
+The **nested** one shows under a directory-qualified name (e.g. `apps/web:deploy`), while the slash command (`/deploy`)
+defaults to the broader-scope version. Claude picks the variant that matches the files it is working on.
 
 Plugin skills use a `plugin-name:skill-name` namespace, so they cannot conflict with other levels.<br/>
 Files in `.claude/commands/` work the same way, but the skill will take precedence if a skill and a command share the
@@ -2014,6 +2012,26 @@ echo '@.claude/rules/aws-agent-rules.md'
 ```
 
 </details>
+
+## Output styles
+
+Refer to [Output styles].
+
+Claude Code can adjust its response style. This does **not** affect its capabilities.
+
+| Style       | Description                                                                       |
+| ----------- | --------------------------------------------------------------------------------- |
+| Default     | Balanced, direct, moderate explanation                                            |
+| Concise     | Leads with results, skips preamble and narration; provides full detail on request |
+| Explanatory | Adds educational insights between tasks; useful when exploring a new codebase     |
+| Learning    | Like Explanatory, but also prompts one to write small pieces of code themselves   |
+
+Enable via `/config` or set the `outputStyle` field in a `settings.json` file.<br/>
+Changes take effect on the **next** session start. Output styles modify the system prompt, so mid-session changes would
+invalidate the prompt cache.
+
+One can create _custom_ output styles as Markdown files in the `~/.claude/output-styles/` and `.claude/output-styles/`
+folders.
 
 ## Using hooks
 
@@ -2722,13 +2740,19 @@ The sub agent works independently, and returns results once finished.
 Most effective for sequential tasks, same-file edits, or tasks with many dependencies.<br/>
 They only report results back to the main agent, and never talk to each other.
 
-`/fork` copies the conversation into a new **background** session (its own row in `claude agents`) while the old one
-keeps working. `/subtask` crates an **in-session subagent** that inherits the full conversation.<br/>
-When agent view is off, `/subtask` is unavailable and `/fork` falls back to `/subtask`'s in-session behavior.
+Sub-agents run in the **background by default** since v2.1.198. Claude runs a sub-agent in the foreground when it
+needs the result before continuing with the task at hand.<br/>
+Pin foreground/background behavior with the `background` frontmatter field.<br/>
+Set `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` to force all sub-agents to run in the foreground.
 
-By default, Claude can spawn at most 200 subagents per session. One can raise this limit setting the desired number in
-`CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION`. Any in-session fork started with `/subtask` does count toward this budget,
-though the cap only blocks subagents Claude spawns itself via the `Agent` tool.
+**Fork mode** is on by default in **interactive** sessions.<br/>
+A fork sub-agent inherits the full conversation and prompt cache so that side tasks do not need the context
+re-explained. Start one with `/fork` or `/subtask`.<br/>
+Disable fork mode with `CLAUDE_CODE_FORK_SUBAGENT=0`. When fork mode is off, `/fork` copies the conversation into a new
+background session and `/subtask` creates an in-session subagent.
+
+The per-session concurrency limit defaults to 20. One can configure it via `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`.
+There is **no** hard cap on the total number of sub-agents per session.
 
 Sub-agents can spawn their own sub-agents up to **5 levels** deep. A sub-agent at depth 5 does **not** receive the
 `Agent` tool and cannot spawn further. The limit applies to both foreground and background sub-agents.<br/>
@@ -2813,6 +2837,9 @@ This is strictly stronger than behavioral-only instructions (_"please always del
 overridden by context pressure or ambiguity.
 
 <details style='padding: 0 0 1rem 1rem'>
+
+> [!important] Deprecated
+> The MCP server is deprecated. Only use this as an example.
 
 ```yaml
 ---
@@ -3225,6 +3252,9 @@ mcpServers:
 Investigate AWS resources and costs using the available MCP tools.
 ```
 
+> [!important] Deprecated
+> The MCP server is deprecated. Only use this as an example.
+
 The sub-agent gets the tools; the parent agent does not.
 
 </details>
@@ -3502,12 +3532,13 @@ Team and Enterprise Owners can disable routines for all members via the admin se
 Sessions can use **multiple** devices or interfaces. Several features allow continuing, steering, or triggering work
 from other surfaces.
 
-|                 | Trigger                                   | Claude runs on  | Best for                                        |
-| --------------- | ----------------------------------------- | --------------- | ----------------------------------------------- |
-| Remote Control  | Drive a running session from any device   | Local machine   | Steering in-progress work from phone or browser |
-| Dispatch        | Message a task from the Claude mobile app | Local machine   | Delegating work while away, minimal setup       |
-| Claude Code web | Start a task in the browser               | Anthropic cloud | Self-contained async work, no local setup       |
-| Computer Use    | Claude controls the screen                | Local machine   | GUI-only apps, simulators, design tools         |
+|                          | Trigger                                   | Claude runs on        | Best for                                        |
+| ------------------------ | ----------------------------------------- | --------------------- | ----------------------------------------------- |
+| Remote Control           | Drive a running session from any device   | Local machine         | Steering in-progress work from phone or browser |
+| Dispatch                 | Message a task from the Claude mobile app | Local machine         | Delegating work while away, minimal setup       |
+| Claude Code web          | Start a task in the browser               | Anthropic cloud       | Self-contained async work, no local setup       |
+| Self-hosted environments | Cloud session on company infrastructure   | Company-managed hosts | Internal services, compliance requirements      |
+| Computer Use             | Claude controls the screen                | Local machine         | GUI-only apps, simulators, design tools         |
 
 ### Remote Control
 
@@ -3563,6 +3594,19 @@ Network access defaults to _Trusted_ (package registries, cloud APIs, common dev
 Use web sessions to kick off long-running tasks and check back later, work on repos not cloned locally, or run multiple
 tasks in parallel.
 
+### Self-hosted environments
+
+Refer to [Self-hosted environments].
+
+Run Claude Code cloud sessions on company or otherwise private infrastructure.<br/>
+In public beta on Team and Enterprise plans.
+
+Run `claude self-hosted-runner setup` on machines or containers to turn them into runners.<br/>
+When someone picks the environment while starting a cloud session, it runs inside the organization's network with access
+to internal services.
+
+An Owner must enable **Allow self-hosted environments** in the admin settings first.
+
 ### Computer Use
 
 Refer to [Computer Use].
@@ -3600,6 +3644,36 @@ The maximum rendered size is 16 MiB, so large embedded images are the most commo
 
 Artifacts can pull live data and take actions through each viewer's own MCP connectors when they open the page. Press
 `Ctrl+]` in the terminal to reopen the most recent artifact.
+
+## Cross-session messaging
+
+Refer to [Cross-session messaging].
+
+Claude Code sessions on the same machine can message each other directly. Claude discovers reachable sessions with the
+`ListAgents` tool and delivers messages with `SendMessage`. It can do this on request, or autonomously when a change in
+one session affects what another is working on.<br/>
+A message is text Claude writes for the other session. It never includes conversation history or files. To move a whole
+conversation or its context, resume the session instead.
+
+Type `@` in the prompt to mention another session by name. Run `/list-agents` to see reachable sessions.<br/>
+`SendMessage` can also reach [Remote Control] sessions on other machines by name.
+
+The feature requires v2.1.224+ (v2.1.234+ on native Windows). **Not** available on Amazon Bedrock, Claude Platform on
+AWS, Google Cloud's Agent Platform, or Microsoft Foundry.
+
+> [!warning]
+> Cross-session messaging depends on feature-flag evaluation. Setting `DISABLE_TELEMETRY=1`,
+> `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`, `DO_NOT_TRACK=1`, or `DISABLE_GROWTHBOOK=1` silently disables it.
+> The `ListAgents` tool will not load and `/list-agents` will not be recognized.
+
+When available and properly configured, messaging is on by default.
+
+Run `/list-agents` (or `/peers`) to check whether the feature is active in a session. If the command is not
+recognized, the feature is off.
+
+This supersedes the experimental [file-watching propagation][propagating knowledge between concurrent sessions]
+approach documented in [Emergent features], which relied on writing to auto-loaded memory files as a communication
+channel. The session registry (below) still provides the discovery infrastructure.
 
 ## Emergent features
 
@@ -3839,6 +3913,7 @@ Claude Code version: `v2.1.41`.
 [Auto memory]: #auto-memory
 [Configuration]: #configuration
 [Dynamic workflows]: #dynamic-workflows
+[Emergent features]: #emergent-features
 [Offloading MCP servers to sub-agents]: #offloading-mcp-servers-to-sub-agents
 [Prompt-based hooks]: #prompt-based-hooks
 [Sub-agents]: #sub-agents
@@ -3894,6 +3969,7 @@ Claude Code version: `v2.1.41`.
 [Codebase]: https://github.com/anthropics/claude-code
 [Computer Use]: https://code.claude.com/docs/en/computer-use
 [Create custom sub-agents]: https://code.claude.com/docs/en/sub-agents
+[Cross-session messaging]: https://code.claude.com/docs/en/cross-session-messaging
 [Documentation / Memory]: https://code.claude.com/docs/en/memory
 [Documentation / Model configuration]: https://code.claude.com/docs/en/model-config
 [Documentation / Sandboxing]: https://code.claude.com/docs/en/sandboxing
@@ -3924,6 +4000,7 @@ Claude Code version: `v2.1.41`.
 [Routines]: https://code.claude.com/docs/en/routines
 [Run prompts on a schedule]: https://code.claude.com/docs/en/scheduled-tasks
 [Schedule tasks on the web]: https://code.claude.com/docs/en/web-scheduled-tasks
+[Self-hosted environments]: https://code.claude.com/docs/en/self-hosted-environments-quickstart
 [Share session output as artifacts]: https://code.claude.com/docs/en/artifacts
 [Sub-agent memory configuration]: https://code.claude.com/docs/en/sub-agents#enable-persistent-memory
 [Tools reference]: https://code.claude.com/docs/en/tools-reference
@@ -3935,6 +4012,7 @@ Claude Code version: `v2.1.41`.
 [Allow MCP tools to be available only to subagent]: https://github.com/anthropics/claude-code/issues/6915
 [AWS API MCP Server]: https://github.com/awslabs/mcp/tree/main/src/aws-api-mcp-server
 [AWS Guidance]: https://github.com/aws/agent-toolkit-for-aws/blob/main/rules/aws-agent-rules.md
+[AWS Toolkit MCP server]: https://docs.aws.amazon.com/agent-toolkit/latest/userguide/mcp-server.html
 [Claude analysis / The System Prompt]: https://rastrigin.systems/blog/claude-code-part-2-system-prompt/
 [Claude analysis / What Claude Code Actually Sends to the Cloud]: https://rastrigin.systems/blog/claude-code-part-1-requests/
 [Claude Code Unpacked]: https://ccunpacked.dev/

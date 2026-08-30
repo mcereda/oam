@@ -15,10 +15,17 @@ Family of [LLMs][large language models] developed by Anthropic.
 
 ## TL;DR
 
-As of 2026-07, the model family spans **Claude 4.X**, **Fable 5** and **Mythos 5**. All models support text and image
-input, text output, multilingual capabilities, and vision.<br/>
-Current model IDs include `claude-opus-4-8`, `claude-opus-4-6[1m]`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001`,
-`claude-fable-5`, and `claude-mythos-5`. Refer to [Claude Code] for the full model alias table and ID examples.
+As of 2026-08, the model family spans **Claude 4.X**, **Claude 5**, **Fable 5** and **Mythos 5**. All models support
+text and image input, text output, multilingual capabilities, and vision.
+
+| Tier   | Current version | Context | Max output | Typical use                                        |
+| ------ | --------------- | ------- | ---------- | -------------------------------------------------- |
+| Haiku  | 4.5             | 200K    | 8K         | Routing, classification, lightweight tasks         |
+| Sonnet | 5               | 1M      | 128K       | General-purpose coding and analysis                |
+| Opus   | 5               | 1M      | 128K       | Complex architecture, investigation, agentic work  |
+| Fable  | 5               | 1M      | 128K       | Frontier intelligence, hardest problems            |
+
+Refer to [Claude Code] for the full model alias table and ID examples.
 
 Prefer **Opus** for the most _demanding_ tasks or when in need for deep reasoning, e.g. large-scale code refactoring,
 complex architectural decisions, multi-step research and analysis, or advanced agentic workflows.<br/>
@@ -69,10 +76,11 @@ trained-in patterns play a major role in how one [interacts with Claude][improvi
 
 Pin model versions in production. Do **not** assume a newer model is better.
 
-Claude Opus 4.7 and 4.8 seem to be **unable** to reach the output quality that 4.6 does.<br/>
+Claude Opus 4.7 and 4.8 were **unable** to reach the output quality that 4.6 does.<br/>
 Independent benchmarks showed regressions from 4.6 to 4.7 (BrowseComp showed -4.4 points, with 1M context accuracy
 lowering from 78.3% to 32.2%), despite a 50% cost increase.<br/>
-4.8 produces around double the token output than 4.6 for less substance, with most of this increase being performative.
+4.8 produces around double the token output than 4.6 for less substance. Most of this increase is performative.<br/>
+Opus 5 is the current generation.
 
 ## The Claude character
 
@@ -272,46 +280,10 @@ Create a recurring job:
 
 ## Subscription and billing practices
 
-Anthropic has a track record of making significant billing changes with little notice or transparency, including the
-consistent pattern of moving those capabilities that were part of the subscription behind separate billing walls
-**after** users have built workflows around them.
+Anthropic has a track record of making significant billing changes with little notice or transparency, and of gating
+features behind telemetry acceptance without informing users of the tradeoff.
 
-In the span of six weeks (April to May 2026), Anthropic:
-
-1. Banned third-party agents (e.g. OpenClaw) from using subscriptions, limiting them to API-only billing.
-1. Temporarily removed [Claude Code] from the Pro subscription tier, then claimed it was a test when users objected.
-1. Announced that non-interactive inference (headless `claude -p`, the Agent SDK), previously covered by subscriptions,
-   would draw from a separate, capped Agent SDK credit pool at full API rates. They presented this like it was a gift
-   from them, and not a new limitation.<br/>
-   This was suspended (but not discarded at the time of writing) when the community backlashed.
-
-   The proposed credit pool caps were:
-
-   | Plan          | Monthly Agent SDK credit |
-   | ------------- | -----------------------: |
-   | Pro           |                      $20 |
-   | Max 5x        |                     $100 |
-   | Max 20x       |                     $200 |
-   | Team Standard |                 $20/seat |
-   | Team Premium  |                $100/seat |
-
-   Credits would not roll over. Once exhausted, invocations would be billed as "extra usage" at standard API rates (if
-   enabled), or stop entirely.
-
-Anthropic also introduced a new tokenizer with Opus 4.7. It inflated token counts for English conversations by ~1.4
-times. Per-token pricing was unchanged, but English-dominant workloads started costing ~35 to 45% more in absolute
-terms, causing a reduced effective context window capacity in the process.
-
-Other incidents include:
-
-- An overly broad DMCA takedown in March 2026, which cascaded to ~8,100 forked GitHub repositories after a Claude Code
-  packaging error exposed the application's source code.
-- Multiple instances of documentation or pricing changes applied without public announcement.
-
-Treat any subscription-covered automation as a convenience that may be further restricted or repriced. Design with
-fallbacks (e.g. local model via [Ollama], API key billing) for non-critical automation.
-
-Refer to [Everything that went/is wrong with Claude] for a community-maintained tracker.
+Refer to [Anthropic practices] for the detailed timeline and mitigations.
 
 ## Further readings
 
@@ -325,6 +297,7 @@ Refer to [Everything that went/is wrong with Claude] for a community-maintained 
 - [Claude Code]
 - [Claude @tag]
 - [Claude for Chrome]
+- [Anthropic practices]
 - [Everything that went/is wrong with Claude]
 
 ### Sources
@@ -346,6 +319,7 @@ Refer to [Everything that went/is wrong with Claude] for a community-maintained 
 [The Claude character]: #the-claude-character
 
 <!-- Knowledge base -->
+[Anthropic practices]: anthropic%20practices.md
 [Claude @tag]: claude%20tag.md
 [Claude Code]: claude%20code.md
 [Claude for Chrome]: claude%20for%20chrome.md
@@ -356,7 +330,6 @@ Refer to [Everything that went/is wrong with Claude] for a community-maintained 
 [layered behavioral model]: ../lms.md#improving-interactions
 [LLM concerns]: ../lms.md#concerns
 [LLM's interaction tips]: ../lms.md#improving-interactions
-[Ollama]: ../ollama.md
 
 <!-- Files -->
 <!-- Upstream -->
