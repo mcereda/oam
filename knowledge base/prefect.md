@@ -10,6 +10,12 @@ complexity.<br/>
 Handles automatic state tracking, failure handling, real-time monitoring, and more.
 
 1. [TL;DR](#tldr)
+1. [Setup](#setup)
+   1. [Self-hosted server](#self-hosted-server)
+1. [Flows and tasks](#flows-and-tasks)
+   1. [Transactions](#transactions)
+1. [Deploying flows](#deploying-flows)
+1. [Automations](#automations)
 1. [Secrets and credentials](#secrets-and-credentials)
 1. [Limiting concurrent jobs on a work pool](#limiting-concurrent-jobs-on-a-work-pool)
 1. [Further readings](#further-readings)
@@ -66,6 +72,15 @@ prefect work-pool ls
 # Pause work pools.
 prefect work-pool pause 'pool-name'
 
+# Run a deployment.
+prefect deployment run 'flow-name/deployment-name'
+
+# Manage variables.
+prefect variable set 'var-name' 'value'
+prefect variable get 'var-name'
+prefect variable ls
+prefect variable unset 'var-name'
+
 # Login to the cloud instance.
 prefect cloud login
 
@@ -87,6 +102,164 @@ prefect cloud workspace set --workspace "some/workspace"
 
 </details>
 -->
+
+## Setup
+
+### Self-hosted server
+
+`prefect server start` from the [TL;DR](#tldr) runs a minimal instance on SQLite.<br/>
+Production workloads require PostgreSQL (with the `pg_trgm` extension). Multi-worker setups also need Redis.
+
+<details>
+  <summary>Production setup (PostgreSQL)</summary>
+
+```sh
+# Set the database connection.
+# Note: the driver must be asyncpg, not the default psycopg2.
+prefect config set PREFECT_SERVER_DATABASE_CONNECTION_URL='postgresql+asyncpg://user:pass@host:5432/prefect'
+
+# Run database migrations.
+prefect server database upgrade -y
+
+# Start the server.
+prefect server start --host '0.0.0.0'
+```
+
+Point clients at the server:
+
+```sh
+prefect config set 'PREFECT_API_URL=http://<server-host>:4200/api'
+```
+
+</details>
+
+<details>
+  <summary>Multi-worker mode</summary>
+
+SQLite does **not** support multi-worker due to database locking. PostgreSQL and Redis are **both** required.
+
+```sh
+prefect config set PREFECT_SERVER_EVENTS_MESSAGING_BROKER='prefect_redis.messaging'
+prefect config set PREFECT_SERVER_EVENTS_MESSAGING_CACHE='prefect_redis.messaging'
+prefect config set PREFECT_SERVER_EVENTS_CAUSAL_ORDERING='prefect_redis.ordering'
+prefect config set PREFECT_SERVER_CONCURRENCY_LEASE_STORAGE='prefect_redis.lease_storage'
+```
+
+</details>
+
+When starting a worker with `--type`, it auto-creates the named pool if it does not exist. In that case, it does so
+with a bare default template (no cluster, subnets, nor roles).<br/>
+Flows scheduled against a non-configured pool appear normal, but fail at **launch** time (not at _scheduling_ time).
+
+Fetch the default template as a starting point for customization:
+
+```sh
+prefect work-pool get-default-base-job-template --type 'ecs' --file 'ecs-base-template.json'
+```
+
+When running behind a reverse proxy, set `PREFECT_UI_API_URL` to the externally reachable URL. Without it, the browser
+UI inherits the container-local `PREFECT_API_URL` and cannot connect.
+
+## Flows and tasks
+
+The `@flow` decorator turns a function into an orchestrated workflow. It automates state tracking, validates typed
+parameters, and allows configuring retries:
+
+```python
+from prefect import flow
+
+@flow(retries=3, retry_delay_seconds=5, timeout_seconds=300, log_prints=True)
+def my_pipeline(name: str = "world"):
+    print(f"Hello {name}!")
+```
+
+Flows can call other flows (creating parent-child relationships) and contain tasks.<br/>
+Nested flows block parents until completion. Async nested flows can run concurrently via `asyncio.gather`.
+
+The `@task` decorator defines the smallest unit of orchestrated work.<br/>
+Tasks are cacheable, retryable, and support transactional semantics.
+
+Tasks can execute in the following modes:
+
+- **Direct**: `result = my_task(args)` blocks until done.
+- **Concurrent**: `future = my_task.submit(args)` returns a `PrefectFuture`; resolve with `future.result()`.<br/>
+  Use `.map()` for parallel iteration over collections.
+- **Background**: `my_task.delay(args)` dispatches to a separate [task worker][Background tasks] (similar to
+  Celery).<br/>
+  Requires `prefect task serve` or `serve(my_task)` from `prefect.task_worker`.
+
+### Transactions
+
+Prefect 3 groups tasks into atomic [transactions][Transactions]. If any part fails, staged subtransactions roll back
+automatically via `on_rollback` hooks:
+
+```python
+from prefect import flow
+from prefect.transactions import transaction
+
+@flow
+def pipeline():
+    with transaction():
+        write_data()
+        validate()  # failure here rolls back write_data
+```
+
+## Deploying flows
+
+Create [deployments][Deployments concept], depending on infrastructure needs, using any of the following methods:
+
+- `flow.serve()` runs flows on **static** infrastructure. Best for simple setups.<br/>
+  A long-running process monitors for work, and executes runs in subprocesses.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  ```python
+  if __name__ == "__main__":
+      my_flow.serve(
+          name="my-deployment",
+          tags=["production"],
+          parameters={"name": "world"},
+          interval=60,
+      )
+  ```
+
+  </details>
+
+- `flow.deploy()` provisions **dynamic** infrastructure via [work pools][Work pools].<br/>
+  By default, it builds and pushes a Docker image.
+
+  <details style='padding: 0 0 1rem 1rem'>
+
+  ```python
+  if __name__ == "__main__":
+      my_flow.deploy(
+          name="my-deployment",
+          work_pool_name="docker-pool",
+          image="my-registry/my-image:latest",
+      )
+  ```
+
+  </details>
+
+- `prefect deploy` is for **declarative** CLI approach. Walks through the creation of a `prefect.yaml` with build, push,
+  and pull steps.
+
+Use `serve` for simple scheduling on persistent infrastructure. Prefer `deploy` when flows need isolated, dynamically
+provisioned environments.
+
+Deployments support their own concurrency limit via `concurrency_limit` and a `collision_strategy` (`ENQUEUE` to queue
+excess runs, `CANCEL_NEW` to reject them), independent of the work pool concurrency covered below.
+
+## Automations
+
+Refer to [Automations].
+
+Execute actions automatically when trigger conditions are met (e.g. a flow run state changes, metrics' thresholds,
+custom events), or by the _absence_ of expected events (e.g. a flow stuck running beyond 30 minutes).
+
+Actions include cancelling/suspending flow runs, pausing deployment schedules or work pools, sending notifications
+(Slack, Teams, email, webhooks), and chaining other automations.<br/>
+Notification templates support Jinja2 (`{{ flow_run.name }}`, `{{ flow_run|ui_url }}`).
 
 ## Secrets and credentials
 
@@ -191,6 +364,7 @@ be changed at runtime without restarting the worker.
 
 - [Website]
 - [Codebase]
+- [Prefect MCP server] for connecting AI assistants (Claude Code, Cursor) to a Prefect environment
 
 ### Sources
 
@@ -205,12 +379,18 @@ be changed at runtime without restarting the worker.
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
+[Automations]: https://docs.prefect.io/v3/concepts/automations
+[Background tasks]: https://docs.prefect.io/v3/how-to-guides/workflows/run-background-tasks
 [Codebase]: https://github.com/PrefectHQ/Prefect
+[Deployments concept]: https://docs.prefect.io/v3/concepts/deployments
 [Documentation]: https://docs.prefect.io/v3/get-started/index
 [How to store secrets]: https://docs.prefect.io/v3/develop/secrets
 [Prefect deployment git clone step not working with Gitlab/Github Credential blocks]: https://github.com/PrefectHQ/prefect/issues/11279
+[Prefect MCP server]: https://docs.prefect.io/v3/how-to-guides/ai/use-prefect-mcp-server
 [prefect-aws]: https://docs.prefect.io/integrations/prefect-aws/index
+[Transactions]: https://docs.prefect.io/v3/develop/transactions
 [Website]: https://www.prefect.io/
+[Work pools]: https://docs.prefect.io/v3/concepts/work-pools
 
 <!-- Others -->
 [boto3 credential chain]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html#configuring-credentials
