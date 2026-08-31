@@ -1195,6 +1195,10 @@ all requests. They can be used in IAM policies to differentiate MCP-initiated ac
 eventually limit or empower them.<br/>
 CloudTrail logs all API calls for audit visibility.
 
+AWS publishes reusable skills that can be installed aside of MCP server.<br/>
+One can search the catalog with `aws --region 'us-east-1' agent-toolkit search-skills --search-query '<query>'`. This is
+currently only available in the `us-west-1` region.
+
 ## Further readings
 
 - [Learn AWS]
