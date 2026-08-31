@@ -6,6 +6,7 @@
 1. [Inventories](#inventories)
    1. [AWS](#aws)
    1. [Patterns](#patterns)
+   1. [Dynamic groups](#dynamic-groups)
 1. [Variables](#variables)
 1. [Templating](#templating)
    1. [Tests](#tests)
@@ -15,14 +16,17 @@
    1. [Assertions](#assertions)
 1. [Asynchronous actions](#asynchronous-actions)
    1. [Run tasks in parallel](#run-tasks-in-parallel)
+1. [Rolling updates](#rolling-updates)
 1. [Error handling](#error-handling)
-   1. [Using blocks](#using-blocks)
+    1. [Using blocks](#using-blocks)
 1. [Output formatting](#output-formatting)
 1. [Handlers](#handlers)
 1. [Roles](#roles)
     1. [Get roles](#get-roles)
     1. [Assign roles](#assign-roles)
     1. [Role dependencies](#role-dependencies)
+    1. [Role argument validation](#role-argument-validation)
+    1. [Testing roles](#testing-roles)
 1. [Create custom filter plugins](#create-custom-filter-plugins)
 1. [Execution environments](#execution-environments)
     1. [Build execution environments](#build-execution-environments)
@@ -95,6 +99,10 @@ pip3 install --user --require-virtualenv 'ansible'
 brew install 'ansible' 'sshpass'         # darwin
 sudo pamac install 'ansible' 'sshpass'   # manjaro linux
 
+# Install the linter.
+pipx install 'ansible-lint'
+pip3 install --user --require-virtualenv 'ansible-lint'
+
 # Generate example configuration files with entries disabled.
 ansible-config init --disabled > 'ansible.cfg'
 ansible-config init --disabled -t 'all' > ~/'.ansible.cfg'
@@ -118,6 +126,12 @@ ansible -i 'inventory' all --list-hosts
 # This will *not* execute the plays inside it.
 ansible-playbook 'path/to/playbook.yml' --syntax-check
 
+# Lint playbooks, roles and collections.
+ansible-lint
+ansible-lint 'path/to/playbook.yml'
+ansible-lint --fix
+ansible-lint --profile 'production'
+
 # Execute playbooks.
 ansible-playbook 'path/to/playbook.yml' -i 'hosts.list'
 ansible-playbook … -i 'host1,host2,hostN,' -l 'hosts,list'
@@ -139,6 +153,9 @@ ansible-playbook 'path/to/playbook.yml' --skip-tags 'system,user'
 ansible-playbook 'path/to/playbook.yml' --list-tasks
 ansible-playbook … --list-tasks --tags 'configuration,packages'
 ansible-playbook … --list-tasks --skip-tags 'system,user'
+
+# Resume/start a run from a specific task.
+ansible-playbook 'path/to/playbook.yml' --start-at-task 'Install Nginx'
 
 # Debug playbooks.
 ANSIBLE_ENABLE_TASK_DEBUGGER=True ansible-playbook …
@@ -449,6 +466,26 @@ The `,` is preferred when dealing with ranges and IPv6 addresses.
 One can use **wildcard** patterns with FQDNs or IP addresses, as long as the hosts are named in your inventory by FQDN
 or IP address.
 
+### Dynamic groups
+
+The [`group_by` module][group_by module] creates host groups during execution, based on gathered facts or any other
+variable.<br/>
+These groups persist for the rest of the run, and can be targeted in subsequent plays.
+
+```yaml
+- name: Group hosts by OS family
+  ansible.builtin.group_by:
+    key: "os_{{ ansible_facts['os_family'] | lower }}"
+
+- name: Apply Debian-specific configuration
+  hosts: os_debian
+  tasks: …
+```
+
+Spaces in group names are automatically converted to dashes.<br/>
+Consider sanitizing values in the key to avoid unexpected group names, e.g.
+`key: "distro_{{ ansible_distribution | lower | replace(' ', '_') }}"`.
+
 ## Variables
 
 Refer [Using variables].
@@ -614,6 +651,13 @@ Updated [examples][examples / templating] are available.
 - ansible.builtin.debug:
     var: "'string' | type_debug"
 ```
+
+Mark files generated from templates with `{{ ansible_managed | comment }}` at the top, to indicate the file is managed
+by Ansible and should not be changed manually.<br/>
+Use the `comment` filter instead of a manual `#` prefix to correctly handle multi-line values and different file
+formats (`comment('c')` for C-style, `comment('xml')` for XML, `comment(decoration='; ')` for INI).<br/>
+Avoid including timestamps or other volatile data in the comment. These cause unnecessary changes on every run and break
+idempotency.
 
 ### Tests
 
@@ -794,6 +838,37 @@ in later tasks:
       delay: 10
 ```
 
+## Rolling updates
+
+Refer [Controlling playbook execution: strategies and more].
+
+The `serial` keyword controls how many hosts a play processes at any one time.<br/>
+Without it, Ansible runs against **all** hosts in the play's `hosts` pattern simultaneously.
+
+```yaml
+---
+- name: Rolling web server update
+  hosts: webservers
+  serial: 3
+  tasks: …
+```
+
+`serial` accepts numbers, percentages, or lists for progressive batch sizes:
+
+```yaml
+# Process 25% of hosts per batch.
+serial: "25%"
+
+# Canary: 1 host first, then 5, then 25% of total for every subsequent batch.
+serial:
+  - 1
+  - 5
+  - "25%"
+```
+
+When combining `serial` with `run_once`, the task runs once **per batch** (and not once for the entire play).<br/>
+Use `when: inventory_hostname == ansible_play_hosts_all[0]` for true single-execution across all batches.
+
 ## Error handling
 
 ### Using blocks
@@ -968,7 +1043,21 @@ In playbooks:
       message: some message
 ```
 
-Roles are applied in order, and can**not** be parallelized at the time of writing.
+Roles are applied in order, and **cannot** be parallelized at the time of writing.
+
+They can also be used in the `tasks` section with [`import_role`][import_role] (static, parsed at load time) or
+[`include_role`][include_role] (dynamic, processed at runtime):
+
+```yaml
+tasks:
+  - name: Apply the web server role conditionally
+    ansible.builtin.include_role:
+      name: web_server
+    when: ansible_facts['os_family'] == 'Debian'
+```
+
+`import_role` gives full tag support, but applies `when` conditions to each task **individually**.<br/>
+`include_role` evaluates `when` once and supports loops, but tags require the `apply` keyword to propagate.
 
 ### Role dependencies
 
@@ -993,6 +1082,41 @@ and/or in `role/meta/requirements.yml`:
 collections:
   - community.dns
 ```
+
+### Role argument validation
+
+> Introduced in Ansible 2.11
+
+Define expected role parameters in `meta/argument_specs.yml` to validate inputs at the start of role execution.<br/>
+If the supplied parameters do not match the specification, the role fails immediately.
+
+```yaml
+# roles/example/meta/argument_specs.yml
+---
+argument_specs:
+  main:
+    short_description: Configure the example service
+    options:
+      example_port:
+        type: int
+        required: true
+        description: Port the service listens on
+      example_state:
+        type: str
+        default: present
+        choices:
+          - present
+          - absent
+```
+
+Argument specs also generate documentation accessible via `ansible-doc -t role`.<br/>
+Refer [Role argument validation].
+
+### Testing roles
+
+[Molecule] tests roles in isolated containers, covering creation, converge (run), idempotency, and verification
+stages.<br/>
+Combine it with [`ansible-lint`][ansible-lint] and a CI pipeline for shift-left testing.
 
 ## Create custom filter plugins
 
@@ -1467,6 +1591,13 @@ that key. The default, AWS-managed `aws/secretsmanager` key does **not** need ex
 
 ## Best practices
 
+- Use [fully qualified collection names][FQCN] (`namespace.collection.module`) for all module references to avoid
+  ambiguity when multiple collections provide modules with the same short name.<br/>
+  [`ansible-lint`][ansible-lint] enforces this; run `ansible-lint --fix` to convert short names in bulk.
+- Lint playbooks with [`ansible-lint`][ansible-lint] to catch deprecated modules, naming issues, and deviations from
+  recommended patterns.<br/>
+  Start with the `moderate` profile and tighten to `production` over time.
+- Verify the integrity of downloaded collections with [`ansible-sign`][ansible-sign].
 - Tag **all** tasks somehow.
 - Define tasks so that playbook runs will **not** fail just because one task depends on another.
 - Provide ways to **manually** feed values to dependent tasks so that runs can start from there or only use tagged
@@ -1944,6 +2075,10 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 - [Ansible Runner]
 - [Using variables]
 - [Galaxy Community User Guide][galaxy / community user guide]
+- [Ansible Lint][ansible-lint]
+- [Controlling playbook execution: strategies and more]
+- [Role argument validation]
+- [Good Practices for Ansible]
 
 ### Sources
 
@@ -2024,23 +2159,33 @@ Another _better (?)_ solution in playbooks/roles would be to sanitize the input 
 [ansible navigator documentation]: https://ansible.readthedocs.io/projects/navigator/
 [ansible runner]: https://ansible.readthedocs.io/projects/runner/en/stable/
 [ansible v2.14 changelog]: https://github.com/ansible/ansible/blob/7bb078bd740fba8ad43cc69e18fc8aeb4719180a/changelogs/CHANGELOG-v2.14.rst#id11
+[ansible-lint]: https://docs.ansible.com/projects/lint/
+[ansible-sign]: https://docs.ansible.com/ansible/latest/collections_guide/collections_verifying.html
 [async_dir not properly expanding variables]: https://github.com/ansible/ansible/issues/85370
 [asynchronous actions and polling]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_async.html
 [automating helm using ansible]: https://www.ansible.com/blog/automating-helm-using-ansible
 [Blocks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_blocks.html
 [collections index]: https://docs.ansible.com/ansible/latest/collections/index.html
 [configuration]: https://docs.ansible.com/ansible/latest/reference_appendices/config.html
+[Controlling playbook execution: strategies and more]: https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_strategies.html
 [debugging tasks]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_debugger.html
 [defining variables at runtime]: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html#defining-variables-at-runtime
 [developing and testing ansible roles with molecule and podman - part 1]: https://www.ansible.com/blog/developing-and-testing-ansible-roles-with-molecule-and-podman-part-1/
 [Execution environment definition]: https://ansible.readthedocs.io/projects/builder/en/stable/definition/
+[FQCN]: https://docs.ansible.com/projects/ansible/latest/tips_tricks/ansible_tips_tricks.html
 [Galaxy / Community User Guide]: https://docs.ansible.com/projects/galaxy-ng/en/latest/community/userguide.html
 [Galaxy / sivel.toiletwater]: https://galaxy.ansible.com/ui/repo/published/sivel/toiletwater/
 [Galaxy]: https://galaxy.ansible.com/
 [Getting started with Execution Environments]: https://docs.ansible.com/ansible/latest/getting_started_ee/index.html
+[Good Practices for Ansible]: https://redhat-cop.github.io/automation-good-practices/
+[group_by module]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/group_by_module.html
+[import_role]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/import_role_module.html
+[include_role]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/include_role_module.html
 [Introduction to Ansible Builder]: https://www.ansible.com/blog/introduction-to-ansible-builder/
+[Molecule]: https://ansible.readthedocs.io/projects/molecule/
 [patterns: targeting hosts and groups]: https://docs.ansible.com/ansible/latest/inventory_guide/intro_patterns.html
 [protecting sensitive data with ansible vault]: https://docs.ansible.com/ansible/latest/vault_guide/index.html
+[Role argument validation]: https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_reuse_roles.html#role-argument-validation
 [roles]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
 [setup module source code]: https://github.com/ansible/ansible/blob/devel/lib/ansible/modules/setup.py
 [setup module]: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/setup_module.html
