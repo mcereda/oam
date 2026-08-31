@@ -20,19 +20,20 @@
 1. [Importing resources](#importing-resources)
    1. [Import components and their children](#import-components-and-their-children)
    1. [Moving resources from a top-level URN to `ComponentResource` child](#moving-resources-from-a-top-level-urn-to-componentresource-child)
+1. [Using Terraform providers](#using-terraform-providers)
 1. [Pulumi Cloud](#pulumi-cloud)
    1. [ESC](#esc)
    1. [IDP](#idp)
 1. [Troubleshooting](#troubleshooting)
-   1. [A project with the same name already exists](#a-project-with-the-same-name-already-exists)
-   1. [Assume role with MFA enabled but AssumeRoleTokenProvider session option not set](#assume-role-with-mfa-enabled-but-assumeroletokenprovider-session-option-not-set)
-   1. [Attempting to deploy or update resources with pending operations from previous deployment](#attempting-to-deploy-or-update-resources-with-pending-operations-from-previous-deployment)
-   1. [Change your program back to the original providers](#change-your-program-back-to-the-original-providers)
-   1. [ECS task definitions keep being replaced](#ecs-task-definitions-keep-being-replaced)
-   1. [RangeError: Invalid string length](#rangeerror-invalid-string-length)
-   1. [Stack init fails because the stack supposedly already exists](#stack-init-fails-because-the-stack-supposedly-already-exists)
-   1. [Stack init fails due to missing scheme](#stack-init-fails-due-to-missing-scheme)
-   1. [Stack init fails due to invalid key identifier](#stack-init-fails-due-to-invalid-key-identifier)
+    1. [A project with the same name already exists](#a-project-with-the-same-name-already-exists)
+    1. [Assume role with MFA enabled but AssumeRoleTokenProvider session option not set](#assume-role-with-mfa-enabled-but-assumeroletokenprovider-session-option-not-set)
+    1. [Attempting to deploy or update resources with pending operations from previous deployment](#attempting-to-deploy-or-update-resources-with-pending-operations-from-previous-deployment)
+    1. [Change your program back to the original providers](#change-your-program-back-to-the-original-providers)
+    1. [ECS task definitions keep being replaced](#ecs-task-definitions-keep-being-replaced)
+    1. [RangeError: Invalid string length](#rangeerror-invalid-string-length)
+    1. [Stack init fails because the stack supposedly already exists](#stack-init-fails-because-the-stack-supposedly-already-exists)
+    1. [Stack init fails due to missing scheme](#stack-init-fails-due-to-missing-scheme)
+    1. [Stack init fails due to invalid key identifier](#stack-init-fails-due-to-invalid-key-identifier)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -151,6 +152,7 @@ pulumi whoami -v
 pulumi whoami --json
 
 # Log out of the current backend.
+# Also deletes the backend configuration for the specific backend being logged out of.
 pulumi logout
 pulumi logout --local
 pulumi logout --all
@@ -168,6 +170,7 @@ pulumi config set --secret 'secretName' 'secretValue'
 pulumi config set --secret 'namespace:secretName' 'secretValue'
 pulumi config set --path 'outer.inner' 'value'
 pulumi config set --path 'list[1]' 'value'
+echo 'multi-line\nvalue' | pulumi config set --raw 'certPem'
 
 # Read configuration values.
 # Secrets get unencrypted.
@@ -223,6 +226,7 @@ pulumi import -f 'resources.to.import.json' --generate-code=false -y
 pulumi destroy
 pulumi down -t 'targetResourceUrn'
 pulumi dn -s 'stack' --exclude-protected
+pulumi destroy --ignore-protect
 
 # Refresh the state against the actual cloud resources.
 pulumi refresh
@@ -271,6 +275,11 @@ pulumi stack rename 'new-name'
 pulumi stack rename 'new-dev' -s 'dev'
 pulumi stack rename -s 'dev' 'organization/internal-services/dev'
 
+# Migrate stacks between backends.
+# Re-encrypts secrets under the target backend's secrets provider.
+pulumi stack migrate 'file://~' 'my-app-production'
+pulumi stack migrate 's3://old-bucket/prefix' 'dev'
+
 # Change secrets providers.
 pulumi stack change-secrets-provider 'awskms://1234abcd-12ab-34cd-56ef-1234567890ab?region=us-east-1'
 pulumi stack change-secrets-provider 'awskms:///arn:aws:kms:eu-east-2:012345678901:key/01234567-890a-bcde-f012-34567890abcd'
@@ -288,6 +297,9 @@ pulumi state rename \
 pulumi state delete 'resourceUrn'
 pulumi state delete --force --target-dependents \
   'urn:pulumi:dev::whatevah::aws:rds/parameterGroup:ParameterGroup::mariadb-slow'
+
+# Show individual resources from state.
+pulumi state get 'resourceUrn'
 
 # Unprotect resources that are protected in states.
 pulumi state unprotect 'resourceUrn'
@@ -348,6 +360,15 @@ pulumi pre … --save-plan 'plan.json'
 pulumi up --yes --non-interactive --stack 'stackname' \
   --skip-preview --plan 'plan.json' \
   --logtostderr --logflow --verbose '9' 1> pulumi-up.txt 2> pulumi-error.txt || exit_code=$?
+
+
+# Operate directly on resources operation (no project nor program required).
+# Records actions in the stack's state by default. Use '--stateless' for one-off operations.
+# Outputs structured JSON to stdout. Progress messages go to stderr.
+pulumi do 'aws:s3/bucket:Bucket' create 'my-bucket' --bucketPrefix 'test-'
+pulumi do 'aws:s3/bucket:Bucket' read 'my-bucket-id'
+pulumi do 'aws:ec2/vpc:Vpc' delete 'my-vpc' --stateless --yes
+pulumi do 'aws:ec2:getAmi' --owners '["amazon"]' --mostRecent true
 ```
 
 </details>
@@ -620,6 +641,7 @@ Learning resources:
 
 - [Blog]
 - [Code examples]
+- [Direct resource operations (`pulumi do`)]
 - [Resources reference]
 
 ## Projects
@@ -1002,6 +1024,12 @@ The Pulumi Cloud backend records every checkpoint to allow to recover from exoti
 Self-managed backends also store backups and history, but may have more trouble recovering from exotic failure scenarios
 compared to Pulumi Cloud.
 
+The Pulumi Cloud backend uses _journaling_. Self-managed backends are unaffected.<br/>
+Updates to the state are sent in parallel, per resource, instead of as full snapshots. Yields much faster `up`,
+`destroy`, and `refresh` operations on large stacks.<br/>
+Journaling is enabled by default, but can be disabled by setting `PULUMI_DISABLE_JOURNALING=true`.<br/>
+Refer to [Now GA: Up to 20x Faster Pulumi Operations for Everyone].
+
 Backends store the states of one or more [stacks], divided by [project][projects].
 Everything **but** the credentials for the backend (`~/.pulumi/credentials.json`) is stored in the backend's root
 directory, under the `.pulumi` folder:
@@ -1095,6 +1123,23 @@ backend:
 
 ### Migrate to different backends
 
+`pulumi stack migrate` handles full migrations in a single command. This includes re-encrypting secrets under the target
+backend's secrets provider:
+
+```sh
+# Log in to the target backend, then migrate from the source.
+pulumi login 's3://super-bros/galaxy2'
+pulumi stack migrate 'file://~' 'mario'
+```
+
+When source and target stack names match, the command updates `Pulumi.<stack>.yaml` in place and creates a `.bak.*`
+backup.<br/>
+When the target stack has a different name, it replaces any existing `Pulumi.<target>.yaml`, including its ESC
+environment imports. Save a copy of that file before migrating if you need its current contents.
+
+<details>
+  <summary>Manual migration (fallback)</summary>
+
 1. Get to the current backend:
 
    ```sh
@@ -1139,6 +1184,8 @@ backend:
    ```sh
    cat 'Pulumi.mario.yaml'
    ```
+
+</details>
 
 ## Composing resources
 
@@ -1660,6 +1707,40 @@ correctly (e.g. by referencing the new component's output).
 
 This approach registers a new AWS resource revision, and orphans the old one.
 
+## Using Terraform providers
+
+Projects can use Terraform providers that have no published Pulumi package by declaring them under `packages:` in the
+project's `Pulumi.yaml`:
+
+```yml
+name: Prefect
+runtime: nodejs
+description: Self-hosted Prefect OSS instance
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: typescript
+packages:
+  prefect:
+    source: terraform-provider
+    version: 1.2.1
+    parameters:
+      - prefecthq/prefect
+      - 3.4.2
+```
+
+Running `pulumi install` regenerates the SDK into the project's `sdks/` folder **before** installing npm
+dependencies. Commit only the `Pulumi.yaml` declaration and the `file:sdks/<name>` dependency in `package.json`, and
+gitignore the folder itself.
+
+If one leaves versions in the declaration unpinned, every install will regenerate them from the registry's `latest`
+version, and silently diverge between hosts.<br/>
+Pin **both** versions in the declaration. Set `version:` (the terraform-provider bridge plugin) and the provider's own
+version as the `parameters:`'s key second item.
+
+Keep the SDK's `allowScripts` entry in `package.json`. NPM v12 blocks lifecycle scripts by default, and the generated
+SDK compiles itself via a `postinstall` hook.
+
 ## Pulumi Cloud
 
 ### ESC
@@ -1884,6 +1965,7 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 - [Things I wish I knew earlier about Pulumi]
 - [Enable pulumi refresh to solve pending creates]
 - [Docker images]
+- [Releases]
 
 ### Sources
 
@@ -1905,6 +1987,8 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 - [Create a ComponentResource]
 - [How to Manage Secrets with Pulumi]
 - [Deploy WordPress to AWS using Pulumi and Ansible]
+- [Introducing pulumi do: Direct Resource Operations for Any Cloud]
+- [Now GA: Up to 20x Faster Pulumi Operations for Everyone]
 
 <!--
   Reference
@@ -1935,6 +2019,7 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 [component resources]: https://www.pulumi.com/docs/iac/concepts/resources/components/
 [deletebeforereplace]: https://www.pulumi.com/docs/concepts/options/deletebeforereplace/
 [Deploy WordPress to AWS using Pulumi and Ansible]: https://www.pulumi.com/blog/deploy-wordpress-aws-pulumi-ansible/
+[Direct resource operations (`pulumi do`)]: https://www.pulumi.com/docs/iac/cli/direct-resource-operations/
 [documentation]: https://www.pulumi.com/docs/
 [enable pulumi refresh to solve pending creates]: https://github.com/pulumi/pulumi/pull/10394
 [get started with pulumi policy as code]: https://www.pulumi.com/docs/using-pulumi/crossguard/get-started/
@@ -1944,7 +2029,9 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 [iac recommended practices: developer stacks and git branches]: https://www.pulumi.com/blog/iac-recommended-practices-developer-stacks-git-branches/
 [ignorechanges]: https://www.pulumi.com/docs/concepts/options/ignorechanges/
 [importing resources]: https://www.pulumi.com/docs/iac/adopting-pulumi/import/
+[Introducing pulumi do: Direct Resource Operations for Any Cloud]: https://www.pulumi.com/blog/pulumi-do-direct-resource-operations/
 [New in Pulumi IaC: `replaceWith` Resource Option]: https://www.pulumi.com/blog/dependent-resource-replacements/
+[Now GA: Up to 20x Faster Pulumi Operations for Everyone]: https://www.pulumi.com/blog/journaling-ga/
 [organizing pulumi projects & stacks]: https://www.pulumi.com/docs/using-pulumi/organizing-projects-stacks/
 [property paths]: https://www.pulumi.com/docs/iac/concepts/miscellaneous/property-paths/
 [pulumi config set-all]: https://www.pulumi.com/docs/cli/commands/pulumi_config_set-all/
@@ -1962,6 +2049,7 @@ Solution: Read [secrets], and fix the configuration by providing a correct key i
 [pulumi-aws/issues/1366]: https://github.com/pulumi/pulumi-aws/issues/1366
 [pulumi/pulumi#11259]: https://github.com/pulumi/pulumi/issues/11259
 [pulumi/pulumi#12173]: https://github.com/pulumi/pulumi/issues/12173
+[releases]: https://www.pulumi.com/releases/
 [resources reference]: https://www.pulumi.com/resources
 [secrets]: https://www.pulumi.com/docs/concepts/secrets/
 [stack references]: https://www.pulumi.com/docs/concepts/stack/#stackreferences
