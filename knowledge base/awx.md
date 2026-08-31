@@ -9,6 +9,7 @@ Part of the upstream projects for the [Red Hat Ansible Automation Platform].
    1. [Deployment](#deployment)
    1. [Update](#update)
    1. [Removal](#removal)
+   1. [Backup and restore](#backup-and-restore)
    1. [Testing](#testing)
    1. [Executing jobs](#executing-jobs)
 1. [Attribute inheritance and overriding](#attribute-inheritance-and-overriding)
@@ -77,6 +78,23 @@ Part of the upstream projects for the [Red Hat Ansible Automation Platform].
   If `init-receptor` is failing despite having the correct configuration, the root cause is easily an operator version
   bug. Pin or upgrade the operator rather than changing `init_container_image` to work around it.<br/>
 
+- The official Helm chart repository for the AWX operator at `ansible.github.io/awx-operator/` has been returning 404
+  since August 2024. The chart moved to the community-maintained [AWX Operator Helm Chart] repository at
+  `ansible-community.github.io/awx-operator-helm/`.<br/>
+  The old repository used chart versions matching operator versions (e.g., chart 2.14.0 = operator 2.14.0), but the new
+  repository uses independent versioning (e.g., chart 3.2.0 = operator 2.19.1).
+
+- The operator auto-generates a `<resourcename>-secret-key` Kubernetes secret if `secret_key_secret` is not specified in
+  the `AWX` resource's specifications. This secret encrypts **all** credentials stored in the AWX database.<br/>
+  Losing this secret (e.g., by deleting the namespace or the secret itself) makes all encrypted credentials
+  **unrecoverable**.<br/>
+  For GitOps or disaster recovery workflows, explicitly create and manage this secret **outside** of the operator's
+  lifecycle.
+
+- Since the 24.6.1 release (July 2024), no new stable AWX releases have been published. The project is undergoing a
+  major refactoring toward a service-oriented architecture.<br/>
+  Refer to the [AWX modernization thread].
+
 ## Setup
 
 ### Deployment
@@ -143,7 +161,7 @@ awx-operator-controller-manager-8b7dfcb58-k7jt8   2/2     Running   0          1
 
 ```sh
 # Add the operator's repository.
-$ helm repo add 'awx-operator' 'https://ansible.github.io/awx-operator/'
+$ helm repo add 'awx-operator' 'https://ansible-community.github.io/awx-operator-helm/'
 "awx-operator" has been added to your repositories
 $ helm repo update 'awx-operator'
 Hang tight while we grab the latest from your chart repositories...
@@ -152,10 +170,10 @@ Update Complete. ⎈Happy Helming!⎈
 
 $ helm search repo 'awx-operator'
 NAME                            CHART VERSION   APP VERSION     DESCRIPTION
-awx-operator/awx-operator       2.14.0          2.14.0          A Helm chart for the AWX Operator
+awx-operator/awx-operator       3.2.0           2.19.1          A Helm chart for the AWX Operator
 
 # Install the operator.
-$ helm -n 'awx' upgrade -i --create-namespace 'my-awx-operator' 'awx-operator/awx-operator' --version '2.14.0'
+$ helm -n 'awx' upgrade -i --create-namespace 'my-awx-operator' 'awx-operator/awx-operator' --version '3.2.0'
 Release "my-awx-operator" does not exist. Installing it now.
 NAME: my-awx-operator
 LAST DEPLOYED: Mon Apr  8 15:34:00 2024
@@ -164,7 +182,7 @@ STATUS: deployed
 REVISION: 1
 TEST SUITE: None
 NOTES:
-AWX Operator installed with Helm Chart version 2.14.0
+AWX Operator installed with Helm Chart version 3.2.0
 $ kubectl -n 'awx' get pods
 NAME                                               READY   STATUS      RESTARTS   AGE
 awx-operator-controller-manager-75b667b745-g9g9c   2/2     Running     0          17m
@@ -196,8 +214,8 @@ kind: Kustomization
 namespace: awx
 helmCharts:
   - name: awx-operator
-    repo: https://ansible.github.io/awx-operator/
-    version: 2.19.0
+    repo: https://ansible-community.github.io/awx-operator-helm/
+    version: 3.2.0
     releaseName: awx-operator
     includeCRDs: true  # Important. Not namespaced. Watch out upon removal.
 resources:
@@ -249,7 +267,7 @@ resources:
 EOF
 
 # Start the operator
-/tmp/awx$ helm repo add 'awx-operator' 'https://ansible.github.io/awx-operator/'
+/tmp/awx$ helm repo add 'awx-operator' 'https://ansible-community.github.io/awx-operator-helm/'
 /tmp/awx$ kubectl kustomize --enable-helm '.' | kubectl apply -f -
 namespace/awx created
 …
@@ -430,7 +448,7 @@ $ cd '/tmp/awx'
 
 ```sh
 # Update the operator by telling it to also deploy the AWX instance.
-$ helm -n 'awx' upgrade -i --create-namespace 'my-awx-operator' 'awx-operator/awx-operator' --version '2.14.0' \
+$ helm -n 'awx' upgrade -i --create-namespace 'my-awx-operator' 'awx-operator/awx-operator' --version '3.2.0' \
   --set 'AWX.enabled=true' --set 'AWX.name=awx-demo'
 Release "my-awx-operator" has been upgraded. Happy Helming!
 NAME: my-awx-operator
@@ -440,7 +458,7 @@ STATUS: deployed
 REVISION: 2
 TEST SUITE: None
 NOTES:
-AWX Operator installed with Helm Chart version 2.14.0
+AWX Operator installed with Helm Chart version 3.2.0
 $ kubectl -n 'awx' get pods
 NAME                                               READY   STATUS      RESTARTS   AGE
 awx-demo-migration-24.1.0-qhbq2                    0/1     Completed   0          12m
@@ -503,6 +521,86 @@ Eventually, remove the namespace too to clean all things up:
 ```sh
 kubectl delete ns 'awx'
 ```
+
+### Backup and restore
+
+The operator provides `AWXBackup` and `AWXRestore` custom resources to back up and restore AWX instances on Kubernetes
+clusters.<br/>
+Backups include the `AWX` custom resource specifications, the PostgreSQL database, and Kubernetes secrets (including the
+encryption secret key, admin password, and broadcast websocket secret).
+
+<details>
+<summary>Create a backup</summary>
+
+```yaml
+---
+apiVersion: awx.ansible.com/v1beta1
+kind: AWXBackup
+metadata:
+  name: awxbackup-2024-07-01
+  namespace: awx
+spec:
+  deployment_name: awx-demo
+  # Optional: tie the backup file lifetime to the AWXBackup resource.
+  clean_backup_on_delete: true
+  # Optional: use an existing PVC instead of creating one.
+  # backup_pvc: 'awx-backup-volume-claim'
+  # Optional: set storage class and size for the auto-created PVC.
+  # backup_storage_class: 'gp3'
+  # backup_storage_requirements: '10Gi'
+```
+
+```sh
+$ kubectl -n 'awx' apply -f 'awxbackup.yaml'
+$ kubectl -n 'awx' get awxbackup
+NAME                    AGE
+awxbackup-2024-07-01    2m
+```
+
+The `pg_dump_suffix` spec field appends arguments to the underlying `pg_dump` command to, e.g., exclude large tables:
+
+```yaml
+spec:
+  pg_dump_suffix: "--exclude-table-data 'main_jobevent*'"
+```
+
+</details>
+
+<details>
+<summary>Restore from a backup</summary>
+
+> [!important]
+> Before restoring over an existing AWX deployment, delete the old `AWX` custom resource and the old PostgreSQL PVC, but
+> do **not** delete the namespace containing the backup PVC.
+
+```yaml
+---
+apiVersion: awx.ansible.com/v1beta1
+kind: AWXRestore
+metadata:
+  name: awxrestore-2024-07-01
+  namespace: awx
+spec:
+  deployment_name: awx-demo
+  backup_name: awxbackup-2024-07-01
+```
+
+If the original `AWXBackup` object no longer exists, reference the PVC and directory directly:
+
+```yaml
+spec:
+  deployment_name: awx-demo
+  backup_pvc: awx-demo-backup-claim
+  backup_dir: /backups/tower-openshift-backup-2024-07-01
+```
+
+```sh
+kubectl -n 'awx' apply -f 'awxrestore.yaml'
+```
+
+</details>
+
+Refer the [operator's backup role] and [operator's restore role] for all available fields.
 
 ### Testing
 
@@ -1393,8 +1491,10 @@ Refer [AWX API Reference] and [How to use AWX REST API to execute jobs].
 AWX offers the `awx` client CLI tool:
 
 ```sh
-# Install the 'awx' client
+# Install the 'awx' client.
 # As of 2025-07-28, Python 3.11 is the last Python version for which the AWX CLI works correctly.
+# On Python 3.12+, awxkit fails with 'ModuleNotFoundError: No module named pkg_resources'
+# unless 'setuptools' is installed alongside it.
 pipx install --python '3.11' 'awxkit'
 pip3.11 install --user 'awxkit'
 ```
@@ -1480,6 +1580,10 @@ Refer [AWX Command Line Interface] for more information.
 - [AWX API Reference]
 - [How to use AWX REST API to execute jobs]
 - [Automation Job isn't created with tolerations from AWX manifest]
+- [AWX Operator Helm Chart]
+- [AWX modernization thread]
+- The Operator's [backup role documentation][operator's backup role]
+- The Operator's [restore role documentation][operator's restore role]
 
 <!--
   Reference
@@ -1523,7 +1627,11 @@ Refer [AWX Command Line Interface] for more information.
 <!-- Others -->
 [arm64 image pulled shows amd64 as its arch]: https://github.com/brancz/kube-rbac-proxy/issues/79#issuecomment-826557647
 [automation job isn't created with tolerations from awx manifest]: https://github.com/ansible/awx-operator/issues/1099#issuecomment-1298706083
+[AWX modernization thread]: https://forum.ansible.com/t/awx-modernization-moving-forward/45134
+[AWX Operator Helm Chart]: https://github.com/ansible-community/awx-operator-helm
 [DeepWiki ansible/awx]: https://deepwiki.com/ansible/awx
 [how to use awx rest api to execute jobs]: https://www.dbi-services.com/blog/how-to-use-awx-rest-api-to-execute-jobs/
 [Kubernetes operator]: https://kubernetes.io/docs/concepts/extend-kubernetes/operator/
+[operator's backup role]: https://github.com/ansible/awx-operator/blob/devel/roles/backup/README.md
+[operator's restore role]: https://github.com/ansible/awx-operator/blob/devel/roles/restore/README.md
 [Passing Ansible variables in Workflows using set_stats]: https://gregsowell.com/?p=7540
