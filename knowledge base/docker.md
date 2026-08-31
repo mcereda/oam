@@ -784,10 +784,9 @@ Alternatively, keep the exec form but force invoking a shell in it:
 ## Further readings
 
 - [Codebase]
-- [Podman]
+- Alternatives: [Colima], [Containerd], [Podman]
 - [Dive]
 - [Testcontainers]
-- [Containerd]
 - [Kaniko]
 - [`amazon-ecr-credential-helper`][amazon-ecr-credential-helper]
 - [Announcing remote cache support in Amazon ECR for BuildKit clients]
@@ -846,6 +845,7 @@ Alternatively, keep the exec form but force invoking a shell in it:
 [arch linux wiki]: https://wiki.archlinux.org/index.php/Docker
 [cheatsheet]: https://collabnix.com/docker-cheatsheet/
 [chipmk/docker-mac-net-connect]: https://github.com/chipmk/docker-mac-net-connect
+[Colima]: https://github.com/abiosoft/colima
 [configuring dns]: https://dockerlabs.collabnix.com/intermediate/networking/Configuring_DNS.html
 [configuring healthcheck in docker-compose]: https://medium.com/@saklani1408/configuring-healthcheck-in-docker-compose-3fa6439ee280
 [difference between expose and ports in docker compose]: https://www.baeldung.com/ops/docker-compose-expose-vs-ports

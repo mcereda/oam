@@ -98,8 +98,7 @@ podman system prune --all
 
 - [Website]
 - [Documentation]
-- [Docker]
-- [Containerd]
+- Alternatives: [Colima], [Containerd], [Docker]
 - [Kaniko]
 - [Volumes and rootless Podman]
 - [Subordinate IDs]
@@ -125,6 +124,7 @@ podman system prune --all
 [Website]: https://podman.io/
 
 <!-- Others -->
+[Colima]: https://github.com/abiosoft/colima
 [Pull Official Images From Docker Hub Using Podman]: https://www.baeldung.com/ops/podman-pull-image-docker-hub
 [User IDs and (rootless) containers with Podman]: https://blog.christophersmart.com/2021/01/26/user-ids-and-rootless-containers-with-podman/
 [Volumes and rootless Podman]: https://blog.christophersmart.com/2021/01/31/volumes-and-rootless-podman/
