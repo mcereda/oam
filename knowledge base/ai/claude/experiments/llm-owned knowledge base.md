@@ -14,6 +14,20 @@ notebook_ for durable, reusable knowledge.
 
 This procedure leverages [karpathy/llm-wiki.md]'s ready-to-use instructions and iteratively improves upon it.
 
+Systems that resemble an LLM-owned KB on the surface might have different owners of the content's lifecycle:
+
+| System                      | Who writes          | Who maintains              | Retrieval                       |
+| --------------------------- | ------------------- | -------------------------- | ------------------------------- |
+| Human wiki                  | Human               | Human                      | Search, browse                  |
+| RAG pipeline                | Human (source docs) | Nobody directly            | Embedding similarity per query  |
+| Second brain (Zettelkasten) | Human captures      | Human connects and reviews | Link-following, graph traversal |
+| Auto-memory (Claude Code)   | LLM writes          | Trigger-based, light-touch | Auto-loaded every session       |
+| **LLM-owned KB**            | LLM synthesizes     | LLM reviews + lint gates   | Grep + curated cross-references |
+
+RAG involves the LLM only during retrieval; wikis depends on humans throughout; auto-memory has the LLM writing with
+minimal curation. The LLM operates the full loop of an LLM-owned KB, deciding what's worth keeping, writing it for
+future sessions, cross-referencing it, detecting staleness, and fixing it.
+
 The KB is the _explicit retrieval_ tier in the [memory ecosystem][Personal experiments / Memory tiers], designed around
 Clark and Chalmers' parity principle (a reference notebook that requires explicit retrieval can play the same functional
 role as biological memory for stored beliefs).<br/>
@@ -23,6 +37,14 @@ The design choices follow from that role:
 - Has grep-based access, because a model needs to use tools to consult it on demand (it is not auto-loaded, and grep
   felt the better solution at the time of the study).
 - Needs to be _curated_, because uncurated reference material degrades its retrieval performance.
+
+The fundamental constraint is that the LLM has no memory between sessions, and everything not written down is just
+**completely gone**.<br/>
+This requirement drives most of the infrastructure: frontmatter fields like `confidence` and `review-after` need to
+exist because a future session can't remember how confident the writing session was; pages must be self-contained
+because the reader has no conversation context; hooks must exist because the LLM won't remember to check for overdue
+reviews; and extraction backstops must exist because a session that discusses an insight without saving it has lost it
+permanently.
 
 > [!important]
 > Not every insight is KB material. The negative space is at least as important as the positive one.
@@ -44,6 +66,12 @@ The design choices follow from that role:
 >
 > Rule of thumb: if the official docs answer the question in one read, do **not** duplicate it in the KB but just
 > reference it instead. If one had to cross-reference three sources or discover it empirically, that is worth a page.
+
+RAG re-synthesizes on **every** query, so the third session asking the same cross-cutting question pays the same
+reasoning cost as the first.<br/>
+A KB that compiles knowledge at write time stores the result and allows subsequent sessions to just read it, which makes
+the content bar concrete: the value of a page is proportional to the synthesis effort it saves future sessions from
+repeating.
 
 The KB's role is to _cultivate_ Claude and guide it naturally by accumulating patterns, gotchas, and non-obvious
 synthesis that compound over time, not recording corrections or rules to follow.<br/>
@@ -327,6 +355,14 @@ to store information abstracted from practice, that is reusable across projects 
   gaps induced by keyword-matching well enough to defer retrieval infrastructure (RAG, vector DBs) indefinitely.<br/>
   Tighten the scope (_has reference material crept in?_) **before** adding retrieval infrastructure.
 
+  At 230+ pages (900+ cross-reference edges, 185 tags), grep-based retrieval can still works if structural investment
+  connects conceptually related pages explicitly.<br/>
+  When retrieval infrastructure does become necessary, it should be a **convenience layer** that the system works
+  without. RAG adds infrastructure disproportionate to the scale, so a lightweight FTS5 index (single SQLite file, no
+  infrastructure) is the natural initial step.<br/>
+  Every convention the extension enforces must also exist in the content, and every write it performs must produce the
+  same files a direct edit would. A session without the extension should only lose speed, not capability.
+
 - Sandboxed project sessions can't write directly to the KB unless **explicitly** allowed globally, but memories can be
   tagged as a workaround.
 
@@ -542,6 +578,12 @@ to store information abstracted from practice, that is reusable across projects 
   This completes the pipeline. The `SessionEnd` hook catches what sessions missed, and the triage skill promotes catches
   into durable knowledge.
 
+  The content bar keeps the KB precise (high-signal) at the cost of occasionally losing insights that sessions discussed
+  but never saved. The extraction hook and triage skill catch what the precision filter drops (concessions to
+  recall).<br/>
+  Neither side can be optional because without the content bar the KB fills up with cached lookups, and without the
+  backstops the precision filter loses too much.
+
 - Billing for non-interactive usage (`claude -p` and the Agent SDK) needs to be accounted for. At Sonnet rates, each
   extraction call costs around $0.025. For light usage (3-5 sessions/day) this is $2-4/month, which is well within any
   tier's Agent SDK monthly credit.
@@ -696,9 +738,9 @@ to store information abstracted from practice, that is reusable across projects 
 
   A working test was for the model to ask "would splitting let me iterate one part without churning the other?"
 
-- Google's [Open Knowledge Format][OKF specification] (OKF) v0.1, published June 2026, formalizes the LLM wiki concept
-  into a minimal interoperability specification that requires only the `type` field, and has five _recommended_ fields,
-  two reserved filenames (`index.md`, `log.md`), and standard markdown cross-links.
+- Google's [Open Knowledge Format][OKF specification] (OKF) formalizes the LLM wiki concept into a minimal
+  interoperability specification. It only requires the `type` field, and has ten _recommended_ fields, two reserved
+  filenames (`index.md`, `log.md`), and standard markdown cross-links.
 
   Making `type` the only required field in the frontmatter shifts it from organizational metadata (helping find things)
   to reading instructions (_gotchas_ alert about traps, _patterns_ suggest to try specific approaches, and _references_
@@ -736,9 +778,15 @@ to store information abstracted from practice, that is reusable across projects 
   it should **not** apply (e.g., when a session uses `--add-dir` to read KB files but should not follow the KB's
   operational rules).
 
-The KB relies on multiple cross-project modes that are **complementary**: _filing agents_ take care of live writes from
-any session, a _memory inbox_ allows deferring promotion during review sessions, and an _extraction hook_ is a backstop
+The KB must rely on multiple cross-project modes, all **complementary**: _filing agents_ take care of live writes from
+any session; a _memory inbox_ allows deferring promotion during review sessions; an _extraction hook_ is a backstop
 for missed insights.
+
+These modes form different write paths, depending on how much judgment they require: **captures** are cheap and can be
+done by any session; **promotions** can be batched and are judgment-heavy; potential **direct writes** require a
+mechanical convention enforcement to address low judgment writes.<br/>
+The _capture_ path benefits from being harness-agnostic and mostly mechanical; depending on a specific tool's memory
+structure excludes sessions on other harnesses from being able to intake data with low effort.
 
 Review sessions that need both the KB and another project's context can use `--add-dir` to load conventions from both
 repositories.
@@ -839,14 +887,8 @@ repositories.
 
 - Any agent writing to the KB should use **worktree isolation** (e.g., [git worktrees]) by default.
 
-  Multiple sessions or agents writing to the same repository concurrently share the working tree. Writers failing
-  mid-operation can block every other, and everybody accessing the files (other agents, direct sessions, and pre-commit
-  hooks) all see the corrupted state. Switching branches impacts them all the same way.<br/>
-  Worktree isolation makes each write atomic and self-contained. An agent's work is invisible to the main tree until a
-  **successful** merge, and a failure just leaves a disposable branch and does **not** corrupt the shared state.<br/>
-
-  This applies equally to any repository where multiple contributors (human or agent) push concurrently. The merge-back
-  (`--ff-only`) can fail if the main branch has moved, but a failed merge is explicit and recoverable.
+  The [findings](#findings) detail what breaks without it. The same applies to any repository where multiple contributors
+  (human or agent) push concurrently.
 
 - Avoid running full checks at `SessionStart` as the KB grows. They are expensive and scale badly over an increasing
   number of pages.<br/>
@@ -882,9 +924,7 @@ The mechanisms above form an enforcement hierarchy where each layer catches what
 | `CLAUDE.md` files                                | Page scope, tag semantics, what to write                   | Judgment-dependent; can't reduce to pass/fail           |
 
 The pre-commit layer benefits from splitting concerns into separate scripts (content lint, workflow checks, attribution
-checks) rather than bundling everything into one. Different concerns have different false-positive profiles, and
-independent scripts can be enabled or disabled without touching each other. Lefthook's `parallel: true` runs them
-concurrently, so the cost of splitting is negligible.
+checks) as described in the [setup](#setup).
 
 ## Adapt the concept to shared KBs
 
