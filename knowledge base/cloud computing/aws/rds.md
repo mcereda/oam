@@ -19,6 +19,7 @@
 1. [Multi-AZ instances](#multi-az-instances)
    1. [Converting instances between Multi-AZ and Single-AZ](#converting-instances-between-multi-az-and-single-az)
 1. [Operations](#operations)
+    1. [Blue/Green Deployments](#bluegreen-deployments)
     1. [Upgrade the engine version](#upgrade-the-engine-version)
        1. [Upgrade to a new major version](#upgrade-to-a-new-major-version)
        1. [Upgrade to a new minor version](#upgrade-to-a-new-minor-version)
@@ -27,6 +28,7 @@
     1. [Cancel pending modifications](#cancel-pending-modifications)
 1. [Best practices](#best-practices)
     1. [Scale consumers down before resizing](#scale-consumers-down-before-resizing)
+    1. [Set client DNS TTL below 30 seconds](#set-client-dns-ttl-below-30-seconds)
 1. [Pricing](#pricing)
     1. [Cost-saving measures](#cost-saving-measures)
        1. [Reserved DB instances](#reserved-db-instances)
@@ -75,6 +77,9 @@ and settings must use the new name.
 Read replicas **can** be promoted to standalone DB instances.<br/>
 See [Working with DB instance read replicas].
 
+Consider using [RDS Proxy] to provide connection pooling, improved failover handling, and IAM authentication enforcement
+for applications that need to connect to RDS instances. Supports MariaDB, MySQL, PostgreSQL, and SQL Server.
+
 Disk free metrics are available in CloudWatch.
 
 Turning Performance Insights on and off does **not** cause downtime, a reboot, or a failover.<br/>
@@ -84,6 +89,12 @@ One can choose any of the following retention periods for instances' Performance
 - _n_ months, where _n_ is a number from 1 to 23.<br/>
   This **must** be _n*31_ for API calls (including the CLI).
 - 731 days, likely 365 × 2 + 1 (two years accounting for one leap day).
+
+> [!warning]
+> Performance Insights reached end-of-life on **2026-07-31**. After that, the Performance Insights console just
+> redirects to [CloudWatch Database Insights].<br/>
+> The Performance Insights API continues unchanged, and existing retention settings are preserved at the same cost under
+> Database Insights Standard mode. Refer [Overview of Performance Insights on Amazon RDS].
 
 Each and every DB instance has a 30-minutes weekly maintenance window defining when modifications and software patching
 occur. Should it not be defined during creation, one will be assigned automatically at random from the default time
@@ -303,6 +314,11 @@ Refer [the relative section in the EC2 article](ec2#burstable-instances), with t
 
 Refer [Amazon RDS DB instance storage] and [EBS].
 
+> [!warning]
+> Magnetic storage is **deprecated** since **2026-07-01**.<br/>
+> Existing magnetic volumes have been migrated to GP3 automatically, and snapshots can no longer be restored to magnetic
+> storage. Use General Purpose SSD (GP3) or Provisioned IOPS SSD instead.
+
 When selecting General Purpose SSD or Provisioned IOPS SSD, RDS automatically stripes storage across multiple EBS
 volumes.<br/>
 This enhances performance depending on the selected engine, and the amount of storage requested:
@@ -363,8 +379,7 @@ storage modification.
 
 In _most_ cases, scaled storage does **not** cause outages or performance degradation. However, the storage optimization
 process still takes typically several hours and up to more than a day.<br/>
-The impacted instance is operational and still available during the whole process, unless reboots are required for
-specific cases, such as a change to the storage type between SSD and magnetic disks.
+The impacted instance is operational and still available during the whole process.
 
 > [!important]
 > One cannot speed up storage optimization, and must wait for the process to complete.<br/>
@@ -400,19 +415,8 @@ Used to specify how a DB is configured.
   If one has enough privileges to do so, one can also change parameter values by using the `ALTER DATABASE`,
   `ALTER ROLE`, and `SET` commands.
 
-Learn about available parameters by describing the existing default ones:
-
-```sh
-aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15'
-aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
-  --query "Parameters[?ParameterName=='shared_preload_libraries']" --output 'table'
-
-aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' \
-  --query "Parameters[?ParameterName=='shared_preload_libraries'].ApplyType" --output 'text'
-
-aws rds describe-db-parameters --db-parameter-group-name 'default.postgres15' --output 'table' \
-  --query "Parameters[?ApplyType!='dynamic']"
-```
+Learn about available parameters by describing the existing default ones. See the CLI commands in the [TL;DR](#tldr)
+section for examples.
 
 ## Option Groups
 
@@ -507,7 +511,6 @@ to export.
 - The export process runs in the background and does **not** affect the performance of active DB instances.
 - Multiple export tasks for the same DB snapshot cannot run simultaneously. This applies to both full and partial
   exports.
-- Exporting snapshots from DB instances that use magnetic storage isn't supported.
 - The following characters aren't supported in table column names:
 
   ```plaintext
@@ -753,9 +756,8 @@ Refer
 [What happens when I change my RDS DB instance from a Single-AZ to a Multi-AZ deployment or a Multi-AZ to a Single-AZ deployment?]
 and [When modifying a Multi-AZ RDS to Single Instance the AZ was changed!!].
 
-One can convert existing Single-AZ DB instances to Multi-AZ deployments just by modifying the DB instance.<br/>
-This process involves minimal to no downtime, but requires planning around storage and performance impacts if done on
-active instances.
+One can convert between Single-AZ and Multi-AZ deployments just by modifying the DB instance. Both directions involve
+minimal to no downtime, but require planning around storage and performance impacts if done on active instances.
 
 During a Single-AZ to Multi-AZ conversion, RDS:
 
@@ -764,20 +766,39 @@ During a Single-AZ to Multi-AZ conversion, RDS:
 1. Turns on synchronous block-level replication between the volumes of the primary and standby replicas.
 1. Creates the new standby replica instance in the AZ where the volumes were created, and attaches them to it.
 
-One can convert existing Multi-AZ DB instances to Single-AZ deployments just by modifying the DB instance.<br/>
-This process involves minimal to no downtime, but requires planning around storage and performance impacts if done on
-active instances.
-
 During a Multi-AZ to Single-AZ conversion, RDS typically keeps the instance in the AZ where the primary was located and
 deletes only the secondary instance and volumes. The change does **not** typically affect the primary instance.
 
 ## Operations
 
+### Blue/Green Deployments
+
+Refer [Overview of Amazon RDS Blue/Green Deployments] and
+[Limitations and considerations for Amazon RDS blue/green deployments].
+
+They create a staging (green) environment that copies the relative production (blue) environment and synchronizes via
+replication. One can make changes to resources in the green environment (engine upgrades, parameter group changes,
+instance class changes) without affecting production, test them, and then switch over.
+
+Switching over typically takes under one minute, with no data loss and no application changes required.<br/>
+The green environment inherits the blue environment's topology, which includes read replicas, Multi-AZ configuration,
+storage, and monitoring settings. After the switchover, the old blue instances are renamed with an `-old` suffix and
+kept along for regression testing.
+
+Blue/green deployments are supported for MariaDB, MySQL, and PostgreSQL. Aurora has its own implementation.
+
+> [!important]
+> For PostgreSQL with high write volumes, the green environment may not keep up due to replication lag. AWS recommends
+> DMS when dealing with major version upgrades under sustained heavy writes.
+
+Blue/green deployments support [RDS Proxy] and AWS smart drivers in case one needs to further reduce switchover downtime
+by detecting the topology change and redirecting connections without waiting for DNS propagation.
+
 ### Upgrade the engine version
 
 > [!caution]
 > Database engine upgrades require downtime.<br/>
-> Minimize the downtime by using a blue/green deployment.
+> Minimize the downtime by using a [blue/green deployment][blue/green deployments].
 
 In general, **major** engine version upgrades can introduce breaking changes.<br/>
 **Minor** version upgrades usually only include changes that are backward-compatible with existing applications.
@@ -1188,6 +1209,11 @@ One can resize instances with read replicas **concurrently**. Keep consumers at 
 primary and every replica) report `available`. A replica still lagging behind the primary causes read-path errors
 even after the primary is back.
 
+### Set client DNS TTL below 30 seconds
+
+If a client application caches DNS data, prefer setting the TTL to less than 30 seconds. The IP address of a DB instance
+can change after a failover, and stale DNS cache entries will route connections to an address that is no longer in use.
+
 ## Pricing
 
 Refer [RDS pricing].<br/>
@@ -1444,6 +1470,9 @@ or write workloads and exceeds the instance type quotas.
 - [AWS RDS Max Connections Limit As Per Instance Type]
 - [Amazon RDS and Aurora credentials format]
 - [Amazon RDS: Snapshot, restore, and recovery demystified]
+- [Overview of Amazon RDS Blue/Green Deployments]
+- [Using Amazon RDS Proxy]
+- [Best practices for Amazon RDS]
 
 ### Sources
 
@@ -1474,6 +1503,7 @@ or write workloads and exceeds the instance type quotas.
   -->
 
 <!-- In-article sections -->
+[Blue/Green Deployments]: #bluegreen-deployments
 [Exporting snapshots to S3]: #exporting-snapshots-to-s3
 [Reserved DB instances]: #reserved-db-instances
 [Storage optimization]: #storage-optimization
@@ -1490,18 +1520,24 @@ or write workloads and exceeds the instance type quotas.
 [amazon rds db instances]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.DBInstance.html
 [Amazon RDS: Snapshot, restore, and recovery demystified]: https://aws.amazon.com/blogs/database/amazon-rds-snapshot-restore-and-recovery-demystified/
 [aws kms key management]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.Keys.html
+[Best practices for Amazon RDS]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_BestPractices.html
 [Changing RDS storage from gp2 to gp3]: https://repost.aws/questions/QUDPKCzJclQbCwOt47lf7lFQ/changing-rds-storage-from-gp2-to-gp3
+[CloudWatch Database Insights]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Database-Insights.html
 [how can i decrease the total provisioned storage size of my amazon rds db instance?]: https://repost.aws/knowledge-center/rds-db-storage-size
 [how can i resolve the "error: <module/extension> must be loaded via shared_preload_libraries" error?]: https://repost.aws/knowledge-center/rds-postgresql-resolve-preload-error
 [How do I cancel pending maintenance in Amazon RDS for PostgreSQL?]: https://repost.aws/knowledge-center/rds-postgresql-cancel-maintenance
 [importing data into postgresql on amazon rds]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.Procedural.Importing.html
 [introduction to backups]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
+[Limitations and considerations for Amazon RDS blue/green deployments]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/blue-green-deployments-considerations.html
 [maintaining a db instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html
 [migrating databases to their amazon rds equivalents with aws dms]: https://docs.aws.amazon.com/dms/latest/userguide/data-migrations.html
 [migrating databases using rds postgresql transportable databases]: https://aws.amazon.com/blogs/database/migrating-databases-using-rds-postgresql-transportable-databases/
 [Multi-AZ DB instance deployments for Amazon RDS]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html
+[Overview of Amazon RDS Blue/Green Deployments]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/blue-green-deployments-overview.html
+[Overview of Performance Insights on Amazon RDS]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.html
 [pricing and data retention for performance insights]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.cost.html
 [RDS pricing]: https://aws.amazon.com/rds/pricing/
+[RDS Proxy]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html
 [Recommended alarms for RDS]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Best_Practice_Recommended_Alarms_AWS_Services.html#RDS
 [Renaming a DB instance]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RenameInstance.html
 [Reserved DB instances for Amazon RDS]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithReservedDBInstances.html
@@ -1512,6 +1548,7 @@ or write workloads and exceeds the instance type quotas.
 [transport postgresql databases between two amazon rds db instances using pg_transport]: https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/transport-postgresql-databases-between-two-amazon-rds-db-instances-using-pg_transport.html
 [transporting postgresql databases between db instances]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.TransportableDB.html
 [understanding postgresql roles and permissions]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Roles.html
+[Using Amazon RDS Proxy]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html
 [viewing instance status]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/accessing-monitoring.html
 [What happens when I change my RDS DB instance from a Single-AZ to a Multi-AZ deployment or a Multi-AZ to a Single-AZ deployment?]: https://repost.aws/knowledge-center/rds-convert-single-az-multi-az
 [what is aws database migration service?]: https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html

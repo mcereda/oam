@@ -2,19 +2,32 @@
 
 1. [TL;DR](#tldr)
 1. [Image scanning](#image-scanning)
+1. [Tag immutability](#tag-immutability)
+1. [Encryption](#encryption)
 1. [Lifecycle policies](#lifecycle-policies)
    1. [Archive tier constraints](#archive-tier-constraints)
    1. [Middling with multi-arch images](#middling-with-multi-arch-images)
 1. [Pull through cache feature](#pull-through-cache-feature)
+1. [Replication](#replication)
+1. [Managed signing](#managed-signing)
+1. [VPC endpoints](#vpc-endpoints)
 1. [Cleaning up old images](#cleaning-up-old-images)
 1. [Troubleshooting](#troubleshooting)
-   1. [Docker pull errors with `no basic auth credentials`](#docker-pull-errors-with-no-basic-auth-credentials)
+    1. [Docker pull errors with `no basic auth credentials`](#docker-pull-errors-with-no-basic-auth-credentials)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
 Children images of an image index _can_ carry tags.
+
+ECR can also stores Helm charts and other OCI artifacts like SBOMs and attestations.
+
+AWS also offers [ECR Public] as a separate service with its own API (`ecr-public`), a public image gallery at
+`gallery.ecr.aws`, and management restricted to `us-east-1`. Public images require no authentication to pull.
+
+<details>
+  <summary>Usage</summary>
 
 ```sh
 # List and get information about the repositories in ECRs.
@@ -42,11 +55,16 @@ aws ecr list-images --registry-id '123456789012' --repository-name 'my-image'
 
 
 # Use ECRs as Docker registries.
+# Authorization tokens expire after 12 hours.
 aws ecr get-login-password \
 | docker login --username 'AWS' --password-stdin 'aws_account_id.dkr.ecr.region.amazonaws.com'
 
 # Pull images from ECRs.
 docker pull 'aws_account_id.dkr.ecr.region.amazonaws.com/repository_name/image_name:tag'
+
+# Store Helm charts and OCI artifacts.
+helm push 'chart-0.1.0.tgz' 'oci://aws_account_id.dkr.ecr.region.amazonaws.com/'
+helm install 'release' 'oci://aws_account_id.dkr.ecr.region.amazonaws.com/chart' --version '0.1.0'
 
 
 # List and show pull through cache rules.
@@ -90,6 +108,24 @@ aws ecr put-lifecycle-policy --repository-name 'repository' \
 
 # List repository creation templates.
 aws ecr describe-repository-creation-templates
+
+# Create a repository with KMS encryption and immutable tags.
+aws ecr create-repository --repository-name 'my-image' \
+  --image-tag-mutability 'IMMUTABLE' \
+  --encryption-configuration '{"encryptionType":"KMS"}'
+
+# Make tags immutable with exclusions (e.g. 'latest' stays mutable).
+aws ecr put-image-tag-mutability --repository-name 'my-image' \
+  --image-tag-mutability 'IMMUTABLE_WITH_EXCLUSION' \
+  --image-tag-mutability-exclusion-filters 'filterType=WILDCARD,filter=latest'
+
+
+# Show the registry's replication configuration.
+aws ecr describe-registry --query 'replicationConfiguration'
+
+# Show the registry's signing configuration.
+aws ecr get-signing-configuration
+
 
 # Check what ECR Basic Scanning technology is used by the account.
 aws ecr get-account-setting --name 'BASIC_SCAN_TYPE_VERSION' --query 'value' --output 'text'
@@ -143,6 +179,40 @@ CI/CD scan if integrated with Jenkins, TeamCity, or similar.
 > [!caution]
 > Switching between basic and enhanced **loses** previous scan findings. The data isn't shared between modes. Switching
 > back **restores** the original mode's findings.
+
+## Tag immutability
+
+Repositories can be configured so that image tags cannot be overwritten. When enabled, pushing an image with a tag
+that already exists returns `ImageTagAlreadyExistsException`.
+
+| Mode                       | Behavior                                                                   |
+| -------------------------- | -------------------------------------------------------------------------- |
+| `MUTABLE`                  | Tags can be overwritten freely (default)                                   |
+| `MUTABLE_WITH_EXCLUSION`   | Tags can be overwritten **except** those matching the exclusion filters    |
+| `IMMUTABLE`                | No tags can be overwritten                                                 |
+| `IMMUTABLE_WITH_EXCLUSION` | No tags can be overwritten **except** those matching the exclusion filters |
+
+Exclusion filters use basic wildcard matching (e.g. `latest`, `dev-*`).
+
+Tag immutability **can** be changed after repository creation.
+
+When [replication] is enabled and the destination repository has tag immutability on, an image replicated with a
+duplicate tag arrives **untagged**. This can silently break tag-based deployments at the destination.
+
+## Encryption
+
+Repositories have an encryption setting that can be configured **once**, during creation. It **cannot** be changed
+afterward.
+
+| Type     | Key                               | Cost        | Notes                                            |
+| -------- | --------------------------------- | ----------- | ------------------------------------------------ |
+| `AES256` | S3-managed (SSE-S3)               | Free        | Default                                          |
+| `KMS`    | AWS-managed (`aws/ecr`) or custom | KMS charges | Key must be in the same region as the repository |
+
+When using a customer-managed KMS key, the principal creating the repository also needs `kms:CreateGrant` and
+`kms:DescribeKey` permissions, and the principal deleting it also needs `kms:RetireGrant`.<br/>
+Revoking the KMS grant breaks the repository (images cannot be pushed to or pulled from it). Prefer deleting the
+repository instead.
 
 ## Lifecycle policies
 
@@ -306,6 +376,65 @@ require it to be granted in an additional policy.
 > when pulling images. Instead, they only kick in once the container is running and the SDK reaches for credentials. A
 > pod can be perfectly configured with Pod Identity and still hit `ImagePullBackOff` if the node role lacks the relevant
 > ECR permissions.
+
+## Replication
+
+ECR supports cross-region and cross-account replication. Available at the **registry** level.
+
+Only images pushed (or restored) **after** replication is configured are replicated. Pre-existing images require a
+separate migration (e.g. pull + re-push, or a Step Functions workflow).
+
+If A replicates to B and B replicates to C, an image pushed to A does reach B, but it does **not** reach C
+automatically. Configure A → C directly.
+
+Replication actions fire **once** every time the image is **pushed** or **restored**. They do **not** run on pulls,
+deletions, nor archival.
+
+Repository policies, IAM policies, and lifecycle policies are **not** replicated at the destination.<br/>
+Use [repository creation templates] to apply default settings (tag immutability, encryption, lifecycle policies) to
+auto-created destination repositories.
+
+If the destination has tag immutability enabled and a replicated image carries a duplicate tag, the image arrives at the
+destination **untagged**.
+
+One can have **up to 25 rules** with **up to 100 filters** per rule, and a maximum of 25 unique destinations **across
+all rules**. The service does **not** support replication cross-partition (e.g. `us-west-2` to `cn-north-1`).
+
+When replicating cross-account, the **destination** account must set a registry permissions policy that grants
+`ecr:ReplicateImage` and `ecr:CreateRepository` to the source account. The source account needs no special repository
+policies.<br/>
+Without `ecr:CreateRepository`, replication fails on any repository that does not already exist at the destination.
+
+## Managed signing
+
+ECR can automatically sign images on push using [AWS Signer].
+
+Signing rules (up to 10 per registry) pair a Signer signing profile with optional repository wildcard filters.<br/>
+When a pushed image matches a rule, ECR generates a cryptographic signature using the identity of the pushing principal.
+
+Supports cross-account signing. The signing profile can live in a different account.<br/>
+Does **not** support cross-region signing (the signing profile must be in the same region as the registry).
+
+The pushing principal needs both the standard ECR push permissions and `signer:SignPayload` on the relevant signing
+profile.
+
+## VPC endpoints
+
+Workloads in private subnets (no internet gateway) need three VPC endpoints to use ECR:
+
+| Endpoint                              | Purpose                                 |
+| ------------------------------------- | --------------------------------------- |
+| `com.amazonaws.<region>.ecr.api`      | ECR API calls (`DescribeImages`, etc.)  |
+| `com.amazonaws.<region>.ecr.dkr`      | Docker registry API (`push`, `pull`)    |
+| `com.amazonaws.<region>.s3` (gateway) | Image layer storage (ECR backs onto S3) |
+
+The security group on each interface endpoint must allow inbound TCP 443 from the private subnet.
+
+> [!important] Pull-through caches' first pull still require internet access.
+> Even with all three VPC endpoints in place, the first pull of an image through a
+> [pull-through cache rule][using pull through cache rules] needs a NAT gateway to reach the
+> upstream registry.<br/>
+> Subsequent pulls of the same image work entirely through the VPC endpoints.
 
 ## Cleaning up old images
 
@@ -567,6 +696,13 @@ Context: trying to pull an image on an EC2 instance that is using the amazon-ecr
 - [Lifecycle policies]
 - [Lifecycle policy parameters]
 - [Repository creation templates]
+- [Tag immutability]
+- [Encryption at rest]
+- [Private image replication]
+- [Managed signing]
+- [Private registry authentication]
+- [VPC endpoints]
+- [Pushing a Helm chart to an Amazon ECR private repository]
 
 <!--
   Reference
@@ -575,6 +711,7 @@ Context: trying to pull an image on an EC2 instance that is using the amazon-ecr
 
 <!-- In-article sections -->
 [Cleaning up old images]: #cleaning-up-old-images
+[replication]: #replication
 
 <!-- Knowledge base -->
 [amazon web services]: README.md
@@ -583,11 +720,20 @@ Context: trying to pull an image on an EC2 instance that is using the amazon-ecr
 <!-- Files -->
 <!-- Upstream -->
 [announcing remote cache support in amazon ecr for buildkit clients]: https://aws.amazon.com/blogs/containers/announcing-remote-cache-support-in-amazon-ecr-for-buildkit-clients/
+[AWS Signer]: https://docs.aws.amazon.com/signer/latest/developerguide/Welcome.html
 [cli subcommand reference]: https://docs.aws.amazon.com/cli/latest/reference/ecr/
 [creating a lifecycle policy preview]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/lpp_creation.html
+[ECR Public]: https://docs.aws.amazon.com/AmazonECR/latest/public/what-is-ecr.html
+[encryption at rest]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/encryption-at-rest.html
 [lifecycle policies]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html
 [lifecycle policy parameters]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/lifecycle_policy_parameters.html
+[managed signing]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/managed-signing.html
+[private image replication]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/replication.html
+[private registry authentication]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/registry_auth.html
+[pushing a Helm chart to an Amazon ECR private repository]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/push-oci-artifact.html
 [repository creation templates]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-creation-templates.html
 [StartLifecyclePolicyPreview]: https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_StartLifecyclePolicyPreview.html
+[tag immutability]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-tag-mutability.html
 [Troubleshooting pull through cache issues in Amazon ECR]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/error-pullthroughcache.html
 [using pull through cache rules]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache.html
+[VPC endpoints]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html
