@@ -136,35 +136,39 @@ They are made available in the shell used by commands.
 
 ```yml
 env:
-  SOME_VAR: some DEFAULT value
+  GLOBAL_VAR: some GLOBAL value
+  SHARED_VAR: some SHARED value
 tasks:
   env_vars:test:
     env:
-      SOME_VAR: some value
+      SHARED_VAR: some TASK SHARED value
+      TASK_VAR: some TASK value
     cmds:
-      - echo $SOME_VAR
+      - echo $GLOBAL_VAR - $SHARED_VAR - $TASK_VAR
 ```
 
 </details>
 
 **Exported** and **command-specific** shell variables **take precedence** over the ones defined in the Taskfile.
 
+Global `vars:` are resolved **before** any task-level inputs.<br/>
+`task foo VAR=value` sets `VAR` only for **that task**'s own `vars:` block. Global variables never see it, and keep
+their default.<br/>
+Set the value as environment variable to change a global variable instead.
+
 <details style="padding: 0 0 1em 1em;">
 
 ```sh
 $ task env_vars:test
-some value
+some GLOBAL value - some TASK SHARED value - some TASK value
 
-$ set SOME_VAR 'some OTHER value'
-$ task env_vars:test
-some value
+$ task env_vars:test \
+    GLOBAL_VAR='some global given value' SHARED_VAR='some shared given value' TASK_VAR='some task given value'
+some GLOBAL value - some TASK SHARED value - some TASK value
 
-$ set -x SOME_VAR 'some OTHER value'
-$ task env_vars:test
-some OTHER value
-
-$ SOME_VAR='some EPHEMERAL value' task env_vars:test
-some EPHEMERAL value
+$ GLOBAL_VAR='some global given value' SHARED_VAR='some shared given value' TASK_VAR='some task given value' \
+  task env_vars:test
+some global given value - some shared given value - some task given value
 ```
 
 </details>
