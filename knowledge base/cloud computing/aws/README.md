@@ -31,6 +31,7 @@
    1. [Reserved instances](#reserved-instances)
    1. [Tiered pricing](#tiered-pricing)
    1. [Enterprise discount program](#enterprise-discount-program)
+   1. [Scheduled resource management](#scheduled-resource-management)
    1. [Other tools](#other-tools)
 1. [Resource tagging](#resource-tagging)
 1. [API](#api)
@@ -366,6 +367,7 @@ Options:
 | [Inspector]                   | Security vulnerability assessment             |
 | [Kinesis]                     | Video or data streams                         |
 | [KMS]                         | Key management                                |
+| [Lambda]                      | Serverless compute                            |
 | [OpenSearch]                  | ELK, logging                                  |
 | [PrivateLink]                 | Private VPC to AWS service connection         |
 | [RDS]                         | Databases                                     |
@@ -611,26 +613,15 @@ Each key counts as one when calculating key resource quotas, regardless of the n
 
 ### Lambda functions
 
-TODO
+Refer [Lambda].
 
-> [!warning] IAM role deletions aren't guarded by AWS
-> AWS does not check wether a role being deleted is actively attached to a Lambda function. When such a role is deleted,
-> the function simply and silently ends up with a dangling role reference.
+Serverless compute that runs code in response to events without provisioning or managing servers.<br/>
+Functions are triggered by AWS services (S3 events, API Gateway requests, EventBridge schedules, SQS messages, etc.)
+and by direct invocation.
 
-To deploy:
-
-1. Archive the code (as `.zip`) and upload it to S3.
-1. Point The lambda function to that archive.
-
-During a **cold** start, the Lambda service downloads the configured archive from S3 and extracts it to `/var/task/` in
-the function's execution environment. Its working directory contains all the files in the archive, side by side.<br/>
-This allows including data alongside the code (e.g., configuration files and blobs).
-
-> [!warning]
-> Lambda support environment variables up to a **hard** limit of **4KB** across all variables and values combined.<br/>
-> Over that, one should move at least the large configuration values out of the environment variables and bundle them
-> with the code (e.g., as a `config.json` file inside the Lambda's package) and read them from the execution environment
-> during cold start instead.
+See [Lambda] for deployment details, environment variable limits, and a comprehensive example of
+[scheduled resource management][Lambda scheduled resource management] (stopping non-production resources at night to
+save cost).
 
 ### PrivateLink
 
@@ -985,6 +976,17 @@ negotiate custom discounts and support terms.
 
 These negotiations are only available to large enterprises, and **require** long-term contractual commitment.
 
+### Scheduled resource management
+
+Non-production resources running 24/7 accumulate most of their cost during unattended hours (nights and weekends).<br/>
+Some services (e.g. ECS) provide native ways to scale resources based on time or consumption. One can also use one or
+more [Lambda] functions triggered by EventBridge Scheduler to do that (especially useful when custom requirements need
+to be satisfied, like application dependencies).
+
+See [Lambda's scheduled resource management][Lambda scheduled resource management] for a comprehensive reference
+covering EC2, RDS, ECS, and ASG stop/start operations, safety rails, dependency ordering, CloudWatch alarm suppression,
+and EventBridge Scheduler configuration.
+
 ### Other tools
 
 AWS offers tools that can help optimize cost:
@@ -1287,6 +1289,8 @@ currently only available in the `us-west-1` region.
 [EFS]: ecs.md
 [EKS]: eks.md
 [ELB]: elb.md
+[Lambda]: lambda.md
+[Lambda scheduled resource management]: lambda.md#example-scheduled-resource-management
 [IAM]: iam.md
 [Image builder]: image%20builder.md
 [OpenSearch]: opensearch.md

@@ -1,0 +1,86 @@
+{
+    "_description": "Bundled as config.json in the Lambda package at deploy time. See function.py for field docs.",
+    "slackSigningSecretId": "resource-controller/slack-signing-secret",
+    "allowedSlackChannelIds": [
+        "C01ABCDEF",
+        "C02GHIJKL"
+    ],
+    "aliases": {
+        "staging.core": [
+            {
+                "type": "rds",
+                "id": "staging-postgres"
+            },
+            {
+                "type": "ecs",
+                "cluster": "staging",
+                "service": "api",
+                "dependsOn": [
+                    "rds:staging-postgres"
+                ]
+            },
+            {
+                "type": "ecs",
+                "cluster": "staging",
+                "service": "worker",
+                "dependsOn": [
+                    "rds:staging-postgres"
+                ]
+            }
+        ],
+        "staging.monitoring": [
+            {
+                "type": "ecs",
+                "cluster": "staging",
+                "service": "grafana"
+            }
+        ]
+    },
+    "defaultCounts": {
+        "ecs:staging:api": 2,
+        "ecs:staging:worker": 1,
+        "ecs:staging:grafana": 1,
+        "asg:staging-runners": 2
+    },
+    "resourceRegistry": {
+        "rds:staging-postgres": {
+            "type": "rds",
+            "id": "staging-postgres"
+        },
+        "ecs:staging:api": {
+            "type": "ecs",
+            "cluster": "staging",
+            "service": "api",
+            "dependsOn": [
+                "rds:staging-postgres"
+            ]
+        },
+        "ecs:staging:worker": {
+            "type": "ecs",
+            "cluster": "staging",
+            "service": "worker",
+            "dependsOn": [
+                "rds:staging-postgres"
+            ]
+        }
+    },
+    "nightlyStopTargets": [
+        "staging.core",
+        "staging.monitoring",
+        {
+            "type": "asg",
+            "name": "staging-runners"
+        },
+        {
+            "type": "rds",
+            "id": "analytics-staging"
+        }
+    ],
+    "morningStartTargets": [
+        "staging.core",
+        {
+            "type": "asg",
+            "name": "staging-runners"
+        }
+    ]
+}

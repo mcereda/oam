@@ -2287,7 +2287,14 @@ Total: ~$0.08 per hour, ~$1.75 per day, ~$54.14 per 31d-month, ~$639.14 per 366d
 - Prefer using ARM-based compute capacity over the default `X86_64`, where feasible.<br/>
   Refer [CPU architectures].
 
-- Consider **stopping** (scaling to 0) non-production services after working hours.
+- Consider **scaling down** non-production services after working hours.
+
+  Scaling down a service to 0 equals to stopping that service. Use `UpdateService` with `desiredCount: 0` to drain all
+  its tasks, and set it back to the original count to restore them.<br/>
+  This operation is idempotent (issuing the update command to set the desired count to what is currently takes no real
+  action and just returns success).<br/>
+  Services behind a load balancer take up to the configured `deregistrationDelay` (default 300s) to fully drain.
+
 - Prefer using [**spot** capacity][effectively using spot instances in aws ecs for production workloads] for
 
   - Non-critical services and tasks.

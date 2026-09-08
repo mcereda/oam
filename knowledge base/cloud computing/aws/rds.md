@@ -1126,9 +1126,10 @@ Interruptions are due to the exhaustion of I/O burst credits, which tainted the 
 
 Refer [Stopping an Amazon RDS DB instance temporarily].
 
-RDS instances can be stopped **only up to 7 days**.<br/>
-The service will automatically start DB instances that have been stopped for 7 consecutive days so that they do not fall
-behind required maintenance updates.
+> [!important]
+> RDS instances can be stopped **only up to 7 days**.<br/>
+> The service will automatically start DB instances that have been stopped for 7 consecutive days so that they do not
+> fall behind required maintenance updates.
 
 One can still stop and start DB instances on a schedule via Step Functions.
 
@@ -1269,6 +1270,10 @@ Impacting factors (from most to least impactful):
 - Prefer using Single-AZ deployments when high-availability is not necessary (e.g., for development or testing DBs).
 - Prefer disabling Extended support for an instance when not necessary (e.g., for development or testing DBs).<br/>
   Keep the DBs' engine versions updated to stay out of the Extended support otherwise.
+- Consider **[stopping][stop instances]** non-production instances after working hours.
+
+  Since RDS instances can only be stopped for up to **7 consecutive days** before the service force-starts them (see
+  [stop instances]), consider automating this with a [Lambda].
 
 #### Reserved DB instances
 
@@ -1506,10 +1511,12 @@ or write workloads and exceeds the instance type quotas.
 [Blue/Green Deployments]: #bluegreen-deployments
 [Exporting snapshots to S3]: #exporting-snapshots-to-s3
 [Reserved DB instances]: #reserved-db-instances
+[Stop instances]: #stop-instances
 [Storage optimization]: #storage-optimization
 
 <!-- Knowledge base -->
 [EBS]: ebs.md
+[Lambda]: lambda.md
 [S3]: s3.md
 
 <!-- Files -->

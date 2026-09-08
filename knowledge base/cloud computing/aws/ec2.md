@@ -19,6 +19,10 @@
 
 The API for EC2 are [**eventually** consistent][Eventual consistency in the Amazon EC2 API].
 
+`StopInstances` and `StartInstances` are **idempotent**.<br/>
+Issuing a _stop_ command to an already stopped instance (or, similarly, a _start_ command to an already started one and
+such) returns success **without** taking any real action.
+
 EC2 instances are billed by the second, with a minimum of 60s,
 [since 2017-10-02][announcing amazon ec2 per second billing].
 
@@ -26,7 +30,7 @@ Use an IAM Instance Profile to allow an EC2 instance to use an IAM role.
 
 `T` instances launch as `unlimited` by default. Launch them in `standard` mode to avoid paying for surplus credits.
 
-The instance type [_can_ be changed][change the instance type]. The procedure depends on the root volume, and **does**
+An instance type [_can_ be changed][change the instance type]. The procedure depends on the root volume, and **does**
 require downtime.
 
 When using spot instances, prefer instrumenting the application to be aware of [termination notifications].
@@ -40,6 +44,21 @@ Clone EC2 instances by:
 
 Consider using specialized AMIs for specialized purposes.<br/>
 E.g., [using AL2023 based Amazon ECS AMIs to host containerized workloads].
+
+<details>
+  <summary>Usage</summary>
+
+```sh
+# Stop instances.
+aws ec2 stop-instances --instance-ids 'i-0abc123'
+aws ec2 stop-instances --instance-ids 'i-0123abc' … 'i-abcdef0'
+
+# Start instances.
+aws ec2 start-instances --instance-ids 'i-0abc123'
+aws ec2 start-instances --instance-ids 'i-0123abc' … 'i-abcdef0'
+```
+
+</details>
 
 <details>
   <summary>Real world use cases</summary>
@@ -284,7 +303,7 @@ Also see [Automatic instance recovery].
 - When employing **underused** burstable instances, prefer re-launching them in `standard` mode to avoid paying for
   surplus credits.
 - Prefer using [spot instances] instead of on-demand ones where possible.
-- Consider **stopping** or (even better) deleting non-production hosts after working hours.
+- Consider **stopping** or (even better) **deleting** non-production instances after working hours.
 - Consider applying for EC2 Instance and/or Compute Savings Plans.
 - Consider [archiving snapshots] should they not be accessed for 90d or more.<br/>
   Archiving has a 90d minimum storage fee, **and** archived resources have retrieval fees.
