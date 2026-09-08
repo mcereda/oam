@@ -497,11 +497,29 @@ Use the `max_slot_wal_keep_size` parameter to configure a quota for WAL files fo
 directory at checkpoint time.<br/>
 This value applies to the **global disk space** used by **all** the replication slots. There's currently **no** setting
 for per-slot size limits.
+
+```sql
+-- Set limit
+ALTER SYSTEM SET max_slot_wal_keep_size = '10240';  -- 10 GB (10 * 1024 MB)
+SELECT pg_reload_conf();
+
+-- Check the current value
+SHOW max_slot_wal_keep_size;
+
+-- Check slot health
+SELECT slot_name, active, restart_lsn, wal_status
+FROM pg_replication_slots;
+```
+
 If this value is specified without units, it is taken as MB.<br/>
 If it is -1 (the default), replication slots may retain an **unlimited** amount of WAL files. Otherwise, they will be
 removed when the `restart_lsn` value of a replication slot falls behind the current LSN by more than the configured max
-size.<br/>
+size.
+
 The removal of required WAL files may block a consumer from continuing replication.<br/>
+An invalidated slot stays registered, but no longer pins WAL. Consumers that reconnect to an invalidated slot **must**
+re-snapshot the data.
+
 This parameter can only be set in the `postgresql.conf` file or on the server command line. If set in the configuration
 file, use a `SIGHUP` to apply it.
 
