@@ -17,6 +17,7 @@ Part of the upstream projects for the [Red Hat Ansible Automation Platform].
 1. [Elevating privileges in tasks](#elevating-privileges-in-tasks)
 1. [Workflow automation](#workflow-automation)
    1. [Pass data between workflow Nodes](#pass-data-between-workflow-nodes)
+   1. [Workflow nodes sharing a host must agree on privilege level](#workflow-nodes-sharing-a-host-must-agree-on-privilege-level)
 1. [API](#api)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -1483,6 +1484,40 @@ Considering a workflow where Node1 needs to pass data to Node2:
    ```
 
 </details>
+
+### Workflow nodes sharing a host must agree on privilege level
+
+Each workflow node runs as a separate AWX job, each with its own connection and session.<br/>
+When multiple nodes target the same remote host, they do have access to the filesystem, but could run as different users
+depending on their settings. This is especially true if one of them uses `become` and the other does not.
+
+Ansible creates working directories on the remote host during execution:
+
+| Directory       | Purpose                        | Created by              |
+| --------------- | ------------------------------ | ----------------------- |
+| `<remote_tmp>/` | Module transfer and temp files | First task to run       |
+| `<async_dir>/`  | Async job results files        | First async task to run |
+
+Both paths are configurable (`remote_tmp` and `async_dir` in `ansible.cfg`, defaulting to `~/.ansible/tmp` and
+`~/.ansible_async` respectively).
+
+These directories are created with the permissions of whatever user runs the **first** job. If that job runs with
+`become`, the directories are owned by that user. Subsequent jobs running **without** `become` (e.g., as `ssm-user`)
+might **not** be able to access them.
+
+The failure is **silent**. What happens is the following:
+
+1. Ansible's async wrapper forks the process. Its parent reports "started" to the controller, but the child crashes when
+   accessing the job file.
+1. The controller's `async_status` poll then finds no results file and reports "could not find job" with `finished: 1`,
+   which satisfies the typical `until: result.finished` retry condition on the first attempt.
+
+> [!caution]
+> The error message "could not find job" does **not** mention permissions.\
+> Actual `EPERM` errors only appear in the system's journal (most commonly `journalctl`) on the remote host.
+
+As a rule of thumb, all workflow nodes targeting the same remote host should use the same `become_enabled` setting.<br/>
+When in doubt, enable `become` on all nodes in the workflow.
 
 ## API
 
