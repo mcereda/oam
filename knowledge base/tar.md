@@ -11,6 +11,8 @@
 # Create archives.
 tar czvf 'directory.tar.gz' 'source-directory'
 tar -capvf 'archive.tar.bz2' 'directory1' 'directory2' 'file1' 'fileN'
+tar czf 'archive.tar.gz' --exclude='.venv' --exclude='node_modules' 'folder1/' 'folder2/' 'folderN/'
+tar czf 'archive.tar.gz' --exclude-from='exclude.txt' 'folder1/' 'folder2/'
 
 # List the content of archives.
 tar tf 'archive.tar'
