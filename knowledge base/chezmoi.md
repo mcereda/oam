@@ -70,7 +70,9 @@ chezmoi data
 
 # Test templates.
 chezmoi execute-template < .local/share/chezmoi/dot_gitconfig.tmpl
+chezmoi execute-template --file "$(chezmoi source-path)/.chezmoiignore"
 chezmoi execute-template --init --promptString email=me@home.org < ~/.local/share/chezmoi/.chezmoi.yaml.tmpl
+chezmoi execute-template --init --file "$(chezmoi source-path)/.chezmoi.yaml.tmpl"
 
 # Use `git` on chezmoi's data storage.
 chezmoi git add -- '.'
