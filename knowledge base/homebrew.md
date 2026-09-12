@@ -21,6 +21,13 @@
 ```
 
 ```sh
+# Check the current state of analytics.
+brew analytics state
+
+# Opt out of analytics.
+brew analytics off
+export HOMEBREW_NO_ANALYTICS=1
+
 # Require SHA check for casks.
 # Change cask installation dir to the Application folder in the user's HOME.
 export HOMEBREW_CASK_OPTS="--require-sha --appdir $HOME/Applications"
