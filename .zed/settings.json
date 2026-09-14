@@ -1,9 +1,11 @@
 {
+    "$schema": "zed://schemas/settings",
+    "telemetry": {
+        "diagnostics": false,
+        "metrics": false
+    },
     "wrap_guides": [
         80,
         120
-    ],
-    "buffer_font_features": {
-        "calt": false
-    }
+    ]
 }

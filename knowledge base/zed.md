@@ -16,11 +16,13 @@ Next-generation code editor.
 
 ```sh
 brew install --cask 'zed'
-sudo zypper ar 'https://download.opensuse.org/repositories/editors/openSUSE_Tumbleweed/editors.repo' && sudo zypper in 'zed'
+sudo zypper ar 'https://download.opensuse.org/repositories/editors/openSUSE_Tumbleweed/editors.repo' \
+  && sudo zypper in 'zed'
 ```
 
-Global settings at `~/.config/zed/settings.json`.
-Folder-specific settings at `.zed/settings.json`.
+Global settings at `~/.config/zed/settings.json`.\
+Folder-specific settings at `.zed/settings.json`.\
+Reference at [All Settings].
 
 Disable telemetry:
 
@@ -71,8 +73,9 @@ Disable telemetry:
 <!-- Knowledge base -->
 <!-- Files -->
 <!-- Upstream -->
-[codebase]: https://github.com/zed-industries/zed
-[documentation]: https://zed.dev/docs/
-[website]: https://zed.dev/
+[All Settings]: https://zed.dev/docs/reference/all-settings
+[Codebase]: https://github.com/zed-industries/zed
+[Documentation]: https://zed.dev/docs/
+[Website]: https://zed.dev/
 
 <!-- Others -->
