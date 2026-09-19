@@ -2,9 +2,6 @@
 
 Next-generation code editor.
 
-<!-- Remove this line to uncomment if used
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
@@ -24,6 +21,13 @@ Global settings at `~/.config/zed/settings.json`.\
 Folder-specific settings at `.zed/settings.json`.\
 Reference at [All Settings].
 
+The settings file's schema is included in Zed and the file is identified automatically.\
+One _can_ make it explicit by using its internal URL:
+
+```json
+"$schema": "zed://schemas/settings"
+```
+
 Disable telemetry:
 
 ```json
@@ -31,6 +35,31 @@ Disable telemetry:
     "diagnostics": false,
     "metrics": false
 }
+```
+
+Disable all AI features:
+
+```json
+"disable_ai": true
+```
+
+Change the terminal's default shell:
+
+```json
+"terminal": {
+    "shell": {
+        "program": "fish"
+    },
+}
+```
+
+Show wrapping guides:
+
+```json
+"wrap_guides": [
+    80,
+    120
+]
 ```
 
 </details>
