@@ -2,32 +2,45 @@
 ## ~/.ssh/config
 ##
 ## Gotchas:
+## - once a Host or Match block starts, it gobbles options until the next block *regardless* of indentation
+## - blocks can specify multiple host names (and aliases)
+## - targets may match multiple blocks; in that case, options are applied as the blocks are discovered
 ## - options are applied first-come-first-served, so:
-##   - specific and higher priority settings go on top, generic and lower ones
-##     go on the bottom
-##   - user defaults MUST come last to be treated as such
-## - host specificity is NOT a factor of priority
-## - multiple host names (and aliases) may be specified per section
-## - targets may match multiple host sections and have settings applied in order
-## - host sections only apply to the matched names
-## - canonicalization forces a configuration reload to check the now canonical
-##   host name against the configuration
+##   - specific and higher priority settings must go on top, generic and lower priority ones must go at the bottom
+##   - specify global options *before* any block to apply them to all targets
+##   - set defaults at the *end* of the file inside a match-all "Host *" block so that they are applied as fallbacks
+## - host specificity is NOT a substitute for priority
+## - host blocks apply the settings they defined *only* to the hostnames that matched
+## - canonicalization forces the client to parse the configuration again, in order to apply settings to the now
+##   canonicalized hostname
 ##
 ## Sources:
 ## - https://man.openbsd.org/ssh_config
 ################################################################################
 
-# Canonicalize host names as first thing
-# Forces a configuration reload so that only the canonical host name is matched
-# against the rest of the configuration
-CanonicalizeHostname  yes
-CanonicalDomains      lan localdomain my.org
+## Settings to apply to all targets
 
-# 'special' devices
-# E.g. work ones
+# Keep connections open for some time to reuse them
+# %C returns a hash of different information and is useful as socket identifier
+ControlMaster   auto
+ControlPersist  30s
+ControlPath     ~/.ssh/control-%C
+
+# GnuPG integration
+IdentityAgent  ~/.gnupg/S.gpg-agent.ssh
+
+## Settings for specific targets
+
+# Canonicalize hostnames as the first thing
 Host  net?a?-fw? org?-h?-sw?
 	CanonicalDomains     that.org
 	CanonicalizeMaxDots  0
+Host *
+  CanonicalizeHostname  yes
+  CanonicalDomains      lan localdomain my.org
+
+# 'special' devices
+# E.g. work ones
 Host  !bastion* *.brt*.my.org *.brs? *.brs??
 	AddressFamily  inet6
 	ProxyCommand   ssh -W %h:%p `host bastion.my.org | awk '/address/ {print $4; exit}' | xargs host | cut -d\  -f5`
@@ -78,20 +91,14 @@ Match  User robots
 	ServerAliveInterval  30
 	UseKeyChain          no
 
-# Keep connections open for some time to reuse them
-# %C returns a hash of different information and is useful as socket identifier
-ControlMaster   auto
-ControlPersist  30s
-ControlPath     ~/.ssh/control-%C
+## Defaults
+## Must be treatead as fallbacks
 
-# User defaults
-AddKeysToAgent       yes
-Compression          yes
-ForwardAgent         yes
-HashKnownHosts       no
-ServerAliveCountMax  2
-ServerAliveInterval  300
-UseKeyChain          yes
-
-# GnuPG integration
-IdentityAgent  ~/.gnupg/S.gpg-agent.ssh
+Host  *
+  AddKeysToAgent       yes
+  Compression          yes
+  ForwardAgent         yes
+  HashKnownHosts       no
+  ServerAliveCountMax  2
+  ServerAliveInterval  300
+  UseKeyChain          yes

@@ -183,21 +183,20 @@ When connecting to a host, the SSH client will use settings:
 1. from the user's `~/.ssh/config` file,
 1. from the `/etc/ssh/ssh_config` file
 
-Unless noted otherwise, for each parameter, only the **first** obtained value will be used
-(_first-come-first-served_).<br/>
+For each parameter, only the **first** configured value will be used, in a _first-come-first-served_ fashion.<br/>
 Values should hence appear from the most **specific** to the most **generic**, both by file and by position in those
 files.
 
-The configuration files contain sections separated by `Host` specifications<br/>
-Those sections are only applied to hosts that match one of the patterns given in each specification.
+Blocks that start with `Host` or `Match` define settings that are **only** applied to hosts that match any of the
+blocks' patterns.
 
-The file contains keyword-argument pairs, one per line.<br/>
+Options are configured as keyword-argument pairs, one per line.<br/>
 Lines starting with `#` and empty lines are interpreted as comments.<br/>
-Arguments may optionally be enclosed in **double** quotes (`"`) in order to represent arguments containing spaces.<br/>
-Configuration options may be separated by whitespace, or optional whitespace and exactly one `=`. The latter format is
-useful to avoid the need to quote whitespace when specifying configuration options using the ssh, scp, and sftp `-o`
-option.<br/>
-Keywords are case-**in**sensitive and arguments are case-**sensitive**.
+Arguments _may_ be enclosed in **double** quotes (`"`) in order to represent arguments containing spaces.<br/>
+Configuration options may be separated by either whitespace or optional whitespace and exactly one `=`. The latter
+format is useful to avoid needing to quote whitespace, especially when specifying configuration options using the `ssh`,
+`scp`, and `sftp` `-o` option.<br/>
+Keywords are case-**in**sensitive, while their arguments are case-**sensitive**.
 
 ```ssh-config
 Host targaryen
@@ -274,8 +273,7 @@ Host  *.yyy.auckland.ac.nz
 
 ```ssh-config
 # Keep a connection open for 30s and reuse it when possible.
-# Save the above pipe in a safe directory, and use a hash of different data to
-# identify it.
+# Save the above pipe in a safe directory, and use a hash of different data to identify it.
 # source: https://www.cyberciti.biz/faq/linux-unix-reuse-openssh-connection/
 ControlMaster auto
 ControlPath ~/.ssh/control-%C
@@ -385,7 +383,7 @@ Suggestions:
 
 - Disable authentication with empty passwords:
 
-  ```sh
+  ```ssh-config
   PermitEmptyPasswords no
   ```
 
