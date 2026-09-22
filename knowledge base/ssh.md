@@ -259,6 +259,41 @@ Host *
 
 ### Append domains to a hostname before attempting to check if they exist
 
+> [!warning]
+> OpenSSH seems to canonicalize targets by doing **direct** DNS queries itself. This will **bypass** most settings in
+> place for hostname lookups.\
+> Furthermore, OpenSSH:
+>
+> - Only cares about **forward lookups** (name to IP), not what the reverse lookup of the eventual host's IP is.
+> - Does **not** follow CNAMEs by default when canonicalizing hostnames. See the `CanonicalizePermittedCNAMEs` setting.
+
+`CanonicalizeHostname yes|no|always|none` enables or disables explicit hostname canonicalisation.\
+Defaults to **`no`**, which **disables** canonicalization and uses the system resolver to handle all hostname lookups.\
+`yes` enables canonicalization for connections that do **not** set a `ProxyCommand` or `ProxyJump`.\
+`always` enables canonicalization for proxied connections too.\
+`none` disables the use of a ProxyJump host.
+
+> [!important]
+> Enabling canonicalization forces the client to process configuration files again, this time using the
+> **canonicalized** target name to pick up settings in matching Host and Match stanzas.
+
+`CanonicalDomains someDomain|someDomain …` specifies the _space-separated list_ of domain suffixes in which to search
+for the specified target.
+
+`CanonicalizeMaxDots` specifies how many `.` characters can appear in the target before the client disables
+canonicalization.\
+Defaults to `1`, which allows targets like `hostname.subdomain` to be canonicalized. Setting this to `0` disables
+canonicalization for matching targets and makes the client ignore the rest of the canonicalization options.
+
+`CanonicalizeFallbackLocal yes|no` specifies whether the original, unqualified name should be passed to the system's
+resolver in case it was **not** found in any of the suffixes specified in `CanonicalDomains`.\
+Defaults to **`yes`**.
+
+`CanonicalizePermittedCNAMEs none|source_domain_list:target_domain_list,…` specifies rules to determine whether to
+follow CNAMEs when canonicalising a name. CNAMEs are **not** followed by default (`none`).
+
+The only ones required when enabling the feature are `CanonicalizeHostname=yes` and `CanonicalDomains`.
+
 ```ssh-config
 CanonicalizeHostname yes
 CanonicalDomains xxx.auckland.ac.nz yyy.auckland.ac.nz
@@ -512,6 +547,9 @@ Solution: update the SSH server.
 - [How to check if an RSA public / private key pair match]
 - [Why I don't change SSH from port 22]
 - [How To Harden OpenSSH on Ubuntu 20.04]
+- [How to Fix SSH "Could Not Resolve Hostname" Error]
+- [Hostname canonicalisation in OpenSSH]
+- [Some notes on OpenSSH's optional hostname canonicalization]
 
 <!--
   Reference
@@ -535,8 +573,10 @@ Solution: update the SSH server.
 <!-- Others -->
 [fail2ban]: https://github.com/fail2ban/fail2ban
 [get started with openssh for windows]: https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=gui
+[Hostname canonicalisation in OpenSSH]: https://blog.djm.net.au/2014/01/hostname-canonicalisation-in-openssh.html
 [how to check if an rsa public / private key pair match]: https://serverfault.com/questions/426394/how-to-check-if-an-rsa-public-private-key-pair-match#426429
 [how to enable ssh access using a gpg key for authentication]: https://opensource.com/article/19/4/gpg-subkeys-ssh
+[How to Fix SSH "Could Not Resolve Hostname" Error]: https://devops-daily.com/posts/ssh-could-not-resolve-hostname-error
 [how to harden openssh on ubuntu 20.04]: https://www.digitalocean.com/community/tutorials/how-to-harden-openssh-on-ubuntu-20-04
 [how to list keys added to ssh-agent with ssh-add?]: https://unix.stackexchange.com/questions/58969/how-to-list-keys-added-to-ssh-agent-with-ssh-add
 [how to perform hostname canonicalization]: https://sleeplessbeastie.eu/2020/08/24/how-to-perform-hostname-canonicalization/
@@ -544,6 +584,7 @@ Solution: update the SSH server.
 [multiple similar entries in ssh config]: https://unix.stackexchange.com/questions/61655/multiple-similar-entries-in-ssh-config
 [restrict ssh login to a specific ip or host]: https://docs.rackspace.com/support/how-to/restrict-ssh-login-to-a-specific-ip-or-host/
 [security through obscurity (sto): history, criticism & risks]: https://www.okta.com/uk/identity-101/security-through-obscurity/
+[Some notes on OpenSSH's optional hostname canonicalization]: https://utcc.utoronto.ca/~cks/space/blog/sysadmin/SSHCanonHostnames
 [stick with security: yubikey, ssh, gnupg, macos]: https://evilmartians.com/chronicles/stick-with-security-yubikey-ssh-gnupg-macos
 [use sshfs to mount a remote directory as a volume on osx]: https://benohead.com/mac-os-x-use-sshfs-to-mount-a-remote-directory-as-a-volume/
 [using the ssh config file]: https://linuxize.com/post/using-the-ssh-config-file/

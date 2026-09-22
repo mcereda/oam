@@ -1,6 +1,6 @@
 # Route 53
 
-AWS DNS service offering.
+AWS' [DNS] service offering.
 
 1. [TL;DR](#tldr)
 1. [Hosted zones have overlapping namespaces](#hosted-zones-have-overlapping-namespaces)
@@ -168,6 +168,8 @@ does not need to replicate a record in the private zone.
 
 <!-- In-article sections -->
 <!-- Knowledge base -->
+[DNS]: ../../dns.md
+
 <!-- Files -->
 <!-- Upstream -->
 [Considerations when working with a private hosted zone]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zone-private-considerations.html

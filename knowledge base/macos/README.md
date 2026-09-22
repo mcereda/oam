@@ -77,9 +77,6 @@ caffeinate
 caffeinate -dis
 caffeinate -t '600'
 
-# Perform network speed tests.
-networkquality -sv
-
 # List open ports.
 netstat
 netstat -n -p 'tcp'
@@ -90,6 +87,10 @@ sudo lsof -n -i 'TCP' -s 'TCP:LISTEN'
 # Get the PID of processes using specific ports.
 lsof -nt -i ':443'
 
+
+# Perform network speed tests.
+networkquality -sv
+
 # List network interfaces.
 ifconfig
 networksetup -listallnetworkservices
@@ -97,8 +98,21 @@ networksetup -listallhardwareports
 
 # Get information about network interfaces.
 networksetup -getinfo 'Wi-Fi'
+networksetup -getdnsservers 'Wi-Fi'
 ipconfig getoption 'en0' 'domain_name_server'
 ipconfig getoption 'en0' 'subnet_mask'
+
+# Configure network interfaces.
+sudo networksetup -setdnsservers 'Wi-Fi' '8.8.8.8' '1.1.1.1'
+
+# Get the DNS configuration.
+scutil --dns
+
+# Get the proxy configuration.
+scutil --proxy
+
+# Get network information.
+scutil --nwi
 
 # Clear the DNS cache.
 sudo dscacheutil -flushcache; sudo killall -HUP 'mDNSResponder'
@@ -164,15 +178,6 @@ defaults read '/Library/Preferences/SystemConfiguration/com.apple.smb.server' 'N
 /usr/libexec/PlistBuddy -c "Print :NetBIOSName" \
   '/Library/Preferences/SystemConfiguration/com.apple.smb.server.plist'
 
-# Get the DNS configuration.
-scutil --dns
-
-# Get the proxy configuration.
-scutil --proxy
-
-# Get network information.
-scutil --nwi
-
 
 # Get environment variables from inside launchd.
 launchctl getenv 'key'
@@ -190,10 +195,12 @@ launchctl bslist
 launchctl bstree
 
 # Start jobs.
-launchctl start 'job_label'
+# launchctl start 'job_label'
+sudo launchctl start 'com.apple.mDNSResponder'
 
 # Stop jobs.
-launchctl stop 'job_label'
+# launchctl stop 'job_label'
+sudo launchctl stop 'com.apple.mDNSResponder'
 
 
 # Enable file trimming on SSD.
@@ -226,13 +233,13 @@ sudo xattr -d 'com.apple.quarantine' '/path/to/app.app'
 sudo xattr -dr 'com.apple.quarantine' '/path/to/directory'
 
 
-# Install Rosetta
-# Very difficult to remove, once installed
+# Install Rosetta.
+# Very difficult to remove, once installed.
 softwareupdate --install-rosetta --agree-to-license
 
 
-# Specify the maximum amount of RAM to use in the GPU
-# Specifically meaningful since the introduction of the unified architecture in M1
+# Specify the maximum amount of RAM to use in the GPU.
+# Specifically meaningful since the introduction of the unified architecture in M1.
 sysctl iogpu.wired_limit_mb       # get the current value. 0 is auto calculated to around 75%
 sysctl iogpu.wired_limit_mb=4096
 ```
@@ -679,6 +686,7 @@ your Mac, or after your Mac begins to restart. Keep holding until the described 
 - [trusktr's default keybindings]
 - [Improve docker volume performance on MacOS with a RAM disk]
 - [Prevent a Mac laptop from turning on when opening its lid or connecting to power]
+- [How to Fix SSH "Could Not Resolve Hostname" Error]
 
 <!--
   Reference
@@ -714,6 +722,7 @@ your Mac, or after your Mac begins to restart. Keep holding until the described 
 [can touch id for the mac touch bar authenticate sudo users and admin privileges?]: https://apple.stackexchange.com/questions/259093/can-touch-id-for-the-mac-touch-bar-authenticate-sudo-users-and-admin-privileges#306324
 [command line access to the mac keychain]: https://blog.koehntopp.info/2017/01/26/command-line-access-to-the-mac-keychain.html
 [how to clear dns cache in macos ventura & macos monterey]: https://osxdaily.com/2022/11/21/how-clear-dns-cache-macos-ventura-monterey/
+[How to Fix SSH "Could Not Resolve Hostname" Error]: https://devops-daily.com/posts/ssh-could-not-resolve-hostname-error
 [how to update xcode from command line]: https://stackoverflow.com/questions/34617452/how-to-update-xcode-from-command-line#34617930
 [improve docker volume performance on macos with a ram disk]: https://thoughts.theden.sh/posts/docker-ramdisk-macos-benchmark/
 [installing .pkg with terminal?]: https://apple.stackexchange.com/questions/72226/installing-pkg-with-terminal#394976
