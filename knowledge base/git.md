@@ -3,6 +3,7 @@
 1. [TL;DR](#tldr)
 1. [Authentication](#authentication)
 1. [Configuration](#configuration)
+   1. [Sign commits](#sign-commits)
    1. [Inclusions](#inclusions)
       1. [Conditional inclusions](#conditional-inclusions)
    1. [Remotes](#remotes)
@@ -219,6 +220,7 @@ git log --graph --full-history --all --color --decorate --oneline
 # Show signatures.
 git log --show-signature -1
 git log --show-signature --format="  %h %s%n  Author: %an <%ae>"
+git log --pretty="format:%h %G? %aN  %s"
 
 # Remove staged and working directory changes.
 git reset --hard
@@ -518,11 +520,6 @@ git config --local 'user.name' 'Me'
 git config --local 'core.autocrlf' 'input'
 git config --local 'core.autocrlf' 'true'
 
-# Sign commits by default.
-# Get the GPG key short ID with `gpg --list-keys --keyid-format short`.
-git config --local 'user.signingKey' 'KEY_ID_IN_SHORT_FORMAT'
-git config --local 'commit.gpgSign' true
-
 # Pull submodules by default.
 git config --global 'submodule.recurse' true
 
@@ -552,6 +549,49 @@ git config --list \
 | awk -F '=' '{print $1}' | sort -u \
 | xargs -I {} sh -c 'printf "{}=" && git config --get {}'
 ```
+
+### Sign commits
+
+```sh
+# Retrieve the GPG key's short ID.
+gpg --list-keys --keyid-format 'short'
+gpg --list-keys --keyid-format 'short' 'SOME_KEY_ID'
+
+# Sign commits manually.
+# When not specified, defaults to the committer's identity.
+# When specified, must be attached to the option (no space).
+git commit --gpg-sign='KEY_ID_IN_SHORT_FORMAT' …
+git commit -S …
+# Sign tags manually.
+git tag --sign …
+git tag -s …
+
+# Sign commits by default.
+git config --local 'user.signingKey' 'KEY_ID_IN_SHORT_FORMAT'
+git config --local 'commit.gpgSign' true
+
+# Check commits have been signed.
+git log --show-signature -1
+git log --show-signature --format="  %h %s%n  Author: %an <%ae>"
+git log --pretty="format:%h %G? %aN  %s"
+
+# Verify signatures on tags.
+git show 'v1.4.2.1'
+git tag -v 'v1.4.2.1'
+```
+
+`%G?` in the `git log` format is the verification flag. It shows the trust level of the GPG signature:
+
+| Flag | Meaning                                                                                            |
+| ---- | -------------------------------------------------------------------------------------------------- |
+| `G`  | Good (valid) signature                                                                             |
+| `B`  | Bad signature                                                                                      |
+| `U`  | Valid signature with unknown validity; the public key is probably _untrusted_ in one's GPG keyring |
+| `X`  | Valid but expired signature.                                                                       |
+| `Y`  | Valid signature made with an expired key                                                           |
+| `R`  | Valid signature made with a revoked key                                                            |
+| `E`  | Cannot check the signature; the public key is probably missing from one's GPG keyring              |
+| `N`  | Not signed                                                                                         |
 
 ### Inclusions
 
