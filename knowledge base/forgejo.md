@@ -77,11 +77,19 @@ forgejo manager restart
 # Gracefully shut down.
 forgejo manager shutdown
 
-# Backup everything into a single zip file.
-# Only when everything is on a single file system and the instance is not busy.
-# Contains a copy of the database, though open bugs may introduce problems when re-injecting the SQL dump in a new
-# database.
+# Backup everything into a single archive.
+# Only do this when everything is on a single file system and the instance is not busy.
+# Does contain a copy of the db, though open bugs may introduce problems when re-injecting the SQL dump in a new one.
 forgejo dump
+forgejo dump --type 'tar.gz' --file '/path/to/dump.tar.gz' --quiet
+
+# Verify a dump file.
+unzip -t '/path/to/dump.zip'
+tar -tzf '/path/to/dump.tar.gz' > /dev/null
+
+# Backup the db.
+cp -a '/path/to/forgejo/workdir/db/forgejo.db' 'path/to/db/backup.db'  # only sqlite
+
 ```
 
 </details>

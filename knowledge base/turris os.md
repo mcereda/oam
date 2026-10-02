@@ -471,7 +471,7 @@ config container
 <details>
   <summary>Forgejo</summary>
 
-1. Create and start the container.
+1. Create and start the container:
 
    ```sh
    lxc-create --name 'forgejo' --template 'download' -- \
@@ -496,6 +496,39 @@ config container
    ```
 
 1. Connect to <http://forgejo:3000> to start the first-time installation wizard.
+1. \[optionally] Configure an automation to backup Forgejo:
+
+   ```sh
+   su - forgejo -c 'mkdir -m "2750" -pv "/var/lib/forgejo/backups"'
+   cat <<'DUMP_SCRIPT' > '/var/lib/forgejo/backups/dump.sh'
+   #!/bin/sh
+
+   set -e -o pipefail
+   : "${DATE:=$(date +%FT%H-%M-%S)}"
+   : "${WORKDIR:=/var/lib/forgejo}"
+
+   # dump
+   DUMP_FILE="${WORKDIR}/backups/dump_${DATE}.tar.gz"
+   echo "Dumping to '$DUMP_FILE'..."
+   forgejo dump --type 'tar.gz' --file "$DUMP_FILE" && echo -e "Dump succeeded\n"
+   echo "Copying DB..."
+   cp -av "${WORKDIR}/db/forgejo.db" "${WORKDIR}/backups/db_${DATE}.db" && echo -e "DB copy succeeded\n"
+
+   # verify
+   echo "Verifying dump file '$DUMP_FILE'..."
+   tar -tzf "$DUMP_FILE" | tail -n '5' && echo -e "Dump file is a valid archive\n"
+
+   # retain only the last 5 to keep storage space in check
+   echo "Rotating files..."
+   find "${WORKDIR}/backups" -type 'f' -name "dump_*" | head -n '-5' | xargs -r rm -v && echo -e "Dumps rotated\n"
+   find "${WORKDIR}/backups" -type 'f' -name "db_*"   | head -n '-5' | xargs -r rm -v && echo "DB copies rotated"
+   DUMP_SCRIPT
+
+   chown 'forgejo:' '/var/lib/forgejo/backups/dump.sh'
+   chmod '2750' '/var/lib/forgejo/backups/dump.sh'
+   echo '43  0  *  *  *  /var/lib/forgejo/backups/dump.sh > /var/lib/forgejo/backups/dump_$(date +%FT%H-%M-%S).log 2>&1' | crontab -u 'forgejo' -
+   ```
+
 1. \[optionally] Configure Turris OS to [start the container at boot][start containers at boot].
 
 </details>
