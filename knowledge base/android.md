@@ -6,6 +6,8 @@
    1. [Enable _Developer options_](#enable-developer-options)
    1. [Enable OEM unlocking](#enable-oem-unlocking)
    1. [Enable USB debugging](#enable-usb-debugging)
+1. [Multiple users](#multiple-users)
+   1. [Guest user](#guest-user)
 1. [Device specifics](#device-specifics)
    1. [Fairphone](#fairphone)
    1. [Google Pixel](#google-pixel)
@@ -141,6 +143,51 @@ The new section will appear under _Settings_ > _System_, in the _Advanced_ secti
 1. Go to _Settings_ > _System_ > _Developer options_.
 1. Switch _USB debugging_ on.
 
+## Multiple users
+
+Refer to [Support multiple users].
+
+A.K.A. _user profiles_.\
+This feature is **disabled** by default.
+
+When activating a device, it creates the first _system_ user (_Owner_) and starts settings things up in it.\
+This user has special privileges and settings that only it can set. It can only be removed via factory reset.
+
+Android supports multiple users on a single Android device. The system keeps accounts and their own application data
+**isolated** from each other.\
+Creating a new user starts the device configuration for that user.
+
+_Secondary users_ are for physical people.\
+Each user owns its own application data and some user-level settings. They can run in the background while others are
+active.\
+The Owner user is always running, even when others are in the foreground.
+
+_Profiles_ own their own application data and share some system-wide settings. They are subsets of a single user and are
+tied to it. Users can have multiple profiles. If a user is deleted, its profiles are removed with it.
+
+_Accounts_ are contained within and owned by a single user. Users do **not** require accounts to be functional.
+
+_Applications_ have their own data and live in a user sandbox. Apps within the same user can interact with each other
+via IPC.
+
+_Managed profiles_ are created by an app to contain work data and apps. Managed **exclusively** by the profile's owner.\
+Launcher, notifications, and recent tasks are shared by the parent user and the managed profile.
+
+_Restricted profiles_ use accounts defined in the parent user.\
+Only that user can control what apps are available on the restricted profile. Available only on tablets and tvs.
+
+_Clone profiles_ enables running multiple instances of a single app on one device.\
+[AOSP] doesn't provide end-to-end support for the feature and requires OEMs to complete it before shipping.
+
+_Private profiles_ are sandboxed spaces separate from rest of the device. They can be locked separately from the Owner.\
+A private profile can exist **only** for the Owner, on the same device, along with work profiles and clone profiles.\
+When a private profile is unlocked, its apps become visible. These apps are hidden when locked.
+
+### Guest user
+
+Temporary secondary user. There can be only one at any time.\
+Its settings have an explicit option that enables quickly deleting it when its usefulness is over.
+
 ## Device specifics
 
 ### Fairphone
@@ -160,14 +207,16 @@ Refer to [/e/OS / Devices] instead if it came with /e/OS.
 
 ### Google Pixel
 
-Pixel devices ship with unique [closed-source features][Pixel Drop: Here's everything new added to Google Pixel devices]
-like the following:
+Pixel devices ship with exclusive [closed-source
+features][Pixel Drop: Here's everything new added to Google Pixel devices] like the following:
 
 - Call and message screening with scam detection.
-- Astrophotography and time-lapse options for the camera.
-- [Native Linux terminal application][Android's Linux Terminal app is now widely available on Pixels, and here's how to get it].\
-  Allows access to a full-fledged Debian-based environment similar to the Windows Subsystem for Linux.
-- Display Port support with desktop mode.
+- Astrophotography and time-lapse options for the camera app.
+- Bypass charging once the battery reaches the set charging limit.
+- A [Native Linux terminal
+  application][Android's Linux Terminal app is now widely available on Pixels, and here's how to get it] that grants
+  access to a full-fledged Debian-based environment, similar to the Windows Subsystem for Linux.
+- DisplayPort support with desktop and mirror modes.
 
 Such features came to Pixel devices first, and only _some_ of them have been later ported to [AOSP].
 
@@ -226,6 +275,7 @@ Generic installation steps:
 
 <!-- Upstream -->
 [ADB]: https://developer.android.com/studio/command-line/adb
+[Support multiple users]: https://source.android.com/docs/devices/admin/multi-user
 
 <!-- Others -->
 [/e/OS / Devices]: https://doc.e.foundation/devices/
