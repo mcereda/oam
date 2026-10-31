@@ -8,7 +8,7 @@
    1. [Enable USB debugging](#enable-usb-debugging)
 1. [Multiple users](#multiple-users)
    1. [Guest user](#guest-user)
-1. [Device specifics](#device-specifics)
+1. [Devices' specifics](#devices-specifics)
    1. [Fairphone](#fairphone)
    1. [Google Pixel](#google-pixel)
 1. [Distributions](#distributions)
@@ -150,25 +150,31 @@ Refer to [Support multiple users].
 A.K.A. _user profiles_.\
 This feature is **disabled** by default.
 
-When activating a device, it creates the first _system_ user (_Owner_) and starts settings things up in it.\
-This user has special privileges and settings that only it can set. It can only be removed via factory reset.
+Activating a device creates its first _system user_ (named _Owner_ by default), and starts settings things up in it.\
+This user has special privileges, and settings that only it can set. It can **only** be removed via factory reset.
 
-Android supports multiple users on a single Android device. The system keeps accounts and their own application data
-**isolated** from each other.\
+Android does support multiple users on a single Android device.\
+The system keeps users and their own data (contacts, media store, home directory, etc) **isolated** from each other.
+Each user has their **own** instances of apps, app data, profile data and encryption keys. Apps in a user profile
+**cannot** see data in other profiles and can only communicate with other apps within that same user profile (with
+**mutual** consent of the other apps). There is currently **no** way to directly share data between profiles.\
 Creating a new user starts the device configuration for that user.
 
-_Secondary users_ are for physical people.\
-Each user owns its own application data and some user-level settings. They can run in the background while others are
-active.\
-The Owner user is always running, even when others are in the foreground.
+The system only shows the **currently active** user's notifications.
+
+_Secondary users_ are all those users that are added to a device other than the system user.\
+These users can be removed by the system user or by themselves, and **cannot** impact other users set up on the same
+device. They are usually intended for sharing a device between multiple physical people.\
+Each user owns its own application data and some user-level settings. They _can_ run in the background while other users
+are active. The Owner user **always** keeps running, even when other users are active in the foreground.
 
 _Profiles_ own their own application data and share some system-wide settings. They are subsets of a single user and are
 tied to it. Users can have multiple profiles. If a user is deleted, its profiles are removed with it.
 
 _Accounts_ are contained within and owned by a single user. Users do **not** require accounts to be functional.
 
-_Applications_ have their own data and live in a user sandbox. Apps within the same user can interact with each other
-via IPC.
+_Applications_ have their own data and live in a user sandbox. Apps installed within the **same** user profile can
+interact with each other via IPC. Apps installed in different user profiles cannot communicate at all.
 
 _Managed profiles_ are created by an app to contain work data and apps. Managed **exclusively** by the profile's owner.\
 Launcher, notifications, and recent tasks are shared by the parent user and the managed profile.
@@ -183,12 +189,19 @@ _Private profiles_ are sandboxed spaces separate from rest of the device. They c
 A private profile can exist **only** for the Owner, on the same device, along with work profiles and clone profiles.\
 When a private profile is unlocked, its apps become visible. These apps are hidden when locked.
 
+The secondary users can be thought as non-root users in a GNU/Linux system (with Owner being almost `root`).\
+Separating profiles by trust level (e.g. _trusted_/_untrusted_/_work_) works _usually_ better than separating them by
+function (e.g. _banking_/_gaming_/_social_).
+
+By default, Android supports up to 4 total users (3 + guest).\
+Vendors can customize this limit.
+
 ### Guest user
 
 Temporary secondary user. There can be only one at any time.\
 Its settings have an explicit option that enables quickly deleting it when its usefulness is over.
 
-## Device specifics
+## Devices' specifics
 
 ### Fairphone
 
@@ -211,8 +224,10 @@ Pixel devices ship with exclusive [closed-source
 features][Pixel Drop: Here's everything new added to Google Pixel devices] like the following:
 
 - Call and message screening with scam detection.
-- Astrophotography and time-lapse options for the camera app.
-- Bypass charging once the battery reaches the set charging limit.
+- Specialized camera app (Pixel Camera), with modes like astrophotography and time-lapse.
+- [_Bypass charging_][Pixel phones now support bypass charging when set to the 80% charging limit].\
+  Once the battery reaches the set charging limit (usually 80%), power from the charger is routed **directly** to the
+  phone's components. It completely bypasses the battery, which sits idle and neither charges nor discharges.
 - A [Native Linux terminal
   application][Android's Linux Terminal app is now widely available on Pixels, and here's how to get it] that grants
   access to a full-fledged Debian-based environment, similar to the Windows Subsystem for Linux.
@@ -250,6 +265,11 @@ Generic installation steps:
 1. Enable [OEM unlocking][Enable OEM unlocking] and [USB debugging][Enable USB debugging] on the device.
 1. FIXME.
 
+[Multiple users]' management improves to allow to up to 31 secondary users, optionally configure them to forward their
+notifications to the currently active profile, reuse apps between profiles, and other features.
+
+Most of GrapheneOS' default apps are available in Google's Play Store (and hence in those app stores that mirror it).
+
 ## Further readings
 
 - [ADB]
@@ -272,6 +292,7 @@ Generic installation steps:
 [Enable USB debugging]: #enable-usb-debugging
 [Google Pixel]: #google-pixel
 [GrapheneOS]: #grapheneos
+[Multiple users]: #multiple-users
 
 <!-- Upstream -->
 [ADB]: https://developer.android.com/studio/command-line/adb
@@ -306,6 +327,7 @@ Generic installation steps:
 [Phyphox]: https://phyphox.org
 [PingTools]: https://www.pingtools.org
 [Pixel Drop: Here's everything new added to Google Pixel devices]: https://www.androidauthority.com/google-pixel-feature-drop-3360934/
+[Pixel phones now support bypass charging when set to the 80% charging limit]: https://www.androidauthority.com/pixel-bypass-charging-3507373/
 [Rethink]: https://rethinkdns.com/app
 [Signal]: https://signal.org/
 [System Purifier]: https://github.com/orailnoor/sys-purifier
