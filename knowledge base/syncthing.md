@@ -31,6 +31,14 @@ sudo zypper install 'syncthing'
 
 </details>
 
+| Port/Protocol | Summary                                                        |
+| ------------- | -------------------------------------------------------------- |
+| 8384/TCP      | Default web UI port                                            |
+| 22000/TCP     | Data transfer and Sync protocol's traffic via TCP              |
+| 22000/UDP     | Data transfer Sync protocol's traffic via QUIC                 |
+| 21027/UDP     | Local network discovery (broadcast on IPv4, multicast on IPv6) |
+| 22067/UDP     | Data transfer via relay protocol fallback (`strelaysrv`)       |
+
 <details>
   <summary>Usage</summary>
 
@@ -68,6 +76,7 @@ Then enter the settings on the host and set a new password.
 ### Sources
 
 - [Documentation]
+- [Syncthing Port Guide: Fast Setup & Direct P2P Sync Fix]
 
 <!--
   Reference
@@ -85,3 +94,4 @@ Then enter the settings on the host and set a new password.
 [Website]: https://syncthing.net/
 
 <!-- Others -->
+[Syncthing Port Guide: Fast Setup & Direct P2P Sync Fix]: https://natchecker.com/blog/syncthing-port

@@ -147,12 +147,14 @@
 | SSID    | Service Set IDentifier                                 | Wireless network name                                                                               |
 | SSM     | State-Space Model                                      |                                                                                                     |
 | SSSD    | [System Security Services Daemon]                      |                                                                                                     |
+| STUN    | Session Traversal Utilities for NAT                    |                                                                                                     |
 | TCP     | Transport Control Protocol                             |                                                                                                     |
 | TFE     | [TerraForm Enterprise]                                 |                                                                                                     |
 | TIL     | Today I Learned                                        |                                                                                                     |
 | TL;DR   | Too Long; Didn't Read                                  |                                                                                                     |
 | TL;DW   | Too Long; Didn't Watch                                 | TL;DR, but for videos                                                                               |
 | TLD     | Top Level Domain                                       |                                                                                                     |
+| TURN    | Traversal Using Relays around NAT                      |                                                                                                     |
 | TYL     | Today You Learned                                      | Like TIL, but for when somebody else messes up                                                      |
 | UART    | Universal Asynchronous Receiver and Transmitter        |                                                                                                     |
 | UDP     | User Datagram Protocol                                 |                                                                                                     |
