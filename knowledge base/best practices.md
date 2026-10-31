@@ -13,9 +13,15 @@ What really worked for me personally, or in my experience.
 
 ## Generic concepts
 
+- Consider **what** you are working towards.<br/>
+  Developers often value having less friction over best practices that hinder operations. If the objective is security,
+  it could be worth having blockers; if deployment speed is paramount, even enforcing linting might be a pain.
 - Always think critically and question all the things. Especially those that don't appear to make any sense.<br/>
   Don't just follow trends or advice from others. They _might_ know better, but you will be the one dealing with the
   issues in the end.
+- Every system has **exactly und exactly one** constraint or bottleneck that limits its overall throughput at any given
+  point in time (_theory of constraints_).\
+  Once one is solved, another will show itself. Focus on and optimize for the **current** bottleneck first.
 - Try to understand how something really works, may it be a technology, a tool or what else.<br/>
   Try at least once to do manually what an automation would do in your place. Look at the source code of tools. Read the
   _fabulous_ documentation. Check if they hide error messages behind successful responses.
@@ -24,18 +30,18 @@ What really worked for me personally, or in my experience.
   Claims that feel obvious short-circuit the check that would have exposed them. Verify especially those claims that do
   not feel like they need verification.
 - Stay curious. Experiment. Learn and break things (in a sane and safe way). Dive deeper into what interests you.
-- Make the **informed** decision that most satisfies your **current** necessities.<br/>
-  There is no _perfect_ nor _correct_ solution, just different sets of tradeoff. Besides, no one will ever have all the
+- Make the **informed** decision that most satisfies the **current** necessities.<br/>
+  There is no _perfect_ nor _correct_ solution, just different sets of tradeoff. No one will ever have all the
   information at the start, as some of them only come with experience and looking back at decisions one has already made
   gives the distorted perspective that those decisions were clearer than they really were.
-- Record decisions with their reasoning.<br/>
-  Include what you decided to **not** pursuit and why. This will come handy in later times.
-- Review every decision after some time. Check they are still relevant, or if there is some improvement you can
+- Record decisions **together** with the reasoning behind them.<br/>
+  Include what is decided to **not** pursuit and why. This will come handy in later times.
+- Review every decision after some time. Check they are still relevant, or if there is some improvement one can
   implement.<br/>
-  Things change constantly: new technologies are given birth often, and processes improve. Also, now you know better
-  than before.
-- Retire a speculative design as soon as its specified use case reduces to what existing infrastructure or tools can
-  already provide.<br/>
+  Things change constantly. New technologies are given birth often, processes improve, and one knows better only after
+  some testing.
+- Retire a speculative design as soon as its use case reduces to what existing infrastructure or tools can already
+  provide.<br/>
   Clear reasoning about mechanisms' roles can resolve speculative slots sooner. Don't wait for empty practice as the
   only signal for retirement.
 - Match format details to the artifact's cognitive role rather than to inherited convention.<br/>
@@ -55,7 +61,7 @@ What really worked for me personally, or in my experience.
   simplicity.<br/>
   Always going for the simple solution makes things complicated on a higher level.<br/>
   Check out [KISS principle is not that simple].
-- Modularize stuff when it makes sense, not just to
+- Modularize stuff **when it makes sense**, not just to
   [avoid repetitions][don't repeat yourself(dry) in software development].
 - Create abstractions that **do** hide away the complexity behind them.<br/>
   Avoid creating wrappers that would map features 1-to-1 with their
@@ -121,7 +127,7 @@ What really worked for me personally, or in my experience.
   interpretative capabilities_ (fast/small LLMs or just stupid users), pair them with their rationale and state
   negative cases explicitly.
 
-- Separate a design from its implementation details.
+- Separate a _design_ from its _implementation details_.
 
   _Concepts_ decay on a different schedule than _implementations_. Workflow strategies will be valid long after the
   specific file format changes.<br/>
@@ -132,7 +138,7 @@ What really worked for me personally, or in my experience.
 
 - Fixing a lot of issues to achieve a goal might be an indicator that the decision is wrong. Stop and reconsider.<br/>
   Inside the loop it feels like making progress, but the high might hide poor decisions.
-- When a decision feels obviously correct and frictionless, question it harder. It might come from habits instead of
+- When a decision feels _obviously_ correct and frictionless, question it harder. It might come from habits instead of
   reasoning.
 
 ## Teamwork
@@ -264,6 +270,7 @@ Listed in order of addition:
 - [Keeping green]
 - [Why committing straight to main/master must be allowed]
 - [The harsh reality of good software - prime reacts]
+- [If you thought the speed of writing code was your problem, you have bigger problems - Andrew Murphy]
 
 <!--
   Reference
@@ -307,6 +314,7 @@ Listed in order of addition:
 [hacking your manager - how to get platform engineering on their radar]: https://www.youtube.com/watch?v=8xprsTXKr0w
 [how to mind goodhart's law and avoid unintended consequences]: https://builtin.com/data-science/goodharts-law
 [how to tackle pull request fatigue]: https://javascript.plainenglish.io/tackling-pr-fatigue-6865edc205ce
+[If you thought the speed of writing code was your problem, you have bigger problems - Andrew Murphy]: https://www.youtube.com/watch?v=kSzbuPFjdQo
 [keeping green]: https://fullstackopen.com/en/part11/keeping_green
 [kiss principle is not that simple]: https://artero.dev/posts/kiss-principle-is-not-that-simple/
 [less is more: the minimum effective dose]: https://medium.com/the-mission/less-is-more-the-minimum-effective-dose-e6d56625931e
