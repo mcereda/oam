@@ -8,6 +8,7 @@
    1. [Enable USB debugging](#enable-usb-debugging)
 1. [Multiple users](#multiple-users)
    1. [Guest user](#guest-user)
+1. [Work profiles](#work-profiles)
 1. [Devices' specifics](#devices-specifics)
    1. [Fairphone](#fairphone)
    1. [Google Pixel](#google-pixel)
@@ -145,12 +146,12 @@ The new section will appear under _Settings_ > _System_, in the _Advanced_ secti
 
 ## Multiple users
 
+A.K.A. _user profiles_.
+
 Refer to [Support multiple users].
 
-A.K.A. _user profiles_.\
-This feature is **disabled** by default.
-
-Activating a device creates its first _system user_ (named _Owner_ by default), and starts settings things up in it.\
+Activating a device creates its _primary user_ a.k.a. its first _system user_ (named _Owner_ by default), and starts
+settings things up in it.\
 This user has special privileges, and settings that only it can set. It can **only** be removed via factory reset.
 
 Android does support multiple users on a single Android device.\
@@ -186,8 +187,10 @@ _Clone profiles_ enables running multiple instances of a single app on one devic
 [AOSP] doesn't provide end-to-end support for the feature and requires OEMs to complete it before shipping.
 
 _Private profiles_ are sandboxed spaces separate from rest of the device. They can be locked separately from the Owner.\
-A private profile can exist **only** for the Owner, on the same device, along with work profiles and clone profiles.\
-When a private profile is unlocked, its apps become visible. These apps are hidden when locked.
+A private profile can exist **only** for the primary user (Owner), on the same device. It can exist along with managed
+and clone profiles.\
+Apps in these profiles become visible when the profile is unlocked. The system stops and hides them when the profile is
+locked.
 
 The secondary users can be thought as non-root users in a GNU/Linux system (with Owner being almost `root`).\
 Separating profiles by trust level (e.g. _trusted_/_untrusted_/_work_) works _usually_ better than separating them by
@@ -200,6 +203,27 @@ Vendors can customize this limit.
 
 Temporary secondary user. There can be only one at any time.\
 Its settings have an explicit option that enables quickly deleting it when its usefulness is over.
+
+## Work profiles
+
+_Managed_ user profiles. They separate the data of registered apps from the primary user profile, but share some
+system-wide settings like WiFi and Bluetooth.\
+The primary goal of a work profile is to create a segregated and secure container to hold managed data. The
+administrator of a work profile has full control over the scope, ingress, egress, and lifetime of data.
+
+Refer to [Employ work profiles].
+
+Any app in the **primary** user profile (Owner) can create a work profile. The user is notified of work profile
+behaviors and policy enforcement before their creation.\
+Apps known as _profile owners_ can programmatically invoke APIs to restrict use through policies. Profile owners are
+defined during the initial profile setup.
+
+Search for "work" in settings. The process will create a code that an IT team has to use to manage the profile.\
+Use [Shelter], [Insular], or [Test DPC] to enable work profiles without needing corporate accounts. These still
+require high level permissions, and **only** work from the Owner user profile.
+
+Work profiles **badge** instances of apps they manage (with a small suitcase icon by default), so that an user can
+identify and distinct them from personal instances.
 
 ## Devices' specifics
 
@@ -279,6 +303,7 @@ Most of GrapheneOS' default apps are available in Google's Play Store (and hence
 
 - [How to Use ADB and Fastboot on Android]
 - [System Purifier]
+- [Hide sensitive apps with private space]
 
 <!--
   Reference
@@ -296,6 +321,7 @@ Most of GrapheneOS' default apps are available in Google's Play Store (and hence
 
 <!-- Upstream -->
 [ADB]: https://developer.android.com/studio/command-line/adb
+[Hide sensitive apps with private space]: https://support.google.com/android/answer/15341885?hl=en
 [Support multiple users]: https://source.android.com/docs/devices/admin/multi-user
 
 <!-- Others -->
@@ -308,6 +334,7 @@ Most of GrapheneOS' default apps are available in Google's Play Store (and hence
 [Android Open Source Project]: https://source.android.com/
 [Android's Linux Terminal app is now widely available on Pixels, and here's how to get it]: https://www.androidauthority.com/android-linux-terminal-app-available-3532999/
 [AuroraReach]: https://play.google.com/store/apps/details?id=com.aurorareach.app
+[Employ work profiles]: https://source.android.com/docs/devices/admin/managed-profiles
 [F-Droid]: https://f-droid.org
 [Factory Images for Nexus and Pixel Devices]: https://developers.google.com/android/images
 [Fairphone / Register your product]: https://www.fairphone.com/warranty/start
@@ -321,6 +348,7 @@ Most of GrapheneOS' default apps are available in Google's Play Store (and hence
 [How to unlock or lock your Fairphone's bootloader]: https://support.fairphone.com/hc/en-us/articles/10492476238865-How-to-unlock-or-lock-your-Fairphone-s-bootloader
 [How to Use ADB and Fastboot on Android]: https://www.makeuseof.com/tag/use-adb-fastboot-android/
 [Immich]: https://immich.app
+[Insular]: https://f-droid.org/en/packages/com.oasisfeng.island.fdroid/
 [Logseq]: https://logseq.com
 [OpenKeyChain]: https://www.openkeychain.org
 [Organic Maps]: https://organicmaps.app
@@ -329,6 +357,8 @@ Most of GrapheneOS' default apps are available in Google's Play Store (and hence
 [Pixel Drop: Here's everything new added to Google Pixel devices]: https://www.androidauthority.com/google-pixel-feature-drop-3360934/
 [Pixel phones now support bypass charging when set to the 80% charging limit]: https://www.androidauthority.com/pixel-bypass-charging-3507373/
 [Rethink]: https://rethinkdns.com/app
+[Shelter]: https://f-droid.org/en/packages/net.typeblog.shelter/
 [Signal]: https://signal.org/
 [System Purifier]: https://github.com/orailnoor/sys-purifier
+[Test DPC]: https://play.google.com/store/apps/details?id=com.afwsamples.testdpc
 [Using ADB and fastboot]: https://wiki.lineageos.org/adb_fastboot_guide
