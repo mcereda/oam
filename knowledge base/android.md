@@ -20,11 +20,13 @@
 
 ## TL;DR
 
+Prefer [OpenMTP] or [MacDroid] to Android File Transfer for transferring files to macOS.
+
 <details>
   <summary>Setup</summary>
 
 ```sh
-brew install 'android-platform-tools'
+brew install 'android-platform-tools' && brew install --cask 'openmtp'
 ```
 
 </details>
@@ -350,7 +352,9 @@ Most of GrapheneOS' default apps are available in Google's Play Store (and hence
 [Immich]: https://immich.app
 [Insular]: https://f-droid.org/en/packages/com.oasisfeng.island.fdroid/
 [Logseq]: https://logseq.com
+[MacDroid]: https://www.macdroid.app/
 [OpenKeyChain]: https://www.openkeychain.org
+[OpenMTP]: https://openmtp.ganeshrvel.com/
 [Organic Maps]: https://organicmaps.app
 [Phyphox]: https://phyphox.org
 [PingTools]: https://www.pingtools.org
