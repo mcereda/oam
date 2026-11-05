@@ -25,3 +25,5 @@ MD033:  # no-inline-html
     - ul
 MD041:  # first-line-heading
   allow_preamble: true
+MD046:  # code-block-style
+  style: fenced
