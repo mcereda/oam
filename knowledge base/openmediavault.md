@@ -14,6 +14,7 @@ NAS solution based on [Debian Linux][debian].
    1. [CPU governor](#cpu-governor)
    1. [Disk power options](#disk-power-options)
    1. [Shut down automatically depending on usage](#shut-down-automatically-depending-on-usage)
+1. [Reduce OS disk wear and tear](#reduce-os-disk-wear-and-tear)
 1. [OMV Extras](#omv-extras)
 1. [Antivirus](#antivirus)
 1. [UPS](#ups)
@@ -206,6 +207,19 @@ when a value higher than 128 is selected for APM.
 1. Install the `openmediavault-autoshutdown` plugin.
 1. Configure it via the _Services_ > _AutoShutdown_ tab.
 
+## Reduce OS disk wear and tear
+
+Use the RAM (e.g., via `tmpfs`+`overlayfs`) to reduce or avoid writing to disk for selected write-heavy system paths.\
+This reduces strain on the disk the OS uses, by preventing avoidable write-ups of cache data. Especially valuable when
+using USB disks and SD cards.
+
+The easiest way is to use the [WriteCache Plugin For OMV8]:
+
+1. [Install OMV-Extras][omv extras].
+1. Install the `openmediavault-writecache` plugin.
+1. Reload the WebUI if needed (`ctrl+shift+R`).
+1. Enable and configure the service under _Services_ > _WriteCache_.
+
 ## OMV Extras
 
 From the CLI, as the `root` user:
@@ -221,14 +235,16 @@ From the CLI, as the `root` user:
 ## Antivirus
 
 1. Install the `openmediavault-clamav` plugin.
-1. Enable the service under _Services_ > _Antivirus_ > _Settings_.
+1. Reload the WebUI if needed (`ctrl+shift+R`).
+1. Enable and configure the service under _Services_ > _Antivirus_ > _Settings_.
 1. Apply pending changes.<br/>
    The first run will take a long time.
 
 ## UPS
 
 1. Install the `openmediavault-nut` plugin.
-1. Enable the service under _Services_ > _UPS_.
+1. Reload the WebUI if needed (`ctrl+shift+R`).
+1. Enable and configure the service under _Services_ > _UPS_.
 1. Apply pending changes.
 
 ## ZFS
@@ -323,6 +339,7 @@ Just enable that property in the pool or datasets.
 [Plugins]: https://docs.openmediavault.org/en/stable/plugins.html
 [Software & Update Management]: https://docs.openmediavault.org/en/stable/various/apt.html
 [Website]: https://www.openmediavault.org/
+[WriteCache Plugin For OMV8]: https://wiki.omv-extras.org/doku.php?id=omv8:omv8_plugins:write_cache
 [ZFS Plugin For OMV8]: https://wiki.omv-extras.org/doku.php?id=omv8:omv8_plugins:zfs
 
 <!-- Others -->
