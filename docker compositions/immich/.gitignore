@@ -1,2 +1,4 @@
-/library/
-/postgres/
+library
+ml-model-cache
+postgres
+redis

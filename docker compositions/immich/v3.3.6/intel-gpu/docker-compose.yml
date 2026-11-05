@@ -1,0 +1,99 @@
+#
+# WARNING: To install Immich, follow our guide: https://docs.immich.app/install/docker-compose
+#
+# Make sure to use the docker-compose.yml of the current release:
+#
+# https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml
+#
+# The compose file on main may not be compatible with the latest release.
+
+name: immich
+
+secrets:
+  db-password:
+    file: ./db-password.txt
+
+services:
+  immich-server:
+    container_name: immich_server
+    image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
+    extends:
+      file: hwaccel.transcoding.yml
+      service: quicksync
+    user: '1000:1000'
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - NET_RAW
+    volumes:
+      - ${UPLOAD_LOCATION}:/data
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - .env
+    ports:
+      - '2283:2283'
+    depends_on:
+      - redis
+      - database
+    restart: unless-stopped
+    healthcheck:
+      disable: false
+    secrets:
+      - db-password
+
+  immich-machine-learning:
+    container_name: immich_machine_learning
+    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}-openvino
+    extends:
+      file: hwaccel.ml.yml
+      service: openvino
+    user: '1000:1000'
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - NET_RAW
+    volumes:
+      - ./ml-model-cache:/cache
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      disable: false
+
+  redis:
+    container_name: immich_redis
+    image: docker.io/valkey/valkey:9@sha256:c123e3715db63d06d4ad6964884037aa0d5d4d703939b9929954112889708e1d
+    user: '1000:1000'
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - NET_RAW
+    volumes:
+      - ./redis:/data
+    healthcheck:
+      test: redis-cli ping | grep -q PONG || exit 1
+    restart: unless-stopped
+
+  database:
+    container_name: immich_postgres
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+    user: '1000:1000'
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - NET_RAW
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_DB: ${DB_DATABASE_NAME}
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+      DB_STORAGE_TYPE: 'HDD'
+    volumes:
+      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+    env_file:
+      - .env
+    shm_size: 128mb
+    restart: unless-stopped
+    healthcheck:
+      disable: false
+    secrets:
+      - db-password

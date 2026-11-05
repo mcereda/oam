@@ -12,10 +12,11 @@ Self-hosted photo and video management solution.
   <summary>Setup</summary>
 
 ```sh
-curl -O 'https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml' \
-&& curl -o '.env' 'https://github.com/immich-app/immich/releases/latest/download/example.env' \
-&& curl -O 'https://github.com/immich-app/immich/releases/latest/download/hwaccel.transcoding.yml' \
-&& curl -O 'https://github.com/immich-app/immich/releases/latest/download/hwaccel.ml.yml' \
+curl -Lo 'docker-compose.yml' 'https://github.com/immich-app/immich/releases/download/v3.3.6/docker-compose.rootless.yml' \
+&& curl -Lo '.env' 'https://github.com/immich-app/immich/releases/download/v3.3.6/example.env' \
+&& curl -LO 'https://github.com/immich-app/immich/releases/download/v3.3.6/hwaccel.transcoding.yml' \
+&& curl -LO 'https://github.com/immich-app/immich/releases/download/v3.3.6/hwaccel.ml.yml' \
+&& mkdir {library,ml-model-cache,postgres,redis} \
 && docker compose up -d \
 && xdg-open 'http://localhost:2283'
 ```
