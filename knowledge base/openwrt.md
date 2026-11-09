@@ -1,13 +1,23 @@
 # OpenWrt
 
-Linux operating system targeting embedded devices, providing a fully writable filesystem with package management.
+Linux-based operating system for embedded devices.\
+Provides a fully writable filesystem with package management.
 
-## Table of contents <!-- omit in toc -->
-
+1. [VLANs](#vlans)
 1. [Monitoring](#monitoring)
    1. [Prometheus](#prometheus)
 1. [Further readings](#further-readings)
 1. [Sources](#sources)
+
+## VLANs
+
+Refer to [OpenWrt's VLAN page][OpenWrt / VLAN].
+
+One _can_ create multiple virtual WiFi interfaces on the same physical radio card.\
+Each virtual interface can manage its own SSID.
+
+By default, OpenWrt puts different VLANs into different firewall zones. This isolates them from each other.\
+Create appropriate firewall rules to allow traffic to flow from one zone to another.
 
 ## Monitoring
 
@@ -54,11 +64,9 @@ All the references in the [further readings] section, plus the following:
 - [How I monitor my OpenWrt router with Grafana Cloud and Prometheus]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
-
-<!-- Upstream -->
-[website]: https://openwrt.org/
 
 <!-- In-article sections -->
 [further readings]: #further-readings
@@ -68,6 +76,10 @@ All the references in the [further readings] section, plus the following:
 [opkg]: opkg.md
 [turris os]: turris%20os.md
 [uci]: uci.md
+
+<!-- Upstream -->
+[OpenWrt / VLAN]: https://openwrt.org/docs/guide-user/network/vlan/switch_configuration
+[website]: https://openwrt.org/
 
 <!-- Others -->
 [how i monitor my openwrt router with grafana cloud and prometheus]: https://grafana.com/blog/2021/02/09/how-i-monitor-my-openwrt-router-with-grafana-cloud-and-prometheus/

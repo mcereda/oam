@@ -55,6 +55,7 @@
 | DoH     | DNS over HTTPS                                         |                                                                                                     |
 | DoT     | DNS over TLS                                           |                                                                                                     |
 | DPO     | Direct Preference Optimization                         |                                                                                                     |
+| DSA     | Distributed Switch Architecture                        |                                                                                                     |
 | EA      | Extended Attributes                                    |                                                                                                     |
 | EEPROM  | Electronically Erasable Programmable Read-Only Memory  |                                                                                                     |
 | ELI5    | Explain Like I'm 5                                     |                                                                                                     |

@@ -15,6 +15,7 @@ Linux distribution based on top of OpenWrt. Check the [website] for more informa
    1. [Start containers at boot](#start-containers-at-boot)
    1. [Examples](#examples)
 1. [Hardening](#hardening)
+1. [VLANs](#vlans)
 1. [The SFP+ caged module](#the-sfp-caged-module)
    1. [Use the SFP module as a LAN port](#use-the-sfp-module-as-a-lan-port)
 1. [Further readings](#further-readings)
@@ -682,9 +683,43 @@ config container
 
 ## Hardening
 
-See:
+See [SSH hardening].
 
-- [SSH hardening].
+## VLANs
+
+Refer to [LuCI VLAN setup] and [OpenWrt's VLANs section][OpenWrt / VLANs].
+
+Short for _Virtual Local Area Network_ and defined by the IEEE [802.1Q][IEEE 802.1Q] and [802.1ad][IEEE 802.1ad]
+standards.\
+Used to keep network clients separated even when they are using the same shared physical network, by adding tags to
+their frame headers.\
+They require at least 2 devices that support VLAN features.
+
+Interfaces that tag and receive tagged packets are _VLAN tagging interfaces_.\
+They **must** be configured to use a specific VLAN ID and ports.
+
+**Tagged** ports are meant to pass traffic for multiple VLANs, acting as links between switches (_trunk ports_).\
+**Untagged** ports accept traffic for only a single VLAN, acting as links to end devices (_access ports_).
+
+_Untagged_ ports will accept only **physically** incoming traffic that has **no** VLAN IDs (e.g. normal ethernet
+traffic). These same ports will also **remove** VLAN IDs from **physically** outgoing packets.\
+Each port can only be assigned as _untagged_ to exactly one VLAN ID.
+
+Turris OS uses the Distributed Switch Architecture (DSA) to manage the switch. It enables creating VLAN interfaces
+**directly** over physical interfaces.
+
+Create VLAN interfaces for LAN ports on top of interfaces in the `lan` zone. Use interfaces in the `wan` or `wan6`
+zones for traffic that does **not** pass through the LAN switch.
+
+Configure VLAN interfaces in LuCI, in the `Network` > `Interfaces` menu, in the _Devices_ tab.
+
+> [!tip]
+> Prefer adding VLAN tagged interfaces to bridges in the format `<if>.X`, where `<if>` is the desired interface and `X`
+> is the VLAN's ID (e.g. `lan0.12`, `wan0.50`, `eth0.42`).\
+> This creates _driver-level_ VLANs, which allows for manual configuration.
+
+> [!warning]
+> TODO: continue
 
 ## The SFP+ caged module
 
@@ -790,6 +825,7 @@ luci-reload
 [baikal]: baikal.md
 [lxc]: lxc.md
 [openwrt]: openwrt.md
+[OpenWrt / VLANs]: openwrt.md#vlans
 [opkg]: opkg.md
 [pi-hole]: pi-hole.md
 [ssh hardening]: ssh.md#hardening
@@ -800,12 +836,15 @@ luci-reload
 [factory reset on turris omnia]: https://docs.turris.cz/hw/omnia/rescue-modes/
 [home nas]: https://wiki.turris.cz/doc/en/howto/nas
 [how to control led diodes]: https://wiki.turris.cz/doc/en/howto/led_settings
+[LuCI VLAN setup]: https://docs.turris.cz/basics/luci/vlan/luci-vlan/
 [operating temperature]: https://forum.turris.cz/t/operating-temperature/998
 [supported sfp modules]: https://wiki.turris.cz/doc/en/public/sfp
 [turris wiki]: https://wiki.turris.cz/doc/en/start
 [website]: https://www.turris.com/turris-os/
 
 <!-- Others -->
+[IEEE 802.1ad]: https://en.wikipedia.org/wiki/IEEE_802.1ad
+[IEEE 802.1Q]: https://en.wikipedia.org/wiki/IEEE_802.1Q
 [install pi-hole]: https://github.com/nminten/turris-omnia_documentation/blob/master/howtos/pihole.md
 [installing pi-hole on turris omnia]: https://blog.weinreich.org/posts/2020/2020-05-02-turris-omnia-pihole/
 [pi-hole on turris omnia]: http://polster.github.io/2017/08/04/Pi-Hole-on-Turris.html
