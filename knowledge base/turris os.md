@@ -619,7 +619,7 @@ config container
 
 Refer to the [Alpine Linux wiki page][Alpine wiki / Nextcloud].
 
-Bare minimal using SQlite:
+Bare minimal, using **SQlite**, and **Nginx** with a **self-signed** certificate:
 
 1. Create and start the container:
 
@@ -652,7 +652,7 @@ Bare minimal using SQlite:
    # Create a self-signed SSL certificate.
    openssl req -x509 -nodes -days '365' -newkey 'rsa:4096' \
      -keyout '/etc/ssl/private/nextcloud-selfsigned.key' -out '/etc/ssl/certs/nextcloud-selfsigned.crt' \
-     -subj '/C=US/ST=Oregon/L=Portland/O=Example Org/OU=R&D/CN=nextcloud.lan'
+     -subj '/CN=nextcloud.lan' -addext "subjectAltName=DNS:nextcloud.lan"
 
    # Configure the webserver.
    rm '/etc/nginx/http.d/default.conf'
@@ -708,6 +708,26 @@ Bare minimal using SQlite:
 
 1. Connect to <https://nextcloud.lan> to start the first-time installation wizard.
 1. \[optionally] Configure Turris OS to [start the container at boot][start containers at boot].
+
+Consider adding the self-signed certificate to one's keychains so that applications will not refuse to contact it
+([Android][Android / Install a certificate], [macOS][macOS / Add self-signed certificates to the keychain]).
+
+Use a Let's Encrypt certificate (will **not** work with non-TLDs like `.lan` or `.local`):
+
+1. Follow the procedure as before.
+1. Install Certbot and its plugin for nginx:
+
+   ```sh
+   apk --no-cache add 'certbot' 'certbot-nginx'
+   ```
+
+1. Generate the certificate:
+
+   ```sh
+   certbot --nginx
+   ```
+
+1. FIXME: finish.
 
 </details>
 
@@ -919,10 +939,12 @@ luci-reload
 [Start containers at boot]: #start-containers-at-boot
 
 <!-- Knowledge base -->
+[Android / Install a certificate]: android.md#install-a-certificate
 [baikal]: baikal.md
 [lxc]: lxc.md
-[openwrt]: openwrt.md
+[macOS / Add self-signed certificates to the keychain]: macos/README.md#add-self-signed-certificates-to-the-keychain
 [OpenWrt / VLANs]: openwrt.md#vlans
+[openwrt]: openwrt.md
 [opkg]: opkg.md
 [pi-hole]: pi-hole.md
 [ssh hardening]: ssh.md#hardening

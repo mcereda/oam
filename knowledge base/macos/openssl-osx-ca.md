@@ -1,6 +1,6 @@
 # `openssl-osx-ca`
 
-## Table of contents <!-- omit in toc -->
+Periodic task that sync OSX Keychain certificates to Homebrew installed OpenSSL & LibreSSL ones.
 
 1. [TL;DR](#tldr)
 1. [Further readings](#further-readings)

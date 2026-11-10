@@ -15,6 +15,7 @@
     1. [Fix iTerm2](#fix-iterm2)
 1. [Create custom DNS resolvers](#create-custom-dns-resolvers)
 1. [Remap the Home and End keys](#remap-the-home-and-end-keys)
+1. [Add self-signed certificates to the keychain](#add-self-signed-certificates-to-the-keychain)
 1. [Xcode CLI tools](#xcode-cli-tools)
     1. [Headless installation](#headless-installation)
     1. [Removal](#removal)
@@ -557,6 +558,19 @@ cat <<-EOF | tee "$HOME/Library/KeyBindings/DefaultKeyBinding.dict"
 }
 EOF
 ```
+
+## Add self-signed certificates to the keychain
+
+1. Open `Keychain Access` (find it via Spotlight with `Cmd + Space`).
+1. Select the _Local_ keychain from the list on the left to limit the addition to the current user only.\
+1. Select the _System_ keychain from the same list to make it available to **all** users and background processes.
+1. Drag and drop the certificate's `.crt` or `.p12` file into the list of certificates.\
+   If using a `.p12` file, one will be prompted for the password that was created when exporting it.
+1. Find the certificate one just added in the list, and double-click it to open its settings.
+1. Click the arrow next to _Trust_ to expand that section.
+1. Change the setting for _When using this certificate_ to _Always Trust_.
+1. Close the window.\
+   One will be prompted for their macOS password to confirm the changes.
 
 ## Xcode CLI tools
 

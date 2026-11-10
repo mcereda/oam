@@ -4,6 +4,7 @@
 1. [Applications of interest](#applications-of-interest)
 1. [Common operations](#common-operations)
    1. [Enable _Developer options_](#enable-developer-options)
+   1. [Install a certificate](#install-a-certificate)
    1. [Toggle OEM unlocking](#toggle-oem-unlocking)
    1. [Toggle USB debugging](#toggle-usb-debugging)
 1. [Multiple users](#multiple-users)
@@ -238,6 +239,20 @@ fastboot reboot
 1. Click the _Build number_ menu entry repeatedly until it enables developer mode.
 
 The new section will appear under _Settings_ > _System_, in the _Advanced_ section.
+
+### Install a certificate
+
+1. Transfer the certificate's file (usually ending in `.crt`, `.cer`, or `.pem`) to the device's internal storage.
+1. Open _Settings_ > _Security and privacy_ > _More security settings_ > _Encryption and credentials_.
+1. Select _Install a certificate_.
+1. Choose the type of certificate.
+
+   CA certificates are used **system-wide** (e.g., for a corporate proxy).\
+   VPN and app user certificate set up specific authentication.
+   Wi-Fi certificates only work for enterprise Wi-Fi networks.
+
+1. Browse the internal storage, select the certificate's file, and provide a name for it.
+1. Enter the device's PIN or password to confirm the installation.
 
 ### Toggle OEM unlocking
 
