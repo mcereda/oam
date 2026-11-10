@@ -476,7 +476,7 @@ config container
 
    ```sh
    lxc-create --name 'forgejo' --template 'download' -- \
-     --server 'images.linuxcontainers.org' --dist 'alpine' --release '3.23' --arch 'armhf'
+     --server 'images.linuxcontainers.org' --dist 'alpine' --release '3.24' --arch 'armhf'
    lxc-start --name 'forgejo'
    ```
 
@@ -611,6 +611,103 @@ config container
    # All done!
    exit
    ```
+
+</details>
+
+<details>
+  <summary>Nextcloud</summary>
+
+Refer to the [Alpine Linux wiki page][Alpine wiki / Nextcloud].
+
+Bare minimal using SQlite:
+
+1. Create and start the container:
+
+   ```sh
+   lxc-create --name 'nextcloud' --template 'download' -- \
+     --server 'images.linuxcontainers.org' --dist 'alpine' --release '3.24' --arch 'armhf'
+   lxc-start --name 'nextcloud'
+   ```
+
+1. Get a shell in the container:
+
+   ```sh
+   lxc-attach --name 'nextcloud'
+   ```
+
+1. Install and configure Nexcloud in the container:
+
+   ```sh
+   # Set the correct hostname.
+   # Should be already set correctly.
+   echo 'nextcloud' > '/etc/hostname'
+   hostname -F '/etc/hostname'
+
+   # Install Nextcloud and its dependencies.
+   apk --no-cache add \
+     'nginx' 'openssl' \
+     'php85-exif' 'php85-fpm' 'php85-pecl-apcu' 'php85-pecl-imagick' 'php85-sodium' 'php85-sysvsem' \
+     'nextcloud33' 'nextcloud33-initscript' 'nextcloud33-occ' 'nextcloud33-sqlite'
+
+   # Create a self-signed SSL certificate.
+   openssl req -x509 -nodes -days '365' -newkey 'rsa:4096' \
+     -keyout '/etc/ssl/private/nextcloud-selfsigned.key' -out '/etc/ssl/certs/nextcloud-selfsigned.crt' \
+     -subj '/C=US/ST=Oregon/L=Portland/O=Example Org/OU=R&D/CN=nextcloud.lan'
+
+   # Configure the webserver.
+   rm '/etc/nginx/http.d/default.conf'
+   cat <<'EOF' > '/etc/nginx/http.d/nextcloud.lan.conf'
+   server {
+       listen       80;
+       listen       [::]:80;
+       server_name  nextcloud.lan;
+       return       301  https://$host$request_uri;
+   }
+   server {
+       listen       443 ssl;
+       listen       [::]:443 ssl;
+       server_name  nextcloud.lan;
+
+       root              /usr/share/webapps/nextcloud;
+       index             index.php index.html index.htm;
+       disable_symlinks  off;
+
+       ssl_certificate      /etc/ssl/certs/nextcloud-selfsigned.crt;
+       ssl_certificate_key  /etc/ssl/private/nextcloud-selfsigned.key;
+       ssl_session_timeout  5m;
+
+       add_header  Strict-Transport-Security  "max-age=31536000; includeSubDomains"  always;
+
+       location  /  {
+           try_files $uri $uri/ /index.html;
+       }
+       location  ~  [^/]\.php(/|$)  {
+           fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+           if (!-f $document_root$fastcgi_script_name)  { return 404; }
+           fastcgi_pass  unix:/run/nextcloud/fastcgi.sock;
+           fastcgi_index index.php;
+           include       fastcgi.conf;
+       }
+       location  ^~ /.well-known/carddav    { return 301 /remote.php/dav/; }
+       location  ^~ /.well-known/caldav     { return 301 /remote.php/dav/; }
+       location  ^~ /.well-known/webfinger  { return 301 /index.php/.well-known/webfinger; }
+       location  ^~ /.well-known/nodeinfo   { return 301 /index.php/.well-known/nodeinfo; }
+
+       include mime.types;
+       types { text/javascript mjs; }
+   }
+   EOF
+   nginx -t  # needs to check the whole configuration
+
+   # Start Nextcloud.
+   rc-update add nginx
+   rc-update add nextcloud
+   rc-service nginx start
+   rc-service nextcloud start
+   ```
+
+1. Connect to <https://nextcloud.lan> to start the first-time installation wizard.
+1. \[optionally] Configure Turris OS to [start the container at boot][start containers at boot].
 
 </details>
 
@@ -843,6 +940,7 @@ luci-reload
 [website]: https://www.turris.com/turris-os/
 
 <!-- Others -->
+[Alpine wiki / Nextcloud]: https://wiki.alpinelinux.org/wiki/Nextcloud
 [IEEE 802.1ad]: https://en.wikipedia.org/wiki/IEEE_802.1ad
 [IEEE 802.1Q]: https://en.wikipedia.org/wiki/IEEE_802.1Q
 [install pi-hole]: https://github.com/nminten/turris-omnia_documentation/blob/master/howtos/pihole.md
