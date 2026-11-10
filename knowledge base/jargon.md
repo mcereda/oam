@@ -73,6 +73,7 @@
 | FS      | FileSystem                                             |                                                                                                     |
 | FW      | FireWall                                               |                                                                                                     |
 | GA      | General Availability                                   |                                                                                                     |
+| GID     | Group ID                                               |                                                                                                     |
 | GNU     | GNU is Not Unix                                        |                                                                                                     |
 | GPG     | GNU Privacy Guard                                      |                                                                                                     |
 | GUI     | Graphical User Interface                               |                                                                                                     |
@@ -123,6 +124,7 @@
 | PEBCAK  | Problem Exists Between Chair And Keyboard              |                                                                                                     |
 | PEM     | Privacy Enhanced Mail                                  |                                                                                                     |
 | PGP     | Pretty Good Privacy                                    |                                                                                                     |
+| PID     | Process ID                                             |                                                                                                     |
 | PII     | Personally Identifiable Information                    |                                                                                                     |
 | PR      | Pull Request                                           | Prevalently used in GitHub                                                                          |
 | QQ      | Quick Question                                         |                                                                                                     |
@@ -160,6 +162,7 @@
 | UART    | Universal Asynchronous Receiver and Transmitter        |                                                                                                     |
 | UDP     | User Datagram Protocol                                 |                                                                                                     |
 | UFW     | Uncomplicated FireWall                                 |                                                                                                     |
+| UID     | User ID                                                |                                                                                                     |
 | URI     | Uniform Resource Identifier                            | See [URI vs URL vs URN]                                                                             |
 | URL     | Uniform Resource Locator                               | See [URI vs URL vs URN]                                                                             |
 | URN     | Uniform Resource Name                                  | See [URI vs URL vs URN]                                                                             |

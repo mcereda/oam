@@ -44,10 +44,15 @@ echo 'vm.swappiness = 5' | sudo tee -a /etc/sysctl.d/99-swappiness.conf
 
 - [How to reload sysctl.conf variables on Linux]
 - [Documentation for /proc/sys]
+- [the /proc filesystem]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
+
+<!-- Knowledge base -->
+[The /proc filesystem]: linux/procfs.md
 
 <!-- Upstream -->
 [documentation for /proc/sys]: https://docs.kernel.org/admin-guide/sysctl/
