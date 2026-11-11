@@ -5,7 +5,7 @@
    1. [Basic setup through Alpine Linux packages, SQlite, and Nginx with a self-signed certificate](#basic-setup-through-alpine-linux-packages-sqlite-and-nginx-with-a-self-signed-certificate)
    1. [Using containers](#using-containers)
    1. [Kubernetes](#kubernetes)
-1. [Using Snap](#using-snap)
+   1. [Using Snap](#using-snap)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -225,7 +225,7 @@ kubectl delete namespace --ignore-not-found nextcloud
 
 </details>
 
-## Using Snap
+### Using Snap
 
 To configure Nextcloud from `snap`:
 
