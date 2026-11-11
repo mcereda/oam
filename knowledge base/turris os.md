@@ -635,82 +635,22 @@ Bare minimal, using **SQlite**, and **Nginx** with a **self-signed** certificate
    lxc-attach --name 'nextcloud'
    ```
 
-1. Install and configure Nexcloud in the container:
+1. Configure the container:
 
    ```sh
-   # Set the correct hostname.
+   # Set the correct hostname if needed.
    # Should be already set correctly.
    echo 'nextcloud' > '/etc/hostname'
    hostname -F '/etc/hostname'
-
-   # Install Nextcloud and its dependencies.
-   apk --no-cache add \
-     'nginx' 'openssl' \
-     'php85-exif' 'php85-fpm' 'php85-pecl-apcu' 'php85-pecl-imagick' 'php85-sodium' 'php85-sysvsem' \
-     'nextcloud33' 'nextcloud33-initscript' 'nextcloud33-occ' 'nextcloud33-sqlite'
-
-   # Create a self-signed SSL certificate.
-   openssl req -x509 -nodes -days '365' -newkey 'rsa:4096' \
-     -keyout '/etc/ssl/private/nextcloud-selfsigned.key' -out '/etc/ssl/certs/nextcloud-selfsigned.crt' \
-     -subj '/CN=nextcloud.lan' -addext "subjectAltName=DNS:nextcloud.lan"
-
-   # Configure the webserver.
-   rm '/etc/nginx/http.d/default.conf'
-   cat <<'EOF' > '/etc/nginx/http.d/nextcloud.lan.conf'
-   server {
-       listen       80;
-       listen       [::]:80;
-       server_name  nextcloud.lan;
-       return       301  https://$host$request_uri;
-   }
-   server {
-       listen       443 ssl;
-       listen       [::]:443 ssl;
-       server_name  nextcloud.lan;
-
-       root              /usr/share/webapps/nextcloud;
-       index             index.php index.html index.htm;
-       disable_symlinks  off;
-
-       ssl_certificate      /etc/ssl/certs/nextcloud-selfsigned.crt;
-       ssl_certificate_key  /etc/ssl/private/nextcloud-selfsigned.key;
-       ssl_session_timeout  5m;
-
-       add_header  Strict-Transport-Security  "max-age=31536000; includeSubDomains"  always;
-
-       location  /  {
-           try_files $uri $uri/ /index.html;
-       }
-       location  ~  [^/]\.php(/|$)  {
-           fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-           if (!-f $document_root$fastcgi_script_name)  { return 404; }
-           fastcgi_pass  unix:/run/nextcloud/fastcgi.sock;
-           fastcgi_index index.php;
-           include       fastcgi.conf;
-       }
-       location  ^~ /.well-known/carddav    { return 301 /remote.php/dav/; }
-       location  ^~ /.well-known/caldav     { return 301 /remote.php/dav/; }
-       location  ^~ /.well-known/webfinger  { return 301 /index.php/.well-known/webfinger; }
-       location  ^~ /.well-known/nodeinfo   { return 301 /index.php/.well-known/nodeinfo; }
-
-       include mime.types;
-       types { text/javascript mjs; }
-   }
-   EOF
-   nginx -t  # needs to check the whole configuration
-
-   # Start Nextcloud.
-   rc-update add nginx
-   rc-update add nextcloud
-   rc-service nginx start
-   rc-service nextcloud start
    ```
 
+1. [Setup Nextcloud][Nextcloud / Setup].
+   Prefer the
+   [basic setup using repository packages, SQlite, and Nginx with a self-signed certificate][Nextcloud / Basic setup through Alpine Linux packages, SQlite, and Nginx with a self-signed certificate].\
 1. Connect to <https://nextcloud.lan> to start the first-time installation wizard.
-1. \[optionally] Configure Turris OS to [start the container at boot][start containers at boot].
-
-Consider adding the self-signed certificate to one's keychains so that applications will not refuse to contact it
-([Android][Android / Install a certificate], [macOS][macOS / Add self-signed certificates to the keychain]).
+1. \[_recommended_] Configure Turris OS to [start the container at boot][start containers at boot].
+1. \[_recommended_] Add the self-signed certificate to one's devices
+   ([Android][Android / Install a certificate], [macOS][macOS / Add self-signed certificates to the keychain]).
 
 Use a Let's Encrypt certificate (will **not** work with non-TLDs like `.lan` or `.local`):
 
@@ -943,6 +883,8 @@ luci-reload
 [baikal]: baikal.md
 [lxc]: lxc.md
 [macOS / Add self-signed certificates to the keychain]: macos/README.md#add-self-signed-certificates-to-the-keychain
+[Nextcloud / Basic setup through Alpine Linux packages, SQlite, and Nginx with a self-signed certificate]: nextcloud.md#basic-setup-through-alpine-linux-packages-sqlite-and-nginx-with-a-self-signed-certificate
+[Nextcloud / Setup]: nextcloud.md#setup
 [OpenWrt / VLANs]: openwrt.md#vlans
 [openwrt]: openwrt.md
 [opkg]: opkg.md
