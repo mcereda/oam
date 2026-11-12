@@ -121,7 +121,9 @@ certificate responding to `nextcloud.lan`:
        types { text/javascript mjs; }
    }
    EOF
-   nginx -t  # check the whole configuration
+
+   # Check the whole configuration.
+   nginx -t
    ```
 
 1. Start the services:

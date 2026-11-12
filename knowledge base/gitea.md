@@ -24,7 +24,7 @@ git clone 'https://github.com/go-gitea/gitea' -b 'release/v1.22' && cd 'gitea' \
 && TAGS='bindata sqlite sqlite_unlock_notify' make build
 
 # Install as package.
-apk add 'gitea'
+apk add 'gitea' 'gitea-openrc'
 brew install 'gitea'
 emerge -aqv 'gitea'
 pacman -S 'gitea'

@@ -1,17 +1,17 @@
 # Turris OS
 
-Linux distribution based on top of OpenWrt. Check the [website] for more information.
+Linux distribution based on top of [OpenWrt].\
+Check the [website] for more information.
 
 1. [TL;DR](#tldr)
-1. [LED diodes settings](#led-diodes-settings)
-   1. [Automatic overnight dimming](#automatic-overnight-dimming)
 1. [Local DNS resolution](#local-dns-resolution)
 1. [Static DHCP leases and hostnames](#static-dhcp-leases-and-hostnames)
 1. [Containers](#containers)
+   1. [Get information about running containers](#get-information-about-running-containers)
    1. [Create new containers](#create-new-containers)
    1. [Assign containers a static IP address](#assign-containers-a-static-ip-address)
    1. [Start containers](#start-containers)
-   1. [Execute a shell into containers](#execute-a-shell-into-containers)
+   1. [Get a shell into running containers](#get-a-shell-into-running-containers)
    1. [Start containers at boot](#start-containers-at-boot)
    1. [Examples](#examples)
 1. [Hardening](#hardening)
@@ -22,6 +22,10 @@ Linux distribution based on top of OpenWrt. Check the [website] for more informa
    1. [Sources](#sources)
 
 ## TL;DR
+
+Using SQM might **slow down** network throughput instead of boosting performances.\
+This is especially true on older, lower power devices. A Turris Omnia (ARMv7 Processor rev 1, v7l) dropped Internet
+download speed from the _normal_ ~30 MBps to _at most_ 1.3 MBps when SQM was enabled.
 
 <details>
   <summary>Usage</summary>
@@ -53,6 +57,7 @@ uci commit 'dhcp'
 reload_config
 luci-reload
 
+
 # Get LEDs intensity.
 rainbow brightness -q
 
@@ -60,6 +65,7 @@ rainbow brightness -q
 # 0 to 8 normally, 0 to 255 using '-p'.
 rainbow brightness '5'
 rainbow brightness -p '100'
+
 
 # Manage services.
 /etc/init.d/sshd restart
@@ -74,18 +80,43 @@ poweroff
 cat '/sys/class/thermal/thermal_zone0/temp'
 sensors
 
+
 # List available LXC container images.
 # Default source is 'repo.turris.cz/lxc'.
-lxc-create -n 'test' -t 'download'; lxc-destroy -n 'test'
-lxc-create … -t 'download' -- --server 'images.linuxcontainers.org'
+lxc-create --name 'test' --template 'download'; lxc-destroy --name 'test'
+lxc-create -n 'test' -t 'download' -- --server 'images.linuxcontainers.org'; lxc-destroy --name 'test'
 
 # Create LXC containers.
 # Default source is 'repo.turris.cz/lxc'.
 # Values are case sensitive and depend from what is on the server.
-lxc-create -n 'alpine' -t 'download' -- -d 'Alpine' -r '3.18' -a 'armv7l'
-lxc-create --name 'ubuntu-focal' --template 'download' -- \
-  --server 'repo.turris.cz/lxc' \
-  --dist 'Ubuntu' --release 'Focal' --arch 'armv7l'
+lxc-create --name 'alpine' --template 'download' -- --dist 'Alpine' --release '3.18' --arch 'armv7l'
+lxc-create -n 'ubuntu-focal' -t 'download' -- \
+  -s 'repo.turris.cz/lxc' \
+  -d 'Ubuntu' -r 'Focal' -a 'armv7l'
+
+# List containers.
+lxc-ls
+
+# Show information about running containers
+lxc-info --name 'nextcloud'
+lxc-info -n 'pi-hole'
+lxc-info 'gitea' --ips
+
+# Start containers.
+lxc-start --name 'baikal'
+lxc-start -n 'forgejo'
+lxc-start 'gitea'
+
+# Stop containers.
+lxc-stop --name 'gitea'
+lxc-stop -n 'forgejo'
+lxc-stop 'nextcloud'
+
+# Delete containers and their data.
+lxc-destroy --name 'gitea'
+lxc-destroy -n 'forgejo'
+lxc-destroy 'nextcloud'
+
 
 # List snapshots.
 schnapps list
@@ -109,58 +140,31 @@ schnapps delete -t 'post'
 
 </details>
 
-Using SQM might **slow down** network throughput instead of boosting performances.<br>
-This is especially true on older, lower power devices. A Turris Omnia (ARMv7 Processor rev 1, v7l) dropped Internet
-download speed from ~30 MBps to at most 1.3 MBps on the interfaces it was configured on.
-
-## LED diodes settings
-
-Permanent changes can be set in `/etc/config/rainbow`, the UCI configuration file.
-
-The `rainbow` utility allows to change the color and set the status of each diode individually.<br/>
-The setting are `disable` (off), `enable` (on) or `auto`; `auto` leaves the control of the diodes to the hardware, like
-blinking during data transfer and so on.
-
-`rainbow`'s `brightness` subcommand uses numbers from 0 to 8, or from 0 to 255 if using the `-p` switch for higher
-precision.
-
-### Automatic overnight dimming
-
-Automatically adjust the intensity of LEDs using a cronjob to be able to see the state of individual devices during the
-day, but not to be dazzled by the diodes in the night.
-
-Create the cron file in the `/etc/cron.d` directory:
-
-```sh
-$ cat '/etc/cron.d/rainbow_night'
-# Set the light intensity to the second lowest degree every day at 11 PM and set
-# it back to maximum every day at 7 AM.
-MAILTO=""   # avoid automatic logging of the output
-0  23  *  *  *  root   rainbow brightness -p 3
-0   7  *  *  *  root   rainbow brightness 5
-```
-
 ## Local DNS resolution
 
-Turris OS can answer DNS queries for local devices.
-
-> [!note]
-> Requires the _Network Settings_ > _DNS_ > _Enable DHCP clients in DNS_ option to be enabled.
+Turris OS can answer DNS queries from devices in the local networks.\
+This feature requires the _Network Settings_ > _DNS_ > _Enable DHCP clients in DNS_ option to be enabled.
 
 ## Static DHCP leases and hostnames
 
-When assigning static DHCP leases LuCI **only requires** the IP and MAC addresses, while reForis will **also**:
+Assigning static DHCP leases from the shell or LuCI **only requires** the IP and MAC address pairs. Doing it from
+reForis will **also**:
 
-- **require** a unique hostname for each entry
-- set the lease time to _infinite_
+- **Require** a unique hostname for each lease.
+- Set the lease time to _infinite_.
 
-Setting a hostname in an entry will make Turris OS resolve the IP address **only** with that given hostname (and **not**
-the name the host presents itself with).<br/>
-Not setting a hostname in an entry will make Turris OS resolve the IP address with the name the host presents itself
-with.
+> [!important]
+> Hosts might (and containers usually do) present themselves with a hostname when requesting an IP address.\
+> This hostname will resolve to the IP address the DHCP provided.
+>
+> Specifying the hostname in a static DNS lease forces the resolver to answer with the static IP address **only** when
+> the request comes in for **that** specific hostname (and **not** for _any_ other name the host might present itself
+> with).\
+> **Not** specifying the hostname in a static DNS lease allows the static IP address to resolve **by default** to any
+> name the host presented itself with.
 
 <details>
-  <summary>CLI procedure</summary>
+  <summary>Via the shell</summary>
 
 ```sh
 uci add dhcp host
@@ -176,48 +180,61 @@ luci-reload
 
 ## Containers
 
-Some packages are not available in `opkg`'s repository, but containers can replace them.<br/>
-This is particularly useful to run services off the system which are not officially supported (like [Pi-hole]).
+Some packages are not available in [Opkg]'s repository, but containers can replace them.\
+This is particularly useful to run unsupported, non-integrated, or otherwise custom services off the system (like
+[Pi-hole]).
 
-At the time of writing, [LXC] is the only container runtime supported in Turris OS, and this guide will assume one is
-using it.<br/>
-This requires the `lxc` package to be installed.
+At the time of writing, [LXC] is the only container runtime _officially_ supported in Turris OS.\
+It requires installing the `lxc` package.
 
 > [!tip]
-> Use an [expansion disk](turris%20omnia.md#hardware-upgrades) to store containers' data.<br/>
-> Especially suggested for any I/O heavy application, to avoid wearing down the device's internal storage.
+> Use an [expansion disk](turris%20omnia.md#hardware-upgrades) to store containers' data.\
+> Recommended for any I/O heavy application, as this avoids wearing down the device's internal storage.
 
-The _standard_ procedure to have a new working container is as follows:
+The _standard_ procedure to deploy a containerized service is as follows:
 
-1. [Create a new container](#create-new-containers).
-1. \[optionally] [assign it a static IP address](#assign-containers-a-static-ip-address).<br/>
-   Particularly suggested in case of services.
-1. [Start the container](#start-containers).
-1. [Execute a shell](#execute-a-shell-into-containers) in the container and set it all up.<br/>
+1. [Create a new container][create new containers].
+1. \[_optional_] [Assign the container a static IP address][assign containers a static ip address].\
+   Recommended in case of services.
+1. [Start the container][start containers].
+1. [Get a shell in the container][get a shell into running containers].
+1. Configure the service inside the container.\
    See the examples below.
 1. Check all is working as expected.
-1. If you changed the container's hostname from inside if, restart it for good measure.
-1. \[optionally] Set the container to [start at boot](#start-containers-at-boot).
+1. If changed the container's hostname from **inside** of it, restart it for good measure.
+1. \[_optional_] Configure Turris OS to [start the container at boot][start containers at boot].
 
-Details for all actions are explained in the next sections.<br/>
+Details for all actions are explained in the next sections.\
 Unless otherwise specified:
 
 - All shell commands need to be executed from Turris OS.
-- All WebUI actions need to be taken from LuCI.<br/>
-  As of 2026-02-23, reForis does not allow to manage containers.
+- All webUI actions need to be taken from LuCI.\
+  As of 2026-11-12, reForis does not allow to manage containers.
 
-Gather information about running containers (in shell):
+> [!tip] Mind the device's available resources.
+> The main purpose of Turris OS is to run a router with (usually) limited resources.\
+> Avoid overloading with too many heavy containers, and monitor usage.
+
+### Get information about running containers
+
+<details>
+  <summary>Via the shell</summary>
 
 ```sh
 lxc-info --name 'gitea'
+lxc-info -n 'nextcloud'
+lxc-info 'pi-hole'
 
-# Only the first IP address.
+# Only get the first IP address.
 lxc-info --name 'forgejo' --ips --no-humanize | head -n '1'
 ```
 
+</details>
+
 ### Create new containers
 
-In shell:
+<details>
+  <summary>Via the shell</summary>
 
 ```sh
 # List available LXC container images.
@@ -235,15 +252,21 @@ lxc-create --name 'pi-hole' --template 'download' -- \
   --dist 'Ubuntu' --release 'Focal' --arch 'armv7l'
 ```
 
-Using the WebUI:
+</details>
+
+<details>
+  <summary>Using the webUI</summary>
 
 1. Navigate to the _Services_ > _LXC Containers_ page.
 1. In the _Create New Container_ section, give it a name and choose its template.
 1. Click the _Create_ button under _Actions_.
 
+</details>
+
 ### Assign containers a static IP address
 
-In shell:
+<details>
+  <summary>Via the shell</summary>
 
 ```sh
 uci add dhcp host
@@ -255,7 +278,10 @@ reload_config
 luci-reload
 ```
 
-Using the WebUI:
+</details>
+
+<details>
+  <summary>Using the webUI</summary>
 
 1. Get the container's MAC address:
 
@@ -266,9 +292,12 @@ Using the WebUI:
 1. Navigate to the _Network_ > _DHCP and DNS_ page.
 1. In the _Static Leases_ tab, assign a new lease to the container's MAC address.
 
+</details>
+
 ### Start containers
 
-In shell:
+<details>
+  <summary>Via the shell</summary>
 
 ```sh
 lxc-start --name 'pi-hole'
@@ -277,30 +306,44 @@ lxc-start --name 'pi-hole'
 lxc-info --name 'pi-hole'
 ```
 
-Using the WebUI:
+</details>
+
+<details>
+  <summary>Using the webUI</summary>
 
 1. Navigate to the _Services_ > _LXC Containers_ page.
 1. In the _Available Containers_ section, click the _Start_ button under _Actions_.
 
-### Execute a shell into containers
+</details>
 
-In shell:
+### Get a shell into running containers
+
+<details>
+  <summary>Via the shell</summary>
 
 ```sh
 lxc-attach --name 'pi-hole'
+lxc-attach -n 'nextcloud'
 ```
+
+</details>
 
 ### Start containers at boot
 
-```sh
-vim '/etc/config/lxc-auto'
-```
+<details>
+  <summary>Via the shell</summary>
 
-```txt
+Add a section to `/etc/config/lxc-auto` for each container that should:
+
+```sh
+cat <<'EOF' >> '/etc/config/lxc-auto'
 config container
   option name pi-hole
   option timeout 60
+EOF
 ```
+
+</details>
 
 ### Examples
 
@@ -313,7 +356,8 @@ config container
 1. Create and start the container:
 
    ```sh
-   lxc-create -n 'baikal' -t 'download' -- -d 'Debian' -r 'Bookworm' -a 'armv7l'
+   lxc-create --name 'baikal' --template 'download' -- --dist 'Debian' --release 'Bookworm' --arch 'armv7l'
+   lxc-start --name 'baikal'
    ```
 
 1. Install and configure Baikal in the container:
@@ -380,7 +424,15 @@ config container
      --url 'https://baikal.lan/dav.php/calendars/mark@baikal.lan/default/'
    ```
 
-1. \[optionally] Configure Turris OS to [start the container at boot][start containers at boot].
+1. Configure Turris OS to [start the container at boot][start containers at boot]:
+
+   ```sh
+   cat <<'EOF' >> '/etc/config/lxc-auto'
+   config container
+     option name baikal
+     option timeout 60
+   EOF
+   ```
 
 </details>
 
@@ -390,7 +442,8 @@ config container
 1. Create and start the container.
 
    ```sh
-   lxc-create -n 'git' -t 'download' -- -d 'Debian' -r 'Bullseye' -a 'armv7l'
+   lxc-create --name 'git' --template 'download' -- --dist 'Debian' --release 'Bookworm' --arch 'armv7l'
+   lxc-start --name 'git'
    ```
 
 1. Install and configure the git server in the container:
@@ -437,14 +490,13 @@ config container
 <details>
   <summary>CFEngine hub</summary>
 
-> [!warning]
-> CFEngine does **not** seem to support 32bits ARM processors anymore (but it does support arm64).<br/>
-> Still, I am using a 32bit processor so this is **not** doable for me.
+> [!warning] Review for `arm64` processors
+> CFEngine does **not** seem to support 32 bits ARM processors anymore (but it does support `arm64`).
 
   <details style="padding-left: 1em;">
     <summary>Old installation test</summary>
 
-  1. Create and start the container.
+  1. Create and start the container:
 
      ```sh
      lxc-create -n 'cfengine' -t 'download' -- -d 'Debian' -r 'Bullseye' -a 'armv7l'
@@ -477,91 +529,90 @@ config container
    ```sh
    lxc-create --name 'forgejo' --template 'download' -- \
      --server 'images.linuxcontainers.org' --dist 'alpine' --release '3.24' --arch 'armhf'
-   lxc-start --name 'forgejo'
+   lxc-start --name 'forgejo' && lxc-info --name 'forgejo'
    ```
 
-1. Install and configure Forgejo in the container:
+1. [Get a shell into the container][get a shell into running containers]:
 
    ```sh
-   # Set the correct hostname.
-   # Should be already set correctly.
-   echo 'forgejo' > '/etc/hostname'
-   hostname -F '/etc/hostname'
-
-   # Install Forgejo.
-   apk add 'forgejo' 'forgejo-openrc'
-
-   # Start Forgejo.
-   rc-update add 'forgejo'
-   rc-service 'forgejo' start
+   lxc-attach --name 'forgejo'
    ```
+
+1. From within the container:
+
+   1. Make sure the hostname is the expected one.\
+      It should be already set correctly to the container's name.
+
+      ```sh
+      echo 'forgejo' > '/etc/hostname'
+      hostname -F '/etc/hostname'
+      ```
+
+   1. [Setup Forgejo][forgejo / setup] for Alpine Linux:
+
+      ```sh
+      apk --no-cache add 'forgejo' 'forgejo-openrc'
+      rc-update add 'forgejo' && rc-service 'forgejo' start
+      ```
 
 1. Connect to <http://forgejo:3000> to start the first-time installation wizard.
-1. \[optionally] Configure an automation to backup Forgejo:
+1. [Automate backups][forgejo / automate backups].
+1. Configure Turris OS to [start the container at boot][start containers at boot]:
 
    ```sh
-   su - forgejo -c 'mkdir -m "2750" -pv "/var/lib/forgejo/backups"'
-   cat <<'DUMP_SCRIPT' > '/var/lib/forgejo/backups/dump.sh'
-   #!/bin/sh
-
-   set -e -o pipefail
-   : "${DATE:=$(date +%FT%H-%M-%S)}"
-   : "${WORKDIR:=/var/lib/forgejo}"
-
-   # dump
-   DUMP_FILE="${WORKDIR}/backups/dump_${DATE}.tar.gz"
-   echo "Dumping to '$DUMP_FILE'..."
-   forgejo dump --type 'tar.gz' --file "$DUMP_FILE" && echo -e "Dump succeeded\n"
-   echo "Copying DB..."
-   cp -av "${WORKDIR}/db/forgejo.db" "${WORKDIR}/backups/db_${DATE}.db" && echo -e "DB copy succeeded\n"
-
-   # verify
-   echo "Verifying dump file '$DUMP_FILE'..."
-   tar -tzf "$DUMP_FILE" | tail -n '5' && echo -e "Dump file is a valid archive\n"
-
-   # retain only the last 5 to keep storage space in check
-   echo "Rotating files..."
-   find "${WORKDIR}/backups" -type 'f' -name "dump_*" | head -n '-5' | xargs -r rm -v && echo -e "Dumps rotated\n"
-   find "${WORKDIR}/backups" -type 'f' -name "db_*"   | head -n '-5' | xargs -r rm -v && echo "DB copies rotated"
-   DUMP_SCRIPT
-
-   chown 'forgejo:' '/var/lib/forgejo/backups/dump.sh'
-   chmod '2750' '/var/lib/forgejo/backups/dump.sh'
-   echo '43  0  *  *  *  /var/lib/forgejo/backups/dump.sh > /var/lib/forgejo/backups/dump_$(date +%FT%H-%M-%S).log 2>&1' | crontab -u 'forgejo' -
+   cat <<'EOF' >> '/etc/config/lxc-auto'
+   config container
+     option name forgejo
+     option timeout 60
+   EOF
    ```
-
-1. \[optionally] Configure Turris OS to [start the container at boot][start containers at boot].
 
 </details>
 
 <details>
   <summary>Gitea</summary>
 
-1. Create and start the container.
+1. Create and start the container:
 
    ```sh
    lxc-create --name 'gitea' --template 'download' -- \
-     --server 'images.linuxcontainers.org' --dist 'alpine' --release '3.20' --arch 'armhf'
+     --server 'images.linuxcontainers.org' --dist 'alpine' --release '3.24' --arch 'armhf'
+   lxc-start --name 'gitea' && lxc-info --name 'gitea'
    ```
 
-1. Install and configure Gitea in the container:
+1. [Get a shell into the container][get a shell into running containers]:
 
    ```sh
-   # Set the correct hostname.
-   # Should be already set correctly.
-   echo 'gitea' > '/etc/hostname'
-   hostname -F '/etc/hostname'
-
-   # Install Gitea.
-   apk add 'gitea' 'gitea-openrc'
-
-   # Start Gitea.
-   rc-update add 'gitea'
-   rc-service 'gitea' start
+   lxc-attach --name 'gitea'
    ```
 
+1. From within the container:
+
+   1. Make sure the hostname is the expected one.\
+      It should be already set correctly to the container's name.
+
+      ```sh
+      echo 'gitea' > '/etc/hostname'
+      hostname -F '/etc/hostname'
+      ```
+
+   1. Setup Gitea for Alpine Linux:
+
+      ```sh
+      apk --no-cache add 'gitea' 'gitea-openrc'
+      rc-update add 'gitea' && rc-service 'gitea' start
+      ```
+
 1. Connect to <http://gitea:3000> to start the first-time installation wizard.
-1. \[optionally] Configure Turris OS to [start the container at boot][start containers at boot].
+1. Configure Turris OS to [start the container at boot][start containers at boot]:
+
+   ```sh
+   cat <<'EOF' >> '/etc/config/lxc-auto'
+   config container
+     option name gitea
+     option timeout 60
+   EOF
+   ```
 
 </details>
 
@@ -569,57 +620,78 @@ config container
   <summary>Monitoring</summary>
 
 > [!warning]
-> The stack used in this container could _**easily**_ overload the device.<br/>
+> The stack used in this container could _**easily**_ overload the device.\
 > Keep CPU and memory usage under control.
 
 1. Create and start the container.
 
    ```sh
-   lxc-create -n 'monitoring' -t 'download' -- -d 'Debian' -r 'Bullseye' -a 'armv7l'
+   lxc-create --name 'monitoring' --template 'download' -- --dist 'Debian' --release 'Bullseye' --arch 'armv7l'
+   lxc-start --name 'monitoring' && lxc-info --name 'monitoring'
    ```
 
-1. Install and configure the services in the container:
+1. [Get a shell in the container][get a shell into running containers]:
 
    ```sh
-   # Set the correct hostname.
-   hostnamectl set-hostname 'monitoring'
+   lxc-attach --name 'monitoring'
+   ```
 
-   # Install the requirements
-   DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'unattended-upgrades' 'wget'
+1. From within the container:
 
-   # Stop installing recommended and suggested packages.
-   cat > /etc/apt/apt.conf.d/99norecommend << EOF
-   APT::Install-Recommends "0";
-   APT::Install-Suggests "0";
+   1. Make sure the hostname is the expected one.\
+      It should be already set correctly to the container's name.
+
+      ```sh
+      hostnamectl set-hostname 'monitoring'
+      ```
+
+   1. Configure the system:
+
+      ```sh
+      # Install the requirements
+      DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'unattended-upgrades' 'wget'
+
+      # Stop installing recommended and suggested packages.
+      cat <<'EOF' > '/etc/apt/apt.conf.d/99norecommend'
+      APT::Install-Recommends "0";
+      APT::Install-Suggests "0";
+      EOF
+      ```
+
+   1. Setup the monitoring components:
+
+      ```sh
+      # Add Grafana's repository with its key.
+      wget -q -O '/usr/share/keyrings/grafana.key' 'https://apt.grafana.com/gpg.key'
+      echo "deb [signed-by=/usr/share/keyrings/grafana.key] https://apt.grafana.com stable main" \
+      | tee -a '/etc/apt/sources.list.d/grafana.list'
+      apt update
+
+      # Install Prometheus and Grafana.
+      DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'grafana-enterprise' 'prometheus'
+
+      # Configure Prometheus and Grafana.
+      # See the '/docker/monitoring' example at the root of this repo.
+
+      # Enable the services.
+      systemctl enable 'grafana-server.service'
+      systemctl enable 'prometheus.service'
+      ```
+
+1. Configure Turris OS to [start the container at boot][start containers at boot]:
+
+   ```sh
+   cat <<'EOF' >> '/etc/config/lxc-auto'
+   config container
+     option name monitoring
+     option timeout 60
    EOF
-
-   # Add Grafana's repository with its key.
-   wget -q -O /usr/share/keyrings/grafana.key https://apt.grafana.com/gpg.key
-   echo "deb [signed-by=/usr/share/keyrings/grafana.key] https://apt.grafana.com stable main" | tee -a /etc/apt/sources.list.d/grafana.list
-
-   # Install Prometheus and Grafana.
-   apt update
-   DEBIAN_FRONTEND='noninteractive' apt-get install --assume-yes 'grafana-enterprise' 'prometheus'
-
-   # Configure Prometheus and Grafana.
-   # See the '/docker/monitoring' example.
-
-   # Enable the services.
-   systemctl enable 'grafana-server.service'
-   systemctl enable 'prometheus.service'
-
-   # All done!
-   exit
    ```
 
 </details>
 
 <details>
   <summary>Nextcloud</summary>
-
-Refer to the [Alpine Linux wiki page][Alpine wiki / Nextcloud].
-
-Bare minimal, using **SQlite**, and **Nginx** with a **self-signed** certificate:
 
 1. Create and start the container:
 
@@ -629,45 +701,98 @@ Bare minimal, using **SQlite**, and **Nginx** with a **self-signed** certificate
    lxc-start --name 'nextcloud'
    ```
 
-1. Get a shell in the container:
+1. [Get a shell in the container][get a shell into running containers]:
 
    ```sh
    lxc-attach --name 'nextcloud'
    ```
 
-1. Configure the container:
+1. From within the container:
+
+   1. Make sure the hostname is the expected one.\
+      It should be already set correctly to the container's name.
+
+      ```sh
+      echo 'nextcloud' > '/etc/hostname'
+      hostname -F '/etc/hostname'
+      ```
+
+   1. [Setup Nextcloud for Alpine Linux][nextcloud / basic setup through alpine Linux packages, sqlite, and nginx with a self-signed certificate]:
+
+      ```sh
+      # Install required packages.
+      apk --no-cache add \
+        'nginx' 'openssl' \
+        'php85-exif' 'php85-fpm' 'php85-pecl-apcu' 'php85-pecl-imagick' 'php85-sodium' 'php85-sysvsem' \
+        'nextcloud33' 'nextcloud33-initscript' 'nextcloud33-occ' 'nextcloud33-sqlite'
+
+      # Create a self-signed certificate.
+      openssl req -x509 -nodes -days '365' -newkey 'rsa:4096' \
+        -keyout '/etc/ssl/private/nextcloud-selfsigned.key' -out '/etc/ssl/certs/nextcloud-selfsigned.crt' \
+        -subj '/CN=nextcloud' -addext "subjectAltName=DNS:nextcloud"
+
+      # Configure the webserver.
+      rm '/etc/nginx/http.d/default.conf'
+      cat <<'EOF' > '/etc/nginx/http.d/nextcloud.conf'
+      server {
+          listen 80;
+          listen [::]:80;
+          server_name nextcloud;
+          return 301  https://$host$request_uri;
+      }
+      server {
+          listen 443 ssl;
+          listen [::]:443 ssl;
+          server_name nextcloud;
+
+          root /usr/share/webapps/nextcloud;
+          index index.php index.html index.htm;
+          disable_symlinks off;
+
+          ssl_certificate /etc/ssl/certs/nextcloud-selfsigned.crt;
+          ssl_certificate_key /etc/ssl/private/nextcloud-selfsigned.key;
+          ssl_session_timeout 5m;
+
+          add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+          location / {
+              try_files $uri $uri/ /index.html;
+          }
+          location ~ [^/]\.php(/|$) {
+              fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+              if (!-f $document_root$fastcgi_script_name) { return 404; }
+              fastcgi_pass unix:/run/nextcloud/fastcgi.sock;
+              fastcgi_index index.php;
+              include fastcgi.conf;
+          }
+          location ^~ /.well-known/carddav { return 301 /remote.php/dav/; }
+          location ^~ /.well-known/caldav { return 301 /remote.php/dav/; }
+          location ^~ /.well-known/webfinger { return 301 /index.php/.well-known/webfinger; }
+          location ^~ /.well-known/nodeinfo { return 301 /index.php/.well-known/nodeinfo; }
+
+          include mime.types;
+          types { text/javascript mjs; }
+      }
+      EOF
+
+      # Check the whole webserver configuration.
+      nginx -t
+
+      # Start the services.
+      rc-update add nginx && rc-service nginx start
+      rc-update add nextcloud && rc-service nextcloud start
+      ```
+
+1. Connect to <https://nextcloud> to start the first-time installation wizard.
+1. Configure Turris OS to [start the container at boot][start containers at boot]:
 
    ```sh
-   # Set the correct hostname if needed.
-   # Should be already set correctly.
-   echo 'nextcloud' > '/etc/hostname'
-   hostname -F '/etc/hostname'
+   cat <<'EOF' >> '/etc/config/lxc-auto'
+   config container
+     option name nextcloud
+     option timeout 60
+   EOF
    ```
-
-1. [Setup Nextcloud][Nextcloud / Setup].
-   Prefer the
-   [basic setup using repository packages, SQlite, and Nginx with a self-signed certificate][Nextcloud / Basic setup through Alpine Linux packages, SQlite, and Nginx with a self-signed certificate].\
-1. Connect to <https://nextcloud.lan> to start the first-time installation wizard.
-1. \[_recommended_] Configure Turris OS to [start the container at boot][start containers at boot].
-1. \[_recommended_] Add the self-signed certificate to one's devices
-   ([Android][Android / Install a certificate], [macOS][macOS / Add self-signed certificates to the keychain]).
-
-Use a Let's Encrypt certificate (will **not** work with non-TLDs like `.lan` or `.local`):
-
-1. Follow the procedure as before.
-1. Install Certbot and its plugin for nginx:
-
-   ```sh
-   apk --no-cache add 'certbot' 'certbot-nginx'
-   ```
-
-1. Generate the certificate:
-
-   ```sh
-   certbot --nginx
-   ```
-
-1. FIXME: finish.
 
 </details>
 
@@ -744,9 +869,9 @@ See [SSH hardening].
 
 ## VLANs
 
-Refer to [LuCI VLAN setup] and [OpenWrt's VLANs section][OpenWrt / VLANs].
+Refer to [LuCI VLAN setup] and [OpenWrt's VLANs section][openwrt / vlans].
 
-Short for _Virtual Local Area Network_ and defined by the IEEE [802.1Q][IEEE 802.1Q] and [802.1ad][IEEE 802.1ad]
+Short for _Virtual Local Area Network_ and defined by the IEEE [802.1Q][ieee 802.1q] and [802.1ad][ieee 802.1ad]
 standards.\
 Used to keep network clients separated even when they are using the same shared physical network, by adding tags to
 their frame headers.\
@@ -787,7 +912,7 @@ List of [supported SFP modules].
 > physical WAN **port** **will be disabled**, and the virtual WAN interface will automatically be switched to the SFP
 > module.
 
-When the OS is installed, it will probably miss the SFP kernel modules.<br/>
+When the OS is installed, it will probably miss the SFP kernel modules.\
 Check the module is recognized by the system like so:
 
 1. Insert the module in the cage.
@@ -804,7 +929,7 @@ Check the module is recognized by the system like so:
    [   8.167128] sfp sfp: Turris  RTSFP-10G  rev A  sn 1234567890  dc 123456
    ```
 
-   the SFP module is recognized and probably started working already right away.<br/>
+   the SFP module is recognized and probably started working already right away.\
    If, instead, no result has been returned:
 
    1. Make sure the SFP kernel modules are installed:
@@ -821,7 +946,8 @@ Check the module is recognized by the system like so:
 To use the SFP module as a LAN port, assign any other physical switch port to the virtual WAN interface to use that as
 the WAN connection and the SFP module in the LAN.
 
-In the Foris web interface:
+<details>
+  <summary>reForis webUI</summary>
 
 1. Go to _Network Settings_ > _Interfaces_.
 1. Select the WAN interface.
@@ -830,7 +956,10 @@ In the Foris web interface:
 1. In the dropdown _Network_ menu, change _LAN_ to _WAN_.
 1. Hit _Save_.
 
-In the LuCI web interface:
+</details>
+
+<details>
+  <summary>LuCI webUI</summary>
 
 1. Go to _Network_ > _Interfaces_.
 1. In the _Interfaces_ tab, edit the WAN interface and assign the _lan4_ port to it.
@@ -838,7 +967,13 @@ In the LuCI web interface:
    `eth2`).
 1. Hit _Save & Apply_.
 
-Using the CLI (yet to be tested):
+</details>
+
+<details>
+  <summary>Via the shell</summary>
+
+> [!warning]
+> FIXME: needs testing.
 
 ```sh
 uci set network.wan.device='lan4'
@@ -849,17 +984,19 @@ reload_config
 luci-reload
 ```
 
+</details>
+
 ## Further readings
 
 - [Website]
-- Turris' [official documentation][docs]
-- Turris' [wiki][turris wiki]
+- Turris' official [documentation]
+- Turris' [wiki]
 - [How to control LED diodes]
 - [Factory reset on Turris Omnia]
 - [Supported SFP modules]
 - [Home NAS]
 - [OpenWrt]
-- [`opkg`][opkg]
+- [Opkg]
 - [UCI]
 - [LXC]
 
@@ -876,37 +1013,39 @@ luci-reload
   -->
 
 <!-- In-article sections -->
+[Assign containers a static IP address]: #assign-containers-a-static-ip-address
+[Create new containers]: #create-new-containers
+[Get a shell into running containers]: #get-a-shell-into-running-containers
+[Start containers]: #start-containers
 [Start containers at boot]: #start-containers-at-boot
 
 <!-- Knowledge base -->
-[Android / Install a certificate]: android.md#install-a-certificate
-[baikal]: baikal.md
-[lxc]: lxc.md
-[macOS / Add self-signed certificates to the keychain]: macos/README.md#add-self-signed-certificates-to-the-keychain
+[Baikal]: baikal.md
+[Forgejo / Automate backups]: forgejo.md#automate-backups
+[Forgejo / Setup]: forgejo.md#setup
+[LXC]: lxc.md
 [Nextcloud / Basic setup through Alpine Linux packages, SQlite, and Nginx with a self-signed certificate]: nextcloud.md#basic-setup-through-alpine-linux-packages-sqlite-and-nginx-with-a-self-signed-certificate
-[Nextcloud / Setup]: nextcloud.md#setup
 [OpenWrt / VLANs]: openwrt.md#vlans
-[openwrt]: openwrt.md
-[opkg]: opkg.md
-[pi-hole]: pi-hole.md
-[ssh hardening]: ssh.md#hardening
-[uci]: uci.md
+[OpenWrt]: openwrt.md
+[Opkg]: opkg.md
+[Pi-hole]: pi-hole.md
+[SSH hardening]: ssh.md#hardening
+[UCI]: uci.md
 
 <!-- Upstream -->
-[docs]: https://docs.turris.cz
-[factory reset on turris omnia]: https://docs.turris.cz/hw/omnia/rescue-modes/
-[home nas]: https://wiki.turris.cz/doc/en/howto/nas
-[how to control led diodes]: https://wiki.turris.cz/doc/en/howto/led_settings
+[Documentation]: https://docs.turris.cz
+[Factory reset on Turris Omnia]: https://docs.turris.cz/hw/omnia/rescue-modes/
+[Home NAS]: https://wiki.turris.cz/doc/en/howto/nas
+[How to control LED diodes]: https://wiki.turris.cz/doc/en/howto/led_settings
 [LuCI VLAN setup]: https://docs.turris.cz/basics/luci/vlan/luci-vlan/
-[operating temperature]: https://forum.turris.cz/t/operating-temperature/998
-[supported sfp modules]: https://wiki.turris.cz/doc/en/public/sfp
-[turris wiki]: https://wiki.turris.cz/doc/en/start
-[website]: https://www.turris.com/turris-os/
+[Operating temperature]: https://forum.turris.cz/t/operating-temperature/998
+[Supported SFP modules]: https://wiki.turris.cz/doc/en/public/sfp
+[Website]: https://www.turris.com/turris-os/
+[Wiki]: https://wiki.turris.cz/doc/en/start
 
 <!-- Others -->
-[Alpine wiki / Nextcloud]: https://wiki.alpinelinux.org/wiki/Nextcloud
 [IEEE 802.1ad]: https://en.wikipedia.org/wiki/IEEE_802.1ad
 [IEEE 802.1Q]: https://en.wikipedia.org/wiki/IEEE_802.1Q
-[install pi-hole]: https://github.com/nminten/turris-omnia_documentation/blob/master/howtos/pihole.md
-[installing pi-hole on turris omnia]: https://blog.weinreich.org/posts/2020/2020-05-02-turris-omnia-pihole/
-[pi-hole on turris omnia]: http://polster.github.io/2017/08/04/Pi-Hole-on-Turris.html
+[Install Pi-hole]: https://github.com/nminten/turris-omnia_documentation/blob/master/howtos/pihole.md
+[Installing Pi-hole on Turris Omnia]: https://blog.weinreich.org/posts/2020/2020-05-02-turris-omnia-pihole/
+[Pi-hole on Turris Omnia]: http://polster.github.io/2017/08/04/Pi-Hole-on-Turris.html

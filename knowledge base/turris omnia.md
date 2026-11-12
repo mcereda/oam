@@ -1,6 +1,8 @@
 # Turris Omnia
 
 1. [Factory reset](#factory-reset)
+1. [LED diodes settings](#led-diodes-settings)
+   1. [Automatic overnight dimming](#automatic-overnight-dimming)
 1. [Hardware upgrades](#hardware-upgrades)
 1. [Further readings](#further-readings)
 
@@ -10,12 +12,12 @@ Keep pressed the reset button on the back panel and wait for LEDs to indicate th
 release the reset button.
 
 The LEDs are used as a counter, with the number of lid LEDs (regardless of the color) indicating the reset mode the
-router will reboot into.<br/>
+router will reboot into.\
 The LEDs will transition from green to red, and when the last LED turns red the next LED will light up and the counter
-is incremented.<br/>
+is incremented.\
 When the counter reaches 12 (the total number of LEDs), it will start again from 1.
 
-When the reset button is released, the LED counter will blink three times to confirm the selected reset mode.<br/>
+When the reset button is released, the LED counter will blink three times to confirm the selected reset mode.\
 If the selected mode is different from the required one, just press the reset button again and start the mode selection
 process again.
 
@@ -29,20 +31,48 @@ Available reset modes are:
 - 6 LEDs: re-flash from the Internet (Omnia 2019 and newer)
 - 7 LEDs: start a rescue shell
 
-> **Tip:** release the reset button immediately after the required number of LEDs starts shining (regardless of the
+> [!tip]
+> Release the reset button immediately after the required number of LEDs starts shining (regardless of the
 > color).
 >
-> Do not unnecessarily prolong holding the reset button when the last LED is lit.<br/>
-> By doing this you decrease a chance of accidentally transitioning to the next mode at the same moment when the button
-> is released.
+> Do **not** unnecessarily prolong holding the reset button when the last LED is lit.\
+> Holding it for too long just increases the chance of accidentally transitioning to a successive mode at the moment one
+> releases the button.
 
 After the selected mode indication is performed, all LEDs will turn blue for a moment and then a light wave indicates
 the start the first stage boot during which LEDs turn green.
 
-> **Warning:** when LEDs turn red, it means that some highly sensitive operation is in process and data may be corrupted
-> if it is interrupted.<br/>
-> Try not to reset router during the process or you might end up with corrupted filesystem. That one can be fixed using
-> mode 4 but with complete data loss.
+> [!warning]
+> The LEDs turn red when some highly sensitive operation is in process. Data may be corrupted if this is interrupted.\
+> Avoid resetting the router during the process, or one might end up with a corrupted filesystem. In this case, only
+> mode 4 can fix the issue. It means complete data loss.
+
+## LED diodes settings
+
+If using [Turris OS], permanent changes can be set in `/etc/config/rainbow`, the UCI configuration file.
+
+The `rainbow` utility allows to change the color and set the status of each diode individually.\
+The setting are `disable` (off), `enable` (on) or `auto`; `auto` leaves the control of the diodes to the hardware, like
+blinking during data transfer and so on.
+
+`rainbow`'s `brightness` subcommand uses numbers from 0 to 8, or from 0 to 255 if using the `-p` switch for higher
+precision.
+
+### Automatic overnight dimming
+
+Automatically adjust the intensity of LEDs using a cronjob to be able to see the state of individual devices during the
+day, but not to be dazzled by the diodes in the night.
+
+Create the cron file in the `/etc/cron.d` directory:
+
+```sh
+$ cat '/etc/cron.d/rainbow_night'
+# Set the light intensity to the second lowest degree every day at 11 PM and set
+# it back to maximum every day at 7 AM.
+MAILTO=""   # avoid automatic logging of the output
+0  23  *  *  *  root   rainbow brightness -p 3
+0   7  *  *  *  root   rainbow brightness 5
+```
 
 ## Hardware upgrades
 

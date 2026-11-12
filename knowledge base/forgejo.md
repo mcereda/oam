@@ -4,6 +4,8 @@ Community-driven code forge platform similar to GitHub.<br/>
 Forked from [Gitea] after the for-profit company Gitea Ltd took control of it.
 
 1. [TL;DR](#tldr)
+1. [Setup](#setup)
+   1. [Automate backups](#automate-backups)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -13,7 +15,10 @@ Forked from [Gitea] after the for-profit company Gitea Ltd took control of it.
   <summary>Setup</summary>
 
 ```sh
+apk add 'forgejo' 'forgejo-openrc'
 docker pull 'codeberg.org/forgejo/forgejo'  # or 'data.forgejo.org/forgejo/forgejo'
+
+rc-update add 'forgejo' && rc-service 'forgejo' start
 ```
 
 The configuration uses the INI format.<br/>
@@ -89,7 +94,6 @@ tar -tzf '/path/to/dump.tar.gz' > /dev/null
 
 # Backup the db.
 cp -a '/path/to/forgejo/workdir/db/forgejo.db' 'path/to/db/backup.db'  # only sqlite
-
 ```
 
 </details>
@@ -103,6 +107,52 @@ cp -a '/path/to/forgejo/workdir/db/forgejo.db' 'path/to/db/backup.db'  # only sq
 
 </details>
 -->
+
+## Setup
+
+<details>
+  <summary>Alpine Linux</summary>
+
+```sh
+apk add 'forgejo' 'forgejo-openrc'  # add --no-cache if cache is not needed
+rc-update add 'forgejo'
+rc-service 'forgejo' start
+```
+
+</details>
+
+### Automate backups
+
+```sh
+su - forgejo -c 'mkdir -m "2750" -pv "/var/lib/forgejo/backups"'
+cat <<'DUMP_SCRIPT' > '/var/lib/forgejo/backups/dump.sh'
+#!/bin/sh
+
+set -e -o pipefail
+: "${DATE:=$(date +%FT%H-%M-%S)}"
+: "${WORKDIR:=/var/lib/forgejo}"
+
+# dump instance and db
+DUMP_FILE="${WORKDIR}/backups/dump_${DATE}.tar.gz"
+echo "Dumping to '$DUMP_FILE'..."
+forgejo dump --type 'tar.gz' --file "$DUMP_FILE" && echo -e "Dump succeeded\n"
+echo "Copying DB..."
+cp -av "${WORKDIR}/db/forgejo.db" "${WORKDIR}/backups/db_${DATE}.db" && echo -e "DB copy succeeded\n"
+
+# verify dumps
+echo "Verifying dump file '$DUMP_FILE'..."
+tar -tzf "$DUMP_FILE" | tail -n '5' && echo -e "Dump file is a valid archive\n"
+
+# retain only the last 5 archives to keep storage space in check
+echo "Rotating files..."
+find "${WORKDIR}/backups" -type 'f' -name "dump_*" | head -n '-5' | xargs -r rm -v && echo -e "Dumps rotated\n"
+find "${WORKDIR}/backups" -type 'f' -name "db_*"   | head -n '-5' | xargs -r rm -v && echo "DB copies rotated"
+DUMP_SCRIPT
+
+chown 'forgejo:' '/var/lib/forgejo/backups/dump.sh'
+chmod '2750' '/var/lib/forgejo/backups/dump.sh'
+echo '43  0  *  *  *  /var/lib/forgejo/backups/dump.sh > /var/lib/forgejo/backups/dump_$(date +%FT%H-%M-%S).log 2>&1' | crontab -u 'forgejo' -
+```
 
 ## Further readings
 
