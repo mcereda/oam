@@ -68,6 +68,7 @@ and may terminate the connection altogether to block the server from loading.
 - [Let's Encrypt], a Certificate Authority that provides free TLS certificates.
 - [OpenSSL]
 - [Common Names (CN) and Subject Alternative Names (SAN) in SSL Certificates: How They Work Together, SAN with Multiple DNS Names, CN Behavior, and OpenSSL 0.9.8b+ Handling Explained]
+- [TLS Configurator]
 
 ### Sources
 
@@ -87,4 +88,5 @@ and may terminate the connection altogether to block the server from loading.
 <!-- Upstream -->
 <!-- Others -->
 [Common Names (CN) and Subject Alternative Names (SAN) in SSL Certificates: How They Work Together, SAN with Multiple DNS Names, CN Behavior, and OpenSSL 0.9.8b+ Handling Explained]: https://www.codegenes.net/blog/how-do-common-names-cn-and-subject-alternative-names-san-work-together/
+[TLS Configurator]: https://configurator.tlsref.org
 [What is an SSL certificate?]: https://www.cloudflare.com/learning/ssl/what-is-an-ssl-certificate/

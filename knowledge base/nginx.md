@@ -110,6 +110,7 @@ pkill -TERM 'nginx'
 - [Proxy]
 - [Website]
 - [Nginx Proxy Manager]
+- [TLS Configurator]
 
 ### Sources
 
@@ -131,3 +132,4 @@ pkill -TERM 'nginx'
 [website]: https://nginx.org/en/
 
 <!-- Others -->
+[TLS Configurator]: https://configurator.tlsref.org

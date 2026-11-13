@@ -18,22 +18,37 @@ openssl rand -base64 18
 
 # Generate certificate signing requests.
 # '-nodes' leaves the output files unencrypted.
-openssl req -new -out 'request.csr' \
-  -newkey 'rsa:2048' -keyout 'private.key'
+openssl req -new -out 'request.csr' -newkey 'rsa:2048' -keyout 'private.key'
 openssl req -new -out 'request.csr' -key 'private.key'
-openssl req -new -out 'domain.req.pem' … \
-  -config 'domain.conf' -days '365' -sha256
+openssl req -new -out 'domain.req.pem' … -config 'domain.conf' -days '365' -sha256
+# with `-config`'s arguments being INI files like so:
+#   [req]
+#   prompt = no
+#   default_md = sha256
+#   distinguished_name = dn
+#   req_extensions = req_ext
+#
+#   [dn]
+#   CN = example.com
+#
+#   [req_ext]
+#   subjectAltName = @alt_names
+#
+#   [alt_names]
+#   DNS.1 = example.com
+#   DNS.2 = www.example.com
+#   DNS.3 = ftp.example.com
 
 # Generate certificate signing requests from existing certificates and keys.
-openssl x509 -x509toreq -out 'request.csr' \
-  -in 'certificate.crt' -signkey 'private.key'
+openssl x509 -x509toreq -out 'request.csr' -in 'certificate.crt' -signkey 'private.key'
 
 # Generate self-signed certificates.
 openssl req -x509 -out 'certificate.pem' \
   -newkey 'rsa:4096' -keyout 'private.key' \
-  -subj '/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=www.company.com' \
-  -days '365' -sha256
-openssl req -x509 -out 'certificate.pem' … -key 'private.key'
+  -subj '/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=full-subj.company.com' \
+  -days '3650' -sha256 -nodes
+openssl req … -out 'certificate.crt' -key 'private.key' -subj '/CN=cn-only.company.com' \
+  -addext "subjectAltName=DNS:example.com,DNS:www.example.com,DNS:api.example.com,IP:10.0.0.1"
 
 
 # Check PKCS#12 file (.p12 or .pfx).
@@ -185,7 +200,7 @@ closed
 See also [OpenSSL unable to verify the first certificate for Experian URL] and [Verify certificate chain with OpenSSL].
 
 One or more certificates in the certificate chain is not valid, self-signed or simply was not provided by either the
-server or the client (if a client certificate is needed).<br />
+server or the client (if a client certificate is needed).\
 This could also mean that the root certificate is not in the local database of trusted root certificates, which could
 have been not given to, or queried by, OpenSSL.
 
@@ -202,7 +217,7 @@ You can:
 
 ### Code 21: unable to verify the first certificate
 
-The certificate chain is broken.<br />
+The certificate chain is broken.\
 This error is somewhat generic, and a previous error message might be telling more about the problem.
 
 See [code 20](#code-20-unable-to-get-local-issuer-certificate).
@@ -224,6 +239,7 @@ See [code 20](#code-20-unable-to-get-local-issuer-certificate).
 - [How to put domain correctly in CSR?]
 - [OpenSSL command cheatsheet]
 - [The Only OpenSSL CheatSheet You Will Need!]
+- [How to Configure and Generate the SSL Certificate for your internal organization]
 
 <!--
   Reference
@@ -237,6 +253,7 @@ See [code 20](#code-20-unable-to-get-local-issuer-certificate).
 [check ssl certificate chain with openssl examples]: https://www.howtouselinux.com/post/certificate-chain
 [create a self signed certificate]: https://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl#10176685
 [display the contents of a ssl certificate]: https://support.qacafe.com/knowledge-base/how-do-i-display-the-contents-of-a-ssl-certificate/
+[How to Configure and Generate the SSL Certificate for your internal organization]: https://medium.com/@cyberRuptor/how-to-configure-and-generate-the-ssl-certificates-for-your-internal-organization-bc704fd3d7a9#513d
 [how to generate a self-signed ssl certificate using openssl]: https://stackoverflow.com/questions/10175812/how-to-generate-a-self-signed-ssl-certificate-using-openssl#10176685
 [how to put domain correctly in csr?]: https://www.namecheap.com/support/knowledgebase/article.aspx/9641/2290/how-to-put-domain-correctly-in-csr/
 [openssl command cheatsheet]: https://www.freecodecamp.org/news/openssl-command-cheatsheet-b441be1e8c4a

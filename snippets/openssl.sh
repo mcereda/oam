@@ -93,11 +93,23 @@ openssl x509 -x509toreq -in 'certificate.pem' -out 'request.csr' -signkey 'priva
 # Generate CSRs for multi-domain SAN certificates by supplying OpenSSL config files
 openssl req -new -key 'private.key' -out 'request.csr' -config 'request.conf'
 openssl req -new -out 'certificate.pem' -config 'csr.conf' -days '365' -sha256
-# with 'request.conf' being:
-#   [req]prompt=nodefault_md = sha256distinguished_name = dnreq_extensions = req_ext
-#   [dn]CN=example.com
-#   [req_ext]subjectAltName=@alt_names
-#   [alt_names]DNS.1=example.comDNS.2=www.example.comDNS.3=ftp.example.com
+# with `-config`'s arguments being INI files like so:
+#   [req]
+#   prompt = no
+#   default_md = sha256
+#   distinguished_name = dn
+#   req_extensions = req_ext
+#
+#   [dn]
+#   CN = example.com
+#
+#   [req_ext]
+#   subjectAltName = @alt_names
+#
+#   [alt_names]
+#   DNS.1 = example.com
+#   DNS.2 = www.example.com
+#   DNS.3 = ftp.example.com
 
 # Verify CSR signatures
 openssl req -in 'request.csr' -verify
@@ -111,8 +123,11 @@ openssl req -in 'request.csr' -verify -text -noout  # prints the data given in i
 
 # Create self-signed certificates with their new private key from scratch
 openssl req -nodes -newkey 'rsa:2048' -keyout 'private.key' -out 'certificate.crt' -x509 -days '365'
-openssl req -newkey 'rsa:4096' -keyout 'private.key' -out 'certificate.pem' -x509 -days '365' -sha256 \
-	-subj '/C=US/ST=Oregon/L=Portland/O=Example Org/OU=R&D/CN=www.example.org'
+openssl req … -newkey 'rsa:4096' -out 'certificate.pem' -sha256 -subj '/CN=just-cn.example.org'
+openssl req … -subj '/C=US/ST=Oregon/L=Portland/O=Example Org/OU=R&D/CN=full-subj.example.org'
+openssl req … -out 'certificate.crt' -key 'private.key' \
+	-addext "subjectAltName=DNS:example.com,DNS:www.example.com,DNS:api.example.com,IP:10.0.0.1"
+openssl req … -config 'example.org.cnf' -extensions 'v3_req'
 
 # Create self-signed certificates using existing CSRs and private keys
 openssl x509 -req -in 'request.csr' -signkey 'private.key' -out 'certificate.crt' -days '365'
