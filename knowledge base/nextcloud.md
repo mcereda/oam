@@ -1,9 +1,12 @@
 # NextCloud
 
+Open source, real-time content collaboration platform.\
+Initially forked from [ownCloud].
+
 1. [TL;DR](#tldr)
 1. [Setup](#setup)
    1. [Basic setup through Alpine Linux packages, SQlite, and Nginx with a self-signed certificate](#basic-setup-through-alpine-linux-packages-sqlite-and-nginx-with-a-self-signed-certificate)
-   1. [Using containers](#using-containers)
+   1. [Container composition](#container-composition)
    1. [Kubernetes](#kubernetes)
    1. [Using Snap](#using-snap)
 1. [Further readings](#further-readings)
@@ -11,8 +14,12 @@
 
 ## TL;DR
 
-Redis is recommended to prevent file locking problems.
+Redis (or Valkey) is recommended to prevent file locking problems.
 
+Prefer authenticating with an application password when using a third-party WebDAV client. This includes any operating
+system's built-in client.\
+It should avoid the performance penalty that derives from using a regular password, since that requires the server to
+verify it for each every request.
 <details>
   <summary>Setup</summary>
 
@@ -65,7 +72,8 @@ certificate responding to `nextcloud.lan`:
    apk --no-cache add \
      'nginx' 'openssl' \
      'php85-exif' 'php85-fpm' 'php85-pecl-apcu' 'php85-pecl-imagick' 'php85-sodium' 'php85-sysvsem' \
-     'nextcloud33' 'nextcloud33-initscript' 'nextcloud33-occ' 'nextcloud33-sqlite'
+     'nextcloud33' 'nextcloud33-initscript' 'nextcloud33-occ' 'nextcloud33-sqlite' \
+     'imagemagick-svg'
    ```
 
 1. Create the self-signed certificate:
@@ -137,7 +145,12 @@ certificate responding to `nextcloud.lan`:
 1. \[_recommended_] Add the self-signed certificate to one's devices so that applications will not refuse to contact it
    ([Android][Android / Install a certificate], [macOS][macOS / Add self-signed certificates to the keychain]).
 
-### Using containers
+### Container composition
+
+> [!tip]
+> Prefer the **full** NextCloud composition to the AIO counterpart.
+
+[NextCloud](/docker%20compositions/nextcloud/) | [NextCloud-AIO](/docker%20compositions/nextcloud-aio/)
 
 Use environment variables to inform Nextcloud about internal configuration:
 
@@ -240,18 +253,16 @@ To configure Nextcloud from `snap`:
 - [Website]
 - [Self-hosting]
 - The docker version's [README][docker readme]
-- The snap version's [README][snap readme]
+- The snap version's [README][snappy nextcloud]
 - [How to install and configure Nextcloud on Ubuntu 18.04]
-
-Providers:
-
-- [The Good Cloud](https://thegood.cloud)
+- [Providers][nextcloud partners]
 
 ### Sources
 
 - [Docker image]
 - [Helm chart]
 - [How to check if Redis is used in NC]
+- [Accessing Nextcloud files using WebDAV]
 
 <!--
   Reference
@@ -264,13 +275,16 @@ Providers:
 [self-hosting]: self-hosting.md
 
 <!-- Upstream -->
-[how to check if redis is used in nc]: https://help.nextcloud.com/t/how-to-check-if-redis-is-used-in-nc/22268/2
+[Accessing Nextcloud files using WebDAV]: https://docs.nextcloud.com/server/latest/user_manual/en/files/access_webdav.html
 [docker image]: https://hub.docker.com/_/nextcloud/
 [docker readme]: https://github.com/docker-library/docs/blob/master/nextcloud/README.md
 [helm chart]: https://github.com/nextcloud/helm/tree/master/charts/nextcloud
-[snap readme]: https://github.com/nextcloud/nextcloud-snap
-[website]: https://nextcloud.com/
+[how to check if redis is used in nc]: https://help.nextcloud.com/t/how-to-check-if-redis-is-used-in-nc/22268/2
+[Nextcloud partners]: https://nextcloud.com/partners/
+[Snappy Nextcloud]: https://github.com/nextcloud/nextcloud-snap
+[Website]: https://nextcloud.com/
 
 <!-- Others -->
 [Alpine wiki / Nextcloud]: https://wiki.alpinelinux.org/wiki/Nextcloud
 [how to install and configure nextcloud on ubuntu 18.04]: https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-nextcloud-on-ubuntu-18-04
+[ownCloud]: https://owncloud.com/

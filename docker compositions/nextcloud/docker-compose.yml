@@ -23,7 +23,14 @@ services:
     image: nextcloud:stable
     restart: unless-stopped
     ports:
-      - 8080:80
+      - name: http
+        host_ip: 192.168.1.42
+        published: 8080
+        target: 80
+      - name: https
+        host_ip: 192.168.1.42
+        published: 8443
+        target: 443
     volumes:
       - nextcloud:/var/www/html
       - config:/var/www/html/config

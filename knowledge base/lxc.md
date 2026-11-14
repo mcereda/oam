@@ -1,18 +1,26 @@
 # Linux Container Runtime
 
-## Table of contents <!-- omit in toc -->
-
 1. [TL;DR](#tldr)
 1. [Create new containers as an unprivileged user](#create-new-containers-as-an-unprivileged-user)
 1. [Further readings](#further-readings)
 
 ## TL;DR
 
+<details>
+  <summary>Setup</summary>
+
 ```sh
 # Install the LXC runtime
 apt-get install 'lxc'
 snap install 'lxd'
+```
 
+</details>
+
+<details>
+  <summary>Usage</summary>
+
+```sh
 # List available templates.
 ls '/usr/share/lxc/templates'
 
@@ -66,11 +74,22 @@ man 'lxc.container.conf.5'
 man 'lxc.container.conf(5)'
 ```
 
+</details>
+
+<details>
+  <summary>Real world use cases</summary>
+
+```sh
+# Allow user 'vagrant' to create up to 10 'veth' devices connected to the 'lxcbr0' bridge.
+echo "vagrant veth lxcbr0 10" | sudo tee -a '/etc/lxc/lxc-usernet'
+```
+
+</details>
+
 ## Create new containers as an unprivileged user
 
 ```sh
-# Allow user 'vagrant' to create up to 10 'veth' devices connected to the
-# 'lxcbr0' bridge.
+# Allow user 'vagrant' to create up to 10 'veth' devices connected to the 'lxcbr0' bridge.
 echo "vagrant veth lxcbr0 10" | sudo tee -a '/etc/lxc/lxc-usernet'
 ```
 
@@ -80,7 +99,8 @@ echo "vagrant veth lxcbr0 10" | sudo tee -a '/etc/lxc/lxc-usernet'
 - [Getting started guide][getting started]
 
 <!--
-  References
+  Reference
+  ═╬═Time══
   -->
 
 <!-- Upstream -->

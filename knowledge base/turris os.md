@@ -18,6 +18,7 @@ Check the [website] for more information.
 1. [VLANs](#vlans)
 1. [The SFP+ caged module](#the-sfp-caged-module)
    1. [Use the SFP module as a LAN port](#use-the-sfp-module-as-a-lan-port)
+1. [Nextcloud](#nextcloud)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -693,12 +694,15 @@ EOF
 <details>
   <summary>Nextcloud</summary>
 
+> [!tip]
+> There is a package available for this. Prefer installing that from reForis.
+
 1. Create and start the container:
 
    ```sh
    lxc-create --name 'nextcloud' --template 'download' -- \
      --server 'images.linuxcontainers.org' --dist 'alpine' --release '3.24' --arch 'armhf'
-   lxc-start --name 'nextcloud'
+   lxc-start --name 'nextcloud' && lxc-info --name 'nextcloud'
    ```
 
 1. [Get a shell in the container][get a shell into running containers]:
@@ -717,53 +721,81 @@ EOF
       hostname -F '/etc/hostname'
       ```
 
-   1. [Setup Nextcloud for Alpine Linux][nextcloud / basic setup through alpine Linux packages, sqlite, and nginx with a self-signed certificate]:
+   1. Setup Nextcloud for Alpine Linux:
 
       ```sh
       # Install required packages.
       apk --no-cache add \
         'nginx' 'openssl' \
+        'mariadb' 'mariadb-client' 'mariadb-openrc' \
         'php85-exif' 'php85-fpm' 'php85-pecl-apcu' 'php85-pecl-imagick' 'php85-sodium' 'php85-sysvsem' \
-        'nextcloud33' 'nextcloud33-initscript' 'nextcloud33-occ' 'nextcloud33-sqlite'
+        'nextcloud33' 'nextcloud33-initscript' 'nextcloud33-occ' 'nextcloud33-mysql' \
+        'imagemagick-svg'
+
+      # Initialize the DB.
+      mariadb-install-db --user 'mysql' --datadir '/var/lib/mysql'
+      rc-update add mariadb && rc-service mariadb start
+      mariadb -u root -e "
+        CREATE DATABASE nextcloud;
+        CREATE USER 'nextcloud'@'localhost' IDENTIFIED BY '{{ SOME STRONG PASSWORD HERE }}';
+        GRANT ALL PRIVILEGES ON nextcloud.* TO 'nextcloud'@'localhost';
+        FLUSH PRIVILEGES;
+      "
 
       # Create a self-signed certificate.
       openssl req -x509 -nodes -days '365' -newkey 'rsa:4096' \
         -keyout '/etc/ssl/private/nextcloud-selfsigned.key' -out '/etc/ssl/certs/nextcloud-selfsigned.crt' \
-        -subj '/CN=nextcloud' -addext "subjectAltName=DNS:nextcloud"
+        -subj '/CN=nextcloud' -addext 'subjectAltName=DNS:nextcloud,DNS:nextcloud.lan,IP:192.168.1.1'
 
       # Configure the webserver.
       rm '/etc/nginx/http.d/default.conf'
       cat <<'EOF' > '/etc/nginx/http.d/nextcloud.conf'
       server {
-          listen 80;
-          listen [::]:80;
-          server_name nextcloud;
-          return 301  https://$host$request_uri;
+          listen 80 default_server;
+          listen [::]:80 default_server;
+
+          return 308 https://$host$request_uri;
       }
+
       server {
           listen 443 ssl;
           listen [::]:443 ssl;
-          server_name nextcloud;
 
-          root /usr/share/webapps/nextcloud;
-          index index.php index.html index.htm;
-          disable_symlinks off;
+          server_name nextcloud;
+          http2 on;
 
           ssl_certificate /etc/ssl/certs/nextcloud-selfsigned.crt;
           ssl_certificate_key /etc/ssl/private/nextcloud-selfsigned.key;
           ssl_session_timeout 5m;
+          ssl_session_cache shared:MozSSL:10m;
 
           add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+          add_header X-Content-Type-Options nosniff;
+          add_header X-Frame-Options SAMEORIGIN;
+
+          root /usr/share/webapps/nextcloud;
+          index index.php index.html;
+          # disable_symlinks off;  # FIXME: check
 
           location / {
-              try_files $uri $uri/ /index.html;
+              try_files $uri $uri/ /index.php$request_uri /index.html;
           }
           location ~ [^/]\.php(/|$) {
               fastcgi_split_path_info ^(.+?\.php)(/.*)$;
               if (!-f $document_root$fastcgi_script_name) { return 404; }
+
               fastcgi_pass unix:/run/nextcloud/fastcgi.sock;
               fastcgi_index index.php;
               include fastcgi.conf;
+
+              fastcgi_buffering on;
+              fastcgi_buffers 64 16k;
+              fastcgi_buffer_size 64k;
+              fastcgi_read_timeout 300;
+          }
+          location ~ ^/(?:build|tests|config|lib|3rdparty|templates|data)/ {
+              # Do not serve the db or configuration files
+              deny all;
           }
           location ^~ /.well-known/carddav { return 301 /remote.php/dav/; }
           location ^~ /.well-known/caldav { return 301 /remote.php/dav/; }
@@ -986,6 +1018,14 @@ luci-reload
 
 </details>
 
+## Nextcloud
+
+Turris OS offers a community package. Prefer installing that from reForis.
+
+macOS seems to time out trying to list the files from an instance running on a Turris Omnia. This happens with both the
+official desktop client **and** Finder's builtin client.\
+Still not sure why. The Android app seems to be working correctly, and the Turris Omnia seems to be underused.
+
 ## Further readings
 
 - [Website]
@@ -999,6 +1039,7 @@ luci-reload
 - [Opkg]
 - [UCI]
 - [LXC]
+- [Nextcloud]
 
 ### Sources
 
@@ -1024,7 +1065,7 @@ luci-reload
 [Forgejo / Automate backups]: forgejo.md#automate-backups
 [Forgejo / Setup]: forgejo.md#setup
 [LXC]: lxc.md
-[Nextcloud / Basic setup through Alpine Linux packages, SQlite, and Nginx with a self-signed certificate]: nextcloud.md#basic-setup-through-alpine-linux-packages-sqlite-and-nginx-with-a-self-signed-certificate
+[Nextcloud]: nextcloud.md
 [OpenWrt / VLANs]: openwrt.md#vlans
 [OpenWrt]: openwrt.md
 [Opkg]: opkg.md
