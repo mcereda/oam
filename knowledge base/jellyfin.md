@@ -97,6 +97,12 @@ Shows
 
 </details>
 
+| Port/Protocol | Configurable | Summary          |
+| ------------- | ------------ | ---------------- |
+| 8096/TCP      | Yes          | HTTP             |
+| 8920/TCP      | Yes          | HTTPS            |
+| 7359/UDP      | **NOPE**     | Client Discovery |
+
 <!-- Uncomment if used
 <details>
   <summary>Setup</summary>
@@ -173,6 +179,7 @@ happened to really slow down playback.
 ### Sources
 
 - [Documentation]
+- [Networking][Documentation / Post-Install Setup / Networking]
 
 <!--
   Reference
@@ -187,6 +194,7 @@ happened to really slow down playback.
 [Codebase]: https://github.com/jellyfin/jellyfin
 [Documentation / Media / Movies]: https://jellyfin.org/docs/general/server/media/movies
 [Documentation / Media / Shows]: https://jellyfin.org/docs/general/server/media/shows
+[Documentation / Post-Install Setup / Networking]: https://jellyfin.org/docs/general/post-install/networking/
 [Documentation]: https://jellyfin.org/docs
 [Transcoding / Hardware acceleration]: https://jellyfin.org/docs/general/post-install/transcoding/hardware-acceleration/
 [Website]: https://jellyfin.org/

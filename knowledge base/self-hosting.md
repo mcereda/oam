@@ -23,7 +23,8 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 | [Hoppscotch]          | API development environment         | [Yaade]                                   |
 | [Immich]              | Photo and video management solution | Google Photo, [PhotoPrism]                |
 | [IT-tools]            | Handy tools for developers          |                                           |
-| [NextCloud]           | File sharing platform               | [OwnCloud]                                |
+| [Jellyfin]            | Media streaming                     | Plex                                      |
+| [NextCloud]           | File sharing platform               | Dropbox, [ownCloud], Proton suite         |
 | [Nginx Proxy Manager] | Reverse Proxy                       |                                           |
 | [OpenMediaVault]      | NAS solution                        | [TrueNAS]                                 |
 | [Paperless-ngx]       | Document management system          |                                           |
@@ -57,6 +58,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 [GitLab]: gitlab.md
 [Hoppscotch]: hoppscotch.md
 [Immich]: immich.md
+[Jellyfin]: jellyfin.md
 [Nextcloud]: nextcloud.md
 [Nginx proxy manager]: nginx%20proxy%20manager.md
 [OpenMediaVault]: openmediavault.md
@@ -75,7 +77,7 @@ The _art_ of hosting and managing applications on one's own servers instead of c
 [gogs]: https://github.com/gogs/gogs
 [home assistant]: https://www.home-assistant.io/
 [it-tools]: https://github.com/CorentinTh/it-tools
-[owncloud]: https://owncloud.com/
+[ownCloud]: https://owncloud.com/
 [radicale]: https://radicale.org/
 [semaphore]: https://semaphoreui.com/
 [service as a software substitute]: https://www.gnu.org/philosophy/who-does-that-server-really-serve.html
