@@ -2,7 +2,7 @@
 # Refer https://github.com/syncthing/syncthing/blob/main/README-Docker.md
 services:
   syncthing:
-    image: syncthing/syncthing:2.0.14
+    image: syncthing/syncthing:2.1.7
     container_name: syncthing
     hostname: ${HOSTNAME}
     environment:

@@ -2,7 +2,7 @@
 # Refer https://github.com/syncthing/syncthing/blob/main/README-Docker.md
 services:
   syncthing:
-    image: syncthing/syncthing:2.0.12
+    image: syncthing/syncthing:2.1.7
     container_name: syncthing
     hostname: MacBook-Pro
     environment:
@@ -12,7 +12,7 @@ services:
     volumes:
       - ${PWD}/config:/var/syncthing/config:z
       - ${PWD}/data:/var/syncthing/data
-      # - ${HOME}/media:/var/syncthing/media
+      # - ${HOME}/Media:/var/syncthing/media
     ports:
       # No way to use 'host' mode  in OS X
       - 127.0.0.1:8384:8384/tcp   # Web UI

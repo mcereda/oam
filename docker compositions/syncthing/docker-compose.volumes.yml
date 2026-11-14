@@ -1,0 +1,25 @@
+---
+# Refer https://github.com/syncthing/syncthing/blob/main/README-Docker.md
+volumes:
+  config:
+  data:
+services:
+  syncthing:
+    image: syncthing/syncthing:2.1.7
+    container_name: syncthing
+    hostname: ${HOSTNAME}
+    environment:
+      - PUID=${UID-1000}  # use 0 with podman
+      - PGID=${GID-1000}  # use 0 with podman
+      - STGUIADDRESS=0.0.0.0:8384
+    volumes:
+      - config:/var/syncthing/config:z
+      - data:/var/syncthing/data
+      # - ${HOME}/media:/var/syncthing/media
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test: curl -fkLsS -m 2 127.0.0.1:8384/rest/noauth/health | grep -o --color=never OK || exit 1
+      interval: 1m
+      timeout: 10s
+      retries: 3

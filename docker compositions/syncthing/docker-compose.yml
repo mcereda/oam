@@ -2,7 +2,7 @@
 # Refer https://github.com/syncthing/syncthing/blob/main/README-Docker.md
 services:
   syncthing:
-    image: syncthing/syncthing:2.0.12
+    image: syncthing/syncthing:2.1.7
     container_name: syncthing
     hostname: ${HOSTNAME}
     environment:
@@ -12,7 +12,7 @@ services:
     volumes:
       - ${PWD}/config:/var/syncthing/config:z
       - ${PWD}/data:/var/syncthing/data
-      - ${HOME}/Media:/var/syncthing/media
+      - ${HOME}/media:/var/syncthing/media
     network_mode: host
     restart: unless-stopped
     healthcheck:
