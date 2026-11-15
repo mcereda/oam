@@ -172,11 +172,13 @@ sysctl -w 'net.ipv4.ip_forward=1' \
 
 ## Further readings
 
+- [Website]
 - [`iptables`][iptables]
 - [How to Create Secure Stateful Firewall Rules with nftables on Linux]
 
 ### Sources
 
+- [Documentation]
 - [Gentoo wiki]
 - [Arch wiki]
 
@@ -191,6 +193,9 @@ sysctl -w 'net.ipv4.ip_forward=1' \
 
 <!-- Files -->
 <!-- Upstream -->
+[Documentation]: https://wiki.nftables.org/
+[Website]: https://nftables.org/
+
 <!-- Others -->
 [Arch wiki]: https://wiki.archlinux.org/title/Nftables
 [Gentoo wiki]: https://wiki.gentoo.org/wiki/Nftables
