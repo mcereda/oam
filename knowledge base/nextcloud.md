@@ -20,6 +20,7 @@ Prefer authenticating with an application password when using a third-party WebD
 system's built-in client.\
 It should avoid the performance penalty that derives from using a regular password, since that requires the server to
 verify it for each every request.
+
 <details>
   <summary>Setup</summary>
 
@@ -34,6 +35,9 @@ verify it for each every request.
   ```
 
   </details>
+
+  The data directory must **not** be writable by others.\
+  Correct it with `chmod -R '770' '/var/lib/nextcloud/data'`.
 
 </details>
 

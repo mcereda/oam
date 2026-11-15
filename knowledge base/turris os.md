@@ -7,11 +7,9 @@ Check the [website] for more information.
 1. [Local DNS resolution](#local-dns-resolution)
 1. [Static DHCP leases and hostnames](#static-dhcp-leases-and-hostnames)
 1. [Containers](#containers)
-   1. [Get information about running containers](#get-information-about-running-containers)
    1. [Create new containers](#create-new-containers)
    1. [Assign containers a static IP address](#assign-containers-a-static-ip-address)
    1. [Start containers](#start-containers)
-   1. [Get a shell into running containers](#get-a-shell-into-running-containers)
    1. [Start containers at boot](#start-containers-at-boot)
    1. [Examples](#examples)
 1. [Hardening](#hardening)
@@ -80,43 +78,6 @@ poweroff
 # Get the current temperature.
 cat '/sys/class/thermal/thermal_zone0/temp'
 sensors
-
-
-# List available LXC container images.
-# Default source is 'repo.turris.cz/lxc'.
-lxc-create --name 'test' --template 'download'; lxc-destroy --name 'test'
-lxc-create -n 'test' -t 'download' -- --server 'images.linuxcontainers.org'; lxc-destroy --name 'test'
-
-# Create LXC containers.
-# Default source is 'repo.turris.cz/lxc'.
-# Values are case sensitive and depend from what is on the server.
-lxc-create --name 'alpine' --template 'download' -- --dist 'Alpine' --release '3.18' --arch 'armv7l'
-lxc-create -n 'ubuntu-focal' -t 'download' -- \
-  -s 'repo.turris.cz/lxc' \
-  -d 'Ubuntu' -r 'Focal' -a 'armv7l'
-
-# List containers.
-lxc-ls
-
-# Show information about running containers
-lxc-info --name 'nextcloud'
-lxc-info -n 'pi-hole'
-lxc-info 'gitea' --ips
-
-# Start containers.
-lxc-start --name 'baikal'
-lxc-start -n 'forgejo'
-lxc-start 'gitea'
-
-# Stop containers.
-lxc-stop --name 'gitea'
-lxc-stop -n 'forgejo'
-lxc-stop 'nextcloud'
-
-# Delete containers and their data.
-lxc-destroy --name 'gitea'
-lxc-destroy -n 'forgejo'
-lxc-destroy 'nextcloud'
 
 
 # List snapshots.
@@ -198,71 +159,30 @@ The _standard_ procedure to deploy a containerized service is as follows:
 1. \[_optional_] [Assign the container a static IP address][assign containers a static ip address].\
    Recommended in case of services.
 1. [Start the container][start containers].
-1. [Get a shell in the container][get a shell into running containers].
+1. Get a shell into the container.
 1. Configure the service inside the container.\
    See the examples below.
 1. Check all is working as expected.
 1. If changed the container's hostname from **inside** of it, restart it for good measure.
 1. \[_optional_] Configure Turris OS to [start the container at boot][start containers at boot].
 
-Details for all actions are explained in the next sections.\
+Refer to the [LXC] page and the next sections for details on all actions.\
 Unless otherwise specified:
 
 - All shell commands need to be executed from Turris OS.
 - All webUI actions need to be taken from LuCI.\
   As of 2026-11-12, reForis does not allow to manage containers.
+- Container images are taken from `repo.turris.cz/lxc`.
 
 > [!tip] Mind the device's available resources.
 > The main purpose of Turris OS is to run a router with (usually) limited resources.\
 > Avoid overloading with too many heavy containers, and monitor usage.
 
-### Get information about running containers
-
-<details>
-  <summary>Via the shell</summary>
-
-```sh
-lxc-info --name 'gitea'
-lxc-info -n 'nextcloud'
-lxc-info 'pi-hole'
-
-# Only get the first IP address.
-lxc-info --name 'forgejo' --ips --no-humanize | head -n '1'
-```
-
-</details>
-
 ### Create new containers
-
-<details>
-  <summary>Via the shell</summary>
-
-```sh
-# List available LXC container images.
-# Default source is 'repo.turris.cz/lxc'.
-lxc-create -n 'test' -t 'download'; lxc-destroy -n 'test'
-lxc-create … -t 'download' -- --server 'images.linuxcontainers.org'; lxc-destroy -n 'test'
-
-# Create LXC containers.
-# Default source is 'repo.turris.cz/lxc'.
-# Values are case sensitive and depend from what is on the server.
-lxc-create -n 'pi-hole' -t 'download' -- -d 'Debian' -r 'Bullseye' -a 'armv7l'
-lxc-create -n 'baikal' -t 'download' -- -d 'Alpine' -r '3.20' -a 'armv7l'
-lxc-create --name 'pi-hole' --template 'download' -- \
-  --server 'repo.turris.cz/lxc' \
-  --dist 'Ubuntu' --release 'Focal' --arch 'armv7l'
-```
-
-</details>
-
-<details>
-  <summary>Using the webUI</summary>
 
 1. Navigate to the _Services_ > _LXC Containers_ page.
 1. In the _Create New Container_ section, give it a name and choose its template.
 1. Click the _Create_ button under _Actions_.
-
-</details>
 
 ### Assign containers a static IP address
 
@@ -297,37 +217,8 @@ luci-reload
 
 ### Start containers
 
-<details>
-  <summary>Via the shell</summary>
-
-```sh
-lxc-start --name 'pi-hole'
-
-# Check it's running correctly.
-lxc-info --name 'pi-hole'
-```
-
-</details>
-
-<details>
-  <summary>Using the webUI</summary>
-
 1. Navigate to the _Services_ > _LXC Containers_ page.
 1. In the _Available Containers_ section, click the _Start_ button under _Actions_.
-
-</details>
-
-### Get a shell into running containers
-
-<details>
-  <summary>Via the shell</summary>
-
-```sh
-lxc-attach --name 'pi-hole'
-lxc-attach -n 'nextcloud'
-```
-
-</details>
 
 ### Start containers at boot
 
@@ -349,7 +240,7 @@ EOF
 ### Examples
 
 <details>
-  <summary>Baikal</summary>
+  <summary>Baïkal</summary>
 
 > [!tip]
 > Refer [baikal] and <https://sabre.io/baikal/install/>.
@@ -533,7 +424,7 @@ EOF
    lxc-start --name 'forgejo' && lxc-info --name 'forgejo'
    ```
 
-1. [Get a shell into the container][get a shell into running containers]:
+1. Get a shell into the container:
 
    ```sh
    lxc-attach --name 'forgejo'
@@ -581,7 +472,7 @@ EOF
    lxc-start --name 'gitea' && lxc-info --name 'gitea'
    ```
 
-1. [Get a shell into the container][get a shell into running containers]:
+1. Get a shell into the container:
 
    ```sh
    lxc-attach --name 'gitea'
@@ -631,7 +522,7 @@ EOF
    lxc-start --name 'monitoring' && lxc-info --name 'monitoring'
    ```
 
-1. [Get a shell in the container][get a shell into running containers]:
+1. Get a shell in the container:
 
    ```sh
    lxc-attach --name 'monitoring'
@@ -705,7 +596,7 @@ EOF
    lxc-start --name 'nextcloud' && lxc-info --name 'nextcloud'
    ```
 
-1. [Get a shell in the container][get a shell into running containers]:
+1. Get a shell in the container:
 
    ```sh
    lxc-attach --name 'nextcloud'
@@ -1024,7 +915,8 @@ Turris OS offers a community package. Prefer installing that from reForis.
 
 macOS seems to time out trying to list the files from an instance running on a Turris Omnia. This happens with both the
 official desktop client **and** Finder's builtin client.\
-Still not sure why. The Android app seems to be working correctly, and the Turris Omnia seems to be underused.
+Not sure why yet. The Android and Linux apps appear to be working correctly, and the device is underused in CPU, RAM,
+**and** disk (including reading and writing operations).
 
 ## Further readings
 
@@ -1056,7 +948,6 @@ Still not sure why. The Android app seems to be working correctly, and the Turri
 <!-- In-article sections -->
 [Assign containers a static IP address]: #assign-containers-a-static-ip-address
 [Create new containers]: #create-new-containers
-[Get a shell into running containers]: #get-a-shell-into-running-containers
 [Start containers]: #start-containers
 [Start containers at boot]: #start-containers-at-boot
 

@@ -72,15 +72,38 @@ iptables-restore '/etc/iptables/rules.v4'
 
 </details>
 
-<!-- Uncomment if used
 <details>
   <summary>Real world use cases</summary>
 
 ```sh
+# Ensure LXC containers can connect to the Internet.
+# Especially needed when Docker is also installed.
+# 1. enables forwarding; 2. nats traffic from containers; 3. allows initiating traffic from containers; 4. allows
+# responses.
+# 10.0.3.0/24 -> LXC bridge subnet, enp1s0 -> host network interface, lxcbr0 -> LXC bridge network interface.
+# Specifying an interface (e.g., -o 'enp1s0') limits the rule to it. Leave them out to allow traffic on *all* of them.
+sysctl -w 'net.ipv4.ip_forward=1' \
+&& iptables -t 'nat' -A 'POSTROUTING' -s '10.0.3.0/24' ! -d '10.0.3.0/24' -o 'enp1s0' -j 'MASQUERADE' \
+&& iptables -A 'FORWARD' -i 'lxcbr0' -o 'enp1s0' -j 'ACCEPT' \
+&& iptables -A 'FORWARD' -i 'enp1s0' -o 'lxcbr0' -m 'conntrack' --ctstate 'RELATED,ESTABLISHED' -j 'ACCEPT'
+
+# Allow forwarding traffic entering 'eth0' to 'lxcbr0'.
+# Only allows, does not forward any.
+iptables -A 'FORWARD' -i 'eth0' -o 'lxcbr0' -j 'ACCEPT'
+
+# Forward traffic coming on all interfaces on TCP port 443 to '10.0.3.42' on the same port.
+# Exclude the same network to avoid loops.
+iptables -t 'nat' -A 'PREROUTING' ! -s '10.0.3.0/24' -p 'tcp' --dport '443' -j 'DNAT' --to-destination '10.0.3.42:443' \
+&& iptables -A 'FORWARD' -p 'tcp' -d '10.0.3.42' --dport '443' -j 'ACCEPT'
+
+# Forward traffic coming on 'enp1s0' on TCP ports 8080 and 8443 to '10.0.3.42' on the same ports using interface
+# 'lxcbr0'.
+iptables -t 'nat' -A 'PREROUTING' -i 'enp1s0' -p 'tcp' -m 'multiport' --dports '8080,8443' -j 'DNAT' \
+  --to-destination '10.0.3.42' \
+&& iptables -A 'FORWARD' -i 'enp1s0' -o 'lxcbr0' -p 'tcp' -d '10.0.3.42' -m 'multiport' --dports '8080,8443' -j 'ACCEPT'
 ```
 
 </details>
--->
 
 ## Further readings
 

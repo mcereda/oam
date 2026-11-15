@@ -150,6 +150,22 @@ nft add rule 'inet' 'filter' 'input' log
 
 # Delete chains.
 nft delete chain 'inet' 'base_table' 'input_filter'
+
+
+# Ensure LXC containers can connect to the Internet.
+# Especially needed when Docker is also installed.
+# 1. enables forwarding; 2. nats traffic from containers; 3. allows initiating traffic from containers; 4. allows
+# responses.
+# 10.0.3.0/24 -> LXC bridge subnet, enp1s0 -> host network interface, lxcbr0 -> LXC bridge network interface.
+# Specifying an interface (e.g., iifname 'enp1s0') limits the rule to it. Leave them out to allow traffic on *all* of them.
+sysctl -w 'net.ipv4.ip_forward=1' \
+&& nft add table 'ip' 'nat' \
+&& nft add chain 'ip' 'nat' postrouting '{ type nat hook postrouting priority srcnat; policy accept; }' \
+&& nft add rule 'ip' 'nat' postrouting ip saddr '10.0.3.0/24' ip daddr != '10.0.3.0/24' oifname 'enp1s0' masquerade \
+&& nft add table 'ip' 'filter' \
+&& nft add chain 'ip' 'filter' forward '{ type filter hook forward priority filter; policy accept; }' \
+&& nft add rule 'ip' 'filter' forward iifname 'lxcbr0' oifname 'enp1s0' accept \
+&& nft add rule 'ip' 'filter' forward iifname 'enp1s0' oifname 'lxcbr0' ct state 'related,established' accept
 ```
 
 </details>

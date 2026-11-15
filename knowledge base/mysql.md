@@ -32,6 +32,9 @@ show tables;
 -- give permissions
 grant ALL on db.* to 'username'@'localhost' identified by 'password';
 grant ALL on db.* to 'username'@'127.0.0.1';
+
+-- reset passwords
+ALTER USER 'app_user'@'localhost' IDENTIFIED BY 'StrongPassword123!'; FLUSH PRIVILEGES;
 ```
 
 ## Further readings
