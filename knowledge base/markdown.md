@@ -5,13 +5,13 @@ ReadMe's Markdown engine.
 Compare Markdown implementations at [babelmark].
 
 1. [TL;DR](#tldr)
-1. [Tables](#tables)
-1. [Alerts](#alerts)
-1. [Images](#images)
-1. [Troubleshooting](#troubleshooting)
+2. [Tables](#tables)
+3. [Alerts](#alerts)
+4. [Images](#images)
+5. [Troubleshooting](#troubleshooting)
    1. [Escape the backtick character](#escape-the-backtick-character)
-   1. [Render mermaid.js graphs in VS Code's Markdown preview](#render-mermaidjs-graphs-in-vs-codes-markdown-preview)
-1. [Further readings](#further-readings)
+   2. [Render mermaid.js graphs in VS Code's Markdown preview](#render-mermaidjs-graphs-in-vs-codes-markdown-preview)
+6. [Further readings](#further-readings)
    1. [Sources](#sources)
 
 ## TL;DR
@@ -146,7 +146,7 @@ Text in columns can be aligned by putting `:` in the header delimiter line where
 
 ## Alerts
 
-Alerts are **not** defined in the base Markdown specification.<br/>
+Alerts (_callboxes_) are **not** defined in the base Markdown specification.<br/>
 They are extensions that the most famous flavours introduced or adopted, each with small but annoying differences.
 
 <details>

@@ -3,31 +3,38 @@
 ## Table of contents <!-- omit in toc -->
 
 1. [TL;DR](#tldr)
-1. [Encryption](#encryption)
-1. [Decryption](#decryption)
-1. [Key export](#key-export)
-1. [Key import](#key-import)
-1. [Key trust](#key-trust)
-1. [Unattended key generation](#unattended-key-generation)
-1. [Change a key's password](#change-a-keys-password)
-1. [Put comments in a message or file](#put-comments-in-a-message-or-file)
-1. [Use GPG keys for SSH authentication](#use-gpg-keys-for-ssh-authentication)
-    1. [Create authentication-capable keys or subkeys](#create-authentication-capable-keys-or-subkeys)
-    1. [Enable SSH to use GPG (sub)keys](#enable-ssh-to-use-gpg-subkeys)
-    1. [Share GPG-SSH keys](#share-gpg-ssh-keys)
-1. [Troubleshooting](#troubleshooting)
+2. [Create new keys](#create-new-keys)
+   1. [Create new keys non-interactively](#create-new-keys-non-interactively)
+   2. [Create keys or subkeys capable of authenticating](#create-keys-or-subkeys-capable-of-authenticating)
+3. [Trust keys](#trust-keys)
+4. [Change keys' passwords](#change-keys-passwords)
+5. [Export keys](#export-keys)
+6. [Import keys](#import-keys)
+7. [Encrypt files](#encrypt-files)
+8. [Decrypt files](#decrypt-files)
+9. [Put comments in a message or file](#put-comments-in-a-message-or-file)
+10. [Use GPG keys for SSH authentication](#use-gpg-keys-for-ssh-authentication)
+    1. [Allow the SSH agent to use GPG (sub)keys](#allow-the-ssh-agent-to-use-gpg-subkeys)
+    2. [Share GPG-SSH keys](#share-gpg-ssh-keys)
+11. [Troubleshooting](#troubleshooting)
     1. [`gpg failed to sign the data; fatal: failed to write commit object`](#gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object)
-    1. [`sign_and_send_pubkey: signing failed for … from agent: agent refused operation`](#sign_and_send_pubkey-signing-failed-for--from-agent-agent-refused-operation)
-    1. [New configuration settings are ineffective](#new-configuration-settings-are-ineffective)
-1. [Further readings](#further-readings)
+    2. [`sign_and_send_pubkey: signing failed for … from agent: agent refused operation`](#sign_and_send_pubkey-signing-failed-for--from-agent-agent-refused-operation)
+    3. [New configuration settings are ineffective](#new-configuration-settings-are-ineffective)
+12. [Further readings](#further-readings)
     1. [Sources](#sources)
 
 ## TL;DR
+
+Keygrips are internal identifiers that `gpg-agent` uses to refer to them.\
+One keygrip references both the public and private key.
 
 <details>
   <summary>Setup</summary>
 
 ```sh
+# Install on Linux.
+apt install 'gnupg'
+
 # Install on macOS.
 # Choose one.
 brew install --cask 'gpg-suite-no-mail'
@@ -212,96 +219,19 @@ gpg-connect-agent 'keyinfo --ssh-list' '/bye' 2>'/dev/null'
 
 </details>
 
-## Encryption
+## Create new keys
 
 ```sh
-# Single file.
-gpg --output 'file.out.gpg' --encrypt --recipient 'recipient' 'file.in'
-gpg --armor --symmetric --output 'file.out.gpg' 'file.in'
-
-# All files found.
-find . -type 'f' -name 'secret.txt' \
-  -exec gpg --batch --yes --encrypt-files --recipient 'recipient' {} ';'
+gpg --gen-key
+gpg --generate-key
+gpg --full-generate-key
+gpg --expert --full-generate-key
 ```
 
-## Decryption
+### Create new keys non-interactively
 
-```sh
-# Single file.
-gpg -d 'file.gpg'
-gpg --output 'file.out' --decrypt 'file.in.gpg'
-
-# All files found.
-find . -type f -name "*.gpg" -exec gpg --decrypt-files {} +
-```
-
-The second command will create the decrypted version of all files in the same directory. Each file will have the same
-name of the encrypted version, minus the `.gpg` extension.
-
-## Key export
-
-As the original user, export all public keys to a base64-encoded text file and create an encrypted version of that file:
-
-```sh
-# Export.
-gpg --armor --export > 'all.public-keys.asc'
-gpg --armor --export 'recipient' > 'recipient.public-keys.asc'
-
-# Encryption.
-gpg --output 'file.out.gpg' --encrypt --recipient 'recipient' 'file.in'
-gpg --armor --symmetric --output 'file.out.gpg' 'file.in'
-```
-
-Export all encrypted private keys (which will also include corresponding public keys) to a text file and create an
-encrypted version of that file:
-
-```sh
-# Export.
-gpg --armor --export-secret-keys > 'all.private-keys.asc'
-gpg --armor --export-secret-keys 'recipient' > 'recipient.private-keys.asc'
-
-# Encryption.
-gpg --output 'file.out.gpg' --encrypt --recipient 'recipient' 'file.in'
-gpg --armor --symmetric --output 'file.out.gpg' 'file.in'
-```
-
-Optionally, also export `gpg`'s trustdb to a text file:
-
-```sh
-gpg --export-ownertrust > 'otrust.txt'
-```
-
-## Key import
-
-As the new user execute `gpg --import` commands against the secured files, or the decrypted content of those files, and
-then check for the new keys with `gpg -k` and `gpg -K`, e.g.:
-
-```sh
-gpg --output 'myprivatekeys.asc' --decrypt 'mysecretatedprivatekeys.sec.asc' && \
-gpg --import 'myprivatekeys.asc'
-gpg --output 'mypubkeys.asc' --decrypt 'mysecretatedpubkeys.sec.asc'
-gpg --import 'mypubkeys.asc'
-gpg --list-secret-keys
-gpg --list-keys
-```
-
-Optionally import the trustdb file as well:
-
-```sh
-gpg --import-ownertrust 'otrust.txt'
-```
-
-## Key trust
-
-```sh
-$ gpg --edit-key 'key_fingerprint'
-gpg> trust
-gpg> quit
-```
-
-## Unattended key generation
-
-> The non-interactive (--batch) option requires a settings file.
+> [!important]
+> The non-interactive (`--batch`) option **requires** the user to specify a settings file.
 
 ```sh
 # basic key with default values
@@ -320,43 +250,12 @@ gpg --batch --generate-key <<EOF
 EOF
 ```
 
-## Change a key's password
+### Create keys or subkeys capable of authenticating
 
-```sh
-$ gpg --edit-key 'key_fingerprint'
-gpg> passwd
-gpg> quit
-```
+One can enable the authentication capability on a **new** key while creating it.
 
-## Put comments in a message or file
-
-One can put comments in an armored ASCII message or key block using the `Comment` keyword for each line:
-
-```txt
------BEGIN PGP MESSAGE-----
-Comment: …
-Comment: …
-
-hQIMAwbYc…
------END PGP MESSAGE-----
-```
-
-OpenPGP defines all text to be in UTF-8, so a comment may be any UTF-8 string.<br/>
-The whole point of armoring, however, is to provide seven-bit-clean data, so if a comment has characters that are
-outside the US-ASCII range of UTF they may very well not survive transport.
-
-## Use GPG keys for SSH authentication
-
-> See also [How to enable SSH access using a GPG key for authentication].
-
-This exercise will use a GPG subkey with only the authentication capability enabled to complete SSH connections.<br/>
-You can create multiple subkeys as you would do for SSH key pairs.
-
-### Create authentication-capable keys or subkeys
-
-To create subkeys, you should already have a GPG key. If you don't, read one of the many fine tutorials available on
-this topic.<br/>
-Create the subkey by editing your existing key **in expert mode** to get access to the appropriate options:
+Creating **subkeys** requires one to already have a GPG key to subordinate it to.\
+To create a new subkey, edit an existing key **in expert mode** to get access to the appropriate options:
 
 ```sh
 $ gpg --expert --edit-key 'key_fingerprint'
@@ -422,74 +321,225 @@ gpg> quit
 Save changes? (y/N) y
 ```
 
-### Enable SSH to use GPG (sub)keys
-
-When using SSH, `ssh-agent` is used to manage SSH keys. When using a GPG key, `gpg-agent` is used to manage GPG
-keys.<br/>
-To get `gpg-agent` to handle requests from SSH, you need to enable its SSH support:
+## Trust keys
 
 ```sh
-echo "enable-ssh-support" >> ~/.gnupg/gpg-agent.conf
+$ gpg --edit-key 'key_fingerprint'
+gpg> trust
+gpg> quit
 ```
 
-You can avoid using `ssh-add` to load the keys by preemptively specifying which GPG keys to use in the
-`~/.gnupg/sshcontrol` file.<br/>
-Entries in this file need to be keygrips (internal identifiers that `gpg-agent` uses to refer to the keys). A keygrip
-refers to both the public and private key.<br/>
-Find the keygrips you need, then add them to the `~/.gnupg/sshcontrol` file:
+## Change keys' passwords
 
 ```sh
-$ gpg -K --with-keygrip
-/home/jbgood/.gnupg/pubring.kbx
------------------------------
-sec   rsa4096 2017-11-13 [SC] [expires: 2025-11-12]
-      7425E11D898C449FDD3D1B4A7E747A8618CB109F
-      Keygrip = E045864F555B3432E6DFCA2EF7ED47403A6E399C
-uid           [ultimate] Johnny B. Good <j.b.good@email.com>
-uid           [ultimate] Johnny <johnny@mymail.com>
-ssb   rsa4096 2018-01-03 [E]
-      Keygrip = B4674D4429AE049663BE4FEF9407C6B90F7AF122
-ssb   rsa4096 2018-05-04 [A]
-      Keygrip = B3D630644D14A452502A84FB09E5257CF54C3E04
-
-sec   rsa4096 2022-01-03 [SCEA] [expires: 2025-01-02]
-      8B6DC0BF4D73373C2A529C65CC54F9AC6E542DE7
-      Keygrip = 03CE1FCE255AC0BB747BBBF61C9B8378CF78A2FC
-uid           [ unknown] Luna Varasi <luna.var@example.com>
-
-$ echo 'B3D630644D14A452502A84FB09E5257CF54C3E04' >> ~'/.gnupg/sshcontrol'
-$ echo '03CE1FCE255AC0BB747BBBF61C9B8378CF78A2FC' >> ~'/.gnupg/sshcontrol'
+$ gpg --edit-key 'key_fingerprint'
+gpg> passwd
+gpg> quit
 ```
 
-Now tell SSH how to access `gpg-agent` by setting the value of the `SSH_AUTH_SOCK` environment variable.<br/>
-Alternatively, and for a more permanent solution, set the option in the `.ssh/config` file:
+## Export keys
+
+As the original user, export all public keys to a base64-encoded text file and create an encrypted version of that file:
 
 ```sh
-export SSH_AUTH_SOCK=$(gpgconf --list-dirs 'agent-ssh-socket')
+# Export.
+gpg --armor --export > 'all.public-keys.asc'
+gpg --armor --export 'recipient' > 'recipient.public-keys.asc'
 
-# alternative
-echo "\nIdentityAgent $(gpgconf --list-dirs 'agent-ssh-socket')" \
-| tee -a ~'/.ssh/config'
+# Encryption.
+gpg --output 'file.out.gpg' --encrypt --recipient 'recipient' 'file.in'
+gpg --armor --symmetric --output 'file.out.gpg' 'file.in'
 ```
 
-Now you can launch the gpg agent:
+Export all encrypted private keys (which will also include corresponding public keys) to a text file and create an
+encrypted version of that file:
 
 ```sh
-gpgconf --launch gpg-agent
+# Export.
+gpg --armor --export-secret-keys > 'all.private-keys.asc'
+gpg --armor --export-secret-keys 'recipient' > 'recipient.private-keys.asc'
+
+# Encryption.
+gpg --output 'file.out.gpg' --encrypt --recipient 'recipient' 'file.in'
+gpg --armor --symmetric --output 'file.out.gpg' 'file.in'
 ```
 
-Check the key has been imported correctly:
+Optionally, also export `gpg`'s trustdb to a text file:
 
 ```sh
-$ gpg --export-ssh-key 'Johnny B. Good'
-ssh-rsa AAAAB3NzaC…7SD8UQ== openpgp:0x7BB65DA2
-$ ssh-add -L
-ssh-rsa AAAAB3NzaC…7SD8UQ== (none)
+gpg --export-ownertrust > 'otrust.txt'
 ```
+
+## Import keys
+
+As the new user execute `gpg --import` commands against the secured files, or the decrypted content of those files, and
+then check for the new keys with `gpg -k` and `gpg -K`, e.g.:
+
+```sh
+gpg --output 'myprivatekeys.asc' --decrypt 'mysecretatedprivatekeys.sec.asc' && \
+gpg --import 'myprivatekeys.asc'
+gpg --output 'mypubkeys.asc' --decrypt 'mysecretatedpubkeys.sec.asc'
+gpg --import 'mypubkeys.asc'
+gpg --list-secret-keys
+gpg --list-keys
+```
+
+Optionally import the trustdb file as well:
+
+```sh
+gpg --import-ownertrust 'otrust.txt'
+```
+
+## Encrypt files
+
+```sh
+# Single file.
+gpg --output 'file.out.gpg' --encrypt --recipient 'recipient' 'file.in'
+gpg --armor --symmetric --output 'file.out.gpg' 'file.in'
+
+# All files found.
+find . -type 'f' -name 'secret.txt' \
+  -exec gpg --batch --yes --encrypt-files --recipient 'recipient' {} ';'
+```
+
+## Decrypt files
+
+```sh
+# Single file.
+gpg -d 'file.gpg'
+gpg --output 'file.out' --decrypt 'file.in.gpg'
+
+# All files found.
+find . -type f -name "*.gpg" -exec gpg --decrypt-files {} +
+```
+
+The second command will create the decrypted version of all files in the same directory. Each file will have the same
+name of the encrypted version, minus the `.gpg` extension.
+
+## Put comments in a message or file
+
+One can put comments in an armored ASCII message or key block using the `Comment` keyword for each line:
+
+```txt
+-----BEGIN PGP MESSAGE-----
+Comment: …
+Comment: …
+
+hQIMAwbYc…
+-----END PGP MESSAGE-----
+```
+
+OpenPGP defines all text to be in UTF-8, so a comment may be any UTF-8 string.\
+The whole point of armoring, however, is to provide seven-bit-clean data, so if a comment has characters that are
+outside the US-ASCII range of UTF they may very well not survive transport.
+
+## Use GPG keys for SSH authentication
+
+See also [How to enable SSH access using a GPG key for authentication].
+
+This exercise will use a dedicated GPG subkey that only has the authentication capability enabled.\
+One can create multiple subkeys the same way they would do for SSH key pairs.
+
+1. Make sure at least one key or subkey capable of authenticating is available:
+
+   ```sh
+   $ gpg -K
+   /home/jbgood/.gnupg/pubring.kbx
+   -----------------------------
+   sec   rsa4096 2017-11-13 [SC] [expires: 2025-11-12]
+         7425E11D898C449FDD3D1B4A7E747A8618CB109F
+   uid           [ultimate] Johnny B. Good <j.b.good@email.com>
+   uid           [ultimate] Johnny <johnny@mymail.com>
+   ssb   rsa4096 2018-01-03 [E]
+   ssb   rsa4096 2018-05-04 [A]
+
+   sec   rsa4096 2022-01-03 [SCEA] [expires: 2025-01-02]
+         8B6DC0BF4D73373C2A529C65CC54F9AC6E542DE7
+   uid           [ unknown] Luna Varasi <luna.var@example.com>
+   ```
+
+   If none is, [create one][create keys or subkeys capable of authenticating].
+
+1. Make sure the desired (sub)keys are [trusted][trust keys].
+1. [Allow the SSH agent to use GPG (sub)keys].
+
+### Allow the SSH agent to use GPG (sub)keys
+
+`ssh-agent` manages SSH keys. `gpg-agent` manages GPG keys.\
+Enable the GPG agent's SSH support to allow it to handle requests from the SSH agent:
+
+```sh
+echo 'enable-ssh-support' >> ~'/.gnupg/gpg-agent.conf'
+```
+
+> [!tip]
+> Avoid the need of using `ssh-add` to load the keys every time by preemptively by specifying each allowed GPG key's
+> _keygrip_ in the `~/.gnupg/sshcontrol` file.
+>
+> <details>
+>
+> 1. Find the keygrips to allow:
+>
+>    ```sh
+>    $ gpg -K --with-keygrip
+>    /home/jbgood/.gnupg/pubring.kbx
+>    -----------------------------
+>    sec   rsa4096 2017-11-13 [SC] [expires: 2025-11-12]
+>          7425E11D898C449FDD3D1B4A7E747A8618CB109F
+>          Keygrip = E045864F555B3432E6DFCA2EF7ED47403A6E399C
+>    uid           [ultimate] Johnny B. Good <j.b.good@email.com>
+>    uid           [ultimate] Johnny <johnny@mymail.com>
+>    ssb   rsa4096 2018-01-03 [E]
+>          Keygrip = B4674D4429AE049663BE4FEF9407C6B90F7AF122
+>    ssb   rsa4096 2018-05-04 [A]
+>          Keygrip = B3D630644D14A452502A84FB09E5257CF54C3E04
+>
+>    sec   rsa4096 2022-01-03 [SCEA] [expires: 2025-01-02]
+>          8B6DC0BF4D73373C2A529C65CC54F9AC6E542DE7
+>          Keygrip = 03CE1FCE255AC0BB747BBBF61C9B8378CF78A2FC
+>    uid           [ unknown] Luna Varasi <luna.var@example.com>
+>    ```
+>
+> 1. Add them to the `~/.gnupg/sshcontrol` file:
+>
+>    ```sh
+>    echo 'B3D630644D14A452502A84FB09E5257CF54C3E04' >> ~'/.gnupg/sshcontrol'
+>    echo '03CE1FCE255AC0BB747BBBF61C9B8378CF78A2FC' >> ~'/.gnupg/sshcontrol'
+>    ```
+>
+> 1. Tell SSH how to access the GPG agent by setting the value of the `SSH_AUTH_SOCK` environment variable.
+>
+>    ```sh
+>    export SSH_AUTH_SOCK=$(gpgconf --list-dirs 'agent-ssh-socket')
+>    ```
+>
+>    Alternatively, and for a more permanent solution, set the option in one's `.ssh/config` file:
+>
+>    ```sh
+>    echo "\nIdentityAgent $(gpgconf --list-dirs 'agent-ssh-socket')" \
+>    | tee -a ~'/.ssh/config'
+>    ```
+>
+> 1. Launch the gpg agent:
+>
+>    ```sh
+>    gpgconf --launch gpg-agent
+>    ```
+>
+> 1. Check the keys have been imported correctly:
+>
+>    ```sh
+>    $ gpg --export-ssh-key 'Johnny B. Good'
+>    ssh-rsa AAAAB3NzaC…7SD8UQ== openpgp:0x7BB65DA2
+>    $ ssh-add -L
+>    ssh-rsa AAAAB3NzaC…7SD8UQ== (none)
+>    ```
+>
+> </details>
 
 ### Share GPG-SSH keys
 
-Run `ssh-add -L` to list one's public keys, then copy them over manually to the remote host.<br/>
+Run `ssh-add -L` to list one's public keys, then copy them over manually to the remote host.\
 Alternatively, use `ssh-copy-id` as one would normally do.
 
 ## Troubleshooting
@@ -556,7 +606,7 @@ export GPG_TTY=$(tty)
 
 **Cause:**
 
-If already running, the GPG agent is still using the old configuration.<br/>
+If already running, the GPG agent is still using the old configuration.\
 Changing the configuration file now will have no effect.
 
 **Solution:**
@@ -593,6 +643,11 @@ gpg-connect-agent reloadagent '/bye'
   Reference
   ═╬═Time══
   -->
+
+<!-- In-article sections -->
+[Allow the SSH agent to use GPG (sub)keys]: #allow-the-ssh-agent-to-use-gpg-subkeys
+[Create keys or subkeys capable of authenticating]: #create-keys-or-subkeys-capable-of-authenticating
+[Trust keys]: #trust-keys
 
 <!-- Upstream -->
 [commonly seen problems]: https://www.gnupg.org/documentation/manuals/gnupg/Common-Problems.html
