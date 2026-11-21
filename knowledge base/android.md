@@ -16,6 +16,8 @@
 1. [Distributions](#distributions)
    1. [Android Open Source Project (AOSP)](#android-open-source-project-aosp)
    1. [GrapheneOS](#grapheneos)
+1. [Troubleshooting](#troubleshooting)
+   1. [An app cannot _register_ for notifications, but has notification permissions](#an-app-cannot-register-for-notifications-but-has-notification-permissions)
 1. [Further readings](#further-readings)
    1. [Sources](#sources)
 
@@ -210,23 +212,23 @@ fastboot reboot
 
 ## Applications of interest
 
-| Application     | Summary                                                                           |
-| --------------- | --------------------------------------------------------------------------------- |
-| [Aegis]         | Authenticator                                                                     |
-| [Aftership]     | Package tracker                                                                   |
-| [Ampere]        | Measures batteries charging and discharging current                               |
-| [AuroraReach]   | Aurora alert                                                                      |
-| [Aurora Store]  | Download apps from the Google Play Store without needing a Google account         |
-| [F-Droid]       | App store focused on free and open source mobile apps                             |
-| [FUTO keyboard] | Offline, privacy-oriented keyboard                                                |
-| [Immich]        | Self-hosted photo and video management solution                                   |
-| [Logseq]        | Diary and knowledge management                                                    |
-| [OpenKeyChain]  | OpenPGP provider                                                                  |
-| [Organic Maps]  | Privacy-focused offline maps and GPS app for hiking, cycling, biking, and driving |
-| [Phyphox]       | Use the phone for physics experiments                                             |
-| [PingTools]     | Network utilities                                                                 |
-| [Rethink]       | DNS and firewall                                                                  |
-| [Signal]        | Privacy-focused messaging                                                         |
+| Application     |   Requires Google Services   | Summary                                                                           |
+| --------------- | :--------------------------: | --------------------------------------------------------------------------------- |
+| [Aegis]         |              no              | Authenticator                                                                     |
+| [Aftership]     |              no              | Package tracker                                                                   |
+| [Ampere]        |              no              | Measures batteries charging and discharging current                               |
+| [AuroraReach]   | **yes** (push notifications) | Aurora alert                                                                      |
+| [Aurora Store]  |              no              | Download apps from the Google Play Store without needing a Google account         |
+| [F-Droid]       |              no              | App store focused on free and open source mobile apps                             |
+| [FUTO keyboard] |            FIXME             | Offline, privacy-oriented keyboard                                                |
+| [Immich]        |            FIXME             | Self-hosted photo and video management solution                                   |
+| [Logseq]        |            FIXME             | Diary and knowledge management                                                    |
+| [OpenKeyChain]  |            FIXME             | OpenPGP provider                                                                  |
+| [Organic Maps]  |              no              | Privacy-focused offline maps and GPS app for hiking, cycling, biking, and driving |
+| [Phyphox]       |            FIXME             | Use the phone for physics experiments                                             |
+| [PingTools]     |            FIXME             | Network utilities                                                                 |
+| [Rethink]       |              no              | DNS and firewall                                                                  |
+| [Signal]        |            FIXME             | Privacy-focused messaging                                                         |
 
 ## Common operations
 
@@ -433,6 +435,24 @@ distributions.
 
 GrapheneOS uses standard Android hardware attestation or its own remote attestation system at
 <https://grapheneos.org/attestation.json>.
+
+## Troubleshooting
+
+### An app cannot _register_ for notifications, but has notification permissions
+
+It is probably trying to register to Google's **push** notification services.
+
+Apps do **not** need Google Services to request **Android**'s notification permission to send normal notification to
+the user.\
+On Android 13 (API 33) and later, they just need to declare `android.permission.POST_NOTIFICATIONS` in the manifest and
+request it at runtime.\
+If the app targets Android 12L or older APIs, the prompt timing is handled differently by the system.
+
+Apps **do** need Google Services to register for **remote**, **push** notifications.\
+The Android permission for normal notification is separate from push delivery. Android does **not** provide a built-in,
+Google-free push service. Firebase Cloud Messaging (FCM) is the most common option, which relies on Google services on
+the device.\
+Without Google services, one would need another push provider/service or their own delivery mechanism.
 
 ## Further readings
 
