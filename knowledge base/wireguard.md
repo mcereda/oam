@@ -2,10 +2,10 @@
 
 > TODO
 
-Simple yet fast and modern VPN utilizing state-of-the-art cryptography.
+Simple yet fast and modern general purpose VPN utilizing state-of-the-art cryptography.
 
-Designed as a general purpose VPN that can run on embedded interfaces and super computers alike, fit for many different
-circumstances. It is cross-platform and widely deployable.
+Designed to run on embedded interfaces and super computers alike for many different circumstances. Cross-platform and
+widely deployable.
 
 <!-- Remove this line to uncomment if used
 ## Table of contents <!-- omit in toc -->
@@ -15,6 +15,15 @@ circumstances. It is cross-platform and widely deployable.
    1. [Sources](#sources)
 
 ## TL;DR
+
+Encapsulates IP packets over UDP.
+
+Add a WireGuard network interface, configure it with the host's private key and its peers' public keys, and use it as
+a tunnel interface to send packets across.\
+Configure this interface using the usual network utilities (e.g., `ip address`, `ip route`, and so on). Use `wg` to
+configure the WireGuard-specific aspects of it.
+
+Key distribution and configuration push are **not** managed by WireGuard. These are left for other layers.
 
 <!-- Uncomment if used
 <details>
