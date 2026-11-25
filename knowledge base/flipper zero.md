@@ -15,10 +15,10 @@ Portable fully open-source and customizable multi-tool for pentesters and geeks 
 | Hard reboot   | Press and hold `BACK` for 30 seconds                                                                                   | Resets the power circuit |
 | Recovery mode | Press and hold `LEFT` and `BACK` for 5 seconds<br/>Release `BACK` and keep holding `LEFT` until the blue LED lights up |                          |
 
-The device will **not** be able to work properly without a microSD card.<br/>
+The device will **not** be able to work properly without a microSD card.\
 The card of up to 256 GB is needed to store any data (e.g. keys, cards, remotes, databases). A 4 GB one should be
-sufficient to store all the necessary data.<br/>
-The Flipper Zero may take longer to recognize a microSD card with a higher storage capacity.<br/>
+sufficient to store all the necessary data.\
+The Flipper Zero may take longer to recognize a microSD card with a higher storage capacity.\
 The device uses a slow, energy-efficient SPI interface that can read data at almost 600 KiB/s, which is sufficient for
 it's tasks.
 
@@ -28,8 +28,10 @@ Update the device via the _Flipper Mobile_ app or _qFlipper_.
   <summary>Setup</summary>
 
 ```sh
-curl -o 'qFlipper.AppImage' 'https://update.flipperzero.one/builds/qFlipper/1.3.3/qFlipper-x86_64-1.3.3.AppImage'
-sudo './qFlipper.AppImage' rules install
+# Install
+brew install --cask 'qflipper'
+curl -o 'qFlipper.AppImage' 'https://update.flipperzero.one/builds/qFlipper/1.3.3/qFlipper-x86_64-1.3.3.AppImage' \
+&& sudo './qFlipper.AppImage' rules install
 ```
 
 </details>
