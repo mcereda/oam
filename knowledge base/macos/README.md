@@ -22,6 +22,8 @@
     1. [Upgrade](#upgrade)
 1. [Apps of interest](#apps-of-interest)
 1. [Boot keys cheatsheet](#boot-keys-cheatsheet)
+1. [Troubleshooting](#troubleshooting)
+    1. [Completely remove LogiOptions+](#completely-remove-logioptions)
 1. [Further readings](#further-readings)
     1. [Sources](#sources)
 
@@ -658,6 +660,17 @@ your Mac, or after your Mac begins to restart. Keep holding until the described 
 | `⌥ Option` + `N`                                                             | Start from a NetBoot server and use the default boot image on it. Disabled when using a firmware password                                                                                                                     |
 | `⌘ Command` + `S`                                                            | Start in _single-user_ mode. Disabled in macOS Mojave or later, or when using a firmware password                                                                                                                             |
 
+## Troubleshooting
+
+### Completely remove LogiOptions+
+
+Refer to [If you want to completely uninstall LogiOptions+, read this (and why you should)].
+
+```sh
+sudo '/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/Frameworks/logioptionsplus_updater.app/Contents/MacOS/logioptionsplus_updater' --full --uninstall
+brew uninstall -f --cask --zap 'logi-options-plus'  # if previously installed via homebrew
+```
+
 ## Further readings
 
 - [Time Machine]
@@ -701,6 +714,7 @@ your Mac, or after your Mac begins to restart. Keep holding until the described 
 - [Improve docker volume performance on MacOS with a RAM disk]
 - [Prevent a Mac laptop from turning on when opening its lid or connecting to power]
 - [How to Fix SSH "Could Not Resolve Hostname" Error]
+- [If you want to completely uninstall LogiOptions+, read this (and why you should)]
 
 <!--
   Reference
@@ -738,6 +752,7 @@ your Mac, or after your Mac begins to restart. Keep holding until the described 
 [how to clear dns cache in macos ventura & macos monterey]: https://osxdaily.com/2022/11/21/how-clear-dns-cache-macos-ventura-monterey/
 [How to Fix SSH "Could Not Resolve Hostname" Error]: https://devops-daily.com/posts/ssh-could-not-resolve-hostname-error
 [how to update xcode from command line]: https://stackoverflow.com/questions/34617452/how-to-update-xcode-from-command-line#34617930
+[If you want to completely uninstall LogiOptions+, read this (and why you should)]: https://www.reddit.com/r/MacOS/comments/1dfhvcq/if_you_want_to_completely_uninstall_logioptions/
 [improve docker volume performance on macos with a ram disk]: https://thoughts.theden.sh/posts/docker-ramdisk-macos-benchmark/
 [installing .pkg with terminal?]: https://apple.stackexchange.com/questions/72226/installing-pkg-with-terminal#394976
 [launchctl man page]: https://www.unix.com/man-page/osx/1/launchctl
