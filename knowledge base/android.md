@@ -2,6 +2,7 @@
 
 1. [TL;DR](#tldr)
 1. [Applications of interest](#applications-of-interest)
+1. [On-device notifications vs push notifications](#on-device-notifications-vs-push-notifications)
 1. [Common operations](#common-operations)
    1. [Enable _Developer options_](#enable-developer-options)
    1. [Install a certificate](#install-a-certificate)
@@ -17,9 +18,9 @@
    1. [Android Open Source Project (AOSP)](#android-open-source-project-aosp)
    1. [GrapheneOS](#grapheneos)
 1. [Troubleshooting](#troubleshooting)
-   1. [An app cannot _register_ for notifications, but has notification permissions](#an-app-cannot-register-for-notifications-but-has-notification-permissions)
+   1. [An app cannot _register_ for notifications, even though it does have notification permissions](#an-app-cannot-register-for-notifications-even-though-it-does-have-notification-permissions)
 1. [Further readings](#further-readings)
-   1. [Sources](#sources)
+    1. [Sources](#sources)
 
 ## TL;DR
 
@@ -212,23 +213,49 @@ fastboot reboot
 
 ## Applications of interest
 
-| Application     |   Requires Google Services   | Summary                                                                           |
-| --------------- | :--------------------------: | --------------------------------------------------------------------------------- |
-| [Aegis]         |              no              | Authenticator                                                                     |
-| [Aftership]     |              no              | Package tracker                                                                   |
-| [Ampere]        |              no              | Measures batteries charging and discharging current                               |
-| [AuroraReach]   | **yes** (push notifications) | Aurora alert                                                                      |
-| [Aurora Store]  |              no              | Download apps from the Google Play Store without needing a Google account         |
-| [F-Droid]       |              no              | App store focused on free and open source mobile apps                             |
-| [FUTO keyboard] |            FIXME             | Offline, privacy-oriented keyboard                                                |
-| [Immich]        |            FIXME             | Self-hosted photo and video management solution                                   |
-| [Logseq]        |            FIXME             | Diary and knowledge management                                                    |
-| [OpenKeyChain]  |            FIXME             | OpenPGP provider                                                                  |
-| [Organic Maps]  |              no              | Privacy-focused offline maps and GPS app for hiking, cycling, biking, and driving |
-| [Phyphox]       |            FIXME             | Use the phone for physics experiments                                             |
-| [PingTools]     |            FIXME             | Network utilities                                                                 |
-| [Rethink]       |              no              | DNS and firewall                                                                  |
-| [Signal]        |            FIXME             | Privacy-focused messaging                                                         |
+| Application     |   Requires Google Services   | Has ads | Summary                                                             |
+| --------------- | :--------------------------: | :-----: | ------------------------------------------------------------------- |
+| [Aegis]         |              no              |   no    | Authenticator                                                       |
+| [Aftership]     |            FIXME             |  FIXME  | Package tracker                                                     |
+| [Ampere]        |            FIXME             |  FIXME  | Measures batteries charging and discharging current                 |
+| [Aurora Store]  |              no              |   no    | Download apps from Google's Play Store without a Google account     |
+| [AuroraReach]   | **yes** (push notifications) | **yes** | Notify when the aurora borealis might be visible                    |
+| [Binary Eye]    |              no              |   no    | QR code reader                                                      |
+| [Decisions]     |              no              |   no    | Decision making helper                                              |
+| [F-Droid]       |              no              |   no    | App store focused on free and open source mobile apps               |
+| [FUTO keyboard] |            FIXME             |   no    | Offline, privacy-oriented keyboard                                  |
+| [Immich]        |            FIXME             |  FIXME  | Self-hosted photo and video management solution                     |
+| [Logseq]        |            FIXME             |  FIXME  | Diary and knowledge management                                      |
+| [ntfy]          |            FIXME             |  FIXME  | Push notification distributor app for [ntfy.sh]'s service           |
+| [OpenKeyChain]  |            FIXME             |   no    | OpenPGP provider                                                    |
+| [Organic Maps]  |              no              |   no    | Offline maps and GPS                                                |
+| [Phyphox]       |              no              |   no    | Use the phone for physics experiments                               |
+| [PingTools]     |            FIXME             |  FIXME  | Network utilities                                                   |
+| [Rethink]       |              no              |   no    | DNS and firewall                                                    |
+| [Signal]        |            FIXME             |  FIXME  | Privacy-focused messaging                                           |
+| [Sunup]         |              no              |   no    | Push notification distributor app for apps supporting [UnifiedPush] |
+
+## On-device notifications vs push notifications
+
+Android's delivery of _on-device_ notifications is a **local** system, and it is **separate** from the delivery system
+of _push_ notifications, which requires a server on the Internet.
+
+Applications that want to send **on-device** notification to the user only need to request **Android**'s
+`android.permission.POST_NOTIFICATIONS` permissions at runtime.\
+On Android 13 (API 33) and later, they just need to declare it in the manifest and request it while running. On Android
+12L or older APIs, the prompt timing is handled differently by the system.
+
+Application servers publish notifications in the form of short messages to a remote server. The distributor collects
+and forwards them to the applications that register for them. The application then sends the on-device notification.
+
+Android does **not** provide a built-in, Google-free push notifications service. Aside that, most applications **only**
+support Google's Firebase Cloud Messaging (FCM), which relies on the Google services being available on the device.
+
+Without Google's services, one needs (`or`):
+
+- A different push notification system (e.g. [UnifiedPush]), a distributor (e.g. [Sunup] or [ntfy]), **and**
+  support for them on the applications' side.
+- Applications to provide their **own** delivery mechanism.
 
 ## Common operations
 
@@ -438,21 +465,14 @@ GrapheneOS uses standard Android hardware attestation or its own remote attestat
 
 ## Troubleshooting
 
-### An app cannot _register_ for notifications, but has notification permissions
+### An app cannot _register_ for notifications, even though it does have notification permissions
 
-It is probably trying to register to Google's **push** notification services.
+It is probably trying to register to Google's **push** notification services and being unable to do so.
 
-Apps do **not** need Google Services to request **Android**'s notification permission to send normal notification to
-the user.\
-On Android 13 (API 33) and later, they just need to declare `android.permission.POST_NOTIFICATIONS` in the manifest and
-request it at runtime.\
-If the app targets Android 12L or older APIs, the prompt timing is handled differently by the system.
+Check the following:
 
-Apps **do** need Google Services to register for **remote**, **push** notifications.\
-The Android permission for normal notification is separate from push delivery. Android does **not** provide a built-in,
-Google-free push service. Firebase Cloud Messaging (FCM) is the most common option, which relies on Google services on
-the device.\
-Without Google services, one would need another push provider/service or their own delivery mechanism.
+1. It can reach Google's Firebase servers, or the servers for the push notification system it is using.
+1. It is able to register to the distributor (usually Google Services, if trying to reach Firebase).
 
 ## Further readings
 
@@ -497,6 +517,8 @@ Without Google services, one would need another push provider/service or their o
 [Android's Linux Terminal app is now widely available on Pixels, and here's how to get it]: https://www.androidauthority.com/android-linux-terminal-app-available-3532999/
 [Aurora Store]: https://auroraoss.com/aurora-store
 [AuroraReach]: https://play.google.com/store/apps/details?id=com.aurorareach.app
+[Binary Eye]: https://github.com/markusfisch/BinaryEye
+[Decisions]: https://github.com/markusfisch/Libra
 [Employ work profiles]: https://source.android.com/docs/devices/admin/managed-profiles
 [F-Droid]: https://f-droid.org
 [Factory Images for Nexus and Pixel Devices]: https://developers.google.com/android/images
@@ -516,6 +538,8 @@ Without Google services, one would need another push provider/service or their o
 [Insular]: https://f-droid.org/en/packages/com.oasisfeng.island.fdroid/
 [Logseq]: https://logseq.com
 [MacDroid]: https://www.macdroid.app/
+[ntfy.sh]: https://ntfy.sh/
+[ntfy]: https://github.com/binwiederhier/ntfy-android
 [OpenKeyChain]: https://www.openkeychain.org
 [OpenMTP]: https://openmtp.ganeshrvel.com/
 [Organic Maps]: https://organicmaps.app
@@ -526,6 +550,8 @@ Without Google services, one would need another push provider/service or their o
 [Rethink]: https://rethinkdns.com/app
 [Shelter]: https://f-droid.org/en/packages/net.typeblog.shelter/
 [Signal]: https://signal.org/
+[Sunup]: https://codeberg.org/Sunup/android
 [System Purifier]: https://github.com/orailnoor/sys-purifier
 [Test DPC]: https://play.google.com/store/apps/details?id=com.afwsamples.testdpc
+[UnifiedPush]: https://unifiedpush.org/
 [Using ADB and fastboot]: https://wiki.lineageos.org/adb_fastboot_guide
