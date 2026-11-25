@@ -213,27 +213,30 @@ fastboot reboot
 
 ## Applications of interest
 
-| Application     |   Requires Google Services   | Has ads | Summary                                                             |
-| --------------- | :--------------------------: | :-----: | ------------------------------------------------------------------- |
-| [Aegis]         |              no              |   no    | Authenticator                                                       |
-| [Aftership]     |            FIXME             |  FIXME  | Package tracker                                                     |
-| [Ampere]        |            FIXME             |  FIXME  | Measures batteries charging and discharging current                 |
-| [Aurora Store]  |              no              |   no    | Download apps from Google's Play Store without a Google account     |
-| [AuroraReach]   | **yes** (push notifications) | **yes** | Notify when the aurora borealis might be visible                    |
-| [Binary Eye]    |              no              |   no    | QR code reader                                                      |
-| [Decisions]     |              no              |   no    | Decision making helper                                              |
-| [F-Droid]       |              no              |   no    | App store focused on free and open source mobile apps               |
-| [FUTO keyboard] |            FIXME             |   no    | Offline, privacy-oriented keyboard                                  |
-| [Immich]        |            FIXME             |  FIXME  | Self-hosted photo and video management solution                     |
-| [Logseq]        |            FIXME             |  FIXME  | Diary and knowledge management                                      |
-| [ntfy]          |            FIXME             |  FIXME  | Push notification distributor app for [ntfy.sh]'s service           |
-| [OpenKeyChain]  |            FIXME             |   no    | OpenPGP provider                                                    |
-| [Organic Maps]  |              no              |   no    | Offline maps and GPS                                                |
-| [Phyphox]       |              no              |   no    | Use the phone for physics experiments                               |
-| [PingTools]     |            FIXME             |  FIXME  | Network utilities                                                   |
-| [Rethink]       |              no              |   no    | DNS and firewall                                                    |
-| [Signal]        |            FIXME             |  FIXME  | Privacy-focused messaging                                           |
-| [Sunup]         |              no              |   no    | Push notification distributor app for apps supporting [UnifiedPush] |
+| Application     | Summary                                                             | Google Services |   Ads   |
+| --------------- | ------------------------------------------------------------------- | :-------------: | :-----: |
+| [Adventure Lab] | Gamified tour guides                                                |     **YES**     |   no    |
+| [Aegis]         | Authenticator                                                       |       no        |   no    |
+| [Aftership]     | Package tracker                                                     |      FIXME      |  FIXME  |
+| [Ampere]        | Monitor the battery's charging and discharging current              |      FIXME      |  FIXME  |
+| [Aurora Reach]  | Notify when the aurora borealis might be visible                    |     **YES**     | **YES** |
+| [Aurora Store]  | Download apps from Google's Play Store **without** a Google account |       no        |   no    |
+| [Binary Eye]    | QR code reader                                                      |       no        |   no    |
+| [CairnGPS]      | GNSS tool and a trip log                                            |       no        |   no    |
+| [Decisions]     | Weighted decision making helper                                     |       no        |   no    |
+| [F-Droid]       | App store offering free and open source mobile apps                 |       no        |   no    |
+| [FUTO keyboard] | Offline, privacy-oriented keyboard                                  |       no        |   no    |
+| [Geocaching]    | Treasure hunts                                                      |     **YES**     |   no    |
+| [Immich]        | Self-hosted photo and video management                              |      FIXME      |  FIXME  |
+| [Logseq]        | Diary, knowledge management                                         |      FIXME      |  FIXME  |
+| [ntfy]          | Push notification distributor for [ntfy.sh] and [UnifiedPush]       |       no        |   no    |
+| [OpenKeyChain]  | OpenPGP key manager                                                 |       no        |   no    |
+| [Organic Maps]  | Offline maps and GPS                                                |       no        |   no    |
+| [Phyphox]       | Use the device to take data for physics experiments                 |       no        |   no    |
+| [PingTools]     | Network utilities                                                   |      FIXME      |  FIXME  |
+| [Rethink]       | DNS and firewall                                                    |       no        |   no    |
+| [Signal]        | Privacy-focused messaging                                           |      FIXME      |  FIXME  |
+| [Sunup]         | Push notification distributor app for apps supporting [UnifiedPush] |       no        |   no    |
 
 ## On-device notifications vs push notifications
 
@@ -255,7 +258,27 @@ Without Google's services, one needs (`or`):
 
 - A different push notification system (e.g. [UnifiedPush]), a distributor (e.g. [Sunup] or [ntfy]), **and**
   support for them on the applications' side.
-- Applications to provide their **own** delivery mechanism.
+- Applications to provide their **own** delivery mechanism.\
+  Disable battery optimization in case notifications are delayed.
+
+<details>
+  <summary>Reference table</summary>
+
+| Application      | Google's FCM | [UnifiedPush] | Built-in |
+| ---------------- | ------------ | ------------- | -------- |
+| [Adventure Lab]  | **YES**      | no            | no       |
+| [Aurora Compass] | **YES**      | no            | no       |
+| [Aurora Reach]   | **YES**      | no            | no       |
+| [Blinkist]       | **YES**      | no            | no       |
+| [Geocaching]     | **YES**      | no            | no       |
+| [OVpay]          | **YES**      | no            | no       |
+| [ProtonMail]     | **YES**      | no            | no       |
+| [Tuta Mail]      | no           | no            | **YES**  |
+| [Uber Eats]      | **YES**      | no            | no       |
+| [Uber]           | **YES**      | no            | no       |
+| [Uw Zorg Online] | **YES**      | no            | no       |
+
+</details>
 
 ## Common operations
 
@@ -474,6 +497,8 @@ Check the following:
 1. It can reach Google's Firebase servers, or the servers for the push notification system it is using.
 1. It is able to register to the distributor (usually Google Services, if trying to reach Firebase).
 
+Refer to [On-device notifications vs push notifications] for information.
+
 ## Further readings
 
 - [ADB]
@@ -497,6 +522,7 @@ Check the following:
 [Google Pixel]: #google-pixel
 [GrapheneOS]: #grapheneos
 [Multiple users]: #multiple-users
+[On-device notifications vs push notifications]: #on-device-notifications-vs-push-notifications
 [Toggle OEM unlocking]: #toggle-oem-unlocking
 [Toggle USB debugging]: #toggle-usb-debugging
 
@@ -508,6 +534,7 @@ Check the following:
 
 <!-- Others -->
 [/e/OS / Devices]: https://doc.e.foundation/devices/
+[Adventure Lab]: https://play.google.com/store/apps/details?id=com.groundspeak.react.adventures
 [Aegis]: https://getaegis.app
 [Aftership]: https://www.aftership.com/mobile-app
 [Alternative operating systems for Fairphone owners]: https://support.fairphone.com/hc/en-us/articles/38232029008786-Alternative-operating-systems-for-Fairphone-owners
@@ -515,9 +542,12 @@ Check the following:
 [Android Flash Tool]: https://flash.android.com
 [Android Open Source Project]: https://source.android.com/
 [Android's Linux Terminal app is now widely available on Pixels, and here's how to get it]: https://www.androidauthority.com/android-linux-terminal-app-available-3532999/
+[Aurora Compass]: https://play.google.com/store/apps/details?id=com.auroracompass
+[Aurora Reach]: https://play.google.com/store/apps/details?id=com.aurorareach.app
 [Aurora Store]: https://auroraoss.com/aurora-store
-[AuroraReach]: https://play.google.com/store/apps/details?id=com.aurorareach.app
 [Binary Eye]: https://github.com/markusfisch/BinaryEye
+[Blinkist]: https://play.google.com/store/apps/details?id=com.blinkslabs.blinkist.android
+[CairnGPS]: https://f-droid.org/en/packages/app.matthieu.cairngps/
 [Decisions]: https://github.com/markusfisch/Libra
 [Employ work profiles]: https://source.android.com/docs/devices/admin/managed-profiles
 [F-Droid]: https://f-droid.org
@@ -525,6 +555,7 @@ Check the following:
 [Fairphone / Register your product]: https://www.fairphone.com/warranty/start
 [Fairphone / Warranty summary]: https://www.fairphone.com/warranty/summary
 [FUTO keyboard]: https://keyboard.futo.org
+[Geocaching]: https://play.google.com/store/apps/details?id=com.groundspeak.geocaching.intro
 [GrapheneOS / Attestation compatibility guide]: https://grapheneos.org/articles/attestation-compatibility-guide
 [GrapheneOS / CLI install guide]: https://grapheneos.org/install/cli
 [GrapheneOS / Sandboxed Google Play]: https://grapheneos.org/features#sandboxed-google-play
@@ -543,15 +574,21 @@ Check the following:
 [OpenKeyChain]: https://www.openkeychain.org
 [OpenMTP]: https://openmtp.ganeshrvel.com/
 [Organic Maps]: https://organicmaps.app
+[OVpay]: https://play.google.com/store/apps/details?id=nl.tls.ovpay
 [Phyphox]: https://phyphox.org
 [PingTools]: https://www.pingtools.org
 [Pixel Drop: Here's everything new added to Google Pixel devices]: https://www.androidauthority.com/google-pixel-feature-drop-3360934/
 [Pixel phones now support bypass charging when set to the 80% charging limit]: https://www.androidauthority.com/pixel-bypass-charging-3507373/
+[ProtonMail]: https://play.google.com/store/apps/details?id=ch.protonmail.android
 [Rethink]: https://rethinkdns.com/app
 [Shelter]: https://f-droid.org/en/packages/net.typeblog.shelter/
 [Signal]: https://signal.org/
 [Sunup]: https://codeberg.org/Sunup/android
 [System Purifier]: https://github.com/orailnoor/sys-purifier
 [Test DPC]: https://play.google.com/store/apps/details?id=com.afwsamples.testdpc
+[Tuta Mail]: https://play.google.com/store/apps/details?id=de.tutao.tutanota
+[Uber Eats]: https://play.google.com/store/apps/details?id=com.ubercab.eats&hl=en
+[Uber]: https://play.google.com/store/apps/details?id=com.ubercab
 [UnifiedPush]: https://unifiedpush.org/
 [Using ADB and fastboot]: https://wiki.lineageos.org/adb_fastboot_guide
+[Uw Zorg Online]: https://play.google.com/store/apps/details?id=nl.mediapp.pharmeon
