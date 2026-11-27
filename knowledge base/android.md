@@ -213,30 +213,33 @@ fastboot reboot
 
 ## Applications of interest
 
-| Application     | Summary                                                             | Google Services |   Ads   |
-| --------------- | ------------------------------------------------------------------- | :-------------: | :-----: |
-| [Adventure Lab] | Gamified tour guides                                                |     **YES**     |   no    |
-| [Aegis]         | Authenticator                                                       |       no        |   no    |
-| [Aftership]     | Package tracker                                                     |      FIXME      |  FIXME  |
-| [Ampere]        | Monitor the battery's charging and discharging current              |      FIXME      |  FIXME  |
-| [Aurora Reach]  | Notify when the aurora borealis might be visible                    |     **YES**     | **YES** |
-| [Aurora Store]  | Download apps from Google's Play Store **without** a Google account |       no        |   no    |
-| [Binary Eye]    | QR code reader                                                      |       no        |   no    |
-| [CairnGPS]      | GNSS tool and a trip log                                            |       no        |   no    |
-| [Decisions]     | Weighted decision making helper                                     |       no        |   no    |
-| [F-Droid]       | App store offering free and open source mobile apps                 |       no        |   no    |
-| [FUTO keyboard] | Offline, privacy-oriented keyboard                                  |       no        |   no    |
-| [Geocaching]    | Treasure hunts                                                      |     **YES**     |   no    |
-| [Immich]        | Self-hosted photo and video management                              |      FIXME      |  FIXME  |
-| [Logseq]        | Diary, knowledge management                                         |      FIXME      |  FIXME  |
-| [ntfy]          | Push notification distributor for [ntfy.sh] and [UnifiedPush]       |       no        |   no    |
-| [OpenKeyChain]  | OpenPGP key manager                                                 |       no        |   no    |
-| [Organic Maps]  | Offline maps and GPS                                                |       no        |   no    |
-| [Phyphox]       | Use the device to take data for physics experiments                 |       no        |   no    |
-| [PingTools]     | Network utilities                                                   |      FIXME      |  FIXME  |
-| [Rethink]       | DNS and firewall                                                    |       no        |   no    |
-| [Signal]        | Privacy-focused messaging                                           |      FIXME      |  FIXME  |
-| [Sunup]         | Push notification distributor app for apps supporting [UnifiedPush] |       no        |   no    |
+| Application            | Summary                                                             |            Google Services             |        Ads         |
+| ---------------------- | ------------------------------------------------------------------- | :------------------------------------: | :----------------: |
+| [Adventure Lab]        | Gamified tour guides                                                |              **REQUIRED**              |         no         |
+| [Aegis]                | Authenticator                                                       |                not used                |         no         |
+| [Aftership]            | Package tracker                                                     |                 FIXME                  |       FIXME        |
+| [Ampere]               | Monitor the battery's charging and discharging current              |                 FIXME                  |       FIXME        |
+| [Aurora Reach]         | Notify when the aurora borealis might be visible                    |          _push notifications_          |      **YES**       |
+| [Aurora Store]         | Download apps from Google's Play Store **without** a Google account |                not used                |         no         |
+| [Binary Eye]           | QR code reader                                                      |                not used                |         no         |
+| [CairnGPS]             | GNSS tool and a trip log                                            |                not used                |         no         |
+| [Decisions]            | Weighted decision making helper                                     |                not used                |         no         |
+| [F-Droid]              | App store offering free and open source mobile apps                 |                not used                |         no         |
+| [FUTO keyboard]        | Offline, privacy-oriented keyboard                                  |                not used                |         no         |
+| [Geocaching]           | Community treasure hunts                                            |              **REQUIRED**              |         no         |
+| [Immich]               | Self-hosted photo and video management                              |                 FIXME                  |       FIXME        |
+| [K-9 Mail]             | Email client                                                        |                 FIXME                  |         no         |
+| [Logseq]               | Diary, knowledge management                                         |                 FIXME                  |       FIXME        |
+| [Molly]                | Improved [Signal] fork                                              |                 FIXME                  |       FIXME        |
+| [ntfy]                 | Push notification distributor for [ntfy.sh] and [UnifiedPush]       |                not used                |         no         |
+| [OpenKeychain]         | OpenPGP key manager                                                 |                not used                |         no         |
+| [Organic Maps]         | Offline maps and GPS                                                |                not used                |         no         |
+| [Phyphox]              | Use the device to take data for physics experiments                 |                not used                |         no         |
+| [PingTools]            | Network utilities                                                   |                 FIXME                  |       FIXME        |
+| [Rethink]              | DNS and firewall                                                    |                not used                |         no         |
+| [SMS Backup & Restore] | Backup and restore SMSes                                            | if setting up Drive as backup location | **YES**, removable |
+| [Sunup]                | Push notification distributor app for apps supporting [UnifiedPush] |                not used                |         no         |
+| [Thunderbird]          | Email client (based on top off [K-9 Mail])                          |                 FIXME                  |         no         |
 
 ## On-device notifications vs push notifications
 
@@ -262,21 +265,30 @@ Without Google's services, one needs (`or`):
   Disable battery optimization in case notifications are delayed.
 
 <details>
-  <summary>Reference table</summary>
+  <summary>Support table</summary>
 
-| Application      | Google's FCM | [UnifiedPush] | Built-in |
-| ---------------- | ------------ | ------------- | -------- |
-| [Adventure Lab]  | **YES**      | no            | no       |
-| [Aurora Compass] | **YES**      | no            | no       |
-| [Aurora Reach]   | **YES**      | no            | no       |
-| [Blinkist]       | **YES**      | no            | no       |
-| [Geocaching]     | **YES**      | no            | no       |
-| [OVpay]          | **YES**      | no            | no       |
-| [ProtonMail]     | **YES**      | no            | no       |
-| [Tuta Mail]      | no           | no            | **YES**  |
-| [Uber Eats]      | **YES**      | no            | no       |
-| [Uber]           | **YES**      | no            | no       |
-| [Uw Zorg Online] | **YES**      | no            | no       |
+| Application      | FCM (Google) |              [UnifiedPush]               | Built-in |
+| ---------------- | :----------: | :--------------------------------------: | :------: |
+| [ABN AMRO]       | **REQUIRED** |                    no                    |    no    |
+| [Adventure Lab]  | **REQUIRED** |                    no                    |    no    |
+| [Aurora Compass] | **REQUIRED** |                    no                    |    no    |
+| [Aurora Reach]   | **REQUIRED** |                    no                    |    no    |
+| [Blinkist]       | **REQUIRED** |                    no                    |    no    |
+| [DAVx5]          |   **yes**    |                 **yes**                  |    no    |
+| [Geocaching]     | **REQUIRED** |                    no                    |    no    |
+| [K-9 Mail]       |      no      |                    no                    | **yes**  |
+| [Molly]          |   **yes**    |         **yes**, requires server         | **yes**  |
+| [Musora]         | **REQUIRED** |                    no                    |    no    |
+| [N26]            | **REQUIRED** |                    no                    |    no    |
+| [OVpay]          | **REQUIRED** |                    no                    |    no    |
+| [ProtonMail]     | **REQUIRED** |                    no                    |    no    |
+| [Signal]         | **REQUIRED** |                    no                    |    no    |
+| [Thunderbird]    |      no      |                    no                    | **yes**  |
+| [Tuta Mail]      |      no      |                    no                    | **yes**  |
+| [Uber Eats]      | **REQUIRED** |                    no                    |    no    |
+| [Uber]           | **REQUIRED** |                    no                    |    no    |
+| [Uw Zorg Online] | **REQUIRED** |                    no                    |    no    |
+| [WhatsApp]       | **REQUIRED** | no, use [whatsapp-unifiedpush] as bridge |    no    |
 
 </details>
 
@@ -534,6 +546,7 @@ Refer to [On-device notifications vs push notifications] for information.
 
 <!-- Others -->
 [/e/OS / Devices]: https://doc.e.foundation/devices/
+[ABN AMRO]: https://play.google.com/store/apps/details/ABN_AMRO?id=com.abnamro.nl.mobile.payments
 [Adventure Lab]: https://play.google.com/store/apps/details?id=com.groundspeak.react.adventures
 [Aegis]: https://getaegis.app
 [Aftership]: https://www.aftership.com/mobile-app
@@ -548,6 +561,7 @@ Refer to [On-device notifications vs push notifications] for information.
 [Binary Eye]: https://github.com/markusfisch/BinaryEye
 [Blinkist]: https://play.google.com/store/apps/details?id=com.blinkslabs.blinkist.android
 [CairnGPS]: https://f-droid.org/en/packages/app.matthieu.cairngps/
+[DAVx5]: https://www.davx5.com/
 [Decisions]: https://github.com/markusfisch/Libra
 [Employ work profiles]: https://source.android.com/docs/devices/admin/managed-profiles
 [F-Droid]: https://f-droid.org
@@ -567,11 +581,15 @@ Refer to [On-device notifications vs push notifications] for information.
 [How to Use ADB and Fastboot on Android]: https://www.makeuseof.com/tag/use-adb-fastboot-android/
 [Immich]: https://immich.app
 [Insular]: https://f-droid.org/en/packages/com.oasisfeng.island.fdroid/
+[K-9 Mail]: https://play.google.com/store/apps/details/K-9+Mail?id=com.fsck.k9
 [Logseq]: https://logseq.com
 [MacDroid]: https://www.macdroid.app/
+[Molly]: https://molly.im/
+[Musora]: https://play.google.com/store/apps/details?id=com.drumeo
+[N26]: https://play.google.com/store/apps/details?id=de.number26.android
 [ntfy.sh]: https://ntfy.sh/
 [ntfy]: https://github.com/binwiederhier/ntfy-android
-[OpenKeyChain]: https://www.openkeychain.org
+[OpenKeychain]: https://www.openkeychain.org
 [OpenMTP]: https://openmtp.ganeshrvel.com/
 [Organic Maps]: https://organicmaps.app
 [OVpay]: https://play.google.com/store/apps/details?id=nl.tls.ovpay
@@ -583,12 +601,16 @@ Refer to [On-device notifications vs push notifications] for information.
 [Rethink]: https://rethinkdns.com/app
 [Shelter]: https://f-droid.org/en/packages/net.typeblog.shelter/
 [Signal]: https://signal.org/
+[SMS Backup & Restore]: https://play.google.com/store/apps/details?id=com.riteshsahu.SMSBackupRestore
 [Sunup]: https://codeberg.org/Sunup/android
 [System Purifier]: https://github.com/orailnoor/sys-purifier
 [Test DPC]: https://play.google.com/store/apps/details?id=com.afwsamples.testdpc
+[Thunderbird]: https://play.google.com/store/apps/details?id=net.thunderbird.android
 [Tuta Mail]: https://play.google.com/store/apps/details?id=de.tutao.tutanota
 [Uber Eats]: https://play.google.com/store/apps/details?id=com.ubercab.eats&hl=en
 [Uber]: https://play.google.com/store/apps/details?id=com.ubercab
 [UnifiedPush]: https://unifiedpush.org/
 [Using ADB and fastboot]: https://wiki.lineageos.org/adb_fastboot_guide
 [Uw Zorg Online]: https://play.google.com/store/apps/details?id=nl.mediapp.pharmeon
+[whatsapp-unifiedpush]: https://github.com/sheepymeh/whatsapp-unifiedpush
+[WhatsApp]: https://play.google.com/store/apps/details?id=com.whatsapp
